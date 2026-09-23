@@ -90,8 +90,11 @@ export async function copySelected(
         "configuration",
         "Copy must stay within workspace boundaries",
       );
-    if (!(await lstat(from).catch(() => undefined)))
-      throw new OutpostError("workspace", `Copy source is missing: ${entry}`);
+    const info = await lstat(from).catch((error) => {
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") return undefined;
+      throw error;
+    });
+    if (!info || resolve(from) === resolve(to)) continue;
     await mkdir(dirname(to), { recursive: true });
     await cp(from, to, {
       recursive: true,

@@ -18,10 +18,11 @@ export function parseEnvironment(text: string): Record<string, string> {
       const double = value.startsWith('"');
       value = value.slice(1, -1);
       if (double)
-        value = value
-          .replaceAll("\\n", "\n")
-          .replaceAll("\\r", "\r")
-          .replaceAll('\\"', '"');
+        value = value.replace(
+          /\\([nrt"\\])/g,
+          (_, character: string) =>
+            ({ n: "\n", r: "\r", t: "\t", '"': '"', "\\": "\\" })[character]!,
+        );
     } else value = value.replace(/\s+#.*$/, "").trim();
     result[match[1]!] = value;
   }
@@ -49,18 +50,10 @@ export async function resolveVariables(
       throw error;
     });
   const variables = {
-    ...parseEnvironment(await optional(join(repository, ".env"))),
     ...parseEnvironment(await optional(join(repository, ".outpost", ".env"))),
   };
-  const known = [
-    "CODEX_API_KEY",
-    "OPENAI_API_KEY",
-    "ANTHROPIC_API_KEY",
-    "CLAUDE_CODE_OAUTH_TOKEN",
-    "GH_TOKEN",
-    "GITHUB_TOKEN",
-  ];
-  for (const key of new Set([...Object.keys(variables), ...known]))
-    if (environment[key] !== undefined) variables[key] = environment[key]!;
+  for (const key of Object.keys(variables))
+    if (!variables[key] && environment[key] !== undefined)
+      variables[key] = environment[key]!;
   return Object.freeze({ ...variables, ...provider, ...agent });
 }

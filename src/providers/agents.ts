@@ -53,6 +53,7 @@ export function claude(settings: ClaudeSettings = {}): AgentAdapter {
   return Object.freeze({
     name: "claude",
     conversations: "claude",
+    resumable: true,
     capture: settings.saveConversations ?? true,
     variables: Object.freeze({ ...settings.variables }),
     request(input: AgentInput) {
@@ -99,15 +100,15 @@ export function claude(settings: ClaudeSettings = {}): AgentAdapter {
             });
         }
       if (event.type === "result") {
+        if (!event.is_error && typeof event.result === "string")
+          events.push({ kind: "result", text: event.result });
         const usage = record(event.usage);
         if (event.usage)
           events.push({
             kind: "usage",
             tokens: {
-              input:
-                number(usage.input_tokens) +
-                number(usage.cache_creation_input_tokens) +
-                number(usage.cache_read_input_tokens),
+              input: number(usage.input_tokens),
+              cacheCreated: number(usage.cache_creation_input_tokens),
               cached: number(usage.cache_read_input_tokens),
               output: number(usage.output_tokens),
             },
@@ -127,6 +128,23 @@ export function claude(settings: ClaudeSettings = {}): AgentAdapter {
       }
       return events.length ? events : [{ kind: "raw", value: event }];
     },
+    transcriptUsage(text: string) {
+      let usage;
+      for (const line of text.split(/\r?\n/)) {
+        const event = decode(line);
+        if (event?.type !== "assistant") continue;
+        const message = record(event.message);
+        if (!message.usage) continue;
+        const tokens = record(message.usage);
+        usage = {
+          input: number(tokens.input_tokens),
+          cacheCreated: number(tokens.cache_creation_input_tokens),
+          cached: number(tokens.cache_read_input_tokens),
+          output: number(tokens.output_tokens),
+        };
+      }
+      return usage;
+    },
   });
 }
 
@@ -134,6 +152,7 @@ export function codex(settings: CodexSettings = {}): AgentAdapter {
   return Object.freeze({
     name: "codex",
     conversations: "codex",
+    resumable: true,
     capture: settings.saveConversations ?? true,
     variables: Object.freeze({ ...settings.variables }),
     request(input: AgentInput) {
@@ -209,7 +228,11 @@ export function codex(settings: CodexSettings = {}): AgentAdapter {
           {
             kind: "failure",
             message: String(
-              event.message ?? record(event.error).message ?? "Agent failed",
+              event.message ??
+                (typeof event.error === "string"
+                  ? event.error
+                  : record(event.error).message) ??
+                "Agent failed",
             ),
           },
         ];

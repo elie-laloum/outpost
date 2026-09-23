@@ -20,7 +20,7 @@ test("container contract maps Git metadata, mounts, limits, credentials and invo
       image: "test:1",
       user: { uid: 1000, gid: 1000 },
       volumes: [
-        { source: "base.txt", target: "inputs/base.txt", readOnly: true },
+        { source: "base.txt", target: "~/inputs/base.txt", readOnly: true },
       ],
       networks: ["net-a", "net-b"],
       groups: [20],
@@ -123,11 +123,11 @@ test("container preflight validates UID, options and missing volumes", async (t)
   assert.throws(() => docker({ cpus: 0 }), /cpus/);
   assert.throws(() => podman({ memoryMb: 1 }), /memory/);
   await assert.rejects(
-    containerProvider(
-      "docker",
-      { user: { uid: 1000, gid: 1000 } },
-      async () => ({ status: 0, stdout: "123", stderr: "" }),
-    ).acquire(context),
+    containerProvider("docker", {}, async () => ({
+      status: 0,
+      stdout: "123",
+      stderr: "",
+    })).acquire(context),
     /UID/,
   );
   await assert.rejects(

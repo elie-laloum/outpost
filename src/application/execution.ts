@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 import { OutpostError, invariant, positive } from "../domain/errors.ts";
 import type {
   AgentAdapter,
-  AgentEvent,
+  AgentObservation,
   SandboxLease,
   Usage,
   WorkspaceRecord,
@@ -21,20 +21,23 @@ export interface DispatchOptions<T = undefined> {
   readonly passes?: number;
   readonly until?: string | readonly string[];
   readonly idleMs?: number;
+  readonly idleWarningMs?: number;
   readonly settleMs?: number;
   readonly deadlineMs?: number;
   readonly expansionMs?: number;
   readonly signal?: AbortSignal;
   readonly continuation?: { readonly id: string; readonly fork?: boolean };
   readonly response?: ResponseSpec<T>;
-  readonly observe?: (event: AgentEvent) => void;
+  readonly observe?: (event: AgentObservation) => void;
   readonly warn?: (message: string) => void;
+  readonly diagnostic?: (message: string) => void;
 }
 
 export interface Turn {
   readonly text: string;
   readonly status: number;
   readonly conversation?: string;
+  readonly transcript?: string;
   readonly usage: Usage;
   readonly durationMs: number;
 }
@@ -65,13 +68,13 @@ export async function renderBrief(
   workspace: WorkspaceRecord,
   lease: SandboxLease,
   host: boolean,
-  options: Pick<DispatchOptions, "signal" | "expansionMs" | "warn">,
+  options: Pick<
+    DispatchOptions,
+    "signal" | "expansionMs" | "warn" | "diagnostic"
+  >,
 ): Promise<string> {
   if (brief.text !== undefined) return brief.text;
-  const source = await readFile(
-    resolve(workspace.repository, brief.file),
-    "utf8",
-  );
+  const source = await readFile(resolve(brief.file), "utf8");
   const prepared = prepareBrief(source, brief.values, {
     WORK_BRANCH: workspace.branch,
     BASE_BRANCH: workspace.baseBranch,
@@ -101,6 +104,10 @@ export async function renderBrief(
           command: fragment.value,
           ...result,
         });
+      notify(
+        options.diagnostic,
+        `Prompt command expanded to approximately ${Math.ceil(result.stdout.length / 4)} tokens`,
+      );
       return result.stdout.trimEnd();
     } catch (cause) {
       controller.abort(cause);
@@ -116,6 +123,7 @@ export async function renderBrief(
 }
 
 export function validateDispatch(options: DispatchOptions<unknown>): void {
+  options.signal?.throwIfAborted();
   validateBrief(options.brief);
   positive(options.passes ?? 1, "passes");
   invariant(
@@ -124,6 +132,7 @@ export function validateDispatch(options: DispatchOptions<unknown>): void {
   );
   for (const key of [
     "idleMs",
+    "idleWarningMs",
     "settleMs",
     "deadlineMs",
     "expansionMs",
@@ -146,6 +155,29 @@ export function validateDispatch(options: DispatchOptions<unknown>): void {
   );
 }
 
+export async function preflightDispatch(
+  options: DispatchOptions<unknown>,
+  _repository: string,
+  agent?: AgentAdapter,
+): Promise<void> {
+  validateDispatch(options);
+  if (!options.response) return;
+  if (options.response.repairs > 0)
+    invariant(
+      agent?.resumable ?? !!(agent?.conversations || agent?.storage),
+      "Response repair requires an adapter that supports continuation",
+    );
+  const brief = options.brief;
+  const text = brief.text ?? (await readFile(resolve(brief.file!), "utf8"));
+  const resolved = text.replace(/\{\{\s*(\w+)\s*\}\}/g, (token, key: string) =>
+    brief.values?.[key] === undefined ? token : String(brief.values[key]),
+  );
+  invariant(
+    resolved.includes(`<${options.response.tag}>`),
+    `Brief must request an opening <${options.response.tag}> tag`,
+  );
+}
+
 async function turn(
   lease: SandboxLease,
   agent: AgentAdapter,
@@ -153,6 +185,7 @@ async function turn(
   options: DispatchOptions<unknown>,
   continuation: DispatchOptions["continuation"],
   markers: readonly string[],
+  pass: number,
 ): Promise<Turn> {
   const start = Date.now();
   const controller = new AbortController();
@@ -164,9 +197,13 @@ async function turn(
     text = "",
     conversation: string | undefined,
     failure: string | undefined;
+  let finalText: string | undefined,
+    rawTail = "",
+    lastActivity = Date.now();
   let usage: Usage = { input: 0, cached: 0, output: 0 };
   let completed = false;
   const refresh = () => {
+    lastActivity = Date.now();
     clearTimeout(idle);
     clearTimeout(settle);
     if (!completed)
@@ -187,8 +224,11 @@ async function turn(
       );
   };
   const consume = (line: string) => {
+    const at = new Date().toISOString();
+    notify(options.observe, { kind: "raw", value: line, pass, at });
     for (const event of agent.events(line)) {
       if (event.kind === "text") text += event.text;
+      if (event.kind === "result") finalText = event.text;
       if (event.kind === "conversation") conversation = event.id;
       if (event.kind === "failure") failure = event.message;
       if (event.kind === "usage")
@@ -196,11 +236,31 @@ async function turn(
           input: usage.input + event.tokens.input,
           cached: usage.cached + event.tokens.cached,
           output: usage.output + event.tokens.output,
+          ...(usage.cacheCreated !== undefined ||
+          event.tokens.cacheCreated !== undefined
+            ? {
+                cacheCreated:
+                  (usage.cacheCreated ?? 0) + (event.tokens.cacheCreated ?? 0),
+              }
+            : {}),
         };
-      notify(options.observe, event);
+      if (event.kind !== "raw") notify(options.observe, { ...event, pass, at });
     }
-    completed = markers.some((marker) => text.includes(marker));
+    completed = markers.some((marker) => (finalText ?? text).includes(marker));
   };
+  const warningInterval = options.idleWarningMs ?? 60_000;
+  const warnings = setInterval(() => {
+    if (Date.now() - lastActivity >= warningInterval) {
+      const message = `Agent has been idle for ${Math.floor((Date.now() - lastActivity) / 1000)} seconds`;
+      notify(options.warn, message);
+      notify(options.observe, {
+        kind: "warning",
+        message,
+        pass,
+        at: new Date().toISOString(),
+      });
+    }
+  }, warningInterval);
   refresh();
   let status = 0;
   try {
@@ -214,6 +274,7 @@ async function turn(
       deadlineMs: options.deadlineMs ?? 3_600_000,
       observe(channel, chunk) {
         if (channel === "stdout") {
+          rawTail = (rawTail + chunk).slice(-65_536);
           pending += chunk;
           let end: number;
           while ((end = pending.indexOf("\n")) >= 0) {
@@ -236,13 +297,7 @@ async function turn(
         conversation,
       });
   } catch (cause) {
-    if (options.signal?.aborted)
-      throw new OutpostError(
-        "aborted",
-        "Dispatch cancelled",
-        { conversation },
-        cause,
-      );
+    options.signal?.throwIfAborted();
     if (controller.signal.reason !== "completion")
       throw controller.signal.reason instanceof OutpostError
         ? controller.signal.reason
@@ -254,10 +309,11 @@ async function turn(
   } finally {
     clearTimeout(idle);
     clearTimeout(settle);
+    clearInterval(warnings);
   }
   if (failure) throw new OutpostError("process", failure, { conversation });
   return {
-    text,
+    text: finalText ?? (text || rawTail),
     status,
     usage,
     durationMs: Date.now() - start,
@@ -271,6 +327,7 @@ export async function execute<T>(
   agent: AgentAdapter,
   host: boolean,
   options: DispatchOptions<T>,
+  afterTurn?: (turn: Turn) => Promise<Turn>,
 ): Promise<Execution<T>> {
   validateDispatch(options);
   const markers =
@@ -288,6 +345,15 @@ export async function execute<T>(
     ? 1 + options.response.repairs
     : (options.passes ?? 1);
   for (let index = 0; index < attempts; index++) {
+    notify(options.observe, {
+      kind: "phase",
+      name: "preparing prompt",
+      agent: agent.name,
+      branch: workspace.branch,
+      directory: workspace.directory,
+      pass: index + 1,
+      at: new Date().toISOString(),
+    });
     const prompt =
       repair ??
       (await renderBrief(options.brief, workspace, lease, host, options));
@@ -296,16 +362,39 @@ export async function execute<T>(
         prompt.includes(`<${options.response.tag}>`),
         `Brief must request an opening <${options.response.tag}> tag`,
       );
-    notify(options.observe, { kind: "prompt", text: prompt });
-    const current = await turn(
+    notify(options.observe, {
+      kind: "prompt",
+      text: prompt,
+      pass: index + 1,
+      at: new Date().toISOString(),
+    });
+    notify(options.observe, {
+      kind: "phase",
+      name: "running",
+      agent: agent.name,
+      branch: workspace.branch,
+      pass: index + 1,
+      at: new Date().toISOString(),
+    });
+    const finished = await turn(
       lease,
       agent,
       prompt,
       options,
       continuation,
       markers,
+      index + 1,
     );
+    const current = afterTurn ? await afterTurn(finished) : finished;
     turns.push(current);
+    notify(options.observe, {
+      kind: "summary",
+      durationMs: current.durationMs,
+      status: current.status,
+      tokens: current.usage,
+      pass: index + 1,
+      at: new Date().toISOString(),
+    });
     completed = markers.some((marker) => current.text.includes(marker));
     if (options.response) {
       try {
@@ -322,7 +411,14 @@ export async function execute<T>(
         };
         if (index + 1 >= attempts || !current.conversation) throw error;
         continuation = { id: current.conversation };
-        repair = `Your response could not be validated: ${error.message}. Return a corrected response inside <${options.response.tag}> and </${options.response.tag}>.`;
+        repair = [
+          `Correct the response inside <${options.response.tag}> and </${options.response.tag}>.`,
+          `Validation failure: ${error.message}`,
+          `Previous content: ${error.raw ?? "No complete tagged response was returned."}`,
+          `Cause: ${error.cause instanceof Error ? error.cause.message : (JSON.stringify(error.cause) ?? "unspecified")}`,
+          `Further repair attempts after this one: ${attempts - index - 2}.`,
+          "Do not edit files, run commands or continue implementation. Only return the corrected response.",
+        ].join("\n");
       }
     } else if (completed) break;
   }
@@ -342,8 +438,15 @@ export async function execute<T>(
         input: sum.input + item.usage.input,
         cached: sum.cached + item.usage.cached,
         output: sum.output + item.usage.output,
+        ...(sum.cacheCreated !== undefined ||
+        item.usage.cacheCreated !== undefined
+          ? {
+              cacheCreated:
+                (sum.cacheCreated ?? 0) + (item.usage.cacheCreated ?? 0),
+            }
+          : {}),
       }),
-      { input: 0, cached: 0, output: 0 },
+      { input: 0, cached: 0, output: 0 } as Usage,
     ),
   };
 }

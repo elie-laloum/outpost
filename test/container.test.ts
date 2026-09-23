@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readFile, mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { createSandbox, codex, claude } from "../src/index.ts";
 import { docker } from "../src/providers/docker.ts";
@@ -82,6 +82,11 @@ test(
         variables: { OUTPOST_FIXTURE: "injected" },
       });
       assert.equal(env.stdout.trim(), "injected");
+      const tracker = await box.command({
+        executable: "bd",
+        arguments: ["--version"],
+      });
+      assert.equal(tracker.status, 0, tracker.stderr);
       const output = await box.dispatch({
         agent: {
           name: "protocol-fixture",
@@ -99,6 +104,66 @@ test(
       assert.equal(output.completed, true);
     } finally {
       await box.close();
+    }
+  },
+);
+
+test(
+  "real container round-trips binary trees and prepares writable file-mount parents",
+  { skip: !process.env.OUTPOST_CONTAINER_ENGINE },
+  async (t) => {
+    const root = await repository(t),
+      factory =
+        process.env.OUTPOST_CONTAINER_ENGINE === "podman" ? podman : docker;
+    const input = join(root, "transfer inputs");
+    await mkdir(join(input, "nested folder"), { recursive: true });
+    const bytes = Buffer.from([0, 1, 2, 255, 128, 10, 13, 0]);
+    await writeFile(join(input, "nested folder", "binary file.bin"), bytes);
+    const mounted = join(root, "mounted.txt");
+    await writeFile(mounted, "read-only source");
+    const lease = await factory({
+      image: "outpost-ci:latest",
+      networks: "none",
+      volumes: [
+        {
+          source: mounted,
+          target: "~/private/deep/config.txt",
+          readOnly: true,
+        },
+      ],
+    }).acquire({
+      repository: root,
+      directory: root,
+      gitDirectories: [],
+      variables: {},
+    });
+    try {
+      await lease.upload(input, "/home/agent/transfer inputs");
+      const destination = join(root, "downloaded tree");
+      await lease.download("/home/agent/transfer inputs", destination);
+      assert.deepEqual(
+        await readFile(join(destination, "nested folder", "binary file.bin")),
+        bytes,
+      );
+      await lease.upload(
+        join(input, "nested folder", "binary file.bin"),
+        "/home/agent/single.bin",
+      );
+      await lease.download(
+        "/home/agent/single.bin",
+        join(root, "single copy.bin"),
+      );
+      assert.deepEqual(await readFile(join(root, "single copy.bin")), bytes);
+      const permissions = await lease.invoke({
+        executable: "sh",
+        arguments: [
+          "-c",
+          'test "$(id -u)" != 0 && test "$(cat /home/agent/private/deep/config.txt)" = \'read-only source\' && echo sibling > /home/agent/private/deep/sibling.txt && ! echo forbidden > /home/agent/private/deep/config.txt',
+        ],
+      });
+      assert.equal(permissions.status, 0, permissions.stderr);
+    } finally {
+      await lease.release();
     }
   },
 );

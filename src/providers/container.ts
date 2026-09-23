@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { execFileSync } from "node:child_process";
 import { mkdir, stat } from "node:fs/promises";
 import { basename, dirname, isAbsolute, posix, relative } from "node:path";
 import { OutpostError, invariant } from "../domain/errors.ts";
@@ -29,6 +30,7 @@ export interface ContainerOptions {
   readonly memoryMb?: number;
   readonly label?: "z" | "Z" | false;
   readonly retain?: number;
+  readonly userns?: "keep-id" | false;
 }
 
 export function imageName(repository: string): string {
@@ -43,6 +45,7 @@ export function containerProvider(
   engine: "docker" | "podman",
   options: ContainerOptions = {},
   executor: Executor = executeProcess,
+  platform: NodeJS.Platform = process.platform,
 ): SandboxProvider {
   const config = { ...options };
   if (config.cpus !== undefined)
@@ -60,6 +63,7 @@ export function containerProvider(
     placement: "mounted",
     variables: { ...config.variables },
     async acquire(context) {
+      context.signal?.throwIfAborted();
       const name = `outpost-${randomUUID()}`;
       const image = config.image ?? imageName(context.repository);
       const user = config.user ?? {
@@ -78,6 +82,18 @@ export function containerProvider(
           { executable: engine, arguments: args, deadlineMs: 60_000, ...extra },
           executor,
         );
+      if (engine === "podman" && platform === "darwin") {
+        const machines = await call(["machine", "list", "--format", "json"]);
+        const entries: unknown = JSON.parse(machines.stdout);
+        invariant(
+          Array.isArray(entries) &&
+            entries.some(
+              (machine) =>
+                machine.Running === true || machine.State === "running",
+            ),
+          "Start a Podman machine with podman machine start before creating a sandbox",
+        );
+      }
       const inspection = await call([
         "image",
         "inspect",
@@ -87,6 +103,7 @@ export function containerProvider(
       ]);
       const configuredUser = inspection.stdout.trim().split(":")[0];
       if (
+        !config.user &&
         configuredUser &&
         /^\d+$/.test(configuredUser) &&
         Number(configuredUser) !== user.uid
@@ -130,21 +147,40 @@ export function containerProvider(
         env.GIT_WORK_TREE = root;
       }
       const volumes: string[] = [];
+      const fileParents = new Set<string>();
       for (const volume of [...internal, ...(config.volumes ?? [])]) {
         const source = expandPath(volume.source, context.repository);
-        if (!(await stat(source).catch(() => undefined)))
+        const info = await stat(source).catch(() => undefined);
+        if (!info)
           throw new OutpostError(
             "provider",
             `Mount source is unavailable: ${source}`,
           );
-        const target = volume.target.startsWith("/")
-          ? posix.normalize(volume.target)
-          : posix.resolve(root, volume.target);
+        const destination = volume.target.replaceAll("\\", "/");
+        const target =
+          destination === "~"
+            ? home
+            : destination.startsWith("~/")
+              ? posix.resolve(home, destination.slice(2))
+              : posix.resolve(root, destination);
+        if (info.isFile() && !internal.includes(volume)) {
+          const parent = posix.dirname(target);
+          invariant(
+            parent === home || parent.startsWith(home + "/"),
+            "File mounts must live inside the agent home; mount the containing directory for other destinations",
+          );
+          for (
+            let folder = parent;
+            folder !== home;
+            folder = posix.dirname(folder)
+          )
+            fileParents.add(folder);
+        }
         invariant(
           !source.includes(",") && !target.includes(","),
           "Mount paths cannot contain commas",
         );
-        if (config.label === false || process.platform !== "linux")
+        if (config.label === false || platform !== "linux")
           volumes.push(
             "--mount",
             `type=bind,source=${source},target=${target}${volume.readOnly ? ",readonly" : ""}`,
@@ -166,19 +202,27 @@ export function containerProvider(
         "--init",
         "--user",
         `${user.uid}:${user.gid}`,
-        ...(engine === "podman" && process.getuid?.() !== 0
-          ? ["--userns", "keep-id"]
+        ...(engine === "podman" &&
+        config.userns !== false &&
+        (process.getuid?.() !== 0 || config.userns === "keep-id")
+          ? [
+              "--userns",
+              config.user
+                ? `keep-id:uid=${user.uid},gid=${user.gid}`
+                : "keep-id",
+            ]
           : []),
         "--workdir",
         root,
         "--cap-drop",
         "ALL",
+        ...(fileParents.size ? ["--cap-add", "CHOWN"] : []),
         "--security-opt",
         "no-new-privileges",
         "--tmpfs",
         engine === "podman"
           ? "/home/agent:rw,mode=1777"
-          : `/home/agent:rw,uid=${user.uid},gid=${user.gid},mode=0700`,
+          : `/home/agent:rw,uid=${fileParents.size ? 0 : user.uid},gid=${fileParents.size ? 0 : user.gid},mode=0700`,
         ...volumes,
         ...networks.flatMap((network) => ["--network", network]),
         ...(config.groups ?? []).flatMap((group) => [
@@ -216,6 +260,26 @@ export function containerProvider(
           ["start", name],
           context.signal ? { signal: context.signal } : {},
         );
+        for (const parent of fileParents)
+          await call([
+            "exec",
+            "--user",
+            "0:0",
+            name,
+            "sh",
+            "-c",
+            `mkdir -p ${quote(parent)} && chown ${user.uid}:${user.gid} ${quote(parent)}`,
+          ]);
+        if (fileParents.size)
+          await call([
+            "exec",
+            "--user",
+            "0:0",
+            name,
+            "chown",
+            `${user.uid}:${user.gid}`,
+            home,
+          ]);
         await call([
           "exec",
           name,
@@ -234,7 +298,14 @@ export function containerProvider(
         }
         throw cause;
       }
-      unregister = registerCleanup(release);
+      unregister = registerCleanup(release, () => {
+        if (!closed)
+          execFileSync(engine, ["rm", "--force", name], {
+            timeout: 10_000,
+            stdio: "ignore",
+            windowsHide: true,
+          });
+      });
       return {
         root,
         home,
@@ -321,13 +392,18 @@ export function containerProvider(
               );
           }
         },
-        async upload(source, destination) {
-          await call(["exec", name, "mkdir", "-p", posix.dirname(destination)]);
-          await call(["cp", source, `${name}:${destination}`]);
+        async upload(source, destination, options = {}) {
+          options.signal?.throwIfAborted();
+          await call(
+            ["exec", name, "mkdir", "-p", posix.dirname(destination)],
+            options,
+          );
+          await call(["cp", source, `${name}:${destination}`], options);
         },
-        async download(source, destination) {
+        async download(source, destination, options = {}) {
+          options.signal?.throwIfAborted();
           await mkdir(dirname(destination), { recursive: true });
-          await call(["cp", `${name}:${source}`, destination]);
+          await call(["cp", `${name}:${source}`, destination], options);
         },
         release,
       };

@@ -1,11 +1,13 @@
 import { join, posix } from "node:path";
-import { OutpostError, invariant } from "../domain/errors.ts";
+import { readFile, stat } from "node:fs/promises";
+import { OutpostError, invariant, recordRecovery } from "../domain/errors.ts";
 import type {
   AgentAdapter,
   BranchPolicy,
   Command,
   CommandResult,
   Commit,
+  ConversationRecord,
   Disposal,
   LifecycleHooks,
   SandboxLease,
@@ -15,19 +17,13 @@ import type {
 } from "../domain/ports.ts";
 import type { Brief } from "../domain/prompts.ts";
 import { validateBrief } from "../domain/prompts.ts";
-import { ResponseError } from "../domain/response.ts";
 import {
   acquireWorkspace,
   commits,
   git,
   type WorkspaceLease,
 } from "../infrastructure/git.ts";
-import {
-  captureConversation,
-  locateConversation,
-  restoreConversation,
-  type ConversationLocation,
-} from "../infrastructure/conversations.ts";
+import { nativeConversations } from "../infrastructure/conversations.ts";
 import { resolveVariables } from "../infrastructure/settings.ts";
 import {
   executeProcess,
@@ -36,6 +32,8 @@ import {
 } from "../infrastructure/process.ts";
 import { journal, type Logging } from "../infrastructure/journal.ts";
 import { registerCleanup } from "../infrastructure/shutdown.ts";
+import { restoreTerminal } from "../infrastructure/terminal.ts";
+import { boundedTransfers } from "../infrastructure/transfer.ts";
 import { docker } from "../providers/docker.ts";
 import { agentVersions } from "../providers/versions.ts";
 import {
@@ -43,28 +41,42 @@ import {
   notify,
   renderBrief,
   validateDispatch,
+  preflightDispatch,
   type DispatchOptions,
   type Execution,
 } from "./execution.ts";
 import { seedRemote, type RemoteSync } from "./remote-workspace.ts";
+import { completeBrief, type VariableQuestion } from "./interactive-brief.ts";
 
 export interface WorkspaceOptions {
+  readonly signal?: AbortSignal;
   readonly repository?: string;
   readonly branch?: BranchPolicy;
   readonly copies?: readonly string[];
   readonly limits?: StageLimits;
+  readonly label?: string;
+  readonly hooks?: LifecycleHooks;
 }
 
 export interface Workspace extends WorkspaceRecord {
   dispatch<T = undefined>(
-    options: Omit<SandboxOptions, keyof WorkspaceOptions | "workspace"> &
+    options: Omit<
+      SandboxOptions,
+      Exclude<keyof WorkspaceOptions, "hooks" | "label"> | "workspace"
+    > &
       DispatchOptions<T> & { readonly agent: AgentAdapter },
   ): Promise<DispatchResult<T>>;
   sandbox(
-    options?: Omit<SandboxOptions, keyof WorkspaceOptions | "workspace">,
+    options?: Omit<
+      SandboxOptions,
+      Exclude<keyof WorkspaceOptions, "hooks" | "label"> | "workspace"
+    >,
   ): Promise<Sandbox>;
   attach(
-    options: Omit<SandboxOptions, keyof WorkspaceOptions | "workspace"> &
+    options: Omit<
+      SandboxOptions,
+      Exclude<keyof WorkspaceOptions, "hooks" | "label"> | "workspace"
+    > &
       AttachOptions & { readonly agent: AgentAdapter },
   ): Promise<AttachResult>;
   close(options?: { readonly preserve?: boolean }): Promise<Disposal>;
@@ -74,14 +86,73 @@ export interface Workspace extends WorkspaceRecord {
 
 const workspaces = new WeakMap<
   Workspace,
-  { lease: WorkspaceLease; active: boolean; closed: boolean }
+  {
+    lease: WorkspaceLease;
+    active: boolean;
+    closed: boolean;
+    hooks?: LifecycleHooks;
+  }
 >();
+
+const storageFor = (agent: AgentAdapter) =>
+  agent.storage ??
+  (agent.conversations ? nativeConversations(agent.conversations) : undefined);
+
+async function startupFailure(
+  workspace: WorkspaceRecord,
+  cause: unknown,
+  options: { logging?: Logging; label?: string },
+): Promise<void> {
+  try {
+    const log = await journal(
+      workspace.repository,
+      options.logging,
+      options.label,
+    );
+    log.record({
+      kind: "phase",
+      name: "preparation failed",
+      branch: workspace.branch,
+      directory: workspace.directory,
+    });
+    log.record({
+      kind: "failure",
+      message: cause instanceof Error ? cause.message : String(cause),
+    });
+    await log.close();
+    recordRecovery(cause, {
+      branch: workspace.branch,
+      directory: workspace.directory,
+      log: log.file,
+    });
+  } catch {
+    /* Logging must preserve the preparation error. */
+  }
+}
 
 export async function openWorkspace(
   options: WorkspaceOptions = {},
 ): Promise<Workspace> {
+  options.signal?.throwIfAborted();
   const lease = await acquireWorkspace(options);
-  const state = { lease, active: false, closed: false };
+  try {
+    await hooks(
+      options.hooks?.workspaceReady ?? [],
+      lease.directory,
+      executeProcess,
+      options.signal,
+    );
+  } catch (cause) {
+    await startupFailure(lease, cause, options);
+    await lease.dispose();
+    throw cause;
+  }
+  const state = {
+    lease,
+    active: false,
+    closed: false,
+    ...(options.hooks ? { hooks: options.hooks } : {}),
+  };
   const result: Workspace = {
     ...lease,
     dispatch(options) {
@@ -110,6 +181,7 @@ export async function openWorkspace(
 }
 
 export interface SandboxOptions extends WorkspaceOptions {
+  readonly includeUncommitted?: boolean;
   readonly agent?: AgentAdapter;
   readonly provider?: SandboxProvider;
   readonly workspace?: Workspace;
@@ -121,10 +193,12 @@ export interface SandboxOptions extends WorkspaceOptions {
 }
 
 export interface AttachOptions {
+  readonly ask?: VariableQuestion;
   readonly agent?: AgentAdapter;
   readonly brief?: Brief;
   readonly continuation?: { readonly id: string; readonly fork?: boolean };
   readonly signal?: AbortSignal;
+  readonly terminal?: Command["terminal"];
 }
 
 export interface AttachResult extends CommandResult, Disposal {
@@ -141,9 +215,58 @@ export interface DispatchResult<T> extends Execution<T> {
   readonly log?: string;
   readonly retainedDirectory?: string;
   resume<U = undefined>(
-    options: DispatchOptions<U>,
+    options: ContinuationOptions<U>,
   ): Promise<DispatchResult<U>>;
-  fork<U = undefined>(options: DispatchOptions<U>): Promise<DispatchResult<U>>;
+  fork<U = undefined>(
+    options: ContinuationOptions<U>,
+  ): Promise<DispatchResult<U>>;
+}
+
+export type ContinuationOptions<T = undefined> = DispatchOptions<T> &
+  Omit<SandboxOptions, "agent">;
+
+function continuationConfiguration<T extends SandboxOptions>(
+  configuration: T,
+  next: SandboxOptions,
+): T {
+  if (next.repository || next.branch || next.copies) {
+    const { workspace, ...rest } = configuration;
+    return {
+      ...(workspace ? { repository: workspace.repository } : {}),
+      ...rest,
+    } as T;
+  }
+  return configuration;
+}
+
+export interface WarmDispatchResult<T> extends Omit<
+  DispatchResult<T>,
+  "resume" | "fork"
+> {
+  resume<U = undefined>(
+    options: DispatchOptions<U>,
+  ): Promise<WarmDispatchResult<U>>;
+  fork<U = undefined>(
+    options: DispatchOptions<U>,
+  ): Promise<WarmDispatchResult<U>>;
+}
+
+function warmContinuation(options: object): void {
+  invariant(
+    ![
+      "repository",
+      "branch",
+      "provider",
+      "workspace",
+      "copies",
+      "hooks",
+      "limits",
+      "bootstrap",
+      "conversationHome",
+      "includeUncommitted",
+    ].some((key) => key in options),
+    "Warm continuation uses its existing sandbox; use dispatch() to change sandbox settings",
+  );
 }
 
 export interface Sandbox {
@@ -151,15 +274,15 @@ export interface Sandbox {
   readonly root: string;
   dispatch<T = undefined>(
     options: DispatchOptions<T>,
-  ): Promise<DispatchResult<T>>;
+  ): Promise<WarmDispatchResult<T>>;
   resume<T = undefined>(
     id: string,
     options: DispatchOptions<T>,
-  ): Promise<DispatchResult<T>>;
+  ): Promise<WarmDispatchResult<T>>;
   fork<T = undefined>(
     id: string,
     options: DispatchOptions<T>,
-  ): Promise<DispatchResult<T>>;
+  ): Promise<WarmDispatchResult<T>>;
   attach(options?: AttachOptions): Promise<AttachResult>;
   command(command: Command): Promise<CommandResult>;
   close(options?: { readonly preserve?: boolean }): Promise<Disposal>;
@@ -171,12 +294,31 @@ async function hooks(
   directory: string,
   invoke: SandboxLease["invoke"],
   signal?: AbortSignal,
+  parallel = false,
 ): Promise<void> {
+  if (parallel) {
+    const controller = new AbortController();
+    const combined = signal
+      ? AbortSignal.any([signal, controller.signal])
+      : controller.signal;
+    const outcomes = await Promise.allSettled(
+      commands.map((command) =>
+        hooks([command], directory, invoke, combined).catch((cause) => {
+          controller.abort(cause);
+          throw cause;
+        }),
+      ),
+    );
+    const failure = outcomes.find((outcome) => outcome.status === "rejected");
+    if (failure?.status === "rejected") throw failure.reason;
+    return;
+  }
   for (const command of commands)
     await requireSuccess(
       {
         ...command,
         directory: command.directory ?? directory,
+        deadlineMs: command.deadlineMs ?? 600_000,
         ...(signal ? { signal } : {}),
       },
       invoke,
@@ -223,7 +365,10 @@ async function prepareAdapter(
 export async function createSandbox(
   options: SandboxOptions = {},
 ): Promise<Sandbox> {
+  options.signal?.throwIfAborted();
   const provider = options.provider ?? docker();
+  if (provider.placement === "remote" && !options.workspace && !options.branch)
+    options = { ...options, branch: { mode: "integrate" } };
   invariant(
     !options.workspace ||
       (!options.repository && !options.branch && !options.copies),
@@ -243,6 +388,7 @@ export async function createSandbox(
     "Workspace must be open and cannot belong to another sandbox",
   );
   state.active = true;
+  const lifecycle = options.hooks ?? state.hooks;
   const stop = new AbortController();
   const setupSignal = options.signal
     ? AbortSignal.any([options.signal, stop.signal])
@@ -278,52 +424,73 @@ export async function createSandbox(
       GIT_COMMITTER_EMAIL: email,
       ...configured,
     };
-    await hooks(
-      options.hooks?.workspaceReady ?? [],
-      workspace.directory,
-      executeProcess,
-      setupSignal,
+    lease = boundedTransfers(
+      await provider.acquire({
+        repository: workspace.repository,
+        directory: workspace.directory,
+        gitDirectories: workspace.gitDirectories,
+        variables,
+        signal: setupSignal,
+      }),
+      {
+        ...(options.limits?.copyMs
+          ? { deadlineMs: options.limits.copyMs }
+          : {}),
+      },
     );
-    lease = await provider.acquire({
-      repository: workspace.repository,
-      directory: workspace.directory,
-      gitDirectories: workspace.gitDirectories,
-      variables,
-      signal: setupSignal,
-    });
     if (provider.placement === "remote") {
-      sync = await seedRemote(workspace, lease);
+      sync = await seedRemote(workspace, lease, {
+        ...(options.includeUncommitted ? { includeUncommitted: true } : {}),
+        ...(options.limits ? { limits: options.limits } : {}),
+        signal: setupSignal,
+      });
       for (const path of options.copies ?? [])
-        await lease.upload(
-          join(workspace.directory, path),
-          posix.join(lease.root, path.replaceAll("\\", "/")),
-        );
+        if (
+          await stat(join(workspace.directory, path)).catch((error) => {
+            if ((error as NodeJS.ErrnoException).code === "ENOENT")
+              return undefined;
+            throw error;
+          })
+        )
+          await lease.upload(
+            join(workspace.directory, path),
+            posix.join(lease.root, path.replaceAll("\\", "/")),
+          );
       if (options.bootstrap !== false && options.agent)
         prepared.set(
           options.agent,
           await prepareAdapter(options.agent, lease, setupSignal),
         );
     }
-    const initialized = await Promise.allSettled([
-      hooks(
-        options.hooks?.hostReady ?? [],
-        workspace.directory,
-        executeProcess,
-        setupSignal,
+    const initialized = await Promise.allSettled(
+      [
+        hooks(
+          lifecycle?.hostReady ?? [],
+          workspace.directory,
+          executeProcess,
+          setupSignal,
+        ),
+        hooks(
+          lifecycle?.sandboxReady ?? [],
+          lease.root,
+          lease.invoke.bind(lease),
+          setupSignal,
+          true,
+        ),
+      ].map((pending) =>
+        pending.catch((cause) => {
+          stop.abort(cause);
+          throw cause;
+        }),
       ),
-      hooks(
-        options.hooks?.sandboxReady ?? [],
-        lease.root,
-        lease.invoke.bind(lease),
-        setupSignal,
-      ),
-    ]);
+    );
     const failure = initialized.find((item) => item.status === "rejected");
     if (failure?.status === "rejected") throw failure.reason;
   } catch (cause) {
+    await startupFailure(workspace, cause, options);
     await lease?.release().catch(() => undefined);
     state.active = false;
-    if (owned) await workspace.close({ preserve: true });
+    if (owned) await workspace.close();
     throw cause;
   }
   const runtime = lease;
@@ -382,15 +549,12 @@ export async function createSandbox(
     };
   };
   const conversationKey = (agent: AgentAdapter, id: string) =>
-    `${agent.conversations ?? agent.name}:${id}`;
+    `${agent.storage?.name ?? agent.conversations ?? agent.name}:${id}`;
   const restore = async (id: string, agent: AgentAdapter) => {
     if (known.has(conversationKey(agent, id))) return;
-    invariant(
-      agent.conversations,
-      "This adapter does not support native conversations",
-    );
-    const found = await locateConversation(
-      agent.conversations,
+    const storage = storageFor(agent);
+    invariant(storage, "This adapter does not support native conversations");
+    const found = await storage.locate(
       id,
       workspace.repository,
       options.conversationHome,
@@ -399,7 +563,11 @@ export async function createSandbox(
       provider.placement !== "host" ||
       workspace.directory !== workspace.repository
     )
-      await restoreConversation(found, runtime, staging);
+      await storage.restore(found, {
+        repository: workspace.repository,
+        sandbox: runtime,
+        staging,
+      });
     known.add(conversationKey(agent, id));
   };
   const result: Sandbox = {
@@ -408,6 +576,11 @@ export async function createSandbox(
     dispatch<T>(dispatch: DispatchOptions<T>) {
       validateDispatch(dispatch);
       return exclusive(async () => {
+        await preflightDispatch(
+          dispatch,
+          workspace.repository,
+          dispatch.agent ?? options.agent,
+        );
         const signal = dispatch.signal
           ? AbortSignal.any([dispatch.signal, stop.signal])
           : stop.signal;
@@ -426,12 +599,30 @@ export async function createSandbox(
           dispatch.label,
         );
         let execution: Execution<T> | undefined,
-          transcript: ConversationLocation | undefined;
+          transcript: ConversationRecord | undefined;
+        const captured = new Map<string, ConversationRecord>();
+        const storage = storageFor(selected);
         let failure: unknown;
         let conversation = dispatch.continuation?.id;
         const conversations = new Set<string>(
           conversation ? [conversation] : [],
         );
+        const save = async (id: string) => {
+          invariant(storage, "Conversation storage is unavailable");
+          const location = await storage.capture(id, {
+            repository: workspace.repository,
+            sandbox: runtime,
+            staging,
+            ...(options.conversationHome
+              ? { home: options.conversationHome }
+              : {}),
+            ...(dispatch.warn ? { warn: dispatch.warn } : {}),
+            local: provider.placement === "host",
+          });
+          captured.set(id, location);
+          transcript = location;
+          return location;
+        };
         try {
           execution = await execute(
             workspace,
@@ -451,28 +642,32 @@ export async function createSandbox(
                 notify(dispatch.observe, event);
               },
             },
+            async (turn) => {
+              if (!turn.conversation || !storage || selected.capture === false)
+                return turn;
+              const location = await save(turn.conversation);
+              const usage = selected.transcriptUsage?.(
+                await readFile(location.file, "utf8"),
+              );
+              return {
+                ...turn,
+                transcript: location.file,
+                ...(usage ? { usage } : {}),
+              };
+            },
           );
         } catch (cause) {
           failure = cause;
+          log.record({
+            kind: "failure",
+            message: cause instanceof Error ? cause.message : String(cause),
+          });
         }
         try {
           await sync?.pull();
-          if (selected.conversations && selected.capture !== false)
+          if (storage && selected.capture !== false)
             for (const id of conversations)
-              transcript = await captureConversation(
-                selected.conversations,
-                id,
-                workspace.repository,
-                runtime,
-                staging,
-                {
-                  ...(options.conversationHome
-                    ? { home: options.conversationHome }
-                    : {}),
-                  ...(dispatch.warn ? { warn: dispatch.warn } : {}),
-                  local: provider.placement === "host",
-                },
-              );
+              if (failure || !captured.has(id)) await save(id);
         } catch (cause) {
           failure = failure
             ? new AggregateError(
@@ -492,13 +687,13 @@ export async function createSandbox(
           options.limits?.collectMs,
         );
         if (failure) {
-          if (failure instanceof ResponseError)
-            failure.recovery = {
-              ...failure.recovery,
-              commits: changes,
-              transcript: transcript?.file,
-              log: log.file,
-            };
+          recordRecovery(failure, {
+            branch: workspace.branch,
+            directory: workspace.directory,
+            commits: changes,
+            transcript: transcript?.file,
+            log: log.file,
+          });
           throw failure;
         }
         invariant(execution, "Execution did not produce a result");
@@ -510,10 +705,12 @@ export async function createSandbox(
           ...(transcript ? { transcript: transcript.file } : {}),
           ...(log.file ? { log: log.file } : {}),
           resume<U>(next: DispatchOptions<U>) {
+            warmContinuation(next);
             invariant(conversation, "No conversation was emitted");
             return result.resume(conversation, { agent: selected, ...next });
           },
           fork<U>(next: DispatchOptions<U>) {
+            warmContinuation(next);
             invariant(conversation, "No conversation was emitted");
             return result.fork(conversation, { agent: selected, ...next });
           },
@@ -527,6 +724,7 @@ export async function createSandbox(
       return result.dispatch({ ...dispatch, continuation: { id, fork: true } });
     },
     attach(settings = {}) {
+      settings.signal?.throwIfAborted();
       validateBrief(settings.brief, true);
       return exclusive(async () => {
         const signal = settings.signal
@@ -538,9 +736,10 @@ export async function createSandbox(
         );
         if (settings.continuation)
           await restore(settings.continuation.id, selected);
-        const text = settings.brief
+        const brief = await completeBrief(settings.brief, signal, settings.ask);
+        const text = brief
           ? await renderBrief(
-              settings.brief,
+              brief,
               workspace,
               executionLease,
               provider.placement === "host",
@@ -561,12 +760,14 @@ export async function createSandbox(
         try {
           output = await executionLease.invoke({
             ...command,
+            ...(settings.terminal ? { terminal: settings.terminal } : {}),
             deadlineMs: 86_400_000,
             signal: settings.signal
               ? AbortSignal.any([settings.signal, stop.signal])
               : stop.signal,
           });
         } finally {
+          restoreTerminal();
           await sync?.pull();
         }
         return {
@@ -582,6 +783,7 @@ export async function createSandbox(
       });
     },
     command(command) {
+      command.signal?.throwIfAborted();
       return exclusive(async () => {
         try {
           return await runtime.invoke({
@@ -603,6 +805,7 @@ export async function createSandbox(
         let failure: unknown;
         try {
           await runtime.release();
+          await sync?.close();
         } catch (cause) {
           failure = cause;
         }
@@ -629,14 +832,56 @@ export async function dispatch<T = undefined>(
   options: SandboxOptions &
     DispatchOptions<T> & { readonly agent: AgentAdapter },
 ): Promise<DispatchResult<T>> {
-  validateDispatch(options);
+  options.signal?.throwIfAborted();
+  await preflightDispatch(
+    options,
+    options.workspace?.repository ?? options.repository ?? process.cwd(),
+    options.agent,
+  );
+  if ((options.passes ?? 1) > 1) {
+    const outputs: DispatchResult<T>[] = [];
+    for (let index = 0; index < options.passes!; index++) {
+      options.signal?.throwIfAborted();
+      const output = await dispatch({
+        ...options,
+        passes: 1,
+        observe: (event) =>
+          notify(options.observe, { ...event, pass: index + 1 }),
+      });
+      outputs.push(output);
+      if (output.completed) break;
+    }
+    const last = outputs.at(-1)!;
+    return {
+      ...last,
+      text: outputs.map((output) => output.text).join("\n"),
+      turns: outputs.flatMap((output) => output.turns),
+      commits: outputs.flatMap((output) => output.commits),
+      usage: outputs.reduce(
+        (sum, output) => ({
+          input: sum.input + output.usage.input,
+          cached: sum.cached + output.usage.cached,
+          output: sum.output + output.usage.output,
+          ...(sum.cacheCreated !== undefined ||
+          output.usage.cacheCreated !== undefined
+            ? {
+                cacheCreated:
+                  (sum.cacheCreated ?? 0) + (output.usage.cacheCreated ?? 0),
+              }
+            : {}),
+        }),
+        {
+          input: 0,
+          cached: 0,
+          output: 0,
+        } as import("../domain/ports.ts").Usage,
+      ),
+    };
+  }
   if (options.continuation) {
-    invariant(
-      options.agent.conversations,
-      "This adapter does not support native conversations",
-    );
-    await locateConversation(
-      options.agent.conversations,
+    const storage = storageFor(options.agent);
+    invariant(storage, "This adapter does not support native conversations");
+    await storage.locate(
       options.continuation.id,
       options.workspace?.repository ?? options.repository ?? process.cwd(),
       options.conversationHome,
@@ -660,23 +905,29 @@ export async function dispatch<T = undefined>(
     return {
       ...output,
       ...disposed,
-      resume<U>(next: DispatchOptions<U>) {
+      resume<U>(next: ContinuationOptions<U>) {
         invariant(continuation, "No conversation was emitted");
         return dispatch({
-          ...configuration,
+          ...continuationConfiguration(configuration, next),
           ...next,
           continuation: { id: continuation },
         });
       },
-      fork<U>(next: DispatchOptions<U>) {
+      fork<U>(next: ContinuationOptions<U>) {
         invariant(continuation, "No conversation was emitted");
         return dispatch({
-          ...configuration,
+          ...continuationConfiguration(configuration, next),
           ...next,
           continuation: { id: continuation, fork: true },
         });
       },
     };
+  } catch (cause) {
+    recordRecovery(cause, {
+      branch: sandbox.workspace.branch,
+      directory: sandbox.workspace.directory,
+    });
+    throw cause;
   } finally {
     if (!successful) await sandbox.close({ preserve: true });
   }
@@ -685,14 +936,14 @@ export async function dispatch<T = undefined>(
 export async function attach(
   options: SandboxOptions & AttachOptions & { readonly agent: AgentAdapter },
 ): Promise<AttachResult> {
+  options.signal?.throwIfAborted();
   validateBrief(options.brief, true);
+  const brief = await completeBrief(options.brief, options.signal, options.ask);
+  if (brief) options = { ...options, brief };
   if (options.continuation) {
-    invariant(
-      options.agent.conversations,
-      "This adapter does not support native conversations",
-    );
-    await locateConversation(
-      options.agent.conversations,
+    const storage = storageFor(options.agent);
+    invariant(storage, "This adapter does not support native conversations");
+    await storage.locate(
       options.continuation.id,
       options.workspace?.repository ?? options.repository ?? process.cwd(),
       options.conversationHome,

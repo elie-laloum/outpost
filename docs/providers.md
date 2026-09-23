@@ -34,7 +34,7 @@ const provider = docker({
 });
 ```
 
-`podman()` accepts the same options. Default image is `outpost:<normalized-repository-directory>`. Build it with the CLI. Default UID/GID match the host on POSIX and use 1000 on Windows. The image preflight reports numeric UID mismatches. Mount sources support `~`, relative and absolute paths, and files. Relative targets resolve under `/workspace`. Linux mounts use SELinux `z` by default; choose `Z` for a private label or `false` to omit labels. Windows/macOS use bind-mount syntax.
+`podman()` accepts the same options. Default image is `outpost:<normalized-repository-directory>`. Build it with the CLI. Default UID/GID match the host on POSIX and use 1000 on Windows. The image preflight reports numeric UID mismatches when the user was not explicitly overridden. Podman supports `userns: "keep-id" | false` and maps explicit UIDs/GIDs. macOS checks that Podman Machine is running. Mount sources support `~`, relative and absolute paths, and files. Relative targets resolve under `/workspace`; `~` and `~/...` resolve under the agent home. Individual file mounts must target the home: mount a directory for other destinations. Their parents are prepared for the agent UID/GID. Linux mounts use SELinux `z` by default; choose `Z` for a private label or `false` to omit labels. Windows/macOS use bind-mount syntax.
 
 Containers have a private ephemeral home, dropped capabilities, no-new-privileges and an init process. Only selected mounts and Git metadata are exposed. Git paths are remapped so Windows worktree pointers remain usable inside Linux. Credentials are passed through environment names rather than command-line values. A command-specific process group allows cancellation without destroying the warm environment.
 
@@ -89,7 +89,7 @@ const provider = daytona({
 
 ## Remote Git transport
 
-Remote workspaces are initialized from a Git bundle, then receive the host's tracked patch and untracked files. Selected copied inputs are uploaded too. Each dispatch, command or terminal completion synchronizes back. New commits retain their object IDs, authors, timestamps and parent relationships. Repeated synchronization handles uncommitted work later becoming committed without duplicating commits.
+Remote workspaces default to temporary integration branches and start from committed Git history. `includeUncommitted: true` explicitly sends the host patch and untracked files. Otherwise pre-existing host edits are preserved and overlapping remote edits are rejected before local mutation. Selected copied inputs are uploaded too. Each dispatch, command or terminal completion synchronizes back. New commits retain their object IDs, authors, timestamps and parent relationships. Repeated synchronization handles uncommitted work later becoming committed without duplicating commits.
 
 Outpost compares host state with its last synchronized state. Concurrent local edits cause a recovery error. Before applying remote changes it saves patches, untracked files and incoming commits in `.outpost/recovery`. Rewritten/non-fast-forward remote history is rejected. Relative transfer paths are validated, and local symlink-parent traversal is rejected.
 
@@ -102,10 +102,18 @@ interface SandboxLease {
   root: string;
   home: string;
   invoke(command: Command): Promise<CommandResult>;
-  upload(source: string, destination: string): Promise<void>;
-  download(source: string, destination: string): Promise<void>;
+  upload(
+    source: string,
+    destination: string,
+    options?: TransferOptions,
+  ): Promise<void>;
+  download(
+    source: string,
+    destination: string,
+    options?: TransferOptions,
+  ): Promise<void>;
   release(): Promise<void>;
 }
 ```
 
-`invoke` must stream output to `observe`, respect abort/deadline, and leave the lease reusable after cancellation. `release` must be idempotent. Remote providers must support Git and file transfer; Outpost performs synchronization through those capabilities. Interactive support is optional but unsupported calls must fail clearly. Cloud factories also accept an optional connection factory for contract tests or custom SDK wiring.
+`invoke` must stream output to `observe`, respect abort/deadline, and leave the lease reusable after cancellation. `release` must be idempotent. Transfer options contain `signal` and `deadlineMs`; custom transfers must stop writing after cancellation. Outpost bounds the wait, but cannot forcibly cancel arbitrary user callbacks. Cloud SDK requests already sent may finish remotely; built-in downloads check cancellation before writing returned bytes. Remote providers must support Git and file transfer; Outpost performs synchronization through those capabilities. Interactive support is optional but unsupported calls must fail clearly. Cloud factories also accept an optional connection factory for contract tests or custom SDK wiring.

@@ -38,7 +38,7 @@ try {
     [
       "--input-type=module",
       "-e",
-      "import {response, workflow} from '@elie-laloum/outpost'; import {docker} from '@elie-laloum/outpost/providers/docker'; if((await response.text({tag:'ok'}).read('<ok>yes</ok>'))!=='yes'||docker().name!=='docker')throw Error('Package import failed'); (await workflow('empty',[]).start()).unwrap()",
+      "import {response, workflow, campaign, conversations, reporter, githubBacklog, beadsBacklog, recoveryDetails} from '@elie-laloum/outpost'; import {docker} from '@elie-laloum/outpost/providers/docker'; if((await response.text({tag:'ok'}).read('<ok>yes</ok>'))!=='yes'||docker().name!=='docker')throw Error('Package import failed'); for(const item of [campaign,conversations.capture,reporter,githubBacklog,beadsBacklog,recoveryDetails])if(typeof item!=='function')throw Error('Missing public extension'); (await workflow('empty',[]).start()).unwrap()",
     ],
     { cwd: temporary, stdio: "inherit" },
   );
@@ -78,6 +78,9 @@ await using sandbox = await createSandbox({ provider: local() });
 const result = await sandbox.dispatch({ agent: codex(), brief: { text: 'Return <n>1</n>' }, response: response.json({tag:'n', schema: value => Number(value)}) });
 const n: number = result.value;
 const once = await dispatch({agent:codex(),provider:local(),brief:{text:'hello'}});
+await once.fork({brief:{text:'alternative'},branch:{mode:'named',name:'outpost/alternative'},hooks:{workspaceReady:[]}});
+// @ts-expect-error Warm results cannot replace their sandbox configuration.
+await result.resume({brief:{text:'continue'},branch:{mode:'named',name:'outpost/wrong'}});
 console.log(n,once.commits);
 `,
   );

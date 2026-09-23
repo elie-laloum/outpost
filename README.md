@@ -26,11 +26,11 @@ npm pack
 Install the resulting tarball in your target repository, or use the package from [GitHub Packages](https://github.com/elie-laloum/outpost/packages). Registry configuration is documented in [Operations](docs/operations.md).
 
 ```sh
-npm install --save-dev /path/to/elie-laloum-outpost-1.0.0.tgz
+npm install --save-dev /path/to/elie-laloum-outpost-1.1.0.tgz
 npx outpost init --yes --agent codex --provider docker --template blank --build
 ```
 
-Set `OPENAI_API_KEY` in the environment or `.outpost/.env`. For Claude, select `--agent claude` and set `ANTHROPIC_API_KEY` or `CLAUDE_CODE_OAUTH_TOKEN`. Run the generated script:
+Copy `.outpost/.env.example` to `.outpost/.env`. Set `OPENAI_API_KEY` there, or leave its declaration empty to inherit the process value. For Claude, select `--agent claude` and declare `ANTHROPIC_API_KEY` or `CLAUDE_CODE_OAUTH_TOKEN`. Only declared process variables are imported into isolated sandboxes. Run the generated script:
 
 ```sh
 node .outpost/run.mts "Add validation and tests for the configuration loader"
@@ -126,7 +126,7 @@ const result = await dispatch({
 
 Files support `{{OBJECTIVE}}`, reserved `{{WORK_BRANCH}}` and `{{BASE_BRANCH}}`, and shell expansion such as `` !`git status --short` ``. Original file commands run concurrently inside the sandbox after setup hooks. Substituted text cannot introduce additional commands. Values inserted into an existing command are shell input: only interpolate trusted values there. Missing variables fail; unused variables warn through `warn`.
 
-Completion markers stop the loop. If the process hangs after a marker, the completion grace period resets on subsequent output and then stops that command. Every turn includes its duration and raw token counts; the result includes aggregate usage and the matched completion marker.
+Completion markers stop the loop. If the process hangs after a marker, the completion grace period resets on subsequent output and then stops that command. Every turn includes its duration, native transcript path when available and raw token counts (input, cache read, cache creation, output); the result includes aggregate usage and the matched completion marker.
 
 ## Structured responses and conversations
 
@@ -160,9 +160,11 @@ await result.resume({ brief: { text: "Explain the result." } });
 await result.fork({ brief: { text: "Explore a different solution." } });
 ```
 
-`response.text` extracts tagged text. `response.json` accepts a function or a Standard Schema validator, including asynchronous validation. Structured responses and conversation continuations require one pass. Repairs resume the same conversation. `ResponseError.recovery` exposes the conversation, commits and recovery paths.
+`response.text` extracts tagged text. `response.json` accepts a function or a Standard Schema validator, including asynchronous validation. Structured responses and conversation continuations require one pass. Repairs resume the same conversation. `ResponseError.recovery` exposes the conversation, commits and recovery paths. `recoveryDetails(error)` also retrieves recovery metadata for other failures without replacing cancellation reasons.
 
 Native conversation capture is enabled by default. Transcripts are saved to the host agent's own storage and working-directory fields are rewritten for host resumption. Claude child transcripts are copied on a best-effort basis. Set `saveConversations: false` on an adapter to opt out. Forks create a new conversation; use a separate workspace when filesystem isolation is also required.
+
+Each cold `dispatch({ passes })` provisions a fresh sandbox per pass. `sandbox.dispatch({ passes })` deliberately reuses its environment. Relative brief filenames resolve from the caller’s working directory. Cold result `resume`/`fork` accepts new branch/provider/hook settings; warm result methods retain the sandbox’s settings. See [1.1 migration notes](docs/migration-1.1.md).
 
 ## Typed workflows
 
@@ -188,11 +190,17 @@ console.log(result.value(implement));
 
 The graph validates dependencies and cycles before running. Results are typed and scoped to one execution. Conditions, cooperative cancellation, retries, concurrency limits, observer events and Mermaid diagrams are built in. `agentTask`, `commandTask` and `isolatedTask` connect workflows to sandbox operations. [Workflow guide](docs/workflows.md).
 
+## Issue campaigns
+
+`campaign({ agent, provider, backlog })` loads a backlog, validates a typed plan, allocates a branch per issue and bounds parallel implementation. Review shares each issue sandbox. A merge phase validates the combined work; issue closure occurs only after integration into the host branch. The backlog is refreshed for the next cycle. GitHub and Beads connectors expose list, detail and close operations; custom trackers implement `Backlog`.
+
+[Campaign configuration and starter examples](docs/workflows.md#issue-campaigns).
+
 ## Configuration and extension
 
-Provider settings cover environment variables, file/directory mounts, networks, resource limits, devices, extra groups and SELinux labels. Hooks run at workspace readiness and after sandbox creation. The two post-creation hook groups run concurrently, with sequential commands inside each group. [Complete API](docs/api.md) and [provider reference](docs/providers.md).
+Provider settings cover environment variables, file/directory mounts, networks, resource limits, devices, extra groups and SELinux labels. Hooks run at workspace readiness and after sandbox creation. The two post-creation hook groups run concurrently. Host commands run in order; sandbox commands run concurrently and cancel their siblings on failure. [Complete API](docs/api.md) and [provider reference](docs/providers.md).
 
-Outpost reads repository `.env`, then `.outpost/.env`; declared process values override file values. Explicit provider and adapter variables override those values. The same variable cannot be declared by both provider and adapter. Logs default to `.outpost/logs`, with `false`, `"stdout"`, custom files and verbose modes available.
+Outpost reads only `.outpost/.env`. Nonempty file values win; empty declarations inherit matching process values. The repository-root `.env` is not imported. Explicit provider and adapter variables override those values. The same variable cannot be declared by both provider and adapter. Logs default to `.outpost/logs`, with `false`, `"stdout"`, custom files and verbose modes available.
 
 Implement `AgentAdapter` to add an agent. Implement `SandboxProvider` directly or use `mountedProvider`/`remoteProvider` to add an execution backend. Domain contracts do not depend on a specific cloud SDK. [Architecture](docs/architecture.md).
 

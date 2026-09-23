@@ -17,7 +17,9 @@ export async function uploadTree(
   upload: (path: string, data: Buffer) => Promise<void>,
   link: (target: string, path: string) => Promise<void>,
   metadata?: (path: string, directory: boolean, mode: number) => Promise<void>,
+  signal?: AbortSignal,
 ): Promise<void> {
+  signal?.throwIfAborted();
   const info = await lstat(source);
   if (info.isSymbolicLink()) {
     const { readlink } = await import("node:fs/promises");
@@ -33,12 +35,16 @@ export async function uploadTree(
         upload,
         link,
         metadata,
+        signal,
       );
     return;
   }
   if (!info.isFile())
     throw new OutpostError("provider", `Unsupported upload input: ${source}`);
-  await upload(destination, await readFile(source));
+  const data = await readFile(source);
+  signal?.throwIfAborted();
+  await upload(destination, data);
+  signal?.throwIfAborted();
   await metadata?.(destination, false, info.mode & 0o777);
 }
 
@@ -59,11 +65,13 @@ export async function downloadTree(
   destination: string,
   manifest: string,
   read: (path: string) => Promise<Buffer>,
+  signal?: AbortSignal,
 ): Promise<void> {
   const entries: unknown = JSON.parse(manifest);
   if (!Array.isArray(entries))
     throw new OutpostError("provider", "Invalid transfer manifest");
   for (const entry of entries) {
+    signal?.throwIfAborted();
     if (
       !entry ||
       typeof entry.path !== "string" ||
@@ -81,7 +89,9 @@ export async function downloadTree(
     if (entry.kind === "directory") {
       await mkdir(target, { recursive: true });
     } else if (entry.kind === "file") {
-      await saveDownload(target, await read(posix.join(source, entry.path)));
+      const data = await read(posix.join(source, entry.path));
+      signal?.throwIfAborted();
+      await saveDownload(target, data);
       await chmod(target, entry.mode & 0o777);
     } else if (entry.kind === "link" && typeof entry.target === "string") {
       await mkdir(dirname(target), { recursive: true });

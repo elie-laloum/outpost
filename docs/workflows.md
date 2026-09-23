@@ -48,14 +48,54 @@ Task deadlines are **cooperative**: task code must honor `context.signal`. The s
 
 Use dependencies to serialize tasks sharing a sandbox. Use `isolatedTask` with distinct named workspaces for fanout. Parallel temporary integration branches serialize their host merge stage, but semantically conflicting changes still require human resolution.
 
+## Issue campaigns
+
+`campaign` is the application-level orchestration service for issue delivery. A `Backlog` supplies `list(signal)`, `get(id, signal)` and `close(id, signal)`. Each issue has an id, title, optional body and optional `blockedBy` ids. Blocked issues are excluded while their dependencies remain open.
+
+```ts
+import { campaign, codex, claude, githubBacklog } from "@elie-laloum/outpost";
+import { docker } from "@elie-laloum/outpost/providers/docker";
+
+const result = await campaign({
+  agent: codex(),
+  planner: claude(),
+  reviewer: codex(),
+  merger: codex(),
+  provider: docker(),
+  backlog: githubBacklog({ label: "outpost-ready" }),
+  cycles: 10,
+  concurrency: 3,
+  implementationPasses: 100,
+  reviewPasses: 1,
+  standards:
+    "Follow repository conventions, test behavior and keep comments brief.",
+  observe: (event) => console.log(event.phase, event.cycle, event.issue),
+});
+console.log(result.reason, result.issues);
+```
+
+Each cycle refreshes the backlog. The planner returns validated assignments with unique issue ids and new branch names. Unknown issues, invalid branches and duplicate assignments fail before implementation. `planner: false` takes ready issues in order, up to the concurrency limit.
+
+Each issue owns a named workspace and one sandbox. Implementation and optional review share that sandbox; review inspects the full diff against the cycle's base commit. An implementation without commits skips review and closure. A failed issue is recorded while independent issues finish. `reviewer: false` disables review.
+
+Completed branches enter a separate integration sandbox, even when only one branch completed. The merger resolves conflicts, validates the result and commits corrections. Outpost verifies that the original issue commits are ancestors of the integrated result and rejects uncommitted leftovers. Only after integration into the host branch does it close the issues. Merge failure retains the workspace; tracker closure failure is reported after integration and requires reconciliation before rerunning.
+
+The campaign stops on an empty or blocked backlog, no progress, cancellation, or the cycle limit. The result distinguishes `empty`, `blocked`, `no-progress` and `limit`, and records each issue as `empty`, `failed` or `merged`. Positive integer limits are validated before work starts.
+
 ## Starter templates
 
-| Template      | Structure                                                             |
-| ------------- | --------------------------------------------------------------------- |
-| `blank`       | One dispatch and a configurable objective.                            |
-| `iterate`     | Completion-driven loop with a finite pass budget.                     |
-| `review`      | Implementation followed by review in a warm sandbox.                  |
-| `plan`        | Three independent planning perspectives, then an implementation task. |
-| `plan-review` | Parallel planning, implementation, then review.                       |
+| Template      | Structure                                                                          |
+| ------------- | ---------------------------------------------------------------------------------- |
+| `blank`       | One dispatch with a configurable objective.                                        |
+| `iterate`     | Sequential campaign; reloads the tracker each cycle.                               |
+| `review`      | Sequential implementation and conditional warm review per issue.                   |
+| `plan`        | Typed plan, separate issue branches, bounded concurrent execution and integration. |
+| `plan-review` | Planned parallel execution with a warm review for each changed issue.              |
 
-Scaffold tracker connectors with `--tracker github`, `beads`, or `custom`. GitHub requires authenticated `gh`, Beads requires `bd`, and the custom connector reads `OUTPOST_TRACKER_URL`. The starter uses returned issues as its objective unless you supply a command-line objective. Issue mutation remains explicit in your workflow. Custom connectors include `.outpost/TRACKER.md` setup instructions. `--label NAME` can create/update the GitHub label during initialization.
+Without a tracker, a campaign starter wraps the command-line objective as one in-memory issue. With `--tracker github`, `beads` or `custom`, the tracker supplies the workload. Limits and role adapters are editable at the top level of the generated call; standards live in `.outpost/STANDARDS.md`.
+
+GitHub uses authenticated host `gh`, paginates all issue pages, excludes pull requests and applies the configured label. `--label NAME` creates/updates the label and configures filtering. Declare `GH_TOKEN` in `.outpost/.env` or authenticate `gh` directly. The connector follows the official [GitHub CLI pagination contract](https://cli.github.com/manual/gh_api).
+
+Beads uses host `bd ready --json --limit 0`, `bd show` and `bd close`. Install and initialize [Beads](https://github.com/gastownhall/beads) on the host before running. Selecting Beads also installs its pinned CLI in the generated container image.
+
+The custom starter implements three HTTP operations: GET `issues?state=open`, GET `issues/:id`, POST `issues/:id/close`. Set `OUTPOST_TRACKER_URL` on the host and adapt authentication/pagination in `tickets.ts` or `tickets.mts`. `.outpost/TRACKER.md` documents the contract. Keep tracker mutation in the host connector so agents do not close issues before integration.

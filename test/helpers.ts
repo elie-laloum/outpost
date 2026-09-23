@@ -27,6 +27,7 @@ export function scripted(
 ): AgentAdapter {
   return {
     name: "fixture",
+    resumable: true,
     request(input) {
       return {
         executable: process.execPath,

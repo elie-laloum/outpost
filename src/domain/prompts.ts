@@ -35,14 +35,17 @@ export function prepareBrief(
   );
   const used = new Set<string>();
   const substitute = (text: string) =>
-    text.replace(/\{\{([A-Za-z_][A-Za-z0-9_]*)\}\}/g, (_, key: string) => {
-      if (!Object.hasOwn(available, key))
-        throw new OutpostError("prompt", `Missing prompt variable: ${key}`, {
-          key,
-        });
-      used.add(key);
-      return String(available[key as keyof typeof available]);
-    });
+    text.replace(
+      /\{\{\s*([A-Za-z_][A-Za-z0-9_]*)\s*\}\}/g,
+      (_, key: string) => {
+        if (!Object.hasOwn(available, key))
+          throw new OutpostError("prompt", `Missing prompt variable: ${key}`, {
+            key,
+          });
+        used.add(key);
+        return String(available[key as keyof typeof available]);
+      },
+    );
   const fragments: PromptFragment[] = [];
   let previous = 0;
   for (const match of source.matchAll(/!`([^`]+)`/g)) {

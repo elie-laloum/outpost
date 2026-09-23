@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.1.0
+
+- Add typed issue campaigns with dynamic planning, bounded concurrency, per-issue branches, warm review, verified integration and tracker closure.
+- Add complete GitHub and Beads backlog connectors and executable campaign starters.
+- Isolate cold passes, validate cancellation and structured responses before allocation, and preserve raw/final agent output.
+- Expose per-turn transcripts, custom conversation stores, selective path rewriting and separate Claude cache counters.
+- Align environment allowlists, caller-relative prompts, interactive variable collection and lifecycle hook ordering.
+- Recover managed workspaces, refresh reusable branches and preserve host edits during committed-only remote synchronization.
+- Complete Podman namespace options, macOS preflight, file-mount preparation and bounded transfers.
+- Add human progress reporting, appendable journals, recovery metadata and terminal cleanup.
+- Expand functional, provider and package tests; document migration in English and French.
+
 ## 1.0.0
 
 Initial Outpost release.

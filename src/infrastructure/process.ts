@@ -2,6 +2,7 @@ import { spawn } from "node:child_process";
 import { StringDecoder } from "node:string_decoder";
 import { OutpostError, positive } from "../domain/errors.ts";
 import type { Channel, Command, CommandResult } from "../domain/ports.ts";
+import { restoreTerminal } from "./terminal.ts";
 
 export type Executor = (command: Command) => Promise<CommandResult>;
 
@@ -19,7 +20,8 @@ export const executeProcess: Executor = (command) => {
       shell: false,
       windowsHide: true,
       detached: !interactive && process.platform !== "win32",
-      stdio: interactive ? "inherit" : ["pipe", "pipe", "pipe"],
+      stdio:
+        interactive && !command.terminal ? "inherit" : ["pipe", "pipe", "pipe"],
     });
     const decoder = {
       stdout: new StringDecoder("utf8"),
@@ -100,6 +102,8 @@ export const executeProcess: Executor = (command) => {
     command.signal?.addEventListener("abort", abort, { once: true });
     if (command.signal?.aborted) abort();
     child.on("close", (status) => {
+      if (interactive) restoreTerminal();
+      if (child.stdin) command.terminal?.input?.unpipe(child.stdin);
       clearTimeout(timer);
       clearTimeout(escalation);
       command.signal?.removeEventListener("abort", abort);
@@ -110,7 +114,13 @@ export const executeProcess: Executor = (command) => {
       if (failed) reject(reason);
       else resolve({ status: status ?? 1, ...output });
     });
-    child.stdin?.end(command.stdin);
+    if (child.stdin && command.terminal?.input)
+      command.terminal.input.pipe(child.stdin);
+    else child.stdin?.end(command.stdin);
+    if (child.stdout && command.terminal?.output)
+      child.stdout.pipe(command.terminal.output, { end: false });
+    if (child.stderr && command.terminal?.error)
+      child.stderr.pipe(command.terminal.error, { end: false });
   });
 };
 

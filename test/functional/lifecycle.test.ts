@@ -158,7 +158,7 @@ test("warm sandbox rejects overlap and remains usable after cancellation", async
     /active operation/,
   );
   setTimeout(() => stop.abort(), 80);
-  await assert.rejects(running, /cancelled/);
+  await assert.rejects(running, (error) => error === stop.signal.reason);
   assert.equal(
     (
       await box.command({
@@ -186,7 +186,7 @@ test("file briefs reload between passes and literal briefs never expand", async 
   t.after(() => box.close());
   let seen = 0;
   const output = await box.dispatch({
-    brief: { file: "prompt.md" },
+    brief: { file: path },
     passes: 2,
     observe(event) {
       if (event.kind === "text" && ++seen === 1) writeFileSync(path, "second");

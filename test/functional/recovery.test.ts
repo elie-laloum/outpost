@@ -92,8 +92,28 @@ test("cold result resume and fork round-trip native transcripts while preserving
   const continued = await first.resume({ brief: { text: "continued" } });
   assert.equal(continued.conversation, "parent-id");
   const parent = await readFile(first.transcript, "utf8");
-  const forked = await continued.fork({ brief: { text: "alternative" } });
+  const forked = await continued.fork({
+    brief: { text: "alternative" },
+    branch: { mode: "named", name: "alternate-session" },
+    hooks: {
+      workspaceReady: [
+        {
+          executable: process.execPath,
+          arguments: [
+            "-e",
+            "require('fs').writeFileSync('fork-hook.txt','ran')",
+          ],
+        },
+      ],
+    },
+  });
   assert.equal(forked.conversation, "child-id");
+  assert.equal(forked.branch, "alternate-session");
+  assert.notEqual(forked.directory, continued.directory);
+  assert.equal(
+    await readFile(join(forked.directory, "fork-hook.txt"), "utf8"),
+    "ran",
+  );
   assert.equal(await readFile(first.transcript, "utf8"), parent);
 });
 
@@ -170,7 +190,7 @@ test("prompt commands run after hooks and fail with diagnostics", async (t) => {
   t.after(() => box.close());
   const output = await box.dispatch({
     brief: {
-      file: "brief.md",
+      file: join(root, "brief.md"),
       values: { INPUT: "!`not-executed`", EXTRA: "unused" },
     },
     warn: (message) => warnings.push(message),
@@ -180,7 +200,7 @@ test("prompt commands run after hooks and fail with diagnostics", async (t) => {
   assert.equal(await readFile(join(root, "hook.txt"), "utf8"), "ready");
   await writeFile(join(root, "brief.md"), "!`exit 8`");
   await assert.rejects(
-    box.dispatch({ brief: { file: "brief.md" } }),
+    box.dispatch({ brief: { file: join(root, "brief.md") } }),
     /Prompt command failed/,
   );
 });

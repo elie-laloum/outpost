@@ -11,6 +11,7 @@ export type FaultCode =
   | "provider";
 
 export class OutpostError extends Error {
+  recovery: Readonly<Record<string, unknown>> = {};
   readonly code: FaultCode;
   readonly details: Readonly<Record<string, unknown>>;
   constructor(
@@ -24,6 +25,33 @@ export class OutpostError extends Error {
     this.code = code;
     this.details = Object.freeze({ ...details });
   }
+}
+
+const recoveryRecords = new WeakMap<
+  object,
+  Readonly<Record<string, unknown>>
+>();
+
+export function recordRecovery(
+  error: unknown,
+  details: Record<string, unknown>,
+): void {
+  if (error && (typeof error === "object" || typeof error === "function")) {
+    const previous = recoveryDetails(error);
+    const recovery = Object.freeze({ ...previous, ...details });
+    recoveryRecords.set(error, recovery);
+    if (error instanceof OutpostError) error.recovery = recovery;
+  }
+}
+
+export function recoveryDetails(
+  error: unknown,
+): Readonly<Record<string, unknown>> | undefined {
+  return error instanceof OutpostError
+    ? error.recovery
+    : error && (typeof error === "object" || typeof error === "function")
+      ? recoveryRecords.get(error)
+      : undefined;
 }
 
 export function invariant(

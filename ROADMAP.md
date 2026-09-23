@@ -6,6 +6,9 @@ Reusable sandboxes; independent workspaces; current/named/integration branch pol
 
 ## V1.x: efficiency and diagnostics
 
+- Durable campaign closure receipts to reconcile tracker outages without reimplementing merged issues.
+- Configurable planner policies, merge validation commands and per-role token budgets.
+
 - Incremental remote file manifests and compressed transfer batches while preserving recovery guarantees.
 - Content-addressed dependency caches and prebuilt agent images with signed provenance.
 - Configurable recovery retention with an inspect/prune CLI and storage quotas.

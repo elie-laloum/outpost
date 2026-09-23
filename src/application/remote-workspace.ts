@@ -10,12 +10,23 @@ import {
 import { dirname, join, posix } from "node:path";
 import { createHash, randomUUID } from "node:crypto";
 import { OutpostError } from "../domain/errors.ts";
-import type { SandboxLease, WorkspaceRecord } from "../domain/ports.ts";
+import type {
+  SandboxLease,
+  StageLimits,
+  WorkspaceRecord,
+} from "../domain/ports.ts";
 import { git } from "../infrastructure/git.ts";
 import { safeDestination } from "../infrastructure/files.ts";
 
 export interface RemoteSync {
   pull(): Promise<void>;
+  close(): Promise<void>;
+}
+
+export interface RemoteSyncOptions {
+  readonly includeUncommitted?: boolean;
+  readonly signal?: AbortSignal;
+  readonly limits?: StageLimits;
 }
 
 async function extras(directory: string): Promise<string[]> {
@@ -47,7 +58,9 @@ async function digest(directory: string, recovery: string): Promise<string> {
 export async function seedRemote(
   workspace: WorkspaceRecord,
   lease: SandboxLease,
+  options: RemoteSyncOptions = {},
 ): Promise<RemoteSync> {
+  options.signal?.throwIfAborted();
   const recovery = join(
     workspace.repository,
     ".outpost",
@@ -56,20 +69,30 @@ export async function seedRemote(
   );
   await mkdir(recovery, { recursive: true });
   const bundle = join(recovery, "initial.bundle");
-  await git(workspace.directory, ["bundle", "create", bundle, "HEAD"]);
+  await git(workspace.directory, ["bundle", "create", bundle, "--all", "HEAD"]);
   const remoteBundle = posix.join(
     lease.root.replaceAll("\\", "/"),
     "..",
     `outpost-${randomUUID()}.bundle`,
   );
   await lease.upload(bundle, remoteBundle);
+  let initializing = true,
+    failed = false;
   const run = async (args: readonly string[]) => {
-    const result = await lease.invoke({
-      executable: "git",
-      arguments: args,
-      directory: lease.root,
-      retain: 16_777_216,
-    });
+    let result;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      result = await lease.invoke({
+        executable: "git",
+        arguments: args,
+        directory: lease.root,
+        retain: 16_777_216,
+        ...(initializing && options.signal ? { signal: options.signal } : {}),
+        ...(options.limits?.gitMs ? { deadlineMs: options.limits.gitMs } : {}),
+      });
+      if (!initializing || result.status !== 126) break;
+    }
+    if (!result)
+      throw new OutpostError("workspace", "Remote Git did not start");
     if (result.status !== 0)
       throw new OutpostError("workspace", "Remote Git operation failed", {
         ...result,
@@ -98,18 +121,44 @@ export async function seedRemote(
     "HEAD",
     `--output=${initialPatch}`,
   ]);
-  if ((await readFile(initialPatch)).length) {
+  const initialIndex = join(recovery, "initial-index.patch");
+  await git(workspace.directory, [
+    "diff",
+    "--cached",
+    "--binary",
+    `--output=${initialIndex}`,
+  ]);
+  const protectedFiles = options.includeUncommitted
+    ? []
+    : [
+        ...(
+          await git(workspace.directory, ["diff", "--name-only", "-z", "HEAD"])
+        )
+          .split("\0")
+          .filter(Boolean),
+        ...(await extras(workspace.directory)),
+      ];
+  const originalHead = (
+    await git(workspace.directory, ["rev-parse", "HEAD"])
+  ).trim();
+  if (options.includeUncommitted && (await readFile(initialPatch)).length) {
     await lease.upload(initialPatch, `${remoteBundle}.patch`);
     await run(["apply", "--binary", `${remoteBundle}.patch`]);
   }
-  for (const file of await extras(workspace.directory))
+  for (const file of options.includeUncommitted
+    ? await extras(workspace.directory)
+    : [])
     await lease.upload(
       await safeDestination(workspace.directory, file),
       posix.join(lease.root, file),
     );
   let synchronized = (await run(["rev-parse", "HEAD"])).trim();
+  initializing = false;
   let expected = await digest(workspace.directory, recovery);
   return {
+    async close() {
+      if (!failed) await rm(recovery, { recursive: true, force: true });
+    },
     async pull() {
       const transfer = join(recovery, randomUUID());
       await mkdir(transfer, { recursive: true });
@@ -145,6 +194,28 @@ export async function seedRemote(
           await run(["bundle", "create", remoteBundle, "HEAD"]);
           await lease.download(remoteBundle, join(transfer, "commits.bundle"));
         }
+        if (protectedFiles.length) {
+          const changed = new Set([
+            ...(await run(["diff", "--name-only", "-z", originalHead]))
+              .split("\0")
+              .filter(Boolean),
+            ...incoming,
+          ]);
+          const overlaps = protectedFiles.filter((file) =>
+            [...changed].some(
+              (path) =>
+                path === file ||
+                path.startsWith(`${file}/`) ||
+                file.startsWith(`${path}/`),
+            ),
+          );
+          if (overlaps.length)
+            throw new OutpostError(
+              "conflict",
+              "Remote changes overlap uncommitted host files",
+              { files: overlaps, recovery: transfer },
+            );
+        }
         if ((await digest(workspace.directory, recovery)) !== expected)
           throw new OutpostError(
             "conflict",
@@ -162,6 +233,40 @@ export async function seedRemote(
             "--is-ancestor",
             "HEAD",
             "FETCH_HEAD",
+          ]);
+        }
+        const validation = join(transfer, "validation");
+        await git(workspace.directory, [
+          "worktree",
+          "add",
+          "--detach",
+          validation,
+          head,
+        ]);
+        try {
+          if ((await readFile(patch)).length)
+            await git(validation, ["apply", "--binary", patch]);
+          if (
+            !options.includeUncommitted &&
+            (await readFile(initialPatch)).length
+          )
+            await git(validation, ["apply", "--binary", initialPatch]);
+          if (
+            !options.includeUncommitted &&
+            (await readFile(initialIndex)).length
+          )
+            await git(validation, [
+              "apply",
+              "--cached",
+              "--binary",
+              initialIndex,
+            ]);
+        } finally {
+          await git(workspace.directory, [
+            "worktree",
+            "remove",
+            "--force",
+            validation,
           ]);
         }
         const previousPatch = join(transfer, "previous.patch");
@@ -211,7 +316,9 @@ export async function seedRemote(
             previousPatch,
           ]);
         await git(workspace.directory, ["reset", "--mixed", "HEAD"]);
-        for (const file of previousExtras)
+        for (const file of previousExtras.filter(
+          (file) => !protectedFiles.includes(file),
+        ))
           await rm(await safeDestination(workspace.directory, file), {
             force: true,
           });
@@ -219,6 +326,21 @@ export async function seedRemote(
           await git(workspace.directory, ["merge", "--ff-only", "FETCH_HEAD"]);
         if ((await readFile(patch)).length)
           await git(workspace.directory, ["apply", "--binary", patch]);
+        if (
+          !options.includeUncommitted &&
+          (await readFile(initialPatch)).length
+        )
+          await git(workspace.directory, ["apply", "--binary", initialPatch]);
+        if (
+          !options.includeUncommitted &&
+          (await readFile(initialIndex)).length
+        )
+          await git(workspace.directory, [
+            "apply",
+            "--cached",
+            "--binary",
+            initialIndex,
+          ]);
         for (const file of incoming) {
           const target = await safeDestination(workspace.directory, file);
           await mkdir(dirname(target), { recursive: true });
@@ -228,7 +350,9 @@ export async function seedRemote(
         }
         synchronized = head;
         expected = await digest(workspace.directory, recovery);
+        await rm(transfer, { recursive: true, force: true });
       } catch (cause) {
+        failed = true;
         throw new OutpostError(
           "workspace",
           "Remote changes could not be fully synchronized; recovery files retained",

@@ -26,11 +26,11 @@ npm pack
 Installez l’archive obtenue dans votre dépôt cible, ou utilisez [GitHub Packages](https://github.com/elie-laloum/outpost/packages). La configuration du registre figure dans le [guide d’exploitation](docs/operations.md).
 
 ```sh
-npm install --save-dev /chemin/elie-laloum-outpost-1.0.0.tgz
+npm install --save-dev /chemin/elie-laloum-outpost-1.1.0.tgz
 npx outpost init --yes --agent codex --provider docker --template blank --build
 ```
 
-Définissez `OPENAI_API_KEY` dans l’environnement ou `.outpost/.env`. Pour Claude, choisissez `--agent claude` et fournissez `ANTHROPIC_API_KEY` ou `CLAUDE_CODE_OAUTH_TOKEN`.
+Copiez `.outpost/.env.example` vers `.outpost/.env`. Renseignez `OPENAI_API_KEY`, ou laissez cette déclaration vide pour reprendre sa valeur dans le processus. Pour Claude, choisissez `--agent claude` et déclarez `ANTHROPIC_API_KEY` ou `CLAUDE_CODE_OAUTH_TOKEN`. Seules les clés déclarées sont importées dans les sandbox isolés.
 
 ```sh
 node .outpost/run.mts "Ajouter la validation de configuration et ses tests"
@@ -135,7 +135,7 @@ Les fichiers acceptent `{{OBJECTIVE}}`, les variables réservées `{{WORK_BRANCH
 
 Les variables absentes déclenchent une erreur ; les variables inutilisées passent par `warn`. Un marqueur de fin interrompt la boucle. Si l’agent reste actif après ce marqueur, le délai de grâce se renouvelle à chaque sortie, puis arrête sa commande. Un budget épuisé sans marqueur retourne `completed: false`.
 
-Chaque tour fournit sa durée, son statut, son texte, sa conversation éventuelle et les tokens bruts. Le résultat regroupe `input`, `cached`, `output`, les commits et le marqueur observé. Aucun coût monétaire n’est extrapolé.
+Chaque tour fournit sa durée, son statut, son texte, sa conversation éventuelle et les tokens bruts. Chaque tour expose aussi son chemin `transcript` lorsqu’il est capturé. Le résultat regroupe `input`, `cached` (lecture du cache), `cacheCreated` (création du cache), `output`, les commits et le marqueur observé. Aucun coût monétaire n’est extrapolé.
 
 ## Réponses structurées
 
@@ -209,13 +209,21 @@ L’annulation et le délai maximal des tâches sont coopératifs : le code d’
 
 Les cinq modèles CLI sont `blank`, `iterate`, `review`, `plan` et `plan-review`. Les deux derniers font travailler plusieurs analyses indépendantes avant l’implémentation. Les connecteurs GitHub Issues, Beads et personnalisés sont générés avec `--tracker`. Consultez le [guide des workflows](docs/workflows.md).
 
+Un `dispatch({ passes })` ponctuel acquiert une nouvelle sandbox à chaque passe ; `sandbox.dispatch({ passes })` conserve son environnement. Les fichiers de prompt relatifs sont résolus depuis le répertoire de l’appelant. Les méthodes `resume`/`fork` d’un résultat ponctuel acceptent une nouvelle branche, un autre fournisseur et des hooks ; celles d’un résultat chaud restent liées à leur sandbox.
+
+## Campagnes par issue
+
+`campaign` relit le backlog à chaque cycle, valide un plan typé et attribue une branche par issue. Le parallélisme est borné ; la revue partage la sandbox d’implémentation. Une phase de fusion et de vérification intervient même pour une seule branche. La fermeture d’une issue a lieu uniquement après intégration des commits dans la branche hôte. GitHub et Beads fournissent les opérations de liste, détail et fermeture. Un connecteur personnalisé implémente `Backlog`.
+
+Les starters exposent `cycles`, `concurrency`, `implementationPasses`, `reviewPasses`, les agents de chaque rôle et les règles de `.outpost/STANDARDS.md`. Une issue sans commit n’est ni revue ni fermée. Un cycle sans progression s’arrête. `recoveryDetails(error)` fournit les chemins disponibles en cas d’erreur, sans remplacer la raison d’annulation. [Guide de migration 1.1 en français](docs/migration-1.1.fr.md).
+
 ## Configuration et fournisseurs
 
 Les fournisseurs prennent en charge les variables d’environnement, montages de fichiers/répertoires, réseaux, ressources, groupes supplémentaires, périphériques et labels SELinux selon le backend. Les SDK cloud sont des dépendances optionnelles, chargées uniquement à l’utilisation du fournisseur concerné. [Référence des fournisseurs](docs/providers.md).
 
-Les hooks s’exécutent après la copie des entrées puis après la création de la sandbox. Les groupes `hostReady` et `sandboxReady` tournent en parallèle ; les commandes d’un même groupe restent séquentielles.
+Les hooks s’exécutent après la copie des entrées puis après la création de la sandbox. Les groupes `hostReady` et `sandboxReady` tournent en parallèle ; les commandes hôte restent séquentielles, tandis que les commandes du groupe sandbox démarrent ensemble et annulent leurs voisines en cas d’échec.
 
-Priorité de l’environnement : `.env` du dépôt, `.outpost/.env`, valeurs du processus pour les clés déclarées, puis variables explicites du fournisseur et de l’adaptateur. Une clé déclarée simultanément par le fournisseur et l’adaptateur provoque une erreur. Les journaux sont écrits dans `.outpost/logs` par défaut ; `false`, `"stdout"`, un chemin personnalisé et le mode verbeux sont disponibles.
+Seul `.outpost/.env` est lu. Une valeur non vide du fichier est prioritaire ; une déclaration vide reprend la valeur du processus. Le `.env` à la racine du dépôt n’est pas importé. Les variables explicites du fournisseur et de l’adaptateur restent prioritaires. Une clé déclarée simultanément par le fournisseur et l’adaptateur provoque une erreur. Les journaux sont écrits dans `.outpost/logs` par défaut ; `false`, `"stdout"`, un chemin personnalisé et le mode verbeux sont disponibles.
 
 `AgentAdapter` permet d’ajouter un agent. `SandboxProvider`, `mountedProvider` et `remoteProvider` permettent d’ajouter un backend. Le domaine ne dépend pas d’un SDK cloud. [Architecture](docs/architecture.md) et [API complète](docs/api.md).
 

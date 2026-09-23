@@ -2,6 +2,7 @@ import { mkdir, open, type FileHandle } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { randomUUID } from "node:crypto";
 import type { AgentEvent } from "../domain/ports.ts";
+import { reporter } from "./reporter.ts";
 
 export type Logging =
   false | "stdout" | { readonly file?: string; readonly verbose?: boolean };
@@ -30,9 +31,17 @@ export async function journal(
   let handle: FileHandle | undefined,
     pending = Promise.resolve();
   let failure: unknown;
+  const display = reporter({ ...(label ? { label } : {}) });
   if (file) {
     await mkdir(dirname(file), { recursive: true });
-    handle = await open(file, "wx", 0o600);
+    handle = await open(file, "a", 0o600);
+    await handle.write(
+      JSON.stringify({
+        kind: "dispatch-start",
+        at: new Date().toISOString(),
+        label,
+      }) + "\n",
+    );
   }
   return {
     ...(file ? { file } : {}),
@@ -46,8 +55,7 @@ export async function journal(
           ...(label ? { label } : {}),
           ...event,
         }) + "\n";
-      if (logging === "stdout")
-        process.stdout.write(event.kind === "text" ? event.text : line);
+      if (logging === "stdout") display(event);
       else
         pending = pending
           .then(async () => {

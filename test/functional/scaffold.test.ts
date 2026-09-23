@@ -74,7 +74,7 @@ test("initialization supports cloud peers, trackers and requested package manage
   assert.ok(calls.some((call) => call.executable === "gh"));
   assert.match(
     await readFile(join(root, ".outpost", "tickets.mts"), "utf8"),
-    /issue/,
+    /githubBacklog\(\{ label: "outpost-ready" \}\)/,
   );
   for (const [provider, tracker] of [
     ["daytona", "beads"],

@@ -137,7 +137,10 @@ test("agent streams normalize text, tools, sessions, usage and failures", () => 
         cache_creation_input_tokens: 1,
       },
     })[0],
-    { kind: "usage", tokens: { input: 6, cached: 2, output: 4 } },
+    {
+      kind: "usage",
+      tokens: { input: 3, cached: 2, cacheCreated: 1, output: 4 },
+    },
   );
   assert.equal(
     parse(c, { type: "result", is_error: true, result: "bad" })[0]?.kind,

@@ -3,7 +3,12 @@ import { homedir } from "node:os";
 import { dirname, resolve } from "node:path";
 import { executeProcess } from "../infrastructure/process.ts";
 import { OutpostError } from "../domain/errors.ts";
-import type { Command, SandboxProvider, Variables } from "../domain/ports.ts";
+import type {
+  Command,
+  SandboxProvider,
+  Variables,
+  TransferOptions,
+} from "../domain/ports.ts";
 
 export function local(
   options: { variables?: Variables } = {},
@@ -17,10 +22,24 @@ export function local(
       const stop = new AbortController();
       const active = new Set<Promise<unknown>>();
       let disposed = false;
-      const copy = async (source: string, destination: string) => {
+      const copy = async (
+        source: string,
+        destination: string,
+        options: TransferOptions = {},
+      ) => {
+        options.signal?.throwIfAborted();
+        if (disposed)
+          throw new OutpostError("provider", "Local sandbox is closed");
         if (resolve(source) === resolve(destination)) return;
         await mkdir(dirname(destination), { recursive: true });
-        await cp(source, destination, { recursive: true, force: true });
+        await cp(source, destination, {
+          recursive: true,
+          force: true,
+          filter: () => {
+            options.signal?.throwIfAborted();
+            return true;
+          },
+        });
       };
       return {
         root: context.directory,
@@ -29,13 +48,6 @@ export function local(
           if (disposed)
             return Promise.reject(
               new OutpostError("provider", "Local sandbox is closed"),
-            );
-          if (command.elevated)
-            return Promise.reject(
-              new OutpostError(
-                "provider",
-                "Host execution does not perform privilege elevation",
-              ),
             );
           const signal = command.signal
             ? AbortSignal.any([command.signal, stop.signal])

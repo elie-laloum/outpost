@@ -5,6 +5,8 @@ import { imageName } from "../providers/container.ts";
 import { agentVersions } from "../providers/versions.ts";
 import { requireSuccess, type Executor } from "../infrastructure/process.ts";
 
+import { starter, tracker } from "./starters.ts";
+
 export type Template = "blank" | "iterate" | "review" | "plan" | "plan-review";
 export interface InitOptions {
   readonly directory?: string;
@@ -30,31 +32,6 @@ ENV HOME=/home/agent
 USER $AGENT_UID:$AGENT_GID
 WORKDIR /workspace
 `;
-
-function starter(options: InitOptions, extension: string): string {
-  const agent = options.agent ?? "codex",
-    provider = options.provider ?? "docker",
-    template = options.template ?? "blank";
-  const importLine = `import { dispatch, createSandbox, task, workflow, response, ${agent} } from "@elie-laloum/outpost";\nimport { ${provider} } from "@elie-laloum/outpost/providers/${provider}";\n${options.tracker ? `import { tickets } from "./tickets.${extension}";\n` : ""}`;
-  const config = `const runtime = { agent: ${agent}(${options.model ? `{ model: ${JSON.stringify(options.model)} }` : ""}), provider: ${provider}(${options.image && (provider === "docker" || provider === "podman") ? `{ image: ${JSON.stringify(options.image)} }` : ""}) };\nconst objective = process.argv.slice(2).join(" ") || ${options.tracker ? "JSON.stringify(await tickets())" : '"Inspect this repository and implement one useful improvement."'};\n`;
-  const brief = `{ file: ".outpost/brief.md", values: { OBJECTIVE: objective } }`;
-  if (template === "blank" || template === "iterate")
-    return `${importLine}\n${config}\nconst result = await dispatch({ ...runtime, branch: { mode: "integrate" }, brief: ${brief}, passes: ${template === "iterate" ? 10 : 1} });\nconsole.log({ branch: result.branch, commits: result.commits, conversation: result.conversation });\n`;
-  if (template === "review")
-    return `${importLine}\n${config}\nawait using sandbox = await createSandbox({ ...runtime, branch: { mode: "integrate" } });\nconst implement = task({ key: "implement", perform: ({ signal }) => sandbox.dispatch({ brief: ${brief}, signal }) });\nconst review = task({ key: "review", after: [implement], perform: ({ signal }) => sandbox.dispatch({ brief: { text: "Review the changes, fix concrete defects, run tests and commit the result." }, signal }) });\n(await workflow("implementation-review", [implement, review]).start()).unwrap();\nawait sandbox.workspace.integrate?.();\n`;
-  return `${importLine}\n${config}\nconst approaches = ["correctness", "maintainability", "testability"].map((perspective, index) => task({\n  key: perspective,\n  perform: ({ signal }) => dispatch({ ...runtime, branch: { mode: "named", name: \`outpost/plan-\${index}-\${Date.now()}\` }, brief: { text: \`Objective: \${objective}. Analyze this repository from the \${perspective} perspective. Do not change files. Return your proposal inside <proposal> tags.\` }, response: response.text({ tag: "proposal" }), signal }),\n}));\nconst implement = task({ key: "implement", after: approaches, perform: context => dispatch({ ...runtime, branch: { mode: "integrate" }, brief: { text: "Implement a coherent improvement from these proposals, test and commit it:\\n" + approaches.map(item => context.value(item).value).join("\\n") }, signal: context.signal }) });\n${template === "plan-review" ? 'const review = task({ key: "review", after: [implement], perform: context => dispatch({ ...runtime, branch: { mode: "integrate" }, brief: { text: "Review the latest changes, fix concrete defects, test and commit." }, signal: context.signal }) });\n' : ""}(await workflow("parallel-planning", [...approaches, implement${template === "plan-review" ? ", review" : ""}]).start({ concurrency: 3 })).unwrap();\n`;
-}
-
-function tracker(kind: NonNullable<InitOptions["tracker"]>): string {
-  if (kind === "custom")
-    return `export interface Ticket { id: string; title: string; body: string }\nexport async function tickets(): Promise<Ticket[]> {\n  const url = process.env.OUTPOST_TRACKER_URL;\n  if (!url) throw new Error("Set OUTPOST_TRACKER_URL");\n  const response = await fetch(url);\n  if (!response.ok) throw new Error(\`Tracker returned \${response.status}\`);\n  return await response.json() as Ticket[];\n}\n`;
-  const program = kind === "github" ? "gh" : "bd",
-    args =
-      kind === "github"
-        ? '["issue", "list", "--state", "open", "--json", "number,title,body"]'
-        : '["ready", "--json"]';
-  return `import { execFile } from "node:child_process";\nimport { promisify } from "node:util";\nexport async function tickets() {\n  const { stdout } = await promisify(execFile)(${JSON.stringify(program)}, ${args});\n  return JSON.parse(stdout) as { ${kind === "github" ? "number: number" : "id: string"}; title: string; body?: string }[];\n}\n`;
-}
 
 export async function initialize(
   options: InitOptions = {},
@@ -82,12 +59,21 @@ export async function initialize(
   let pkg: { type?: string; packageManager?: string } = {};
   try {
     pkg = JSON.parse(await readFile(join(root, "package.json"), "utf8"));
+    if (!pkg || typeof pkg !== "object") pkg = {};
   } catch (cause) {
-    if ((cause as NodeJS.ErrnoException).code !== "ENOENT") throw cause;
+    if (
+      !(cause instanceof SyntaxError) &&
+      (cause as NodeJS.ErrnoException).code !== "ENOENT"
+    )
+      throw cause;
   }
   const extension = pkg.type === "module" ? "ts" : "mts";
-  let detected = pkg.packageManager?.split("@")[0];
-  if (!detected)
+  let detected =
+    typeof pkg.packageManager === "string"
+      ? pkg.packageManager.split("@")[0]
+      : undefined;
+  if (!detected || !["npm", "pnpm", "yarn", "bun"].includes(detected)) {
+    detected = undefined;
     for (const [file, manager] of [
       ["pnpm-lock.yaml", "pnpm"],
       ["yarn.lock", "yarn"],
@@ -103,6 +89,7 @@ export async function initialize(
         break;
       }
     }
+  }
   const manager = options.manager ?? detected ?? "npm";
   invariant(
     ["npm", "pnpm", "yarn", "bun"].includes(manager),
@@ -113,15 +100,26 @@ export async function initialize(
     "brief.md":
       "Objective: {{OBJECTIVE}}\n\nWork on {{WORK_BRANCH}} from {{BASE_BRANCH}}. Inspect the repository, implement the objective, run relevant tests and commit your changes. When finished, write <outpost>done</outpost>.\n",
     ".env.example":
-      agent === "codex" ? "OPENAI_API_KEY=\n" : "ANTHROPIC_API_KEY=\n",
+      (agent === "codex" ? "OPENAI_API_KEY=\n" : "ANTHROPIC_API_KEY=\n") +
+      (options.tracker === "github" ? "GH_TOKEN=\n" : ""),
     ".gitignore": ".env\nworkspaces/\nlocks/\nrecovery/\nlogs/\n",
   };
   if (provider === "docker" || provider === "podman")
-    files[provider === "docker" ? "Dockerfile" : "Containerfile"] = imageRecipe;
-  if (options.tracker) files[`tickets.${extension}`] = tracker(options.tracker);
+    files[provider === "docker" ? "Dockerfile" : "Containerfile"] =
+      options.tracker === "beads"
+        ? imageRecipe.replace(
+            "RUN groupmod",
+            "RUN npm install -g --allow-scripts=@beads/bd @beads/bd@1.2.2\nRUN groupmod",
+          )
+        : imageRecipe;
+  if (template !== "blank")
+    files["STANDARDS.md"] =
+      "# Engineering standards\n\nKeep domain rules separate from infrastructure. Test observable behavior, handle failure and cancellation, and preserve existing user changes. Run the repository checks before committing. Prefer clear names to comments; keep necessary comments at most two lines. Review the complete diff against the supplied base commit.\n";
+  if (options.tracker)
+    files[`tickets.${extension}`] = tracker(options.tracker, options.label);
   if (options.tracker === "custom")
     files["TRACKER.md"] =
-      `# Custom issue tracker\n\nSet OUTPOST_TRACKER_URL in the host environment before running the starter. The endpoint must return an array of { id, title, body } objects. The generated tickets.${extension} is yours to adapt: add authentication, pagination and filtering for your tracker there. Never commit credentials.\n\nThe starter uses the returned tickets as its objective when no command-line objective is supplied. Issue updates and state transitions should be explicit workflow tasks.\n`;
+      `# Custom issue tracker\n\nSet OUTPOST_TRACKER_URL in the host environment before running the starter. Implement GET issues?state=open (Issue[]), GET issues/:id (Issue), and POST issues/:id/close (any successful status). Issue has id, title, optional body and optional blockedBy ids. The generated tickets.${extension} is yours to adapt: add authentication, pagination and filtering for your tracker there. Never commit credentials.\n\nThe campaign reloads the backlog each cycle, reads an issue before implementation, and closes it only after its commits reach the host branch. Configure authentication in tickets.${extension}. A failed close is reported and must be reconciled before rerunning.\n`;
   for (const name of Object.keys(files))
     if (
       await access(join(folder, name))

@@ -7,10 +7,11 @@ import {
   writeFile,
 } from "node:fs/promises";
 import { homedir } from "node:os";
-import { basename, dirname, join, posix, resolve } from "node:path";
+import { basename, dirname, join, posix, resolve, relative } from "node:path";
 import { randomUUID } from "node:crypto";
 import { OutpostError, invariant } from "../domain/errors.ts";
-import type { SandboxLease } from "../domain/ports.ts";
+import type { SandboxLease, ConversationStore } from "../domain/ports.ts";
+import { safeDestination } from "./files.ts";
 
 export type ConversationFormat = "claude" | "codex";
 export interface ConversationLocation {
@@ -18,6 +19,67 @@ export interface ConversationLocation {
   readonly file: string;
   readonly format: ConversationFormat;
 }
+
+export function nativeConversations(
+  format: ConversationFormat,
+): ConversationStore {
+  return {
+    name: format,
+    locate(id, repository, home) {
+      return locateConversation(format, id, repository, home);
+    },
+    capture(id, context) {
+      return captureConversation(
+        format,
+        id,
+        context.repository,
+        context.sandbox,
+        context.staging,
+        context,
+      );
+    },
+    restore(record, context) {
+      invariant(
+        record.format === format,
+        "Conversation format does not match its storage",
+      );
+      return restoreConversation(
+        { ...record, format },
+        context.sandbox,
+        context.staging,
+      );
+    },
+  };
+}
+
+export const conversations = {
+  native: nativeConversations,
+  locate: locateConversation,
+  capture: captureConversation,
+  restore: restoreConversation,
+  rewrite: relocateTranscript,
+  projectKey,
+  claudePath(id: string, repository: string, home = homedir()): string {
+    validId(id);
+    return join(
+      home,
+      ".claude",
+      "projects",
+      projectKey(resolve(repository)),
+      `${id}.jsonl`,
+    );
+  },
+  directory(
+    format: ConversationFormat,
+    repository: string,
+    home = homedir(),
+  ): string {
+    return format === "claude"
+      ? join(home, ".claude", "projects", projectKey(resolve(repository)))
+      : join(home, ".codex", "sessions");
+  },
+  destination: remotePath,
+};
 
 export function projectKey(path: string): string {
   return path.replace(/[^a-zA-Z0-9]/g, "-");
@@ -57,10 +119,10 @@ export async function locateConversation(
       projectKey(resolve(repository)),
       `${id}.jsonl`,
     );
-    if (await stat(expected).catch(() => undefined))
+    if ((await stat(expected).catch(() => undefined))?.isFile())
       return { id, file: expected, format };
     const found = (await files(join(home, ".claude", "projects"))).find(
-      (path) => path.endsWith(`${id}.jsonl`),
+      (path) => basename(path) === `${id}.jsonl`,
     );
     if (found) return { id, file: found, format };
   } else {
@@ -76,24 +138,45 @@ export async function locateConversation(
   );
 }
 
-export function relocateTranscript(text: string, destination: string): string {
+export function relocateTranscript(
+  text: string,
+  destination: string,
+  source?: string,
+): string {
+  const records = text.split("\n");
+  const origin =
+    source ??
+    records.reduce<string | undefined>((found, line) => {
+      if (found) return found;
+      try {
+        const item = JSON.parse(line);
+        return item.cwd ?? item.payload?.cwd;
+      } catch {
+        return undefined;
+      }
+    }, undefined);
   function visit(value: unknown): unknown {
     if (Array.isArray(value)) return value.map(visit);
     if (value && typeof value === "object")
       return Object.fromEntries(
         Object.entries(value).map(([key, item]) => [
           key,
-          key === "cwd" && typeof item === "string" ? destination : visit(item),
+          key === "cwd" && typeof item === "string" && item === origin
+            ? destination
+            : visit(item),
         ]),
       );
     return value;
   }
-  return text
-    .split("\n")
+  return records
     .map((line) => {
       if (!line.trim()) return line;
       try {
-        return JSON.stringify(visit(JSON.parse(line)));
+        const value = JSON.parse(line);
+        const rewritten = visit(value);
+        return JSON.stringify(value) === JSON.stringify(rewritten)
+          ? line
+          : JSON.stringify(rewritten);
       } catch {
         return line;
       }
@@ -146,7 +229,7 @@ export async function restoreConversation(
   if (location.format === "claude") {
     const sidecars = join(dirname(location.file), location.id, "subagents");
     for (const file of await files(sidecars)) {
-      const name = file.slice(sidecars.length).replaceAll("\\", "/");
+      const name = relative(sidecars, file).replaceAll("\\", "/");
       const local = join(staging, `${randomUUID()}.jsonl`);
       await writeFile(
         local,
@@ -253,11 +336,12 @@ export async function captureConversation(
         try {
           const scratch = join(staging, `${randomUUID()}.jsonl`);
           await lease.download(child, scratch);
-          const destination = join(
-            dirname(file),
-            id,
-            "subagents",
-            posix.basename(child.replaceAll("\\", "/")),
+          const destination = await safeDestination(
+            join(dirname(file), id, "subagents"),
+            posix.relative(
+              remoteSidecars.replaceAll("\\", "/"),
+              child.replaceAll("\\", "/"),
+            ),
           );
           await mkdir(dirname(destination), { recursive: true });
           try {

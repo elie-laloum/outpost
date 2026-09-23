@@ -6,6 +6,7 @@ import { OutpostError } from "../domain/errors.ts";
 import { quote } from "../infrastructure/process.ts";
 import { registerCleanup } from "../infrastructure/shutdown.ts";
 import { downloadTree, manifestScript, uploadTree } from "./cloud-files.ts";
+import { transfer } from "../infrastructure/transfer.ts";
 
 export interface VercelOptions {
   readonly create?: NonNullable<Parameters<typeof Sandbox.create>[0]>;
@@ -128,66 +129,72 @@ export function vercel(
                 .catch(() => undefined);
           }
         },
-        async upload(source, destination) {
-          await uploadTree(
-            source,
-            destination,
-            (path, content) => sandbox.writeFiles([{ path, content }]),
-            async (target, path) => {
-              await sandbox.mkDir(posix.dirname(path));
-              const result = await sandbox.runCommand("ln", [
-                "-s",
-                "--",
-                target,
-                path,
-              ]);
-              if (result.exitCode !== 0)
-                throw new OutpostError("provider", "Symlink upload failed");
-            },
-            async (path, directory, mode) => {
-              if (directory) await sandbox.mkDir(path);
-              const result = await sandbox.runCommand("chmod", [
-                mode.toString(8),
-                path,
-              ]);
-              if (result.exitCode !== 0)
-                throw new OutpostError(
-                  "provider",
-                  "Transfer permissions could not be set",
-                );
-            },
-          );
-        },
-        async download(source, destination) {
-          const listing = await sandbox.runCommand("node", [
-            "-e",
-            manifestScript,
-            source,
-          ]);
-          if (listing.exitCode !== 0)
-            throw new OutpostError(
-              "provider",
-              "Remote transfer source is unavailable",
+        async upload(source, destination, options = {}) {
+          return transfer(options, async (signal) => {
+            await uploadTree(
+              source,
+              destination,
+              (path, content) => sandbox.writeFiles([{ path, content }]),
+              async (target, path) => {
+                await sandbox.mkDir(posix.dirname(path));
+                const result = await sandbox.runCommand("ln", [
+                  "-s",
+                  "--",
+                  target,
+                  path,
+                ]);
+                if (result.exitCode !== 0)
+                  throw new OutpostError("provider", "Symlink upload failed");
+              },
+              async (path, directory, mode) => {
+                if (directory) await sandbox.mkDir(path);
+                const result = await sandbox.runCommand("chmod", [
+                  mode.toString(8),
+                  path,
+                ]);
+                if (result.exitCode !== 0)
+                  throw new OutpostError(
+                    "provider",
+                    "Transfer permissions could not be set",
+                  );
+              },
+              signal,
             );
-          await downloadTree(
-            source,
-            destination,
-            await listing.stdout(),
-            async (path) => {
-              const stream = await sandbox.readFile({ path });
-              if (!stream)
-                throw new OutpostError(
-                  "provider",
-                  `Remote file is missing: ${path}`,
-                );
-              const chunks: Buffer[] = [];
-              for await (const chunk of stream)
-                chunks.push(
-                  Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk),
-                );
-              return Buffer.concat(chunks);
-            },
-          );
+          });
+        },
+        async download(source, destination, options = {}) {
+          return transfer(options, async (signal) => {
+            const listing = await sandbox.runCommand("node", [
+              "-e",
+              manifestScript,
+              source,
+            ]);
+            if (listing.exitCode !== 0)
+              throw new OutpostError(
+                "provider",
+                "Remote transfer source is unavailable",
+              );
+            await downloadTree(
+              source,
+              destination,
+              await listing.stdout(),
+              async (path) => {
+                const stream = await sandbox.readFile({ path });
+                if (!stream)
+                  throw new OutpostError(
+                    "provider",
+                    `Remote file is missing: ${path}`,
+                  );
+                const chunks: Buffer[] = [];
+                for await (const chunk of stream)
+                  chunks.push(
+                    Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk),
+                  );
+                return Buffer.concat(chunks);
+              },
+              signal,
+            );
+          });
         },
         release,
       };

@@ -51,7 +51,7 @@ Includes `WorkspaceOptions`, plus:
 | `bootstrap`        | Remote agent installation when absent; defaults to `true`.                                                                                      |
 | `conversationHome` | Host directory containing `.claude`/`.codex`; defaults to OS home.                                                                              |
 
-Hook order is copies → `workspaceReady` on host → provider acquisition/synchronization → concurrent `hostReady` and `sandboxReady`. Each group runs its commands sequentially. Commands may choose a directory, environment and timeout. Sandbox commands can request `elevated: true` on providers supporting elevation. Host execution does not elevate privileges.
+Hook order is copies → `workspaceReady` on host → provider acquisition/synchronization → concurrent `hostReady` and `sandboxReady`. Host commands run sequentially. Sandbox commands run concurrently. Failure aborts sibling hooks and waits for their cleanup. `openWorkspace({ hooks })` runs `workspaceReady` immediately and passes the remaining hooks to later sandboxes without repeating it. Commands may choose a directory, environment and timeout. Sandbox commands can request `elevated: true` on providers supporting elevation. Host execution does not elevate privileges.
 
 ## DispatchOptions
 
@@ -75,9 +75,9 @@ Hook order is copies → `workspaceReady` on host → provider acquisition/synch
 
 Resume and structured output require `passes: 1`. A one-shot continuation validates the host transcript before allocating an environment. Warm continuations reuse sessions already present, otherwise importing the host transcript.
 
-`DispatchResult<T>` contains `text`, `value`, `turns`, `usage`, `completed`, optional `completion`, `conversation`, `transcript`, `log`, `branch`, `directory`, `commits`, optional `retainedDirectory`, and `resume`/`fork` methods. `value` is inferred from the response validator. Without a validator it is `undefined`. Usage contains raw `input`, `cached` and `output` token counts. Costs are not estimated.
+`DispatchResult<T>` contains `text`, `value`, `turns`, `usage`, `completed`, optional `completion`, `conversation`, `transcript`, `log`, `branch`, `directory`, `commits`, optional `retainedDirectory`, and `resume`/`fork` methods. `value` is inferred from the response validator. Without a validator it is `undefined`. Usage contains raw `input`, `cached` (cache read), optional `cacheCreated` (cache creation) and `output` token counts. Claude transcript usage takes the final assistant message, independently from streamed totals. Costs are not estimated.
 
-Each turn contains `text`, `status`, `durationMs`, `usage`, and optional `conversation`. Commits contain their original `oid` and `subject`. A budget exhausted without a completion marker returns `completed: false`; process failures throw.
+Each turn contains `text`, `status`, `durationMs`, `usage`, and optional `conversation` and `transcript`. Commits contain their original `oid` and `subject`. A budget exhausted without a completion marker returns `completed: false`; process failures throw.
 
 ## Agent settings
 
@@ -103,7 +103,7 @@ Model is optional; the installed CLI chooses its default. Codex reasoning accept
 
 Noninteractive defaults avoid permission prompts because the outer sandbox is responsible for isolation. Codex can instead use the auto-review approval reviewer. Interactive commands use native terminal behavior and native session resume/fork commands.
 
-Events are a discriminated union with `kind`: `prompt`, `text`, `tool`, `conversation`, `usage`, `failure`, `finished`, `raw`. Protocol noise is retained as `raw`. Adapters implement `request(input): Command` and `events(line): AgentEvent[]`; a custom adapter can omit native conversation support.
+Events are a discriminated union with `kind`: `phase`, `prompt`, `text`, `result`, `tool`, `conversation`, `usage`, `summary`, `warning`, `failure`, `finished`, `raw`. Every public observation adds a one-based `pass` and ISO timestamp `at`. Protocol noise is retained as `raw`. Adapters implement `request(input): Command` and `events(line): AgentEvent[]`; a custom adapter can omit native conversation support.
 
 ## Command and attachment
 
@@ -121,14 +121,27 @@ const result = await sandbox.command({
 });
 ```
 
-Arguments are passed directly, without implicit shell expansion. For shell syntax, explicitly invoke `sh -c` (inside Linux sandboxes) or the host shell. Default directory is the sandbox workspace. `stdin` supplies a string. `interactive` inherits terminal input/output. `retain` bounds the captured tail of each stream; observers receive all output. `CommandResult` contains `status`, `stdout`, `stderr`.
+Arguments are passed directly, without implicit shell expansion. For shell syntax, explicitly invoke `sh -c` (inside Linux sandboxes) or the host shell. Default directory is the sandbox workspace. `stdin` supplies a string. `interactive` inherits terminal input/output by default; `terminal: { input?, output?, error? }` supplies caller-owned streams. Raw mode and cursor visibility are restored after attachment. `retain` bounds the captured tail of each stream; observers receive all output. `CommandResult` contains `status`, `stdout`, `stderr`.
 
-`attach({ agent?, brief?, continuation?, signal? })` uses the adapter's terminal mode. Docker, Podman and host support it. Remote cloud adapters reject it explicitly. Both warm and one-shot results include commits, branch and workspace directory. The top-level result additionally returns disposal information.
+`attach({ agent?, brief?, continuation?, signal?, ask?, terminal? })` uses the adapter's terminal mode. Missing file-prompt variables are requested once per variable through the TTY or the optional async `ask(name)` callback. Existing values are preserved. Docker, Podman and host support attachment. Remote cloud adapters reject it explicitly. Both warm and one-shot results include commits, branch and workspace directory. The top-level result additionally returns disposal information.
 
 ## Errors and recovery
 
-`OutpostError` has a machine-readable `code`, frozen `details`, and optional `cause`. Codes: `configuration`, `process`, `timeout`, `aborted`, `workspace`, `conflict`, `prompt`, `response`, `session`, `provider`. Multiple failures can surface as `AggregateError` without losing the original causes.
+`OutpostError` has a machine-readable `code`, frozen `details`, `recovery`, and optional `cause`. `recoveryDetails(error)` retrieves recovery metadata for native errors and cancellation reasons as well, preserving their original identity. Codes: `configuration`, `process`, `timeout`, `aborted`, `workspace`, `conflict`, `prompt`, `response`, `session`, `provider`. Multiple failures can surface as `AggregateError` without losing the original causes.
 
 `ResponseError` adds `tag`, optional `raw` and `recovery`. Recovery records include the conversation and workspace; after collection they also include commits, transcript and log. Native main-transcript capture failure fails the dispatch. Child transcript capture errors only warn.
 
 Remote recovery directories contain Git bundles, binary patches and copied untracked files. A failed synchronization reports its recovery path. Do not delete it before inspecting the failure. See [Operations](operations.md).
+
+## Additional 1.1 contracts
+
+- `WorkspaceOptions.label` names generated branches and workspace directories; `hooks` and `signal` are available on standalone workspaces.
+- `SandboxOptions.includeUncommitted` explicitly seeds remote patches and untracked files; the default is committed history only.
+- `DispatchOptions.idleWarningMs` defaults to 60000; `diagnostic(message)` receives expansion-size estimates. Relative file briefs use the caller's cwd.
+- `AgentAdapter.resumable` declares repair capability. `storage?: ConversationStore` supplies locate/capture/restore; `transcriptUsage?(text)` extracts authoritative usage.
+- `conversations.native(format)` returns a store. Helpers include `locate`, `capture`, `restore`, `rewrite`, `projectKey`, `claudePath`, `directory` and `destination`.
+- Cold `DispatchResult.resume/fork` accepts `ContinuationOptions`, including a new branch, provider and lifecycle hooks. `WarmDispatchResult` accepts dispatch settings only.
+- `TransferOptions` contains optional `signal` and `deadlineMs`. `SandboxLease.upload/download` accept it as a third argument. Orchestration uses `limits.copyMs`, with a 120000 ms transfer default.
+- `reporter` renders observations with label, verbose, quiet and custom writer settings.
+- `campaign`, `CampaignOptions`, `CampaignResult`, `CampaignEvent`, `IssueOutcome`, `Issue`, `Assignment` and `Backlog` define issue delivery. See the [workflow guide](workflows.md#issue-campaigns).
+- `githubBacklog` and `beadsBacklog` accept `directory`, `label` and `deadlineMs`. Their commands receive declared project environment values.

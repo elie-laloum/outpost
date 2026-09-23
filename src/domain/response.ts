@@ -23,7 +23,6 @@ export interface ResponseSpec<T> {
 export class ResponseError extends OutpostError {
   readonly tag: string;
   readonly raw: string | undefined;
-  recovery: Readonly<Record<string, unknown>> = {};
   constructor(tag: string, message: string, raw?: string, cause?: unknown) {
     super("response", message, { tag, raw }, cause);
     this.name = "ResponseError";
@@ -82,7 +81,8 @@ export const response = {
     repairs?: number;
   }): ResponseSpec<T> =>
     spec(options.tag, options.repairs ?? 0, async (text) => {
-      const input: unknown = JSON.parse(text);
+      const fenced = text.match(/^```(?:json)?\s*\r?\n([\s\S]*?)\r?\n```$/i);
+      const input: unknown = JSON.parse(fenced ? fenced[1]! : text);
       if (typeof options.schema === "function") return options.schema(input);
       const result = await options.schema["~standard"].validate(input);
       if (result.issues) throw new Error(JSON.stringify(result.issues));

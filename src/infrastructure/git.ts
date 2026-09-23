@@ -1,7 +1,15 @@
 import { createHash, randomUUID } from "node:crypto";
-import { appendFile, mkdir, open, readFile, rm } from "node:fs/promises";
-import { dirname, join, resolve } from "node:path";
-import { OutpostError } from "../domain/errors.ts";
+import {
+  appendFile,
+  mkdir,
+  open,
+  readFile,
+  rm,
+  stat,
+  rename,
+} from "node:fs/promises";
+import { basename, dirname, join, resolve } from "node:path";
+import { OutpostError, recordRecovery } from "../domain/errors.ts";
 import type {
   BranchPolicy,
   Commit,
@@ -26,6 +34,7 @@ export async function git(
       ...args,
     ],
     directory: cwd,
+    variables: { LC_ALL: "C", GIT_TERMINAL_PROMPT: "0" },
     deadlineMs,
     retain: 16_777_216,
     ...(stdin === undefined ? {} : { stdin }),
@@ -102,6 +111,7 @@ export async function acquireWorkspace(options: {
   branch?: BranchPolicy;
   copies?: readonly string[];
   limits?: StageLimits;
+  label?: string;
 }): Promise<WorkspaceLease> {
   const requested = await directory(options.repository);
   const root = (
@@ -155,7 +165,14 @@ export async function acquireWorkspace(options: {
       ? baseBranch || "HEAD"
       : policy.mode === "named"
         ? policy.name
-        : `outpost/job-${randomUUID()}`;
+        : `outpost/${
+            options.label
+              ? options.label
+                  .toLowerCase()
+                  .replace(/[^a-z0-9]+/g, "-")
+                  .slice(0, 48) + "-"
+              : "job-"
+          }${randomUUID()}`;
   if (policy.mode !== "current")
     await git(repository, ["check-ref-format", "--branch", branch]);
   const unlock = await lock(
@@ -163,6 +180,7 @@ export async function acquireWorkspace(options: {
     policy.mode === "current" ? repository : branch,
   );
   let workdir = repository;
+  let created = false;
   let disposal: Promise<Disposal> | undefined;
   try {
     if (policy.mode !== "current") {
@@ -170,7 +188,13 @@ export async function acquireWorkspace(options: {
         .update(branch)
         .digest("hex")
         .slice(0, 12);
-      const expected = join(repository, ".outpost", "workspaces", hash);
+      const label = options.label
+        ?.toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .slice(0, 48);
+      const managed = join(repository, ".outpost", "workspaces");
+      const expected = join(managed, `${label ? label + "-" : ""}${hash}`);
+      await git(repository, ["worktree", "prune", "--expire", "now"]);
       const list = await git(repository, [
         "worktree",
         "list",
@@ -178,21 +202,102 @@ export async function acquireWorkspace(options: {
         "-z",
       ]);
       const entries = list.split("\0\0").map((item) => item.split("\0"));
-      const existing = entries.find((fields) =>
-        fields.includes(`branch refs/heads/${branch}`),
+      const existing = entries.find(
+        (fields) =>
+          fields.includes(`branch refs/heads/${branch}`) ||
+          (fields.includes("detached") &&
+            fields.some(
+              (field) =>
+                field.startsWith("worktree ") &&
+                inside(managed, field.slice(9)) &&
+                (basename(field.slice(9)) === hash ||
+                  basename(field.slice(9)).endsWith("-" + hash)),
+            )),
       );
       if (existing) {
         workdir = existing
           .find((field) => field.startsWith("worktree "))!
           .slice(9);
-        if (resolve(workdir) !== resolve(expected))
+        if (!inside(managed, workdir) || resolve(workdir) === resolve(managed))
           throw new OutpostError(
             "conflict",
             `Branch ${branch} is checked out elsewhere`,
             { path: workdir },
           );
-        await directory(workdir);
+        workdir = await directory(workdir);
+        const attached = (
+          await git(workdir, [
+            "symbolic-ref",
+            "--quiet",
+            "--short",
+            "HEAD",
+          ]).catch(() => "")
+        ).trim();
+        const dirty = (await git(workdir, ["status", "--porcelain"])).trim();
+        if (attached === branch && !dirty) {
+          const remote = (await git(repository, ["remote"]))
+            .split(/\s+/)
+            .includes("origin");
+          if (remote) {
+            const fetched = await git(
+              repository,
+              [
+                "fetch",
+                "origin",
+                `refs/heads/${branch}:refs/remotes/origin/${branch}`,
+              ],
+              options.limits?.gitMs,
+            ).then(
+              () => true,
+              () => false,
+            );
+            if (fetched) {
+              const head = (await git(workdir, ["rev-parse", "HEAD"])).trim();
+              const target = `refs/remotes/origin/${branch}`;
+              const forward = await git(repository, [
+                "merge-base",
+                "--is-ancestor",
+                head,
+                target,
+              ]).then(
+                () => true,
+                () => false,
+              );
+              if (forward)
+                await git(
+                  workdir,
+                  ["merge", "--ff-only", target],
+                  options.limits?.gitMs,
+                );
+            }
+          }
+        }
       } else {
+        if (
+          await stat(expected).catch((error) => {
+            if ((error as NodeJS.ErrnoException).code === "ENOENT")
+              return undefined;
+            throw error;
+          })
+        ) {
+          const managed = join(repository, ".outpost", "workspaces");
+          if (
+            !inside(managed, expected) ||
+            resolve(expected) === resolve(managed)
+          )
+            throw new OutpostError(
+              "workspace",
+              "Refusing to relocate an unmanaged directory",
+            );
+          const recovery = join(
+            repository,
+            ".outpost",
+            "recovery",
+            `orphan-${hash}-${randomUUID()}`,
+          );
+          await mkdir(dirname(recovery), { recursive: true });
+          await rename(expected, recovery);
+        }
         await mkdir(join(repository, ".outpost", "workspaces"), {
           recursive: true,
         });
@@ -218,6 +323,8 @@ export async function acquireWorkspace(options: {
         await git(
           repository,
           [
+            "-c",
+            "branch.autoSetupMerge=false",
             "worktree",
             "add",
             ...(branchExists.status === 0 ? [] : ["-b", branch]),
@@ -227,6 +334,7 @@ export async function acquireWorkspace(options: {
           options.limits?.gitMs,
         );
         workdir = expected;
+        created = true;
       }
     }
     await copySelected(
@@ -289,6 +397,12 @@ export async function acquireWorkspace(options: {
           try {
             if (policy.mode === "current") return {};
             if (preserve) return { retainedDirectory: workdir };
+            const attached = await git(workdir, [
+              "symbolic-ref",
+              "--quiet",
+              "HEAD",
+            ]).catch(() => "");
+            if (!attached.trim()) return { retainedDirectory: workdir };
             const dirty = await git(workdir, [
               "status",
               "--porcelain",
@@ -314,6 +428,17 @@ export async function acquireWorkspace(options: {
       },
     };
   } catch (error) {
+    if (created) {
+      const clean = await git(workdir, ["status", "--porcelain"]).then(
+        (output) => !output.trim(),
+        () => false,
+      );
+      if (clean && inside(join(repository, ".outpost", "workspaces"), workdir))
+        await git(repository, ["worktree", "remove", workdir]).catch(
+          () => undefined,
+        );
+      else recordRecovery(error, { branch, directory: workdir });
+    }
     await unlock();
     throw error;
   }

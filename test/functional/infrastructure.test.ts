@@ -74,7 +74,6 @@ test("environment precedence is explicit and provider/agent overlap is rejected"
       { A: "process", UNDECLARED: "hidden" },
     ),
     {
-      A: "process",
       B: "local",
       C: "local",
       AGENT: "agent",
@@ -87,7 +86,7 @@ test("environment precedence is explicit and provider/agent overlap is rejected"
   );
 });
 
-test("copy and destination validation reject traversal and missing inputs", async (t) => {
+test("copies skip absent optional inputs and reject traversal", async (t) => {
   const root = await repository(t),
     target = join(root, "target");
   await mkdir(target);
@@ -95,7 +94,8 @@ test("copy and destination validation reject traversal and missing inputs", asyn
   assert.equal(await readFile(join(target, "base.txt"), "utf8"), "base\n");
   for (const name of ["../outside", ".git/config", "nested/../../escape"])
     await assert.rejects(safeDestination(root, name), /Unsafe/);
-  await assert.rejects(copySelected(root, target, ["missing"]), /missing/);
+  await copySelected(root, target, ["missing", "base.txt"]);
+  assert.equal(await readFile(join(target, "base.txt"), "utf8"), "base\n");
 });
 
 test("native conversation transfer rewrites cwd without changing message text", async (t) => {
