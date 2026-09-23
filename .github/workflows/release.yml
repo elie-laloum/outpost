@@ -55,3 +55,37 @@ jobs:
       - run: npm run build
       - run: npm pkg set repository.url=https://github.com/elie-laloum/outpost.git
       - run: npm publish --provenance --access public
+  documentation:
+    needs: [verify, github-package, npm]
+    if: >-
+      always() && needs.verify.result == 'success' &&
+      needs.github-package.result == 'success' &&
+      (needs.npm.result == 'success' || needs.npm.result == 'skipped')
+    runs-on: ubuntu-latest
+    concurrency:
+      group: github-pages-production
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - id: release
+        run: node docs/scripts/release-channel.mjs
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - uses: actions/configure-pages@v5
+        if: steps.release.outputs.deploy == 'true'
+      - uses: actions/deploy-pages@v4
+        id: deployment
+        if: steps.release.outputs.deploy == 'true'

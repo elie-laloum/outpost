@@ -16,6 +16,10 @@ const runNpm = (args, cwd = root) =>
 const packing = JSON.parse(runNpm(["pack", "--json", "--ignore-scripts"]));
 const packed = Array.isArray(packing) ? packing[0] : Object.values(packing)[0];
 assert.ok(packed?.filename, "npm pack did not return an archive");
+assert.ok(
+  !packed.files.some(({ path }) => path.startsWith("docs/")),
+  "The documentation site must stay out of the library package",
+);
 const temporary = mkdtempSync(join(tmpdir(), "outpost-package-"));
 try {
   writeFileSync(

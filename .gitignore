@@ -10,3 +10,6 @@ coverage/
 .outpost/locks/
 .outpost/logs/
 .outpost/recovery/
+
+docs/.astro/
+docs/.examples/

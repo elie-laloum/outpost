@@ -1,0 +1,56 @@
+---
+title: "Historique des versions"
+description: "Historique des versions — Outpost API"
+sidebar:
+  order: 2
+---
+
+Traduction du journal `CHANGELOG.md` conservé à la racine du dépôt. Chaque version publiée possède ses notes dans les deux langues.
+
+## 1.1.3
+
+- Documentation Astro Starlight en anglais et français, avec anglais par défaut, guides ciblés et référence de tous les exports publics.
+- Vérification en CI des traductions, exemples TypeScript, liens, navigation et fichiers de recherche.
+- Déploiement d’un seul site GitHub Pages après les releases stables réussies, protégé contre le retour à une ancienne version.
+- Déplacement du démarrage français et de la roadmap dans le site ; conservation du changelog racine et suppression des anciennes migrations et du fichier de contribution.
+- Exclusion des outils documentaires de l’archive de la bibliothèque.
+
+## 1.1.2
+
+- Alignement des métadonnées npm sur l’origine GitHub de la compilation pour la provenance. GitLab reste le dépôt source principal.
+
+## 1.1.1
+
+- Séparation des adapters Claude et Codex, de la construction des commandes et du décodage ; conservation des événements inconnus comme observations brutes.
+- Découpage de l’allocation, de la propriété des opérations, du dispatch, de l’attachement, du stockage des conversations et de la récupération en services dédiés.
+- Séparation de la planification des campagnes, de l’exécution des issues et de l’intégration ; isolation de l’état, des tentatives et de l’ordonnancement des workflows.
+- Isolation de la configuration des containers, montages, commandes et transferts, adapters cloud, worktrees Git et étapes de synchronisation distante.
+- Extraction des contrats dans `.types.ts` et des constantes dans `.constants.ts`, sans changer les points d’entrée publics.
+- Contrôle en CI des dépendances, du placement des types et des déclarations inutilisées ; documentation bilingue de l’architecture.
+
+## 1.1.0
+
+- Campagnes d’issues typées avec planification dynamique, concurrence bornée, branches par issue, revue dans la même sandbox, intégration vérifiée et fermeture du tracker.
+- Connecteurs complets GitHub et Beads et scripts de campagne exécutables.
+- Isolation des passes ponctuelles, validation préalable de l’annulation et des réponses structurées, conservation de la sortie brute et finale des agents.
+- Transcripts par tour, stores personnalisés, réécriture sélective des chemins et compteurs de cache Claude séparés.
+- Alignement des variables autorisées, prompts relatifs à l’appelant, collecte interactive et ordre des hooks.
+- Récupération des workspaces, actualisation des branches réutilisées et préservation des modifications locales pendant la synchronisation distante de l’historique commité.
+- Options de namespace Podman, contrôles macOS, préparation des montages de fichiers et transferts bornés.
+- Affichage de progression, journaux ajoutables, métadonnées de récupération et restauration du terminal.
+- Extension des tests fonctionnels, providers et packages ; documentation bilingue de l’évolution des contrats.
+
+## 1.0.0
+
+Première version d’Outpost.
+
+- Propriété séparée des workspaces et sandboxes, environnements réutilisables et fermeture asynchrone.
+- Adapters Codex et Claude Code avec conversations natives, reprise et fork.
+- Providers Docker, Podman, local, Vercel et Daytona, avec contrats extensibles.
+- Worktrees gérés, branches nommées, intégration automatique et récupération.
+- Synchronisation distante préservant l’identité des commits et protégeant les changements locaux concurrents.
+- Fichiers de prompt, variables typées, expansion de commandes, boucles de complétion et délais d’inactivité.
+- Réponses texte/JSON balisées, Standard Schema et réparations avec reprise.
+- Workflows typés avec conditions, tentatives, annulation, concurrence et diagrammes.
+- Initialisation interactive ou automatisée, cinq modèles et connecteurs d’issues.
+- Documentation anglais/français, tests multiplateformes, seuils de couverture et publication automatisée.

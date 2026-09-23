@@ -8,6 +8,8 @@ on:
 permissions:
   contents: read
 jobs:
+  documentation:
+    uses: ./.github/workflows/documentation.yml
   checks:
     strategy:
       fail-fast: false

@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.1.3
+
+- Replace the flat documentation with an Astro Starlight site in English and French, with English as the default language.
+- Organize usage into focused guides and generate checked reference pages for every public API export and supporting contract.
+- Validate translations, TypeScript examples, rendered links, navigation and search assets in CI.
+- Deploy one GitHub Pages site after successful stable releases, protecting it from older release deployments.
+- Move the French getting-started content and roadmap into the documentation, retain the root changelog and remove obsolete migration and contribution files.
+- Keep documentation tooling out of the published library archive.
+
 ## 1.1.2
 
 - Match npm package repository metadata to the GitHub build origin for provenance verification. GitLab remains the canonical source repository.

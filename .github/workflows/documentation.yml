@@ -1,0 +1,33 @@
+name: Documentation
+on:
+  workflow_call:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      ASTRO_TELEMETRY_DISABLED: 1
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            docs/package-lock.json
+      - run: npm ci
+      - run: npm ci --prefix docs
+      - run: npm run build
+      - run: npm run docs:check
+      - run: npm run docs:build
+      - run: npm run docs:test
+      - run: npm audit --prefix docs --audit-level=high
+      - uses: actions/upload-pages-artifact@v4
+        if: startsWith(github.ref, 'refs/tags/v')
+        with:
+          path: docs/dist
+          retention-days: 7
