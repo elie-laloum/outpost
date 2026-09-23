@@ -53,4 +53,5 @@ jobs:
       - run: node scripts/verify-release.mjs
       - run: npm ci
       - run: npm run build
+      - run: npm pkg set repository.url=https://github.com/elie-laloum/outpost.git
       - run: npm publish --provenance --access public

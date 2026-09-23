@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.2
+
+- Match npm package repository metadata to the GitHub build origin for provenance verification. GitLab remains the canonical source repository.
+
 ## 1.1.1
 
 - Separate Claude and Codex adapters, request builders and protocol decoders; preserve unknown events as raw observations.
