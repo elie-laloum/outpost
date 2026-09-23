@@ -10,3 +10,43 @@ ENV HOME=/home/agent
 USER $AGENT_UID:$AGENT_GID
 WORKDIR /workspace
 `;
+
+export const supportedAgents: readonly string[] = ["codex", "claude"];
+export const supportedProviders: readonly string[] = [
+  "docker",
+  "podman",
+  "vercel",
+  "daytona",
+  "local",
+];
+export const supportedTemplates: readonly string[] = [
+  "blank",
+  "iterate",
+  "review",
+  "plan",
+  "plan-review",
+];
+export const supportedTrackers: readonly string[] = [
+  "github",
+  "beads",
+  "custom",
+];
+export const supportedManagers: readonly string[] = [
+  "npm",
+  "pnpm",
+  "yarn",
+  "bun",
+];
+export const managerLocks = [
+  ["pnpm-lock.yaml", "pnpm"],
+  ["yarn.lock", "yarn"],
+  ["bun.lock", "bun"],
+  ["bun.lockb", "bun"],
+] as const;
+export const providerPackages = {
+  docker: [],
+  podman: [],
+  local: [],
+  vercel: ["@vercel/sandbox"],
+  daytona: ["@daytona/sdk"],
+} as const;

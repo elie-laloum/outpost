@@ -7,6 +7,7 @@ import { manageImage } from "./image.ts";
 import { projectSettings } from "./project-settings.ts";
 import { scaffoldFiles } from "./scaffold-files.ts";
 import { validateInitialization } from "./scaffold-validation.ts";
+import { providerPackages } from "./scaffold.constants.ts";
 import type { InitOptions, ScaffoldResult } from "./scaffold.types.ts";
 
 export { manageImage } from "./image.ts";
@@ -37,14 +38,7 @@ export async function initialize(
   for (const [name, content] of Object.entries(files))
     await writeFile(join(folder, name), content, { flag: "wx" });
   if (options.install) {
-    const packages = [
-      "@elie-laloum/outpost",
-      ...(provider === "vercel"
-        ? ["@vercel/sandbox"]
-        : provider === "daytona"
-          ? ["@daytona/sdk"]
-          : []),
-    ];
+    const packages = ["@elie-laloum/outpost", ...providerPackages[provider]];
     const args =
       manager === "npm"
         ? ["install", "--save-dev", ...packages]

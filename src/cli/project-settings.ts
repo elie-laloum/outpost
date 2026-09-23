@@ -1,6 +1,7 @@
 import { access, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { invariant } from "../domain/errors.ts";
+import { managerLocks, supportedManagers } from "./scaffold.constants.ts";
 import type {
   InitOptions,
   PackageManifest,
@@ -27,14 +28,9 @@ export async function projectSettings(
     typeof pkg.packageManager === "string"
       ? pkg.packageManager.split("@")[0]
       : undefined;
-  if (!detected || !["npm", "pnpm", "yarn", "bun"].includes(detected)) {
+  if (!detected || !supportedManagers.includes(detected)) {
     detected = undefined;
-    for (const [file, manager] of [
-      ["pnpm-lock.yaml", "pnpm"],
-      ["yarn.lock", "yarn"],
-      ["bun.lock", "bun"],
-      ["bun.lockb", "bun"],
-    ]) {
+    for (const [file, manager] of managerLocks) {
       if (
         await access(join(root, file!))
           .then(() => true)
@@ -46,10 +42,7 @@ export async function projectSettings(
     }
   }
   const manager = options.manager ?? detected ?? "npm";
-  invariant(
-    ["npm", "pnpm", "yarn", "bun"].includes(manager),
-    "Unknown package manager",
-  );
+  invariant(supportedManagers.includes(manager), "Unknown package manager");
 
   return { extension, manager };
 }

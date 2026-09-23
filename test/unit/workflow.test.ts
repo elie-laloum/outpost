@@ -50,6 +50,40 @@ test("concurrency is bounded and independent work actually overlaps", async () =
   assert.equal(active, 0);
 });
 
+test("a dependent starts after the last remaining asynchronous task settles", async () => {
+  let release!: () => void;
+  const pending = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const fast = task({
+    key: "fast",
+    perform() {
+      setImmediate(release);
+      return 1;
+    },
+  });
+  const slow = task({
+    key: "slow",
+    async perform() {
+      await pending;
+      return 2;
+    },
+  });
+  const dependent = task({
+    key: "dependent",
+    after: [slow],
+    perform: (context) => context.value(slow) + 1,
+  });
+  const result = await workflow("asynchronous-dependency", [
+    fast,
+    slow,
+    dependent,
+  ]).start({ concurrency: 2 });
+  result.unwrap();
+  assert.equal(result.value(dependent), 3);
+  assert.ok(result.tasks.every((entry) => entry.status === "done"));
+});
+
 test("errors skip dependents while independent branches finish", async () => {
   const bad = task({
     key: "bad",

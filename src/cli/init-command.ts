@@ -1,4 +1,5 @@
 import { createInterface } from "node:readline/promises";
+import { initializationQuestions } from "./main.constants.ts";
 import type { CliInvocation } from "./main.types.ts";
 import { initialize } from "./scaffold.ts";
 import type { InitOptions } from "./scaffold.types.ts";
@@ -23,16 +24,7 @@ export async function initializeCommand({
       output: process.stdout,
     });
     try {
-      for (const [key, label, fallback] of [
-        ["agent", "Agent (codex/claude)", "codex"],
-        ["provider", "Sandbox (docker/podman/vercel/daytona/local)", "docker"],
-        [
-          "template",
-          "Template (blank/iterate/review/plan/plan-review)",
-          "blank",
-        ],
-        ["tracker", "Issue tracker (github/beads/custom)", "github"],
-      ] as const) {
+      for (const [key, label, fallback] of initializationQuestions) {
         options[key] ??=
           (await terminal.question(`${label} [${fallback}]: `)).trim() ||
           fallback;

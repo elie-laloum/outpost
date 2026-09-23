@@ -27,3 +27,10 @@ export const cliOptions = {
   uid: { type: "string" },
   gid: { type: "string" },
 } as const;
+
+export const initializationQuestions = [
+  ["agent", "Agent (codex/claude)", "codex"],
+  ["provider", "Sandbox (docker/podman/vercel/daytona/local)", "docker"],
+  ["template", "Template (blank/iterate/review/plan/plan-review)", "blank"],
+  ["tracker", "Issue tracker (github/beads/custom)", "github"],
+] as const;

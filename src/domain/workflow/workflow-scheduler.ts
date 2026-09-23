@@ -61,8 +61,11 @@ export async function schedule(
       active.set(item, running);
       changed = true;
     }
-    if (active.size) await Promise.race(active.values());
-    if (!active.size && !changed) break;
+    if (active.size) {
+      await Promise.race(active.values());
+      continue;
+    }
+    if (!changed) break;
   }
   if (options.signal?.aborted) errors.push(options.signal.reason);
   const status = options.signal?.aborted
