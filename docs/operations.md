@@ -59,6 +59,8 @@ Live model/cloud tests require separate provider credentials. Contract tests and
 
 The publishing job has `packages: write` and `contents: write`; ordinary CI only has `contents: read`. Checkout does not persist credentials. No long-lived package-publishing token is needed for GitHub Packages.
 
+For GitHub Packages, the release job sets the archive's repository metadata to the GitHub mirror so package permissions attach to that workflow repository. The tracked source manifest, writable repository and tag creation remain on GitLab.
+
 Optional npm publication is disabled until repository variable `NPM_PUBLISH` is `true`. Before enabling it, configure the npm package's trusted publisher for GitHub owner `elie-laloum`, repository `outpost`, workflow `release.yml`. The job uses OIDC and provenance. Account/namespace ownership and the registry's initial package setup must be completed by an authorized npm account. Enabling a variable alone does not establish that trust.
 
 Published package versions are immutable. If a release fails after publication, inspect the registry before rerunning to avoid duplicate publication errors; use a new patch version for changed content. Never move a released tag.

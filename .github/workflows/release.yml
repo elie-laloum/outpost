@@ -25,6 +25,7 @@ jobs:
       - run: node scripts/verify-release.mjs
       - run: npm ci
       - run: npm run build
+      - run: npm pkg set repository.url=https://github.com/elie-laloum/outpost.git
       - run: npm pack --ignore-scripts
       - run: npm publish ./*.tgz --registry=https://npm.pkg.github.com --provenance=false --ignore-scripts
         env:
