@@ -13,7 +13,9 @@ const runNpm = (args, cwd = root) =>
     encoding: "utf8",
     stdio: ["ignore", "pipe", "inherit"],
   });
-const packed = JSON.parse(runNpm(["pack", "--json", "--ignore-scripts"]))[0];
+const packing = JSON.parse(runNpm(["pack", "--json", "--ignore-scripts"]));
+const packed = Array.isArray(packing) ? packing[0] : Object.values(packing)[0];
+assert.ok(packed?.filename, "npm pack did not return an archive");
 const temporary = mkdtempSync(join(tmpdir(), "outpost-package-"));
 try {
   writeFileSync(

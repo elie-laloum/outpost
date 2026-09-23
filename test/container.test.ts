@@ -21,65 +21,68 @@ test(
       branch: { mode: "named", name: "container-test" },
       logging: false,
     });
-    t.after(() => box.close());
-    const result = await box.command({
-      executable: "sh",
-      arguments: [
-        "-c",
-        "printf 'container change\\n' > base.txt; git add base.txt && git commit -m 'Container commit' && git status --porcelain",
-      ],
-    });
-    assert.equal(result.status, 0, result.stderr);
-    assert.equal(
-      await readFile(join(box.workspace.directory, "base.txt"), "utf8"),
-      "container change\n",
-    );
-    for (const adapter of [codex(), claude()]) {
-      const version = await box.command({
-        executable: adapter.name,
-        arguments: ["--version"],
-      });
-      assert.equal(version.status, 0, version.stderr);
-      const help = await box.command({
-        ...adapter.request({
-          text: "",
-          continuation: {
-            id: "00000000-0000-0000-0000-000000000000",
-            fork: true,
-          },
-        }),
+    try {
+      const result = await box.command({
+        executable: "sh",
         arguments: [
+          "-c",
+          "printf 'container change\\n' > base.txt; git add base.txt && git commit -m 'Container commit' && git status --porcelain",
+        ],
+      });
+      assert.equal(result.status, 0, result.stderr);
+      assert.equal(
+        await readFile(join(box.workspace.directory, "base.txt"), "utf8"),
+        "container change\n",
+      );
+      for (const adapter of [codex(), claude()]) {
+        const version = await box.command({
+          executable: adapter.name,
+          arguments: ["--version"],
+        });
+        assert.equal(version.status, 0, version.stderr);
+        const help = await box.command({
           ...adapter.request({
+            text: "",
             continuation: {
               id: "00000000-0000-0000-0000-000000000000",
               fork: true,
             },
-          }).arguments!,
-          "--help",
+          }),
+          arguments: [
+            ...adapter.request({
+              continuation: {
+                id: "00000000-0000-0000-0000-000000000000",
+                fork: true,
+              },
+            }).arguments!,
+            "--help",
+          ],
+        });
+        assert.equal(help.status, 0, help.stderr);
+      }
+      const cancelled = box.command({
+        executable: "sh",
+        arguments: ["-c", "sleep 2; echo leaked > cancellation-leak.txt"],
+        deadlineMs: 100,
+      });
+      await assert.rejects(cancelled);
+      assert.equal((await box.command({ executable: "true" })).status, 0);
+      const verify = await box.command({
+        executable: "sh",
+        arguments: [
+          "-c",
+          "sleep 3; test ! -e cancellation-leak.txt; test ! -S /var/run/docker.sock",
         ],
       });
-      assert.equal(help.status, 0, help.stderr);
+      assert.equal(verify.status, 0);
+      const env = await box.command({
+        executable: "printenv",
+        arguments: ["OUTPOST_FIXTURE"],
+        variables: { OUTPOST_FIXTURE: "injected" },
+      });
+      assert.equal(env.stdout.trim(), "injected");
+    } finally {
+      await box.close();
     }
-    const cancelled = box.command({
-      executable: "sh",
-      arguments: ["-c", "sleep 2; echo leaked > cancellation-leak.txt"],
-      deadlineMs: 100,
-    });
-    await assert.rejects(cancelled);
-    assert.equal((await box.command({ executable: "true" })).status, 0);
-    const verify = await box.command({
-      executable: "sh",
-      arguments: [
-        "-c",
-        "sleep 3; test ! -e cancellation-leak.txt; test ! -S /var/run/docker.sock",
-      ],
-    });
-    assert.equal(verify.status, 0);
-    const env = await box.command({
-      executable: "printenv",
-      arguments: ["OUTPOST_FIXTURE"],
-      variables: { OUTPOST_FIXTURE: "injected" },
-    });
-    assert.equal(env.stdout.trim(), "injected");
   },
 );

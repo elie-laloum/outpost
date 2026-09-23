@@ -156,6 +156,9 @@ export function containerProvider(
         "--init",
         "--user",
         `${user.uid}:${user.gid}`,
+        ...(engine === "podman" && process.getuid?.() !== 0
+          ? ["--userns", "keep-id"]
+          : []),
         "--workdir",
         root,
         "--cap-drop",
@@ -165,7 +168,6 @@ export function containerProvider(
         "--tmpfs",
         `/home/agent:rw,uid=${user.uid},gid=${user.gid},mode=0700`,
         ...volumes,
-        ...Object.keys(env).flatMap((key) => ["--env", key]),
         ...networks.flatMap((network) => ["--network", network]),
         ...(config.groups ?? []).flatMap((group) => [
           "--group-add",
@@ -196,7 +198,6 @@ export function containerProvider(
       };
       try {
         await call(args, {
-          variables: env,
           ...(context.signal ? { signal: context.signal } : {}),
         });
         await call(
@@ -231,23 +232,35 @@ export function containerProvider(
           command.signal?.throwIfAborted();
           const id = randomUUID();
           const pidFile = `/tmp/outpost-${id}.pid`;
-          const variables = { ...command.variables };
+          const variables = { ...env, ...command.variables };
           invariant(
             Object.keys(variables).every((key) =>
               /^[A-Za-z_][A-Za-z0-9_]*$/.test(key),
             ),
             "Invalid environment key",
           );
+          const environment = Object.fromEntries(
+            Object.entries(variables).map(([key, value], index) => [
+              `OUTPOST_VALUE_${index}`,
+              value,
+            ]),
+          );
+          const exports = Object.keys(variables)
+            .map(
+              (key, index) =>
+                `export ${key}="$OUTPOST_VALUE_${index}"; unset OUTPOST_VALUE_${index};`,
+            )
+            .join(" ");
           const flags = [
             "exec",
             command.interactive && process.stdin.isTTY ? "-it" : "-i",
             ...(command.elevated ? ["--user", "0:0"] : []),
             "--workdir",
             command.directory ?? root,
-            ...Object.keys(variables).flatMap((key) => ["--env", key]),
+            ...Object.keys(environment).flatMap((key) => ["--env", key]),
             name,
           ];
-          const wrapper = `echo $$ > ${quote(pidFile)}; test ! -f ${quote(pidFile + ".cancel")} || exit 130; exec "$@"`;
+          const wrapper = `${exports} echo $$ > ${quote(pidFile)}; test ! -f ${quote(pidFile + ".cancel")} || exit 130; exec "$@"`;
           const { directory: _directory, ...invocation } = command;
           let interrupted = false;
           try {
@@ -258,6 +271,9 @@ export function containerProvider(
                 ...flags,
                 "setsid",
                 ...(command.interactive ? ["--wait"] : []),
+                ...(command.interactive && process.stdin.isTTY
+                  ? ["--ctty"]
+                  : []),
                 "sh",
                 "-c",
                 wrapper,
@@ -265,7 +281,7 @@ export function containerProvider(
                 command.executable,
                 ...(command.arguments ?? []),
               ],
-              variables,
+              variables: environment,
               retain: command.retain ?? config.retain ?? 65_536,
             });
           } catch (cause) {
@@ -273,6 +289,7 @@ export function containerProvider(
             try {
               await call([
                 "exec",
+                ...(command.elevated ? ["--user", "0:0"] : []),
                 name,
                 "sh",
                 "-c",

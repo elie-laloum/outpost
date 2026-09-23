@@ -45,11 +45,10 @@ test("container contract maps Git metadata, mounts, limits, credentials and invo
     variables: { PRIVATE_KEY: "hidden" },
   });
   const create = calls.find((call) => call.arguments?.[0] === "create")!;
-  assert.equal(create.variables?.PRIVATE_KEY, "hidden");
+  assert.equal(create.variables, undefined);
   assert.ok(!create.arguments?.includes("hidden"));
   assert.ok(create.arguments?.includes("--cpus"));
   assert.ok(create.arguments?.includes("net-b"));
-  assert.equal(create.variables?.GIT_WORK_TREE, "/workspace");
   await lease.invoke({
     executable: "node",
     arguments: ["-e", "console.log(1)"],
@@ -59,7 +58,14 @@ test("container contract maps Git metadata, mounts, limits, credentials and invo
   const invocation = calls.find((call) => call.arguments?.includes("setsid"))!;
   assert.equal(invocation.directory, undefined);
   assert.ok(invocation.arguments?.includes("/workspace/sub"));
-  assert.equal(invocation.variables?.EXTRA, "value");
+  assert.ok(Object.values(invocation.variables ?? {}).includes("value"));
+  assert.ok(Object.values(invocation.variables ?? {}).includes("hidden"));
+  assert.equal(invocation.variables?.HOME, undefined);
+  assert.ok(
+    invocation.arguments?.some((value) =>
+      value.includes("export GIT_WORK_TREE="),
+    ),
+  );
   await lease.upload(join(root, "base.txt"), "/tmp/input");
   await lease.download("/tmp/result", join(root, "download"));
   await lease.release();
