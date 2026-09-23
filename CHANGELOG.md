@@ -1,14 +1,13 @@
 # Changelog
 
-## Unreleased
+## 2.0.0
 
+- Normalize the workflow test directory before computing relative repository paths, fixing macOS CI with symlinked temporary directories.
 - Show live agent progress in generated starters and report cancellation recovery details without an uncaught error stack trace.
 - Document workflow directories, repository path resolution and multi-repository task ownership in English and French.
-
 - Generate standalone workflow projects directly in the chosen directory, with `run.ts`, a default package manifest and preserved existing package/ignore files.
 - Add `init --repository` for external repositories; resolve generated brief/environment paths from the script and pin the workflow container image independently of the target repository.
 - Read image build recipes from the workflow root; older layouts can use `--file .outpost/Dockerfile`.
-
 - Remove issue campaigns, GitHub/Beads/custom backlog connectors and their public types.
 - Simplify initialization to a dispatch starter; remove campaign templates, `--template`, `--tracker`, `--label`, tracker files and GitHub/Beads CLI installation.
 

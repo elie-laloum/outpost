@@ -5,6 +5,7 @@ import {
   mkdtemp,
   readdir,
   readFile,
+  realpath,
   rm,
   writeFile,
 } from "node:fs/promises";
@@ -117,7 +118,9 @@ test("image management uses explicit Dockerfile and numeric build arguments", as
 
 test("generated starter uses an external repository, workflow credentials and brief from another cwd", async (t) => {
   const root = await repository(t);
-  const folder = await mkdtemp(join(tmpdir(), "outpost-workflow-"));
+  const folder = await realpath(
+    await mkdtemp(join(tmpdir(), "outpost-workflow-")),
+  );
   t.after(() => rm(folder, { recursive: true, force: true }));
   await initialize({
     directory: folder,
