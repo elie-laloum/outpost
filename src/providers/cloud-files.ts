@@ -73,6 +73,7 @@ export async function downloadTree(
     const target = entry.path
       ? await safeDestination(destination, entry.path)
       : destination;
+    if ((await lstat(target).catch(() => undefined))?.isSymbolicLink()) throw new OutpostError("provider", "Refusing to overwrite a local symlink");
     if (entry.kind === "directory") {
       await mkdir(target, { recursive: true });
     } else if (entry.kind === "file") {

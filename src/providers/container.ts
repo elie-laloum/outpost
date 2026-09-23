@@ -166,7 +166,9 @@ export function containerProvider(
         "--security-opt",
         "no-new-privileges",
         "--tmpfs",
-        `/home/agent:rw,uid=${user.uid},gid=${user.gid},mode=0700`,
+        engine === "podman"
+          ? "/home/agent:rw,mode=1777"
+          : `/home/agent:rw,uid=${user.uid},gid=${user.gid},mode=0700`,
         ...volumes,
         ...networks.flatMap((network) => ["--network", network]),
         ...(config.groups ?? []).flatMap((group) => [

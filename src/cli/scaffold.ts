@@ -8,6 +8,7 @@ import {
 import { join, resolve } from "node:path";
 import { OutpostError, invariant } from "../domain/errors.ts";
 import { imageName } from "../providers/container.ts";
+import { agentVersions } from "../providers/versions.ts";
 import { requireSuccess, type Executor } from "../infrastructure/process.ts";
 
 export type Template = "blank" | "iterate" | "review" | "plan" | "plan-review";
@@ -29,7 +30,7 @@ export const imageRecipe = `FROM node:24-bookworm-slim
 ARG AGENT_UID=1000
 ARG AGENT_GID=1000
 RUN apt-get update && apt-get install -y --no-install-recommends git openssh-client ca-certificates curl procps util-linux python3 && rm -rf /var/lib/apt/lists/*
-RUN npm install -g @openai/codex @anthropic-ai/claude-code
+RUN npm install -g --allow-scripts=@anthropic-ai/claude-code @openai/codex@${agentVersions.codex} @anthropic-ai/claude-code@${agentVersions.claude}
 RUN groupmod -o -g "$AGENT_GID" node && usermod -o -u "$AGENT_UID" -g "$AGENT_GID" node
 ENV HOME=/home/agent
 USER $AGENT_UID:$AGENT_GID

@@ -9,6 +9,7 @@ export type Logging =
 export async function journal(
   repository: string,
   logging: Logging = {},
+  label?: string,
 ): Promise<{
   file?: string;
   record(event: AgentEvent): void;
@@ -22,7 +23,7 @@ export async function journal(
             join(
               ".outpost",
               "logs",
-              `${new Date().toISOString().replaceAll(":", "-")}-${randomUUID()}.jsonl`,
+              `${label ? label.replace(/[^A-Za-z0-9_-]/g, "-").slice(0, 64) + "-" : ""}${new Date().toISOString().replaceAll(":", "-")}-${randomUUID()}.jsonl`,
             ),
         )
       : undefined;
@@ -40,7 +41,11 @@ export async function journal(
       if (event.kind === "raw" && logging !== "stdout" && !logging.verbose)
         return;
       const line =
-        JSON.stringify({ at: new Date().toISOString(), ...event }) + "\n";
+        JSON.stringify({
+          at: new Date().toISOString(),
+          ...(label ? { label } : {}),
+          ...event,
+        }) + "\n";
       if (logging === "stdout")
         process.stdout.write(event.kind === "text" ? event.text : line);
       else

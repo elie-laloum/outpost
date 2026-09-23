@@ -11,8 +11,12 @@ import type {
 import { prepareBrief, validateBrief, type Brief } from "../domain/prompts.ts";
 import { ResponseError, type ResponseSpec } from "../domain/response.ts";
 import { shell } from "../infrastructure/process.ts";
+import type { Logging } from "../infrastructure/journal.ts";
 
 export interface DispatchOptions<T = undefined> {
+  readonly agent?: AgentAdapter;
+  readonly logging?: Logging;
+  readonly label?: string;
   readonly brief: Brief;
   readonly passes?: number;
   readonly until?: string | readonly string[];

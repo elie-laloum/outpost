@@ -24,6 +24,7 @@ export function prepareBrief(
   for (const key of Object.keys(builtins))
     invariant(!(key in values), `Reserved prompt variable: ${key}`);
   const available = { ...values, ...builtins };
+  invariant(Object.values(values).every(value => typeof value === "string" || typeof value === "boolean" || typeof value === "number" && Number.isFinite(value)), "Prompt variables must be finite numbers, strings or booleans");
   const used = new Set<string>();
   const substitute = (text: string) =>
     text.replace(/\{\{([A-Za-z_][A-Za-z0-9_]*)\}\}/g, (_, key: string) => {

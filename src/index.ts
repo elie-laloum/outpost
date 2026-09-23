@@ -33,6 +33,7 @@ export type {
 } from "./domain/workflow.ts";
 export { agentTask, isolatedTask, commandTask } from "./application/tasks.ts";
 export { claude, codex } from "./providers/agents.ts";
+export { agentVersions } from "./providers/versions.ts";
 export type { ClaudeSettings, CodexSettings } from "./providers/agents.ts";
 export { mountedProvider, remoteProvider } from "./providers/factories.ts";
 export { response, ResponseError } from "./domain/response.ts";

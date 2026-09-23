@@ -37,6 +37,7 @@ import {
 import { journal, type Logging } from "../infrastructure/journal.ts";
 import { registerCleanup } from "../infrastructure/shutdown.ts";
 import { docker } from "../providers/docker.ts";
+import { agentVersions } from "../providers/versions.ts";
 import {
   execute,
   notify,
@@ -57,14 +58,14 @@ export interface WorkspaceOptions {
 export interface Workspace extends WorkspaceRecord {
   dispatch<T = undefined>(
     options: Omit<SandboxOptions, keyof WorkspaceOptions | "workspace"> &
-      DispatchOptions<T>,
+      DispatchOptions<T> & { readonly agent: AgentAdapter },
   ): Promise<DispatchResult<T>>;
   sandbox(
     options: Omit<SandboxOptions, keyof WorkspaceOptions | "workspace">,
   ): Promise<Sandbox>;
   attach(
     options: Omit<SandboxOptions, keyof WorkspaceOptions | "workspace"> &
-      AttachOptions,
+      AttachOptions & { readonly agent: AgentAdapter },
   ): Promise<AttachResult>;
   close(options?: { readonly preserve?: boolean }): Promise<Disposal>;
   integrate(): Promise<void>;
@@ -109,7 +110,7 @@ export async function openWorkspace(
 }
 
 export interface SandboxOptions extends WorkspaceOptions {
-  readonly agent: AgentAdapter;
+  readonly agent?: AgentAdapter;
   readonly provider?: SandboxProvider;
   readonly workspace?: Workspace;
   readonly hooks?: LifecycleHooks;
@@ -120,6 +121,7 @@ export interface SandboxOptions extends WorkspaceOptions {
 }
 
 export interface AttachOptions {
+  readonly agent?: AgentAdapter;
   readonly brief?: Brief;
   readonly continuation?: { readonly id: string; readonly fork?: boolean };
   readonly signal?: AbortSignal;
@@ -181,6 +183,43 @@ async function hooks(
     );
 }
 
+async function prepareAdapter(
+  agent: AgentAdapter,
+  runtime: SandboxLease,
+  signal: AbortSignal,
+): Promise<AgentAdapter> {
+  if (!agent.conversations) return agent;
+  const executable = agent.conversations;
+  const cli =
+    executable === "claude"
+      ? `@anthropic-ai/claude-code@${agentVersions.claude}`
+      : `@openai/codex@${agentVersions.codex}`;
+  const prefix = posix.join(runtime.home, ".outpost-tools"),
+    target = posix.join(prefix, "bin", executable);
+  const installed = await requireSuccess(
+    {
+      executable: "sh",
+      arguments: [
+        "-c",
+        `if command -v ${executable} >/dev/null 2>&1; then command -v ${executable}; elif test -x ${quote(target)}; then printf '%s\\n' ${quote(target)}; else npm install --global --allow-scripts=@anthropic-ai/claude-code --prefix ${quote(prefix)} ${cli} >&2 && printf '%s\\n' ${quote(target)}; fi`,
+      ],
+      signal,
+    },
+    runtime.invoke.bind(runtime),
+  );
+  const binary = installed.stdout.trim();
+  invariant(
+    binary.startsWith("/") && !binary.includes("\n"),
+    "Agent bootstrap returned an invalid executable path",
+  );
+  return {
+    ...agent,
+    request(input) {
+      return { ...agent.request(input), executable: binary };
+    },
+  };
+}
+
 export async function createSandbox(options: SandboxOptions): Promise<Sandbox> {
   const provider = options.provider ?? docker();
   invariant(
@@ -207,7 +246,7 @@ export async function createSandbox(options: SandboxOptions): Promise<Sandbox> {
     ? AbortSignal.any([options.signal, stop.signal])
     : stop.signal;
   let lease: SandboxLease | undefined, sync: RemoteSync | undefined;
-  let agent = options.agent;
+  const prepared = new Map<AgentAdapter, AgentAdapter>();
   const staging = join(
     workspace.repository,
     ".outpost",
@@ -217,7 +256,7 @@ export async function createSandbox(options: SandboxOptions): Promise<Sandbox> {
   try {
     const configured = await resolveVariables(
       workspace.repository,
-      options.agent.variables,
+      {},
       provider.variables,
     );
     const name = (
@@ -257,36 +296,11 @@ export async function createSandbox(options: SandboxOptions): Promise<Sandbox> {
           join(workspace.directory, path),
           posix.join(lease.root, path.replaceAll("\\", "/")),
         );
-      if (options.bootstrap !== false && options.agent.conversations) {
-        const cli =
-          options.agent.conversations === "claude"
-            ? "@anthropic-ai/claude-code"
-            : "@openai/codex";
-        const prefix = posix.join(lease.home, ".outpost-tools"),
-          executable = options.agent.conversations;
-        const installed = await requireSuccess(
-          {
-            executable: "sh",
-            arguments: [
-              "-c",
-              `if command -v ${executable} >/dev/null 2>&1; then command -v ${executable}; else npm install --global --prefix ${quote(prefix)} ${cli} >&2 && printf '%s\\n' ${quote(posix.join(prefix, "bin", executable))}; fi`,
-            ],
-            signal: setupSignal,
-          },
-          lease.invoke.bind(lease),
+      if (options.bootstrap !== false && options.agent)
+        prepared.set(
+          options.agent,
+          await prepareAdapter(options.agent, lease, setupSignal),
         );
-        const binary = installed.stdout.trim();
-        invariant(
-          binary.startsWith("/") && !binary.includes("\n"),
-          "Agent bootstrap returned an invalid executable path",
-        );
-        agent = {
-          ...options.agent,
-          request(input) {
-            return { ...options.agent.request(input), executable: binary };
-          },
-        };
-      }
     }
     const initialized = await Promise.allSettled([
       hooks(
@@ -333,14 +347,48 @@ export async function createSandbox(options: SandboxOptions): Promise<Sandbox> {
     );
     return pending;
   };
-  const restore = async (id: string) => {
-    if (known.has(id)) return;
+  const selectAgent = async (
+    selected: AgentAdapter | undefined,
+    signal: AbortSignal,
+  ) => {
+    invariant(selected, "Provide an agent on the sandbox or this operation");
+    if (!prepared.has(selected))
+      prepared.set(
+        selected,
+        provider.placement === "remote" && options.bootstrap !== false
+          ? await prepareAdapter(selected, runtime, signal)
+          : selected,
+      );
+    const variables = await resolveVariables(
+      workspace.repository,
+      selected.variables,
+      provider.variables,
+    );
+    const adapter = prepared.get(selected)!;
+    return {
+      selected,
+      adapter,
+      executionLease: {
+        ...runtime,
+        invoke(command: Command) {
+          return runtime.invoke({
+            ...command,
+            variables: { ...variables, ...command.variables },
+          });
+        },
+      },
+    };
+  };
+  const conversationKey = (agent: AgentAdapter, id: string) =>
+    `${agent.conversations ?? agent.name}:${id}`;
+  const restore = async (id: string, agent: AgentAdapter) => {
+    if (known.has(conversationKey(agent, id))) return;
     invariant(
-      options.agent.conversations,
+      agent.conversations,
       "This adapter does not support native conversations",
     );
     const found = await locateConversation(
-      options.agent.conversations,
+      agent.conversations,
       id,
       workspace.repository,
       options.conversationHome,
@@ -350,7 +398,7 @@ export async function createSandbox(options: SandboxOptions): Promise<Sandbox> {
       workspace.directory !== workspace.repository
     )
       await restoreConversation(found, runtime, staging);
-    known.add(id);
+    known.add(conversationKey(agent, id));
   };
   const result: Sandbox = {
     workspace,
@@ -358,23 +406,32 @@ export async function createSandbox(options: SandboxOptions): Promise<Sandbox> {
     dispatch<T>(dispatch: DispatchOptions<T>) {
       validateDispatch(dispatch);
       return exclusive(async () => {
-        if (dispatch.continuation) await restore(dispatch.continuation.id);
+        const signal = dispatch.signal
+          ? AbortSignal.any([dispatch.signal, stop.signal])
+          : stop.signal;
+        const { selected, adapter, executionLease } = await selectAgent(
+          dispatch.agent ?? options.agent,
+          signal,
+        );
+        if (dispatch.continuation)
+          await restore(dispatch.continuation.id, selected);
         const baseline = (
           await git(workspace.directory, ["rev-parse", "HEAD"])
         ).trim();
-        const log = await journal(workspace.repository, options.logging);
+        const log = await journal(
+          workspace.repository,
+          dispatch.logging ?? options.logging,
+          dispatch.label,
+        );
         let execution: Execution<T> | undefined,
           transcript: ConversationLocation | undefined;
         let failure: unknown;
         let conversation = dispatch.continuation?.id;
-        const signal = dispatch.signal
-          ? AbortSignal.any([dispatch.signal, stop.signal])
-          : stop.signal;
         try {
           execution = await execute(
             workspace,
-            runtime,
-            agent,
+            executionLease,
+            adapter,
             provider.placement === "host",
             {
               ...dispatch,
@@ -382,7 +439,7 @@ export async function createSandbox(options: SandboxOptions): Promise<Sandbox> {
               observe(event) {
                 if (event.kind === "conversation") {
                   conversation = event.id;
-                  known.add(event.id);
+                  known.add(conversationKey(selected, event.id));
                 }
                 log.record(event);
                 notify(dispatch.observe, event);
@@ -396,11 +453,11 @@ export async function createSandbox(options: SandboxOptions): Promise<Sandbox> {
           await sync?.pull();
           if (
             conversation &&
-            options.agent.conversations &&
-            options.agent.capture !== false
+            selected.conversations &&
+            selected.capture !== false
           )
             transcript = await captureConversation(
-              options.agent.conversations,
+              selected.conversations,
               conversation,
               workspace.repository,
               runtime,
@@ -451,11 +508,11 @@ export async function createSandbox(options: SandboxOptions): Promise<Sandbox> {
           ...(log.file ? { log: log.file } : {}),
           resume<U>(next: DispatchOptions<U>) {
             invariant(conversation, "No conversation was emitted");
-            return result.resume(conversation, next);
+            return result.resume(conversation, { agent: selected, ...next });
           },
           fork<U>(next: DispatchOptions<U>) {
             invariant(conversation, "No conversation was emitted");
-            return result.fork(conversation, next);
+            return result.fork(conversation, { agent: selected, ...next });
           },
         };
       });
@@ -469,17 +526,25 @@ export async function createSandbox(options: SandboxOptions): Promise<Sandbox> {
     attach(settings = {}) {
       validateBrief(settings.brief, true);
       return exclusive(async () => {
-        if (settings.continuation) await restore(settings.continuation.id);
+        const signal = settings.signal
+          ? AbortSignal.any([settings.signal, stop.signal])
+          : stop.signal;
+        const { selected, adapter, executionLease } = await selectAgent(
+          settings.agent ?? options.agent,
+          signal,
+        );
+        if (settings.continuation)
+          await restore(settings.continuation.id, selected);
         const text = settings.brief
           ? await renderBrief(
               settings.brief,
               workspace,
-              runtime,
+              executionLease,
               provider.placement === "host",
               settings,
             )
           : undefined;
-        const command = agent.request({
+        const command = adapter.request({
           interactive: true,
           ...(text === undefined ? {} : { text }),
           ...(settings.continuation
@@ -487,7 +552,7 @@ export async function createSandbox(options: SandboxOptions): Promise<Sandbox> {
             : {}),
         });
         try {
-          return await runtime.invoke({
+          return await executionLease.invoke({
             ...command,
             deadlineMs: 86_400_000,
             signal: settings.signal
@@ -544,7 +609,8 @@ export async function createSandbox(options: SandboxOptions): Promise<Sandbox> {
 }
 
 export async function dispatch<T = undefined>(
-  options: SandboxOptions & DispatchOptions<T>,
+  options: SandboxOptions &
+    DispatchOptions<T> & { readonly agent: AgentAdapter },
 ): Promise<DispatchResult<T>> {
   validateDispatch(options);
   if (options.continuation) {
@@ -600,7 +666,7 @@ export async function dispatch<T = undefined>(
 }
 
 export async function attach(
-  options: SandboxOptions & AttachOptions,
+  options: SandboxOptions & AttachOptions & { readonly agent: AgentAdapter },
 ): Promise<AttachResult> {
   validateBrief(options.brief, true);
   if (options.continuation) {

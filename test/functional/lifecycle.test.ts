@@ -13,6 +13,36 @@ import { local } from "../../src/providers/local.ts";
 import { git } from "../../src/infrastructure/git.ts";
 import { repository, scripted, emit } from "../helpers.ts";
 
+test("a warm sandbox switches agents and does not leak adapter variables between runs", async (t) => {
+  const root = await repository(t);
+  await using box = await createSandbox({
+    repository: root,
+    provider: local(),
+    logging: false,
+  });
+  const first = {
+    ...scripted(
+      "console.log(JSON.stringify({kind:'text',text:process.env.AGENT_ONLY??'absent'}))",
+    ),
+    variables: { AGENT_ONLY: "first" },
+  };
+  const second = scripted(
+    "console.log(JSON.stringify({kind:'text',text:process.env.AGENT_ONLY??'absent'}))",
+  );
+  assert.equal(
+    (await box.dispatch({ agent: first, brief: { text: "test" } })).text,
+    "first",
+  );
+  assert.equal(
+    (await box.dispatch({ agent: second, brief: { text: "test" } })).text,
+    "absent",
+  );
+  await assert.rejects(
+    box.dispatch({ brief: { text: "missing adapter" } }),
+    /Provide an agent/,
+  );
+});
+
 test("one-shot dispatch writes a journal, returns usage and integrates committed changes", async (t) => {
   const root = await repository(t);
   const agent = scripted(

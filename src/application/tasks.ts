@@ -4,7 +4,7 @@ import {
   type TaskContext,
   type TaskOptions,
 } from "../domain/workflow.ts";
-import type { Command, CommandResult } from "../domain/ports.ts";
+import type { AgentAdapter, Command, CommandResult } from "../domain/ports.ts";
 import { OutpostError } from "../domain/errors.ts";
 import type { DispatchOptions } from "./execution.ts";
 import type { DispatchResult, Sandbox, SandboxOptions } from "./outpost.ts";
@@ -26,7 +26,9 @@ export function agentTask<T>(
 
 export function isolatedTask<T>(
   options: Omit<TaskOptions<DispatchResult<T>>, "perform"> & {
-    request: (context: TaskContext) => SandboxOptions & DispatchOptions<T>;
+    request: (
+      context: TaskContext,
+    ) => SandboxOptions & DispatchOptions<T> & { readonly agent: AgentAdapter };
   },
 ): Task<DispatchResult<T>> {
   const { request, ...definition } = options;
