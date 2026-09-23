@@ -31,3 +31,7 @@ GitHub backlog operations use host `gh`: authenticate it or declare `GH_TOKEN`. 
 Environment maps contain strings. Avoid putting secret values into command arguments, source files or prompt templates. Generated `.env.example` files list variable names, never real secrets. Logs and native transcripts can still contain sensitive content emitted by your task.
 
 See [mounts](../../providers/containers/) and [security boundaries](../../operations/security/).
+
+## Connect an account
+
+Follow [Claude Code account setup](../connect-claude/) or [Codex account setup](../connect-codex/) for subscription login, API keys and container authentication. Merely declaring OPENAI_API_KEY does not initialize a Codex login; use the documented setup hook.

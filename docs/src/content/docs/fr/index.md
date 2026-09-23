@@ -28,3 +28,5 @@ Les guides présentent une opération à la fois. La référence API recense cha
 Recherchez un nom d’API, une option du CLI ou une erreur dans la barre de recherche. Le sélecteur de langue relie les pages françaises et anglaises correspondantes. Le site publié suit la dernière release ; la CI vérifie les changements non publiés avant la release suivante.
 
 [Historique des versions](project/changelog/) · [Roadmap](project/roadmap/) · [Sources sur GitLab](https://gitlab.elielaloum.com/elielaloum/outpost)
+
+Explorez les [cookbooks](./cookbooks/) pour des recettes complètes, du correctif ciblé au workflow de livraison validé.

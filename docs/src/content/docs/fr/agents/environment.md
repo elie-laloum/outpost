@@ -31,3 +31,7 @@ Les opérations GitHub utilisent `gh` sur l’hôte : authentifiez-le ou déclar
 Les valeurs d’environnement sont des chaînes. Évitez les secrets dans les arguments de commande, les sources et les modèles de prompt. Les `.env.example` générés listent les noms, jamais de vrais secrets. Les logs et transcripts peuvent néanmoins contenir les données sensibles produites par votre tâche.
 
 Voir [les montages](../../providers/containers/) et [les limites de sécurité](../../operations/security/).
+
+## Connecter un compte
+
+Suivez la [connexion Claude Code](../connect-claude/) ou la [connexion Codex](../connect-codex/) pour les abonnements, clés API et conteneurs. Déclarer OPENAI_API_KEY ne crée pas à lui seul une connexion Codex ; utilisez le hook documenté.

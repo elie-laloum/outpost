@@ -144,7 +144,7 @@ export function containerProvider(
           name,
           "sh",
           "-c",
-          "command -v setsid >/dev/null && command -v kill >/dev/null",
+          "command -v setsid >/dev/null && command -v kill >/dev/null && command -v tar >/dev/null && command -v cp >/dev/null",
         ]);
       } catch (cause) {
         try {
@@ -178,7 +178,16 @@ export function containerProvider(
           call,
           isClosed: () => closed,
         }),
-        ...containerFiles(call, name),
+        ...containerFiles({
+          engine,
+          config,
+          executor,
+          root,
+          name,
+          env,
+          call,
+          isClosed: () => closed,
+        }),
         release,
       };
     },

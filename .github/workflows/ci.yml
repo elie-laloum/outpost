@@ -55,3 +55,6 @@ jobs:
       - run: node --test test/container.test.ts
         env:
           OUTPOST_CONTAINER_ENGINE: ${{ matrix.engine }}
+      - run: printf 'hello\n' | script -qec 'node test/fixtures/container-terminal.ts' /dev/null
+        env:
+          OUTPOST_CONTAINER_ENGINE: ${{ matrix.engine }}

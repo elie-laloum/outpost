@@ -56,6 +56,7 @@ test("container contract maps Git metadata, mounts, limits, credentials and invo
     variables: { EXTRA: "value" },
   });
   const invocation = calls.find((call) => call.arguments?.includes("setsid"))!;
+  assert.ok(invocation.arguments?.includes("--wait"));
   assert.equal(invocation.directory, undefined);
   assert.ok(invocation.arguments?.includes("/workspace/sub"));
   assert.ok(Object.values(invocation.variables ?? {}).includes("value"));
@@ -66,8 +67,6 @@ test("container contract maps Git metadata, mounts, limits, credentials and invo
       value.includes("export GIT_WORK_TREE="),
     ),
   );
-  await lease.upload(join(root, "base.txt"), "/tmp/input");
-  await lease.download("/tmp/result", join(root, "download"));
   await lease.release();
   await lease.release();
   assert.equal(calls.filter((call) => call.arguments?.[0] === "rm").length, 1);

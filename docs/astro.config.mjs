@@ -8,6 +8,7 @@ const groups = [
   ["Sandboxes and Git", "Sandboxes et Git", "sandboxes"],
   ["Agents and prompts", "Agents et prompts", "agents"],
   ["Workflows", "Workflows", "workflows"],
+  ["Cookbooks", "Cookbooks", "cookbooks"],
   ["Providers", "Providers", "providers"],
   ["Extend Outpost", "Étendre Outpost", "extend"],
   ["Operations", "Exploitation", "operations"],

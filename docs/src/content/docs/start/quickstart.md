@@ -38,3 +38,5 @@ Use `run.ts` instead when your package declares `"type": "module"`; initializati
 Review Git status and history, the returned commits and the logs under `.outpost/logs`. A dispatch collects agent changes; the selected branch policy determines whether those commits stay on a separate branch or integrate into the host branch. It does not push your repository to a remote.
 
 To control the lifecycle yourself, read [one-shot dispatch](../../agents/dispatch/) and [branch policies](../../sandboxes/branches/). To automate several steps, continue with [workflows](../../workflows/graph/).
+
+For account-based access, follow [Connect Codex](../../agents/connect-codex/) or [Connect Claude](../../agents/connect-claude/). For a Codex API key, add the login hook from that guide to the generated script before dispatching.

@@ -38,3 +38,5 @@ Utilisez `run.ts` si votre package déclare `"type": "module"` : l’initialisat
 Vérifiez l’état et l’historique Git, les commits retournés et les logs dans `.outpost/logs`. Un dispatch collecte les changements de l’agent ; la politique de branche détermine si les commits restent séparés ou sont intégrés à la branche de l’hôte. Il ne pousse pas votre dépôt vers un serveur distant.
 
 Pour contrôler le cycle de vie, consultez [le dispatch ponctuel](../../agents/dispatch/) et [les politiques de branche](../../sandboxes/branches/). Pour automatiser plusieurs étapes, poursuivez avec [les workflows](../../workflows/graph/).
+
+Pour un accès par compte, suivez [Connecter Codex](../../agents/connect-codex/) ou [Connecter Claude](../../agents/connect-claude/). Avec une clé API Codex, ajoutez le hook de connexion du guide au script généré avant le dispatch.

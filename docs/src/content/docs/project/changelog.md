@@ -7,6 +7,15 @@ sidebar:
 
 The release notes below are synchronized from the root `CHANGELOG.md`, the single source of release history.
 
+## 1.1.4
+
+- Wait for noninteractive container commands and preserve their real exit status; reuse the runtime terminal for interactive commands.
+- Stream binary archives through the running Docker/Podman container so uploads and conversation capture/restore see the same tmpfs home as agents.
+- Preserve ordinary file modes and links, reject unsafe download destinations, and support GNU tar and bsdtar hosts.
+- Create a private writable agent home in generated images, including when used without the sandbox tmpfs mount.
+- Add real container, pseudo-terminal, cancellation, binary integrity and native conversation regression checks.
+- Add English/French account-connection guides for Claude Code and Codex, plus seven progressive cookbooks.
+
 ## 1.1.3
 
 - Replace the flat documentation with an Astro Starlight site in English and French, with English as the default language.

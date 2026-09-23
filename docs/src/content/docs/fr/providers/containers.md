@@ -51,3 +51,11 @@ Les containers utilisent un home privé éphémère, des capacités réduites, n
 Les contrôles préalables signalent les écarts d’UID de l’image lorsqu’aucun utilisateur explicite n’est fourni. Podman gère les espaces utilisateurs rootless ; sa machine doit être démarrée sur macOS. Linux utilise les labels SELinux, Windows/macOS la syntaxe bind-mount. Les chemins Git des worktrees Windows sont adaptés aux containers Linux.
 
 En cas de problème de droits, vérifiez ensemble UID/GID de l’image, propriétaire hôte, espace utilisateur Podman et SELinux. N’exposez pas des répertoires sans rapport pour contourner l’erreur.
+
+## Transfert de fichiers
+
+Les transferts diffusent des archives tar binaires dans le conteneur actif, y compris pour le home tmpfs. L’hôte nécessite tar (GNU tar ou bsdtar) ; une image personnalisée nécessite tar, cp et util-linux setsid avec --wait. Les images générées incluent ces outils. Les archives ne sont ni converties en texte ni tronquées par la rétention des sorties. Le stockage temporaire est supprimé après transfert.
+
+Un dossier copié vers un dossier existant est placé sous son nom source. Une source terminée par /. copie son contenu. Fichiers, permissions ordinaires et liens symboliques sont conservés ; le propriétaire devient l’utilisateur destinataire. Un téléchargement refuse les liens symboliques existants à destination ou dans ses parents. Les périphériques spéciaux et FIFO ne sont pas pris en charge. Authentification et conversations restent dans le même home éphémère.
+
+Après mise à jour, reconstruisez les images pour inclure le home inscriptible : ajoutez mkdir/chown/chmod pour /home/agent avant USER dans les anciens Dockerfiles. La génération du scaffold n’écrase pas les fichiers existants.

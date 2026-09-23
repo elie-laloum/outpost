@@ -1,5 +1,14 @@
 # Historique des versions
 
+## 1.1.4
+
+- Attente de la fin des commandes non interactives et transmission du vrai code de sortie ; réutilisation du terminal du runtime en mode interactif.
+- Transfert d’archives binaires dans le conteneur Docker/Podman actif : uploads et capture/restauration des conversations voient le même home tmpfs que les agents.
+- Conservation des permissions ordinaires et liens, rejet des destinations dangereuses et compatibilité GNU tar/bsdtar.
+- Création d’un home privé inscriptible dans les images, y compris sans montage tmpfs.
+- Tests de régression sur les conteneurs réels, pseudo-terminaux, annulations, fichiers binaires et conversations natives.
+- Guides de connexion Claude Code/Codex et sept cookbooks progressifs en anglais et français.
+
 ## 1.1.3
 
 - Documentation Astro Starlight en anglais et français, avec anglais par défaut, guides ciblés et référence de tous les exports publics.

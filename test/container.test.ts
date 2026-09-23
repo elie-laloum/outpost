@@ -1,12 +1,15 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFile, mkdir, writeFile } from "node:fs/promises";
+import { readFile, mkdir, writeFile, readlink, lstat } from "node:fs/promises";
 import { join } from "node:path";
 import { createSandbox, codex, claude } from "../src/index.ts";
 import { docker } from "../src/providers/docker.ts";
 import { podman } from "../src/providers/podman.ts";
 import { repository } from "./helpers.ts";
 import type { AgentEvent } from "../src/index.ts";
+import { conversations } from "../src/index.ts";
+import { executeProcess } from "../src/infrastructure/process.ts";
+import { imageRecipe } from "../src/cli/scaffold.constants.ts";
 
 test(
   "real container supports Git, native CLIs, transfers, cancellation and warm reuse",
@@ -139,11 +142,20 @@ test(
     });
     try {
       await lease.upload(input, "/home/agent/transfer inputs");
+      const visible = await lease.invoke({
+        executable: "node",
+        arguments: [
+          "-e",
+          "const f=require('node:fs');const p='/home/agent/transfer inputs/nested folder/binary file.bin';process.stdout.write(f.readFileSync(p).toString('hex'));f.appendFileSync(p,Buffer.from([42]));",
+        ],
+      });
+      assert.equal(visible.status, 0, visible.stderr);
+      assert.equal(visible.stdout, bytes.toString("hex"));
       const destination = join(root, "downloaded tree");
       await lease.download("/home/agent/transfer inputs", destination);
       assert.deepEqual(
         await readFile(join(destination, "nested folder", "binary file.bin")),
-        bytes,
+        Buffer.concat([bytes, Buffer.from([42])]),
       );
       await lease.upload(
         join(input, "nested folder", "binary file.bin"),
@@ -165,5 +177,238 @@ test(
     } finally {
       await lease.release();
     }
+  },
+);
+
+test(
+  "container commands wait, propagate failures and cancel descendants without closing the sandbox",
+  { skip: !process.env.OUTPOST_CONTAINER_ENGINE },
+  async (t) => {
+    const root = await repository(t);
+    const factory =
+      process.env.OUTPOST_CONTAINER_ENGINE === "podman" ? podman : docker;
+    const lease = await factory({
+      image: "outpost-ci:latest",
+      networks: "none",
+    }).acquire({
+      repository: root,
+      directory: root,
+      gitDirectories: [],
+      variables: {},
+    });
+    try {
+      const delayed = await lease.invoke({
+        executable: "sh",
+        arguments: ["-c", "sleep 1; echo done; exit 7"],
+      });
+      assert.equal(delayed.stdout, "done\n");
+      assert.equal(delayed.status, 7);
+      const closed = await lease.invoke({
+        executable: "sh",
+        arguments: [
+          "-c",
+          "exec >/dev/null 2>&1; sleep 1; echo done > /tmp/closed-streams; exit 7",
+        ],
+      });
+      assert.equal(closed.status, 7);
+      assert.equal(
+        (
+          await lease.invoke({
+            executable: "cat",
+            arguments: ["/tmp/closed-streams"],
+          })
+        ).stdout,
+        "done\n",
+      );
+      for (const interactive of [false, true]) {
+        const result = await lease.invoke({
+          executable: "sh",
+          arguments: ["-c", "printf input:; read value; echo $value; exit 9"],
+          interactive,
+          stdin: "hello\n",
+          terminal: {},
+        });
+        assert.equal(result.status, 9);
+        assert.match(result.stdout, /input:hello/);
+      }
+      const stop = new AbortController();
+      const timer = setTimeout(
+        () => stop.abort(new Error("cancel fixture")),
+        500,
+      );
+      try {
+        await assert.rejects(
+          lease.invoke({
+            executable: "sh",
+            arguments: [
+              "-c",
+              "(sleep 2; echo leaked > /tmp/descendant) & wait",
+            ],
+            signal: stop.signal,
+          }),
+          /cancel fixture/,
+        );
+      } finally {
+        clearTimeout(timer);
+      }
+      assert.equal(
+        (
+          await lease.invoke({
+            executable: "sh",
+            arguments: ["-c", "sleep 2; test ! -e /tmp/descendant"],
+          })
+        ).status,
+        0,
+      );
+      const missing = await lease.invoke({
+        executable: "outpost-command-that-does-not-exist",
+      });
+      assert.notEqual(missing.status, 0);
+    } finally {
+      await lease.release();
+    }
+  },
+);
+
+test(
+  "native home files, permissions, links and conversation capture survive binary transfers",
+  { skip: !process.env.OUTPOST_CONTAINER_ENGINE },
+  async (t) => {
+    const root = await repository(t);
+    const factory =
+      process.env.OUTPOST_CONTAINER_ENGINE === "podman" ? podman : docker;
+    const lease = await factory({
+      image: "outpost-ci:latest",
+      networks: "none",
+    }).acquire({
+      repository: root,
+      directory: root,
+      gitDirectories: [],
+      variables: {},
+    });
+    try {
+      const created = await lease.invoke({
+        executable: "sh",
+        arguments: [
+          "-c",
+          "mkdir -p /home/agent/tree; head -c 2097152 /dev/urandom > /home/agent/tree/data; printf '#!/bin/sh\\necho hello\\n' > /home/agent/tree/run; chmod 750 /home/agent/tree/run; ln -s data /home/agent/tree/link",
+        ],
+      });
+      assert.equal(created.status, 0, created.stderr);
+      const destination = join(root, "tree copy");
+      await lease.download("/home/agent/tree", destination);
+      assert.equal((await readFile(join(destination, "data"))).length, 2097152);
+      assert.equal(await readlink(join(destination, "link")), "data");
+      assert.equal((await lstat(join(destination, "run"))).mode & 0o777, 0o750);
+      await lease.upload(destination, "/home/agent/reuploaded");
+      const copied = await lease.invoke({
+        executable: "sh",
+        arguments: [
+          "-c",
+          "cmp /home/agent/tree/data /home/agent/reuploaded/data && test $(stat -c %a /home/agent/reuploaded/run) = 750 && test -L /home/agent/reuploaded/link || { ls -lR /home/agent/reuploaded; exit 1; }",
+        ],
+      });
+      assert.equal(copied.status, 0, JSON.stringify(copied));
+      await mkdir(join(root, "existing"));
+      await lease.download("/home/agent/tree", join(root, "existing"));
+      assert.equal(
+        (await readFile(join(root, "existing", "tree", "data"))).length,
+        2097152,
+      );
+      await lease.download("/home/agent/tree/.", join(root, "contents"));
+      assert.equal(
+        (await readFile(join(root, "contents", "data"))).length,
+        2097152,
+      );
+      await assert.rejects(
+        lease.download("/home/agent/missing", join(root, "missing")),
+      );
+      for (const format of ["claude", "codex"] as const) {
+        const id = "12345678-1234-1234-1234-123456789abc";
+        const remote =
+          format === "claude"
+            ? `/home/agent/.claude/projects/-workspace/${id}.jsonl`
+            : `/home/agent/.codex/sessions/rollout-${id}.jsonl`;
+        const payload =
+          JSON.stringify({ cwd: "/workspace", message: "fixture" }) + "\n";
+        assert.equal(
+          (
+            await lease.invoke({
+              executable: "node",
+              arguments: [
+                "-e",
+                "const f=require('node:fs'),p=require('node:path');f.mkdirSync(p.dirname(process.argv[1]),{recursive:true});f.writeFileSync(process.argv[1],process.argv[2]);",
+                remote,
+                payload,
+              ],
+            })
+          ).status,
+          0,
+        );
+        const captured = await conversations.capture(
+          format,
+          id,
+          root,
+          lease,
+          join(root, "staging"),
+          { home: join(root, "auth-home") },
+        );
+        assert.match(await readFile(captured.file, "utf8"), /fixture/);
+        await lease.invoke({ executable: "rm", arguments: [remote] });
+        await conversations.restore(captured, lease, join(root, "staging"));
+        const restored = conversations.destination(
+          format,
+          id,
+          lease,
+          captured.file,
+        );
+        assert.match(
+          (await lease.invoke({ executable: "cat", arguments: [restored] }))
+            .stdout,
+          /fixture/,
+        );
+        assert.equal(
+          (
+            await lease.invoke({
+              executable: "sh",
+              arguments: ["-c", `test -w '${restored}'`],
+            })
+          ).status,
+          0,
+        );
+      }
+      const cancelled = AbortSignal.abort(new Error("skip transfer"));
+      await assert.rejects(
+        lease.upload(join(destination, "data"), "/home/agent/aborted", {
+          signal: cancelled,
+        }),
+        /skip transfer/,
+      );
+    } finally {
+      await lease.release();
+    }
+  },
+);
+
+test(
+  "generated image has a writable private home without a tmpfs mount",
+  { skip: !process.env.OUTPOST_CONTAINER_ENGINE },
+  async () => {
+    assert.match(imageRecipe, /mkdir -p \/home\/agent/);
+    const result = await executeProcess({
+      executable: process.env.OUTPOST_CONTAINER_ENGINE!,
+      arguments: [
+        "run",
+        "--rm",
+        "--network",
+        "none",
+        "--entrypoint",
+        "sh",
+        "outpost-ci:latest",
+        "-c",
+        'test -d "$HOME" && test -w "$HOME" && test "$(stat -c %a "$HOME")" = 700 && touch "$HOME/test-home"',
+      ],
+    });
+    assert.equal(result.status, 0, result.stderr);
   },
 );

@@ -52,9 +52,9 @@ export function containerCommand(
         executable: engine,
         arguments: [
           ...flags,
-          "setsid",
-          ...(command.interactive ? ["--wait"] : []),
-          ...(command.interactive && process.stdin.isTTY ? ["--ctty"] : []),
+          ...(command.interactive && process.stdin.isTTY
+            ? []
+            : ["setsid", "--wait"]),
           "sh",
           "-c",
           wrapper,

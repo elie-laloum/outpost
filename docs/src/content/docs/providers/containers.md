@@ -51,3 +51,11 @@ Containers use a private ephemeral home, dropped capabilities, no-new-privileges
 Preflight checks report image UID mismatches when no user override is supplied. Podman supports rootless user namespaces; on macOS its machine must be running. Linux uses SELinux labels, while Windows/macOS use bind-mount syntax. Git paths are remapped for Windows worktree metadata inside Linux containers.
 
 If permissions fail, verify the image UID/GID, host ownership, Podman namespace and SELinux settings together. Do not fix a mount error by exposing unrelated host directories.
+
+## File transfers
+
+Transfers stream binary tar archives through the running container, including files in its tmpfs home. The host needs tar (GNU tar or bsdtar); custom images need tar, cp and util-linux setsid with --wait support. Generated images include these tools. No archive is converted to text or limited by the command output retention setting. Temporary staging is removed after transfer.
+
+A directory copied to an existing directory is placed under its source basename. A source ending in /. copies its contents. Files, ordinary permissions and symbolic links are preserved; ownership becomes the receiving user. Downloads refuse existing destination symlinks and symlink parents. Special devices and FIFOs are not supported. Authentication and transcript paths stay in the same ephemeral home.
+
+After upgrading, rebuild generated images to include the writable home: for existing Dockerfiles add mkdir/chown/chmod for /home/agent before USER. Regenerating a scaffold does not overwrite your existing files.

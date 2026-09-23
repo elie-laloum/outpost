@@ -28,3 +28,5 @@ Guides explain one operation at a time. The API reference lists every public exp
 Use the search box for an API name, CLI flag or error. The language selector switches between matching English and French pages. The published site follows the latest release; unreleased source changes are validated by CI before the next release.
 
 [Release history](project/changelog/) · [Roadmap](project/roadmap/) · [Source on GitLab](https://gitlab.elielaloum.com/elielaloum/outpost)
+
+Explore the [cookbooks](./cookbooks/) for complete recipes, from a focused fix to a validated delivery pipeline.
