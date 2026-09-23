@@ -1,3 +1,4 @@
+import { gitDefaults } from "./git.constants.ts";
 import { createHash, randomUUID } from "node:crypto";
 import { mkdir, rename, stat } from "node:fs/promises";
 import { basename, dirname, join, resolve } from "node:path";
@@ -15,13 +16,14 @@ export async function managedWorktree(
   context: ManagedWorktreeOptions,
 ): Promise<ManagedWorktree> {
   const { repository, policy, branch, options } = context;
-  let workdir = repository,
-    created = false;
-  const hash = createHash("sha256").update(branch).digest("hex").slice(0, 12);
+  const hash = createHash("sha256")
+    .update(branch)
+    .digest("hex")
+    .slice(0, gitDefaults.hashLength);
   const label = options.label
     ?.toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
-    .slice(0, 48);
+    .slice(0, gitDefaults.labelLength);
   const managed = join(repository, ".outpost", "workspaces");
   const expected = join(managed, `${label ? label + "-" : ""}${hash}`);
   await git(repository, ["worktree", "prune", "--expire", "now"]);
@@ -40,7 +42,9 @@ export async function managedWorktree(
         )),
   );
   if (existing) {
-    workdir = existing.find((field) => field.startsWith("worktree "))!.slice(9);
+    let workdir = existing
+      .find((field) => field.startsWith("worktree "))!
+      .slice(9);
     if (!inside(managed, workdir) || resolve(workdir) === resolve(managed))
       throw new OutpostError(
         "conflict",
@@ -51,61 +55,58 @@ export async function managedWorktree(
     await refreshWorktree(repository, workdir, branch, options.limits?.gitMs);
     return { workdir, created: false };
   }
-  {
-    if (
-      await stat(expected).catch((error) => {
-        if ((error as NodeJS.ErrnoException).code === "ENOENT")
-          return undefined;
-        throw error;
-      })
-    ) {
-      const managed = join(repository, ".outpost", "workspaces");
-      if (!inside(managed, expected) || resolve(expected) === resolve(managed))
-        throw new OutpostError(
-          "workspace",
-          "Refusing to relocate an unmanaged directory",
-        );
-      const recovery = join(
-        repository,
-        ".outpost",
-        "recovery",
-        `orphan-${hash}-${randomUUID()}`,
+
+  if (
+    await stat(expected).catch((error) => {
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") return undefined;
+      throw error;
+    })
+  ) {
+    const managed = join(repository, ".outpost", "workspaces");
+    if (!inside(managed, expected) || resolve(expected) === resolve(managed))
+      throw new OutpostError(
+        "workspace",
+        "Refusing to relocate an unmanaged directory",
       );
-      await mkdir(dirname(recovery), { recursive: true });
-      await rename(expected, recovery);
-    }
-    await mkdir(join(repository, ".outpost", "workspaces"), {
-      recursive: true,
-    });
-    const branchExists = await executeProcess({
-      executable: "git",
-      arguments: ["show-ref", "--verify", "--quiet", `refs/heads/${branch}`],
-      directory: repository,
-    });
-    const from = policy.from ?? "HEAD";
-    const oid = (
-      await git(repository, [
-        "rev-parse",
-        "--verify",
-        "--end-of-options",
-        `${from}^{commit}`,
-      ])
-    ).trim();
-    await git(
+    const recovery = join(
       repository,
-      [
-        "-c",
-        "branch.autoSetupMerge=false",
-        "worktree",
-        "add",
-        ...(branchExists.status === 0 ? [] : ["-b", branch]),
-        expected,
-        branchExists.status === 0 ? branch : oid,
-      ],
-      options.limits?.gitMs,
+      ".outpost",
+      "recovery",
+      `orphan-${hash}-${randomUUID()}`,
     );
-    workdir = expected;
-    created = true;
+    await mkdir(dirname(recovery), { recursive: true });
+    await rename(expected, recovery);
   }
-  return { workdir, created };
+  await mkdir(join(repository, ".outpost", "workspaces"), {
+    recursive: true,
+  });
+  const branchExists = await executeProcess({
+    executable: "git",
+    arguments: ["show-ref", "--verify", "--quiet", `refs/heads/${branch}`],
+    directory: repository,
+  });
+  const from = policy.from ?? "HEAD";
+  const oid = (
+    await git(repository, [
+      "rev-parse",
+      "--verify",
+      "--end-of-options",
+      `${from}^{commit}`,
+    ])
+  ).trim();
+  await git(
+    repository,
+    [
+      "-c",
+      "branch.autoSetupMerge=false",
+      "worktree",
+      "add",
+      ...(branchExists.status === 0 ? [] : ["-b", branch]),
+      expected,
+      branchExists.status === 0 ? branch : oid,
+    ],
+    options.limits?.gitMs,
+  );
+
+  return { workdir: expected, created: true };
 }
