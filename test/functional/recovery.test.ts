@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, realpath, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { executeProcess } from "../../src/infrastructure/process.ts";
@@ -20,7 +20,7 @@ import { shell } from "../../src/infrastructure/process.ts";
 import { repository, scripted, emit } from "../helpers.ts";
 
 test("multi-pass dispatch saves every native conversation before releasing its workspace", async (t) => {
-  const root = await repository(t),
+  const root = await realpath(await repository(t)),
     home = join(root, ".outpost", "recovery", "history");
   await mkdir(home, { recursive: true });
   const host = local();

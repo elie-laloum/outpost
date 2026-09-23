@@ -61,7 +61,7 @@ export interface Workspace extends WorkspaceRecord {
       DispatchOptions<T> & { readonly agent: AgentAdapter },
   ): Promise<DispatchResult<T>>;
   sandbox(
-    options: Omit<SandboxOptions, keyof WorkspaceOptions | "workspace">,
+    options?: Omit<SandboxOptions, keyof WorkspaceOptions | "workspace">,
   ): Promise<Sandbox>;
   attach(
     options: Omit<SandboxOptions, keyof WorkspaceOptions | "workspace"> &
@@ -87,7 +87,7 @@ export async function openWorkspace(
     dispatch(options) {
       return dispatch({ ...options, workspace: result });
     },
-    sandbox(options) {
+    sandbox(options = {}) {
       return createSandbox({ ...options, workspace: result });
     },
     attach(options) {
@@ -160,7 +160,7 @@ export interface Sandbox {
     id: string,
     options: DispatchOptions<T>,
   ): Promise<DispatchResult<T>>;
-  attach(options?: AttachOptions): Promise<CommandResult>;
+  attach(options?: AttachOptions): Promise<AttachResult>;
   command(command: Command): Promise<CommandResult>;
   close(options?: { readonly preserve?: boolean }): Promise<Disposal>;
   [Symbol.asyncDispose](): Promise<void>;
@@ -220,7 +220,9 @@ async function prepareAdapter(
   };
 }
 
-export async function createSandbox(options: SandboxOptions): Promise<Sandbox> {
+export async function createSandbox(
+  options: SandboxOptions = {},
+): Promise<Sandbox> {
   const provider = options.provider ?? docker();
   invariant(
     !options.workspace ||
@@ -552,8 +554,12 @@ export async function createSandbox(options: SandboxOptions): Promise<Sandbox> {
             ? { continuation: settings.continuation }
             : {}),
         });
+        const baseline = (
+          await git(workspace.directory, ["rev-parse", "HEAD"])
+        ).trim();
+        let output: CommandResult;
         try {
-          return await executionLease.invoke({
+          output = await executionLease.invoke({
             ...command,
             deadlineMs: 86_400_000,
             signal: settings.signal
@@ -563,6 +569,16 @@ export async function createSandbox(options: SandboxOptions): Promise<Sandbox> {
         } finally {
           await sync?.pull();
         }
+        return {
+          ...output,
+          branch: workspace.branch,
+          directory: workspace.directory,
+          commits: await commits(
+            workspace.directory,
+            baseline,
+            options.limits?.collectMs,
+          ),
+        };
       });
     },
     command(command) {

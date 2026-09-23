@@ -123,7 +123,7 @@ const result = await sandbox.command({
 
 Arguments are passed directly, without implicit shell expansion. For shell syntax, explicitly invoke `sh -c` (inside Linux sandboxes) or the host shell. Default directory is the sandbox workspace. `stdin` supplies a string. `interactive` inherits terminal input/output. `retain` bounds the captured tail of each stream; observers receive all output. `CommandResult` contains `status`, `stdout`, `stderr`.
 
-`attach({ brief?, continuation?, signal? })` uses the adapter's terminal mode. Docker, Podman and host support it. Remote cloud adapters reject it explicitly. The top-level result additionally returns commits, branch and disposal information.
+`attach({ agent?, brief?, continuation?, signal? })` uses the adapter's terminal mode. Docker, Podman and host support it. Remote cloud adapters reject it explicitly. Both warm and one-shot results include commits, branch and workspace directory. The top-level result additionally returns disposal information.
 
 ## Errors and recovery
 
