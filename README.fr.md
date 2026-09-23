@@ -85,6 +85,8 @@ await sandbox.attach();
 
 Une commande retourne son statut, même non nul. Une exécution d’agent en échec lève une erreur. L’annulation par `AbortSignal`, le délai maximal et la surveillance d’inactivité arrêtent l’opération courante sans détruire la sandbox réutilisable. Une sandbox accepte une opération active à la fois. Le parallélisme utilise plusieurs sandbox.
 
+L’agent par défaut est optionnel pour une sandbox chaude. Fournissez `agent` à chaque appel de `sandbox.dispatch` ou `sandbox.attach` pour changer d’agent ou de modèle sans recréer l’environnement. Chaque exécution reçoit uniquement les variables de l’adaptateur choisi.
+
 `await using` ferme automatiquement le handle. `close()` est également disponible et idempotent. `attach()` ouvre le terminal natif avec Docker, Podman ou le fournisseur local. Les fournisseurs cloud rejettent explicitement cette opération.
 
 ## Espace de travail indépendant

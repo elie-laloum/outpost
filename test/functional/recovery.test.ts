@@ -2,6 +2,8 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import { pathToFileURL } from "node:url";
+import { executeProcess } from "../../src/infrastructure/process.ts";
 import {
   createSandbox,
   dispatch,
@@ -16,6 +18,97 @@ import {
 import { local } from "../../src/providers/local.ts";
 import { shell } from "../../src/infrastructure/process.ts";
 import { repository, scripted, emit } from "../helpers.ts";
+
+test("multi-pass dispatch saves every native conversation before releasing its workspace", async (t) => {
+  const root = await repository(t),
+    home = join(root, ".outpost", "recovery", "history");
+  await mkdir(home, { recursive: true });
+  const host = local();
+  const provider = {
+    ...host,
+    async acquire(context: Parameters<typeof host.acquire>[0]) {
+      return { ...(await host.acquire(context)), home };
+    },
+  };
+  let turn = 0;
+  const agent = {
+    ...scripted(() => {
+      const id = `turn-${++turn}`;
+      return `import fs from 'node:fs';import path from 'node:path';const folder=path.join(${JSON.stringify(home)},'.claude','projects',process.cwd().replace(/[^a-zA-Z0-9]/g,'-'));fs.mkdirSync(folder,{recursive:true});fs.writeFileSync(path.join(folder,${JSON.stringify(id + ".jsonl")}),JSON.stringify({cwd:process.cwd()})+'\\n');console.log(JSON.stringify({kind:'conversation',id:${JSON.stringify(id)}}));${emit("continue")}`;
+    }),
+    conversations: "claude" as const,
+  };
+  const result = await dispatch({
+    repository: root,
+    provider,
+    agent,
+    conversationHome: home,
+    branch: { mode: "named", name: "history" },
+    brief: { text: "iterate" },
+    passes: 3,
+    logging: false,
+  });
+  assert.equal(result.turns.length, 3);
+  for (const id of ["turn-1", "turn-2", "turn-3"]) {
+    const file = join(
+      home,
+      ".claude",
+      "projects",
+      root.replace(/[^a-zA-Z0-9]/g, "-"),
+      id + ".jsonl",
+    );
+    assert.equal(JSON.parse((await readFile(file, "utf8")).trim()).cwd, root);
+  }
+});
+
+test("cold result resume and fork round-trip native transcripts while preserving the parent", async (t) => {
+  const root = await repository(t),
+    home = join(root, ".outpost", "recovery", "native-home");
+  await mkdir(home, { recursive: true });
+  const host = local();
+  const provider = {
+    ...host,
+    async acquire(context: Parameters<typeof host.acquire>[0]) {
+      return { ...(await host.acquire(context)), home };
+    },
+  };
+  const agent = {
+    ...scripted((input) => {
+      const id = input.continuation?.fork ? "child-id" : "parent-id";
+      return `import fs from 'node:fs'; import path from 'node:path'; const directory=path.join(${JSON.stringify(home)},'.claude','projects',process.cwd().replace(/[^a-zA-Z0-9]/g,'-')); fs.mkdirSync(directory,{recursive:true}); fs.writeFileSync(path.join(directory,${JSON.stringify(id + ".jsonl")}),JSON.stringify({cwd:process.cwd(),text:${JSON.stringify(input.text)}})+'\\n');console.log(JSON.stringify({kind:'conversation',id:${JSON.stringify(id)}})); ${emit("answer")}`;
+    }),
+    conversations: "claude" as const,
+  };
+  const first = await dispatch({
+    repository: root,
+    provider,
+    agent,
+    conversationHome: home,
+    branch: { mode: "named", name: "native-sessions" },
+    brief: { text: "first" },
+    logging: false,
+  });
+  assert.ok(first.transcript);
+  const continued = await first.resume({ brief: { text: "continued" } });
+  assert.equal(continued.conversation, "parent-id");
+  const parent = await readFile(first.transcript, "utf8");
+  const forked = await continued.fork({ brief: { text: "alternative" } });
+  assert.equal(forked.conversation, "child-id");
+  assert.equal(await readFile(first.transcript, "utf8"), parent);
+});
+
+test("shutdown saves application state before releasing lower-level resources", async () => {
+  const module = pathToFileURL(
+    join(process.cwd(), "src", "infrastructure", "shutdown.ts"),
+  ).href;
+  const script = `import {registerCleanup} from ${JSON.stringify(module)};const order=[];const release=async()=>{order.push('release');unregister()};const unregister=registerCleanup(release);const stop=registerCleanup(async()=>{order.push('save');await release();stop()});process.emit('SIGTERM');setTimeout(()=>console.log(JSON.stringify(order)),20);`;
+  const result = await executeProcess({
+    executable: process.execPath,
+    arguments: ["--input-type=module", "-e", script],
+  });
+  assert.equal(result.status, 143);
+  assert.deepEqual(JSON.parse(result.stdout), ["save", "release"]);
+});
 
 test("idle and completion watchdogs have distinct outcomes and allow reuse", async (t) => {
   const root = await repository(t);

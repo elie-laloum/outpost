@@ -5,7 +5,9 @@ let installed = false,
 async function shutdown(signal: NodeJS.Signals): Promise<void> {
   if (closing) return;
   closing = true;
-  await Promise.allSettled([...cleaners].map((clean) => clean()));
+  for (const clean of [...cleaners].reverse()) {
+    if (cleaners.has(clean)) await clean().catch(() => undefined);
+  }
   process.exitCode = signal === "SIGINT" ? 130 : 143;
   closing = false;
 }

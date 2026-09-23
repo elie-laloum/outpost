@@ -5,6 +5,7 @@ import { writeFileSync } from "node:fs";
 import { join } from "node:path";
 import {
   createSandbox,
+  attach,
   dispatch,
   openWorkspace,
   response,
@@ -12,6 +13,47 @@ import {
 import { local } from "../../src/providers/local.ts";
 import { git } from "../../src/infrastructure/git.ts";
 import { repository, scripted, emit } from "../helpers.ts";
+
+test("terminal attachment integrates successful commits and preserves failed work", async (t) => {
+  const root = await repository(t);
+  const success = scripted((input) => {
+    assert.equal(input.interactive, true);
+    assert.equal(input.text, "terminal objective");
+    return "import fs from 'node:fs'; import {execFileSync} from 'node:child_process'; fs.writeFileSync('terminal.txt','saved');execFileSync('git',['add','terminal.txt']);execFileSync('git',['commit','-m','Terminal change']);";
+  });
+  const result = await attach({
+    repository: root,
+    provider: local(),
+    agent: success,
+    branch: { mode: "integrate" },
+    brief: { text: "terminal objective" },
+  });
+  assert.equal(result.status, 0);
+  assert.equal(result.commits[0]?.subject, "Terminal change");
+  assert.equal(await readFile(join(root, "terminal.txt"), "utf8"), "saved");
+  const failed = await attach({
+    repository: root,
+    provider: local(),
+    agent: scripted(
+      "import fs from 'node:fs';fs.writeFileSync('unfinished.txt','kept');process.exit(7)",
+    ),
+    branch: { mode: "named", name: "terminal-recovery" },
+  });
+  assert.equal(failed.status, 7);
+  assert.equal(failed.retainedDirectory, failed.directory);
+  assert.equal(
+    await readFile(join(failed.directory, "unfinished.txt"), "utf8"),
+    "kept",
+  );
+  await using box = await createSandbox({
+    repository: root,
+    provider: local(),
+  });
+  assert.equal(
+    (await box.attach({ agent: scripted("process.exit(0)") })).status,
+    0,
+  );
+});
 
 test("a warm sandbox switches agents and does not leak adapter variables between runs", async (t) => {
   const root = await repository(t);

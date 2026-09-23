@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { mkdir, stat } from "node:fs/promises";
-import { basename, dirname, posix } from "node:path";
+import { basename, dirname, isAbsolute, posix, relative } from "node:path";
 import { OutpostError, invariant } from "../domain/errors.ts";
 import type {
   Command,
@@ -107,15 +107,25 @@ export function containerProvider(
       };
       const internal: Volume[] = [{ source: context.directory, target: root }];
       if (context.gitDirectories.length) {
+        const common = context.gitDirectories.at(-1)!;
+        const offset = relative(common, context.gitDirectories[0]!);
+        const nested =
+          !isAbsolute(offset) &&
+          offset !== ".." &&
+          !offset.startsWith("..\\") &&
+          !offset.startsWith("../");
         internal.push({
-          source: context.gitDirectories[0]!,
-          target: "/outpost/git/worktree",
-        });
-        internal.push({
-          source: context.gitDirectories.at(-1)!,
+          source: common,
           target: "/outpost/git/common",
         });
-        env.GIT_DIR = "/outpost/git/worktree";
+        if (!nested)
+          internal.push({
+            source: context.gitDirectories[0]!,
+            target: "/outpost/git/worktree",
+          });
+        env.GIT_DIR = nested
+          ? posix.join("/outpost/git/common", offset.replaceAll("\\", "/"))
+          : "/outpost/git/worktree";
         env.GIT_COMMON_DIR = "/outpost/git/common";
         env.GIT_WORK_TREE = root;
       }

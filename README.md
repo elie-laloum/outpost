@@ -85,6 +85,8 @@ await sandbox.attach();
 
 Commands return nonzero statuses; agent dispatches throw on agent failure. `AbortSignal`, command deadlines and idle watchdogs stop the current operation while leaving a warm sandbox usable. A sandbox accepts one active operation at a time. Use separate sandboxes for parallel work.
 
+The default agent is optional for a warm sandbox. Pass `agent` to individual `sandbox.dispatch` or `sandbox.attach` calls to switch between Codex and Claude, or change models, without recreating the environment. Each job receives only its selected adapter's variables.
+
 ## Own the workspace separately
 
 ```ts

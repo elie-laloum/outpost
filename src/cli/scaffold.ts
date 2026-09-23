@@ -1,10 +1,4 @@
-import {
-  access,
-  appendFile,
-  mkdir,
-  readFile,
-  writeFile,
-} from "node:fs/promises";
+import { access, mkdir, readFile, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { OutpostError, invariant } from "../domain/errors.ts";
 import { imageName } from "../providers/container.ts";
@@ -29,7 +23,7 @@ export interface InitOptions {
 export const imageRecipe = `FROM node:24-bookworm-slim
 ARG AGENT_UID=1000
 ARG AGENT_GID=1000
-RUN apt-get update && apt-get install -y --no-install-recommends git openssh-client ca-certificates curl procps util-linux python3 && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends git gh openssh-client ca-certificates curl procps util-linux python3 && rm -rf /var/lib/apt/lists/*
 RUN npm install -g --allow-scripts=@anthropic-ai/claude-code @openai/codex@${agentVersions.codex} @anthropic-ai/claude-code@${agentVersions.claude}
 RUN groupmod -o -g "$AGENT_GID" node && usermod -o -u "$AGENT_UID" -g "$AGENT_GID" node
 ENV HOME=/home/agent
@@ -41,14 +35,14 @@ function starter(options: InitOptions, extension: string): string {
   const agent = options.agent ?? "codex",
     provider = options.provider ?? "docker",
     template = options.template ?? "blank";
-  const importLine = `import { dispatch, createSandbox, task, workflow, response, ${agent} } from "@elie-laloum/outpost";\nimport { ${provider} } from "@elie-laloum/outpost/providers/${provider}";\n`;
-  const config = `const runtime = { agent: ${agent}(${options.model ? `{ model: ${JSON.stringify(options.model)} }` : ""}), provider: ${provider}(${options.image && (provider === "docker" || provider === "podman") ? `{ image: ${JSON.stringify(options.image)} }` : ""}) };\n`;
-  const brief = `{ file: ".outpost/brief.md", values: { OBJECTIVE: process.argv.slice(2).join(" ") || "Inspect this repository and implement one useful improvement." } }`;
+  const importLine = `import { dispatch, createSandbox, task, workflow, response, ${agent} } from "@elie-laloum/outpost";\nimport { ${provider} } from "@elie-laloum/outpost/providers/${provider}";\n${options.tracker ? `import { tickets } from "./tickets.${extension}";\n` : ""}`;
+  const config = `const runtime = { agent: ${agent}(${options.model ? `{ model: ${JSON.stringify(options.model)} }` : ""}), provider: ${provider}(${options.image && (provider === "docker" || provider === "podman") ? `{ image: ${JSON.stringify(options.image)} }` : ""}) };\nconst objective = process.argv.slice(2).join(" ") || ${options.tracker ? "JSON.stringify(await tickets())" : '"Inspect this repository and implement one useful improvement."'};\n`;
+  const brief = `{ file: ".outpost/brief.md", values: { OBJECTIVE: objective } }`;
   if (template === "blank" || template === "iterate")
     return `${importLine}\n${config}\nconst result = await dispatch({ ...runtime, branch: { mode: "integrate" }, brief: ${brief}, passes: ${template === "iterate" ? 10 : 1} });\nconsole.log({ branch: result.branch, commits: result.commits, conversation: result.conversation });\n`;
   if (template === "review")
     return `${importLine}\n${config}\nawait using sandbox = await createSandbox({ ...runtime, branch: { mode: "integrate" } });\nconst implement = task({ key: "implement", perform: ({ signal }) => sandbox.dispatch({ brief: ${brief}, signal }) });\nconst review = task({ key: "review", after: [implement], perform: ({ signal }) => sandbox.dispatch({ brief: { text: "Review the changes, fix concrete defects, run tests and commit the result." }, signal }) });\n(await workflow("implementation-review", [implement, review]).start()).unwrap();\nawait sandbox.workspace.integrate?.();\n`;
-  return `${importLine}\n${config}\nconst approaches = ["correctness", "maintainability", "testability"].map((perspective, index) => task({\n  key: perspective,\n  perform: ({ signal }) => dispatch({ ...runtime, branch: { mode: "named", name: \`outpost/plan-\${index}-\${Date.now()}\` }, brief: { text: \`Analyze this repository from the \${perspective} perspective. Do not change files. Return your proposal inside <proposal> tags.\` }, response: response.text({ tag: "proposal" }), signal }),\n}));\nconst implement = task({ key: "implement", after: approaches, perform: context => dispatch({ ...runtime, branch: { mode: "integrate" }, brief: { text: "Implement a coherent improvement from these proposals, test and commit it:\\n" + approaches.map(item => context.value(item).value).join("\\n") }, signal: context.signal }) });\n${template === "plan-review" ? 'const review = task({ key: "review", after: [implement], perform: context => dispatch({ ...runtime, branch: { mode: "integrate" }, brief: { text: "Review the latest changes, fix concrete defects, test and commit." }, signal: context.signal }) });\n' : ""}(await workflow("parallel-planning", [...approaches, implement${template === "plan-review" ? ", review" : ""}]).start({ concurrency: 3 })).unwrap();\n`;
+  return `${importLine}\n${config}\nconst approaches = ["correctness", "maintainability", "testability"].map((perspective, index) => task({\n  key: perspective,\n  perform: ({ signal }) => dispatch({ ...runtime, branch: { mode: "named", name: \`outpost/plan-\${index}-\${Date.now()}\` }, brief: { text: \`Objective: \${objective}. Analyze this repository from the \${perspective} perspective. Do not change files. Return your proposal inside <proposal> tags.\` }, response: response.text({ tag: "proposal" }), signal }),\n}));\nconst implement = task({ key: "implement", after: approaches, perform: context => dispatch({ ...runtime, branch: { mode: "integrate" }, brief: { text: "Implement a coherent improvement from these proposals, test and commit it:\\n" + approaches.map(item => context.value(item).value).join("\\n") }, signal: context.signal }) });\n${template === "plan-review" ? 'const review = task({ key: "review", after: [implement], perform: context => dispatch({ ...runtime, branch: { mode: "integrate" }, brief: { text: "Review the latest changes, fix concrete defects, test and commit." }, signal: context.signal }) });\n' : ""}(await workflow("parallel-planning", [...approaches, implement${template === "plan-review" ? ", review" : ""}]).start({ concurrency: 3 })).unwrap();\n`;
 }
 
 function tracker(kind: NonNullable<InitOptions["tracker"]>): string {
@@ -125,6 +119,9 @@ export async function initialize(
   if (provider === "docker" || provider === "podman")
     files[provider === "docker" ? "Dockerfile" : "Containerfile"] = imageRecipe;
   if (options.tracker) files[`tickets.${extension}`] = tracker(options.tracker);
+  if (options.tracker === "custom")
+    files["TRACKER.md"] =
+      `# Custom issue tracker\n\nSet OUTPOST_TRACKER_URL in the host environment before running the starter. The endpoint must return an array of { id, title, body } objects. The generated tickets.${extension} is yours to adapt: add authentication, pagination and filtering for your tracker there. Never commit credentials.\n\nThe starter uses the returned tickets as its objective when no command-line objective is supplied. Issue updates and state transitions should be explicit workflow tasks.\n`;
   for (const name of Object.keys(files))
     if (
       await access(join(folder, name))

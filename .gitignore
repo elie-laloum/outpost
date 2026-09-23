@@ -7,5 +7,6 @@ coverage/
 !.env.example
 .outpost/.env
 .outpost/workspaces/
+.outpost/locks/
 .outpost/logs/
 .outpost/recovery/

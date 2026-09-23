@@ -129,7 +129,12 @@ export async function seedRemote(
           .split("\0")
           .filter(Boolean);
         for (const file of incoming) {
-          if (/^\.outpost\/(locks|recovery|workspaces|logs)(\/|$)/i.test(file)) throw new OutpostError("workspace", "Remote file overlaps Outpost runtime state", { file });
+          if (/^\.outpost\/(locks|recovery|workspaces|logs)(\/|$)/i.test(file))
+            throw new OutpostError(
+              "workspace",
+              "Remote file overlaps Outpost runtime state",
+              { file },
+            );
           await safeDestination(workspace.directory, file);
           await lease.download(
             posix.join(lease.root, file),

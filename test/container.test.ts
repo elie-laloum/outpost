@@ -6,6 +6,7 @@ import { createSandbox, codex, claude } from "../src/index.ts";
 import { docker } from "../src/providers/docker.ts";
 import { podman } from "../src/providers/podman.ts";
 import { repository } from "./helpers.ts";
+import type { AgentEvent } from "../src/index.ts";
 
 test(
   "real container supports Git, native CLIs, transfers, cancellation and warm reuse",
@@ -71,7 +72,7 @@ test(
         executable: "sh",
         arguments: [
           "-c",
-          "sleep 3; test ! -e cancellation-leak.txt; test ! -S /var/run/docker.sock",
+          "sleep 3; test ! -e cancellation-leak.txt && test ! -S /var/run/docker.sock",
         ],
       });
       assert.equal(verify.status, 0);
@@ -81,6 +82,21 @@ test(
         variables: { OUTPOST_FIXTURE: "injected" },
       });
       assert.equal(env.stdout.trim(), "injected");
+      const output = await box.dispatch({
+        agent: {
+          name: "protocol-fixture",
+          request: () => ({
+            executable: "node",
+            arguments: [
+              "-e",
+              "console.log(JSON.stringify({kind:'text',text:'<outpost>done</outpost>'}))",
+            ],
+          }),
+          events: (line) => [JSON.parse(line) as AgentEvent],
+        },
+        brief: { text: "Verify dispatch in a real container" },
+      });
+      assert.equal(output.completed, true);
     } finally {
       await box.close();
     }

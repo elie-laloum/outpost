@@ -58,4 +58,4 @@ Use dependencies to serialize tasks sharing a sandbox. Use `isolatedTask` with d
 | `plan`        | Three independent planning perspectives, then an implementation task. |
 | `plan-review` | Parallel planning, implementation, then review.                       |
 
-Scaffold tracker connectors with `--tracker github`, `beads`, or `custom`. GitHub requires authenticated `gh`, Beads requires `bd`, and the custom connector reads `OUTPOST_TRACKER_URL`. These adapters return issue data for your scripts to use; issue mutation remains explicit in your workflow. `--label NAME` can create/update the GitHub label during initialization.
+Scaffold tracker connectors with `--tracker github`, `beads`, or `custom`. GitHub requires authenticated `gh`, Beads requires `bd`, and the custom connector reads `OUTPOST_TRACKER_URL`. The starter uses returned issues as its objective unless you supply a command-line objective. Issue mutation remains explicit in your workflow. Custom connectors include `.outpost/TRACKER.md` setup instructions. `--label NAME` can create/update the GitHub label during initialization.

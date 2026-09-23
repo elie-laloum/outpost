@@ -69,6 +69,38 @@ try {
     ),
   );
   assert.ok(manifest.exports["."].types);
+  const consumer = join(temporary, "consumer.ts");
+  writeFileSync(
+    consumer,
+    `import { dispatch, codex, response, createSandbox } from '@elie-laloum/outpost';
+import { local } from '@elie-laloum/outpost/providers/local';
+await using sandbox = await createSandbox({ provider: local() });
+const result = await sandbox.dispatch({ agent: codex(), brief: { text: 'Return <n>1</n>' }, response: response.json({tag:'n', schema: value => Number(value)}) });
+const n: number = result.value;
+const once = await dispatch({agent:codex(),provider:local(),brief:{text:'hello'}});
+console.log(n,once.commits);
+`,
+  );
+  execFileSync(
+    process.execPath,
+    [
+      resolve("node_modules/typescript/bin/tsc"),
+      "--noEmit",
+      "--strict",
+      "--module",
+      "nodenext",
+      "--target",
+      "es2023",
+      "--lib",
+      "esnext",
+      "--typeRoots",
+      resolve("node_modules/@types"),
+      "--types",
+      "node",
+      consumer,
+    ],
+    { cwd: temporary, stdio: "inherit" },
+  );
   console.log("Packed package imports and initializes successfully.");
 } finally {
   rmSync(temporary, { recursive: true, force: true });

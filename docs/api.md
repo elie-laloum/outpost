@@ -40,35 +40,38 @@ type BranchPolicy =
 
 Includes `WorkspaceOptions`, plus:
 
-| Field              | Meaning                                                                         |
-| ------------------ | ------------------------------------------------------------------------------- |
-| `agent`            | Required `AgentAdapter`. Use `codex()` or `claude()`.                           |
-| `provider`         | `SandboxProvider`; defaults to `docker()`.                                      |
-| `workspace`        | Existing workspace. Cannot be combined with `repository`, `branch` or `copies`. |
-| `hooks`            | `workspaceReady`, `hostReady`, `sandboxReady` command arrays.                   |
-| `signal`           | Cancels provisioning. In one-shot calls, also cancels execution.                |
-| `logging`          | `false`, `"stdout"`, or `{ file?, verbose? }`; default generated JSONL file.    |
-| `bootstrap`        | Remote agent installation when absent; defaults to `true`.                      |
-| `conversationHome` | Host directory containing `.claude`/`.codex`; defaults to OS home.              |
+| Field              | Meaning                                                                                                                                         |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `agent`            | Default `AgentAdapter` for warm operations; optional on `createSandbox`, required on one-shot `dispatch`/`attach`. Use `codex()` or `claude()`. |
+| `provider`         | `SandboxProvider`; defaults to `docker()`.                                                                                                      |
+| `workspace`        | Existing workspace. Cannot be combined with `repository`, `branch` or `copies`.                                                                 |
+| `hooks`            | `workspaceReady`, `hostReady`, `sandboxReady` command arrays.                                                                                   |
+| `signal`           | Cancels provisioning. In one-shot calls, also cancels execution.                                                                                |
+| `logging`          | `false`, `"stdout"`, or `{ file?, verbose? }`; default generated JSONL file.                                                                    |
+| `bootstrap`        | Remote agent installation when absent; defaults to `true`.                                                                                      |
+| `conversationHome` | Host directory containing `.claude`/`.codex`; defaults to OS home.                                                                              |
 
 Hook order is copies → `workspaceReady` on host → provider acquisition/synchronization → concurrent `hostReady` and `sandboxReady`. Each group runs its commands sequentially. Commands may choose a directory, environment and timeout. Sandbox commands can request `elevated: true` on providers supporting elevation. Host execution does not elevate privileges.
 
 ## DispatchOptions
 
-| Field          | Default / meaning                                                                        |
-| -------------- | ---------------------------------------------------------------------------------------- |
-| `brief`        | Required `{ text }` or `{ file, values? }`.                                              |
-| `passes`       | Positive integer, default 1. Maximum agent turns when no response validator is supplied. |
-| `until`        | String or strings; default `<outpost>done</outpost>`. Empty array disables markers.      |
-| `idleMs`       | 600000; maximum silence before completion. Any output refreshes it.                      |
-| `settleMs`     | 60000; grace period after completion, refreshed by output.                               |
-| `deadlineMs`   | 3600000; hard deadline for each agent command.                                           |
-| `expansionMs`  | 30000; deadline for each embedded prompt command.                                        |
-| `signal`       | Cancels this operation, preserving a warm sandbox.                                       |
-| `continuation` | `{ id, fork? }`; native resume or conversation fork.                                     |
-| `response`     | A `ResponseSpec<T>` produced by `response.text/json`.                                    |
-| `observe`      | Receives normalized events; exceptions cannot fail the job.                              |
-| `warn`         | Receives nonfatal warnings; exceptions cannot fail the job.                              |
+| Field          | Default / meaning                                                                             |
+| -------------- | --------------------------------------------------------------------------------------------- |
+| `brief`        | Required `{ text }` or `{ file, values? }`.                                                   |
+| `agent`        | Overrides the warm sandbox's default adapter for this job, including its model and variables. |
+| `logging`      | Overrides the sandbox's logging policy for this job.                                          |
+| `label`        | Optional label included in journal records and generated log filenames.                       |
+| `passes`       | Positive integer, default 1. Maximum agent turns when no response validator is supplied.      |
+| `until`        | String or strings; default `<outpost>done</outpost>`. Empty array disables markers.           |
+| `idleMs`       | 600000; maximum silence before completion. Any output refreshes it.                           |
+| `settleMs`     | 60000; grace period after completion, refreshed by output.                                    |
+| `deadlineMs`   | 3600000; hard deadline for each agent command.                                                |
+| `expansionMs`  | 30000; deadline for each embedded prompt command.                                             |
+| `signal`       | Cancels this operation, preserving a warm sandbox.                                            |
+| `continuation` | `{ id, fork? }`; native resume or conversation fork.                                          |
+| `response`     | A `ResponseSpec<T>` produced by `response.text/json`.                                         |
+| `observe`      | Receives normalized events; exceptions cannot fail the job.                                   |
+| `warn`         | Receives nonfatal warnings; exceptions cannot fail the job.                                   |
 
 Resume and structured output require `passes: 1`. A one-shot continuation validates the host transcript before allocating an environment. Warm continuations reuse sessions already present, otherwise importing the host transcript.
 

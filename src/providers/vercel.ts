@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { posix } from "node:path";
 import type { Sandbox } from "@vercel/sandbox";
 import type { SandboxProvider, Variables } from "../domain/ports.ts";
 import { OutpostError } from "../domain/errors.ts";
@@ -133,6 +134,7 @@ export function vercel(
             destination,
             (path, content) => sandbox.writeFiles([{ path, content }]),
             async (target, path) => {
+              await sandbox.mkDir(posix.dirname(path));
               const result = await sandbox.runCommand("ln", [
                 "-s",
                 "--",

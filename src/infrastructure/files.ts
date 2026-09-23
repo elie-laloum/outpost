@@ -43,7 +43,9 @@ export async function safeDestination(
   if (
     !entry ||
     isAbsolute(entry) ||
-    entry.split(/[\\/]/).some((part) => part === ".." || part.toLowerCase() === ".git") ||
+    entry
+      .split(/[\\/]/)
+      .some((part) => part === ".." || part.toLowerCase() === ".git") ||
     entry.includes("\0")
   )
     throw new OutpostError("workspace", `Unsafe workspace path: ${entry}`);

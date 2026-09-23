@@ -427,6 +427,9 @@ export async function createSandbox(options: SandboxOptions): Promise<Sandbox> {
           transcript: ConversationLocation | undefined;
         let failure: unknown;
         let conversation = dispatch.continuation?.id;
+        const conversations = new Set<string>(
+          conversation ? [conversation] : [],
+        );
         try {
           execution = await execute(
             workspace,
@@ -439,6 +442,7 @@ export async function createSandbox(options: SandboxOptions): Promise<Sandbox> {
               observe(event) {
                 if (event.kind === "conversation") {
                   conversation = event.id;
+                  conversations.add(event.id);
                   known.add(conversationKey(selected, event.id));
                 }
                 log.record(event);
@@ -451,25 +455,22 @@ export async function createSandbox(options: SandboxOptions): Promise<Sandbox> {
         }
         try {
           await sync?.pull();
-          if (
-            conversation &&
-            selected.conversations &&
-            selected.capture !== false
-          )
-            transcript = await captureConversation(
-              selected.conversations,
-              conversation,
-              workspace.repository,
-              runtime,
-              staging,
-              {
-                ...(options.conversationHome
-                  ? { home: options.conversationHome }
-                  : {}),
-                ...(dispatch.warn ? { warn: dispatch.warn } : {}),
-                local: provider.placement === "host",
-              },
-            );
+          if (selected.conversations && selected.capture !== false)
+            for (const id of conversations)
+              transcript = await captureConversation(
+                selected.conversations,
+                id,
+                workspace.repository,
+                runtime,
+                staging,
+                {
+                  ...(options.conversationHome
+                    ? { home: options.conversationHome }
+                    : {}),
+                  ...(dispatch.warn ? { warn: dispatch.warn } : {}),
+                  local: provider.placement === "host",
+                },
+              );
         } catch (cause) {
           failure = failure
             ? new AggregateError(
