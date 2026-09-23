@@ -7,11 +7,13 @@ sidebar:
 
 La roadmap décrit des ajouts prévus, pas des prérequis à l’utilisation de la version actuelle. Elle ne constitue pas un engagement de date.
 
-## Disponible aujourd’hui
+## Disponible en 2.0.0
 
 Sandboxes réutilisables et workspaces Git indépendants ; adapters Claude Code et Codex ; capture, reprise et fork natifs ; providers Docker, Podman, local, Vercel et Daytona ; prompts, itération, réponses structurées et hooks ; workflows typés ; CLI, documentation bilingue et publication automatisée.
 
-## V1.x — efficacité et diagnostic
+La version 2.0.0 ajoute des projets de workflow autonomes avec `init --repository`, des chemins de dépôt, de brief et d’environnement relatifs au script, la progression de l’agent et les détails de récupération après annulation. Les workflows typés peuvent coordonner des dépôts indépendants via des tâches isolées. Les campagnes d’issues et les connecteurs de backlog ont été supprimés ; l’initialisation génère un script de dispatch.
+
+## Prochaines étapes — efficacité et diagnostic
 
 - Manifestes de fichiers incrémentaux et transferts compressés avec garanties de récupération.
 - Caches de dépendances et images d’agents préconstruites avec provenance signée.
@@ -20,7 +22,7 @@ Sandboxes réutilisables et workspaces Git indépendants ; adapters Claude Code 
 - Diagnostic des capacités providers et rapports de compatibilité des CLI.
 - Davantage de fixtures cloud et de vérifications réelles planifiées.
 
-## V2 — orchestration durable
+## À plus long terme — orchestration durable
 
 - Checkpoints persistants et reprise après redémarrage.
 - Files distribuées et leases de workers avec fencing tokens.
