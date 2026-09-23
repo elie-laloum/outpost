@@ -16,6 +16,8 @@ import { daytona } from "@elie-laloum/outpost/providers/daytona";
 ## Signature
 
 ```ts
+import type { Daytona, DaytonaConfig } from "@daytona/sdk";
+
 export declare function daytona(
   options?: DaytonaOptions,
   connect?: (

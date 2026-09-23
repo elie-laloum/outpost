@@ -16,6 +16,8 @@ import type { VercelOptions } from "@elie-laloum/outpost/providers/vercel";
 ## Signature
 
 ```ts
+import type { Sandbox } from "@vercel/sandbox";
+
 export interface VercelOptions {
   readonly create?: NonNullable<Parameters<typeof Sandbox.create>[0]>;
   readonly variables?: Variables;

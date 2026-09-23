@@ -108,6 +108,26 @@ for (const [symbol, { declaration, related }] of symbols) {
   let code = declaration.getText().replaceAll(/import\("[^"\n]+"\)\./g, "");
   if (ts.isVariableDeclaration(declaration))
     code = `export declare const ${code};`;
+  const externalImports = declaration
+    .getSourceFile()
+    .statements.filter(
+      (node) =>
+        ts.isImportDeclaration(node) &&
+        !node.moduleSpecifier.text.startsWith("."),
+    )
+    .flatMap((node) => {
+      const bindings = node.importClause?.namedBindings;
+      if (!bindings || !ts.isNamedImports(bindings)) return [];
+      const names = bindings.elements.filter((item) =>
+        new RegExp(`\\b${item.name.text}\\b`).test(code),
+      );
+      return names.length
+        ? [
+            `import type { ${names.map((item) => item.getText()).join(", ")} } from ${node.moduleSpecifier.getText()};`,
+          ]
+        : [];
+    });
+  if (externalImports.length) code = `${externalImports.join("\n")}\n\n${code}`;
   for (const [language, locale] of [
     [0, ""],
     [1, "fr/"],

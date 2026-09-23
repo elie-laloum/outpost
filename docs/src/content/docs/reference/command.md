@@ -16,6 +16,8 @@ import type { Command } from "@elie-laloum/outpost";
 ## Signature
 
 ```ts
+import type { Readable, Writable } from "node:stream";
+
 export interface Command {
   readonly executable: string;
   readonly arguments?: readonly string[];

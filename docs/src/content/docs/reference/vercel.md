@@ -16,6 +16,8 @@ import { vercel } from "@elie-laloum/outpost/providers/vercel";
 ## Signature
 
 ```ts
+import type { Sandbox } from "@vercel/sandbox";
+
 export declare function vercel(
   options?: VercelOptions,
   connect?: (config: VercelOptions["create"]) => Promise<Sandbox>,

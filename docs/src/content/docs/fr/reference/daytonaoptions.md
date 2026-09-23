@@ -16,6 +16,12 @@ import type { DaytonaOptions } from "@elie-laloum/outpost/providers/daytona";
 ## Signature
 
 ```ts
+import type {
+  CreateSandboxFromImageParams,
+  CreateSandboxFromSnapshotParams,
+  DaytonaConfig,
+} from "@daytona/sdk";
+
 export interface DaytonaOptions {
   readonly connection?: DaytonaConfig;
   readonly create?:
