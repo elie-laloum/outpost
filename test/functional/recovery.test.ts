@@ -163,7 +163,8 @@ test("idle and completion watchdogs have distinct outcomes and allow reuse", asy
 
 test("prompt commands run after hooks and fail with diagnostics", async (t) => {
   const root = await repository(t),
-    warnings: string[] = [];
+    warnings: string[] = [],
+    diagnostics: string[] = [];
   await writeFile(
     join(root, "brief.md"),
     "{{INPUT}} !`echo expanded` {{WORK_BRANCH}}",
@@ -194,9 +195,11 @@ test("prompt commands run after hooks and fail with diagnostics", async (t) => {
       values: { INPUT: "!`not-executed`", EXTRA: "unused" },
     },
     warn: (message) => warnings.push(message),
+    diagnostic: (message) => diagnostics.push(message),
   });
   assert.equal(output.text, "!`not-executed` expanded main");
   assert.equal(warnings.length, 1);
+  assert.match(diagnostics[0]!, /approximately \d+ tokens/);
   assert.equal(await readFile(join(root, "hook.txt"), "utf8"), "ready");
   await writeFile(join(root, "brief.md"), "!`exit 8`");
   await assert.rejects(

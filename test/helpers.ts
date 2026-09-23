@@ -1,4 +1,4 @@
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, rm, writeFile, realpath } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { TestContext } from "node:test";
@@ -19,7 +19,7 @@ export async function repository(t: TestContext): Promise<string> {
   await writeFile(join(path, "base.txt"), "base\n");
   await git(path, ["add", "."]);
   await git(path, ["commit", "-m", "Initial"]);
-  return path;
+  return await realpath(path);
 }
 
 export function scripted(

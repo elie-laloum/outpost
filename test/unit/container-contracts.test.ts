@@ -82,7 +82,12 @@ test("Podman supports explicit UID mapping and a namespace opt-out", async (t) =
       },
       async (command) => {
         calls.push(command);
-        return { status: 0, stdout: "", stderr: "" };
+        return {
+          status: 0,
+          stdout:
+            command.arguments?.[0] === "machine" ? '[{"Running":true}]' : "",
+          stderr: "",
+        };
       },
     ).acquire({
       repository: root,
@@ -155,7 +160,12 @@ test("SELinux mount labels preserve readonly and writable combinations", async (
         { label, volumes: [{ source: root, target: "/inputs", readOnly }] },
         async (command) => {
           calls.push(command);
-          return { status: 0, stdout: "", stderr: "" };
+          return {
+            status: 0,
+            stdout:
+              command.arguments?.[0] === "machine" ? '[{"Running":true}]' : "",
+            stderr: "",
+          };
         },
         "linux",
       ).acquire({

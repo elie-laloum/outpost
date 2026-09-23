@@ -87,7 +87,12 @@ test("command cancellation kills only its process group and keeps the container"
         fail = false;
         throw new Error("cancelled");
       }
-      return { status: 0, stdout: "", stderr: "" };
+      return {
+        status: 0,
+        stdout:
+          command.arguments?.[0] === "machine" ? '[{"Running":true}]' : "",
+        stderr: "",
+      };
     },
   ).acquire({
     repository: root,

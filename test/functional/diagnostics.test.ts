@@ -260,3 +260,29 @@ test("scaffolding falls back for malformed metadata and installs the selected tr
     /@beads\/bd@1\.2\.2/,
   );
 });
+
+test("local elevated commands run as the current account without escalation", async (t) => {
+  const root = await repository(t);
+  const box = await createSandbox({
+    repository: root,
+    provider: local(),
+    logging: false,
+  });
+  try {
+    const output = await box.command({
+      executable: process.execPath,
+      arguments: [
+        "-e",
+        "console.log(JSON.stringify({uid:process.getuid?.()??null,username:process.env.USERNAME??null}))",
+      ],
+      elevated: true,
+    });
+    assert.equal(output.status, 0, output.stderr);
+    assert.deepEqual(JSON.parse(output.stdout), {
+      uid: process.getuid?.() ?? null,
+      username: process.env.USERNAME ?? null,
+    });
+  } finally {
+    await box.close();
+  }
+});

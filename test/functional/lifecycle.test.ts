@@ -203,10 +203,11 @@ test("file briefs reload between passes and literal briefs never expand", async 
 
 test("schema repairs resume the same conversation and observer failures are harmless", async (t) => {
   const root = await repository(t);
-  const agent = scripted(
-    (input) =>
-      `console.log(JSON.stringify({kind:'conversation',id:'fixture-id'})); ${emit(input.continuation ? '<answer>{"ok":true}</answer>' : "bad")}`,
-  );
+  const prompts: string[] = [];
+  const agent = scripted((input) => {
+    prompts.push(input.text ?? "");
+    return `console.log(JSON.stringify({kind:'conversation',id:'fixture-id'})); ${emit(input.continuation ? '<answer>{"ok":true}</answer>' : "bad")}`;
+  });
   const box = await createSandbox({
     repository: root,
     provider: local(),
@@ -227,6 +228,14 @@ test("schema repairs resume the same conversation and observer failures are harm
   });
   assert.deepEqual(output.value, { ok: true });
   assert.equal(output.turns.length, 2);
+  assert.match(prompts[1]!, /Validation failure:/);
+  assert.match(prompts[1]!, /Previous content:/);
+  assert.match(prompts[1]!, /Cause:/);
+  assert.match(prompts[1]!, /Further repair attempts after this one: 0/);
+  assert.match(
+    prompts[1]!,
+    /Do not edit files, run commands or continue implementation/,
+  );
   assert.equal(
     (await output.resume({ brief: { text: "continue" } })).conversation,
     "fixture-id",

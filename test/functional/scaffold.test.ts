@@ -73,6 +73,10 @@ test("initialization supports cloud peers, trackers and requested package manage
   );
   assert.ok(calls.some((call) => call.executable === "gh"));
   assert.match(
+    await readFile(join(root, ".outpost", ".env.example"), "utf8"),
+    /^GH_TOKEN=$/m,
+  );
+  assert.match(
     await readFile(join(root, ".outpost", "tickets.mts"), "utf8"),
     /githubBacklog\(\{ label: "outpost-ready" \}\)/,
   );
