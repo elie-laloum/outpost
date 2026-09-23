@@ -2,7 +2,7 @@
 title: "Capture, reprise et fork"
 description: "Capture, reprise et fork — Outpost"
 sidebar:
-  order: 7
+  order: 9
 ---
 
 La capture native des conversations est active par défaut. Le transcript est copié dans le stockage de l’agent sur l’hôte ; ses chemins de travail sont réécrits pour permettre une reprise native dans le bon dépôt.

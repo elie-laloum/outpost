@@ -2,7 +2,7 @@
 title: "Événements, logs et consommation"
 description: "Événements, logs et consommation — Outpost"
 sidebar:
-  order: 9
+  order: 11
 ---
 
 Utilisez `reporter` pour une sortie terminal lisible ou `observe` pour une intégration structurée.

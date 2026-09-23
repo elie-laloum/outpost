@@ -2,7 +2,7 @@
 title: "Events, logs and usage"
 description: "Events, logs and usage — Outpost"
 sidebar:
-  order: 9
+  order: 11
 ---
 
 Use `reporter` for readable terminal output or `observe` for structured integration.

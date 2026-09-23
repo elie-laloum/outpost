@@ -2,7 +2,7 @@
 title: "File briefs and expansion"
 description: "File briefs and expansion — Outpost"
 sidebar:
-  order: 4
+  order: 6
 ---
 
 A brief is either `{ text }` or `{ file, values? }`. Supply exactly one form. Inline text is literal: it is never expanded.

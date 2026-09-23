@@ -2,7 +2,7 @@
 title: "Capture, resume and fork"
 description: "Capture, resume and fork — Outpost"
 sidebar:
-  order: 7
+  order: 9
 ---
 
 Native conversation capture is enabled by default. The transcript is copied to the agent’s host storage and working-directory fields are rewritten so native host resumption targets the right repository.

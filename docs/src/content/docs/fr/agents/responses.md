@@ -2,7 +2,7 @@
 title: "Réponses validées"
 description: "Réponses validées — Outpost"
 sidebar:
-  order: 6
+  order: 8
 ---
 
 Utilisez `response.text` ou `response.json` pour transformer la réponse de l’agent en valeur typée. Le prompt doit demander la balise correspondante.

@@ -2,7 +2,7 @@
 title: "Délais et annulation"
 description: "Délais et annulation — Outpost"
 sidebar:
-  order: 8
+  order: 10
 ---
 
 Utilisez `AbortSignal` pour une annulation pilotée par l’appelant et les délais pour borner l’exécution. Ils concernent des étapes distinctes.

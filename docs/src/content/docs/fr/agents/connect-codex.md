@@ -15,7 +15,7 @@ Avec `local()`, Codex utilise les identifiants de l'hôte. Docker/Podman démarr
 
 ## Utiliser son compte ChatGPT dans un conteneur
 
-Cette recette nécessite `~/.codex/auth.json`. Si les identifiants sont dans le trousseau, sélectionnez `cli_auth_credentials_store = "file"` dans la configuration Codex et reconnectez-vous, si la politique l'autorise. Voir le [stockage des identifiants](https://developers.openai.com/codex/auth#credential-storage).
+Cette recette nécessite `~/.codex/auth.json`. Si les identifiants sont dans le trousseau, sélectionnez `cli_auth_credentials_store = "file"` dans `~/.codex/config.toml` et reconnectez-vous, si la politique l'autorise. Voir le [stockage des identifiants](https://developers.openai.com/codex/auth#credential-storage).
 
 Montez une source d'identifiants en lecture seule, puis copiez-la dans le home éphémère inscriptible :
 

@@ -2,7 +2,7 @@
 title: "Briefs en fichier et expansion"
 description: "Briefs en fichier et expansion — Outpost"
 sidebar:
-  order: 4
+  order: 6
 ---
 
 Un brief prend la forme `{ text }` ou `{ file, values? }`. Fournissez une seule de ces formes. Le texte inline est littéral et n’est jamais développé.

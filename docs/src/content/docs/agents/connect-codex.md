@@ -15,7 +15,7 @@ With `local()`, Codex uses host credentials. Docker/Podman start with a private 
 
 ## Use your ChatGPT account in a container
 
-This recipe requires `~/.codex/auth.json`. If credentials are in the OS keychain, select `cli_auth_credentials_store = "file"` in Codex configuration and sign in again, where policy permits. See [credential storage](https://developers.openai.com/codex/auth#credential-storage).
+This recipe requires `~/.codex/auth.json`. If credentials are in the OS keychain, select `cli_auth_credentials_store = "file"` in `~/.codex/config.toml` and sign in again, where policy permits. See [credential storage](https://developers.openai.com/codex/auth#credential-storage).
 
 Mount a read-only credential seed, then copy it into the writable ephemeral home:
 

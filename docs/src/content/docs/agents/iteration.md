@@ -2,7 +2,7 @@
 title: "Passes and completion markers"
 description: "Passes and completion markers — Outpost"
 sidebar:
-  order: 5
+  order: 7
 ---
 
 Set a bounded number of passes when an agent should iterate until a completion marker appears.

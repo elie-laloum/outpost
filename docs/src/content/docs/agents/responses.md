@@ -2,7 +2,7 @@
 title: "Validated responses"
 description: "Validated responses — Outpost"
 sidebar:
-  order: 6
+  order: 8
 ---
 
 Use `response.text` or `response.json` to turn the agent’s answer into a typed value. The prompt must request the matching XML-style tag.

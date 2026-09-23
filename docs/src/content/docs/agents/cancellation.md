@@ -2,7 +2,7 @@
 title: "Timeouts and cancellation"
 description: "Timeouts and cancellation — Outpost"
 sidebar:
-  order: 8
+  order: 10
 ---
 
 Use `AbortSignal` for caller-controlled cancellation and deadlines for bounded execution. They apply to different stages.

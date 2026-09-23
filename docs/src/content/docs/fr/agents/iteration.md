@@ -2,7 +2,7 @@
 title: "Passes et marqueurs de fin"
 description: "Passes et marqueurs de fin — Outpost"
 sidebar:
-  order: 5
+  order: 7
 ---
 
 Fixez un nombre maximal de passes pour laisser un agent itérer jusqu’à l’apparition d’un marqueur de fin.
