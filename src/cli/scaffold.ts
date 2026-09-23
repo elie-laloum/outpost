@@ -1,8 +1,15 @@
-import { access, mkdir, writeFile } from "node:fs/promises";
+import {
+  appendFile,
+  lstat,
+  mkdir,
+  readFile,
+  writeFile,
+} from "node:fs/promises";
 import { join, resolve } from "node:path";
-import { invariant, OutpostError } from "../domain/errors.ts";
+import { OutpostError } from "../domain/errors.ts";
 import { requireSuccess } from "../infrastructure/process.ts";
 import type { Executor } from "../infrastructure/process.types.ts";
+import { imageName } from "../providers/container.ts";
 import { manageImage } from "./image.ts";
 import { projectSettings } from "./project-settings.ts";
 import { scaffoldFiles } from "./scaffold-files.ts";
@@ -12,31 +19,60 @@ import type { InitOptions, ScaffoldResult } from "./scaffold.types.ts";
 
 export { manageImage } from "./image.ts";
 export { imageRecipe } from "./scaffold.constants.ts";
-export type { InitOptions, Template } from "./scaffold.types.ts";
+export type { InitOptions } from "./scaffold.types.ts";
 
 export async function initialize(
   options: InitOptions = {},
   executor?: Executor,
 ): Promise<ScaffoldResult> {
-  const root = resolve(options.directory ?? process.cwd()),
-    folder = join(root, ".outpost");
+  const root = resolve(options.directory ?? process.cwd());
   const provider = options.provider ?? "docker";
   validateInitialization(options);
-  const { extension, manager } = await projectSettings(root, options);
-  const files = scaffoldFiles(options, extension);
+  const { hasPackage, manager, extension } = await projectSettings(
+    root,
+    options,
+  );
+  const files = await scaffoldFiles(
+    { ...options, image: options.image ?? imageName(root) },
+    hasPackage,
+    extension,
+  );
+  const existingIgnore = await readFile(join(root, ".gitignore"), "utf8").catch(
+    (error) => {
+      if (error.code === "ENOENT") return undefined;
+      throw error;
+    },
+  );
+  const ignore = files[".gitignore"]!;
+  if (existingIgnore !== undefined) delete files[".gitignore"];
   for (const name of Object.keys(files))
     if (
-      await access(join(folder, name))
+      await lstat(join(root, name))
         .then(() => true)
-        .catch(() => false)
+        .catch((error) => {
+          if (error.code === "ENOENT") return false;
+          throw error;
+        })
     )
       throw new OutpostError(
         "configuration",
-        `Initialization would overwrite .outpost/${name}`,
+        `Initialization would overwrite ${name}`,
       );
-  await mkdir(folder, { recursive: true });
+  await mkdir(root, { recursive: true });
   for (const [name, content] of Object.entries(files))
-    await writeFile(join(folder, name), content, { flag: "wx" });
+    await writeFile(join(root, name), content, { flag: "wx" });
+  if (existingIgnore !== undefined) {
+    const rules = new Set(existingIgnore.split(/\r?\n/));
+    const additions = ignore
+      .trimEnd()
+      .split("\n")
+      .filter((rule) => !rules.has(rule));
+    if (additions.length) {
+      const suffix = `${existingIgnore && !existingIgnore.endsWith("\n") ? "\n" : ""}${additions.join("\n")}\n`;
+      await appendFile(join(root, ".gitignore"), suffix);
+      files[".gitignore"] = existingIgnore + suffix;
+    }
+  }
   if (options.install) {
     const packages = ["@elie-laloum/outpost", ...providerPackages[provider]];
     const args =
@@ -54,29 +90,6 @@ export async function initialize(
       executor,
     );
   }
-  if (options.label) {
-    invariant(
-      options.tracker === "github",
-      "Labels require the GitHub tracker",
-    );
-    await requireSuccess(
-      {
-        executable: "gh",
-        arguments: [
-          "label",
-          "create",
-          options.label,
-          "--color",
-          "4969ED",
-          "--description",
-          "Ready for Outpost",
-          "--force",
-        ],
-        directory: root,
-      },
-      executor,
-    );
-  }
   if (options.build && (provider === "docker" || provider === "podman"))
     await manageImage(
       "build",
@@ -88,7 +101,7 @@ export async function initialize(
       executor,
     );
   return {
-    files: Object.keys(files).map((name) => join(folder, name)),
-    run: `node .outpost/run.${extension}`,
+    files: Object.keys(files).map((name) => join(root, name)),
+    run: `node run.${extension}`,
   };
 }

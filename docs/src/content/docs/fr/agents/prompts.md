@@ -13,7 +13,7 @@ import { dispatch, codex } from "@elie-laloum/outpost";
 await dispatch({
   agent: codex(),
   brief: {
-    file: ".outpost/brief.md",
+    file: "brief.md",
     values: { OBJECTIVE: "Corriger la validation" },
   },
   diagnostic: console.log,
@@ -21,7 +21,7 @@ await dispatch({
 });
 ```
 
-Exemple de `.outpost/brief.md` :
+Exemple de `brief.md` :
 
 ```md
 Objectif : {{OBJECTIVE}}

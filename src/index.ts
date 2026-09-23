@@ -40,21 +40,6 @@ export type {
 
 export { agentTask, commandTask, isolatedTask } from "./application/tasks.ts";
 
-export { campaign } from "./application/campaign.ts";
-
-export type {
-  CampaignEvent,
-  CampaignOptions,
-  CampaignResult,
-  IssueOutcome,
-} from "./application/campaign.ts";
-
-export type { Assignment, Backlog, Issue } from "./domain/backlog.ts";
-
-export { beadsBacklog, githubBacklog } from "./providers/backlogs.ts";
-
-export type { BacklogSettings } from "./providers/backlogs.ts";
-
 export { claude, codex } from "./providers/agents.ts";
 
 export { agentVersions } from "./providers/versions.ts";

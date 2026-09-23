@@ -5,12 +5,13 @@ sidebar:
   order: 3
 ---
 
-Outpost lit **uniquement `.outpost/.env`** comme fichier d’environnement du projet. Il n’importe pas le `.env` à la racine du dépôt.
+L’API Outpost charge automatiquement `.outpost/.env` dans le **dépôt ciblé**. Elle n’importe pas le `.env` à la racine du dépôt.
+
+Le script `run.ts` généré par `init` lit explicitement le `.env` placé **à côté du script**, puis transmet ses déclarations au provider via `variables`. Ces valeurs sont prioritaires sur celles du dépôt. Les déclarations vides reprennent les variables du processus. Cela permet de conserver les identifiants dans un dossier de workflow indépendant.
 
 ```dotenv
 OPENAI_API_KEY=
 ANTHROPIC_API_KEY=
-GH_TOKEN=
 PROJECT_MODE=test
 ```
 
@@ -26,7 +27,7 @@ Le provider et l’adapter ne peuvent pas déclarer le même nom. Placez l’env
 
 Utilisez `OPENAI_API_KEY` pour Codex, et `ANTHROPIC_API_KEY` ou `CLAUDE_CODE_OAUTH_TOKEN` pour Claude Code. Pour l’authentification native, montez explicitement le fichier ou répertoire requis dans le home de l’agent. Préférez la lecture seule lorsque le CLI la supporte. Ne montez pas tout votre home pour fournir un seul identifiant.
 
-Les opérations GitHub utilisent `gh` sur l’hôte : authentifiez-le ou déclarez `GH_TOKEN`. Les identifiants Vercel/Daytona servent à allouer la sandbox, indépendamment des appels au modèle. Une connexion au provider réussie ne prouve pas que l’agent est authentifié.
+Les identifiants Vercel/Daytona servent à allouer la sandbox, indépendamment des appels au modèle. Une connexion au provider réussie ne prouve pas que l’agent est authentifié.
 
 Les valeurs d’environnement sont des chaînes. Évitez les secrets dans les arguments de commande, les sources et les modèles de prompt. Les `.env.example` générés listent les noms, jamais de vrais secrets. Les logs et transcripts peuvent néanmoins contenir les données sensibles produites par votre tâche.
 

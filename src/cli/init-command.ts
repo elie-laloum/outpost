@@ -1,3 +1,4 @@
+import { resolve } from "node:path";
 import { createInterface } from "node:readline/promises";
 import { initializationQuestions } from "./main.constants.ts";
 import type { CliInvocation } from "./main.types.ts";
@@ -13,10 +14,10 @@ export async function initializeCommand({
   if (
     !values.yes &&
     !process.stdin.isTTY &&
-    (!values.agent || !values.provider || !values.template || !values.tracker)
+    (!values.agent || !values.provider)
   )
     throw new Error(
-      "Headless initialization requires --yes for defaults, or --agent, --provider, --template and --tracker.",
+      "Headless initialization requires --yes for defaults, or --agent and --provider.",
     );
   if (!values.yes && process.stdin.isTTY) {
     const terminal = createInterface({
@@ -35,6 +36,6 @@ export async function initializeCommand({
   }
   const result = await initialize(options as InitOptions);
   process.stdout.write(
-    `Created ${result.files.length} files.\nRun: ${result.run}\n`,
+    `Initialized ${result.files.length} files in ${resolve(values.directory ?? process.cwd())}.\nRun: ${result.run}\n`,
   );
 }

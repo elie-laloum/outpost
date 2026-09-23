@@ -22,7 +22,6 @@ Start with the error code, operation log and retained workspace path. Change one
 | Branch checked out elsewhere           | Use that workspace deliberately or choose a different branch; do not move it behind Git’s back.    |
 | Host changed during remote execution   | Preserve recovery material and reconcile host/incoming changes separately.                         |
 | Workflow waits after cancellation      | Custom callbacks/providers must honor their AbortSignal and finish cleanup.                        |
-| Campaign merged but issue remains open | Repair tracker authentication/state and reconcile closure before rerunning.                        |
 | Init refuses to overwrite files        | Edit the existing scaffold or choose another project directory.                                    |
 
 For reports, include OS, Node/Outpost/provider/agent versions, sanitized error code and the smallest reproducible configuration. Strip credentials, private prompts and source from shared logs. See [recovery](../recovery/) for retained data and [security](../security/) for private reporting.

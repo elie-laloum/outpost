@@ -13,17 +13,18 @@ export async function projectSettings(
   options: InitOptions,
 ): Promise<ProjectSettings> {
   let pkg: PackageManifest = {};
+  let hasPackage = true;
   try {
     pkg = JSON.parse(await readFile(join(root, "package.json"), "utf8"));
     if (!pkg || typeof pkg !== "object") pkg = {};
   } catch (cause) {
+    if ((cause as NodeJS.ErrnoException).code === "ENOENT") hasPackage = false;
     if (
       !(cause instanceof SyntaxError) &&
       (cause as NodeJS.ErrnoException).code !== "ENOENT"
     )
       throw cause;
   }
-  const extension = pkg.type === "module" ? "ts" : "mts";
   let detected =
     typeof pkg.packageManager === "string"
       ? pkg.packageManager.split("@")[0]
@@ -44,5 +45,9 @@ export async function projectSettings(
   const manager = options.manager ?? detected ?? "npm";
   invariant(supportedManagers.includes(manager), "Unknown package manager");
 
-  return { extension, manager };
+  return {
+    hasPackage,
+    manager,
+    extension: pkg.type === "commonjs" ? "mts" : "ts",
+  };
 }

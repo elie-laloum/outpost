@@ -35,7 +35,7 @@ export async function manageImage(
           "--tag",
           image,
           "--file",
-          resolve(root, options.file ?? `.outpost/${imageFiles[engine]}`),
+          resolve(root, options.file ?? imageFiles[engine]),
           "--build-arg",
           `AGENT_UID=${uid}`,
           "--build-arg",

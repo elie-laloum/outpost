@@ -42,4 +42,4 @@ Remote recovery folders may contain `initial.bundle`/`commits.bundle`, binary-ca
 3. Examine bundles/patches in a separate recovery clone before applying them to valuable work.
 4. Resolve local/remote overlap or merge conflicts, then resume with an explicit branch and conversation where appropriate.
 
-Do not blindly rerun a campaign after tracker closure failure: commits may already be integrated. Reconcile issue state first. Never remove a live lock just to bypass ownership checks.
+Never remove a live lock just to bypass ownership checks.

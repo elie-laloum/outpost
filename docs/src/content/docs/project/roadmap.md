@@ -9,12 +9,10 @@ Roadmap items are planned additions, not requirements for using the current rele
 
 ## Available today
 
-Reusable sandboxes and independent Git workspaces; Claude Code and Codex adapters; native conversation capture, resume and fork; Docker, Podman, local, Vercel and Daytona providers; prompts, iteration, structured responses and hooks; typed workflows and issue campaigns; setup CLI, bilingual documentation and automated package releases.
+Reusable sandboxes and independent Git workspaces; Claude Code and Codex adapters; native conversation capture, resume and fork; Docker, Podman, local, Vercel and Daytona providers; prompts, iteration, structured responses and hooks; typed workflows; setup CLI, bilingual documentation and automated package releases.
 
 ## V1.x — efficiency and diagnostics
 
-- Durable campaign closure receipts to reconcile tracker outages without reimplementing merged issues.
-- Configurable planner policies, merge validation commands and per-role token budgets.
 - Incremental remote file manifests and compressed transfer batches with recovery guarantees.
 - Dependency caches and prebuilt agent images with signed provenance.
 - Recovery inspection/pruning, retention configuration and storage quotas.

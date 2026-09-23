@@ -36,4 +36,4 @@ Use the workspace path to inspect Git status/diffs and read the journal/transcri
 
 With a valid transcript, supply its conversation ID through **continuation: { id }** on a new dispatch, or use a successful result's **resume**. Configure authentication again. A transcript restores history, not the previous home, processes or uncommitted files.
 
-Keep the named branch's commits. Inspect retained worktrees before moving/deleting them. Do not blindly rerun a campaign that already integrated changes or partially updated its tracker. See [continuation](../../agents/conversations/) and [recovery details](../../operations/recovery/).
+Keep the named branch's commits. Inspect retained worktrees before moving/deleting them. See [continuation](../../agents/conversations/) and [recovery details](../../operations/recovery/).

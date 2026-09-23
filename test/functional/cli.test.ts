@@ -30,7 +30,7 @@ test("CLI dispatches help and reports unknown or incomplete commands", async () 
   assert.match(missing.stderr, /Headless initialization/);
 });
 
-test("CLI initializes a selected starter noninteractively and refuses overwrites", async (t) => {
+test("CLI initializes a project noninteractively and refuses overwrites", async (t) => {
   const directory = await mkdtemp(join(tmpdir(), "outpost-cli-"));
   t.after(() => rm(directory, { recursive: true, force: true }));
   const args = [
@@ -39,18 +39,16 @@ test("CLI initializes a selected starter noninteractively and refuses overwrites
     "codex",
     "--provider",
     "local",
-    "--template",
-    "blank",
-    "--tracker",
-    "custom",
     "--directory",
     directory,
+    "--repository",
+    "../target-repository",
   ];
   const output = await run(args);
   assert.equal(output.status, 0, output.stderr);
   assert.match(
-    await readFile(join(directory, ".outpost", "run.mts"), "utf8"),
-    /dispatch/,
+    await readFile(join(directory, "run.ts"), "utf8"),
+    /const repository = resolve\(import.meta.dirname, "\.\.\/target-repository"\)/,
   );
   const repeat = await run(args);
   assert.equal(repeat.status, 1);

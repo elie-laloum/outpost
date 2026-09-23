@@ -5,32 +5,36 @@ sidebar:
   order: 4
 ---
 
-`outpost init` generates editable project files. Run it from your target repository. Interactive mode asks for choices; automation should pass `--yes` or all required choices.
+`outpost init` creates a workflow project in the current directory or `--directory`. This directory can be independent of the target Git repositories. Interactive mode asks for choices; automation should pass `--yes` or all required choices.
 
 ```sh
-npx outpost init --yes --agent claude --provider podman --template plan-review --tracker github --label outpost-ready --install --build
+npx @elie-laloum/outpost init --yes --agent claude --provider podman --repository /path1/repository --install --build
 ```
 
-| Flag           | Values / behavior                                                                  |
-| -------------- | ---------------------------------------------------------------------------------- |
-| `--yes`, `-y`  | Accept defaults without prompting.                                                 |
-| `--agent`      | `codex` (default) or `claude`.                                                     |
-| `--provider`   | `docker` (default), `podman`, `local`, `vercel`, `daytona`.                        |
-| `--template`   | `blank` (default), `iterate`, `review`, `plan`, `plan-review`.                     |
-| `--tracker`    | `github`, `beads`, `custom`; omitted headless default uses an in-memory objective. |
-| `--manager`    | `npm`, `pnpm`, `yarn`, `bun`; otherwise detected from project metadata/lockfiles.  |
-| `--model`      | Model name written into the generated adapter.                                     |
-| `--install`    | Install Outpost and the selected optional SDK.                                     |
-| `--build`      | Build the selected container image.                                                |
-| `--image`      | Override generated image name.                                                     |
-| `--label`      | Tracker label/filter; GitHub setup creates or updates it.                          |
-| `--directory`  | Target project directory.                                                          |
-| `--help`, `-h` | Display usage.                                                                     |
+| Flag           | Values / behavior                                                                    |
+| -------------- | ------------------------------------------------------------------------------------ |
+| `--yes`, `-y`  | Accept defaults without prompting.                                                   |
+| `--agent`      | `codex` (default) or `claude`.                                                       |
+| `--provider`   | `docker` (default), `podman`, `local`, `vercel`, `daytona`.                          |
+| `--manager`    | `npm`, `pnpm`, `yarn`, `bun`; otherwise detected from project metadata/lockfiles.    |
+| `--model`      | Model name written into the generated adapter.                                       |
+| `--install`    | Install Outpost and the selected optional SDK.                                       |
+| `--build`      | Build the selected container image.                                                  |
+| `--image`      | Override generated image name.                                                       |
+| `--directory`  | Workflow directory; current directory by default.                                    |
+| `--repository` | Target Git repository; absolute or relative to the workflow directory. Default: `.`. |
+| `--help`, `-h` | Display usage.                                                                       |
 
-Initialization refuses existing scaffold files rather than overwriting them. It creates `.outpost/run.ts` for ESM projects and `.outpost/run.mts` otherwise, plus configuration, prompt/standards files and provider/tracker-specific files. The final output prints the exact run command.
+Initialization creates `run.ts`, `brief.md`, `.env.example`, `.gitignore`, a `package.json` and provider-specific files directly in that directory. The manifest includes a `start` script, Outpost and the optional cloud SDK; `--install` installs these dependencies. Existing package manifests are preserved and missing ignore rules are appended to `.gitignore`. Any collision with the other generated files fails initialization before writing.
 
-## Templates
+The script defaults to `run.ts`. If an existing manifest declares `"type": "commonjs"`, `init` generates `run.mts` to preserve ESM compatibility without changing that manifest. Node.js 24+ executes these TypeScript files directly.
 
-`blank` runs one dispatch. `iterate` delivers issues sequentially. `review` adds warm review. `plan` plans independent branches with bounded parallel work and integration. `plan-review` combines planning and review. Without a tracker, campaign starters wrap the command-line objective as one in-memory issue.
+## Generated script
 
-Edit the generated call to change limits and role adapters. Standards live in `.outpost/STANDARDS.md`. The CLI is a starting point; library calls remain the source of runtime behavior.
+The script runs one `dispatch` with the objective supplied on the command line. Edit `brief.md` to customize the prompt and `run.ts` to configure execution. Copy `.env.example` to `.env` in the workflow directory: the script passes declared variables to the provider. An empty declaration inherits the matching process variable.
+
+Repository, brief and environment paths are resolved from the script directory, regardless of the launch directory. With `--directory /path2/workflow1`, run `node /path2/workflow1/run.ts "My objective"`, or enter that directory and run `npm start -- "My objective"` after installing dependencies.
+
+The workflow directory does not need to be a Git repository. The target repository must have a commit. Worktrees, locks and logs remain under the target repository’s `.outpost`. To work on several repositories, compose tasks with their own `repository`: see [multi-repository workflows](../../workflows/sandbox-tasks/#multiple-repositories).
+
+See [choose a repository](../../sandboxes/repositories/) for workflow directories, target repositories and relative paths.

@@ -13,7 +13,6 @@ const roots = [];
 const runnable = new Set([
   "workflows/graph.md",
   "workflows/execution.md",
-  "workflows/backlogs.md",
   "extend/agents.md",
 ]);
 let executed = 0;

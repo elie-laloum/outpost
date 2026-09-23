@@ -42,4 +42,4 @@ Les dossiers distants peuvent contenir `initial.bundle`/`commits.bundle`, patche
 3. Inspectez bundles et patches dans un clone séparé avant toute application à un travail important.
 4. Résolvez chevauchements ou conflits, puis reprenez avec branche et conversation explicites si nécessaire.
 
-Ne relancez pas aveuglément une campagne après un échec de fermeture du tracker : les commits peuvent déjà être intégrés. Réconciliez d’abord les issues. Ne supprimez jamais un verrou actif pour contourner les règles de propriété.
+Ne supprimez jamais un verrou actif pour contourner les règles de propriété.

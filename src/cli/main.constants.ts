@@ -1,11 +1,12 @@
 export const help = `Outpost — sandboxed coding agents and workflows
 
 outpost init [--yes] [--agent codex|claude] [--provider docker|podman|vercel|daytona|local]
-             [--template blank|iterate|review|plan|plan-review] [--tracker github|beads|custom]
-             [--manager npm|pnpm|yarn|bun] [--model NAME] [--install] [--build] [--image NAME] [--label NAME] [--directory PATH]
+             [--manager npm|pnpm|yarn|bun] [--model NAME] [--install] [--build] [--image NAME] [--directory PATH] [--repository PATH]
 outpost image build|remove [--engine docker|podman] [--file PATH] [--image NAME] [--uid ID] [--gid ID]
 
 Node.js 24+ and Git are required. Run generated scripts with Node.js.
+Initialization writes run.ts and project files directly into --directory (default: current directory).
+--repository selects the target Git repository; relative paths are resolved from the workflow directory.
 `;
 
 export const cliOptions = {
@@ -15,12 +16,10 @@ export const cliOptions = {
   build: { type: "boolean" },
   agent: { type: "string" },
   provider: { type: "string" },
-  template: { type: "string" },
-  tracker: { type: "string" },
   manager: { type: "string" },
   model: { type: "string" },
-  label: { type: "string" },
   directory: { type: "string" },
+  repository: { type: "string" },
   engine: { type: "string" },
   file: { type: "string" },
   image: { type: "string" },
@@ -31,6 +30,4 @@ export const cliOptions = {
 export const initializationQuestions = [
   ["agent", "Agent (codex/claude)", "codex"],
   ["provider", "Sandbox (docker/podman/vercel/daytona/local)", "docker"],
-  ["template", "Template (blank/iterate/review/plan/plan-review)", "blank"],
-  ["tracker", "Issue tracker (github/beads/custom)", "github"],
 ] as const;

@@ -101,20 +101,6 @@ Chaque export public du package et de ses sous-chemins possède une page de réf
 - [commandTask](./commandtask/)
 - [isolatedTask](./isolatedtask/)
 
-## Campagnes et backlogs
-
-- [campaign](./campaign/)
-- [CampaignEvent](./campaignevent/)
-- [CampaignOptions](./campaignoptions/)
-- [CampaignResult](./campaignresult/)
-- [IssueOutcome](./issueoutcome/)
-- [Assignment](./assignment/)
-- [Backlog](./backlog/)
-- [Issue](./issue/)
-- [beadsBacklog](./beadsbacklog/)
-- [githubBacklog](./githubbacklog/)
-- [BacklogSettings](./backlogsettings/)
-
 ## Providers
 
 - [docker](./docker/)

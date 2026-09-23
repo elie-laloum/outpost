@@ -22,7 +22,6 @@ Commencez par le code d’erreur, le log et le chemin du workspace conservé. Ch
 | Branche utilisée ailleurs                 | Utiliser volontairement ce workspace ou choisir une autre branche.                             |
 | Hôte modifié pendant l’exécution distante | Garder la récupération et réconcilier séparément changements locaux et entrants.               |
 | Workflow en attente après annulation      | Les callbacks/providers personnalisés doivent respecter AbortSignal et finir leur nettoyage.   |
-| Campagne fusionnée mais issue ouverte     | Corriger l’accès au tracker et réconcilier la fermeture avant de relancer.                     |
 | Init refuse l’écrasement                  | Modifier les fichiers existants ou choisir un autre répertoire projet.                         |
 
 Pour signaler un problème, fournissez OS, versions de Node/Outpost/provider/agent, code d’erreur expurgé et configuration minimale. Retirez identifiants, prompts privés et sources des logs partagés. Voir [récupération](../recovery/) et [sécurité](../security/).

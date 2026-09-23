@@ -25,6 +25,6 @@ Managed worktrees live in `.outpost/workspaces`. If a named branch is already ch
 
 ## Parallel work
 
-Give parallel jobs distinct branch names. Host integration is serialized, but serialization cannot resolve semantic conflicts between independently developed changes. Use an explicit review/integration phase for related work, or [campaigns](../../workflows/campaigns/).
+Give parallel jobs distinct branch names. Host integration is serialized, but serialization cannot resolve semantic conflicts between independently developed changes. Use an explicit review/integration phase for related work.
 
 Locks record the owner PID. Active ownership prevents conflicting operations; dead-owner locks can be recovered. Do not remove a live lock to force concurrent access.

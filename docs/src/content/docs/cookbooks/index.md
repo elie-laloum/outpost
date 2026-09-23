@@ -14,7 +14,6 @@ Each recipe includes a complete script, prerequisites, an expected outcome and f
 | Intermediate | [Codex implements, Claude reviews](./pair-review/) | Two agents sharing a workspace      |
 | Intermediate | [Parallel investigations](./parallel/)             | Independent branches and results    |
 | Advanced     | [Delivery gates](./delivery-gate/)                 | Tests and review before integration |
-| Advanced     | [Issue campaign](./issue-campaign/)                | Bounded tracker-driven delivery     |
 | Operations   | [Recovery](./recovery/)                            | Inspect and resume partial work     |
 
 ## Shared setup

@@ -25,6 +25,6 @@ Les worktrees gérés résident dans `.outpost/workspaces`. Si une branche nomm�
 
 ## Travail parallèle
 
-Attribuez des noms de branche distincts aux tâches parallèles. L’intégration sur l’hôte est séquentielle, mais cela ne résout pas les conflits sémantiques entre changements indépendants. Prévoyez une étape de revue et d’intégration, ou utilisez les [campagnes](../../workflows/campaigns/).
+Attribuez des noms de branche distincts aux tâches parallèles. L’intégration sur l’hôte est séquentielle, mais cela ne résout pas les conflits sémantiques entre changements indépendants. Prévoyez une étape de revue et d’intégration.
 
 Les verrous enregistrent le PID propriétaire. Un propriétaire actif empêche les accès concurrents ; un verrou abandonné peut être récupéré. Ne supprimez pas un verrou actif pour forcer l’accès.

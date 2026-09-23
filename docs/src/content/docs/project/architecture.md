@@ -7,15 +7,14 @@ sidebar:
 
 Outpost uses ports and adapters. Domain contracts describe capabilities; application services coordinate their use. Concrete agents and sandbox providers implement independent ports. A new agent does not require changes to sandbox allocation, and a new provider does not require changes to agent protocols.
 
-| Layer               | Owns                                                                                | Dependencies                                   |
-| ------------------- | ----------------------------------------------------------------------------------- | ---------------------------------------------- |
-| `domain`            | Contracts, validation, prompts, responses, task graphs and workflow execution rules | Domain and Node primitives                     |
-| `adapters/agents`   | Claude/Codex command construction and event translation                             | Domain and infrastructure                      |
-| `adapters/backlogs` | GitHub/Beads issue access                                                           | Domain and infrastructure                      |
-| `providers`         | Sandbox allocation, commands, transfers and disposal                                | Domain, infrastructure and provider services   |
-| `infrastructure`    | Git, processes, files, native transcript storage and logging                        | Domain and infrastructure                      |
-| `application`       | Resource ownership, use cases, campaigns and remote synchronization                 | Domain, adapters, providers and infrastructure |
-| `cli`               | Argument handling, onboarding and image commands                                    | Application and adapters                       |
+| Layer             | Owns                                                                                | Dependencies                                   |
+| ----------------- | ----------------------------------------------------------------------------------- | ---------------------------------------------- |
+| `domain`          | Contracts, validation, prompts, responses, task graphs and workflow execution rules | Domain and Node primitives                     |
+| `adapters/agents` | Claude/Codex command construction and event translation                             | Domain and infrastructure                      |
+| `providers`       | Sandbox allocation, commands, transfers and disposal                                | Domain, infrastructure and provider services   |
+| `infrastructure`  | Git, processes, files, native transcript storage and logging                        | Domain and infrastructure                      |
+| `application`     | Resource ownership, use cases and remote synchronization                            | Domain, adapters, providers and infrastructure |
+| `cli`             | Argument handling, onboarding and image commands                                    | Application and adapters                       |
 
 ## Contracts and configuration
 
@@ -45,11 +44,9 @@ Git infrastructure separates repository preparation, locking, managed worktree a
 
 Remote synchronization follows explicit stages: download changes, validate them, back up host state, then apply changes. These services retain overlap checks, concurrent-edit detection and recovery artifacts. The coordinator owns the last synchronized revision and decides whether cleanup is safe.
 
-## Workflows and campaigns
+## Workflows
 
 Workflow graph validation, execution state, task retries and dependency scheduling are separate domain services. Task identity controls access to dependency values. Observer errors cannot alter execution outcomes.
-
-Campaign orchestration composes a planner, an issue worker and an integration service. A worker implements and reviews one issue; integration verifies commits before tracker closure. The campaign owns cycle limits and outcome aggregation.
 
 ## Extending and validating
 

@@ -42,7 +42,7 @@ try {
     [
       "--input-type=module",
       "-e",
-      "import {response, workflow, campaign, conversations, reporter, githubBacklog, beadsBacklog, recoveryDetails} from '@elie-laloum/outpost'; import {docker} from '@elie-laloum/outpost/providers/docker'; if((await response.text({tag:'ok'}).read('<ok>yes</ok>'))!=='yes'||docker().name!=='docker')throw Error('Package import failed'); for(const item of [campaign,conversations.capture,reporter,githubBacklog,beadsBacklog,recoveryDetails])if(typeof item!=='function')throw Error('Missing public extension'); (await workflow('empty',[]).start()).unwrap()",
+      "import {response, workflow, conversations, reporter, recoveryDetails} from '@elie-laloum/outpost'; import {docker} from '@elie-laloum/outpost/providers/docker'; if((await response.text({tag:'ok'}).read('<ok>yes</ok>'))!=='yes'||docker().name!=='docker')throw Error('Package import failed'); for(const item of [conversations.capture,reporter,recoveryDetails])if(typeof item!=='function')throw Error('Missing public extension'); (await workflow('empty',[]).start()).unwrap()",
     ],
     { cwd: temporary, stdio: "inherit" },
   );
@@ -60,6 +60,35 @@ try {
     [cli, "init", "--yes", "--provider", "local"],
     { cwd: temporary, stdio: "inherit" },
   );
+  execFileSync(process.execPath, ["--check", join(temporary, "run.ts")], {
+    cwd: temporary,
+    stdio: "inherit",
+  });
+  const standalone = join(temporary, "workflow");
+  execFileSync(
+    process.execPath,
+    [
+      cli,
+      "init",
+      "--yes",
+      "--provider",
+      "vercel",
+      "--directory",
+      standalone,
+      "--repository",
+      "../repository",
+    ],
+    {
+      cwd: temporary,
+      stdio: "inherit",
+    },
+  );
+  const generated = JSON.parse(
+    readFileSync(join(standalone, "package.json"), "utf8"),
+  );
+  assert.equal(generated.scripts.start, "node run.ts");
+  assert.ok(generated.devDependencies["@elie-laloum/outpost"]);
+  assert.ok(generated.devDependencies["@vercel/sandbox"]);
   const manifest = JSON.parse(
     readFileSync(
       join(

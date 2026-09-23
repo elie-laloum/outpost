@@ -14,7 +14,6 @@ Chaque recette fournit un script complet, des prérequis, un résultat attendu e
 | Intermédiaire | [Codex implémente, Claude relit](./pair-review/) | Deux agents dans le même workspace              |
 | Intermédiaire | [Investigations parallèles](./parallel/)         | Des branches et résultats indépendants          |
 | Avancé        | [Contrôles de livraison](./delivery-gate/)       | Tests et revue avant intégration                |
-| Avancé        | [Campagne d'issues](./issue-campaign/)           | Une livraison bornée pilotée par le tracker     |
 | Exploitation  | [Récupération](./recovery/)                      | Inspecter et reprendre un travail partiel       |
 
 ## Installation commune

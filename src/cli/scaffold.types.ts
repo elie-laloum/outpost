@@ -1,15 +1,11 @@
-export type Template = "blank" | "iterate" | "review" | "plan" | "plan-review";
-
 export interface InitOptions {
   readonly directory?: string;
+  readonly repository?: string;
   readonly agent?: "claude" | "codex";
   readonly provider?: "docker" | "podman" | "vercel" | "daytona" | "local";
-  readonly template?: Template;
-  readonly tracker?: "github" | "beads" | "custom";
   readonly manager?: "npm" | "pnpm" | "yarn" | "bun";
   readonly model?: string;
   readonly install?: boolean;
-  readonly label?: string;
   readonly build?: boolean;
   readonly image?: string;
 }
@@ -19,7 +15,8 @@ export interface PackageManifest {
   readonly packageManager?: string;
 }
 export interface ProjectSettings {
-  readonly extension: string;
+  readonly extension: "ts" | "mts";
+  readonly hasPackage: boolean;
   readonly manager: string;
 }
 export interface ScaffoldResult {

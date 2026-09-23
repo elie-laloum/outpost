@@ -36,4 +36,4 @@ Utilisez le chemin du workspace pour inspecter état Git et diffs, puis journal 
 
 Avec une conversation valide, fournissez son identifiant via **continuation: { id }** à un nouveau dispatch, ou utilisez **resume** sur un résultat réussi. Configurez de nouveau l’authentification. La transcription restaure l’historique, pas l’ancien home, les processus ou les fichiers non commités.
 
-Conservez les commits de la branche nommée. Inspectez les worktrees avant déplacement ou suppression. Ne relancez pas aveuglément une campagne ayant déjà intégré ou partiellement modifié le tracker. Voir la [reprise](../../agents/conversations/) et les [informations de récupération](../../operations/recovery/).
+Conservez les commits de la branche nommée. Inspectez les worktrees avant déplacement ou suppression. Voir la [reprise](../../agents/conversations/) et les [informations de récupération](../../operations/recovery/).

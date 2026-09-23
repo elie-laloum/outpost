@@ -17,13 +17,12 @@ Outpost est une bibliothèque TypeScript accompagnée d’un petit CLI de config
 | Comprendre la propriété des ressources et leur fermeture | [Concepts essentiels](start/concepts/)          |
 | Conserver un environnement entre plusieurs tâches        | [Sandboxes réutilisables](sandboxes/lifecycle/) |
 | Coordonner des tâches et des agents                      | [Premier workflow](workflows/graph/)            |
-| Traiter les issues d’un outil de suivi                   | [Campagnes d’issues](workflows/campaigns/)      |
 | Retrouver une option ou un type de retour                | [Index de l’API](reference/)                    |
 | Diagnostiquer un échec                                   | [Dépannage](operations/troubleshooting/)        |
 
 ## Utiliser cette documentation
 
-Les guides présentent une opération à la fois. La référence API recense chaque export public et son contrat TypeScript. Les exemples utilisent ESM et Node.js 24 ou ultérieur. Sauf indication contraire, les chemins comme `.outpost/run.mts` sont relatifs à votre projet.
+Les guides présentent une opération à la fois. La référence API recense chaque export public et son contrat TypeScript. Les exemples utilisent ESM et Node.js 24 ou ultérieur. Sauf indication contraire, les chemins comme `run.ts` sont relatifs à votre projet.
 
 Recherchez un nom d’API, une option du CLI ou une erreur dans la barre de recherche. Le sélecteur de langue relie les pages françaises et anglaises correspondantes. Le site publié suit la dernière release ; la CI vérifie les changements non publiés avant la release suivante.
 

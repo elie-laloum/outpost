@@ -17,13 +17,12 @@ Outpost is a TypeScript library and a small setup CLI. It supports **Claude Code
 | Understand ownership and cleanup         | [Core concepts](start/concepts/)               |
 | Keep an environment running between jobs | [Reusable sandboxes](sandboxes/lifecycle/)     |
 | Coordinate tasks and agents              | [Your first workflow](workflows/graph/)        |
-| Deliver issues from a tracker            | [Issue campaigns](workflows/campaigns/)        |
 | Find a specific option or return type    | [API index](reference/)                        |
 | Diagnose a failed run                    | [Troubleshooting](operations/troubleshooting/) |
 
 ## How to use these docs
 
-Guides explain one operation at a time. The API reference lists every public export and its TypeScript contract. Examples use ESM and Node.js 24 or later. Paths such as `.outpost/run.mts` are relative to your project unless a page says otherwise.
+Guides explain one operation at a time. The API reference lists every public export and its TypeScript contract. Examples use ESM and Node.js 24 or later. Paths such as `run.ts` are relative to your project unless a page says otherwise.
 
 Use the search box for an API name, CLI flag or error. The language selector switches between matching English and French pages. The published site follows the latest release; unreleased source changes are validated by CI before the next release.
 

@@ -7,15 +7,14 @@ sidebar:
 
 Outpost utilise des ports et des adapters. Le domaine décrit les capacités ; les services applicatifs coordonnent leur utilisation. Les agents et les providers de sandbox implémentent des contrats indépendants.
 
-| Couche              | Responsabilité                                                          |
-| ------------------- | ----------------------------------------------------------------------- |
-| `domain`            | Contrats, règles, prompts, réponses, graphes et exécution des workflows |
-| `adapters/agents`   | Commandes et protocoles propres à Claude et Codex                       |
-| `adapters/backlogs` | Accès aux issues GitHub et Beads                                        |
-| `providers`         | Allocation, commandes, transferts et libération des sandboxes           |
-| `infrastructure`    | Git, processus, fichiers, conversations et journaux                     |
-| `application`       | Cycle de vie, dispatch, campagnes et synchronisation distante           |
-| `cli`               | Commandes, initialisation et images                                     |
+| Couche            | Responsabilité                                                          |
+| ----------------- | ----------------------------------------------------------------------- |
+| `domain`          | Contrats, règles, prompts, réponses, graphes et exécution des workflows |
+| `adapters/agents` | Commandes et protocoles propres à Claude et Codex                       |
+| `providers`       | Allocation, commandes, transferts et libération des sandboxes           |
+| `infrastructure`  | Git, processus, fichiers, conversations et journaux                     |
+| `application`     | Cycle de vie, dispatch et synchronisation distante                      |
+| `cli`             | Commandes, initialisation et images                                     |
 
 Les contrats nommés et les types objets sont placés dans des fichiers `*.types.ts`, sans initialisation à l’exécution. Les paramètres par défaut, options reconnues, recettes et limites partagées sont placés dans des fichiers `*.constants.ts`. Les variables locales et valeurs calculées restent dans leur opération.
 
@@ -29,7 +28,7 @@ Les points d’entrée publics sont conservés. Les façades `providers/agents.t
 - L’exécution d’un tour, l’accumulation des événements et la surveillance des délais sont séparées. L’agrégation de consommation est une règle commune du domaine.
 - Les providers composent leurs services de préparation, commandes et transferts. Docker et Podman partagent la mécanique du moteur de conteneurs.
 - La synchronisation distante suit quatre étapes : téléchargement, validation, sauvegarde puis application. Le coordinateur conserve la révision synchronisée et les informations de récupération.
-- Les workflows séparent validation du graphe, état d’exécution, tentatives d’une tâche et ordonnancement. Les campagnes composent planification, traitement d’une issue et intégration vérifiée avant clôture.
+- Les workflows séparent validation du graphe, état d’exécution, tentatives d’une tâche et ordonnancement.
 
 ## Extension et vérification
 

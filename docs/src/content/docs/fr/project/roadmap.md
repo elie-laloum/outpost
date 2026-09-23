@@ -9,12 +9,10 @@ La roadmap décrit des ajouts prévus, pas des prérequis à l’utilisation de 
 
 ## Disponible aujourd’hui
 
-Sandboxes réutilisables et workspaces Git indépendants ; adapters Claude Code et Codex ; capture, reprise et fork natifs ; providers Docker, Podman, local, Vercel et Daytona ; prompts, itération, réponses structurées et hooks ; workflows typés et campagnes ; CLI, documentation bilingue et publication automatisée.
+Sandboxes réutilisables et workspaces Git indépendants ; adapters Claude Code et Codex ; capture, reprise et fork natifs ; providers Docker, Podman, local, Vercel et Daytona ; prompts, itération, réponses structurées et hooks ; workflows typés ; CLI, documentation bilingue et publication automatisée.
 
 ## V1.x — efficacité et diagnostic
 
-- Reçus persistants de fermeture de campagne pour réconcilier les pannes de tracker sans refaire les issues fusionnées.
-- Politiques de planification, commandes de validation de fusion et budgets de tokens par rôle configurables.
 - Manifestes de fichiers incrémentaux et transferts compressés avec garanties de récupération.
 - Caches de dépendances et images d’agents préconstruites avec provenance signée.
 - Inspection/nettoyage de récupération, rétention et quotas de stockage.

@@ -51,7 +51,7 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - run: node src/cli/main.ts init --yes --provider ${{ matrix.engine }} --tracker beads --image outpost-ci:latest --build
+      - run: node src/cli/main.ts init --yes --provider ${{ matrix.engine }} --image outpost-ci:latest --build
       - run: node --test test/container.test.ts
         env:
           OUTPOST_CONTAINER_ENGINE: ${{ matrix.engine }}

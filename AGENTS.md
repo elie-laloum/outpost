@@ -4,7 +4,7 @@ This file applies to the entire repository. It is the durable project brief for 
 
 ## Purpose and philosophy
 
-Outpost is a TypeScript library and CLI for running coding agents in sandboxes, managing their Git workspaces, preserving conversations and composing typed workflows and issue campaigns.
+Outpost is a TypeScript library and CLI for running coding agents in sandboxes, managing their Git workspaces, preserving conversations and composing typed workflows.
 
 - Prioritize reliable, directly usable behavior and an excellent developer experience.
 - Make code understandable through names, small responsibilities and explicit contracts.
@@ -29,15 +29,14 @@ Use the repository as the source of truth for versions, supported options and co
 
 ## Architecture and responsibilities
 
-| Location                 | Responsibility                                                                                          |
-| ------------------------ | ------------------------------------------------------------------------------------------------------- |
-| `src/domain/`            | Contracts, validation, prompts, responses, usage, task graphs and workflow rules.                       |
-| `src/application/`       | Use cases, resource ownership, dispatch, lifecycle orchestration, campaigns and remote synchronization. |
-| `src/adapters/agents/`   | One implementation per agent, with separate request construction and event decoding.                    |
-| `src/adapters/backlogs/` | Tracker-specific issue access behind backlog contracts.                                                 |
-| `src/providers/`         | Sandbox allocation, command execution, file transfer and disposal.                                      |
-| `src/infrastructure/`    | Processes, binary streams, Git, files, native conversation storage and logging.                         |
-| `src/cli/`               | Argument handling, project scaffolding and image commands.                                              |
+| Location               | Responsibility                                                                               |
+| ---------------------- | -------------------------------------------------------------------------------------------- |
+| `src/domain/`          | Contracts, validation, prompts, responses, usage, task graphs and workflow rules.            |
+| `src/application/`     | Use cases, resource ownership, dispatch, lifecycle orchestration and remote synchronization. |
+| `src/adapters/agents/` | One implementation per agent, with separate request construction and event decoding.         |
+| `src/providers/`       | Sandbox allocation, command execution, file transfer and disposal.                           |
+| `src/infrastructure/`  | Processes, binary streams, Git, files, native conversation storage and logging.              |
+| `src/cli/`             | Argument handling, project scaffolding and image commands.                                   |
 
 `scripts/check-architecture.mjs` enforces these internal dependency directions:
 
@@ -53,6 +52,12 @@ These are allowed boundaries, not a reason to add unnecessary dependencies. Keep
 Apply SRP throughout the codebase: allocation, request building, event decoding, process supervision, transfer, storage and cleanup have different reasons to change. Split them accordingly. Do not centralize Claude and Codex implementations in a provider file. Compatibility facades such as `providers/agents.ts` re-export; internal services import their owning modules directly.
 
 Use `AgentAdapter` for agent behavior, `SandboxProvider`/`SandboxLease` for execution environments and `ConversationStore` for transcript persistence. Prefer composition and injected capabilities to inheritance or branching on provider names throughout the application. Extend the relevant adapter or strategy when introducing a variant.
+
+## Workflow projects and repositories
+
+`outpost init` creates a standalone workflow project directly in `--directory`, including `run.ts` (`run.mts` for explicit CommonJS manifests), a brief, environment declarations and provider files. Preserve existing package manifests and ignore rules. `--repository` selects a local Git checkout independently of the workflow directory; generated scripts resolve relative paths from their own directory and pass `repository` explicitly to dispatch.
+
+Each sandbox owns one repository. Compose multiple repositories with `isolatedTask` and dependency edges; no shared Git transaction or automatic push spans them. Runtime worktrees, locks and logs belong under the target repository's `.outpost`. Keep bilingual repository guidance and standalone/multi-repository regression tests aligned with these contracts.
 
 ## Code conventions
 
@@ -81,7 +86,7 @@ Treat these as review and regression-test obligations when changing the affected
 - Preserve conversation capture, restore, continuation, fork and transcript relocation. Agent authentication and conversation storage are separate concerns.
 - Preserve hook ordering, structured-response validation, retries, usage aggregation and observer isolation. Observer failures must not change execution outcomes.
 - Protect concurrent host edits during remote synchronization. Validate and back up before applying incoming changes. Preserve recovery artifacts whenever cleanup would discard recoverable work.
-- Keep branch integration and tracker closure explicit and correctly ordered. Never discard dirty or detached worktrees as routine cleanup.
+- Keep branch integration explicit and correctly ordered. Never discard dirty or detached worktrees as routine cleanup.
 - Do not silently fall back from an isolated provider to host execution. `local()` is explicitly unisolated; mounted Git metadata is not an adversarial security boundary.
 
 ## Tests and coverage
@@ -89,7 +94,7 @@ Treat these as review and regression-test obligations when changing the affected
 Use `node:test` and `node:assert/strict`, following the existing suite. Test observable contracts and failures rather than mirroring implementation details.
 
 - `test/unit/`: domain rules, protocol adapters, boundaries and isolated infrastructure behavior.
-- `test/functional/`: lifecycle, Git, synchronization, recovery, CLI and campaign behavior using temporary resources.
+- `test/functional/`: lifecycle, Git, synchronization, recovery, CLI and workflow behavior using temporary resources.
 - `test/container.test.ts`: real Docker/Podman behavior. Mocks alone cannot validate process sessions, tmpfs, mounts, ownership or archive transfer.
 - `test/fixtures/container-terminal.ts`: real PTY input, exit status, cancellation and warm reuse.
 - `scripts/package-smoke.mjs`: the packed package as a consumer sees it, including exports and declarations.

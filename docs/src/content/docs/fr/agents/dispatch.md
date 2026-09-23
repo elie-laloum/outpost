@@ -12,6 +12,7 @@ import { dispatch, codex } from "@elie-laloum/outpost";
 import { docker } from "@elie-laloum/outpost/providers/docker";
 
 const result = await dispatch({
+  repository: "/work/backend",
   agent: codex(),
   provider: docker(),
   branch: { mode: "integrate" },
@@ -21,6 +22,8 @@ console.log(result.text, result.branch, result.commits);
 ```
 
 Le `dispatch` de premier niveau exige un agent et un brief. Il combine la [configuration de sandbox](../../reference/sandboxoptions/) et les [options de dispatch](../../reference/dispatchoptions/). Il ferme les ressources créées ; un workspace fourni reste ouvert.
+
+`repository` sélectionne le dépôt Git local à modifier. Sans cette option, la bibliothèque utilise `process.cwd()`. Pour un chemin indépendant du dossier de lancement, utilisez `resolve(import.meta.dirname, "../backend")` ; voir [choisir un dépôt](../../sandboxes/repositories/).
 
 ## Lire le résultat
 

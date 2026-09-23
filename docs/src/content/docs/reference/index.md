@@ -101,20 +101,6 @@ Every public export from the package and its subpaths has a reference page. Sign
 - [commandTask](./commandtask/)
 - [isolatedTask](./isolatedtask/)
 
-## Campaigns and backlogs
-
-- [campaign](./campaign/)
-- [CampaignEvent](./campaignevent/)
-- [CampaignOptions](./campaignoptions/)
-- [CampaignResult](./campaignresult/)
-- [IssueOutcome](./issueoutcome/)
-- [Assignment](./assignment/)
-- [Backlog](./backlog/)
-- [Issue](./issue/)
-- [beadsBacklog](./beadsbacklog/)
-- [githubBacklog](./githubbacklog/)
-- [BacklogSettings](./backlogsettings/)
-
 ## Providers
 
 - [docker](./docker/)

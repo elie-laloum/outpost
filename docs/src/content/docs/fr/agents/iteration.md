@@ -12,7 +12,7 @@ import { dispatch, codex } from "@elie-laloum/outpost";
 
 const result = await dispatch({
   agent: codex(),
-  brief: { file: ".outpost/brief.md" },
+  brief: { file: "brief.md" },
   passes: 5,
   until: ["<outpost>done</outpost>"],
 });

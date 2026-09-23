@@ -7,6 +7,18 @@ sidebar:
 
 Traduction du journal `CHANGELOG.md` conservé à la racine du dépôt. Chaque version publiée possède ses notes dans les deux langues.
 
+## Unreleased
+
+- Affiche la progression de l’agent dans les scripts générés et les détails de récupération lors d’une annulation, sans trace d’erreur non interceptée.
+- Documente en français et en anglais les dossiers de workflow, les chemins des dépôts et les tâches multi-dépôts.
+
+- Générer les projets de workflow directement dans le dossier choisi, avec `run.ts`, un manifeste par défaut et conservation des fichiers package/ignore existants.
+- Ajouter `init --repository` pour cibler un dépôt externe ; résoudre brief et environnement depuis le script et conserver l’image du workflow indépendamment du dépôt ciblé.
+- Lire les recettes d’image à la racine du workflow ; les anciennes installations peuvent utiliser `--file .outpost/Dockerfile`.
+
+- Supprimer les campagnes d’issues, les connecteurs de backlog GitHub/Beads/personnalisés et leurs types publics.
+- Simplifier l’initialisation en un script de dispatch ; retirer les modèles de campagne, `--template`, `--tracker`, `--label`, les fichiers de tracker et l’installation des CLI GitHub/Beads.
+
 ## 1.1.4
 
 - Attente de la fin des commandes non interactives et transmission du vrai code de sortie ; réutilisation du terminal du runtime en mode interactif.

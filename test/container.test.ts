@@ -85,11 +85,6 @@ test(
         variables: { OUTPOST_FIXTURE: "injected" },
       });
       assert.equal(env.stdout.trim(), "injected");
-      const tracker = await box.command({
-        executable: "bd",
-        arguments: ["--version"],
-      });
-      assert.equal(tracker.status, 0, tracker.stderr);
       const output = await box.dispatch({
         agent: {
           name: "protocol-fixture",

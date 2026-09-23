@@ -5,38 +5,42 @@ sidebar:
   order: 2
 ---
 
-This guide uses Codex and Docker. Start in a committed Git repository after [installing Outpost](../installation/).
+This guide uses Codex and Docker. Choose a Git repository with a commit. The workflow will live in a separate directory; see also [installation](../installation/).
 
 ## 1. Generate the project files
 
 ```sh
-npx outpost init --yes --agent codex --provider docker --template blank --build
+mkdir workflow1
+cd workflow1
+npx @elie-laloum/outpost init --yes --repository /path1/repository --install --build
 ```
 
-This creates `.outpost` with a starter script, image recipe and environment example, then builds the image. It refuses to overwrite an existing scaffold. For Podman, replace `docker` with `podman`. For Claude Code, replace `codex` with `claude`.
+This creates `package.json`, `run.ts`, `brief.md`, `.env.example`, `.gitignore` and an image recipe directly in `workflow1`, installs dependencies and builds the image. It refuses to overwrite an existing scaffold. For Podman, replace `docker` with `podman`. For Claude Code, replace `codex` with `claude`.
 
 ## 2. Declare agent credentials
 
-Copy `.outpost/.env.example` to `.outpost/.env`. Declare `OPENAI_API_KEY` for Codex. For Claude Code, declare `ANTHROPIC_API_KEY` or `CLAUDE_CODE_OAUTH_TOKEN`.
+Copy `.env.example` to `.env`. Declare `OPENAI_API_KEY` for Codex. For Claude Code, declare `ANTHROPIC_API_KEY` or `CLAUDE_CODE_OAUTH_TOKEN`.
 
 ```dotenv
 OPENAI_API_KEY=
 ```
 
-An empty declaration imports the matching process variable. A nonempty file value takes precedence. Your repository-root `.env` is not read. Keep the credentials file untracked. See [environment configuration](../../agents/environment/) for native authentication files and overrides.
+An empty declaration imports the matching process variable. A nonempty file value takes precedence. The script reads the workflow directory’s `.env` and passes its declarations to the provider. Keep the credentials file untracked. See [environment configuration](../../agents/environment/) for native authentication files and overrides.
 
 ## 3. Run the starter
 
 ```sh
-node .outpost/run.mts "Add input validation, run tests and commit the change"
+node run.ts "Add input validation, run tests and commit the change"
 ```
 
-Use `run.ts` instead when your package declares `"type": "module"`; initialization prints the exact command. The image contains both agent CLIs, Git, Node and Python. Add other project tools to the recipe as needed.
+The script uses TypeScript, executed directly by Node.js 24+. For existing projects declaring `"type": "commonjs"`, the generated file is `run.mts`; use the command printed by `init`. The image contains both agent CLIs, Git, Node and Python. Add other project tools to the recipe as needed.
 
 ## 4. Inspect the result
 
-Review Git status and history, the returned commits and the logs under `.outpost/logs`. A dispatch collects agent changes; the selected branch policy determines whether those commits stay on a separate branch or integrate into the host branch. It does not push your repository to a remote.
+Review Git status and history, the returned commits and the logs under the target repository’s `.outpost/logs`. A dispatch collects agent changes; the selected branch policy determines whether those commits stay on a separate branch or integrate into the host branch. It does not push your repository to a remote.
 
 To control the lifecycle yourself, read [one-shot dispatch](../../agents/dispatch/) and [branch policies](../../sandboxes/branches/). To automate several steps, continue with [workflows](../../workflows/graph/).
 
 For account-based access, follow [Connect Codex](../../agents/connect-codex/) or [Connect Claude](../../agents/connect-claude/). For a Codex API key, add the login hook from that guide to the generated script before dispatching.
+
+See [choose a repository](../../sandboxes/repositories/) for workflow directories, target repositories and relative paths.

@@ -41,4 +41,37 @@ const verify = commandTask({
 
 Serialize tasks sharing one sandbox with `after`. For parallel agent jobs, use `isolatedTask` and distinct named branches in each request. The request must include its agent, brief and any provider/workspace settings.
 
-Retries can repeat filesystem or external side effects. Test commands are usually easy to retry; a committing agent or tracker mutation needs a deliberate retry policy.
+Retries can repeat filesystem or external side effects. Test commands are usually easy to retry; a committing agent needs a deliberate retry policy.
+
+## Multiple repositories
+
+A workflow can live in `/path2/workflow1` and orchestrate external repositories. Each isolated task selects its own `repository`; a sandbox owns one repository. Tasks can depend on each other or run concurrently when independent.
+
+In the generated `run.ts`, keep the `.env` loading and `runtime` configuration. Replace the `dispatch` import with `isolatedTask, workflow`, then replace the final dispatch with:
+
+```js
+const backend = isolatedTask({
+  key: "backend",
+  request: () => ({
+    ...runtime,
+    repository: "/path1/repository",
+    branch: { mode: "named", name: "outpost/backend" },
+    brief: { text: "Implement the API change, test and commit." },
+  }),
+});
+const frontend = isolatedTask({
+  key: "frontend",
+  after: [backend],
+  request: () => ({
+    ...runtime,
+    repository: "/path3/another-repository",
+    branch: { mode: "named", name: "outpost/frontend" },
+    brief: { text: "Adapt the frontend, test and commit." },
+  }),
+});
+(await workflow("workflow1", [backend, frontend]).start()).unwrap();
+```
+
+Commits remain on the named branches in each repository. Managed worktrees and logs are stored in each target repository’s `.outpost`; clean worktrees are removed after successful disposal. There is no shared Git transaction across repositories: a successful task is not rolled back if a later task fails.
+
+`after: [backend]` orders execution; it does not copy files or commits into the frontend repository. Use `request(context)` and `context.value(backend)` to pass the backend result explicitly into the next brief. Independent tasks can run concurrently; tasks sharing a sandbox must be serialized. See [choose a repository](../../sandboxes/repositories/) for paths and file locations.

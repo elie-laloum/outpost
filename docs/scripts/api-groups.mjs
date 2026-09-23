@@ -52,12 +52,6 @@ export const groups = [
       "task workflow WorkflowFailure Retry Task TaskContext TaskOptions TaskRecord TaskStatus Workflow WorkflowEvent WorkflowOptions WorkflowResult agentTask commandTask isolatedTask",
   },
   {
-    title: ["Campaigns and backlogs", "Campagnes et backlogs"],
-    guide: "workflows/campaigns",
-    names:
-      "campaign CampaignEvent CampaignOptions CampaignResult IssueOutcome Assignment Backlog Issue beadsBacklog githubBacklog BacklogSettings",
-  },
-  {
     title: ["Providers", "Providers"],
     guide: "providers/overview",
     names:

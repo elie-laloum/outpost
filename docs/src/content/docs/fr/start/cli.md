@@ -5,32 +5,36 @@ sidebar:
   order: 4
 ---
 
-`outpost init` génère des fichiers modifiables dans votre dépôt cible. Le mode interactif demande les choix ; en automatisation, passez `--yes` ou tous les choix requis.
+`outpost init` crée un projet de workflow dans le dossier courant ou celui indiqué par `--directory`. Ce dossier peut être indépendant des dépôts Git ciblés. Le mode interactif demande les choix ; en automatisation, passez `--yes` ou tous les choix requis.
 
 ```sh
-npx outpost init --yes --agent claude --provider podman --template plan-review --tracker github --label outpost-ready --install --build
+npx @elie-laloum/outpost init --yes --agent claude --provider podman --repository /path1/repository --install --build
 ```
 
-| Option         | Valeurs / comportement                                                             |
-| -------------- | ---------------------------------------------------------------------------------- |
-| `--yes`, `-y`  | Accepter les défauts sans question.                                                |
-| `--agent`      | `codex` (défaut) ou `claude`.                                                      |
-| `--provider`   | `docker` (défaut), `podman`, `local`, `vercel`, `daytona`.                         |
-| `--template`   | `blank` (défaut), `iterate`, `review`, `plan`, `plan-review`.                      |
-| `--tracker`    | `github`, `beads`, `custom` ; sans choix en mode automatique, objectif en mémoire. |
-| `--manager`    | `npm`, `pnpm`, `yarn`, `bun` ; sinon détection via métadonnées/lockfiles.          |
-| `--model`      | Nom du modèle inscrit dans l’adapter généré.                                       |
-| `--install`    | Installer Outpost et le SDK optionnel sélectionné.                                 |
-| `--build`      | Construire l’image de container choisie.                                           |
-| `--image`      | Remplacer le nom d’image généré.                                                   |
-| `--label`      | Label/filtre du tracker ; créé ou mis à jour pour GitHub.                          |
-| `--directory`  | Répertoire du projet cible.                                                        |
-| `--help`, `-h` | Afficher l’aide.                                                                   |
+| Option         | Valeurs / comportement                                                            |
+| -------------- | --------------------------------------------------------------------------------- |
+| `--yes`, `-y`  | Accepter les défauts sans question.                                               |
+| `--agent`      | `codex` (défaut) ou `claude`.                                                     |
+| `--provider`   | `docker` (défaut), `podman`, `local`, `vercel`, `daytona`.                        |
+| `--manager`    | `npm`, `pnpm`, `yarn`, `bun` ; sinon détection via métadonnées/lockfiles.         |
+| `--model`      | Nom du modèle inscrit dans l’adapter généré.                                      |
+| `--install`    | Installer Outpost et le SDK optionnel sélectionné.                                |
+| `--build`      | Construire l’image de container choisie.                                          |
+| `--image`      | Remplacer le nom d’image généré.                                                  |
+| `--directory`  | Répertoire du workflow, courant par défaut.                                       |
+| `--repository` | Dépôt Git ciblé ; chemin relatif au dossier du workflow, ou absolu. Défaut : `.`. |
+| `--help`, `-h` | Afficher l’aide.                                                                  |
 
-L’initialisation refuse les fichiers existants au lieu de les écraser. Elle crée `.outpost/run.ts` pour les projets ESM, `.outpost/run.mts` sinon, ainsi que configuration, prompts/standards et fichiers spécifiques au provider/tracker. La sortie finale affiche la commande exacte.
+L’initialisation crée `run.ts`, `brief.md`, `.env.example`, `.gitignore`, un `package.json` et les fichiers spécifiques au provider directement dans ce dossier. Le manifeste contient un script `start`, Outpost et le SDK cloud éventuel ; `--install` installe ces dépendances. Un `package.json` existant est conservé et les règles manquantes sont ajoutées au `.gitignore`. Tout conflit avec les autres fichiers générés fait échouer l’initialisation avant écriture.
 
-## Modèles de départ
+Le script est `run.ts` par défaut. Si un manifeste existant déclare `"type": "commonjs"`, `init` génère `run.mts` pour conserver la compatibilité ESM sans modifier ce manifeste. Node.js 24+ exécute directement ces fichiers TypeScript.
 
-`blank` lance un dispatch. `iterate` traite les issues séquentiellement. `review` ajoute une revue dans la même sandbox. `plan` planifie des branches indépendantes avec concurrence bornée et intégration. `plan-review` combine planification et revue. Sans tracker, les campagnes utilisent l’objectif de la ligne de commande comme une issue en mémoire.
+## Script généré
 
-Modifiez l’appel généré pour régler limites et adapters de rôles. Les standards résident dans `.outpost/STANDARDS.md`. Le CLI fournit un point de départ ; les appels de bibliothèque définissent le comportement d’exécution.
+Le script lance un `dispatch` avec l’objectif fourni en ligne de commande. Modifiez `brief.md` pour adapter le prompt et `run.ts` pour configurer les options. Copiez `.env.example` vers `.env` dans le dossier du workflow : le script transmet les variables déclarées au provider. Une déclaration vide reprend la variable du processus.
+
+Le dépôt, le brief et le `.env` sont résolus depuis le dossier du script, indépendamment du répertoire de lancement. Avec `--directory /path2/workflow1`, lancez `node /path2/workflow1/run.ts "Mon objectif"`, ou placez-vous dans ce dossier puis lancez `npm start -- "Mon objectif"` après installation.
+
+Le dossier du workflow n’a pas besoin d’être un dépôt Git. Le dépôt ciblé doit contenir un commit. Les worktrees, verrous et logs restent dans `.outpost` du dépôt ciblé. Pour plusieurs dépôts, composez des tâches avec leurs propres `repository` : voir [les workflows multi-dépôts](../../workflows/sandbox-tasks/#plusieurs-dépôts).
+
+Consultez [choisir un dépôt](../../sandboxes/repositories/) pour distinguer le dossier du workflow, le dépôt ciblé et les chemins relatifs.
