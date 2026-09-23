@@ -1,21 +1,17 @@
-import { mkdir, open, type FileHandle } from "node:fs/promises";
-import { dirname, join, resolve } from "node:path";
 import { randomUUID } from "node:crypto";
-import type { AgentEvent } from "../domain/ports.ts";
+import type { FileHandle } from "node:fs/promises";
+import { mkdir, open } from "node:fs/promises";
+import { dirname, join, resolve } from "node:path";
+import type { Journal, Logging } from "./journal.types.ts";
 import { reporter } from "./reporter.ts";
 
-export type Logging =
-  false | "stdout" | { readonly file?: string; readonly verbose?: boolean };
+export type { Logging } from "./journal.types.ts";
 
 export async function journal(
   repository: string,
   logging: Logging = {},
   label?: string,
-): Promise<{
-  file?: string;
-  record(event: AgentEvent): void;
-  close(): Promise<void>;
-}> {
+): Promise<Journal> {
   const file =
     logging && logging !== "stdout"
       ? resolve(

@@ -17,7 +17,7 @@ Create commits and tags on GitLab. The push mirror includes branches and tags an
 Download the `.tgz` from [GitHub Releases](https://github.com/elie-laloum/outpost/releases), then:
 
 ```sh
-npm install --save-dev ./elie-laloum-outpost-1.1.0.tgz
+npm install --save-dev ./elie-laloum-outpost-1.1.1.tgz
 npx outpost --help
 ```
 

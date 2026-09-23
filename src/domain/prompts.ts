@@ -1,26 +1,23 @@
 import { OutpostError, invariant } from "./errors.ts";
+import type {
+  Brief,
+  PreparedBrief,
+  PromptBuiltins,
+  PromptFragment,
+  PromptVariables,
+} from "./prompts.types.ts";
 
-export type PromptVariables = Readonly<
-  Record<string, string | number | boolean>
->;
-export type Brief =
-  | { readonly text: string; readonly file?: never; readonly values?: never }
-  | {
-      readonly file: string;
-      readonly text?: never;
-      readonly values?: PromptVariables;
-    };
-
-export interface PromptFragment {
-  readonly kind: "literal" | "command";
-  readonly value: string;
-}
+export type {
+  Brief,
+  PromptFragment,
+  PromptVariables,
+} from "./prompts.types.ts";
 
 export function prepareBrief(
   source: string,
   values: PromptVariables = {},
-  builtins: { WORK_BRANCH: string; BASE_BRANCH: string },
-): { fragments: readonly PromptFragment[]; unused: readonly string[] } {
+  builtins: PromptBuiltins,
+): PreparedBrief {
   for (const key of Object.keys(builtins))
     invariant(!(key in values), `Reserved prompt variable: ${key}`);
   const available = { ...values, ...builtins };

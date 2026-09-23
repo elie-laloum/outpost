@@ -2,14 +2,16 @@ import {
   chmod,
   lstat,
   mkdir,
-  readFile,
   readdir,
+  readFile,
   symlink,
   writeFile,
 } from "node:fs/promises";
 import { dirname, join, posix } from "node:path";
 import { OutpostError } from "../domain/errors.ts";
 import { safeDestination } from "../infrastructure/files.ts";
+
+export { manifestScript } from "./cloud-files.constants.ts";
 
 export async function uploadTree(
   source: string,
@@ -58,8 +60,6 @@ export async function saveDownload(
   await writeFile(destination, data);
 }
 
-export const manifestScript = `const f=require('node:fs'),p=require('node:path'),root=process.argv[1],items=[];function walk(path,relative){const s=f.lstatSync(path),kind=s.isSymbolicLink()?'link':s.isDirectory()?'directory':s.isFile()?'file':'unsupported';items.push({path:relative,kind,mode:s.mode&511,...(kind==='link'?{target:f.readlinkSync(path)}:{})});if(kind==='directory')for(const name of f.readdirSync(path))walk(p.join(path,name),relative?relative+'/'+name:name)}walk(root,'');console.log(JSON.stringify(items))`;
-
 export async function downloadTree(
   source: string,
   destination: string,
@@ -88,14 +88,20 @@ export async function downloadTree(
       );
     if (entry.kind === "directory") {
       await mkdir(target, { recursive: true });
-    } else if (entry.kind === "file") {
+      continue;
+    }
+    if (entry.kind === "file") {
       const data = await read(posix.join(source, entry.path));
       signal?.throwIfAborted();
       await saveDownload(target, data);
       await chmod(target, entry.mode & 0o777);
-    } else if (entry.kind === "link" && typeof entry.target === "string") {
+      continue;
+    }
+    if (entry.kind === "link" && typeof entry.target === "string") {
       await mkdir(dirname(target), { recursive: true });
       await symlink(entry.target, target);
-    } else throw new OutpostError("provider", "Unsupported remote file type");
+      continue;
+    }
+    throw new OutpostError("provider", "Unsupported remote file type");
   }
 }

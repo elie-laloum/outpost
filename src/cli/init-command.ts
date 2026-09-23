@@ -1,0 +1,48 @@
+import { createInterface } from "node:readline/promises";
+import type { CliInvocation } from "./main.types.ts";
+import { initialize } from "./scaffold.ts";
+import type { InitOptions } from "./scaffold.types.ts";
+
+export async function initializeCommand({
+  values,
+}: CliInvocation): Promise<void> {
+  const options: Record<string, unknown> = Object.fromEntries(
+    Object.entries(values).filter(([key]) => !["help", "yes"].includes(key)),
+  );
+  if (
+    !values.yes &&
+    !process.stdin.isTTY &&
+    (!values.agent || !values.provider || !values.template || !values.tracker)
+  )
+    throw new Error(
+      "Headless initialization requires --yes for defaults, or --agent, --provider, --template and --tracker.",
+    );
+  if (!values.yes && process.stdin.isTTY) {
+    const terminal = createInterface({
+      input: process.stdin,
+      output: process.stdout,
+    });
+    try {
+      for (const [key, label, fallback] of [
+        ["agent", "Agent (codex/claude)", "codex"],
+        ["provider", "Sandbox (docker/podman/vercel/daytona/local)", "docker"],
+        [
+          "template",
+          "Template (blank/iterate/review/plan/plan-review)",
+          "blank",
+        ],
+        ["tracker", "Issue tracker (github/beads/custom)", "github"],
+      ] as const) {
+        options[key] ??=
+          (await terminal.question(`${label} [${fallback}]: `)).trim() ||
+          fallback;
+      }
+    } finally {
+      terminal.close();
+    }
+  }
+  const result = await initialize(options as InitOptions);
+  process.stdout.write(
+    `Created ${result.files.length} files.\nRun: ${result.run}\n`,
+  );
+}

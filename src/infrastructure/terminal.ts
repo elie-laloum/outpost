@@ -1,10 +1,6 @@
-export interface TerminalState {
-  readonly input: {
-    readonly isTTY?: boolean;
-    setRawMode?(mode: boolean): unknown;
-  };
-  readonly output: { readonly isTTY?: boolean; write(text: string): unknown };
-}
+import type { TerminalState } from "./terminal.types.ts";
+
+export type { TerminalState } from "./terminal.types.ts";
 
 export function restoreTerminal(
   terminal: TerminalState = { input: process.stdin, output: process.stdout },
@@ -12,15 +8,11 @@ export function restoreTerminal(
   if (terminal.input.isTTY) {
     try {
       terminal.input.setRawMode?.(false);
-    } catch {
-      /* The terminal may already be disconnected. */
-    }
+    } catch {}
   }
   if (terminal.output.isTTY) {
     try {
       terminal.output.write("\u001b[?25h");
-    } catch {
-      /* Cursor restoration is best effort after disconnect. */
-    }
+    } catch {}
   }
 }

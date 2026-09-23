@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
+import type { Variables } from "../domain/command.types.ts";
 import { OutpostError } from "../domain/errors.ts";
-import type { Variables } from "../domain/ports.ts";
 
 export function parseEnvironment(text: string): Record<string, string> {
   const result: Record<string, string> = {};

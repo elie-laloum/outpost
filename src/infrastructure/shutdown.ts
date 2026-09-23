@@ -1,4 +1,5 @@
 const cleaners = new Map<() => unknown, (() => void) | undefined>();
+
 let installed = false,
   closing = false;
 
@@ -17,9 +18,7 @@ async function shutdown(signal?: NodeJS.Signals): Promise<void> {
     cleaners.delete(clean);
     try {
       await clean();
-    } catch {
-      /* Cleanup must continue for remaining resources. */
-    }
+    } catch {}
   }
   uninstall();
   if (signal) process.exitCode = signal === "SIGINT" ? 130 : 143;
@@ -29,9 +28,11 @@ async function shutdown(signal?: NodeJS.Signals): Promise<void> {
 const onInterrupt = () => {
   void shutdown("SIGINT");
 };
+
 const onTerminate = () => {
   void shutdown("SIGTERM");
 };
+
 const onExit = () => {
   for (const [clean, immediate] of [...cleaners.entries()].reverse()) {
     if (!cleaners.has(clean)) continue;
@@ -39,9 +40,7 @@ const onExit = () => {
     try {
       if (immediate) immediate();
       else void Promise.resolve(clean()).catch(() => undefined);
-    } catch {
-      /* An exit callback must not hide the original exit status. */
-    }
+    } catch {}
   }
   uninstall();
 };

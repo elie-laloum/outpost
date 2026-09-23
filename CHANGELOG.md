@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.1.1
+
+- Separate Claude and Codex adapters, request builders and protocol decoders; preserve unknown events as raw observations.
+- Split sandbox provisioning, operation ownership, dispatch, attachment, conversation storage and recovery into dedicated services.
+- Separate campaign planning, issue execution and integration; isolate workflow state, retries and scheduling.
+- Isolate container planning, mounts, commands and transfers, cloud command/file adapters, Git worktree management and remote synchronization stages.
+- Extract contracts into `.types.ts` modules and configuration defaults into `.constants.ts` modules, without changing public entry points.
+- Enforce dependency boundaries and type placement in CI, reject unused implementation declarations, and document the structure in English and French.
+
 ## 1.1.0
 
 - Add typed issue campaigns with dynamic planning, bounded concurrency, per-issue branches, warm review, verified integration and tracker closure.

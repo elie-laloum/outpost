@@ -1,24 +1,11 @@
 import { OutpostError, invariant } from "./errors.ts";
+import type {
+  JsonResponseOptions,
+  ResponseSpec,
+  TextResponseOptions,
+} from "./response.types.ts";
 
-export interface StandardValidator<T> {
-  readonly "~standard": {
-    readonly validate: (
-      input: unknown,
-    ) =>
-      | { readonly value: T; readonly issues?: undefined }
-      | { readonly issues: readonly unknown[] }
-      | Promise<
-          | { readonly value: T; readonly issues?: undefined }
-          | { readonly issues: readonly unknown[] }
-        >;
-  };
-}
-
-export interface ResponseSpec<T> {
-  readonly tag: string;
-  readonly repairs: number;
-  read(text: string): Promise<T>;
-}
+export type { ResponseSpec, StandardValidator } from "./response.types.ts";
 
 export class ResponseError extends OutpostError {
   readonly tag: string;
@@ -73,13 +60,9 @@ function spec<T>(
 }
 
 export const response = {
-  text: (options: { tag: string; repairs?: number }): ResponseSpec<string> =>
+  text: (options: TextResponseOptions): ResponseSpec<string> =>
     spec(options.tag, options.repairs ?? 0, async (text) => text),
-  json: <T>(options: {
-    tag: string;
-    schema: StandardValidator<T> | ((input: unknown) => T | Promise<T>);
-    repairs?: number;
-  }): ResponseSpec<T> =>
+  json: <T>(options: JsonResponseOptions<T>): ResponseSpec<T> =>
     spec(options.tag, options.repairs ?? 0, async (text) => {
       const fenced = text.match(/^```(?:json)?\s*\r?\n([\s\S]*?)\r?\n```$/i);
       const input: unknown = JSON.parse(fenced ? fenced[1]! : text);

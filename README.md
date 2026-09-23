@@ -26,7 +26,7 @@ npm pack
 Install the resulting tarball in your target repository, or use the package from [GitHub Packages](https://github.com/elie-laloum/outpost/packages). Registry configuration is documented in [Operations](docs/operations.md).
 
 ```sh
-npm install --save-dev /path/to/elie-laloum-outpost-1.1.0.tgz
+npm install --save-dev /path/to/elie-laloum-outpost-1.1.1.tgz
 npx outpost init --yes --agent codex --provider docker --template blank --build
 ```
 

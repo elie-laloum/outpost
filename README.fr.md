@@ -26,7 +26,7 @@ npm pack
 Installez l’archive obtenue dans votre dépôt cible, ou utilisez [GitHub Packages](https://github.com/elie-laloum/outpost/packages). La configuration du registre figure dans le [guide d’exploitation](docs/operations.md).
 
 ```sh
-npm install --save-dev /chemin/elie-laloum-outpost-1.1.0.tgz
+npm install --save-dev /chemin/elie-laloum-outpost-1.1.1.tgz
 npx outpost init --yes --agent codex --provider docker --template blank --build
 ```
 

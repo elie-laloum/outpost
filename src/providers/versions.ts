@@ -1,4 +1,1 @@
-export const agentVersions = Object.freeze({
-  codex: "0.156.1",
-  claude: "2.1.280",
-});
+export { agentVersions } from "./versions.constants.ts";

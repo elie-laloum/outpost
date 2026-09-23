@@ -1,16 +1,22 @@
 import { spawn } from "node:child_process";
 import { StringDecoder } from "node:string_decoder";
+import type {
+  Channel,
+  Command,
+  CommandResult,
+} from "../domain/command.types.ts";
 import { OutpostError, positive } from "../domain/errors.ts";
-import type { Channel, Command, CommandResult } from "../domain/ports.ts";
+import { outputChannels, processDefaults } from "./process.constants.ts";
+import type { Executor } from "./process.types.ts";
 import { restoreTerminal } from "./terminal.ts";
 
-export type Executor = (command: Command) => Promise<CommandResult>;
+export type { Executor } from "./process.types.ts";
 
 export const executeProcess: Executor = (command) => {
   command.signal?.throwIfAborted();
-  const deadline = command.deadlineMs ?? 600_000;
+  const deadline = command.deadlineMs ?? processDefaults.deadlineMs;
   positive(deadline, "deadlineMs");
-  const limit = command.retain ?? 65_536;
+  const limit = command.retain ?? processDefaults.retainBytes;
   positive(limit, "retain");
   return new Promise((resolve, reject) => {
     const interactive = command.interactive === true;
@@ -62,7 +68,7 @@ export const executeProcess: Executor = (command) => {
       failed = true;
       reason = error;
       kill(false);
-      escalation = setTimeout(() => kill(true), 500);
+      escalation = setTimeout(() => kill(true), processDefaults.killGraceMs);
     }
     const abort = () =>
       interrupt(
@@ -107,7 +113,7 @@ export const executeProcess: Executor = (command) => {
       clearTimeout(timer);
       clearTimeout(escalation);
       command.signal?.removeEventListener("abort", abort);
-      for (const channel of ["stdout", "stderr"] as const) {
+      for (const channel of outputChannels) {
         const tail = decoder[channel].end();
         if (tail) consume(channel, tail);
       }

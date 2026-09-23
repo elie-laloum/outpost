@@ -1,18 +1,16 @@
 import { cp, mkdir } from "node:fs/promises";
 import { homedir } from "node:os";
 import { dirname, resolve } from "node:path";
-import { executeProcess } from "../infrastructure/process.ts";
+import type { Command } from "../domain/command.types.ts";
 import { OutpostError } from "../domain/errors.ts";
 import type {
-  Command,
   SandboxProvider,
-  Variables,
   TransferOptions,
-} from "../domain/ports.ts";
+} from "../domain/sandbox.types.ts";
+import { executeProcess } from "../infrastructure/process.ts";
+import type { LocalOptions } from "./local.types.ts";
 
-export function local(
-  options: { variables?: Variables } = {},
-): SandboxProvider {
+export function local(options: LocalOptions = {}): SandboxProvider {
   return {
     name: "local",
     placement: "host",

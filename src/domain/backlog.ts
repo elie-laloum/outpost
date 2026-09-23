@@ -1,22 +1,7 @@
+import type { Assignment } from "./backlog.types.ts";
 import { invariant } from "./errors.ts";
 
-export interface Issue {
-  readonly id: string;
-  readonly title: string;
-  readonly body?: string;
-  readonly blockedBy?: readonly string[];
-}
-
-export interface Backlog {
-  list(signal?: AbortSignal): Promise<readonly Issue[]>;
-  get(id: string, signal?: AbortSignal): Promise<Issue>;
-  close(id: string, signal?: AbortSignal): Promise<void>;
-}
-
-export interface Assignment {
-  readonly id: string;
-  readonly branch: string;
-}
+export type { Assignment, Backlog, Issue } from "./backlog.types.ts";
 
 export function readPlan(input: unknown): readonly Assignment[] {
   invariant(

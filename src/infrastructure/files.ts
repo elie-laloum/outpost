@@ -1,6 +1,6 @@
 import { cp, lstat, mkdir, realpath, stat } from "node:fs/promises";
-import { dirname, isAbsolute, relative, resolve, sep } from "node:path";
 import { homedir } from "node:os";
+import { dirname, isAbsolute, relative, resolve, sep } from "node:path";
 import { OutpostError } from "../domain/errors.ts";
 
 export function expandPath(value: string, base = process.cwd()): string {

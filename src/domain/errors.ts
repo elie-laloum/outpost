@@ -1,14 +1,6 @@
-export type FaultCode =
-  | "configuration"
-  | "process"
-  | "timeout"
-  | "aborted"
-  | "workspace"
-  | "conflict"
-  | "prompt"
-  | "response"
-  | "session"
-  | "provider";
+import type { FaultCode } from "./errors.types.ts";
+
+export type { FaultCode } from "./errors.types.ts";
 
 export class OutpostError extends Error {
   recovery: Readonly<Record<string, unknown>> = {};

@@ -1,15 +1,11 @@
-import type { AgentEvent } from "../domain/ports.ts";
+import type { AgentEvent } from "../domain/agent.types.ts";
+import type { ReporterOptions, ReportPass } from "./reporter.types.ts";
 
-export interface ReporterOptions {
-  readonly label?: string;
-  readonly verbose?: boolean;
-  readonly quiet?: boolean;
-  readonly write?: (text: string) => void;
-}
+export type { ReporterOptions } from "./reporter.types.ts";
 
 export function reporter(
   options: ReporterOptions = {},
-): (event: AgentEvent & { readonly pass?: number }) => void {
+): (event: AgentEvent & ReportPass) => void {
   const write = options.write ?? ((text) => process.stdout.write(text));
   let streamed = false;
   return (event) => {

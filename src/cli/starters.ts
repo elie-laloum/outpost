@@ -1,4 +1,4 @@
-import type { InitOptions } from "./scaffold.ts";
+import type { InitOptions } from "./scaffold.types.ts";
 
 export function starter(options: InitOptions, extension: string): string {
   const agent = options.agent ?? "codex",

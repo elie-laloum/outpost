@@ -1,13 +1,14 @@
-import type { SandboxLease, TransferOptions } from "../domain/ports.ts";
 import { invariant, OutpostError } from "../domain/errors.ts";
+import type { SandboxLease, TransferOptions } from "../domain/sandbox.types.ts";
 import { interruptible } from "./abort.ts";
+import { transferDefaults } from "./transfer.constants.ts";
 
 export async function transfer<T>(
   options: TransferOptions,
   perform: (signal: AbortSignal) => Promise<T>,
 ): Promise<T> {
   options.signal?.throwIfAborted();
-  const deadlineMs = options.deadlineMs ?? 120_000;
+  const deadlineMs = options.deadlineMs ?? transferDefaults.deadlineMs;
   invariant(
     Number.isFinite(deadlineMs) && deadlineMs > 0,
     "Transfer deadline must be positive",

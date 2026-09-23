@@ -1,16 +1,6 @@
-import type {
-  SandboxContext,
-  SandboxLease,
-  SandboxProvider,
-  Variables,
-} from "../domain/ports.ts";
 import { invariant } from "../domain/errors.ts";
-
-interface ProviderDefinition {
-  readonly name: string;
-  readonly variables?: Variables;
-  acquire(context: SandboxContext): Promise<SandboxLease>;
-}
+import type { SandboxProvider } from "../domain/sandbox.types.ts";
+import type { ProviderDefinition } from "./factories.types.ts";
 
 function provider(
   placement: "mounted" | "remote",
@@ -27,6 +17,7 @@ function provider(
 export const mountedProvider = (
   definition: ProviderDefinition,
 ): SandboxProvider => provider("mounted", definition);
+
 export const remoteProvider = (
   definition: ProviderDefinition,
 ): SandboxProvider => provider("remote", definition);

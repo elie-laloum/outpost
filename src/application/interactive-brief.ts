@@ -1,12 +1,10 @@
 import { readFile } from "node:fs/promises";
 import { createInterface } from "node:readline/promises";
-import type { Brief, PromptVariables } from "../domain/prompts.ts";
 import { invariant } from "../domain/errors.ts";
+import type { Brief, PromptVariables } from "../domain/prompts.types.ts";
+import type { VariableQuestion } from "./interactive-brief.types.ts";
 
-export type VariableQuestion = (
-  key: string,
-  signal?: AbortSignal,
-) => Promise<string>;
+export type { VariableQuestion } from "./interactive-brief.types.ts";
 
 export async function completeBrief(
   brief: Brief | undefined,
