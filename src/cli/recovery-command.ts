@@ -1,3 +1,4 @@
+import { recoveryRestoreCommand } from "./recovery-restore-command.ts";
 import { recoveryPruneCommand } from "./recovery-prune-command.ts";
 import { recoveryVerifyCommand } from "./recovery-verify-command.ts";
 import { inspectRecovery } from "../application/recovery-inspection.ts";
@@ -8,6 +9,8 @@ export async function recoveryCommand({
   values,
   positionals,
 }: CliInvocation): Promise<void> {
+  if (positionals[1] === "restore")
+    return recoveryRestoreCommand({ values, positionals });
   if (positionals[1] === "prune")
     return recoveryPruneCommand({ values, positionals });
   if (positionals[1] === "verify")

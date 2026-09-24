@@ -147,3 +147,13 @@ export type {
   StorageReservation,
   StorageReservationOptions,
 } from "./infrastructure/storage-reservations.types.ts";
+
+export {
+  planRecoveryRestore,
+  restoreRecoveryTransfer,
+} from "./application/recovery-restore.ts";
+export type {
+  RecoveryRestoreOptions,
+  RecoveryRestorePlan,
+  RecoveryRestoreResult,
+} from "./application/recovery-restore.types.ts";

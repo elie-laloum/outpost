@@ -43,7 +43,7 @@ function paths(value: unknown): value is readonly string[] {
   );
 }
 
-function transferState(value: unknown): value is RecoveryTransferState {
+export function transferState(value: unknown): value is RecoveryTransferState {
   if (!value || typeof value !== "object") return false;
   if (
     !("previous" in value) ||
