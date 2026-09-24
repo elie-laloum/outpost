@@ -1,45 +1,102 @@
 import { createHash, randomUUID } from "node:crypto";
-import { mkdir, open, readFile, rm } from "node:fs/promises";
+import { mkdir, open, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { OutpostError } from "../../domain/errors.ts";
-import type { LockOwner } from "./lock.types.ts";
+import { localProcessIdentity, observeOwnership } from "./process-identity.ts";
+import { readInspectionFile } from "../inspection-file.ts";
+import { lockInspectionDefaults } from "./lock-inspection.constants.ts";
+
+export function lockPath(root: string, key: string): string {
+  return join(
+    root,
+    ".outpost",
+    "locks",
+    `${createHash("sha256").update(key).digest("hex").slice(0, 20)}.json`,
+  );
+}
+
+async function readOwner(path: string): Promise<unknown> {
+  return JSON.parse(
+    (await readInspectionFile(path, lockInspectionDefaults.maxBytes)).toString(
+      "utf8",
+    ),
+  );
+}
+
+async function createLock(path: string): Promise<() => Promise<void>> {
+  const file = await open(path, "wx", 0o600);
+  const nonce = randomUUID();
+  try {
+    await file.writeFile(
+      JSON.stringify({
+        pid: process.pid,
+        nonce,
+        identity: await localProcessIdentity(),
+      }),
+    );
+  } finally {
+    await file.close();
+  }
+  return async () => {
+    const current = await readOwner(path).catch(() => null);
+    if (
+      current &&
+      typeof current === "object" &&
+      "nonce" in current &&
+      current.nonce === nonce
+    )
+      await rm(path, { force: true });
+  };
+}
 
 export async function lock(
   root: string,
   key: string,
 ): Promise<() => Promise<void>> {
-  const folder = join(root, ".outpost", "locks");
-  await mkdir(folder, { recursive: true });
-  const path = join(
-    folder,
-    `${createHash("sha256").update(key).digest("hex").slice(0, 20)}.json`,
-  );
-  for (let attempt = 0; attempt < 2; attempt++) {
-    try {
-      const file = await open(path, "wx", 0o600);
-      await file.writeFile(
-        JSON.stringify({ pid: process.pid, nonce: randomUUID() }),
-      );
-      await file.close();
-      return () => rm(path, { force: true });
-    } catch (cause) {
-      if ((cause as NodeJS.ErrnoException).code !== "EEXIST") throw cause;
-      const owner = JSON.parse(await readFile(path, "utf8")) as LockOwner;
-      let alive = true;
-      try {
-        if (!owner.pid) throw new Error();
-        process.kill(owner.pid, 0);
-      } catch (error) {
-        alive = (error as NodeJS.ErrnoException).code === "EPERM";
-      }
-      if (alive)
-        throw new OutpostError(
-          "conflict",
-          `Workspace is already in use: ${key}`,
-          { lock: path, pid: owner.pid },
-        );
-      await rm(path, { force: true });
-    }
+  await mkdir(join(root, ".outpost", "locks"), { recursive: true });
+  const path = lockPath(root, key);
+  try {
+    return await createLock(path);
+  } catch (cause) {
+    if (!(
+      cause &&
+      typeof cause === "object" &&
+      "code" in cause &&
+      cause.code === "EEXIST"
+    ))
+      throw cause;
   }
-  throw new OutpostError("conflict", "Unable to acquire workspace lock");
+  const conflict = () =>
+    new OutpostError(
+      "conflict",
+      `Workspace is already in use or ownership is unknown: ${key}`,
+      { lock: path },
+    );
+  // Serialize stale reclamation so another contender cannot unlink a new owner.
+  const releaseGuard = await createLock(`${path}.reclaim`).catch(() => {
+    throw conflict();
+  });
+  try {
+    const owner = await readOwner(path).catch(() => null);
+    const pid =
+      owner && typeof owner === "object" && "pid" in owner
+        ? owner.pid
+        : undefined;
+    const identity =
+      owner && typeof owner === "object" && "identity" in owner
+        ? owner.identity
+        : undefined;
+    const ownership =
+      typeof pid === "number" &&
+      Number.isSafeInteger(pid) &&
+      pid > 0 &&
+      pid <= lockInspectionDefaults.maxPid
+        ? await observeOwnership(pid, identity)
+        : undefined;
+    if (ownership?.status !== "inactive") throw conflict();
+    await rm(path, { force: true });
+    return await createLock(path);
+  } finally {
+    await releaseGuard();
+  }
 }

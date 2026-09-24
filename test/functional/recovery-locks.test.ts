@@ -1,3 +1,4 @@
+import { localProcessIdentity } from "../../src/infrastructure/git/process-identity.ts";
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
@@ -43,6 +44,9 @@ test("optional lock inspection observes a real owner without exposing its nonce 
     path,
     state: "present",
     pid: process.pid,
+    ownership: (await localProcessIdentity())
+      ? { status: "active", reason: "LOCAL_IDENTITY_MATCH" }
+      : { status: "unknown", reason: "LEGACY_OR_INVALID_IDENTITY" },
   });
   assert.doesNotMatch(JSON.stringify(report), /nonce/);
   assert.deepEqual(await readFile(path), contents);

@@ -98,3 +98,22 @@ export { reporter } from "./infrastructure/reporter.ts";
 export type { ReporterOptions } from "./infrastructure/reporter.ts";
 
 export type { VariableQuestion } from "./application/interactive-brief.ts";
+
+export {
+  planRecoveryRetention,
+  pruneRecoveryRetention,
+  assertRecoveryQuota,
+} from "./application/recovery-retention.ts";
+export type {
+  RecoveryRetentionPolicy,
+  RecoveryRetentionOptions,
+  RecoveryRetentionPlan,
+  RecoveryRetentionEntry,
+  RecoveryPruneResult,
+  RecoveryQuotaOptions,
+} from "./application/recovery-retention.types.ts";
+export { verifyRecoveryTransfer } from "./application/recovery-verification.ts";
+export type {
+  RecoveryVerification,
+  RecoveryVerificationOptions,
+} from "./application/recovery-verification.types.ts";

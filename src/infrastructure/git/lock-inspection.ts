@@ -1,14 +1,16 @@
+import { observeOwnership } from "./process-identity.ts";
 import { readInspectionFile } from "../inspection-file.ts";
 import type { StorageEntry, StorageIssue } from "../storage-inventory.types.ts";
 import { lockInspectionDefaults } from "./lock-inspection.constants.ts";
 import type {
+  LockIdentityRecord,
   LockInspection,
   LockInspectionEntry,
   LockInspectionState,
   LockPidProbe,
 } from "./lock-inspection.types.ts";
 
-async function readPid(path: string): Promise<number | undefined> {
+async function readPid(path: string): Promise<LockIdentityRecord | undefined> {
   const record: unknown = JSON.parse(
     (await readInspectionFile(path, lockInspectionDefaults.maxBytes)).toString(
       "utf8",
@@ -24,7 +26,10 @@ async function readPid(path: string): Promise<number | undefined> {
     pid > lockInspectionDefaults.maxPid
   )
     return undefined;
-  return pid;
+  return {
+    pid,
+    ...("identity" in record ? { identity: record.identity } : {}),
+  };
 }
 
 async function inspectEntry(
@@ -32,16 +37,18 @@ async function inspectEntry(
   probe: LockPidProbe,
 ): Promise<LockInspectionState> {
   if (entry.kind !== "file") return { state: "skipped", reason: "NOT_FILE" };
-  let pid: number | undefined;
+  let record: LockIdentityRecord | undefined;
   try {
-    pid = await readPid(entry.path);
+    record = await readPid(entry.path);
   } catch {
     return { state: "unknown", reason: "LOCK_READ_FAILED" };
   }
-  if (pid === undefined) return { state: "unknown", reason: "INVALID_PID" };
+  if (record === undefined) return { state: "unknown", reason: "INVALID_PID" };
+  const { pid, identity } = record;
+  const ownership = await observeOwnership(pid, identity);
   try {
     probe(pid);
-    return { state: "present", pid };
+    return { state: "present", pid, ownership };
   } catch (error) {
     if (
       error &&
@@ -49,8 +56,8 @@ async function inspectEntry(
       "code" in error &&
       error.code === "ESRCH"
     )
-      return { state: "absent", pid };
-    return { state: "unknown", pid, reason: "PID_PROBE_FAILED" };
+      return { state: "absent", pid, ownership };
+    return { state: "unknown", pid, reason: "PID_PROBE_FAILED", ownership };
   }
 }
 

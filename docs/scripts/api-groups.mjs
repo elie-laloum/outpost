@@ -58,6 +58,12 @@ export const groups = [
       "docker podman local vercel daytona ContainerOptions VercelOptions DaytonaOptions mountedProvider remoteProvider SandboxContext SandboxLease SandboxProvider TransferOptions Variables Volume",
   },
   {
+    title: ["Recovery and retention", "Récupération et rétention"],
+    guide: "operations/recovery",
+    names:
+      "planRecoveryRetention pruneRecoveryRetention assertRecoveryQuota RecoveryRetentionPolicy RecoveryRetentionOptions RecoveryRetentionPlan RecoveryRetentionEntry RecoveryPruneResult RecoveryQuotaOptions verifyRecoveryTransfer RecoveryVerification RecoveryVerificationOptions",
+  },
+  {
     title: ["Errors", "Erreurs"],
     guide: "operations/recovery",
     names: "OutpostError recoveryDetails FaultCode",

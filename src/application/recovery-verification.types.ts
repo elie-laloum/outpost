@@ -17,7 +17,7 @@ export interface RecoveryStructureCheck {
 
 export interface RecoveryVerification {
   readonly directory: string;
-  readonly scope: "transfer-structure";
+  readonly scope: "transfer-structure" | "transfer-restorability";
   readonly complete: boolean;
   readonly integrity: RecoveryIntegrity;
   readonly checksums?: RecoveryChecksumResult;
@@ -25,6 +25,8 @@ export interface RecoveryVerification {
 }
 
 export interface RecoveryVerificationOptions {
+  readonly restorability?: boolean;
+  readonly repository?: string;
   readonly checksums?: boolean;
   readonly maxBytes?: number;
 }

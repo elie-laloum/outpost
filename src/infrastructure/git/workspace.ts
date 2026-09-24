@@ -94,7 +94,11 @@ export async function acquireWorkspace(
     );
   } catch (error) {
     if (created) {
-      const clean = await git(workdir, ["status", "--porcelain"]).then(
+      const clean = await git(workdir, [
+        "status",
+        "--porcelain",
+        "--ignored",
+      ]).then(
         (output) => !output.trim(),
         () => false,
       );

@@ -1,3 +1,4 @@
+import { recoveryPruneCommand } from "./recovery-prune-command.ts";
 import { recoveryVerifyCommand } from "./recovery-verify-command.ts";
 import { inspectRecovery } from "../application/recovery-inspection.ts";
 import { invariant, positive } from "../domain/errors.ts";
@@ -7,6 +8,8 @@ export async function recoveryCommand({
   values,
   positionals,
 }: CliInvocation): Promise<void> {
+  if (positionals[1] === "prune")
+    return recoveryPruneCommand({ values, positionals });
   if (positionals[1] === "verify")
     return recoveryVerifyCommand({ values, positionals });
   invariant(
@@ -73,7 +76,7 @@ export async function recoveryCommand({
         const pid = "pid" in lock ? ` | PID ${lock.pid}` : "";
         const reason = "reason" in lock ? ` | ${lock.reason}` : "";
         process.stdout.write(
-          `  ${JSON.stringify(lock.name)} | ${lock.state}${pid}${reason}\n`,
+          `  ${JSON.stringify(lock.name)} | ${lock.state}${pid}${reason}${lock.ownership ? ` | ownership ${lock.ownership.status}: ${lock.ownership.reason}` : ""}\n`,
         );
       }
       for (const issue of report.locks.issues)

@@ -31,7 +31,7 @@ try {
 
 ## What is preserved
 
-Recovery metadata can include workspace, conversation, commits, transcript and log. Availability depends on how far execution reached. Dirty managed worktrees are retained; clean owned workspaces are removed after startup failure. Named branches survive clean worktree removal.
+Recovery metadata can include workspace, conversation, commits, transcript and log. Availability depends on how far execution reached. Dirty managed worktrees and worktrees containing ignored files are retained; clean owned workspaces are removed after startup failure. Named branches survive clean worktree removal.
 
 Remote recovery folders may contain `initial.bundle`/`commits.bundle`, binary-capable patches, `previous-index.patch`, untracked files under `incoming`/`previous-files`, and `state.json`. They represent prior and incoming state, not a guarantee that an interrupted transfer captured everything.
 
@@ -84,7 +84,7 @@ node src/cli/main.ts recovery inspect --repository /path/to/repository --locks -
 
 Only regular files among the inventoried lock entries are read, with a 4 KiB limit per record. Positive integer PIDs up to 2,147,483,647 are probed with signal `0`, which does not terminate the process. The report displays the PID and `present`, `absent` or `unknown`. Only a process-not-found result (`ESRCH`) means `absent`; permission errors and other probe failures remain `unknown`. Malformed, oversized, unreadable or changing records are also unknown. Symlinks, directories and other non-file entries are skipped. Raw lock contents and nonces are not displayed.
 
-This is a local PID observation, not proof of lock ownership or activity. Current lock records identify neither the host nor the process start time: shared filesystems, PID namespaces and PID reuse can make a PID observation misleading. An absent PID does not authorize deletion. Inspection never acquires, releases or removes existing locks, and `activity` remains `"unverified"`.
+This is a local PID observation, not proof of lock ownership or activity. Legacy lock records identify neither the host nor the process start time; shared filesystems, PID namespaces and PID reuse can make a PID observation misleading. New records also support the separate ownership observation described below. An absent PID does not authorize deletion. Inspection never acquires, releases or removes existing locks, and `activity` remains `"unverified"`.
 
 JSON adds `locks: { scope: "local-pid", complete, entries, issues }`. Each entry has `name`, `path`, `state`, a valid `pid` when available, and a `reason` for unknown/skipped results. `locks.complete` applies only to listed entries; an unknown result makes it false and the CLI exits with `1`. Present/absent PIDs alone do not fail inspection. The inventory and optional Git check keep their separate completeness fields; any partial check causes exit status `1`.
 
@@ -98,57 +98,11 @@ It creates a temporary Git repository, holds one real Outpost lock and adds one 
 
 ## Verify a retained transfer structure
 
-Use the unreleased `recovery verify` command on a specific remote transfer directory, the one containing `state.json` (normally `.outpost/recovery/<session>/<transfer>`):
-
-```sh
-node src/cli/main.ts recovery verify --directory /path/to/retained/transfer
-node src/cli/main.ts recovery verify --directory /path/to/retained/transfer --json
-```
-
-The directory may have been relocated and need not belong to a Git checkout. This command checks the current transfer format produced by `backupHost`, not the parent session directory, conversation stores or orphaned workspaces. A transfer interrupted before the host backup stage can legitimately lack `state.json`; a failed check indicates incomplete or unverifiable structure, not proof of corruption.
-
-By default the command reads only `state.json`, limited to 64 KiB. It requires `previous` and `next` commit identifiers in the same 40- or 64-character hexadecimal format, plus `previousExtras` and `incoming` arrays of at most 1,000 unique relative paths each. Empty paths/components, dot components, parent traversal, Git metadata paths and POSIX/Windows rooted paths are refused before inspecting references. Unknown additional fields are ignored and never displayed.
-
-It then checks filesystem metadata for the three required regular files `remote.patch`, `previous.patch` and `previous-index.patch`, and for `commits.bundle` when `previous` differs from `next`. Empty patches are valid. Every referenced payload must exist under `previous-files` or `incoming` as a regular file or a leaf symlink. Leaf symlinks are reported as `SYMLINK_PRESENT` without reading their targets; parent symlinks and symlinked state/patch/bundle files are refused. Unreferenced files are outside the check.
-
-Exit status `0` means the expected structure is present. Exit status `1` means a failed check or invalid invocation. JSON contains `directory`, `scope: "transfer-structure"`, `complete`, `integrity: "unverified"` and `checks` (`path`, `status`, `code`). Raw metadata contents, patches, payloads and bundles are not displayed. No Git command runs and no file is changed by verification.
-
-This is an observation, not an atomic snapshot or proof that restoration will work. Patch/bundle contents, hashes, permissions, commit availability, cross-file consistency and resource activity remain unverified. Even a malformed bundle can pass this structural check when its file exists. Recorded checksum comparison is available separately below; full restoration validation remains planned.
-
-Try a temporary demonstration from the source checkout:
-
-```sh
-node test/fixtures/recovery-verification.ts
-```
-
-It constructs a synthetic transfer with all expected files, verifies exit status `0`, removes one referenced payload, then verifies exit status `1` with `FILE_UNAVAILABLE`. The demonstration removes only its temporary directory and exits successfully when both expected results are observed.
+See [structure, checksum and isolated Git restoration checks](../recovery-verification/).
 
 ## Check recorded transfer checksums
 
-New remote transfers on main record `checksums.json` after host backup and before host apply. It contains a versioned, unsigned SHA-256 manifest covering `state.json`, the three transfer patches, the required commit bundle and the referenced files under `previous-files` and `incoming`. File bytes are hashed in chunks; symlinks record a hash of their link text, never their target contents. The manifest also records entry kind and byte count. Parent session files such as `initial.bundle` and unrelated artifacts are outside this manifest.
-
-Capture adds one read of each covered file during backup and atomically publishes the completed manifest. If capture fails, synchronization stops before host apply and retains its recovery files. Verification never creates or repairs a manifest for an existing backup.
-
-Request checksum verification explicitly:
-
-```sh
-node src/cli/main.ts recovery verify --directory /path/to/retained/transfer --checksums
-node src/cli/main.ts recovery verify --directory /path/to/retained/transfer --checksums --max-bytes 268435456 --json
-```
-
-Checksum verification starts only after structural checks pass. The manifest must cover exactly the expected paths without duplicates; unexpected paths are rejected before hashing. The manifest read is limited to 1 MiB. File and symlink hashes use a default aggregate budget of 1 GiB; `--max-bytes` changes it and requires `--checksums`. The separately bounded state and manifest metadata reads are outside this budget. The budget is checked against observed sizes, not trusted manifest sizes. Changed files, unsupported entries and exhausted budgets stop verification with an explicit failure. File hashing uses fixed-size buffers rather than loading whole backups into memory.
-
-JSON `integrity` is `checksums-match` when all required entries match, `checksums-mismatch` when hashing completes with a divergence, and `unverified` when checks were not requested or could not finish. An optional `checksums` object includes its checks, integrity result, `bytesChecked` and `maxBytes`. `bytesChecked` counts successfully hashed bytes. Any mismatch, missing/unreadable/invalid manifest, unavailable source or exceeded limit makes the requested check fail with exit status `1`. Older backups without a manifest still support the default structural check; requesting checksums reports `CHECKSUMS_UNAVAILABLE`, never an assumed match.
-
-A matching unsigned manifest detects divergence from the recorded bytes; it does not authenticate the backup or protect against someone rewriting both data and manifest. It also does not prove valid Git objects, applicable patches, correct permissions, consistent capture, inactivity or successful restoration. Checksums of symlinks say nothing about target contents. No content or digest values are printed in the verification report.
-
-Try a same-size edit in a temporary transfer:
-
-```sh
-node test/fixtures/recovery-checksums.ts
-```
-
-Expect `checksums-match` and exit status `0`, then `CHECKSUM_MISMATCH`, `checksums-mismatch` and exit status `1` after the demonstration changes a payload without changing its size. The demonstration cleans up its own temporary directory.
+[SHA-256 manifests](../recovery-verification/) are checked explicitly, separately from patch applicability.
 
 ## Recover deliberately
 
@@ -158,3 +112,13 @@ Expect `checksums-match` and exit status `0`, then `CHECKSUM_MISMATCH`, `checksu
 4. Resolve local/remote overlap or merge conflicts, then resume with an explicit branch and conversation where appropriate.
 
 Never remove a live lock just to bypass ownership checks.
+
+## Observe local ownership
+
+Lock inspection keeps its existing PID fields and adds `ownership: { status, reason }` when a valid PID is available. On Linux, new locks record a hashed machine identifier, boot identifier, PID namespace and kernel process start ticks. Matching observations report `active`; a confirmed absent process in the same host, boot and namespace reports `inactive`. Legacy/malformed identities, other hosts or boots, inaccessible processes, different PID namespaces and reused PIDs remain `unknown`, with an explicit reason. Identity fields and nonces are never included in inspection output.
+
+This is an observation of the recorded local owner, not a distributed lease, proof of useful work or a global activity check. The top-level `activity` stays `unverified`, and `locks.complete` still describes PID inspection rather than ownership certainty. Platforms without these Linux identity facilities report ownership as unknown; normal acquisition of an absent lock and nonce-checked release still work everywhere.
+
+Acquisition only reclaims an existing lock when its local owner is confirmed inactive. Unknown, malformed and legacy locks block acquisition, including an absent legacy PID. A crashed process on a platform without identity support therefore needs deliberate manual investigation. Release checks its nonce and never intentionally removes a replacement owner's record. Do not remove a lock merely because the PID field appears stale.
+
+See [retention and quotas](../storage-retention/) to plan explicit cleanup.
