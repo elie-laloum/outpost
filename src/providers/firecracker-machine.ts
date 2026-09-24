@@ -22,6 +22,10 @@ import type {
 } from "./firecracker.types.ts";
 
 export function validateFirecracker(options: FirecrackerOptions): void {
+  invariant(
+    !("egress" in options) || options.egress === undefined,
+    "Firecracker cannot enforce Outpost egress policies; configure host networking explicitly",
+  );
   for (const path of [
     options.binary,
     options.kernel,

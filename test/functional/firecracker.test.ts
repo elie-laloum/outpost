@@ -203,6 +203,8 @@ test(
     const f = await fixture();
     try {
       assert.equal(firecracker(f.options).placement, "remote");
+      const networkOptions = { ...f.options, egress: { mode: "deny-all" } };
+      assert.throws(() => firecracker(networkOptions), /egress/);
       assert.throws(
         () => firecracker({ ...f.options, kernel: "relative" }),
         /absolute/,
