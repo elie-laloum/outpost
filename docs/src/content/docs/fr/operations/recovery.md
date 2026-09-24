@@ -37,7 +37,7 @@ Les dossiers distants peuvent contenir `initial.bundle`/`commits.bundle`, patche
 
 ## Inspecter le stockage conservé
 
-La commande non publiée `outpost recovery inspect` inventorie `.outpost/recovery`, `.outpost/logs`, `.outpost/locks` et `.outpost/workspaces` dans le checkout choisi. Elle est disponible sur main. Elle lit les métadonnées du système de fichiers, sans lire le contenu des transcripts, patches ou verrous, modifier les métadonnées Git, créer de dossiers d’exécution ni supprimer de fichiers.
+La commande non publiée `outpost recovery inspect` inventorie `.outpost/recovery`, `.outpost/logs`, `.outpost/locks` et `.outpost/workspaces` dans le checkout choisi. Elle est disponible sur main. Par défaut, elle lit les métadonnées du système de fichiers, sans lire le contenu des transcripts, patches ou verrous, modifier les métadonnées Git, créer de dossiers d’exécution ni supprimer de fichiers.
 
 ```sh
 node src/cli/main.ts recovery inspect --repository /chemin/du/depot
@@ -55,6 +55,23 @@ node src/cli/main.ts recovery inspect --repository /chemin/du/depot --max-entrie
 ```
 
 Un parcours complet termine avec le code `0`. Un parcours partiel termine avec `1` tout en affichant son rapport ; arguments invalides ou checkout Git indisponible terminent aussi avec `1`. Le JSON contient `repository`, `root`, `categories`, `usage`, `issues`, `complete`, `scannedEntries`, `maxEntries` et `activity: "unverified"`. Il expose uniquement des métadonnées. Un inventaire complet ne prouve ni la validité ni l’inactivité des données récupérables. Cette commande ne détermine pas si une suppression est sûre, ne nettoie pas le stockage et n’applique ni rétention ni quotas.
+
+## Inspecter l’état Git des workspaces
+
+Ajoutez `--git` pour inspecter l’état Git des entrées de workspaces inventoriées :
+
+```sh
+node src/cli/main.ts recovery inspect --repository /chemin/du/depot --git
+node src/cli/main.ts recovery inspect --repository /chemin/du/depot --git --json
+```
+
+Les worktrees enregistrés affichent leur branche ou HEAD détachée, commit, état clean/dirty et indicateur de verrou Git. Dirty inclut les changements indexés, non indexés, non suivis et ceux des sous-modules. Les fichiers ignorés sont exclus du statut Git, mais leurs tailles restent dans l’inventaire du stockage. Un worktree propre n’est pas forcément supprimable : fichiers ignorés, commits non publiés et opérations en cours peuvent encore compter. Un verrou de worktree Git est distinct d’un verrou d’opération Outpost et ne prouve pas une activité.
+
+Les dossiers absents du registre des worktrees du dépôt choisi sont signalés `unregistered` ; ils ne sont pas inspectés à travers le dépôt parent. Les entrées autres que des dossiers, dont les liens symboliques, sont `skipped`. Les worktrees enregistrés aux métadonnées Git illisibles ou incohérentes sont `unavailable`, jamais supposés propres. Les dossiers enregistrés mais absents sont hors de cet inventaire, qui liste uniquement les entrées de stockage observées. La commande ne nettoie pas le registre Git.
+
+Cette vérification optionnelle laisse Git lire le contenu des workspaces pour calculer leur état ; contenus, noms des fichiers modifiés et raisons des verrous ne sont pas affichés. Les verrous Git optionnels, fsmonitor et la maintenance automatique sont désactivés. Chaque commande Git dispose de 10 secondes et d’une limite stdout de 1 Mio ; erreurs ou limites atteintes rendent l’inspection Git partielle. Le budget `--max-entries` de l’inventaire ne borne pas le parcours propre à Git. Les deux vérifications restent des observations, pas un instantané atomique ni une vérification d’activité ou d’intégrité.
+
+Le JSON ajoute `git: { complete, workspaces, issues }`. Chaque workspace possède `name`, `path`, `state` et, s’il est enregistré, `head`, `branch` (`null` pour une HEAD détachée), `dirty` et `locked`. Les entrées skipped/unavailable possèdent aussi une `reason`. Le champ racine `complete` décrit l’inventaire du stockage ; `git.complete` décrit les vérifications Git optionnelles des entrées listées. Le code de sortie est `1` si l’une des deux inspections est partielle ; des workspaces modifiés, détachés, verrouillés ou non enregistrés ne font pas échouer l’inspection à eux seuls.
 
 ## Procédure de récupération
 

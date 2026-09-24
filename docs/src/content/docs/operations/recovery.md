@@ -37,7 +37,7 @@ Remote recovery folders may contain `initial.bundle`/`commits.bundle`, binary-ca
 
 ## Inspect retained storage
 
-The unreleased `outpost recovery inspect` command inventories the selected checkout's `.outpost/recovery`, `.outpost/logs`, `.outpost/locks` and `.outpost/workspaces`. It is available on main. It reads filesystem metadata, without reading transcript, patch or lock contents, modifying Git metadata, creating runtime directories or removing files.
+The unreleased `outpost recovery inspect` command inventories the selected checkout's `.outpost/recovery`, `.outpost/logs`, `.outpost/locks` and `.outpost/workspaces`. It is available on main. By default it reads filesystem metadata, without reading transcript, patch or lock contents, modifying Git metadata, creating runtime directories or removing files.
 
 ```sh
 node src/cli/main.ts recovery inspect --repository /path/to/repository
@@ -55,6 +55,23 @@ node src/cli/main.ts recovery inspect --repository /path/to/repository --max-ent
 ```
 
 A complete scan exits with `0`. A partial scan exits with `1` while still printing its report; invalid arguments or an unavailable Git checkout also exit with `1`. JSON includes `repository`, `root`, `categories`, `usage`, `issues`, `complete`, `scannedEntries`, `maxEntries` and `activity: "unverified"`. It exposes metadata only. A complete inventory does not prove that recovery files are valid or inactive. This command does not determine deletion safety, prune storage, enforce retention or apply quotas.
+
+## Inspect workspace Git state
+
+Add `--git` to inspect the Git state of the inventoried workspace entries:
+
+```sh
+node src/cli/main.ts recovery inspect --repository /path/to/repository --git
+node src/cli/main.ts recovery inspect --repository /path/to/repository --git --json
+```
+
+Registered worktrees show their branch or detached HEAD, commit, clean/dirty status and Git worktree lock flag. Dirty includes staged, unstaged, untracked and submodule changes. Ignored files are excluded from Git status, although their sizes remain in the storage inventory. A clean worktree is not necessarily safe to delete: ignored files, unpublished commits and ongoing operations may still matter. A Git worktree lock is distinct from an Outpost operation lock and does not prove activity.
+
+Directories absent from the selected repository's worktree registry are reported as `unregistered`; they are not inspected through the parent repository. Non-directory entries, including symlinks, are `skipped`. Registered worktrees with unreadable or inconsistent Git metadata are `unavailable`, never assumed clean. Missing registered directories are outside this inventory, which only lists observed storage entries. The command does not prune Git registrations.
+
+This optional check lets Git read workspace contents to calculate status; file contents, changed filenames and lock reasons are not displayed. Optional Git locks, fsmonitor and automatic maintenance are disabled. Each Git command has a 10-second deadline and a 1 MiB stdout limit; errors or exceeded limits make the Git inspection partial. The inventory's `--max-entries` budget does not bound Git's own traversal. Both checks remain observations, not an atomic snapshot or an activity/integrity check.
+
+JSON adds `git: { complete, workspaces, issues }`. Each workspace has `name`, `path`, `state` and, when registered, `head`, `branch` (`null` for detached HEAD), `dirty` and `locked`. Skipped/unavailable entries also have a `reason`. The top-level `complete` describes the storage inventory; `git.complete` describes the optional Git checks for listed entries. Exit status is `1` if either is partial; dirty, detached, locked or unregistered workspaces alone do not fail inspection.
 
 ## Recover deliberately
 

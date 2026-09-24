@@ -1,6 +1,7 @@
 import { join } from "node:path";
 import { directory } from "../infrastructure/files.ts";
 import { git } from "../infrastructure/git/command.ts";
+import { inspectWorktreeGit } from "../infrastructure/git/worktree-inspection.ts";
 import { storageInventory } from "../infrastructure/storage-inventory.ts";
 import type {
   RecoveryInspection,
@@ -18,5 +19,17 @@ export async function inspectRecovery(
     join(repository, ".outpost"),
     options.maxEntries,
   );
-  return { repository, activity: "unverified", ...inventory };
+  const gitReport = options.git
+    ? await inspectWorktreeGit(
+        repository,
+        inventory.categories.find((category) => category.name === "workspaces")
+          ?.entries ?? [],
+      )
+    : undefined;
+  return {
+    repository,
+    activity: "unverified",
+    ...inventory,
+    ...(gitReport ? { git: gitReport } : {}),
+  };
 }

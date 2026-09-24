@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Ajouter les rapports optionnels `recovery inspect --git` avec branche/HEAD détachée, état clean/dirty, verrous Git et états non enregistrés/indisponibles explicites, sans rafraîchir les index ni nettoyer le registre.
 - Ajouter les rapports en lecture seule `outpost recovery inspect` pour récupération, logs, verrous et workspaces gérés, avec tailles logiques issues des métadonnées, protection contre les liens symboliques et résultats partiels explicites en cas de limite ou d’erreur de parcours.
 - Vérifier l’aide des commandes agents par défaut de lancement/reprise/fork dans les images de diagnostic, en contrôlant usage et options déclarées plutôt que le seul code de sortie ; conserver explicitement l’exécution réelle et la compatibilité du protocole comme non vérifiées.
 - Étendre `doctor --image` au diagnostic d’une image Docker/Podman locale dans une sandbox temporaire, sans téléchargement d’image ni réseau ; distinguer versions des agents de l’image, erreurs de nettoyage et vérifications hôtes.
