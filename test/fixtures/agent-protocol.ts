@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { protocolFixtures } from "../../src/adapters/agents/protocol-fixtures.constants.ts";
 
 const [agent, mode, ...args] = process.argv.slice(2);
-assert.ok(agent === "claude" || agent === "codex");
+assert.ok(agent === "claude" || agent === "codex" || agent === "gemini");
 assert.ok(mode === "start" || mode === "resume" || mode === "fork");
 const continuation = mode === "start" ? [] : [mode, "fixture-conversation"];
 if (agent === "codex")
@@ -23,6 +23,15 @@ if (agent === "claude")
     ...(mode === "start" ? [] : ["--resume", "fixture-conversation"]),
     ...(mode === "fork" ? ["--fork-session"] : []),
   ]);
+if (agent === "gemini") {
+  assert.equal(mode, "start");
+  assert.deepEqual(args, [
+    "--approval-mode",
+    "yolo",
+    "--output-format",
+    "stream-json",
+  ]);
+}
 let input = "";
 for await (const chunk of process.stdin) input += chunk;
 assert.equal(input, "fixture-prompt");

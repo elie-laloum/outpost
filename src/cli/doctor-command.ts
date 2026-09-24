@@ -34,8 +34,8 @@ export async function doctorCommand(
     "Unknown provider. Choose docker, podman, local, vercel or daytona.",
   );
   invariant(
-    agent === "codex" || agent === "claude",
-    "Unknown agent. Choose codex or claude.",
+    agent === "codex" || agent === "claude" || agent === "gemini",
+    "Unknown agent. Choose codex, claude or gemini.",
   );
   const report = await diagnose(
     {

@@ -19,7 +19,8 @@ export function agentOutput(
     conversation: string | undefined,
     failure: string | undefined;
   let usage: Usage = { input: 0, cached: 0, output: 0 };
-  let completed = false;
+  let completed = false,
+    finished = false;
   const handlers: import("../domain/agent.types.ts").AgentEventHandlers = {
     text: (event) => {
       text += event.text;
@@ -29,6 +30,9 @@ export function agentOutput(
     },
     conversation: (event) => {
       conversation = event.id;
+    },
+    finished: () => {
+      finished = true;
     },
     failure: (event) => {
       failure = event.message;
@@ -44,7 +48,9 @@ export function agentOutput(
       visitAgentEvent(event, handlers);
       if (event.kind !== "raw") notify(options.observe, { ...event, pass, at });
     }
-    completed = markers.some((marker) => (finalText ?? text).includes(marker));
+    completed =
+      (!agent.requiresFinishedEvent || finished) &&
+      markers.some((marker) => (finalText ?? text).includes(marker));
   }
   return {
     get completed() {
@@ -70,6 +76,12 @@ export function agentOutput(
     },
     result() {
       if (failure) throw new OutpostError("process", failure, { conversation });
+      if (agent.requiresFinishedEvent && !finished)
+        throw new OutpostError(
+          "process",
+          "Agent exited without a successful final event",
+          { conversation },
+        );
       return {
         text: finalText ?? (text || rawTail),
         usage,

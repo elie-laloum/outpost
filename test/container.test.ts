@@ -15,6 +15,9 @@ import { conversations } from "../src/index.ts";
 import { executeProcess } from "../src/infrastructure/process.ts";
 import { imageRecipe } from "../src/cli/scaffold.constants.ts";
 
+const containerImage =
+  process.env.OUTPOST_CONTAINER_IMAGE ?? "outpost-ci:latest";
+
 test(
   "real container supports Git, native CLIs, transfers, cancellation and warm reuse",
   { skip: !process.env.OUTPOST_CONTAINER_ENGINE },
@@ -24,7 +27,7 @@ test(
         process.env.OUTPOST_CONTAINER_ENGINE === "podman" ? podman : docker;
     const box = await createSandbox({
       repository: root,
-      provider: provider({ image: "outpost-ci:latest", networks: "none" }),
+      provider: provider({ image: containerImage, networks: "none" }),
       agent: codex(),
       branch: { mode: "named", name: "container-test" },
       logging: false,
@@ -124,7 +127,7 @@ test(
     const mounted = join(root, "mounted.txt");
     await writeFile(mounted, "read-only source");
     const lease = await factory({
-      image: "outpost-ci:latest",
+      image: containerImage,
       networks: "none",
       volumes: [
         {
@@ -187,7 +190,7 @@ test(
     const factory =
       process.env.OUTPOST_CONTAINER_ENGINE === "podman" ? podman : docker;
     const lease = await factory({
-      image: "outpost-ci:latest",
+      image: containerImage,
       networks: "none",
     }).acquire({
       repository: root,
@@ -277,7 +280,7 @@ test(
     const factory =
       process.env.OUTPOST_CONTAINER_ENGINE === "podman" ? podman : docker;
     const lease = await factory({
-      image: "outpost-ci:latest",
+      image: containerImage,
       networks: "none",
     }).acquire({
       repository: root,
@@ -403,7 +406,7 @@ test(
         "none",
         "--entrypoint",
         "sh",
-        "outpost-ci:latest",
+        containerImage,
         "-c",
         'test -d "$HOME" && test -w "$HOME" && test "$(stat -c %a "$HOME")" = 700 && touch "$HOME/test-home"',
       ],
@@ -413,15 +416,15 @@ test(
 );
 
 test(
-  "real image diagnostics check both agents and remove containers after success and timeout",
+  "real image diagnostics check all bundled agents and remove containers after success and timeout",
   { skip: !process.env.OUTPOST_CONTAINER_ENGINE },
   async () => {
     const engine =
       process.env.OUTPOST_CONTAINER_ENGINE === "podman" ? "podman" : "docker";
-    for (const agent of ["codex", "claude"] as const) {
+    for (const agent of ["codex", "claude", "gemini"] as const) {
       let name = "";
       const checks = await diagnoseImage(
-        { provider: engine, agent, image: "outpost-ci:latest" },
+        { provider: engine, agent, image: containerImage },
         async (command) => {
           const args = command.arguments ?? [];
           if (args[0] === "create") name = args[args.indexOf("--name") + 1]!;
@@ -449,7 +452,9 @@ test(
         checks
           .filter((check) => check.id.startsWith("agent.cli."))
           .map((check) => check.id),
-        ["agent.cli.start", "agent.cli.resume", "agent.cli.fork"],
+        agent === "gemini"
+          ? ["agent.cli.start"]
+          : ["agent.cli.start", "agent.cli.resume", "agent.cli.fork"],
       );
       assert.equal(
         checks.find((check) => check.id === "agent.sandbox")?.version,
@@ -459,7 +464,7 @@ test(
     }
     let name = "";
     const checks = await diagnoseImage(
-      { provider: engine, agent: "codex", image: "outpost-ci:latest" },
+      { provider: engine, agent: "codex", image: containerImage },
       async (command) => {
         const args = command.arguments ?? [];
         if (args[0] === "create") name = args[args.indexOf("--name") + 1]!;
@@ -569,10 +574,10 @@ test(
       ["v2", "empty"],
     ]) {
       const caches = [{ name: "npm", key: key! }];
-      const mounts = await cacheMounts(caches, root, "outpost-ci:latest", user);
+      const mounts = await cacheMounts(caches, root, containerImage, user);
       if (!volumes.includes(mounts[0]!.volume)) volumes.push(mounts[0]!.volume);
       const lease = await factory({
-        image: "outpost-ci:latest",
+        image: containerImage,
         networks: "none",
         caches,
       }).acquire(context);

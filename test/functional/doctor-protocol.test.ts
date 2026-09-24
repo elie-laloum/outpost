@@ -1,13 +1,17 @@
 import assert from "node:assert/strict";
 import { fileURLToPath } from "node:url";
 import { test } from "node:test";
-import { claude, codex, diagnoseAgentProtocol } from "../../src/index.ts";
+import {
+  claude,
+  codex,
+  gemini,
+  diagnoseAgentProtocol,
+} from "../../src/index.ts";
 import { protocolFixtures } from "../../src/adapters/agents/protocol-fixtures.constants.ts";
 import { executeProcess } from "../../src/infrastructure/process.ts";
 
-for (const factory of [claude, codex]) {
-  const agent = factory();
-  const name = factory === claude ? "claude" : "codex";
+for (const name of ["claude", "codex", "gemini"] as const) {
+  const agent = { claude, codex, gemini }[name]();
   test(`${name} reports only synthetic structural compatibility`, () => {
     const report = diagnoseAgentProtocol(name);
     assert.equal(report.hasFailures, false);
@@ -23,6 +27,7 @@ for (const factory of [claude, codex]) {
     );
   });
   for (const mode of ["start", "resume", "fork"] as const) {
+    if (name === "gemini" && mode !== "start") continue;
     test(`${name} ${mode} default request executes deterministic streaming fixture`, async () => {
       const request = agent.request({
         text: "fixture-prompt",

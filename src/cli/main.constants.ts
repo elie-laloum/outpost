@@ -1,10 +1,10 @@
 export const help = `Outpost — sandboxed coding agents and workflows
 
-outpost init [--yes] [--agent codex|claude] [--provider docker|podman|vercel|daytona|local]
+outpost init [--yes] [--agent codex|claude|gemini] [--provider docker|podman|vercel|daytona|local]
              [--manager npm|pnpm|yarn|bun] [--model NAME] [--install] [--build] [--image NAME] [--directory PATH] [--repository PATH]
 outpost image build|remove [--engine docker|podman] [--file PATH] [--image NAME] [--uid ID] [--gid ID]
 
-outpost doctor [--provider docker|podman|local|vercel|daytona] [--agent codex|claude] [--image NAME] [--json]
+outpost doctor [--provider docker|podman|local|vercel|daytona] [--agent codex|claude|gemini] [--image NAME] [--json]
 
 outpost recovery inspect [--repository PATH] [--max-entries NUMBER] [--git] [--locks] [--resources] [--json]
 outpost recovery verify --directory TRANSFER_PATH [--checksums] [--max-bytes NUMBER] [--restorability --repository PATH] [--json]
@@ -47,6 +47,6 @@ export const cliOptions = {
 } as const;
 
 export const initializationQuestions = [
-  ["agent", "Agent (codex/claude)", "codex"],
+  ["agent", "Agent (codex/claude/gemini)", "codex"],
   ["provider", "Sandbox (docker/podman/vercel/daytona/local)", "docker"],
 ] as const;

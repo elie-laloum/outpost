@@ -39,6 +39,11 @@ export async function preflightDispatch(
   agent?: AgentAdapter,
 ): Promise<void> {
   validateDispatch(options);
+  if (options.continuation)
+    invariant(
+      agent?.resumable !== false,
+      `${agent?.name} does not support continuation or fork in Outpost`,
+    );
   if (!options.response) return;
   if (options.response.repairs > 0)
     invariant(
