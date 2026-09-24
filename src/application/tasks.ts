@@ -39,7 +39,7 @@ export function isolatedTask<T>(
   return task({
     ...definition,
     async perform(context) {
-      const options = request(context);
+      const options = await request(context);
       const usage = taskUsage(context, options.observe);
       const result = await dispatch({
         ...options,
