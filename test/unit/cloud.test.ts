@@ -65,9 +65,22 @@ test("Vercel contract streams bounded output, stages stdin and transfers files",
     repository: root,
     directory: root,
     gitDirectories: [],
-    variables: { KEY: "value" },
+    variables: {
+      ANTHROPIC_API_KEY: "allocation-key",
+      CLAUDE_CODE_OAUTH_TOKEN: "subscription-token",
+    },
   });
   assert.equal(lease.home, "/home/test");
+  await lease.invoke({
+    executable: "claude",
+    variables: { ANTHROPIC_API_KEY: "command-key" },
+  });
+  const invocation = invocations.at(-1) as [{ env: Record<string, string> }];
+  assert.deepEqual(invocation[0].env, {
+    ANTHROPIC_API_KEY: "command-key",
+    CLAUDE_CODE_OAUTH_TOKEN: "subscription-token",
+  });
+
   let seen = "";
   const result = await lease.invoke({
     executable: "node",
