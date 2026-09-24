@@ -1,5 +1,6 @@
 import { cp, mkdir, writeFile } from "node:fs/promises";
 import { dirname, join, posix } from "node:path";
+import { downloadHistory } from "./remote-history.ts";
 import { OutpostError } from "../domain/errors.ts";
 import {
   fileManifest,
@@ -96,8 +97,7 @@ export async function downloadChanges(
       );
     }
   if (head !== synchronized) {
-    await run(["bundle", "create", remoteBundle, "HEAD"]);
-    await lease.download(remoteBundle, join(transfer, "commits.bundle"));
+    await downloadHistory(context, synchronized, head, transfer);
   }
 
   return { head, patch, incoming, ...(manifest ? { manifest } : {}) };

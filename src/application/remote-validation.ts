@@ -1,5 +1,7 @@
-import { readFile } from "node:fs/promises";
+import { readFile, rm } from "node:fs/promises";
 import { join } from "node:path";
+import { prepareHistoryValidation } from "./remote-history.ts";
+import { verificationGit } from "../infrastructure/git/verification-command.ts";
 import { OutpostError } from "../domain/errors.ts";
 import { git } from "../infrastructure/git/command.ts";
 import type {
@@ -85,40 +87,29 @@ export async function validateChanges(
       "Host workspace changed while the remote sandbox was active",
       { recovery },
     );
-  if (head !== synchronized) {
-    await git(workspace.directory, [
-      "fetch",
-      join(transfer, "commits.bundle"),
-      "HEAD",
-    ]);
-    await git(workspace.directory, [
+  const validation = join(transfer, "validation");
+  if (head === synchronized) await prepareHistoryValidation(context, transfer);
+  if (head !== synchronized)
+    await verificationGit(validation, [
       "merge-base",
       "--is-ancestor",
-      "HEAD",
-      "FETCH_HEAD",
+      synchronized,
+      head,
     ]);
-  }
-  const validation = join(transfer, "validation");
-  await git(workspace.directory, [
-    "worktree",
-    "add",
-    "--detach",
-    validation,
-    head,
-  ]);
+  await verificationGit(validation, ["checkout", "--detach", head]);
   try {
     if ((await readFile(patch)).length)
-      await git(validation, ["apply", "--binary", patch]);
+      await verificationGit(validation, ["apply", "--binary", patch]);
     if (!options.includeUncommitted && (await readFile(initialPatch)).length)
-      await git(validation, ["apply", "--binary", initialPatch]);
+      await verificationGit(validation, ["apply", "--binary", initialPatch]);
     if (!options.includeUncommitted && (await readFile(initialIndex)).length)
-      await git(validation, ["apply", "--cached", "--binary", initialIndex]);
+      await verificationGit(validation, [
+        "apply",
+        "--cached",
+        "--binary",
+        initialIndex,
+      ]);
   } finally {
-    await git(workspace.directory, [
-      "worktree",
-      "remove",
-      "--force",
-      validation,
-    ]);
+    await rm(validation, { recursive: true, force: true });
   }
 }

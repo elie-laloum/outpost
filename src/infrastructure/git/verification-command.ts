@@ -5,6 +5,8 @@ import { gitDefaults } from "./git.constants.ts";
 export async function verificationGit(
   directory: string,
   args: readonly string[],
+  deadlineMs: number = gitDefaults.deadlineMs,
+  signal?: AbortSignal,
 ): Promise<string> {
   const environment = Object.fromEntries(
     Object.entries(process.env).filter(
@@ -37,7 +39,8 @@ export async function verificationGit(
         GIT_OPTIONAL_LOCKS: "0",
         LC_ALL: "C",
       },
-      timeout: gitDefaults.deadlineMs,
+      timeout: deadlineMs,
+      ...(signal ? { signal } : {}),
       maxBuffer: gitDefaults.retainBytes,
       encoding: "utf8",
       windowsHide: true,

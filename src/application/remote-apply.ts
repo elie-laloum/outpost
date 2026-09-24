@@ -34,6 +34,12 @@ export async function applyChanges(
       "Host workspace changed during synchronization",
       { recovery },
     );
+  if (head !== synchronized)
+    await git(workspace.directory, [
+      "fetch",
+      join(transfer, "commits.bundle"),
+      "HEAD",
+    ]);
   if ((await readFile(previousPatch)).length)
     await git(workspace.directory, [
       "apply",
