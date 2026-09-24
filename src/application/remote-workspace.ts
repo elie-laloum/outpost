@@ -66,6 +66,12 @@ export async function seedRemote(
         ...result,
         recovery,
       });
+    if (result.stdout.length >= gitDefaults.retainBytes)
+      throw new OutpostError(
+        "workspace",
+        "Remote Git output exceeds synchronization limit",
+        { recovery },
+      );
     return result.stdout;
   };
   await run(["init"]);
@@ -124,6 +130,7 @@ export async function seedRemote(
   initializing = false;
   let expected = await digest(workspace.directory, recovery);
   const context: RemoteWorkspaceContext = {
+    transferred: new Map(),
     workspace,
     lease,
     options,
@@ -165,6 +172,9 @@ export async function seedRemote(
           expected,
           transfer,
         );
+        context.transferred?.clear();
+        for (const entry of changes.manifest ?? [])
+          context.transferred?.set(entry.path, entry);
         const { head } = changes;
         synchronized = head;
         expected = await digest(workspace.directory, recovery);

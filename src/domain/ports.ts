@@ -17,6 +17,8 @@ export type {
   ConversationStore,
 } from "./conversation.types.ts";
 export type {
+  FileManifestEntry,
+  FileTransfers,
   SandboxContext,
   SandboxLease,
   SandboxProvider,

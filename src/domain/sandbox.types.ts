@@ -19,7 +19,30 @@ export interface TransferOptions {
   readonly deadlineMs?: number;
 }
 
+export interface FileManifestEntry {
+  readonly path: string;
+  readonly kind: "file" | "link";
+  readonly mode: number;
+  readonly size: number;
+  readonly sha256: string;
+}
+
+export interface FileTransfers {
+  manifest(
+    source: string,
+    paths: readonly string[],
+    options?: TransferOptions,
+  ): Promise<readonly FileManifestEntry[]>;
+  downloadBatch(
+    source: string,
+    entries: readonly FileManifestEntry[],
+    destination: string,
+    options?: TransferOptions,
+  ): Promise<void>;
+}
+
 export interface SandboxLease {
+  readonly fileTransfers?: FileTransfers;
   readonly root: string;
   readonly home: string;
   invoke(command: Command): Promise<CommandResult>;

@@ -1,5 +1,5 @@
-import { cp, mkdir, readFile, rm } from "node:fs/promises";
-import { dirname, join } from "node:path";
+import { cp, lstat, mkdir, readFile, rm, rmdir } from "node:fs/promises";
+import { dirname, join, resolve } from "node:path";
 import { OutpostError } from "../domain/errors.ts";
 import { safeDestination } from "../infrastructure/files.ts";
 import { git } from "../infrastructure/git/command.ts";
@@ -44,10 +44,27 @@ export async function applyChanges(
   await git(workspace.directory, ["reset", "--mixed", "HEAD"]);
   for (const file of previousExtras.filter(
     (file) => !protectedFiles.includes(file),
-  ))
-    await rm(await safeDestination(workspace.directory, file), {
-      force: true,
-    });
+  )) {
+    const target = await safeDestination(workspace.directory, file);
+    await rm(target, { force: true });
+    let parent = dirname(target);
+    while (parent !== resolve(workspace.directory)) {
+      const removed = await rmdir(parent).then(
+        () => true,
+        (error: NodeJS.ErrnoException) => {
+          if (
+            error.code === "ENOTEMPTY" ||
+            error.code === "ENOENT" ||
+            error.code === "EEXIST"
+          )
+            return false;
+          throw error;
+        },
+      );
+      if (!removed) break;
+      parent = dirname(parent);
+    }
+  }
   if (head !== synchronized)
     await git(workspace.directory, ["merge", "--ff-only", "FETCH_HEAD"]);
   if ((await readFile(patch)).length)
@@ -63,9 +80,14 @@ export async function applyChanges(
     ]);
   for (const file of incoming) {
     const target = await safeDestination(workspace.directory, file);
+    if ((await lstat(target).catch(() => undefined))?.isDirectory())
+      await rmdir(target);
     await mkdir(dirname(target), { recursive: true });
     await cp(join(transfer, "incoming", file), target, {
       dereference: false,
+      verbatimSymlinks: true,
+      force: false,
+      errorOnExist: true,
     });
   }
 }

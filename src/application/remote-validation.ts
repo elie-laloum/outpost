@@ -6,6 +6,7 @@ import type {
   RemoteChanges,
   RemoteWorkspaceContext,
 } from "./remote-workspace.types.ts";
+import { remoteSyncLimits } from "./remote-workspace.constants.ts";
 import { digest } from "./workspace-fingerprint.ts";
 
 export async function validateChanges(
@@ -26,6 +27,36 @@ export async function validateChanges(
     initialIndex,
   } = context;
   const { head, patch, incoming } = changes;
+  const ignoredOverlaps: string[] = [];
+  for (
+    let offset = 0;
+    offset < incoming.length;
+    offset += remoteSyncLimits.pathspecs
+  ) {
+    ignoredOverlaps.push(
+      ...(
+        await git(workspace.directory, [
+          "ls-files",
+          "--others",
+          "--ignored",
+          "--exclude-standard",
+          "-z",
+          "--",
+          ...incoming
+            .slice(offset, offset + remoteSyncLimits.pathspecs)
+            .map((path) => `:(literal)${path}`),
+        ])
+      )
+        .split("\0")
+        .filter(Boolean),
+    );
+  }
+  if (ignoredOverlaps.length)
+    throw new OutpostError(
+      "conflict",
+      "Remote changes overlap ignored host files",
+      { files: ignoredOverlaps, recovery: transfer },
+    );
   if (protectedFiles.length) {
     const changed = new Set([
       ...(await run(["diff", "--name-only", "-z", originalHead]))

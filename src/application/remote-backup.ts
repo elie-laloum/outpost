@@ -40,6 +40,7 @@ export async function backupHost(
     await mkdir(dirname(backup), { recursive: true });
     await cp(await safeDestination(workspace.directory, file), backup, {
       dereference: false,
+      verbatimSymlinks: true,
     });
   }
   const state = {

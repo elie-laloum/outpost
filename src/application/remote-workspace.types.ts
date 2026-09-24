@@ -1,4 +1,7 @@
-import type { SandboxLease } from "../domain/sandbox.types.ts";
+import type {
+  FileManifestEntry,
+  SandboxLease,
+} from "../domain/sandbox.types.ts";
 import type {
   StageLimits,
   WorkspaceRecord,
@@ -16,6 +19,7 @@ export interface RemoteSyncOptions {
 }
 
 export interface RemoteWorkspaceContext {
+  readonly transferred?: Map<string, FileManifestEntry>;
   readonly workspace: WorkspaceRecord;
   readonly lease: SandboxLease;
   readonly options: RemoteSyncOptions;
@@ -28,6 +32,7 @@ export interface RemoteWorkspaceContext {
   readonly initialIndex: string;
 }
 export interface RemoteChanges {
+  readonly manifest?: readonly FileManifestEntry[];
   readonly head: string;
   readonly patch: string;
   readonly incoming: readonly string[];
