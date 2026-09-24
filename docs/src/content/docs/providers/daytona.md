@@ -35,3 +35,5 @@ The environment needs Node.js, npm, Git, `sh` and `setsid`. Automatic agent boot
 Native process sessions stream stdout/stderr and are cleaned up after invocation. Cancellation terminates the command process group rather than the whole warm sandbox. Files and directories transfer through the lease. Interactive attachment is not supported in this release.
 
 Read [remote synchronization](../../sandboxes/remote-sync/) before enabling `includeUncommitted` or editing the host workspace concurrently. Provider contract tests do not provision a live paid sandbox.
+
+[Run opt-in hosted compatibility checks](../../operations/cloud-compatibility/) for live provider contracts and credential-free agent CLI checks.

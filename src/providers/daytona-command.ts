@@ -1,3 +1,4 @@
+import { setTimeout } from "node:timers/promises";
 import { randomUUID } from "node:crypto";
 import { OutpostError } from "../domain/errors.ts";
 import type { SandboxLease } from "../domain/sandbox.types.ts";
@@ -87,16 +88,15 @@ export function daytonaCommand(
       );
       if (cancellation) await cancellation;
       signal.throwIfAborted();
-      const result = await sandbox.process.getSessionCommand(
-        id,
-        response.cmdId,
-      );
-      if (result.exitCode === undefined)
-        throw new OutpostError(
-          "provider",
-          "Cloud command ended without an exit status",
+      while (true) {
+        const result = await interruptible(
+          sandbox.process.getSessionCommand(id, response.cmdId),
+          signal,
         );
-      return { status: result.exitCode, ...output };
+        if (result.exitCode !== undefined)
+          return { status: result.exitCode, ...output };
+        await setTimeout(cloudDefaults.pollMs, undefined, { signal });
+      }
     } catch (cause) {
       cancel();
       try {

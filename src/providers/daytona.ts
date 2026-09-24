@@ -25,8 +25,6 @@ export function daytona(
       context.signal?.throwIfAborted();
       const client = await connect(options.connection);
       const sandbox = await client.create(options.create ?? {});
-      const home = (await sandbox.getUserHomeDir()) ?? cloudRoots.daytonaHome;
-      const root = options.root ?? posix.join(home, "outpost");
       let closed = false,
         releasing: Promise<void> | undefined;
       let unregister = () => {};
@@ -42,10 +40,21 @@ export function daytona(
             throw error;
           }));
       unregister = registerCleanup(release);
+      let home: string;
+      let root: string;
       try {
+        home = (await sandbox.getUserHomeDir()) ?? cloudRoots.daytonaHome;
+        root = options.root ?? posix.join(home, "outpost");
         await sandbox.fs.createFolder(root, "755");
       } catch (cause) {
-        await release();
+        try {
+          await release();
+        } catch (cleanup) {
+          throw new AggregateError(
+            [cause, cleanup],
+            "Cloud setup and cleanup failed",
+          );
+        }
         throw cause;
       }
       const lease = {

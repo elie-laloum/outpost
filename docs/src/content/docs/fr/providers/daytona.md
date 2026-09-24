@@ -35,3 +35,5 @@ L’environnement doit contenir Node.js, npm, Git, `sh` et `setsid`. L’install
 Les sessions de processus natives transmettent stdout/stderr et sont nettoyées après l’appel. L’annulation termine le groupe de la commande, pas la sandbox entière. Le lease transfère fichiers et répertoires. L’attachement interactif n’est pas disponible dans cette version.
 
 Lisez [la synchronisation distante](../../sandboxes/remote-sync/) avant d’activer `includeUncommitted` ou de modifier simultanément le workspace hôte. Les tests de contrat n’allouent pas de sandbox payante réelle.
+
+[Exécutez les vérifications hébergées sur activation explicite](../../operations/cloud-compatibility/) pour les contrats des fournisseurs réels et les CLI sans identifiants de modèle.
