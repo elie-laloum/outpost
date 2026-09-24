@@ -34,7 +34,7 @@ Le répertoire est résolu depuis le répertoire courant. Utilisez un chemin abs
 
 ## Redémarrage et politique de rejeu
 
-Par défaut, un checkpoint incomplet est refusé avant toute tâche. Définissez `checkpoint.resume: "retry-incomplete"` pour autoriser le rejeu des tâches qui n'ont pas réussi. Les tâches réussies restent terminées ; les autres, y compris celles ignorées à cause de dépendances, redeviennent en attente et leurs conditions sont réévaluées. Un graphe entièrement terminé conserve ses tâches ignorées conditionnellement.
+Par défaut, un checkpoint interrompu ou en échec est refusé avant toute tâche. Une [approbation ou pause](../approvals/) propre peut être rouverte sans autorisation de rejeu ; les demandes en attente et les refus définitifs restent inchangés. Définissez `checkpoint.resume: "retry-incomplete"` pour autoriser le rejeu des tâches qui n'ont pas réussi. Les tâches réussies restent terminées ; les autres, y compris celles ignorées à cause de dépendances, redeviennent en attente et leurs conditions sont réévaluées. Un graphe entièrement terminé ou en pause propre conserve ses tâches ignorées conditionnellement. Les décisions acceptées et les étapes refusées ne sont jamais rejouées.
 
 L'identifiant d'exécution et `context.attempt`, cumulatif et commençant à un, survivent aux redémarrages. Chaque rejeu dispose d'un nouveau cycle selon la politique de retry de la tâche ; les budgets de tentatives et de tokens du workflow incluent les exécutions précédentes. Les enregistrements conservent les tentatives ; le rejeu remplace les derniers champs de début, fin et erreur.
 
@@ -44,7 +44,7 @@ Une tâche interrompue peut avoir effectué un effet externe avant la sauvegarde
 
 ## Identité et contrat des résultats
 
-L'identité sauvegardée inclut le nom du workflow, les clés et dépendances, la configuration des retries et délais, la présence des conditions et la `version` fournie. Changez `version` dès que les implémentations, conditions, prédicats de retry ou entrées changent : les fonctions et variables capturées ne peuvent pas être identifiées fiablement. Une différence de version ou de graphe échoue avant exécution ; utilisez un nouvel identifiant pour le workflow modifié.
+L'identité sauvegardée inclut le nom du workflow, les clés et dépendances, la configuration des retries et délais, la présence des conditions, le type/message/acteurs des étapes de décision et la `version` fournie. Changez `version` dès que les implémentations, conditions, prédicats de retry ou entrées changent : les fonctions et variables capturées ne peuvent pas être identifiées fiablement. Une différence de version ou de graphe échoue avant exécution ; utilisez un nouvel identifiant pour le workflow modifié.
 
 Les résultats doivent être des valeurs JSON sans perte, ou `undefined` au premier niveau pour les tâches sans résultat. Les `undefined` imbriqués, tableaux creux, accesseurs, fonctions, instances de classes, symboles, cycles, nombres non finis, zéro négatif et `BigInt` provoquent un échec de tâche. Convertissez dates et objets métier en données simples dans `perform()` puis reconstruisez-les dans les tâches dépendantes. Stockez les gros artefacts séparément et retournez une référence.
 

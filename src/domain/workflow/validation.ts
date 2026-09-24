@@ -1,3 +1,4 @@
+import { validateGate } from "./gate-validation.ts";
 import type { Task } from "../workflow.types.ts";
 
 export function positive(value: number, label: string): void {
@@ -11,6 +12,13 @@ export function validate(tasks: readonly Task[]): void {
   const visiting = new Set<Task>();
   const visited = new Set<Task>();
   for (const item of tasks) {
+    if (item.gate) {
+      validateGate(item.gate);
+      if (item.condition || item.retry || item.timeoutMs !== undefined)
+        throw new Error(
+          "Workflow gates cannot have conditions, retries or timeouts",
+        );
+    }
     if (keys.has(item.key)) throw new Error(`Duplicate task: ${item.key}`);
     keys.add(item.key);
     for (const dependency of item.after)

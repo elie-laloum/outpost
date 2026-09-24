@@ -1,3 +1,9 @@
+import type {
+  WorkflowDecision,
+  WorkflowDecisionRecord,
+  WorkflowGate,
+  WorkflowPauseRequest,
+} from "./workflow/gates.types.ts";
 import type { WorkflowCheckpointOptions } from "./workflow/checkpoint.types.ts";
 import type { Usage } from "./agent.types.ts";
 import type {
@@ -23,6 +29,7 @@ export interface Retry {
 
 export interface Task<T = unknown> {
   readonly key: string;
+  readonly gate?: WorkflowGate;
   readonly after: readonly Task[];
   readonly perform: (context: TaskContext) => T | Promise<T>;
   readonly condition?: (context: TaskContext) => boolean | Promise<boolean>;
@@ -35,9 +42,18 @@ export type TaskOptions<T> = Omit<Task<T>, "after"> & {
 };
 
 export type TaskStatus =
-  "waiting" | "active" | "done" | "failed" | "skipped" | "cancelled";
+  | "waiting"
+  | "active"
+  | "done"
+  | "failed"
+  | "skipped"
+  | "cancelled"
+  | "paused"
+  | "rejected";
 
 export interface TaskRecord {
+  pause?: WorkflowPauseRequest;
+  decision?: WorkflowDecisionRecord;
   readonly key: string;
   status: TaskStatus;
   attempts: number;
@@ -59,6 +75,7 @@ export interface WorkflowEvent {
 }
 
 export interface WorkflowOptions {
+  readonly decisions?: readonly WorkflowDecision[];
   readonly checkpoint?: WorkflowCheckpointOptions;
   readonly signal?: AbortSignal;
   readonly concurrency?: number;
@@ -70,7 +87,7 @@ export interface WorkflowOptions {
 export interface WorkflowResult {
   readonly executionId: string;
   readonly name: string;
-  readonly status: "done" | "failed" | "cancelled";
+  readonly status: "done" | "failed" | "cancelled" | "paused";
   readonly tasks: readonly Readonly<TaskRecord>[];
   readonly errors: readonly unknown[];
   readonly observerErrors: readonly unknown[];

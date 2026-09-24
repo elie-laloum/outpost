@@ -1,3 +1,4 @@
+import { validateGateRecord } from "./gate-validation.ts";
 import type { WorkflowCheckpoint } from "./checkpoint.types.ts";
 import type { Task } from "../workflow.types.ts";
 import { checkpointValue } from "./checkpoint-value.ts";
@@ -42,9 +43,16 @@ export function validateCheckpoint(
       typeof record.key !== "string" ||
       !keys.delete(record.key) ||
       !integer(record.attempts) ||
-      !["waiting", "active", "done", "failed", "skipped", "cancelled"].includes(
-        String(record.status),
-      )
+      ![
+        "waiting",
+        "active",
+        "done",
+        "failed",
+        "skipped",
+        "cancelled",
+        "paused",
+        "rejected",
+      ].includes(String(record.status))
     )
       throw invalid();
     for (const field of ["startedAt", "finishedAt", "error"])
@@ -54,6 +62,12 @@ export function validateCheckpoint(
     const output = Object.hasOwn(value.values, record.key)
       ? value.values[record.key]
       : undefined;
+    validateGateRecord(
+      record,
+      tasks.find((item) => item.key === record.key)!,
+      value.executionId,
+      output,
+    );
     if (record.status !== "done") {
       if (output !== undefined) throw invalid();
       continue;
@@ -76,7 +90,9 @@ export function validateCheckpoint(
   const records = new Map(value.records.map((entry) => [entry.key, entry]));
   for (const item of tasks)
     if (
-      records.get(item.key)?.status === "done" &&
+      ["done", "paused", "rejected"].includes(
+        String(records.get(item.key)?.status),
+      ) &&
       item.after.some(
         (dependency) => records.get(dependency.key)?.status !== "done",
       )

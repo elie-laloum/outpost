@@ -1,3 +1,4 @@
+import { applyDecisions, pauseGate, prepareDecisions } from "./gates.ts";
 import { openCheckpoint } from "./checkpoint.ts";
 import type { WorkflowCheckpointSession } from "./checkpoint.types.ts";
 import type {
@@ -15,6 +16,13 @@ export async function schedule(
   tasks: readonly Task[],
   options: WorkflowOptions,
 ): Promise<WorkflowResult> {
+  if (
+    !options.checkpoint &&
+    (tasks.some((item) => item.gate) || options.decisions?.length)
+  )
+    throw new Error("Workflow gates and decisions require a checkpoint");
+  if (options.decisions && !options.decisions.length)
+    throw new Error("Workflow decisions cannot be empty");
   const checkpoint = options.checkpoint
     ? await openCheckpoint(name, tasks, options.checkpoint)
     : undefined;
@@ -47,7 +55,9 @@ async function scheduleRun(
   } = state;
   const active = new Map<Task, Promise<void>>();
   const started = Date.now();
+  const decisions = prepareDecisions(state);
   emit({ type: "start" });
+  applyDecisions(state, decisions);
   await state.persist();
   try {
     while (true) {
@@ -64,7 +74,7 @@ async function scheduleRun(
         );
         if (
           dependencies.some((status) =>
-            ["failed", "skipped", "cancelled"].includes(status),
+            ["failed", "skipped", "cancelled", "rejected"].includes(status),
           )
         ) {
           finish(item, "skipped");
@@ -77,7 +87,9 @@ async function scheduleRun(
           !dependencies.every((status) => status === "done")
         )
           continue;
-        const running = runTask(item, state).finally(() => {
+        const running = (
+          item.gate ? pauseGate(item, state) : runTask(item, state)
+        ).finally(() => {
           active.delete(item);
         });
         active.set(item, running);
@@ -96,11 +108,13 @@ async function scheduleRun(
   }
   await state.persist();
   if (options.signal?.aborted) errors.push(options.signal.reason);
-  const status = options.signal?.aborted
-    ? "cancelled"
-    : errors.length
-      ? "failed"
-      : "done";
+  const paused = [...records.values()].some(
+    (entry) => entry.status === "paused",
+  );
+  let status: WorkflowResult["status"] = "done";
+  if (paused) status = "paused";
+  if (errors.length) status = "failed";
+  if (options.signal?.aborted) status = "cancelled";
   emit({ type: "finish", status, durationMs: Date.now() - started });
   const result: WorkflowResult = Object.freeze({
     executionId,

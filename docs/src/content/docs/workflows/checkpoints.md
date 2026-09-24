@@ -34,7 +34,7 @@ The directory resolves from the current working directory. Use an absolute path 
 
 ## Restart and replay policy
 
-By default, an incomplete checkpoint is rejected before running any task. Set `checkpoint.resume: "retry-incomplete"` to authorize replay of tasks that did not finish successfully. Completed tasks remain done; other tasks, including dependency skips, return to waiting and their conditions are evaluated again. A fully completed graph retains its conditional skips.
+By default, an interrupted or failed checkpoint is rejected before running any task. A clean [approval or pause](../approvals/) can be reopened without replay authorization; pending requests and terminal rejections remain unchanged. Set `checkpoint.resume: "retry-incomplete"` to authorize replay of tasks that did not finish successfully. Completed tasks remain done; other tasks, including dependency skips, return to waiting and their conditions are evaluated again. A fully completed graph or clean pause retains its conditional skips. Accepted decisions and rejected gates are never replayed.
 
 The stable execution ID and cumulative one-based `context.attempt` survive restarts. Each replay gets a new retry cycle according to the task's retry policy; workflow attempt and token budgets still include earlier executions. Existing per-task records retain attempts, while replay replaces the latest start/finish/error fields.
 
@@ -44,7 +44,7 @@ An interrupted task may have completed an external side effect before its succes
 
 ## Identity and output contract
 
-The stored identity includes the workflow name, graph keys and edges, retry/timeout configuration, condition presence and caller-provided `version`. Change `version` whenever implementations, conditions, retry predicates or inputs change: function bodies and captured variables cannot be fingerprinted reliably. A version or graph mismatch fails before execution; select a new run ID for the changed workflow.
+The stored identity includes the workflow name, graph keys and edges, retry/timeout configuration, condition presence, gate kind/prompt/actors and caller-provided `version`. Change `version` whenever implementations, conditions, retry predicates or inputs change: function bodies and captured variables cannot be fingerprinted reliably. A version or graph mismatch fails before execution; select a new run ID for the changed workflow.
 
 Outputs must be lossless JSON values, or top-level `undefined` for tasks with no result. Nested `undefined`, sparse arrays, accessors, functions, class instances, symbols, cycles, non-finite numbers, negative zero and `BigInt` are rejected as task failures. Convert dates and domain objects into explicit plain data in `perform()` and reconstruct them in dependent tasks. Store large artifacts separately and return a reference.
 

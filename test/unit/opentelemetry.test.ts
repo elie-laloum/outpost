@@ -248,3 +248,63 @@ test("throwing telemetry APIs and diagnostics never affect workflow outcomes or 
   safe.unwrap();
   broken.close();
 });
+
+test("paused workflows end neutral spans and rejected gates end error spans", async (t) => {
+  const sdk = telemetry();
+  t.after(async () => {
+    sdk.observer.close();
+    await sdk.tracer.shutdown();
+    await sdk.meter.shutdown();
+  });
+  const event = {
+    executionId: "gate-run",
+    workflow: "gate-workflow",
+    timestamp: new Date().toISOString(),
+  };
+  sdk.observer.observe({ ...event, type: "start" });
+  sdk.observer.observe({
+    ...event,
+    type: "task",
+    key: "review",
+    status: "paused",
+  });
+  sdk.observer.observe({ ...event, type: "finish", status: "paused" });
+  sdk.observer.observe({ ...event, type: "start" });
+  sdk.observer.observe({
+    ...event,
+    type: "task",
+    key: "review",
+    status: "active",
+  });
+  sdk.observer.observe({
+    ...event,
+    type: "task",
+    key: "review",
+    status: "rejected",
+  });
+  sdk.observer.observe({ ...event, type: "finish", status: "failed" });
+  const spans = sdk.spans.getFinishedSpans();
+  assert.equal(spans.length, 3);
+  assert.equal(spans[0]!.status.code, SpanStatusCode.UNSET);
+  assert.equal(spans[0]!.attributes["outpost.status"], "paused");
+  assert.equal(spans[1]!.status.code, SpanStatusCode.ERROR);
+  assert.equal(spans[1]!.attributes["outpost.status"], "rejected");
+  assert.equal(spans[2]!.status.code, SpanStatusCode.ERROR);
+  await sdk.meter.forceFlush();
+  const metrics = sdk.metrics
+    .getMetrics()
+    .flatMap((batch) => batch.scopeMetrics.flatMap((scope) => scope.metrics));
+  const tasks = metrics.find(
+    (metric) => metric.descriptor.name === "outpost.task.executions",
+  )!;
+  assert.ok(
+    tasks.dataPoints.some(
+      (point) => point.attributes["outpost.status"] === "paused",
+    ),
+  );
+  assert.ok(
+    tasks.dataPoints.some(
+      (point) => point.attributes["outpost.status"] === "rejected",
+    ),
+  );
+});
