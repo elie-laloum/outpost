@@ -1,0 +1,51 @@
+name: Hosted provider compatibility
+on:
+  schedule:
+    - cron: "23 6 * * 1"
+  workflow_dispatch:
+    inputs:
+      agents:
+        description: Install current Claude Code/Codex CLIs and check help contracts (no model calls)
+        type: boolean
+        default: true
+permissions:
+  contents: read
+concurrency:
+  group: cloud-compatibility
+  cancel-in-progress: false
+jobs:
+  compatibility:
+    if: vars.OUTPOST_CLOUD_LIVE == '1' && github.ref == 'refs/heads/main'
+    environment: cloud-compatibility
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      matrix:
+        provider: [vercel, daytona]
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Run explicitly enabled live fixtures
+        run: node test/cloud-live.ts > cloud-compatibility.json
+        env:
+          OUTPOST_CLOUD_LIVE: "1"
+          OUTPOST_CLOUD_PROVIDERS: ${{ matrix.provider }}
+          OUTPOST_CLOUD_AGENTS: ${{ github.event_name == 'schedule' && '1' || inputs.agents && '1' || '0' }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          DAYTONA_API_KEY: ${{ secrets.DAYTONA_API_KEY }}
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: cloud-compatibility-${{ matrix.provider }}
+          path: cloud-compatibility.json
+          if-no-files-found: warn
+          retention-days: 14

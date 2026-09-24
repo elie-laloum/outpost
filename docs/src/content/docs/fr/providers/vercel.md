@@ -30,3 +30,5 @@ Les options propres à Outpost sont `root` (répertoire distant), `retain` (fin 
 Le travail distant exige `named` ou `integrate` ; une branche omise utilise l’intégration. Les commandes transmettent leur sortie et rapatrient les changements. L’attachement interactif n’est pas disponible. Le guide de [synchronisation distante](../../sandboxes/remote-sync/) explique entrées non commitées, conflits locaux et récupération.
 
 Les tests de contrat du SDK utilisent des doubles contrôlés. Disponibilité, quotas et accès aux modèles nécessitent une vérification avec votre compte.
+
+[Exécutez les vérifications hébergées sur activation explicite](../../operations/cloud-compatibility/) pour les contrats des fournisseurs réels et les CLI sans identifiants de modèle.
