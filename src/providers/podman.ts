@@ -7,3 +7,5 @@ export const podman = (options: ContainerOptions = {}) =>
   containerProvider("podman", options);
 
 export type { DependencyCache } from "./container-cache.types.ts";
+
+export type { EgressPolicy } from "../domain/egress.types.ts";

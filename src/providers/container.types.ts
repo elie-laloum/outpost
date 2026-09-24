@@ -1,3 +1,4 @@
+import type { EgressPolicy } from "../domain/egress.types.ts";
 import type {
   Command,
   CommandResult,
@@ -8,6 +9,7 @@ import type { Executor } from "../infrastructure/process.types.ts";
 import type { DependencyCache } from "./container-cache.types.ts";
 
 export interface ContainerOptions {
+  readonly egress?: EgressPolicy;
   readonly repositoryMode?: "mounted" | "isolated";
   readonly caches?: readonly DependencyCache[];
   readonly image?: string;

@@ -116,7 +116,7 @@ try {
   const consumer = join(temporary, "consumer.ts");
   writeFileSync(
     consumer,
-    `import { dispatch, codex, gemini, response, createSandbox, type GeminiSettings } from '@elie-laloum/outpost';
+    `import { dispatch, codex, gemini, response, createSandbox, type GeminiSettings, type EgressPolicy } from '@elie-laloum/outpost';
 import { local } from '@elie-laloum/outpost/providers/local';
 import { firecracker, type FirecrackerOptions } from '@elie-laloum/outpost/providers/firecracker';
 const microvm: typeof firecracker = (options: FirecrackerOptions) => firecracker(options);
@@ -124,6 +124,9 @@ console.log(microvm);
 import { docker, type DependencyCache } from '@elie-laloum/outpost/providers/docker';
 import { podman } from '@elie-laloum/outpost/providers/podman';
 import { planRecoveryRetention, pruneRecoveryRetention, assertRecoveryQuota, verifyRecoveryTransfer, type RecoveryRetentionPolicy, type FileTransfers, type SandboxLease } from '@elie-laloum/outpost';
+const egress: EgressPolicy = { mode: 'deny-all' };
+docker({egress});
+podman({egress});
 const cache: DependencyCache = {name:'npm', key:'lock-v1'};
 docker({caches:[cache]});
 podman({caches:[cache]});

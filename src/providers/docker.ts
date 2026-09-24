@@ -7,3 +7,5 @@ export const docker = (options: ContainerOptions = {}) =>
   containerProvider("docker", options);
 
 export type { DependencyCache } from "./container-cache.types.ts";
+
+export type { EgressPolicy } from "../domain/egress.types.ts";

@@ -5,6 +5,7 @@ import { fileBatches } from "./file-batches.ts";
 import { registerCleanup } from "../infrastructure/shutdown.ts";
 import { cloudRoots } from "./cloud.constants.ts";
 import { vercelCommand } from "./vercel-command.ts";
+import { vercelNetworkPolicy } from "./vercel-network.ts";
 import { vercelFiles } from "./vercel-files.ts";
 import type { VercelOptions } from "./vercel.types.ts";
 
@@ -16,6 +17,7 @@ export function vercel(
     config,
   ) => (await import("@vercel/sandbox")).Sandbox.create(config),
 ): SandboxProvider {
+  const networkPolicy = vercelNetworkPolicy(options);
   return {
     name: "vercel",
     placement: "remote",
@@ -24,6 +26,7 @@ export function vercel(
       context.signal?.throwIfAborted();
       const sandbox = await connect({
         ...options.create,
+        ...(networkPolicy === undefined ? {} : { networkPolicy }),
         env: { ...options.create?.env, ...context.variables },
       });
       const root = options.root ?? cloudRoots.vercel;
@@ -74,3 +77,5 @@ export function vercel(
     },
   };
 }
+
+export type { EgressPolicy } from "../domain/egress.types.ts";
