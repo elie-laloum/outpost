@@ -9,11 +9,13 @@ import type { FileArtifactStoreOptions } from "./artifact-store.types.ts";
 
 async function directory(path: string): Promise<void> {
   const parent = dirname(path);
-  if (parent !== path) await directory(parent);
-  try {
-    await mkdir(path, { mode: 0o700 });
-  } catch (error) {
-    if (!code(error, "EEXIST")) throw error;
+  if (parent !== path) {
+    await directory(parent);
+    try {
+      await mkdir(path, { mode: 0o700 });
+    } catch (error) {
+      if (!code(error, "EEXIST")) throw error;
+    }
   }
   if (!(await lstat(path)).isDirectory())
     throw new Error("Artifact directory must not contain symlinks");

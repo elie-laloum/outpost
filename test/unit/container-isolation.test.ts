@@ -39,6 +39,7 @@ test("isolated containers use remote placement and private writable Git storage"
     const create = calls.find(
       (call) => call.arguments?.[0] === "create",
     )!.arguments!;
+    assert.equal(create[create.indexOf("--workdir") + 1], "/");
     assert.ok(!create.includes("--mount") && !create.includes("--volume"));
     assert.ok(!create.some((arg) => arg.includes(root)));
     assert.ok(

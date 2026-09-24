@@ -57,3 +57,5 @@ L'adaptateur fichier écrit des fichiers privés (0600) via des fichiers tempora
 Consultez les [politiques d'exécution](../execution/) et les [budgets d'usage](../budgets/) pour l'annulation, les retries et les limites d'admission.
 
 Un `DispatchResult` complet contient des fonctions de continuation et ne peut pas être sauvegardé directement. Appelez `dispatch` dans une tâche, transmettez son signal et déclarez sa consommation, puis retournez des données simples comme `result.value`. Une tâche d’artefact peut publier ces données et retourner une référence JSON ; voir les [artefacts typés](../artifacts/).
+
+La reprise automatique d’un verrou inactif exige l’identité de processus Linux. Sur les plateformes qui ne la fournissent pas, notamment macOS et Windows, un propriétaire interrompu reste incertain et bloque le redémarrage. Après avoir vérifié indépendamment qu’aucun runner ne détient encore le checkpoint, conservez son JSON et retirez uniquement le verrou indiqué par le conflit avant de réessayer.

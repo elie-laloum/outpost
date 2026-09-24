@@ -116,23 +116,26 @@ test("crashed worker lease expires; restart preserves fences and rejects stale c
   );
   await delay(50);
   const reopened = await sqliteTaskQueue(path);
-  t.after(() => reopened.close());
-  const second = await reopened.claim({
-    worker: "live",
-    handlers: ["work"],
-    leaseMs: 5000,
-  });
-  assert.ok(second);
-  assert.ok(second.fence > first.fence);
-  const stale = { id: first.id, worker: "dead", fence: first.fence };
-  await assert.rejects(queue.renew(stale, 300));
-  await assert.rejects(queue.complete(stale, { value: "stale" }));
-  await assert.rejects(queue.cancel(first.id, first.fence));
-  const lease = { id: second.id, worker: "live", fence: second.fence };
-  await queue.complete(lease, { value: "accepted" });
-  await assert.rejects(queue.complete(lease, { value: "duplicate" }));
-  assert.equal((await reopened.get(request.id))?.result?.value, "accepted");
-  assert.equal((await queue.cancel(request.id, second.fence)).status, "done");
+  try {
+    const second = await reopened.claim({
+      worker: "live",
+      handlers: ["work"],
+      leaseMs: 5000,
+    });
+    assert.ok(second);
+    assert.ok(second.fence > first.fence);
+    const stale = { id: first.id, worker: "dead", fence: first.fence };
+    await assert.rejects(queue.renew(stale, 300));
+    await assert.rejects(queue.complete(stale, { value: "stale" }));
+    await assert.rejects(queue.cancel(first.id, first.fence));
+    const lease = { id: second.id, worker: "live", fence: second.fence };
+    await queue.complete(lease, { value: "accepted" });
+    await assert.rejects(queue.complete(lease, { value: "duplicate" }));
+    assert.equal((await reopened.get(request.id))?.result?.value, "accepted");
+    assert.equal((await queue.cancel(request.id, second.fence)).status, "done");
+  } finally {
+    reopened.close();
+  }
 });
 
 test("HTTP authentication, routing, malformed messages and size bounds", async (t) => {

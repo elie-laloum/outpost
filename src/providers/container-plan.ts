@@ -30,7 +30,7 @@ export function containerPlan({
         ]
       : []),
     "--workdir",
-    root,
+    config.repositoryMode === "isolated" ? "/" : root,
     "--cap-drop",
     "ALL",
     ...(fileParents.size ||

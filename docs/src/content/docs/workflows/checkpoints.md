@@ -57,3 +57,5 @@ The filesystem adapter writes private files (0600) using temporary files, file s
 See [execution policies](../execution/) and [usage budgets](../budgets/) for cancellation, retries and admission limits.
 
 A full `DispatchResult` contains continuation functions and cannot be checkpointed directly. Call `dispatch` inside a task, forward its signal and report its usage, then return plain data such as `result.value`. An artifact task can publish that data and return a JSON reference; see [typed artifacts](../artifacts/).
+
+Automatic dead-owner reclamation requires Linux process identity. On platforms without it, including macOS and Windows, an interrupted owner remains uncertain and blocks restart. After independently verifying that no runner still owns the checkpoint, preserve the checkpoint JSON and remove only the lock path reported by the conflict before retrying.

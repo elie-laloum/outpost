@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import fs from "node:fs/promises";
+import { syncBuiltinESMExports } from "node:module";
 import type { TestContext } from "node:test";
 import {
   mkdtemp,
@@ -10,7 +12,7 @@ import {
   writeFile,
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { join, parse } from "node:path";
 import {
   artifact,
   artifactTask,
@@ -363,4 +365,32 @@ test("concurrent publishers never replace committed data and binary payloads are
   );
   const empty = await publishArtifact(store, binary, new Uint8Array(), options);
   assert.equal((await readStoredArtifact(store, binary, empty)).byteLength, 0);
+});
+
+test("artifact publication validates filesystem roots without recreating them", async (t) => {
+  const path = await directory(t);
+  const mkdir = fs.mkdir;
+  t.mock.method(fs, "mkdir", async (...args: Parameters<typeof mkdir>) => {
+    if (args[0] === parse(path).root)
+      throw Object.assign(new Error("Drive root cannot be created"), {
+        code: "EPERM",
+      });
+    return mkdir(...args);
+  });
+  syncBuiltinESMExports();
+  try {
+    const store = fileArtifactStore({
+      directory: join(path, "nested", "artifacts"),
+    });
+    const reference = await publishArtifact(store, binary, Uint8Array.of(9), {
+      producer,
+    });
+    assert.deepEqual(
+      await readStoredArtifact(store, binary, reference),
+      Uint8Array.of(9),
+    );
+  } finally {
+    t.mock.restoreAll();
+    syncBuiltinESMExports();
+  }
 });

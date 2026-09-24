@@ -6,6 +6,8 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { spawn } from "node:child_process";
 import { once } from "node:events";
+import { lockPath } from "../../src/infrastructure/git/lock.ts";
+import { localProcessIdentity } from "../../src/infrastructure/git/process-identity.ts";
 import {
   fileWorkflowCheckpointStore,
   task,
@@ -276,50 +278,64 @@ test("lossy outputs fail tasks without publishing success", async (t) => {
   }
 });
 
-test(
-  "a killed process leaves completed outputs and an interrupted attempt recoverable",
-  { timeout: 10000 },
-  async (t) => {
-    const directory = await temporary(t);
-    const script = join(directory, "run.mjs");
-    const module = new URL("../../src/index.ts", import.meta.url).href;
-    await writeFile(
-      script,
-      `import {fileWorkflowCheckpointStore,task,workflow} from ${JSON.stringify(module)};
+for (const unavailableIdentity of [false, true])
+  test(
+    `a killed process preserves recoverable outputs (unknown identity: ${unavailableIdentity})`,
+    { timeout: 10000 },
+    async (t) => {
+      const directory = await temporary(t);
+      const script = join(directory, "run.mjs");
+      const module = new URL("../../src/index.ts", import.meta.url).href;
+      await writeFile(
+        script,
+        `import {fileWorkflowCheckpointStore,task,workflow} from ${JSON.stringify(module)};
 const first = task({key:'first',perform:()=>42});
 const second = task({key:'second',after:[first],async perform(context){context.reportUsage({input:5,cached:0,output:1}); await context.checkpoint?.(); process.send('active'); return new Promise(()=>{setInterval(()=>{},1000)});}});
 await workflow('process',[first,second]).start({checkpoint:{store:fileWorkflowCheckpointStore({directory:${JSON.stringify(directory)}}),runId:'process',version:'1'}});`,
-    );
-    const child = spawn(process.execPath, [script], {
-      stdio: ["ignore", "pipe", "pipe", "ipc"],
-    });
-    t.after(() => child.kill("SIGKILL"));
-    await once(child, "message");
-    child.kill("SIGKILL");
-    await once(child, "exit");
-    const first = task({
-      key: "first",
-      perform: () => assert.fail("completed task replayed"),
-    });
-    const second = task({
-      key: "second",
-      after: [first],
-      perform: (context) => context.value(first) + context.attempt,
-    });
-    const result = await workflow("process", [first, second]).start({
-      checkpoint: {
-        store: fileWorkflowCheckpointStore({ directory }),
-        runId: "process",
-        version: "1",
-        resume: "retry-incomplete",
-      },
-    });
-    result.unwrap();
-    assert.equal(result.value(second), 44);
-    assert.equal(result.usage.attempts, 3);
-    assert.equal(result.usage.tokens.input, 5);
-  },
-);
+      );
+      const child = spawn(process.execPath, [script], {
+        stdio: ["ignore", "pipe", "pipe", "ipc"],
+      });
+      t.after(() => child.kill("SIGKILL"));
+      await once(child, "message");
+      child.kill("SIGKILL");
+      await once(child, "exit");
+      const first = task({
+        key: "first",
+        perform: () => assert.fail("completed task replayed"),
+      });
+      const second = task({
+        key: "second",
+        after: [first],
+        perform: (context) => context.value(first) + context.attempt,
+      });
+      const restart = () =>
+        workflow("process", [first, second]).start({
+          checkpoint: {
+            store: fileWorkflowCheckpointStore({ directory }),
+            runId: "process",
+            version: "1",
+            resume: "retry-incomplete",
+          },
+        });
+      const path = lockPath(directory, "workflow:process");
+      if (unavailableIdentity)
+        await writeFile(
+          path,
+          JSON.stringify({ pid: child.pid, nonce: "test-unknown-owner" }),
+        );
+      if (unavailableIdentity || !(await localProcessIdentity())) {
+        await assert.rejects(restart(), /ownership is unknown/);
+        // The fixture has independently awaited its owned child's exit.
+        await rm(path);
+      }
+      const result = await restart();
+      result.unwrap();
+      assert.equal(result.value(second), 44);
+      assert.equal(result.usage.attempts, 3);
+      assert.equal(result.usage.tokens.input, 5);
+    },
+  );
 
 test("checkpoint admission refuses invalid IDs and releases leases after read failure", async (t) => {
   const directory = await temporary(t);
