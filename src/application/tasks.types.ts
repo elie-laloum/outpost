@@ -12,10 +12,13 @@ export type CommandTaskOptions = {
 export type IsolatedTaskOptions<T> = {
   request: (
     context: TaskContext,
-  ) => SandboxOptions & DispatchOptions<T> & { readonly agent: AgentAdapter };
+  ) => IsolatedTaskRequest<T> | Promise<IsolatedTaskRequest<T>>;
 };
 
 export type AgentTaskOptions<T> = {
   sandbox: Sandbox;
   request: (context: TaskContext) => DispatchOptions<T>;
 };
+
+export type IsolatedTaskRequest<T> = SandboxOptions &
+  DispatchOptions<T> & { readonly agent: AgentAdapter };

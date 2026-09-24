@@ -192,3 +192,24 @@ export type {
   ResourceOperationResult,
   ResourcePhase,
 } from "./infrastructure/resource-activity.types.ts";
+
+export {
+  artifact,
+  publishArtifact,
+  readStoredArtifact,
+} from "./domain/artifact.ts";
+export { artifactTask, readArtifact } from "./application/artifact-tasks.ts";
+export { fileArtifactStore } from "./infrastructure/artifact-store.ts";
+export type {
+  ArtifactContract,
+  ArtifactContractOptions,
+  ArtifactIdentity,
+  ArtifactProducer,
+  ArtifactReference,
+  ArtifactStore,
+  JsonArtifactOptions,
+  PublishArtifactOptions,
+  ReadArtifactOptions,
+} from "./domain/artifact.types.ts";
+export type { ArtifactTaskOptions } from "./application/artifact-tasks.types.ts";
+export type { FileArtifactStoreOptions } from "./infrastructure/artifact-store.types.ts";
