@@ -1,6 +1,6 @@
 ---
 title: Hosted compatibility checks
-description: Run opt-in Vercel and Daytona contract checks without model calls.
+description: Run opt-in Vercel and Daytona contract checks and optional authenticated model calls.
 sidebar:
   order: 8
 ---
@@ -22,7 +22,7 @@ This fixture deliberately uses explicit Vercel access-token authentication, incl
 OUTPOST_CLOUD_LIVE=1 OUTPOST_CLOUD_PROVIDERS=vercel,daytona node test/cloud-live.ts > /tmp/outpost-cloud-compatibility.json
 ```
 
-Set `OUTPOST_CLOUD_AGENTS=1` to additionally install the current `@openai/codex`, `@anthropic-ai/claude-code` and `@google/gemini-cli` npm packages inside each disposable sandbox. The report records only the numeric CLI versions. Their actual version/help commands check the adapters' start options and, for Claude Code and Codex, resume and fork options. Gemini currently checks start only. This requires outbound npm access and more runtime. These checks exercise CLI syntax; they do not establish authenticated model execution, conversation capture or end-to-end agent behavior. The report always marks authenticated model turns as skipped.
+Set `OUTPOST_CLOUD_AGENTS=1` to additionally install the current `@openai/codex`, `@anthropic-ai/claude-code` and `@google/gemini-cli` npm packages inside each disposable sandbox. The report records only the numeric CLI versions. Their actual version/help commands check the adapters' start options and, for Claude Code and Codex, resume and fork options. Gemini currently checks start only. This requires outbound npm access and more runtime. These checks exercise CLI syntax; they do not establish authenticated model execution, conversation capture or end-to-end agent behavior. Authenticated model turns remain skipped unless separately enabled below.
 
 The runner writes JSON with schema version 1 and per-provider/per-check `pass`, `fail` or `skipped` statuses. It omits raw SDK errors, command output, paths, tokens and file contents. Exit code 0 means the executed provider checks passed; 1 means a contract or cleanup failed; 2 means every provider was skipped. Read individual provider statuses: a passed provider does not turn another provider's missing credentials into a live pass.
 
