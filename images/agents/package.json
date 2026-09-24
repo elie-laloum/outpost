@@ -1,0 +1,12 @@
+{
+  "name": "outpost-agent-image",
+  "private": true,
+  "version": "1.0.0",
+  "dependencies": {
+    "@openai/codex": "0.156.1",
+    "@anthropic-ai/claude-code": "2.1.280"
+  },
+  "allowScripts": {
+    "@anthropic-ai/claude-code": true
+  }
+}

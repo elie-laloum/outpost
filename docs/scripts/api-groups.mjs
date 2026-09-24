@@ -55,7 +55,7 @@ export const groups = [
     title: ["Providers", "Providers"],
     guide: "providers/overview",
     names:
-      "docker podman local vercel daytona ContainerOptions VercelOptions DaytonaOptions mountedProvider remoteProvider SandboxContext SandboxLease SandboxProvider TransferOptions Variables Volume",
+      "docker podman local vercel daytona ContainerOptions DependencyCache VercelOptions DaytonaOptions mountedProvider remoteProvider SandboxContext SandboxLease SandboxProvider TransferOptions Variables Volume",
   },
   {
     title: ["Errors", "Erreurs"],

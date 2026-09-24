@@ -559,3 +559,69 @@ test(
     );
   },
 );
+
+test(
+  "dependency caches persist across leases, invalidate by key and leave authentication homes ephemeral",
+  { skip: !process.env.OUTPOST_CONTAINER_ENGINE },
+  async (t) => {
+    const root = await repository(t);
+    const engine =
+      process.env.OUTPOST_CONTAINER_ENGINE === "podman" ? "podman" : "docker";
+    const factory = engine === "podman" ? podman : docker;
+    const { cacheMounts } = await import("../src/providers/container-cache.ts");
+    const user = {
+      uid: process.getuid?.() ?? 1000,
+      gid: process.getgid?.() ?? 1000,
+    };
+    const context = {
+      repository: root,
+      directory: root,
+      gitDirectories: [],
+      variables: {},
+    };
+    const volumes: string[] = [];
+    t.after(async () => {
+      for (const volume of volumes)
+        await executeProcess({
+          executable: engine,
+          arguments: ["volume", "rm", volume],
+        });
+    });
+    for (const [key, expected] of [
+      ["v1", "empty"],
+      ["v1", "retained"],
+      ["v2", "empty"],
+    ]) {
+      const caches = [{ name: "npm", key: key! }];
+      const mounts = await cacheMounts(caches, root, "outpost-ci:latest", user);
+      if (!volumes.includes(mounts[0]!.volume)) volumes.push(mounts[0]!.volume);
+      const lease = await factory({
+        image: "outpost-ci:latest",
+        networks: "none",
+        caches,
+      }).acquire(context);
+      try {
+        const result = await lease.invoke({
+          executable: "sh",
+          arguments: [
+            "-c",
+            'test ! -e "$HOME/auth-fixture" && test "$(stat -c %a /outpost/cache/npm)" = 700 && test "$(stat -c %u /outpost/cache/npm)" = "$(id -u)" && if test -e /outpost/cache/npm/entry; then echo retained; else echo empty; fi; echo payload > /outpost/cache/npm/entry; echo private > "$HOME/auth-fixture"',
+          ],
+        });
+        assert.equal(result.status, 0, result.stderr);
+        assert.equal(result.stdout.trim(), expected);
+        assert.equal(
+          (
+            await lease.invoke({
+              executable: "cat",
+              arguments: ["/outpost/cache/npm/entry"],
+            })
+          ).stdout,
+          "payload\n",
+        );
+      } finally {
+        await lease.release();
+      }
+    }
+  },
+);

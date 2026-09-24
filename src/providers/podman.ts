@@ -5,3 +5,5 @@ export type { ContainerOptions } from "./container.ts";
 
 export const podman = (options: ContainerOptions = {}) =>
   containerProvider("podman", options);
+
+export type { DependencyCache } from "./container-cache.types.ts";

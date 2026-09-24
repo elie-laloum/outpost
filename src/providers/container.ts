@@ -11,6 +11,8 @@ import {
 } from "../infrastructure/process.ts";
 import type { Executor } from "../infrastructure/process.types.ts";
 import { registerCleanup } from "../infrastructure/shutdown.ts";
+import { cacheMounts, validateCaches } from "./container-cache.ts";
+import { cacheDefaults } from "./container-cache.constants.ts";
 import { containerCommand } from "./container-command.ts";
 import { containerFiles } from "./container-files.ts";
 import { containerMounts } from "./container-mounts.ts";
@@ -35,7 +37,11 @@ export function containerProvider(
   executor: Executor = executeProcess,
   platform: NodeJS.Platform = process.platform,
 ): SandboxProvider {
-  const config = { ...options };
+  const config = {
+    ...options,
+    caches: (options.caches ?? []).map((cache) => ({ ...cache })),
+  };
+  validateCaches(config);
   if (config.cpus !== undefined)
     invariant(
       Number.isFinite(config.cpus) && config.cpus > 0,
@@ -86,6 +92,14 @@ export function containerProvider(
         root,
         home,
       );
+      const caches = await cacheMounts(
+        config.caches ?? [],
+        context.repository,
+        image,
+        user,
+      );
+      for (const cache of caches)
+        volumes.push("--volume", `${cache.volume}:${cache.target}:nocopy`);
       const args = containerPlan({
         config,
         engine,
@@ -112,6 +126,17 @@ export function containerProvider(
         return releasing;
       };
       try {
+        for (const cache of caches)
+          await call(
+            [
+              "volume",
+              "create",
+              "--label",
+              `${cacheDefaults.label}=true`,
+              cache.volume,
+            ],
+            context.signal ? { signal: context.signal } : {},
+          );
         await call(args, {
           ...(context.signal ? { signal: context.signal } : {}),
         });
@@ -119,6 +144,24 @@ export function containerProvider(
           ["start", name],
           context.signal ? { signal: context.signal } : {},
         );
+        for (const cache of caches) {
+          await call(
+            [
+              "exec",
+              "--user",
+              "0:0",
+              name,
+              "chown",
+              `${user.uid}:${user.gid}`,
+              cache.target,
+            ],
+            context.signal ? { signal: context.signal } : {},
+          );
+          await call(
+            ["exec", name, "chmod", "700", cache.target],
+            context.signal ? { signal: context.signal } : {},
+          );
+        }
         for (const parent of fileParents)
           await call([
             "exec",
