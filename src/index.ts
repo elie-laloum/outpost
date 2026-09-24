@@ -140,3 +140,10 @@ export type {
 } from "./application/doctor.types.ts";
 export { diagnoseAgentProtocol } from "./application/doctor-protocol.ts";
 export type { AgentProtocolReport } from "./application/doctor-protocol.types.ts";
+
+export { reserveRecoveryStorage } from "./application/storage-reservation.ts";
+export type { RecoveryStorageReservationOptions } from "./application/storage-reservation.types.ts";
+export type {
+  StorageReservation,
+  StorageReservationOptions,
+} from "./infrastructure/storage-reservations.types.ts";

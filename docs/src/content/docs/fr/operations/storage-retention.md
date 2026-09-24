@@ -60,4 +60,44 @@ const plan = await planRecoveryRetention({
 console.log(plan.usageBytes, plan.projectedBytes, plan.quota);
 ```
 
-L’admission lève `OutpostError` si la consommation observée plus `reserveBytes` dépasse `maxBytes`, ou si l’inventaire est incomplet. Les quatre catégories, y compris leurs entrées protégées, sont incluses. Elle ne réserve pas d’octets, n’impose pas de quota physique et n’est pas appelée automatiquement par `dispatch` ou les providers. Sérialisez les admissions avec la propriété de votre workflow lorsque plusieurs rédacteurs partagent un budget. `maxEntries` borne le parcours ; un inventaire partiel ne constitue jamais une admission réussie.
+L’admission lève `OutpostError` si la consommation observée plus `reserveBytes` dépasse `maxBytes`, ou si l’inventaire est incomplet. Les quatre catégories, y compris leurs entrées protégées, sont incluses. Elle ne réserve pas d’octets, n’impose pas de quota physique et n’est pas appelée automatiquement par `dispatch` ou les providers. Utilisez `reserveRecoveryStorage` ci-dessous lorsque plusieurs rédacteurs partagent un budget. `maxEntries` borne le parcours ; un inventaire partiel ne constitue jamais une admission réussie.
+
+## Réserver de la capacité entre opérations concurrentes
+
+`reserveRecoveryStorage` sérialise l'admission des processus coopérants utilisant le même checkout du dépôt. Le calcul additionne le stockage local mesuré, les réservations existantes, la marge demandée et les métadonnées de réservation avant d'enregistrer le propriétaire. Tous les participants doivent utiliser le même budget `maxBytes`.
+
+```ts
+import { reserveRecoveryStorage } from "@elie-laloum/outpost";
+
+const repository = "/path/to/repository";
+await using reservation = await reserveRecoveryStorage({
+  repository,
+  maxBytes: 1_073_741_824,
+  reserveBytes: 104_857_600,
+});
+// Effectuer les opérations pendant la durée de la réservation.
+// reservation.release() permet aussi une libération explicite et idempotente.
+```
+
+Pour une gestion automatique, définir `storageQuota` sur `openWorkspace`, `createSandbox`, `dispatch` ou les options de sandbox d'une tâche isolée :
+
+```ts
+import { openWorkspace } from "@elie-laloum/outpost";
+
+await using workspace = await openWorkspace({
+  repository: "/path/to/repository",
+  branch: { mode: "named", name: "reserved-work" },
+  storageQuota: {
+    maxBytes: 1_073_741_824,
+    reserveBytes: 104_857_600,
+  },
+});
+```
+
+La réservation précède l'allocation du workspace. Un échec d'allocation ou de démarrage la libère ; un workspace ouvert la conserve jusqu'à `close()`, y compris entre les opérations de sandboxes réutilisées. Un workspace fourni possède son quota : configurer le workspace lui-même, sans transmettre un second quota à sa sandbox. Fermer une sandbox qui emprunte le workspace ne libère pas sa réservation. Utiliser soit la gestion automatique, soit une réservation manuelle pour les mêmes opérations, afin d'éviter une double réservation.
+
+Les réservations représentent une marge, pas un compteur d'octets consommés : leur montant entier reste comptabilisé en plus du stockage mesuré jusqu'à leur libération. Ce calcul prudent peut refuser l'admission avant que le disque physique soit plein. Fermer un workspace libère sa réservation même si ses fichiers modifiés sont conservés ; ces fichiers restent comptés dans le stockage mesuré. Aucune suppression automatique ne permet de satisfaire un quota.
+
+Les enregistrements privés et versionnés sont stockés dans `.outpost/locks/storage-reservations/` et comptés dans la catégorie protégée des verrous. L'admission attend au maximum cinq secondes la propriété du dépôt et accepte un signal d'annulation. Un inventaire incomplet, des enregistrements corrompus ou des chemins dangereux font refuser l'admission. Les propriétaires actifs ou incertains restent comptabilisés. Lors d'une admission ultérieure, un enregistrement est récupéré uniquement si l'identité locale du processus prouve que son propriétaire est terminé. Cette récupération automatique nécessite actuellement l'identité des processus Linux ; les hôtes, démarrages, espaces de PID inconnus, PID réutilisés et plateformes sans cette identité conservent leurs réservations pour examen manuel. Une écriture interrompue ou illisible du verrou de propriété bloque également l'admission. Ne jamais supprimer un enregistrement incertain sans avoir confirmé indépendamment l'arrêt de son propriétaire.
+
+Il s'agit de réservations logiques du stockage local pour les appelants Outpost coopérants, pas de quotas du système de fichiers. Elles n'empêchent pas une commande active ou un autre processus de dépasser l'estimation et ne couvrent pas les disques cloud, volumes de cache des conteneurs, objets Git partagés ou transcriptions externes. `assertRecoveryQuota` reste une vérification instantanée sans réservation ; utiliser les réservations pour l'admission concurrente.

@@ -1,5 +1,5 @@
 import { invariant } from "../domain/errors.ts";
-import { acquireWorkspace } from "../infrastructure/git/workspace.ts";
+import { allocateWorkspace } from "./workspace-allocation.ts";
 import { executeProcess } from "../infrastructure/process.ts";
 import { attach } from "./attach.ts";
 import { dispatch } from "./dispatch.ts";
@@ -13,7 +13,7 @@ export async function openWorkspace(
   options: WorkspaceOptions = {},
 ): Promise<Workspace> {
   options.signal?.throwIfAborted();
-  const lease = await acquireWorkspace(options);
+  const lease = await allocateWorkspace(options);
   try {
     await hooks(
       options.hooks?.workspaceReady ?? [],

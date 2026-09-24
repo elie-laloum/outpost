@@ -60,4 +60,44 @@ const plan = await planRecoveryRetention({
 console.log(plan.usageBytes, plan.projectedBytes, plan.quota);
 ```
 
-Admission throws an `OutpostError` when observed storage plus the caller's proposed `reserveBytes` exceeds `maxBytes`, or when inventory is incomplete. It includes all four categories, including protected entries. It does not reserve bytes, enforce a physical disk quota or automatically run inside `dispatch`/provider allocation. Serialize admissions with your own workflow ownership when several writers share a budget. `maxEntries` bounds inventory work and partial scans never count as successful admission.
+Admission throws an `OutpostError` when observed storage plus the caller's proposed `reserveBytes` exceeds `maxBytes`, or when inventory is incomplete. It includes all four categories, including protected entries. It does not reserve bytes, enforce a physical disk quota or automatically run inside `dispatch`/provider allocation. Use `reserveRecoveryStorage` below when several writers share a budget. `maxEntries` bounds inventory work and partial scans never count as successful admission.
+
+## Reserve capacity across concurrent operations
+
+`reserveRecoveryStorage` serializes admission for cooperating processes using the same repository checkout. It charges measured local storage, existing reservations, the requested headroom and reservation metadata before recording ownership. All participants should use the same `maxBytes` budget.
+
+```ts
+import { reserveRecoveryStorage } from "@elie-laloum/outpost";
+
+const repository = "/path/to/repository";
+await using reservation = await reserveRecoveryStorage({
+  repository,
+  maxBytes: 1_073_741_824,
+  reserveBytes: 104_857_600,
+});
+// Perform custom work while the reservation remains owned.
+// Explicit reservation.release() is also supported and idempotent.
+```
+
+For automatic ownership, set `storageQuota` on `openWorkspace`, `createSandbox`, `dispatch` or an isolated task's sandbox options:
+
+```ts
+import { openWorkspace } from "@elie-laloum/outpost";
+
+await using workspace = await openWorkspace({
+  repository: "/path/to/repository",
+  branch: { mode: "named", name: "reserved-work" },
+  storageQuota: {
+    maxBytes: 1_073_741_824,
+    reserveBytes: 104_857_600,
+  },
+});
+```
+
+Reservation happens before workspace allocation. Allocation and startup failures release it; a successful workspace retains it until `close()`, including between warm sandbox operations. A supplied workspace owns its quota: configure the workspace itself, rather than passing another quota to its sandbox. Closing a sandbox that borrows the workspace does not release that workspace's reservation. Use either automatic ownership or a manual reservation for the same work to avoid reserving twice.
+
+Reservations represent headroom, not consumed-byte counters: their entire amount remains charged alongside current measured storage until release. This conservative accounting can refuse admission before the physical disk is full. Closing a workspace releases the claim even when dirty files are retained; those files continue counting as measured storage. No cleanup or eviction is performed to make admission fit.
+
+Private versioned records live in `.outpost/locks/storage-reservations/` and count in the existing protected locks category. Admission waits up to five seconds for repository ownership and accepts an abort signal. Incomplete storage inventories, corrupt records and unsafe record paths refuse admission. Active and uncertain owners remain charged. On a later admission, a record is reclaimed only when local process identity proves that its owner exited. This automatic crash recovery currently requires Linux process identity; unknown hosts, boots, PID namespaces, reused PIDs and platforms without that identity retain their claims for operator investigation. An unreadable or interrupted ownership-lock write also fails closed. Never delete an uncertain record until its owner is independently confirmed stopped.
+
+These are logical local storage reservations for cooperating Outpost callers, not filesystem quotas. They do not prevent a running command or unrelated filesystem writer from exceeding its estimate, and they do not include cloud disks, container cache volumes, shared Git objects or external transcript stores. The original `assertRecoveryQuota` remains a snapshot check and creates no claim; use reservations for concurrent admission.

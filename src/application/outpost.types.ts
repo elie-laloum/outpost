@@ -10,6 +10,7 @@ import type {
   StageLimits,
   WorkspaceRecord,
 } from "../domain/workspace.types.ts";
+import type { StorageReservationOptions } from "../infrastructure/storage-reservations.types.ts";
 import type { Logging } from "../infrastructure/journal.types.ts";
 import type {
   SandboxDiagnosticOptions,
@@ -19,6 +20,7 @@ import type { DispatchOptions, Execution } from "./execution.types.ts";
 import type { VariableQuestion } from "./interactive-brief.types.ts";
 
 export interface WorkspaceOptions {
+  readonly storageQuota?: Omit<StorageReservationOptions, "signal">;
   readonly signal?: AbortSignal;
   readonly repository?: string;
   readonly branch?: BranchPolicy;
