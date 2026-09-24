@@ -241,3 +241,14 @@ export type {
   QueueWorkerOptions,
 } from "./application/queue-worker.types.ts";
 export type { QueuedTaskOptions } from "./application/queued-task.types.ts";
+
+export { speculate } from "./application/speculation.ts";
+export type {
+  SpeculationOptions,
+  SpeculationResult,
+  SpeculativeCandidate,
+  SpeculativeCandidateResult,
+  SpeculativeOutput,
+  SpeculativeHostSnapshot,
+  SpeculativeValidation,
+} from "./application/speculation.types.ts";
