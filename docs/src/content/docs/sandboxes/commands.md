@@ -39,4 +39,4 @@ console.log(session.status, session.commits);
 
 Use `sandbox.attach()` to keep the environment afterward. `continuation: { id, fork? }` opens a native conversation. File briefs can ask for missing variables in the TTY or through async `ask(name)`. Values already supplied are preserved.
 
-Docker, Podman and local execution support interactive attachment; Vercel and Daytona explicitly reject it. `terminal: { input, output, error }` lets callers own the streams. Terminal raw mode and cursor visibility are restored on exit. Attachment results include `status`, output, commits, branch, directory and available disposal information.
+Docker, Podman, Daytona and local execution support interactive attachment; Vercel explicitly rejects it. Daytona uses a native PTY with combined stdout/stderr, byte streaming and terminal resize forwarding. Its default dimensions are 80 columns and 24 rows when the output stream provides no dimensions. `terminal: { input, output, error }` lets callers own the streams. Terminal raw mode and cursor visibility are restored on exit. Attachment results include `status`, output, commits, branch, directory and available disposal information.

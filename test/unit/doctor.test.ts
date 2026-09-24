@@ -108,7 +108,7 @@ test("local and cloud diagnostics never allocate a sandbox or require unrelated 
     );
     assert.deepEqual(calls, ["git", "claude"]);
     assert.equal(report.hasFailures, false);
-    assert.equal(report.interactiveTerminal, provider === "local");
+    assert.equal(report.interactiveTerminal, provider !== "vercel");
     assert.equal(
       report.checks.some(
         (check) => check.id === "provider.cloud" && check.status === "skipped",

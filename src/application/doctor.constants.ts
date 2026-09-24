@@ -16,5 +16,5 @@ export const providerDiagnostics: Readonly<
   podman: { placement: "mounted", interactiveTerminal: true },
   local: { placement: "host", interactiveTerminal: true },
   vercel: { placement: "remote", interactiveTerminal: false },
-  daytona: { placement: "remote", interactiveTerminal: false },
+  daytona: { placement: "remote", interactiveTerminal: true },
 };

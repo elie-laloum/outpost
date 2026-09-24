@@ -32,8 +32,16 @@ await dispatch({
 
 L’environnement doit contenir Node.js, npm, Git, `sh` et `setsid`. L’installation automatique de l’agent est active sauf avec `bootstrap: false`. Une image personnalisée doit fournir les autres outils du projet.
 
-Les sessions de processus natives transmettent stdout/stderr et sont nettoyées après l’appel. L’annulation termine le groupe de la commande, pas la sandbox entière. Le lease transfère fichiers et répertoires. L’attachement interactif n’est pas disponible dans cette version.
+Les sessions de processus natives transmettent stdout/stderr et sont nettoyées après l’appel. L’annulation termine le groupe de la commande, pas la sandbox entière. Le lease transfère fichiers et répertoires. Les commandes interactives et `sandbox.attach()` utilisent l’[API PTY native de Daytona](https://www.daytona.io/docs/en/pty/). Les flux préservent les octets ; stdout et stderr sont fusionnés dans la sortie du terminal. Outpost transmet les dimensions et événements de redimensionnement du flux de sortie, restaure le mode brut de l’entrée et déconnecte le PTY après exécution. Le statut de la commande est vérifié indépendamment de la fermeture WebSocket. L’annulation termine le groupe de processus et le PTY en conservant une sandbox réutilisable.
 
 Lisez [la synchronisation distante](../../sandboxes/remote-sync/) avant d’activer `includeUncommitted` ou de modifier simultanément le workspace hôte. Les tests de contrat n’allouent pas de sandbox payante réelle.
 
 [Exécutez les vérifications hébergées sur activation explicite](../../operations/cloud-compatibility/) pour les contrats des fournisseurs réels et les CLI sans identifiants de modèle.
+
+Exécutez le scénario de terminal natif avec un compte Daytona existant :
+
+```sh
+OUTPOST_DAYTONA_TERMINAL=1 node test/fixtures/daytona-terminal.ts
+```
+
+Il exige `DAYTONA_API_KEY`, alloue une sandbox facturable et tente toujours sa suppression. Il vérifie les vrais descripteurs TTY, l’entrée, le statut non nul après fermeture des sorties, le redimensionnement, l’annulation des descendants et la réutilisation. Il n’appelle aucun modèle. Les tests unitaires courants utilisent des doublures du contrat SDK ; leur réussite ne prouve pas la compatibilité cloud réelle.
