@@ -42,3 +42,5 @@ Les clés sont uniques. Chaque dépendance doit appartenir au graphe ; les cycle
 `delivery.diagram()` retourne du texte Mermaid représentant les dépendances. Il n’exécute aucune tâche. Enregistrez-le ou affichez-le avec un outil compatible pour examiner le graphe.
 
 Poursuivez avec [les politiques d’exécution](../execution/) ou [les tâches de sandbox](../sandbox-tasks/).
+
+Consultez les [budgets de consommation](../budgets/) pour les limites partagées d’admission et de tokens, et la [télémétrie](../../operations/telemetry/) pour les métriques structurées.

@@ -13,6 +13,8 @@ const roots = [];
 const runnable = new Set([
   "workflows/graph.md",
   "workflows/execution.md",
+  "workflows/budgets.md",
+  "operations/telemetry.md",
   "extend/agents.md",
 ]);
 let executed = 0;
@@ -60,6 +62,9 @@ const program = ts.createProgram(roots, {
   paths: {
     "@elie-laloum/outpost": [resolve(root, "src/index.ts")],
     "@elie-laloum/outpost/providers/*": [resolve(root, "src/providers/*.ts")],
+    "@elie-laloum/outpost/opentelemetry": [
+      resolve(root, "src/infrastructure/opentelemetry.ts"),
+    ],
   },
 });
 const diagnostics = ts.getPreEmitDiagnostics(program);

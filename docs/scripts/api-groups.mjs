@@ -43,13 +43,14 @@ export const groups = [
   {
     title: ["Observability", "Observabilité"],
     guide: "agents/observability",
-    names: "reporter ReporterOptions Logging AgentEvent AgentObservation Usage",
+    names:
+      "reporter ReporterOptions Logging AgentEvent AgentObservation Usage openTelemetry OpenTelemetryOptions OpenTelemetryObserver",
   },
   {
     title: ["Workflows", "Workflows"],
     guide: "workflows/graph",
     names:
-      "task workflow WorkflowFailure Retry Task TaskContext TaskOptions TaskRecord TaskStatus Workflow WorkflowEvent WorkflowOptions WorkflowResult agentTask commandTask isolatedTask",
+      "task workflow WorkflowFailure Retry Task TaskContext TaskOptions TaskRecord TaskStatus Workflow WorkflowEvent WorkflowOptions WorkflowBudget WorkflowUsage WorkflowBudgetExceeded WorkflowResult agentTask commandTask isolatedTask",
   },
   {
     title: ["Providers", "Providers"],

@@ -1,7 +1,15 @@
+import type { Usage } from "./agent.types.ts";
+import type {
+  WorkflowAccounting,
+  WorkflowBudget,
+  WorkflowUsage,
+} from "./workflow/budget.types.ts";
+
 export interface TaskContext {
   readonly signal: AbortSignal;
   readonly attempt: number;
   readonly executionId: string;
+  reportUsage(usage: Usage): void;
   value<T>(dependency: Task<T>): T;
 }
 
@@ -40,15 +48,18 @@ export interface WorkflowEvent {
   readonly executionId: string;
   readonly workflow: string;
   readonly timestamp: string;
-  readonly type: "start" | "task" | "retry" | "finish";
+  readonly type: "start" | "task" | "attempt" | "retry" | "usage" | "finish";
   readonly key?: string;
   readonly status?: TaskStatus;
   readonly attempt?: number;
+  readonly usage?: Usage;
+  readonly durationMs?: number;
 }
 
 export interface WorkflowOptions {
   readonly signal?: AbortSignal;
   readonly concurrency?: number;
+  readonly budget?: WorkflowBudget;
   readonly stopOnError?: boolean;
   readonly observe?: (event: WorkflowEvent) => void;
 }
@@ -60,6 +71,7 @@ export interface WorkflowResult {
   readonly tasks: readonly Readonly<TaskRecord>[];
   readonly errors: readonly unknown[];
   readonly observerErrors: readonly unknown[];
+  readonly usage: WorkflowUsage;
   value<T>(task: Task<T>): T;
   unwrap(): void;
 }
@@ -84,6 +96,8 @@ export interface WorkflowExecutionState {
   readonly errors: unknown[];
   readonly observerErrors: unknown[];
   readonly options: WorkflowOptions;
+  readonly accounting: WorkflowAccounting;
+  closeAttempt(task: Task): void;
   record(task: Task): TaskRecord;
   emit(event: WorkflowNotification): void;
   finish(task: Task, status: TaskStatus): void;

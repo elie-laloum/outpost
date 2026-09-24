@@ -42,3 +42,5 @@ Keys must be unique. Every dependency must be present in the graph, and cycles a
 `delivery.diagram()` returns Mermaid text for the declared dependency graph. It does not execute tasks. Save or render it in a Mermaid-capable tool to inspect structure.
 
 Continue with [execution policies](../execution/) or [sandbox tasks](../sandbox-tasks/).
+
+See [usage budgets](../budgets/) for shared admission and token limits, and [telemetry](../../operations/telemetry/) for structured metrics.

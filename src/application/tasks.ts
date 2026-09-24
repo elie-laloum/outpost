@@ -1,3 +1,4 @@
+import { taskUsage } from "./task-usage.ts";
 import { OutpostError } from "../domain/errors.ts";
 import type { CommandResult } from "../domain/ports.ts";
 import { task, type Task, type TaskOptions } from "../domain/workflow.ts";
@@ -16,8 +17,17 @@ export function agentTask<T>(
   const { sandbox, request, ...definition } = options;
   return task({
     ...definition,
-    perform: (context) =>
-      sandbox.dispatch({ ...request(context), signal: context.signal }),
+    async perform(context) {
+      const options = request(context);
+      const usage = taskUsage(context, options.observe);
+      const result = await sandbox.dispatch({
+        ...options,
+        signal: context.signal,
+        observe: usage.observe,
+      });
+      usage.reconcile(result.usage);
+      return result;
+    },
   });
 }
 
@@ -28,8 +38,17 @@ export function isolatedTask<T>(
   const { request, ...definition } = options;
   return task({
     ...definition,
-    perform: (context) =>
-      dispatch({ ...request(context), signal: context.signal }),
+    async perform(context) {
+      const options = request(context);
+      const usage = taskUsage(context, options.observe);
+      const result = await dispatch({
+        ...options,
+        signal: context.signal,
+        observe: usage.observe,
+      });
+      usage.reconcile(result.usage);
+      return result;
+    },
   });
 }
 

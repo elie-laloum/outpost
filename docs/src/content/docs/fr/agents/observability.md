@@ -31,8 +31,12 @@ Les erreurs des callbacks d’observation et d’avertissement ne font pas écho
 
 Le défaut est un fichier JSONL généré dans `.outpost/logs`. Utilisez `logging: false` pour la désactiver, `"stdout"` pour la sortie standard, ou `{ file, verbose }` pour la configurer. Un dispatch peut surcharger la politique de sa sandbox. Le mode verbeux inclut le protocole brut.
 
+Des dispatchs successifs peuvent compléter le même `logging.file`. Les écritures simultanées au même chemin sont refusées pendant sa possession dans ce dépôt. Les logs par défaut reçoivent un fichier annexe privé indiquant leur fermeture pour la conservation ; fermer un journal est idempotent.
+
 ## Comptage des tokens
 
 `Usage` contient `input`, `cached` (lecture du cache), `cacheCreated` facultatif (création du cache) et `output`. Chaque tour fournit `durationMs` et sa consommation ; le résultat les cumule. La consommation du transcript Claude utilise le dernier message assistant, indépendamment des totaux du flux. Il s’agit de comptages bruts, pas d’une estimation de coût.
 
 Les logs et transcripts peuvent contenir sources et prompts privés. Gérez leur conservation séparément du nettoyage des workspaces ; capture native et journalisation sont indépendantes.
+
+Les [budgets](../../workflows/budgets/) et [OpenTelemetry](../../operations/telemetry/) décrivent les limites de consommation et les métriques respectant la confidentialité.

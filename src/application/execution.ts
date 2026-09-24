@@ -40,6 +40,7 @@ export async function execute<T>(
     ? 1 + options.response.repairs
     : (options.passes ?? executionDefaults.passes);
   for (let index = 0; index < attempts; index++) {
+    options.signal?.throwIfAborted();
     notify(options.observe, {
       kind: "phase",
       name: "preparing prompt",
