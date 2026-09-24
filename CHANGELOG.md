@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Add optional `recovery inspect --locks` with bounded lock metadata reads and local PID observations; report invalid or unverifiable records explicitly without claiming ownership or deleting locks.
 - Add optional `recovery inspect --git` workspace reports with branch/detached HEAD, clean/dirty status, Git locks and explicit unregistered/unavailable states, without refreshing indexes or pruning registrations.
 - Add read-only `outpost recovery inspect` reports for recovery files, logs, locks and managed workspaces, with metadata-only logical sizes, symlink protection and explicit partial results when traversal limits or filesystem errors prevent a complete inventory.
 - Check default agent start/resume/fork CLI help inside diagnostic images, verifying command usage and declared options instead of trusting a successful help exit; keep real execution and protocol compatibility explicitly unverified.

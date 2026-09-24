@@ -1,3 +1,4 @@
+import { inspectLocks } from "../infrastructure/git/lock-inspection.ts";
 import { join } from "node:path";
 import { directory } from "../infrastructure/files.ts";
 import { git } from "../infrastructure/git/command.ts";
@@ -26,10 +27,17 @@ export async function inspectRecovery(
           ?.entries ?? [],
       )
     : undefined;
+  const lockReport = options.locks
+    ? await inspectLocks(
+        inventory.categories.find((category) => category.name === "locks")
+          ?.entries ?? [],
+      )
+    : undefined;
   return {
     repository,
     activity: "unverified",
     ...inventory,
     ...(gitReport ? { git: gitReport } : {}),
+    ...(lockReport ? { locks: lockReport } : {}),
   };
 }

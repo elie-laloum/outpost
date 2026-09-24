@@ -8,11 +8,11 @@ export async function recoveryCommand({
 }: CliInvocation): Promise<void> {
   invariant(
     positionals.length === 2 && positionals[1] === "inspect",
-    "Usage: outpost recovery inspect [--repository PATH] [--max-entries NUMBER] [--git] [--json]",
+    "Usage: outpost recovery inspect [--repository PATH] [--max-entries NUMBER] [--git] [--locks] [--json]",
   );
   for (const key of Object.keys(values))
     invariant(
-      ["repository", "max-entries", "git", "json"].includes(key),
+      ["repository", "max-entries", "git", "locks", "json"].includes(key),
       `Unsupported recovery option: --${key}`,
     );
   const maxEntries =
@@ -25,6 +25,7 @@ export async function recoveryCommand({
       : {}),
     ...(maxEntries !== undefined ? { maxEntries } : {}),
     ...(values.git ? { git: true } : {}),
+    ...(values.locks ? { locks: true } : {}),
   });
   if (values.json) process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
   else {
@@ -61,6 +62,25 @@ export async function recoveryCommand({
         "Git status excludes ignored files. Clean does not mean safe to delete.\n",
       );
     }
+    if (report.locks) {
+      process.stdout.write(
+        `Lock PID inspection (local host): ${report.locks.complete ? "complete for listed entries" : "partial"}\n`,
+      );
+      for (const lock of report.locks.entries) {
+        const pid = "pid" in lock ? ` | PID ${lock.pid}` : "";
+        const reason = "reason" in lock ? ` | ${lock.reason}` : "";
+        process.stdout.write(
+          `  ${JSON.stringify(lock.name)} | ${lock.state}${pid}${reason}\n`,
+        );
+      }
+      for (const issue of report.locks.issues)
+        process.stdout.write(
+          `[PARTIAL] ${issue.code}: ${JSON.stringify(issue.path)}\n`,
+        );
+      process.stdout.write(
+        "PID presence does not prove lock ownership; PID absence does not authorize deletion.\n",
+      );
+    }
     for (const issue of report.issues)
       process.stdout.write(
         `[PARTIAL] ${issue.code}: ${JSON.stringify(issue.path)}\n`,
@@ -72,10 +92,15 @@ export async function recoveryCommand({
       `${report.complete ? "Inventory complete." : "Inventory incomplete; totals are partial."} File sizes are logical bytes; symlink targets are excluded.\n`,
     );
     process.stdout.write(
-      report.git
-        ? "Activity and recovery integrity are unverified. No file contents were displayed or files removed.\n"
+      report.git || report.locks
+        ? "Activity and recovery integrity are unverified. No raw file contents were displayed or files removed.\n"
         : "Activity and recovery integrity are unverified. No files were read for content or removed.\n",
     );
   }
-  if (!report.complete || report.git?.complete === false) process.exitCode = 1;
+  if (
+    !report.complete ||
+    report.git?.complete === false ||
+    report.locks?.complete === false
+  )
+    process.exitCode = 1;
 }

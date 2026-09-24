@@ -73,6 +73,29 @@ This optional check lets Git read workspace contents to calculate status; file c
 
 JSON adds `git: { complete, workspaces, issues }`. Each workspace has `name`, `path`, `state` and, when registered, `head`, `branch` (`null` for detached HEAD), `dirty` and `locked`. Skipped/unavailable entries also have a `reason`. The top-level `complete` describes the storage inventory; `git.complete` describes the optional Git checks for listed entries. Exit status is `1` if either is partial; dirty, detached, locked or unregistered workspaces alone do not fail inspection.
 
+## Inspect lock PIDs
+
+Add `--locks` to read lock metadata and check whether the recorded PID exists on the local host:
+
+```sh
+node src/cli/main.ts recovery inspect --repository /path/to/repository --git --locks
+node src/cli/main.ts recovery inspect --repository /path/to/repository --locks --json
+```
+
+Only regular files among the inventoried lock entries are read, with a 4 KiB limit per record. Positive integer PIDs up to 2,147,483,647 are probed with signal `0`, which does not terminate the process. The report displays the PID and `present`, `absent` or `unknown`. Only a process-not-found result (`ESRCH`) means `absent`; permission errors and other probe failures remain `unknown`. Malformed, oversized, unreadable or changing records are also unknown. Symlinks, directories and other non-file entries are skipped. Raw lock contents and nonces are not displayed.
+
+This is a local PID observation, not proof of lock ownership or activity. Current lock records identify neither the host nor the process start time: shared filesystems, PID namespaces and PID reuse can make a PID observation misleading. An absent PID does not authorize deletion. Inspection never acquires, releases or removes existing locks, and `activity` remains `"unverified"`.
+
+JSON adds `locks: { scope: "local-pid", complete, entries, issues }`. Each entry has `name`, `path`, `state`, a valid `pid` when available, and a `reason` for unknown/skipped results. `locks.complete` applies only to listed entries; an unknown result makes it false and the CLI exits with `1`. Present/absent PIDs alone do not fail inspection. The inventory and optional Git check keep their separate completeness fields; any partial check causes exit status `1`.
+
+If your repository has no locks, try this source-checkout demonstration:
+
+```sh
+node test/fixtures/recovery-locks.ts
+```
+
+It creates a temporary Git repository, holds one real Outpost lock and adds one invalid PID record. Expect one `present` entry, one `unknown | INVALID_PID` and a reported inspection exit status of `1`. The demonstration itself exits successfully when this expected result is observed and removes only its temporary repository.
+
 ## Recover deliberately
 
 1. Record the error, paths and branch names; keep the recovery directory intact.

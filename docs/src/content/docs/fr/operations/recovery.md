@@ -73,6 +73,29 @@ Cette vérification optionnelle laisse Git lire le contenu des workspaces pour c
 
 Le JSON ajoute `git: { complete, workspaces, issues }`. Chaque workspace possède `name`, `path`, `state` et, s’il est enregistré, `head`, `branch` (`null` pour une HEAD détachée), `dirty` et `locked`. Les entrées skipped/unavailable possèdent aussi une `reason`. Le champ racine `complete` décrit l’inventaire du stockage ; `git.complete` décrit les vérifications Git optionnelles des entrées listées. Le code de sortie est `1` si l’une des deux inspections est partielle ; des workspaces modifiés, détachés, verrouillés ou non enregistrés ne font pas échouer l’inspection à eux seuls.
 
+## Inspecter les PID des verrous
+
+Ajoutez `--locks` pour lire les métadonnées des verrous et vérifier si le PID enregistré existe sur l’hôte local :
+
+```sh
+node src/cli/main.ts recovery inspect --repository /chemin/du/depot --git --locks
+node src/cli/main.ts recovery inspect --repository /chemin/du/depot --locks --json
+```
+
+Seuls les fichiers ordinaires parmi les verrous inventoriés sont lus, avec une limite de 4 Kio par enregistrement. Les PID entiers positifs jusqu’à 2 147 483 647 sont sondés avec le signal `0`, qui ne termine pas le processus. Le rapport affiche le PID et `present`, `absent` ou `unknown`. Seul un résultat « processus introuvable » (`ESRCH`) signifie `absent` ; les erreurs de permission et autres échecs restent `unknown`. Les enregistrements malformés, trop grands, illisibles ou changeants sont aussi inconnus. Liens symboliques, dossiers et autres entrées non ordinaires sont ignorés. Le contenu brut et les nonces des verrous ne sont pas affichés.
+
+C’est une observation locale du PID, pas une preuve de propriété ou d’activité du verrou. Les enregistrements actuels n’identifient ni l’hôte ni la date de démarrage du processus : systèmes de fichiers partagés, espaces de PID et réutilisation des PID peuvent rendre cette observation trompeuse. Un PID absent n’autorise pas une suppression. L’inspection n’acquiert, ne libère et ne supprime aucun verrou existant ; `activity` reste `"unverified"`.
+
+Le JSON ajoute `locks: { scope: "local-pid", complete, entries, issues }`. Chaque entrée possède `name`, `path`, `state`, un `pid` valide lorsqu’il est disponible et une `reason` pour les résultats unknown/skipped. `locks.complete` concerne seulement les entrées listées ; un résultat inconnu le rend faux et le CLI termine avec `1`. Des PID présents/absents ne font pas échouer l’inspection à eux seuls. L’inventaire et la vérification Git optionnelle conservent leurs champs de complétude distincts ; toute vérification partielle entraîne le code `1`.
+
+Si votre dépôt ne contient aucun verrou, utilisez cette démonstration depuis les sources :
+
+```sh
+node test/fixtures/recovery-locks.ts
+```
+
+Elle crée un dépôt Git temporaire, conserve un véritable verrou Outpost et ajoute un enregistrement au PID invalide. Résultat attendu : une entrée `present`, une entrée `unknown | INVALID_PID` et un code d’inspection affiché de `1`. La démonstration elle-même termine avec succès lorsque ce résultat attendu est observé et supprime uniquement son dépôt temporaire.
+
 ## Procédure de récupération
 
 1. Notez erreur, chemins et branches ; conservez le dossier de récupération.

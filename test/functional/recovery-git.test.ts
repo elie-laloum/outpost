@@ -222,7 +222,7 @@ test("Git CLI output includes branches, detached HEAD and dirty state without fi
   assert.match(result.stdout, /detached HEAD \| clean/);
   assert.match(
     result.stdout,
-    /No file contents were displayed or files removed/,
+    /No raw file contents were displayed or files removed/,
   );
   assert.doesNotMatch(result.stdout, /private-changes/);
 });
