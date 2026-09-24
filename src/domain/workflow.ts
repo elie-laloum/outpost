@@ -39,3 +39,6 @@ export function workflow(name: string, tasks: readonly Task[]): Workflow {
     },
   });
 }
+
+export { WorkflowBudgetExceeded } from "./workflow/budget.ts";
+export type { WorkflowBudget, WorkflowUsage } from "./workflow/budget.types.ts";

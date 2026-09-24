@@ -31,8 +31,12 @@ Observer and warning callback exceptions do not fail the job. Do not use an obse
 
 The default is a generated JSONL file under `.outpost/logs`. Set `logging: false` to disable it, `"stdout"` for standard output, or `{ file, verbose }` for control. A dispatch can override the warm sandbox’s logging policy. Verbose logging includes raw protocol events.
 
+A configured `logging.file` can be appended by sequential dispatches. Concurrent writers to the same path are rejected while it is owned in that repository. Default logs receive a private closed-log sidecar for retention; closing a journal is idempotent.
+
 ## Token accounting
 
 `Usage` contains `input`, `cached` (cache read), optional `cacheCreated` (cache creation), and `output`. Each turn records `durationMs` and usage; the result aggregates turns. Claude native transcript usage uses the final assistant message independently of streamed totals. These are raw counts, not a currency estimate.
 
 Logs and transcripts may include source and private prompts. Choose retention separately from workspace cleanup; native transcript capture and logging are independent options.
+
+Workflow usage budgets and privacy-preserving metrics are covered in [budgets](../../workflows/budgets/) and [OpenTelemetry](../../operations/telemetry/).

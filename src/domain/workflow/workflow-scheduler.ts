@@ -28,12 +28,13 @@ export async function schedule(
     finish,
   } = state;
   const active = new Map<Task, Promise<void>>();
+  const started = Date.now();
   emit({ type: "start" });
   while (true) {
     let changed = false;
     for (const item of tasks) {
       if (record(item).status !== "waiting") continue;
-      if (signal.aborted) {
+      if (signal.aborted || state.accounting.exhausted) {
         finish(item, "cancelled");
         changed = true;
         continue;
@@ -73,11 +74,12 @@ export async function schedule(
     : errors.length
       ? "failed"
       : "done";
-  emit({ type: "finish" });
+  emit({ type: "finish", status, durationMs: Date.now() - started });
   const result: WorkflowResult = Object.freeze({
     executionId,
     name,
     status,
+    usage: state.accounting.snapshot(),
     tasks: Object.freeze(
       [...records.values()].map((value) => Object.freeze({ ...value })),
     ),

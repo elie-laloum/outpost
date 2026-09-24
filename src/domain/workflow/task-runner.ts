@@ -1,3 +1,4 @@
+import { WorkflowBudgetExceeded } from "./budget.ts";
 import { setTimeout as delay } from "node:timers/promises";
 import type { Task, WorkflowExecutionState } from "../workflow.types.ts";
 
@@ -30,7 +31,9 @@ export async function runTask(
     const limit = item.retry?.attempts ?? 1;
     for (let attempt = 1; attempt <= limit; attempt++) {
       signal.throwIfAborted();
+      runtime.accounting.admit();
       state.attempts = attempt;
+      emit({ type: "attempt", key: item.key, attempt });
       const deadline = new AbortController();
       const timer =
         item.timeoutMs === undefined
@@ -41,12 +44,14 @@ export async function runTask(
             );
       const taskSignal = AbortSignal.any([signal, deadline.signal]);
       try {
+        taskSignal.throwIfAborted();
         const value = await item.perform(context(item, attempt, taskSignal));
         taskSignal.throwIfAborted();
         values.set(item, value);
         finish(item, "done");
         return;
       } catch (error) {
+        runtime.closeAttempt(item);
         if (
           signal.aborted ||
           attempt === limit ||
@@ -55,13 +60,18 @@ export async function runTask(
           throw error;
         emit({ type: "retry", key: item.key, attempt });
       } finally {
+        runtime.closeAttempt(item);
         clearTimeout(timer);
       }
       await delay(item.retry?.delayMs ?? 0, undefined, { signal });
     }
   } catch (error) {
     state.error = error instanceof Error ? error.message : String(error);
-    if (signal.aborted) finish(item, "cancelled");
+    if (
+      signal.aborted ||
+      (error instanceof WorkflowBudgetExceeded && runtime.accounting.exhausted)
+    )
+      finish(item, "cancelled");
     else {
       errors.push(error);
       finish(item, "failed");

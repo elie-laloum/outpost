@@ -23,7 +23,12 @@ export type {
   Turn,
 } from "./application/execution.ts";
 
-export { WorkflowFailure, task, workflow } from "./domain/workflow.ts";
+export {
+  WorkflowFailure,
+  WorkflowBudgetExceeded,
+  task,
+  workflow,
+} from "./domain/workflow.ts";
 
 export type {
   Retry,
@@ -35,6 +40,8 @@ export type {
   Workflow,
   WorkflowEvent,
   WorkflowOptions,
+  WorkflowBudget,
+  WorkflowUsage,
   WorkflowResult,
 } from "./domain/workflow.ts";
 
