@@ -1,3 +1,6 @@
+import { maxUsageReceiptsPerTask } from "./usage-receipt.constants.ts";
+import { validateUsageReceipt } from "./usage-receipt.ts";
+import type { Usage } from "../agent.types.ts";
 import type { WorkflowCheckpointSession } from "./checkpoint.types.ts";
 import { workflowAccounting } from "./budget.ts";
 import { randomUUID } from "node:crypto";
@@ -48,6 +51,9 @@ export function workflowState(
       const entry = saved.records.find((entry) => entry.key === item.key)!;
       records.set(item, {
         ...entry,
+        ...(entry.usageReceipts
+          ? { usageReceipts: Object.freeze([...entry.usageReceipts]) }
+          : {}),
         ...(entry.pause
           ? {
               pause: Object.freeze({
@@ -120,28 +126,53 @@ export function workflowState(
     taskSignal: AbortSignal,
   ): TaskContext {
     if (attempt > 0) activeAttempts.set(item, attempt);
+    function report(usage: Usage, receipt?: string): void {
+      const current = record(item);
+      if (
+        attempt === 0 ||
+        current.status !== "active" ||
+        activeAttempts.get(item) !== attempt
+      )
+        throw new Error(
+          "Usage must be reported during its active task attempt",
+        );
+      if (receipt !== undefined) {
+        validateUsageReceipt(receipt);
+        if (current.usageReceipts?.includes(receipt)) return;
+        if ((current.usageReceipts?.length ?? 0) >= maxUsageReceiptsPerTask)
+          throw new Error("Workflow usage receipt limit exceeded");
+      }
+      const previousReceipts = current.usageReceipts;
+      if (receipt !== undefined)
+        current.usageReceipts = Object.freeze([
+          ...(previousReceipts ?? []),
+          receipt,
+        ]);
+      try {
+        accounting.report(usage);
+      } catch (error) {
+        if (previousReceipts) current.usageReceipts = previousReceipts;
+        else delete current.usageReceipts;
+        throw error;
+      }
+      void runtime.persist().catch((error: unknown) => stop.abort(error));
+      emit({
+        type: "usage",
+        key: item.key,
+        attempt,
+        usage: Object.freeze({ ...usage }),
+      });
+    }
+
     return {
       signal: taskSignal,
       attempt,
       executionId,
       checkpoint: () => runtime.persist(),
-      reportUsage(usage) {
-        if (
-          attempt === 0 ||
-          record(item).status !== "active" ||
-          activeAttempts.get(item) !== attempt
-        )
-          throw new Error(
-            "Usage must be reported during its active task attempt",
-          );
-        accounting.report(usage);
-        void runtime.persist().catch((error: unknown) => stop.abort(error));
-        emit({
-          type: "usage",
-          key: item.key,
-          attempt,
-          usage: Object.freeze({ ...usage }),
-        });
+      reportUsage: (usage) => report(usage),
+      reportUsageOnce: (receipt, usage) => {
+        validateUsageReceipt(receipt);
+        report(usage, receipt);
       },
       value<T>(dependency: Task<T>): T {
         if (!item.after.includes(dependency))

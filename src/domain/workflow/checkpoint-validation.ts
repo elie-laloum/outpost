@@ -1,3 +1,4 @@
+import { validateUsageReceipts } from "./usage-receipt.ts";
 import { validateGateRecord } from "./gate-validation.ts";
 import type { WorkflowCheckpoint } from "./checkpoint.types.ts";
 import type { Task } from "../workflow.types.ts";
@@ -58,6 +59,7 @@ export function validateCheckpoint(
     for (const field of ["startedAt", "finishedAt", "error"])
       if (record[field] !== undefined && typeof record[field] !== "string")
         throw invalid();
+    validateUsageReceipts(record.usageReceipts);
     attempts += record.attempts;
     const output = Object.hasOwn(value.values, record.key)
       ? value.values[record.key]
