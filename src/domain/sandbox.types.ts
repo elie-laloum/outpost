@@ -28,6 +28,12 @@ export interface FileManifestEntry {
 }
 
 export interface FileTransfers {
+  uploadBatch?(
+    source: string,
+    entries: readonly FileManifestEntry[],
+    destination: string,
+    options?: TransferOptions,
+  ): Promise<void>;
   manifest(
     source: string,
     paths: readonly string[],

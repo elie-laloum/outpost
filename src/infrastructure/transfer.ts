@@ -1,5 +1,9 @@
 import { invariant, OutpostError } from "../domain/errors.ts";
-import type { SandboxLease, TransferOptions } from "../domain/sandbox.types.ts";
+import type {
+  FileManifestEntry,
+  SandboxLease,
+  TransferOptions,
+} from "../domain/sandbox.types.ts";
 import { interruptible } from "./abort.ts";
 import { transferDefaults } from "./transfer.constants.ts";
 
@@ -50,6 +54,24 @@ export function boundedTransfers(
     ...(lease.fileTransfers
       ? {
           fileTransfers: {
+            ...(lease.fileTransfers.uploadBatch
+              ? {
+                  uploadBatch: (
+                    source: string,
+                    entries: readonly FileManifestEntry[],
+                    destination: string,
+                    options: TransferOptions = {},
+                  ) =>
+                    transfer({ ...defaults, ...options }, (signal) =>
+                      lease.fileTransfers!.uploadBatch!(
+                        source,
+                        entries,
+                        destination,
+                        { ...defaults, ...options, signal },
+                      ),
+                    ),
+                }
+              : {}),
             manifest: (source, paths, options = {}) =>
               transfer({ ...defaults, ...options }, (signal) =>
                 lease.fileTransfers!.manifest(source, paths, {
