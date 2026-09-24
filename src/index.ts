@@ -140,3 +140,13 @@ export type {
 } from "./application/doctor.types.ts";
 export { diagnoseAgentProtocol } from "./application/doctor-protocol.ts";
 export type { AgentProtocolReport } from "./application/doctor-protocol.types.ts";
+
+export {
+  planRecoveryRestore,
+  restoreRecoveryTransfer,
+} from "./application/recovery-restore.ts";
+export type {
+  RecoveryRestoreOptions,
+  RecoveryRestorePlan,
+  RecoveryRestoreResult,
+} from "./application/recovery-restore.types.ts";

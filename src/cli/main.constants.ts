@@ -8,6 +8,7 @@ outpost doctor [--provider docker|podman|local|vercel|daytona] [--agent codex|cl
 
 outpost recovery inspect [--repository PATH] [--max-entries NUMBER] [--git] [--locks] [--json]
 outpost recovery verify --directory TRANSFER_PATH [--checksums] [--max-bytes NUMBER] [--restorability --repository PATH] [--json]
+outpost recovery restore --directory TRANSFER_PATH --repository PATH --destination NEW_PATH --side previous|incoming [--max-bytes NUMBER] [--apply] [--json]
 outpost recovery prune --policy FILE [--repository PATH] [--apply] [--json]
 
 Node.js 24+ and Git are required. Run generated scripts with Node.js.
@@ -35,6 +36,8 @@ export const cliOptions = {
   model: { type: "string" },
   directory: { type: "string" },
   repository: { type: "string" },
+  destination: { type: "string" },
+  side: { type: "string" },
   engine: { type: "string" },
   file: { type: "string" },
   image: { type: "string" },
