@@ -34,3 +34,24 @@ Le travail distant exige `named` ou `integrate` ; une branche omise utilise l’
 Les tests de contrat du SDK utilisent des doubles contrôlés. Disponibilité, quotas et accès aux modèles nécessitent une vérification avec votre compte.
 
 [Exécutez les vérifications hébergées sur activation explicite](../../operations/cloud-compatibility/) pour les contrats des fournisseurs réels et les CLI sans identifiants de modèle.
+
+## Authentification de l’agent
+
+Les credentials d’allocation Vercel ne connectent pas Claude Code à votre compte. En changeant de provider, conservez explicitement les variables du modèle :
+
+```ts
+import { claude, createSandbox } from "@elie-laloum/outpost";
+import { vercel } from "@elie-laloum/outpost/providers/vercel";
+
+const token = process.env.CLAUDE_CODE_OAUTH_TOKEN;
+if (!token) throw new Error("Set CLAUDE_CODE_OAUTH_TOKEN before allocation");
+await using sandbox = await createSandbox({
+  agent: claude(),
+  provider: vercel({
+    create: { timeout: 300_000 },
+    variables: { CLAUDE_CODE_OAUTH_TOKEN: token },
+  }),
+});
+```
+
+Obtenez ce jeton avec `claude setup-token` sur l’hôte. Pour utiliser la facturation API, transmettez plutôt `ANTHROPIC_API_KEY` sans jeton d’abonnement. La bibliothèque ne charge pas automatiquement le `.env` du dossier de workflow : lisez-le explicitement, utilisez le script généré ou déclarez la variable dans `.outpost/.env` du dépôt ciblé. Voir [l’authentification Claude](../../agents/connect-claude/) et [la priorité des variables](../../agents/environment/).

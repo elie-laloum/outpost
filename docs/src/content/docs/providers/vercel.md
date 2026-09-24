@@ -34,3 +34,24 @@ Remote work requires `named` or `integrate`; omitted branch configuration defaul
 SDK contract tests use controlled doubles. Availability, quotas and model access in your account require an account-specific smoke test.
 
 [Run opt-in hosted compatibility checks](../../operations/cloud-compatibility/) for live provider contracts and credential-free agent CLI checks.
+
+## Agent authentication
+
+Vercel allocation credentials do not sign Claude Code into your account. When changing providers, preserve the model variables explicitly:
+
+```ts
+import { claude, createSandbox } from "@elie-laloum/outpost";
+import { vercel } from "@elie-laloum/outpost/providers/vercel";
+
+const token = process.env.CLAUDE_CODE_OAUTH_TOKEN;
+if (!token) throw new Error("Set CLAUDE_CODE_OAUTH_TOKEN before allocation");
+await using sandbox = await createSandbox({
+  agent: claude(),
+  provider: vercel({
+    create: { timeout: 300_000 },
+    variables: { CLAUDE_CODE_OAUTH_TOKEN: token },
+  }),
+});
+```
+
+Obtain this token with `claude setup-token` on the host. For API billing instead, pass `ANTHROPIC_API_KEY` without the subscription token. A workflow-local `.env` is not automatically loaded by the library: read it explicitly, use the generated starter, or declare the variable in the target repository's `.outpost/.env`. See [Claude authentication](../../agents/connect-claude/) and [environment precedence](../../agents/environment/).

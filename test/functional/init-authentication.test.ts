@@ -151,3 +151,54 @@ test("custom Responses starters use the selected key without performing OpenAI l
     /require Codex/,
   );
 });
+
+test("generated Vercel starter forwards a declared parent token without a workflow env file", async (t) => {
+  const directory = await repository(t);
+  await initialize({
+    directory,
+    agent: "claude",
+    provider: "vercel",
+    authentication: "oauth-token",
+  });
+  await writeFile(
+    join(directory, "bridge.mjs"),
+    `import assert from "node:assert/strict";
+export class OutpostError extends Error {}
+export const reporter=()=>()=>{};
+export const claude=()=>({name:"claude"});
+export const vercel=(options)=>options;
+export async function dispatch(options) {
+ assert.equal(options.provider.variables.CLAUDE_CODE_OAUTH_TOKEN,"fixture-subscription-token");
+ assert.equal(options.provider.variables.UNDECLARED_SECRET,undefined);
+ assert.equal(options.provider.variables.ANTHROPIC_API_KEY,undefined);
+ return {branch:"checked",commits:[]};
+}`,
+  );
+  const runner = join(directory, "run.ts");
+  const source = (await readFile(runner, "utf8"))
+    .replaceAll('"@elie-laloum/outpost"', '"./bridge.mjs"')
+    .replaceAll('"@elie-laloum/outpost/providers/vercel"', '"./bridge.mjs"');
+  await writeFile(runner, source);
+  const result = await executeProcess({
+    executable: process.execPath,
+    arguments: [runner],
+    variables: {
+      CLAUDE_CODE_OAUTH_TOKEN: "fixture-subscription-token",
+      UNDECLARED_SECRET: "must-not-forward",
+    },
+  });
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /checked/);
+  assert.doesNotMatch(
+    result.stdout + result.stderr,
+    /fixture-subscription-token|must-not-forward/,
+  );
+  const missing = await executeProcess({
+    executable: process.execPath,
+    arguments: [runner],
+    variables: { CLAUDE_CODE_OAUTH_TOKEN: "" },
+  });
+  assert.equal(missing.status, 1);
+  assert.match(missing.stderr, /Missing CLAUDE_CODE_OAUTH_TOKEN/);
+  assert.doesNotMatch(missing.stderr, /Preparing sandbox/);
+});
