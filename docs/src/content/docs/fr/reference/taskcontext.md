@@ -21,6 +21,8 @@ export interface TaskContext {
   readonly attempt: number;
   readonly executionId: string;
   reportUsage(usage: Usage): void;
+  reportUsageOnce?(receipt: string, usage: Usage): void;
+  checkpoint?(): Promise<void>;
   value<T>(dependency: Task<T>): T;
 }
 ```

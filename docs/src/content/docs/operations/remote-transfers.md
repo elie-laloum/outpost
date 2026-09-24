@@ -13,7 +13,7 @@ The first synchronization downloads every untracked file selected by Git. Each s
 
 Git's `ls-files --others --exclude-standard` selects the files, including nested files and symbolic links. Empty directories and ignored files are not synchronization inputs. The optimization does not change these Git selection rules. Explicit `copies` still upload their requested inputs independently. Incoming untracked paths that overlap ignored or protected host files cause a conflict; they are not silently skipped or overwritten.
 
-Tracked changes still use binary Git patches, and new commits still use self-contained Git bundles. Repository history and tracked initial changes use their existing transfer paths. An unchanged pull still downloads its Git patch and performs Git validation and host backups.
+Tracked changes use binary Git patches. [Git history transfers](../../sandboxes/remote-sync/) use verified delta bundles when a suitable base exists; recovery retains complete self-contained bundles. Fresh repositories still need complete history. An unchanged pull still downloads its Git patch and performs Git validation and host backups.
 
 ## Initial uploads and copied inputs
 

@@ -18,6 +18,8 @@ import type { AgentAdapter } from "@elie-laloum/outpost";
 ```ts
 export interface AgentAdapter {
   readonly name: string;
+  readonly bootstrap?: string;
+  readonly requiresFinishedEvent?: boolean;
   readonly variables?: Variables;
   readonly conversations?: "claude" | "codex";
   readonly storage?: ConversationStore;

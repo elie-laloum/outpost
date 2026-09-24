@@ -2,7 +2,9 @@
 
 [Documentation](https://elie-laloum.github.io/outpost/) · [Français](https://elie-laloum.github.io/outpost/fr/) · [API](https://elie-laloum.github.io/outpost/reference/) · [Changelog](CHANGELOG.md)
 
-Outpost is a TypeScript library for running coding agents in reusable sandboxes, managing their Git workspaces and composing typed workflows. Claude Code and Codex adapters work with Docker, Podman, Vercel, Daytona or explicit host execution.
+Outpost is a TypeScript library for running coding agents in reusable sandboxes, managing their Git workspaces and composing typed workflows. Claude Code, Codex and Gemini CLI adapters work with Docker, Podman, Vercel, Daytona or explicit host execution. Gemini supports fresh sessions only; native conversation capture, resume and fork are available for Claude Code and Codex.
+
+The source documentation includes additions on main that are not yet published. Package version 3.0.0 remains the latest recorded release; see [Unreleased changes](CHANGELOG.md#unreleased) and the [roadmap](https://elie-laloum.github.io/outpost/project/roadmap/) for their status.
 
 ## Get started
 

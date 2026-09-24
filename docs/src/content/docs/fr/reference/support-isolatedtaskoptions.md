@@ -11,16 +11,13 @@ Contrat auxiliaire utilisé dans une signature publique. Il n’est pas exporté
 
 ```ts
 export type IsolatedTaskOptions<T> = {
-  request: (context: TaskContext) => SandboxOptions &
-    DispatchOptions<T> & {
-      readonly agent: AgentAdapter;
-    };
+  request: (
+    context: TaskContext,
+  ) => IsolatedTaskRequest<T> | Promise<IsolatedTaskRequest<T>>;
 };
 ```
 
 ## Contrats associés
 
-- [AgentAdapter](../agentadapter/)
-- [DispatchOptions](../dispatchoptions/)
-- [SandboxOptions](../sandboxoptions/)
+- [IsolatedTaskRequest](../support-isolatedtaskrequest/)
 - [TaskContext](../taskcontext/)

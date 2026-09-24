@@ -32,7 +32,7 @@ export const groups = [
     title: ["Agents", "Agents"],
     guide: "agents/adapters",
     names:
-      "claude codex ClaudeSettings CodexSettings agentVersions AgentAdapter AgentInput",
+      "claude codex gemini ClaudeSettings CodexSettings GeminiSettings agentVersions AgentAdapter AgentInput",
   },
   {
     title: ["Prompts and responses", "Prompts et réponses"],
@@ -79,5 +79,63 @@ export const groups = [
     title: ["Errors", "Erreurs"],
     guide: "operations/recovery",
     names: "OutpostError recoveryDetails FaultCode",
+  },
+  {
+    title: ["Storage reservations", "Réservations de stockage"],
+    guide: "operations/storage-retention",
+    names:
+      "reserveRecoveryStorage RecoveryStorageReservationOptions StorageReservation StorageReservationOptions",
+  },
+  {
+    title: ["Recovery restoration", "Restauration de récupération"],
+    guide: "operations/recovery-restoration",
+    names:
+      "planRecoveryRestore restoreRecoveryTransfer RecoveryRestoreOptions RecoveryRestorePlan RecoveryRestoreResult",
+  },
+  {
+    title: ["Resource activity", "Activité des ressources"],
+    guide: "operations/recovery",
+    names:
+      "inspectRecovery RecoveryInspection RecoveryInspectionOptions ResourceActivityRecord ResourceInspection ResourceInspectionEntry ResourceOperation ResourceOperationKind ResourceOperationResult ResourcePhase",
+  },
+  {
+    title: ["Workflow checkpoints", "Checkpoints de workflow"],
+    guide: "workflows/checkpoints",
+    names:
+      "fileWorkflowCheckpointStore FileWorkflowCheckpointOptions WorkflowCheckpoint WorkflowCheckpointOptions WorkflowCheckpointStore WorkflowCheckpointLease WorkflowCheckpointValue WorkflowJson",
+  },
+  {
+    title: ["Approval and pause gates", "Approbations et pauses"],
+    guide: "workflows/approvals",
+    names:
+      "approvalTask pauseTask WorkflowGate WorkflowGateOptions WorkflowPauseRequest WorkflowDecision WorkflowDecisionRecord",
+  },
+  {
+    title: ["Typed artifacts", "Artefacts typés"],
+    guide: "workflows/artifacts",
+    names:
+      "artifact publishArtifact readStoredArtifact artifactTask readArtifact fileArtifactStore ArtifactContract ArtifactContractOptions ArtifactIdentity ArtifactProducer ArtifactReference ArtifactStore JsonArtifactOptions PublishArtifactOptions ReadArtifactOptions ArtifactTaskOptions FileArtifactStoreOptions",
+  },
+  {
+    title: ["Distributed execution", "Exécution distribuée"],
+    guide: "workflows/distributed",
+    names:
+      "sqliteTaskQueue serveTaskQueue httpTaskQueue runQueueWorker queuedTask QueueRequest QueueResult QueueJob QueueClaim QueueLease TaskQueue DurableTaskQueue QueueServerOptions QueueServer QueueClientOptions QueueHandlerContext QueueHandler QueueWorkerOptions QueuedTaskOptions",
+  },
+  {
+    title: ["Outbound networking", "Réseau sortant"],
+    guide: "sandboxes/egress",
+    names: "EgressPolicy",
+  },
+  {
+    title: ["Speculative execution", "Exécution spéculative"],
+    guide: "workflows/speculation",
+    names:
+      "speculate SpeculationOptions SpeculationResult SpeculativeCandidate SpeculativeCandidateResult SpeculativeOutput SpeculativeHostSnapshot SpeculativeValidation",
+  },
+  {
+    title: ["Firecracker prototype", "Prototype Firecracker"],
+    guide: "providers/firecracker",
+    names: "firecracker FirecrackerOptions",
   },
 ];

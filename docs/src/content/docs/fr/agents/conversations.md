@@ -5,7 +5,7 @@ sidebar:
   order: 9
 ---
 
-La capture native des conversations est active par défaut. Le transcript est copié dans le stockage de l’agent sur l’hôte ; ses chemins de travail sont réécrits pour permettre une reprise native dans le bon dépôt.
+La capture native des conversations est active par défaut pour Claude Code et Codex. [Gemini](../gemini/) ne prend en charge ni capture native, ni reprise, ni fork dans Outpost. Le transcript est copié dans le stockage de l’agent sur l’hôte ; ses chemins de travail sont réécrits pour permettre une reprise native dans le bon dépôt.
 
 ```ts
 import { dispatch, codex } from "@elie-laloum/outpost";

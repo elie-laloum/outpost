@@ -7,7 +7,7 @@ sidebar:
 
 Run coding agents in controlled environments, keep their Git work separate, and connect their work with typed workflows.
 
-Outpost is a TypeScript library and a small setup CLI. It supports **Claude Code and Codex**, with **Docker, Podman, Vercel, Daytona or explicit host execution**. Agent adapters choose what runs; sandbox providers choose where it runs.
+Outpost is a TypeScript library and a small setup CLI. It supports **Claude Code, Codex and Gemini CLI**, with **Docker, Podman, Vercel, Daytona or explicit host execution**. Agent adapters choose what runs; sandbox providers choose where it runs.
 
 ## Choose your next step
 

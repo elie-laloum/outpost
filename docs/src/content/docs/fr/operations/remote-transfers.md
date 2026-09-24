@@ -13,7 +13,7 @@ La première synchronisation télécharge tous les fichiers non suivis sélectio
 
 La sélection repose sur `ls-files --others --exclude-standard`, y compris les fichiers imbriqués et les liens symboliques. Les dossiers vides et les fichiers ignorés ne sont pas des entrées de synchronisation. Cette optimisation ne modifie pas les règles de sélection Git. Les `copies` explicites téléversent toujours leurs entrées indépendamment. Un chemin entrant non suivi qui recouvre un fichier hôte ignoré ou protégé provoque un conflit ; il n'est ni omis ni écrasé silencieusement.
 
-Les changements suivis utilisent toujours des patchs Git binaires et les nouveaux commits des bundles Git autonomes. L'historique du dépôt et les modifications suivies initiales conservent leurs chemins de transfert existants. Une synchronisation sans changement télécharge encore son patch Git et réalise la validation Git et la sauvegarde hôte.
+Les changements suivis utilisent des patchs Git binaires. Les [transferts d’historique Git](../../sandboxes/remote-sync/) utilisent des bundles différentiels vérifiés lorsqu’une base adaptée existe ; la récupération conserve des bundles complets autonomes. Un dépôt neuf nécessite toujours l’historique complet. Une synchronisation sans changement télécharge encore son patch Git et réalise la validation Git et la sauvegarde hôte.
 
 ## Téléversements initiaux et copies
 

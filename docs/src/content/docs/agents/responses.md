@@ -41,6 +41,6 @@ The last complete matching tag is used, with surrounding whitespace removed. JSO
 
 ## Repair and recovery
 
-`repairs` is a nonnegative integer, default `0`. A repair resumes the same conversation with validation feedback, so the adapter must support resumption. Both built-in adapters do. Structured responses require `passes: 1`.
+`repairs` is a nonnegative integer, default `0`. A repair resumes the same conversation with validation feedback, so the adapter must support resumption. Claude Code and Codex support it; [Gemini](../gemini/) requires `repairs: 0`. Structured responses require `passes: 1`.
 
 If repair is exhausted, inspect `ResponseError.tag`, `raw`, `cause` and recovery metadata. `recoveryDetails(error)` retrieves conversation, workspace and available commits/log/transcript without changing the original error identity. A failed response does not mean the agent made no filesystem changes.

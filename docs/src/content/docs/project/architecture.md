@@ -10,7 +10,7 @@ Outpost uses ports and adapters. Domain contracts describe capabilities; applica
 | Layer             | Owns                                                                                | Dependencies                                   |
 | ----------------- | ----------------------------------------------------------------------------------- | ---------------------------------------------- |
 | `domain`          | Contracts, validation, prompts, responses, task graphs and workflow execution rules | Domain and Node primitives                     |
-| `adapters/agents` | Claude/Codex command construction and event translation                             | Domain and infrastructure                      |
+| `adapters/agents` | Claude/Codex/Gemini command construction and event translation                      | Domain and infrastructure                      |
 | `providers`       | Sandbox allocation, commands, transfers and disposal                                | Domain, infrastructure and provider services   |
 | `infrastructure`  | Git, processes, files, native transcript storage and logging                        | Domain and infrastructure                      |
 | `application`     | Resource ownership, use cases and remote synchronization                            | Domain, adapters, providers and infrastructure |
@@ -46,7 +46,7 @@ Git infrastructure separates repository preparation, locking, managed worktree a
 
 Remote synchronization follows explicit stages: download changes, validate them, back up host state, then apply changes. These services retain overlap checks, concurrent-edit detection and recovery artifacts. The coordinator owns the last synchronized revision and successful file manifest, and decides whether cleanup is safe. Optional `FileTransfers` capabilities provide verified incremental payload reuse and bounded compressed batches without coupling the coordinator to provider names.
 
-Recovery inventory, integrity checks, isolated Git verification and retention are separate operations. Explicit pruning reacquires ownership and revalidates candidates; quota admission observes repository storage without reserving capacity. Container dependency cache volumes have a separate, engine-managed lifetime.
+Recovery inventory, integrity checks, isolated Git verification and retention are separate operations. Explicit pruning reacquires ownership and revalidates candidates; `assertRecoveryQuota` observes storage, while explicit reservations serialize cooperative admission and can be owned by a workspace. Resource activity records describe locally observed leases and operations, without enumerating remote accounts. Container dependency cache volumes have a separate, engine-managed lifetime.
 
 ## Workflows
 
@@ -59,3 +59,9 @@ To add an agent, implement `AgentAdapter` in its own module, with request and ev
 Run `npm run check` for architecture checks, type checking, unit/functional tests and the build. `npm run coverage` enforces 80% lines, branches and functions. Type-only modules are excluded from runtime coverage because TypeScript erases them; type checking and the packed consumer test validate their contracts. CLI command handlers are covered; only the process entry wrapper is excluded.
 
 CI rejects reversed layer dependencies, inline contract declarations, runtime initialization in type modules, chained alternative branches and unused implementation declarations. Multi-platform checks, real Docker/Podman tests and a packed-package consumer exercise the supported boundaries. These checks support architectural review; they do not mechanically prove SRP.
+
+## Durable orchestration and research boundaries
+
+Checkpoint and gate contracts belong to the domain; the filesystem checkpoint adapter owns atomic persistence and local ownership. Artifact contracts validate values and lineage, while the filesystem store owns immutable bytes. The SQLite queue and HTTP transport provide durable claims; application workers execute registered handlers under fenced leases. Replay remains explicit and side effects are at least once. Gate actor names and artifact lineage are trusted metadata, not authentication.
+
+The opt-in isolated container checkout, Firecracker provider, egress policies and speculative execution helper have separate [research limits](../roadmap/). Gemini has no native conversation store. Daytona terminal execution uses its native PTY API; Vercel rejects interactive attachment.

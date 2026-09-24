@@ -1,5 +1,20 @@
 # Changelog
 
+## Unreleased
+
+These additions are implemented on main; package version remains 3.0.0 and no new release is implied.
+
+- Add cooperative storage reservations with workspace ownership, isolated restoration of retained previous/incoming transfer state, and local sandbox/resource activity inspection.
+- Batch and verify incremental file/symlink uploads; transfer verified Git history deltas while retaining complete recovery bundles. Directory copies keep their existing transfer behavior.
+- Persist workflow checkpoints with JSON outputs, explicit replay and cumulative usage. Add approval/pause gates and typed immutable artifacts with unsigned lineage.
+- Add SQLite durable task queues, authenticated HTTP transport and fenced workers. Replays can repeat side effects; terminal usage receipts prevent double accounting without guaranteeing real-time billing caps.
+- Extend task statuses with `paused` and `rejected`, and workflow result status with `paused`; exhaustive status consumers must handle these values. Add optional checkpoint flushing and usage-receipt methods to task contexts.
+- Support Daytona native PTY attachment with cancellation, resize and reuse; live account validation remains outstanding.
+- Add the Gemini CLI adapter, bootstrap, diagnostics and image installation pinned to 0.61.0. Gemini supports fresh sessions only, without native conversation capture, continuation or automatic response repairs.
+- Add opt-in research prototypes for isolated Docker/Podman Git checkouts, prepared-host Firecracker microVMs, container deny-all/Vercel egress policies, and bounded speculative candidates with explicit validation and no automatic integration.
+- Attribute cloud reports to source commit/runtime/time and retain successful image-attestation verification artifacts. Live cloud campaigns, signed publication and real Firecracker boot remain separately gated validation, not implied successes.
+- Synchronize the complete public API reference, bilingual guides and roadmap with implemented behavior and remaining prototype limits.
+
 ## 3.0.0
 
 - Canonicalize temporary recovery verification directories across platforms and reuse existing Podman cache volumes without recreation.

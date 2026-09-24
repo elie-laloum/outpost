@@ -18,6 +18,8 @@ import type { ContainerOptions } from "@elie-laloum/outpost/providers/podman";
 
 ```ts
 export interface ContainerOptions {
+  readonly egress?: EgressPolicy;
+  readonly repositoryMode?: "mounted" | "isolated";
   readonly caches?: readonly DependencyCache[];
   readonly image?: string;
   readonly user?: {
@@ -40,5 +42,6 @@ export interface ContainerOptions {
 ## Contrats associés
 
 - [DependencyCache](../dependencycache/)
+- [EgressPolicy](../egresspolicy/)
 - [Variables](../variables/)
 - [Volume](../volume/)

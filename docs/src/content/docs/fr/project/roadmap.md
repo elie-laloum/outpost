@@ -31,22 +31,28 @@ Les [diagnostics avancés](../../operations/doctor/) inspectent une sandbox exis
 
 Les [tests cloud](../../operations/cloud-compatibility/) ajoutent des fixtures déterministes et une campagne Vercel/Daytona planifiée ou manuelle, activée explicitement avec identifiants et rapports filtrés. Les contrôles réels restent à exécuter dans les comptes configurés ; les appels modèles sont explicitement exclus.
 
-## Suites possibles — efficacité et diagnostic
+## Implémenté sur main — non publié
 
-- Uploads initiaux et transferts d’historique Git incrémentaux au-delà de l’optimisation actuelle des fichiers non suivis.
-- Orchestration d’une restauration complète, suivi d’activité de ressources supplémentaires et réservations de stockage au-delà des observations d’admission des quotas.
+Le package reste en version 3.0.0. Les ajouts suivants existent dans les sources mais ne font pas partie de cette version publiée. Les guides et références API générées décrivent main ; leur publication nécessite une release distincte.
 
-## À plus long terme — orchestration durable
+- Les [réservations de stockage](../../operations/storage-retention/) coordonnent les rédacteurs locaux coopérants et peuvent suivre la propriété du workspace. L’[activité des ressources](../../operations/recovery/) enregistre les sandboxes, opérations et nettoyages observés localement ; elle n’énumère pas les comptes distants.
+- La [restauration de récupération](../../operations/recovery-restoration/) reconstruit l’état précédent ou entrant conservé dans un nouveau dossier isolé après contrôles d’intégrité et Git. Elle ne restaure ni fichiers ignorés, ni dépôts de sous-modules, ni état du provider, ni conversations.
+- Les [uploads](../../operations/remote-transfers/) regroupent et vérifient les fichiers/liens ; les copies de dossiers conservent leur fonctionnement existant. Les [transferts Git](../../sandboxes/remote-sync/) utilisent un historique différentiel vérifié lorsque possible ; la récupération conserve des bundles complets et la validation locale traite encore l’historique complet.
+- Les [checkpoints](../../workflows/checkpoints/) conservent les résultats JSON et la consommation, avec répétition explicite des tâches inachevées. Les [approbations et pauses](../../workflows/approvals/) conservent demandes et décisions ; les acteurs déclarés sont des métadonnées de confiance, pas une authentification.
+- Les [artefacts typés](../../workflows/artifacts/) fournissent valeurs validées, stockage immuable et filiation non signée. Les [files persistantes](../../workflows/distributed/) utilisent SQLite et des workers HTTP optionnels avec fencing, jeton partagé et TLS externe. Les répétitions peuvent reproduire des effets ; la consommation terminale est différée et les reçus empêchent son double comptage.
+- Les [terminaux Daytona](../../providers/daytona/) utilisent son API PTY native. Les tests déterministes couvrent l’adapter ; une validation réelle avec compte reste nécessaire. Vercel refuse toujours l’attachement interactif.
+- [Gemini CLI](../../agents/gemini/) ajoute adapter, bootstrap, installation dans les images générées et diagnostics épinglés à 0.61.0. Seules les nouvelles sessions sont prises en charge : aucune capture native, reprise, fork ou réparation automatique de réponse.
+- Les [rapports cloud](../../operations/cloud-compatibility/) identifient commit source, runtime et date d’exécution. La [publication d’images](../../providers/agent-images/) conserve les preuves de vérification de signature réussie. Ces workflows ne prouvent pas qu’une campagne réelle ou une publication signée a eu lieu.
 
-- Checkpoints persistants et reprise après redémarrage.
-- Files distribuées et leases de workers avec fencing tokens.
-- Nœuds d’approbation et de pause/reprise.
-- Contrats d’artefacts typés entre tâches isolées avec traçabilité.
-- Terminaux cloud natifs lorsque des API PTY fiables existent.
-- Nouveaux agents via les ports d’adapters existants.
+## Prototypes de recherche sur activation explicite
 
-## Recherche
+- Les [dépôts Docker/Podman isolés](../../providers/repository-isolation/) évitent le montage du checkout et des métadonnées Git hôtes. Ils conservent les limites des conteneurs concernant montages, caches et confiance envers l’hôte.
+- [Firecracker](../../providers/firecracker/) nécessite Linux KVM, TAP, image invitée et SSH préparés. Il possède des tests simulés et une fixture réelle optionnelle ; aucun démarrage réel n’est établi ici. Jailer, cgroups, snapshots, performances et tests adversariaux restent à terminer.
+- Les [politiques sortantes](../../sandboxes/egress/) proposent le blocage total des conteneurs et les règles domaines/CIDR de Vercel. Les autres providers refusent les politiques non prises en charge. Allowlists de conteneurs, mises à jour dynamiques, audit du trafic et filtrage plus fin restent à étudier.
+- Les [candidats spéculatifs](../../workflows/speculation/) comparent des branches bornées depuis une base épinglée, choisissent un gagnant validé et nettoyé et appliquent des budgets de consommation observée. Aucune intégration n’est automatique ; la comparaison hôte reste indicative. La reprise persistante et des garanties renforcées sur les conflits/coûts restent à terminer.
 
-Isolation renforcée des métadonnées Git contre les agents hostiles, backends microVM, réseau sortant finement contrôlé et exécution spéculative avec maîtrise des conflits et coûts.
+## Validation et production restantes
 
-Consultez [le changelog](../changelog/) pour les fonctions livrées et [l’architecture](../architecture/) pour les frontières d’extension.
+Les campagnes cloud réelles de commandes, transferts, pare-feu et PTY Daytona nécessitent des comptes configurés et une exécution explicite ; les fixtures déterministes ne les remplacent pas. La publication d’images signées et la vérification de provenance nécessitent une publication configurée réussie. Le démarrage Firecracker réel et son durcissement restent distincts. Podman nécessite ses contrôles réels de moteur et PTY dans un environnement adapté. Le fonctionnement authentifié des modèles nécessite une validation séparée ; l’aide CLI sans identifiants ne le prouve pas.
+
+Consultez le [changelog](../changelog/) pour les limites de version et l’[architecture](../architecture/) pour les contrats d’extension. Aucun élément ne constitue un engagement de date.

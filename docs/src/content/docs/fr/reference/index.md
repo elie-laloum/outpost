@@ -61,8 +61,10 @@ Chaque export public du package et de ses sous-chemins possède une page de réf
 
 - [claude](./claude/)
 - [codex](./codex/)
+- [gemini](./gemini/)
 - [ClaudeSettings](./claudesettings/)
 - [CodexSettings](./codexsettings/)
+- [GeminiSettings](./geminisettings/)
 - [agentVersions](./agentversions/)
 - [AgentAdapter](./agentadapter/)
 - [AgentInput](./agentinput/)
@@ -164,3 +166,114 @@ Chaque export public du package et de ses sous-chemins possède une page de réf
 - [OutpostError](./outposterror/)
 - [recoveryDetails](./recoverydetails/)
 - [FaultCode](./faultcode/)
+
+## Réservations de stockage
+
+- [reserveRecoveryStorage](./reserverecoverystorage/)
+- [RecoveryStorageReservationOptions](./recoverystoragereservationoptions/)
+- [StorageReservation](./storagereservation/)
+- [StorageReservationOptions](./storagereservationoptions/)
+
+## Restauration de récupération
+
+- [planRecoveryRestore](./planrecoveryrestore/)
+- [restoreRecoveryTransfer](./restorerecoverytransfer/)
+- [RecoveryRestoreOptions](./recoveryrestoreoptions/)
+- [RecoveryRestorePlan](./recoveryrestoreplan/)
+- [RecoveryRestoreResult](./recoveryrestoreresult/)
+
+## Activité des ressources
+
+- [inspectRecovery](./inspectrecovery/)
+- [RecoveryInspection](./recoveryinspection/)
+- [RecoveryInspectionOptions](./recoveryinspectionoptions/)
+- [ResourceActivityRecord](./resourceactivityrecord/)
+- [ResourceInspection](./resourceinspection/)
+- [ResourceInspectionEntry](./resourceinspectionentry/)
+- [ResourceOperation](./resourceoperation/)
+- [ResourceOperationKind](./resourceoperationkind/)
+- [ResourceOperationResult](./resourceoperationresult/)
+- [ResourcePhase](./resourcephase/)
+
+## Checkpoints de workflow
+
+- [fileWorkflowCheckpointStore](./fileworkflowcheckpointstore/)
+- [FileWorkflowCheckpointOptions](./fileworkflowcheckpointoptions/)
+- [WorkflowCheckpoint](./workflowcheckpoint/)
+- [WorkflowCheckpointOptions](./workflowcheckpointoptions/)
+- [WorkflowCheckpointStore](./workflowcheckpointstore/)
+- [WorkflowCheckpointLease](./workflowcheckpointlease/)
+- [WorkflowCheckpointValue](./workflowcheckpointvalue/)
+- [WorkflowJson](./workflowjson/)
+
+## Approbations et pauses
+
+- [approvalTask](./approvaltask/)
+- [pauseTask](./pausetask/)
+- [WorkflowGate](./workflowgate/)
+- [WorkflowGateOptions](./workflowgateoptions/)
+- [WorkflowPauseRequest](./workflowpauserequest/)
+- [WorkflowDecision](./workflowdecision/)
+- [WorkflowDecisionRecord](./workflowdecisionrecord/)
+
+## Artefacts typés
+
+- [artifact](./artifact/)
+- [publishArtifact](./publishartifact/)
+- [readStoredArtifact](./readstoredartifact/)
+- [artifactTask](./artifacttask/)
+- [readArtifact](./readartifact/)
+- [fileArtifactStore](./fileartifactstore/)
+- [ArtifactContract](./artifactcontract/)
+- [ArtifactContractOptions](./artifactcontractoptions/)
+- [ArtifactIdentity](./artifactidentity/)
+- [ArtifactProducer](./artifactproducer/)
+- [ArtifactReference](./artifactreference/)
+- [ArtifactStore](./artifactstore/)
+- [JsonArtifactOptions](./jsonartifactoptions/)
+- [PublishArtifactOptions](./publishartifactoptions/)
+- [ReadArtifactOptions](./readartifactoptions/)
+- [ArtifactTaskOptions](./artifacttaskoptions/)
+- [FileArtifactStoreOptions](./fileartifactstoreoptions/)
+
+## Exécution distribuée
+
+- [sqliteTaskQueue](./sqlitetaskqueue/)
+- [serveTaskQueue](./servetaskqueue/)
+- [httpTaskQueue](./httptaskqueue/)
+- [runQueueWorker](./runqueueworker/)
+- [queuedTask](./queuedtask/)
+- [QueueRequest](./queuerequest/)
+- [QueueResult](./queueresult/)
+- [QueueJob](./queuejob/)
+- [QueueClaim](./queueclaim/)
+- [QueueLease](./queuelease/)
+- [TaskQueue](./taskqueue/)
+- [DurableTaskQueue](./durabletaskqueue/)
+- [QueueServerOptions](./queueserveroptions/)
+- [QueueServer](./queueserver/)
+- [QueueClientOptions](./queueclientoptions/)
+- [QueueHandlerContext](./queuehandlercontext/)
+- [QueueHandler](./queuehandler/)
+- [QueueWorkerOptions](./queueworkeroptions/)
+- [QueuedTaskOptions](./queuedtaskoptions/)
+
+## Réseau sortant
+
+- [EgressPolicy](./egresspolicy/)
+
+## Exécution spéculative
+
+- [speculate](./speculate/)
+- [SpeculationOptions](./speculationoptions/)
+- [SpeculationResult](./speculationresult/)
+- [SpeculativeCandidate](./speculativecandidate/)
+- [SpeculativeCandidateResult](./speculativecandidateresult/)
+- [SpeculativeOutput](./speculativeoutput/)
+- [SpeculativeHostSnapshot](./speculativehostsnapshot/)
+- [SpeculativeValidation](./speculativevalidation/)
+
+## Prototype Firecracker
+
+- [firecracker](./firecracker/)
+- [FirecrackerOptions](./firecrackeroptions/)

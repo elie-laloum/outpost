@@ -37,7 +37,7 @@ Les clés sont uniques. Chaque dépendance doit appartenir au graphe ; les cycle
 
 ## Résultat et visualisation
 
-`result.status` vaut `done`, `failed` ou `cancelled`. `tasks` contient statut, tentatives, dates et texte d’erreur éventuel. `errors` conserve les erreurs originales ; `observerErrors` conserve celles des callbacks. `result.unwrap()` lève `WorkflowFailure` si l’exécution n’a pas réussi ; l’erreur conserve le résultat.
+`result.status` vaut `done`, `failed`, `cancelled` ou `paused`. `tasks` contient statut, tentatives, dates et texte d’erreur éventuel. `errors` conserve les erreurs originales ; `observerErrors` conserve celles des callbacks. `result.unwrap()` lève `WorkflowFailure` si l’exécution n’a pas réussi ; l’erreur conserve le résultat.
 
 `delivery.diagram()` retourne du texte Mermaid représentant les dépendances. Il n’exécute aucune tâche. Enregistrez-le ou affichez-le avec un outil compatible pour examiner le graphe.
 
@@ -46,3 +46,5 @@ Poursuivez avec [les politiques d’exécution](../execution/) ou [les tâches d
 Consultez les [budgets de consommation](../budgets/) pour les limites partagées d’admission et de tokens, et la [télémétrie](../../operations/telemetry/) pour les métriques structurées.
 
 Conservez les résultats après un redémarrage avec les [checkpoints de workflow](../checkpoints/).
+
+Utilisez les [approbations et pauses](../approvals/) pour arrêter le workflow sur une décision persistante, les [artefacts typés](../artifacts/) pour échanger des données validées et les [workers distribués](../distributed/) pour une exécution en file. Les [candidats spéculatifs](../speculation/) constituent un prototype de recherche séparé sur activation explicite.

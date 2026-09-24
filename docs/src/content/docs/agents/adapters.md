@@ -35,6 +35,8 @@ Without `model`, the installed CLI chooses its default. Actual model availabilit
 
 Noninteractive defaults avoid blocking on permission prompts and rely on the selected execution boundary. Choose permissions deliberately when using host execution. Interactive attachment uses the native terminal behavior.
 
-The generated container image includes both CLIs. Local execution requires you to install and authenticate them. Remote providers can bootstrap a missing selected CLI unless `bootstrap: false` is set. Agent credentials are separate from sandbox-provider credentials.
+The generated container image includes Claude Code, Codex and [Gemini CLI](../gemini/). Gemini has a separate configuration and supports fresh sessions without native conversation continuation. Local execution requires you to install and authenticate them. Remote providers can bootstrap a missing selected CLI unless `bootstrap: false` is set. Agent credentials are separate from sandbox-provider credentials.
 
 See [environment](../environment/), [conversations](../conversations/), or [custom adapters](../../extend/agents/).
+
+For Gemini settings and fresh-session limits, see [Run Gemini CLI](../gemini/).

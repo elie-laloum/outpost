@@ -31,4 +31,4 @@ Incoming history, patches and untracked files are backed up under `.outpost/reco
 
 `limits.copyMs` overrides transfer timeouts used by orchestration; otherwise transfers default to 120 seconds. Custom leases receive optional `{ signal, deadlineMs }` as the third argument to `upload` and `download`. Both files and directories are supported by the built-in providers.
 
-Remote cloud providers do not expose native interactive attachment in this release. Use noninteractive dispatch and commands.
+[Daytona](../../providers/daytona/) supports native PTY attachment on current main. Vercel rejects interactive attachment. See [commands and terminal sessions](../commands/) for streaming and cancellation behavior.

@@ -7,11 +7,11 @@ sidebar:
 
 `egress` est un prototype de recherche optionnel configuré lors de la création du provider. Son omission conserve le comportement réseau existant. Outpost valide et copie la politique avant l'allocation ; il n'installe pas de proxy dans le processus et ne dépend pas de la coopération de l'agent.
 
-| Provider        | `deny-all`                    | `allowlist`                        |
-| --------------- | ----------------------------- | ---------------------------------- |
-| Docker / Podman | Réseau du conteneur `none`    | Rejet avant allocation             |
-| Vercel          | Pare-feu natif                | Pare-feu natif par domaine et CIDR |
-| Local / Daytona | Pas d'option Outpost `egress` | Pas d'option Outpost `egress`      |
+| Provider                      | `deny-all`                    | `allowlist`                        |
+| ----------------------------- | ----------------------------- | ---------------------------------- |
+| Docker / Podman               | Réseau du conteneur `none`    | Rejet avant allocation             |
+| Vercel                        | Pare-feu natif                | Pare-feu natif par domaine et CIDR |
+| Local / Daytona / Firecracker | Pas d'option Outpost `egress` | Pas d'option Outpost `egress`      |
 
 ## Exécuter une commande hors ligne
 

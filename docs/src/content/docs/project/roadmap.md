@@ -31,22 +31,28 @@ Read-only [recovery inspection](../../operations/recovery/) covers inventory, Gi
 
 [Cloud tests](../../operations/cloud-compatibility/) add deterministic fixtures and an explicitly enabled scheduled/manual Vercel/Daytona campaign with credentials and sanitized reports. Live checks still need execution in configured accounts; model calls are explicitly outside this suite.
 
-## Follow-up — efficiency and diagnostics
+## Implemented on main — unreleased
 
-- Incremental initial uploads and Git history transfers beyond the current untracked-file optimization.
-- Complete restoration orchestration, broader resource activity tracking and storage reservations beyond quota admission snapshots.
+Package version remains 3.0.0. The following additions exist in source but are not part of that published version. Guides and generated API references describe current main; publication requires a separate release.
 
-## Longer term — durable orchestration
+- [Storage reservations](../../operations/storage-retention/) coordinate cooperating local writers and can follow workspace ownership. [Resource activity](../../operations/recovery/) records locally observed sandboxes, operations and cleanup; it does not enumerate remote accounts.
+- [Recovery restoration](../../operations/recovery-restoration/) reconstructs retained previous or incoming state in a new isolated directory after integrity and Git checks. It does not restore ignored files, submodule repositories, provider state or conversations.
+- [Uploads](../../operations/remote-transfers/) batch and verify file/symlink inputs; directory copies retain their existing path. [Git transfers](../../sandboxes/remote-sync/) use verified delta history when possible while recovery keeps complete bundles and local validation still processes full history.
+- [Checkpoints](../../workflows/checkpoints/) persist JSON task outputs and usage with explicit retry of incomplete tasks. [Approval and pause gates](../../workflows/approvals/) persist requests and decisions; declared actors are trusted metadata, not authentication.
+- [Typed artifacts](../../workflows/artifacts/) provide validated values, immutable storage and unsigned lineage. [Durable queues](../../workflows/distributed/) use SQLite and optional HTTP workers with fenced leases, shared-token trust and external TLS. Retries can repeat side effects; terminal usage is delayed and receipt metadata prevents double accounting.
+- [Daytona terminals](../../providers/daytona/) use its native PTY API. Deterministic tests cover the adapter; live account validation remains required. Vercel still rejects interactive attachment.
+- [Gemini CLI](../../agents/gemini/) adds an adapter, bootstrap, generated-image installation and diagnostics pinned to 0.61.0. Only fresh sessions are supported: no native transcript capture, resume, fork or automatic response repairs.
+- [Cloud reports](../../operations/cloud-compatibility/) attribute results to source commit, runtime and execution time. [Image publication](../../providers/agent-images/) retains successful signature-verification evidence. These workflows do not establish that a live campaign or signed publication has run.
 
-- Persisted workflow checkpoints and restart recovery.
-- Distributed task queues and worker leases with fencing tokens.
-- Approval and pause/resume nodes.
-- Typed artifact contracts between isolated tasks, with lineage.
-- Native cloud terminals where reliable PTY APIs are available.
-- Additional agents through the existing adapter ports.
+## Opt-in research prototypes on main
 
-## Research
+- [Isolated Docker/Podman repositories](../../providers/repository-isolation/) avoid mounting host checkout and Git metadata. They remain container boundaries with explicit mount, cache and host-trust limits.
+- [Firecracker](../../providers/firecracker/) requires prepared Linux KVM, TAP, a guest image and SSH. It has simulated tests and an opt-in live fixture; no real boot evidence is established here. Jailer integration, cgroups, snapshots, performance and adversarial testing remain unfinished.
+- [Outbound policies](../../sandboxes/egress/) support container deny-all and Vercel domain/CIDR policies. Other providers reject unsupported policy requests. Container allowlists, dynamic updates, traffic auditing and finer filtering remain research.
+- [Speculative candidates](../../workflows/speculation/) race bounded branches from a pinned base, select a validated and cleaned-up winner and apply observed usage budgets. They never integrate automatically; host comparisons are advisory. Durable race recovery and stronger conflict/cost guarantees remain unfinished.
 
-Stronger Git metadata isolation for adversarial agents, microVM backends, fine-grained outbound networking and speculative execution with conflict/cost controls.
+## Remaining validation and production work
 
-See the [changelog](../changelog/) for shipped behavior and the [architecture](../architecture/) for the extension boundaries.
+Real cloud command, transfer, firewall and Daytona PTY campaigns require configured accounts and explicit execution; deterministic fixtures do not replace them. Signed image publication and provenance verification require a successful configured publication run. Real Firecracker boot and production hardening remain separate work. Podman behavior requires its real engine and PTY checks in a suitable environment. Authenticated model behavior requires separate validation; credential-free CLI checks do not establish it.
+
+See the [changelog](../changelog/) for version boundaries and the [architecture](../architecture/) for extension contracts. No roadmap item is a delivery-date commitment.

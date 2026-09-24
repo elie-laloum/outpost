@@ -14,7 +14,7 @@ sidebar:
 | Adapter d’agent   | Commande du CLI natif et traduction des événements | Configuration réutilisable             |
 | Tâche de workflow | Opération typée et dépendances                     | Un nœud du graphe                      |
 
-Une conversation est indépendante : son transcript natif peut survivre à la sandbox et être repris plus tard. Dupliquer une conversation ne duplique pas ses fichiers.
+Pour Claude Code et Codex, une conversation est indépendante : son transcript natif peut survivre à la sandbox et être repris plus tard. Dupliquer une conversation ne duplique pas ses fichiers.
 
 ## Choisir le point d’entrée
 

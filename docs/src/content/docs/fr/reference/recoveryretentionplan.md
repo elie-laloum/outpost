@@ -31,6 +31,6 @@ export interface RecoveryRetentionPlan {
 
 ## Contrats associés
 
-- [RecoveryInspection](../support-recoveryinspection/)
+- [RecoveryInspection](../recoveryinspection/)
 - [RecoveryRetentionEntry](../recoveryretentionentry/)
 - [RecoveryRetentionPolicy](../recoveryretentionpolicy/)

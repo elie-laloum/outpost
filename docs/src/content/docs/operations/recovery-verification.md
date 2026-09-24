@@ -9,7 +9,7 @@ Start by [inspecting retained data](../recovery/).
 
 ## Verify a retained transfer structure
 
-Use the unreleased `recovery verify` command on a specific remote transfer directory, the one containing `state.json` (normally `.outpost/recovery/<session>/<transfer>`):
+Use the `recovery verify` command, available since 3.0.0, on a specific remote transfer directory, the one containing `state.json` (normally `.outpost/recovery/<session>/<transfer>`):
 
 ```sh
 node src/cli/main.ts recovery verify --directory /path/to/retained/transfer
@@ -36,7 +36,7 @@ It constructs a synthetic transfer with all expected files, verifies exit status
 
 ## Check recorded transfer checksums
 
-New remote transfers on main record `checksums.json` after host backup and before host apply. It contains a versioned, unsigned SHA-256 manifest covering `state.json`, the three transfer patches, the required commit bundle and the referenced files under `previous-files` and `incoming`. File bytes are hashed in chunks; symlinks record a hash of their link text, never their target contents. The manifest also records entry kind and byte count. Parent session files such as `initial.bundle` and unrelated artifacts are outside this manifest.
+Remote transfers since 3.0.0 record `checksums.json` after host backup and before host apply. It contains a versioned, unsigned SHA-256 manifest covering `state.json`, the three transfer patches, the required commit bundle and the referenced files under `previous-files` and `incoming`. File bytes are hashed in chunks; symlinks record a hash of their link text, never their target contents. The manifest also records entry kind and byte count. Parent session files such as `initial.bundle` and unrelated artifacts are outside this manifest.
 
 Capture adds one read of each covered file during backup and atomically publishes the completed manifest. If capture fails, synchronization stops before host apply and retains its recovery files. Verification never creates or repairs a manifest for an existing backup.
 

@@ -17,5 +17,12 @@ import type { TaskStatus } from "@elie-laloum/outpost";
 
 ```ts
 export type TaskStatus =
-  "waiting" | "active" | "done" | "failed" | "skipped" | "cancelled";
+  | "waiting"
+  | "active"
+  | "done"
+  | "failed"
+  | "skipped"
+  | "cancelled"
+  | "paused"
+  | "rejected";
 ```

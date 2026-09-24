@@ -37,7 +37,7 @@ Remote recovery folders may contain `initial.bundle`/`commits.bundle`, binary-ca
 
 ## Inspect retained storage
 
-The unreleased `outpost recovery inspect` command inventories the selected checkout's `.outpost/recovery`, `.outpost/logs`, `.outpost/locks` and `.outpost/workspaces`. It is available on main. By default it reads filesystem metadata, without reading transcript, patch or lock contents, modifying Git metadata, creating runtime directories or removing files.
+The `outpost recovery inspect` command, available since 3.0.0, inventories the selected checkout's `.outpost/recovery`, `.outpost/logs`, `.outpost/locks` and `.outpost/workspaces`. By default it reads filesystem metadata, without reading transcript, patch or lock contents, modifying Git metadata, creating runtime directories or removing files.
 
 ```sh
 node src/cli/main.ts recovery inspect --repository /path/to/repository

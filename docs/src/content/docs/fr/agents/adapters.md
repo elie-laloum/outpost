@@ -35,6 +35,8 @@ Sans `model`, le CLI installé choisit son défaut. La disponibilité des modèl
 
 Les défauts non interactifs évitent de bloquer sur une demande de permission et s’appuient sur la frontière d’exécution choisie. Sélectionnez les permissions avec soin pour l’exécution locale. L’attachement interactif utilise le comportement natif du terminal.
 
-L’image générée contient les deux CLI. L’exécution locale exige leur installation et leur authentification sur l’hôte. Les providers distants peuvent installer le CLI sélectionné s’il manque, sauf avec `bootstrap: false`. Les identifiants d’agent sont distincts de ceux du provider.
+L’image générée contient Claude Code, Codex et [Gemini CLI](../gemini/). Gemini possède sa propre configuration et prend en charge les sessions nouvelles sans continuation native. L’exécution locale exige leur installation et leur authentification sur l’hôte. Les providers distants peuvent installer le CLI sélectionné s’il manque, sauf avec `bootstrap: false`. Les identifiants d’agent sont distincts de ceux du provider.
 
 Voir [l’environnement](../environment/), [les conversations](../conversations/) et [les adapters personnalisés](../../extend/agents/).
+
+Pour les options de Gemini et les limites des nouvelles sessions, voir [Exécuter Gemini CLI](../gemini/).

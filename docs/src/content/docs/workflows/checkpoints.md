@@ -55,3 +55,5 @@ Outputs must be lossless JSON values, or top-level `undefined` for tasks with no
 The filesystem adapter writes private files (0600) using temporary files, file synchronization and atomic replacement, plus parent-directory synchronization on POSIX. Each checkpoint is limited to 16 MiB. Local process locks reject concurrent owners, reclaim confirmed dead owners and refuse uncertain ownership. This adapter is for a local filesystem with local process ownership, not a distributed or network-filesystem lock. Checkpoints can contain sensitive results; protect the directory and keep it outside tracked content. Recovery preserves checkpoint data until you explicitly remove it.
 
 See [execution policies](../execution/) and [usage budgets](../budgets/) for cancellation, retries and admission limits.
+
+A full `DispatchResult` contains continuation functions and cannot be checkpointed directly. Call `dispatch` inside a task, forward its signal and report its usage, then return plain data such as `result.value`. An artifact task can publish that data and return a JSON reference; see [typed artifacts](../artifacts/).
