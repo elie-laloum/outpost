@@ -241,3 +241,5 @@ export type {
   QueueWorkerOptions,
 } from "./application/queue-worker.types.ts";
 export type { QueuedTaskOptions } from "./application/queued-task.types.ts";
+
+export type { EgressPolicy } from "./domain/egress.types.ts";

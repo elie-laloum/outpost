@@ -116,11 +116,14 @@ try {
   const consumer = join(temporary, "consumer.ts");
   writeFileSync(
     consumer,
-    `import { dispatch, codex, response, createSandbox } from '@elie-laloum/outpost';
+    `import { dispatch, codex, response, createSandbox, type EgressPolicy } from '@elie-laloum/outpost';
 import { local } from '@elie-laloum/outpost/providers/local';
 import { docker, type DependencyCache } from '@elie-laloum/outpost/providers/docker';
 import { podman } from '@elie-laloum/outpost/providers/podman';
 import { planRecoveryRetention, pruneRecoveryRetention, assertRecoveryQuota, verifyRecoveryTransfer, type RecoveryRetentionPolicy, type FileTransfers, type SandboxLease } from '@elie-laloum/outpost';
+const egress: EgressPolicy = { mode: 'deny-all' };
+docker({egress});
+podman({egress});
 const cache: DependencyCache = {name:'npm', key:'lock-v1'};
 docker({caches:[cache]});
 podman({caches:[cache]});

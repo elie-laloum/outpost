@@ -1,4 +1,5 @@
 import type { Daytona, DaytonaConfig } from "@daytona/sdk";
+import { invariant } from "../domain/errors.ts";
 import { posix } from "node:path";
 import type { SandboxProvider } from "../domain/sandbox.types.ts";
 import { fileBatches } from "./file-batches.ts";
@@ -17,6 +18,10 @@ export function daytona(
   ) => Promise<Pick<Daytona, "create" | "delete">> = async (config) =>
     new (await import("@daytona/sdk")).Daytona(config),
 ): SandboxProvider {
+  invariant(
+    !("egress" in options) || options.egress === undefined,
+    "Daytona does not support Outpost egress policies; configure provider-native networking explicitly",
+  );
   return {
     name: "daytona",
     placement: "remote",

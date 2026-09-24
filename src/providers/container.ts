@@ -2,6 +2,7 @@ import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { basename } from "node:path";
 import type { Command } from "../domain/command.types.ts";
+import { containerNetworks } from "./container-network.ts";
 import { invariant } from "../domain/errors.ts";
 import type { SandboxProvider } from "../domain/sandbox.types.ts";
 import {
@@ -42,6 +43,7 @@ export function containerProvider(
 ): SandboxProvider {
   const config = {
     ...options,
+    networks: containerNetworks(options),
     caches: (options.caches ?? []).map((cache) => ({ ...cache })),
   };
   invariant(

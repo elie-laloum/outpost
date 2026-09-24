@@ -756,3 +756,49 @@ test(
     }
   },
 );
+
+test(
+  "real container deny-all blocks raw IP egress while commands remain usable",
+  { skip: !process.env.OUTPOST_CONTAINER_ENGINE },
+  async (t) => {
+    const root = await repository(t);
+    const factory =
+      process.env.OUTPOST_CONTAINER_ENGINE === "podman" ? podman : docker;
+    const lease = await factory({
+      image: "outpost-ci:latest",
+      egress: { mode: "deny-all" },
+    }).acquire({
+      repository: root,
+      directory: root,
+      gitDirectories: [],
+      variables: {},
+    });
+    try {
+      const probe = await lease.invoke({
+        executable: "node",
+        arguments: [
+          "-e",
+          `
+      const assert = require('node:assert/strict');
+      const os = require('node:os');
+      const net = require('node:net');
+      assert.ok(Object.values(os.networkInterfaces()).flat().every(address => address.internal));
+      const socket = net.connect({ host: '192.0.2.1', port: 443 });
+      socket.setTimeout(2000, () => { socket.destroy(); process.exit(2); });
+      socket.on('connect', () => { socket.destroy(); process.exit(3); });
+      socket.on('error', error => { assert.equal(error.code, 'ENETUNREACH'); });
+    `,
+        ],
+      });
+      assert.equal(probe.status, 0, probe.stderr);
+      assert.equal(
+        (await lease.invoke({ executable: "sh", arguments: ["-c", "exit 7"] }))
+          .status,
+        7,
+      );
+      assert.equal((await lease.invoke({ executable: "true" })).status, 0);
+    } finally {
+      await lease.release();
+    }
+  },
+);
