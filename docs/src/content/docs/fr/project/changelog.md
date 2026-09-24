@@ -9,6 +9,7 @@ Traduction du journal `CHANGELOG.md` conservé à la racine du dépôt. Chaque v
 
 ## Unreleased
 
+- Ajouter les contrôles en lecture seule `recovery verify --directory` des métadonnées de transfert et fichiers de sauvegarde requis, avec lecture bornée et distinction explicite de l’intégrité du contenu ou d’une validation de restauration.
 - Ajouter `recovery inspect --locks` avec lecture bornée des métadonnées et observation locale des PID ; signaler les enregistrements invalides ou non vérifiables sans présumer la propriété ni supprimer de verrous.
 - Ajouter les rapports optionnels `recovery inspect --git` avec branche/HEAD détachée, état clean/dirty, verrous Git et états non enregistrés/indisponibles explicites, sans rafraîchir les index ni nettoyer le registre.
 - Ajouter les rapports en lecture seule `outpost recovery inspect` pour récupération, logs, verrous et workspaces gérés, avec tailles logiques issues des métadonnées, protection contre les liens symboliques et résultats partiels explicites en cas de limite ou d’erreur de parcours.

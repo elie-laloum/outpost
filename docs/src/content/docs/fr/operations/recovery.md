@@ -96,6 +96,33 @@ node test/fixtures/recovery-locks.ts
 
 Elle crée un dépôt Git temporaire, conserve un véritable verrou Outpost et ajoute un enregistrement au PID invalide. Résultat attendu : une entrée `present`, une entrée `unknown | INVALID_PID` et un code d’inspection affiché de `1`. La démonstration elle-même termine avec succès lorsque ce résultat attendu est observé et supprime uniquement son dépôt temporaire.
 
+## Vérifier la structure d’un transfert conservé
+
+Utilisez la commande non publiée `recovery verify` sur un dossier de transfert distant précis, celui contenant `state.json` (normalement `.outpost/recovery/<session>/<transfert>`) :
+
+```sh
+node src/cli/main.ts recovery verify --directory /chemin/du/transfert/conserve
+node src/cli/main.ts recovery verify --directory /chemin/du/transfert/conserve --json
+```
+
+Le dossier peut avoir été déplacé et ne doit pas nécessairement appartenir à un checkout Git. Cette commande vérifie le format actuel produit par `backupHost`, pas le dossier de session parent, les magasins de conversations ni les workspaces orphelins. Un transfert interrompu avant la sauvegarde hôte peut légitimement ne pas avoir de `state.json` ; un échec indique une structure incomplète ou non vérifiable, pas une preuve de corruption.
+
+La commande lit uniquement `state.json`, limité à 64 Kio. Elle exige les identifiants de commits `previous` et `next` au même format hexadécimal de 40 ou 64 caractères, ainsi que les tableaux `previousExtras` et `incoming`, limités chacun à 1 000 chemins relatifs uniques. Chemins ou composants vides, composants point, remontées vers un parent, chemins de métadonnées Git et chemins avec racine POSIX/Windows sont refusés avant l’examen des références. Les champs supplémentaires inconnus sont ignorés et jamais affichés.
+
+Elle vérifie ensuite les métadonnées des trois fichiers ordinaires requis `remote.patch`, `previous.patch` et `previous-index.patch`, ainsi que `commits.bundle` lorsque `previous` diffère de `next`. Les patches vides sont valides. Chaque fichier référencé doit exister sous `previous-files` ou `incoming` comme fichier ordinaire ou lien symbolique final. Les liens finaux sont signalés `SYMLINK_PRESENT` sans lire leur cible ; les liens parents et les fichiers state/patch/bundle symboliques sont refusés. Les fichiers non référencés restent hors du contrôle.
+
+Le code `0` signifie que la structure attendue est présente. Le code `1` indique une vérification en échec ou une invocation invalide. Le JSON contient `directory`, `scope: "transfer-structure"`, `complete`, `integrity: "unverified"` et `checks` (`path`, `status`, `code`). Contenus bruts des métadonnées, patches, fichiers et bundles ne sont pas affichés. La vérification n’exécute aucune commande Git et ne modifie aucun fichier.
+
+C’est une observation, pas un instantané atomique ni une preuve qu’une restauration fonctionnera. Contenus des patches/bundles, empreintes, permissions, disponibilité des commits, cohérence entre fichiers et activité restent non vérifiés. Même un bundle malformé peut réussir ce contrôle structurel si son fichier existe. L’intégrité complète du contenu et la validation d’une restauration restent planifiées.
+
+Essayez une démonstration temporaire depuis les sources :
+
+```sh
+node test/fixtures/recovery-verification.ts
+```
+
+Elle construit un transfert synthétique avec tous les fichiers attendus, vérifie le code `0`, retire un fichier référencé puis vérifie le code `1` avec `FILE_UNAVAILABLE`. La démonstration supprime uniquement son dossier temporaire et termine avec succès lorsque les deux résultats attendus sont observés.
+
 ## Procédure de récupération
 
 1. Notez erreur, chemins et branches ; conservez le dossier de récupération.

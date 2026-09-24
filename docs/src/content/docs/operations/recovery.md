@@ -96,6 +96,33 @@ node test/fixtures/recovery-locks.ts
 
 It creates a temporary Git repository, holds one real Outpost lock and adds one invalid PID record. Expect one `present` entry, one `unknown | INVALID_PID` and a reported inspection exit status of `1`. The demonstration itself exits successfully when this expected result is observed and removes only its temporary repository.
 
+## Verify a retained transfer structure
+
+Use the unreleased `recovery verify` command on a specific remote transfer directory, the one containing `state.json` (normally `.outpost/recovery/<session>/<transfer>`):
+
+```sh
+node src/cli/main.ts recovery verify --directory /path/to/retained/transfer
+node src/cli/main.ts recovery verify --directory /path/to/retained/transfer --json
+```
+
+The directory may have been relocated and need not belong to a Git checkout. This command checks the current transfer format produced by `backupHost`, not the parent session directory, conversation stores or orphaned workspaces. A transfer interrupted before the host backup stage can legitimately lack `state.json`; a failed check indicates incomplete or unverifiable structure, not proof of corruption.
+
+The command reads only `state.json`, limited to 64 KiB. It requires `previous` and `next` commit identifiers in the same 40- or 64-character hexadecimal format, plus `previousExtras` and `incoming` arrays of at most 1,000 unique relative paths each. Empty paths/components, dot components, parent traversal, Git metadata paths and POSIX/Windows rooted paths are refused before inspecting references. Unknown additional fields are ignored and never displayed.
+
+It then checks filesystem metadata for the three required regular files `remote.patch`, `previous.patch` and `previous-index.patch`, and for `commits.bundle` when `previous` differs from `next`. Empty patches are valid. Every referenced payload must exist under `previous-files` or `incoming` as a regular file or a leaf symlink. Leaf symlinks are reported as `SYMLINK_PRESENT` without reading their targets; parent symlinks and symlinked state/patch/bundle files are refused. Unreferenced files are outside the check.
+
+Exit status `0` means the expected structure is present. Exit status `1` means a failed check or invalid invocation. JSON contains `directory`, `scope: "transfer-structure"`, `complete`, `integrity: "unverified"` and `checks` (`path`, `status`, `code`). Raw metadata contents, patches, payloads and bundles are not displayed. No Git command runs and no file is changed by verification.
+
+This is an observation, not an atomic snapshot or proof that restoration will work. Patch/bundle contents, hashes, permissions, commit availability, cross-file consistency and resource activity remain unverified. Even a malformed bundle can pass this structural check when its file exists. Full content integrity and restoration validation remain planned.
+
+Try a temporary demonstration from the source checkout:
+
+```sh
+node test/fixtures/recovery-verification.ts
+```
+
+It constructs a synthetic transfer with all expected files, verifies exit status `0`, removes one referenced payload, then verifies exit status `1` with `FILE_UNAVAILABLE`. The demonstration removes only its temporary directory and exits successfully when both expected results are observed.
+
 ## Recover deliberately
 
 1. Record the error, paths and branch names; keep the recovery directory intact.

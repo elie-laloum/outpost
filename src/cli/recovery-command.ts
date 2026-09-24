@@ -1,3 +1,4 @@
+import { recoveryVerifyCommand } from "./recovery-verify-command.ts";
 import { inspectRecovery } from "../application/recovery-inspection.ts";
 import { invariant, positive } from "../domain/errors.ts";
 import type { CliInvocation } from "./main.types.ts";
@@ -6,6 +7,8 @@ export async function recoveryCommand({
   values,
   positionals,
 }: CliInvocation): Promise<void> {
+  if (positionals[1] === "verify")
+    return recoveryVerifyCommand({ values, positionals });
   invariant(
     positionals.length === 2 && positionals[1] === "inspect",
     "Usage: outpost recovery inspect [--repository PATH] [--max-entries NUMBER] [--git] [--locks] [--json]",

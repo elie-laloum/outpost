@@ -1,6 +1,4 @@
-import { lstat, open, realpath } from "node:fs/promises";
-import { resolve } from "node:path";
-import type { Stats } from "node:fs";
+import { readInspectionFile } from "../inspection-file.ts";
 import type { StorageEntry, StorageIssue } from "../storage-inventory.types.ts";
 import { lockInspectionDefaults } from "./lock-inspection.constants.ts";
 import type {
@@ -10,61 +8,23 @@ import type {
   LockPidProbe,
 } from "./lock-inspection.types.ts";
 
-function unchanged(before: Stats, after: Stats): boolean {
-  return (
-    before.dev === after.dev &&
-    before.ino === after.ino &&
-    before.size === after.size &&
-    before.mtimeMs === after.mtimeMs &&
-    before.ctimeMs === after.ctimeMs
-  );
-}
-
 async function readPid(path: string): Promise<number | undefined> {
-  const before = await lstat(path);
-  if (!before.isFile() || (await realpath(path)) !== resolve(path))
-    throw new Error("Lock path changed");
-  if (before.size > lockInspectionDefaults.maxBytes)
-    throw new Error("Lock is too large");
-  const file = await open(path, lockInspectionDefaults.openFlags);
-  try {
-    const opened = await file.stat();
-    if (!opened.isFile() || !unchanged(before, opened))
-      throw new Error("Lock changed");
-    const buffer = Buffer.alloc(lockInspectionDefaults.maxBytes + 1);
-    let length = 0;
-    while (length < buffer.length) {
-      const { bytesRead } = await file.read(
-        buffer,
-        length,
-        buffer.length - length,
-        length,
-      );
-      if (!bytesRead) break;
-      length += bytesRead;
-    }
-    if (length > lockInspectionDefaults.maxBytes)
-      throw new Error("Lock is too large");
-    if (
-      !unchanged(opened, await file.stat()) ||
-      !unchanged(opened, await lstat(path))
-    )
-      throw new Error("Lock changed");
-    const record: unknown = JSON.parse(buffer.toString("utf8", 0, length));
-    if (!record || typeof record !== "object" || !("pid" in record))
-      return undefined;
-    const pid = record.pid;
-    if (
-      typeof pid !== "number" ||
-      !Number.isInteger(pid) ||
-      pid <= 0 ||
-      pid > lockInspectionDefaults.maxPid
-    )
-      return undefined;
-    return pid;
-  } finally {
-    await file.close();
-  }
+  const record: unknown = JSON.parse(
+    (await readInspectionFile(path, lockInspectionDefaults.maxBytes)).toString(
+      "utf8",
+    ),
+  );
+  if (!record || typeof record !== "object" || !("pid" in record))
+    return undefined;
+  const pid = record.pid;
+  if (
+    typeof pid !== "number" ||
+    !Number.isInteger(pid) ||
+    pid <= 0 ||
+    pid > lockInspectionDefaults.maxPid
+  )
+    return undefined;
+  return pid;
 }
 
 async function inspectEntry(
