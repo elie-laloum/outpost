@@ -47,5 +47,28 @@ export function boundedTransfers(
     release: lease.release.bind(lease),
     upload: copy("upload"),
     download: copy("download"),
+    ...(lease.fileTransfers
+      ? {
+          fileTransfers: {
+            manifest: (source, paths, options = {}) =>
+              transfer({ ...defaults, ...options }, (signal) =>
+                lease.fileTransfers!.manifest(source, paths, {
+                  ...defaults,
+                  ...options,
+                  signal,
+                }),
+              ),
+            downloadBatch: (source, entries, destination, options = {}) =>
+              transfer({ ...defaults, ...options }, (signal) =>
+                lease.fileTransfers!.downloadBatch(
+                  source,
+                  entries,
+                  destination,
+                  { ...defaults, ...options, signal },
+                ),
+              ),
+          },
+        }
+      : {}),
   };
 }

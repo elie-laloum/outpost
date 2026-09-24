@@ -1,6 +1,7 @@
 import type { Sandbox } from "@vercel/sandbox";
 import { OutpostError } from "../domain/errors.ts";
 import type { SandboxProvider } from "../domain/sandbox.types.ts";
+import { fileBatches } from "./file-batches.ts";
 import { registerCleanup } from "../infrastructure/shutdown.ts";
 import { cloudRoots } from "./cloud.constants.ts";
 import { vercelCommand } from "./vercel-command.ts";
@@ -56,7 +57,7 @@ export function vercel(
         await release();
         throw cause;
       }
-      return {
+      const lease = {
         root,
         home,
         invoke: vercelCommand({
@@ -69,6 +70,7 @@ export function vercel(
         ...vercelFiles(sandbox),
         release,
       };
+      return { ...lease, fileTransfers: fileBatches(lease) };
     },
   };
 }

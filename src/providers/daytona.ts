@@ -1,6 +1,7 @@
 import type { Daytona, DaytonaConfig } from "@daytona/sdk";
 import { posix } from "node:path";
 import type { SandboxProvider } from "../domain/sandbox.types.ts";
+import { fileBatches } from "./file-batches.ts";
 import { registerCleanup } from "../infrastructure/shutdown.ts";
 import { cloudRoots } from "./cloud.constants.ts";
 import { daytonaCommand } from "./daytona-command.ts";
@@ -47,7 +48,7 @@ export function daytona(
         await release();
         throw cause;
       }
-      return {
+      const lease = {
         root,
         home,
         invoke: daytonaCommand({
@@ -60,6 +61,7 @@ export function daytona(
         ...daytonaFiles(sandbox),
         release,
       };
+      return { ...lease, fileTransfers: fileBatches(lease) };
     },
   };
 }

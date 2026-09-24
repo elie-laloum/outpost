@@ -78,6 +78,8 @@ export type {
   ConversationStore,
   Disposal,
   LifecycleHooks,
+  FileManifestEntry,
+  FileTransfers,
   SandboxContext,
   SandboxLease,
   SandboxProvider,

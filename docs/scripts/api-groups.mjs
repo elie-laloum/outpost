@@ -58,6 +58,11 @@ export const groups = [
       "docker podman local vercel daytona ContainerOptions VercelOptions DaytonaOptions mountedProvider remoteProvider SandboxContext SandboxLease SandboxProvider TransferOptions Variables Volume",
   },
   {
+    title: ["Remote transfers", "Transferts distants"],
+    guide: "operations/remote-transfers",
+    names: "FileManifestEntry FileTransfers",
+  },
+  {
     title: ["Errors", "Erreurs"],
     guide: "operations/recovery",
     names: "OutpostError recoveryDetails FaultCode",
