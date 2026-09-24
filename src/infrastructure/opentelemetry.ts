@@ -78,7 +78,7 @@ export function openTelemetry(
     if (!operation) return;
     const attributes = { "outpost.status": status };
     safe(() => operation.span?.setAttributes(attributes));
-    if (status !== "skipped")
+    if (status !== "skipped" && status !== "paused")
       safe(() =>
         operation.span?.setStatus({
           code: status === "done" ? SpanStatusCode.OK : SpanStatusCode.ERROR,

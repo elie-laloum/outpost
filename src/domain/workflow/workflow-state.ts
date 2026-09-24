@@ -35,11 +35,36 @@ export function workflowState(
     const complete = saved.records.every((entry) =>
       ["done", "skipped"].includes(entry.status),
     );
+    const settledPause =
+      saved.records.some((entry) =>
+        ["paused", "rejected"].includes(entry.status),
+      ) &&
+      saved.records.every(
+        (entry) =>
+          ["done", "skipped", "paused", "rejected"].includes(entry.status) ||
+          (entry.status === "waiting" && entry.attempts === 0),
+      );
     for (const item of tasks) {
       const entry = saved.records.find((entry) => entry.key === item.key)!;
       records.set(item, {
         ...entry,
-        status: entry.status === "done" || complete ? entry.status : "waiting",
+        ...(entry.pause
+          ? {
+              pause: Object.freeze({
+                ...entry.pause,
+                actors: Object.freeze([...entry.pause.actors]),
+              }),
+            }
+          : {}),
+        ...(entry.decision
+          ? { decision: Object.freeze({ ...entry.decision }) }
+          : {}),
+        status:
+          ["done", "paused", "rejected"].includes(entry.status) ||
+          complete ||
+          (settledPause && entry.status === "skipped")
+            ? entry.status
+            : "waiting",
       });
       if (entry.status === "done") {
         const output = saved.values[item.key]!;
@@ -49,6 +74,8 @@ export function workflowState(
   }
   const errors: unknown[] = [],
     observerErrors: unknown[] = [];
+  for (const entry of records.values())
+    if (entry.status === "rejected") errors.push(new Error(entry.error));
   const accounting = workflowAccounting(
     options.budget,
     (error) => {

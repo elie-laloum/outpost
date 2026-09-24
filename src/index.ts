@@ -168,3 +168,12 @@ export type {
   WorkflowCheckpointValue,
   WorkflowJson,
 } from "./domain/workflow/checkpoint.types.ts";
+
+export { approvalTask, pauseTask } from "./domain/workflow/gates.ts";
+export type {
+  WorkflowGate,
+  WorkflowGateOptions,
+  WorkflowPauseRequest,
+  WorkflowDecision,
+  WorkflowDecisionRecord,
+} from "./domain/workflow/gates.types.ts";
