@@ -39,6 +39,10 @@
     "./opentelemetry": {
       "types": "./dist/infrastructure/opentelemetry.d.ts",
       "import": "./dist/infrastructure/opentelemetry.js"
+    },
+    "./providers/firecracker": {
+      "types": "./dist/providers/firecracker.d.ts",
+      "import": "./dist/providers/firecracker.js"
     }
   },
   "files": [

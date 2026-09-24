@@ -53,7 +53,7 @@ try {
     [
       "--input-type=module",
       "-e",
-      "import {response, workflow, conversations, reporter, recoveryDetails, diagnoseAgentProtocol, diagnoseSandbox, planRecoveryRetention, pruneRecoveryRetention, assertRecoveryQuota, verifyRecoveryTransfer} from '@elie-laloum/outpost'; import {docker} from '@elie-laloum/outpost/providers/docker'; if((await response.text({tag:'ok'}).read('<ok>yes</ok>'))!=='yes'||docker().name!=='docker')throw Error('Package import failed'); for(const item of [conversations.capture,reporter,recoveryDetails,diagnoseSandbox,planRecoveryRetention,pruneRecoveryRetention,assertRecoveryQuota,verifyRecoveryTransfer])if(typeof item!=='function')throw Error('Missing public extension'); if(diagnoseAgentProtocol('codex').hasFailures)throw Error('Protocol fixtures failed'); (await workflow('empty',[]).start()).unwrap()",
+      "import {response, workflow, conversations, reporter, recoveryDetails, diagnoseAgentProtocol, diagnoseSandbox, planRecoveryRetention, pruneRecoveryRetention, assertRecoveryQuota, verifyRecoveryTransfer} from '@elie-laloum/outpost'; import {docker} from '@elie-laloum/outpost/providers/docker'; import {firecracker} from '@elie-laloum/outpost/providers/firecracker'; if(typeof firecracker!=='function')throw Error('Missing Firecracker provider'); if((await response.text({tag:'ok'}).read('<ok>yes</ok>'))!=='yes'||docker().name!=='docker')throw Error('Package import failed'); for(const item of [conversations.capture,reporter,recoveryDetails,diagnoseSandbox,planRecoveryRetention,pruneRecoveryRetention,assertRecoveryQuota,verifyRecoveryTransfer])if(typeof item!=='function')throw Error('Missing public extension'); if(diagnoseAgentProtocol('codex').hasFailures)throw Error('Protocol fixtures failed'); (await workflow('empty',[]).start()).unwrap()",
     ],
     { cwd: temporary, stdio: "inherit" },
   );
@@ -118,6 +118,9 @@ try {
     consumer,
     `import { dispatch, codex, response, createSandbox } from '@elie-laloum/outpost';
 import { local } from '@elie-laloum/outpost/providers/local';
+import { firecracker, type FirecrackerOptions } from '@elie-laloum/outpost/providers/firecracker';
+const microvm: typeof firecracker = (options: FirecrackerOptions) => firecracker(options);
+console.log(microvm);
 import { docker, type DependencyCache } from '@elie-laloum/outpost/providers/docker';
 import { podman } from '@elie-laloum/outpost/providers/podman';
 import { planRecoveryRetention, pruneRecoveryRetention, assertRecoveryQuota, verifyRecoveryTransfer, type RecoveryRetentionPolicy, type FileTransfers, type SandboxLease } from '@elie-laloum/outpost';
