@@ -29,22 +29,23 @@ console.log(provider.name);
 
 ## Options
 
-| Option              | Meaning                                                                |
-| ------------------- | ---------------------------------------------------------------------- |
-| `image`             | Defaults to `outpost:<normalized-repository-directory>`.               |
-| `user`              | Explicit `{ uid, gid }`; otherwise POSIX host IDs, or 1000 on Windows. |
-| `volumes`           | Source/target mounts with optional `readOnly`.                         |
-| `networks`          | One network name or an array.                                          |
-| `groups`, `devices` | Extra group IDs/names and device mappings.                             |
-| `cpus`, `memoryMb`  | Engine resource constraints.                                           |
-| `label`             | SELinux `z` (default on Linux), `Z`, or `false`.                       |
-| `retain`            | Captured output tail bound.                                            |
-| `userns`            | Podman `"keep-id"` or `false`.                                         |
-| `variables`         | Provider environment.                                                  |
+| Option              | Meaning                                                                                             |
+| ------------------- | --------------------------------------------------------------------------------------------------- |
+| `repositoryMode`    | `"mounted"` (default) or opt-in `"isolated"`; see [repository isolation](../repository-isolation/). |
+| `image`             | Defaults to `outpost:<normalized-repository-directory>`.                                            |
+| `user`              | Explicit `{ uid, gid }`; otherwise POSIX host IDs, or 1000 on Windows.                              |
+| `volumes`           | Source/target mounts with optional `readOnly`.                                                      |
+| `networks`          | One network name or an array.                                                                       |
+| `groups`, `devices` | Extra group IDs/names and device mappings.                                                          |
+| `cpus`, `memoryMb`  | Engine resource constraints.                                                                        |
+| `label`             | SELinux `z` (default on Linux), `Z`, or `false`.                                                    |
+| `retain`            | Captured output tail bound.                                                                         |
+| `userns`            | Podman `"keep-id"` or `false`.                                                                      |
+| `variables`         | Provider environment.                                                                               |
 
-Mount sources accept `~`, relative or absolute paths. Relative targets resolve under `/workspace`; `~` targets the agent home. Individual file mounts must target the home; use a directory mount elsewhere. Missing parent directories for file mounts are prepared for the configured agent UID/GID.
+Mount sources accept `~`, relative or absolute paths. Relative targets resolve under `/workspace` in mounted mode; isolated mode reserves its `/outpost/workspace` root and rejects relative workspace mounts; `~` targets the agent home. Individual file mounts must target the home; use a directory mount elsewhere. Missing parent directories for file mounts are prepared for the configured agent UID/GID.
 
-Containers use a private ephemeral home, dropped capabilities, no-new-privileges and an init process. Only selected mounts and required Git metadata are exposed; the Docker socket is not mounted automatically. Cancellation stops the current command group without destroying the warm container.
+Containers use a private ephemeral home, dropped capabilities, no-new-privileges and an init process. Mounted mode exposes selected mounts and required Git metadata; isolated mode copies repository content and history into private container storage; the Docker socket is not mounted automatically. Cancellation stops the current command group without destroying the warm container.
 
 ## Platform differences
 

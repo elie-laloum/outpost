@@ -563,17 +563,19 @@ test(
           arguments: ["volume", "rm", volume],
         });
     });
-    for (const [key, expected] of [
-      ["v1", "empty"],
-      ["v1", "retained"],
-      ["v2", "empty"],
-    ]) {
+    for (const [key, expected, repositoryMode] of [
+      ["v1", "empty", "mounted"],
+      ["v1", "retained", "mounted"],
+      ["v2", "empty", "mounted"],
+      ["v1", "retained", "isolated"],
+    ] as const) {
       const caches = [{ name: "npm", key: key! }];
       const mounts = await cacheMounts(caches, root, "outpost-ci:latest", user);
       if (!volumes.includes(mounts[0]!.volume)) volumes.push(mounts[0]!.volume);
       const lease = await factory({
         image: "outpost-ci:latest",
         networks: "none",
+        repositoryMode,
         caches,
       }).acquire(context);
       try {
@@ -620,3 +622,137 @@ async function assertContainerRemoved(
   assert.equal(result.status, 0, result.stderr);
   assert.equal(result.stdout.trim(), "");
 }
+
+test(
+  "isolated repository keeps host config, hooks and refs private while synchronizing commits",
+  { skip: !process.env.OUTPOST_CONTAINER_ENGINE },
+  async (t) => {
+    const { git } = await import("../src/infrastructure/git.ts");
+    const root = await repository(t);
+    const factory =
+      process.env.OUTPOST_CONTAINER_ENGINE === "podman" ? podman : docker;
+    await git(root, ["config", "outpost.hostOnly", "private"]);
+    const hook = join(root, ".git", "hooks", "pre-commit");
+    await writeFile(hook, "host hook sentinel\n");
+    const configuration = await readFile(join(root, ".git", "config"));
+    const main = await git(root, ["rev-parse", "main"]);
+    const box = await createSandbox({
+      repository: root,
+      provider: factory({
+        image: "outpost-ci:latest",
+        networks: "none",
+        repositoryMode: "isolated",
+      }),
+      branch: { mode: "named", name: "isolated-test" },
+      logging: false,
+    });
+    try {
+      assert.equal(box.root, "/outpost/workspace");
+      const command = await box.command({
+        executable: "sh",
+        arguments: [
+          "-c",
+          'test -d .git && test ! -e /outpost/git && test ! -e "$1" && test ! -e "$2" && ! git config --get outpost.hostOnly && git config outpost.hostOnly guest && printf "guest hook\\n" > .git/hooks/pre-commit && git update-ref refs/heads/private-guest HEAD && printf "isolated change\\n" > isolated.txt && git add isolated.txt && git -c core.hooksPath=/dev/null commit -m isolated',
+          "fixture",
+          root,
+          box.workspace.directory,
+        ],
+      });
+      assert.equal(command.status, 0, command.stderr);
+      assert.equal(
+        await readFile(join(box.workspace.directory, "isolated.txt"), "utf8"),
+        "isolated change\n",
+      );
+      assert.equal(
+        (
+          await git(box.workspace.directory, ["log", "-1", "--format=%s"])
+        ).trim(),
+        "isolated",
+      );
+      assert.deepEqual(
+        await readFile(join(root, ".git", "config")),
+        configuration,
+      );
+      assert.equal(await readFile(hook, "utf8"), "host hook sentinel\n");
+      assert.equal(await git(root, ["rev-parse", "main"]), main);
+      await assert.rejects(
+        git(root, ["show-ref", "--verify", "refs/heads/private-guest"]),
+      );
+      const failure = await box.command({
+        executable: "sh",
+        arguments: ["-c", "exec >/dev/null 2>&1; sleep 1; exit 7"],
+      });
+      assert.equal(failure.status, 7);
+      await assert.rejects(
+        box.command({
+          executable: "sh",
+          arguments: ["-c", "(sleep 2; touch /tmp/isolation-leak) & wait"],
+          deadlineMs: 100,
+        }),
+      );
+      assert.equal(
+        (
+          await box.command({
+            executable: "sh",
+            arguments: ["-c", "sleep 2; test ! -e /tmp/isolation-leak"],
+          })
+        ).status,
+        0,
+      );
+    } finally {
+      await box.close();
+    }
+  },
+);
+
+test(
+  "isolated synchronization preserves dirty and concurrently edited host workspaces",
+  { skip: !process.env.OUTPOST_CONTAINER_ENGINE },
+  async (t) => {
+    const { openWorkspace } = await import("../src/index.ts");
+    const root = await repository(t);
+    const factory =
+      process.env.OUTPOST_CONTAINER_ENGINE === "podman" ? podman : docker;
+    for (const concurrent of [false, true]) {
+      const workspace = await openWorkspace({
+        repository: root,
+        branch: {
+          mode: "named",
+          name: concurrent ? "concurrent-test" : "dirty-test",
+        },
+      });
+      if (!concurrent)
+        await writeFile(join(workspace.directory, "base.txt"), "host edit\n");
+      const box = await workspace.sandbox({
+        provider: factory({
+          image: "outpost-ci:latest",
+          networks: "none",
+          repositoryMode: "isolated",
+        }),
+        logging: false,
+      });
+      try {
+        if (concurrent)
+          await writeFile(join(workspace.directory, "base.txt"), "host edit\n");
+        await assert.rejects(
+          box.command({
+            executable: "sh",
+            arguments: ["-c", "echo guest > base.txt"],
+          }),
+          /recovery files retained/,
+        );
+        assert.equal(
+          await readFile(join(workspace.directory, "base.txt"), "utf8"),
+          "host edit\n",
+        );
+        const { readdir } = await import("node:fs/promises");
+        assert.ok(
+          (await readdir(join(root, ".outpost", "recovery"))).length > 0,
+        );
+      } finally {
+        await box.close();
+        await workspace.close({ preserve: true });
+      }
+    }
+  },
+);

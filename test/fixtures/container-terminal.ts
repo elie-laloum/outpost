@@ -12,6 +12,9 @@ const factory =
 const lease = await factory({
   image: "outpost-ci:latest",
   networks: "none",
+  ...(process.env.OUTPOST_ISOLATED_REPOSITORY
+    ? { repositoryMode: "isolated" as const }
+    : {}),
 }).acquire({
   repository: root,
   directory: root,

@@ -33,7 +33,9 @@ export function containerPlan({
     root,
     "--cap-drop",
     "ALL",
-    ...(fileParents.size || config.caches?.length
+    ...(fileParents.size ||
+    config.caches?.length ||
+    config.repositoryMode === "isolated"
       ? ["--cap-add", "CHOWN"]
       : []),
     "--security-opt",
