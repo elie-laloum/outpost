@@ -17,16 +17,22 @@ Version 2.0.0 adds standalone workflow projects with `init --repository`, script
 
 Host diagnostics with `outpost doctor`: Node.js, Git, Docker/Podman access, host agent versions, provider contract summary and JSON reports. The optional `--image` check starts and cleans up a temporary Docker/Podman sandbox and checks its agent version without network or model access. It also checks start/resume/fork command help and the option names used by the default headless adapters. See [host diagnostics](../../operations/doctor/) for the checks and limitations.
 
-Read-only [recovery storage inspection](../../operations/recovery/#inspect-retained-storage) reports retained files and logical sizes, with traversal limits and explicit partial results. The optional `--git` check reports workspace branches, detached HEAD, clean/dirty state and registration problems. The optional `--locks` check reads bounded lock metadata and reports local PID presence without proving ownership. `recovery verify --directory` checks the structure of a retained remote transfer and the presence of its referenced backup files. New remote transfer backups record unsigned SHA-256 manifests; `recovery verify --checksums` compares covered contents against them with a byte budget. Authenticity, resource activity and restorability remain unverified.
+Read-only [recovery inspection](../../operations/recovery/) covers inventory, Git workspace state and local lock observations. New Linux locks include host, boot, namespace and process-start identity; uncertain ownership prevents automatic reclamation. [Verification](../../operations/recovery-verification/) checks retained structures, unsigned SHA-256 manifests and, on request, Git objects and independent patch applicability in an isolated copy. [Retention policies](../../operations/storage-retention/) provide dry runs, explicit revalidated pruning of eligible workspaces and closed logs, and quota admission observations. Recovery artifacts and uncertain resources remain protected.
 
-## Next — efficiency and diagnostics
+[Remote transfers](../../operations/remote-transfers/) use incremental SHA-256 manifests and bounded compressed batches for Vercel/Daytona untracked file downloads. Verified unchanged host files are reused while every recovery attempt retains its own complete incoming payload. Initial uploads, tracked patches and self-contained Git bundles retain their existing paths.
 
-- Incremental remote file manifests and compressed transfer batches with recovery guarantees.
-- Dependency caches and prebuilt agent images with signed provenance.
-- Recovery integrity and activity checks, explicit pruning, retention configuration and storage quotas.
-- Structured metrics, OpenTelemetry integration and per-workflow usage budgets.
-- Diagnostics of existing workflow sandboxes, cloud capability probes and agent protocol compatibility reports.
-- Additional hosted-provider fixtures and scheduled live compatibility checks.
+[Dependency caches](../../providers/dependency-caches/) are opt-in Docker/Podman volumes with explicit invalidation keys. [Agent-image tooling](../../providers/agent-images/) builds pinned inputs and provides a gated publication workflow with signed provenance verification. Image publication and signature verification must still run in the configured release environment; adding the workflow does not publish an image.
+
+[Workflow events and metrics](../../operations/telemetry/) feed an optional OpenTelemetry integration with injected tracer and meter. [Budgets](../../workflows/budgets/) limit task attempt admissions and observed usage across retries and concurrent tasks; they do not guarantee billing caps.
+
+[Advanced diagnostics](../../operations/doctor/) inspect an existing sandbox under exclusive ownership, with optional binary transfer probes and cleanup. Bundled protocol checks are offline structural fixtures; they do not certify authenticated model behavior.
+
+[Cloud tests](../../operations/cloud-compatibility/) add deterministic fixtures and an explicitly enabled scheduled/manual Vercel/Daytona campaign with credentials and sanitized reports. Live checks still need execution in configured accounts; model calls are explicitly outside this suite.
+
+## Follow-up — efficiency and diagnostics
+
+- Incremental initial uploads and Git history transfers beyond the current untracked-file optimization.
+- Complete restoration orchestration, broader resource activity tracking and storage reservations beyond quota admission snapshots.
 
 ## Longer term — durable orchestration
 

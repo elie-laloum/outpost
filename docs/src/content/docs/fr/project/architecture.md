@@ -18,7 +18,7 @@ Outpost utilise des ports et des adapters. Le domaine décrit les capacités ; l
 
 Les contrats nommés et les types objets sont placés dans des fichiers `*.types.ts`, sans initialisation à l’exécution. Les paramètres par défaut, options reconnues, recettes et limites partagées sont placés dans des fichiers `*.constants.ts`. Les variables locales et valeurs calculées restent dans leur opération.
 
-Les points d’entrée publics sont conservés. Les façades `providers/agents.ts`, `application/outpost.ts` et `domain/ports.ts` réexportent les implémentations et contrats ; les services internes importent directement leurs dépendances.
+Les points d’entrée publics comprennent `src/index.ts`, les sous-chemins `providers/*` et l’entrée optionnelle `opentelemetry`. Seule cette dernière importe l’API optionnelle de télémétrie. Les façades `providers/agents.ts`, `application/outpost.ts` et `domain/ports.ts` réexportent les implémentations et contrats ; les services internes importent directement leurs dépendances.
 
 ## Responsabilités
 
@@ -27,8 +27,11 @@ Les points d’entrée publics sont conservés. Les façades `providers/agents.t
 - Le workspace possède son état Git. La préparation du sandbox, les opérations exclusives, le dispatch, le terminal et la fermeture ont chacun un service dédié.
 - L’exécution d’un tour, l’accumulation des événements et la surveillance des délais sont séparées. L’agrégation de consommation est une règle commune du domaine.
 - Les providers composent leurs services de préparation, commandes et transferts. Docker et Podman partagent la mécanique du moteur de conteneurs.
-- La synchronisation distante suit quatre étapes : téléchargement, validation, sauvegarde puis application. Le coordinateur conserve la révision synchronisée et les informations de récupération.
-- Les workflows séparent validation du graphe, état d’exécution, tentatives d’une tâche et ordonnancement.
+- La synchronisation distante suit quatre étapes : téléchargement, validation, sauvegarde puis application. Le coordinateur conserve la révision et le manifeste de fichiers appliqués avec succès. Le contrat optionnel `FileTransfers` permet la réutilisation incrémentale vérifiée et les lots compressés bornés, sans branchement sur les noms de providers.
+- Inventaire, intégrité, vérification Git isolée et rétention sont des opérations distinctes. Le nettoyage explicite acquiert les verrous et revalide les candidats ; les quotas observent le stockage sans réserver de capacité. Les volumes de cache des conteneurs ont une durée de vie distincte, gérée par le moteur.
+- La propriété locale des verrous est vérifiée lorsque la plateforme le permet ; les propriétaires incertains bloquent la reprise automatique. Les workspaces modifiés, détachés ou contenant des fichiers ignorés restent récupérables.
+- Les workflows séparent validation du graphe, état d’exécution, tentatives, budgets et ordonnancement. Les wrappers applicatifs transmettent la consommation normalisée des agents au comptage partagé. L’adapter OpenTelemetry d’infrastructure consomme les événements avec tracer et meter injectés, noms fixes et attributs bornés. Les erreurs d’observateurs ne changent pas l’issue de l’exécution.
+- Les diagnostics d’une sandbox détenue utilisent la même exclusion d’opération que commandes et dispatch. Le nettoyage des probes temporaires est indépendant ; le diagnostic ne devient jamais propriétaire de la libération de la lease.
 
 ## Extension et vérification
 

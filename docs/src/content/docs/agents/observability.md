@@ -40,3 +40,5 @@ A configured `logging.file` can be appended by sequential dispatches. Concurrent
 Logs and transcripts may include source and private prompts. Choose retention separately from workspace cleanup; native transcript capture and logging are independent options.
 
 Workflow usage budgets and privacy-preserving metrics are covered in [budgets](../../workflows/budgets/) and [OpenTelemetry](../../operations/telemetry/).
+
+See [retention policies and quotas](../../operations/storage-retention/) for explicit pruning of closed journals.

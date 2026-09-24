@@ -7,6 +7,18 @@ sidebar:
 
 Every public export from the package and its subpaths has a reference page. Signatures are extracted from compiled TypeScript declarations and checked in CI. Guides explain usage; contracts list exact fields. Supporting contracts are linked from the types that use them.
 
+## Diagnostics
+
+- [diagnoseSandbox](./diagnosesandbox/)
+- [SandboxDiagnosticOptions](./sandboxdiagnosticoptions/)
+- [SandboxDiagnosticReport](./sandboxdiagnosticreport/)
+- [DiagnosticCapability](./diagnosticcapability/)
+- [DiagnosticCheck](./diagnosticcheck/)
+- [DiagnosticStatus](./diagnosticstatus/)
+- [DoctorAgent](./doctoragent/)
+- [diagnoseAgentProtocol](./diagnoseagentprotocol/)
+- [AgentProtocolReport](./agentprotocolreport/)
+
 ## Workspaces
 
 - [openWorkspace](./openworkspace/)
@@ -81,6 +93,9 @@ Every public export from the package and its subpaths has a reference page. Sign
 - [AgentEvent](./agentevent/)
 - [AgentObservation](./agentobservation/)
 - [Usage](./usage/)
+- [openTelemetry](./opentelemetry/)
+- [OpenTelemetryOptions](./opentelemetryoptions/)
+- [OpenTelemetryObserver](./opentelemetryobserver/)
 
 ## Workflows
 
@@ -96,6 +111,9 @@ Every public export from the package and its subpaths has a reference page. Sign
 - [Workflow](./workflow/)
 - [WorkflowEvent](./workflowevent/)
 - [WorkflowOptions](./workflowoptions/)
+- [WorkflowBudget](./workflowbudget/)
+- [WorkflowUsage](./workflowusage/)
+- [WorkflowBudgetExceeded](./workflowbudgetexceeded/)
 - [WorkflowResult](./workflowresult/)
 - [agentTask](./agenttask/)
 - [commandTask](./commandtask/)
@@ -109,6 +127,7 @@ Every public export from the package and its subpaths has a reference page. Sign
 - [vercel](./vercel/)
 - [daytona](./daytona/)
 - [ContainerOptions](./containeroptions/)
+- [DependencyCache](./dependencycache/)
 - [VercelOptions](./verceloptions/)
 - [DaytonaOptions](./daytonaoptions/)
 - [mountedProvider](./mountedprovider/)
@@ -119,6 +138,26 @@ Every public export from the package and its subpaths has a reference page. Sign
 - [TransferOptions](./transferoptions/)
 - [Variables](./variables/)
 - [Volume](./volume/)
+
+## Remote transfers
+
+- [FileManifestEntry](./filemanifestentry/)
+- [FileTransfers](./filetransfers/)
+
+## Recovery and retention
+
+- [planRecoveryRetention](./planrecoveryretention/)
+- [pruneRecoveryRetention](./prunerecoveryretention/)
+- [assertRecoveryQuota](./assertrecoveryquota/)
+- [RecoveryRetentionPolicy](./recoveryretentionpolicy/)
+- [RecoveryRetentionOptions](./recoveryretentionoptions/)
+- [RecoveryRetentionPlan](./recoveryretentionplan/)
+- [RecoveryRetentionEntry](./recoveryretentionentry/)
+- [RecoveryPruneResult](./recoverypruneresult/)
+- [RecoveryQuotaOptions](./recoveryquotaoptions/)
+- [verifyRecoveryTransfer](./verifyrecoverytransfer/)
+- [RecoveryVerification](./recoveryverification/)
+- [RecoveryVerificationOptions](./recoveryverificationoptions/)
 
 ## Errors
 

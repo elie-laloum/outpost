@@ -20,13 +20,16 @@ export interface WorkflowEvent {
   readonly executionId: string;
   readonly workflow: string;
   readonly timestamp: string;
-  readonly type: "start" | "task" | "retry" | "finish";
+  readonly type: "start" | "task" | "attempt" | "retry" | "usage" | "finish";
   readonly key?: string;
   readonly status?: TaskStatus;
   readonly attempt?: number;
+  readonly usage?: Usage;
+  readonly durationMs?: number;
 }
 ```
 
 ## Related contracts
 
 - [TaskStatus](../taskstatus/)
+- [Usage](../usage/)

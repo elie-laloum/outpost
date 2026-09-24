@@ -7,6 +7,18 @@ sidebar:
 
 Chaque export public du package et de ses sous-chemins possède une page de référence. Les signatures sont extraites des déclarations TypeScript compilées et vérifiées en CI. Les guides expliquent les usages ; les contrats détaillent les champs exacts. Les contrats auxiliaires restent accessibles depuis les types qui les utilisent.
 
+## Diagnostics
+
+- [diagnoseSandbox](./diagnosesandbox/)
+- [SandboxDiagnosticOptions](./sandboxdiagnosticoptions/)
+- [SandboxDiagnosticReport](./sandboxdiagnosticreport/)
+- [DiagnosticCapability](./diagnosticcapability/)
+- [DiagnosticCheck](./diagnosticcheck/)
+- [DiagnosticStatus](./diagnosticstatus/)
+- [DoctorAgent](./doctoragent/)
+- [diagnoseAgentProtocol](./diagnoseagentprotocol/)
+- [AgentProtocolReport](./agentprotocolreport/)
+
 ## Workspaces
 
 - [openWorkspace](./openworkspace/)
@@ -81,6 +93,9 @@ Chaque export public du package et de ses sous-chemins possède une page de réf
 - [AgentEvent](./agentevent/)
 - [AgentObservation](./agentobservation/)
 - [Usage](./usage/)
+- [openTelemetry](./opentelemetry/)
+- [OpenTelemetryOptions](./opentelemetryoptions/)
+- [OpenTelemetryObserver](./opentelemetryobserver/)
 
 ## Workflows
 
@@ -96,6 +111,9 @@ Chaque export public du package et de ses sous-chemins possède une page de réf
 - [Workflow](./workflow/)
 - [WorkflowEvent](./workflowevent/)
 - [WorkflowOptions](./workflowoptions/)
+- [WorkflowBudget](./workflowbudget/)
+- [WorkflowUsage](./workflowusage/)
+- [WorkflowBudgetExceeded](./workflowbudgetexceeded/)
 - [WorkflowResult](./workflowresult/)
 - [agentTask](./agenttask/)
 - [commandTask](./commandtask/)
@@ -109,6 +127,7 @@ Chaque export public du package et de ses sous-chemins possède une page de réf
 - [vercel](./vercel/)
 - [daytona](./daytona/)
 - [ContainerOptions](./containeroptions/)
+- [DependencyCache](./dependencycache/)
 - [VercelOptions](./verceloptions/)
 - [DaytonaOptions](./daytonaoptions/)
 - [mountedProvider](./mountedprovider/)
@@ -119,6 +138,26 @@ Chaque export public du package et de ses sous-chemins possède une page de réf
 - [TransferOptions](./transferoptions/)
 - [Variables](./variables/)
 - [Volume](./volume/)
+
+## Transferts distants
+
+- [FileManifestEntry](./filemanifestentry/)
+- [FileTransfers](./filetransfers/)
+
+## Récupération et rétention
+
+- [planRecoveryRetention](./planrecoveryretention/)
+- [pruneRecoveryRetention](./prunerecoveryretention/)
+- [assertRecoveryQuota](./assertrecoveryquota/)
+- [RecoveryRetentionPolicy](./recoveryretentionpolicy/)
+- [RecoveryRetentionOptions](./recoveryretentionoptions/)
+- [RecoveryRetentionPlan](./recoveryretentionplan/)
+- [RecoveryRetentionEntry](./recoveryretentionentry/)
+- [RecoveryPruneResult](./recoverypruneresult/)
+- [RecoveryQuotaOptions](./recoveryquotaoptions/)
+- [verifyRecoveryTransfer](./verifyrecoverytransfer/)
+- [RecoveryVerification](./recoveryverification/)
+- [RecoveryVerificationOptions](./recoveryverificationoptions/)
 
 ## Erreurs
 

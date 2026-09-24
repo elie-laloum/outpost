@@ -68,3 +68,5 @@ docker volume rm EXACT_VOLUME_NAME
 ```
 
 Use the equivalent `podman volume` commands for Podman. Inspect and remove individual volumes; do not prune unrelated engine resources. See [prebuilt agent images](../agent-images/) to reduce image setup time too.
+
+Cache volumes are outside the [repository storage quotas](../../operations/storage-retention/).

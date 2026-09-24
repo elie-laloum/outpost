@@ -40,3 +40,5 @@ Des dispatchs successifs peuvent compléter le même `logging.file`. Les écritu
 Les logs et transcripts peuvent contenir sources et prompts privés. Gérez leur conservation séparément du nettoyage des workspaces ; capture native et journalisation sont indépendantes.
 
 Les [budgets](../../workflows/budgets/) et [OpenTelemetry](../../operations/telemetry/) décrivent les limites de consommation et les métriques respectant la confidentialité.
+
+Voir les [politiques de rétention et quotas](../../operations/storage-retention/) pour le nettoyage explicite des journaux fermés.

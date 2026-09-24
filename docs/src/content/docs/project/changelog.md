@@ -9,6 +9,16 @@ The release notes below are synchronized from the root `CHANGELOG.md`, the singl
 
 ## Unreleased
 
+- Add shared workflow attempt and observed usage budgets, including retries and agent repairs, with graceful admission draining and cooperative token-limit cancellation.
+- Add structured workflow usage/lifecycle events and an optional OpenTelemetry entry point with injected tracer/meter, fixed span names, counters and duration histograms without task contents or identifiers.
+- Diagnose caller-owned sandboxes through an exclusive operation, with optional binary transfer probes and cleanup; report observed capabilities separately from advertised contracts and bundled agent protocol fixture checks.
+- Add credential-free cloud contract fixtures and explicitly enabled scheduled Vercel/Daytona checks with sanitized reports, independent cleanup and optional live CLI syntax probes; authenticated model turns remain outside this suite.
+- Wait for Daytona command exit status after output closes, and register allocation cleanup before discovering the sandbox home.
+- Add explicit recovery retention plans, revalidated cleanup and quota admission; protect recovery artifacts, uncertain logs and workspaces containing ignored files.
+- Observe lock ownership using Linux host, boot, namespace and process-start identity; serialize stale-lock reclamation and refuse uncertain owners.
+- Verify retained Git bundles, objects and patch applicability in an isolated copy without inherited Git filters or changes to the source repository.
+- Add opt-in Docker/Podman dependency caches with explicit invalidation keys and repository, image and user scoping; add pinned agent-image build tooling and a gated publication workflow with signed provenance verification.
+- Download changed untracked files from Vercel/Daytona using SHA-256 manifests and bounded gzip batches; reuse verified unchanged files while retaining complete recovery payloads and protecting ignored host files.
 - Record atomic SHA-256 manifests for new remote transfer backups before host apply; add opt-in `recovery verify --checksums` with bounded streaming verification, explicit missing/mismatched results and preserved host state on capture failure.
 - Add read-only `recovery verify --directory` checks for retained transfer metadata and required backup files, with bounded state parsing and explicit separation from content integrity or restoration validation.
 - Add optional `recovery inspect --locks` with bounded lock metadata reads and local PID observations; report invalid or unverifiable records explicitly without claiming ownership or deleting locks.

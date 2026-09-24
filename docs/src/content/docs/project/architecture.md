@@ -20,7 +20,7 @@ Outpost uses ports and adapters. Domain contracts describe capabilities; applica
 
 Named contracts and object type declarations live in dedicated `*.types.ts` files next to their owner. These modules have no runtime initialization. Configuration defaults, supported options, recipes and shared limits belong in `*.constants.ts` files. Local variables and computed values stay with their operation.
 
-The public facade remains `src/index.ts`, with the existing `providers/*` package subpaths. Compatibility facades such as `providers/agents.ts`, `application/outpost.ts` and `domain/ports.ts` re-export implementations or contracts. Internal services import their dependencies directly.
+The public facade remains `src/index.ts`, with the `providers/*` package subpaths and optional `opentelemetry` entry point. Only that telemetry entry imports the optional vendor API. Compatibility facades such as `providers/agents.ts`, `application/outpost.ts` and `domain/ports.ts` re-export implementations or contracts. Internal services import their dependencies directly.
 
 ## Agents and conversations
 
@@ -34,15 +34,19 @@ Each agent has its own factory, request builder and event decoder in `adapters/a
 
 `sandbox-dispatch.ts` owns the dispatch transaction: execution, transcript capture, synchronization, journal closure and recovery metadata. `agent-turn.ts` supervises one process; `agent-output.ts` accumulates protocol output; `activity-watchdog.ts` owns timers. Usage aggregation is a domain operation shared by warm and cold execution.
 
+Owned-sandbox diagnostics use the same exclusive operation gate as commands and dispatch. Their temporary transfer probes clean up independently; diagnosis never takes ownership of lease disposal.
+
 Workspaces and sandboxes retain separate lifetimes. Cold passes allocate separate environments; warm operations reuse a lease. Cancellation, continuation, hook ordering and recovery remain part of the contract.
 
 ## Providers and Git
 
 Docker and Podman share the container adapter while preflight, allocation arguments, mounts, invocation and file transfers have separate modules. Vercel and Daytona compose dedicated command and transfer services. Optional SDK loading stays in the corresponding provider entry point.
 
-Git infrastructure separates repository preparation, locking, managed worktree allocation, remote refresh, history collection and lease disposal. Dirty or detached worktrees remain recoverable.
+Git infrastructure separates repository preparation, locking, managed worktree allocation, remote refresh, history collection and lease disposal. Dirty or detached worktrees, and worktrees containing ignored files, remain recoverable. Lock acquisition uses local process identity where available and conservatively refuses uncertain owners.
 
-Remote synchronization follows explicit stages: download changes, validate them, back up host state, then apply changes. These services retain overlap checks, concurrent-edit detection and recovery artifacts. The coordinator owns the last synchronized revision and decides whether cleanup is safe.
+Remote synchronization follows explicit stages: download changes, validate them, back up host state, then apply changes. These services retain overlap checks, concurrent-edit detection and recovery artifacts. The coordinator owns the last synchronized revision and successful file manifest, and decides whether cleanup is safe. Optional `FileTransfers` capabilities provide verified incremental payload reuse and bounded compressed batches without coupling the coordinator to provider names.
+
+Recovery inventory, integrity checks, isolated Git verification and retention are separate operations. Explicit pruning reacquires ownership and revalidates candidates; quota admission observes repository storage without reserving capacity. Container dependency cache volumes have a separate, engine-managed lifetime.
 
 ## Workflows
 

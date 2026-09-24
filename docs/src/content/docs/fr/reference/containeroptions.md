@@ -18,6 +18,7 @@ import type { ContainerOptions } from "@elie-laloum/outpost/providers/podman";
 
 ```ts
 export interface ContainerOptions {
+  readonly caches?: readonly DependencyCache[];
   readonly image?: string;
   readonly user?: {
     readonly uid: number;
@@ -38,5 +39,6 @@ export interface ContainerOptions {
 
 ## Contrats associés
 
+- [DependencyCache](../dependencycache/)
 - [Variables](../variables/)
 - [Volume](../volume/)

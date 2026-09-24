@@ -17,6 +17,7 @@ import type { SandboxLease } from "@elie-laloum/outpost";
 
 ```ts
 export interface SandboxLease {
+  readonly fileTransfers?: FileTransfers;
   readonly root: string;
   readonly home: string;
   invoke(command: Command): Promise<CommandResult>;
@@ -38,4 +39,5 @@ export interface SandboxLease {
 
 - [Command](../command/)
 - [CommandResult](../commandresult/)
+- [FileTransfers](../filetransfers/)
 - [TransferOptions](../transferoptions/)

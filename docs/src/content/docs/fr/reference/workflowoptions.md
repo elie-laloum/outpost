@@ -19,6 +19,7 @@ import type { WorkflowOptions } from "@elie-laloum/outpost";
 export interface WorkflowOptions {
   readonly signal?: AbortSignal;
   readonly concurrency?: number;
+  readonly budget?: WorkflowBudget;
   readonly stopOnError?: boolean;
   readonly observe?: (event: WorkflowEvent) => void;
 }
@@ -26,4 +27,5 @@ export interface WorkflowOptions {
 
 ## Contrats associés
 
+- [WorkflowBudget](../workflowbudget/)
 - [WorkflowEvent](../workflowevent/)

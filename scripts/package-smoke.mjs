@@ -1,5 +1,11 @@
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import assert from "node:assert/strict";
@@ -37,12 +43,17 @@ try {
     ],
     temporary,
   );
+  assert.equal(
+    existsSync(join(temporary, "node_modules", "@opentelemetry", "api")),
+    false,
+    "Base consumers must not require the optional telemetry API",
+  );
   execFileSync(
     process.execPath,
     [
       "--input-type=module",
       "-e",
-      "import {response, workflow, conversations, reporter, recoveryDetails} from '@elie-laloum/outpost'; import {docker} from '@elie-laloum/outpost/providers/docker'; if((await response.text({tag:'ok'}).read('<ok>yes</ok>'))!=='yes'||docker().name!=='docker')throw Error('Package import failed'); for(const item of [conversations.capture,reporter,recoveryDetails])if(typeof item!=='function')throw Error('Missing public extension'); (await workflow('empty',[]).start()).unwrap()",
+      "import {response, workflow, conversations, reporter, recoveryDetails, diagnoseAgentProtocol, diagnoseSandbox, planRecoveryRetention, pruneRecoveryRetention, assertRecoveryQuota, verifyRecoveryTransfer} from '@elie-laloum/outpost'; import {docker} from '@elie-laloum/outpost/providers/docker'; if((await response.text({tag:'ok'}).read('<ok>yes</ok>'))!=='yes'||docker().name!=='docker')throw Error('Package import failed'); for(const item of [conversations.capture,reporter,recoveryDetails,diagnoseSandbox,planRecoveryRetention,pruneRecoveryRetention,assertRecoveryQuota,verifyRecoveryTransfer])if(typeof item!=='function')throw Error('Missing public extension'); if(diagnoseAgentProtocol('codex').hasFailures)throw Error('Protocol fixtures failed'); (await workflow('empty',[]).start()).unwrap()",
     ],
     { cwd: temporary, stdio: "inherit" },
   );
@@ -107,7 +118,21 @@ try {
     consumer,
     `import { dispatch, codex, response, createSandbox } from '@elie-laloum/outpost';
 import { local } from '@elie-laloum/outpost/providers/local';
+import { docker, type DependencyCache } from '@elie-laloum/outpost/providers/docker';
+import { podman } from '@elie-laloum/outpost/providers/podman';
+import { planRecoveryRetention, pruneRecoveryRetention, assertRecoveryQuota, verifyRecoveryTransfer, type RecoveryRetentionPolicy, type FileTransfers, type SandboxLease } from '@elie-laloum/outpost';
+const cache: DependencyCache = {name:'npm', key:'lock-v1'};
+docker({caches:[cache]});
+podman({caches:[cache]});
+const policy: RecoveryRetentionPolicy = {version:1, scopes:['closed-logs'], minAgeMs:1000};
+const plan = await planRecoveryRetention({policy});
+await pruneRecoveryRetention(plan);
+await assertRecoveryQuota({maxBytes:1024});
+await verifyRecoveryTransfer('/tmp/transfer', {checksums:true});
+const batchCapability = (lease: SandboxLease): FileTransfers | undefined => lease.fileTransfers;
+console.log(batchCapability);
 await using sandbox = await createSandbox({ provider: local() });
+await sandbox.diagnose({transfers:true});
 const result = await sandbox.dispatch({ agent: codex(), brief: { text: 'Return <n>1</n>' }, response: response.json({tag:'n', schema: value => Number(value)}) });
 const n: number = result.value;
 const once = await dispatch({agent:codex(),provider:local(),brief:{text:'hello'}});
@@ -117,26 +142,61 @@ await result.resume({brief:{text:'continue'},branch:{mode:'named',name:'outpost/
 console.log(n,once.commits);
 `,
   );
-  execFileSync(
-    process.execPath,
-    [
-      resolve("node_modules/typescript/bin/tsc"),
-      "--noEmit",
-      "--strict",
-      "--module",
-      "nodenext",
-      "--target",
-      "es2023",
-      "--lib",
-      "esnext",
-      "--typeRoots",
-      resolve("node_modules/@types"),
-      "--types",
-      "node",
-      consumer,
-    ],
-    { cwd: temporary, stdio: "inherit" },
+  const checkTypes = (file) =>
+    execFileSync(
+      process.execPath,
+      [
+        resolve("node_modules/typescript/bin/tsc"),
+        "--noEmit",
+        "--strict",
+        "--module",
+        "nodenext",
+        "--target",
+        "es2023",
+        "--lib",
+        "esnext",
+        "--typeRoots",
+        resolve("node_modules/@types"),
+        "--types",
+        "node",
+        file,
+      ],
+      { cwd: temporary, stdio: "inherit" },
+    );
+  checkTypes(consumer);
+  const telemetryApi = JSON.parse(
+    readFileSync(
+      resolve("node_modules/@opentelemetry/api/package.json"),
+      "utf8",
+    ),
   );
+  runNpm(
+    [
+      "install",
+      "--ignore-scripts",
+      "--no-audit",
+      "--no-fund",
+      `@opentelemetry/api@${telemetryApi.version}`,
+    ],
+    temporary,
+  );
+  const telemetryConsumer = join(temporary, "telemetry.ts");
+  writeFileSync(
+    telemetryConsumer,
+    `import { metrics, trace } from '@opentelemetry/api';
+import { openTelemetry, type OpenTelemetryObserver } from '@elie-laloum/outpost/opentelemetry';
+import { task, workflow } from '@elie-laloum/outpost';
+const telemetry: OpenTelemetryObserver = openTelemetry({tracer:trace.getTracer('consumer'),meter:metrics.getMeter('consumer')});
+const step = task({key:'sample',perform(context){context.reportUsage({input:1,cached:0,output:1});return 1;}});
+(await workflow('smoke',[step]).start({budget:{attempts:1},observe:telemetry.observe})).unwrap();
+telemetry.close();
+`,
+  );
+  checkTypes(telemetryConsumer);
+  execFileSync(process.execPath, [telemetryConsumer], {
+    cwd: temporary,
+    stdio: "inherit",
+  });
   console.log("Packed package imports and initializes successfully.");
 } finally {
   rmSync(temporary, { recursive: true, force: true });

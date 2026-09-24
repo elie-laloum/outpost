@@ -23,6 +23,7 @@ export interface WorkflowResult {
   readonly tasks: readonly Readonly<TaskRecord>[];
   readonly errors: readonly unknown[];
   readonly observerErrors: readonly unknown[];
+  readonly usage: WorkflowUsage;
   value<T>(task: Task<T>): T;
   unwrap(): void;
 }
@@ -32,3 +33,4 @@ export interface WorkflowResult {
 
 - [Task](../task/)
 - [TaskRecord](../taskrecord/)
+- [WorkflowUsage](../workflowusage/)

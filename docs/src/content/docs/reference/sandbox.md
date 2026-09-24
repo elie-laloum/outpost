@@ -17,6 +17,9 @@ import type { Sandbox } from "@elie-laloum/outpost";
 
 ```ts
 export interface Sandbox {
+  diagnose(
+    options?: SandboxDiagnosticOptions,
+  ): Promise<SandboxDiagnosticReport>;
   readonly workspace: Workspace;
   readonly root: string;
   dispatch<T = undefined>(
@@ -45,5 +48,7 @@ export interface Sandbox {
 - [CommandResult](../commandresult/)
 - [DispatchOptions](../dispatchoptions/)
 - [Disposal](../disposal/)
+- [SandboxDiagnosticOptions](../sandboxdiagnosticoptions/)
+- [SandboxDiagnosticReport](../sandboxdiagnosticreport/)
 - [WarmDispatchResult](../warmdispatchresult/)
 - [Workspace](../workspace/)

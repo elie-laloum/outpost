@@ -68,3 +68,5 @@ docker volume rm EXACT_VOLUME_NAME
 ```
 
 Utilisez les commandes `podman volume` équivalentes pour Podman. Inspectez et supprimez les volumes individuellement, sans nettoyer les ressources étrangères. Les [images d'agents préconstruites](../agent-images/) réduisent aussi le temps de préparation.
+
+Les volumes de cache sont en dehors des [quotas de stockage du dépôt](../../operations/storage-retention/).

@@ -20,6 +20,7 @@ export interface TaskContext {
   readonly signal: AbortSignal;
   readonly attempt: number;
   readonly executionId: string;
+  reportUsage(usage: Usage): void;
   value<T>(dependency: Task<T>): T;
 }
 ```
@@ -27,3 +28,4 @@ export interface TaskContext {
 ## Related contracts
 
 - [Task](../task/)
+- [Usage](../usage/)

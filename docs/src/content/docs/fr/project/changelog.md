@@ -9,6 +9,16 @@ Traduction du journal `CHANGELOG.md` conservé à la racine du dépôt. Chaque v
 
 ## Unreleased
 
+- Ajouter des budgets partagés de tentatives et de consommation observée par workflow, couvrant retries et réparations agents, avec attente des tentatives admises et annulation coopérative aux limites de consommation.
+- Ajouter des événements structurés de consommation et de cycle de vie des workflows ainsi qu’une entrée OpenTelemetry optionnelle avec tracer/meter injectés, noms de spans fixes, compteurs et histogrammes de durée sans contenus ni identifiants des tâches.
+- Diagnostiquer les sandboxes détenues par l’appelant avec une opération exclusive, des probes binaires optionnelles et leur nettoyage ; distinguer capacités observées, contrats déclarés et contrôles des fixtures de protocole embarquées.
+- Ajouter des fixtures cloud sans identifiants et des vérifications Vercel/Daytona planifiées sur activation explicite, avec rapports filtrés, nettoyage indépendant et contrôles optionnels des CLI réelles ; les appels modèles authentifiés restent hors de cette suite.
+- Attendre le code de sortie des commandes Daytona après fermeture des sorties, et enregistrer le nettoyage de l’allocation avant la découverte du home.
+- Ajouter des plans explicites de rétention, un nettoyage avec revalidation et un contrôle d’admission des quotas ; protéger les artefacts de récupération, les journaux incertains et les workspaces contenant des fichiers ignorés.
+- Observer la propriété des verrous avec l’identité Linux de l’hôte, du démarrage, du namespace et du processus ; sérialiser la reprise des verrous périmés et refuser les propriétaires incertains.
+- Vérifier bundles, objets Git et applicabilité des patches conservés dans une copie isolée, sans filtres Git hérités ni modification du dépôt source.
+- Ajouter des caches de dépendances Docker/Podman optionnels, avec clés d’invalidation explicites et séparation par dépôt, image et utilisateur ; ajouter la construction d’images d’agents épinglées et un workflow de publication contrôlé avec vérification de provenance signée.
+- Télécharger les fichiers non suivis modifiés de Vercel/Daytona avec manifestes SHA-256 et lots gzip bornés ; réutiliser les fichiers inchangés vérifiés tout en conservant des sauvegardes complètes et en protégeant les fichiers hôtes ignorés.
 - Enregistrer des manifestes SHA-256 atomiques pour les nouvelles sauvegardes de transfert avant application hôte ; ajouter `recovery verify --checksums` avec vérification en flux bornée, résultats absents/divergents explicites et état hôte préservé si la capture échoue.
 - Ajouter les contrôles en lecture seule `recovery verify --directory` des métadonnées de transfert et fichiers de sauvegarde requis, avec lecture bornée et distinction explicite de l’intégrité du contenu ou d’une validation de restauration.
 - Ajouter `recovery inspect --locks` avec lecture bornée des métadonnées et observation locale des PID ; signaler les enregistrements invalides ou non vérifiables sans présumer la propriété ni supprimer de verrous.
