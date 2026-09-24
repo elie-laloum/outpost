@@ -13,7 +13,15 @@ The first synchronization downloads every untracked file selected by Git. Each s
 
 Git's `ls-files --others --exclude-standard` selects the files, including nested files and symbolic links. Empty directories and ignored files are not synchronization inputs. The optimization does not change these Git selection rules. Explicit `copies` still upload their requested inputs independently. Incoming untracked paths that overlap ignored or protected host files cause a conflict; they are not silently skipped or overwritten.
 
-Tracked changes still use binary Git patches, and new commits still use self-contained Git bundles. Initial repository seeding, requested copies and initial uncommitted uploads use their existing transfer paths. These operations are not incremental compressed file batches. An unchanged pull still downloads its Git patch and performs Git validation and host backups.
+Tracked changes still use binary Git patches, and new commits still use self-contained Git bundles. Repository history and tracked initial changes use their existing transfer paths. An unchanged pull still downloads its Git patch and performs Git validation and host backups.
+
+## Initial uploads and copied inputs
+
+The built-in cloud providers also batch initial untracked inputs when `includeUncommitted` is enabled, and explicit `copies` that name individual files or symlinks. Before sending a payload, Outpost hashes the source and the current destination and compares kind, mode, size and SHA-256. Verified matching destination entries need no upload. A fresh sandbox still needs every selected byte; the optimization saves payloads only when the destination already contains matching files, including a custom provider that reuses or preseeds its workspace. There is no persistent upload cache.
+
+Upload batches use the same 8 MiB and 128-entry bounds. Files over 8 MiB use a verified local snapshot and the provider's ordinary binary upload before remote checksum verification; that individual upload retains the provider's memory characteristics. Temporary payloads are staged privately, checked before installation and cleaned on success, failure and cancellation. Source changes detected during transfer reject the operation. Completed earlier files can remain after failure; uploads are not an atomic multi-file transaction. Destination directories and symlink parents are rejected instead of traversed or recursively replaced.
+
+Directory entries in `copies` retain the provider's existing recursive upload behavior, including empty directories and directory permissions; these copies are not incremental. Individual upload batches preserve file modes and literal symlink targets. They do not remove unrelated destination files. Initial Git bundles, tracked patches and recovery artifacts remain independent of these file batches. Custom leases without `uploadBatch` retain ordinary uploads.
 
 ## Compression and limits
 
@@ -36,3 +44,5 @@ The manifest advances only after successful application. Deleted files cannot re
 `FileTransfers.manifest(source, paths, options)` returns one `FileManifestEntry` for each requested relative path, in order. Entries describe regular files or symlinks with `path`, `kind`, `mode`, `size` and lowercase hexadecimal `sha256`. A symlink's size and digest describe its UTF-8 target text. Directory contents are represented by their individual file paths.
 
 `FileTransfers.downloadBatch(source, entries, destination, options)` must materialize the requested entries beneath the destination, preserve metadata, verify the supplied digests and reject unsafe paths. The destination is fresh per attempt. Implementations must honor cancellation and deadlines and reject source changes during transfer. This capability is optional and must not silently fall back to host execution. The built-in cloud implementation requires Node.js in the remote environment, as their existing file transfers already do.
+
+`FileTransfers.uploadBatch(source, entries, destination, options)` is an optional additional method. Its source is a host directory and its destination is a sandbox directory. It must verify the supplied source manifest, skip payloads only after verifying the current destination, preserve file metadata, reject unsafe paths, honor cancellation and deadlines, and reject source mutation or damaged payloads. Existing implementations with only `manifest` and `downloadBatch` remain valid.

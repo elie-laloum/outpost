@@ -1,4 +1,4 @@
-import { stat } from "node:fs/promises";
+import { lstat } from "node:fs/promises";
 import { join, posix } from "node:path";
 import type { AgentAdapter } from "../domain/agent.types.ts";
 import { invariant } from "../domain/errors.ts";
@@ -11,6 +11,7 @@ import { docker } from "../providers/docker.ts";
 import { prepareAdapter } from "./agent-bootstrap.ts";
 import { hooks } from "./lifecycle-hooks.ts";
 import type { SandboxOptions } from "./outpost.types.ts";
+import { uploadFiles } from "./remote-upload.ts";
 import { seedRemote } from "./remote-workspace.ts";
 import type { RemoteSync } from "./remote-workspace.types.ts";
 import type { ProvisionedSandbox } from "./sandbox-session.types.ts";
@@ -103,18 +104,29 @@ export async function provisionSandbox(
         ...(options.limits ? { limits: options.limits } : {}),
         signal: setupSignal,
       });
-      for (const path of options.copies ?? [])
-        if (
-          await stat(join(workspace.directory, path)).catch((error) => {
+      const copiedFiles: string[] = [];
+      for (const path of options.copies ?? []) {
+        const info = await lstat(join(workspace.directory, path)).catch(
+          (error) => {
             if ((error as NodeJS.ErrnoException).code === "ENOENT")
               return undefined;
             throw error;
-          })
-        )
-          await lease.upload(
-            join(workspace.directory, path),
-            posix.join(lease.root, path.replaceAll("\\", "/")),
-          );
+          },
+        );
+        if (!info) continue;
+        if (info.isFile() || info.isSymbolicLink()) {
+          copiedFiles.push(path.replaceAll("\\", "/"));
+          continue;
+        }
+        await lease.upload(
+          join(workspace.directory, path),
+          posix.join(lease.root, path.replaceAll("\\", "/")),
+          { signal: setupSignal },
+        );
+      }
+      await uploadFiles(lease, workspace.directory, [...new Set(copiedFiles)], {
+        signal: setupSignal,
+      });
       if (options.bootstrap !== false && options.agent)
         prepared.set(
           options.agent,

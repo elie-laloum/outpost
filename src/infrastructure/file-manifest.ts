@@ -8,7 +8,9 @@ import { safeDestination } from "./files.ts";
 export async function fileManifest(
   root: string,
   path: string,
+  signal?: AbortSignal,
 ): Promise<FileManifestEntry> {
+  signal?.throwIfAborted();
   const target = await safeDestination(root, path);
   const info = await lstat(target);
   if (!info.isFile() && !info.isSymbolicLink())
@@ -22,7 +24,8 @@ export async function fileManifest(
     size = value.length;
     hash.update(value);
   } else {
-    for await (const chunk of createReadStream(target)) hash.update(chunk);
+    for await (const chunk of createReadStream(target, { signal }))
+      hash.update(chunk);
   }
   return {
     path,

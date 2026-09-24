@@ -34,8 +34,11 @@ import {
   fileBatchScript,
 } from "./file-batches.constants.ts";
 
+import { uploadBatch } from "./file-upload.ts";
+
 export function fileBatches(
-  lease: Pick<SandboxLease, "invoke" | "download">,
+  lease: Pick<SandboxLease, "invoke" | "download"> &
+    Partial<Pick<SandboxLease, "upload">>,
 ): FileTransfers {
   const run = async (args: readonly string[], options: TransferOptions) => {
     const result = await lease.invoke({
@@ -53,6 +56,14 @@ export function fileBatches(
     return result.stdout;
   };
   return {
+    ...(lease.upload
+      ? {
+          uploadBatch: uploadBatch({
+            invoke: lease.invoke.bind(lease),
+            upload: lease.upload.bind(lease),
+          }),
+        }
+      : {}),
     manifest(source, paths, options = {}) {
       return transfer(options, async (signal) => {
         validateFilePaths(paths);

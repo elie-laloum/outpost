@@ -4,7 +4,7 @@ import { join, posix } from "node:path";
 import { OutpostError } from "../domain/errors.ts";
 import type { SandboxLease } from "../domain/sandbox.types.ts";
 import type { WorkspaceRecord } from "../domain/workspace.types.ts";
-import { safeDestination } from "../infrastructure/files.ts";
+import { uploadFiles } from "./remote-upload.ts";
 import { git } from "../infrastructure/git/command.ts";
 import { gitDefaults } from "../infrastructure/git/git.constants.ts";
 import { applyChanges } from "./remote-apply.ts";
@@ -119,13 +119,12 @@ export async function seedRemote(
     await lease.upload(initialPatch, `${remoteBundle}.patch`);
     await run(["apply", "--binary", `${remoteBundle}.patch`]);
   }
-  for (const file of options.includeUncommitted
-    ? await extras(workspace.directory)
-    : [])
-    await lease.upload(
-      await safeDestination(workspace.directory, file),
-      posix.join(lease.root, file),
-    );
+  await uploadFiles(
+    lease,
+    workspace.directory,
+    options.includeUncommitted ? await extras(workspace.directory) : [],
+    { ...(options.signal ? { signal: options.signal } : {}) },
+  );
   let synchronized = (await run(["rev-parse", "HEAD"])).trim();
   initializing = false;
   let expected = await digest(workspace.directory, recovery);
