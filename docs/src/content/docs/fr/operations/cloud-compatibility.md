@@ -1,11 +1,11 @@
 ---
 title: Vérifications de compatibilité hébergée
-description: Vérifier Vercel et Daytona sur activation explicite, sans appel de modèle.
+description: Vérifier Vercel et Daytona, avec appels modèles authentifiés optionnels.
 sidebar:
   order: 8
 ---
 
-La fixture contributrice `test/cloud-live.ts` crée des sandboxes Vercel ou Daytona jetables. Elle vérifie la fin du processus après fermeture des sorties, les codes non nuls, les délais, l'annulation, la réutilisation, les transferts binaires, les permissions exécutables, les liens symboliques, les chemins avec apostrophes et les téléchargements incrémentaux par lots. Elle ne téléverse ni votre dépôt ni des identifiants de modèle. L'allocation et l'exécution cloud peuvent être facturées.
+La fixture contributrice `test/cloud-live.ts` crée des sandboxes Vercel ou Daytona jetables. Elle vérifie la fin du processus après fermeture des sorties, les codes non nuls, les délais, l'annulation, la réutilisation, les transferts binaires, les permissions exécutables, les liens symboliques, les chemins avec apostrophes et les téléchargements incrémentaux par lots. Par défaut, elle ne téléverse ni votre dépôt ni des identifiants de modèle. L'allocation et l'exécution cloud peuvent être facturées.
 
 ## Exécution manuelle
 
@@ -22,7 +22,7 @@ Cette fixture utilise explicitement un jeton d'accès Vercel, avec les identifia
 OUTPOST_CLOUD_LIVE=1 OUTPOST_CLOUD_PROVIDERS=vercel,daytona node test/cloud-live.ts > /tmp/outpost-cloud-compatibility.json
 ```
 
-Ajoutez `OUTPOST_CLOUD_AGENTS=1` pour installer les versions npm courantes de `@openai/codex`, `@anthropic-ai/claude-code` et `@google/gemini-cli` dans chaque sandbox jetable. Le rapport ne conserve que les versions numériques des CLI. Leurs commandes réelles de version et d'aide vérifient les options de démarrage et, pour Claude Code et Codex, de reprise et de fork. Gemini vérifie actuellement le démarrage uniquement. Cela nécessite un accès réseau à npm et davantage de temps d'exécution. Ces vérifications portent sur la syntaxe CLI ; elles ne prouvent ni une exécution authentifiée de modèle, ni la capture de conversations, ni le comportement complet de l'agent. Le rapport indique toujours que les tours de modèle authentifiés sont ignorés.
+Ajoutez `OUTPOST_CLOUD_AGENTS=1` pour installer les versions npm courantes de `@openai/codex`, `@anthropic-ai/claude-code` et `@google/gemini-cli` dans chaque sandbox jetable. Le rapport ne conserve que les versions numériques des CLI. Leurs commandes réelles de version et d'aide vérifient les options de démarrage et, pour Claude Code et Codex, de reprise et de fork. Gemini vérifie actuellement le démarrage uniquement. Cela nécessite un accès réseau à npm et davantage de temps d'exécution. Ces vérifications portent sur la syntaxe CLI ; elles ne prouvent ni une exécution authentifiée de modèle, ni la capture de conversations, ni le comportement complet de l'agent. Les tours de modèle authentifiés restent ignorés sauf activation distincte ci-dessous.
 
 Le programme écrit du JSON de schéma version 1 avec des états `pass`, `fail` ou `skipped` par fournisseur et vérification. Il omet les erreurs SDK brutes, les sorties de commandes, les chemins, les jetons et les contenus de fichiers. Le code de sortie 0 signifie que les vérifications exécutées ont réussi ; 1 indique un échec de contrat ou de nettoyage ; 2 signifie que tous les fournisseurs ont été ignorés. Consultez les états individuels : la réussite d'un fournisseur ne transforme pas les identifiants absents d'un autre en réussite réelle.
 
