@@ -63,6 +63,12 @@ export const groups = [
     names: "FileManifestEntry FileTransfers",
   },
   {
+    title: ["Recovery and retention", "Récupération et rétention"],
+    guide: "operations/recovery",
+    names:
+      "planRecoveryRetention pruneRecoveryRetention assertRecoveryQuota RecoveryRetentionPolicy RecoveryRetentionOptions RecoveryRetentionPlan RecoveryRetentionEntry RecoveryPruneResult RecoveryQuotaOptions verifyRecoveryTransfer RecoveryVerification RecoveryVerificationOptions",
+  },
+  {
     title: ["Errors", "Erreurs"],
     guide: "operations/recovery",
     names: "OutpostError recoveryDetails FaultCode",

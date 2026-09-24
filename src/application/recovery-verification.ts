@@ -1,5 +1,6 @@
+import { verifyRecoveryRestorability } from "./recovery-restorability.ts";
 import { verifyRecoveryChecksums } from "./recovery-checksums.ts";
-import { positive } from "../domain/errors.ts";
+import { invariant, positive } from "../domain/errors.ts";
 import { lstat } from "node:fs/promises";
 import { isAbsolute, join, win32 } from "node:path";
 import { directory, safeDestination } from "../infrastructure/files.ts";
@@ -83,12 +84,18 @@ export async function verifyRecoveryTransfer(
   path: string,
   options: RecoveryVerificationOptions = {},
 ): Promise<RecoveryVerification> {
+  invariant(
+    !options.restorability || !!options.repository,
+    "Restorability verification requires a repository",
+  );
   if (options.maxBytes !== undefined) positive(options.maxBytes, "maxBytes");
   const root = await directory(path);
   const checks: RecoveryStructureCheck[] = [];
   const report = (): RecoveryVerification => ({
     directory: root,
-    scope: "transfer-structure",
+    scope: options.restorability
+      ? "transfer-restorability"
+      : "transfer-structure",
     complete: checks.every((check) => check.status === "pass"),
     integrity: "unverified",
     checks,
@@ -125,6 +132,14 @@ export async function verifyRecoveryTransfer(
     checks.push(await checkFile(root, `previous-files/${name}`, true));
   for (const name of state.incoming)
     checks.push(await checkFile(root, `incoming/${name}`, true));
+  if (
+    options.restorability &&
+    options.repository &&
+    checks.every((check) => check.status === "pass")
+  )
+    checks.push(
+      ...(await verifyRecoveryRestorability(root, state, options.repository)),
+    );
   if (options.checksums && checks.every((check) => check.status === "pass")) {
     const checksums = await verifyRecoveryChecksums(
       root,

@@ -300,7 +300,7 @@ test("verify CLI requires a transfer path and reports structure separately from 
   ]) {
     const result = await run(args);
     assert.equal(result.status, 1);
-    assert.match(result.stderr, /Usage|Unsupported/);
+    assert.match(result.stderr, /Usage|Unsupported|requires/);
   }
   assert.ok((await lstat(path)).isDirectory());
 });

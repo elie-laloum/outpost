@@ -66,6 +66,7 @@ export function workspaceLease(
             "status",
             "--porcelain",
             "--untracked-files=normal",
+            "--ignored",
           ]);
           if (dirty.trim()) return { retainedDirectory: workdir };
           if (!inside(join(repository, ".outpost", "workspaces"), workdir))
