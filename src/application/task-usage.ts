@@ -5,7 +5,7 @@ import { notify } from "./observation.ts";
 import type { TaskUsageObserver } from "./task-usage.types.ts";
 
 export function taskUsage(
-  context: TaskContext,
+  context: Pick<TaskContext, "reportUsage">,
   observer: ((event: AgentObservation) => void) | undefined,
 ): TaskUsageObserver {
   const passes = new Map<number, Usage>();

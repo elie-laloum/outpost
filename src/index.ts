@@ -247,3 +247,14 @@ export type {
 export type { QueuedTaskOptions } from "./application/queued-task.types.ts";
 
 export type { EgressPolicy } from "./domain/egress.types.ts";
+
+export { speculate } from "./application/speculation.ts";
+export type {
+  SpeculationOptions,
+  SpeculationResult,
+  SpeculativeCandidate,
+  SpeculativeCandidateResult,
+  SpeculativeOutput,
+  SpeculativeHostSnapshot,
+  SpeculativeValidation,
+} from "./application/speculation.types.ts";
