@@ -1,5 +1,11 @@
 export const groups = [
   {
+    title: ["Diagnostics", "Diagnostics"],
+    guide: "operations/doctor",
+    names:
+      "diagnoseSandbox SandboxDiagnosticOptions SandboxDiagnosticReport DiagnosticCapability DiagnosticCheck DiagnosticStatus DoctorAgent diagnoseAgentProtocol AgentProtocolReport",
+  },
+  {
     title: ["Workspaces", "Workspaces"],
     guide: "sandboxes/workspaces",
     names:

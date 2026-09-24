@@ -50,7 +50,7 @@ export async function diagnosticProbe(
     };
   } catch (error) {
     if (error instanceof OutpostError && error.code === "timeout")
-      return failure(`Check timed out after ${doctorDefaults.deadlineMs} ms`);
+      return failure("Check timed out");
     if (
       error &&
       typeof error === "object" &&

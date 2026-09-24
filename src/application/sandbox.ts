@@ -3,6 +3,7 @@ import { validateBrief } from "../domain/prompts.ts";
 import type { Disposal } from "../domain/workspace.types.ts";
 import { registerCleanup } from "../infrastructure/shutdown.ts";
 import { validateDispatch } from "./dispatch-validation.ts";
+import { diagnoseSandbox } from "./doctor-sandbox.ts";
 import { operationGate } from "./operation-gate.ts";
 import type { Sandbox, SandboxOptions } from "./outpost.types.ts";
 import { sandboxAgents } from "./sandbox-agents.ts";
@@ -38,6 +39,18 @@ export async function createSandbox(
       settings.signal?.throwIfAborted();
       validateBrief(settings.brief, true);
       return exclusive(() => attachInSandbox(context, agents, settings));
+    },
+    diagnose(settings = {}) {
+      settings.signal?.throwIfAborted();
+      return exclusive(() =>
+        diagnoseSandbox(runtime, {
+          ...settings,
+          provider: context.provider,
+          signal: settings.signal
+            ? AbortSignal.any([settings.signal, stop.signal])
+            : stop.signal,
+        }),
+      );
     },
     command(command) {
       command.signal?.throwIfAborted();
