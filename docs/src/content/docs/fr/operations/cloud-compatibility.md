@@ -47,3 +47,9 @@ Vercel reçoit une durée de vie de cinq minutes. Daytona reçoit un arrêt auto
 Pour `contract-failed`, relancez d'abord la suite déterministe (`node --test test/functional/cloud-*.test.ts`), puis vérifiez les versions SDK/CLI et la disponibilité du fournisseur. Les rapports masquent volontairement les erreurs distantes ; examinez les détails en privé dans le tableau de bord du fournisseur. Un échec de l'aide CLI peut révéler une modification des options en amont malgré des vérifications d'infrastructure réussies. La suite déterministe utilise des doubles SDK et des processus locaux isolés ; elle ne prouve pas le fonctionnement des ressources d'un compte réel ou des appels de modèles payants.
 
 Pour sonder une sandbox que vous possédez déjà, consultez les [diagnostics](../doctor/).
+
+## Vérifications authentifiées des modèles
+
+Les campagnes manuelles peuvent activer `OUTPOST_CLOUD_MODELS=1` (paramètre `models` du workflow). Elles installent les CLI natifs et effectuent une courte requête modèle facturable. Sélectionnez `OUTPOST_CLOUD_MODEL_AGENTS=claude,codex`, ou un seul agent. Fournissez `OPENAI_API_KEY` pour Codex et `ANTHROPIC_API_KEY` ou `CLAUDE_CODE_OAUTH_TOKEN` pour Claude Code. Le jeton d’abonnement Claude est prioritaire dans cette fixture. `OUTPOST_CLAUDE_MODEL` et `OUTPOST_CODEX_MODEL` permettent de choisir les modèles. Les credentials absents produisent un résultat ignoré, jamais réussi. Les rapports excluent les sorties brutes et les secrets. Les campagnes planifiées n’activent pas les appels modèles.
+
+Une connexion navigateur sur l’hôte n’est pas copiée dans le sandbox cloud. Déclarez les credentials du modèle dans l’environnement du workflow ou dans les `variables` de l’agent/provider ; les credentials d’allocation Vercel/Daytona n’authentifient pas l’agent. Consultez [l’authentification Claude](../../agents/connect-claude/) et [l’authentification Codex](../../agents/connect-codex/).

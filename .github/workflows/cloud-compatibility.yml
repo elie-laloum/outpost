@@ -8,6 +8,10 @@ on:
         description: Install current Claude Code/Codex/Gemini CLIs and check help contracts (no model calls)
         type: boolean
         default: true
+      models:
+        description: Make paid authenticated Claude/Codex model calls (manual opt-in)
+        type: boolean
+        default: false
 permissions:
   contents: read
 concurrency:
@@ -41,6 +45,10 @@ jobs:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_TEAM_ID: ${{ secrets.VERCEL_TEAM_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          OUTPOST_CLOUD_MODELS: ${{ github.event_name == 'workflow_dispatch' && inputs.models && '1' || '0' }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           DAYTONA_API_KEY: ${{ secrets.DAYTONA_API_KEY }}
       - uses: actions/upload-artifact@v7
         if: always()

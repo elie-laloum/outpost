@@ -6,7 +6,7 @@ import { cloudDefaults } from "./cloud.constants.ts";
 import type { VercelRuntime } from "./vercel.types.ts";
 
 export function vercelCommand(runtime: VercelRuntime): SandboxLease["invoke"] {
-  const { sandbox, root, options, isClosed } = runtime;
+  const { sandbox, root, options, context, isClosed } = runtime;
   return async (command) => {
     if (isClosed())
       throw new OutpostError("provider", "Cloud sandbox is closed");
@@ -41,7 +41,7 @@ export function vercelCommand(runtime: VercelRuntime): SandboxLease["invoke"] {
         cmd,
         args,
         cwd: command.directory ?? root,
-        env: { ...command.variables },
+        env: { ...context.variables, ...command.variables },
         sudo: command.elevated ?? false,
         detached: true,
         signal,

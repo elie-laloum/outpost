@@ -47,3 +47,9 @@ Vercel receives a five-minute sandbox lifetime. Daytona receives a five-minute i
 For `contract-failed`, rerun the deterministic suite (`node --test test/functional/cloud-*.test.ts`) first, then check SDK/CLI versions and provider availability. The reports intentionally suppress remote error text; investigate details privately through the provider dashboard. A CLI help failure can signal upstream option changes even while infrastructure checks pass. The deterministic suite uses SDK doubles and isolated local processes; it is not evidence that live account resources or paid model calls worked.
 
 For probes in a sandbox you already own, see [diagnostics](../doctor/).
+
+## Authenticated model checks
+
+Manual campaigns can enable `OUTPOST_CLOUD_MODELS=1` (workflow input `models`). This installs the native CLIs and makes a short paid model request. Select `OUTPOST_CLOUD_MODEL_AGENTS=claude,codex`, or just one agent. Supply `OPENAI_API_KEY` for Codex and either `ANTHROPIC_API_KEY` or `CLAUDE_CODE_OAUTH_TOKEN` for Claude Code. A Claude subscription token takes precedence in this fixture. Optional `OUTPOST_CLAUDE_MODEL` and `OUTPOST_CODEX_MODEL` select the models. Missing credentials are reported as skipped, never passed. Reports exclude raw model output and credentials. Scheduled campaigns do not enable model calls.
+
+A host browser login is not copied to a cloud sandbox. Declare the model credentials in the workflow environment or adapter/provider `variables`; Vercel/Daytona allocation credentials alone do not authenticate the agent. See [Claude authentication](../../agents/connect-claude/) and [Codex authentication](../../agents/connect-codex/).

@@ -14,6 +14,7 @@ import type {
   CompatibilityReport,
 } from "./cloud-compatibility.types.ts";
 import { verifyCloudLease } from "./cloud-lease-contract.ts";
+import { verifyCloudModels } from "./cloud-model-contract.ts";
 import { verifyCloudAgents } from "./cloud-agent-contract.ts";
 
 export async function runCloudCompatibility(
@@ -73,7 +74,10 @@ export async function runCloudCompatibility(
         ),
         signal,
       );
-      if (options.environment.OUTPOST_CLOUD_AGENTS === "1") {
+      if (
+        options.environment.OUTPOST_CLOUD_AGENTS === "1" ||
+        options.environment.OUTPOST_CLOUD_MODELS === "1"
+      ) {
         stage = "agent-cli-contract";
         await interruptible(
           verifyCloudAgents(lease, signal, (check) => checks.push(check)),
@@ -85,6 +89,20 @@ export async function runCloudCompatibility(
           status: "skipped",
           reason: "not-opted-in",
         });
+      if (options.environment.OUTPOST_CLOUD_MODELS === "1") {
+        stage = "authenticated-model-turn";
+        await interruptible(
+          verifyCloudModels(lease, options.environment, signal, (check) =>
+            checks.push(check),
+          ),
+          signal,
+        );
+      } else
+        checks.push({
+          name: "authenticated-model-turn",
+          status: "skipped",
+          reason: "not-opted-in",
+        });
     } catch {
       checks.push({
         name: stage,
@@ -92,11 +110,6 @@ export async function runCloudCompatibility(
         reason: signal.aborted ? "deadline-exceeded" : "contract-failed",
       });
     } finally {
-      checks.push({
-        name: "authenticated-model-turn",
-        status: "skipped",
-        reason: "outside-fixture-scope",
-      });
       if (lease) {
         try {
           await interruptible(
