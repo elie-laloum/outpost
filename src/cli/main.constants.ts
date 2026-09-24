@@ -7,7 +7,7 @@ outpost image build|remove [--engine docker|podman] [--file PATH] [--image NAME]
 outpost doctor [--provider docker|podman|local|vercel|daytona] [--agent codex|claude] [--image NAME] [--json]
 
 outpost recovery inspect [--repository PATH] [--max-entries NUMBER] [--git] [--locks] [--json]
-outpost recovery verify --directory TRANSFER_PATH [--json]
+outpost recovery verify --directory TRANSFER_PATH [--checksums] [--max-bytes NUMBER] [--json]
 
 Node.js 24+ and Git are required. Run generated scripts with Node.js.
 Initialization writes run.ts and project files directly into --directory (default: current directory).
@@ -22,6 +22,8 @@ export const cliOptions = {
   json: { type: "boolean" },
   git: { type: "boolean" },
   locks: { type: "boolean" },
+  checksums: { type: "boolean" },
+  "max-bytes": { type: "string" },
   "max-entries": { type: "string" },
   agent: { type: "string" },
   provider: { type: "string" },

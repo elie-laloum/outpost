@@ -1,3 +1,5 @@
+import { verifyRecoveryChecksums } from "./recovery-checksums.ts";
+import { positive } from "../domain/errors.ts";
 import { lstat } from "node:fs/promises";
 import { isAbsolute, join, win32 } from "node:path";
 import { directory, safeDestination } from "../infrastructure/files.ts";
@@ -10,6 +12,7 @@ import type {
   RecoveryStructureCheck,
   RecoveryTransferState,
   RecoveryVerification,
+  RecoveryVerificationOptions,
 } from "./recovery-verification.types.ts";
 
 function paths(value: unknown): value is readonly string[] {
@@ -78,7 +81,9 @@ async function checkFile(
 
 export async function verifyRecoveryTransfer(
   path: string,
+  options: RecoveryVerificationOptions = {},
 ): Promise<RecoveryVerification> {
+  if (options.maxBytes !== undefined) positive(options.maxBytes, "maxBytes");
   const root = await directory(path);
   const checks: RecoveryStructureCheck[] = [];
   const report = (): RecoveryVerification => ({
@@ -120,5 +125,14 @@ export async function verifyRecoveryTransfer(
     checks.push(await checkFile(root, `previous-files/${name}`, true));
   for (const name of state.incoming)
     checks.push(await checkFile(root, `incoming/${name}`, true));
+  if (options.checksums && checks.every((check) => check.status === "pass")) {
+    const checksums = await verifyRecoveryChecksums(
+      root,
+      state,
+      options.maxBytes,
+    );
+    checks.push(...checksums.checks);
+    return { ...report(), integrity: checksums.integrity, checksums };
+  }
   return report();
 }

@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Record atomic SHA-256 manifests for new remote transfer backups before host apply; add opt-in `recovery verify --checksums` with bounded streaming verification, explicit missing/mismatched results and preserved host state on capture failure.
 - Add read-only `recovery verify --directory` checks for retained transfer metadata and required backup files, with bounded state parsing and explicit separation from content integrity or restoration validation.
 - Add optional `recovery inspect --locks` with bounded lock metadata reads and local PID observations; report invalid or unverifiable records explicitly without claiming ownership or deleting locks.
 - Add optional `recovery inspect --git` workspace reports with branch/detached HEAD, clean/dirty status, Git locks and explicit unregistered/unavailable states, without refreshing indexes or pruning registrations.

@@ -1,3 +1,4 @@
+import { captureRecoveryChecksums } from "./recovery-checksum-capture.ts";
 import { cp, mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { safeDestination } from "../infrastructure/files.ts";
@@ -41,15 +42,14 @@ export async function backupHost(
       dereference: false,
     });
   }
-  await writeFile(
-    join(transfer, "state.json"),
-    JSON.stringify({
-      previous: synchronized,
-      next: head,
-      previousExtras,
-      incoming,
-    }),
-  );
+  const state = {
+    previous: synchronized,
+    next: head,
+    previousExtras,
+    incoming,
+  };
+  await writeFile(join(transfer, "state.json"), JSON.stringify(state));
+  await captureRecoveryChecksums(transfer, state);
 
   return { previousPatch, previousExtras };
 }

@@ -79,6 +79,9 @@ test("verification accepts the state and backups produced by the real host backu
   assert.equal(report.scope, "transfer-structure");
   assert.equal(report.integrity, "unverified");
   assert.equal(report.checks.length, 5);
+  const checksummed = await verifyRecoveryTransfer(path, { checksums: true });
+  assert.equal(checksummed.complete, true);
+  assert.equal(checksummed.integrity, "checksums-match");
   assert.deepEqual(await readFile(join(root, ".git", "index")), index);
   assert.deepEqual(await readFile(join(path, "previous.patch")), patch);
   assert.equal(
@@ -282,7 +285,7 @@ test("verify CLI requires a transfer path and reports structure separately from 
   assert.equal(JSON.parse(success.stdout).complete, true);
   assert.equal(JSON.parse(success.stdout).integrity, "unverified");
   const text = await run(["--directory", path]);
-  assert.match(text.stdout, /Expected transfer structure is present/);
+  assert.match(text.stdout, /Requested transfer checks passed/);
   assert.match(text.stdout, /restorability are unverified/);
   await rm(join(path, "previous-index.patch"));
   const failure = await run(["--directory", path]);

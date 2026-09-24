@@ -1,5 +1,5 @@
 import { verifyRecoveryTransfer } from "../application/recovery-verification.ts";
-import { invariant } from "../domain/errors.ts";
+import { invariant, positive } from "../domain/errors.ts";
 import type { CliInvocation } from "./main.types.ts";
 
 export async function recoveryVerifyCommand({
@@ -8,14 +8,23 @@ export async function recoveryVerifyCommand({
 }: CliInvocation): Promise<void> {
   invariant(
     positionals.length === 2 && !!values.directory,
-    "Usage: outpost recovery verify --directory TRANSFER_PATH [--json]",
+    "Usage: outpost recovery verify --directory TRANSFER_PATH [--checksums] [--max-bytes NUMBER] [--json]",
   );
   for (const key of Object.keys(values))
     invariant(
-      ["directory", "json"].includes(key),
+      ["directory", "checksums", "max-bytes", "json"].includes(key),
       `Unsupported recovery verify option: --${key}`,
     );
-  const report = await verifyRecoveryTransfer(values.directory);
+  invariant(
+    values["max-bytes"] === undefined || values.checksums,
+    "--max-bytes requires --checksums",
+  );
+  const report = await verifyRecoveryTransfer(values.directory, {
+    ...(values.checksums ? { checksums: true } : {}),
+    ...(values["max-bytes"] !== undefined
+      ? { maxBytes: positive(Number(values["max-bytes"]), "max-bytes") }
+      : {}),
+  });
   if (values.json) process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
   else {
     process.stdout.write(
@@ -26,11 +35,19 @@ export async function recoveryVerifyCommand({
         `[${check.status.toUpperCase()}] ${check.code}: ${JSON.stringify(check.path)}\n`,
       );
     process.stdout.write(
-      `${report.complete ? "Expected transfer structure is present." : "Transfer structure is incomplete or unverifiable."}\n`,
+      `${report.complete ? "Requested transfer checks passed." : "Transfer checks failed or are incomplete."}\n`,
     );
-    process.stdout.write(
-      "Patch and bundle contents, commit availability, activity and restorability are unverified. No files were changed.\n",
-    );
+    if (values.checksums) {
+      process.stdout.write(
+        `Checksums: ${report.integrity}; ${report.checksums?.bytesChecked ?? 0} bytes checked.\n`,
+      );
+      process.stdout.write(
+        "Checksums compare against an unsigned manifest. Commit availability, activity and restorability are unverified. No files were changed.\n",
+      );
+    } else
+      process.stdout.write(
+        "Patch and bundle contents, commit availability, activity and restorability are unverified. No files were changed.\n",
+      );
   }
   if (!report.complete) process.exitCode = 1;
 }

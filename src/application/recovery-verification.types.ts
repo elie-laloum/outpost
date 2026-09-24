@@ -1,3 +1,7 @@
+import type {
+  RecoveryChecksumResult,
+  RecoveryIntegrity,
+} from "./recovery-checksums.types.ts";
 export interface RecoveryTransferState {
   readonly previous: string;
   readonly next: string;
@@ -15,6 +19,12 @@ export interface RecoveryVerification {
   readonly directory: string;
   readonly scope: "transfer-structure";
   readonly complete: boolean;
-  readonly integrity: "unverified";
+  readonly integrity: RecoveryIntegrity;
+  readonly checksums?: RecoveryChecksumResult;
   readonly checks: readonly RecoveryStructureCheck[];
+}
+
+export interface RecoveryVerificationOptions {
+  readonly checksums?: boolean;
+  readonly maxBytes?: number;
 }
