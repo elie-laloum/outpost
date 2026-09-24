@@ -1,7 +1,10 @@
 # Changelog
 
-## Unreleased
+## 3.0.0
 
+- Canonicalize temporary recovery verification directories across platforms and reuse existing Podman cache volumes without recreation.
+- Breaking: custom implementations of `Sandbox`, `TaskContext` and `WorkflowResult` must provide `diagnose`, `reportUsage` and `usage`, respectively; exhaustive workflow observers must handle the new `attempt` and `usage` events. Factory-created objects provide these members automatically.
+- Treat uncertain or legacy lock ownership conservatively; simultaneous writers to the same configured journal now conflict instead of sharing the file.
 - Add shared workflow attempt and observed usage budgets, including retries and agent repairs, with graceful admission draining and cooperative token-limit cancellation.
 - Add structured workflow usage/lifecycle events and an optional OpenTelemetry entry point with injected tracer/meter, fixed span names, counters and duration histograms without task contents or identifiers.
 - Diagnose caller-owned sandboxes through an exclusive operation, with optional binary transfer probes and cleanup; report observed capabilities separately from advertised contracts and bundled agent protocol fixture checks.

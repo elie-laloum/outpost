@@ -7,13 +7,15 @@ sidebar:
 
 La roadmap décrit des ajouts prévus, pas des prérequis à l’utilisation de la version actuelle. Elle ne constitue pas un engagement de date.
 
-## Disponible en 2.0.0
+## Disponible en 3.0.0
 
 Sandboxes réutilisables et workspaces Git indépendants ; adapters Claude Code et Codex ; capture, reprise et fork natifs ; providers Docker, Podman, local, Vercel et Daytona ; prompts, itération, réponses structurées et hooks ; workflows typés ; CLI, documentation bilingue et publication automatisée.
 
-La version 2.0.0 ajoute des projets de workflow autonomes avec `init --repository`, des chemins de dépôt, de brief et d’environnement relatifs au script, la progression de l’agent et les détails de récupération après annulation. Les workflows typés peuvent coordonner des dépôts indépendants via des tâches isolées. Les campagnes d’issues et les connecteurs de backlog ont été supprimés ; l’initialisation génère un script de dispatch.
+La version 2.0.0 a introduit des projets de workflow autonomes avec `init --repository`, des chemins de dépôt, de brief et d’environnement relatifs au script, la progression de l’agent et les détails de récupération après annulation. Les workflows typés peuvent coordonner des dépôts indépendants via des tâches isolées. Les campagnes d’issues et les connecteurs de backlog ont été supprimés ; l’initialisation génère un script de dispatch.
 
-## Implémenté sur main — non publié
+## Ajouts de la version 3.0.0
+
+Cette version majeure étend les contrats TypeScript publics : les implémentations personnalisées de `Sandbox`, `TaskContext` et `WorkflowResult` doivent fournir les nouveaux membres de diagnostic et de consommation. Les observateurs exhaustifs doivent accepter `attempt` et `usage`. Voir le [changelog](../changelog/) pour les adaptations et changements de comportement.
 
 Diagnostic hôte avec `outpost doctor` : Node.js, Git, accès Docker/Podman, versions des agents hôtes, résumé des contrats providers et rapports JSON. L’option `--image` démarre et nettoie une sandbox Docker/Podman temporaire et vérifie la version de son agent sans réseau ni appel modèle. Elle contrôle aussi l’aide des commandes de lancement/reprise/fork et les noms d’options utilisés par les adapters non interactifs par défaut. Voir [le diagnostic hôte](../../operations/doctor/) pour les vérifications et limites.
 

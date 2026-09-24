@@ -7,8 +7,11 @@ sidebar:
 
 Traduction du journal `CHANGELOG.md` conservé à la racine du dépôt. Chaque version publiée possède ses notes dans les deux langues.
 
-## Unreleased
+## 3.0.0
 
+- Canonicaliser les dossiers temporaires de vérification de récupération sur les différentes plateformes et réutiliser les volumes de cache Podman existants sans les recréer.
+- Rupture de compatibilité : les implémentations personnalisées de `Sandbox`, `TaskContext` et `WorkflowResult` doivent fournir respectivement `diagnose`, `reportUsage` et `usage` ; les observateurs exhaustifs doivent traiter les nouveaux événements `attempt` et `usage`. Les objets créés par les factories fournissent automatiquement ces membres.
+- Traiter prudemment la propriété incertaine ou ancienne des verrous ; les écritures simultanées vers un même journal configuré provoquent désormais un conflit au lieu de partager le fichier.
 - Ajouter des budgets partagés de tentatives et de consommation observée par workflow, couvrant retries et réparations agents, avec attente des tentatives admises et annulation coopérative aux limites de consommation.
 - Ajouter des événements structurés de consommation et de cycle de vie des workflows ainsi qu’une entrée OpenTelemetry optionnelle avec tracer/meter injectés, noms de spans fixes, compteurs et histogrammes de durée sans contenus ni identifiants des tâches.
 - Diagnostiquer les sandboxes détenues par l’appelant avec une opération exclusive, des probes binaires optionnelles et leur nettoyage ; distinguer capacités observées, contrats déclarés et contrôles des fixtures de protocole embarquées.

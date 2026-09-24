@@ -7,13 +7,15 @@ sidebar:
 
 Roadmap items are planned additions, not requirements for using the current release. They are not delivery-date commitments.
 
-## Available in 2.0.0
+## Available in 3.0.0
 
 Reusable sandboxes and independent Git workspaces; Claude Code and Codex adapters; native conversation capture, resume and fork; Docker, Podman, local, Vercel and Daytona providers; prompts, iteration, structured responses and hooks; typed workflows; setup CLI, bilingual documentation and automated package releases.
 
-Version 2.0.0 adds standalone workflow projects with `init --repository`, script-relative repository, brief and environment paths, live agent progress and cancellation recovery details. Typed workflows can coordinate independent repositories through isolated tasks. Issue campaigns and backlog connectors have been removed; initialization generates a dispatch starter.
+Version 2.0.0 introduced standalone workflow projects with `init --repository`, script-relative repository, brief and environment paths, live agent progress and cancellation recovery details. Typed workflows can coordinate independent repositories through isolated tasks. Issue campaigns and backlog connectors have been removed; initialization generates a dispatch starter.
 
-## Implemented on main — unreleased
+## Added in 3.0.0
+
+This major version extends public TypeScript contracts: custom implementations of `Sandbox`, `TaskContext` and `WorkflowResult` must provide the new diagnostic and usage members. Exhaustive observers must accept `attempt` and `usage`. See the [changelog](../changelog/) for adaptations and behavioral changes.
 
 Host diagnostics with `outpost doctor`: Node.js, Git, Docker/Podman access, host agent versions, provider contract summary and JSON reports. The optional `--image` check starts and cleans up a temporary Docker/Podman sandbox and checks its agent version without network or model access. It also checks start/resume/fork command help and the option names used by the default headless adapters. See [host diagnostics](../../operations/doctor/) for the checks and limitations.
 
