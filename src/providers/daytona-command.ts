@@ -5,6 +5,7 @@ import type { SandboxLease } from "../domain/sandbox.types.ts";
 import { interruptible } from "../infrastructure/abort.ts";
 import { quote } from "../infrastructure/process.ts";
 import { cloudDefaults } from "./cloud.constants.ts";
+import { daytonaTerminal } from "./daytona-terminal.ts";
 import type { DaytonaRuntime } from "./daytona.types.ts";
 
 export function daytonaCommand(
@@ -14,11 +15,6 @@ export function daytonaCommand(
   return async (command) => {
     if (isClosed())
       throw new OutpostError("provider", "Cloud sandbox is closed");
-    if (command.interactive)
-      throw new OutpostError(
-        "provider",
-        "Interactive terminals require a mounted or local provider",
-      );
     const signal = command.signal
       ? AbortSignal.any([
           command.signal,
@@ -26,6 +22,7 @@ export function daytonaCommand(
         ])
       : AbortSignal.timeout(command.deadlineMs ?? cloudDefaults.deadlineMs);
     signal.throwIfAborted();
+    if (command.interactive) return daytonaTerminal(runtime, command, signal);
     const id = `outpost-${randomUUID()}`;
     const input = `/tmp/${id}.stdin`;
     const pid = `/tmp/${id}.pid`;

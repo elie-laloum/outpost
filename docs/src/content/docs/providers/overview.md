@@ -13,7 +13,7 @@ The provider controls where commands execute. It does not choose the agent or ch
 | `podman()`  | Mounted worktree | Yes                  | Podman engine and generated/custom image     |
 | `local()`   | Host checkout    | Yes                  | Native agent CLI installed and authenticated |
 | `vercel()`  | Remote Git copy  | No                   | Vercel credentials and `@vercel/sandbox`     |
-| `daytona()` | Remote Git copy  | No                   | Daytona credentials and `@daytona/sdk`       |
+| `daytona()` | Remote Git copy  | Yes                  | Daytona credentials and `@daytona/sdk`       |
 
 Docker is the default. All built-in providers support file/directory transfers through the lease contract, streamed commands and cancellation. Import a provider from `@elie-laloum/outpost/providers/NAME`.
 

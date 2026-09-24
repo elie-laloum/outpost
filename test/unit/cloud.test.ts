@@ -178,10 +178,6 @@ test("Daytona contract isolates commands, preserves streams and cancels without 
   assert.equal(sessions, 0);
   wait = false;
   assert.equal((await lease.invoke({ executable: "true" })).status, 0);
-  await assert.rejects(
-    lease.invoke({ executable: "node", interactive: true }),
-    /Interactive/,
-  );
   await lease.release();
   await lease.release();
   assert.equal(deleted, 1);

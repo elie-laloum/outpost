@@ -13,7 +13,7 @@ Le provider détermine où les commandes s’exécutent. Il ne choisit pas l’a
 | `podman()`  | Worktree monté     | Oui                 | Moteur Podman et image générée/personnalisée |
 | `local()`   | Copie de l’hôte    | Oui                 | CLI natif installé et authentifié            |
 | `vercel()`  | Copie Git distante | Non                 | Identifiants Vercel et `@vercel/sandbox`     |
-| `daytona()` | Copie Git distante | Non                 | Identifiants Daytona et `@daytona/sdk`       |
+| `daytona()` | Copie Git distante | Oui                 | Identifiants Daytona et `@daytona/sdk`       |
 
 Docker est le défaut. Tous les providers intégrés prennent en charge transferts de fichiers/répertoires via le contrat lease, flux de sortie et annulation. Importez chaque provider depuis `@elie-laloum/outpost/providers/NOM`.
 
