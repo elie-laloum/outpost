@@ -5,7 +5,7 @@ sidebar:
   order: 4
 ---
 
-Outpost fournit un workflow de construction d'une image combinant Claude Code et Codex. Les versions des agents proviennent des mêmes références épinglées que les projets générés. Le workflow et sa procédure de vérification sont disponibles ; cette page n'affirme pas qu'une image publique ou une attestation signée a été publiée. Utilisez uniquement le digest d'une publication réussie et vérifiée.
+Outpost fournit un workflow de construction d'une image combinant Claude Code, Codex et Gemini. Les versions des agents proviennent des mêmes références épinglées que les projets générés. Le workflow et sa procédure de vérification sont disponibles ; cette page n'affirme pas qu'une image publique ou une attestation signée a été publiée. Utilisez uniquement le digest d'une publication réussie et vérifiée.
 
 ## Construire localement
 
@@ -22,7 +22,7 @@ docker build --build-arg AGENT_UID="$(id -u)" \
 
 Remplacez `REVIEWED_BASE_DIGEST` par 64 caractères hexadécimaux. Podman accepte le même Dockerfile et les mêmes arguments. Le contexte contient uniquement la recette et les manifestes de paquets ; les fichiers du dépôt, identifiants et transcriptions sont exclus.
 
-Le contexte réutilise les paquets existants, l'utilisateur non root et le home privé, en ajoutant une base épinglée par digest, des dépôts Debian datés et `npm ci` avec `images/agents/package-lock.json`. Les dépendances des agents sont installées dans `/opt/outpost/agents`, hors du home éphémère. Les deux CLI sont dans `PATH`. Le générateur échoue si le manifeste ne correspond plus aux versions d'agents supportées. Mettez à jour le manifeste et son lockfile lorsque ces versions changent :
+Le contexte réutilise les paquets existants, l'utilisateur non root et le home privé, en ajoutant une base épinglée par digest, des dépôts Debian datés et `npm ci` avec `images/agents/package-lock.json`. Les dépendances des agents sont installées dans `/opt/outpost/agents`, hors du home éphémère. Les trois CLI sont dans `PATH`. Le générateur échoue si le manifeste ne correspond plus aux versions d'agents supportées. Mettez à jour le manifeste et son lockfile lorsque ces versions changent :
 
 ```sh
 npm install --package-lock-only --ignore-scripts --prefix images/agents
@@ -36,7 +36,7 @@ Le workflow dédié `.github/workflows/agent-images.yml` est manuel et limité �
 
 Avant d'activer la publication, les mainteneurs doivent configurer l'environnement GitHub `agent-images` avec des approbateurs obligatoires et uniquement `main`, puis définir la variable de dépôt `OUTPOST_AGENT_IMAGES_PUBLISH=true`. Lancez le workflow avec `publish=true` pour activer le job de publication distinct protégé par cet environnement. La protection de l'environnement relève de l'hébergement et n'est pas créée par le workflow. Synchronisez les changements depuis GitLab canonique avant de lancer le workflow sur le miroir GitHub.
 
-Le job publie l'archive testée sous un tag unique de commit/run/tentative, crée une attestation signée de provenance SLSA pour le digest du registre et vérifie ce digest contre le dépôt, le commit source et ce workflow. Il n'affiche le digest vérifié qu'après réussite. Un échec d'envoi, d'attestation ou de vérification marque le run en échec ; un tag dans le registre ne prouve pas une publication signée. Aucun tag `latest` ni release de paquet n'est créé. GitHub fournit l'identité de signature temporaire via OIDC ; aucune clé privée de signature ne doit être dans le dépôt. Consultez les [attestations GitHub](https://docs.github.com/en/actions/how-tos/secure-your-work/use-artifact-attestations/use-artifact-attestations) et l'[action attest](https://github.com/actions/attest).
+Le job publie l'archive testée sous un tag unique de commit/run/tentative, crée une attestation signée de provenance SLSA pour le digest du registre et vérifie ce digest contre le dépôt, le commit source et ce workflow. Il affiche le digest vérifié et le commit source uniquement après réussite de la vérification, puis conserve le résultat JSON dans l'artefact `agent-image-verification` pendant quatorze jours. Téléchargez ce résultat avec les entrées de construction avant expiration des artefacts ; il contient l'attestation vérifiée, dont le digest de l'image et l'identité des sources. Une construction seule ou une publication ignorée ne constitue pas une preuve de publication signée. Un échec d'envoi, d'attestation ou de vérification marque le run en échec ; un tag dans le registre ne prouve pas une publication signée. Aucun tag `latest` ni release de paquet n'est créé. GitHub fournit l'identité de signature temporaire via OIDC ; aucune clé privée de signature ne doit être dans le dépôt. Consultez les [attestations GitHub](https://docs.github.com/en/actions/how-tos/secure-your-work/use-artifact-attestations/use-artifact-attestations) et l'[action attest](https://github.com/actions/attest).
 
 ## Vérifier avant de télécharger et d'exécuter
 

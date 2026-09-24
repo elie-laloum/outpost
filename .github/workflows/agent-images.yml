@@ -111,5 +111,12 @@ jobs:
           DIGEST: ${{ steps.push.outputs.digest }}
           REPOSITORY: ${{ github.repository }}
         run: |
-          gh attestation verify "oci://$IMAGE@$DIGEST" --repo "$REPOSITORY" --signer-workflow "$REPOSITORY/.github/workflows/agent-images.yml" --source-ref refs/heads/main --source-digest "$GITHUB_SHA"
+          gh attestation verify "oci://$IMAGE@$DIGEST" --repo "$REPOSITORY" --signer-workflow "$REPOSITORY/.github/workflows/agent-images.yml" --source-ref refs/heads/main --source-digest "$GITHUB_SHA" --format json > "$RUNNER_TEMP/agent-image-verification.json"
+          echo "Source commit: \`$GITHUB_SHA\`" >> "$GITHUB_STEP_SUMMARY"
           echo "Verified image: \`$IMAGE@$DIGEST\`" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: agent-image-verification
+          path: ${{ runner.temp }}/agent-image-verification.json
+          if-no-files-found: error
+          retention-days: 14

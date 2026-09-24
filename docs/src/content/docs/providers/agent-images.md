@@ -5,7 +5,7 @@ sidebar:
   order: 4
 ---
 
-Outpost includes a build workflow for a combined Claude Code/Codex container image. Its agent versions come from the same pins as generated workflow projects. The workflow and verification procedure are available; this page does not assert that a public image or signed attestation has been published. Use only a digest from a successful, verified publication run.
+Outpost includes a build workflow for a combined Claude Code/Codex/Gemini container image. Its agent versions come from the same pins as generated workflow projects. The workflow and verification procedure are available; this page does not assert that a public image or signed attestation has been published. Use only a digest from a successful, verified publication run.
 
 ## Build locally
 
@@ -22,7 +22,7 @@ docker build --build-arg AGENT_UID="$(id -u)" \
 
 Replace `REVIEWED_BASE_DIGEST` with 64 hexadecimal characters. Podman accepts the same generated Dockerfile and build arguments. The context contains only the recipe and package manifests; repository files, credentials and transcripts are excluded.
 
-The context reuses the existing packages, non-root user and private home recipe, adding a digest-pinned base, dated Debian package repositories and `npm ci` against `images/agents/package-lock.json`. Agent dependencies are installed under `/opt/outpost/agents`, outside the ephemeral home. Both CLI binaries are on `PATH`. The generator fails when the image manifest no longer matches the supported-agent versions. Update both the manifest and its lockfile when updating those pins:
+The context reuses the existing packages, non-root user and private home recipe, adding a digest-pinned base, dated Debian package repositories and `npm ci` against `images/agents/package-lock.json`. Agent dependencies are installed under `/opt/outpost/agents`, outside the ephemeral home. All three CLI binaries are on `PATH`. The generator fails when the image manifest no longer matches the supported-agent versions. Update both the manifest and its lockfile when updating those pins:
 
 ```sh
 npm install --package-lock-only --ignore-scripts --prefix images/agents
@@ -36,7 +36,7 @@ The dedicated `.github/workflows/agent-images.yml` workflow is manual and restri
 
 Before enabling publication, maintainers must configure the `agent-images` GitHub environment with required reviewers and allow only `main`, then set repository variable `OUTPOST_AGENT_IMAGES_PUBLISH=true`. Dispatch with `publish=true` to enable the separate environment-gated publication job. Repository environment protection is hosting configuration and is not created by this workflow. Synchronize workflow changes from canonical GitLab before dispatching on the GitHub mirror.
 
-The job publishes the tested archive under a unique commit/run/attempt tag, creates a signed SLSA provenance attestation for the registry digest, and verifies that digest against the repository, source commit and this workflow. It emits the verified digest only after verification succeeds. A failed push, attestation or verification leaves the run unsuccessful; a registry tag alone is not evidence of signed publication. No `latest` tag or package release is created. GitHub supplies the short-lived signing identity through OIDC; no private signing key belongs in the repository. See [GitHub artifact attestations](https://docs.github.com/en/actions/how-tos/secure-your-work/use-artifact-attestations/use-artifact-attestations) and the [attest action](https://github.com/actions/attest).
+The job publishes the tested archive under a unique commit/run/attempt tag, creates a signed SLSA provenance attestation for the registry digest, and verifies that digest against the repository, source commit and this workflow. It emits the verified digest and source commit only after verification succeeds, then retains the JSON verification result as the `agent-image-verification` workflow artifact for fourteen days. Download this result alongside the build inputs before artifact expiry; it records the verified attestation, including the image digest and source identity. A build-only or skipped publication job provides no signed publication evidence. A failed push, attestation or verification leaves the run unsuccessful; a registry tag alone is not evidence of signed publication. No `latest` tag or package release is created. GitHub supplies the short-lived signing identity through OIDC; no private signing key belongs in the repository. See [GitHub artifact attestations](https://docs.github.com/en/actions/how-tos/secure-your-work/use-artifact-attestations/use-artifact-attestations) and the [attest action](https://github.com/actions/attest).
 
 ## Verify before pulling and running
 
