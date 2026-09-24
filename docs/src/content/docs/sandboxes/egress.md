@@ -7,11 +7,11 @@ sidebar:
 
 `egress` is an opt-in research prototype configured when constructing a provider. Omitting it preserves the provider's existing networking behavior. Outpost validates and copies the policy before allocation; it does not install an in-process proxy or depend on agent cooperation.
 
-| Provider        | `deny-all`                 | `allowlist`                     |
-| --------------- | -------------------------- | ------------------------------- |
-| Docker / Podman | Container network `none`   | Rejected before allocation      |
-| Vercel          | Native firewall            | Native domain and CIDR firewall |
-| Local / Daytona | No Outpost `egress` option | No Outpost `egress` option      |
+| Provider                      | `deny-all`                 | `allowlist`                     |
+| ----------------------------- | -------------------------- | ------------------------------- |
+| Docker / Podman               | Container network `none`   | Rejected before allocation      |
+| Vercel                        | Native firewall            | Native domain and CIDR firewall |
+| Local / Daytona / Firecracker | No Outpost `egress` option | No Outpost `egress` option      |
 
 ## Run an offline command
 

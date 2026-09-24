@@ -17,6 +17,8 @@ import type { WorkflowOptions } from "@elie-laloum/outpost";
 
 ```ts
 export interface WorkflowOptions {
+  readonly decisions?: readonly WorkflowDecision[];
+  readonly checkpoint?: WorkflowCheckpointOptions;
   readonly signal?: AbortSignal;
   readonly concurrency?: number;
   readonly budget?: WorkflowBudget;
@@ -28,4 +30,6 @@ export interface WorkflowOptions {
 ## Contrats associés
 
 - [WorkflowBudget](../workflowbudget/)
+- [WorkflowCheckpointOptions](../workflowcheckpointoptions/)
+- [WorkflowDecision](../workflowdecision/)
 - [WorkflowEvent](../workflowevent/)

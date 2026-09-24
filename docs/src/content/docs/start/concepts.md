@@ -14,7 +14,7 @@ sidebar:
 | Agent adapter | Native CLI command and event translation      | Reusable configuration      |
 | Workflow task | Typed operation and dependencies              | One node in a graph         |
 
-A conversation is separate: its native transcript can survive the sandbox and be resumed later. Forking a conversation does not fork its files.
+For Claude Code and Codex, a conversation is separate: its native transcript can survive the sandbox and be resumed later. Forking a conversation does not fork its files.
 
 ## Pick the right entry point
 

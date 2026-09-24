@@ -41,6 +41,6 @@ La dernière balise complète correspondante est retenue, sans espaces périphé
 
 ## Réparation et récupération
 
-`repairs` est un entier positif ou nul, égal à `0` par défaut. Une réparation reprend la même conversation avec le retour de validation ; l’adapter doit donc permettre la reprise. Les deux adapters intégrés le permettent. Les réponses structurées exigent `passes: 1`.
+`repairs` est un entier positif ou nul, égal à `0` par défaut. Une réparation reprend la même conversation avec le retour de validation ; l’adapter doit donc permettre la reprise. Claude Code et Codex le permettent ; [Gemini](../gemini/) exige `repairs: 0`. Les réponses structurées exigent `passes: 1`.
 
 Si les réparations sont épuisées, examinez `ResponseError.tag`, `raw`, `cause` et les informations de récupération. `recoveryDetails(error)` fournit conversation, workspace et commits/log/transcript disponibles sans changer l’identité de l’erreur. Une réponse invalide ne signifie pas que l’agent n’a modifié aucun fichier.

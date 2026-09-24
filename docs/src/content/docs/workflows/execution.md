@@ -38,4 +38,4 @@ result.unwrap();
 
 Task `timeoutMs` is cooperative. It aborts the task signal, but JavaScript cannot forcibly stop arbitrary callbacks. The scheduler waits for active tasks to clean up rather than returning while they still mutate resources.
 
-Observer event types are `start`, `task`, `retry` and `finish`, with execution ID, workflow name, timestamp and optional task/status/attempt. Callback exceptions are recorded in `observerErrors`, not used to change outcomes.
+Observer event types are `start`, `task`, `attempt`, `usage`, `retry` and `finish`, with execution ID, workflow name, timestamp and optional task/status/attempt. Callback exceptions are recorded in `observerErrors`, not used to change outcomes.

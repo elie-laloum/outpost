@@ -5,7 +5,7 @@ sidebar:
   order: 9
 ---
 
-Native conversation capture is enabled by default. The transcript is copied to the agent’s host storage and working-directory fields are rewritten so native host resumption targets the right repository.
+Native conversation capture is enabled by default for Claude Code and Codex. [Gemini](../gemini/) has no native capture, resume or fork support in Outpost. The transcript is copied to the agent’s host storage and working-directory fields are rewritten so native host resumption targets the right repository.
 
 ```ts
 import { dispatch, codex } from "@elie-laloum/outpost";

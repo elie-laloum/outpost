@@ -19,7 +19,7 @@ import type { WorkflowResult } from "@elie-laloum/outpost";
 export interface WorkflowResult {
   readonly executionId: string;
   readonly name: string;
-  readonly status: "done" | "failed" | "cancelled";
+  readonly status: "done" | "failed" | "cancelled" | "paused";
   readonly tasks: readonly Readonly<TaskRecord>[];
   readonly errors: readonly unknown[];
   readonly observerErrors: readonly unknown[];

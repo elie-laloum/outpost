@@ -7,7 +7,7 @@ sidebar:
 
 Exécutez des agents de code dans des environnements contrôlés, séparez leur travail Git et reliez leurs opérations avec des workflows typés.
 
-Outpost est une bibliothèque TypeScript accompagnée d’un petit CLI de configuration. Elle prend en charge **Claude Code et Codex**, avec **Docker, Podman, Vercel, Daytona ou une exécution explicite sur l’hôte**. Les adapters d’agents déterminent ce qui s’exécute ; les providers de sandbox déterminent où.
+Outpost est une bibliothèque TypeScript accompagnée d’un petit CLI de configuration. Elle prend en charge **Claude Code, Codex et Gemini CLI**, avec **Docker, Podman, Vercel, Daytona ou une exécution explicite sur l’hôte**. Les adapters d’agents déterminent ce qui s’exécute ; les providers de sandbox déterminent où.
 
 ## Choisir un parcours
 

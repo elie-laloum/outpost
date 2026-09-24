@@ -7,6 +7,21 @@ sidebar:
 
 Traduction du journal `CHANGELOG.md` conservé à la racine du dépôt. Chaque version publiée possède ses notes dans les deux langues.
 
+## Unreleased
+
+Ces ajouts sont implémentés sur main ; le package reste en version 3.0.0 et aucune nouvelle publication n’est implicite.
+
+- Ajouter les réservations coopératives liées au workspace, la restauration isolée des états précédent/entrant conservés et l’inspection locale de l’activité des sandboxes et ressources.
+- Regrouper et vérifier les uploads incrémentaux de fichiers/liens ; transférer les différences d’historique Git vérifiées tout en conservant des bundles de récupération complets. Les copies de dossiers gardent leur comportement existant.
+- Persister les checkpoints avec résultats JSON, répétition explicite et consommation cumulée. Ajouter approbations/pauses et artefacts immuables typés avec filiation non signée.
+- Ajouter des files SQLite persistantes, un transport HTTP authentifié et des workers avec fencing. Les répétitions peuvent reproduire des effets ; les reçus de consommation terminale évitent le double comptage sans garantir un plafond de facturation en temps réel.
+- Étendre les statuts de tâche avec `paused` et `rejected`, et le statut du workflow avec `paused` ; les consommateurs exhaustifs doivent les traiter. Ajouter des méthodes optionnelles de synchronisation des checkpoints et de reçus de consommation aux contextes de tâche.
+- Prendre en charge le PTY natif Daytona avec annulation, redimensionnement et réutilisation ; la validation réelle avec compte reste à effectuer.
+- Ajouter l’adapter Gemini CLI, le bootstrap, les diagnostics et l’installation dans les images épinglés à 0.61.0. Gemini ne prend en charge que les nouvelles sessions, sans capture native, continuation ni réparation automatique des réponses.
+- Ajouter des prototypes sur activation explicite : checkouts Git Docker/Podman isolés, microVM Firecracker sur hôte préparé, blocage réseau total des conteneurs/politiques Vercel et candidats spéculatifs bornés avec validation explicite et sans intégration automatique.
+- Attribuer les rapports cloud au commit/runtime/date et conserver les preuves de vérification d’attestation d’image réussie. Campagnes cloud réelles, publication signée et démarrage Firecracker restent des validations distinctes, jamais des réussites implicites.
+- Synchroniser toute la référence API publique, les guides bilingues et la roadmap avec le comportement implémenté et les limites restantes des prototypes.
+
 ## 3.0.0
 
 - Canonicaliser les dossiers temporaires de vérification de récupération sur les différentes plateformes et réutiliser les volumes de cache Podman existants sans les recréer.

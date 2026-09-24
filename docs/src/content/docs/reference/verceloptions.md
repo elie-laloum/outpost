@@ -19,6 +19,7 @@ import type { VercelOptions } from "@elie-laloum/outpost/providers/vercel";
 import type { Sandbox } from "@vercel/sandbox";
 
 export interface VercelOptions {
+  readonly egress?: EgressPolicy;
   readonly create?: NonNullable<Parameters<typeof Sandbox.create>[0]>;
   readonly variables?: Variables;
   readonly root?: string;
@@ -28,4 +29,5 @@ export interface VercelOptions {
 
 ## Related contracts
 
+- [EgressPolicy](../egresspolicy/)
 - [Variables](../variables/)

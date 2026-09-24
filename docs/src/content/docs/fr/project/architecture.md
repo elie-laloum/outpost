@@ -10,7 +10,7 @@ Outpost utilise des ports et des adapters. Le domaine décrit les capacités ; l
 | Couche            | Responsabilité                                                          |
 | ----------------- | ----------------------------------------------------------------------- |
 | `domain`          | Contrats, règles, prompts, réponses, graphes et exécution des workflows |
-| `adapters/agents` | Commandes et protocoles propres à Claude et Codex                       |
+| `adapters/agents` | Commandes et protocoles propres à Claude, Codex et Gemini               |
 | `providers`       | Allocation, commandes, transferts et libération des sandboxes           |
 | `infrastructure`  | Git, processus, fichiers, conversations et journaux                     |
 | `application`     | Cycle de vie, dispatch et synchronisation distante                      |
@@ -28,7 +28,7 @@ Les points d’entrée publics comprennent `src/index.ts`, les sous-chemins `pro
 - L’exécution d’un tour, l’accumulation des événements et la surveillance des délais sont séparées. L’agrégation de consommation est une règle commune du domaine.
 - Les providers composent leurs services de préparation, commandes et transferts. Docker et Podman partagent la mécanique du moteur de conteneurs.
 - La synchronisation distante suit quatre étapes : téléchargement, validation, sauvegarde puis application. Le coordinateur conserve la révision et le manifeste de fichiers appliqués avec succès. Le contrat optionnel `FileTransfers` permet la réutilisation incrémentale vérifiée et les lots compressés bornés, sans branchement sur les noms de providers.
-- Inventaire, intégrité, vérification Git isolée et rétention sont des opérations distinctes. Le nettoyage explicite acquiert les verrous et revalide les candidats ; les quotas observent le stockage sans réserver de capacité. Les volumes de cache des conteneurs ont une durée de vie distincte, gérée par le moteur.
+- Inventaire, intégrité, vérification Git isolée et rétention sont des opérations distinctes. Le nettoyage explicite acquiert les verrous et revalide les candidats ; `assertRecoveryQuota` observe le stockage, tandis que les réservations explicites sérialisent l’admission coopérative et peuvent appartenir au workspace. Les enregistrements d’activité décrivent les leases et opérations observées localement, sans énumérer les comptes distants. Les volumes de cache des conteneurs ont une durée de vie distincte, gérée par le moteur.
 - La propriété locale des verrous est vérifiée lorsque la plateforme le permet ; les propriétaires incertains bloquent la reprise automatique. Les workspaces modifiés, détachés ou contenant des fichiers ignorés restent récupérables.
 - Les workflows séparent validation du graphe, état d’exécution, tentatives, budgets et ordonnancement. Les wrappers applicatifs transmettent la consommation normalisée des agents au comptage partagé. L’adapter OpenTelemetry d’infrastructure consomme les événements avec tracer et meter injectés, noms fixes et attributs bornés. Les erreurs d’observateurs ne changent pas l’issue de l’exécution.
 - Les diagnostics d’une sandbox détenue utilisent la même exclusion d’opération que commandes et dispatch. Le nettoyage des probes temporaires est indépendant ; le diagnostic ne devient jamais propriétaire de la libération de la lease.
@@ -40,3 +40,9 @@ Un nouvel agent implémente `AgentAdapter` dans son propre module. Un nouveau ba
 `npm run check` vérifie l’architecture, les types, les tests unitaires et fonctionnels et la compilation. `npm run coverage` impose 80 % sur les lignes, branches et fonctions. Les modules de types, effacés à l’exécution, sont contrôlés par TypeScript et le test consommateur du package. Les handlers CLI entrent dans la couverture ; seul le point d’entrée du processus est exclu.
 
 La CI refuse les dépendances entre couches dans le mauvais sens, les contrats déclarés hors des fichiers de types, l’initialisation à l’exécution dans ces fichiers, les chaînes de branches alternatives et les déclarations inutilisées. Elle vérifie aussi les trois systèmes, Docker, Podman et le package installé. Le respect du SRP reste également un travail de revue.
+
+## Orchestration durable et limites de recherche
+
+Les contrats de checkpoints et de portes appartiennent au domaine ; l’adapter de fichiers possède la persistance atomique et la propriété locale. Les contrats d’artefacts valident les valeurs et la filiation ; leur store de fichiers possède les octets immuables. La file SQLite et son transport HTTP fournissent les claims persistants ; les workers applicatifs exécutent les handlers enregistrés sous leases protégées par fencing. La répétition reste explicite et les effets peuvent être exécutés plusieurs fois. Les noms d’acteurs et la filiation sont des métadonnées de confiance, pas une authentification.
+
+Le checkout isolé des conteneurs, le provider Firecracker, les politiques réseau et l’exécution spéculative ont leurs propres [limites de recherche](../roadmap/). Gemini ne possède pas de store de conversations natives. Daytona utilise son API PTY native ; Vercel refuse l’attachement interactif.

@@ -37,7 +37,7 @@ Keys must be unique. Every dependency must be present in the graph, and cycles a
 
 ## Result and visualization
 
-`result.status` is `done`, `failed` or `cancelled`. `tasks` contains execution records with status, attempts, timestamps and optional error text. `errors` holds original failures; `observerErrors` holds callback failures. `result.unwrap()` throws `WorkflowFailure` when the run did not succeed; that error retains the result.
+`result.status` is `done`, `failed`, `cancelled` or `paused`. `tasks` contains execution records with status, attempts, timestamps and optional error text. `errors` holds original failures; `observerErrors` holds callback failures. `result.unwrap()` throws `WorkflowFailure` when the run did not succeed; that error retains the result.
 
 `delivery.diagram()` returns Mermaid text for the declared dependency graph. It does not execute tasks. Save or render it in a Mermaid-capable tool to inspect structure.
 
@@ -46,3 +46,5 @@ Continue with [execution policies](../execution/) or [sandbox tasks](../sandbox-
 See [usage budgets](../budgets/) for shared admission and token limits, and [telemetry](../../operations/telemetry/) for structured metrics.
 
 Persist results across process restarts with [workflow checkpoints](../checkpoints/).
+
+Use [approval and pause gates](../approvals/) to stop at persisted decisions, [typed artifacts](../artifacts/) to exchange validated data, and [distributed workers](../distributed/) for queued execution. [Speculative candidates](../speculation/) are a separate opt-in research helper.

@@ -17,6 +17,9 @@ import type { TaskRecord } from "@elie-laloum/outpost";
 
 ```ts
 export interface TaskRecord {
+  usageReceipts?: readonly string[];
+  pause?: WorkflowPauseRequest;
+  decision?: WorkflowDecisionRecord;
   readonly key: string;
   status: TaskStatus;
   attempts: number;
@@ -29,3 +32,5 @@ export interface TaskRecord {
 ## Contrats associés
 
 - [TaskStatus](../taskstatus/)
+- [WorkflowDecisionRecord](../workflowdecisionrecord/)
+- [WorkflowPauseRequest](../workflowpauserequest/)

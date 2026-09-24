@@ -37,7 +37,7 @@ Les dossiers distants peuvent contenir `initial.bundle`/`commits.bundle`, patche
 
 ## Inspecter le stockage conservé
 
-La commande non publiée `outpost recovery inspect` inventorie `.outpost/recovery`, `.outpost/logs`, `.outpost/locks` et `.outpost/workspaces` dans le checkout choisi. Elle est disponible sur main. Par défaut, elle lit les métadonnées du système de fichiers, sans lire le contenu des transcripts, patches ou verrous, modifier les métadonnées Git, créer de dossiers d’exécution ni supprimer de fichiers.
+La commande `outpost recovery inspect`, disponible depuis 3.0.0, inventorie `.outpost/recovery`, `.outpost/logs`, `.outpost/locks` et `.outpost/workspaces` dans le checkout choisi. Par défaut, elle lit les métadonnées du système de fichiers, sans lire le contenu des transcripts, patches ou verrous, modifier les métadonnées Git, créer de dossiers d’exécution ni supprimer de fichiers.
 
 ```sh
 node src/cli/main.ts recovery inspect --repository /chemin/du/depot

@@ -17,6 +17,7 @@ import type { WorkspaceOptions } from "@elie-laloum/outpost";
 
 ```ts
 export interface WorkspaceOptions {
+  readonly storageQuota?: Omit<StorageReservationOptions, "signal">;
   readonly signal?: AbortSignal;
   readonly repository?: string;
   readonly branch?: BranchPolicy;
@@ -32,3 +33,4 @@ export interface WorkspaceOptions {
 - [BranchPolicy](../branchpolicy/)
 - [LifecycleHooks](../lifecyclehooks/)
 - [StageLimits](../stagelimits/)
+- [StorageReservationOptions](../storagereservationoptions/)

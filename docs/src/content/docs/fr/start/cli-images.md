@@ -21,7 +21,7 @@ npx outpost image remove --engine podman --image outpost:custom
 | `--uid`, `--gid` | Identité numérique de construction adaptée aux droits d’exécution. |
 | `--directory`    | Répertoire du projet cible ; répertoire courant par défaut.        |
 
-L’image générée utilise Node 24 et inclut Git, Python et les deux CLI d’agents. Installez les outils supplémentaires du projet dans la recette puis reconstruisez.
+L’image générée utilise Node 24 et inclut Git, Python et les CLI Claude Code, Codex et Gemini. Installez les outils supplémentaires du projet dans la recette puis reconstruisez.
 
 La suppression cible l’image sélectionnée ; ce n’est pas un nettoyage global. Outpost ne reconstruit pas automatiquement une image obsolète au lancement. Reconstruisez après un changement de recette, de versions des agents ou d’UID/GID.
 

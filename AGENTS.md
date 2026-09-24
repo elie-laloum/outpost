@@ -9,10 +9,10 @@ Outpost is a TypeScript library and CLI for running coding agents in sandboxes, 
 - Prioritize reliable, directly usable behavior and an excellent developer experience.
 - Make code understandable through names, small responsibilities and explicit contracts.
 - Use domain-driven design and ports and adapters pragmatically. Introduce abstractions for real responsibilities and variations, not speculative flexibility.
-- Keep agent protocols independent of sandbox backends. Claude Code and Codex are the supported agents; additional agents belong behind the existing ports.
+- Keep agent protocols independent of sandbox backends. Claude Code, Codex and Gemini CLI have adapters; Gemini currently supports fresh sessions without native conversation capture, resume, fork or automatic response repairs. Additional agents belong behind the existing ports.
 - Preserve existing features and public contracts during refactoring. Architecture changes must not silently change execution behavior.
 - Prefer explicit ownership, predictable failure modes and recoverable state over hidden automation.
-- Describe only shipped capabilities as available. Planned features belong in the roadmap.
+- Distinguish released behavior, implemented but unreleased additions, and opt-in research prototypes. Keep remaining work and live-validation prerequisites in the roadmap; do not imply publication from a local implementation.
 
 ## Start here
 
@@ -85,6 +85,8 @@ Treat these as review and regression-test obligations when changing the affected
 - Keep the agent home coherent. The default private home remains ephemeral; do not solve authentication by persisting only a fragment of it. Generated images must create the home with correct ownership and permissions.
 - Preserve conversation capture, restore, continuation, fork and transcript relocation. Agent authentication and conversation storage are separate concerns.
 - Preserve hook ordering, structured-response validation, retries, usage aggregation and observer isolation. Observer failures must not change execution outcomes.
+- Durable workflows persist lossless JSON outputs, explicit replay authorization and cumulative usage. Gates use trusted actor metadata; queues fence stale leases but do not guarantee exactly-once effects. Artifact digests and lineage provide integrity, not authentication.
+- Resource activity is a local observation, and storage reservations coordinate cooperating writers rather than imposing physical quotas. Opt-in research providers and policies must reject unsupported capabilities explicitly.
 - Protect concurrent host edits during remote synchronization. Validate and back up before applying incoming changes. Preserve recovery artifacts whenever cleanup would discard recoverable work.
 - Keep branch integration explicit and correctly ordered. Never discard dirty or detached worktrees as routine cleanup.
 - Do not silently fall back from an isolated provider to host execution. `local()` is explicitly unisolated; mounted Git metadata is not an adversarial security boundary.

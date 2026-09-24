@@ -2,10 +2,16 @@
 title: "RecoveryInspection"
 description: "RecoveryInspection — Outpost API"
 sidebar:
-  order: 20
+  order: 10
 ---
 
-Supporting contract used by a public signature. It is not directly exported from the package; use TypeScript inference or the public type that references it.
+Contrat public de **RecoveryInspection**. Consultez le [guide activité des ressources](../../operations/recovery/) pour le comportement, les valeurs par défaut et des exemples.
+
+## Import
+
+```ts
+import type { RecoveryInspection } from "@elie-laloum/outpost";
+```
 
 ## Signature
 
@@ -15,11 +21,13 @@ export interface RecoveryInspection extends StorageInventory {
   readonly activity: "unverified";
   readonly git?: WorkspaceGitInspection;
   readonly locks?: LockInspection;
+  readonly resources?: ResourceInspection;
 }
 ```
 
-## Related contracts
+## Contrats associés
 
 - [LockInspection](../support-lockinspection/)
+- [ResourceInspection](../resourceinspection/)
 - [StorageInventory](../support-storageinventory/)
 - [WorkspaceGitInspection](../support-workspacegitinspection/)

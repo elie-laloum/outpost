@@ -38,4 +38,4 @@ result.unwrap();
 
 `timeoutMs` est coopératif. Il annule le signal de la tâche, mais JavaScript ne peut pas arrêter de force un callback arbitraire. Le planificateur attend le nettoyage des tâches actives avant de retourner.
 
-Les événements sont `start`, `task`, `retry` et `finish`, avec identifiant d’exécution, nom du workflow, date et éventuellement tâche/statut/tentative. Les erreurs du callback sont conservées dans `observerErrors` sans changer le résultat.
+Les événements sont `start`, `task`, `attempt`, `usage`, `retry` et `finish`, avec identifiant d’exécution, nom du workflow, date et éventuellement tâche/statut/tentative. Les erreurs du callback sont conservées dans `observerErrors` sans changer le résultat.

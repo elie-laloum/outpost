@@ -9,7 +9,7 @@ Commencez par [inspecter les données conservées](../recovery/).
 
 ## Vérifier la structure d’un transfert conservé
 
-Utilisez la commande non publiée `recovery verify` sur un dossier de transfert distant précis, celui contenant `state.json` (normalement `.outpost/recovery/<session>/<transfert>`) :
+Utilisez la commande `recovery verify`, disponible depuis 3.0.0, sur un dossier de transfert distant précis, celui contenant `state.json` (normalement `.outpost/recovery/<session>/<transfert>`) :
 
 ```sh
 node src/cli/main.ts recovery verify --directory /chemin/du/transfert/conserve
@@ -36,7 +36,7 @@ Elle construit un transfert synthétique avec tous les fichiers attendus, vérif
 
 ## Vérifier les empreintes enregistrées du transfert
 
-Les nouveaux transferts distants sur main enregistrent `checksums.json` après la sauvegarde hôte et avant l’application côté hôte. Il contient un manifeste SHA-256 versionné et non signé couvrant `state.json`, les trois patches du transfert, le bundle de commits requis et les fichiers référencés sous `previous-files` et `incoming`. Les fichiers sont hachés par blocs ; les liens symboliques enregistrent une empreinte du texte du lien, jamais du contenu de leur cible. Le manifeste enregistre aussi le type et le nombre d’octets. Les fichiers de session parents comme `initial.bundle` et les autres artefacts restent hors de ce manifeste.
+Les transferts distants depuis 3.0.0 enregistrent `checksums.json` après la sauvegarde hôte et avant l’application côté hôte. Il contient un manifeste SHA-256 versionné et non signé couvrant `state.json`, les trois patches du transfert, le bundle de commits requis et les fichiers référencés sous `previous-files` et `incoming`. Les fichiers sont hachés par blocs ; les liens symboliques enregistrent une empreinte du texte du lien, jamais du contenu de leur cible. Le manifeste enregistre aussi le type et le nombre d’octets. Les fichiers de session parents comme `initial.bundle` et les autres artefacts restent hors de ce manifeste.
 
 La capture ajoute une lecture de chaque fichier couvert pendant la sauvegarde et publie atomiquement le manifeste terminé. Si elle échoue, la synchronisation s’arrête avant l’application côté hôte et conserve ses fichiers de récupération. La vérification ne crée ni ne répare de manifeste pour une sauvegarde existante.
 

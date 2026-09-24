@@ -5,7 +5,7 @@ sidebar:
   order: 3
 ---
 
-`outpost doctor` inspecte l’hôte par défaut. Ajoutez `--image` pour inspecter aussi une image Docker/Podman locale dans une sandbox temporaire. Aucun des deux modes n’installe d’outil ni n’appelle de modèle. Cette commande est disponible sur main et n’est pas encore publiée.
+`outpost doctor` inspecte l’hôte par défaut. Ajoutez `--image` pour inspecter aussi une image Docker/Podman locale dans une sandbox temporaire. Aucun des deux modes n’installe d’outil ni n’appelle de modèle. Les diagnostics hôte et image sont disponibles depuis 3.0.0 ; les contrôles Gemini sont un ajout non publié.
 
 ```sh
 outpost doctor --provider docker --agent codex
