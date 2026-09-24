@@ -9,6 +9,7 @@ import { openWorkspace } from "../../src/application/workspace.ts";
 import { createSandbox } from "../../src/application/sandbox.ts";
 import { lock } from "../../src/infrastructure/git/lock.ts";
 import { localProcessIdentity } from "../../src/infrastructure/git/process-identity.ts";
+import { storageMutationLockDefaults } from "../../src/infrastructure/storage-mutation-lock.constants.ts";
 import { storageReservationDefaults } from "../../src/infrastructure/storage-reservations.constants.ts";
 import { repository } from "../helpers.ts";
 import { local } from "../../src/providers/local.ts";
@@ -174,7 +175,7 @@ test("partial inventory and invalid bounds refuse admission without creating cla
 
 test("cancellation interrupts lock waiting without creating a reservation", async (t) => {
   const root = await repository(t);
-  const release = await lock(root, storageReservationDefaults.lockKey);
+  const release = await lock(root, storageMutationLockDefaults.lockKey);
   try {
     await assert.rejects(
       reserveRecoveryStorage({

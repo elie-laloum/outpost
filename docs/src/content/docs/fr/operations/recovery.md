@@ -31,7 +31,7 @@ try {
 
 ## Éléments conservés
 
-La récupération peut inclure workspace, conversation, commits, transcript et log selon l’étape atteinte. Les worktrees modifiés sont conservés ; les workspaces propres possédés sont supprimés après un échec au démarrage. Les branches nommées survivent à la suppression d’un worktree propre.
+La récupération peut inclure workspace, conversation, commits, transcript et log selon l’étape atteinte. Les worktrees modifiés sont conservés ; les workspaces propres possédés sont supprimés après un échec au démarrage si aucune allocation fournisseur n’a commencé ou si le bail obtenu a été libéré avec succès. Les branches nommées survivent à la suppression d’un worktree propre.
 
 Les dossiers distants peuvent contenir `initial.bundle`/`commits.bundle`, patches binaires, `previous-index.patch`, fichiers non suivis dans `incoming`/`previous-files` et `state.json`. Ils représentent les états précédent et entrant, sans garantir qu’un transfert interrompu est complet.
 
@@ -122,3 +122,33 @@ C’est une observation du propriétaire local enregistré, pas un bail distribu
 L’acquisition ne reprend un verrou existant que si son propriétaire local est confirmé inactif. Verrous inconnus, malformés ou anciens bloquent l’acquisition, même avec un ancien PID absent. Un processus interrompu sur une plateforme sans identité nécessite donc une investigation manuelle. La libération vérifie son nonce et ne supprime pas intentionnellement le verrou d’un nouveau propriétaire. Un PID apparemment périmé ne suffit pas pour supprimer un verrou.
 
 Consultez aussi la [rétention et les quotas](../storage-retention/) pour planifier un nettoyage explicite.
+
+## Inspecter l’activité des sandboxes
+
+Les sandboxes créées par `createSandbox`, les méthodes d’un workspace, dispatch ou attach enregistrent leur cycle de vie dans `.outpost/locks/resource-activity`. Inspectez ces enregistrements sans contacter les fournisseurs :
+
+```sh
+outpost recovery inspect --repository /path/to/repository --resources --json
+```
+
+```ts
+import { inspectRecovery } from "@elie-laloum/outpost";
+
+const report = await inspectRecovery({
+  repository: "/path/to/repository",
+  resources: true,
+});
+for (const entry of report.resources?.entries ?? []) {
+  console.log(entry.record?.phase, entry.record?.operations, entry.ownership);
+}
+```
+
+Chaque enregistrement contient un identifiant unique du propriétaire de la sandbox, le PID, l’identité Linux du processus lorsqu’elle est disponible, le nom et le placement du fournisseur, le chemin du workspace, les dates et une phase : `allocating`, `ready`, `closing`, `cleanup-failed` ou `allocation-uncertain`. Les dispatchs, attachements, diagnostics et commandes actifs sont listés avec les invocations, uploads, téléchargements et opérations de manifeste ou téléchargement groupé sous-jacents. Les opérations terminées ou échouées ne conservent que le dernier résultat et le dernier échec ; les enregistrements ne contiennent ni commandes, prompts, chemins de transfert, identifiants secrets ni messages d’exception. `completed` signifie que l’appel a retourné ; une commande peut avoir un code de sortie non nul.
+
+Les fichiers (0600) et dossiers (0700) sont privés lorsque la plateforme le permet. Les limites sont de 64 Kio par enregistrement, un compteur actif par type d’opération et 10 000 enregistrements conservés par checkout. L’inscription refuse de dépasser cette limite et ne supprime jamais d’anciens enregistrements pour libérer de la place. Les mises à jour atomiques évitent la lecture d’enregistrements partiellement écrits. L’inscription partage le verrou de mutation des réservations de stockage et les octets d’activité sont comptés dans l’inventaire. Les réservations ne réservent pas une taille maximale fixe pour les futures mises à jour d’activité.
+
+La fermeture réussie supprime son propre enregistrement tout en laissant ouverts les workspaces appartenant à l’appelant. Un échec de nettoyage du fournisseur conserve l’enregistrement et le workspace possédé. Si l’allocation a commencé sans retourner de bail, le nettoyage ne peut pas être confirmé : `allocation-uncertain` conserve l’enregistrement et le workspace possédé, même pour une simple erreur d’allocation. La rétention protège les enregistrements d’activité et les workspaces qu’ils référencent, même si le propriétaire enregistré est inactif ou inconnu. Des enregistrements illisibles empêchent par prudence l’élagage des workspaces propres. L’investigation et le nettoyage éventuel chez le fournisseur restent explicites.
+
+`resources: { scope: "recorded-sandboxes", complete, entries, issues }` est une observation supplémentaire. Chaque entrée inclut l’enregistrement lisible et un statut/motif `ownership` suivant les mêmes règles d’identité locale que l’inspection des verrous. `complete` décrit la lisibilité des enregistrements, pas la certitude de propriété ni l’état du fournisseur. L’inspection est limitée au minimum de `--max-entries` et 10 000 enregistrements, indépendamment du budget d’inventaire du stockage. Les enregistrements malformés, trop volumineux, changeants, symboliques ou illisibles produisent un rapport partiel et un code de sortie CLI 1 ; les propriétaires inactifs ou incertains restent signalés sans suppression. Le champ global `activity` reste `unverified`.
+
+Les appels directs à `provider.acquire()` sont hors de ce registre. Celui-ci ne découvre pas les conteneurs ou ressources cloud non enregistrés, n’expose pas leurs identifiants fournisseur, ne sonde pas leur disponibilité distante, ne fournit pas de baux distribués et ne récupère pas automatiquement les ressources. Un processus inactif peut avoir laissé une sandbox distante facturable ; inspectez le compte du fournisseur avant de décider quoi supprimer.

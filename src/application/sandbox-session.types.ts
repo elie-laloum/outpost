@@ -1,3 +1,4 @@
+import type { ResourceActivity } from "../infrastructure/resource-activity.types.ts";
 import type { AgentAdapter } from "../domain/agent.types.ts";
 import type { SandboxLease, SandboxProvider } from "../domain/sandbox.types.ts";
 import type { LifecycleHooks } from "../domain/workspace.types.ts";
@@ -20,6 +21,7 @@ export interface ProvisionedSandbox {
   readonly owned: boolean;
   readonly stop: AbortController;
   readonly runtime: SandboxLease;
+  readonly activity: ResourceActivity;
   readonly sync: RemoteSync | undefined;
   readonly prepared: Map<AgentAdapter, AgentAdapter>;
   readonly staging: string;

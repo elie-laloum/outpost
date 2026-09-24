@@ -20,6 +20,14 @@ async function workspaceReason(
   entry: StorageEntry,
   inspection: RecoveryInspection,
 ): Promise<string> {
+  if (inspection.resources?.complete === false)
+    return "RESOURCE_ACTIVITY_UNKNOWN";
+  if (
+    inspection.resources?.entries.some(
+      (resource) => resource.record?.workspace === entry.path,
+    )
+  )
+    return "RESOURCE_ACTIVITY_RECORDED";
   const workspace = inspection.git?.workspaces.find(
     (value) => value.path === entry.path,
   );
@@ -64,6 +72,7 @@ export async function planRecoveryRetention(
     ...options,
     git: true,
     locks: true,
+    resources: true,
   });
   const entries: RecoveryRetentionEntry[] = [];
   const inspectedAt = new Date().toISOString();

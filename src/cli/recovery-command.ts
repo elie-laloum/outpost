@@ -17,11 +17,18 @@ export async function recoveryCommand({
     return recoveryVerifyCommand({ values, positionals });
   invariant(
     positionals.length === 2 && positionals[1] === "inspect",
-    "Usage: outpost recovery inspect [--repository PATH] [--max-entries NUMBER] [--git] [--locks] [--json]",
+    "Usage: outpost recovery inspect [--repository PATH] [--max-entries NUMBER] [--git] [--locks] [--resources] [--json]",
   );
   for (const key of Object.keys(values))
     invariant(
-      ["repository", "max-entries", "git", "locks", "json"].includes(key),
+      [
+        "repository",
+        "max-entries",
+        "git",
+        "locks",
+        "resources",
+        "json",
+      ].includes(key),
       `Unsupported recovery option: --${key}`,
     );
   const maxEntries =
@@ -34,6 +41,7 @@ export async function recoveryCommand({
       : {}),
     ...(maxEntries !== undefined ? { maxEntries } : {}),
     ...(values.git ? { git: true } : {}),
+    ...(values.resources ? { resources: true } : {}),
     ...(values.locks ? { locks: true } : {}),
   });
   if (values.json) process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
@@ -90,6 +98,26 @@ export async function recoveryCommand({
         "PID presence does not prove lock ownership; PID absence does not authorize deletion.\n",
       );
     }
+    if (report.resources) {
+      process.stdout.write(
+        `Recorded sandbox activity: ${report.resources.complete ? "complete for listed records" : "partial"}\n`,
+      );
+      for (const entry of report.resources.entries) {
+        const detail = entry.record
+          ? `${JSON.stringify(entry.record.provider)} | ${entry.record.phase} | ${entry.record.operations.map((operation) => `${operation.kind} (${operation.count})`).join(", ") || "idle"}`
+          : "unreadable";
+        process.stdout.write(
+          `  ${JSON.stringify(entry.path)} | ${detail} | ownership ${entry.ownership.status}: ${entry.ownership.reason}\n`,
+        );
+      }
+      for (const issue of report.resources.issues)
+        process.stdout.write(
+          `[PARTIAL] ${issue.code}: ${JSON.stringify(issue.path)}\n`,
+        );
+      process.stdout.write(
+        "Recorded activity is a snapshot; stale or unknown ownership does not authorize resource deletion. Provider resources are not queried.\n",
+      );
+    }
     for (const issue of report.issues)
       process.stdout.write(
         `[PARTIAL] ${issue.code}: ${JSON.stringify(issue.path)}\n`,
@@ -101,7 +129,7 @@ export async function recoveryCommand({
       `${report.complete ? "Inventory complete." : "Inventory incomplete; totals are partial."} File sizes are logical bytes; symlink targets are excluded.\n`,
     );
     process.stdout.write(
-      report.git || report.locks
+      report.git || report.locks || report.resources
         ? "Activity and recovery integrity are unverified. No raw file contents were displayed or files removed.\n"
         : "Activity and recovery integrity are unverified. No files were read for content or removed.\n",
     );
@@ -109,7 +137,8 @@ export async function recoveryCommand({
   if (
     !report.complete ||
     report.git?.complete === false ||
-    report.locks?.complete === false
+    report.locks?.complete === false ||
+    report.resources?.complete === false
   )
     process.exitCode = 1;
 }

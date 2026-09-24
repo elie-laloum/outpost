@@ -1,3 +1,4 @@
+import type { ResourceOperationKind } from "../infrastructure/resource-activity.types.ts";
 import { OutpostError } from "../domain/errors.ts";
 import { validateBrief } from "../domain/prompts.ts";
 import type { Disposal } from "../domain/workspace.types.ts";
@@ -18,14 +19,17 @@ export async function createSandbox(
   const { workspace, runtime, sync, stop, state, owned } = context;
   const agents = sandboxAgents(context);
   const gate = operationGate();
-  const exclusive = gate.run;
+  const exclusive = <T>(
+    kind: ResourceOperationKind,
+    action: () => Promise<T>,
+  ) => gate.run(() => context.activity.run(kind, action));
   let closing: Promise<Disposal> | undefined;
   const result: Sandbox = {
     workspace,
     root: runtime.root,
     dispatch(settings) {
       validateDispatch(settings);
-      return exclusive(() =>
+      return exclusive("dispatch", () =>
         dispatchInSandbox(context, agents, result, settings),
       );
     },
@@ -38,11 +42,13 @@ export async function createSandbox(
     attach(settings = {}) {
       settings.signal?.throwIfAborted();
       validateBrief(settings.brief, true);
-      return exclusive(() => attachInSandbox(context, agents, settings));
+      return exclusive("attach", () =>
+        attachInSandbox(context, agents, settings),
+      );
     },
     diagnose(settings = {}) {
       settings.signal?.throwIfAborted();
-      return exclusive(() =>
+      return exclusive("diagnose", () =>
         diagnoseSandbox(runtime, {
           ...settings,
           provider: context.provider,
@@ -54,7 +60,7 @@ export async function createSandbox(
     },
     command(command) {
       command.signal?.throwIfAborted();
-      return exclusive(async () => {
+      return exclusive("command", async () => {
         try {
           return await runtime.invoke({
             ...command,
@@ -73,20 +79,34 @@ export async function createSandbox(
         stop.abort(new OutpostError("aborted", "Sandbox closed"));
         await gate.close();
         let failure: unknown;
+        await context.activity.phase("closing").catch(() => undefined);
         try {
           await runtime.release();
           await sync?.close();
+          if (!(await context.activity.idle()))
+            throw new OutpostError(
+              "provider",
+              "Sandbox operations remain unsettled after release",
+            );
         } catch (cause) {
           failure = cause;
         }
         state.active = false;
 
         unregister();
-        const disposal = owned
-          ? await workspace.close({ preserve: settings.preserve || !!failure })
-          : {};
-        if (failure) throw failure;
-        return disposal;
+        let disposal: Disposal = {};
+        try {
+          if (owned)
+            disposal = await workspace.close({
+              preserve: settings.preserve || !!failure,
+            });
+          if (failure) throw failure;
+          await context.activity.remove();
+          return disposal;
+        } catch (cause) {
+          await context.activity.phase("cleanup-failed").catch(() => undefined);
+          throw cause;
+        }
       })();
       return closing;
     },

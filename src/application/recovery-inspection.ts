@@ -1,3 +1,4 @@
+import { inspectResourceActivity } from "../infrastructure/resource-activity-inspection.ts";
 import { inspectLocks } from "../infrastructure/git/lock-inspection.ts";
 import { join } from "node:path";
 import { directory } from "../infrastructure/files.ts";
@@ -33,10 +34,14 @@ export async function inspectRecovery(
           ?.entries ?? [],
       )
     : undefined;
+  const resources = options.resources
+    ? await inspectResourceActivity(repository, options.maxEntries)
+    : undefined;
   return {
     repository,
     activity: "unverified",
     ...inventory,
+    ...(resources ? { resources } : {}),
     ...(gitReport ? { git: gitReport } : {}),
     ...(lockReport ? { locks: lockReport } : {}),
   };

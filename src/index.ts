@@ -177,3 +177,18 @@ export type {
   WorkflowDecision,
   WorkflowDecisionRecord,
 } from "./domain/workflow/gates.types.ts";
+
+export { inspectRecovery } from "./application/recovery-inspection.ts";
+export type {
+  RecoveryInspection,
+  RecoveryInspectionOptions,
+} from "./application/recovery-inspection.types.ts";
+export type {
+  ResourceActivityRecord,
+  ResourceInspection,
+  ResourceInspectionEntry,
+  ResourceOperation,
+  ResourceOperationKind,
+  ResourceOperationResult,
+  ResourcePhase,
+} from "./infrastructure/resource-activity.types.ts";
