@@ -71,7 +71,7 @@ test("initialization supports cloud peers and requested package manager", async 
   );
   assert.deepEqual(
     calls.map((call) => call.executable),
-    [process.platform === "win32" ? "cmd.exe" : "pnpm"],
+    Array(2).fill(process.platform === "win32" ? "cmd.exe" : "pnpm"),
   );
   assert.equal(
     await readFile(join(root, ".env.example"), "utf8"),
@@ -127,6 +127,7 @@ test("generated starter uses an external repository, workflow credentials and br
     repository: relative(folder, root),
     provider: "local",
     agent: "codex",
+    authentication: "login",
   });
   await writeFile(
     join(folder, ".env"),

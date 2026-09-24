@@ -112,3 +112,29 @@ test("CLI scopes help and rejects options belonging to another command", async (
     );
   }
 });
+
+test("CLI allows opting out of the default image build and declares subscription credentials", async (t) => {
+  const directory = await mkdtemp(join(tmpdir(), "outpost-cli-auth-"));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const result = await run([
+    "init",
+    "--yes",
+    "--provider",
+    "docker",
+    "--agent",
+    "claude",
+    "--authentication",
+    "oauth-token",
+    "--no-build",
+    "--directory",
+    directory,
+  ]);
+  assert.equal(result.status, 0, result.stderr);
+  assert.equal(
+    await readFile(join(directory, ".env.example"), "utf8"),
+    "CLAUDE_CODE_OAUTH_TOKEN=\n",
+  );
+  assert.match(result.stdout, /claude setup-token/);
+  const source = await readFile(join(directory, "run.ts"), "utf8");
+  assert.match(source, /Missing CLAUDE_CODE_OAUTH_TOKEN/);
+});

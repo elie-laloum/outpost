@@ -1,10 +1,7 @@
 import { readFile } from "node:fs/promises";
-import {
-  agentEnvironment,
-  imageRecipe,
-  providerPackages,
-} from "./scaffold.constants.ts";
+import { imageRecipe, providerPackages } from "./scaffold.constants.ts";
 import type { InitOptions } from "./scaffold.types.ts";
+import { authenticationEnvironment } from "./init-authentication.ts";
 import { starter } from "./starters.ts";
 
 export async function scaffoldFiles(
@@ -12,13 +9,12 @@ export async function scaffoldFiles(
   hasPackage: boolean,
   extension: "ts" | "mts",
 ): Promise<Record<string, string>> {
-  const agent = options.agent ?? "codex",
-    provider = options.provider ?? "docker";
+  const provider = options.provider ?? "docker";
   const files: Record<string, string> = {
     [`run.${extension}`]: starter(options),
     "brief.md":
       "Objective: {{OBJECTIVE}}\n\nWork on {{WORK_BRANCH}} from {{BASE_BRANCH}}. Inspect the repository, implement the objective, run relevant tests and commit your changes. When finished, write <outpost>done</outpost>.\n",
-    ".env.example": agentEnvironment[agent],
+    ".env.example": authenticationEnvironment(options),
     ".gitignore":
       "node_modules/\n.env\n.outpost/workspaces/\n.outpost/locks/\n.outpost/recovery/\n.outpost/logs/\n",
   };

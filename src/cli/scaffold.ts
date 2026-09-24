@@ -32,6 +32,24 @@ export async function initialize(
     root,
     options,
   );
+  if (options.install) {
+    try {
+      await requireSuccess(
+        process.platform === "win32"
+          ? {
+              executable: "cmd.exe",
+              arguments: ["/d", "/c", `${manager} --version`],
+            }
+          : { executable: manager, arguments: ["--version"] },
+        executor,
+      );
+    } catch {
+      throw new OutpostError(
+        "configuration",
+        `Package manager ${manager} is unavailable. Install it or select an installed manager with --manager before using --install.`,
+      );
+    }
+  }
   const files = await scaffoldFiles(
     { ...options, image: options.image ?? imageName(root) },
     hasPackage,

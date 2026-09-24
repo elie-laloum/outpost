@@ -1,4 +1,16 @@
 export const cliOptions = {
+  "base-url": {
+    type: "string",
+    description: "Custom Codex Responses API base URL (requires --model)",
+  },
+  "api-key-env": {
+    type: "string",
+    description: "Custom provider API-key environment variable",
+  },
+  authentication: {
+    type: "string",
+    description: "Authentication: api-key, oauth-token (Claude), login (Codex)",
+  },
   help: { type: "boolean", short: "h", description: "Help" },
   yes: {
     type: "boolean",
@@ -58,7 +70,10 @@ export const commandOptions = {
       "agent",
       "provider",
       "manager",
+      "authentication",
       "model",
+      "base-url",
+      "api-key-env",
       "install",
       "build",
       "image",
@@ -123,3 +138,18 @@ export const initializationQuestions = [
     choices: ["docker", "podman", "vercel", "daytona", "local"],
   },
 ] as const;
+
+export const authenticationChoices = {
+  codex: [
+    { value: "api-key", label: "OpenAI API key (API billing)" },
+    { value: "login", label: "Existing Codex account login" },
+  ],
+  claude: [
+    { value: "api-key", label: "Anthropic API key (API billing)" },
+    {
+      value: "oauth-token",
+      label: "Claude subscription token (claude setup-token)",
+    },
+  ],
+  gemini: [{ value: "api-key", label: "Gemini API key" }],
+} as const;

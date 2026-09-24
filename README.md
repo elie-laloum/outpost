@@ -13,7 +13,7 @@ Requires Node.js **24+**, Git, a target repository with a commit, and the creden
 ```sh
 mkdir workflow1
 cd workflow1
-npx @elie-laloum/outpost init --yes --repository /path1/repository --install --build
+npx @elie-laloum/outpost init --yes --repository /path1/repository --install
 ```
 
 Copy `.env.example` to `.env` and declare `OPENAI_API_KEY`. An empty declaration inherits the matching process variable. Then run the generated script:
@@ -24,7 +24,7 @@ node run.ts "Add validation, run tests and commit the change"
 
 `init` creates `package.json`, `run.ts`, `brief.md`, `.env.example`, `.gitignore` and a container recipe directly in the workflow directory. Existing package manifests are preserved; explicit CommonJS projects get `run.mts` for compatibility. The script resolves its brief, environment and relative repository paths from its own directory. See [multi-repository workflows](https://elie-laloum.github.io/outpost/workflows/sandbox-tasks/) to orchestrate several repositories.
 
-For Codex API-key authentication, add the login hook from [Connect Codex](https://elie-laloum.github.io/outpost/agents/connect-codex/) before dispatching.
+Generated Codex API-key workflows prepare login inside the sandbox. For account login and credential storage, see [Connect Codex](https://elie-laloum.github.io/outpost/agents/connect-codex/) before dispatching.
 
 ## Use the library
 

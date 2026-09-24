@@ -12,12 +12,6 @@ USER $AGENT_UID:$AGENT_GID
 WORKDIR /workspace
 `;
 
-export const agentEnvironment = {
-  codex: "OPENAI_API_KEY=\n",
-  claude: "ANTHROPIC_API_KEY=\n",
-  gemini: "GEMINI_API_KEY=\n",
-} as const;
-
 export const supportedAgents: readonly string[] = ["codex", "claude", "gemini"];
 export const supportedProviders: readonly string[] = [
   "docker",

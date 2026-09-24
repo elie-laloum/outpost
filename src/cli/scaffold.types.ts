@@ -5,6 +5,9 @@ export interface InitOptions {
   readonly provider?: "docker" | "podman" | "vercel" | "daytona" | "local";
   readonly manager?: "npm" | "pnpm" | "yarn" | "bun";
   readonly model?: string;
+  readonly baseUrl?: string;
+  readonly apiKeyEnvironment?: string;
+  readonly authentication?: "api-key" | "oauth-token" | "login";
   readonly install?: boolean;
   readonly build?: boolean;
   readonly image?: string;

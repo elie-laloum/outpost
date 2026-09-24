@@ -39,13 +39,20 @@ export async function runCli(
         ),
       );
     }
+    if (name === "init")
+      command.addOption(
+        new Option(
+          "--no-build",
+          "Skip automatic container image build",
+        ).default(undefined),
+      );
     command.action(async () => {
       const values: Record<string, string | boolean> = {};
       const parsed = command.opts<Record<string, unknown>>();
       for (const option of command.options) {
         const value = parsed[option.attributeName()];
         if (typeof value === "string" || typeof value === "boolean")
-          values[option.long!.slice(2)] = value;
+          values[option.long!.replace(/^--(?:no-)?/, "")] = value;
       }
       await handlers[path[0]!]!({
         values: values as CliValues,
