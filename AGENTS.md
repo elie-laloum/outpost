@@ -57,6 +57,8 @@ Use `AgentAdapter` for agent behavior, `SandboxProvider`/`SandboxLease` for exec
 
 `outpost init` creates a standalone workflow project directly in `--directory`, including `run.ts` (`run.mts` for explicit CommonJS manifests), a brief, environment declarations and provider files. Preserve existing package manifests and ignore rules. `--repository` selects a local Git checkout independently of the workflow directory; generated scripts resolve relative paths from their own directory and pass `repository` explicitly to dispatch.
 
+The CLI uses Commander for command-specific parsing/help and Clack for interactive setup. Preserve headless execution, JSON output and cancellation. `init` builds Docker/Podman images by default; `--no-build` opts out. Authentication is selected explicitly: API keys, Claude subscription tokens or Codex account credential seeds. Never infer authorization to export a host keychain or forward undeclared secrets. Custom Codex model providers require Responses API compatibility; do not imply Chat Completions support.
+
 Each sandbox owns one repository. Compose multiple repositories with `isolatedTask` and dependency edges; no shared Git transaction or automatic push spans them. Runtime worktrees, locks and logs belong under the target repository's `.outpost`. Keep bilingual repository guidance and standalone/multi-repository regression tests aligned with these contracts.
 
 ## Code conventions

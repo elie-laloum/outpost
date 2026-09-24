@@ -4,7 +4,7 @@
 
 Outpost is a TypeScript library for running coding agents in reusable sandboxes, managing their Git workspaces and composing typed workflows. Claude Code, Codex and Gemini CLI adapters work with Docker, Podman, Vercel, Daytona or explicit host execution. Gemini supports fresh sessions only; native conversation capture, resume and fork are available for Claude Code and Codex.
 
-Version 4.0.0 adds durable orchestration, recovery and transfer improvements, Gemini CLI and native Daytona terminals. Research prototypes remain opt-in; see the [changelog](CHANGELOG.md#400) for public contract changes and the [roadmap](https://elie-laloum.github.io/outpost/project/roadmap/) for capabilities, limits and remaining work.
+Version 4.1.0 improves CLI setup, explicit agent authentication and custom OpenAI Responses providers. Docker/Podman images build automatically during `init`; use `--no-build` to opt out. See the [changelog](CHANGELOG.md#410) for behavior changes and the [roadmap](https://elie-laloum.github.io/outpost/project/roadmap/) for upcoming priorities.
 
 ## Get started
 

@@ -1,5 +1,15 @@
 # Historique des versions
 
+## 4.1.0
+
+- Remplacer le parsing global et l’aide manuelle du CLI par les sous-commandes Commander et leurs options propres ; utiliser les sélections Clack pour l’initialisation interactive. Les options d’autres commandes auparavant ignorées sont désormais refusées. Les sorties sans terminal et JSON restent sans décoration.
+- Guider le choix du gestionnaire de paquets et de l’authentification. Vérifier la disponibilité du gestionnaire avant écriture avec `--install`. Construire automatiquement les images Docker/Podman ; `--no-build` permet de générer les fichiers sans build. Les workflows déjà générés restent inchangés.
+- Générer les parcours explicites par clé API, jeton d’abonnement Claude et session de compte Codex. Vérifier les credentials requis avant allocation ; préparer la connexion API Codex par stdin ou copier une source de credentials de compte explicitement sélectionnée dans le home privé du sandbox. Les trousseaux hôtes ne sont pas exportés.
+- Ajouter `CodexModelProvider` avec URL Responses personnalisée et nom de variable de clé API ; exposer `--base-url`, `--api-key-env` et `--model` dans init. Les endpoints limités à Chat Completions ne sont pas pris en charge. Vérifier la connexion native Codex contre un endpoint Responses simulé local dans la CI container.
+- Conserver les variables d’allocation Vercel pour chaque commande, avec priorité aux variables de commande. Tester la transmission du jeton Claude par le script généré et documenter la conservation des variables lors d’un changement de provider.
+- Ajouter des campagnes cloud Claude/Codex authentifiées activables manuellement, avec rapports sans secrets. Les credentials absents restent ignorés ; cette fixture ne prouve pas la réussite d’une campagne sur un compte réel. Les campagnes planifiées n’appellent pas les modèles.
+- Recentrer la roadmap bilingue sur la fiabilité à court terme et les orientations à moyen terme, avec critères explicites de validation.
+
 ## 4.0.0
 
 Cette version majeure étend les unions publiques de statuts des workflows. Les consommateurs exhaustifs doivent traiter les statuts de tâche `paused` et `rejected`, ainsi que le statut de résultat de workflow `paused`. Les fonctionnalités de recherche restent sur activation explicite, avec leurs limites documentées.

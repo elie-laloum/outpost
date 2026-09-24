@@ -1,5 +1,15 @@
 # Changelog
 
+## 4.1.0
+
+- Replace global CLI parsing and manual help with Commander subcommands and command-specific options; use Clack selection prompts for interactive initialization. Previously ignored options belonging to other commands are now rejected. Headless and JSON output remain plain.
+- Guide initialization through package manager and authentication choices. Check a requested package manager before writing files when `--install` is used. Build Docker/Podman images automatically; use `--no-build` to generate files without building. Existing generated workflows are unchanged.
+- Generate explicit API-key, Claude subscription-token and Codex account-login setup. Validate required model credentials before allocation; prepare Codex API login through stdin, or copy an explicitly selected account credential seed into the private sandbox home. Host keychains are not exported.
+- Add `CodexModelProvider` with a custom Responses API URL and API-key environment variable; expose `--base-url`, `--api-key-env` and `--model` in initialization. Chat Completions-only endpoints are not supported. Verify the native Codex connection against a local simulated Responses endpoint in container CI.
+- Preserve Vercel allocation variables on every command, with command-level overrides. Regress generated Claude token forwarding and document that switching providers must preserve explicit model variables.
+- Add manually enabled authenticated Claude/Codex cloud campaigns with sanitized reports. Missing credentials remain skipped; adding this fixture does not establish a successful live account campaign. Scheduled runs do not make model calls.
+- Refocus the bilingual roadmap on near-term reliability and medium-term directions with explicit validation criteria.
+
 ## 4.0.0
 
 This major release extends public workflow status unions. Exhaustive consumers must handle task statuses `paused` and `rejected`, and workflow result status `paused`. Research features remain explicitly opt-in with their documented limitations.
