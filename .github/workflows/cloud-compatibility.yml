@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       agents:
-        description: Install current Claude Code/Codex CLIs and check help contracts (no model calls)
+        description: Install current Claude Code/Codex/Gemini CLIs and check help contracts (no model calls)
         type: boolean
         default: true
 permissions:
@@ -33,7 +33,7 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Run explicitly enabled live fixtures
-        run: node test/cloud-live.ts > cloud-compatibility.json
+        run: node test/cloud-live.ts > "$RUNNER_TEMP/cloud-compatibility.json"
         env:
           OUTPOST_CLOUD_LIVE: "1"
           OUTPOST_CLOUD_PROVIDERS: ${{ matrix.provider }}
@@ -46,6 +46,6 @@ jobs:
         if: always()
         with:
           name: cloud-compatibility-${{ matrix.provider }}
-          path: cloud-compatibility.json
+          path: ${{ runner.temp }}/cloud-compatibility.json
           if-no-files-found: warn
           retention-days: 14

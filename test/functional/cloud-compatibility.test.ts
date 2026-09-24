@@ -237,6 +237,10 @@ test("standalone cloud runner reports skipped with exit 2 when disabled", async 
   assert.equal(result.status, 2);
   const report = JSON.parse(result.stdout);
   assert.equal(report.schemaVersion, 1);
+  assert.match(report.source.commit, /^(?:[a-f0-9]{40}|[a-f0-9]{64})$/);
+  assert.equal(typeof report.source.dirty, "boolean");
+  assert.equal(report.node, process.version);
+  assert.ok(Number.isFinite(Date.parse(report.startedAt)));
   assert.ok(
     report.reports.every(
       (provider: { status: string }) => provider.status === "skipped",
@@ -247,6 +251,7 @@ test("standalone cloud runner reports skipped with exit 2 when disabled", async 
 test("agent CLI probes only request installation, versions and adapter help", async () => {
   const calls: string[] = [];
   const checks: string[] = [];
+  let missingGeminiOption = false;
   const lease: SandboxLease = {
     root: "/fixture",
     home: "/fixture",
@@ -258,6 +263,7 @@ test("agent CLI probes only request installation, versions and adapter help", as
       const args = command.arguments ?? [];
       if (command.executable === "npm") {
         assert.equal(args[0], "install");
+        assert.ok(args.includes("@google/gemini-cli"));
         return { status: 0, stdout: "", stderr: "" };
       }
       assert.ok(args.includes("--help") || args.includes("--version"));
@@ -268,6 +274,9 @@ test("agent CLI probes only request installation, versions and adapter help", as
           "codex exec resume",
           "codex exec fork",
           "claude",
+          missingGeminiOption
+            ? "gemini"
+            : "gemini --approval-mode --output-format",
           ...args,
         ].join(" "),
         stderr: "",
@@ -277,6 +286,22 @@ test("agent CLI probes only request installation, versions and adapter help", as
   await verifyCloudAgents(lease, new AbortController().signal, (check) =>
     checks.push(check.name),
   );
-  assert.equal(calls.length, 9);
-  assert.equal(checks.length, 8);
+  assert.equal(calls.length, 11);
+  assert.deepEqual(checks, [
+    "codex-cli-version",
+    "codex-cli-start",
+    "codex-cli-resume",
+    "codex-cli-fork",
+    "claude-cli-version",
+    "claude-cli-start",
+    "claude-cli-resume",
+    "claude-cli-fork",
+    "gemini-cli-version",
+    "gemini-cli-start",
+  ]);
+  missingGeminiOption = true;
+  await assert.rejects(
+    verifyCloudAgents(lease, new AbortController().signal, () => {}),
+    { code: "ERR_ASSERTION" },
+  );
 });

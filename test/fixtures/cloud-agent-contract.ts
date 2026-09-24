@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { posix } from "node:path";
 import { codexDiagnostics } from "../../src/adapters/agents/codex-diagnostics.ts";
+import { geminiDiagnostics } from "../../src/adapters/agents/gemini-diagnostics.ts";
 import { claudeDiagnostics } from "../../src/adapters/agents/claude-diagnostics.ts";
 import type { SandboxLease } from "../../src/domain/sandbox.types.ts";
 import type { CompatibilityCheck } from "./cloud-compatibility.types.ts";
@@ -30,11 +31,13 @@ export async function verifyCloudAgents(
     retain: 1024,
   });
   assert.equal(installed.status, 0);
-  for (const [index, scenarios] of [
-    codexDiagnostics(),
-    claudeDiagnostics(),
-  ].entries()) {
-    const agent = agentPackages[index]!;
+  const diagnostics = {
+    codex: codexDiagnostics,
+    claude: claudeDiagnostics,
+    gemini: geminiDiagnostics,
+  };
+  for (const agent of agentPackages) {
+    const scenarios = diagnostics[agent.executable]();
     const executable = posix.join(
       prefix,
       "node_modules",

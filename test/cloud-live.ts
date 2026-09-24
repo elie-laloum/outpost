@@ -1,7 +1,13 @@
+import { fileURLToPath } from "node:url";
+import { cloudCompatibilitySource } from "./fixtures/cloud-compatibility-source.ts";
 import { daytona } from "../src/providers/daytona.ts";
 import { vercel } from "../src/providers/vercel.ts";
 import { runCloudCompatibility } from "./fixtures/cloud-compatibility.ts";
 
+const source = await cloudCompatibilitySource(
+  fileURLToPath(new URL("../", import.meta.url)),
+);
+const startedAt = new Date().toISOString();
 const environment = process.env;
 const reports = await runCloudCompatibility({
   environment,
@@ -26,7 +32,13 @@ const reports = await runCloudCompatibility({
     });
   },
 });
-console.log(JSON.stringify({ schemaVersion: 1, reports }, null, 2));
+console.log(
+  JSON.stringify(
+    { schemaVersion: 1, source, startedAt, node: process.version, reports },
+    null,
+    2,
+  ),
+);
 process.exitCode = reports.some((report) => report.status === "fail")
   ? 1
   : reports.every((report) => report.status === "skipped")

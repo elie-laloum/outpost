@@ -19,12 +19,14 @@ From a checkout of Outpost, install the locked dependencies with `npm ci` and us
 This fixture deliberately uses explicit Vercel access-token authentication, including team and project identifiers, rather than ambient OIDC discovery. See [Vercel authentication](https://vercel.com/docs/sandbox/concepts/authentication) and [Daytona configuration](https://www.daytona.io/docs/en/typescript-sdk/daytona/). Model billing and model login are separate from provider allocation; no model access is required here.
 
 ```sh
-OUTPOST_CLOUD_LIVE=1 OUTPOST_CLOUD_PROVIDERS=vercel,daytona node test/cloud-live.ts > cloud-compatibility.json
+OUTPOST_CLOUD_LIVE=1 OUTPOST_CLOUD_PROVIDERS=vercel,daytona node test/cloud-live.ts > /tmp/outpost-cloud-compatibility.json
 ```
 
-Set `OUTPOST_CLOUD_AGENTS=1` to additionally install the current `@openai/codex` and `@anthropic-ai/claude-code` npm packages inside each disposable sandbox. The report records only the numeric CLI versions. Their actual version/help commands check the adapters' start, resume and fork command options. This requires outbound npm access and more runtime. These checks exercise CLI syntax; they do not establish authenticated model execution, conversation capture or end-to-end agent behavior. The report always marks authenticated model turns as skipped.
+Set `OUTPOST_CLOUD_AGENTS=1` to additionally install the current `@openai/codex`, `@anthropic-ai/claude-code` and `@google/gemini-cli` npm packages inside each disposable sandbox. The report records only the numeric CLI versions. Their actual version/help commands check the adapters' start options and, for Claude Code and Codex, resume and fork options. Gemini currently checks start only. This requires outbound npm access and more runtime. These checks exercise CLI syntax; they do not establish authenticated model execution, conversation capture or end-to-end agent behavior. The report always marks authenticated model turns as skipped.
 
 The runner writes JSON with schema version 1 and per-provider/per-check `pass`, `fail` or `skipped` statuses. It omits raw SDK errors, command output, paths, tokens and file contents. Exit code 0 means the executed provider checks passed; 1 means a contract or cleanup failed; 2 means every provider was skipped. Read individual provider statuses: a passed provider does not turn another provider's missing credentials into a live pass.
+
+The report also records `startedAt`, the Node.js version and `source.commit`/`source.dirty` from the fixture checkout before allocation. Keep the output outside the checkout so creating it does not mark the source dirty. A dirty checkout cannot establish compatibility of the recorded commit alone; unavailable Git metadata is reported as `null`. These fields are local observations, not signed provenance. Archive the workflow URL and report together, and compare the recorded commit with the commit you intend to validate. A successful run on an older remote commit does not verify unpushed changes.
 
 ## Scheduled checks
 

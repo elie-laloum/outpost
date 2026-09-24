@@ -27,3 +27,8 @@ export interface CompatibilityOptions {
   readonly deadlineMs?: number;
   readonly cleanupMs?: number;
 }
+
+export interface CompatibilitySource {
+  readonly commit: string | null;
+  readonly dirty: boolean | null;
+}
