@@ -1,4 +1,4 @@
-import type { SandboxLease } from "../domain/sandbox.types.ts";
+import type { FileTransfers, SandboxLease } from "../domain/sandbox.types.ts";
 import type { ResourceActivity } from "../infrastructure/resource-activity.types.ts";
 
 export function trackedSandboxLease(
@@ -6,6 +6,10 @@ export function trackedSandboxLease(
   activity: ResourceActivity,
 ): SandboxLease {
   const transfers = lease.fileTransfers;
+  const upload = transfers?.uploadBatch?.bind(transfers);
+  const uploadBatch: FileTransfers["uploadBatch"] = upload
+    ? (...args) => activity.run("upload-batch", () => upload(...args))
+    : undefined;
   return {
     ...lease,
     invoke: (command) => activity.run("invoke", () => lease.invoke(command)),
@@ -20,6 +24,7 @@ export function trackedSandboxLease(
       ? {
           fileTransfers: {
             ...transfers,
+            ...(uploadBatch ? { uploadBatch } : {}),
             manifest: (source, paths, options) =>
               activity.run("manifest", () =>
                 transfers.manifest(source, paths, options),

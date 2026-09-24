@@ -22,4 +22,5 @@ export const resourceOperationKinds = [
   "download",
   "manifest",
   "download-batch",
+  "upload-batch",
 ] as const;
