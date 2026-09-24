@@ -65,3 +65,53 @@ La version d’agent de l’hôte ne décrit pas celle d’un container ou d’u
 Le code de sortie `1` indique une vérification en échec ou une invocation invalide. Les avertissements et vérifications ignorées seuls laissent le code `0`. `--json` écrit uniquement le rapport sur stdout pour une invocation valide, y compris lorsque des vérifications échouent. Les champs comprennent `provider`, `agent`, `scope` (`host` ou `host-and-image`), éventuellement `image`, `placement`, `interactiveTerminal`, `checks` et `hasFailures`. Chaque vérification contient `id`, `status`, `message` et éventuellement `version`/`referenceVersion`. Les sorties brutes des commandes et les identifiants ne sont pas inclus.
 
 Voir [dépannage](../troubleshooting/) pour les échecs d’exécution et [récupération](../recovery/) pour les travaux conservés.
+
+## Inspecter une sandbox déjà détenue
+
+Appelez `sandbox.diagnose()` ou `diagnoseSandbox(sandbox)` dans le workflow qui détient la sandbox active. Les sondes inspectent ses véritables exécutables Node.js/Git, les permissions du home, les flux de sortie et le code de sortie non nul d’une commande. Elles n’allouent, ne libèrent, n’installent et ne remplacent aucune sandbox. Toute la séquence conserve l’exclusivité de la sandbox : aucun dispatch, attachement ou commande ne peut la chevaucher.
+
+```ts
+import { createSandbox, diagnoseSandbox } from "@elie-laloum/outpost";
+import { docker } from "@elie-laloum/outpost/providers/docker";
+
+const sandbox = await createSandbox({
+  repository: "/path/to/repository",
+  provider: docker({ image: "outpost:my-workflow" }),
+});
+try {
+  const report = await diagnoseSandbox(sandbox, {
+    agent: "codex",
+    deadlineMs: 5000,
+  });
+  console.log(report.hasFailures, report.capabilities, report.checks);
+} finally {
+  await sandbox.close();
+}
+```
+
+`agent` est facultatif. Sa présence ajoute les sondes de version et d’aide des commandes par défaut start/resume/fork de la CLI installée dans la sandbox. Aucune conversation n’est exécutée. Sans `agent`, aucun exécutable d’agent n’est invoqué. Les variables existantes restent celles de la sandbox détenue ; cela ne reproduit pas l’environnement sans réseau ni identifiants de `--image`.
+
+Les commandes conservent une sortie bornée et disposent chacune de cinq secondes par défaut, configurables de 1 à 60 000 millisecondes avec `deadlineMs`. Un `signal` facultatif annule les sondes suivantes. Les providers doivent respecter les délais et l’annulation des commandes et transferts ; les diagnostics ne peuvent pas forcer un provider personnalisé qui ignore ce contrat à terminer. Les rapports contiennent des observations filtrées, sans sorties brutes ni erreurs du provider. `scope` vaut `owned-sandbox`, `ownership` vaut `caller` et `modelCompatibility` reste `unverified`.
+
+### Sondes cloud et transferts explicites
+
+`diagnoseSandbox(lease, options)` accepte une `SandboxLease` existante, notamment une lease cloud explicitement acquise par votre code. Doctor ne déclenche aucune allocation cloud ; votre workflow choisit le provider, les identifiants, le coût des ressources et leur libération. Vous devez conserver l’exclusivité d’une lease fournie directement pendant l’inspection et la libérer vous-même. Vous pouvez fournir `{ provider: { name, placement } }` comme métadonnées annoncées ; les diagnostics ne les vérifient pas. Une `Sandbox` fournit automatiquement son provider configuré.
+
+Activez `transfers: true` pour tester l’envoi et le téléchargement binaires. La sonde crée un répertoire temporaire unique sous la racine de la lease, vérifie les octets envoyés via un processus Node.js dans la sandbox, puis compare le téléchargement sur l’hôte. Le nettoyage utilise un signal borné indépendant, même après annulation. Vérifiez `sandbox.transfers.cleanup` ; un échec indique le chemin conservé et laisse la propriété à l’appelant. Les sondes réussies suppriment leurs fichiers temporaires sur l’hôte et dans la sandbox. Par défaut, aucun fichier de transfert n’est créé.
+
+`capabilities` sépare les méthodes annoncées (`advertised`) des résultats observés (`observed`). Une sonde de transfert réussie couvre uniquement ce petit fichier binaire. Les transferts par lots, liens symboliques, permissions, sémantique des répertoires et terminaux interactifs restent non vérifiés. L’annulation des descendants d’une charge arbitraire, l’accès réseau, la synchronisation du dépôt et l’accès au compte/modèle ne sont pas certifiés. Pour les tests explicites de compatibilité des SDK cloud, consultez [la compatibilité cloud](../cloud-compatibility/).
+
+## Inspecter les fixtures de protocole intégrées
+
+```ts
+import { diagnoseAgentProtocol } from "@elie-laloum/outpost";
+
+console.log(diagnoseAgentProtocol("codex"));
+console.log(diagnoseAgentProtocol("claude"));
+```
+
+Ce rapport synchrone et hors ligne décode des événements synthétiques intégrés : identifiants de conversation, texte, outils, usage, fin, échecs, événements inconnus et entrées malformées. `scope` vaut `bundled-protocol-fixtures`. `referenceVersion` identifie la version configurée de l’agent ; `installedCli` et `modelCompatibility` restent `unverified`. Une réussite vérifie le parseur du package contre ces fixtures structurelles, sans certifier un exécutable installé, un compte authentifié ou un modèle. Aucune sonde de modèle réel n’est fournie ou appelée implicitement.
+
+Les fixtures exécutables déterministes dans `test/fixtures/agent-protocol.ts` exercent également les arguments et l’entrée standard des requêtes start/resume/fork par défaut avec une sortie JSON par lignes fragmentée. Lancez-les depuis les sources avec `node --test test/functional/doctor-protocol.test.ts`. Elles n’utilisent ni CLI d’agent installée ni identifiants.
+
+Lancez `node test/fixtures/sandbox-diagnostics.ts` depuis les sources pour une démonstration locale complète. Elle crée un dépôt Git temporaire, diagnostique une sandbox `local()` explicite avec sondes binaires, vérifie sa réutilisation par une commande, contrôle les deux protocoles intégrés puis supprime ses ressources temporaires. Elle n’invoque jamais d’agent réel. Pour exercer une image de conteneur locale existante, définissez `OUTPOST_CONTAINER_ENGINE=docker` ou `podman` ; `OUTPOST_CONTAINER_IMAGE` vaut `outpost-ci:latest` par défaut. La fixture conserve son dépôt temporaire si le nettoyage de la sandbox ne peut pas être confirmé.

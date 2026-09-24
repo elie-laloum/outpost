@@ -11,6 +11,10 @@ import type {
   WorkspaceRecord,
 } from "../domain/workspace.types.ts";
 import type { Logging } from "../infrastructure/journal.types.ts";
+import type {
+  SandboxDiagnosticOptions,
+  SandboxDiagnosticReport,
+} from "./doctor-sandbox.types.ts";
 import type { DispatchOptions, Execution } from "./execution.types.ts";
 import type { VariableQuestion } from "./interactive-brief.types.ts";
 
@@ -108,6 +112,9 @@ export interface WarmDispatchResult<T> extends Omit<
 }
 
 export interface Sandbox {
+  diagnose(
+    options?: SandboxDiagnosticOptions,
+  ): Promise<SandboxDiagnosticReport>;
   readonly workspace: Workspace;
   readonly root: string;
   dispatch<T = undefined>(

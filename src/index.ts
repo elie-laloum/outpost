@@ -119,3 +119,17 @@ export type {
   RecoveryVerification,
   RecoveryVerificationOptions,
 } from "./application/recovery-verification.types.ts";
+
+export { diagnoseSandbox } from "./application/doctor-sandbox.ts";
+export type {
+  SandboxDiagnosticOptions,
+  SandboxDiagnosticReport,
+  DiagnosticCapability,
+} from "./application/doctor-sandbox.types.ts";
+export type {
+  DiagnosticCheck,
+  DiagnosticStatus,
+  DoctorAgent,
+} from "./application/doctor.types.ts";
+export { diagnoseAgentProtocol } from "./application/doctor-protocol.ts";
+export type { AgentProtocolReport } from "./application/doctor-protocol.types.ts";
