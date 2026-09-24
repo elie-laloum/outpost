@@ -1,5 +1,11 @@
 # Historique des versions
 
+## Unreleased
+
+- Vérifier l’aide des commandes agents par défaut de lancement/reprise/fork dans les images de diagnostic, en contrôlant usage et options déclarées plutôt que le seul code de sortie ; conserver explicitement l’exécution réelle et la compatibilité du protocole comme non vérifiées.
+- Étendre `doctor --image` au diagnostic d’une image Docker/Podman locale dans une sandbox temporaire, sans téléchargement d’image ni réseau ; distinguer versions des agents de l’image, erreurs de nettoyage et vérifications hôtes.
+- Ajouter `outpost doctor` avec vérifications bornées des prérequis hôtes, accès Docker/Podman, comparaison des versions des agents hôtes, capacités non vérifiées explicites et rapports JSON.
+
 ## 2.0.0
 
 - Normaliser le dossier du test de workflow avant de calculer les chemins relatifs des dépôts, pour corriger la CI macOS avec les dossiers temporaires symboliques.

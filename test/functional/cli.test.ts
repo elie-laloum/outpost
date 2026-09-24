@@ -54,3 +54,42 @@ test("CLI initializes a project noninteractively and refuses overwrites", async 
   assert.equal(repeat.status, 1);
   assert.match(repeat.stderr, /overwrite/);
 });
+
+test("doctor CLI emits a complete JSON report and exits nonzero when Git is absent", async (t) => {
+  const directory = await mkdtemp(join(tmpdir(), "outpost-doctor-"));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const output = await executeProcess({
+    executable: process.execPath,
+    arguments: [
+      cli,
+      "doctor",
+      "--provider",
+      "local",
+      "--agent",
+      "codex",
+      "--json",
+    ],
+    directory,
+    variables: { PATH: directory },
+  });
+  assert.equal(output.status, 1);
+  assert.equal(output.stderr, "");
+  const report = JSON.parse(output.stdout);
+  assert.equal(report.hasFailures, true);
+  assert.equal(report.scope, "host");
+  assert.ok(
+    report.checks.some(
+      (check: { id: string; status: string }) =>
+        check.id === "host.git" && check.status === "fail",
+    ),
+  );
+  assert.ok(
+    report.checks.some(
+      (check: { id: string; status: string }) =>
+        check.id === "execution" && check.status === "skipped",
+    ),
+  );
+  const invalid = await run(["doctor", "--provider", "constructor"]);
+  assert.equal(invalid.status, 1);
+  assert.match(invalid.stderr, /Unknown provider/);
+});

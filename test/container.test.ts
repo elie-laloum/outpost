@@ -1,3 +1,7 @@
+import { spawn } from "node:child_process";
+import { once } from "node:events";
+import { diagnoseImage } from "../src/application/doctor-image.ts";
+import { agentVersions } from "../src/providers/versions.constants.ts";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFile, mkdir, writeFile, readlink, lstat } from "node:fs/promises";
@@ -405,5 +409,153 @@ test(
       ],
     });
     assert.equal(result.status, 0, result.stderr);
+  },
+);
+
+test(
+  "real image diagnostics check both agents and remove containers after success and timeout",
+  { skip: !process.env.OUTPOST_CONTAINER_ENGINE },
+  async () => {
+    const engine =
+      process.env.OUTPOST_CONTAINER_ENGINE === "podman" ? "podman" : "docker";
+    for (const agent of ["codex", "claude"] as const) {
+      let name = "";
+      const checks = await diagnoseImage(
+        { provider: engine, agent, image: "outpost-ci:latest" },
+        async (command) => {
+          const args = command.arguments ?? [];
+          if (args[0] === "create") name = args[args.indexOf("--name") + 1]!;
+          const result = await executeProcess(command);
+          if (args[0] === "start" && result.status === 0) {
+            const inspected = await executeProcess({
+              executable: engine,
+              arguments: [
+                "inspect",
+                "--format",
+                "{{json .HostConfig.NetworkMode}}",
+                name,
+              ],
+            });
+            assert.equal(JSON.parse(inspected.stdout), "none");
+          }
+          return result;
+        },
+      );
+      assert.ok(
+        checks.every((check) => check.status === "pass"),
+        JSON.stringify(checks),
+      );
+      assert.deepEqual(
+        checks
+          .filter((check) => check.id.startsWith("agent.cli."))
+          .map((check) => check.id),
+        ["agent.cli.start", "agent.cli.resume", "agent.cli.fork"],
+      );
+      assert.equal(
+        checks.find((check) => check.id === "agent.sandbox")?.version,
+        agentVersions[agent],
+      );
+      assert.equal(
+        (
+          await executeProcess({
+            executable: engine,
+            arguments: ["inspect", name],
+          })
+        ).status,
+        1,
+      );
+    }
+    let name = "";
+    const checks = await diagnoseImage(
+      { provider: engine, agent: "codex", image: "outpost-ci:latest" },
+      async (command) => {
+        const args = command.arguments ?? [];
+        if (args[0] === "create") name = args[args.indexOf("--name") + 1]!;
+        const inner = args.indexOf("outpost");
+        if (inner >= 0 && args[inner + 1] === "codex")
+          return executeProcess({
+            ...command,
+            arguments: [
+              ...args.slice(0, inner + 1),
+              "node",
+              "-e",
+              "setTimeout(() => {}, 30000)",
+            ],
+          });
+        return executeProcess(command);
+      },
+    );
+    assert.match(
+      checks.find((check) => check.id === "agent.sandbox")!.message,
+      /timed out/,
+    );
+    assert.equal(
+      checks.find((check) => check.id === "image.cleanup")?.status,
+      "pass",
+    );
+    assert.equal(
+      (
+        await executeProcess({
+          executable: engine,
+          arguments: ["inspect", name],
+        })
+      ).status,
+      1,
+    );
+  },
+);
+
+test(
+  "interrupting image diagnostics removes the active container",
+  {
+    skip: !process.env.OUTPOST_CONTAINER_ENGINE || process.platform === "win32",
+  },
+  async (t) => {
+    const engine =
+      process.env.OUTPOST_CONTAINER_ENGINE === "podman" ? "podman" : "docker";
+    const child = spawn(
+      process.execPath,
+      ["test/fixtures/doctor-interruption.ts", engine],
+      { stdio: ["ignore", "pipe", "pipe"] },
+    );
+    const closed = once(child, "close");
+    let output = "",
+      error = "",
+      name = "",
+      interrupted = false;
+    child.stderr.on("data", (data: Buffer) => {
+      error += data.toString();
+    });
+    child.stdout.on("data", (data: Buffer) => {
+      output += data.toString();
+      name = /container=(outpost-[\w-]+)/.exec(output)?.[1] ?? name;
+      if (!interrupted && output.includes("ready")) {
+        interrupted = true;
+        child.kill("SIGTERM");
+      }
+    });
+    const timeout = setTimeout(() => child.kill("SIGKILL"), 20_000);
+    t.after(async () => {
+      clearTimeout(timeout);
+      child.kill("SIGKILL");
+      if (name)
+        await executeProcess({
+          executable: engine,
+          arguments: ["rm", "--force", name],
+        });
+    });
+    const [status] = await closed;
+    assert.equal(interrupted, true, error);
+    assert.equal(status, 143, error);
+    assert.ok(name);
+    assert.equal(
+      (
+        await executeProcess({
+          executable: engine,
+          arguments: ["inspect", name],
+        })
+      ).status,
+      1,
+    );
   },
 );

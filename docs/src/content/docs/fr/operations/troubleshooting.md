@@ -7,6 +7,8 @@ sidebar:
 
 Commencez par le code d’erreur, le log et le chemin du workspace conservé. Changez une seule configuration à la fois pour garder le diagnostic lisible.
 
+Utilisez [le diagnostic hôte](../doctor/) pour vérifier les prérequis avant d’examiner un échec d’exécution.
+
 | Symptôme                                  | Vérification / action                                                                          |
 | ----------------------------------------- | ---------------------------------------------------------------------------------------------- |
 | Image introuvable                         | Construire avec le même moteur et le même tag que le provider.                                 |

@@ -1,0 +1,68 @@
+import {
+  doctorDefaults,
+  providerDiagnostics,
+} from "../application/doctor.constants.ts";
+import { diagnose } from "../application/doctor.ts";
+import type { DoctorProvider } from "../application/doctor.types.ts";
+import { invariant } from "../domain/errors.ts";
+import type { Executor } from "../infrastructure/process.types.ts";
+import type { CliInvocation } from "./main.types.ts";
+
+function isProvider(value: string): value is DoctorProvider {
+  return Object.hasOwn(providerDiagnostics, value);
+}
+export async function doctorCommand(
+  { values, positionals }: CliInvocation,
+  execute?: Executor,
+  write: (text: string) => void = (text) => {
+    process.stdout.write(text);
+  },
+): Promise<void> {
+  invariant(
+    positionals.length === 1,
+    "Usage: outpost doctor [--provider NAME] [--agent NAME] [--image NAME] [--json]",
+  );
+  for (const key of Object.keys(values))
+    invariant(
+      ["provider", "agent", "image", "json"].includes(key),
+      `Unsupported doctor option: --${key}`,
+    );
+  const provider = values.provider ?? doctorDefaults.provider;
+  const agent = values.agent ?? doctorDefaults.agent;
+  invariant(
+    isProvider(provider),
+    "Unknown provider. Choose docker, podman, local, vercel or daytona.",
+  );
+  invariant(
+    agent === "codex" || agent === "claude",
+    "Unknown agent. Choose codex or claude.",
+  );
+  const report = await diagnose(
+    {
+      provider,
+      agent,
+      ...(values.image !== undefined ? { image: values.image } : {}),
+    },
+    execute,
+  );
+  if (values.json) write(`${JSON.stringify(report, null, 2)}\n`);
+  else {
+    write(
+      `Outpost doctor — ${report.scope === "host" ? "host checks" : "host and image checks"} (${provider}, ${agent})\n`,
+    );
+    write(
+      `Provider contract: ${report.placement}; interactive terminal: ${report.interactiveTerminal ? "supported" : "unsupported"}. Workflow execution is not tested.\n`,
+    );
+    if (report.image) write(`Image: ${report.image}\n`);
+    for (const check of report.checks)
+      write(
+        `[${check.status.toUpperCase()}] ${check.id}${check.version ? ` ${check.version}` : ""}${check.referenceVersion ? ` (pinned: ${check.referenceVersion})` : ""}: ${check.message}\n`,
+      );
+    write(
+      report.hasFailures
+        ? "Diagnostic checks found failures.\n"
+        : "No blocking check failed; warnings and skipped checks still need review.\n",
+    );
+  }
+  if (report.hasFailures) process.exitCode = 1;
+}

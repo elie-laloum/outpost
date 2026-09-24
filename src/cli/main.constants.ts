@@ -4,6 +4,8 @@ outpost init [--yes] [--agent codex|claude] [--provider docker|podman|vercel|day
              [--manager npm|pnpm|yarn|bun] [--model NAME] [--install] [--build] [--image NAME] [--directory PATH] [--repository PATH]
 outpost image build|remove [--engine docker|podman] [--file PATH] [--image NAME] [--uid ID] [--gid ID]
 
+outpost doctor [--provider docker|podman|local|vercel|daytona] [--agent codex|claude] [--image NAME] [--json]
+
 Node.js 24+ and Git are required. Run generated scripts with Node.js.
 Initialization writes run.ts and project files directly into --directory (default: current directory).
 --repository selects the target Git repository; relative paths are resolved from the workflow directory.
@@ -14,6 +16,7 @@ export const cliOptions = {
   yes: { type: "boolean", short: "y" },
   install: { type: "boolean" },
   build: { type: "boolean" },
+  json: { type: "boolean" },
   agent: { type: "string" },
   provider: { type: "string" },
   manager: { type: "string" },

@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Check default agent start/resume/fork CLI help inside diagnostic images, verifying command usage and declared options instead of trusting a successful help exit; keep real execution and protocol compatibility explicitly unverified.
+- Extend `doctor --image` to check a local Docker/Podman image in a temporary sandbox, without image downloads or networking; report image agent versions and cleanup failures separately from host checks.
+- Add `outpost doctor` with bounded host prerequisite checks, Docker/Podman connectivity, host agent version comparison, explicit unchecked capabilities and JSON reports.
+
 ## 2.0.0
 
 - Normalize the workflow test directory before computing relative repository paths, fixing macOS CI with symlinked temporary directories.

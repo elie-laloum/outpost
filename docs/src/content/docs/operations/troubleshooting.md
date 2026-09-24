@@ -7,6 +7,8 @@ sidebar:
 
 Start with the error code, operation log and retained workspace path. Change one configuration at a time so the result remains diagnosable.
 
+Use [host diagnostics](../doctor/) to check prerequisites before investigating an execution failure.
+
 | Symptom                                | Check / next action                                                                                |
 | -------------------------------------- | -------------------------------------------------------------------------------------------------- |
 | Image not found                        | Build with the same engine and image tag configured in the provider.                               |
