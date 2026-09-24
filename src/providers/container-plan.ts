@@ -33,7 +33,9 @@ export function containerPlan({
     root,
     "--cap-drop",
     "ALL",
-    ...(fileParents.size ? ["--cap-add", "CHOWN"] : []),
+    ...(fileParents.size || config.caches?.length
+      ? ["--cap-add", "CHOWN"]
+      : []),
     "--security-opt",
     "no-new-privileges",
     "--tmpfs",

@@ -5,8 +5,10 @@ import type {
 } from "../domain/command.types.ts";
 import type { Volume } from "../domain/sandbox.types.ts";
 import type { Executor } from "../infrastructure/process.types.ts";
+import type { DependencyCache } from "./container-cache.types.ts";
 
 export interface ContainerOptions {
+  readonly caches?: readonly DependencyCache[];
   readonly image?: string;
   readonly user?: { readonly uid: number; readonly gid: number };
   readonly volumes?: readonly Volume[];

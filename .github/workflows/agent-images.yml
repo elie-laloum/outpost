@@ -1,0 +1,115 @@
+name: Agent images
+on:
+  workflow_dispatch:
+    inputs:
+      base:
+        description: "Pinned node:24-bookworm-slim@sha256:<digest> base"
+        required: true
+        type: string
+      snapshot:
+        description: "Debian snapshot timestamp (YYYYMMDDTHHMMSSZ)"
+        required: true
+        type: string
+      publish:
+        description: "Publish and attest the tested image (requires agent-images environment approval)"
+        default: false
+        type: boolean
+permissions:
+  contents: read
+concurrency:
+  group: agent-images-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  build:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    outputs:
+      image: ${{ steps.names.outputs.image }}
+      tag: ${{ steps.names.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - name: Generate pinned build context
+        env:
+          BASE: ${{ inputs.base }}
+          SNAPSHOT: ${{ inputs.snapshot }}
+        run: node scripts/prepare-agent-image.mjs "$RUNNER_TEMP/agent-image" "$BASE" "$SNAPSHOT"
+      - name: Name this build
+        id: names
+        env:
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          echo "image=ghcr.io/${REPOSITORY,,}/agents" >> "$GITHUB_OUTPUT"
+          echo "tag=sha-${GITHUB_SHA}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" >> "$GITHUB_OUTPUT"
+      - name: Build and test the image
+        run: |
+          docker build --build-arg AGENT_UID="$(id -u)" --build-arg AGENT_GID="$(id -g)" -t outpost-ci:latest "$RUNNER_TEMP/agent-image"
+          OUTPOST_CONTAINER_ENGINE=docker node --test test/container.test.ts
+          printf 'hello\n' | OUTPOST_CONTAINER_ENGINE=docker script -qec 'node test/fixtures/container-terminal.ts' /dev/null
+          docker save outpost-ci:latest -o "$RUNNER_TEMP/agent-image.tar"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: agent-image
+          path: ${{ runner.temp }}/agent-image.tar
+          retention-days: 7
+      - uses: actions/upload-artifact@v7
+        with:
+          name: agent-image-inputs
+          path: ${{ runner.temp }}/agent-image
+          retention-days: 7
+          include-hidden-files: true
+  publish:
+    needs: build
+    if: inputs.publish && github.ref == 'refs/heads/main' && vars.OUTPOST_AGENT_IMAGES_PUBLISH == 'true'
+    runs-on: ubuntu-latest
+    environment: agent-images
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: agent-image
+          path: ${{ runner.temp }}
+          digest-mismatch: error
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Push the tested image
+        id: push
+        env:
+          IMAGE: ${{ needs.build.outputs.image }}
+          TAG: ${{ needs.build.outputs.tag }}
+        run: |
+          docker load -i "$RUNNER_TEMP/agent-image.tar"
+          docker tag outpost-ci:latest "$IMAGE:$TAG"
+          docker push "$IMAGE:$TAG"
+          digest=$(docker inspect --format '{{range .RepoDigests}}{{println .}}{{end}}' "$IMAGE:$TAG" | awk -F @ -v image="$IMAGE" '$1 == image { print $2 }')
+          [[ "$digest" =~ ^sha256:[a-f0-9]{64}$ ]]
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+      - uses: actions/attest@v4
+        with:
+          subject-name: ${{ needs.build.outputs.image }}
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: true
+      - name: Verify the published digest
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          IMAGE: ${{ needs.build.outputs.image }}
+          DIGEST: ${{ steps.push.outputs.digest }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          gh attestation verify "oci://$IMAGE@$DIGEST" --repo "$REPOSITORY" --signer-workflow "$REPOSITORY/.github/workflows/agent-images.yml" --source-ref refs/heads/main --source-digest "$GITHUB_SHA"
+          echo "Verified image: \`$IMAGE@$DIGEST\`" >> "$GITHUB_STEP_SUMMARY"
