@@ -96,3 +96,32 @@ The hook runs once per sandbox. Keep dependent setup in the same command: sandbo
 Run `codex login status` inside the sandbox. Check missing/expired seed files, keychain-only login and undeclared variables. These examples only check authentication; dispatching makes model calls. For cloud providers, use the API-key hook with explicit variables; local mounts apply only to Docker/Podman. Provider allocation credentials do not authenticate Codex.
 
 Continue with [environment precedence](../environment/) or [cookbooks](../../cookbooks/).
+
+## OpenAI-compatible model providers
+
+Use a custom provider for a service implementing the OpenAI Responses API, including streamed responses and Codex tool calls. Chat Completions-only endpoints are not supported. Supply the model name explicitly; model names and availability belong to that service.
+
+```ts
+import { codex, dispatch } from "@elie-laloum/outpost";
+import { docker } from "@elie-laloum/outpost/providers/docker";
+
+const result = await dispatch({
+  agent: codex({
+    model: "vendor/model",
+    modelProvider: {
+      baseUrl: "https://models.example.com/v1",
+      apiKeyEnvironment: "MODEL_API_KEY",
+    },
+    variables: { MODEL_API_KEY: process.env.MODEL_API_KEY! },
+  }),
+  provider: docker(),
+  brief: {
+    text: "Inspect the repository and describe the next useful change.",
+  },
+});
+console.log(result.text);
+```
+
+`apiKeyEnvironment` defaults to `OPENAI_API_KEY`; use `false` only for an endpoint that needs no authentication. Set the secret in the parent process and pass it explicitly, or declare it in the repository's `.outpost/.env`. Outpost passes the environment variable name to Codex configuration, never the key in command arguments. This provider does not require `codex login`; billing belongs to the selected service. URLs must not embed credentials, query parameters or fragments. `localhost` is the sandbox itself, so local servers must be reachable from that sandbox.
+
+See [Codex custom model providers](https://developers.openai.com/codex/config-advanced/#custom-model-providers). Native Codex conversation and sandbox contracts remain applicable. Compatibility must be validated against the chosen service; an OpenAI-compatible label alone does not establish support for Responses or tools.

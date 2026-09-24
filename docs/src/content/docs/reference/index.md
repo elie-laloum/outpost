@@ -64,6 +64,7 @@ Every public export from the package and its subpaths has a reference page. Sign
 - [gemini](./gemini/)
 - [ClaudeSettings](./claudesettings/)
 - [CodexSettings](./codexsettings/)
+- [CodexModelProvider](./codexmodelprovider/)
 - [GeminiSettings](./geminisettings/)
 - [agentVersions](./agentversions/)
 - [AgentAdapter](./agentadapter/)

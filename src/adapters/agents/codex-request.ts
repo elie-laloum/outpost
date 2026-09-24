@@ -1,5 +1,6 @@
 import type { AgentInput } from "../../domain/agent.types.ts";
 import type { Command } from "../../domain/command.types.ts";
+import { codexProvider } from "./codex-provider.ts";
 import { validateContinuation } from "./continuation.ts";
 import type { CodexSettings } from "./settings.types.ts";
 
@@ -8,7 +9,7 @@ export function codexRequest(
   input: AgentInput,
 ): Command {
   validateContinuation(input);
-  const args: string[] = [];
+  const args: string[] = [...codexProvider(settings)];
   if (settings.approvalReviewer === "auto_review")
     args.push(
       "-a",
