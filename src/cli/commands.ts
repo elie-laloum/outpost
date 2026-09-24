@@ -1,4 +1,5 @@
 import { parseArgs } from "node:util";
+import { recoveryCommand } from "./recovery-command.ts";
 import { doctorCommand } from "./doctor-command.ts";
 import { imageCommand } from "./image-command.ts";
 import { initializeCommand } from "./init-command.ts";
@@ -19,6 +20,7 @@ export async function runCli(
   }
   const commands: Readonly<Record<string, CliCommand>> = {
     doctor: doctorCommand,
+    recovery: recoveryCommand,
     init: initializeCommand,
     image: imageCommand,
   };

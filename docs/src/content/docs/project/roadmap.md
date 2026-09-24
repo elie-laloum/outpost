@@ -17,11 +17,13 @@ Version 2.0.0 adds standalone workflow projects with `init --repository`, script
 
 Host diagnostics with `outpost doctor`: Node.js, Git, Docker/Podman access, host agent versions, provider contract summary and JSON reports. The optional `--image` check starts and cleans up a temporary Docker/Podman sandbox and checks its agent version without network or model access. It also checks start/resume/fork command help and the option names used by the default headless adapters. See [host diagnostics](../../operations/doctor/) for the checks and limitations.
 
+Read-only [recovery storage inspection](../../operations/recovery/#inspect-retained-storage) reports retained files and logical sizes, with traversal limits and explicit partial results. Resource activity and recovery integrity remain unverified.
+
 ## Next — efficiency and diagnostics
 
 - Incremental remote file manifests and compressed transfer batches with recovery guarantees.
 - Dependency caches and prebuilt agent images with signed provenance.
-- Recovery inspection/pruning, retention configuration and storage quotas.
+- Recovery integrity and activity checks, explicit pruning, retention configuration and storage quotas.
 - Structured metrics, OpenTelemetry integration and per-workflow usage budgets.
 - Diagnostics of existing workflow sandboxes, cloud capability probes and agent protocol compatibility reports.
 - Additional hosted-provider fixtures and scheduled live compatibility checks.

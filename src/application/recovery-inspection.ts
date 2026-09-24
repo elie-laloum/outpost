@@ -1,0 +1,22 @@
+import { join } from "node:path";
+import { directory } from "../infrastructure/files.ts";
+import { git } from "../infrastructure/git/command.ts";
+import { storageInventory } from "../infrastructure/storage-inventory.ts";
+import type {
+  RecoveryInspection,
+  RecoveryInspectionOptions,
+} from "./recovery-inspection.types.ts";
+
+export async function inspectRecovery(
+  options: RecoveryInspectionOptions = {},
+): Promise<RecoveryInspection> {
+  const requested = await directory(options.repository);
+  const repository = await directory(
+    (await git(requested, ["rev-parse", "--show-toplevel"])).trim(),
+  );
+  const inventory = await storageInventory(
+    join(repository, ".outpost"),
+    options.maxEntries,
+  );
+  return { repository, activity: "unverified", ...inventory };
+}

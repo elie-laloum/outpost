@@ -9,6 +9,7 @@ The release notes below are synchronized from the root `CHANGELOG.md`, the singl
 
 ## Unreleased
 
+- Add read-only `outpost recovery inspect` reports for recovery files, logs, locks and managed workspaces, with metadata-only logical sizes, symlink protection and explicit partial results when traversal limits or filesystem errors prevent a complete inventory.
 - Check default agent start/resume/fork CLI help inside diagnostic images, verifying command usage and declared options instead of trusting a successful help exit; keep real execution and protocol compatibility explicitly unverified.
 - Extend `doctor --image` to check a local Docker/Podman image in a temporary sandbox, without image downloads or networking; report image agent versions and cleanup failures separately from host checks.
 - Add `outpost doctor` with bounded host prerequisite checks, Docker/Podman connectivity, host agent version comparison, explicit unchecked capabilities and JSON reports.

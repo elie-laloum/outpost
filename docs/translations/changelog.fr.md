@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Ajouter les rapports en lecture seule `outpost recovery inspect` pour récupération, logs, verrous et workspaces gérés, avec tailles logiques issues des métadonnées, protection contre les liens symboliques et résultats partiels explicites en cas de limite ou d’erreur de parcours.
 - Vérifier l’aide des commandes agents par défaut de lancement/reprise/fork dans les images de diagnostic, en contrôlant usage et options déclarées plutôt que le seul code de sortie ; conserver explicitement l’exécution réelle et la compatibilité du protocole comme non vérifiées.
 - Étendre `doctor --image` au diagnostic d’une image Docker/Podman locale dans une sandbox temporaire, sans téléchargement d’image ni réseau ; distinguer versions des agents de l’image, erreurs de nettoyage et vérifications hôtes.
 - Ajouter `outpost doctor` avec vérifications bornées des prérequis hôtes, accès Docker/Podman, comparaison des versions des agents hôtes, capacités non vérifiées explicites et rapports JSON.

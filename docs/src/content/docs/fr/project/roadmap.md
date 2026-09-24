@@ -17,11 +17,13 @@ La version 2.0.0 ajoute des projets de workflow autonomes avec `init --repositor
 
 Diagnostic hôte avec `outpost doctor` : Node.js, Git, accès Docker/Podman, versions des agents hôtes, résumé des contrats providers et rapports JSON. L’option `--image` démarre et nettoie une sandbox Docker/Podman temporaire et vérifie la version de son agent sans réseau ni appel modèle. Elle contrôle aussi l’aide des commandes de lancement/reprise/fork et les noms d’options utilisés par les adapters non interactifs par défaut. Voir [le diagnostic hôte](../../operations/doctor/) pour les vérifications et limites.
 
+L’[inspection en lecture seule du stockage de récupération](../../operations/recovery/#inspecter-le-stockage-conservé) décrit les fichiers conservés et leurs tailles logiques, avec limites de parcours et résultats partiels explicites. L’activité des ressources et l’intégrité des données récupérables restent non vérifiées.
+
 ## Prochaines étapes — efficacité et diagnostic
 
 - Manifestes de fichiers incrémentaux et transferts compressés avec garanties de récupération.
 - Caches de dépendances et images d’agents préconstruites avec provenance signée.
-- Inspection/nettoyage de récupération, rétention et quotas de stockage.
+- Vérification de l’intégrité et de l’activité des ressources de récupération, nettoyage explicite, rétention et quotas de stockage.
 - Métriques structurées, OpenTelemetry et budgets par workflow.
 - Diagnostic des sandboxes de workflow existantes, vérification des capacités cloud et rapports de compatibilité des protocoles agents.
 - Davantage de fixtures cloud et de vérifications réelles planifiées.
