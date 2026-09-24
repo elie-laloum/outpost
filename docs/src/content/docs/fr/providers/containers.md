@@ -29,22 +29,23 @@ console.log(provider.name);
 
 ## Options
 
-| Option              | Signification                                                               |
-| ------------------- | --------------------------------------------------------------------------- |
-| `image`             | Défaut : `outpost:<répertoire-du-dépôt-normalisé>`.                         |
-| `user`              | `{ uid, gid }` explicite ; sinon IDs POSIX de l’hôte, ou 1000 sous Windows. |
-| `volumes`           | Montages source/cible et `readOnly` facultatif.                             |
-| `networks`          | Nom de réseau ou tableau de noms.                                           |
-| `groups`, `devices` | Groupes supplémentaires et correspondances de périphériques.                |
-| `cpus`, `memoryMb`  | Contraintes de ressources du moteur.                                        |
-| `label`             | SELinux `z` (défaut Linux), `Z` ou `false`.                                 |
-| `retain`            | Taille de la fin de sortie conservée.                                       |
-| `userns`            | Podman : `"keep-id"` ou `false`.                                            |
-| `variables`         | Environnement du provider.                                                  |
+| Option              | Signification                                                                                                |
+| ------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `repositoryMode`    | `"mounted"` (défaut) ou `"isolated"` sur activation ; voir [l’isolation du dépôt](../repository-isolation/). |
+| `image`             | Défaut : `outpost:<répertoire-du-dépôt-normalisé>`.                                                          |
+| `user`              | `{ uid, gid }` explicite ; sinon IDs POSIX de l’hôte, ou 1000 sous Windows.                                  |
+| `volumes`           | Montages source/cible et `readOnly` facultatif.                                                              |
+| `networks`          | Nom de réseau ou tableau de noms.                                                                            |
+| `groups`, `devices` | Groupes supplémentaires et correspondances de périphériques.                                                 |
+| `cpus`, `memoryMb`  | Contraintes de ressources du moteur.                                                                         |
+| `label`             | SELinux `z` (défaut Linux), `Z` ou `false`.                                                                  |
+| `retain`            | Taille de la fin de sortie conservée.                                                                        |
+| `userns`            | Podman : `"keep-id"` ou `false`.                                                                             |
+| `variables`         | Environnement du provider.                                                                                   |
 
-Les sources acceptent `~`, chemins relatifs ou absolus. Les cibles relatives partent de `/workspace` ; `~` cible le home de l’agent. Un montage de fichier individuel doit cibler le home ; ailleurs, montez un répertoire. Les parents manquants sont préparés pour l’UID/GID de l’agent.
+Les sources acceptent `~`, chemins relatifs ou absolus. Les cibles relatives partent de `/workspace` en mode monté ; le mode isolé réserve sa racine `/outpost/workspace` et refuse les montages relatifs du workspace ; `~` cible le home de l’agent. Un montage de fichier individuel doit cibler le home ; ailleurs, montez un répertoire. Les parents manquants sont préparés pour l’UID/GID de l’agent.
 
-Les containers utilisent un home privé éphémère, des capacités réduites, no-new-privileges et un processus init. Seuls les montages sélectionnés et les métadonnées Git nécessaires sont exposés ; le socket Docker n’est pas monté automatiquement. L’annulation arrête le groupe de la commande sans détruire le container actif.
+Les containers utilisent un home privé éphémère, des capacités réduites, no-new-privileges et un processus init. Le mode monté expose les montages sélectionnés et les métadonnées Git nécessaires ; le mode isolé copie le contenu et l’historique du dépôt dans le stockage privé du conteneur ; le socket Docker n’est pas monté automatiquement. L’annulation arrête le groupe de la commande sans détruire le container actif.
 
 ## Différences entre plateformes
 

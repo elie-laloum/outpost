@@ -2,9 +2,11 @@
 
 Outpost runs coding agents that execute arbitrary project commands. Use it with repositories and credentials appropriate for that task.
 
-Docker/Podman expose only the selected checkout, Git metadata and explicit volumes. The Docker socket is not mounted by default. Containers use a chosen UID/GID, dropped capabilities, no-new-privileges and a private home. Extra devices, writable mounts and elevated hooks expand the boundary deliberately.
+By default, Docker/Podman expose the selected checkout, Git metadata and explicit volumes. The Docker socket is not mounted by default. Containers use a chosen UID/GID, dropped capabilities, no-new-privileges and a private home. Extra devices, writable mounts and elevated hooks expand the boundary deliberately.
 
 Shared Git metadata is writable by the agent. A mounted sandbox is not an adversarial boundary protecting the host repository or its configuration. Outpost disables host Git hooks for its own Git commands, but a malicious repository can contain other executable configuration or project tooling. Do not run untrusted repositories with valuable host credentials. Host `local()` provides no isolation.
+
+The opt-in Docker/Podman `repositoryMode: "isolated"` prototype uses a private container checkout and Git directory, without mounting the host checkout or Git metadata. Bundle transfer and validated synchronization import changes into the host workspace; host hooks, configuration and unrelated refs are not copied back. Explicit mounts overlapping canonical host repository/workspace/Git paths or container workspace/control paths are rejected, including read-only mounts. Dependency caches remain separate engine-managed volumes. Trust the container image, engine and host mount configuration: custom devices, external mounts, credentials, network access and shared caches expand the boundary. This is not a certified hostile-agent sandbox or protection against container/kernel escapes, malicious host path replacement during allocation, or dangerous project code later executed on the host.
 
 Remote providers upload repository history and inputs to the selected cloud account. Explicit credentials and environment files are sent to that environment. Review the cloud provider's own storage/network policy. Concurrent host changes stop synchronization; recovery files preserve prior and incoming state when available.
 

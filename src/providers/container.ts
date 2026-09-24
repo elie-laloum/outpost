@@ -44,6 +44,12 @@ export function containerProvider(
     ...options,
     caches: (options.caches ?? []).map((cache) => ({ ...cache })),
   };
+  invariant(
+    config.repositoryMode === undefined ||
+      config.repositoryMode === "mounted" ||
+      config.repositoryMode === "isolated",
+    "repositoryMode must be mounted or isolated",
+  );
   validateCaches(config);
   if (config.cpus !== undefined)
     invariant(
@@ -58,7 +64,7 @@ export function containerProvider(
     );
   return {
     name: engine,
-    placement: "mounted",
+    placement: config.repositoryMode === "isolated" ? "remote" : "mounted",
     variables: { ...config.variables },
     async acquire(context) {
       context.signal?.throwIfAborted();
@@ -86,7 +92,10 @@ export function containerProvider(
           executor,
         );
       await containerPreflight(engine, platform, call, config, image, user);
-      const root = containerDefaults.root,
+      const root =
+          config.repositoryMode === "isolated"
+            ? containerDefaults.isolatedRoot
+            : containerDefaults.root,
         home = containerDefaults.home;
       const { env, volumes, fileParents } = await containerMounts(
         context,
@@ -186,6 +195,19 @@ export function containerProvider(
             `${user.uid}:${user.gid}`,
             home,
           ]);
+        if (config.repositoryMode === "isolated")
+          await call(
+            [
+              "exec",
+              "--user",
+              "0:0",
+              name,
+              "sh",
+              "-c",
+              `mkdir -p ${quote(root)} && chmod 700 ${quote(root)} /outpost && chown ${user.uid}:${user.gid} ${quote(root)} /outpost`,
+            ],
+            context.signal ? { signal: context.signal } : {},
+          );
         await call([
           "exec",
           name,

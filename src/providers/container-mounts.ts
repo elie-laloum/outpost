@@ -3,6 +3,7 @@ import { isAbsolute, posix, relative } from "node:path";
 import { invariant, OutpostError } from "../domain/errors.ts";
 import type { SandboxContext, Volume } from "../domain/sandbox.types.ts";
 import { expandPath } from "../infrastructure/files.ts";
+import { validateIsolatedMount } from "./container-isolation.ts";
 import type { ContainerMounts, ContainerOptions } from "./container.types.ts";
 
 export async function containerMounts(
@@ -19,8 +20,11 @@ export async function containerMounts(
     GIT_CONFIG_KEY_0: "safe.directory",
     GIT_CONFIG_VALUE_0: "*",
   };
-  const internal: Volume[] = [{ source: context.directory, target: root }];
-  if (context.gitDirectories.length) {
+  const internal: Volume[] =
+    config.repositoryMode === "isolated"
+      ? []
+      : [{ source: context.directory, target: root }];
+  if (config.repositoryMode !== "isolated" && context.gitDirectories.length) {
     const common = context.gitDirectories.at(-1)!;
     const offset = relative(common, context.gitDirectories[0]!);
     const nested =
@@ -60,6 +64,8 @@ export async function containerMounts(
         : destination.startsWith("~/")
           ? posix.resolve(home, destination.slice(2))
           : posix.resolve(root, destination);
+    if (config.repositoryMode === "isolated")
+      await validateIsolatedMount(context, source, target);
     if (info.isFile() && !internal.includes(volume)) {
       const parent = posix.dirname(target);
       invariant(
