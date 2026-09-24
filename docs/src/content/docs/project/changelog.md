@@ -7,9 +7,12 @@ sidebar:
 
 The release notes below are synchronized from the root `CHANGELOG.md`, the single source of release history.
 
-## Unreleased
+## 4.0.0
 
-These additions are implemented on main; package version remains 3.0.0 and no new release is implied.
+This major release extends public workflow status unions. Exhaustive consumers must handle task statuses `paused` and `rejected`, and workflow result status `paused`. Research features remain explicitly opt-in with their documented limitations.
+
+- Allocate isolated container workspaces under a writable private parent for rootless Podman, and publish file artifacts without recreating Windows drive roots. Document manual checkpoint lock recovery when process ownership cannot be verified.
+- Create missing Vercel workspace and transfer parent directories recursively before writing files.
 
 - Add cooperative storage reservations with workspace ownership, isolated restoration of retained previous/incoming transfer state, and local sandbox/resource activity inspection.
 - Batch and verify incremental file/symlink uploads; transfer verified Git history deltas while retaining complete recovery bundles. Directory copies keep their existing transfer behavior.

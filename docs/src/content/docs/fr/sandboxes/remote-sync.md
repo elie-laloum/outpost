@@ -31,4 +31,4 @@ L’historique entrant, les patches et les fichiers non suivis sont sauvegardés
 
 `limits.copyMs` surcharge le délai des transferts pilotés par l’orchestration ; le défaut est de 120 secondes. Les leases personnalisés reçoivent `{ signal, deadlineMs }` en troisième argument de `upload` et `download`. Les providers intégrés gèrent fichiers et répertoires.
 
-[Daytona](../../providers/daytona/) prend en charge un terminal PTY natif sur main. Vercel refuse l’attachement interactif. Voir [les commandes et sessions terminal](../commands/) pour les flux et l’annulation.
+[Daytona](../../providers/daytona/) prend en charge un terminal PTY natif depuis la version 4.0.0. Vercel refuse l’attachement interactif. Voir [les commandes et sessions terminal](../commands/) pour les flux et l’annulation.

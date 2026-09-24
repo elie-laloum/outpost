@@ -7,7 +7,7 @@ sidebar:
 
 Roadmap items are planned additions, not requirements for using the current release. They are not delivery-date commitments.
 
-## Available in 3.0.0
+## Foundation available through 3.0.0
 
 Reusable sandboxes and independent Git workspaces; Claude Code and Codex adapters; native conversation capture, resume and fork; Docker, Podman, local, Vercel and Daytona providers; prompts, iteration, structured responses and hooks; typed workflows; setup CLI, bilingual documentation and automated package releases.
 
@@ -31,9 +31,9 @@ Read-only [recovery inspection](../../operations/recovery/) covers inventory, Gi
 
 [Cloud tests](../../operations/cloud-compatibility/) add deterministic fixtures and an explicitly enabled scheduled/manual Vercel/Daytona campaign with credentials and sanitized reports. Live checks still need execution in configured accounts; model calls are explicitly outside this suite.
 
-## Implemented on main — unreleased
+## Available in 4.0.0
 
-Package version remains 3.0.0. The following additions exist in source but are not part of that published version. Guides and generated API references describe current main; publication requires a separate release.
+Version 4.0.0 adds the capabilities below. Its extended public workflow status unions require exhaustive consumers to handle task statuses `paused` and `rejected`, and workflow result status `paused`. The research prototypes in the following section are shipped on explicit opt-in, with their documented limits; publication does not establish live cloud, microVM or signed-image validation.
 
 - [Storage reservations](../../operations/storage-retention/) coordinate cooperating local writers and can follow workspace ownership. [Resource activity](../../operations/recovery/) records locally observed sandboxes, operations and cleanup; it does not enumerate remote accounts.
 - [Recovery restoration](../../operations/recovery-restoration/) reconstructs retained previous or incoming state in a new isolated directory after integrity and Git checks. It does not restore ignored files, submodule repositories, provider state or conversations.
@@ -44,7 +44,7 @@ Package version remains 3.0.0. The following additions exist in source but are n
 - [Gemini CLI](../../agents/gemini/) adds an adapter, bootstrap, generated-image installation and diagnostics pinned to 0.61.0. Only fresh sessions are supported: no native transcript capture, resume, fork or automatic response repairs.
 - [Cloud reports](../../operations/cloud-compatibility/) attribute results to source commit, runtime and execution time. [Image publication](../../providers/agent-images/) retains successful signature-verification evidence. These workflows do not establish that a live campaign or signed publication has run.
 
-## Opt-in research prototypes on main
+## Opt-in research prototypes in 4.0.0
 
 - [Isolated Docker/Podman repositories](../../providers/repository-isolation/) avoid mounting host checkout and Git metadata. They remain container boundaries with explicit mount, cache and host-trust limits.
 - [Firecracker](../../providers/firecracker/) requires prepared Linux KVM, TAP, a guest image and SSH. It has simulated tests and an opt-in live fixture; no real boot evidence is established here. Jailer integration, cgroups, snapshots, performance and adversarial testing remain unfinished.
@@ -53,6 +53,6 @@ Package version remains 3.0.0. The following additions exist in source but are n
 
 ## Remaining validation and production work
 
-Real cloud command, transfer, firewall and Daytona PTY campaigns require configured accounts and explicit execution; deterministic fixtures do not replace them. Signed image publication and provenance verification require a successful configured publication run. Real Firecracker boot and production hardening remain separate work. Podman behavior requires its real engine and PTY checks in a suitable environment. Authenticated model behavior requires separate validation; credential-free CLI checks do not establish it.
+Real cloud command, transfer, firewall and Daytona PTY campaigns require configured accounts and explicit execution; deterministic fixtures do not replace them. Signed image publication and provenance verification require a successful configured publication run. Real Firecracker boot and production hardening remain separate work. Real Docker/Podman and PTY checks are part of release CI. Authenticated model behavior requires separate validation; credential-free CLI checks do not establish it.
 
 See the [changelog](../changelog/) for version boundaries and the [architecture](../architecture/) for extension contracts. No roadmap item is a delivery-date commitment.

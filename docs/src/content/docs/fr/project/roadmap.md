@@ -7,7 +7,7 @@ sidebar:
 
 La roadmap décrit des ajouts prévus, pas des prérequis à l’utilisation de la version actuelle. Elle ne constitue pas un engagement de date.
 
-## Disponible en 3.0.0
+## Socle disponible jusqu’à la version 3.0.0
 
 Sandboxes réutilisables et workspaces Git indépendants ; adapters Claude Code et Codex ; capture, reprise et fork natifs ; providers Docker, Podman, local, Vercel et Daytona ; prompts, itération, réponses structurées et hooks ; workflows typés ; CLI, documentation bilingue et publication automatisée.
 
@@ -31,9 +31,9 @@ Les [diagnostics avancés](../../operations/doctor/) inspectent une sandbox exis
 
 Les [tests cloud](../../operations/cloud-compatibility/) ajoutent des fixtures déterministes et une campagne Vercel/Daytona planifiée ou manuelle, activée explicitement avec identifiants et rapports filtrés. Les contrôles réels restent à exécuter dans les comptes configurés ; les appels modèles sont explicitement exclus.
 
-## Implémenté sur main — non publié
+## Disponible en 4.0.0
 
-Le package reste en version 3.0.0. Les ajouts suivants existent dans les sources mais ne font pas partie de cette version publiée. Les guides et références API générées décrivent main ; leur publication nécessite une release distincte.
+La version 4.0.0 ajoute les capacités ci-dessous. Les nouvelles unions publiques de statuts des workflows demandent aux consommateurs exhaustifs de traiter les statuts de tâche `paused` et `rejected`, ainsi que le statut de résultat de workflow `paused`. Les prototypes de recherche de la section suivante sont livrés sur activation explicite, avec leurs limites documentées ; la publication ne prouve pas une validation cloud réelle, microVM ou d’image signée.
 
 - Les [réservations de stockage](../../operations/storage-retention/) coordonnent les rédacteurs locaux coopérants et peuvent suivre la propriété du workspace. L’[activité des ressources](../../operations/recovery/) enregistre les sandboxes, opérations et nettoyages observés localement ; elle n’énumère pas les comptes distants.
 - La [restauration de récupération](../../operations/recovery-restoration/) reconstruit l’état précédent ou entrant conservé dans un nouveau dossier isolé après contrôles d’intégrité et Git. Elle ne restaure ni fichiers ignorés, ni dépôts de sous-modules, ni état du provider, ni conversations.
@@ -44,7 +44,7 @@ Le package reste en version 3.0.0. Les ajouts suivants existent dans les sources
 - [Gemini CLI](../../agents/gemini/) ajoute adapter, bootstrap, installation dans les images générées et diagnostics épinglés à 0.61.0. Seules les nouvelles sessions sont prises en charge : aucune capture native, reprise, fork ou réparation automatique de réponse.
 - Les [rapports cloud](../../operations/cloud-compatibility/) identifient commit source, runtime et date d’exécution. La [publication d’images](../../providers/agent-images/) conserve les preuves de vérification de signature réussie. Ces workflows ne prouvent pas qu’une campagne réelle ou une publication signée a eu lieu.
 
-## Prototypes de recherche sur activation explicite
+## Prototypes de recherche de la version 4.0.0, sur activation explicite
 
 - Les [dépôts Docker/Podman isolés](../../providers/repository-isolation/) évitent le montage du checkout et des métadonnées Git hôtes. Ils conservent les limites des conteneurs concernant montages, caches et confiance envers l’hôte.
 - [Firecracker](../../providers/firecracker/) nécessite Linux KVM, TAP, image invitée et SSH préparés. Il possède des tests simulés et une fixture réelle optionnelle ; aucun démarrage réel n’est établi ici. Jailer, cgroups, snapshots, performances et tests adversariaux restent à terminer.
@@ -53,6 +53,6 @@ Le package reste en version 3.0.0. Les ajouts suivants existent dans les sources
 
 ## Validation et production restantes
 
-Les campagnes cloud réelles de commandes, transferts, pare-feu et PTY Daytona nécessitent des comptes configurés et une exécution explicite ; les fixtures déterministes ne les remplacent pas. La publication d’images signées et la vérification de provenance nécessitent une publication configurée réussie. Le démarrage Firecracker réel et son durcissement restent distincts. Podman nécessite ses contrôles réels de moteur et PTY dans un environnement adapté. Le fonctionnement authentifié des modèles nécessite une validation séparée ; l’aide CLI sans identifiants ne le prouve pas.
+Les campagnes cloud réelles de commandes, transferts, pare-feu et PTY Daytona nécessitent des comptes configurés et une exécution explicite ; les fixtures déterministes ne les remplacent pas. La publication d’images signées et la vérification de provenance nécessitent une publication configurée réussie. Le démarrage Firecracker réel et son durcissement restent distincts. Les contrôles Docker/Podman réels et PTY font partie de la CI de release. Le fonctionnement authentifié des modèles nécessite une validation séparée ; l’aide CLI sans identifiants ne le prouve pas.
 
 Consultez le [changelog](../changelog/) pour les limites de version et l’[architecture](../architecture/) pour les contrats d’extension. Aucun élément ne constitue un engagement de date.

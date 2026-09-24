@@ -5,7 +5,7 @@ sidebar:
   order: 3
 ---
 
-`outpost doctor` inspects the host by default. Add `--image` to also inspect a local Docker/Podman image in a temporary sandbox. Neither mode installs tools or makes a model call. Host and image diagnostics are available since 3.0.0; Gemini checks are an unreleased addition.
+`outpost doctor` inspects the host by default. Add `--image` to also inspect a local Docker/Podman image in a temporary sandbox. Neither mode installs tools or makes a model call. Host and image diagnostics are available since 3.0.0; Gemini checks are available since 4.0.0.
 
 ```sh
 outpost doctor --provider docker --agent codex

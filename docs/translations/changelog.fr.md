@@ -1,8 +1,11 @@
 # Historique des versions
 
-## Unreleased
+## 4.0.0
 
-Ces ajouts sont implémentés sur main ; le package reste en version 3.0.0 et aucune nouvelle publication n’est implicite.
+Cette version majeure étend les unions publiques de statuts des workflows. Les consommateurs exhaustifs doivent traiter les statuts de tâche `paused` et `rejected`, ainsi que le statut de résultat de workflow `paused`. Les fonctionnalités de recherche restent sur activation explicite, avec leurs limites documentées.
+
+- Allouer les workspaces des conteneurs isolés sous un parent privé accessible en écriture pour Podman rootless, et publier les artefacts sans recréer les racines de disque Windows. Documenter la récupération manuelle des verrous de checkpoint quand la propriété du processus ne peut pas être vérifiée.
+- Créer récursivement les dossiers Vercel de workspace et les parents des destinations de transfert avant toute écriture.
 
 - Ajouter les réservations coopératives liées au workspace, la restauration isolée des états précédent/entrant conservés et l’inspection locale de l’activité des sandboxes et ressources.
 - Regrouper et vérifier les uploads incrémentaux de fichiers/liens ; transférer les différences d’historique Git vérifiées tout en conservant des bundles de récupération complets. Les copies de dossiers gardent leur comportement existant.
