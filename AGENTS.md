@@ -130,6 +130,7 @@ CI checks Windows, macOS and Linux, real Docker/Podman execution, package consum
 - Keep account/subscription login and API-key authentication clearly separated, including billing implications and host-versus-sandbox credential locations. Check current official vendor documentation when modifying authentication guidance.
 - The API reference and both documentation changelogs are synchronized by `docs/scripts/sync-reference.mjs`. Update their sources and regenerate; do not patch generated output as the source of truth. Changelog sources are root `CHANGELOG.md` and `docs/translations/changelog.fr.md`.
 - Keep `CHANGELOG.md` at the root and in the documentation. The roadmap belongs in the documentation. Do not reintroduce a root French README, `CONTRIBUTING.md`, root roadmap or migration guides without a new requirement.
+- When API is updated and docs is updated as well always update docs/references with changes.
 - Documentation checks validate language parity, links, generated references, rendered output, search and examples. Do not treat a successful Astro build alone as complete validation.
 
 ## Git, CI and releases
