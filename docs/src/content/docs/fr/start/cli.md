@@ -38,3 +38,5 @@ Le dépôt, le brief et le `.env` sont résolus depuis le dossier du script, ind
 Le dossier du workflow n’a pas besoin d’être un dépôt Git. Le dépôt ciblé doit contenir un commit. Les worktrees, verrous et logs restent dans `.outpost` du dépôt ciblé. Pour plusieurs dépôts, composez des tâches avec leurs propres `repository` : voir [les workflows multi-dépôts](../../workflows/sandbox-tasks/#plusieurs-dépôts).
 
 Consultez [choisir un dépôt](../../sandboxes/repositories/) pour distinguer le dossier du workflow, le dépôt ciblé et les chemins relatifs.
+
+Utilisez `outpost <commande> --help` pour les options de chaque commande. L’initialisation interactive propose des listes de choix ; Ctrl+C annule avant l’écriture des fichiers. Les rapports JSON et les commandes sans terminal conservent une sortie sans décoration.

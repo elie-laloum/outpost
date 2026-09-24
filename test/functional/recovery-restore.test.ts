@@ -294,7 +294,7 @@ test("CLI plans by default and restores only with explicit apply", async (t) => 
     arguments: [...args, "--checksums"],
   });
   assert.equal(invalid.status, 1);
-  assert.match(invalid.stderr, /Unsupported recovery restore option/);
+  assert.match(invalid.stderr, /unknown option/);
 });
 
 test("concurrent restorations acquire destination ownership once", async (t) => {

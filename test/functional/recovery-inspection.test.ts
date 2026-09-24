@@ -252,6 +252,9 @@ test("recovery CLI emits metadata-only JSON, honest partial exit status and acti
   ]) {
     const result = await run(args);
     assert.equal(result.status, 1);
-    assert.match(result.stderr, /Usage|Unsupported|positive integer/);
+    assert.match(
+      result.stderr,
+      /Unknown command|Usage|Unsupported|positive integer|unknown option|too many arguments/,
+    );
   }
 });

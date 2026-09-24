@@ -38,3 +38,5 @@ Repository, brief and environment paths are resolved from the script directory, 
 The workflow directory does not need to be a Git repository. The target repository must have a commit. Worktrees, locks and logs remain under the target repository’s `.outpost`. To work on several repositories, compose tasks with their own `repository`: see [multi-repository workflows](../../workflows/sandbox-tasks/#multiple-repositories).
 
 See [choose a repository](../../sandboxes/repositories/) for workflow directories, target repositories and relative paths.
+
+Use `outpost <command> --help` for command-specific options. Interactive initialization uses selection lists; Ctrl+C cancels before project files are written. JSON reports and headless commands keep plain output.

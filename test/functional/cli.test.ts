@@ -23,7 +23,7 @@ test("CLI dispatches help and reports unknown or incomplete commands", async () 
   ]) {
     const output = await run(args);
     assert.equal(output.status, 1);
-    assert.match(output.stderr, /Unknown command/);
+    assert.match(output.stderr, /[Uu]nknown command/);
   }
   const missing = await run(["init"]);
   assert.equal(missing.status, 1);
@@ -92,4 +92,23 @@ test("doctor CLI emits a complete JSON report and exits nonzero when Git is abse
   const invalid = await run(["doctor", "--provider", "constructor"]);
   assert.equal(invalid.status, 1);
   assert.match(invalid.stderr, /Unknown provider/);
+});
+
+test("CLI scopes help and rejects options belonging to another command", async () => {
+  const help = await run(["recovery", "restore", "--help"]);
+  assert.equal(help.status, 0);
+  assert.match(help.stdout, /--destination/);
+  assert.doesNotMatch(help.stdout, /--agent/);
+  for (const args of [
+    ["doctor", "--install"],
+    ["image", "build", "unexpected"],
+    ["init", "--agent"],
+  ]) {
+    const output = await run(args);
+    assert.equal(output.status, 1);
+    assert.match(
+      output.stderr,
+      /unknown option|too many arguments|argument missing/,
+    );
+  }
 });

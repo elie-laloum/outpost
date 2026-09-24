@@ -85,8 +85,8 @@
   },
   "peerDependencies": {
     "@daytona/sdk": "^0.216.0",
-    "@vercel/sandbox": "^3.3.0",
-    "@opentelemetry/api": "^1.9.0"
+    "@opentelemetry/api": "^1.9.0",
+    "@vercel/sandbox": "^3.3.0"
   },
   "peerDependenciesMeta": {
     "@daytona/sdk": {
@@ -100,15 +100,19 @@
     }
   },
   "devDependencies": {
-    "@types/node": "^24.0.0",
-    "typescript": "^6.0.3",
-    "prettier": "^3.5.3",
-    "c8": "^10.1.3",
     "@daytona/sdk": "^0.216.0",
-    "@vercel/sandbox": "^3.3.0",
     "@opentelemetry/api": "^1.9.0",
+    "@opentelemetry/sdk-metrics": "^2.0.0",
     "@opentelemetry/sdk-trace-base": "^2.0.0",
-    "@opentelemetry/sdk-metrics": "^2.0.0"
+    "@types/node": "^24.0.0",
+    "@vercel/sandbox": "^3.3.0",
+    "c8": "^10.1.3",
+    "prettier": "^3.5.3",
+    "typescript": "^6.0.3"
   },
-  "homepage": "https://elie-laloum.github.io/outpost/"
+  "homepage": "https://elie-laloum.github.io/outpost/",
+  "dependencies": {
+    "@clack/prompts": "^1.8.1",
+    "commander": "^15.0.0"
+  }
 }
