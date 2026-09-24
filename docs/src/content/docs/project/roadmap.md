@@ -1,58 +1,39 @@
 ---
-title: "Roadmap"
-description: "Roadmap — Outpost"
+title: Roadmap
+description: Near-term priorities, medium-term directions and the evidence needed to deliver them.
 sidebar:
   order: 3
 ---
 
-Roadmap items are planned additions, not requirements for using the current release. They are not delivery-date commitments.
+Outpost's next priority is reliable everyday execution: a successful first run, explainable failures and recovery that has been exercised under real conditions. The horizons below express ordering, not promised dates or release numbers. The [changelog](../changelog/) records deliveries; this page describes the work ahead.
 
-## Foundation available through 3.0.0
+## Starting point
 
-Reusable sandboxes and independent Git workspaces; Claude Code and Codex adapters; native conversation capture, resume and fork; Docker, Podman, local, Vercel and Daytona providers; prompts, iteration, structured responses and hooks; typed workflows; setup CLI, bilingual documentation and automated package releases.
+The foundation includes reusable sandboxes, Git workspaces, agent adapters, typed workflows and recovery tools. The CLI, authentication setup and custom Responses providers are documented in the [setup guide](../../start/cli/). Use the [API reference](../../reference/) for implemented contracts and the changelog for released versions. An implementation or simulated test is not evidence of a successful live provider campaign.
 
-Version 2.0.0 introduced standalone workflow projects with `init --repository`, script-relative repository, brief and environment paths, live agent progress and cancellation recovery details. Typed workflows can coordinate independent repositories through isolated tasks. Issue campaigns and backlog connectors have been removed; initialization generates a dispatch starter.
+## Near term: make execution dependable
 
-## Added in 3.0.0
+| Priority                            | Outcome                                                                                                                                             | Evidence required                                                                                                                                                                           |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. Authenticate real cloud runs     | Users can distinguish provider allocation, agent login, model access and network failures on Vercel and Daytona.                                    | Repeatable opt-in Claude/Codex campaigns with API keys and supported account credentials; sanitized reports tied to CLI versions and source commits; verified cleanup after failure.        |
+| 2. Diagnose setup failures          | Missing package managers, expired credentials, unreachable endpoints and incompatible models have actionable diagnostics before useful work starts. | First-run and recovery scenarios on Linux, macOS and Windows, including headless CI and cancellation. Authentication checks must not expose credentials or silently change billing methods. |
+| 3. Verify reproducible agent images | Users can select an image whose bundled agents and provenance have been checked.                                                                    | A successful signed publication, independent signature verification and native CLI/container checks for the published digest.                                                               |
+| 4. Measure remote execution costs   | Transfer and startup optimizations have demonstrated benefits without weakening recovery.                                                           | Vercel/Daytona measurements on representative repositories, including large files, many small files, interrupted transfers and concurrent host edits.                                       |
 
-This major version extends public TypeScript contracts: custom implementations of `Sandbox`, `TaskContext` and `WorkflowResult` must provide the new diagnostic and usage members. Exhaustive observers must accept `attempt` and `usage`. See the [changelog](../changelog/) for adaptations and behavioral changes.
+Start with [cloud compatibility campaigns](../../operations/cloud-compatibility/), [diagnostics](../../operations/doctor/) and [agent images](../../providers/agent-images/). Fix contract failures before expanding the provider matrix. CI syntax probes and local simulated endpoints remain useful checks, but do not replace authenticated provider runs.
 
-Host diagnostics with `outpost doctor`: Node.js, Git, Docker/Podman access, host agent versions, provider contract summary and JSON reports. The optional `--image` check starts and cleans up a temporary Docker/Podman sandbox and checks its agent version without network or model access. It also checks start/resume/fork command help and the option names used by the default headless adapters. See [host diagnostics](../../operations/doctor/) for the checks and limitations.
+## Medium term: extend proven contracts
 
-Read-only [recovery inspection](../../operations/recovery/) covers inventory, Git workspace state and local lock observations. New Linux locks include host, boot, namespace and process-start identity; uncertain ownership prevents automatic reclamation. [Verification](../../operations/recovery-verification/) checks retained structures, unsigned SHA-256 manifests and, on request, Git objects and independent patch applicability in an isolated copy. [Retention policies](../../operations/storage-retention/) provide dry runs, explicit revalidated pruning of eligible workspaces and closed logs, and quota admission observations. Recovery artifacts and uncertain resources remain protected.
+| Direction                     | Next useful capability                                                                       | Conditions before promotion                                                                                                                                                                       |
+| ----------------------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Durable distributed workflows | Operate checkpoints, approvals, artifacts and queues across multiple trusted workers.        | Fault-injection and restart campaigns, authenticated actor identity, credential rotation, operational guidance and explicit replay/idempotency policies. Never promise exactly-once side effects. |
+| Agent and model portability   | Extend native conversation support for Gemini and broaden tested custom model endpoints.     | Stable upstream protocols, native capture/resume/fork fixtures and service-specific Responses/tool compatibility evidence. Chat Completions support needs a separate execution strategy.          |
+| Remote interactive sessions   | Make remote troubleshooting and agent attachment reliable where providers support terminals. | Live Daytona PTY validation for input, resize, exit, interruption and reuse; evaluate Vercel attachment only when its execution contract supports it.                                             |
+| Stronger execution isolation  | Move selected isolation prototypes toward an operationally supported deployment.             | Real Firecracker boots, resource limits, jailer integration, lifecycle cleanup and adversarial review; measured container isolation and egress behavior.                                          |
+| Recoverable speculative work  | Resume interrupted candidate races and compare their actual cost and integration outcomes.   | Durable candidate ownership, recovery after coordinator failure, bounded cleanup and explicit conflict handling before integration.                                                               |
 
-[Remote transfers](../../operations/remote-transfers/) use incremental SHA-256 manifests and bounded compressed batches for Vercel/Daytona untracked file downloads. Verified unchanged host files are reused while every recovery attempt retains its own complete incoming payload. Initial uploads, tracked patches and self-contained Git bundles retain their existing paths.
+These directions build on [durable workflows](../../workflows/distributed/), [Gemini](../../agents/gemini/), [repository isolation](../../providers/repository-isolation/), [Firecracker](../../providers/firecracker/), [egress policies](../../sandboxes/egress/) and [speculation](../../workflows/speculation/). Their documented limits remain in force until the corresponding evidence exists. Container allowlists, dynamic network policies, microVM snapshots and stronger artifact trust are candidates for this horizon, not current guarantees.
 
-[Dependency caches](../../providers/dependency-caches/) are opt-in Docker/Podman volumes with explicit invalidation keys. [Agent-image tooling](../../providers/agent-images/) builds pinned inputs and provides a gated publication workflow with signed provenance verification. Image publication and signature verification must still run in the configured release environment; adding the workflow does not publish an image.
+## How priorities change
 
-[Workflow events and metrics](../../operations/telemetry/) feed an optional OpenTelemetry integration with injected tracer and meter. [Budgets](../../workflows/budgets/) limit task attempt admissions and observed usage across retries and concurrent tasks; they do not guarantee billing caps.
-
-[Advanced diagnostics](../../operations/doctor/) inspect an existing sandbox under exclusive ownership, with optional binary transfer probes and cleanup. Bundled protocol checks are offline structural fixtures; they do not certify authenticated model behavior.
-
-[Cloud tests](../../operations/cloud-compatibility/) add deterministic fixtures and an explicitly enabled scheduled/manual Vercel/Daytona campaign with credentials and sanitized reports. Live checks still need execution in configured accounts; model calls are explicitly outside this suite.
-
-## Available in 4.0.0
-
-Version 4.0.0 adds the capabilities below. Its extended public workflow status unions require exhaustive consumers to handle task statuses `paused` and `rejected`, and workflow result status `paused`. The research prototypes in the following section are shipped on explicit opt-in, with their documented limits; publication does not establish live cloud, microVM or signed-image validation.
-
-- [Storage reservations](../../operations/storage-retention/) coordinate cooperating local writers and can follow workspace ownership. [Resource activity](../../operations/recovery/) records locally observed sandboxes, operations and cleanup; it does not enumerate remote accounts.
-- [Recovery restoration](../../operations/recovery-restoration/) reconstructs retained previous or incoming state in a new isolated directory after integrity and Git checks. It does not restore ignored files, submodule repositories, provider state or conversations.
-- [Uploads](../../operations/remote-transfers/) batch and verify file/symlink inputs; directory copies retain their existing path. [Git transfers](../../sandboxes/remote-sync/) use verified delta history when possible while recovery keeps complete bundles and local validation still processes full history.
-- [Checkpoints](../../workflows/checkpoints/) persist JSON task outputs and usage with explicit retry of incomplete tasks. [Approval and pause gates](../../workflows/approvals/) persist requests and decisions; declared actors are trusted metadata, not authentication.
-- [Typed artifacts](../../workflows/artifacts/) provide validated values, immutable storage and unsigned lineage. [Durable queues](../../workflows/distributed/) use SQLite and optional HTTP workers with fenced leases, shared-token trust and external TLS. Retries can repeat side effects; terminal usage is delayed and receipt metadata prevents double accounting.
-- [Daytona terminals](../../providers/daytona/) use its native PTY API. Deterministic tests cover the adapter; live account validation remains required. Vercel still rejects interactive attachment.
-- [Gemini CLI](../../agents/gemini/) adds an adapter, bootstrap, generated-image installation and diagnostics pinned to 0.61.0. Only fresh sessions are supported: no native transcript capture, resume, fork or automatic response repairs.
-- [Cloud reports](../../operations/cloud-compatibility/) attribute results to source commit, runtime and execution time. [Image publication](../../providers/agent-images/) retains successful signature-verification evidence. These workflows do not establish that a live campaign or signed publication has run.
-
-## Opt-in research prototypes in 4.0.0
-
-- [Isolated Docker/Podman repositories](../../providers/repository-isolation/) avoid mounting host checkout and Git metadata. They remain container boundaries with explicit mount, cache and host-trust limits.
-- [Firecracker](../../providers/firecracker/) requires prepared Linux KVM, TAP, a guest image and SSH. It has simulated tests and an opt-in live fixture; no real boot evidence is established here. Jailer integration, cgroups, snapshots, performance and adversarial testing remain unfinished.
-- [Outbound policies](../../sandboxes/egress/) support container deny-all and Vercel domain/CIDR policies. Other providers reject unsupported policy requests. Container allowlists, dynamic updates, traffic auditing and finer filtering remain research.
-- [Speculative candidates](../../workflows/speculation/) race bounded branches from a pinned base, select a validated and cleaned-up winner and apply observed usage budgets. They never integrate automatically; host comparisons are advisory. Durable race recovery and stronger conflict/cost guarantees remain unfinished.
-
-## Remaining validation and production work
-
-Real cloud command, transfer, firewall and Daytona PTY campaigns require configured accounts and explicit execution; deterministic fixtures do not replace them. Signed image publication and provenance verification require a successful configured publication run. Real Firecracker boot and production hardening remain separate work. Real Docker/Podman and PTY checks are part of release CI. Authenticated model behavior requires separate validation; credential-free CLI checks do not establish it.
-
-See the [changelog](../changelog/) for version boundaries and the [architecture](../architecture/) for extension contracts. No roadmap item is a delivery-date commitment.
+Reproducible failures, security boundaries and recovery of user work take precedence over new features. Promote a capability when its contract, failure behavior, tests and bilingual documentation agree. Keep work experimental when it depends on unvalidated infrastructure or unstable upstream behavior. Revisit the ordering after each release using observed failures and performance measurements; move delivered items into the changelog instead of growing a historical catalogue here.
