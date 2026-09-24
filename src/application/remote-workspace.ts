@@ -4,6 +4,7 @@ import { join, posix } from "node:path";
 import { OutpostError } from "../domain/errors.ts";
 import type { SandboxLease } from "../domain/sandbox.types.ts";
 import type { WorkspaceRecord } from "../domain/workspace.types.ts";
+import { seedHistory } from "./remote-history.ts";
 import { uploadFiles } from "./remote-upload.ts";
 import { git } from "../infrastructure/git/command.ts";
 import { gitDefaults } from "../infrastructure/git/git.constants.ts";
@@ -36,14 +37,11 @@ export async function seedRemote(
     randomUUID(),
   );
   await mkdir(recovery, { recursive: true });
-  const bundle = join(recovery, "initial.bundle");
-  await git(workspace.directory, ["bundle", "create", bundle, "--all", "HEAD"]);
   const remoteBundle = posix.join(
     lease.root.replaceAll("\\", "/"),
     "..",
     `outpost-${randomUUID()}.bundle`,
   );
-  await lease.upload(bundle, remoteBundle);
   let initializing = true,
     failed = false;
   const run = async (args: readonly string[]) => {
@@ -76,8 +74,7 @@ export async function seedRemote(
   };
   await run(["init"]);
   await run(["config", "core.autocrlf", "false"]);
-  await run(["fetch", remoteBundle, "HEAD"]);
-  await run(["checkout", "-B", workspace.branch, "FETCH_HEAD"]);
+  await seedHistory(workspace, lease, options, recovery, remoteBundle, run);
   for (const key of ["user.name", "user.email"] as const) {
     const fallback = key === "user.name" ? "Outpost" : "outpost@localhost";
     const value =
