@@ -5,13 +5,21 @@ import type { SandboxLease } from "../domain/sandbox.types.ts";
 import { quote, requireSuccess } from "../infrastructure/process.ts";
 import { agentPackages } from "./agent-bootstrap.constants.ts";
 
+function isBootstrapAgent(name: string): name is keyof typeof agentPackages {
+  return Object.hasOwn(agentPackages, name);
+}
+
 export async function prepareAdapter(
   agent: AgentAdapter,
   runtime: SandboxLease,
   signal: AbortSignal,
 ): Promise<AgentAdapter> {
-  if (!agent.conversations) return agent;
-  const executable = agent.conversations;
+  const executable = agent.bootstrap ?? agent.conversations;
+  if (!executable) return agent;
+  invariant(
+    isBootstrapAgent(executable),
+    `Unknown agent bootstrap: ${executable}`,
+  );
   const cli = agentPackages[executable];
   const prefix = posix.join(runtime.home, ".outpost-tools"),
     target = posix.join(prefix, "bin", executable);

@@ -10,7 +10,7 @@ const root = await mkdtemp(join(tmpdir(), "outpost-terminal-"));
 const factory =
   process.env.OUTPOST_CONTAINER_ENGINE === "podman" ? podman : docker;
 const lease = await factory({
-  image: "outpost-ci:latest",
+  image: process.env.OUTPOST_CONTAINER_IMAGE ?? "outpost-ci:latest",
   networks: "none",
   ...(process.env.OUTPOST_ISOLATED_REPOSITORY
     ? { repositoryMode: "isolated" as const }

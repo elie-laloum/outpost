@@ -20,7 +20,7 @@ export async function diagnoseAgentCli(
         command: { ...plan.command, retain: agentDiagnosticDefaults.retain },
         failureStatus: "fail",
         remedy:
-          "The default Outpost invocation with --help failed. Check the agent CLI in this image and rebuild it if needed.",
+          "The agent CLI help command failed. Check the agent CLI in this image and rebuild it if needed.",
       },
       async (command) => {
         const result = await execute(command);

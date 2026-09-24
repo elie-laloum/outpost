@@ -1,7 +1,7 @@
 import type { Command } from "../domain/command.types.ts";
 export type DoctorProvider =
   "docker" | "podman" | "local" | "vercel" | "daytona";
-export type DoctorAgent = "codex" | "claude";
+export type DoctorAgent = "codex" | "claude" | "gemini";
 export type DiagnosticStatus = "pass" | "warn" | "fail" | "skipped";
 export interface DiagnosticCheck {
   readonly id: string;

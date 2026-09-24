@@ -1,8 +1,45 @@
 import type { AgentProtocolFixture } from "./protocol-fixtures.types.ts";
 
 export const protocolFixtures: Readonly<
-  Record<"claude" | "codex", readonly AgentProtocolFixture[]>
+  Record<"claude" | "codex" | "gemini", readonly AgentProtocolFixture[]>
 > = {
+  gemini: [
+    {
+      name: "turn",
+      lines: [
+        '{"type":"init","session_id":"fixture-conversation","model":"fixture-model"}',
+        '{"type":"tool_use","tool_name":"command","tool_id":"call-1","parameters":{"command":"fixture-command"}}',
+        '{"type":"message","role":"assistant","content":"fixture-result","delta":true}',
+        '{"type":"result","status":"success","stats":{"input_tokens":10,"cached":2,"output_tokens":3}}',
+      ],
+      expected: [
+        { kind: "conversation", id: "fixture-conversation" },
+        {
+          kind: "tool",
+          name: "command",
+          input: { command: "fixture-command" },
+        },
+        { kind: "text", text: "fixture-result" },
+        { kind: "usage", tokens: { input: 10, cached: 2, output: 3 } },
+        { kind: "finished" },
+      ],
+    },
+    {
+      name: "failure",
+      lines: [
+        '{"type":"result","status":"error","error":{"message":"fixture-failure"}}',
+      ],
+      expected: [{ kind: "failure", message: "fixture-failure" }],
+    },
+    {
+      name: "unknown",
+      lines: ['{"type":"future.event"}', "invalid-json"],
+      expected: [
+        { kind: "raw", value: { type: "future.event" } },
+        { kind: "raw", value: "invalid-json" },
+      ],
+    },
+  ],
   codex: [
     {
       name: "turn",

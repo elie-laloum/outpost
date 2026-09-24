@@ -47,7 +47,7 @@ export type {
 
 export { agentTask, commandTask, isolatedTask } from "./application/tasks.ts";
 
-export { claude, codex } from "./providers/agents.ts";
+export { claude, codex, gemini } from "./providers/agents.ts";
 
 export { agentVersions } from "./providers/versions.ts";
 
@@ -58,7 +58,11 @@ export type {
   ConversationLocation,
 } from "./infrastructure/conversations.ts";
 
-export type { ClaudeSettings, CodexSettings } from "./providers/agents.ts";
+export type {
+  ClaudeSettings,
+  CodexSettings,
+  GeminiSettings,
+} from "./providers/agents.ts";
 
 export { mountedProvider, remoteProvider } from "./providers/factories.ts";
 

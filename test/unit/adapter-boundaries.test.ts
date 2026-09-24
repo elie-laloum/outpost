@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { claude, codex } from "../../src/providers/agents.ts";
+import { claude, codex, gemini } from "../../src/providers/agents.ts";
 import { agentOutput } from "../../src/application/agent-output.ts";
 import { operationGate } from "../../src/application/operation-gate.ts";
 import { addUsage } from "../../src/domain/usage.ts";
 
-for (const adapter of [claude(), codex()]) {
+for (const adapter of [claude(), codex(), gemini()]) {
   test(`${adapter.name} preserves unknown protocol events without invoking inherited handlers`, () => {
     for (const type of [
       "future.event",

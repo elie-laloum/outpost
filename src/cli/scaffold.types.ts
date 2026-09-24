@@ -1,7 +1,7 @@
 export interface InitOptions {
   readonly directory?: string;
   readonly repository?: string;
-  readonly agent?: "claude" | "codex";
+  readonly agent?: "claude" | "codex" | "gemini";
   readonly provider?: "docker" | "podman" | "vercel" | "daytona" | "local";
   readonly manager?: "npm" | "pnpm" | "yarn" | "bun";
   readonly model?: string;

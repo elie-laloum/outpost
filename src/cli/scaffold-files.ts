@@ -1,5 +1,9 @@
 import { readFile } from "node:fs/promises";
-import { imageRecipe, providerPackages } from "./scaffold.constants.ts";
+import {
+  agentEnvironment,
+  imageRecipe,
+  providerPackages,
+} from "./scaffold.constants.ts";
 import type { InitOptions } from "./scaffold.types.ts";
 import { starter } from "./starters.ts";
 
@@ -14,8 +18,7 @@ export async function scaffoldFiles(
     [`run.${extension}`]: starter(options),
     "brief.md":
       "Objective: {{OBJECTIVE}}\n\nWork on {{WORK_BRANCH}} from {{BASE_BRANCH}}. Inspect the repository, implement the objective, run relevant tests and commit your changes. When finished, write <outpost>done</outpost>.\n",
-    ".env.example":
-      agent === "codex" ? "OPENAI_API_KEY=\n" : "ANTHROPIC_API_KEY=\n",
+    ".env.example": agentEnvironment[agent],
     ".gitignore":
       "node_modules/\n.env\n.outpost/workspaces/\n.outpost/locks/\n.outpost/recovery/\n.outpost/logs/\n",
   };
