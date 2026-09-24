@@ -43,7 +43,7 @@ function worker(
   queue: TaskQueue,
   name: string,
   handlers: Record<string, QueueHandler>,
-  leaseMs = 300,
+  leaseMs = 30_000,
 ) {
   const stop = new AbortController();
   const done = runQueueWorker({
@@ -57,7 +57,7 @@ function worker(
   return { stop, done };
 }
 
-test("HTTP workers claim disjoint jobs, renew long handlers, and return JSON/usage", async (t) => {
+test("HTTP workers claim disjoint jobs and return JSON/usage", async (t) => {
   const { queue } = await fixture(t);
   for (let i = 0; i < 8; i++)
     await queue.enqueue({ id: `job-${i}`, handler: "double", input: i });
@@ -77,8 +77,8 @@ test("HTTP workers claim disjoint jobs, renew long handlers, and return JSON/usa
       usage: { input: 1, cached: 0, output: 2 },
     };
   };
-  const first = worker(queue, "worker-a", { double: handle }, 600);
-  const second = worker(queue, "worker-b", { double: handle }, 600);
+  const first = worker(queue, "worker-a", { double: handle });
+  const second = worker(queue, "worker-b", { double: handle });
   t.after(async () => {
     first.stop.abort();
     second.stop.abort();
@@ -99,6 +99,8 @@ test("HTTP workers claim disjoint jobs, renew long handlers, and return JSON/usa
 });
 
 test("crashed worker lease expires; restart preserves fences and rejects stale completion/cancellation", async (t) => {
+  let now = Date.now();
+  t.mock.method(Date, "now", () => now);
   const { queue, path } = await fixture(t);
   const request = { id: "crash", handler: "work", input: null };
   assert.equal((await queue.enqueue(request)).fence, 0);
@@ -114,7 +116,7 @@ test("crashed worker lease expires; restart preserves fences and rejects stale c
     await queue.claim({ worker: "other", handlers: ["work"], leaseMs: 30 }),
     undefined,
   );
-  await delay(50);
+  now += 31;
   const reopened = await sqliteTaskQueue(path);
   try {
     const second = await reopened.claim({
@@ -226,6 +228,8 @@ test("cancellation revokes active worker and deadline survives coordinator reope
 });
 
 test("handler failures are durable results; worker shutdown leaves jobs reclaimable", async (t) => {
+  let now = Date.now();
+  t.mock.method(Date, "now", () => now);
   const { queue } = await fixture(t);
   await queue.enqueue({ id: "fail", handler: "fail", input: null });
   const running = worker(queue, "one", {
@@ -254,7 +258,7 @@ test("handler failures are durable results; worker shutdown leaves jobs reclaima
   await until(queue, "shutdown", "active");
   shutdown.stop.abort();
   await shutdown.done;
-  await delay(110);
+  now += 91;
   assert.ok(
     await queue.claim({
       worker: "replacement",
@@ -523,4 +527,52 @@ test("worker cancellation during claim does not start a newly assigned handler",
     signal: stop.signal,
   });
   assert.equal((await queue.get("late-claim"))?.status, "active");
+});
+
+test("HTTP heartbeat extends ownership beyond the initial expiry before publishing", async (t) => {
+  let now = Date.now();
+  t.mock.method(Date, "now", () => now);
+  const { queue } = await fixture(t);
+  await queue.enqueue({ id: "heartbeat", handler: "wait", input: null });
+  let release = () => {};
+  const renewed = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  let initialExpiry = 0;
+  let renewals = 0;
+  const observed: TaskQueue = {
+    ...queue,
+    async renew(lease, leaseMs) {
+      if (!renewals) now = initialExpiry - 1;
+      const job = await queue.renew(lease, leaseMs);
+      assert.ok(job.expires! > initialExpiry);
+      renewals++;
+      now = initialExpiry + 1;
+      release();
+      return job;
+    },
+  };
+  const running = worker(
+    observed,
+    "renewing",
+    {
+      async wait(_, { job }) {
+        initialExpiry = job.expires!;
+        await renewed;
+        return { value: "after initial expiry" };
+      },
+    },
+    90,
+  );
+  try {
+    const job = await until(queue, "heartbeat", "done");
+    assert.ok(renewals >= 1);
+    assert.ok(now > initialExpiry);
+    assert.equal(job.fence, 1);
+    assert.equal(job.result?.value, "after initial expiry");
+  } finally {
+    running.stop.abort();
+    release();
+    await running.done;
+  }
 });
