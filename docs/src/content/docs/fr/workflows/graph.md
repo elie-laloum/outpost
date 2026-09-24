@@ -44,3 +44,5 @@ Les clés sont uniques. Chaque dépendance doit appartenir au graphe ; les cycle
 Poursuivez avec [les politiques d’exécution](../execution/) ou [les tâches de sandbox](../sandbox-tasks/).
 
 Consultez les [budgets de consommation](../budgets/) pour les limites partagées d’admission et de tokens, et la [télémétrie](../../operations/telemetry/) pour les métriques structurées.
+
+Conservez les résultats après un redémarrage avec les [checkpoints de workflow](../checkpoints/).

@@ -1,7 +1,11 @@
 import type { Usage } from "../agent.types.ts";
 import { addUsage } from "../usage.ts";
 import { usageDimensions } from "./budget.constants.ts";
-import type { WorkflowAccounting, WorkflowBudget } from "./budget.types.ts";
+import type {
+  WorkflowAccounting,
+  WorkflowBudget,
+  WorkflowUsage,
+} from "./budget.types.ts";
 
 export class WorkflowBudgetExceeded extends Error {
   readonly dimension: "attempts" | keyof Usage;
@@ -25,6 +29,7 @@ export class WorkflowBudgetExceeded extends Error {
 export function workflowAccounting(
   budget: WorkflowBudget | undefined,
   exhaust: (error: WorkflowBudgetExceeded) => void,
+  initial?: WorkflowUsage,
 ): WorkflowAccounting {
   for (const [key, value] of Object.entries({
     attempts: budget?.attempts,
@@ -35,8 +40,10 @@ export function workflowAccounting(
         `Workflow budget ${key} must be a nonnegative safe integer`,
       );
   }
-  let attempts = 0;
-  let tokens: Usage = { input: 0, cached: 0, output: 0 };
+  let attempts = initial?.attempts ?? 0;
+  let tokens: Usage = initial
+    ? { ...initial.tokens }
+    : { input: 0, cached: 0, output: 0 };
   let exhausted = false;
   let usageExhausted = false;
   function fail(

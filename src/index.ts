@@ -140,3 +140,14 @@ export type {
 } from "./application/doctor.types.ts";
 export { diagnoseAgentProtocol } from "./application/doctor-protocol.ts";
 export type { AgentProtocolReport } from "./application/doctor-protocol.types.ts";
+
+export { fileWorkflowCheckpointStore } from "./infrastructure/workflow-checkpoint.ts";
+export type { FileWorkflowCheckpointOptions } from "./infrastructure/workflow-checkpoint.types.ts";
+export type {
+  WorkflowCheckpoint,
+  WorkflowCheckpointOptions,
+  WorkflowCheckpointStore,
+  WorkflowCheckpointLease,
+  WorkflowCheckpointValue,
+  WorkflowJson,
+} from "./domain/workflow/checkpoint.types.ts";
