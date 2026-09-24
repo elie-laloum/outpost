@@ -1,9 +1,8 @@
 import { randomUUID } from "node:crypto";
 import { mkdir, open, readdir, realpath, rm } from "node:fs/promises";
 import { join } from "node:path";
-import { setTimeout } from "node:timers/promises";
 import { invariant, OutpostError } from "../domain/errors.ts";
-import { lock } from "./git/lock.ts";
+import { lockStorageMutation } from "./storage-mutation-lock.ts";
 import {
   localProcessIdentity,
   observeOwnership,
@@ -31,24 +30,6 @@ async function reservationDirectory(root: string): Promise<string> {
     );
   }
   return paths[2]!;
-}
-
-async function ownership(root: string, signal?: AbortSignal) {
-  const deadline = Date.now() + defaults.lockWaitMs;
-  while (true) {
-    signal?.throwIfAborted();
-    try {
-      return await lock(root, defaults.lockKey);
-    } catch (error) {
-      if (
-        !(error instanceof OutpostError) ||
-        error.code !== "conflict" ||
-        Date.now() >= deadline
-      )
-        throw error;
-      await setTimeout(defaults.lockPollMs, undefined, { signal });
-    }
-  }
 }
 
 function validRecord(value: unknown): value is StorageReservationRecord {
@@ -130,7 +111,7 @@ async function releaseRecord(
   id: string,
 ): Promise<void> {
   await reservationDirectory(root);
-  const unlock = await ownership(root);
+  const unlock = await lockStorageMutation(root);
   try {
     const names = await readdir(
       join(root, ".outpost", "locks", "storage-reservations"),
@@ -161,7 +142,7 @@ export async function reserveStorage(
   );
   options.signal?.throwIfAborted();
   const directory = await reservationDirectory(repository);
-  const unlock = await ownership(repository, options.signal);
+  const unlock = await lockStorageMutation(repository, options.signal);
   const id = randomUUID();
   const path = join(directory, `${id}.json`);
   try {

@@ -6,6 +6,9 @@ import type { SandboxLease } from "../domain/sandbox.types.ts";
 import { git } from "../infrastructure/git/command.ts";
 import { executeProcess } from "../infrastructure/process.ts";
 import { resolveVariables } from "../infrastructure/settings.ts";
+import { registerResourceActivity } from "../infrastructure/resource-activity.ts";
+import type { ResourceActivity } from "../infrastructure/resource-activity.types.ts";
+import { trackedSandboxLease } from "./sandbox-activity.ts";
 import { boundedTransfers } from "../infrastructure/transfer.ts";
 import { docker } from "../providers/docker.ts";
 import { prepareAdapter } from "./agent-bootstrap.ts";
@@ -53,6 +56,8 @@ export async function provisionSandbox(
     ? AbortSignal.any([options.signal, stop.signal])
     : stop.signal;
   let lease: SandboxLease | undefined, sync: RemoteSync | undefined;
+  let activity: ResourceActivity | undefined;
+  let acquisitionStarted = false;
   const prepared = new Map<AgentAdapter, AgentAdapter>();
   const staging = join(
     workspace.repository,
@@ -61,6 +66,12 @@ export async function provisionSandbox(
     "conversations",
   );
   try {
+    activity = await registerResourceActivity({
+      repository: workspace.repository,
+      workspace: workspace.directory,
+      provider: provider.name,
+      placement: provider.placement,
+    });
     const configured = await resolveVariables(
       workspace.repository,
       {},
@@ -83,14 +94,18 @@ export async function provisionSandbox(
       GIT_COMMITTER_EMAIL: email,
       ...configured,
     };
+    acquisitionStarted = true;
     lease = boundedTransfers(
-      await provider.acquire({
-        repository: workspace.repository,
-        directory: workspace.directory,
-        gitDirectories: workspace.gitDirectories,
-        variables,
-        signal: setupSignal,
-      }),
+      trackedSandboxLease(
+        await provider.acquire({
+          repository: workspace.repository,
+          directory: workspace.directory,
+          gitDirectories: workspace.gitDirectories,
+          variables,
+          signal: setupSignal,
+        }),
+        activity,
+      ),
       {
         ...(options.limits?.copyMs
           ? { deadlineMs: options.limits.copyMs }
@@ -145,11 +160,28 @@ export async function provisionSandbox(
     );
     const failure = initialized.find((item) => item.status === "rejected");
     if (failure?.status === "rejected") throw failure.reason;
+    await activity.phase("ready");
   } catch (cause) {
     await startupFailure(workspace, cause, options);
-    await lease?.release().catch(() => undefined);
+    const allocationUncertain = acquisitionStarted && !lease;
+    let cleanupFailed = allocationUncertain;
+    await activity?.phase("closing").catch(() => {
+      cleanupFailed = true;
+    });
+    await lease?.release().catch(() => {
+      cleanupFailed = true;
+    });
+    if (activity && !(await activity.idle())) cleanupFailed = true;
     state.active = false;
-    if (owned) await workspace.close();
+    if (owned)
+      await workspace.close({ preserve: cleanupFailed }).catch(() => {
+        cleanupFailed = true;
+      });
+    if (cleanupFailed)
+      await activity
+        ?.phase(allocationUncertain ? "allocation-uncertain" : "cleanup-failed")
+        .catch(() => undefined);
+    if (!cleanupFailed) await activity?.remove().catch(() => undefined);
     throw cause;
   }
 
@@ -161,6 +193,7 @@ export async function provisionSandbox(
     owned,
     stop,
     runtime: lease,
+    activity,
     sync,
     prepared,
     staging,

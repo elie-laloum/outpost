@@ -90,6 +90,12 @@ for (const signal of ["SIGINT", "SIGTERM", undefined] as const) {
       assert.match(output.stderr, /OutpostError:/);
       assert.doesNotMatch(output.stderr, /Cancelled/);
     }
-    assert.deepEqual(await readdir(join(root, ".outpost", "locks")), []);
+    assert.deepEqual(await readdir(join(root, ".outpost", "locks")), [
+      "resource-activity",
+    ]);
+    assert.deepEqual(
+      await readdir(join(root, ".outpost", "locks", "resource-activity")),
+      [],
+    );
   });
 }

@@ -93,7 +93,7 @@ test("workspace hooks run immediately once and sandbox hooks start concurrently"
   assert.equal(await readFile(join(root, "ready.txt"), "utf8"), "once");
 });
 
-test("failed provisioning removes a clean owned workspace", async (t) => {
+test("failed allocation preserves a clean owned workspace when provider cleanup is uncertain", async (t) => {
   const root = await repository(t);
   const provider = {
     ...local(),
@@ -112,7 +112,7 @@ test("failed provisioning removes a clean owned workspace", async (t) => {
   assert.equal(
     (await git(root, ["worktree", "list", "--porcelain"])).match(/^worktree /gm)
       ?.length,
-    1,
+    2,
   );
 });
 

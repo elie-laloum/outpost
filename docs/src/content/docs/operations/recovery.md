@@ -31,7 +31,7 @@ try {
 
 ## What is preserved
 
-Recovery metadata can include workspace, conversation, commits, transcript and log. Availability depends on how far execution reached. Dirty managed worktrees and worktrees containing ignored files are retained; clean owned workspaces are removed after startup failure. Named branches survive clean worktree removal.
+Recovery metadata can include workspace, conversation, commits, transcript and log. Availability depends on how far execution reached. Dirty managed worktrees and worktrees containing ignored files are retained; clean owned workspaces are removed after startup failure when no provider allocation began or an acquired lease was successfully released. Named branches survive clean worktree removal.
 
 Remote recovery folders may contain `initial.bundle`/`commits.bundle`, binary-capable patches, `previous-index.patch`, untracked files under `incoming`/`previous-files`, and `state.json`. They represent prior and incoming state, not a guarantee that an interrupted transfer captured everything.
 
@@ -122,3 +122,33 @@ This is an observation of the recorded local owner, not a distributed lease, pro
 Acquisition only reclaims an existing lock when its local owner is confirmed inactive. Unknown, malformed and legacy locks block acquisition, including an absent legacy PID. A crashed process on a platform without identity support therefore needs deliberate manual investigation. Release checks its nonce and never intentionally removes a replacement owner's record. Do not remove a lock merely because the PID field appears stale.
 
 See [retention and quotas](../storage-retention/) to plan explicit cleanup.
+
+## Inspect sandbox activity
+
+Sandboxes created through `createSandbox`, workspace methods, dispatch or attach register their lifecycle under `.outpost/locks/resource-activity`. Inspect these records without contacting providers:
+
+```sh
+outpost recovery inspect --repository /path/to/repository --resources --json
+```
+
+```ts
+import { inspectRecovery } from "@elie-laloum/outpost";
+
+const report = await inspectRecovery({
+  repository: "/path/to/repository",
+  resources: true,
+});
+for (const entry of report.resources?.entries ?? []) {
+  console.log(entry.record?.phase, entry.record?.operations, entry.ownership);
+}
+```
+
+Each record has a unique sandbox owner ID, PID, available Linux process identity, provider name and placement, workspace path, timestamps and a phase: `allocating`, `ready`, `closing`, `cleanup-failed` or `allocation-uncertain`. Active dispatch, attachment, diagnostics and commands are listed alongside underlying invocations, uploads, downloads and batch download/manifest operations. Completed or failed operations leave only the most recent result and failure; records contain no commands, prompts, transfer paths, credentials or exception messages. `completed` means the call returned; a command may have a nonzero exit status.
+
+Records use private files (0600) and directories (0700) where supported, bounded to 64 KiB per record, one active counter per operation kind and 10,000 retained records per checkout. Registration refuses to exceed the record limit; it never deletes old records to make space. Atomic updates avoid exposing partially written records. Record admission shares the storage reservation mutation lock, and activity bytes count toward storage inventory. Reservations do not reserve a fixed maximum size for future activity updates.
+
+Successful sandbox closure removes its own record while leaving caller-owned workspaces open. Failed provider cleanup retains the record and preserves an owned workspace. If allocation began but returned no lease, cleanup cannot be confirmed: `allocation-uncertain` retains both the record and owned workspace, even for a plain allocation error. Retention protects activity records and the workspaces they reference, including when the recorded owner is stale or unknown. Unreadable activity records conservatively prevent clean-workspace pruning. Investigation and any subsequent provider cleanup remain explicit.
+
+`resources: { scope: "recorded-sandboxes", complete, entries, issues }` is an additional observation. Each entry includes its record when readable and an `ownership` status/reason using the same local process identity rules as lock inspection. `complete` describes readable records, not certainty about ownership or provider state. Inspection is bounded to the smaller of `--max-entries` and 10,000 records independently of the storage inventory budget. Malformed, oversized, changing, symlinked or unreadable records produce a partial report and CLI exit status 1; stale or uncertain owners remain reported without deletion. Overall `activity` remains `unverified`.
+
+Direct calls to `provider.acquire()` are outside this registry. It does not discover unrecorded containers or cloud resources, expose provider resource identifiers, poll remote liveness, provide distributed leases or automatically reclaim resources. An inactive process may have left a billable remote sandbox; inspect the provider account before deciding what to remove.
