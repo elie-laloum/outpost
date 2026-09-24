@@ -27,8 +27,11 @@ export async function provisionSandbox(
     options = { ...options, branch: { mode: "integrate" } };
   invariant(
     !options.workspace ||
-      (!options.repository && !options.branch && !options.copies),
-    "A supplied workspace owns its repository, branch and copied inputs",
+      (!options.repository &&
+        !options.branch &&
+        !options.copies &&
+        !options.storageQuota),
+    "A supplied workspace owns its repository, branch, copied inputs and storage quota",
   );
   const owned = !options.workspace;
   invariant(
