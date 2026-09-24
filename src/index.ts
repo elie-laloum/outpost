@@ -213,3 +213,31 @@ export type {
 } from "./domain/artifact.types.ts";
 export type { ArtifactTaskOptions } from "./application/artifact-tasks.types.ts";
 export type { FileArtifactStoreOptions } from "./infrastructure/artifact-store.types.ts";
+
+export { sqliteTaskQueue } from "./infrastructure/task-queue.ts";
+export {
+  serveTaskQueue,
+  httpTaskQueue,
+} from "./infrastructure/task-queue-http.ts";
+export { runQueueWorker } from "./application/queue-worker.ts";
+export { queuedTask } from "./application/queued-task.ts";
+export type {
+  QueueRequest,
+  QueueResult,
+  QueueJob,
+  QueueClaim,
+  QueueLease,
+  TaskQueue,
+  DurableTaskQueue,
+} from "./domain/task-queue.types.ts";
+export type {
+  QueueServerOptions,
+  QueueServer,
+  QueueClientOptions,
+} from "./infrastructure/task-queue-http.types.ts";
+export type {
+  QueueHandlerContext,
+  QueueHandler,
+  QueueWorkerOptions,
+} from "./application/queue-worker.types.ts";
+export type { QueuedTaskOptions } from "./application/queued-task.types.ts";
