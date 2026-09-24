@@ -4,6 +4,7 @@ import type { SandboxLease } from "../domain/sandbox.types.ts";
 import { transfer } from "../infrastructure/transfer.ts";
 import { manifestScript } from "./cloud-files.constants.ts";
 import { downloadTree, uploadTree } from "./cloud-files.ts";
+import { vercelDirectory } from "./vercel-directory.ts";
 import type { VercelRuntime } from "./vercel.types.ts";
 
 export function vercelFiles(
@@ -17,7 +18,7 @@ export function vercelFiles(
           destination,
           (path, content) => sandbox.writeFiles([{ path, content }]),
           async (target, path) => {
-            await sandbox.mkDir(posix.dirname(path));
+            await vercelDirectory(sandbox, posix.dirname(path));
             const result = await sandbox.runCommand("ln", [
               "-s",
               "--",
@@ -28,7 +29,7 @@ export function vercelFiles(
               throw new OutpostError("provider", "Symlink upload failed");
           },
           async (path, directory, mode) => {
-            if (directory) await sandbox.mkDir(path);
+            if (directory) await vercelDirectory(sandbox, path);
             const result = await sandbox.runCommand("chmod", [
               mode.toString(8),
               path,

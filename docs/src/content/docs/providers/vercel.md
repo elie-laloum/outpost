@@ -27,6 +27,8 @@ await dispatch({
 
 Outpost-specific options are `root` (remote workspace path), `retain` (captured output tail) and `variables` (provider environment). Outpost discovers the actual remote home and can install the selected missing agent in a user-writable prefix. Set `bootstrap: false` on dispatch/sandbox options to manage installation yourself.
 
+The default workspace is `/vercel/sandbox/outpost`. Outpost creates missing parent directories recursively, including on images whose initial working directory is `/vercel`. A custom `root` must be writable by the sandbox user.
+
 Remote work requires `named` or `integrate`; omitted branch configuration defaults to integration. Commands stream output and synchronize changes back. Interactive attachment is not supported. Use [remote synchronization](../../sandboxes/remote-sync/) to understand uncommitted inputs, host-edit conflicts and recovery.
 
 SDK contract tests use controlled doubles. Availability, quotas and model access in your account require an account-specific smoke test.

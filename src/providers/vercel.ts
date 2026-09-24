@@ -6,6 +6,7 @@ import { registerCleanup } from "../infrastructure/shutdown.ts";
 import { cloudRoots } from "./cloud.constants.ts";
 import { vercelCommand } from "./vercel-command.ts";
 import { vercelNetworkPolicy } from "./vercel-network.ts";
+import { vercelDirectory } from "./vercel-directory.ts";
 import { vercelFiles } from "./vercel-files.ts";
 import type { VercelOptions } from "./vercel.types.ts";
 
@@ -47,7 +48,7 @@ export function vercel(
       unregister = registerCleanup(release);
       let home: string;
       try {
-        await sandbox.mkDir(root);
+        await vercelDirectory(sandbox, root);
         home = (
           await (await sandbox.runCommand("printenv", ["HOME"])).stdout()
         ).trim();
