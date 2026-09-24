@@ -195,3 +195,37 @@ test("cancelling cache initialization releases the container but keeps persisten
     );
   }
 });
+
+test("Podman reuses an existing cache volume without recreating or deleting it", async (t) => {
+  const root = await repository(t);
+  const volumes = new Set<string>();
+  const provider = containerProvider(
+    "podman",
+    {
+      caches: [{ name: "npm", key: "stable" }],
+      user: { uid: 1000, gid: 1000 },
+    },
+    async (command) => {
+      const args = command.arguments ?? [];
+      if (args[0] === "volume" && args[1] === "create") {
+        const name = args.at(-1)!;
+        if (volumes.has(name) && !args.includes("--ignore"))
+          return { status: 125, stdout: "", stderr: "volume already exists" };
+        volumes.add(name);
+      }
+      assert.notDeepEqual(args.slice(0, 2), ["volume", "rm"]);
+      return { status: 0, stdout: "1000:1000", stderr: "" };
+    },
+    "linux",
+  );
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const lease = await provider.acquire({
+      repository: root,
+      directory: root,
+      gitDirectories: [],
+      variables: {},
+    });
+    await lease.release();
+  }
+  assert.equal(volumes.size, 1);
+});

@@ -94,7 +94,10 @@ test("optional Git inspection distinguishes clean, dirty, detached, locked and u
     entries.find((entry) => entry.name === "file")?.state,
     "skipped",
   );
-  assert.doesNotMatch(JSON.stringify(report), /private/);
+  assert.doesNotMatch(
+    JSON.stringify(report),
+    /private (ignored content|changes|reason|content)/,
+  );
 });
 
 test("Git inspection detects staged and untracked changes without refreshing the index or running fsmonitor", async (t) => {
@@ -184,6 +187,7 @@ test("Git inspection refuses a registered path redirected to an unrelated reposi
   const root = await repository(t);
   const other = await repository(t);
   const path = await workspace(root, "replaced");
+  await rm(join(path, ".git"));
   await writeFile(join(path, ".git"), `gitdir: ${join(other, ".git")}\n`);
   const report = await inspectRecovery({ repository: root, git: true });
   assert.equal(report.git?.complete, false);

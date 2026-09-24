@@ -12,7 +12,10 @@ import {
 import type { Executor } from "../infrastructure/process.types.ts";
 import { registerCleanup } from "../infrastructure/shutdown.ts";
 import { cacheMounts, validateCaches } from "./container-cache.ts";
-import { cacheDefaults } from "./container-cache.constants.ts";
+import {
+  cacheCreateOptions,
+  cacheDefaults,
+} from "./container-cache.constants.ts";
 import { containerCommand } from "./container-command.ts";
 import { containerFiles } from "./container-files.ts";
 import { containerMounts } from "./container-mounts.ts";
@@ -131,6 +134,7 @@ export function containerProvider(
             [
               "volume",
               "create",
+              ...cacheCreateOptions[engine],
               "--label",
               `${cacheDefaults.label}=true`,
               cache.volume,

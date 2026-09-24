@@ -455,15 +455,7 @@ test(
         checks.find((check) => check.id === "agent.sandbox")?.version,
         agentVersions[agent],
       );
-      assert.equal(
-        (
-          await executeProcess({
-            executable: engine,
-            arguments: ["inspect", name],
-          })
-        ).status,
-        1,
-      );
+      await assertContainerRemoved(engine, name);
     }
     let name = "";
     const checks = await diagnoseImage(
@@ -493,15 +485,7 @@ test(
       checks.find((check) => check.id === "image.cleanup")?.status,
       "pass",
     );
-    assert.equal(
-      (
-        await executeProcess({
-          executable: engine,
-          arguments: ["inspect", name],
-        })
-      ).status,
-      1,
-    );
+    await assertContainerRemoved(engine, name);
   },
 );
 
@@ -548,15 +532,7 @@ test(
     assert.equal(interrupted, true, error);
     assert.equal(status, 143, error);
     assert.ok(name);
-    assert.equal(
-      (
-        await executeProcess({
-          executable: engine,
-          arguments: ["inspect", name],
-        })
-      ).status,
-      1,
-    );
+    await assertContainerRemoved(engine, name);
   },
 );
 
@@ -625,3 +601,22 @@ test(
     }
   },
 );
+
+async function assertContainerRemoved(
+  engine: string,
+  name: string,
+): Promise<void> {
+  const result = await executeProcess({
+    executable: engine,
+    arguments: [
+      "ps",
+      "--all",
+      "--filter",
+      `name=${name}`,
+      "--format",
+      "{{.Names}}",
+    ],
+  });
+  assert.equal(result.status, 0, result.stderr);
+  assert.equal(result.stdout.trim(), "");
+}

@@ -1,4 +1,11 @@
-import { copyFile, lstat, mkdir, mkdtemp, rm } from "node:fs/promises";
+import {
+  copyFile,
+  lstat,
+  mkdir,
+  mkdtemp,
+  realpath,
+  rm,
+} from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { directory, safeDestination } from "../infrastructure/files.ts";
@@ -15,7 +22,9 @@ export async function verifyRecoveryRestorability(
   state: RecoveryTransferState,
   repository: string,
 ): Promise<readonly RecoveryStructureCheck[]> {
-  const temporary = await mkdtemp(join(tmpdir(), "outpost-restore-check-"));
+  const temporary = await realpath(
+    await mkdtemp(join(tmpdir(), "outpost-restore-check-")),
+  );
   const checks: RecoveryStructureCheck[] = [];
   let stage = "REPOSITORY_OBJECTS";
   try {

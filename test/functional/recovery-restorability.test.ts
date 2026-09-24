@@ -1,6 +1,13 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import {
+  mkdir,
+  readFile,
+  readdir,
+  rm,
+  symlink,
+  writeFile,
+} from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { verifyRecoveryTransfer } from "../../src/application/recovery-verification.ts";
 import { git } from "../../src/infrastructure/git/command.ts";
@@ -228,4 +235,35 @@ test("promisor and alternate object sources are explicitly unsupported without s
   assert.ok(
     alternate.checks.some((check) => check.code === "SOURCE_UNSUPPORTED"),
   );
+});
+
+test("restorability canonicalizes a symlinked system temporary directory", async (t) => {
+  const root = await repository(t);
+  const path = await transfer(root);
+  const temporary = join(root, "temporary");
+  const alias = join(root, "temporary-alias");
+  await mkdir(temporary);
+  await symlink(
+    temporary,
+    alias,
+    process.platform === "win32" ? "junction" : "dir",
+  );
+  const result = await executeProcess({
+    executable: process.execPath,
+    arguments: [
+      resolve("src/cli/main.ts"),
+      "recovery",
+      "verify",
+      "--directory",
+      path,
+      "--restorability",
+      "--repository",
+      root,
+      "--json",
+    ],
+    variables: { TMPDIR: alias, TMP: alias, TEMP: alias },
+  });
+  assert.equal(result.status, 0, result.stdout + result.stderr);
+  assert.equal(JSON.parse(result.stdout).complete, true);
+  assert.deepEqual(await readdir(temporary), []);
 });

@@ -5,3 +5,5 @@ export const cacheDefaults = Object.freeze({
   namePattern: /^[a-z][a-z0-9-]{0,47}$/,
   maximumKeyLength: 1024,
 });
+
+export const cacheCreateOptions = { docker: [], podman: ["--ignore"] } as const;
