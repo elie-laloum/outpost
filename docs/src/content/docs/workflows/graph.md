@@ -44,3 +44,5 @@ Keys must be unique. Every dependency must be present in the graph, and cycles a
 Continue with [execution policies](../execution/) or [sandbox tasks](../sandbox-tasks/).
 
 See [usage budgets](../budgets/) for shared admission and token limits, and [telemetry](../../operations/telemetry/) for structured metrics.
+
+Persist results across process restarts with [workflow checkpoints](../checkpoints/).

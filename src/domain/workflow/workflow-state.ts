@@ -1,3 +1,4 @@
+import type { WorkflowCheckpointSession } from "./checkpoint.types.ts";
 import { workflowAccounting } from "./budget.ts";
 import { randomUUID } from "node:crypto";
 import type {
@@ -14,8 +15,9 @@ export function workflowState(
   name: string,
   tasks: readonly Task[],
   options: WorkflowOptions,
+  checkpoint?: WorkflowCheckpointSession,
 ): WorkflowExecutionState {
-  const executionId = randomUUID();
+  const executionId = checkpoint?.initial?.executionId ?? randomUUID();
   const stop = new AbortController();
   const signal = options.signal
     ? AbortSignal.any([options.signal, stop.signal])
@@ -28,12 +30,33 @@ export function workflowState(
       { key: item.key, status: "waiting", attempts: 0 },
     ]),
   );
+  const saved = checkpoint?.initial;
+  if (saved) {
+    const complete = saved.records.every((entry) =>
+      ["done", "skipped"].includes(entry.status),
+    );
+    for (const item of tasks) {
+      const entry = saved.records.find((entry) => entry.key === item.key)!;
+      records.set(item, {
+        ...entry,
+        status: entry.status === "done" || complete ? entry.status : "waiting",
+      });
+      if (entry.status === "done") {
+        const output = saved.values[item.key]!;
+        values.set(item, output.kind === "json" ? output.value : undefined);
+      }
+    }
+  }
   const errors: unknown[] = [],
     observerErrors: unknown[] = [];
-  const accounting = workflowAccounting(options.budget, (error) => {
-    errors.push(error);
-    if (error.dimension !== "attempts") stop.abort(error);
-  });
+  const accounting = workflowAccounting(
+    options.budget,
+    (error) => {
+      errors.push(error);
+      if (error.dimension !== "attempts") stop.abort(error);
+    },
+    saved?.usage,
+  );
   const record = (item: Task) => records.get(item)!;
   function emit(
     event: Omit<WorkflowEvent, "executionId" | "workflow" | "timestamp">,
@@ -74,6 +97,7 @@ export function workflowState(
       signal: taskSignal,
       attempt,
       executionId,
+      checkpoint: () => runtime.persist(),
       reportUsage(usage) {
         if (
           attempt === 0 ||
@@ -84,6 +108,7 @@ export function workflowState(
             "Usage must be reported during its active task attempt",
           );
         accounting.report(usage);
+        void runtime.persist().catch((error: unknown) => stop.abort(error));
         emit({
           type: "usage",
           key: item.key,
@@ -103,7 +128,10 @@ export function workflowState(
     };
   }
 
-  return {
+  const runtime: WorkflowExecutionState = {
+    async persist() {
+      await checkpoint?.save(runtime);
+    },
     executionId,
     accounting,
     closeAttempt(item) {
@@ -121,4 +149,5 @@ export function workflowState(
     context,
     options,
   };
+  return runtime;
 }

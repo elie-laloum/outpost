@@ -1,3 +1,4 @@
+import type { WorkflowCheckpointOptions } from "./workflow/checkpoint.types.ts";
 import type { Usage } from "./agent.types.ts";
 import type {
   WorkflowAccounting,
@@ -10,6 +11,7 @@ export interface TaskContext {
   readonly attempt: number;
   readonly executionId: string;
   reportUsage(usage: Usage): void;
+  checkpoint?(): Promise<void>;
   value<T>(dependency: Task<T>): T;
 }
 
@@ -57,6 +59,7 @@ export interface WorkflowEvent {
 }
 
 export interface WorkflowOptions {
+  readonly checkpoint?: WorkflowCheckpointOptions;
   readonly signal?: AbortSignal;
   readonly concurrency?: number;
   readonly budget?: WorkflowBudget;
@@ -97,6 +100,7 @@ export interface WorkflowExecutionState {
   readonly observerErrors: unknown[];
   readonly options: WorkflowOptions;
   readonly accounting: WorkflowAccounting;
+  persist(): Promise<void>;
   closeAttempt(task: Task): void;
   record(task: Task): TaskRecord;
   emit(event: WorkflowNotification): void;

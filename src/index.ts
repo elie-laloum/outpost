@@ -157,3 +157,14 @@ export type {
   RecoveryRestorePlan,
   RecoveryRestoreResult,
 } from "./application/recovery-restore.types.ts";
+
+export { fileWorkflowCheckpointStore } from "./infrastructure/workflow-checkpoint.ts";
+export type { FileWorkflowCheckpointOptions } from "./infrastructure/workflow-checkpoint.types.ts";
+export type {
+  WorkflowCheckpoint,
+  WorkflowCheckpointOptions,
+  WorkflowCheckpointStore,
+  WorkflowCheckpointLease,
+  WorkflowCheckpointValue,
+  WorkflowJson,
+} from "./domain/workflow/checkpoint.types.ts";

@@ -1,3 +1,5 @@
+import { openCheckpoint } from "./checkpoint.ts";
+import type { WorkflowCheckpointSession } from "./checkpoint.types.ts";
 import type {
   Task,
   WorkflowOptions,
@@ -13,9 +15,25 @@ export async function schedule(
   tasks: readonly Task[],
   options: WorkflowOptions,
 ): Promise<WorkflowResult> {
+  const checkpoint = options.checkpoint
+    ? await openCheckpoint(name, tasks, options.checkpoint)
+    : undefined;
+  try {
+    return await scheduleRun(name, tasks, options, checkpoint);
+  } finally {
+    await checkpoint?.release();
+  }
+}
+
+async function scheduleRun(
+  name: string,
+  tasks: readonly Task[],
+  options: WorkflowOptions,
+  checkpoint?: WorkflowCheckpointSession,
+): Promise<WorkflowResult> {
   const concurrency = options.concurrency ?? 1;
   positive(concurrency, "concurrency");
-  const state = workflowState(name, tasks, options);
+  const state = workflowState(name, tasks, options, checkpoint);
   const {
     executionId,
     signal,
@@ -30,44 +48,53 @@ export async function schedule(
   const active = new Map<Task, Promise<void>>();
   const started = Date.now();
   emit({ type: "start" });
-  while (true) {
-    let changed = false;
-    for (const item of tasks) {
-      if (record(item).status !== "waiting") continue;
-      if (signal.aborted || state.accounting.exhausted) {
-        finish(item, "cancelled");
-        changed = true;
-        continue;
-      }
-      const dependencies = item.after.map(
-        (dependency) => record(dependency).status,
-      );
-      if (
-        dependencies.some((status) =>
-          ["failed", "skipped", "cancelled"].includes(status),
+  await state.persist();
+  try {
+    while (true) {
+      let changed = false;
+      for (const item of tasks) {
+        if (record(item).status !== "waiting") continue;
+        if (signal.aborted || state.accounting.exhausted) {
+          finish(item, "cancelled");
+          changed = true;
+          continue;
+        }
+        const dependencies = item.after.map(
+          (dependency) => record(dependency).status,
+        );
+        if (
+          dependencies.some((status) =>
+            ["failed", "skipped", "cancelled"].includes(status),
+          )
+        ) {
+          finish(item, "skipped");
+          changed = true;
+          continue;
+        }
+        if (
+          active.size >= concurrency ||
+          item.after.some((dependency) => active.has(dependency)) ||
+          !dependencies.every((status) => status === "done")
         )
-      ) {
-        finish(item, "skipped");
+          continue;
+        const running = runTask(item, state).finally(() => {
+          active.delete(item);
+        });
+        active.set(item, running);
         changed = true;
+      }
+      if (active.size) {
+        await Promise.race(active.values());
         continue;
       }
-      if (
-        active.size >= concurrency ||
-        !dependencies.every((status) => status === "done")
-      )
-        continue;
-      const running = runTask(item, state).finally(() => {
-        active.delete(item);
-      });
-      active.set(item, running);
-      changed = true;
+      if (!changed) break;
     }
-    if (active.size) {
-      await Promise.race(active.values());
-      continue;
-    }
-    if (!changed) break;
+  } catch (error) {
+    state.stop.abort(error);
+    await Promise.allSettled(active.values());
+    throw error;
   }
+  await state.persist();
   if (options.signal?.aborted) errors.push(options.signal.reason);
   const status = options.signal?.aborted
     ? "cancelled"
