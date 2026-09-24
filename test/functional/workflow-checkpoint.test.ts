@@ -445,3 +445,35 @@ test("corrupt records, output envelopes and accounting never replay effects", as
   }
   assert.equal(calls, 1);
 });
+
+test("checkpoint restart preserves graph identity across host locales", async (t) => {
+  const directory = await temporary(t);
+  const program = `
+    import { fileWorkflowCheckpointStore, task, workflow } from ${JSON.stringify(new URL("../../src/index.ts", import.meta.url).href)};
+    const tasks = ["a", "A"].map(key => task({ key, perform() {
+      if (process.env.OUTPOST_TEST_RESUME === "1") throw new Error("Completed task replayed");
+      return key;
+    } }));
+    const result = await workflow("portable", tasks).start({ checkpoint: {
+      store: fileWorkflowCheckpointStore({ directory: process.env.OUTPOST_TEST_CHECKPOINT }), runId: "portable", version: "v1"
+    } });
+    result.unwrap();
+    console.log(result.value(tasks[0]));
+  `;
+  const { executeProcess } =
+    await import("../../src/infrastructure/process.ts");
+  for (const [index, locale] of ["en_US.UTF-8", "da_DK.UTF-8"].entries()) {
+    const result = await executeProcess({
+      executable: process.execPath,
+      arguments: ["--input-type=module", "-e", program],
+      variables: {
+        LANG: locale,
+        LC_ALL: locale,
+        OUTPOST_TEST_CHECKPOINT: directory,
+        OUTPOST_TEST_RESUME: String(index),
+      },
+    });
+    assert.equal(result.status, 0, result.stderr);
+    assert.equal(result.stdout.trim(), "a");
+  }
+});

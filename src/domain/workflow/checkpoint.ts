@@ -26,7 +26,10 @@ export async function openCheckpoint(
       condition: !!item.condition,
       accepts: !!item.retry?.accepts,
     }))
-    .sort((a, b) => a.key.localeCompare(b.key));
+    .sort((a, b) => {
+      if (a.key === b.key) return 0;
+      return a.key < b.key ? -1 : 1;
+    });
   const identity = createHash("sha256")
     .update(JSON.stringify({ name, version: options.version, graph }))
     .digest("hex");
