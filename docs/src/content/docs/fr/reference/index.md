@@ -64,6 +64,7 @@ Chaque export public du package et de ses sous-chemins possède une page de réf
 - [gemini](./gemini/)
 - [ClaudeSettings](./claudesettings/)
 - [CodexSettings](./codexsettings/)
+- [CodexModelProvider](./codexmodelprovider/)
 - [GeminiSettings](./geminisettings/)
 - [agentVersions](./agentversions/)
 - [AgentAdapter](./agentadapter/)

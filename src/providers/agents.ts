@@ -5,4 +5,5 @@ export type { GeminiSettings } from "../adapters/agents/gemini.types.ts";
 export type {
   ClaudeSettings,
   CodexSettings,
+  CodexModelProvider,
 } from "../adapters/agents/settings.types.ts";

@@ -17,6 +17,7 @@ import type { CodexSettings } from "@elie-laloum/outpost";
 
 ```ts
 export interface CodexSettings extends CommonAgentSettings {
+  readonly modelProvider?: CodexModelProvider;
   readonly reasoning?: "low" | "medium" | "high" | "xhigh";
   readonly approvalReviewer?: "user" | "auto_review";
 }
@@ -24,4 +25,5 @@ export interface CodexSettings extends CommonAgentSettings {
 
 ## Contrats associés
 
+- [CodexModelProvider](../codexmodelprovider/)
 - [CommonAgentSettings](../support-commonagentsettings/)

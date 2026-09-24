@@ -32,7 +32,7 @@ export const groups = [
     title: ["Agents", "Agents"],
     guide: "agents/adapters",
     names:
-      "claude codex gemini ClaudeSettings CodexSettings GeminiSettings agentVersions AgentAdapter AgentInput",
+      "claude codex gemini ClaudeSettings CodexSettings CodexModelProvider GeminiSettings agentVersions AgentAdapter AgentInput",
   },
   {
     title: ["Prompts and responses", "Prompts et réponses"],

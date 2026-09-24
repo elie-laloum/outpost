@@ -61,6 +61,7 @@ export type {
 export type {
   ClaudeSettings,
   CodexSettings,
+  CodexModelProvider,
   GeminiSettings,
 } from "./providers/agents.ts";
 

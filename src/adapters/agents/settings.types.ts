@@ -17,7 +17,13 @@ export interface ClaudeSettings extends CommonAgentSettings {
     | "bypassPermissions";
 }
 
+export interface CodexModelProvider {
+  readonly baseUrl: string;
+  readonly apiKeyEnvironment?: string | false;
+}
+
 export interface CodexSettings extends CommonAgentSettings {
+  readonly modelProvider?: CodexModelProvider;
   readonly reasoning?: "low" | "medium" | "high" | "xhigh";
   readonly approvalReviewer?: "user" | "auto_review";
 }

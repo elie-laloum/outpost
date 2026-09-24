@@ -96,3 +96,32 @@ Le hook s'exécute une fois par sandbox. Gardez les étapes dépendantes dans la
 Lancez `codex login status` dans la sandbox. Vérifiez les fichiers absents ou expirés, le stockage uniquement dans le trousseau et les variables non déclarées. Ces exemples vérifient la connexion ; un dispatch appelle le modèle. Pour les providers cloud, utilisez le hook de clé API avec des variables explicites ; les montages locaux concernent Docker/Podman. Les identifiants du provider ne connectent pas Codex.
 
 Suite : [priorité des variables](../environment/) ou [cookbooks](../../cookbooks/).
+
+## Fournisseurs de modèles compatibles OpenAI
+
+Utilisez un fournisseur personnalisé pour un service implémentant l’API OpenAI Responses, avec les réponses en streaming et les appels d’outils Codex. Les endpoints limités à Chat Completions ne sont pas pris en charge. Indiquez explicitement le modèle ; son nom et sa disponibilité dépendent du service.
+
+```ts
+import { codex, dispatch } from "@elie-laloum/outpost";
+import { docker } from "@elie-laloum/outpost/providers/docker";
+
+const result = await dispatch({
+  agent: codex({
+    model: "vendor/model",
+    modelProvider: {
+      baseUrl: "https://models.example.com/v1",
+      apiKeyEnvironment: "MODEL_API_KEY",
+    },
+    variables: { MODEL_API_KEY: process.env.MODEL_API_KEY! },
+  }),
+  provider: docker(),
+  brief: {
+    text: "Inspect the repository and describe the next useful change.",
+  },
+});
+console.log(result.text);
+```
+
+`apiKeyEnvironment` vaut `OPENAI_API_KEY` par défaut ; utilisez `false` uniquement pour un endpoint sans authentification. Définissez le secret dans le processus parent et transmettez-le explicitement, ou déclarez-le dans `.outpost/.env` du dépôt. Outpost transmet le nom de variable à la configuration Codex, jamais la clé dans les arguments. Ce fournisseur ne nécessite pas `codex login` ; la facturation relève du service choisi. Les URL ne peuvent contenir de credentials, paramètres de requête ou fragments. `localhost` désigne le sandbox : un serveur local doit être accessible depuis celui-ci.
+
+Consultez les [fournisseurs personnalisés Codex](https://developers.openai.com/codex/config-advanced/#custom-model-providers). Les contrats de conversation native Codex et de sandbox restent applicables. Validez la compatibilité avec le service choisi ; la mention « compatible OpenAI » ne garantit pas Responses ni les outils.
