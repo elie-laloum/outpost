@@ -5,7 +5,7 @@ sidebar:
   order: 4
 ---
 
-`repositoryMode: "isolated"` est un prototype sur activation pour Docker et Podman. Chaque conteneur reçoit son checkout et son répertoire Git privés dans `/outpost/workspace`. Le checkout hôte et les métadonnées Git partagées ne sont pas montés. Le mode `"mounted"` par défaut conserve son comportement.
+`repositoryMode: "isolated"` est un prototype sur activation pour Docker et Podman. Chaque conteneur reçoit son checkout et son répertoire Git privés dans `/tmp/outpost/workspace`. Le checkout hôte et les métadonnées Git partagées ne sont pas montés. Le mode `"mounted"` par défaut conserve son comportement.
 
 ```ts
 import { createSandbox } from "@elie-laloum/outpost";

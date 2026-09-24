@@ -5,7 +5,7 @@ sidebar:
   order: 4
 ---
 
-`repositoryMode: "isolated"` is an opt-in prototype for Docker and Podman. It gives each container a private checkout and Git directory at `/outpost/workspace`. The host checkout and shared Git metadata are not mounted. The default `"mounted"` mode retains its existing behavior.
+`repositoryMode: "isolated"` is an opt-in prototype for Docker and Podman. It gives each container a private checkout and Git directory at `/tmp/outpost/workspace`. The host checkout and shared Git metadata are not mounted. The default `"mounted"` mode retains its existing behavior.
 
 ```ts
 import { createSandbox } from "@elie-laloum/outpost";

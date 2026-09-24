@@ -652,7 +652,7 @@ test(
       logging: false,
     });
     try {
-      assert.equal(box.root, "/outpost/workspace");
+      assert.equal(box.root, "/tmp/outpost/workspace");
       const command = await box.command({
         executable: "sh",
         arguments: [

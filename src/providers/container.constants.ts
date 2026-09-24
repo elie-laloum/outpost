@@ -5,7 +5,7 @@ export const containerDefaults = Object.freeze({
   cleanupMs: 10_000,
   retainBytes: 65_536,
   root: "/workspace",
-  isolatedRoot: "/outpost/workspace",
+  isolatedRoot: "/tmp/outpost/workspace",
   home: "/home/agent",
   minimumMemoryMb: 64,
 });

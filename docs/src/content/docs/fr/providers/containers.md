@@ -43,7 +43,7 @@ console.log(provider.name);
 | `userns`            | Podman : `"keep-id"` ou `false`.                                                                             |
 | `variables`         | Environnement du provider.                                                                                   |
 
-Les sources acceptent `~`, chemins relatifs ou absolus. Les cibles relatives partent de `/workspace` en mode monté ; le mode isolé réserve sa racine `/outpost/workspace` et refuse les montages relatifs du workspace ; `~` cible le home de l’agent. Un montage de fichier individuel doit cibler le home ; ailleurs, montez un répertoire. Les parents manquants sont préparés pour l’UID/GID de l’agent.
+Les sources acceptent `~`, chemins relatifs ou absolus. Les cibles relatives partent de `/workspace` en mode monté ; le mode isolé réserve sa racine `/tmp/outpost/workspace` et refuse les montages relatifs du workspace ; `~` cible le home de l’agent. Un montage de fichier individuel doit cibler le home ; ailleurs, montez un répertoire. Les parents manquants sont préparés pour l’UID/GID de l’agent.
 
 Les containers utilisent un home privé éphémère, des capacités réduites, no-new-privileges et un processus init. Le mode monté expose les montages sélectionnés et les métadonnées Git nécessaires ; le mode isolé copie le contenu et l’historique du dépôt dans le stockage privé du conteneur ; le socket Docker n’est pas monté automatiquement. L’annulation arrête le groupe de la commande sans détruire le container actif.
 

@@ -43,7 +43,7 @@ console.log(provider.name);
 | `userns`            | Podman `"keep-id"` or `false`.                                                                      |
 | `variables`         | Provider environment.                                                                               |
 
-Mount sources accept `~`, relative or absolute paths. Relative targets resolve under `/workspace` in mounted mode; isolated mode reserves its `/outpost/workspace` root and rejects relative workspace mounts; `~` targets the agent home. Individual file mounts must target the home; use a directory mount elsewhere. Missing parent directories for file mounts are prepared for the configured agent UID/GID.
+Mount sources accept `~`, relative or absolute paths. Relative targets resolve under `/workspace` in mounted mode; isolated mode reserves its `/tmp/outpost/workspace` root and rejects relative workspace mounts; `~` targets the agent home. Individual file mounts must target the home; use a directory mount elsewhere. Missing parent directories for file mounts are prepared for the configured agent UID/GID.
 
 Containers use a private ephemeral home, dropped capabilities, no-new-privileges and an init process. Mounted mode exposes selected mounts and required Git metadata; isolated mode copies repository content and history into private container storage; the Docker socket is not mounted automatically. Cancellation stops the current command group without destroying the warm container.
 

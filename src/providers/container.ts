@@ -206,7 +206,7 @@ export function containerProvider(
               name,
               "sh",
               "-c",
-              `mkdir -p ${quote(root)} && chmod 700 ${quote(root)} /outpost && chown ${user.uid}:${user.gid} ${quote(root)} /outpost`,
+              `mkdir -p ${quote(root)} && chmod 700 ${quote(root)} /tmp/outpost && chown ${user.uid}:${user.gid} ${quote(root)} /tmp/outpost`,
             ],
             context.signal ? { signal: context.signal } : {},
           );

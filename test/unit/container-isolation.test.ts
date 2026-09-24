@@ -35,7 +35,7 @@ test("isolated containers use remote placement and private writable Git storage"
       gitDirectories: [join(root, ".git")],
       variables: {},
     });
-    assert.equal(lease.root, "/outpost/workspace");
+    assert.equal(lease.root, "/tmp/outpost/workspace");
     const create = calls.find(
       (call) => call.arguments?.[0] === "create",
     )!.arguments!;
@@ -45,7 +45,7 @@ test("isolated containers use remote placement and private writable Git storage"
     assert.ok(
       calls.some((call) =>
         call.arguments?.some((arg) =>
-          arg.includes("chown 1234:1234 '/outpost/workspace' /outpost"),
+          arg.includes("chown 1234:1234 '/tmp/outpost/workspace' /tmp/outpost"),
         ),
       ),
     );
@@ -82,7 +82,7 @@ test("isolated mounts reject canonical repository aliases and reserved targets",
         volumes: [{ source, target, readOnly: true }],
       },
       process.platform,
-      "/outpost/workspace",
+      "/tmp/outpost/workspace",
       "/home/agent",
     );
   for (const source of [
