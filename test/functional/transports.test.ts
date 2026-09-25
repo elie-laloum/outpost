@@ -451,14 +451,18 @@ for (const [name, factory] of Object.entries(adapters)) {
       elsewhere,
       home,
     );
-    assert.match(await readFile(restored, "utf8"), /parent/);
-    assert.ok((await readFile(restored, "utf8")).includes(elsewhere));
-    assert.match(
-      await readFile(
-        join(restored.slice(0, -".jsonl".length), "subagents/child.jsonl"),
-        "utf8",
+    assert.deepEqual(JSON.parse(await readFile(restored, "utf8")), {
+      cwd: elsewhere,
+      text: "parent",
+    });
+    assert.deepEqual(
+      JSON.parse(
+        await readFile(
+          join(restored.slice(0, -".jsonl".length), "subagents/child.jsonl"),
+          "utf8",
+        ),
       ),
-      /child/,
+      { cwd: elsewhere, text: "child" },
     );
     await lease.release();
   });
