@@ -1,8 +1,8 @@
-import { lstat, open, realpath } from "node:fs/promises";
-import { resolve } from "node:path";
+import { lstat, open } from "node:fs/promises";
 import type { Stats } from "node:fs";
 import { positive } from "../domain/errors.ts";
 import { inspectionFileFlags } from "./inspection-file.constants.ts";
+import { isDirectInspectionPath } from "./inspection-path.ts";
 
 function unchanged(before: Stats, after: Stats): boolean {
   return (
@@ -20,7 +20,7 @@ export async function readInspectionFile(
 ): Promise<Buffer> {
   positive(maxBytes, "maxBytes");
   const before = await lstat(path);
-  if (!before.isFile() || (await realpath(path)) !== resolve(path))
+  if (!before.isFile() || !(await isDirectInspectionPath(path)))
     throw new Error("Inspection path changed");
   if (before.size > maxBytes) throw new Error("Inspection file is too large");
   const file = await open(path, inspectionFileFlags);

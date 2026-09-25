@@ -1,11 +1,15 @@
 # Changelog
 
-## Unreleased
+## 4.2.0
 
 - Add experimental `openaiCompatible()` and typed model-provider contracts for direct, non-streaming Chat Completions or Responses calls without Codex. Bound requests and response sizes, support cancellation and optional reported usage, and reject incomplete or unsupported outputs. Tool execution and the agent harness remain planned for phase two; live service compatibility is unvalidated.
 - Add a bilingual Model providers reference family with experimental icons and generated warning banners explaining the limitations. Add the same warning treatment to Firecracker and FirecrackerOptions.
 - Add local/S3 object transports for artifacts, exclusively owned checkpoints, segmented journals, native conversation snapshots, verified recovery archives, shared storage reservations, resource activity and remote inventory/retention/quota operations. Preserve existing directory stores and local execution paths; AWS SDK loading remains optional. Remote ownership recovery is explicit and authenticated live storage campaigns remain outstanding.
 - Add the optional `@elie-laloum/outpost/queues/bullmq` adapter for standalone Redis and BullMQ 5, preserving queue identity, lossless JSON results, fenced leases, cancellation and deadlines. Include asynchronous connection cleanup, real Redis integration tests and bilingual reference and operational guidance.
+
+- Rebuild the bilingual documentation with separate Guide and Reference navigation, family overviews, contextual API descriptions, preserved symbol URLs and redirects for moved guides. Add complete runnable preparations and a schema-validation guide covering Zod, Valibot and JSON Schema.
+- Group reference families under five fixed sections with short English labels in both locales, localized overview links with house icons, and keyboard-accessible desktop/mobile navigation. Group egress policies with sandbox providers.
+- Avoid recreating filesystem roots when initializing local transports on Windows, and accept native short/case aliases during inspection without allowing symlink traversal. Preserve child transcripts when capturing Windows conversations, verify relocated paths as decoded JSON, and build the library before running documented Docker/Podman examples in CI.
 
 ## 4.1.0
 

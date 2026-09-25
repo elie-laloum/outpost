@@ -69,7 +69,9 @@ const bytes = (value: string) => Buffer.from(value);
 
 test("local transport creates nested storage beneath an existing filesystem root", async (t) => {
   const directory = join(await temporary(t), "missing", "nested", "store");
-  const transporter = localTransport({ directory });
+  const alias =
+    process.platform === "win32" ? directory.toUpperCase() : directory;
+  const transporter = localTransport({ directory: alias });
   const input = Uint8Array.of(0, 255, 128, 10);
   const entry = await transporter.write("nested/payload", input, {
     ifRevision: null,

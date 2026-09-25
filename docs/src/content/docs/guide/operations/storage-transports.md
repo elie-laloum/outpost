@@ -5,7 +5,7 @@ sidebar:
   order: 7
 ---
 
-Use a `Transport` to choose where Outpost reads and writes persistent data. Stores retain their domain rules while local and S3 adapters provide versioned binary objects and conditional mutations. This addition is implemented for the next release; legacy directory configurations retain their behavior.
+Use a `Transport` to choose where Outpost reads and writes persistent data. Stores retain their domain rules while local and S3 adapters provide versioned binary objects and conditional mutations. Available since Outpost 4.2.0; existing directory configurations retain their behavior.
 
 <!-- scenario:offline -->
 <!-- preparation:offline -->

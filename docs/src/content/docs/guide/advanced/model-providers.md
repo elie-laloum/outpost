@@ -6,7 +6,7 @@ sidebar:
 ---
 
 :::caution[Experimental — phase one]
-`openaiCompatible()` implements direct text generation without Codex. It has no agent harness: tools, repository edits, automatic context collection and conversation persistence are not implemented. Its API may change. This is an implemented, unreleased addition; install a build of this source revision to try it.
+`openaiCompatible()` implements direct text generation without Codex. It has no agent harness: tools, repository edits, automatic context collection and conversation persistence are not implemented. Its API may change. Available since Outpost 4.2.0 as an experimental API.
 :::
 
 A model provider chooses the HTTP service that generates text. A [sandbox provider](../../environment/providers/overview/) chooses where commands execute. This client runs in the process that calls `generate()` and allocates no sandbox. It cannot be passed as `agent` or `provider` to `dispatch()` or `createSandbox()`.
@@ -16,16 +16,13 @@ A model provider chooses the HTTP service that generates text. A [sandbox provid
 <details>
 <summary>Complete preparation and executable example</summary>
 
-Use Node.js 24+ and a checkout of Outpost containing this implementation. Build that checkout, then install it in a separate example directory:
+Use Node.js 24+ and npm. Install Outpost 4.2.0 or later in a new example directory:
 
 ```sh
-cd /absolute/path/outpost
-npm ci
-npm run build
-mkdir /absolute/path/model-example
-cd /absolute/path/model-example
+mkdir model-example
+cd model-example
 npm init -y
-npm install /absolute/path/outpost
+npm install '@elie-laloum/outpost@^4.2.0'
 ```
 
 Create an ignored `.env` file declaring `MODEL_BASE_URL`, `MODEL_NAME` and `MODEL_API_KEY`. Use the chosen service's API base URL, including its version prefix, and one of its available model identifiers. The call sends the prompt and key to that service and can incur its API charges. No Codex or ChatGPT account session is used. Do not commit the key.

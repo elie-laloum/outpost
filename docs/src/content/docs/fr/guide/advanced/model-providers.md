@@ -6,7 +6,7 @@ sidebar:
 ---
 
 :::caution[Expérimental — première phase]
-`openaiCompatible()` implémente la génération directe de texte sans Codex. Il ne dispose pas de harness d’agent : outils, modifications du dépôt, collecte automatique du contexte et persistance des conversations ne sont pas implémentés. Son API peut évoluer. Cet ajout est implémenté mais non publié ; installez un build de cette révision source pour l’essayer.
+`openaiCompatible()` implémente la génération directe de texte sans Codex. Il ne dispose pas de harness d’agent : outils, modifications du dépôt, collecte automatique du contexte et persistance des conversations ne sont pas implémentés. Son API peut évoluer. Disponible depuis Outpost 4.2.0 sous forme d’API expérimentale.
 :::
 
 Un fournisseur de modèles choisit le service HTTP qui génère le texte. Un [provider de sandbox](../../environment/providers/overview/) choisit où les commandes s’exécutent. Ce client s’exécute dans le processus qui appelle `generate()` et n’alloue aucune sandbox. Il ne peut pas être passé comme `agent` ou `provider` à `dispatch()` ou `createSandbox()`.
@@ -16,16 +16,13 @@ Un fournisseur de modèles choisit le service HTTP qui génère le texte. Un [pr
 <details>
 <summary>Préparation complète et exemple exécutable</summary>
 
-Utilisez Node.js 24+ et un checkout d’Outpost contenant cette implémentation. Construisez ce checkout, puis installez-le dans un répertoire d’exemple distinct :
+Utilisez Node.js 24+ et npm. Installez Outpost 4.2.0 ou ultérieur dans un nouveau répertoire d’exemple :
 
 ```sh
-cd /absolute/path/outpost
-npm ci
-npm run build
-mkdir /absolute/path/model-example
-cd /absolute/path/model-example
+mkdir model-example
+cd model-example
 npm init -y
-npm install /absolute/path/outpost
+npm install '@elie-laloum/outpost@^4.2.0'
 ```
 
 Créez un fichier `.env` ignoré déclarant `MODEL_BASE_URL`, `MODEL_NAME` et `MODEL_API_KEY`. Utilisez l’URL de base de l’API du service choisi, avec son préfixe de version, et un identifiant de modèle disponible. L’appel envoie le prompt et la clé à ce service et peut entraîner sa facturation API. Aucune session de compte Codex ou ChatGPT n’intervient. Ne commitez pas la clé.

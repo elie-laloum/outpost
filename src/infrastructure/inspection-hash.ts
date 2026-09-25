@@ -1,10 +1,11 @@
 import { createHash } from "node:crypto";
-import { lstat, open, readlink, realpath } from "node:fs/promises";
-import { dirname, resolve } from "node:path";
+import { lstat, open, readlink } from "node:fs/promises";
+import { dirname } from "node:path";
 import type { Stats } from "node:fs";
 import { OutpostError } from "../domain/errors.ts";
 import { inspectionFileFlags } from "./inspection-file.constants.ts";
 import { inspectionHashChunkBytes } from "./inspection-hash.constants.ts";
+import { isDirectInspectionPath } from "./inspection-path.ts";
 import type { InspectionHash } from "./inspection-hash.types.ts";
 
 function unchanged(before: Stats, after: Stats): boolean {
@@ -22,7 +23,7 @@ export async function hashInspectionEntry(
   maxBytes = Number.MAX_SAFE_INTEGER,
 ): Promise<InspectionHash> {
   const before = await lstat(path);
-  if ((await realpath(dirname(path))) !== resolve(dirname(path)))
+  if (!(await isDirectInspectionPath(dirname(path))))
     throw new Error("Hash path traverses a symlink");
   const hash = createHash("sha256");
   if (before.isSymbolicLink()) {

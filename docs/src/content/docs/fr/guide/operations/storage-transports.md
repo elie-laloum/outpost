@@ -5,7 +5,7 @@ sidebar:
   order: 7
 ---
 
-Utilisez un `Transport` pour choisir où Outpost lit et écrit ses données persistantes. Les stores conservent leurs règles métier ; les adaptateurs local et S3 fournissent des objets binaires versionnés et des mutations conditionnelles. Cet ajout est implémenté pour la prochaine version ; les configurations par dossier gardent leur comportement.
+Utilisez un `Transport` pour choisir où Outpost lit et écrit ses données persistantes. Les stores conservent leurs règles métier ; les adaptateurs local et S3 fournissent des objets binaires versionnés et des mutations conditionnelles. Disponible depuis Outpost 4.2.0 ; les configurations par dossier gardent leur comportement.
 
 <!-- scenario:offline -->
 <!-- preparation:offline -->

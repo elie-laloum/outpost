@@ -3,26 +3,18 @@ title: Run a task through BullMQ and Redis
 description: Use the optional BullMQ adapter with the existing Outpost worker and workflow contracts.
 ---
 
-The optional `bullmqTaskQueue` adapter connects `queuedTask` and `runQueueWorker` directly to standalone Redis. SQLite and the HTTP coordinator remain available. This addition is implemented but **unreleased**; use a package built from this checkout until a release includes it.
+The optional `bullmqTaskQueue` adapter connects `queuedTask` and `runQueueWorker` directly to standalone Redis. SQLite and the HTTP coordinator remain available. This adapter is available since Outpost 4.2.0.
 
 <details>
 <summary>Prepare this example from scratch</summary>
 
-Use Node.js **24+**, npm and Docker. No model account or agent credentials are needed. In the Outpost source checkout, build and pack the library:
-
-```sh
-npm ci
-npm run build
-npm pack
-```
-
-Create a separate demonstration directory. Replace the archive path below with the absolute path printed by `npm pack`:
+Use Node.js **24+**, npm and Docker. No model account or agent credentials are needed. Create a separate demonstration directory and install Outpost 4.2.0 or later with the optional BullMQ dependency:
 
 ```sh
 mkdir outpost-redis-example
 cd outpost-redis-example
 npm init -y
-npm install /absolute/path/to/package.tgz 'bullmq@^5.81.5'
+npm install '@elie-laloum/outpost@^4.2.0' 'bullmq@^5.81.5'
 docker run -d --name outpost-redis-demo \
   -p 127.0.0.1:6379:6379 -v outpost-redis-demo:/data \
   redis:7-alpine redis-server --appendonly yes --maxmemory-policy noeviction

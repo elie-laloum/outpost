@@ -1,11 +1,15 @@
 # Historique des versions
 
-## Non publié
+## 4.2.0
 
 - Ajouter `openaiCompatible()` et les contrats typés expérimentaux de fournisseurs de modèles pour des appels directs sans streaming à Chat Completions ou Responses, sans Codex. Borner les requêtes et la taille des réponses, gérer l’annulation et la consommation déclarée si présente, et refuser les sorties incomplètes ou non prises en charge. L’exécution d’outils et le harness d’agent restent prévus en deuxième phase ; la compatibilité avec les services réels n’est pas validée.
 - Ajouter une famille bilingue Fournisseurs de modèles dans la référence, avec icônes expérimentales et bandeaux générés expliquant les limites. Ajouter les mêmes avertissements à Firecracker et FirecrackerOptions.
 - Ajout des transports objet local/S3 pour les artefacts, checkpoints à propriété exclusive, journaux segmentés, snapshots de conversations natives, archives de récupération vérifiées, réservations partagées, activités des ressources et opérations distantes d’inventaire/rétention/quotas. Conservation des stores par dossier et chemins d’exécution locaux ; le SDK AWS reste optionnel. La récupération de propriété distante est explicite et les campagnes de stockage réelles authentifiées restent à effectuer.
 - Ajouter l’adaptateur optionnel `@elie-laloum/outpost/queues/bullmq` pour Redis standalone et BullMQ 5, avec identité des jobs, résultats JSON sans perte, baux protégés par génération, annulation et échéances. Inclure la fermeture asynchrone des connexions, des tests sur Redis réel et la référence et le guide d’exploitation bilingues.
+
+- Refondre la documentation bilingue avec des navigations Guide et Référence distinctes, des vues d’ensemble par famille, des descriptions API contextualisées, la conservation des URL des symboles et des redirections pour les guides déplacés. Ajouter des préparations complètes exécutables et un guide de validation des schémas couvrant Zod, Valibot et JSON Schema.
+- Regrouper les familles de référence sous cinq sections fixes avec libellés courts en anglais dans les deux langues, liens de vue d’ensemble localisés avec icônes de maison et navigation clavier sur ordinateur et mobile. Regrouper les politiques réseau avec les providers de sandbox.
+- Éviter de recréer les racines du système de fichiers lors de l’initialisation des transports locaux sous Windows et accepter les alias natifs courts ou de casse lors de l’inspection sans autoriser la traversée de liens symboliques. Préserver les transcripts enfants lors de la capture de conversations Windows, vérifier les chemins déplacés après décodage JSON et compiler la bibliothèque avant les exemples Docker/Podman documentés en CI.
 
 ## 4.1.0
 
