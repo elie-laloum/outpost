@@ -61,6 +61,6 @@ node example.mts
 
 La sortie est `hello-world`, suivie du graphe Mermaid des dépendances. `after` ordonne l’exécution et autorise la lecture de la valeur de cette tâche. Une clé nomme une tâche ; son objet identifie le résultat typé. Le graphe rejette clés dupliquées, dépendances absentes et cycles avant exécution. Une dépendance en échec ou ignorée empêche le travail en aval.
 
-[Contrats, options et cas particuliers](../../../reference/behavior/workflows/graph/).
+[Contrats, options et cas particuliers](../../behavior/workflows/graph/).
 
 Les fichiers persistants éventuels restent dans ce dossier de démonstration.

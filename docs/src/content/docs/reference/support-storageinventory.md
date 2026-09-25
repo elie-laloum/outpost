@@ -5,27 +5,17 @@ sidebar:
   order: 20
 ---
 
-Supporting contract used by a public signature. It is not directly exported from the package; use TypeScript inference or the public type that references it.
-
-## Purpose and behavior
-
-Inspect retained work and plan explicit storage retention without discarding recoverable edits.
-
-Planning does not prune. Application reacquires ownership and revalidates candidates. Quota checks observe usage rather than imposing physical filesystem limits.
-
-[Complete example and detailed rules](../../guide/operations/recovery/).
-
 ## Parameters and properties
 
-| Name             | Type                         | Presence | Meaning                                                                 |
-| ---------------- | ---------------------------- | -------- | ----------------------------------------------------------------------- |
-| `root`           | `string`                     | Required | See the linked contract and this family's rules for its interpretation. |
-| `categories`     | `readonly StorageCategory[]` | Required | See the linked contract and this family's rules for its interpretation. |
-| `usage`          | `Readonly<StorageUsage>`     | Required | Reported usage counters; not a currency estimate.                       |
-| `issues`         | `readonly StorageIssue[]`    | Required | See the linked contract and this family's rules for its interpretation. |
-| `complete`       | `boolean`                    | Required | See the linked contract and this family's rules for its interpretation. |
-| `scannedEntries` | `number`                     | Required | See the linked contract and this family's rules for its interpretation. |
-| `maxEntries`     | `number`                     | Required | See the linked contract and this family's rules for its interpretation. |
+| Name             | Type                         | Presence | Meaning                                                                                              |
+| ---------------- | ---------------------------- | -------- | ---------------------------------------------------------------------------------------------------- |
+| `root`           | `string`                     | Required | Repository-local .outpost directory whose storage was inspected.                                     |
+| `categories`     | `readonly StorageCategory[]` | Required | Storage grouped into recovery, logs, locks and workspaces.                                           |
+| `usage`          | `Readonly<StorageUsage>`     | Required | Observed storage bytes and counts of files, directories, symbolic links and other entries.           |
+| `issues`         | `readonly StorageIssue[]`    | Required | Filesystem, Git or ownership problems that prevented complete inspection.                            |
+| `complete`       | `boolean`                    | Required | Whether all requested inspection work completed without hitting scan limits or inaccessible entries. |
+| `scannedEntries` | `number`                     | Required | Number of filesystem entries visited within the inspection bound.                                    |
+| `maxEntries`     | `number`                     | Required | Maximum filesystem entries inspected before marking the inventory incomplete.                        |
 
 ## Signature
 

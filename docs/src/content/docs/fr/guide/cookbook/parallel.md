@@ -261,6 +261,6 @@ node example.mts
 
 Deux tâches indépendantes peuvent s’exécuter ensemble car chacune possède son environnement et sa branche nommée. `stopOnError: false` laisse le travail indépendant terminer ; `unwrap()` signale quand même un workflow en échec. Examinez les états avant de lire des résultats potentiellement absents. Les conclusions ne sont pas fusionnées automatiquement.
 
-[Contrats, options et cas particuliers](../../../reference/behavior/cookbooks/parallel/).
+[Contrats, options et cas particuliers](../../behavior/cookbooks/parallel/).
 
 Pour recommencer, utilisez un nouveau dossier de démonstration. Les branches nommées conservent les commits ; les worktrees sales restent disponibles pour récupération. Les scripts ne poussent aucun commit.

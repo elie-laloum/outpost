@@ -5,8 +5,6 @@ sidebar:
   order: 10
 ---
 
-Public contract for **EgressPolicy**. See the [outbound networking guide](../../guide/advanced/egress/) for behavior, defaults and examples.
-
 ## Import
 
 ```ts
@@ -16,19 +14,16 @@ import type { EgressPolicy } from "@elie-laloum/outpost/providers/podman";
 import type { EgressPolicy } from "@elie-laloum/outpost/providers/vercel";
 ```
 
-## Purpose and behavior
-
-Select an opt-in provider-enforced egress policy.
-
-Research prototype. Docker/Podman support deny-all, not domain allowlists. Vercel maps native firewall options. Unsupported capabilities are rejected instead of weakened.
-
-[Complete example and detailed rules](../../guide/advanced/egress/).
-
 ## Parameters and properties
 
-| Name   | Type                        | Presence | Meaning                                                                 |
-| ------ | --------------------------- | -------- | ----------------------------------------------------------------------- |
-| `mode` | `"deny-all" \| "allowlist"` | Required | See the linked contract and this family's rules for its interpretation. |
+The fields below cover all variants; the signature specifies their allowed combinations.
+
+| Name         | Type                             | Presence          | Meaning                                                                                           |
+| ------------ | -------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------- |
+| `mode`       | `"deny-all" \| "allowlist"`      | Required          | deny-all blocks outbound traffic; allowlist restricts it to declared destinations when supported. |
+| `domains`    | `readonly string[] \| undefined` | Variant-dependent | Allowed outbound domain names for providers supporting domain allowlists.                         |
+| `allowCidrs` | `readonly string[] \| undefined` | Variant-dependent | Network ranges explicitly allowed by the provider’s egress policy.                                |
+| `denyCidrs`  | `readonly string[] \| undefined` | Variant-dependent | Network ranges explicitly denied by the provider’s egress policy.                                 |
 
 ## Signature
 

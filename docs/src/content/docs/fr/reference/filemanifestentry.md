@@ -2,10 +2,8 @@
 title: "FileManifestEntry"
 description: "FileManifestEntry — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Contrat public de **FileManifestEntry**. Consultez le [guide transferts distants](../../guide/operations/remote-transfers/) pour le comportement, les valeurs par défaut et des exemples.
 
 ## Import
 
@@ -13,23 +11,15 @@ Contrat public de **FileManifestEntry**. Consultez le [guide transferts distants
 import type { FileManifestEntry } from "@elie-laloum/outpost";
 ```
 
-## Rôle et comportement
-
-Transférer fichiers binaires et manifestes validés en préservant les modifications hôtes concurrentes.
-
-La synchronisation valide et sauvegarde avant application. Les transferts préservent permissions et liens pris en charge et rejettent les traversées dangereuses. Les données de récupération survivent à un nettoyage risqué.
-
-[Exemple complet et règles détaillées](../../guide/operations/remote-transfers/).
-
 ## Paramètres et propriétés
 
-| Nom      | Type               | Présence | Rôle                                                                             |
-| -------- | ------------------ | -------- | -------------------------------------------------------------------------------- |
-| `path`   | `string`           | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `kind`   | `"file" \| "link"` | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `mode`   | `number`           | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `size`   | `number`           | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `sha256` | `string`           | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
+| Nom      | Type               | Présence | Rôle                                                                                                 |
+| -------- | ------------------ | -------- | ---------------------------------------------------------------------------------------------------- |
+| `path`   | `string`           | Requis   | Chemin relatif de ce fichier ou lien symbolique dans l’arborescence transférée.                      |
+| `kind`   | `"file" \| "link"` | Requis   | Indique si cette entrée contient les octets d’un fichier ordinaire ou la cible d’un lien symbolique. |
+| `mode`   | `number`           | Requis   | Bits de permissions de fichiers à préserver pendant le transfert.                                    |
+| `size`   | `number`           | Requis   | Taille en octets du contenu du fichier ou de la cible du lien décrit par le manifeste.               |
+| `sha256` | `string`           | Requis   | Empreinte SHA-256 utilisée pour vérifier le contenu du fichier ou du lien transféré.                 |
 
 ## Signature
 

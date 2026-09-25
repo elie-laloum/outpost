@@ -20,3 +20,48 @@
   outline: 2px solid var(--sl-color-accent-high);
   outline-offset: 4px;
 }
+
+a[data-api-kind] {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5em;
+}
+a[data-api-kind]::before {
+  content: "";
+  display: inline-block;
+  flex: 0 0 1em;
+  width: 1em;
+  height: 1em;
+  align-self: center;
+  background-color: currentColor;
+  mask: var(--api-symbol-icon) center / contain no-repeat;
+}
+a[data-api-kind="function"] {
+  --api-symbol-icon: url("../assets/reference-function.svg");
+}
+a[data-api-kind="interface"] {
+  --api-symbol-icon: url("../assets/reference-interface.svg");
+}
+
+a[data-api-kind="type"] {
+  --api-symbol-icon: url("../assets/reference-type.svg");
+}
+
+a[data-api-kind="class"] {
+  --api-symbol-icon: url("../assets/reference-class.svg");
+}
+
+a[data-api-kind="constant"] {
+  --api-symbol-icon: url("../assets/reference-constant.svg");
+}
+
+a[data-api-status="experimental"]::after {
+  content: "";
+  flex: 0 0 1em;
+  width: 1em;
+  height: 1em;
+  align-self: center;
+  margin-inline-start: auto;
+  background-color: var(--sl-color-text-accent);
+  mask: url("../assets/reference-experiment.svg") center / contain no-repeat;
+}

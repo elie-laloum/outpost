@@ -2,10 +2,8 @@
 title: "readStoredArtifact"
 description: "readStoredArtifact — Outpost API"
 sidebar:
-  order: 10
+  order: 0
 ---
-
-Contrat public de **readStoredArtifact**. Consultez le [guide artefacts typés](../../guide/advanced/artifacts/) pour le comportement, les valeurs par défaut et des exemples.
 
 ## Import
 
@@ -15,23 +13,21 @@ import { readStoredArtifact } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Publier des données immuables et échanger des références avec validation du contrat, de l’empreinte et de la filiation.
-
-Les données du store fichier sont limitées à 16 Mio par défaut. L’appelant possède la rétention. L’empreinte fournit l’intégrité par rapport à une référence fiable, pas l’authentification du producteur ni une transaction commune.
+Valide une référence d’artefact, charge ses octets et vérifie contrat, taille et empreinte avant décodage. Les attentes optionnelles de producteur et parents ajoutent des contrôles de filiation. S’utilise hors contexte de tâche ou lorsque la référence est déjà disponible.
 
 [Exemple complet et règles détaillées](../../guide/advanced/artifacts/).
 
 ## Paramètres et propriétés
 
-| Nom                | Type                                        | Présence  | Rôle                                                                                          |
-| ------------------ | ------------------------------------------- | --------- | --------------------------------------------------------------------------------------------- |
-| `store`            | `ArtifactStore`                             | Requis    | Implémentation de persistance fournie par l’appelant.                                         |
-| `contract`         | `ArtifactContract<T>`                       | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation.              |
-| `value`            | `unknown`                                   | Requis    | Valeur typée produite ou consommée par ce contrat.                                            |
-| `options`          | `ReadArtifactOptions \| undefined`          | Optionnel | Objet de configuration. Ses champs sont décrits dans le contrat d’options associé ci-dessous. |
-| `options.producer` | `ArtifactProducer \| undefined`             | Optionnel | Identité enregistrée du producteur, sans authentification.                                    |
-| `options.parents`  | `readonly ArtifactReference[] \| undefined` | Optionnel | Références ou identifiants parents ordonnés.                                                  |
-| `options.signal`   | `AbortSignal \| undefined`                  | Optionnel | Annulation coopérative de cette opération.                                                    |
+| Nom                | Type                                        | Présence  | Rôle                                                                                              |
+| ------------------ | ------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------- |
+| `store`            | `ArtifactStore`                             | Requis    | Store d’octets d’artefacts utilisé pour la publication immuable ou la lecture bornée des données. |
+| `contract`         | `ArtifactContract<T>`                       | Requis    | Contrat d’artefact nommé et versionné définissant encodage et validation.                         |
+| `value`            | `unknown`                                   | Requis    | Référence d’artefact non validée à contrôler avant chargement et vérification des octets stockés. |
+| `options`          | `ReadArtifactOptions \| undefined`          | Optionnel | Producteur et filiation parentale attendus, avec annulation de lecture.                           |
+| `options.producer` | `ArtifactProducer \| undefined`             | Optionnel | Exécution, tâche et tentative du producteur attendu ; une différence fait échouer la lecture.     |
+| `options.parents`  | `readonly ArtifactReference[] \| undefined` | Optionnel | Références parentes ordonnées attendues ; une filiation différente fait échouer la lecture.       |
+| `options.signal`   | `AbortSignal \| undefined`                  | Optionnel | Annulation coopérative de cette opération.                                                        |
 
 ## Retour
 

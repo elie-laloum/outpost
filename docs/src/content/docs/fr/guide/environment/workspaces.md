@@ -120,6 +120,6 @@ node example.mts
 
 Vous voyez deux fois la même branche. La sandbox ferme à chaque fin d’itération ; le workspace ferme après la boucle. Une sandbox ne ferme pas implicitement un workspace appartenant à l’appelant. Fermez les environnements avant leur workspace. Le dossier géré peut être supprimé à sa fermeture s’il est propre, tandis que la branche nommée reste.
 
-[Contrats, options et cas particuliers](../../../reference/behavior/sandboxes/workspaces/).
+[Contrats, options et cas particuliers](../../behavior/sandboxes/workspaces/).
 
 Pour recommencer, utilisez un nouveau dossier de démonstration. Les branches nommées conservent les commits ; les worktrees sales restent disponibles pour récupération. Les scripts ne poussent aucun commit.

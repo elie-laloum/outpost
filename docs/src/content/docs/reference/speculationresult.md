@@ -2,10 +2,8 @@
 title: "SpeculationResult"
 description: "SpeculationResult — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Public contract for **SpeculationResult**. See the [speculative execution guide](../../guide/advanced/speculation/) for behavior, defaults and examples.
 
 ## Import
 
@@ -13,26 +11,18 @@ Public contract for **SpeculationResult**. See the [speculative execution guide]
 import type { SpeculationResult } from "@elie-laloum/outpost";
 ```
 
-## Purpose and behavior
-
-Race bounded candidate branches and select the first one that passes explicit validation and cleanup.
-
-Research prototype: at most eight candidates, default concurrency two. No automatic integration, push or durable race resumption. Observed usage is not a billing cap.
-
-[Complete example and detailed rules](../../guide/advanced/speculation/).
-
 ## Parameters and properties
 
-| Name         | Type                                                                                                                                           | Presence | Meaning                                                                 |
-| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------- |
-| `id`         | `string`                                                                                                                                       | Required | See the linked contract and this family's rules for its interpretation. |
-| `baseline`   | `string`                                                                                                                                       | Required | See the linked contract and this family's rules for its interpretation. |
-| `host`       | `{ readonly before: SpeculativeHostSnapshot; readonly after?: SpeculativeHostSnapshot; readonly changed: boolean; readonly error?: unknown; }` | Required | See the linked contract and this family's rules for its interpretation. |
-| `status`     | `"aborted" \| "winner" \| "no-winner" \| "budget-exhausted"`                                                                                   | Required | Recorded process or lifecycle outcome; inspect its declared type.       |
-| `winner`     | `SpeculativeCandidateResult<T> \| undefined`                                                                                                   | Optional | See the linked contract and this family's rules for its interpretation. |
-| `candidates` | `readonly SpeculativeCandidateResult<T>[]`                                                                                                     | Required | See the linked contract and this family's rules for its interpretation. |
-| `usage`      | `WorkflowUsage`                                                                                                                                | Required | Reported usage counters; not a currency estimate.                       |
-| `error`      | `unknown`                                                                                                                                      | Optional | See the linked contract and this family's rules for its interpretation. |
+| Name         | Type                                                                                                                                           | Presence | Meaning                                                                                            |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------- |
+| `id`         | `string`                                                                                                                                       | Required | Unique identifier of this speculative race.                                                        |
+| `baseline`   | `string`                                                                                                                                       | Required | Git commit used as the initial snapshot for measuring new work.                                    |
+| `host`       | `{ readonly before: SpeculativeHostSnapshot; readonly after?: SpeculativeHostSnapshot; readonly changed: boolean; readonly error?: unknown; }` | Required | Host checkout snapshots before and after the race, with change detection and any inspection error. |
+| `status`     | `"aborted" \| "winner" \| "no-winner" \| "budget-exhausted"`                                                                                   | Required | Race outcome: winner, no-winner, aborted or budget-exhausted.                                      |
+| `winner`     | `SpeculativeCandidateResult<T> \| undefined`                                                                                                   | Optional | Selected candidate that passed validation and completed cleanup, when one exists.                  |
+| `candidates` | `readonly SpeculativeCandidateResult<T>[]`                                                                                                     | Required | Final status, branch, retained work and available output of every candidate.                       |
+| `usage`      | `WorkflowUsage`                                                                                                                                | Required | Cumulative admitted attempts and observed token usage, including restored accounting.              |
+| `error`      | `unknown`                                                                                                                                      | Optional | Original failure encountered during candidate execution, validation or race cleanup.               |
 
 ## Signature
 

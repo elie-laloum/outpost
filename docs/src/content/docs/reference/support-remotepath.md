@@ -2,27 +2,23 @@
 title: "remotePath"
 description: "remotePath — Outpost API"
 sidebar:
-  order: 20
+  order: 0
 ---
 
-Supporting contract used by a public signature. It is not directly exported from the package; use TypeScript inference or the public type that references it.
+Supporting contract not directly exported; use TypeScript inference or the public type that references it.
 
 ## Purpose and behavior
 
-Locate, capture, restore and relocate native transcripts separately from authentication.
-
-The host conversation home defaults to the OS home. A cold continuation requires a restorable transcript before allocation. A fork does not copy a workspace.
-
-[Complete example and detailed rules](../../guide/agents/conversations/).
+Compute the native transcript path inside a sandbox lease from the format and conversation ID, using the lease’s home and workspace path.
 
 ## Parameters and properties
 
-| Name       | Type                 | Presence | Meaning                                                                 |
-| ---------- | -------------------- | -------- | ----------------------------------------------------------------------- |
-| `format`   | `ConversationFormat` | Required | See the linked contract and this family's rules for its interpretation. |
-| `id`       | `string`             | Required | See the linked contract and this family's rules for its interpretation. |
-| `lease`    | `SandboxLease`       | Required | See the linked contract and this family's rules for its interpretation. |
-| `original` | `string`             | Required | See the linked contract and this family's rules for its interpretation. |
+| Name       | Type                 | Presence | Meaning                                                                                  |
+| ---------- | -------------------- | -------- | ---------------------------------------------------------------------------------------- |
+| `format`   | `ConversationFormat` | Required | Native transcript layout: claude or codex.                                               |
+| `id`       | `string`             | Required | Native conversation identifier used to locate or continue the session.                   |
+| `lease`    | `SandboxLease`       | Required | Sandbox execution lease used to access the native agent home and transfer transcripts.   |
+| `original` | `string`             | Required | Original native transcript filename, when needed to preserve the Codex session filename. |
 
 ## Returns
 

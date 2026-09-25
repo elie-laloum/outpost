@@ -63,6 +63,6 @@ node example.mts
 
 The output is `failed 1`: the first task finishes, but the second cannot start. Attempt budgets count task executions, including retries, not every internal model turn. Token limits use observed reports and may overshoot during concurrent work. They are not guaranteed billing caps.
 
-[Contracts, options and edge cases](../../../reference/behavior/workflows/budgets/).
+[Contracts, options and edge cases](../../behavior/workflows/budgets/).
 
 Any persisted example files remain inside this demonstration directory.

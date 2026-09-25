@@ -2,10 +2,8 @@
 title: "queuedTask"
 description: "queuedTask — Outpost API"
 sidebar:
-  order: 10
+  order: 0
 ---
-
-Contrat public de **queuedTask**. Consultez le [guide exécution distribuée](../../guide/advanced/distributed/) pour le comportement, les valeurs par défaut et des exemples.
 
 ## Import
 
@@ -15,29 +13,27 @@ import { queuedTask } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Coordonner des tâches JSON durables via SQLite, un transport HTTP authentifié et des workers enregistrés.
-
-Les effets sont au moins une fois. Un jeton périmé ne peut valider l’état de file, mais les effets externes peuvent se répéter. HTTP écoute loopback par défaut sans TLS. Un worker traite une tâche à la fois.
+Définit un nœud qui envoie un travail durable dans la file et interroge sa progression. Déduit son identité de l’exécution et de la tâche, décode le résultat JSON et comptabilise l’usage renvoyé. Un worker enregistré exécute le gestionnaire distant.
 
 [Exemple complet et règles détaillées](../../guide/advanced/distributed/).
 
 ## Paramètres et propriétés
 
-| Nom                 | Type                                                                   | Présence  | Rôle                                                                                          |
-| ------------------- | ---------------------------------------------------------------------- | --------- | --------------------------------------------------------------------------------------------- |
-| `options`           | `QueuedTaskOptions<T>`                                                 | Requis    | Objet de configuration. Ses champs sont décrits dans le contrat d’options associé ci-dessous. |
-| `options.after`     | `readonly Task<unknown>[] \| undefined`                                | Optionnel | Dépendances déclarées dont les valeurs peuvent être lues.                                     |
-| `options.key`       | `string`                                                               | Requis    | Clé stable de tâche ou cache dans le contrat concerné.                                        |
-| `options.gate`      | `WorkflowGate \| undefined`                                            | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation.              |
-| `options.condition` | `((context: TaskContext) => boolean \| Promise<boolean>) \| undefined` | Optionnel | Prédicat évalué avant la première tentative.                                                  |
-| `options.retry`     | `Retry \| undefined`                                                   | Optionnel | Politique explicite de reprise ; les effets peuvent se répéter.                               |
-| `options.timeoutMs` | `number \| undefined`                                                  | Optionnel | Délai en millisecondes pour l’opération concernée.                                            |
-| `options.queue`     | `TaskQueue`                                                            | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation.              |
-| `options.handler`   | `string`                                                               | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation.              |
-| `options.input`     | `(context: TaskContext) => WorkflowJson`                               | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation.              |
-| `options.decode`    | `(value: WorkflowJson) => T`                                           | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation.              |
-| `options.deadline`  | `number \| undefined`                                                  | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation.              |
-| `options.pollMs`    | `number \| undefined`                                                  | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation.              |
+| Nom                 | Type                                                                   | Présence  | Rôle                                                                                                                         |
+| ------------------- | ---------------------------------------------------------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `options`           | `QueuedTaskOptions<T>`                                                 | Requis    | Ordonnancement de tâche, gestionnaire de file, fabrique d’entrée, décodeur de résultat et interrogation.                     |
+| `options.after`     | `readonly Task<unknown>[] \| undefined`                                | Optionnel | Dépendances déclarées dont les valeurs peuvent être lues.                                                                    |
+| `options.key`       | `string`                                                               | Requis    | Clé de tâche stable identifiant le nœud dans son graphe de workflow.                                                         |
+| `options.gate`      | `WorkflowGate \| undefined`                                            | Optionnel | Définition persistée d’approbation ou pause ; son exécution exige un checkpoint et une décision de confiance correspondante. |
+| `options.condition` | `((context: TaskContext) => boolean \| Promise<boolean>) \| undefined` | Optionnel | Prédicat évalué avant la première tentative.                                                                                 |
+| `options.retry`     | `Retry \| undefined`                                                   | Optionnel | Politique explicite de reprise ; les effets peuvent se répéter.                                                              |
+| `options.timeoutMs` | `number \| undefined`                                                  | Optionnel | Durée maximale en millisecondes de chaque tentative ; l’annulation est coopérative via context.signal.                       |
+| `options.queue`     | `TaskQueue`                                                            | Requis    | File de tâches utilisée pour envoyer, prendre en charge et persister l’état des travaux.                                     |
+| `options.handler`   | `string`                                                               | Requis    | Nom du gestionnaire enregistré du worker qui exécutera ce travail JSON.                                                      |
+| `options.input`     | `(context: TaskContext) => WorkflowJson`                               | Requis    | Construit l’entrée JSON du travail en file depuis les dépendances de tâche.                                                  |
+| `options.decode`    | `(value: WorkflowJson) => T`                                           | Requis    | Valide et décode le résultat JSON du worker dans le type de sortie de cette tâche.                                           |
+| `options.deadline`  | `number \| undefined`                                                  | Optionnel | Échéance absolue du travail sous forme d’horodatage Unix en millisecondes.                                                   |
+| `options.pollMs`    | `number \| undefined`                                                  | Optionnel | Intervalle en millisecondes entre les interrogations de la file.                                                             |
 
 ## Retour
 
@@ -52,4 +48,4 @@ export declare function queuedTask<T>(options: QueuedTaskOptions<T>): Task<T>;
 ## Contrats associés
 
 - [QueuedTaskOptions](../queuedtaskoptions/)
-- [Task](../task/)
+- [Task](../type-task/)

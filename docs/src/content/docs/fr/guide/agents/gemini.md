@@ -249,6 +249,6 @@ node example.mts
 
 Avant exécution, déclarez `GEMINI_API_KEY=` dans `workflow/.env` et fournissez sa valeur. Gemini démarre une session neuve ; capture native, reprise, fork et réparations automatiques ne sont pas pris en charge. L’image générée inclut la CLI ; changer d’agent n’exige pas de changer de provider. Le modèle éventuel doit correspondre à l’accès de votre compte Gemini.
 
-[Contrats, options et cas particuliers](../../../reference/behavior/agents/gemini/).
+[Contrats, options et cas particuliers](../../behavior/agents/gemini/).
 
 Pour recommencer, utilisez un nouveau dossier de démonstration. Les branches nommées conservent les commits ; les worktrees sales restent disponibles pour récupération. Les scripts ne poussent aucun commit.

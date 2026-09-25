@@ -5,24 +5,14 @@ sidebar:
   order: 20
 ---
 
-Contrat auxiliaire utilisé dans une signature publique. Il n’est pas exporté directement depuis le package ; utilisez l’inférence TypeScript ou le type public qui le référence.
-
-## Rôle et comportement
-
-Inspecter le travail conservé et planifier explicitement sa rétention sans abandonner les modifications récupérables.
-
-Planifier ne supprime rien. L’application reprend possession et revalide les candidats. Les quotas observent l’usage plutôt que d’imposer une limite physique au système de fichiers.
-
-[Exemple complet et règles détaillées](../../guide/operations/recovery/).
-
 ## Paramètres et propriétés
 
-| Nom         | Type     | Présence | Rôle                                                                             |
-| ----------- | -------- | -------- | -------------------------------------------------------------------------------- |
-| `host`      | `string` | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `boot`      | `string` | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `namespace` | `string` | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `started`   | `string` | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
+| Nom         | Type     | Présence | Rôle                                                                                                         |
+| ----------- | -------- | -------- | ------------------------------------------------------------------------------------------------------------ |
+| `host`      | `string` | Requis   | Identité d’hôte utilisée pour distinguer les processus de machines différentes.                              |
+| `boot`      | `string` | Requis   | Identité de démarrage système utilisée pour détecter les identifiants de processus d’un démarrage précédent. |
+| `namespace` | `string` | Requis   | Identité d’espace de noms de processus utilisée pour évaluer la possession locale du verrou.                 |
+| `started`   | `string` | Requis   | Identité système de début de processus utilisée pour détecter la réutilisation d’un PID.                     |
 
 ## Signature
 

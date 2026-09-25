@@ -2,27 +2,21 @@
 title: "LockInspectionEntry"
 description: "LockInspectionEntry — Outpost API"
 sidebar:
-  order: 20
+  order: 10
 ---
-
-Contrat auxiliaire utilisé dans une signature publique. Il n’est pas exporté directement depuis le package ; utilisez l’inférence TypeScript ou le type public qui le référence.
-
-## Rôle et comportement
-
-Inspecter le travail conservé et planifier explicitement sa rétention sans abandonner les modifications récupérables.
-
-Planifier ne supprime rien. L’application reprend possession et revalide les candidats. Les quotas observent l’usage plutôt que d’imposer une limite physique au système de fichiers.
-
-[Exemple complet et règles détaillées](../../guide/operations/recovery/).
 
 ## Paramètres et propriétés
 
-| Nom         | Type                                              | Présence  | Rôle                                                                             |
-| ----------- | ------------------------------------------------- | --------- | -------------------------------------------------------------------------------- |
-| `name`      | `string`                                          | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `path`      | `string`                                          | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `ownership` | `LockOwnership \| undefined`                      | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `state`     | `"unknown" \| "skipped" \| "present" \| "absent"` | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
+Les champs ci-dessous couvrent toutes les variantes ; la signature précise leurs combinaisons autorisées.
+
+| Nom         | Type                                              | Présence          | Rôle                                                                                    |
+| ----------- | ------------------------------------------------- | ----------------- | --------------------------------------------------------------------------------------- |
+| `name`      | `string`                                          | Requis            | Nom de fichier de l’entrée de stockage inspectée.                                       |
+| `path`      | `string`                                          | Requis            | Chemin hôte de l’entrée de stockage inspectée.                                          |
+| `ownership` | `LockOwnership \| undefined`                      | Optionnel         | Évaluation de la possession actuelle de la ressource par le processus local enregistré. |
+| `state`     | `"present" \| "absent" \| "unknown" \| "skipped"` | Requis            | Indique si le fichier de verrou est présent, absent, inconnu ou délibérément ignoré.    |
+| `pid`       | `number \| number \| undefined`                   | Selon la variante | Identifiant du processus extrait du fichier de verrou local lorsqu’il est disponible.   |
+| `reason`    | `string \| "NOT_FILE"`                            | Selon la variante | Motif du classement du verrou local dans cet état de possession.                        |
 
 ## Signature
 

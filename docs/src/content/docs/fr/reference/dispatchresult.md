@@ -2,10 +2,8 @@
 title: "DispatchResult"
 description: "DispatchResult — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Contrat public de **DispatchResult**. Consultez le [guide dispatch](../../guide/agents/dispatch/) pour le comportement, les valeurs par défaut et des exemples.
 
 ## Import
 
@@ -13,33 +11,25 @@ Contrat public de **DispatchResult**. Consultez le [guide dispatch](../../guide/
 import type { DispatchResult } from "@elie-laloum/outpost";
 ```
 
-## Rôle et comportement
-
-Exécuter une tâche d’agent et collecter texte, sortie typée, commits, usage et conversation native.
-
-Une passe est la valeur par défaut. Les échecs de processus ou réponse rejettent la promesse. Épuiser les passes peut plutôt renvoyer completed: false. Le dispatch froid ferme ses ressources ; le dispatch chaud conserve sa sandbox.
-
-[Exemple complet et règles détaillées](../../guide/agents/dispatch/).
-
 ## Paramètres et propriétés
 
-| Nom                 | Type                                                                             | Présence  | Rôle                                                                             |
-| ------------------- | -------------------------------------------------------------------------------- | --------- | -------------------------------------------------------------------------------- |
-| `branch`            | `string`                                                                         | Requis    | Politique de workspace Git ou identité de branche résultante selon ce contrat.   |
-| `directory`         | `string`                                                                         | Requis    | Dossier utilisé par l’opération ; voir les règles de résolution.                 |
-| `commits`           | `readonly Commit[]`                                                              | Requis    | Identités et sujets des commits Git collectés.                                   |
-| `transcript`        | `string \| undefined`                                                            | Optionnel | Chemin hôte disponible du transcript capturé.                                    |
-| `log`               | `string \| undefined`                                                            | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `retainedDirectory` | `string \| undefined`                                                            | Optionnel | Workspace conservé pour inspection ou récupération.                              |
-| `resume`            | `<U = undefined>(options: ContinuationOptions<U>) => Promise<DispatchResult<U>>` | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `fork`              | `<U = undefined>(options: ContinuationOptions<U>) => Promise<DispatchResult<U>>` | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `text`              | `string`                                                                         | Requis    | Contenu textuel ; sa provenance dépend de l’opération.                           |
-| `turns`             | `readonly Turn[]`                                                                | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `usage`             | `Usage`                                                                          | Requis    | Compteurs d’usage rapportés ; aucune estimation monétaire.                       |
-| `conversation`      | `string \| undefined`                                                            | Optionnel | Identité de conversation native disponible.                                      |
-| `value`             | `T`                                                                              | Requis    | Valeur typée produite ou consommée par ce contrat.                               |
-| `completed`         | `boolean`                                                                        | Requis    | Indique si le marqueur de fin configuré a été détecté.                           |
-| `completion`        | `string \| undefined`                                                            | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
+| Nom                 | Type                                                                             | Présence  | Rôle                                                                                            |
+| ------------------- | -------------------------------------------------------------------------------- | --------- | ----------------------------------------------------------------------------------------------- |
+| `branch`            | `string`                                                                         | Requis    | Nom de la branche de travail utilisée ou observée pendant l’exécution.                          |
+| `directory`         | `string`                                                                         | Requis    | Dossier hôte du workspace utilisé pour cette exécution.                                         |
+| `commits`           | `readonly Commit[]`                                                              | Requis    | Identités et sujets des commits Git collectés.                                                  |
+| `transcript`        | `string \| undefined`                                                            | Optionnel | Chemin hôte disponible du transcript capturé.                                                   |
+| `log`               | `string \| undefined`                                                            | Optionnel | Chemin hôte du journal du dispatch lorsqu’un journal a été produit.                             |
+| `retainedDirectory` | `string \| undefined`                                                            | Optionnel | Workspace conservé pour inspection ou récupération.                                             |
+| `resume`            | `<U = undefined>(options: ContinuationOptions<U>) => Promise<DispatchResult<U>>` | Requis    | Poursuit la conversation de ce résultat dans une sandbox nouvellement allouée.                  |
+| `fork`              | `<U = undefined>(options: ContinuationOptions<U>) => Promise<DispatchResult<U>>` | Requis    | Bifurque depuis la conversation de ce résultat dans une sandbox nouvellement allouée.           |
+| `text`              | `string`                                                                         | Requis    | Texte final rapporté par l’exécution de l’agent.                                                |
+| `turns`             | `readonly Turn[]`                                                                | Requis    | Résultats ordonnés des tours d’agent : texte, statut, durée et usage de tokens de chaque passe. |
+| `usage`             | `Usage`                                                                          | Requis    | Compteurs d’usage rapportés ; aucune estimation monétaire.                                      |
+| `conversation`      | `string \| undefined`                                                            | Optionnel | Identité de conversation native disponible.                                                     |
+| `value`             | `T`                                                                              | Requis    | Valeur de réponse structurée validée ; undefined en l’absence de spécification de réponse.      |
+| `completed`         | `boolean`                                                                        | Requis    | Indique si le marqueur de fin configuré a été détecté.                                          |
+| `completion`        | `string \| undefined`                                                            | Optionnel | Marqueur de fin correspondant à la sortie de l’agent lorsqu’il a été trouvé.                    |
 
 ## Signature
 

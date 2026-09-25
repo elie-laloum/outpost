@@ -122,6 +122,6 @@ node example.mts
 
 Docker is the default in this page’s preparation. For Podman, select `--provider podman` during initialization, then run `node example.mts podman`; engine image stores are separate. Outpost does not switch to the host if the engine fails. Bind mounts and writable Git metadata are not a hostile-code security boundary. The sandbox’s private home is ephemeral.
 
-[Contracts, options and edge cases](../../../../reference/behavior/providers/containers/).
+[Contracts, options and edge cases](../../../behavior/providers/containers/).
 
 To start again, use a new demonstration directory. Named branches retain commits; dirty worktrees remain available for recovery. Scripts do not push commits.

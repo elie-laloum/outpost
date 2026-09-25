@@ -2,26 +2,22 @@
 title: "restoreConversation"
 description: "restoreConversation — Outpost API"
 sidebar:
-  order: 20
+  order: 0
 ---
 
-Supporting contract used by a public signature. It is not directly exported from the package; use TypeScript inference or the public type that references it.
+Supporting contract not directly exported; use TypeScript inference or the public type that references it.
 
 ## Purpose and behavior
 
-Locate, capture, restore and relocate native transcripts separately from authentication.
-
-The host conversation home defaults to the OS home. A cold continuation requires a restorable transcript before allocation. A fork does not copy a workspace.
-
-[Complete example and detailed rules](../../guide/agents/conversations/).
+Upload a previously located native transcript into the sandbox’s agent home, rewriting repository paths from the original checkout to the current workspace before continuation.
 
 ## Parameters and properties
 
-| Name       | Type                   | Presence | Meaning                                                                 |
-| ---------- | ---------------------- | -------- | ----------------------------------------------------------------------- |
-| `location` | `ConversationLocation` | Required | See the linked contract and this family's rules for its interpretation. |
-| `lease`    | `SandboxLease`         | Required | See the linked contract and this family's rules for its interpretation. |
-| `staging`  | `string`               | Required | See the linked contract and this family's rules for its interpretation. |
+| Name       | Type                   | Presence | Meaning                                                                                |
+| ---------- | ---------------------- | -------- | -------------------------------------------------------------------------------------- |
+| `location` | `ConversationLocation` | Required | Existing transcript identity, format and host file path to restore.                    |
+| `lease`    | `SandboxLease`         | Required | Sandbox execution lease used to access the native agent home and transfer transcripts. |
+| `staging`  | `string`               | Required | Host directory used to stage native transcript files during transfer.                  |
 
 ## Returns
 

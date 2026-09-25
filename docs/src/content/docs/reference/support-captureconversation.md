@@ -2,32 +2,28 @@
 title: "captureConversation"
 description: "captureConversation — Outpost API"
 sidebar:
-  order: 20
+  order: 0
 ---
 
-Supporting contract used by a public signature. It is not directly exported from the package; use TypeScript inference or the public type that references it.
+Supporting contract not directly exported; use TypeScript inference or the public type that references it.
 
 ## Purpose and behavior
 
-Locate, capture, restore and relocate native transcripts separately from authentication.
-
-The host conversation home defaults to the OS home. A cold continuation requires a restorable transcript before allocation. A fork does not copy a workspace.
-
-[Complete example and detailed rules](../../guide/agents/conversations/).
+Copy a native transcript from the sandbox lease into host staging and return its location when available. Capture can report warnings through options.warn; it does not export credentials.
 
 ## Parameters and properties
 
-| Name            | Type                                       | Presence | Meaning                                                                                  |
-| --------------- | ------------------------------------------ | -------- | ---------------------------------------------------------------------------------------- |
-| `format`        | `ConversationFormat`                       | Required | See the linked contract and this family's rules for its interpretation.                  |
-| `id`            | `string`                                   | Required | See the linked contract and this family's rules for its interpretation.                  |
-| `repository`    | `string`                                   | Required | Target host Git checkout.                                                                |
-| `lease`         | `SandboxLease`                             | Required | See the linked contract and this family's rules for its interpretation.                  |
-| `staging`       | `string`                                   | Required | See the linked contract and this family's rules for its interpretation.                  |
-| `options`       | `CaptureOptions \| undefined`              | Optional | Configuration object. Its fields are described in the associated options contract below. |
-| `options.home`  | `string \| undefined`                      | Optional | See the linked contract and this family's rules for its interpretation.                  |
-| `options.warn`  | `((message: string) => void) \| undefined` | Optional | See the linked contract and this family's rules for its interpretation.                  |
-| `options.local` | `boolean \| undefined`                     | Optional | See the linked contract and this family's rules for its interpretation.                  |
+| Name            | Type                                       | Presence | Meaning                                                                                |
+| --------------- | ------------------------------------------ | -------- | -------------------------------------------------------------------------------------- |
+| `format`        | `ConversationFormat`                       | Required | Native transcript layout: claude or codex.                                             |
+| `id`            | `string`                                   | Required | Native conversation identifier used to locate or continue the session.                 |
+| `repository`    | `string`                                   | Required | Target host Git checkout.                                                              |
+| `lease`         | `SandboxLease`                             | Required | Sandbox execution lease used to access the native agent home and transfer transcripts. |
+| `staging`       | `string`                                   | Required | Host directory used to stage native transcript files during transfer.                  |
+| `options`       | `CaptureOptions \| undefined`              | Optional | Host transcript home, local access mode and nonfatal warning callback.                 |
+| `options.home`  | `string \| undefined`                      | Optional | Host agent home used to locate or persist native transcripts.                          |
+| `options.warn`  | `((message: string) => void) \| undefined` | Optional | Callback receiving nonfatal execution or conversation-storage warnings.                |
+| `options.local` | `boolean \| undefined`                     | Optional | Use host-local transcript access instead of transferring through the sandbox lease.    |
 
 ## Returns
 

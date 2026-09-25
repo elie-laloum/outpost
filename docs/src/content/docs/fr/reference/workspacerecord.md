@@ -2,10 +2,8 @@
 title: "WorkspaceRecord"
 description: "WorkspaceRecord — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Contrat public de **WorkspaceRecord**. Consultez le [guide workspaces](../../guide/environment/workspaces/) pour le comportement, les valeurs par défaut et des exemples.
 
 ## Import
 
@@ -13,25 +11,17 @@ Contrat public de **WorkspaceRecord**. Consultez le [guide workspaces](../../gui
 import type { WorkspaceRecord } from "@elie-laloum/outpost";
 ```
 
-## Rôle et comportement
-
-Posséder un checkout, une branche et un verrou indépendamment de la durée de vie de la sandbox.
-
-Le dépôt vaut par défaut le dossier courant. Les branches nommées conservent les commits ; les worktrees sales ou détachés restent récupérables. Fermez la sandbox avant le workspace appartenant à l’appelant.
-
-[Exemple complet et règles détaillées](../../guide/environment/workspaces/).
-
 ## Paramètres et propriétés
 
-| Nom              | Type                | Présence | Rôle                                                                             |
-| ---------------- | ------------------- | -------- | -------------------------------------------------------------------------------- |
-| `repository`     | `string`            | Requis   | Checkout Git hôte ciblé.                                                         |
-| `directory`      | `string`            | Requis   | Dossier utilisé par l’opération ; voir les règles de résolution.                 |
-| `branch`         | `string`            | Requis   | Politique de workspace Git ou identité de branche résultante selon ce contrat.   |
-| `baseBranch`     | `string`            | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `baseline`       | `string`            | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `gitDirectories` | `readonly string[]` | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `policy`         | `BranchPolicy`      | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
+| Nom              | Type                | Présence | Rôle                                                                           |
+| ---------------- | ------------------- | -------- | ------------------------------------------------------------------------------ |
+| `repository`     | `string`            | Requis   | Checkout Git hôte ciblé.                                                       |
+| `directory`      | `string`            | Requis   | Dossier hôte du workspace utilisé pour cette exécution.                        |
+| `branch`         | `string`            | Requis   | Nom de la branche de travail utilisée ou observée pendant l’exécution.         |
+| `baseBranch`     | `string`            | Requis   | Branche hôte choisie comme cible d’intégration à l’ouverture du workspace.     |
+| `baseline`       | `string`            | Requis   | Commit Git utilisé comme état initial pour mesurer le nouveau travail.         |
+| `gitDirectories` | `readonly string[]` | Requis   | Dossiers hôtes de métadonnées Git nécessaires à l’accès au dépôt du workspace. |
+| `policy`         | `BranchPolicy`      | Requis   | Politique de branche choisie à l’ouverture du workspace.                       |
 
 ## Signature
 

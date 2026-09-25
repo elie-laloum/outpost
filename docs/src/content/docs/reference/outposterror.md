@@ -5,8 +5,6 @@ sidebar:
   order: 10
 ---
 
-Public contract for **OutpostError**. See the [errors guide](../../guide/operations/recovery/) for behavior, defaults and examples.
-
 ## Import
 
 ```ts
@@ -15,23 +13,21 @@ import { OutpostError } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Identify failure codes and available recovery paths before retrying or cleaning up.
-
-A failed agent throws; a raw command can return a nonzero status. Preserve original errors and recovery artifacts when reporting or retrying.
+Error with a stable fault code and structured details for execution, configuration and recovery failures. cause preserves the original failure and recovery may identify retained work; branch cleanup must respect those recovery locations.
 
 [Complete example and detailed rules](../../guide/operations/recovery/).
 
 ## Parameters and properties
 
-| Name       | Type                                | Presence | Meaning                                                                 |
-| ---------- | ----------------------------------- | -------- | ----------------------------------------------------------------------- |
-| `recovery` | `Readonly<Record<string, unknown>>` | Required | See the linked contract and this family's rules for its interpretation. |
-| `code`     | `FaultCode`                         | Required | See the linked contract and this family's rules for its interpretation. |
-| `details`  | `Readonly<Record<string, unknown>>` | Required | See the linked contract and this family's rules for its interpretation. |
-| `name`     | `string`                            | Required | See the linked contract and this family's rules for its interpretation. |
-| `message`  | `string`                            | Required | See the linked contract and this family's rules for its interpretation. |
-| `stack`    | `string \| undefined`               | Optional | See the linked contract and this family's rules for its interpretation. |
-| `cause`    | `unknown`                           | Optional | See the linked contract and this family's rules for its interpretation. |
+| Name       | Type                                | Presence | Meaning                                                                         |
+| ---------- | ----------------------------------- | -------- | ------------------------------------------------------------------------------- |
+| `recovery` | `Readonly<Record<string, unknown>>` | Required | Metadata describing retained workspace and transfer artifacts after failure.    |
+| `code`     | `FaultCode`                         | Required | Stable Outpost fault category used for programmatic failure handling.           |
+| `details`  | `Readonly<Record<string, unknown>>` | Required | Structured diagnostic data attached to the fault code.                          |
+| `name`     | `string`                            | Required | Error class name used to distinguish this failure from other JavaScript errors. |
+| `message`  | `string`                            | Required | Human-readable explanation of the failure.                                      |
+| `stack`    | `string \| undefined`               | Optional | JavaScript stack trace for the error, when available.                           |
+| `cause`    | `unknown`                           | Optional | Original failure attached to this error.                                        |
 
 ## Signature
 

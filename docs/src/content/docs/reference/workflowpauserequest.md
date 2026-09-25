@@ -2,10 +2,8 @@
 title: "WorkflowPauseRequest"
 description: "WorkflowPauseRequest — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Public contract for **WorkflowPauseRequest**. See the [approval and pause gates guide](../../guide/advanced/approvals/) for behavior, defaults and examples.
 
 ## Import
 
@@ -13,23 +11,15 @@ Public contract for **WorkflowPauseRequest**. See the [approval and pause gates 
 import type { WorkflowPauseRequest } from "@elie-laloum/outpost";
 ```
 
-## Purpose and behavior
-
-Persist a pending decision and block dependent work until a trusted caller submits it.
-
-Actor names are trusted metadata, not authentication. Paused runs need no timer. Rejection is final for that run. Invalid decision batches fail before applying any decision.
-
-[Complete example and detailed rules](../../guide/advanced/approvals/).
-
 ## Parameters and properties
 
-| Name          | Type                    | Presence | Meaning                                                                 |
-| ------------- | ----------------------- | -------- | ----------------------------------------------------------------------- |
-| `id`          | `string`                | Required | See the linked contract and this family's rules for its interpretation. |
-| `requestedAt` | `string`                | Required | See the linked contract and this family's rules for its interpretation. |
-| `kind`        | `"approval" \| "pause"` | Required | See the linked contract and this family's rules for its interpretation. |
-| `prompt`      | `string`                | Required | Human-readable instruction presented at this boundary.                  |
-| `actors`      | `readonly string[]`     | Required | Trusted actor identifiers, not an authentication mechanism.             |
+| Name          | Type                    | Presence | Meaning                                                                                                   |
+| ------------- | ----------------------- | -------- | --------------------------------------------------------------------------------------------------------- |
+| `id`          | `string`                | Required | Unique ID of this pending gate request; decisions must match it.                                          |
+| `requestedAt` | `string`                | Required | ISO timestamp when the gate entered its paused state.                                                     |
+| `kind`        | `"approval" \| "pause"` | Required | approval waits for approve; pause waits for resume. Both accept rejection.                                |
+| `prompt`      | `string`                | Required | Instruction explaining the approval or pause decision requested from the trusted actor.                   |
+| `actors`      | `readonly string[]`     | Required | Nonempty list of trusted actor names allowed to decide this gate; callers authenticate actors externally. |
 
 ## Signature
 

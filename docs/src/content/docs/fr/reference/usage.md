@@ -2,10 +2,8 @@
 title: "Usage"
 description: "Usage — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Contrat public de **Usage**. Consultez le [guide observabilité](../../guide/agents/observability/) pour le comportement, les valeurs par défaut et des exemples.
 
 ## Import
 
@@ -13,22 +11,14 @@ Contrat public de **Usage**. Consultez le [guide observabilité](../../guide/age
 import type { Usage } from "@elie-laloum/outpost";
 ```
 
-## Rôle et comportement
-
-Observer la progression, journaliser l’exécution et comptabiliser l’usage rapporté sans changer les résultats.
-
-Les échecs d’observateurs sont isolés. Les tokens ne sont pas des prix. Le point d’entrée OpenTelemetry optionnel charge son API séparément des imports du cœur.
-
-[Exemple complet et règles détaillées](../../guide/agents/observability/).
-
 ## Paramètres et propriétés
 
-| Nom            | Type                  | Présence  | Rôle                                                                             |
-| -------------- | --------------------- | --------- | -------------------------------------------------------------------------------- |
-| `input`        | `number`              | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `cached`       | `number`              | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `cacheCreated` | `number \| undefined` | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `output`       | `number`              | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
+| Nom            | Type                  | Présence  | Rôle                                                                                    |
+| -------------- | --------------------- | --------- | --------------------------------------------------------------------------------------- |
+| `input`        | `number`              | Requis    | Tokens d’entrée rapportés pour l’exécution de l’agent.                                  |
+| `cached`       | `number`              | Requis    | Tokens d’entrée rapportés comme servis depuis le cache du modèle.                       |
+| `cacheCreated` | `number \| undefined` | Optionnel | Tokens rapportés comme écrits dans le cache du modèle lorsque le protocole les fournit. |
+| `output`       | `number`              | Requis    | Tokens de sortie rapportés comme générés par le modèle.                                 |
 
 ## Signature
 

@@ -259,6 +259,6 @@ node example.mts
 
 Les hooks de connexion s’exécutent avant `npm ci` car l’ordre du tableau est conservé. Un hook en échec arrête l’opération. La préparation de sandbox s’exécute une fois par environnement, pas à chaque dispatch chaud. Les hooks de workspace ont une autre durée de vie. Conservez les hooks d’authentification lorsque vous ajoutez votre préparation.
 
-[Contrats, options et cas particuliers](../../../reference/behavior/sandboxes/hooks/).
+[Contrats, options et cas particuliers](../../behavior/sandboxes/hooks/).
 
 Pour recommencer, utilisez un nouveau dossier de démonstration. Les branches nommées conservent les commits ; les worktrees sales restent disponibles pour récupération. Les scripts ne poussent aucun commit.

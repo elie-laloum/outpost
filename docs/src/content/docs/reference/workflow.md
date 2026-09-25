@@ -1,48 +1,43 @@
 ---
-title: "Workflow"
-description: "Workflow — Outpost API"
+title: "workflow"
+description: "workflow — Outpost API"
 sidebar:
-  order: 10
+  order: 0
 ---
-
-Public contract for **Workflow**. See the [workflows guide](../../guide/workflows/graph/) for behavior, defaults and examples.
 
 ## Import
 
 ```ts
-import type { Workflow } from "@elie-laloum/outpost";
+import { workflow } from "@elie-laloum/outpost";
 ```
 
 ## Purpose and behavior
 
-Compose tasks with explicit dependency edges and typed result access.
-
-Duplicate keys, missing dependencies and cycles fail validation. Failed or skipped dependencies skip descendants. Retries can repeat external effects. Unwrap throws on a non-successful result.
+Validate a named task graph for duplicate keys, missing dependencies and cycles, then return a reusable workflow definition. start schedules the tasks with concurrency, cancellation and optional checkpoints; diagram renders the dependency graph as Mermaid.
 
 [Complete example and detailed rules](../../guide/workflows/graph/).
 
 ## Parameters and properties
 
-| Name      | Type                                                     | Presence | Meaning                                                                 |
-| --------- | -------------------------------------------------------- | -------- | ----------------------------------------------------------------------- |
-| `name`    | `string`                                                 | Required | See the linked contract and this family's rules for its interpretation. |
-| `tasks`   | `readonly Task<unknown>[]`                               | Required | See the linked contract and this family's rules for its interpretation. |
-| `start`   | `(options?: WorkflowOptions) => Promise<WorkflowResult>` | Required | See the linked contract and this family's rules for its interpretation. |
-| `diagram` | `() => string`                                           | Required | See the linked contract and this family's rules for its interpretation. |
+| Name    | Type                       | Presence | Meaning                                                                    |
+| ------- | -------------------------- | -------- | -------------------------------------------------------------------------- |
+| `name`  | `string`                   | Required | Name of the workflow definition, included in its execution reports.        |
+| `tasks` | `readonly Task<unknown>[]` | Required | Task definitions making up the graph, including every declared dependency. |
+
+## Returns
+
+`Workflow`
 
 ## Signature
 
 ```ts
-export interface Workflow {
-  readonly name: string;
-  readonly tasks: readonly Task[];
-  start(options?: WorkflowOptions): Promise<WorkflowResult>;
-  diagram(): string;
-}
+export declare function workflow(
+  name: string,
+  tasks: readonly Task[],
+): Workflow;
 ```
 
 ## Related contracts
 
-- [Task](../task/)
-- [WorkflowOptions](../workflowoptions/)
-- [WorkflowResult](../workflowresult/)
+- [Task](../type-task/)
+- [Workflow](../type-workflow/)

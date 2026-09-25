@@ -2,10 +2,8 @@
 title: "approvalTask"
 description: "approvalTask — Outpost API"
 sidebar:
-  order: 10
+  order: 0
 ---
-
-Contrat public de **approvalTask**. Consultez le [guide approbations et pauses](../../guide/advanced/approvals/) pour le comportement, les valeurs par défaut et des exemples.
 
 ## Import
 
@@ -15,21 +13,19 @@ import { approvalTask } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Persister une décision attendue et bloquer les dépendants jusqu’à sa soumission par un appelant de confiance.
-
-Les noms d’acteurs sont des métadonnées de confiance, pas une authentification. Une pause ne nécessite aucun timer. Le rejet est définitif pour cette exécution. Un lot invalide échoue avant toute application.
+Définit une gate d’approbation persistée par checkpoint qui suspend l’exécution après ses dépendances. Un acteur de confiance autorisé doit soumettre approve ou reject avec un motif. L’approbation transmet la décision persistée aux tâches dépendantes ; le rejet est définitif pour cette exécution.
 
 [Exemple complet et règles détaillées](../../guide/advanced/approvals/).
 
 ## Paramètres et propriétés
 
-| Nom              | Type                                    | Présence  | Rôle                                                                                          |
-| ---------------- | --------------------------------------- | --------- | --------------------------------------------------------------------------------------------- |
-| `options`        | `WorkflowGateOptions`                   | Requis    | Objet de configuration. Ses champs sont décrits dans le contrat d’options associé ci-dessous. |
-| `options.key`    | `string`                                | Requis    | Clé stable de tâche ou cache dans le contrat concerné.                                        |
-| `options.after`  | `readonly Task<unknown>[] \| undefined` | Optionnel | Dépendances déclarées dont les valeurs peuvent être lues.                                     |
-| `options.prompt` | `string`                                | Requis    | Instruction lisible présentée à cette étape.                                                  |
-| `options.actors` | `readonly string[]`                     | Requis    | Identifiants d’acteurs de confiance, sans mécanisme d’authentification.                       |
+| Nom              | Type                                    | Présence  | Rôle                                                                                                                        |
+| ---------------- | --------------------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `options`        | `WorkflowGateOptions`                   | Requis    | Clé de gate, dépendances, demande d’approbation et acteurs de confiance autorisés à approuver ou rejeter.                   |
+| `options.key`    | `string`                                | Requis    | Clé de tâche stable identifiant le nœud dans son graphe de workflow.                                                        |
+| `options.after`  | `readonly Task<unknown>[] \| undefined` | Optionnel | Dépendances déclarées dont les valeurs peuvent être lues.                                                                   |
+| `options.prompt` | `string`                                | Requis    | Instruction expliquant la décision d’approbation ou de reprise demandée à l’acteur de confiance.                            |
+| `options.actors` | `readonly string[]`                     | Requis    | Liste non vide des noms d’acteurs de confiance autorisés à décider cette gate ; leur authentification relève de l’appelant. |
 
 ## Retour
 
@@ -45,6 +41,6 @@ export declare function approvalTask(
 
 ## Contrats associés
 
-- [Task](../task/)
+- [Task](../type-task/)
 - [WorkflowDecisionRecord](../workflowdecisionrecord/)
 - [WorkflowGateOptions](../workflowgateoptions/)

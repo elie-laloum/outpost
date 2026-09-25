@@ -5,24 +5,14 @@ sidebar:
   order: 20
 ---
 
-Contrat auxiliaire utilisé dans une signature publique. Il n’est pas exporté directement depuis le package ; utilisez l’inférence TypeScript ou le type public qui le référence.
-
-## Rôle et comportement
-
-Inspecter le travail conservé et planifier explicitement sa rétention sans abandonner les modifications récupérables.
-
-Planifier ne supprime rien. L’application reprend possession et revalide les candidats. Les quotas observent l’usage plutôt que d’imposer une limite physique au système de fichiers.
-
-[Exemple complet et règles détaillées](../../guide/operations/recovery/).
-
 ## Paramètres et propriétés
 
-| Nom            | Type                                | Présence | Rôle                                                                             |
-| -------------- | ----------------------------------- | -------- | -------------------------------------------------------------------------------- |
-| `integrity`    | `RecoveryIntegrity`                 | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `bytesChecked` | `number`                            | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `maxBytes`     | `number`                            | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `checks`       | `readonly RecoveryStructureCheck[]` | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
+| Nom            | Type                                | Présence | Rôle                                                                                                |
+| -------------- | ----------------------------------- | -------- | --------------------------------------------------------------------------------------------------- |
+| `integrity`    | `RecoveryIntegrity`                 | Requis   | Conclusion d’intégrité issue du manifeste enregistré et de la vérification d’empreintes disponible. |
+| `bytesChecked` | `number`                            | Requis   | Nombre d’octets de données réellement hachés pendant la vérification.                               |
+| `maxBytes`     | `number`                            | Requis   | Nombre maximal d’octets de données autorisé pour la vérification des empreintes.                    |
+| `checks`       | `readonly RecoveryStructureCheck[]` | Requis   | Résultats de vérification par chemin avec statut pass/fail et code de diagnostic.                   |
 
 ## Signature
 

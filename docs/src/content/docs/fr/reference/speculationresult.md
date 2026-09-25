@@ -2,10 +2,8 @@
 title: "SpeculationResult"
 description: "SpeculationResult — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Contrat public de **SpeculationResult**. Consultez le [guide exécution spéculative](../../guide/advanced/speculation/) pour le comportement, les valeurs par défaut et des exemples.
 
 ## Import
 
@@ -13,26 +11,18 @@ Contrat public de **SpeculationResult**. Consultez le [guide exécution spécula
 import type { SpeculationResult } from "@elie-laloum/outpost";
 ```
 
-## Rôle et comportement
-
-Mettre en concurrence des branches candidates bornées et retenir la première validée après nettoyage.
-
-Prototype de recherche : au plus huit candidats, concurrence de deux par défaut. Aucune intégration, aucun push ni reprise durable de la course automatiques. L’usage observé ne plafonne pas la facturation.
-
-[Exemple complet et règles détaillées](../../guide/advanced/speculation/).
-
 ## Paramètres et propriétés
 
-| Nom          | Type                                                                                                                                           | Présence  | Rôle                                                                             |
-| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- | --------- | -------------------------------------------------------------------------------- |
-| `id`         | `string`                                                                                                                                       | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `baseline`   | `string`                                                                                                                                       | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `host`       | `{ readonly before: SpeculativeHostSnapshot; readonly after?: SpeculativeHostSnapshot; readonly changed: boolean; readonly error?: unknown; }` | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `status`     | `"aborted" \| "winner" \| "no-winner" \| "budget-exhausted"`                                                                                   | Requis    | Résultat enregistré du processus ou cycle de vie ; voir son type.                |
-| `winner`     | `SpeculativeCandidateResult<T> \| undefined`                                                                                                   | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `candidates` | `readonly SpeculativeCandidateResult<T>[]`                                                                                                     | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `usage`      | `WorkflowUsage`                                                                                                                                | Requis    | Compteurs d’usage rapportés ; aucune estimation monétaire.                       |
-| `error`      | `unknown`                                                                                                                                      | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
+| Nom          | Type                                                                                                                                           | Présence  | Rôle                                                                                                                  |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------- |
+| `id`         | `string`                                                                                                                                       | Requis    | Identifiant unique de cette course spéculative.                                                                       |
+| `baseline`   | `string`                                                                                                                                       | Requis    | Commit Git utilisé comme état initial pour mesurer le nouveau travail.                                                |
+| `host`       | `{ readonly before: SpeculativeHostSnapshot; readonly after?: SpeculativeHostSnapshot; readonly changed: boolean; readonly error?: unknown; }` | Requis    | Snapshots du checkout hôte avant et après la course, avec détection de changements et éventuelle erreur d’inspection. |
+| `status`     | `"aborted" \| "winner" \| "no-winner" \| "budget-exhausted"`                                                                                   | Requis    | Résultat de la course : winner, no-winner, aborted ou budget-exhausted.                                               |
+| `winner`     | `SpeculativeCandidateResult<T> \| undefined`                                                                                                   | Optionnel | Candidat choisi ayant passé la validation et terminé le nettoyage, lorsqu’il existe.                                  |
+| `candidates` | `readonly SpeculativeCandidateResult<T>[]`                                                                                                     | Requis    | Statut final, branche, travail conservé et sortie disponible de chaque candidat.                                      |
+| `usage`      | `WorkflowUsage`                                                                                                                                | Requis    | Tentatives admises et usage de tokens observé cumulés, y compris la comptabilité restaurée.                           |
+| `error`      | `unknown`                                                                                                                                      | Optionnel | Échec d’origine rencontré pendant l’exécution, la validation d’un candidat ou le nettoyage de la course.              |
 
 ## Signature
 

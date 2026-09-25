@@ -5,8 +5,6 @@ sidebar:
   order: 10
 ---
 
-Contrat public de **WorkflowFailure**. Consultez le [guide workflows](../../guide/workflows/graph/) pour le comportement, les valeurs par défaut et des exemples.
-
 ## Import
 
 ```ts
@@ -15,21 +13,19 @@ import { WorkflowFailure } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Composer des tâches avec dépendances explicites et accès typé aux résultats.
-
-Les clés dupliquées, dépendances absentes et cycles échouent à la validation. Une dépendance en échec ou ignorée empêche ses descendants. Les reprises peuvent répéter les effets externes. Unwrap lève une erreur en cas de non-succès.
+Erreur levée par WorkflowResult.unwrap quand l’exécution n’a pas réussi. result conserve les états des tâches, erreurs et usage pour permettre leur inspection.
 
 [Exemple complet et règles détaillées](../../guide/workflows/graph/).
 
 ## Paramètres et propriétés
 
-| Nom       | Type                  | Présence  | Rôle                                                                             |
-| --------- | --------------------- | --------- | -------------------------------------------------------------------------------- |
-| `result`  | `WorkflowResult`      | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `name`    | `string`              | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `message` | `string`              | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `stack`   | `string \| undefined` | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `cause`   | `unknown`             | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
+| Nom       | Type                  | Présence  | Rôle                                                                                       |
+| --------- | --------------------- | --------- | ------------------------------------------------------------------------------------------ |
+| `result`  | `WorkflowResult`      | Requis    | Résultat complet du workflow non réussi, conservé pour inspecter tâches, erreurs et usage. |
+| `name`    | `string`              | Requis    | Nom de classe d’erreur permettant de distinguer cet échec des autres erreurs JavaScript.   |
+| `message` | `string`              | Requis    | Explication lisible de l’échec.                                                            |
+| `stack`   | `string \| undefined` | Optionnel | Trace de pile JavaScript de l’erreur lorsqu’elle est disponible.                           |
+| `cause`   | `unknown`             | Optionnel | Échec d’origine attaché à cette erreur.                                                    |
 
 ## Signature
 

@@ -121,6 +121,6 @@ node example.mts
 
 Depuis `repository/`, `git branch --show-current` affiche toujours `main` ; `git branch --list workshop/commands` retrouve la branche créée par le script. `current` travaille dans le checkout existant, `named` isole une branche et `integrate` prépare une fusion locale. Une sandbox chaude exige un appel explicite à `workspace.integrate()`. Aucune politique ne pousse vers un remote.
 
-[Contrats, options et cas particuliers](../../../reference/behavior/sandboxes/branches/).
+[Contrats, options et cas particuliers](../../behavior/sandboxes/branches/).
 
 Pour recommencer, utilisez un nouveau dossier de démonstration. Les branches nommées conservent les commits ; les worktrees sales restent disponibles pour récupération. Les scripts ne poussent aucun commit.

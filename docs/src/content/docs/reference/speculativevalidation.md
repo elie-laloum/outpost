@@ -2,10 +2,8 @@
 title: "SpeculativeValidation"
 description: "SpeculativeValidation — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Public contract for **SpeculativeValidation**. See the [speculative execution guide](../../guide/advanced/speculation/) for behavior, defaults and examples.
 
 ## Import
 
@@ -13,22 +11,14 @@ Public contract for **SpeculativeValidation**. See the [speculative execution gu
 import type { SpeculativeValidation } from "@elie-laloum/outpost";
 ```
 
-## Purpose and behavior
-
-Race bounded candidate branches and select the first one that passes explicit validation and cleanup.
-
-Research prototype: at most eight candidates, default concurrency two. No automatic integration, push or durable race resumption. Observed usage is not a billing cap.
-
-[Complete example and detailed rules](../../guide/advanced/speculation/).
-
 ## Parameters and properties
 
-| Name      | Type                   | Presence | Meaning                                                                 |
-| --------- | ---------------------- | -------- | ----------------------------------------------------------------------- |
-| `key`     | `string`               | Required | Stable task or cache key within its owning contract.                    |
-| `result`  | `SpeculativeOutput<T>` | Required | See the linked contract and this family's rules for its interpretation. |
-| `sandbox` | `Sandbox`              | Required | See the linked contract and this family's rules for its interpretation. |
-| `signal`  | `AbortSignal`          | Required | Cooperative cancellation for this operation.                            |
+| Name      | Type                   | Presence | Meaning                                                                                              |
+| --------- | ---------------------- | -------- | ---------------------------------------------------------------------------------------------------- |
+| `key`     | `string`               | Required | Unique candidate key used to correlate its branch, validation and final result.                      |
+| `result`  | `SpeculativeOutput<T>` | Required | Candidate dispatch output with text, commits, usage and typed value, excluding continuation methods. |
+| `sandbox` | `Sandbox`              | Required | Live candidate sandbox available for validation commands before cleanup.                             |
+| `signal`  | `AbortSignal`          | Required | Cooperative cancellation for this operation.                                                         |
 
 ## Signature
 

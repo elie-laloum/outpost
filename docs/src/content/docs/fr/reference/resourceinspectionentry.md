@@ -2,10 +2,8 @@
 title: "ResourceInspectionEntry"
 description: "ResourceInspectionEntry — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Contrat public de **ResourceInspectionEntry**. Consultez le [guide activité des ressources](../../guide/operations/recovery/) pour le comportement, les valeurs par défaut et des exemples.
 
 ## Import
 
@@ -13,21 +11,13 @@ Contrat public de **ResourceInspectionEntry**. Consultez le [guide activité des
 import type { ResourceInspectionEntry } from "@elie-laloum/outpost";
 ```
 
-## Rôle et comportement
-
-Lire l’activité enregistrée localement des baux et opérations.
-
-Les observations locales n’énumèrent pas les comptes distants et ne constituent pas un inventaire cloud faisant autorité.
-
-[Exemple complet et règles détaillées](../../guide/operations/recovery/).
-
 ## Paramètres et propriétés
 
-| Nom         | Type                                  | Présence  | Rôle                                                                             |
-| ----------- | ------------------------------------- | --------- | -------------------------------------------------------------------------------- |
-| `path`      | `string`                              | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `record`    | `ResourceActivityRecord \| undefined` | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `ownership` | `LockOwnership`                       | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
+| Nom         | Type                                  | Présence  | Rôle                                                                                    |
+| ----------- | ------------------------------------- | --------- | --------------------------------------------------------------------------------------- |
+| `path`      | `string`                              | Requis    | Chemin hôte du fichier local d’activité de sandbox.                                     |
+| `record`    | `ResourceActivityRecord \| undefined` | Optionnel | Enregistrement local d’activité de sandbox analysé, lorsqu’il est lisible et valide.    |
+| `ownership` | `LockOwnership`                       | Requis    | Évaluation de la possession actuelle de la ressource par le processus local enregistré. |
 
 ## Signature
 

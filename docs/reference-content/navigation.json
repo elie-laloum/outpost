@@ -1,0 +1,873 @@
+[
+  {
+    "title": ["Diagnostics", "Diagnostics"],
+    "items": [
+      { "slug": "reference/overview/diagnostics" },
+      {
+        "slug": "reference/diagnosesandbox",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/diagnoseagentprotocol",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/diagnosticstatus",
+        "attrs": { "data-api-kind": "type" }
+      },
+      { "slug": "reference/doctoragent", "attrs": { "data-api-kind": "type" } },
+      {
+        "slug": "reference/sandboxdiagnosticoptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/sandboxdiagnosticreport",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/diagnosticcapability",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/diagnosticcheck",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/agentprotocolreport",
+        "attrs": { "data-api-kind": "interface" }
+      }
+    ]
+  },
+  {
+    "title": ["Workspaces", "Workspaces"],
+    "items": [
+      { "slug": "reference/overview/workspaces" },
+      {
+        "slug": "reference/openworkspace",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/branchpolicy",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/workspace",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/workspaceoptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/workspacerecord",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      { "slug": "reference/commit", "attrs": { "data-api-kind": "interface" } },
+      {
+        "slug": "reference/disposal",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/stagelimits",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/lifecyclehooks",
+        "attrs": { "data-api-kind": "interface" }
+      }
+    ]
+  },
+  {
+    "title": ["Sandboxes", "Sandboxes"],
+    "items": [
+      { "slug": "reference/overview/sandboxes" },
+      {
+        "slug": "reference/createsandbox",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/sandbox",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/sandboxoptions",
+        "attrs": { "data-api-kind": "interface" }
+      }
+    ]
+  },
+  {
+    "title": ["Dispatch", "Dispatch"],
+    "items": [
+      { "slug": "reference/overview/dispatch" },
+      {
+        "slug": "reference/dispatch",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/continuationoptions",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/dispatchoptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/dispatchresult",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/warmdispatchresult",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/execution",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      { "slug": "reference/turn", "attrs": { "data-api-kind": "interface" } }
+    ]
+  },
+  {
+    "title": ["Commands and terminal", "Commandes et terminal"],
+    "items": [
+      { "slug": "reference/overview/commands" },
+      { "slug": "reference/attach", "attrs": { "data-api-kind": "function" } },
+      { "slug": "reference/channel", "attrs": { "data-api-kind": "type" } },
+      {
+        "slug": "reference/variablequestion",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/attachoptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/attachresult",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/command",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/commandresult",
+        "attrs": { "data-api-kind": "interface" }
+      }
+    ]
+  },
+  {
+    "title": ["Agents", "Agents"],
+    "items": [
+      { "slug": "reference/overview/agents" },
+      { "slug": "reference/claude", "attrs": { "data-api-kind": "function" } },
+      { "slug": "reference/codex", "attrs": { "data-api-kind": "function" } },
+      { "slug": "reference/gemini", "attrs": { "data-api-kind": "function" } },
+      {
+        "slug": "reference/agentversions",
+        "attrs": { "data-api-kind": "constant" }
+      },
+      {
+        "slug": "reference/claudesettings",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/codexsettings",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/codexmodelprovider",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/geminisettings",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/agentadapter",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/agentinput",
+        "attrs": { "data-api-kind": "interface" }
+      }
+    ]
+  },
+  {
+    "title": ["Prompts and responses", "Prompts et réponses"],
+    "items": [
+      { "slug": "reference/overview/prompts-responses" },
+      { "slug": "reference/brief", "attrs": { "data-api-kind": "type" } },
+      {
+        "slug": "reference/promptvariables",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/response",
+        "attrs": { "data-api-kind": "constant" }
+      },
+      {
+        "slug": "reference/responseerror",
+        "attrs": { "data-api-kind": "class" }
+      },
+      {
+        "slug": "reference/responsespec",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/standardvalidator",
+        "attrs": { "data-api-kind": "interface" }
+      }
+    ]
+  },
+  {
+    "title": ["Conversations", "Conversations"],
+    "items": [
+      { "slug": "reference/overview/conversations" },
+      {
+        "slug": "reference/conversations",
+        "attrs": { "data-api-kind": "constant" }
+      },
+      {
+        "slug": "reference/conversationformat",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/conversationlocation",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/conversationcontext",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/conversationrecord",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/conversationstore",
+        "attrs": { "data-api-kind": "interface" }
+      }
+    ]
+  },
+  {
+    "title": ["Observability", "Observabilité"],
+    "items": [
+      { "slug": "reference/overview/observability" },
+      {
+        "slug": "reference/reporter",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/opentelemetry",
+        "attrs": { "data-api-kind": "function" }
+      },
+      { "slug": "reference/logging", "attrs": { "data-api-kind": "type" } },
+      { "slug": "reference/agentevent", "attrs": { "data-api-kind": "type" } },
+      {
+        "slug": "reference/agentobservation",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/reporteroptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      { "slug": "reference/usage", "attrs": { "data-api-kind": "interface" } },
+      {
+        "slug": "reference/opentelemetryoptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/opentelemetryobserver",
+        "attrs": { "data-api-kind": "interface" }
+      }
+    ]
+  },
+  {
+    "title": ["Workflows", "Workflows"],
+    "items": [
+      { "slug": "reference/overview/workflows" },
+      { "slug": "reference/task", "attrs": { "data-api-kind": "function" } },
+      {
+        "slug": "reference/workflow",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/agenttask",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/commandtask",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/isolatedtask",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/workflowfailure",
+        "attrs": { "data-api-kind": "class" }
+      },
+      { "slug": "reference/taskoptions", "attrs": { "data-api-kind": "type" } },
+      { "slug": "reference/taskstatus", "attrs": { "data-api-kind": "type" } },
+      {
+        "slug": "reference/workflowbudgetexceeded",
+        "attrs": { "data-api-kind": "class" }
+      },
+      { "slug": "reference/retry", "attrs": { "data-api-kind": "interface" } },
+      {
+        "slug": "reference/type-task",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/taskcontext",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/taskrecord",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/type-workflow",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/workflowevent",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/workflowoptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/workflowbudget",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/workflowusage",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/workflowresult",
+        "attrs": { "data-api-kind": "interface" }
+      }
+    ]
+  },
+  {
+    "title": ["Providers", "Providers"],
+    "items": [
+      { "slug": "reference/overview/providers" },
+      { "slug": "reference/docker", "attrs": { "data-api-kind": "function" } },
+      { "slug": "reference/podman", "attrs": { "data-api-kind": "function" } },
+      { "slug": "reference/local", "attrs": { "data-api-kind": "function" } },
+      { "slug": "reference/vercel", "attrs": { "data-api-kind": "function" } },
+      { "slug": "reference/daytona", "attrs": { "data-api-kind": "function" } },
+      {
+        "slug": "reference/firecracker",
+        "attrs": {
+          "data-api-kind": "function",
+          "data-api-status": "experimental",
+          "title": "Experimental / Expérimental"
+        }
+      },
+      {
+        "slug": "reference/mountedprovider",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/remoteprovider",
+        "attrs": { "data-api-kind": "function" }
+      },
+      { "slug": "reference/variables", "attrs": { "data-api-kind": "type" } },
+      {
+        "slug": "reference/firecrackeroptions",
+        "attrs": {
+          "data-api-kind": "interface",
+          "data-api-status": "experimental",
+          "title": "Experimental / Expérimental"
+        }
+      },
+      {
+        "slug": "reference/containeroptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/dependencycache",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/verceloptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/daytonaoptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/sandboxcontext",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/sandboxlease",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/sandboxprovider",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/transferoptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      { "slug": "reference/volume", "attrs": { "data-api-kind": "interface" } }
+    ]
+  },
+  {
+    "title": ["Remote transfers", "Transferts distants"],
+    "items": [
+      { "slug": "reference/overview/remote-transfers" },
+      {
+        "slug": "reference/filemanifestentry",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/filetransfers",
+        "attrs": { "data-api-kind": "interface" }
+      }
+    ]
+  },
+  {
+    "title": ["Recovery and retention", "Récupération et rétention"],
+    "items": [
+      { "slug": "reference/overview/recovery-retention" },
+      {
+        "slug": "reference/planrecoveryretention",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/prunerecoveryretention",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/assertrecoveryquota",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/verifyrecoverytransfer",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/recoveryretentionpolicy",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/recoveryretentionoptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/recoveryretentionplan",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/recoveryretentionentry",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/recoverypruneresult",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/recoveryquotaoptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/recoveryverification",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/recoveryverificationoptions",
+        "attrs": { "data-api-kind": "interface" }
+      }
+    ]
+  },
+  {
+    "title": ["Errors", "Erreurs"],
+    "items": [
+      { "slug": "reference/overview/errors" },
+      {
+        "slug": "reference/recoverydetails",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/outposterror",
+        "attrs": { "data-api-kind": "class" }
+      },
+      { "slug": "reference/faultcode", "attrs": { "data-api-kind": "type" } }
+    ]
+  },
+  {
+    "title": ["Storage reservations", "Réservations de stockage"],
+    "items": [
+      { "slug": "reference/overview/storage-reservations" },
+      {
+        "slug": "reference/reserverecoverystorage",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/recoverystoragereservationoptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/storagereservation",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/storagereservationoptions",
+        "attrs": { "data-api-kind": "interface" }
+      }
+    ]
+  },
+  {
+    "title": ["Recovery restoration", "Restauration de récupération"],
+    "items": [
+      { "slug": "reference/overview/recovery-restoration" },
+      {
+        "slug": "reference/planrecoveryrestore",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/restorerecoverytransfer",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/recoveryrestoreoptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/recoveryrestoreplan",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/recoveryrestoreresult",
+        "attrs": { "data-api-kind": "interface" }
+      }
+    ]
+  },
+  {
+    "title": ["Resource activity", "Activité des ressources"],
+    "items": [
+      { "slug": "reference/overview/resource-activity" },
+      {
+        "slug": "reference/inspectrecovery",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/resourceoperationkind",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/resourcephase",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/recoveryinspection",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/recoveryinspectionoptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/resourceactivityrecord",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/resourceinspection",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/resourceinspectionentry",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/resourceoperation",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/resourceoperationresult",
+        "attrs": { "data-api-kind": "interface" }
+      }
+    ]
+  },
+  {
+    "title": ["Workflow checkpoints", "Checkpoints de workflow"],
+    "items": [
+      { "slug": "reference/overview/checkpoints" },
+      {
+        "slug": "reference/fileworkflowcheckpointstore",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/workflowcheckpointvalue",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/workflowjson",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/fileworkflowcheckpointoptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/workflowcheckpoint",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/workflowcheckpointoptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/workflowcheckpointstore",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/workflowcheckpointlease",
+        "attrs": { "data-api-kind": "interface" }
+      }
+    ]
+  },
+  {
+    "title": ["Approval and pause gates", "Approbations et pauses"],
+    "items": [
+      { "slug": "reference/overview/approvals" },
+      {
+        "slug": "reference/approvaltask",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/pausetask",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/workflowgate",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/workflowgateoptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/workflowpauserequest",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/workflowdecision",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/workflowdecisionrecord",
+        "attrs": { "data-api-kind": "interface" }
+      }
+    ]
+  },
+  {
+    "title": ["Typed artifacts", "Artefacts typés"],
+    "items": [
+      { "slug": "reference/overview/artifacts" },
+      {
+        "slug": "reference/publishartifact",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/readstoredartifact",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/artifacttask",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/readartifact",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/fileartifactstore",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/artifact",
+        "attrs": { "data-api-kind": "constant" }
+      },
+      {
+        "slug": "reference/artifactcontractoptions",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/jsonartifactoptions",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/artifacttaskoptions",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/artifactcontract",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/artifactidentity",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/artifactproducer",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/artifactreference",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/artifactstore",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/publishartifactoptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/readartifactoptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/fileartifactstoreoptions",
+        "attrs": { "data-api-kind": "interface" }
+      }
+    ]
+  },
+  {
+    "title": ["Distributed execution", "Exécution distribuée"],
+    "items": [
+      { "slug": "reference/overview/distributed-execution" },
+      {
+        "slug": "reference/sqlitetaskqueue",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/servetaskqueue",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/httptaskqueue",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/runqueueworker",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/queuedtask",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/queuehandler",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/queuedtaskoptions",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/queuerequest",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/queueresult",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/queuejob",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/queueclaim",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/queuelease",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/taskqueue",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/durabletaskqueue",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/queueserveroptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/queueserver",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/queueclientoptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/queuehandlercontext",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/queueworkeroptions",
+        "attrs": { "data-api-kind": "interface" }
+      }
+    ]
+  },
+  {
+    "title": ["Outbound networking", "Réseau sortant"],
+    "items": [
+      { "slug": "reference/overview/outbound-networking" },
+      { "slug": "reference/egresspolicy", "attrs": { "data-api-kind": "type" } }
+    ]
+  },
+  {
+    "title": ["Speculative execution", "Exécution spéculative"],
+    "items": [
+      { "slug": "reference/overview/speculation" },
+      {
+        "slug": "reference/speculate",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/speculativeoutput",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/speculationoptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/speculationresult",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/speculativecandidate",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/speculativecandidateresult",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/speculativehostsnapshot",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/speculativevalidation",
+        "attrs": { "data-api-kind": "interface" }
+      }
+    ]
+  }
+]

@@ -2,10 +2,8 @@
 title: "SpeculationOptions"
 description: "SpeculationOptions — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Public contract for **SpeculationOptions**. See the [speculative execution guide](../../guide/advanced/speculation/) for behavior, defaults and examples.
 
 ## Import
 
@@ -13,26 +11,18 @@ Public contract for **SpeculationOptions**. See the [speculative execution guide
 import type { SpeculationOptions } from "@elie-laloum/outpost";
 ```
 
-## Purpose and behavior
-
-Race bounded candidate branches and select the first one that passes explicit validation and cleanup.
-
-Research prototype: at most eight candidates, default concurrency two. No automatic integration, push or durable race resumption. Observed usage is not a billing cap.
-
-[Complete example and detailed rules](../../guide/advanced/speculation/).
-
 ## Parameters and properties
 
-| Name          | Type                                                                                                                         | Presence | Meaning                                                                 |
-| ------------- | ---------------------------------------------------------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------- |
-| `repository`  | `string`                                                                                                                     | Required | Target host Git checkout.                                               |
-| `provider`    | `import("../index.js").SandboxProvider`                                                                                      | Required | Execution environment backend.                                          |
-| `candidates`  | `readonly SpeculativeCandidate<T>[]`                                                                                         | Required | See the linked contract and this family's rules for its interpretation. |
-| `concurrency` | `number \| undefined`                                                                                                        | Optional | Maximum admitted concurrent tasks or candidates.                        |
-| `budget`      | `WorkflowBudget`                                                                                                             | Required | Shared attempt and observed usage admission limits.                     |
-| `signal`      | `AbortSignal \| undefined`                                                                                                   | Optional | Cooperative cancellation for this operation.                            |
-| `sandbox`     | `Pick<SandboxOptions, "storageQuota" \| "limits" \| "hooks" \| "logging" \| "bootstrap" \| "conversationHome"> \| undefined` | Optional | See the linked contract and this family's rules for its interpretation. |
-| `validate`    | `(candidate: SpeculativeValidation<T>) => boolean \| Promise<boolean>`                                                       | Required | See the linked contract and this family's rules for its interpretation. |
+| Name          | Type                                                                                                                         | Presence | Meaning                                                                                                     |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------- |
+| `repository`  | `string`                                                                                                                     | Required | Target host Git checkout.                                                                                   |
+| `provider`    | `import("../index.js").SandboxProvider`                                                                                      | Required | Execution environment backend.                                                                              |
+| `candidates`  | `readonly SpeculativeCandidate<T>[]`                                                                                         | Required | Agent requests to race on separate branches; at most eight candidates.                                      |
+| `concurrency` | `number \| undefined`                                                                                                        | Optional | Maximum candidates running concurrently; defaults to two.                                                   |
+| `budget`      | `WorkflowBudget`                                                                                                             | Required | Shared attempt and observed usage admission limits.                                                         |
+| `signal`      | `AbortSignal \| undefined`                                                                                                   | Optional | Cooperative cancellation for this operation.                                                                |
+| `sandbox`     | `Pick<SandboxOptions, "storageQuota" \| "limits" \| "hooks" \| "logging" \| "bootstrap" \| "conversationHome"> \| undefined` | Optional | Shared lifecycle, logging and storage settings applied when allocating each candidate sandbox.              |
+| `validate`    | `(candidate: SpeculativeValidation<T>) => boolean \| Promise<boolean>`                                                       | Required | Predicate run with a candidate’s live sandbox and output; true accepts that candidate as a possible winner. |
 
 ## Signature
 

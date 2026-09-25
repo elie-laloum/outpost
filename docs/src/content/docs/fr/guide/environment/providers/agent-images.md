@@ -68,4 +68,4 @@ La vérification du digest et le téléchargement sont des étapes explicites de
 
 </details>
 
-[Contrat détaillé et limites](../../../../reference/behavior/providers/agent-images/).
+[Contrat détaillé et limites](../../../behavior/providers/agent-images/).

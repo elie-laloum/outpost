@@ -2,26 +2,23 @@
 title: "WorkspaceGitEntry"
 description: "WorkspaceGitEntry — Outpost API"
 sidebar:
-  order: 20
+  order: 10
 ---
-
-Contrat auxiliaire utilisé dans une signature publique. Il n’est pas exporté directement depuis le package ; utilisez l’inférence TypeScript ou le type public qui le référence.
-
-## Rôle et comportement
-
-Inspecter le travail conservé et planifier explicitement sa rétention sans abandonner les modifications récupérables.
-
-Planifier ne supprime rien. L’application reprend possession et revalide les candidats. Les quotas observent l’usage plutôt que d’imposer une limite physique au système de fichiers.
-
-[Exemple complet et règles détaillées](../../guide/operations/recovery/).
 
 ## Paramètres et propriétés
 
-| Nom     | Type                                                           | Présence | Rôle                                                                             |
-| ------- | -------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------- |
-| `name`  | `string`                                                       | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `path`  | `string`                                                       | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `state` | `"skipped" \| "registered" \| "unregistered" \| "unavailable"` | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
+Les champs ci-dessous couvrent toutes les variantes ; la signature précise leurs combinaisons autorisées.
+
+| Nom      | Type                                                           | Présence          | Rôle                                                                                    |
+| -------- | -------------------------------------------------------------- | ----------------- | --------------------------------------------------------------------------------------- |
+| `name`   | `string`                                                       | Requis            | Nom de fichier de l’entrée de stockage inspectée.                                       |
+| `path`   | `string`                                                       | Requis            | Chemin hôte de l’entrée de stockage inspectée.                                          |
+| `state`  | `"registered" \| "unregistered" \| "skipped" \| "unavailable"` | Requis            | Classification de l’état Git du worktree utilisée pour décider si le nettoyage est sûr. |
+| `head`   | `string`                                                       | Selon la variante | Commit Git HEAD enregistré par l’inspection ou le snapshot.                             |
+| `branch` | `string \| null`                                               | Selon la variante | Nom de branche du worktree, ou null lorsque HEAD est détaché.                           |
+| `dirty`  | `boolean`                                                      | Selon la variante | Indique si des changements suivis ou non suivis rendent le checkout sale.               |
+| `locked` | `boolean`                                                      | Selon la variante | Indique si Git marque le worktree comme verrouillé.                                     |
+| `reason` | `string`                                                       | Selon la variante | Motif pour lequel l’état Git n’a pu être inspecté ou a été délibérément ignoré.         |
 
 ## Signature
 

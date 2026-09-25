@@ -55,6 +55,6 @@ node example.mts
 
 Adapters choose native CLI behavior. Providers choose the environment. Constructing an adapter does not authenticate it or make a model request. Pass an adapter to dispatch; change the provider independently. Omitted model settings use the CLI default. Gemini supports fresh sessions only, while Claude and Codex can capture and resume native conversations.
 
-[Contracts, options and edge cases](../../../reference/behavior/agents/adapters/).
+[Contracts, options and edge cases](../../behavior/agents/adapters/).
 
 Any persisted example files remain inside this demonstration directory.

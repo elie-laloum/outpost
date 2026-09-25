@@ -61,6 +61,6 @@ node example.mts
 
 The output is `hello-world`, followed by the Mermaid dependency graph. `after` both orders execution and authorizes reading that task’s value. A key labels a task; the actual task object identifies its typed result. Graphs reject duplicate keys, missing dependencies and cycles before running. Failed or skipped dependencies prevent downstream work.
 
-[Contracts, options and edge cases](../../../reference/behavior/workflows/graph/).
+[Contracts, options and edge cases](../../behavior/workflows/graph/).
 
 Any persisted example files remain inside this demonstration directory.

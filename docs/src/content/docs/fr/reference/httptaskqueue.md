@@ -2,10 +2,8 @@
 title: "httpTaskQueue"
 description: "httpTaskQueue — Outpost API"
 sidebar:
-  order: 10
+  order: 0
 ---
-
-Contrat public de **httpTaskQueue**. Consultez le [guide exécution distribuée](../../guide/advanced/distributed/) pour le comportement, les valeurs par défaut et des exemples.
 
 ## Import
 
@@ -15,20 +13,18 @@ import { httpTaskQueue } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Coordonner des tâches JSON durables via SQLite, un transport HTTP authentifié et des workers enregistrés.
-
-Les effets sont au moins une fois. Un jeton périmé ne peut valider l’état de file, mais les effets externes peuvent se répéter. HTTP écoute loopback par défaut sans TLS. Un worker traite une tâche à la fois.
+Crée un client TaskQueue pour l’endpoint HTTP et le jeton bearer fournis. Chaque requête est soumise à timeoutMs ; ce client transporte les opérations de file sans exécuter de gestionnaire localement.
 
 [Exemple complet et règles détaillées](../../guide/advanced/distributed/).
 
 ## Paramètres et propriétés
 
-| Nom                 | Type                  | Présence  | Rôle                                                                                          |
-| ------------------- | --------------------- | --------- | --------------------------------------------------------------------------------------------- |
-| `options`           | `QueueClientOptions`  | Requis    | Objet de configuration. Ses champs sont décrits dans le contrat d’options associé ci-dessous. |
-| `options.url`       | `string`              | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation.              |
-| `options.token`     | `string`              | Requis    | Identifiant de transport explicite ; jamais dans une URL.                                     |
-| `options.timeoutMs` | `number \| undefined` | Optionnel | Délai en millisecondes pour l’opération concernée.                                            |
+| Nom                 | Type                  | Présence  | Rôle                                                              |
+| ------------------- | --------------------- | --------- | ----------------------------------------------------------------- |
+| `options`           | `QueueClientOptions`  | Requis    | URL d’endpoint de file, jeton bearer et délai des requêtes.       |
+| `options.url`       | `string`              | Requis    | URL HTTP de base du serveur de file de tâches.                    |
+| `options.token`     | `string`              | Requis    | Identifiant de transport explicite ; jamais dans une URL.         |
+| `options.timeoutMs` | `number \| undefined` | Optionnel | Durée maximale en millisecondes de chaque requête HTTP à la file. |
 
 ## Retour
 

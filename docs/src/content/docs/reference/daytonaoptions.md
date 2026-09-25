@@ -2,10 +2,8 @@
 title: "DaytonaOptions"
 description: "DaytonaOptions — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Public contract for **DaytonaOptions**. See the [providers guide](../../guide/environment/providers/overview/) for behavior, defaults and examples.
 
 ## Import
 
@@ -13,23 +11,15 @@ Public contract for **DaytonaOptions**. See the [providers guide](../../guide/en
 import type { DaytonaOptions } from "@elie-laloum/outpost/providers/daytona";
 ```
 
-## Purpose and behavior
-
-Allocate local containers, explicit host execution or remote sandboxes through dedicated package entry points.
-
-Mounted and host providers default to current branches; remote providers default to integration and reject current. Optional SDKs remain optional. Local execution provides no isolation.
-
-[Complete example and detailed rules](../../guide/environment/providers/overview/).
-
 ## Parameters and properties
 
-| Name         | Type                                                                           | Presence | Meaning                                                                 |
-| ------------ | ------------------------------------------------------------------------------ | -------- | ----------------------------------------------------------------------- |
-| `connection` | `DaytonaConfig \| undefined`                                                   | Optional | See the linked contract and this family's rules for its interpretation. |
-| `create`     | `CreateSandboxFromImageParams \| CreateSandboxFromSnapshotParams \| undefined` | Optional | See the linked contract and this family's rules for its interpretation. |
-| `variables`  | `Readonly<Record<string, string>> \| undefined`                                | Optional | Explicit environment declarations; values are strings.                  |
-| `root`       | `string \| undefined`                                                          | Optional | See the linked contract and this family's rules for its interpretation. |
-| `retain`     | `number \| undefined`                                                          | Optional | Maximum retained tail per output stream, in bytes.                      |
+| Name         | Type                                                                           | Presence | Meaning                                                                         |
+| ------------ | ------------------------------------------------------------------------------ | -------- | ------------------------------------------------------------------------------- |
+| `connection` | `DaytonaConfig \| undefined`                                                   | Optional | Daytona SDK client connection settings, separate from sandbox creation options. |
+| `create`     | `CreateSandboxFromImageParams \| CreateSandboxFromSnapshotParams \| undefined` | Optional | Sandbox creation options forwarded to the provider’s SDK.                       |
+| `variables`  | `Readonly<Record<string, string>> \| undefined`                                | Optional | Explicit environment declarations; values are strings.                          |
+| `root`       | `string \| undefined`                                                          | Optional | Repository workspace path inside the execution environment.                     |
+| `retain`     | `number \| undefined`                                                          | Optional | Maximum retained tail per output stream, in bytes.                              |
 
 ## Signature
 

@@ -2,10 +2,8 @@
 title: "FileTransfers"
 description: "FileTransfers — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Public contract for **FileTransfers**. See the [remote transfers guide](../../guide/operations/remote-transfers/) for behavior, defaults and examples.
 
 ## Import
 
@@ -13,21 +11,13 @@ Public contract for **FileTransfers**. See the [remote transfers guide](../../gu
 import type { FileTransfers } from "@elie-laloum/outpost";
 ```
 
-## Purpose and behavior
-
-Move binary files and validated manifests while preserving concurrent host edits.
-
-Synchronization validates and backs up before applying incoming work. Transfers preserve supported permissions and symlinks and reject unsafe destination traversal. Recovery data survives unsafe cleanup.
-
-[Complete example and detailed rules](../../guide/operations/remote-transfers/).
-
 ## Parameters and properties
 
-| Name            | Type                                                                                                                                      | Presence | Meaning                                                                 |
-| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------- |
-| `uploadBatch`   | `((source: string, entries: readonly FileManifestEntry[], destination: string, options?: TransferOptions) => Promise<void>) \| undefined` | Optional | See the linked contract and this family's rules for its interpretation. |
-| `manifest`      | `(source: string, paths: readonly string[], options?: TransferOptions) => Promise<readonly FileManifestEntry[]>`                          | Required | See the linked contract and this family's rules for its interpretation. |
-| `downloadBatch` | `(source: string, entries: readonly FileManifestEntry[], destination: string, options?: TransferOptions) => Promise<void>`                | Required | See the linked contract and this family's rules for its interpretation. |
+| Name            | Type                                                                                                                                      | Presence | Meaning                                                                                                   |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------- |
+| `uploadBatch`   | `((source: string, entries: readonly FileManifestEntry[], destination: string, options?: TransferOptions) => Promise<void>) \| undefined` | Optional | Upload the declared file-manifest entries as a batch when supported.                                      |
+| `manifest`      | `(source: string, paths: readonly string[], options?: TransferOptions) => Promise<readonly FileManifestEntry[]>`                          | Required | Inspect the requested paths in the sandbox and return kind, permissions, size and SHA-256 for each entry. |
+| `downloadBatch` | `(source: string, entries: readonly FileManifestEntry[], destination: string, options?: TransferOptions) => Promise<void>`                | Required | Download the declared manifest entries as one bounded transfer batch.                                     |
 
 ## Signature
 

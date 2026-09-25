@@ -63,6 +63,6 @@ node example.mts
 
 The example owns its resources. Keep vendor protocol handling in an adapter and observer failures separate from task outcomes.
 
-[Contracts, options and edge cases](../../../reference/behavior/extend/agents/).
+[Contracts, options and edge cases](../../behavior/extend/agents/).
 
 Any persisted example files remain inside this demonstration directory.

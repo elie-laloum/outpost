@@ -11,10 +11,14 @@ test("Guide and Reference have separate navigation", async ({ page }) => {
     .filter({ visible: true });
   await reference.click();
   await page
-    .getByRole("link", { name: "API index", exact: true })
+    .getByText("Diagnostics", { exact: true })
     .filter({ visible: true })
     .click();
-  await expect(page).toHaveURL(/\/reference\/$/);
+  await page
+    .getByRole("link", { name: "diagnoseSandbox", exact: true })
+    .filter({ visible: true })
+    .click();
+  await expect(page).toHaveURL(/\/reference\/diagnosesandbox\/$/);
   await expect(
     page
       .getByRole("tab", { name: "Reference", exact: true })
@@ -101,10 +105,14 @@ test("mobile navigation works without horizontal page overflow", async ({
     .filter({ visible: true })
     .click();
   await page
-    .getByRole("link", { name: "API index", exact: true })
+    .getByText("Diagnostics", { exact: true })
     .filter({ visible: true })
     .click();
-  await expect(page).toHaveURL(/\/reference\/$/);
+  await page
+    .getByRole("link", { name: "diagnoseSandbox", exact: true })
+    .filter({ visible: true })
+    .click();
+  await expect(page).toHaveURL(/\/reference\/diagnosesandbox\/$/);
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= window.innerWidth,
@@ -140,7 +148,7 @@ test("legacy URLs and anchors still find their content", async ({ page }) => {
   await expect(page).toHaveURL(/\/guide\/agents\/dispatch\/$/);
   await page.goto("agents/conversations/#continuation-choices");
   await expect(page).toHaveURL(
-    /\/reference\/behavior\/agents\/conversations\/#continuation-choices$/,
+    /\/guide\/behavior\/agents\/conversations\/#continuation-choices$/,
   );
   await expect(page.locator("#continuation-choices")).toBeVisible();
 });
@@ -160,3 +168,111 @@ test("French search opens the matching translated guide", async ({ page }) => {
   await result.click();
   await expect(page).toHaveURL(/\/fr\/guide\/agents\/dispatch\//);
 });
+
+for (const locale of ["", "fr/"]) {
+  test(`moved manuals and detailed behavior belong to Guide (${locale || "en"})`, async ({
+    page,
+  }) => {
+    for (const route of ["manual/cli", "behavior/agents/conversations"]) {
+      await page.goto(`${locale}reference/${route}/`);
+      await expect(page).toHaveURL(new RegExp(`/${locale}guide/${route}/$`));
+      await expect(
+        page
+          .getByRole("tab", { name: "Guide", exact: true })
+          .filter({ visible: true }),
+      ).toHaveAttribute("aria-selected", "true");
+    }
+    await page.goto(`${locale}reference/`);
+    await expect(page).toHaveURL(/\/reference\/diagnosesandbox\/$/);
+    await expect(
+      page.getByRole("link", { name: /^(API index|Index de l’API)$/ }),
+    ).toHaveCount(0);
+    await page.goto(`${locale}reference/type-task/`);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Task");
+    await expect(
+      page.getByRole("heading", {
+        name: /^(Purpose and behavior|Rôle et comportement)$/,
+      }),
+    ).toHaveCount(0);
+  });
+}
+
+test("reference symbol icons retain accessible names in both languages", async ({
+  page,
+}) => {
+  for (const locale of ["", "fr/"]) {
+    const masks = new Map();
+    for (const [name, kind, route] of [
+      ["task", "function", "task"],
+      ["Task", "interface", "type-task"],
+      ["TaskOptions", "type", "taskoptions"],
+      ["WorkflowFailure", "class", "workflowfailure"],
+      ["agentVersions", "constant", "agentversions"],
+      ["docker", "function", "docker"],
+      ["QueueHandler", "type", "queuehandler"],
+    ]) {
+      await page.goto(`${locale}reference/${route}/`);
+      const link = page
+        .getByRole("link", { name, exact: true })
+        .filter({ visible: true })
+        .and(page.locator("a[data-api-kind]"));
+      await expect(link).toHaveAttribute("data-api-kind", kind);
+      const icon = await link.evaluate((element) => {
+        const style = getComputedStyle(element, "::before");
+        return {
+          mask: style.maskImage,
+          width: parseFloat(style.width),
+          content: style.content,
+        };
+      });
+      expect(icon.mask).toMatch(/^url\(/);
+      expect(icon.width).toBeGreaterThan(0);
+      expect(icon.content).toBe('""');
+      if (masks.has(kind)) expect(icon.mask).toBe(masks.get(kind));
+      masks.set(kind, icon.mask);
+    }
+    expect(new Set(masks.values()).size).toBe(5);
+  }
+});
+
+for (const [locale, label, overview] of [
+  ["", "Experimental", "Overview"],
+  ["fr/", "Expérimental", "Vue d’ensemble"],
+]) {
+  test(`provider overview and experimental icons are accessible (${locale || "en"})`, async ({
+    page,
+  }) => {
+    await page.goto(`${locale}reference/firecracker/`);
+    const firecracker = page
+      .getByRole("link", { name: `firecracker — ${label}`, exact: true })
+      .filter({ visible: true });
+    const family = firecracker.locator("xpath=ancestor::details[1]");
+    await expect(family.locator("summary").first()).toContainText("Providers");
+    await expect(family.locator("a").first()).toHaveText(overview);
+    for (const name of ["firecracker", "FirecrackerOptions"]) {
+      const link = family.getByRole("link", {
+        name: `${name} — ${label}`,
+        exact: true,
+      });
+      await expect(link).toHaveAttribute("title", label);
+      const icon = await link.evaluate((element) => {
+        const style = getComputedStyle(element, "::after");
+        return {
+          mask: style.maskImage,
+          width: parseFloat(style.width),
+          margin: parseFloat(style.marginInlineStart),
+        };
+      });
+      expect(icon.mask).not.toBe("none");
+      expect(icon.width).toBeGreaterThan(0);
+      expect(icon.margin).toBeGreaterThan(0);
+    }
+    await family.getByRole("link", { name: overview, exact: true }).click();
+    await expect(page).toHaveURL(
+      new RegExp(`/${locale}reference/overview/providers/$`),
+    );
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+      `Providers — ${overview}`,
+    );
+  });
+}

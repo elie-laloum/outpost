@@ -269,6 +269,6 @@ node example.mts
 
 Consultez les sorties et les effets décrits avant le code.
 
-[Contrats, options et cas particuliers](../../../../reference/behavior/providers/daytona/).
+[Contrats, options et cas particuliers](../../../behavior/providers/daytona/).
 
 Pour recommencer, utilisez un nouveau dossier de démonstration. Les branches nommées conservent les commits ; les worktrees sales restent disponibles pour récupération. Les scripts ne poussent aucun commit.

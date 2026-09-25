@@ -2,10 +2,8 @@
 title: "RecoveryRestorePlan"
 description: "RecoveryRestorePlan — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Public contract for **RecoveryRestorePlan**. See the [recovery restoration guide](../../guide/operations/recovery-restoration/) for behavior, defaults and examples.
 
 ## Import
 
@@ -13,28 +11,20 @@ Public contract for **RecoveryRestorePlan**. See the [recovery restoration guide
 import type { RecoveryRestorePlan } from "@elie-laloum/outpost";
 ```
 
-## Purpose and behavior
-
-Plan then apply a retained transfer into a new destination for review.
-
-Restore into a new directory and inspect before integration. Verification checks recorded structure and integrity; it does not authenticate the author.
-
-[Complete example and detailed rules](../../guide/operations/recovery-restoration/).
-
 ## Parameters and properties
 
-| Name             | Type                           | Presence | Meaning                                                                 |
-| ---------------- | ------------------------------ | -------- | ----------------------------------------------------------------------- |
-| `fingerprint`    | `string`                       | Required | See the linked contract and this family's rules for its interpretation. |
-| `manifestSha256` | `string`                       | Required | See the linked contract and this family's rules for its interpretation. |
-| `commit`         | `string`                       | Required | See the linked contract and this family's rules for its interpretation. |
-| `payloads`       | `readonly string[]`            | Required | See the linked contract and this family's rules for its interpretation. |
-| `staging`        | `"unavailable" \| "preserved"` | Required | See the linked contract and this family's rules for its interpretation. |
-| `directory`      | `string`                       | Required | Filesystem directory used by the owning operation; see path rules.      |
-| `repository`     | `string`                       | Required | Target host Git checkout.                                               |
-| `destination`    | `string`                       | Required | See the linked contract and this family's rules for its interpretation. |
-| `side`           | `"previous" \| "incoming"`     | Required | See the linked contract and this family's rules for its interpretation. |
-| `maxBytes`       | `number \| undefined`          | Optional | See the linked contract and this family's rules for its interpretation. |
+| Name             | Type                           | Presence | Meaning                                                                                                    |
+| ---------------- | ------------------------------ | -------- | ---------------------------------------------------------------------------------------------------------- |
+| `fingerprint`    | `string`                       | Required | Fingerprint binding the plan to the inspected retained source for revalidation before restoration.         |
+| `manifestSha256` | `string`                       | Required | SHA-256 of the retained transfer manifest captured during restoration planning.                            |
+| `commit`         | `string`                       | Required | Git commit used to reconstruct the selected retained state.                                                |
+| `payloads`       | `readonly string[]`            | Required | Retained bundle and patch paths required to restore the selected side.                                     |
+| `staging`        | `"unavailable" \| "preserved"` | Required | Whether the original Git index is preserved; incoming remote state has no recoverable staging information. |
+| `directory`      | `string`                       | Required | Host directory containing the retained transfer artifacts to verify or restore.                            |
+| `repository`     | `string`                       | Required | Target host Git checkout.                                                                                  |
+| `destination`    | `string`                       | Required | New, absent destination directory outside the source repository, Git metadata and retained transfer.       |
+| `side`           | `"previous" \| "incoming"`     | Required | Retained state to restore: previous host state or incoming remote state.                                   |
+| `maxBytes`       | `number \| undefined`          | Optional | Maximum retained payload bytes allowed when snapshotting and verifying restoration sources.                |
 
 ## Signature
 

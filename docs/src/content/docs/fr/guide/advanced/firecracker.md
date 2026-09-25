@@ -75,4 +75,4 @@ Le test démarre la VM fournie, vérifie le transfert binaire depuis un processu
 
 </details>
 
-[Contrat détaillé et limites](../../../reference/behavior/providers/firecracker/).
+[Contrat détaillé et limites](../../behavior/providers/firecracker/).

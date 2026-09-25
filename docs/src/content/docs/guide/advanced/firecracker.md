@@ -75,4 +75,4 @@ The fixture boots the supplied VM, checks binary transfer through a guest proces
 
 </details>
 
-[Detailed contract and limits](../../../reference/behavior/providers/firecracker/).
+[Detailed contract and limits](../../behavior/providers/firecracker/).

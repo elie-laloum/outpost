@@ -9,7 +9,7 @@ La prochaine priorité d’Outpost est une exécution quotidienne fiable : un pr
 
 ## Point de départ
 
-Le socle comprend les sandboxes réutilisables, les workspaces Git, les adapters d’agents, les workflows typés et les outils de récupération. Le CLI, la configuration d’authentification et les fournisseurs Responses personnalisés sont documentés dans le [guide de démarrage](../../reference/manual/cli/). La [référence API](../../reference/) décrit les contrats implémentés et le changelog les versions publiées. Une implémentation ou un test simulé ne prouve pas la réussite d’une campagne réelle sur un provider.
+Le socle comprend les sandboxes réutilisables, les workspaces Git, les adapters d’agents, les workflows typés et les outils de récupération. Le CLI, la configuration d’authentification et les fournisseurs Responses personnalisés sont documentés dans le [guide de démarrage](../../guide/manual/cli/). La [référence API](../../reference/diagnosesandbox/) décrit les contrats implémentés et le changelog les versions publiées. Une implémentation ou un test simulé ne prouve pas la réussite d’une campagne réelle sur un provider.
 
 ## Court terme : fiabiliser l’exécution
 

@@ -121,6 +121,6 @@ node example.mts
 
 From `repository/`, `git branch --show-current` still prints `main`; `git branch --list workshop/commands` finds the branch created by this script. `current` works in the existing checkout, `named` isolates a branch, and `integrate` prepares changes for a local merge. Warm sandboxes require an explicit `workspace.integrate()`. No policy pushes to a remote.
 
-[Contracts, options and edge cases](../../../reference/behavior/sandboxes/branches/).
+[Contracts, options and edge cases](../../behavior/sandboxes/branches/).
 
 To start again, use a new demonstration directory. Named branches retain commits; dirty worktrees remain available for recovery. Scripts do not push commits.

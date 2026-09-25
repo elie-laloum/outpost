@@ -2,24 +2,20 @@
 title: "nativeConversations"
 description: "nativeConversations — Outpost API"
 sidebar:
-  order: 20
+  order: 0
 ---
 
-Supporting contract used by a public signature. It is not directly exported from the package; use TypeScript inference or the public type that references it.
+Supporting contract not directly exported; use TypeScript inference or the public type that references it.
 
 ## Purpose and behavior
 
-Locate, capture, restore and relocate native transcripts separately from authentication.
-
-The host conversation home defaults to the OS home. A cold continuation requires a restorable transcript before allocation. A fork does not copy a workspace.
-
-[Complete example and detailed rules](../../guide/agents/conversations/).
+Create the native ConversationStore for the selected Claude or Codex format, binding locate, capture and restore to that format’s filesystem layout.
 
 ## Parameters and properties
 
-| Name     | Type                 | Presence | Meaning                                                                 |
-| -------- | -------------------- | -------- | ----------------------------------------------------------------------- |
-| `format` | `ConversationFormat` | Required | See the linked contract and this family's rules for its interpretation. |
+| Name     | Type                 | Presence | Meaning                                    |
+| -------- | -------------------- | -------- | ------------------------------------------ |
+| `format` | `ConversationFormat` | Required | Native transcript layout: claude or codex. |
 
 ## Returns
 

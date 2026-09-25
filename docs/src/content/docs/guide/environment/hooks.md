@@ -259,6 +259,6 @@ node example.mts
 
 Authentication hooks run before `npm ci` because the array preserves their order. A failing hook stops the operation. Sandbox preparation runs once per environment, not once per warm dispatch. Workspace hooks have a different lifetime. Keep the existing authentication hooks when adding your own setup.
 
-[Contracts, options and edge cases](../../../reference/behavior/sandboxes/hooks/).
+[Contracts, options and edge cases](../../behavior/sandboxes/hooks/).
 
 To start again, use a new demonstration directory. Named branches retain commits; dirty worktrees remain available for recovery. Scripts do not push commits.

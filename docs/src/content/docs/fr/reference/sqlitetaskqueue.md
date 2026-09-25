@@ -2,10 +2,8 @@
 title: "sqliteTaskQueue"
 description: "sqliteTaskQueue — Outpost API"
 sidebar:
-  order: 10
+  order: 0
 ---
-
-Contrat public de **sqliteTaskQueue**. Consultez le [guide exécution distribuée](../../guide/advanced/distributed/) pour le comportement, les valeurs par défaut et des exemples.
 
 ## Import
 
@@ -15,17 +13,15 @@ import { sqliteTaskQueue } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Coordonner des tâches JSON durables via SQLite, un transport HTTP authentifié et des workers enregistrés.
-
-Les effets sont au moins une fois. Un jeton périmé ne peut valider l’état de file, mais les effets externes peuvent se répéter. HTTP écoute loopback par défaut sans TLS. Un worker traite une tâche à la fois.
+Ouvre une file de tâches SQLite durable à path. L’envoi déduplique les identités, les prises en charge créent des baux avec jeton de génération et les workers périmés ne peuvent valider l’état de file. Fermez la base renvoyée après usage ; les effets externes restent au moins une fois.
 
 [Exemple complet et règles détaillées](../../guide/advanced/distributed/).
 
 ## Paramètres et propriétés
 
-| Nom    | Type     | Présence | Rôle                                                                             |
-| ------ | -------- | -------- | -------------------------------------------------------------------------------- |
-| `path` | `string` | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
+| Nom    | Type     | Présence | Rôle                                      |
+| ------ | -------- | -------- | ----------------------------------------- |
+| `path` | `string` | Requis   | Chemin hôte de la base SQLite de la file. |
 
 ## Retour
 

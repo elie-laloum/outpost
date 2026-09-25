@@ -2,10 +2,8 @@
 title: "WorkflowEvent"
 description: "WorkflowEvent — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Contrat public de **WorkflowEvent**. Consultez le [guide workflows](../../guide/workflows/graph/) pour le comportement, les valeurs par défaut et des exemples.
 
 ## Import
 
@@ -13,27 +11,19 @@ Contrat public de **WorkflowEvent**. Consultez le [guide workflows](../../guide/
 import type { WorkflowEvent } from "@elie-laloum/outpost";
 ```
 
-## Rôle et comportement
-
-Composer des tâches avec dépendances explicites et accès typé aux résultats.
-
-Les clés dupliquées, dépendances absentes et cycles échouent à la validation. Une dépendance en échec ou ignorée empêche ses descendants. Les reprises peuvent répéter les effets externes. Unwrap lève une erreur en cas de non-succès.
-
-[Exemple complet et règles détaillées](../../guide/workflows/graph/).
-
 ## Paramètres et propriétés
 
-| Nom           | Type                                                               | Présence  | Rôle                                                                             |
-| ------------- | ------------------------------------------------------------------ | --------- | -------------------------------------------------------------------------------- |
-| `executionId` | `string`                                                           | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `workflow`    | `string`                                                           | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `timestamp`   | `string`                                                           | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `type`        | `"usage" \| "retry" \| "start" \| "task" \| "attempt" \| "finish"` | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `key`         | `string \| undefined`                                              | Optionnel | Clé stable de tâche ou cache dans le contrat concerné.                           |
-| `status`      | `TaskStatus \| undefined`                                          | Optionnel | Résultat enregistré du processus ou cycle de vie ; voir son type.                |
-| `attempt`     | `number \| undefined`                                              | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `usage`       | `Usage \| undefined`                                               | Optionnel | Compteurs d’usage rapportés ; aucune estimation monétaire.                       |
-| `durationMs`  | `number \| undefined`                                              | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
+| Nom           | Type                                                               | Présence  | Rôle                                                                                                              |
+| ------------- | ------------------------------------------------------------------ | --------- | ----------------------------------------------------------------------------------------------------------------- |
+| `executionId` | `string`                                                           | Requis    | Identité de l’exécution de workflow, conservée lors de la reprise d’un checkpoint.                                |
+| `workflow`    | `string`                                                           | Requis    | Nom du workflow ayant émis cet événement.                                                                         |
+| `timestamp`   | `string`                                                           | Requis    | Horodatage ISO d’émission de l’événement de workflow.                                                             |
+| `type`        | `"usage" \| "retry" \| "start" \| "task" \| "attempt" \| "finish"` | Requis    | Catégorie d’événement : début/fin d’exécution, transition de tâche, tentative, reprise ou rapport d’usage.        |
+| `key`         | `string \| undefined`                                              | Optionnel | Clé de tâche stable identifiant le nœud dans son graphe de workflow.                                              |
+| `status`      | `TaskStatus \| undefined`                                          | Optionnel | État de cycle de vie de tâche, incluant attente, activité, réussite, échec, annulation ou pause/rejet d’une gate. |
+| `attempt`     | `number \| undefined`                                              | Optionnel | Numéro de tentative de tâche commençant à un.                                                                     |
+| `usage`       | `Usage \| undefined`                                               | Optionnel | Compteurs d’usage rapportés ; aucune estimation monétaire.                                                        |
+| `durationMs`  | `number \| undefined`                                              | Optionnel | Durée d’exécution écoulée en millisecondes.                                                                       |
 
 ## Signature
 

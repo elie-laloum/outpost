@@ -125,6 +125,6 @@ node example.mts
 
 The example installs the workshop’s empty dependency set and proves the cache configuration is usable. Real projects reuse downloaded packages. The key is explicit; include toolchain and format inputs when adapting it. Cache volumes survive sandbox disposal and are not physical quotas or integrity boundaries. Inspect `docker volume ls --filter label=io.outpost.cache=true` and remove only identified unused volumes.
 
-[Contracts, options and edge cases](../../../../reference/behavior/providers/dependency-caches/).
+[Contracts, options and edge cases](../../../behavior/providers/dependency-caches/).
 
 To start again, use a new demonstration directory. Named branches retain commits; dirty worktrees remain available for recovery. Scripts do not push commits.

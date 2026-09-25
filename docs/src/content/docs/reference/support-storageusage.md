@@ -5,25 +5,15 @@ sidebar:
   order: 20
 ---
 
-Supporting contract used by a public signature. It is not directly exported from the package; use TypeScript inference or the public type that references it.
-
-## Purpose and behavior
-
-Inspect retained work and plan explicit storage retention without discarding recoverable edits.
-
-Planning does not prune. Application reacquires ownership and revalidates candidates. Quota checks observe usage rather than imposing physical filesystem limits.
-
-[Complete example and detailed rules](../../guide/operations/recovery/).
-
 ## Parameters and properties
 
-| Name          | Type     | Presence | Meaning                                                                 |
-| ------------- | -------- | -------- | ----------------------------------------------------------------------- |
-| `bytes`       | `number` | Required | See the linked contract and this family's rules for its interpretation. |
-| `files`       | `number` | Required | See the linked contract and this family's rules for its interpretation. |
-| `directories` | `number` | Required | See the linked contract and this family's rules for its interpretation. |
-| `symlinks`    | `number` | Required | See the linked contract and this family's rules for its interpretation. |
-| `other`       | `number` | Required | See the linked contract and this family's rules for its interpretation. |
+| Name          | Type     | Presence | Meaning                                                                                      |
+| ------------- | -------- | -------- | -------------------------------------------------------------------------------------------- |
+| `bytes`       | `number` | Required | Total observed bytes across scanned storage entries.                                         |
+| `files`       | `number` | Required | Number of regular files counted in the scanned storage.                                      |
+| `directories` | `number` | Required | Number of directories counted in the scanned storage.                                        |
+| `symlinks`    | `number` | Required | Number of symbolic links counted without traversing their targets.                           |
+| `other`       | `number` | Required | Number of filesystem entries that are neither regular files, directories nor symbolic links. |
 
 ## Signature
 

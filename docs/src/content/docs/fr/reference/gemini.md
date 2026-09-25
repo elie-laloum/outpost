@@ -2,10 +2,8 @@
 title: "gemini"
 description: "gemini — Outpost API"
 sidebar:
-  order: 10
+  order: 0
 ---
-
-Contrat public de **gemini**. Consultez le [guide agents](../../guide/agents/adapters/) pour le comportement, les valeurs par défaut et des exemples.
 
 ## Import
 
@@ -15,17 +13,18 @@ import { gemini } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Configurer Claude Code, Codex ou Gemini indépendamment du backend de sandbox.
-
-La CLI choisit son modèle si omis. La capture native est activée par défaut pour Claude/Codex. Gemini ne prend en charge que les nouvelles sessions. Identifiants d’agent et de provider sont distincts.
+Construit l’adapter Gemini CLI pour une session neuve. Il décode les événements de texte, outils et usage, sans capture native, reprise, bifurcation ni réparation automatique des réponses. Le modèle et le mode d’approbation configurent l’invocation CLI.
 
 [Exemple complet et règles détaillées](../../guide/agents/adapters/).
 
 ## Paramètres et propriétés
 
-| Nom        | Type                          | Présence  | Rôle                                                                             |
-| ---------- | ----------------------------- | --------- | -------------------------------------------------------------------------------- |
-| `settings` | `GeminiSettings \| undefined` | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
+| Nom                     | Type                                                        | Présence  | Rôle                                                                      |
+| ----------------------- | ----------------------------------------------------------- | --------- | ------------------------------------------------------------------------- |
+| `settings`              | `GeminiSettings \| undefined`                               | Optionnel | Réglages Gemini de modèle, mode d’approbation et environnement explicite. |
+| `settings.model`        | `string \| undefined`                                       | Optionnel | Identifiant de modèle natif ; disponibilité selon le compte.              |
+| `settings.variables`    | `Readonly<Record<string, string>> \| undefined`             | Optionnel | Déclarations d’environnement explicites ; les valeurs sont des chaînes.   |
+| `settings.approvalMode` | `"default" \| "plan" \| "auto_edit" \| "yolo" \| undefined` | Optionnel | Mode d’approbation des outils du CLI Gemini.                              |
 
 ## Retour
 

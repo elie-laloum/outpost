@@ -2,10 +2,8 @@
 title: "RecoveryRestoreResult"
 description: "RecoveryRestoreResult — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Public contract for **RecoveryRestoreResult**. See the [recovery restoration guide](../../guide/operations/recovery-restoration/) for behavior, defaults and examples.
 
 ## Import
 
@@ -13,23 +11,15 @@ Public contract for **RecoveryRestoreResult**. See the [recovery restoration gui
 import type { RecoveryRestoreResult } from "@elie-laloum/outpost";
 ```
 
-## Purpose and behavior
-
-Plan then apply a retained transfer into a new destination for review.
-
-Restore into a new directory and inspect before integration. Verification checks recorded structure and integrity; it does not authenticate the author.
-
-[Complete example and detailed rules](../../guide/operations/recovery-restoration/).
-
 ## Parameters and properties
 
-| Name             | Type                           | Presence | Meaning                                                                 |
-| ---------------- | ------------------------------ | -------- | ----------------------------------------------------------------------- |
-| `directory`      | `string`                       | Required | Filesystem directory used by the owning operation; see path rules.      |
-| `commit`         | `string`                       | Required | See the linked contract and this family's rules for its interpretation. |
-| `side`           | `"previous" \| "incoming"`     | Required | See the linked contract and this family's rules for its interpretation. |
-| `staging`        | `"unavailable" \| "preserved"` | Required | See the linked contract and this family's rules for its interpretation. |
-| `sourceRetained` | `true`                         | Required | See the linked contract and this family's rules for its interpretation. |
+| Name             | Type                           | Presence | Meaning                                                                                                    |
+| ---------------- | ------------------------------ | -------- | ---------------------------------------------------------------------------------------------------------- |
+| `directory`      | `string`                       | Required | New checkout directory populated with the restored state.                                                  |
+| `commit`         | `string`                       | Required | Git commit used to reconstruct the selected retained state.                                                |
+| `side`           | `"previous" \| "incoming"`     | Required | Retained state to restore: previous host state or incoming remote state.                                   |
+| `staging`        | `"unavailable" \| "preserved"` | Required | Whether the original Git index is preserved; incoming remote state has no recoverable staging information. |
+| `sourceRetained` | `true`                         | Required | Always true: restoration preserves the original recovery artifacts.                                        |
 
 ## Signature
 

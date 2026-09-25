@@ -261,6 +261,6 @@ node example.mts
 
 Claude and Codex capture native transcripts by default. A resume continues that conversation; a fork creates another conversation identity. Files are a separate concern: this example gives the alternative its own branch. Host transcripts survive sandbox disposal and may contain private prompts and source. Gemini currently cannot capture, resume or fork native conversations.
 
-[Contracts, options and edge cases](../../../reference/behavior/agents/conversations/).
+[Contracts, options and edge cases](../../behavior/agents/conversations/).
 
 To start again, use a new demonstration directory. Named branches retain commits; dirty worktrees remain available for recovery. Scripts do not push commits.

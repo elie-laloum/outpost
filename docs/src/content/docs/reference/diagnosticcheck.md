@@ -2,10 +2,8 @@
 title: "DiagnosticCheck"
 description: "DiagnosticCheck — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Public contract for **DiagnosticCheck**. See the [diagnostics guide](../../guide/operations/doctor/) for behavior, defaults and examples.
 
 ## Import
 
@@ -13,23 +11,15 @@ Public contract for **DiagnosticCheck**. See the [diagnostics guide](../../guide
 import type { DiagnosticCheck } from "@elie-laloum/outpost";
 ```
 
-## Purpose and behavior
-
-Inspect host prerequisites, an owned sandbox or recorded agent protocol fixtures. Diagnostics report observations; they do not prove account or model access.
-
-Checks distinguish unavailable, failed and unsupported capabilities. Sandbox diagnosis uses its existing operation gate and never takes ownership of disposal.
-
-[Complete example and detailed rules](../../guide/operations/doctor/).
-
 ## Parameters and properties
 
-| Name               | Type                  | Presence | Meaning                                                                 |
-| ------------------ | --------------------- | -------- | ----------------------------------------------------------------------- |
-| `id`               | `string`              | Required | See the linked contract and this family's rules for its interpretation. |
-| `status`           | `DiagnosticStatus`    | Required | Recorded process or lifecycle outcome; inspect its declared type.       |
-| `message`          | `string`              | Required | See the linked contract and this family's rules for its interpretation. |
-| `version`          | `string \| undefined` | Optional | Caller-controlled contract or graph version.                            |
-| `referenceVersion` | `string \| undefined` | Optional | See the linked contract and this family's rules for its interpretation. |
+| Name               | Type                  | Presence | Meaning                                                                |
+| ------------------ | --------------------- | -------- | ---------------------------------------------------------------------- |
+| `id`               | `string`              | Required | Stable identifier of the diagnostic check in the report.               |
+| `status`           | `DiagnosticStatus`    | Required | Diagnostic outcome: pass, warn, fail or skipped.                       |
+| `message`          | `string`              | Required | Human-readable explanation of the diagnostic observation.              |
+| `version`          | `string \| undefined` | Optional | Version detected by the diagnostic probe, when available.              |
+| `referenceVersion` | `string \| undefined` | Optional | CLI version against which the bundled protocol fixtures were recorded. |
 
 ## Signature
 

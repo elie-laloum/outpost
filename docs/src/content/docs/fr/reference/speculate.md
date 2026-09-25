@@ -2,10 +2,8 @@
 title: "speculate"
 description: "speculate — Outpost API"
 sidebar:
-  order: 10
+  order: 0
 ---
-
-Contrat public de **speculate**. Consultez le [guide exécution spéculative](../../guide/advanced/speculation/) pour le comportement, les valeurs par défaut et des exemples.
 
 ## Import
 
@@ -15,25 +13,23 @@ import { speculate } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Mettre en concurrence des branches candidates bornées et retenir la première validée après nettoyage.
-
-Prototype de recherche : au plus huit candidats, concurrence de deux par défaut. Aucune intégration, aucun push ni reprise durable de la course automatiques. L’usage observé ne plafonne pas la facturation.
+Exécute des candidats agents bornés sur des branches distinctes issues d’une même base et retient le premier accepté par validate après nettoyage. Annule les perdants et rapporte changements hôtes et usage cumulé. Ce prototype opt-in n’intègre ni ne pousse automatiquement le gagnant.
 
 [Exemple complet et règles détaillées](../../guide/advanced/speculation/).
 
 ## Paramètres et propriétés
 
-| Nom                   | Type                                                                                                                         | Présence  | Rôle                                                                                          |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------------- | --------- | --------------------------------------------------------------------------------------------- |
-| `options`             | `SpeculationOptions<T>`                                                                                                      | Requis    | Objet de configuration. Ses champs sont décrits dans le contrat d’options associé ci-dessous. |
-| `options.repository`  | `string`                                                                                                                     | Requis    | Checkout Git hôte ciblé.                                                                      |
-| `options.provider`    | `import("../index.js").SandboxProvider`                                                                                      | Requis    | Backend de l’environnement d’exécution.                                                       |
-| `options.candidates`  | `readonly SpeculativeCandidate<T>[]`                                                                                         | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation.              |
-| `options.concurrency` | `number \| undefined`                                                                                                        | Optionnel | Nombre maximal de tâches ou candidats concurrents admis.                                      |
-| `options.budget`      | `WorkflowBudget`                                                                                                             | Requis    | Limites partagées de tentatives et d’usage observé.                                           |
-| `options.signal`      | `AbortSignal \| undefined`                                                                                                   | Optionnel | Annulation coopérative de cette opération.                                                    |
-| `options.sandbox`     | `Pick<SandboxOptions, "storageQuota" \| "limits" \| "hooks" \| "logging" \| "bootstrap" \| "conversationHome"> \| undefined` | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation.              |
-| `options.validate`    | `(candidate: SpeculativeValidation<T>) => boolean \| Promise<boolean>`                                                       | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation.              |
+| Nom                   | Type                                                                                                                         | Présence  | Rôle                                                                                                         |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------ |
+| `options`             | `SpeculationOptions<T>`                                                                                                      | Requis    | Dépôt, provider, candidats bornés, budget d’admission et callback de validation du gagnant.                  |
+| `options.repository`  | `string`                                                                                                                     | Requis    | Checkout Git hôte ciblé.                                                                                     |
+| `options.provider`    | `import("../index.js").SandboxProvider`                                                                                      | Requis    | Backend de l’environnement d’exécution.                                                                      |
+| `options.candidates`  | `readonly SpeculativeCandidate<T>[]`                                                                                         | Requis    | Requêtes d’agent mises en concurrence sur des branches distinctes ; huit candidats au maximum.               |
+| `options.concurrency` | `number \| undefined`                                                                                                        | Optionnel | Nombre maximal de candidats exécutés simultanément ; deux par défaut.                                        |
+| `options.budget`      | `WorkflowBudget`                                                                                                             | Requis    | Limites partagées de tentatives et d’usage observé.                                                          |
+| `options.signal`      | `AbortSignal \| undefined`                                                                                                   | Optionnel | Annulation coopérative de cette opération.                                                                   |
+| `options.sandbox`     | `Pick<SandboxOptions, "storageQuota" \| "limits" \| "hooks" \| "logging" \| "bootstrap" \| "conversationHome"> \| undefined` | Optionnel | Réglages communs de cycle de vie, journaux et stockage appliqués à l’allocation de chaque sandbox candidate. |
+| `options.validate`    | `(candidate: SpeculativeValidation<T>) => boolean \| Promise<boolean>`                                                       | Requis    | Prédicat exécuté avec la sandbox active et la sortie d’un candidat ; true l’accepte comme gagnant possible.  |
 
 ## Retour
 

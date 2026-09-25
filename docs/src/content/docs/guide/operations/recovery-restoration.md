@@ -62,4 +62,4 @@ This operation reconstructs the repository state captured by one transfer. Ignor
 
 </details>
 
-[Detailed contract and limits](../../../reference/behavior/operations/recovery-restoration/).
+[Detailed contract and limits](../../behavior/operations/recovery-restoration/).

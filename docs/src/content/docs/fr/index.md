@@ -16,7 +16,7 @@ Outpost est une bibliothèque TypeScript et une CLI pour exécuter des agents de
 
 | Apprendre par la pratique                                                                                | Retrouver un comportement précis                                                                                                  |
 | -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| Le [Guide](guide/) progresse d’une tâche d’agent vers les environnements réutilisables et les workflows. | La [Référence](reference/) explique API, commandes CLI, configuration et limites.                                                 |
+| Le [Guide](guide/) progresse d’une tâche d’agent vers les environnements réutilisables et les workflows. | La [Référence](reference/diagnosesandbox/) explique API, commandes CLI, configuration et limites.                                 |
 | Chaque exemple pratique contient sa préparation, son code complet et le résultat attendu.                | Les signatures suivent les déclarations du package ; les contrats détaillés restent accessibles sans interrompre l’apprentissage. |
 
 Vous connaissez déjà les bases ? Choisissez une [recette du cookbook](guide/cookbook/) ou [diagnostiquez un échec](guide/operations/troubleshooting/).

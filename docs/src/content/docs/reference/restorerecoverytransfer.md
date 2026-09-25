@@ -2,10 +2,8 @@
 title: "restoreRecoveryTransfer"
 description: "restoreRecoveryTransfer — Outpost API"
 sidebar:
-  order: 10
+  order: 0
 ---
-
-Public contract for **restoreRecoveryTransfer**. See the [recovery restoration guide](../../guide/operations/recovery-restoration/) for behavior, defaults and examples.
 
 ## Import
 
@@ -15,17 +13,15 @@ import { restoreRecoveryTransfer } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Plan then apply a retained transfer into a new destination for review.
-
-Restore into a new directory and inspect before integration. Verification checks recorded structure and integrity; it does not authenticate the author.
+Revalidate a restoration plan and materialize the selected retained state into its new destination. Source recovery artifacts remain available, and the result reports whether staging could be preserved. Review the destination before integrating it.
 
 [Complete example and detailed rules](../../guide/operations/recovery-restoration/).
 
 ## Parameters and properties
 
-| Name   | Type                  | Presence | Meaning                                                                 |
-| ------ | --------------------- | -------- | ----------------------------------------------------------------------- |
-| `plan` | `RecoveryRestorePlan` | Required | See the linked contract and this family's rules for its interpretation. |
+| Name   | Type                  | Presence | Meaning                                                                                  |
+| ------ | --------------------- | -------- | ---------------------------------------------------------------------------------------- |
+| `plan` | `RecoveryRestorePlan` | Required | Restoration plan binding source, destination, selected state and integrity fingerprints. |
 
 ## Returns
 

@@ -2,10 +2,8 @@
 title: "Command"
 description: "Command — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Public contract for **Command**. See the [commands and terminal guide](../../guide/environment/commands/) for behavior, defaults and examples.
 
 ## Import
 
@@ -13,30 +11,22 @@ Public contract for **Command**. See the [commands and terminal guide](../../gui
 import type { Command } from "@elie-laloum/outpost";
 ```
 
-## Purpose and behavior
-
-Run a process or attach a native interactive agent session with explicit stream ownership.
-
-Command returns nonzero exit statuses; callers must check them. Attach requires a supported interactive provider. Vercel rejects attachment.
-
-[Complete example and detailed rules](../../guide/environment/commands/).
-
 ## Parameters and properties
 
-| Name          | Type                                                                                                 | Presence | Meaning                                                                 |
-| ------------- | ---------------------------------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------- |
-| `executable`  | `string`                                                                                             | Required | Program to execute without implicit shell parsing.                      |
-| `arguments`   | `readonly string[] \| undefined`                                                                     | Optional | Arguments passed directly to the executable.                            |
-| `stdin`       | `string \| undefined`                                                                                | Optional | Input supplied to the process.                                          |
-| `directory`   | `string \| undefined`                                                                                | Optional | Filesystem directory used by the owning operation; see path rules.      |
-| `variables`   | `Readonly<Record<string, string>> \| undefined`                                                      | Optional | Explicit environment declarations; values are strings.                  |
-| `signal`      | `AbortSignal \| undefined`                                                                           | Optional | Cooperative cancellation for this operation.                            |
-| `deadlineMs`  | `number \| undefined`                                                                                | Optional | Hard operation deadline in milliseconds.                                |
-| `interactive` | `boolean \| undefined`                                                                               | Optional | See the linked contract and this family's rules for its interpretation. |
-| `terminal`    | `{ readonly input?: Readable; readonly output?: Writable; readonly error?: Writable; } \| undefined` | Optional | See the linked contract and this family's rules for its interpretation. |
-| `elevated`    | `boolean \| undefined`                                                                               | Optional | See the linked contract and this family's rules for its interpretation. |
-| `retain`      | `number \| undefined`                                                                                | Optional | Maximum retained tail per output stream, in bytes.                      |
-| `observe`     | `((channel: Channel, text: string) => void) \| undefined`                                            | Optional | Notification callback; observer failures are isolated.                  |
+| Name          | Type                                                                                                 | Presence | Meaning                                                                                   |
+| ------------- | ---------------------------------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------- |
+| `executable`  | `string`                                                                                             | Required | Program to execute without implicit shell parsing.                                        |
+| `arguments`   | `readonly string[] \| undefined`                                                                     | Optional | Arguments passed directly to the executable.                                              |
+| `stdin`       | `string \| undefined`                                                                                | Optional | Input supplied to the process.                                                            |
+| `directory`   | `string \| undefined`                                                                                | Optional | Working directory inside the execution environment; defaults to its workspace root.       |
+| `variables`   | `Readonly<Record<string, string>> \| undefined`                                                      | Optional | Explicit environment declarations; values are strings.                                    |
+| `signal`      | `AbortSignal \| undefined`                                                                           | Optional | Cooperative cancellation for this operation.                                              |
+| `deadlineMs`  | `number \| undefined`                                                                                | Optional | Maximum operation duration in milliseconds before terminating the command or transfer.    |
+| `interactive` | `boolean \| undefined`                                                                               | Optional | Request an interactive agent invocation or process terminal.                              |
+| `terminal`    | `{ readonly input?: Readable; readonly output?: Writable; readonly error?: Writable; } \| undefined` | Optional | Input, output and error streams for real interactive terminal attachment.                 |
+| `elevated`    | `boolean \| undefined`                                                                               | Optional | Request elevated execution from a provider that supports it.                              |
+| `retain`      | `number \| undefined`                                                                                | Optional | Maximum retained tail per output stream, in bytes.                                        |
+| `observe`     | `((channel: Channel, text: string) => void) \| undefined`                                            | Optional | Receive streamed stdout/stderr chunks with their channel; observer failures are isolated. |
 
 ## Signature
 

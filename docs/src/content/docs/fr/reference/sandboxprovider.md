@@ -2,10 +2,8 @@
 title: "SandboxProvider"
 description: "SandboxProvider — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Contrat public de **SandboxProvider**. Consultez le [guide providers](../../guide/environment/providers/overview/) pour le comportement, les valeurs par défaut et des exemples.
 
 ## Import
 
@@ -13,22 +11,14 @@ Contrat public de **SandboxProvider**. Consultez le [guide providers](../../guid
 import type { SandboxProvider } from "@elie-laloum/outpost";
 ```
 
-## Rôle et comportement
-
-Allouer conteneurs locaux, exécution hôte explicite ou sandboxes distantes via les sous-chemins du package.
-
-Les providers montés et hôtes utilisent current par défaut ; les distants utilisent integrate et rejettent current. Les SDK optionnels restent optionnels. L’exécution locale ne fournit aucune isolation.
-
-[Exemple complet et règles détaillées](../../guide/environment/providers/overview/).
-
 ## Paramètres et propriétés
 
-| Nom         | Type                                                 | Présence  | Rôle                                                                             |
-| ----------- | ---------------------------------------------------- | --------- | -------------------------------------------------------------------------------- |
-| `name`      | `string`                                             | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `placement` | `"mounted" \| "remote" \| "host"`                    | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `variables` | `Readonly<Record<string, string>> \| undefined`      | Optionnel | Déclarations d’environnement explicites ; les valeurs sont des chaînes.          |
-| `acquire`   | `(context: SandboxContext) => Promise<SandboxLease>` | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
+| Nom         | Type                                                 | Présence  | Rôle                                                                                                           |
+| ----------- | ---------------------------------------------------- | --------- | -------------------------------------------------------------------------------------------------------------- |
+| `name`      | `string`                                             | Requis    | Identifiant de provider utilisé dans les diagnostics et enregistrements d’activité.                            |
+| `placement` | `"mounted" \| "remote" \| "host"`                    | Requis    | Mode d’accès au workspace : checkout hôte monté, checkout distant synchronisé ou exécution directe sur l’hôte. |
+| `variables` | `Readonly<Record<string, string>> \| undefined`      | Optionnel | Déclarations d’environnement explicites ; les valeurs sont des chaînes.                                        |
+| `acquire`   | `(context: SandboxContext) => Promise<SandboxLease>` | Requis    | Alloue un bail d’exécution pour le contexte de workspace préparé.                                              |
 
 ## Signature
 

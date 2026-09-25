@@ -2,10 +2,8 @@
 title: "SandboxLease"
 description: "SandboxLease — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Contrat public de **SandboxLease**. Consultez le [guide providers](../../guide/environment/providers/overview/) pour le comportement, les valeurs par défaut et des exemples.
 
 ## Import
 
@@ -13,25 +11,17 @@ Contrat public de **SandboxLease**. Consultez le [guide providers](../../guide/e
 import type { SandboxLease } from "@elie-laloum/outpost";
 ```
 
-## Rôle et comportement
-
-Allouer conteneurs locaux, exécution hôte explicite ou sandboxes distantes via les sous-chemins du package.
-
-Les providers montés et hôtes utilisent current par défaut ; les distants utilisent integrate et rejettent current. Les SDK optionnels restent optionnels. L’exécution locale ne fournit aucune isolation.
-
-[Exemple complet et règles détaillées](../../guide/environment/providers/overview/).
-
 ## Paramètres et propriétés
 
-| Nom             | Type                                                                                | Présence  | Rôle                                                                             |
-| --------------- | ----------------------------------------------------------------------------------- | --------- | -------------------------------------------------------------------------------- |
-| `fileTransfers` | `FileTransfers \| undefined`                                                        | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `root`          | `string`                                                                            | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `home`          | `string`                                                                            | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `invoke`        | `(command: Command) => Promise<CommandResult>`                                      | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `upload`        | `(source: string, destination: string, options?: TransferOptions) => Promise<void>` | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `download`      | `(source: string, destination: string, options?: TransferOptions) => Promise<void>` | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `release`       | `() => Promise<void>`                                                               | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
+| Nom             | Type                                                                                | Présence  | Rôle                                                                                                                       |
+| --------------- | ----------------------------------------------------------------------------------- | --------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `fileTransfers` | `FileTransfers \| undefined`                                                        | Optionnel | Capacités optionnelles de manifeste et transfert par lot pour la synchronisation distante.                                 |
+| `root`          | `string`                                                                            | Requis    | Chemin du workspace de dépôt à l’intérieur de l’environnement d’exécution.                                                 |
+| `home`          | `string`                                                                            | Requis    | Chemin du home de l’agent à l’intérieur de l’environnement d’exécution.                                                    |
+| `invoke`        | `(command: Command) => Promise<CommandResult>`                                      | Requis    | Exécute une commande dans l’environnement loué et renvoie le statut réel du processus et ses flux capturés.                |
+| `upload`        | `(source: string, destination: string, options?: TransferOptions) => Promise<void>` | Requis    | Transfère des fichiers ou le contenu de dossiers hôtes vers la sandbox en respectant annulation et délai.                  |
+| `download`      | `(source: string, destination: string, options?: TransferOptions) => Promise<void>` | Requis    | Transfère des fichiers ou le contenu de dossiers de sandbox vers l’hôte en préservant permissions et liens pris en charge. |
+| `release`       | `() => Promise<void>`                                                               | Requis    | Libère l’environnement d’exécution alloué ; les appels répétés doivent être sans danger.                                   |
 
 ## Signature
 

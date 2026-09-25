@@ -2,10 +2,8 @@
 title: "recoveryDetails"
 description: "recoveryDetails — Outpost API"
 sidebar:
-  order: 10
+  order: 0
 ---
-
-Contrat public de **recoveryDetails**. Consultez le [guide erreurs](../../guide/operations/recovery/) pour le comportement, les valeurs par défaut et des exemples.
 
 ## Import
 
@@ -15,17 +13,15 @@ import { recoveryDetails } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Identifier les codes d’échec et chemins de récupération avant reprise ou nettoyage.
-
-Un agent en échec lève une erreur ; une commande brute peut renvoyer un statut non nul. Préservez erreurs originales et artefacts de récupération lors du diagnostic ou de la reprise.
+Extrait les métadonnées de récupération d’une erreur inconnue lorsqu’Outpost les a attachées. Le résultat identifie le travail et les emplacements conservés ; sans métadonnées, renvoie undefined sans déclencher de nettoyage ni de restauration.
 
 [Exemple complet et règles détaillées](../../guide/operations/recovery/).
 
 ## Paramètres et propriétés
 
-| Nom     | Type      | Présence | Rôle                                                                             |
-| ------- | --------- | -------- | -------------------------------------------------------------------------------- |
-| `error` | `unknown` | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
+| Nom     | Type      | Présence | Rôle                                                                         |
+| ------- | --------- | -------- | ---------------------------------------------------------------------------- |
+| `error` | `unknown` | Requis   | Valeur levée inconnue dont extraire les métadonnées de récupération Outpost. |
 
 ## Retour
 

@@ -252,6 +252,6 @@ node example.mts
 
 Le reporter affiche la progression ; `usage` contient les comptes de tokens disponibles, pas une estimation monétaire. Les logs appartiennent au `.outpost` du dépôt ciblé. Une erreur d’observateur ne change pas le résultat de l’exécution. Texte et logs peuvent contenir du code ou des sorties sensibles : choisissez ce que vous conservez ou exportez.
 
-[Contrats, options et cas particuliers](../../../reference/behavior/agents/observability/).
+[Contrats, options et cas particuliers](../../behavior/agents/observability/).
 
 Pour recommencer, utilisez un nouveau dossier de démonstration. Les branches nommées conservent les commits ; les worktrees sales restent disponibles pour récupération. Les scripts ne poussent aucun commit.

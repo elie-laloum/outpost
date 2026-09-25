@@ -264,6 +264,6 @@ node example.mts
 
 Your program receives a string whose shape has been checked. Malformed responses can trigger one repair attempt; a remaining failure rejects the dispatch. Review the finding itself: a valid schema does not establish factual accuracy. “Do not edit” is a prompt instruction, not a filesystem permission.
 
-[Contracts, options and edge cases](../../../reference/behavior/cookbooks/typed-report/).
+[Contracts, options and edge cases](../../behavior/cookbooks/typed-report/).
 
 To start again, use a new demonstration directory. Named branches retain commits; dirty worktrees remain available for recovery. Scripts do not push commits.

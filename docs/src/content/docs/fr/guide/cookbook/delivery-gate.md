@@ -325,6 +325,6 @@ node example.mts
 
 En cas de succès, le script affiche `{ integrated: true }` et fusionne les commits dans la branche courante du dépôt de démonstration. Un test en échec, une revue invalide ou négative, ou un worktree sale empêche l’intégration. Une revue d’agent n’est pas une approbation humaine. Aucune tâche ne répète un commit ou une fusion ; aucun push n’a lieu. Un conflit peut conserver le workspace pour récupération.
 
-[Contrats, options et cas particuliers](../../../reference/behavior/cookbooks/delivery-gate/).
+[Contrats, options et cas particuliers](../../behavior/cookbooks/delivery-gate/).
 
 Pour recommencer, utilisez un nouveau dossier de démonstration. Les branches nommées conservent les commits ; les worktrees sales restent disponibles pour récupération. Les scripts ne poussent aucun commit.

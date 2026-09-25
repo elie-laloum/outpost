@@ -6,7 +6,7 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "check": "node scripts/check-content.mjs",
+    "check": "node scripts/check-content.mjs && node --test scripts/reference-model.test.mjs",
     "test:build": "node scripts/check-build.mjs",
     "test:browser": "playwright test"
   },

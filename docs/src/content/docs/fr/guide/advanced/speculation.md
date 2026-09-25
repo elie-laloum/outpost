@@ -267,6 +267,6 @@ node example.mts
 
 Cet outil de recherche choisit le premier candidat validé qui termine son nettoyage. Il annule coopérativement les concurrents et attend le nettoyage. Examinez la branche gagnante avant fusion ; rien n’est intégré ni poussé automatiquement. Une course interrompue ne reprend pas durablement et l’usage observé ne garantit pas un plafond de facturation.
 
-[Contrats, options et cas particuliers](../../../reference/behavior/workflows/speculation/).
+[Contrats, options et cas particuliers](../../behavior/workflows/speculation/).
 
 Pour recommencer, utilisez un nouveau dossier de démonstration. Les branches nommées conservent les commits ; les worktrees sales restent disponibles pour récupération. Les scripts ne poussent aucun commit.

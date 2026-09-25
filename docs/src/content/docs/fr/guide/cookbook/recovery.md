@@ -130,6 +130,6 @@ node example.mts
 
 Le chemin du workspace reste récupérable car il contient du travail non commité. Examinez `unfinished.txt` et le statut Git au chemin affiché avant de décider de commiter ou relancer. Fermer la sandbox n’autorise pas à abandonner les changements. Les métadonnées identifient les ressources conservées ; elles ne les restaurent ni ne les intègrent automatiquement.
 
-[Contrats, options et cas particuliers](../../../reference/behavior/cookbooks/recovery/).
+[Contrats, options et cas particuliers](../../behavior/cookbooks/recovery/).
 
 Pour recommencer, utilisez un nouveau dossier de démonstration. Les branches nommées conservent les commits ; les worktrees sales restent disponibles pour récupération. Les scripts ne poussent aucun commit.

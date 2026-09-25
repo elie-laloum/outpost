@@ -290,6 +290,6 @@ node example.mts
 
 Consultez les sorties et les effets décrits avant le code.
 
-[Contrats, options et cas particuliers](../../../reference/behavior/cookbooks/pair-review/).
+[Contrats, options et cas particuliers](../../behavior/cookbooks/pair-review/).
 
 Pour recommencer, utilisez un nouveau dossier de démonstration. Les branches nommées conservent les commits ; les worktrees sales restent disponibles pour récupération. Les scripts ne poussent aucun commit.

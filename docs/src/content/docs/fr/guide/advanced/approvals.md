@@ -95,6 +95,6 @@ node example.mts
 
 Le script affiche `paused`, puis `done`. Lancez `node example.mts reject` pour voir le rejet empêcher la livraison. L’exemple fournit volontairement un acteur local de confiance ; son nom n’authentifie pas une personne. Dans une application, authentifiez l’appelant avant de soumettre sa décision. Un résultat en pause est attendu : examinez son statut avant `unwrap()`.
 
-[Contrats, options et cas particuliers](../../../reference/behavior/workflows/approvals/).
+[Contrats, options et cas particuliers](../../behavior/workflows/approvals/).
 
 Les fichiers persistants éventuels restent dans ce dossier de démonstration.

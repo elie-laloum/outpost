@@ -9,7 +9,7 @@ Outpost's next priority is reliable everyday execution: a successful first run, 
 
 ## Starting point
 
-The foundation includes reusable sandboxes, Git workspaces, agent adapters, typed workflows and recovery tools. The CLI, authentication setup and custom Responses providers are documented in the [setup guide](../../reference/manual/cli/). Use the [API reference](../../reference/) for implemented contracts and the changelog for released versions. An implementation or simulated test is not evidence of a successful live provider campaign.
+The foundation includes reusable sandboxes, Git workspaces, agent adapters, typed workflows and recovery tools. The CLI, authentication setup and custom Responses providers are documented in the [setup guide](../../guide/manual/cli/). Use the [API reference](../../reference/diagnosesandbox/) for implemented contracts and the changelog for released versions. An implementation or simulated test is not evidence of a successful live provider campaign.
 
 ## Near term: make execution dependable
 

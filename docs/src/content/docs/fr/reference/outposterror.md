@@ -5,8 +5,6 @@ sidebar:
   order: 10
 ---
 
-Contrat public de **OutpostError**. Consultez le [guide erreurs](../../guide/operations/recovery/) pour le comportement, les valeurs par défaut et des exemples.
-
 ## Import
 
 ```ts
@@ -15,23 +13,21 @@ import { OutpostError } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Identifier les codes d’échec et chemins de récupération avant reprise ou nettoyage.
-
-Un agent en échec lève une erreur ; une commande brute peut renvoyer un statut non nul. Préservez erreurs originales et artefacts de récupération lors du diagnostic ou de la reprise.
+Erreur munie d’un code stable et de détails structurés pour les échecs d’exécution, configuration et récupération. cause conserve l’échec initial et recovery peut identifier du travail conservé ; le nettoyage doit respecter ces emplacements.
 
 [Exemple complet et règles détaillées](../../guide/operations/recovery/).
 
 ## Paramètres et propriétés
 
-| Nom        | Type                                | Présence  | Rôle                                                                             |
-| ---------- | ----------------------------------- | --------- | -------------------------------------------------------------------------------- |
-| `recovery` | `Readonly<Record<string, unknown>>` | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `code`     | `FaultCode`                         | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `details`  | `Readonly<Record<string, unknown>>` | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `name`     | `string`                            | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `message`  | `string`                            | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `stack`    | `string \| undefined`               | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `cause`    | `unknown`                           | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
+| Nom        | Type                                | Présence  | Rôle                                                                                     |
+| ---------- | ----------------------------------- | --------- | ---------------------------------------------------------------------------------------- |
+| `recovery` | `Readonly<Record<string, unknown>>` | Requis    | Métadonnées décrivant le workspace et les artefacts de transfert conservés après échec.  |
+| `code`     | `FaultCode`                         | Requis    | Catégorie stable d’erreur Outpost utilisée pour le traitement programmatique des échecs. |
+| `details`  | `Readonly<Record<string, unknown>>` | Requis    | Données structurées de diagnostic attachées au code d’erreur.                            |
+| `name`     | `string`                            | Requis    | Nom de classe d’erreur permettant de distinguer cet échec des autres erreurs JavaScript. |
+| `message`  | `string`                            | Requis    | Explication lisible de l’échec.                                                          |
+| `stack`    | `string \| undefined`               | Optionnel | Trace de pile JavaScript de l’erreur lorsqu’elle est disponible.                         |
+| `cause`    | `unknown`                           | Optionnel | Échec d’origine attaché à cette erreur.                                                  |
 
 ## Signature
 

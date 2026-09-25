@@ -2,10 +2,8 @@
 title: "StorageReservation"
 description: "StorageReservation — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Public contract for **StorageReservation**. See the [storage reservations guide](../../guide/operations/storage-retention/) for behavior, defaults and examples.
 
 ## Import
 
@@ -13,22 +11,15 @@ Public contract for **StorageReservation**. See the [storage reservations guide]
 import type { StorageReservation } from "@elie-laloum/outpost";
 ```
 
-## Purpose and behavior
-
-Coordinate cooperating writers with explicit storage reservations.
-
-Reservations are admission coordination, not physical quotas. Their owner must release them; workspace ownership can bind their lifecycle.
-
-[Complete example and detailed rules](../../guide/operations/storage-retention/).
-
 ## Parameters and properties
 
-| Name           | Type                  | Presence | Meaning                                                                 |
-| -------------- | --------------------- | -------- | ----------------------------------------------------------------------- |
-| `id`           | `string`              | Required | See the linked contract and this family's rules for its interpretation. |
-| `repository`   | `string`              | Required | Target host Git checkout.                                               |
-| `reserveBytes` | `number`              | Required | See the linked contract and this family's rules for its interpretation. |
-| `release`      | `() => Promise<void>` | Required | See the linked contract and this family's rules for its interpretation. |
+| Name                    | Type                  | Presence | Meaning                                                                                               |
+| ----------------------- | --------------------- | -------- | ----------------------------------------------------------------------------------------------------- |
+| `id`                    | `string`              | Required | Unique identity of this coordinated storage reservation.                                              |
+| `repository`            | `string`              | Required | Target host Git checkout.                                                                             |
+| `reserveBytes`          | `number`              | Required | Additional bytes requested for admission alongside existing storage usage.                            |
+| `release`               | `() => Promise<void>` | Required | Release this coordinated reservation so other cooperating writers can reclaim its admission capacity. |
+| `[Symbol.asyncDispose]` | `() => Promise<void>` | Required | Close this resource through JavaScript asynchronous resource disposal.                                |
 
 ## Signature
 

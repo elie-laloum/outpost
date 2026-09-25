@@ -99,7 +99,7 @@ node example.mts
 
 The output is `/users`. The task output is a JSON reference while bytes live in the caller-owned artifact store. Reads check the contract and content integrity. Hashes and lineage do not authenticate producers. Retain objects as long as saved workflow results need them. Sandbox disposal does not delete this store.
 
-[Contracts, options and edge cases](../../../reference/behavior/workflows/artifacts/).
+[Contracts, options and edge cases](../../behavior/workflows/artifacts/).
 
 Any persisted example files remain inside this demonstration directory.
 

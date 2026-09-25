@@ -2,10 +2,8 @@
 title: "commandTask"
 description: "commandTask — Outpost API"
 sidebar:
-  order: 10
+  order: 0
 ---
-
-Public contract for **commandTask**. See the [workflows guide](../../guide/workflows/graph/) for behavior, defaults and examples.
 
 ## Import
 
@@ -15,25 +13,23 @@ import { commandTask } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Compose tasks with explicit dependency edges and typed result access.
-
-Duplicate keys, missing dependencies and cycles fail validation. Failed or skipped dependencies skip descendants. Retries can repeat external effects. Unwrap throws on a non-successful result.
+Define a workflow node that runs a command in an existing caller-owned sandbox. A command factory can read dependency values. A nonzero process status fails the task, allowing the workflow retry policy to apply; the sandbox remains caller-owned.
 
 [Complete example and detailed rules](../../guide/workflows/graph/).
 
 ## Parameters and properties
 
-| Name                | Type                                                                   | Presence | Meaning                                                                                  |
-| ------------------- | ---------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------- |
-| `options`           | `Omit<TaskOptions<CommandResult>, "perform"> & CommandTaskOptions`     | Required | Configuration object. Its fields are described in the associated options contract below. |
-| `options.after`     | `readonly Task<unknown>[] \| undefined`                                | Optional | Declared task dependencies whose values may be read.                                     |
-| `options.key`       | `string`                                                               | Required | Stable task or cache key within its owning contract.                                     |
-| `options.gate`      | `WorkflowGate \| undefined`                                            | Optional | See the linked contract and this family's rules for its interpretation.                  |
-| `options.condition` | `((context: TaskContext) => boolean \| Promise<boolean>) \| undefined` | Optional | Predicate evaluated before the first task attempt.                                       |
-| `options.retry`     | `Retry \| undefined`                                                   | Optional | Explicit retry policy; repeated effects require care.                                    |
-| `options.timeoutMs` | `number \| undefined`                                                  | Optional | Time limit in milliseconds for the owning operation.                                     |
-| `options.sandbox`   | `Sandbox`                                                              | Required | See the linked contract and this family's rules for its interpretation.                  |
-| `options.command`   | `Command \| ((context: TaskContext) => Command)`                       | Required | See the linked contract and this family's rules for its interpretation.                  |
+| Name                | Type                                                                   | Presence | Meaning                                                                                                  |
+| ------------------- | ---------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------- |
+| `options`           | `Omit<TaskOptions<CommandResult>, "perform"> & CommandTaskOptions`     | Required | Task scheduling settings, existing sandbox and command or command factory.                               |
+| `options.after`     | `readonly Task<unknown>[] \| undefined`                                | Optional | Declared task dependencies whose values may be read.                                                     |
+| `options.key`       | `string`                                                               | Required | Stable task key identifying the node within its workflow graph.                                          |
+| `options.gate`      | `WorkflowGate \| undefined`                                            | Optional | Persisted approval or pause definition; execution requires a checkpoint and a matching trusted decision. |
+| `options.condition` | `((context: TaskContext) => boolean \| Promise<boolean>) \| undefined` | Optional | Predicate evaluated before the first task attempt.                                                       |
+| `options.retry`     | `Retry \| undefined`                                                   | Optional | Explicit retry policy; repeated effects require care.                                                    |
+| `options.timeoutMs` | `number \| undefined`                                                  | Optional | Time limit in milliseconds for each task attempt; cancellation is cooperative through context.signal.    |
+| `options.sandbox`   | `Sandbox`                                                              | Required | Existing caller-owned sandbox reused by the task; the task does not close it.                            |
+| `options.command`   | `Command \| ((context: TaskContext) => Command)`                       | Required | Command to run, or factory that builds it from task dependency values.                                   |
 
 ## Returns
 
@@ -51,5 +47,5 @@ export declare function commandTask(
 
 - [CommandResult](../commandresult/)
 - [CommandTaskOptions](../support-commandtaskoptions/)
-- [Task](../task/)
+- [Task](../type-task/)
 - [TaskOptions](../taskoptions/)

@@ -254,6 +254,6 @@ node example.mts
 
 `dispatch` opens a workspace, starts the sandbox, runs the agent and closes the resources it owns. The named branch keeps committed changes without merging into `main`. From `repository/`, inspect `git diff main...workshop/fix` and `git log workshop/fix`. An agent process failure rejects; `completed: false` instead means no completion marker matched. Neither a marker nor a commit proves that tests passed.
 
-[Contracts, options and edge cases](../../../reference/behavior/agents/dispatch/).
+[Contracts, options and edge cases](../../behavior/agents/dispatch/).
 
 To start again, use a new demonstration directory. Named branches retain commits; dirty worktrees remain available for recovery. Scripts do not push commits.

@@ -261,6 +261,6 @@ node example.mts
 
 Two independent jobs can run together because each task owns its environment and named branch. `stopOnError: false` lets unrelated work finish; `unwrap()` still reports a failed workflow. Inspect task records before reading results that may not exist. There is no automatic merge of independent conclusions.
 
-[Contracts, options and edge cases](../../../reference/behavior/cookbooks/parallel/).
+[Contracts, options and edge cases](../../behavior/cookbooks/parallel/).
 
 To start again, use a new demonstration directory. Named branches retain commits; dirty worktrees remain available for recovery. Scripts do not push commits.

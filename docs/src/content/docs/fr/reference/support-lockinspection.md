@@ -5,24 +5,14 @@ sidebar:
   order: 20
 ---
 
-Contrat auxiliaire utilisé dans une signature publique. Il n’est pas exporté directement depuis le package ; utilisez l’inférence TypeScript ou le type public qui le référence.
-
-## Rôle et comportement
-
-Inspecter le travail conservé et planifier explicitement sa rétention sans abandonner les modifications récupérables.
-
-Planifier ne supprime rien. L’application reprend possession et revalide les candidats. Les quotas observent l’usage plutôt que d’imposer une limite physique au système de fichiers.
-
-[Exemple complet et règles détaillées](../../guide/operations/recovery/).
-
 ## Paramètres et propriétés
 
-| Nom        | Type                             | Présence | Rôle                                                                             |
-| ---------- | -------------------------------- | -------- | -------------------------------------------------------------------------------- |
-| `complete` | `boolean`                        | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `scope`    | `"local-pid"`                    | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `entries`  | `readonly LockInspectionEntry[]` | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `issues`   | `readonly StorageIssue[]`        | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
+| Nom        | Type                             | Présence | Rôle                                                                                                  |
+| ---------- | -------------------------------- | -------- | ----------------------------------------------------------------------------------------------------- |
+| `complete` | `boolean`                        | Requis   | Indique si toute l’inspection demandée s’est terminée sans limite de parcours ni entrée inaccessible. |
+| `scope`    | `"local-pid"`                    | Requis   | Toujours local-pid : les contrôles de possession utilisent l’identité de processus locale.            |
+| `entries`  | `readonly LockInspectionEntry[]` | Requis   | Fichiers de verrou inspectés et évaluations de possession locale.                                     |
+| `issues`   | `readonly StorageIssue[]`        | Requis   | Problèmes de fichiers, Git ou possession ayant empêché une inspection complète.                       |
 
 ## Signature
 

@@ -2,51 +2,41 @@
 title: "IsolatedTaskRequest"
 description: "IsolatedTaskRequest — Outpost API"
 sidebar:
-  order: 20
+  order: 10
 ---
-
-Supporting contract used by a public signature. It is not directly exported from the package; use TypeScript inference or the public type that references it.
-
-## Purpose and behavior
-
-Compose tasks with explicit dependency edges and typed result access.
-
-Duplicate keys, missing dependencies and cycles fail validation. Failed or skipped dependencies skip descendants. Retries can repeat external effects. Unwrap throws on a non-successful result.
-
-[Complete example and detailed rules](../../guide/workflows/graph/).
 
 ## Parameters and properties
 
-| Name                 | Type                                                             | Presence | Meaning                                                                        |
-| -------------------- | ---------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------ |
-| `includeUncommitted` | `boolean \| undefined`                                           | Optional | See the linked contract and this family's rules for its interpretation.        |
-| `agent`              | `AgentAdapter`                                                   | Optional | Native coding-agent adapter.                                                   |
-| `provider`           | `SandboxProvider \| undefined`                                   | Optional | Execution environment backend.                                                 |
-| `workspace`          | `Workspace \| undefined`                                         | Optional | Caller-owned Git workspace; excludes new repository/branch choices.            |
-| `hooks`              | `LifecycleHooks \| undefined`                                    | Optional | Lifecycle commands in declared execution order.                                |
-| `signal`             | `AbortSignal \| undefined`                                       | Optional | Cooperative cancellation for this operation.                                   |
-| `logging`            | `Logging \| undefined`                                           | Optional | See the linked contract and this family's rules for its interpretation.        |
-| `bootstrap`          | `boolean \| undefined`                                           | Optional | Whether to install a missing selected agent automatically.                     |
-| `conversationHome`   | `string \| undefined`                                            | Optional | Host home used for native transcript storage.                                  |
-| `storageQuota`       | `Omit<StorageReservationOptions, "signal"> \| undefined`         | Optional | See the linked contract and this family's rules for its interpretation.        |
-| `repository`         | `string \| undefined`                                            | Optional | Target host Git checkout.                                                      |
-| `branch`             | `BranchPolicy \| undefined`                                      | Optional | Git workspace policy or resulting branch identity, according to this contract. |
-| `copies`             | `readonly string[] \| undefined`                                 | Optional | Repository-relative inputs copied into the workspace.                          |
-| `limits`             | `StageLimits \| undefined`                                       | Optional | See the linked contract and this family's rules for its interpretation.        |
-| `label`              | `string \| undefined`                                            | Optional | See the linked contract and this family's rules for its interpretation.        |
-| `brief`              | `Brief`                                                          | Required | Literal text or file-based task input.                                         |
-| `passes`             | `number \| undefined`                                            | Optional | Maximum agent passes; one by default.                                          |
-| `until`              | `string \| readonly string[] \| undefined`                       | Optional | Completion marker or markers; an empty list disables matching.                 |
-| `idleMs`             | `number \| undefined`                                            | Optional | Maximum silent interval in milliseconds.                                       |
-| `idleWarningMs`      | `number \| undefined`                                            | Optional | See the linked contract and this family's rules for its interpretation.        |
-| `settleMs`           | `number \| undefined`                                            | Optional | See the linked contract and this family's rules for its interpretation.        |
-| `deadlineMs`         | `number \| undefined`                                            | Optional | Hard operation deadline in milliseconds.                                       |
-| `expansionMs`        | `number \| undefined`                                            | Optional | See the linked contract and this family's rules for its interpretation.        |
-| `continuation`       | `{ readonly id: string; readonly fork?: boolean; } \| undefined` | Optional | See the linked contract and this family's rules for its interpretation.        |
-| `response`           | `ResponseSpec<T> \| undefined`                                   | Optional | Parser and validator for the tagged agent answer.                              |
-| `observe`            | `((event: AgentObservation) => void) \| undefined`               | Optional | Notification callback; observer failures are isolated.                         |
-| `warn`               | `((message: string) => void) \| undefined`                       | Optional | See the linked contract and this family's rules for its interpretation.        |
-| `diagnostic`         | `((message: string) => void) \| undefined`                       | Optional | See the linked contract and this family's rules for its interpretation.        |
+| Name                 | Type                                                             | Presence | Meaning                                                                                               |
+| -------------------- | ---------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------- |
+| `includeUncommitted` | `boolean \| undefined`                                           | Optional | Include uncommitted host changes when preparing a remote repository snapshot.                         |
+| `agent`              | `AgentAdapter`                                                   | Optional | Native coding-agent adapter.                                                                          |
+| `provider`           | `SandboxProvider \| undefined`                                   | Optional | Execution environment backend.                                                                        |
+| `workspace`          | `Workspace \| undefined`                                         | Optional | Caller-owned Git workspace; excludes new repository/branch choices.                                   |
+| `hooks`              | `LifecycleHooks \| undefined`                                    | Optional | Lifecycle commands in declared execution order.                                                       |
+| `signal`             | `AbortSignal \| undefined`                                       | Optional | Cooperative cancellation for this operation.                                                          |
+| `logging`            | `Logging \| undefined`                                           | Optional | Configure the dispatch journal file and verbose event retention.                                      |
+| `bootstrap`          | `boolean \| undefined`                                           | Optional | Whether to install a missing selected agent automatically.                                            |
+| `conversationHome`   | `string \| undefined`                                            | Optional | Host home used for native transcript storage.                                                         |
+| `storageQuota`       | `Omit<StorageReservationOptions, "signal"> \| undefined`         | Optional | Admission limits and requested reservation for storage under the repository’s .outpost directory.     |
+| `repository`         | `string \| undefined`                                            | Optional | Target host Git checkout.                                                                             |
+| `branch`             | `BranchPolicy \| undefined`                                      | Optional | Select the current checkout, a retained named work branch or a branch prepared for integration.       |
+| `copies`             | `readonly string[] \| undefined`                                 | Optional | Repository-relative inputs copied into the workspace.                                                 |
+| `limits`             | `StageLimits \| undefined`                                       | Optional | Timeouts for copying, Git preparation, commit collection and integration, in milliseconds.            |
+| `label`              | `string \| undefined`                                            | Optional | Human-readable label used in execution reporting.                                                     |
+| `brief`              | `Brief`                                                          | Required | Literal text or file-based task input.                                                                |
+| `passes`             | `number \| undefined`                                            | Optional | Maximum agent passes; one by default.                                                                 |
+| `until`              | `string \| readonly string[] \| undefined`                       | Optional | Completion marker or markers; an empty list disables matching.                                        |
+| `idleMs`             | `number \| undefined`                                            | Optional | Maximum silent interval in milliseconds.                                                              |
+| `idleWarningMs`      | `number \| undefined`                                            | Optional | Silence interval in milliseconds before emitting an idle warning.                                     |
+| `settleMs`           | `number \| undefined`                                            | Optional | Grace period in milliseconds after completion detection before stopping a lingering agent process.    |
+| `deadlineMs`         | `number \| undefined`                                            | Optional | Maximum duration of each agent process in milliseconds; defaults to one hour.                         |
+| `expansionMs`        | `number \| undefined`                                            | Optional | Deadline in milliseconds for each original shell expansion in a file brief; defaults to 30000.        |
+| `continuation`       | `{ readonly id: string; readonly fork?: boolean; } \| undefined` | Optional | Native conversation ID to continue; fork requests a separate conversation derived from it.            |
+| `response`           | `ResponseSpec<T> \| undefined`                                   | Optional | Parser and validator for the tagged agent answer.                                                     |
+| `observe`            | `((event: AgentObservation) => void) \| undefined`               | Optional | Receive normalized agent observations with pass number and timestamp; observer failures are isolated. |
+| `warn`               | `((message: string) => void) \| undefined`                       | Optional | Callback receiving nonfatal execution or conversation-storage warnings.                               |
+| `diagnostic`         | `((message: string) => void) \| undefined`                       | Optional | Callback receiving execution diagnostic messages.                                                     |
 
 ## Signature
 

@@ -2,10 +2,8 @@
 title: "RecoveryInspection"
 description: "RecoveryInspection — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Contrat public de **RecoveryInspection**. Consultez le [guide activité des ressources](../../guide/operations/recovery/) pour le comportement, les valeurs par défaut et des exemples.
 
 ## Import
 
@@ -13,30 +11,22 @@ Contrat public de **RecoveryInspection**. Consultez le [guide activité des ress
 import type { RecoveryInspection } from "@elie-laloum/outpost";
 ```
 
-## Rôle et comportement
-
-Lire l’activité enregistrée localement des baux et opérations.
-
-Les observations locales n’énumèrent pas les comptes distants et ne constituent pas un inventaire cloud faisant autorité.
-
-[Exemple complet et règles détaillées](../../guide/operations/recovery/).
-
 ## Paramètres et propriétés
 
-| Nom              | Type                                  | Présence  | Rôle                                                                             |
-| ---------------- | ------------------------------------- | --------- | -------------------------------------------------------------------------------- |
-| `repository`     | `string`                              | Requis    | Checkout Git hôte ciblé.                                                         |
-| `activity`       | `"unverified"`                        | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `git`            | `WorkspaceGitInspection \| undefined` | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `locks`          | `LockInspection \| undefined`         | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `resources`      | `ResourceInspection \| undefined`     | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `root`           | `string`                              | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `categories`     | `readonly StorageCategory[]`          | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `usage`          | `Readonly<StorageUsage>`              | Requis    | Compteurs d’usage rapportés ; aucune estimation monétaire.                       |
-| `issues`         | `readonly StorageIssue[]`             | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `complete`       | `boolean`                             | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `scannedEntries` | `number`                              | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `maxEntries`     | `number`                              | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
+| Nom              | Type                                  | Présence  | Rôle                                                                                                      |
+| ---------------- | ------------------------------------- | --------- | --------------------------------------------------------------------------------------------------------- |
+| `repository`     | `string`                              | Requis    | Checkout Git hôte ciblé.                                                                                  |
+| `activity`       | `"unverified"`                        | Requis    | Toujours unverified : l’inventaire de fichiers seul ne prouve pas l’inactivité des ressources conservées. |
+| `git`            | `WorkspaceGitInspection \| undefined` | Optionnel | Rapport d’état Git des worktrees, présent lorsque l’inspection Git a été demandée.                        |
+| `locks`          | `LockInspection \| undefined`         | Optionnel | Rapport de possession locale des verrous, présent lorsque leur inspection a été demandée.                 |
+| `resources`      | `ResourceInspection \| undefined`     | Optionnel | Rapport d’activité locale des sandboxes, présent lorsque l’inspection des ressources a été demandée.      |
+| `root`           | `string`                              | Requis    | Dossier .outpost local au dépôt dont le stockage a été inspecté.                                          |
+| `categories`     | `readonly StorageCategory[]`          | Requis    | Stockage regroupé en récupération, journaux, verrous et workspaces.                                       |
+| `usage`          | `Readonly<StorageUsage>`              | Requis    | Octets de stockage observés et nombres de fichiers, dossiers, liens symboliques et autres entrées.        |
+| `issues`         | `readonly StorageIssue[]`             | Requis    | Problèmes de fichiers, Git ou possession ayant empêché une inspection complète.                           |
+| `complete`       | `boolean`                             | Requis    | Indique si toute l’inspection demandée s’est terminée sans limite de parcours ni entrée inaccessible.     |
+| `scannedEntries` | `number`                              | Requis    | Nombre d’entrées de fichiers visitées dans la limite d’inspection.                                        |
+| `maxEntries`     | `number`                              | Requis    | Nombre maximal d’entrées de fichiers inspectées avant de déclarer l’inventaire incomplet.                 |
 
 ## Signature
 

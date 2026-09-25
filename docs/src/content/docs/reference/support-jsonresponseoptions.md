@@ -2,18 +2,8 @@
 title: "JsonResponseOptions"
 description: "JsonResponseOptions — Outpost API"
 sidebar:
-  order: 20
+  order: 10
 ---
-
-Supporting contract used by a public signature. It is not directly exported from the package; use TypeScript inference or the public type that references it.
-
-## Purpose and behavior
-
-Supply a literal or file brief and validate a tagged model answer before exposing its typed value.
-
-Supply exactly one brief form. Expansion defaults to 30 seconds per original command. Response repairs default to zero. Structured responses require one pass.
-
-[Complete example and detailed rules](../../guide/agents/responses/).
 
 ## Parameters and properties
 

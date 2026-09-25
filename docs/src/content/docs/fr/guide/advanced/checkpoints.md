@@ -75,6 +75,6 @@ node example.mts
 
 La sortie contient `hello-world` et `replayed: 0`. Relancez le même fichier pour rouvrir le résultat dans un autre processus. Conservez l’identité du graphe et sa `version` ; utilisez un nouvel identifiant pour une exécution indépendante. Les sorties doivent être du JSON sans perte. Le travail interrompu exige une autorisation explicite de rejeu et peut déjà avoir produit des effets externes.
 
-[Contrats, options et cas particuliers](../../../reference/behavior/workflows/checkpoints/).
+[Contrats, options et cas particuliers](../../behavior/workflows/checkpoints/).
 
 Les fichiers persistants éventuels restent dans ce dossier de démonstration.

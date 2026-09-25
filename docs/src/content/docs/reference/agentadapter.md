@@ -2,10 +2,8 @@
 title: "AgentAdapter"
 description: "AgentAdapter — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Public contract for **AgentAdapter**. See the [agents guide](../../guide/agents/adapters/) for behavior, defaults and examples.
 
 ## Import
 
@@ -13,29 +11,21 @@ Public contract for **AgentAdapter**. See the [agents guide](../../guide/agents/
 import type { AgentAdapter } from "@elie-laloum/outpost";
 ```
 
-## Purpose and behavior
-
-Configure native Claude Code, Codex or Gemini behavior independently of the sandbox backend.
-
-The installed CLI chooses its model when omitted. Native conversation capture defaults on for Claude/Codex. Gemini supports fresh sessions only. Account and provider credentials are separate.
-
-[Complete example and detailed rules](../../guide/agents/adapters/).
-
 ## Parameters and properties
 
-| Name                    | Type                                                  | Presence | Meaning                                                                 |
-| ----------------------- | ----------------------------------------------------- | -------- | ----------------------------------------------------------------------- |
-| `name`                  | `string`                                              | Required | See the linked contract and this family's rules for its interpretation. |
-| `bootstrap`             | `string \| undefined`                                 | Optional | Whether to install a missing selected agent automatically.              |
-| `requiresFinishedEvent` | `boolean \| undefined`                                | Optional | See the linked contract and this family's rules for its interpretation. |
-| `variables`             | `Readonly<Record<string, string>> \| undefined`       | Optional | Explicit environment declarations; values are strings.                  |
-| `conversations`         | `"claude" \| "codex" \| undefined`                    | Optional | See the linked contract and this family's rules for its interpretation. |
-| `storage`               | `ConversationStore \| undefined`                      | Optional | See the linked contract and this family's rules for its interpretation. |
-| `capture`               | `boolean \| undefined`                                | Optional | See the linked contract and this family's rules for its interpretation. |
-| `resumable`             | `boolean \| undefined`                                | Optional | See the linked contract and this family's rules for its interpretation. |
-| `transcriptUsage`       | `((text: string) => Usage \| undefined) \| undefined` | Optional | See the linked contract and this family's rules for its interpretation. |
-| `request`               | `(input: AgentInput) => Command`                      | Required | See the linked contract and this family's rules for its interpretation. |
-| `events`                | `(line: string) => readonly AgentEvent[]`             | Required | See the linked contract and this family's rules for its interpretation. |
+| Name                    | Type                                                  | Presence | Meaning                                                                               |
+| ----------------------- | ----------------------------------------------------- | -------- | ------------------------------------------------------------------------------------- |
+| `name`                  | `string`                                              | Required | Native agent identifier used in execution events and diagnostics.                     |
+| `bootstrap`             | `string \| undefined`                                 | Optional | Shell recipe that installs the native CLI when bootstrapping is enabled.              |
+| `requiresFinishedEvent` | `boolean \| undefined`                                | Optional | Require the native finished protocol event before treating an agent turn as complete. |
+| `variables`             | `Readonly<Record<string, string>> \| undefined`       | Optional | Explicit environment declarations; values are strings.                                |
+| `conversations`         | `"codex" \| "claude" \| undefined`                    | Optional | Built-in native transcript format used when no custom storage is supplied.            |
+| `storage`               | `ConversationStore \| undefined`                      | Optional | Custom conversation persistence implementation for this adapter.                      |
+| `capture`               | `boolean \| undefined`                                | Optional | Whether the adapter enables native transcript capture.                                |
+| `resumable`             | `boolean \| undefined`                                | Optional | Whether the adapter supports native conversation continuation.                        |
+| `transcriptUsage`       | `((text: string) => Usage \| undefined) \| undefined` | Optional | Parse a native transcript to recover token usage when available.                      |
+| `request`               | `(input: AgentInput) => Command`                      | Required | Build the executable, arguments and environment for the supplied agent input.         |
+| `events`                | `(line: string) => readonly AgentEvent[]`             | Required | Decode one native CLI output line into normalized agent events.                       |
 
 ## Signature
 

@@ -2,10 +2,8 @@
 title: "restoreRecoveryTransfer"
 description: "restoreRecoveryTransfer — Outpost API"
 sidebar:
-  order: 10
+  order: 0
 ---
-
-Contrat public de **restoreRecoveryTransfer**. Consultez le [guide restauration de récupération](../../guide/operations/recovery-restoration/) pour le comportement, les valeurs par défaut et des exemples.
 
 ## Import
 
@@ -15,17 +13,15 @@ import { restoreRecoveryTransfer } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Planifier puis appliquer un transfert conservé vers une nouvelle destination à relire.
-
-Restaurez dans un nouveau dossier et examinez avant intégration. La vérification contrôle structure et intégrité enregistrées ; elle n’authentifie pas l’auteur.
+Revalide un plan de restauration et matérialise l’état conservé choisi dans sa nouvelle destination. Les artefacts sources restent disponibles et le résultat indique si l’index Git a pu être préservé. Examinez la destination avant intégration.
 
 [Exemple complet et règles détaillées](../../guide/operations/recovery-restoration/).
 
 ## Paramètres et propriétés
 
-| Nom    | Type                  | Présence | Rôle                                                                             |
-| ------ | --------------------- | -------- | -------------------------------------------------------------------------------- |
-| `plan` | `RecoveryRestorePlan` | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
+| Nom    | Type                  | Présence | Rôle                                                                                   |
+| ------ | --------------------- | -------- | -------------------------------------------------------------------------------------- |
+| `plan` | `RecoveryRestorePlan` | Requis   | Plan de restauration liant source, destination, état choisi et empreintes d’intégrité. |
 
 ## Retour
 

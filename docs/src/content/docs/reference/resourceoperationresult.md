@@ -2,10 +2,8 @@
 title: "ResourceOperationResult"
 description: "ResourceOperationResult — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Public contract for **ResourceOperationResult**. See the [resource activity guide](../../guide/operations/recovery/) for behavior, defaults and examples.
 
 ## Import
 
@@ -13,24 +11,16 @@ Public contract for **ResourceOperationResult**. See the [resource activity guid
 import type { ResourceOperationResult } from "@elie-laloum/outpost";
 ```
 
-## Purpose and behavior
-
-Read locally recorded lease and operation activity.
-
-Local observations do not enumerate remote accounts and are not an authoritative cloud inventory.
-
-[Complete example and detailed rules](../../guide/operations/recovery/).
-
 ## Parameters and properties
 
-| Name         | Type                                                                                                                                          | Presence | Meaning                                                                 |
-| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------- |
-| `id`         | `string`                                                                                                                                      | Required | See the linked contract and this family's rules for its interpretation. |
-| `finishedAt` | `string`                                                                                                                                      | Required | See the linked contract and this family's rules for its interpretation. |
-| `outcome`    | `"completed" \| "failed"`                                                                                                                     | Required | See the linked contract and this family's rules for its interpretation. |
-| `count`      | `number`                                                                                                                                      | Required | See the linked contract and this family's rules for its interpretation. |
-| `kind`       | `"command" \| "dispatch" \| "attach" \| "diagnose" \| "invoke" \| "upload" \| "download" \| "manifest" \| "download-batch" \| "upload-batch"` | Required | See the linked contract and this family's rules for its interpretation. |
-| `startedAt`  | `string`                                                                                                                                      | Required | See the linked contract and this family's rules for its interpretation. |
+| Name         | Type                                                                                                                                          | Presence | Meaning                                                          |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ---------------------------------------------------------------- |
+| `id`         | `string`                                                                                                                                      | Required | Recorded identifier of the completed resource operation.         |
+| `finishedAt` | `string`                                                                                                                                      | Required | ISO timestamp when execution of this task or operation finished. |
+| `outcome`    | `"completed" \| "failed"`                                                                                                                     | Required | Whether the recorded operation completed or failed.              |
+| `count`      | `number`                                                                                                                                      | Required | Monotonically increasing local operation sequence number.        |
+| `kind`       | `"command" \| "dispatch" \| "attach" \| "diagnose" \| "invoke" \| "upload" \| "download" \| "manifest" \| "download-batch" \| "upload-batch"` | Required | Operation category recorded for sandbox activity tracking.       |
+| `startedAt`  | `string`                                                                                                                                      | Required | ISO timestamp when execution of this task or operation started.  |
 
 ## Signature
 

@@ -2,10 +2,8 @@
 title: "TaskRecord"
 description: "TaskRecord — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Public contract for **TaskRecord**. See the [workflows guide](../../guide/workflows/graph/) for behavior, defaults and examples.
 
 ## Import
 
@@ -13,27 +11,19 @@ Public contract for **TaskRecord**. See the [workflows guide](../../guide/workfl
 import type { TaskRecord } from "@elie-laloum/outpost";
 ```
 
-## Purpose and behavior
-
-Compose tasks with explicit dependency edges and typed result access.
-
-Duplicate keys, missing dependencies and cycles fail validation. Failed or skipped dependencies skip descendants. Retries can repeat external effects. Unwrap throws on a non-successful result.
-
-[Complete example and detailed rules](../../guide/workflows/graph/).
-
 ## Parameters and properties
 
-| Name            | Type                                  | Presence | Meaning                                                                 |
-| --------------- | ------------------------------------- | -------- | ----------------------------------------------------------------------- |
-| `usageReceipts` | `readonly string[] \| undefined`      | Optional | See the linked contract and this family's rules for its interpretation. |
-| `pause`         | `WorkflowPauseRequest \| undefined`   | Optional | See the linked contract and this family's rules for its interpretation. |
-| `decision`      | `WorkflowDecisionRecord \| undefined` | Optional | See the linked contract and this family's rules for its interpretation. |
-| `key`           | `string`                              | Required | Stable task or cache key within its owning contract.                    |
-| `status`        | `TaskStatus`                          | Required | Recorded process or lifecycle outcome; inspect its declared type.       |
-| `attempts`      | `number`                              | Required | Attempt count or admission limit, according to the owning contract.     |
-| `startedAt`     | `string \| undefined`                 | Optional | See the linked contract and this family's rules for its interpretation. |
-| `finishedAt`    | `string \| undefined`                 | Optional | See the linked contract and this family's rules for its interpretation. |
-| `error`         | `string \| undefined`                 | Optional | See the linked contract and this family's rules for its interpretation. |
+| Name            | Type                                  | Presence | Meaning                                                                                               |
+| --------------- | ------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------- |
+| `usageReceipts` | `readonly string[] \| undefined`      | Optional | Persisted receipt IDs that prevent repeated accounting of the same usage report.                      |
+| `pause`         | `WorkflowPauseRequest \| undefined`   | Optional | Persisted pending gate request, including its unique ID and authorized actors.                        |
+| `decision`      | `WorkflowDecisionRecord \| undefined` | Optional | Validated decision recorded for the task’s gate.                                                      |
+| `key`           | `string`                              | Required | Stable task key identifying the node within its workflow graph.                                       |
+| `status`        | `TaskStatus`                          | Required | Task lifecycle state, including waiting, active, done, failure, cancellation or gate pause/rejection. |
+| `attempts`      | `number`                              | Required | Number of attempts actually started for this task.                                                    |
+| `startedAt`     | `string \| undefined`                 | Optional | ISO timestamp when execution of this task or operation started.                                       |
+| `finishedAt`    | `string \| undefined`                 | Optional | ISO timestamp when execution of this task or operation finished.                                      |
+| `error`         | `string \| undefined`                 | Optional | Recorded failure message for the task, when present.                                                  |
 
 ## Signature
 

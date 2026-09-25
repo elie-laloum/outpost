@@ -5,8 +5,6 @@ sidebar:
   order: 10
 ---
 
-Public contract for **WorkflowFailure**. See the [workflows guide](../../guide/workflows/graph/) for behavior, defaults and examples.
-
 ## Import
 
 ```ts
@@ -15,21 +13,19 @@ import { WorkflowFailure } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Compose tasks with explicit dependency edges and typed result access.
-
-Duplicate keys, missing dependencies and cycles fail validation. Failed or skipped dependencies skip descendants. Retries can repeat external effects. Unwrap throws on a non-successful result.
+Error thrown by WorkflowResult.unwrap when the run did not finish successfully. Its result preserves task records, errors and usage for inspection rather than discarding the workflow outcome.
 
 [Complete example and detailed rules](../../guide/workflows/graph/).
 
 ## Parameters and properties
 
-| Name      | Type                  | Presence | Meaning                                                                 |
-| --------- | --------------------- | -------- | ----------------------------------------------------------------------- |
-| `result`  | `WorkflowResult`      | Required | See the linked contract and this family's rules for its interpretation. |
-| `name`    | `string`              | Required | See the linked contract and this family's rules for its interpretation. |
-| `message` | `string`              | Required | See the linked contract and this family's rules for its interpretation. |
-| `stack`   | `string \| undefined` | Optional | See the linked contract and this family's rules for its interpretation. |
-| `cause`   | `unknown`             | Optional | See the linked contract and this family's rules for its interpretation. |
+| Name      | Type                  | Presence | Meaning                                                                              |
+| --------- | --------------------- | -------- | ------------------------------------------------------------------------------------ |
+| `result`  | `WorkflowResult`      | Required | Complete unsuccessful workflow result retained for task, error and usage inspection. |
+| `name`    | `string`              | Required | Error class name used to distinguish this failure from other JavaScript errors.      |
+| `message` | `string`              | Required | Human-readable explanation of the failure.                                           |
+| `stack`   | `string \| undefined` | Optional | JavaScript stack trace for the error, when available.                                |
+| `cause`   | `unknown`             | Optional | Original failure attached to this error.                                             |
 
 ## Signature
 

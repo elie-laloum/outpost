@@ -114,6 +114,6 @@ node example.mts
 
 Cet exercice de conteneur local vérifie le transfert réel via l’environnement d’exécution, pas seulement un aller-retour upload/download. La synchronisation Git cloud télécharge, valide et sauvegarde en plus les changements entrants avant application sur l’hôte. Une modification hôte concurrente arrête la synchronisation et conserve les données récupérables. Copier un transcript, transférer des octets et intégrer l’historique Git sont des opérations distinctes.
 
-[Contrats, options et cas particuliers](../../../reference/behavior/operations/remote-transfers/).
+[Contrats, options et cas particuliers](../../behavior/operations/remote-transfers/).
 
 Pour recommencer, utilisez un nouveau dossier de démonstration. Les branches nommées conservent les commits ; les worktrees sales restent disponibles pour récupération. Les scripts ne poussent aucun commit.

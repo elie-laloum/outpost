@@ -101,6 +101,6 @@ node example.mts
 
 Check the output and effects described before the code.
 
-[Contracts, options and edge cases](../../../reference/behavior/operations/telemetry/).
+[Contracts, options and edge cases](../../behavior/operations/telemetry/).
 
 Any persisted example files remain inside this demonstration directory.

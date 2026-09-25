@@ -2,10 +2,8 @@
 title: "diagnoseSandbox"
 description: "diagnoseSandbox — Outpost API"
 sidebar:
-  order: 10
+  order: 0
 ---
-
-Contrat public de **diagnoseSandbox**. Consultez le [guide diagnostics](../../guide/operations/doctor/) pour le comportement, les valeurs par défaut et des exemples.
 
 ## Import
 
@@ -15,23 +13,21 @@ import { diagnoseSandbox } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Inspecter les prérequis hôtes, une sandbox possédée ou les fixtures de protocole. Les diagnostics sont des observations ; ils ne prouvent pas l’accès au compte ou au modèle.
-
-Les contrôles distinguent capacités absentes, en échec et non prises en charge. Le diagnostic de sandbox utilise son verrou d’opération et ne devient pas propriétaire de sa fermeture.
+Sonde un Sandbox ou SandboxLease appartenant à l’appelant pour vérifier commandes, CLI d’agent et transferts optionnels. Un Sandbox utilise son verrou d’opération ; la fonction rapporte les échecs sans fermer la ressource ni appeler de modèle réel.
 
 [Exemple complet et règles détaillées](../../guide/operations/doctor/).
 
 ## Paramètres et propriétés
 
-| Nom                  | Type                                                        | Présence  | Rôle                                                                                          |
-| -------------------- | ----------------------------------------------------------- | --------- | --------------------------------------------------------------------------------------------- |
-| `target`             | `SandboxLease \| Sandbox`                                   | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation.              |
-| `options`            | `SandboxDiagnosticOptions \| undefined`                     | Optionnel | Objet de configuration. Ses champs sont décrits dans le contrat d’options associé ci-dessous. |
-| `options.agent`      | `DoctorAgent \| undefined`                                  | Optionnel | Adapter natif de l’agent de code.                                                             |
-| `options.deadlineMs` | `number \| undefined`                                       | Optionnel | Échéance absolue de l’opération en millisecondes.                                             |
-| `options.signal`     | `AbortSignal \| undefined`                                  | Optionnel | Annulation coopérative de cette opération.                                                    |
-| `options.transfers`  | `boolean \| undefined`                                      | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation.              |
-| `options.provider`   | `Pick<SandboxProvider, "name" \| "placement"> \| undefined` | Optionnel | Backend de l’environnement d’exécution.                                                       |
+| Nom                  | Type                                                        | Présence  | Rôle                                                                                                 |
+| -------------------- | ----------------------------------------------------------- | --------- | ---------------------------------------------------------------------------------------------------- |
+| `target`             | `SandboxLease \| Sandbox`                                   | Requis    | Sandbox ou SandboxLease appartenant à l’appelant à sonder sans devenir propriétaire de sa fermeture. |
+| `options`            | `SandboxDiagnosticOptions \| undefined`                     | Optionnel | Métadonnées d’agent et provider, sondes de transfert, annulation et délai par sonde.                 |
+| `options.agent`      | `DoctorAgent \| undefined`                                  | Optionnel | Identifiant du CLI d’agent à rapporter ou diagnostiquer : claude, codex ou gemini.                   |
+| `options.deadlineMs` | `number \| undefined`                                       | Optionnel | Durée maximale de chaque sonde de diagnostic en millisecondes.                                       |
+| `options.signal`     | `AbortSignal \| undefined`                                  | Optionnel | Annulation coopérative de cette opération.                                                           |
+| `options.transfers`  | `boolean \| undefined`                                      | Optionnel | Active des sondes temporaires d’envoi et téléchargement pendant le diagnostic de sandbox.            |
+| `options.provider`   | `Pick<SandboxProvider, "name" \| "placement"> \| undefined` | Optionnel | Nom et placement du provider utilisés pour interpréter le rapport de diagnostic.                     |
 
 ## Retour
 

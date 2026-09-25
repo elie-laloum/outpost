@@ -2,10 +2,8 @@
 title: "RecoveryInspectionOptions"
 description: "RecoveryInspectionOptions — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Contrat public de **RecoveryInspectionOptions**. Consultez le [guide activité des ressources](../../guide/operations/recovery/) pour le comportement, les valeurs par défaut et des exemples.
 
 ## Import
 
@@ -13,23 +11,15 @@ Contrat public de **RecoveryInspectionOptions**. Consultez le [guide activité d
 import type { RecoveryInspectionOptions } from "@elie-laloum/outpost";
 ```
 
-## Rôle et comportement
-
-Lire l’activité enregistrée localement des baux et opérations.
-
-Les observations locales n’énumèrent pas les comptes distants et ne constituent pas un inventaire cloud faisant autorité.
-
-[Exemple complet et règles détaillées](../../guide/operations/recovery/).
-
 ## Paramètres et propriétés
 
-| Nom          | Type                   | Présence  | Rôle                                                                             |
-| ------------ | ---------------------- | --------- | -------------------------------------------------------------------------------- |
-| `repository` | `string \| undefined`  | Optionnel | Checkout Git hôte ciblé.                                                         |
-| `maxEntries` | `number \| undefined`  | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `git`        | `boolean \| undefined` | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `locks`      | `boolean \| undefined` | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `resources`  | `boolean \| undefined` | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
+| Nom          | Type                   | Présence  | Rôle                                                                                                 |
+| ------------ | ---------------------- | --------- | ---------------------------------------------------------------------------------------------------- |
+| `repository` | `string \| undefined`  | Optionnel | Checkout Git hôte ciblé.                                                                             |
+| `maxEntries` | `number \| undefined`  | Optionnel | Nombre maximal d’entrées de fichiers inspectées avant de déclarer l’inventaire incomplet.            |
+| `git`        | `boolean \| undefined` | Optionnel | Inclut l’état Git des worktrees et les contrôles de modifications et verrouillage dans l’inventaire. |
+| `locks`      | `boolean \| undefined` | Optionnel | Inclut l’inspection des fichiers de verrou locaux et de leur possession par les processus.           |
+| `resources`  | `boolean \| undefined` | Optionnel | Inclut les baux de sandbox et opérations actives enregistrés localement.                             |
 
 ## Signature
 

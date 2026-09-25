@@ -5,30 +5,20 @@ sidebar:
   order: 20
 ---
 
-Contrat auxiliaire utilisé dans une signature publique. Il n’est pas exporté directement depuis le package ; utilisez l’inférence TypeScript ou le type public qui le référence.
-
-## Rôle et comportement
-
-Inspecter le travail conservé et planifier explicitement sa rétention sans abandonner les modifications récupérables.
-
-Planifier ne supprime rien. L’application reprend possession et revalide les candidats. Les quotas observent l’usage plutôt que d’imposer une limite physique au système de fichiers.
-
-[Exemple complet et règles détaillées](../../guide/operations/recovery/).
-
 ## Paramètres et propriétés
 
-| Nom           | Type                  | Présence  | Rôle                                                                             |
-| ------------- | --------------------- | --------- | -------------------------------------------------------------------------------- |
-| `name`        | `string`              | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `path`        | `string`              | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `kind`        | `StorageEntryKind`    | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `modifiedAt`  | `string \| undefined` | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `complete`    | `boolean`             | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `bytes`       | `number`              | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `files`       | `number`              | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `directories` | `number`              | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `symlinks`    | `number`              | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `other`       | `number`              | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
+| Nom           | Type                  | Présence  | Rôle                                                                                                  |
+| ------------- | --------------------- | --------- | ----------------------------------------------------------------------------------------------------- |
+| `name`        | `string`              | Requis    | Nom de fichier de l’entrée de stockage inspectée.                                                     |
+| `path`        | `string`              | Requis    | Chemin hôte de l’entrée de stockage inspectée.                                                        |
+| `kind`        | `StorageEntryKind`    | Requis    | Type d’entrée de fichiers observé sans suivre les liens symboliques.                                  |
+| `modifiedAt`  | `string \| undefined` | Optionnel | Horodatage ISO de la dernière modification de l’entrée inspectée.                                     |
+| `complete`    | `boolean`             | Requis    | Indique si toute l’inspection demandée s’est terminée sans limite de parcours ni entrée inaccessible. |
+| `bytes`       | `number`              | Requis    | Taille observée en octets de cette entrée, y compris ses enfants parcourus.                           |
+| `files`       | `number`              | Requis    | Nombre de fichiers ordinaires comptés dans le stockage parcouru.                                      |
+| `directories` | `number`              | Requis    | Nombre de dossiers comptés dans le stockage parcouru.                                                 |
+| `symlinks`    | `number`              | Requis    | Nombre de liens symboliques comptés sans parcourir leurs cibles.                                      |
+| `other`       | `number`              | Requis    | Nombre d’entrées qui ne sont ni fichiers ordinaires, ni dossiers, ni liens symboliques.               |
 
 ## Signature
 

@@ -123,6 +123,6 @@ node example.mts
 
 Le test des espaces échoue et `status` est non nul. Une commande renvoie son code de sortie ; elle ne lève pas une exception simplement parce que le processus a échoué. `agentTask` et `commandTask` ont leurs propres contrats d’échec. Vérifiez toujours le statut avant une intégration. Les arguments sont transmis directement, sans expansion shell implicite.
 
-[Contrats, options et cas particuliers](../../../reference/behavior/sandboxes/commands/).
+[Contrats, options et cas particuliers](../../behavior/sandboxes/commands/).
 
 Pour recommencer, utilisez un nouveau dossier de démonstration. Les branches nommées conservent les commits ; les worktrees sales restent disponibles pour récupération. Les scripts ne poussent aucun commit.

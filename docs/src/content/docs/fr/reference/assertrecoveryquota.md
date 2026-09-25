@@ -2,10 +2,8 @@
 title: "assertRecoveryQuota"
 description: "assertRecoveryQuota — Outpost API"
 sidebar:
-  order: 10
+  order: 0
 ---
-
-Contrat public de **assertRecoveryQuota**. Consultez le [guide récupération et rétention](../../guide/operations/recovery/) pour le comportement, les valeurs par défaut et des exemples.
 
 ## Import
 
@@ -15,21 +13,19 @@ import { assertRecoveryQuota } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Inspecter le travail conservé et planifier explicitement sa rétention sans abandonner les modifications récupérables.
-
-Planifier ne supprime rien. L’application reprend possession et revalide les candidats. Les quotas observent l’usage plutôt que d’imposer une limite physique au système de fichiers.
+Inspecte le stockage de récupération et échoue si les octets observés plus la réservation demandée dépassent maxBytes, ou si l’inspection ne permet pas de décider. Ce contrôle ne réserve pas d’espace et n’impose pas de quota physique ; reserveRecoveryStorage coordonne les écrivains coopératifs.
 
 [Exemple complet et règles détaillées](../../guide/operations/recovery/).
 
 ## Paramètres et propriétés
 
-| Nom                    | Type                   | Présence  | Rôle                                                                                          |
-| ---------------------- | ---------------------- | --------- | --------------------------------------------------------------------------------------------- |
-| `options`              | `RecoveryQuotaOptions` | Requis    | Objet de configuration. Ses champs sont décrits dans le contrat d’options associé ci-dessous. |
-| `options.repository`   | `string \| undefined`  | Optionnel | Checkout Git hôte ciblé.                                                                      |
-| `options.maxBytes`     | `number`               | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation.              |
-| `options.reserveBytes` | `number \| undefined`  | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation.              |
-| `options.maxEntries`   | `number \| undefined`  | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation.              |
+| Nom                    | Type                   | Présence  | Rôle                                                                                      |
+| ---------------------- | ---------------------- | --------- | ----------------------------------------------------------------------------------------- |
+| `options`              | `RecoveryQuotaOptions` | Requis    | Dépôt, octets admis maximaux, octets supplémentaires demandés et limite d’inspection.     |
+| `options.repository`   | `string \| undefined`  | Optionnel | Checkout Git hôte ciblé.                                                                  |
+| `options.maxBytes`     | `number`               | Requis    | Total maximal admis du stockage observé et des réservations actives, en octets.           |
+| `options.reserveBytes` | `number \| undefined`  | Optionnel | Octets supplémentaires demandés à l’admission en plus du stockage déjà utilisé.           |
+| `options.maxEntries`   | `number \| undefined`  | Optionnel | Nombre maximal d’entrées de fichiers inspectées avant de déclarer l’inventaire incomplet. |
 
 ## Retour
 

@@ -252,6 +252,6 @@ node example.mts
 
 A completion marker ends iteration early. Reaching the pass limit without one returns `completed: false`. Top-level dispatch starts a fresh sandbox each pass; a warm sandbox reuses its environment. A marker expresses the agent’s claim, so still inspect the changes and test status. Structured responses and native continuations require a single pass.
 
-[Contracts, options and edge cases](../../../reference/behavior/agents/iteration/).
+[Contracts, options and edge cases](../../behavior/agents/iteration/).
 
 To start again, use a new demonstration directory. Named branches retain commits; dirty worktrees remain available for recovery. Scripts do not push commits.

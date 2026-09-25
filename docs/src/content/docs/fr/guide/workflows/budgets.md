@@ -63,6 +63,6 @@ node example.mts
 
 La sortie est `failed 1` : la première tâche termine, mais la seconde ne peut pas démarrer. Les budgets comptent les exécutions de tâches, reprises incluses, pas chaque tour modèle interne. Les limites de tokens utilisent les observations et peuvent être dépassées par du travail concurrent. Ce ne sont pas des plafonds de facturation garantis.
 
-[Contrats, options et cas particuliers](../../../reference/behavior/workflows/budgets/).
+[Contrats, options et cas particuliers](../../behavior/workflows/budgets/).
 
 Les fichiers persistants éventuels restent dans ce dossier de démonstration.

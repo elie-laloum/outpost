@@ -2,10 +2,8 @@
 title: "RecoveryRetentionPolicy"
 description: "RecoveryRetentionPolicy — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Contrat public de **RecoveryRetentionPolicy**. Consultez le [guide récupération et rétention](../../guide/operations/recovery/) pour le comportement, les valeurs par défaut et des exemples.
 
 ## Import
 
@@ -13,23 +11,15 @@ Contrat public de **RecoveryRetentionPolicy**. Consultez le [guide récupératio
 import type { RecoveryRetentionPolicy } from "@elie-laloum/outpost";
 ```
 
-## Rôle et comportement
-
-Inspecter le travail conservé et planifier explicitement sa rétention sans abandonner les modifications récupérables.
-
-Planifier ne supprime rien. L’application reprend possession et revalide les candidats. Les quotas observent l’usage plutôt que d’imposer une limite physique au système de fichiers.
-
-[Exemple complet et règles détaillées](../../guide/operations/recovery/).
-
 ## Paramètres et propriétés
 
-| Nom             | Type                                               | Présence  | Rôle                                                                             |
-| --------------- | -------------------------------------------------- | --------- | -------------------------------------------------------------------------------- |
-| `version`       | `1`                                                | Requis    | Version de contrat ou graphe contrôlée par l’appelant.                           |
-| `scopes`        | `readonly ("clean-workspaces" \| "closed-logs")[]` | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `minAgeMs`      | `number`                                           | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `maxBytes`      | `number \| undefined`                              | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `maxWorkspaces` | `number \| undefined`                              | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
+| Nom             | Type                                               | Présence  | Rôle                                                                                                         |
+| --------------- | -------------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------ |
+| `version`       | `1`                                                | Requis    | Version de ce format d’enregistrement sérialisé ; actuellement 1.                                            |
+| `scopes`        | `readonly ("clean-workspaces" \| "closed-logs")[]` | Requis    | Classes de stockage éligibles au nettoyage : workspaces propres et/ou journaux fermés.                       |
+| `minAgeMs`      | `number`                                           | Requis    | Âge minimal en millisecondes pour qu’un candidat à la rétention soit éligible.                               |
+| `maxBytes`      | `number \| undefined`                              | Optionnel | Taille maximale cible du stockage conservé en octets ; seules les entrées éligibles peuvent être supprimées. |
+| `maxWorkspaces` | `number \| undefined`                              | Optionnel | Nombre maximal cible de workspaces conservés ; les entrées risquées restent protégées.                       |
 
 ## Signature
 

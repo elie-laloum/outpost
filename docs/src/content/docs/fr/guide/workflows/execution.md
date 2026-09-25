@@ -67,6 +67,6 @@ node example.mts
 
 La validation échoue et la livraison est ignorée. Le résultat conserve les états des tâches et les erreurs originales ; `unwrap()` transforme un non-succès en `WorkflowFailure`. Une reprise répète les effets de la tâche : configurez-la uniquement lorsque vous maîtrisez sa répétition. Utilisez des dépendances pour les ressources partagées et des sandboxes indépendantes pour les agents parallèles.
 
-[Contrats, options et cas particuliers](../../../reference/behavior/workflows/execution/).
+[Contrats, options et cas particuliers](../../behavior/workflows/execution/).
 
 Les fichiers persistants éventuels restent dans ce dossier de démonstration.

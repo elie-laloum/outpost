@@ -2,10 +2,8 @@
 title: "recoveryDetails"
 description: "recoveryDetails — Outpost API"
 sidebar:
-  order: 10
+  order: 0
 ---
-
-Public contract for **recoveryDetails**. See the [errors guide](../../guide/operations/recovery/) for behavior, defaults and examples.
 
 ## Import
 
@@ -15,17 +13,15 @@ import { recoveryDetails } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Identify failure codes and available recovery paths before retrying or cleaning up.
-
-A failed agent throws; a raw command can return a nonzero status. Preserve original errors and recovery artifacts when reporting or retrying.
+Extract recovery metadata from an unknown error when Outpost attached it. The result identifies retained work and recovery locations; absent metadata returns undefined and does not trigger cleanup or restoration.
 
 [Complete example and detailed rules](../../guide/operations/recovery/).
 
 ## Parameters and properties
 
-| Name    | Type      | Presence | Meaning                                                                 |
-| ------- | --------- | -------- | ----------------------------------------------------------------------- |
-| `error` | `unknown` | Required | See the linked contract and this family's rules for its interpretation. |
+| Name    | Type      | Presence | Meaning                                                               |
+| ------- | --------- | -------- | --------------------------------------------------------------------- |
+| `error` | `unknown` | Required | Unknown thrown value from which to extract Outpost recovery metadata. |
 
 ## Returns
 

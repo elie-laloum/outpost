@@ -2,10 +2,8 @@
 title: "assertRecoveryQuota"
 description: "assertRecoveryQuota — Outpost API"
 sidebar:
-  order: 10
+  order: 0
 ---
-
-Public contract for **assertRecoveryQuota**. See the [recovery and retention guide](../../guide/operations/recovery/) for behavior, defaults and examples.
 
 ## Import
 
@@ -15,21 +13,19 @@ import { assertRecoveryQuota } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Inspect retained work and plan explicit storage retention without discarding recoverable edits.
-
-Planning does not prune. Application reacquires ownership and revalidates candidates. Quota checks observe usage rather than imposing physical filesystem limits.
+Inspect recovery storage and reject if observed bytes plus the requested reservation exceed maxBytes, or if inspection cannot establish admission. This check does not reserve space or impose a filesystem quota; reserveRecoveryStorage coordinates cooperating writers.
 
 [Complete example and detailed rules](../../guide/operations/recovery/).
 
 ## Parameters and properties
 
-| Name                   | Type                   | Presence | Meaning                                                                                  |
-| ---------------------- | ---------------------- | -------- | ---------------------------------------------------------------------------------------- |
-| `options`              | `RecoveryQuotaOptions` | Required | Configuration object. Its fields are described in the associated options contract below. |
-| `options.repository`   | `string \| undefined`  | Optional | Target host Git checkout.                                                                |
-| `options.maxBytes`     | `number`               | Required | See the linked contract and this family's rules for its interpretation.                  |
-| `options.reserveBytes` | `number \| undefined`  | Optional | See the linked contract and this family's rules for its interpretation.                  |
-| `options.maxEntries`   | `number \| undefined`  | Optional | See the linked contract and this family's rules for its interpretation.                  |
+| Name                   | Type                   | Presence | Meaning                                                                              |
+| ---------------------- | ---------------------- | -------- | ------------------------------------------------------------------------------------ |
+| `options`              | `RecoveryQuotaOptions` | Required | Repository, maximum admitted bytes, additional requested bytes and inspection bound. |
+| `options.repository`   | `string \| undefined`  | Optional | Target host Git checkout.                                                            |
+| `options.maxBytes`     | `number`               | Required | Maximum admitted total of observed storage and active reservations, in bytes.        |
+| `options.reserveBytes` | `number \| undefined`  | Optional | Additional bytes requested for admission alongside existing storage usage.           |
+| `options.maxEntries`   | `number \| undefined`  | Optional | Maximum filesystem entries inspected before marking the inventory incomplete.        |
 
 ## Returns
 

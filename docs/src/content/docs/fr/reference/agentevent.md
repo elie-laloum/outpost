@@ -5,27 +5,31 @@ sidebar:
   order: 10
 ---
 
-Contrat public de **AgentEvent**. Consultez le [guide observabilité](../../guide/agents/observability/) pour le comportement, les valeurs par défaut et des exemples.
-
 ## Import
 
 ```ts
 import type { AgentEvent } from "@elie-laloum/outpost";
 ```
 
-## Rôle et comportement
-
-Observer la progression, journaliser l’exécution et comptabiliser l’usage rapporté sans changer les résultats.
-
-Les échecs d’observateurs sont isolés. Les tokens ne sont pas des prix. Le point d’entrée OpenTelemetry optionnel charge son API séparément des imports du cœur.
-
-[Exemple complet et règles détaillées](../../guide/agents/observability/).
-
 ## Paramètres et propriétés
 
-| Nom    | Type                                                                                                                                             | Présence | Rôle                                                                             |
-| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------ | -------- | -------------------------------------------------------------------------------- |
-| `kind` | `"phase" \| "summary" \| "warning" \| "text" \| "result" \| "prompt" \| "tool" \| "conversation" \| "usage" \| "failure" \| "finished" \| "raw"` | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
+Les champs ci-dessous couvrent toutes les variantes ; la signature précise leurs combinaisons autorisées.
+
+| Nom          | Type                                                                                                                                             | Présence          | Rôle                                                                                                                                                        |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `kind`       | `"phase" \| "summary" \| "warning" \| "text" \| "result" \| "prompt" \| "tool" \| "conversation" \| "usage" \| "failure" \| "finished" \| "raw"` | Requis            | Discriminant sélectionnant les données de l’événement : phase, summary, warning, text, result, prompt, tool, conversation, usage, failure, finished ou raw. |
+| `name`       | `string`                                                                                                                                         | Selon la variante | Nom de phase pour les événements phase ou nom d’outil pour les événements tool.                                                                             |
+| `agent`      | `string \| undefined`                                                                                                                            | Selon la variante | Identifiant du CLI d’agent à rapporter ou diagnostiquer : claude, codex ou gemini.                                                                          |
+| `branch`     | `string \| undefined`                                                                                                                            | Selon la variante | Nom de la branche de travail utilisée ou observée pendant l’exécution.                                                                                      |
+| `directory`  | `string \| undefined`                                                                                                                            | Selon la variante | Dossier hôte du workspace utilisé pour cette exécution.                                                                                                     |
+| `durationMs` | `number`                                                                                                                                         | Selon la variante | Durée d’exécution écoulée en millisecondes.                                                                                                                 |
+| `status`     | `number`                                                                                                                                         | Selon la variante | Code de sortie du processus ; zéro indique le succès.                                                                                                       |
+| `tokens`     | `Usage`                                                                                                                                          | Selon la variante | Compteurs d’usage de tokens portés par un événement usage ou summary.                                                                                       |
+| `message`    | `string`                                                                                                                                         | Selon la variante | Message d’avertissement ou d’échec décodé depuis l’événement d’agent.                                                                                       |
+| `text`       | `string`                                                                                                                                         | Selon la variante | Texte porté par l’événement : texte diffusé, réponse finale ou prompt soumis selon kind.                                                                    |
+| `input`      | `unknown`                                                                                                                                        | Selon la variante | Arguments bruts fournis à l’outil nommé par cet événement tool.                                                                                             |
+| `id`         | `string`                                                                                                                                         | Selon la variante | Identifiant de conversation native utilisé pour localiser ou poursuivre la session.                                                                         |
+| `value`      | `unknown`                                                                                                                                        | Selon la variante | Valeur brute de protocole non reconnue conservée pour observation.                                                                                          |
 
 ## Signature
 

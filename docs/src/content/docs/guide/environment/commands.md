@@ -123,6 +123,6 @@ node example.mts
 
 The whitespace test fails, and `status` is nonzero. A command returns its exit status; it does not throw merely because the process failed. An `agentTask` or `commandTask` has its own failure contract. Always check the status before continuing to integration. Arguments are passed directly, without implicit shell expansion.
 
-[Contracts, options and edge cases](../../../reference/behavior/sandboxes/commands/).
+[Contracts, options and edge cases](../../behavior/sandboxes/commands/).
 
 To start again, use a new demonstration directory. Named branches retain commits; dirty worktrees remain available for recovery. Scripts do not push commits.

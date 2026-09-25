@@ -269,6 +269,6 @@ node example.mts
 
 A successful run prints `0`. A nonzero test status fails `commandTask`; an agent claiming success cannot bypass it. Both tasks share a sandbox, so `after` serializes their operations. `isolatedTask` instead allocates and closes its own environment, which is appropriate for independent branches or repositories.
 
-[Contracts, options and edge cases](../../../reference/behavior/workflows/sandbox-tasks/).
+[Contracts, options and edge cases](../../behavior/workflows/sandbox-tasks/).
 
 To start again, use a new demonstration directory. Named branches retain commits; dirty worktrees remain available for recovery. Scripts do not push commits.

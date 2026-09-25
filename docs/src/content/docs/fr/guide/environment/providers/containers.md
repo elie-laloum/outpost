@@ -122,6 +122,6 @@ node example.mts
 
 Docker est le défaut de cette préparation. Pour Podman, choisissez `--provider podman` à l’initialisation puis lancez `node example.mts podman` ; les moteurs ont des stores d’images séparés. Outpost ne bascule pas vers l’hôte en cas d’échec. Montages et métadonnées Git modifiables ne constituent pas une frontière contre du code hostile. Le home privé est éphémère.
 
-[Contrats, options et cas particuliers](../../../../reference/behavior/providers/containers/).
+[Contrats, options et cas particuliers](../../../behavior/providers/containers/).
 
 Pour recommencer, utilisez un nouveau dossier de démonstration. Les branches nommées conservent les commits ; les worktrees sales restent disponibles pour récupération. Les scripts ne poussent aucun commit.

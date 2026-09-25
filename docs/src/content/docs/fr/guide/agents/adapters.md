@@ -55,6 +55,6 @@ node example.mts
 
 Les adapters choisissent le comportement de la CLI native. Les providers choisissent l’environnement. Construire un adapter ne l’authentifie pas et n’appelle pas de modèle. Passez-le au dispatch et changez indépendamment le provider. Sans modèle explicite, la CLI utilise son défaut. Gemini prend en charge les nouvelles sessions ; Claude et Codex permettent capture et reprise natives.
 
-[Contrats, options et cas particuliers](../../../reference/behavior/agents/adapters/).
+[Contrats, options et cas particuliers](../../behavior/agents/adapters/).
 
 Les fichiers persistants éventuels restent dans ce dossier de démonstration.

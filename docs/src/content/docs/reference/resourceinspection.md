@@ -2,10 +2,8 @@
 title: "ResourceInspection"
 description: "ResourceInspection — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Public contract for **ResourceInspection**. See the [resource activity guide](../../guide/operations/recovery/) for behavior, defaults and examples.
 
 ## Import
 
@@ -13,22 +11,14 @@ Public contract for **ResourceInspection**. See the [resource activity guide](..
 import type { ResourceInspection } from "@elie-laloum/outpost";
 ```
 
-## Purpose and behavior
-
-Read locally recorded lease and operation activity.
-
-Local observations do not enumerate remote accounts and are not an authoritative cloud inventory.
-
-[Complete example and detailed rules](../../guide/operations/recovery/).
-
 ## Parameters and properties
 
-| Name       | Type                                 | Presence | Meaning                                                                 |
-| ---------- | ------------------------------------ | -------- | ----------------------------------------------------------------------- |
-| `scope`    | `"recorded-sandboxes"`               | Required | See the linked contract and this family's rules for its interpretation. |
-| `complete` | `boolean`                            | Required | See the linked contract and this family's rules for its interpretation. |
-| `entries`  | `readonly ResourceInspectionEntry[]` | Required | See the linked contract and this family's rules for its interpretation. |
-| `issues`   | `readonly StorageIssue[]`            | Required | See the linked contract and this family's rules for its interpretation. |
+| Name       | Type                                 | Presence | Meaning                                                                                              |
+| ---------- | ------------------------------------ | -------- | ---------------------------------------------------------------------------------------------------- |
+| `scope`    | `"recorded-sandboxes"`               | Required | Always recorded-sandboxes: inventory covers local activity records, not remote accounts.             |
+| `complete` | `boolean`                            | Required | Whether all requested inspection work completed without hitting scan limits or inaccessible entries. |
+| `entries`  | `readonly ResourceInspectionEntry[]` | Required | Local sandbox activity files and their ownership assessments.                                        |
+| `issues`   | `readonly StorageIssue[]`            | Required | Filesystem, Git or ownership problems that prevented complete inspection.                            |
 
 ## Signature
 

@@ -128,6 +128,6 @@ node example.mts
 
 Les commandes partagent l’environnement actif ; la sortie est donc `warm`. Chaque sandbox accepte une seule opération active à la fois. `await using` la ferme à la sortie de portée. Les changements du dépôt appartiennent au workspace ; un fichier dans `/tmp` appartient à cet environnement et disparaît avec lui.
 
-[Contrats, options et cas particuliers](../../../reference/behavior/sandboxes/lifecycle/).
+[Contrats, options et cas particuliers](../../behavior/sandboxes/lifecycle/).
 
 Pour recommencer, utilisez un nouveau dossier de démonstration. Les branches nommées conservent les commits ; les worktrees sales restent disponibles pour récupération. Les scripts ne poussent aucun commit.

@@ -2,10 +2,8 @@
 title: "RecoveryRetentionPlan"
 description: "RecoveryRetentionPlan — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Contrat public de **RecoveryRetentionPlan**. Consultez le [guide récupération et rétention](../../guide/operations/recovery/) pour le comportement, les valeurs par défaut et des exemples.
 
 ## Import
 
@@ -13,27 +11,19 @@ Contrat public de **RecoveryRetentionPlan**. Consultez le [guide récupération 
 import type { RecoveryRetentionPlan } from "@elie-laloum/outpost";
 ```
 
-## Rôle et comportement
-
-Inspecter le travail conservé et planifier explicitement sa rétention sans abandonner les modifications récupérables.
-
-Planifier ne supprime rien. L’application reprend possession et revalide les candidats. Les quotas observent l’usage plutôt que d’imposer une limite physique au système de fichiers.
-
-[Exemple complet et règles détaillées](../../guide/operations/recovery/).
-
 ## Paramètres et propriétés
 
-| Nom              | Type                                  | Présence | Rôle                                                                             |
-| ---------------- | ------------------------------------- | -------- | -------------------------------------------------------------------------------- |
-| `repository`     | `string`                              | Requis   | Checkout Git hôte ciblé.                                                         |
-| `policy`         | `RecoveryRetentionPolicy`             | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `inspectedAt`    | `string`                              | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `inspection`     | `RecoveryInspection`                  | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `entries`        | `readonly RecoveryRetentionEntry[]`   | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `complete`       | `boolean`                             | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `usageBytes`     | `number`                              | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `projectedBytes` | `number`                              | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `quota`          | `"unknown" \| "within" \| "exceeded"` | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
+| Nom              | Type                                  | Présence | Rôle                                                                                                                      |
+| ---------------- | ------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `repository`     | `string`                              | Requis   | Checkout Git hôte ciblé.                                                                                                  |
+| `policy`         | `RecoveryRetentionPolicy`             | Requis   | Périmètres de stockage, âge minimal et cibles de capacité explicites utilisés pour déterminer l’éligibilité au nettoyage. |
+| `inspectedAt`    | `string`                              | Requis   | Horodatage ISO de l’inventaire de rétention.                                                                              |
+| `inspection`     | `RecoveryInspection`                  | Requis   | Inventaire complet de récupération sur lequel reposent les décisions de rétention.                                        |
+| `entries`        | `readonly RecoveryRetentionEntry[]`   | Requis   | Candidats au nettoyage avec éligibilité, motif de sûreté et taille observée.                                              |
+| `complete`       | `boolean`                             | Requis   | Indique si toute l’inspection demandée s’est terminée sans limite de parcours ni entrée inaccessible.                     |
+| `usageBytes`     | `number`                              | Requis   | Nombre total d’octets observés avant application du plan de rétention.                                                    |
+| `projectedBytes` | `number`                              | Requis   | Estimation des octets conservés après suppression de tous les candidats éligibles.                                        |
+| `quota`          | `"unknown" \| "within" \| "exceeded"` | Requis   | Indique si l’usage projeté respecte la limite, la dépasse ou reste inconnu faute d’inspection complète.                   |
 
 ## Signature
 

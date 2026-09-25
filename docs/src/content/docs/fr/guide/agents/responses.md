@@ -68,7 +68,7 @@ node example.mts
 
 Le résultat est `{ passed: true }` ; la seconde réponse est rejetée car une chaîne n’est pas un booléen. Passez cette même spécification comme `response` à `dispatch` pour obtenir `result.value`. Le schéma valide les données, pas la véracité d’une affirmation de l’agent. Exécutez une vraie commande de test pour vérifier du code. La recette de rapport typé relie cet exemple à un agent réel.
 
-[Contrats, options et cas particuliers](../../../reference/behavior/agents/responses/).
+[Contrats, options et cas particuliers](../../behavior/agents/responses/).
 
 Les fichiers persistants éventuels restent dans ce dossier de démonstration.
 

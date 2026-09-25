@@ -2,10 +2,8 @@
 title: "TaskContext"
 description: "TaskContext — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Public contract for **TaskContext**. See the [workflows guide](../../guide/workflows/graph/) for behavior, defaults and examples.
 
 ## Import
 
@@ -13,25 +11,17 @@ Public contract for **TaskContext**. See the [workflows guide](../../guide/workf
 import type { TaskContext } from "@elie-laloum/outpost";
 ```
 
-## Purpose and behavior
-
-Compose tasks with explicit dependency edges and typed result access.
-
-Duplicate keys, missing dependencies and cycles fail validation. Failed or skipped dependencies skip descendants. Retries can repeat external effects. Unwrap throws on a non-successful result.
-
-[Complete example and detailed rules](../../guide/workflows/graph/).
-
 ## Parameters and properties
 
-| Name              | Type                                                     | Presence | Meaning                                                                 |
-| ----------------- | -------------------------------------------------------- | -------- | ----------------------------------------------------------------------- |
-| `signal`          | `AbortSignal`                                            | Required | Cooperative cancellation for this operation.                            |
-| `attempt`         | `number`                                                 | Required | See the linked contract and this family's rules for its interpretation. |
-| `executionId`     | `string`                                                 | Required | See the linked contract and this family's rules for its interpretation. |
-| `reportUsage`     | `(usage: Usage) => void`                                 | Required | See the linked contract and this family's rules for its interpretation. |
-| `reportUsageOnce` | `((receipt: string, usage: Usage) => void) \| undefined` | Optional | See the linked contract and this family's rules for its interpretation. |
-| `checkpoint`      | `(() => Promise<void>) \| undefined`                     | Optional | Durable execution storage and replay configuration.                     |
-| `value`           | `<T>(dependency: Task<T>) => T`                          | Required | Typed value produced or consumed by this contract.                      |
+| Name              | Type                                                     | Presence | Meaning                                                                                                    |
+| ----------------- | -------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------- |
+| `signal`          | `AbortSignal`                                            | Required | Cooperative cancellation for this operation.                                                               |
+| `attempt`         | `number`                                                 | Required | One-based task attempt number.                                                                             |
+| `executionId`     | `string`                                                 | Required | Identity of the workflow execution, preserved across checkpoint resumption.                                |
+| `reportUsage`     | `(usage: Usage) => void`                                 | Required | Add token usage observed during this task attempt to the workflow’s cumulative accounting.                 |
+| `reportUsageOnce` | `((receipt: string, usage: Usage) => void) \| undefined` | Optional | Add token usage only if the receipt ID has not already been recorded, including across checkpoint resumes. |
+| `checkpoint`      | `(() => Promise<void>) \| undefined`                     | Optional | Persist the current workflow state when durable execution is enabled.                                      |
+| `value`           | `<T>(dependency: Task<T>) => T`                          | Required | Read the completed output of a task listed in this task’s declared dependencies.                           |
 
 ## Signature
 
@@ -49,5 +39,5 @@ export interface TaskContext {
 
 ## Related contracts
 
-- [Task](../task/)
+- [Task](../type-task/)
 - [Usage](../usage/)

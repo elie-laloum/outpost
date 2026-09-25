@@ -5,8 +5,6 @@ sidebar:
   order: 10
 ---
 
-Public contract for **conversations**. See the [conversations guide](../../guide/agents/conversations/) for behavior, defaults and examples.
-
 ## Import
 
 ```ts
@@ -15,11 +13,23 @@ import { conversations } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Locate, capture, restore and relocate native transcripts separately from authentication.
-
-The host conversation home defaults to the OS home. A cold continuation requires a restorable transcript before allocation. A fork does not copy a workspace.
+Group native transcript operations: locate on the host, capture from a sandbox, restore before continuation and rewrite repository paths. native constructs a ConversationStore for Claude or Codex; these storage utilities do not manage agent authentication.
 
 [Complete example and detailed rules](../../guide/agents/conversations/).
+
+## Parameters and properties
+
+| Name          | Type                                                                                                                                                                                                                                                                | Presence | Meaning                                                                                 |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------- |
+| `native`      | `(format: ConversationFormat) => import("../index.js").ConversationStore`                                                                                                                                                                                           | Required | Create a native Claude or Codex ConversationStore for transcript persistence.           |
+| `locate`      | `(format: ConversationFormat, id: string, repository: string, home?: string) => Promise<import("./conversations.types.ts").ConversationLocation>`                                                                                                                   | Required | Locate a native transcript on the host by format, ID, repository and optional home.     |
+| `capture`     | `(format: ConversationFormat, id: string, repository: string, lease: import("../index.js").SandboxLease, staging: string, options?: import("./conversations/capture.types.js").CaptureOptions) => Promise<import("./conversations.types.ts").ConversationLocation>` | Required | Capture the selected conversation from a sandbox lease into host staging.               |
+| `restore`     | `(location: import("./conversations.types.ts").ConversationLocation, lease: import("../index.js").SandboxLease, staging: string) => Promise<void>`                                                                                                                  | Required | Restore a located transcript into a sandbox and relocate its repository paths.          |
+| `rewrite`     | `(text: string, destination: string, source?: string) => string`                                                                                                                                                                                                    | Required | Rewrite native transcript repository paths from source to destination without file I/O. |
+| `projectKey`  | `(path: string) => string`                                                                                                                                                                                                                                          | Required | Encode a repository path as the Claude native project directory key.                    |
+| `claudePath`  | `(id: string, repository: string, home?: string) => string`                                                                                                                                                                                                         | Required | Compute the host Claude transcript file path for an ID and repository.                  |
+| `directory`   | `(format: ConversationFormat, repository: string, home?: string) => string`                                                                                                                                                                                         | Required | Compute the host transcript directory for the selected format and repository.           |
+| `destination` | `(format: ConversationFormat, id: string, lease: import("../index.js").SandboxLease, original: string) => string`                                                                                                                                                   | Required | Compute the destination transcript path within the sandbox’s agent home.                |
 
 ## Signature
 

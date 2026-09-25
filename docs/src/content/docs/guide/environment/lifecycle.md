@@ -128,6 +128,6 @@ node example.mts
 
 Both commands share the running environment, so the output is `warm`. Each sandbox permits one active operation at a time. `await using` closes it at scope exit. Repository changes belong to the workspace; a file in `/tmp` belongs to this environment and disappears with it.
 
-[Contracts, options and edge cases](../../../reference/behavior/sandboxes/lifecycle/).
+[Contracts, options and edge cases](../../behavior/sandboxes/lifecycle/).
 
 To start again, use a new demonstration directory. Named branches retain commits; dirty worktrees remain available for recovery. Scripts do not push commits.

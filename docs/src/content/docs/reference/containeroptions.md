@@ -2,10 +2,8 @@
 title: "ContainerOptions"
 description: "ContainerOptions — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Public contract for **ContainerOptions**. See the [providers guide](../../guide/environment/providers/overview/) for behavior, defaults and examples.
 
 ## Import
 
@@ -14,33 +12,25 @@ import type { ContainerOptions } from "@elie-laloum/outpost/providers/docker";
 import type { ContainerOptions } from "@elie-laloum/outpost/providers/podman";
 ```
 
-## Purpose and behavior
-
-Allocate local containers, explicit host execution or remote sandboxes through dedicated package entry points.
-
-Mounted and host providers default to current branches; remote providers default to integration and reject current. Optional SDKs remain optional. Local execution provides no isolation.
-
-[Complete example and detailed rules](../../guide/environment/providers/overview/).
-
 ## Parameters and properties
 
-| Name             | Type                                                           | Presence | Meaning                                                                 |
-| ---------------- | -------------------------------------------------------------- | -------- | ----------------------------------------------------------------------- |
-| `egress`         | `EgressPolicy \| undefined`                                    | Optional | See the linked contract and this family's rules for its interpretation. |
-| `repositoryMode` | `"mounted" \| "isolated" \| undefined`                         | Optional | See the linked contract and this family's rules for its interpretation. |
-| `caches`         | `readonly DependencyCache[] \| undefined`                      | Optional | See the linked contract and this family's rules for its interpretation. |
-| `image`          | `string \| undefined`                                          | Optional | Container or guest image reference.                                     |
-| `user`           | `{ readonly uid: number; readonly gid: number; } \| undefined` | Optional | See the linked contract and this family's rules for its interpretation. |
-| `volumes`        | `readonly Volume[] \| undefined`                               | Optional | See the linked contract and this family's rules for its interpretation. |
-| `variables`      | `Readonly<Record<string, string>> \| undefined`                | Optional | Explicit environment declarations; values are strings.                  |
-| `networks`       | `string \| readonly string[] \| undefined`                     | Optional | See the linked contract and this family's rules for its interpretation. |
-| `groups`         | `readonly (string \| number)[] \| undefined`                   | Optional | See the linked contract and this family's rules for its interpretation. |
-| `devices`        | `readonly string[] \| undefined`                               | Optional | See the linked contract and this family's rules for its interpretation. |
-| `cpus`           | `number \| undefined`                                          | Optional | See the linked contract and this family's rules for its interpretation. |
-| `memoryMb`       | `number \| undefined`                                          | Optional | See the linked contract and this family's rules for its interpretation. |
-| `label`          | `false \| "z" \| "Z" \| undefined`                             | Optional | See the linked contract and this family's rules for its interpretation. |
-| `retain`         | `number \| undefined`                                          | Optional | Maximum retained tail per output stream, in bytes.                      |
-| `userns`         | `false \| "keep-id" \| undefined`                              | Optional | See the linked contract and this family's rules for its interpretation. |
+| Name             | Type                                                           | Presence | Meaning                                                                                                       |
+| ---------------- | -------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------- |
+| `egress`         | `EgressPolicy \| undefined`                                    | Optional | Explicit outbound network policy; unsupported restrictions are rejected by the provider.                      |
+| `repositoryMode` | `"mounted" \| "isolated" \| undefined`                         | Optional | mounted shares the host checkout and Git metadata; isolated uses the opt-in private repository transfer mode. |
+| `caches`         | `readonly DependencyCache[] \| undefined`                      | Optional | Engine-managed dependency cache volumes with independently owned lifetimes.                                   |
+| `image`          | `string \| undefined`                                          | Optional | Container or guest image reference.                                                                           |
+| `user`           | `{ readonly uid: number; readonly gid: number; } \| undefined` | Optional | UID and GID used for commands and ownership inside the container.                                             |
+| `volumes`        | `readonly Volume[] \| undefined`                               | Optional | Explicit host-to-sandbox filesystem mounts.                                                                   |
+| `variables`      | `Readonly<Record<string, string>> \| undefined`                | Optional | Explicit environment declarations; values are strings.                                                        |
+| `networks`       | `string \| readonly string[] \| undefined`                     | Optional | Container network name or names passed to the engine.                                                         |
+| `groups`         | `readonly (string \| number)[] \| undefined`                   | Optional | Supplementary group names or IDs granted inside the container.                                                |
+| `devices`        | `readonly string[] \| undefined`                               | Optional | Host device mappings explicitly exposed to the container.                                                     |
+| `cpus`           | `number \| undefined`                                          | Optional | CPU allocation limit for the execution environment.                                                           |
+| `memoryMb`       | `number \| undefined`                                          | Optional | Memory allocation limit in megabytes.                                                                         |
+| `label`          | `false \| "z" \| "Z" \| undefined`                             | Optional | SELinux relabeling for mounted paths: z shared, Z private, false disabled.                                    |
+| `retain`         | `number \| undefined`                                          | Optional | Maximum retained tail per output stream, in bytes.                                                            |
+| `userns`         | `false \| "keep-id" \| undefined`                              | Optional | Podman user-namespace mode; keep-id preserves host user IDs and false disables this option.                   |
 
 ## Signature
 

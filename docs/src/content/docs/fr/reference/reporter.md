@@ -2,10 +2,8 @@
 title: "reporter"
 description: "reporter — Outpost API"
 sidebar:
-  order: 10
+  order: 0
 ---
-
-Contrat public de **reporter**. Consultez le [guide observabilité](../../guide/agents/observability/) pour le comportement, les valeurs par défaut et des exemples.
 
 ## Import
 
@@ -15,21 +13,19 @@ import { reporter } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Observer la progression, journaliser l’exécution et comptabiliser l’usage rapporté sans changer les résultats.
-
-Les échecs d’observateurs sont isolés. Les tokens ne sont pas des prix. Le point d’entrée OpenTelemetry optionnel charge son API séparément des imports du cœur.
+Crée un callback d’observation qui formate progression, avertissements et bilans de passe pour un terminal ou une fonction d’écriture. quiet masque toutes les sorties et verbose inclut des événements supplémentaires ; le rapporteur ne pilote pas l’exécution.
 
 [Exemple complet et règles détaillées](../../guide/agents/observability/).
 
 ## Paramètres et propriétés
 
-| Nom               | Type                                    | Présence  | Rôle                                                                                          |
-| ----------------- | --------------------------------------- | --------- | --------------------------------------------------------------------------------------------- |
-| `options`         | `ReporterOptions \| undefined`          | Optionnel | Objet de configuration. Ses champs sont décrits dans le contrat d’options associé ci-dessous. |
-| `options.label`   | `string \| undefined`                   | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation.              |
-| `options.verbose` | `boolean \| undefined`                  | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation.              |
-| `options.quiet`   | `boolean \| undefined`                  | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation.              |
-| `options.write`   | `((text: string) => void) \| undefined` | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation.              |
+| Nom               | Type                                    | Présence  | Rôle                                                                                            |
+| ----------------- | --------------------------------------- | --------- | ----------------------------------------------------------------------------------------------- |
+| `options`         | `ReporterOptions \| undefined`          | Optionnel | Libellé de sortie, verbosité, mode silencieux et fonction d’écriture personnalisée optionnelle. |
+| `options.label`   | `string \| undefined`                   | Optionnel | Libellé lisible utilisé dans les rapports d’exécution.                                          |
+| `options.verbose` | `boolean \| undefined`                  | Optionnel | Inclut les événements détaillés d’agent et d’outils dans la sortie terminal.                    |
+| `options.quiet`   | `boolean \| undefined`                  | Optionnel | Masque toutes les sorties du rapporteur, y compris avertissements et échecs.                    |
+| `options.write`   | `((text: string) => void) \| undefined` | Optionnel | Fonction de destination personnalisée pour la sortie formatée du rapporteur.                    |
 
 ## Retour
 

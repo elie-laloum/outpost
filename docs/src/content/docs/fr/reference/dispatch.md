@@ -2,10 +2,8 @@
 title: "dispatch"
 description: "dispatch — Outpost API"
 sidebar:
-  order: 10
+  order: 0
 ---
-
-Contrat public de **dispatch**. Consultez le [guide dispatch](../../guide/agents/dispatch/) pour le comportement, les valeurs par défaut et des exemples.
 
 ## Import
 
@@ -15,45 +13,43 @@ import { dispatch } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Exécuter une tâche d’agent et collecter texte, sortie typée, commits, usage et conversation native.
-
-Une passe est la valeur par défaut. Les échecs de processus ou réponse rejettent la promesse. Épuiser les passes peut plutôt renvoyer completed: false. Le dispatch froid ferme ses ressources ; le dispatch chaud conserve sa sandbox.
+Exécute le brief d’un agent avec une sandbox allouée pour cet appel, collecte les tours, la sortie validée, l’usage et les commits, puis ferme les ressources possédées. Chaque passe froide reçoit un environnement neuf. Le résultat permet de reprendre ou de bifurquer une conversation capturée dans un environnement ultérieur.
 
 [Exemple complet et règles détaillées](../../guide/agents/dispatch/).
 
 ## Paramètres et propriétés
 
-| Nom                          | Type                                                             | Présence  | Rôle                                                                                          |
-| ---------------------------- | ---------------------------------------------------------------- | --------- | --------------------------------------------------------------------------------------------- |
-| `options`                    | `SandboxOptions & DispatchOptions<T> & RequiredAgent`            | Requis    | Objet de configuration. Ses champs sont décrits dans le contrat d’options associé ci-dessous. |
-| `options.includeUncommitted` | `boolean \| undefined`                                           | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation.              |
-| `options.agent`              | `AgentAdapter`                                                   | Optionnel | Adapter natif de l’agent de code.                                                             |
-| `options.provider`           | `SandboxProvider \| undefined`                                   | Optionnel | Backend de l’environnement d’exécution.                                                       |
-| `options.workspace`          | `Workspace \| undefined`                                         | Optionnel | Workspace Git appartenant à l’appelant ; exclut un nouveau choix de dépôt/branche.            |
-| `options.hooks`              | `LifecycleHooks \| undefined`                                    | Optionnel | Commandes de cycle de vie dans l’ordre déclaré.                                               |
-| `options.signal`             | `AbortSignal \| undefined`                                       | Optionnel | Annulation coopérative de cette opération.                                                    |
-| `options.logging`            | `Logging \| undefined`                                           | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation.              |
-| `options.bootstrap`          | `boolean \| undefined`                                           | Optionnel | Indique si un agent sélectionné absent peut être installé automatiquement.                    |
-| `options.conversationHome`   | `string \| undefined`                                            | Optionnel | Home hôte utilisé pour le stockage des transcripts natifs.                                    |
-| `options.storageQuota`       | `Omit<StorageReservationOptions, "signal"> \| undefined`         | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation.              |
-| `options.repository`         | `string \| undefined`                                            | Optionnel | Checkout Git hôte ciblé.                                                                      |
-| `options.branch`             | `BranchPolicy \| undefined`                                      | Optionnel | Politique de workspace Git ou identité de branche résultante selon ce contrat.                |
-| `options.copies`             | `readonly string[] \| undefined`                                 | Optionnel | Entrées relatives au dépôt copiées dans le workspace.                                         |
-| `options.limits`             | `StageLimits \| undefined`                                       | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation.              |
-| `options.label`              | `string \| undefined`                                            | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation.              |
-| `options.brief`              | `Brief`                                                          | Requis    | Entrée de tâche textuelle littérale ou provenant d’un fichier.                                |
-| `options.passes`             | `number \| undefined`                                            | Optionnel | Nombre maximal de passes d’agent ; une par défaut.                                            |
-| `options.until`              | `string \| readonly string[] \| undefined`                       | Optionnel | Marqueur(s) de fin ; une liste vide désactive la détection.                                   |
-| `options.idleMs`             | `number \| undefined`                                            | Optionnel | Intervalle silencieux maximal en millisecondes.                                               |
-| `options.idleWarningMs`      | `number \| undefined`                                            | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation.              |
-| `options.settleMs`           | `number \| undefined`                                            | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation.              |
-| `options.deadlineMs`         | `number \| undefined`                                            | Optionnel | Échéance absolue de l’opération en millisecondes.                                             |
-| `options.expansionMs`        | `number \| undefined`                                            | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation.              |
-| `options.continuation`       | `{ readonly id: string; readonly fork?: boolean; } \| undefined` | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation.              |
-| `options.response`           | `ResponseSpec<T> \| undefined`                                   | Optionnel | Analyseur et validateur de la réponse balisée.                                                |
-| `options.observe`            | `((event: AgentObservation) => void) \| undefined`               | Optionnel | Callback d’observation ; ses erreurs sont isolées.                                            |
-| `options.warn`               | `((message: string) => void) \| undefined`                       | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation.              |
-| `options.diagnostic`         | `((message: string) => void) \| undefined`                       | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation.              |
+| Nom                          | Type                                                             | Présence  | Rôle                                                                                                                     |
+| ---------------------------- | ---------------------------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `options`                    | `SandboxOptions & DispatchOptions<T> & RequiredAgent`            | Requis    | Préparation du dépôt et de la sandbox, avec brief d’agent, validation de réponse et limites d’exécution.                 |
+| `options.includeUncommitted` | `boolean \| undefined`                                           | Optionnel | Inclut les modifications hôtes non commitées dans le snapshot du dépôt distant.                                          |
+| `options.agent`              | `AgentAdapter`                                                   | Optionnel | Adapter natif de l’agent de code.                                                                                        |
+| `options.provider`           | `SandboxProvider \| undefined`                                   | Optionnel | Backend de l’environnement d’exécution.                                                                                  |
+| `options.workspace`          | `Workspace \| undefined`                                         | Optionnel | Workspace Git appartenant à l’appelant ; exclut un nouveau choix de dépôt/branche.                                       |
+| `options.hooks`              | `LifecycleHooks \| undefined`                                    | Optionnel | Commandes de cycle de vie dans l’ordre déclaré.                                                                          |
+| `options.signal`             | `AbortSignal \| undefined`                                       | Optionnel | Annulation coopérative de cette opération.                                                                               |
+| `options.logging`            | `Logging \| undefined`                                           | Optionnel | Configure le fichier journal du dispatch et la conservation des événements détaillés.                                    |
+| `options.bootstrap`          | `boolean \| undefined`                                           | Optionnel | Indique si un agent sélectionné absent peut être installé automatiquement.                                               |
+| `options.conversationHome`   | `string \| undefined`                                            | Optionnel | Home hôte utilisé pour le stockage des transcripts natifs.                                                               |
+| `options.storageQuota`       | `Omit<StorageReservationOptions, "signal"> \| undefined`         | Optionnel | Limites d’admission et réservation demandée pour le stockage dans .outpost du dépôt.                                     |
+| `options.repository`         | `string \| undefined`                                            | Optionnel | Checkout Git hôte ciblé.                                                                                                 |
+| `options.branch`             | `BranchPolicy \| undefined`                                      | Optionnel | Choisit le checkout courant, une branche de travail nommée conservée ou une branche préparée pour intégration.           |
+| `options.copies`             | `readonly string[] \| undefined`                                 | Optionnel | Entrées relatives au dépôt copiées dans le workspace.                                                                    |
+| `options.limits`             | `StageLimits \| undefined`                                       | Optionnel | Délais de copie, préparation Git, collecte des commits et intégration, en millisecondes.                                 |
+| `options.label`              | `string \| undefined`                                            | Optionnel | Libellé lisible utilisé dans les rapports d’exécution.                                                                   |
+| `options.brief`              | `Brief`                                                          | Requis    | Entrée de tâche textuelle littérale ou provenant d’un fichier.                                                           |
+| `options.passes`             | `number \| undefined`                                            | Optionnel | Nombre maximal de passes d’agent ; une par défaut.                                                                       |
+| `options.until`              | `string \| readonly string[] \| undefined`                       | Optionnel | Marqueur(s) de fin ; une liste vide désactive la détection.                                                              |
+| `options.idleMs`             | `number \| undefined`                                            | Optionnel | Intervalle silencieux maximal en millisecondes.                                                                          |
+| `options.idleWarningMs`      | `number \| undefined`                                            | Optionnel | Intervalle de silence en millisecondes avant émission d’un avertissement d’inactivité.                                   |
+| `options.settleMs`           | `number \| undefined`                                            | Optionnel | Délai de grâce en millisecondes après détection de fin avant l’arrêt d’un processus d’agent encore actif.                |
+| `options.deadlineMs`         | `number \| undefined`                                            | Optionnel | Durée maximale de chaque processus d’agent en millisecondes ; une heure par défaut.                                      |
+| `options.expansionMs`        | `number \| undefined`                                            | Optionnel | Délai en millisecondes de chaque expansion shell d’origine d’un brief fichier ; 30000 par défaut.                        |
+| `options.continuation`       | `{ readonly id: string; readonly fork?: boolean; } \| undefined` | Optionnel | Identifiant de conversation native à poursuivre ; fork demande une conversation distincte dérivée de celle-ci.           |
+| `options.response`           | `ResponseSpec<T> \| undefined`                                   | Optionnel | Analyseur et validateur de la réponse balisée.                                                                           |
+| `options.observe`            | `((event: AgentObservation) => void) \| undefined`               | Optionnel | Reçoit les observations normalisées d’agent avec numéro de passe et horodatage ; les erreurs d’observation sont isolées. |
+| `options.warn`               | `((message: string) => void) \| undefined`                       | Optionnel | Callback recevant les avertissements non bloquants d’exécution ou de stockage des conversations.                         |
+| `options.diagnostic`         | `((message: string) => void) \| undefined`                       | Optionnel | Callback recevant les messages de diagnostic d’exécution.                                                                |
 
 ## Retour
 

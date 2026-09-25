@@ -123,6 +123,6 @@ node example.mts
 
 The wrapper returns the real lease unchanged. A new backend must implement invocation, binary transfer, cancellation and idempotent release; mountedProvider only supplies placement metadata. Preserve observable exit status and reject unsupported terminal/elevation features explicitly. The detailed reference lists the full lease obligations and required contract tests.
 
-[Contracts, options and edge cases](../../../reference/behavior/extend/providers/).
+[Contracts, options and edge cases](../../behavior/extend/providers/).
 
 To start again, use a new demonstration directory. Named branches retain commits; dirty worktrees remain available for recovery. Scripts do not push commits.

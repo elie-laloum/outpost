@@ -84,6 +84,6 @@ node example.mts
 
 Installez Git en plus de la préparation Node/npm. La sortie est `host execution`. La commande tourne sous votre compte système : local n’isole ni fichiers ni environnement. L’exercice possède et supprime uniquement son dossier temporaire. Un worktree sépare les changements Git sans interdire l’accès aux autres fichiers hôtes.
 
-[Contrats, options et cas particuliers](../../../../reference/behavior/providers/local/).
+[Contrats, options et cas particuliers](../../../behavior/providers/local/).
 
 Les fichiers persistants éventuels restent dans ce dossier de démonstration.

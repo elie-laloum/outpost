@@ -2,10 +2,8 @@
 title: "RecoveryInspectionOptions"
 description: "RecoveryInspectionOptions — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Public contract for **RecoveryInspectionOptions**. See the [resource activity guide](../../guide/operations/recovery/) for behavior, defaults and examples.
 
 ## Import
 
@@ -13,23 +11,15 @@ Public contract for **RecoveryInspectionOptions**. See the [resource activity gu
 import type { RecoveryInspectionOptions } from "@elie-laloum/outpost";
 ```
 
-## Purpose and behavior
-
-Read locally recorded lease and operation activity.
-
-Local observations do not enumerate remote accounts and are not an authoritative cloud inventory.
-
-[Complete example and detailed rules](../../guide/operations/recovery/).
-
 ## Parameters and properties
 
-| Name         | Type                   | Presence | Meaning                                                                 |
-| ------------ | ---------------------- | -------- | ----------------------------------------------------------------------- |
-| `repository` | `string \| undefined`  | Optional | Target host Git checkout.                                               |
-| `maxEntries` | `number \| undefined`  | Optional | See the linked contract and this family's rules for its interpretation. |
-| `git`        | `boolean \| undefined` | Optional | See the linked contract and this family's rules for its interpretation. |
-| `locks`      | `boolean \| undefined` | Optional | See the linked contract and this family's rules for its interpretation. |
-| `resources`  | `boolean \| undefined` | Optional | See the linked contract and this family's rules for its interpretation. |
+| Name         | Type                   | Presence | Meaning                                                                       |
+| ------------ | ---------------------- | -------- | ----------------------------------------------------------------------------- |
+| `repository` | `string \| undefined`  | Optional | Target host Git checkout.                                                     |
+| `maxEntries` | `number \| undefined`  | Optional | Maximum filesystem entries inspected before marking the inventory incomplete. |
+| `git`        | `boolean \| undefined` | Optional | Include Git worktree state and dirty/locked checks in the inventory.          |
+| `locks`      | `boolean \| undefined` | Optional | Include local lock-file and process-ownership inspection.                     |
+| `resources`  | `boolean \| undefined` | Optional | Include locally recorded sandbox leases and active operations.                |
 
 ## Signature
 

@@ -258,6 +258,6 @@ node example.mts
 
 The file is read for each pass. `OBJECTIVE` comes from your values; `WORK_BRANCH` comes from the workspace. Original command fragments execute inside the prepared sandbox. An inline `{ text }` brief stays literal. Missing values and failed expansion commands stop the run. Only interpolate trusted values into shell fragments.
 
-[Contracts, options and edge cases](../../../reference/behavior/agents/prompts/).
+[Contracts, options and edge cases](../../behavior/agents/prompts/).
 
 To start again, use a new demonstration directory. Named branches retain commits; dirty worktrees remain available for recovery. Scripts do not push commits.

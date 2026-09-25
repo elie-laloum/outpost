@@ -2,10 +2,8 @@
 title: "openWorkspace"
 description: "openWorkspace — Outpost API"
 sidebar:
-  order: 10
+  order: 0
 ---
-
-Public contract for **openWorkspace**. See the [workspaces guide](../../guide/environment/workspaces/) for behavior, defaults and examples.
 
 ## Import
 
@@ -15,25 +13,23 @@ import { openWorkspace } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Own a repository checkout, branch and lock independently of sandbox lifetime.
-
-Repository defaults to the current working directory. Named branches retain commits; dirty or detached worktrees remain recoverable. Close the sandbox before its caller-owned workspace.
+Acquire a repository lock and prepare the checkout selected by the branch policy. The returned workspace can own several successive sandboxes and remains open until explicitly closed. integrate applies its branch changes; close preserves work that cannot safely be removed.
 
 [Complete example and detailed rules](../../guide/environment/workspaces/).
 
 ## Parameters and properties
 
-| Name                   | Type                                                     | Presence | Meaning                                                                                  |
-| ---------------------- | -------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------- |
-| `options`              | `WorkspaceOptions \| undefined`                          | Optional | Configuration object. Its fields are described in the associated options contract below. |
-| `options.storageQuota` | `Omit<StorageReservationOptions, "signal"> \| undefined` | Optional | See the linked contract and this family's rules for its interpretation.                  |
-| `options.signal`       | `AbortSignal \| undefined`                               | Optional | Cooperative cancellation for this operation.                                             |
-| `options.repository`   | `string \| undefined`                                    | Optional | Target host Git checkout.                                                                |
-| `options.branch`       | `BranchPolicy \| undefined`                              | Optional | Git workspace policy or resulting branch identity, according to this contract.           |
-| `options.copies`       | `readonly string[] \| undefined`                         | Optional | Repository-relative inputs copied into the workspace.                                    |
-| `options.limits`       | `StageLimits \| undefined`                               | Optional | See the linked contract and this family's rules for its interpretation.                  |
-| `options.label`        | `string \| undefined`                                    | Optional | See the linked contract and this family's rules for its interpretation.                  |
-| `options.hooks`        | `LifecycleHooks \| undefined`                            | Optional | Lifecycle commands in declared execution order.                                          |
+| Name                   | Type                                                     | Presence | Meaning                                                                                           |
+| ---------------------- | -------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------- |
+| `options`              | `WorkspaceOptions \| undefined`                          | Optional | Repository, branch policy, copied inputs, hooks and storage admission settings.                   |
+| `options.storageQuota` | `Omit<StorageReservationOptions, "signal"> \| undefined` | Optional | Admission limits and requested reservation for storage under the repository’s .outpost directory. |
+| `options.signal`       | `AbortSignal \| undefined`                               | Optional | Cooperative cancellation for this operation.                                                      |
+| `options.repository`   | `string \| undefined`                                    | Optional | Target host Git checkout.                                                                         |
+| `options.branch`       | `BranchPolicy \| undefined`                              | Optional | Select the current checkout, a retained named work branch or a branch prepared for integration.   |
+| `options.copies`       | `readonly string[] \| undefined`                         | Optional | Repository-relative inputs copied into the workspace.                                             |
+| `options.limits`       | `StageLimits \| undefined`                               | Optional | Timeouts for copying, Git preparation, commit collection and integration, in milliseconds.        |
+| `options.label`        | `string \| undefined`                                    | Optional | Human-readable label used in execution reporting.                                                 |
+| `options.hooks`        | `LifecycleHooks \| undefined`                            | Optional | Lifecycle commands in declared execution order.                                                   |
 
 ## Returns
 

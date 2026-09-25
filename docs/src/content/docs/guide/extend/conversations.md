@@ -60,6 +60,6 @@ node example.mts
 
 The script constructs the store and prints its name without reading credentials or transcripts. Assign it to a custom AgentAdapter.storage when integrating. Actual capture and restore require the native conversation context and lease. Rewrite only structural working-directory metadata, preserve conversation identity on resume, and fail clearly if the authoritative transcript is missing.
 
-[Contracts, options and edge cases](../../../reference/behavior/extend/conversations/).
+[Contracts, options and edge cases](../../behavior/extend/conversations/).
 
 Any persisted example files remain inside this demonstration directory.

@@ -2,10 +2,8 @@
 title: "createSandbox"
 description: "createSandbox — Outpost API"
 sidebar:
-  order: 10
+  order: 0
 ---
-
-Contrat public de **createSandbox**. Consultez le [guide sandboxes](../../guide/environment/lifecycle/) pour le comportement, les valeurs par défaut et des exemples.
 
 ## Import
 
@@ -15,32 +13,30 @@ import { createSandbox } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Acquérir un environnement d’exécution et le réutiliser pour des commandes ou tâches d’agent séquentielles.
-
-Docker est le provider par défaut. Une seule opération peut posséder une sandbox à la fois. La fermeture est idempotente ; annuler une commande ne détruit pas à elle seule une sandbox chaude.
+Alloue un environnement autour d’un workspace nouveau ou fourni par l’appelant. La sandbox renvoyée permet d’enchaîner commandes et tours d’agent sur le même bail ; l’appelant doit la fermer. Un workspace fourni conserve sa durée de vie indépendante.
 
 [Exemple complet et règles détaillées](../../guide/environment/lifecycle/).
 
 ## Paramètres et propriétés
 
-| Nom                          | Type                                                     | Présence  | Rôle                                                                                          |
-| ---------------------------- | -------------------------------------------------------- | --------- | --------------------------------------------------------------------------------------------- |
-| `options`                    | `SandboxOptions \| undefined`                            | Optionnel | Objet de configuration. Ses champs sont décrits dans le contrat d’options associé ci-dessous. |
-| `options.includeUncommitted` | `boolean \| undefined`                                   | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation.              |
-| `options.agent`              | `AgentAdapter \| undefined`                              | Optionnel | Adapter natif de l’agent de code.                                                             |
-| `options.provider`           | `SandboxProvider \| undefined`                           | Optionnel | Backend de l’environnement d’exécution.                                                       |
-| `options.workspace`          | `Workspace \| undefined`                                 | Optionnel | Workspace Git appartenant à l’appelant ; exclut un nouveau choix de dépôt/branche.            |
-| `options.hooks`              | `LifecycleHooks \| undefined`                            | Optionnel | Commandes de cycle de vie dans l’ordre déclaré.                                               |
-| `options.signal`             | `AbortSignal \| undefined`                               | Optionnel | Annulation coopérative de cette opération.                                                    |
-| `options.logging`            | `Logging \| undefined`                                   | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation.              |
-| `options.bootstrap`          | `boolean \| undefined`                                   | Optionnel | Indique si un agent sélectionné absent peut être installé automatiquement.                    |
-| `options.conversationHome`   | `string \| undefined`                                    | Optionnel | Home hôte utilisé pour le stockage des transcripts natifs.                                    |
-| `options.storageQuota`       | `Omit<StorageReservationOptions, "signal"> \| undefined` | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation.              |
-| `options.repository`         | `string \| undefined`                                    | Optionnel | Checkout Git hôte ciblé.                                                                      |
-| `options.branch`             | `BranchPolicy \| undefined`                              | Optionnel | Politique de workspace Git ou identité de branche résultante selon ce contrat.                |
-| `options.copies`             | `readonly string[] \| undefined`                         | Optionnel | Entrées relatives au dépôt copiées dans le workspace.                                         |
-| `options.limits`             | `StageLimits \| undefined`                               | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation.              |
-| `options.label`              | `string \| undefined`                                    | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation.              |
+| Nom                          | Type                                                     | Présence  | Rôle                                                                                                           |
+| ---------------------------- | -------------------------------------------------------- | --------- | -------------------------------------------------------------------------------------------------------------- |
+| `options`                    | `SandboxOptions \| undefined`                            | Optionnel | Configuration de possession du workspace, allocation du provider, agent par défaut et cycle de vie.            |
+| `options.includeUncommitted` | `boolean \| undefined`                                   | Optionnel | Inclut les modifications hôtes non commitées dans le snapshot du dépôt distant.                                |
+| `options.agent`              | `AgentAdapter \| undefined`                              | Optionnel | Adapter natif de l’agent de code.                                                                              |
+| `options.provider`           | `SandboxProvider \| undefined`                           | Optionnel | Backend de l’environnement d’exécution.                                                                        |
+| `options.workspace`          | `Workspace \| undefined`                                 | Optionnel | Workspace Git appartenant à l’appelant ; exclut un nouveau choix de dépôt/branche.                             |
+| `options.hooks`              | `LifecycleHooks \| undefined`                            | Optionnel | Commandes de cycle de vie dans l’ordre déclaré.                                                                |
+| `options.signal`             | `AbortSignal \| undefined`                               | Optionnel | Annulation coopérative de cette opération.                                                                     |
+| `options.logging`            | `Logging \| undefined`                                   | Optionnel | Configure le fichier journal du dispatch et la conservation des événements détaillés.                          |
+| `options.bootstrap`          | `boolean \| undefined`                                   | Optionnel | Indique si un agent sélectionné absent peut être installé automatiquement.                                     |
+| `options.conversationHome`   | `string \| undefined`                                    | Optionnel | Home hôte utilisé pour le stockage des transcripts natifs.                                                     |
+| `options.storageQuota`       | `Omit<StorageReservationOptions, "signal"> \| undefined` | Optionnel | Limites d’admission et réservation demandée pour le stockage dans .outpost du dépôt.                           |
+| `options.repository`         | `string \| undefined`                                    | Optionnel | Checkout Git hôte ciblé.                                                                                       |
+| `options.branch`             | `BranchPolicy \| undefined`                              | Optionnel | Choisit le checkout courant, une branche de travail nommée conservée ou une branche préparée pour intégration. |
+| `options.copies`             | `readonly string[] \| undefined`                         | Optionnel | Entrées relatives au dépôt copiées dans le workspace.                                                          |
+| `options.limits`             | `StageLimits \| undefined`                               | Optionnel | Délais de copie, préparation Git, collecte des commits et intégration, en millisecondes.                       |
+| `options.label`              | `string \| undefined`                                    | Optionnel | Libellé lisible utilisé dans les rapports d’exécution.                                                         |
 
 ## Retour
 

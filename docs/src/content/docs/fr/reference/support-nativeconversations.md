@@ -2,24 +2,20 @@
 title: "nativeConversations"
 description: "nativeConversations — Outpost API"
 sidebar:
-  order: 20
+  order: 0
 ---
 
-Contrat auxiliaire utilisé dans une signature publique. Il n’est pas exporté directement depuis le package ; utilisez l’inférence TypeScript ou le type public qui le référence.
+Contrat auxiliaire non exporté directement ; utilisez l’inférence TypeScript ou le type public qui le référence.
 
 ## Rôle et comportement
 
-Localiser, capturer, restaurer et déplacer les transcripts natifs séparément de l’authentification.
-
-Le home de conversation vaut par défaut le home système. Une continuation froide exige un transcript restaurable avant allocation. Un fork ne copie pas un workspace.
-
-[Exemple complet et règles détaillées](../../guide/agents/conversations/).
+Crée le ConversationStore natif du format Claude ou Codex choisi, en liant localisation, capture et restauration à son organisation de fichiers.
 
 ## Paramètres et propriétés
 
-| Nom      | Type                 | Présence | Rôle                                                                             |
-| -------- | -------------------- | -------- | -------------------------------------------------------------------------------- |
-| `format` | `ConversationFormat` | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
+| Nom      | Type                 | Présence | Rôle                                                   |
+| -------- | -------------------- | -------- | ------------------------------------------------------ |
+| `format` | `ConversationFormat` | Requis   | Organisation native des transcripts : claude ou codex. |
 
 ## Retour
 

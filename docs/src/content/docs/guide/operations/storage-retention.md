@@ -121,6 +121,6 @@ node example.mts
 
 This script does not prune anything. It needs Git but no running container; use `--no-build` in preparation if you only run this page. The reservation releases at scope exit. Protected recovery data can keep usage above a target. Reservations coordinate cooperating writers and are not physical disk quotas. Applying a reviewed plan is a separate explicit operation.
 
-[Contracts, options and edge cases](../../../reference/behavior/operations/storage-retention/).
+[Contracts, options and edge cases](../../behavior/operations/storage-retention/).
 
 To start again, use a new demonstration directory. Named branches retain commits; dirty worktrees remain available for recovery. Scripts do not push commits.

@@ -2,10 +2,8 @@
 title: "runQueueWorker"
 description: "runQueueWorker — Outpost API"
 sidebar:
-  order: 10
+  order: 0
 ---
-
-Public contract for **runQueueWorker**. See the [distributed execution guide](../../guide/advanced/distributed/) for behavior, defaults and examples.
 
 ## Import
 
@@ -15,23 +13,21 @@ import { runQueueWorker } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Coordinate durable JSON jobs through a SQLite queue, authenticated HTTP transport and registered workers.
-
-Effects are at least once. Stale fences cannot complete queue state, but external effects may repeat. HTTP binds loopback by default and supplies no TLS. One worker handles one job at a time.
+Poll for jobs whose handler is registered, run one job at a time and renew its fenced lease while executing. Record JSON results and observed usage, honor cancellation and deadlines, and reject stale completions; external effects may repeat after lease loss.
 
 [Complete example and detailed rules](../../guide/advanced/distributed/).
 
 ## Parameters and properties
 
-| Name               | Type                                     | Presence | Meaning                                                                                  |
-| ------------------ | ---------------------------------------- | -------- | ---------------------------------------------------------------------------------------- |
-| `options`          | `QueueWorkerOptions`                     | Required | Configuration object. Its fields are described in the associated options contract below. |
-| `options.queue`    | `TaskQueue`                              | Required | See the linked contract and this family's rules for its interpretation.                  |
-| `options.worker`   | `string`                                 | Required | See the linked contract and this family's rules for its interpretation.                  |
-| `options.handlers` | `Readonly<Record<string, QueueHandler>>` | Required | See the linked contract and this family's rules for its interpretation.                  |
-| `options.signal`   | `AbortSignal`                            | Required | Cooperative cancellation for this operation.                                             |
-| `options.leaseMs`  | `number \| undefined`                    | Optional | Worker lease duration in milliseconds.                                                   |
-| `options.pollMs`   | `number \| undefined`                    | Optional | See the linked contract and this family's rules for its interpretation.                  |
+| Name               | Type                                     | Presence | Meaning                                                                                 |
+| ------------------ | ---------------------------------------- | -------- | --------------------------------------------------------------------------------------- |
+| `options`          | `QueueWorkerOptions`                     | Required | Queue client, worker identity, handler registry, lease renewal timing and cancellation. |
+| `options.queue`    | `TaskQueue`                              | Required | Task queue used to enqueue, claim and persist job state.                                |
+| `options.worker`   | `string`                                 | Required | Identity of the worker claiming or owning the job lease.                                |
+| `options.handlers` | `Readonly<Record<string, QueueHandler>>` | Required | Registry mapping handler names to their job execution callbacks.                        |
+| `options.signal`   | `AbortSignal`                            | Required | Cooperative cancellation for this operation.                                            |
+| `options.leaseMs`  | `number \| undefined`                    | Optional | Worker lease duration in milliseconds.                                                  |
+| `options.pollMs`   | `number \| undefined`                    | Optional | Interval in milliseconds between queue polls.                                           |
 
 ## Returns
 

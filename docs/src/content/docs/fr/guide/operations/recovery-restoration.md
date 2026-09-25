@@ -62,4 +62,4 @@ Cette opération reconstruit l’état du dépôt capturé par un transfert. Les
 
 </details>
 
-[Contrat détaillé et limites](../../../reference/behavior/operations/recovery-restoration/).
+[Contrat détaillé et limites](../../behavior/operations/recovery-restoration/).

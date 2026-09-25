@@ -254,6 +254,6 @@ node example.mts
 
 `dispatch` ouvre un workspace, démarre la sandbox, exécute l’agent et ferme les ressources qu’il possède. La branche nommée conserve les commits sans fusionner dans `main`. Depuis `repository/`, examinez `git diff main...workshop/fix` et `git log workshop/fix`. Un processus d’agent en échec rejette la promesse ; `completed: false` signifie plutôt qu’aucun marqueur de fin ne correspond. Ni un marqueur ni un commit ne prouvent que les tests passent.
 
-[Contrats, options et cas particuliers](../../../reference/behavior/agents/dispatch/).
+[Contrats, options et cas particuliers](../../behavior/agents/dispatch/).
 
 Pour recommencer, utilisez un nouveau dossier de démonstration. Les branches nommées conservent les commits ; les worktrees sales restent disponibles pour récupération. Les scripts ne poussent aucun commit.

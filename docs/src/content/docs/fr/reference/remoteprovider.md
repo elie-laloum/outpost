@@ -2,10 +2,8 @@
 title: "remoteProvider"
 description: "remoteProvider — Outpost API"
 sidebar:
-  order: 10
+  order: 0
 ---
-
-Contrat public de **remoteProvider**. Consultez le [guide providers](../../guide/environment/providers/overview/) pour le comportement, les valeurs par défaut et des exemples.
 
 ## Import
 
@@ -15,17 +13,15 @@ import { remoteProvider } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Allouer conteneurs locaux, exécution hôte explicite ou sandboxes distantes via les sous-chemins du package.
-
-Les providers montés et hôtes utilisent current par défaut ; les distants utilisent integrate et rejettent current. Les SDK optionnels restent optionnels. L’exécution locale ne fournit aucune isolation.
+Enveloppe une définition de provider avec le placement remote, pour activer l’envoi du dépôt et sa synchronisation par l’application autour du bail fourni par acquire.
 
 [Exemple complet et règles détaillées](../../guide/environment/providers/overview/).
 
 ## Paramètres et propriétés
 
-| Nom          | Type                 | Présence | Rôle                                                                             |
-| ------------ | -------------------- | -------- | -------------------------------------------------------------------------------- |
-| `definition` | `ProviderDefinition` | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
+| Nom          | Type                 | Présence | Rôle                                                                                                            |
+| ------------ | -------------------- | -------- | --------------------------------------------------------------------------------------------------------------- |
+| `definition` | `ProviderDefinition` | Requis   | Nom de provider, variables d’environnement et implémentation acquire à envelopper dans un contrat de placement. |
 
 ## Retour
 

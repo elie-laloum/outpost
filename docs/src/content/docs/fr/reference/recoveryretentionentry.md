@@ -2,10 +2,8 @@
 title: "RecoveryRetentionEntry"
 description: "RecoveryRetentionEntry — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Contrat public de **RecoveryRetentionEntry**. Consultez le [guide récupération et rétention](../../guide/operations/recovery/) pour le comportement, les valeurs par défaut et des exemples.
 
 ## Import
 
@@ -13,26 +11,18 @@ Contrat public de **RecoveryRetentionEntry**. Consultez le [guide récupération
 import type { RecoveryRetentionEntry } from "@elie-laloum/outpost";
 ```
 
-## Rôle et comportement
-
-Inspecter le travail conservé et planifier explicitement sa rétention sans abandonner les modifications récupérables.
-
-Planifier ne supprime rien. L’application reprend possession et revalide les candidats. Les quotas observent l’usage plutôt que d’imposer une limite physique au système de fichiers.
-
-[Exemple complet et règles détaillées](../../guide/operations/recovery/).
-
 ## Paramètres et propriétés
 
-| Nom          | Type                  | Présence  | Rôle                                                                             |
-| ------------ | --------------------- | --------- | -------------------------------------------------------------------------------- |
-| `path`       | `string`              | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `category`   | `string`              | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `bytes`      | `number`              | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `eligible`   | `boolean`             | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `reason`     | `string`              | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `branch`     | `string \| undefined` | Optionnel | Politique de workspace Git ou identité de branche résultante selon ce contrat.   |
-| `head`       | `string \| undefined` | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `modifiedAt` | `string \| undefined` | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
+| Nom          | Type                  | Présence  | Rôle                                                                                                |
+| ------------ | --------------------- | --------- | --------------------------------------------------------------------------------------------------- |
+| `path`       | `string`              | Requis    | Chemin hôte de l’entrée de stockage inspectée.                                                      |
+| `category`   | `string`              | Requis    | Catégorie de stockage du candidat à la rétention.                                                   |
+| `bytes`      | `number`              | Requis    | Octets observés attribuables à ce candidat à la rétention.                                          |
+| `eligible`   | `boolean`             | Requis    | Indique si le candidat a passé les contrôles de sûreté, périmètre et âge autorisant sa suppression. |
+| `reason`     | `string`              | Requis    | Explication de l’éligibilité du candidat au nettoyage ou de la nécessité de le protéger.            |
+| `branch`     | `string \| undefined` | Optionnel | Nom de la branche de travail utilisée ou observée pendant l’exécution.                              |
+| `head`       | `string \| undefined` | Optionnel | Commit Git HEAD enregistré par l’inspection ou le snapshot.                                         |
+| `modifiedAt` | `string \| undefined` | Optionnel | Horodatage ISO de la dernière modification de l’entrée inspectée.                                   |
 
 ## Signature
 

@@ -25,4 +25,4 @@ A **workflow** connects tasks and their typed results. It can run ordinary TypeS
 
 ## Adapt the starter
 
-Change the brief first. Then choose a [branch policy](../../environment/branches/), add a [response contract](../../agents/responses/), or keep a [sandbox warm](../../environment/lifecycle/). The [configuration reference](../../../reference/manual/configuration/) explains path and environment precedence.
+Change the brief first. Then choose a [branch policy](../../environment/branches/), add a [response contract](../../agents/responses/), or keep a [sandbox warm](../../environment/lifecycle/). The [configuration reference](../../manual/configuration/) explains path and environment precedence.

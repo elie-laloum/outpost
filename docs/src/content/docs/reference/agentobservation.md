@@ -5,29 +5,33 @@ sidebar:
   order: 10
 ---
 
-Public contract for **AgentObservation**. See the [observability guide](../../guide/agents/observability/) for behavior, defaults and examples.
-
 ## Import
 
 ```ts
 import type { AgentObservation } from "@elie-laloum/outpost";
 ```
 
-## Purpose and behavior
-
-Observe progress, log execution and account for reported usage without changing task outcomes.
-
-Observer failures are isolated. Token counts are not prices. The optional OpenTelemetry entry point loads its vendor API separately from core imports.
-
-[Complete example and detailed rules](../../guide/agents/observability/).
-
 ## Parameters and properties
 
-| Name   | Type                                                                                                                                             | Presence | Meaning                                                                 |
-| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------ | -------- | ----------------------------------------------------------------------- |
-| `kind` | `"phase" \| "summary" \| "warning" \| "text" \| "result" \| "prompt" \| "tool" \| "conversation" \| "usage" \| "failure" \| "finished" \| "raw"` | Required | See the linked contract and this family's rules for its interpretation. |
-| `pass` | `number`                                                                                                                                         | Required | See the linked contract and this family's rules for its interpretation. |
-| `at`   | `string`                                                                                                                                         | Required | See the linked contract and this family's rules for its interpretation. |
+The fields below cover all variants; the signature specifies their allowed combinations.
+
+| Name         | Type                                                                                                                                             | Presence          | Meaning                                                                                                                                        |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `kind`       | `"phase" \| "summary" \| "warning" \| "text" \| "result" \| "prompt" \| "tool" \| "conversation" \| "usage" \| "failure" \| "finished" \| "raw"` | Required          | Discriminator selecting the event payload: phase, summary, warning, text, result, prompt, tool, conversation, usage, failure, finished or raw. |
+| `name`       | `string`                                                                                                                                         | Variant-dependent | Phase name for phase events or tool name for tool events.                                                                                      |
+| `agent`      | `string \| undefined`                                                                                                                            | Variant-dependent | Agent CLI identifier to report or diagnose: claude, codex or gemini.                                                                           |
+| `branch`     | `string \| undefined`                                                                                                                            | Variant-dependent | Name of the work branch used or observed during execution.                                                                                     |
+| `directory`  | `string \| undefined`                                                                                                                            | Variant-dependent | Host workspace directory used for this execution.                                                                                              |
+| `pass`       | `number`                                                                                                                                         | Required          | One-based agent pass number attached to an observation or reporter state.                                                                      |
+| `at`         | `string`                                                                                                                                         | Required          | ISO timestamp assigned to the agent observation.                                                                                               |
+| `durationMs` | `number`                                                                                                                                         | Variant-dependent | Elapsed execution time in milliseconds.                                                                                                        |
+| `status`     | `number`                                                                                                                                         | Variant-dependent | Process exit code; zero denotes success.                                                                                                       |
+| `tokens`     | `Usage`                                                                                                                                          | Variant-dependent | Token usage counters carried by a usage or summary event.                                                                                      |
+| `message`    | `string`                                                                                                                                         | Variant-dependent | Warning or failure message decoded from the agent event.                                                                                       |
+| `text`       | `string`                                                                                                                                         | Variant-dependent | Text carried by the event: streamed text, final answer or submitted prompt according to kind.                                                  |
+| `input`      | `unknown`                                                                                                                                        | Variant-dependent | Raw arguments supplied to the tool named by this tool event.                                                                                   |
+| `id`         | `string`                                                                                                                                         | Variant-dependent | Native conversation identifier used to locate or continue the session.                                                                         |
+| `value`      | `unknown`                                                                                                                                        | Variant-dependent | Unrecognized raw protocol value preserved for observation.                                                                                     |
 
 ## Signature
 

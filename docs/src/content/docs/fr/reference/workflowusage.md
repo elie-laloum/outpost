@@ -2,10 +2,8 @@
 title: "WorkflowUsage"
 description: "WorkflowUsage — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Contrat public de **WorkflowUsage**. Consultez le [guide workflows](../../guide/workflows/graph/) pour le comportement, les valeurs par défaut et des exemples.
 
 ## Import
 
@@ -13,20 +11,12 @@ Contrat public de **WorkflowUsage**. Consultez le [guide workflows](../../guide/
 import type { WorkflowUsage } from "@elie-laloum/outpost";
 ```
 
-## Rôle et comportement
-
-Composer des tâches avec dépendances explicites et accès typé aux résultats.
-
-Les clés dupliquées, dépendances absentes et cycles échouent à la validation. Une dépendance en échec ou ignorée empêche ses descendants. Les reprises peuvent répéter les effets externes. Unwrap lève une erreur en cas de non-succès.
-
-[Exemple complet et règles détaillées](../../guide/workflows/graph/).
-
 ## Paramètres et propriétés
 
-| Nom        | Type     | Présence | Rôle                                                                             |
-| ---------- | -------- | -------- | -------------------------------------------------------------------------------- |
-| `attempts` | `number` | Requis   | Nombre de tentatives ou limite d’admission selon le contrat.                     |
-| `tokens`   | `Usage`  | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
+| Nom        | Type     | Présence | Rôle                                                                                    |
+| ---------- | -------- | -------- | --------------------------------------------------------------------------------------- |
+| `attempts` | `number` | Requis   | Nombre cumulé de tentatives de tâches admises dans le workflow.                         |
+| `tokens`   | `Usage`  | Requis   | Usage cumulé de tokens observé sur les tentatives, y compris la comptabilité restaurée. |
 
 ## Signature
 

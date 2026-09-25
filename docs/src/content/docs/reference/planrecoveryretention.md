@@ -2,10 +2,8 @@
 title: "planRecoveryRetention"
 description: "planRecoveryRetention — Outpost API"
 sidebar:
-  order: 10
+  order: 0
 ---
-
-Public contract for **planRecoveryRetention**. See the [recovery and retention guide](../../guide/operations/recovery/) for behavior, defaults and examples.
 
 ## Import
 
@@ -15,20 +13,18 @@ import { planRecoveryRetention } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Inspect retained work and plan explicit storage retention without discarding recoverable edits.
-
-Planning does not prune. Application reacquires ownership and revalidates candidates. Quota checks observe usage rather than imposing physical filesystem limits.
+Inspect local recovery storage and compute which clean workspaces or closed logs satisfy the supplied age and capacity policy. Planning reports eligibility and projected usage without removing files.
 
 [Complete example and detailed rules](../../guide/operations/recovery/).
 
 ## Parameters and properties
 
-| Name                 | Type                       | Presence | Meaning                                                                                  |
-| -------------------- | -------------------------- | -------- | ---------------------------------------------------------------------------------------- |
-| `options`            | `RecoveryRetentionOptions` | Required | Configuration object. Its fields are described in the associated options contract below. |
-| `options.repository` | `string \| undefined`      | Optional | Target host Git checkout.                                                                |
-| `options.policy`     | `RecoveryRetentionPolicy`  | Required | See the linked contract and this family's rules for its interpretation.                  |
-| `options.maxEntries` | `number \| undefined`      | Optional | See the linked contract and this family's rules for its interpretation.                  |
+| Name                 | Type                       | Presence | Meaning                                                                                         |
+| -------------------- | -------------------------- | -------- | ----------------------------------------------------------------------------------------------- |
+| `options`            | `RecoveryRetentionOptions` | Required | Repository to inspect, explicit retention policy and scan bound.                                |
+| `options.repository` | `string \| undefined`      | Optional | Target host Git checkout.                                                                       |
+| `options.policy`     | `RecoveryRetentionPolicy`  | Required | Explicit storage scopes, minimum age and capacity targets used to decide retention eligibility. |
+| `options.maxEntries` | `number \| undefined`      | Optional | Maximum filesystem entries inspected before marking the inventory incomplete.                   |
 
 ## Returns
 

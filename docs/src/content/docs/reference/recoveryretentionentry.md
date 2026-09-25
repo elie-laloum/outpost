@@ -2,10 +2,8 @@
 title: "RecoveryRetentionEntry"
 description: "RecoveryRetentionEntry — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Public contract for **RecoveryRetentionEntry**. See the [recovery and retention guide](../../guide/operations/recovery/) for behavior, defaults and examples.
 
 ## Import
 
@@ -13,26 +11,18 @@ Public contract for **RecoveryRetentionEntry**. See the [recovery and retention 
 import type { RecoveryRetentionEntry } from "@elie-laloum/outpost";
 ```
 
-## Purpose and behavior
-
-Inspect retained work and plan explicit storage retention without discarding recoverable edits.
-
-Planning does not prune. Application reacquires ownership and revalidates candidates. Quota checks observe usage rather than imposing physical filesystem limits.
-
-[Complete example and detailed rules](../../guide/operations/recovery/).
-
 ## Parameters and properties
 
-| Name         | Type                  | Presence | Meaning                                                                        |
-| ------------ | --------------------- | -------- | ------------------------------------------------------------------------------ |
-| `path`       | `string`              | Required | See the linked contract and this family's rules for its interpretation.        |
-| `category`   | `string`              | Required | See the linked contract and this family's rules for its interpretation.        |
-| `bytes`      | `number`              | Required | See the linked contract and this family's rules for its interpretation.        |
-| `eligible`   | `boolean`             | Required | See the linked contract and this family's rules for its interpretation.        |
-| `reason`     | `string`              | Required | See the linked contract and this family's rules for its interpretation.        |
-| `branch`     | `string \| undefined` | Optional | Git workspace policy or resulting branch identity, according to this contract. |
-| `head`       | `string \| undefined` | Optional | See the linked contract and this family's rules for its interpretation.        |
-| `modifiedAt` | `string \| undefined` | Optional | See the linked contract and this family's rules for its interpretation.        |
+| Name         | Type                  | Presence | Meaning                                                                           |
+| ------------ | --------------------- | -------- | --------------------------------------------------------------------------------- |
+| `path`       | `string`              | Required | Host path of the inspected storage entry.                                         |
+| `category`   | `string`              | Required | Storage category of the retention candidate.                                      |
+| `bytes`      | `number`              | Required | Observed bytes attributable to this retention candidate.                          |
+| `eligible`   | `boolean`             | Required | Whether the candidate passed retention safety, scope and age checks for removal.  |
+| `reason`     | `string`              | Required | Explanation of why this retention candidate is eligible or must remain protected. |
+| `branch`     | `string \| undefined` | Optional | Name of the work branch used or observed during execution.                        |
+| `head`       | `string \| undefined` | Optional | Git HEAD commit recorded by the inspection or snapshot.                           |
+| `modifiedAt` | `string \| undefined` | Optional | ISO timestamp of the inspected entry’s last filesystem modification.              |
 
 ## Signature
 

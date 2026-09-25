@@ -119,6 +119,6 @@ node example.mts
 
 The command succeeds without model access or package downloads. This remains a research prototype. Docker/Podman deny-all selects network none; loopback and other explicitly exposed host channels are separate concerns. Domain allowlists are unsupported for containers and rejected. The host may still use networking to pull images. Vercel firewall rules have their own documented limits.
 
-[Contracts, options and edge cases](../../../reference/behavior/sandboxes/egress/).
+[Contracts, options and edge cases](../../behavior/sandboxes/egress/).
 
 To start again, use a new demonstration directory. Named branches retain commits; dirty worktrees remain available for recovery. Scripts do not push commits.

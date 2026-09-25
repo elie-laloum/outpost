@@ -5,8 +5,6 @@ sidebar:
   order: 10
 ---
 
-Contrat public de **EgressPolicy**. Consultez le [guide réseau sortant](../../guide/advanced/egress/) pour le comportement, les valeurs par défaut et des exemples.
-
 ## Import
 
 ```ts
@@ -16,19 +14,16 @@ import type { EgressPolicy } from "@elie-laloum/outpost/providers/podman";
 import type { EgressPolicy } from "@elie-laloum/outpost/providers/vercel";
 ```
 
-## Rôle et comportement
-
-Choisir une politique réseau sortante opt-in imposée par le provider.
-
-Prototype de recherche. Docker/Podman prennent en charge deny-all, pas les listes de domaines. Vercel utilise son firewall natif. Les capacités non prises en charge sont rejetées plutôt qu’affaiblies.
-
-[Exemple complet et règles détaillées](../../guide/advanced/egress/).
-
 ## Paramètres et propriétés
 
-| Nom    | Type                        | Présence | Rôle                                                                             |
-| ------ | --------------------------- | -------- | -------------------------------------------------------------------------------- |
-| `mode` | `"deny-all" \| "allowlist"` | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
+Les champs ci-dessous couvrent toutes les variantes ; la signature précise leurs combinaisons autorisées.
+
+| Nom          | Type                             | Présence          | Rôle                                                                                                     |
+| ------------ | -------------------------------- | ----------------- | -------------------------------------------------------------------------------------------------------- |
+| `mode`       | `"deny-all" \| "allowlist"`      | Requis            | deny-all bloque le trafic sortant ; allowlist le restreint aux destinations déclarées si pris en charge. |
+| `domains`    | `readonly string[] \| undefined` | Selon la variante | Noms de domaines sortants autorisés pour les providers prenant en charge ces listes.                     |
+| `allowCidrs` | `readonly string[] \| undefined` | Selon la variante | Plages réseau explicitement autorisées par la politique sortante du provider.                            |
+| `denyCidrs`  | `readonly string[] \| undefined` | Selon la variante | Plages réseau explicitement interdites par la politique sortante du provider.                            |
 
 ## Signature
 

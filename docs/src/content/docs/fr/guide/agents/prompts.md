@@ -258,6 +258,6 @@ node example.mts
 
 Le fichier est relu à chaque passe. `OBJECTIVE` vient de vos valeurs ; `WORK_BRANCH` vient du workspace. Les fragments de commande présents dans le fichier s’exécutent dans la sandbox préparée. Un brief `{ text }` reste littéral. Une valeur manquante ou une commande d’expansion en échec arrête l’exécution. Insérez uniquement des valeurs de confiance dans les fragments shell.
 
-[Contrats, options et cas particuliers](../../../reference/behavior/agents/prompts/).
+[Contrats, options et cas particuliers](../../behavior/agents/prompts/).
 
 Pour recommencer, utilisez un nouveau dossier de démonstration. Les branches nommées conservent les commits ; les worktrees sales restent disponibles pour récupération. Les scripts ne poussent aucun commit.

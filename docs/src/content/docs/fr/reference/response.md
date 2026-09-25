@@ -5,8 +5,6 @@ sidebar:
   order: 10
 ---
 
-Contrat public de **response**. Consultez le [guide prompts et réponses](../../guide/agents/responses/) pour le comportement, les valeurs par défaut et des exemples.
-
 ## Import
 
 ```ts
@@ -15,11 +13,16 @@ import { response } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Fournir un brief littéral ou fichier et valider une réponse balisée avant d’exposer sa valeur typée.
-
-Fournissez exactement une forme de brief. L’expansion vaut par défaut 30 secondes par commande originale. Les réparations de réponse valent zéro par défaut. Une réponse structurée exige une passe.
+Construit des validateurs de réponse balisée avec text ou json. Tous deux lisent la dernière balise complète correspondante ; json analyse son contenu et applique le schéma fourni. Un contenu absent ou invalide lève ResponseError, et repairs vaut zéro par défaut.
 
 [Exemple complet et règles détaillées](../../guide/agents/responses/).
+
+## Paramètres et propriétés
+
+| Nom    | Type                                                      | Présence | Rôle                                                                                                                    |
+| ------ | --------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `text` | `(options: TextResponseOptions) => ResponseSpec<string>`  | Requis   | Construit un validateur renvoyant le contenu nettoyé de la dernière balise complète sous forme de chaîne.               |
+| `json` | `<T>(options: JsonResponseOptions<T>) => ResponseSpec<T>` | Requis   | Construit un validateur analysant le JSON balisé et appliquant un validateur Standard Schema ou une fonction d’analyse. |
 
 ## Signature
 

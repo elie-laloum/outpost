@@ -5,8 +5,6 @@ sidebar:
   order: 10
 ---
 
-Contrat public de **agentVersions**. Consultez le [guide agents](../../guide/agents/adapters/) pour le comportement, les valeurs par défaut et des exemples.
-
 ## Import
 
 ```ts
@@ -15,11 +13,17 @@ import { agentVersions } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Configurer Claude Code, Codex ou Gemini indépendamment du backend de sandbox.
-
-La CLI choisit son modèle si omis. La capture native est activée par défaut pour Claude/Codex. Gemini ne prend en charge que les nouvelles sessions. Identifiants d’agent et de provider sont distincts.
+Expose les versions des CLI Claude, Codex et Gemini servant de références aux fixtures de protocole et aux images générées. Ces valeurs n’interrogent pas les binaires installés et ne prouvent pas l’accès à un compte.
 
 [Exemple complet et règles détaillées](../../guide/agents/adapters/).
+
+## Paramètres et propriétés
+
+| Nom      | Type        | Présence | Rôle                                                                         |
+| -------- | ----------- | -------- | ---------------------------------------------------------------------------- |
+| `gemini` | `"0.61.0"`  | Requis   | Version du CLI Gemini utilisée par les fixtures de compatibilité intégrées.  |
+| `codex`  | `"0.156.1"` | Requis   | Version du CLI Codex utilisée par les fixtures de compatibilité intégrées.   |
+| `claude` | `"2.1.280"` | Requis   | Version de Claude Code utilisée par les fixtures de compatibilité intégrées. |
 
 ## Signature
 

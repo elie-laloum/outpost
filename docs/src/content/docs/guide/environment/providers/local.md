@@ -84,6 +84,6 @@ node example.mts
 
 Install Git as well as the Node/npm preparation. The output is `host execution`. The command runs as your OS account: local provides no filesystem or environment isolation. This exercise owns and deletes only its temporary directory. Using a worktree separates Git changes but does not prevent access to unrelated host files.
 
-[Contracts, options and edge cases](../../../../reference/behavior/providers/local/).
+[Contracts, options and edge cases](../../../behavior/providers/local/).
 
 Any persisted example files remain inside this demonstration directory.

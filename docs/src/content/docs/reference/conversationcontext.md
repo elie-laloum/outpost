@@ -2,10 +2,8 @@
 title: "ConversationContext"
 description: "ConversationContext — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Public contract for **ConversationContext**. See the [conversations guide](../../guide/agents/conversations/) for behavior, defaults and examples.
 
 ## Import
 
@@ -13,24 +11,16 @@ Public contract for **ConversationContext**. See the [conversations guide](../..
 import type { ConversationContext } from "@elie-laloum/outpost";
 ```
 
-## Purpose and behavior
-
-Locate, capture, restore and relocate native transcripts separately from authentication.
-
-The host conversation home defaults to the OS home. A cold continuation requires a restorable transcript before allocation. A fork does not copy a workspace.
-
-[Complete example and detailed rules](../../guide/agents/conversations/).
-
 ## Parameters and properties
 
-| Name         | Type                                       | Presence | Meaning                                                                 |
-| ------------ | ------------------------------------------ | -------- | ----------------------------------------------------------------------- |
-| `repository` | `string`                                   | Required | Target host Git checkout.                                               |
-| `sandbox`    | `SandboxLease`                             | Required | See the linked contract and this family's rules for its interpretation. |
-| `staging`    | `string`                                   | Required | See the linked contract and this family's rules for its interpretation. |
-| `home`       | `string \| undefined`                      | Optional | See the linked contract and this family's rules for its interpretation. |
-| `local`      | `boolean \| undefined`                     | Optional | See the linked contract and this family's rules for its interpretation. |
-| `warn`       | `((message: string) => void) \| undefined` | Optional | See the linked contract and this family's rules for its interpretation. |
+| Name         | Type                                       | Presence | Meaning                                                                             |
+| ------------ | ------------------------------------------ | -------- | ----------------------------------------------------------------------------------- |
+| `repository` | `string`                                   | Required | Target host Git checkout.                                                           |
+| `sandbox`    | `SandboxLease`                             | Required | Execution lease used to transfer transcripts into or out of the agent home.         |
+| `staging`    | `string`                                   | Required | Host directory receiving captured or prepared transcript files.                     |
+| `home`       | `string \| undefined`                      | Optional | Host agent home used to locate or persist native transcripts.                       |
+| `local`      | `boolean \| undefined`                     | Optional | Use host-local transcript access instead of transferring through the sandbox lease. |
+| `warn`       | `((message: string) => void) \| undefined` | Optional | Callback receiving nonfatal execution or conversation-storage warnings.             |
 
 ## Signature
 

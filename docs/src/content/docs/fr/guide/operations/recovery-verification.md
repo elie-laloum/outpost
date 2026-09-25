@@ -91,4 +91,4 @@ Elle crée son dépôt temporaire, vérifie un véritable patch, montre la simul
 
 </details>
 
-[Contrat détaillé et limites](../../../reference/behavior/operations/recovery-verification/).
+[Contrat détaillé et limites](../../behavior/operations/recovery-verification/).

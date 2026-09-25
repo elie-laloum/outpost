@@ -5,8 +5,6 @@ sidebar:
   order: 10
 ---
 
-Public contract for **response**. See the [prompts and responses guide](../../guide/agents/responses/) for behavior, defaults and examples.
-
 ## Import
 
 ```ts
@@ -15,11 +13,16 @@ import { response } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Supply a literal or file brief and validate a tagged model answer before exposing its typed value.
-
-Supply exactly one brief form. Expansion defaults to 30 seconds per original command. Response repairs default to zero. Structured responses require one pass.
+Construct tagged response validators with text or json. Both read the last complete matching tag; json parses its contents and applies the supplied schema. Invalid or missing content raises ResponseError, and repairs defaults to zero.
 
 [Complete example and detailed rules](../../guide/agents/responses/).
+
+## Parameters and properties
+
+| Name   | Type                                                      | Presence | Meaning                                                                                                |
+| ------ | --------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------ |
+| `text` | `(options: TextResponseOptions) => ResponseSpec<string>`  | Required | Build a validator that returns trimmed content of the last complete tag as a string.                   |
+| `json` | `<T>(options: JsonResponseOptions<T>) => ResponseSpec<T>` | Required | Build a validator that parses tagged JSON and applies a Standard Schema validator or parsing function. |
 
 ## Signature
 

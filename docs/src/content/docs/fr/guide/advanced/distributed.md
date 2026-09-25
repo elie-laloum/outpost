@@ -98,6 +98,6 @@ node example.mts
 
 Le worker renvoie `hello-world`. Cet exercice utilise HTTP et SQLite, mais tous les composants tournent sur votre ordinateur. Le serveur et le worker s’arrêtent dans `finally` ; la base reste dans `state/`. Des hôtes séparés nécessitent HTTPS authentifié ou un tunnel chiffré. Les baux empêchent les validations de résultats périmées, sans garantir des effets externes exactement une fois.
 
-[Contrats, options et cas particuliers](../../../reference/behavior/workflows/distributed/).
+[Contrats, options et cas particuliers](../../behavior/workflows/distributed/).
 
 Les fichiers persistants éventuels restent dans ce dossier de démonstration.

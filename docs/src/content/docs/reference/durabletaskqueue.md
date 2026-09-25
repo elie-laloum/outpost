@@ -2,10 +2,8 @@
 title: "DurableTaskQueue"
 description: "DurableTaskQueue — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Public contract for **DurableTaskQueue**. See the [distributed execution guide](../../guide/advanced/distributed/) for behavior, defaults and examples.
 
 ## Import
 
@@ -13,25 +11,17 @@ Public contract for **DurableTaskQueue**. See the [distributed execution guide](
 import type { DurableTaskQueue } from "@elie-laloum/outpost";
 ```
 
-## Purpose and behavior
-
-Coordinate durable JSON jobs through a SQLite queue, authenticated HTTP transport and registered workers.
-
-Effects are at least once. Stale fences cannot complete queue state, but external effects may repeat. HTTP binds loopback by default and supplies no TLS. One worker handles one job at a time.
-
-[Complete example and detailed rules](../../guide/advanced/distributed/).
-
 ## Parameters and properties
 
-| Name       | Type                                                            | Presence | Meaning                                                                 |
-| ---------- | --------------------------------------------------------------- | -------- | ----------------------------------------------------------------------- |
-| `close`    | `() => void`                                                    | Required | See the linked contract and this family's rules for its interpretation. |
-| `enqueue`  | `(request: QueueRequest) => Promise<QueueJob>`                  | Required | See the linked contract and this family's rules for its interpretation. |
-| `get`      | `(id: string) => Promise<QueueJob \| undefined>`                | Required | See the linked contract and this family's rules for its interpretation. |
-| `claim`    | `(request: QueueClaim) => Promise<QueueJob \| undefined>`       | Required | See the linked contract and this family's rules for its interpretation. |
-| `renew`    | `(lease: QueueLease, leaseMs: number) => Promise<QueueJob>`     | Required | See the linked contract and this family's rules for its interpretation. |
-| `complete` | `(lease: QueueLease, result: QueueResult) => Promise<QueueJob>` | Required | See the linked contract and this family's rules for its interpretation. |
-| `cancel`   | `(id: string, fence: number) => Promise<QueueJob>`              | Required | See the linked contract and this family's rules for its interpretation. |
+| Name       | Type                                                            | Presence | Meaning                                                                                     |
+| ---------- | --------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------- |
+| `close`    | `() => void`                                                    | Required | Close the owned SQLite database connection.                                                 |
+| `enqueue`  | `(request: QueueRequest) => Promise<QueueJob>`                  | Required | Persist a JSON job request, deduplicating by ID and rejecting conflicting requests.         |
+| `get`      | `(id: string) => Promise<QueueJob \| undefined>`                | Required | Return the current persisted job for an ID, or undefined if absent.                         |
+| `claim`    | `(request: QueueClaim) => Promise<QueueJob \| undefined>`       | Required | Acquire an eligible job for one of the worker’s registered handlers with a new lease fence. |
+| `renew`    | `(lease: QueueLease, leaseMs: number) => Promise<QueueJob>`     | Required | Extend the current worker lease; reject a stale worker or fence.                            |
+| `complete` | `(lease: QueueLease, result: QueueResult) => Promise<QueueJob>` | Required | Persist a job result only while the worker still owns the matching fenced lease.            |
+| `cancel`   | `(id: string, fence: number) => Promise<QueueJob>`              | Required | Cancel a job only if its current fence matches the supplied generation.                     |
 
 ## Signature
 

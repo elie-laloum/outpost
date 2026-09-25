@@ -2,10 +2,8 @@
 title: "Sandbox"
 description: "Sandbox — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Public contract for **Sandbox**. See the [sandboxes guide](../../guide/environment/lifecycle/) for behavior, defaults and examples.
 
 ## Import
 
@@ -13,27 +11,20 @@ Public contract for **Sandbox**. See the [sandboxes guide](../../guide/environme
 import type { Sandbox } from "@elie-laloum/outpost";
 ```
 
-## Purpose and behavior
-
-Acquire an execution environment and reuse it for sequential commands or agent jobs.
-
-Docker is the default provider. Only one operation may own a sandbox at a time. Closing is idempotent; cancellation of one command does not itself destroy a warm sandbox.
-
-[Complete example and detailed rules](../../guide/environment/lifecycle/).
-
 ## Parameters and properties
 
-| Name        | Type                                                                                         | Presence | Meaning                                                                 |
-| ----------- | -------------------------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------- |
-| `diagnose`  | `(options?: SandboxDiagnosticOptions) => Promise<SandboxDiagnosticReport>`                   | Required | See the linked contract and this family's rules for its interpretation. |
-| `workspace` | `Workspace`                                                                                  | Required | Caller-owned Git workspace; excludes new repository/branch choices.     |
-| `root`      | `string`                                                                                     | Required | See the linked contract and this family's rules for its interpretation. |
-| `dispatch`  | `<T = undefined>(options: DispatchOptions<T>) => Promise<WarmDispatchResult<T>>`             | Required | See the linked contract and this family's rules for its interpretation. |
-| `resume`    | `<T = undefined>(id: string, options: DispatchOptions<T>) => Promise<WarmDispatchResult<T>>` | Required | See the linked contract and this family's rules for its interpretation. |
-| `fork`      | `<T = undefined>(id: string, options: DispatchOptions<T>) => Promise<WarmDispatchResult<T>>` | Required | See the linked contract and this family's rules for its interpretation. |
-| `attach`    | `(options?: AttachOptions) => Promise<AttachResult>`                                         | Required | See the linked contract and this family's rules for its interpretation. |
-| `command`   | `(command: Command) => Promise<CommandResult>`                                               | Required | See the linked contract and this family's rules for its interpretation. |
-| `close`     | `(options?: { readonly preserve?: boolean; }) => Promise<Disposal>`                          | Required | See the linked contract and this family's rules for its interpretation. |
+| Name                    | Type                                                                                         | Presence | Meaning                                                                                                       |
+| ----------------------- | -------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------- |
+| `diagnose`              | `(options?: SandboxDiagnosticOptions) => Promise<SandboxDiagnosticReport>`                   | Required | Probe this sandbox’s commands, agent and optional transfers under its exclusive operation gate.               |
+| `workspace`             | `Workspace`                                                                                  | Required | Workspace bound to this sandbox; its ownership determines whether sandbox closure also closes it.             |
+| `root`                  | `string`                                                                                     | Required | Repository workspace path inside the execution environment.                                                   |
+| `dispatch`              | `<T = undefined>(options: DispatchOptions<T>) => Promise<WarmDispatchResult<T>>`             | Required | Run an agent brief using this sandbox’s existing lease and return a warm result.                              |
+| `resume`                | `<T = undefined>(id: string, options: DispatchOptions<T>) => Promise<WarmDispatchResult<T>>` | Required | Continue the given native conversation ID on this sandbox’s existing lease.                                   |
+| `fork`                  | `<T = undefined>(id: string, options: DispatchOptions<T>) => Promise<WarmDispatchResult<T>>` | Required | Fork the given native conversation ID and run a new brief on this sandbox’s lease.                            |
+| `attach`                | `(options?: AttachOptions) => Promise<AttachResult>`                                         | Required | Attach a real interactive agent terminal to this sandbox’s existing environment.                              |
+| `command`               | `(command: Command) => Promise<CommandResult>`                                               | Required | Execute a command on this lease; return nonzero statuses without converting them into workflow task failures. |
+| `close`                 | `(options?: { readonly preserve?: boolean; }) => Promise<Disposal>`                          | Required | Wait for owned operations and release the sandbox; close only a workspace owned by this sandbox.              |
+| `[Symbol.asyncDispose]` | `() => Promise<void>`                                                                        | Required | Close this resource through JavaScript asynchronous resource disposal.                                        |
 
 ## Signature
 

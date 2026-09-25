@@ -2,10 +2,8 @@
 title: "WarmDispatchResult"
 description: "WarmDispatchResult — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Public contract for **WarmDispatchResult**. See the [dispatch guide](../../guide/agents/dispatch/) for behavior, defaults and examples.
 
 ## Import
 
@@ -13,33 +11,25 @@ Public contract for **WarmDispatchResult**. See the [dispatch guide](../../guide
 import type { WarmDispatchResult } from "@elie-laloum/outpost";
 ```
 
-## Purpose and behavior
-
-Run an agent task and collect text, typed output, commits, usage and native conversation information.
-
-One pass is the default. Process or response failures reject. An exhausted pass budget can instead return completed: false. Cold dispatch closes owned resources; warm dispatch retains its sandbox.
-
-[Complete example and detailed rules](../../guide/agents/dispatch/).
-
 ## Parameters and properties
 
-| Name                | Type                                                                             | Presence | Meaning                                                                        |
-| ------------------- | -------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------ |
-| `resume`            | `<U = undefined>(options: DispatchOptions<U>) => Promise<WarmDispatchResult<U>>` | Required | See the linked contract and this family's rules for its interpretation.        |
-| `fork`              | `<U = undefined>(options: DispatchOptions<U>) => Promise<WarmDispatchResult<U>>` | Required | See the linked contract and this family's rules for its interpretation.        |
-| `text`              | `string`                                                                         | Required | Text content; see the owning operation for its source.                         |
-| `conversation`      | `string \| undefined`                                                            | Optional | Available native conversation identity.                                        |
-| `usage`             | `Usage`                                                                          | Required | Reported usage counters; not a currency estimate.                              |
-| `branch`            | `string`                                                                         | Required | Git workspace policy or resulting branch identity, according to this contract. |
-| `directory`         | `string`                                                                         | Required | Filesystem directory used by the owning operation; see path rules.             |
-| `commits`           | `readonly Commit[]`                                                              | Required | Collected Git commit identities and subjects.                                  |
-| `transcript`        | `string \| undefined`                                                            | Optional | Available host path to the captured transcript.                                |
-| `log`               | `string \| undefined`                                                            | Optional | See the linked contract and this family's rules for its interpretation.        |
-| `retainedDirectory` | `string \| undefined`                                                            | Optional | Workspace retained for inspection or recovery.                                 |
-| `turns`             | `readonly Turn[]`                                                                | Required | See the linked contract and this family's rules for its interpretation.        |
-| `value`             | `T`                                                                              | Required | Typed value produced or consumed by this contract.                             |
-| `completed`         | `boolean`                                                                        | Required | Whether the configured completion marker matched.                              |
-| `completion`        | `string \| undefined`                                                            | Optional | See the linked contract and this family's rules for its interpretation.        |
+| Name                | Type                                                                             | Presence | Meaning                                                                                     |
+| ------------------- | -------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------- |
+| `resume`            | `<U = undefined>(options: DispatchOptions<U>) => Promise<WarmDispatchResult<U>>` | Required | Continue this result’s conversation on the still-open original sandbox.                     |
+| `fork`              | `<U = undefined>(options: DispatchOptions<U>) => Promise<WarmDispatchResult<U>>` | Required | Fork this result’s conversation on the still-open original sandbox.                         |
+| `text`              | `string`                                                                         | Required | Final text reported by the agent execution.                                                 |
+| `conversation`      | `string \| undefined`                                                            | Optional | Available native conversation identity.                                                     |
+| `usage`             | `Usage`                                                                          | Required | Reported usage counters; not a currency estimate.                                           |
+| `branch`            | `string`                                                                         | Required | Name of the work branch used or observed during execution.                                  |
+| `directory`         | `string`                                                                         | Required | Host workspace directory used for this execution.                                           |
+| `commits`           | `readonly Commit[]`                                                              | Required | Collected Git commit identities and subjects.                                               |
+| `transcript`        | `string \| undefined`                                                            | Optional | Available host path to the captured transcript.                                             |
+| `log`               | `string \| undefined`                                                            | Optional | Host path of the dispatch journal, when logging produced one.                               |
+| `retainedDirectory` | `string \| undefined`                                                            | Optional | Workspace retained for inspection or recovery.                                              |
+| `turns`             | `readonly Turn[]`                                                                | Required | Ordered agent-turn results, including text, status, duration and token usage for each pass. |
+| `value`             | `T`                                                                              | Required | Validated structured response value; undefined when no response specification was supplied. |
+| `completed`         | `boolean`                                                                        | Required | Whether the configured completion marker matched.                                           |
+| `completion`        | `string \| undefined`                                                            | Optional | Completion marker that matched the agent’s output, when one was found.                      |
 
 ## Signature
 

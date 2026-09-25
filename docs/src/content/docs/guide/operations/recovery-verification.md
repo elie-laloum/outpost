@@ -91,4 +91,4 @@ It creates its own temporary repository, verifies an actual patch, demonstrates 
 
 </details>
 
-[Detailed contract and limits](../../../reference/behavior/operations/recovery-verification/).
+[Detailed contract and limits](../../behavior/operations/recovery-verification/).

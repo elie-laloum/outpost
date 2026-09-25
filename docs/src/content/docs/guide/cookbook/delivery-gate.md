@@ -325,6 +325,6 @@ node example.mts
 
 On success, the script prints `{ integrated: true }` and merges committed changes into the demonstration repository’s current branch. A failing test, invalid or negative review, or dirty worktree prevents integration. An agent review is not human approval. No task retries a commit or merge; no push occurs. A merge conflict can retain the workspace for recovery.
 
-[Contracts, options and edge cases](../../../reference/behavior/cookbooks/delivery-gate/).
+[Contracts, options and edge cases](../../behavior/cookbooks/delivery-gate/).
 
 To start again, use a new demonstration directory. Named branches retain commits; dirty worktrees remain available for recovery. Scripts do not push commits.

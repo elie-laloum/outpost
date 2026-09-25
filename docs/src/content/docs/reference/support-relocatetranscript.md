@@ -2,26 +2,22 @@
 title: "relocateTranscript"
 description: "relocateTranscript — Outpost API"
 sidebar:
-  order: 20
+  order: 0
 ---
 
-Supporting contract used by a public signature. It is not directly exported from the package; use TypeScript inference or the public type that references it.
+Supporting contract not directly exported; use TypeScript inference or the public type that references it.
 
 ## Purpose and behavior
 
-Locate, capture, restore and relocate native transcripts separately from authentication.
-
-The host conversation home defaults to the OS home. A cold continuation requires a restorable transcript before allocation. A fork does not copy a workspace.
-
-[Complete example and detailed rules](../../guide/agents/conversations/).
+Rewrite native transcript records from a source repository path to a destination repository path while preserving conversation data. The function returns rewritten text and does not itself read or write files.
 
 ## Parameters and properties
 
 | Name          | Type                  | Presence | Meaning                                                                 |
 | ------------- | --------------------- | -------- | ----------------------------------------------------------------------- |
-| `text`        | `string`              | Required | Text content; see the owning operation for its source.                  |
-| `destination` | `string`              | Required | See the linked contract and this family's rules for its interpretation. |
-| `source`      | `string \| undefined` | Optional | See the linked contract and this family's rules for its interpretation. |
+| `text`        | `string`              | Required | Native transcript contents to rewrite.                                  |
+| `destination` | `string`              | Required | New repository path to embed in relocated transcript records.           |
+| `source`      | `string \| undefined` | Optional | Original repository path to replace when relocating transcript records. |
 
 ## Returns
 

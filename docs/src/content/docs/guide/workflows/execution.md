@@ -67,6 +67,6 @@ node example.mts
 
 Validation fails and delivery is skipped. A workflow result retains task records and original errors; `unwrap()` converts a non-success into a `WorkflowFailure`. Retries repeat the task’s effects, so configure them only for operations whose replay you understand. Use dependency edges for shared resources and independent sandboxes for parallel agent work.
 
-[Contracts, options and edge cases](../../../reference/behavior/workflows/execution/).
+[Contracts, options and edge cases](../../behavior/workflows/execution/).
 
 Any persisted example files remain inside this demonstration directory.

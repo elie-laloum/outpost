@@ -5,8 +5,6 @@ sidebar:
   order: 10
 ---
 
-Public contract for **WorkflowBudgetExceeded**. See the [workflows guide](../../guide/workflows/graph/) for behavior, defaults and examples.
-
 ## Import
 
 ```ts
@@ -15,23 +13,21 @@ import { WorkflowBudgetExceeded } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Compose tasks with explicit dependency edges and typed result access.
-
-Duplicate keys, missing dependencies and cycles fail validation. Failed or skipped dependencies skip descendants. Retries can repeat external effects. Unwrap throws on a non-successful result.
+Error identifying the attempt or token dimension whose admission limit was reached. limit and observed report the configured threshold and current accounting; observed model usage is not a billing cap.
 
 [Complete example and detailed rules](../../guide/workflows/graph/).
 
 ## Parameters and properties
 
-| Name        | Type                        | Presence | Meaning                                                                 |
-| ----------- | --------------------------- | -------- | ----------------------------------------------------------------------- |
-| `dimension` | `"attempts" \| keyof Usage` | Required | See the linked contract and this family's rules for its interpretation. |
-| `limit`     | `number`                    | Required | See the linked contract and this family's rules for its interpretation. |
-| `observed`  | `number`                    | Required | See the linked contract and this family's rules for its interpretation. |
-| `name`      | `string`                    | Required | See the linked contract and this family's rules for its interpretation. |
-| `message`   | `string`                    | Required | See the linked contract and this family's rules for its interpretation. |
-| `stack`     | `string \| undefined`       | Optional | See the linked contract and this family's rules for its interpretation. |
-| `cause`     | `unknown`                   | Optional | See the linked contract and this family's rules for its interpretation. |
+| Name        | Type                        | Presence | Meaning                                                                           |
+| ----------- | --------------------------- | -------- | --------------------------------------------------------------------------------- |
+| `dimension` | `"attempts" \| keyof Usage` | Required | Budget dimension whose admission limit was exceeded: attempts or a token counter. |
+| `limit`     | `number`                    | Required | Configured admission threshold for the exceeded budget dimension.                 |
+| `observed`  | `number`                    | Required | Current cumulative amount observed for the exceeded budget dimension.             |
+| `name`      | `string`                    | Required | Error class name used to distinguish this failure from other JavaScript errors.   |
+| `message`   | `string`                    | Required | Human-readable explanation of the failure.                                        |
+| `stack`     | `string \| undefined`       | Optional | JavaScript stack trace for the error, when available.                             |
+| `cause`     | `unknown`                   | Optional | Original failure attached to this error.                                          |
 
 ## Signature
 

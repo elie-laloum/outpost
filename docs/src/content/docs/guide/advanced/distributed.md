@@ -98,6 +98,6 @@ node example.mts
 
 The worker returns `hello-world`. This exercise uses HTTP and SQLite, but all components run on your computer. The server closes and the worker stops in `finally`; the database remains in `state/`. Separate hosts need an authenticated HTTPS endpoint or encrypted tunnel. Queue leases fence stale completions but do not guarantee exactly-once external effects.
 
-[Contracts, options and edge cases](../../../reference/behavior/workflows/distributed/).
+[Contracts, options and edge cases](../../behavior/workflows/distributed/).
 
 Any persisted example files remain inside this demonstration directory.

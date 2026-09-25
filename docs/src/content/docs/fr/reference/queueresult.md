@@ -2,10 +2,8 @@
 title: "QueueResult"
 description: "QueueResult — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Contrat public de **QueueResult**. Consultez le [guide exécution distribuée](../../guide/advanced/distributed/) pour le comportement, les valeurs par défaut et des exemples.
 
 ## Import
 
@@ -13,21 +11,13 @@ Contrat public de **QueueResult**. Consultez le [guide exécution distribuée](.
 import type { QueueResult } from "@elie-laloum/outpost";
 ```
 
-## Rôle et comportement
-
-Coordonner des tâches JSON durables via SQLite, un transport HTTP authentifié et des workers enregistrés.
-
-Les effets sont au moins une fois. Un jeton périmé ne peut valider l’état de file, mais les effets externes peuvent se répéter. HTTP écoute loopback par défaut sans TLS. Un worker traite une tâche à la fois.
-
-[Exemple complet et règles détaillées](../../guide/advanced/distributed/).
-
 ## Paramètres et propriétés
 
-| Nom     | Type                  | Présence  | Rôle                                                                             |
-| ------- | --------------------- | --------- | -------------------------------------------------------------------------------- |
-| `value` | `WorkflowJson`        | Requis    | Valeur typée produite ou consommée par ce contrat.                               |
-| `usage` | `Usage \| undefined`  | Optionnel | Compteurs d’usage rapportés ; aucune estimation monétaire.                       |
-| `error` | `string \| undefined` | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
+| Nom     | Type                  | Présence  | Rôle                                                                                                |
+| ------- | --------------------- | --------- | --------------------------------------------------------------------------------------------------- |
+| `value` | `WorkflowJson`        | Requis    | Sortie JSON sans perte produite par le gestionnaire du worker.                                      |
+| `usage` | `Usage \| undefined`  | Optionnel | Compteurs d’usage rapportés ; aucune estimation monétaire.                                          |
+| `error` | `string \| undefined` | Optionnel | Message d’échec du worker ; sa présence fait enregistrer le travail comme failed à la finalisation. |
 
 ## Signature
 

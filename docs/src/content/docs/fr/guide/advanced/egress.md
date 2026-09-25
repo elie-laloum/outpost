@@ -119,6 +119,6 @@ node example.mts
 
 La commande réussit sans accès modèle ni téléchargement de paquets. Cela reste un prototype de recherche. Docker/Podman deny-all utilise le réseau none ; loopback et autres canaux hôtes explicitement exposés sont distincts. Les listes de domaines pour conteneurs sont rejetées. L’hôte peut encore utiliser le réseau pour télécharger l’image. Le firewall Vercel a ses propres limites documentées.
 
-[Contrats, options et cas particuliers](../../../reference/behavior/sandboxes/egress/).
+[Contrats, options et cas particuliers](../../behavior/sandboxes/egress/).
 
 Pour recommencer, utilisez un nouveau dossier de démonstration. Les branches nommées conservent les commits ; les worktrees sales restent disponibles pour récupération. Les scripts ne poussent aucun commit.

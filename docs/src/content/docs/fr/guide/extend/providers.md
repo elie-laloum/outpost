@@ -123,6 +123,6 @@ node example.mts
 
 L’enveloppe retourne le vrai bail inchangé. Un nouveau backend doit implémenter invocation, transfert binaire, annulation et libération idempotente ; mountedProvider fournit seulement la métadonnée de placement. Préservez le statut observable et rejetez explicitement terminal/élévation non pris en charge. La référence décrit toutes les obligations du bail et tests nécessaires.
 
-[Contrats, options et cas particuliers](../../../reference/behavior/extend/providers/).
+[Contrats, options et cas particuliers](../../behavior/extend/providers/).
 
 Pour recommencer, utilisez un nouveau dossier de démonstration. Les branches nommées conservent les commits ; les worktrees sales restent disponibles pour récupération. Les scripts ne poussent aucun commit.

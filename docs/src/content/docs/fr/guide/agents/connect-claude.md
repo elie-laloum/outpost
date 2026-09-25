@@ -251,6 +251,6 @@ node example.mts
 
 Sélectionnez un profil Claude dans la préparation. Une réponse réussie doit identifier `slug` ; cela appelle réellement le modèle. Une allocation de conteneur réussie ne vérifie pas les identifiants d’agent. Facturation API et accès par compte restent distincts. Séparez authentification native et conversations capturées ; le home privé de sandbox reste éphémère.
 
-[Contrats, options et cas particuliers](../../../reference/behavior/agents/connect-claude/).
+[Contrats, options et cas particuliers](../../behavior/agents/connect-claude/).
 
 Pour recommencer, utilisez un nouveau dossier de démonstration. Les branches nommées conservent les commits ; les worktrees sales restent disponibles pour récupération. Les scripts ne poussent aucun commit.

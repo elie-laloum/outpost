@@ -2,10 +2,8 @@
 title: "WorkflowPauseRequest"
 description: "WorkflowPauseRequest — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Contrat public de **WorkflowPauseRequest**. Consultez le [guide approbations et pauses](../../guide/advanced/approvals/) pour le comportement, les valeurs par défaut et des exemples.
 
 ## Import
 
@@ -13,23 +11,15 @@ Contrat public de **WorkflowPauseRequest**. Consultez le [guide approbations et 
 import type { WorkflowPauseRequest } from "@elie-laloum/outpost";
 ```
 
-## Rôle et comportement
-
-Persister une décision attendue et bloquer les dépendants jusqu’à sa soumission par un appelant de confiance.
-
-Les noms d’acteurs sont des métadonnées de confiance, pas une authentification. Une pause ne nécessite aucun timer. Le rejet est définitif pour cette exécution. Un lot invalide échoue avant toute application.
-
-[Exemple complet et règles détaillées](../../guide/advanced/approvals/).
-
 ## Paramètres et propriétés
 
-| Nom           | Type                    | Présence | Rôle                                                                             |
-| ------------- | ----------------------- | -------- | -------------------------------------------------------------------------------- |
-| `id`          | `string`                | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `requestedAt` | `string`                | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `kind`        | `"approval" \| "pause"` | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `prompt`      | `string`                | Requis   | Instruction lisible présentée à cette étape.                                     |
-| `actors`      | `readonly string[]`     | Requis   | Identifiants d’acteurs de confiance, sans mécanisme d’authentification.          |
+| Nom           | Type                    | Présence | Rôle                                                                                                                        |
+| ------------- | ----------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `id`          | `string`                | Requis   | Identifiant unique de cette demande de gate en attente ; les décisions doivent lui correspondre.                            |
+| `requestedAt` | `string`                | Requis   | Horodatage ISO de l’entrée de la gate en pause.                                                                             |
+| `kind`        | `"approval" \| "pause"` | Requis   | approval attend approve ; pause attend resume. Les deux acceptent un rejet.                                                 |
+| `prompt`      | `string`                | Requis   | Instruction expliquant la décision d’approbation ou de reprise demandée à l’acteur de confiance.                            |
+| `actors`      | `readonly string[]`     | Requis   | Liste non vide des noms d’acteurs de confiance autorisés à décider cette gate ; leur authentification relève de l’appelant. |
 
 ## Signature
 

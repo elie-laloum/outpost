@@ -252,6 +252,6 @@ node example.mts
 
 Un marqueur de fin arrête l’itération plus tôt. Atteindre la limite sans marqueur renvoie `completed: false`. Un dispatch de premier niveau démarre une nouvelle sandbox à chaque passe ; une sandbox chaude réutilise son environnement. Le marqueur exprime l’affirmation de l’agent : vérifiez les changements et les tests. Les réponses structurées et continuations natives exigent une seule passe.
 
-[Contrats, options et cas particuliers](../../../reference/behavior/agents/iteration/).
+[Contrats, options et cas particuliers](../../behavior/agents/iteration/).
 
 Pour recommencer, utilisez un nouveau dossier de démonstration. Les branches nommées conservent les commits ; les worktrees sales restent disponibles pour récupération. Les scripts ne poussent aucun commit.

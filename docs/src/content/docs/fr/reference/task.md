@@ -2,10 +2,8 @@
 title: "task"
 description: "task — Outpost API"
 sidebar:
-  order: 10
+  order: 0
 ---
-
-Contrat public de **task**. Consultez le [guide workflows](../../guide/workflows/graph/) pour le comportement, les valeurs par défaut et des exemples.
 
 ## Import
 
@@ -15,24 +13,22 @@ import { task } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Composer des tâches avec dépendances explicites et accès typé aux résultats.
-
-Les clés dupliquées, dépendances absentes et cycles échouent à la validation. Une dépendance en échec ou ignorée empêche ses descendants. Les reprises peuvent répéter les effets externes. Unwrap lève une erreur en cas de non-succès.
+Définit et fige un nœud de workflow dont le callback perform s’exécute après la réussite de ses dépendances. Créer le nœud ne l’exécute pas et n’alloue aucune sandbox. context.value lit les dépendances déclarées ; isolatedTask prend en charge l’allocation d’une sandbox autour d’un dispatch d’agent à la place d’un callback perform personnalisé.
 
 [Exemple complet et règles détaillées](../../guide/workflows/graph/).
 
 ## Paramètres et propriétés
 
-| Nom                 | Type                                                                   | Présence  | Rôle                                                                                          |
-| ------------------- | ---------------------------------------------------------------------- | --------- | --------------------------------------------------------------------------------------------- |
-| `options`           | `TaskOptions<T>`                                                       | Requis    | Objet de configuration. Ses champs sont décrits dans le contrat d’options associé ci-dessous. |
-| `options.key`       | `string`                                                               | Requis    | Clé stable de tâche ou cache dans le contrat concerné.                                        |
-| `options.gate`      | `WorkflowGate \| undefined`                                            | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation.              |
-| `options.perform`   | `(context: TaskContext) => T \| Promise<T>`                            | Requis    | Implémentation de tâche ; respecter son signal d’annulation.                                  |
-| `options.condition` | `((context: TaskContext) => boolean \| Promise<boolean>) \| undefined` | Optionnel | Prédicat évalué avant la première tentative.                                                  |
-| `options.retry`     | `Retry \| undefined`                                                   | Optionnel | Politique explicite de reprise ; les effets peuvent se répéter.                               |
-| `options.timeoutMs` | `number \| undefined`                                                  | Optionnel | Délai en millisecondes pour l’opération concernée.                                            |
-| `options.after`     | `readonly Task<unknown>[] \| undefined`                                | Optionnel | Dépendances déclarées dont les valeurs peuvent être lues.                                     |
+| Nom                 | Type                                                                   | Présence  | Rôle                                                                                                                         |
+| ------------------- | ---------------------------------------------------------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `options`           | `TaskOptions<T>`                                                       | Requis    | Identité de tâche, dépendances, callback perform et politique de tentatives.                                                 |
+| `options.key`       | `string`                                                               | Requis    | Clé de tâche stable identifiant le nœud dans son graphe de workflow.                                                         |
+| `options.gate`      | `WorkflowGate \| undefined`                                            | Optionnel | Définition persistée d’approbation ou pause ; son exécution exige un checkpoint et une décision de confiance correspondante. |
+| `options.perform`   | `(context: TaskContext) => T \| Promise<T>`                            | Requis    | Callback exécuté à chaque tentative ; renvoie sa sortie et doit respecter context.signal.                                    |
+| `options.condition` | `((context: TaskContext) => boolean \| Promise<boolean>) \| undefined` | Optionnel | Prédicat évalué avant la première tentative.                                                                                 |
+| `options.retry`     | `Retry \| undefined`                                                   | Optionnel | Politique explicite de reprise ; les effets peuvent se répéter.                                                              |
+| `options.timeoutMs` | `number \| undefined`                                                  | Optionnel | Durée maximale en millisecondes de chaque tentative ; l’annulation est coopérative via context.signal.                       |
+| `options.after`     | `readonly Task<unknown>[] \| undefined`                                | Optionnel | Dépendances déclarées dont les valeurs peuvent être lues.                                                                    |
 
 ## Retour
 
@@ -46,5 +42,5 @@ export declare function task<T>(options: TaskOptions<T>): Task<T>;
 
 ## Contrats associés
 
-- [Task](../task/)
+- [Task](../type-task/)
 - [TaskOptions](../taskoptions/)

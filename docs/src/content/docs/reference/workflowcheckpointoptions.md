@@ -2,10 +2,8 @@
 title: "WorkflowCheckpointOptions"
 description: "WorkflowCheckpointOptions — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Public contract for **WorkflowCheckpointOptions**. See the [workflow checkpoints guide](../../guide/advanced/checkpoints/) for behavior, defaults and examples.
 
 ## Import
 
@@ -13,22 +11,14 @@ Public contract for **WorkflowCheckpointOptions**. See the [workflow checkpoints
 import type { WorkflowCheckpointOptions } from "@elie-laloum/outpost";
 ```
 
-## Purpose and behavior
-
-Persist lossless task results and explicitly reopen the same graph across process restarts.
-
-Completed outputs are not replayed. Interrupted ordinary tasks require retry-incomplete authorization. Outputs must be lossless JSON; full dispatch results contain functions and cannot be checkpointed directly.
-
-[Complete example and detailed rules](../../guide/advanced/checkpoints/).
-
 ## Parameters and properties
 
-| Name      | Type                              | Presence | Meaning                                                                 |
-| --------- | --------------------------------- | -------- | ----------------------------------------------------------------------- |
-| `store`   | `WorkflowCheckpointStore`         | Required | Caller-supplied persistence implementation.                             |
-| `runId`   | `string`                          | Required | Stable identity of a saved workflow execution.                          |
-| `version` | `string`                          | Required | Caller-controlled contract or graph version.                            |
-| `resume`  | `"retry-incomplete" \| undefined` | Optional | Explicitly authorize replay of incomplete tasks and their side effects. |
+| Name      | Type                              | Presence | Meaning                                                                                              |
+| --------- | --------------------------------- | -------- | ---------------------------------------------------------------------------------------------------- |
+| `store`   | `WorkflowCheckpointStore`         | Required | Persistence adapter that acquires, reads and writes workflow checkpoints.                            |
+| `runId`   | `string`                          | Required | Stable identity of a saved workflow execution.                                                       |
+| `version` | `string`                          | Required | Caller-supplied graph/implementation version; change it when task code or workflow inputs change.    |
+| `resume`  | `"retry-incomplete" \| undefined` | Optional | Explicit retry-incomplete authorization to replay interrupted tasks and their possible side effects. |
 
 ## Signature
 

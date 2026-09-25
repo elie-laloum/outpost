@@ -4,6 +4,11 @@ import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { groups } from "./api-groups.mjs";
 import { explain } from "./reference-explanations.mjs";
+import {
+  isContract,
+  referenceKind,
+  referenceRank,
+} from "./reference-model.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const check = process.argv.includes("--check");
@@ -20,6 +25,7 @@ const program = ts.createProgram(
     module: ts.ModuleKind.NodeNext,
     moduleResolution: ts.ModuleResolutionKind.NodeNext,
     skipLibCheck: true,
+    target: ts.ScriptTarget.ESNext,
   },
 );
 const checker = program.getTypeChecker();
@@ -83,8 +89,20 @@ function collect(symbol) {
   visit(declaration);
 }
 for (const symbol of publicNames.keys()) collect(symbol);
-const slug = (symbol) =>
-  `${publicNames.has(symbol) ? "" : "support-"}${symbol.name.toLowerCase()}`;
+const exportedSymbols = [...publicNames.keys()];
+const exportedByName = new Map(
+  exportedSymbols.map((symbol) => [symbol.name, symbol]),
+);
+function slug(symbol) {
+  const name = symbol.name.toLowerCase();
+  const collision = exportedSymbols.some(
+    (other) => other !== symbol && other.name.toLowerCase() === name,
+  );
+  const prefix = publicNames.has(symbol) ? "" : "support-";
+  const typePrefix =
+    collision && isContract(symbols.get(symbol).declaration) ? "type-" : "";
+  return `${prefix}${typePrefix}${name}`;
+}
 const expected = new Map();
 const front = (title, order) =>
   `---\ntitle: ${JSON.stringify(title)}\ndescription: ${JSON.stringify(`${title} — Outpost API`)}\nsidebar:\n  order: ${order}\n---\n\n`;
@@ -98,17 +116,63 @@ for (const group of groups)
     if (![...publicNames.keys()].some((symbol) => symbol.name === name))
       throw new Error(`Stale API entry: ${name}`);
 
-const owners = new Map();
-for (const [symbol, entry] of symbols) {
-  const group = groupFor(symbol.name);
-  if (!group) continue;
-  const visit = (current) => {
-    if (owners.has(current)) return;
-    owners.set(current, group);
-    for (const related of symbols.get(current)?.related ?? []) visit(related);
-  };
-  visit(symbol);
+for (const group of groups) {
+  for (const locale of ["", "fr/"]) {
+    const overview = `${locale}reference/overview/${group.id}.md`;
+    const text = await readFile(
+      resolve(root, "src/content/docs", overview),
+      "utf8",
+    );
+    if (!text.includes(group.guide))
+      throw new Error(`Overview must link its practical guide: ${overview}`);
+  }
 }
+
+const navigation = groups.map((group) => ({
+  title: group.title,
+  items: [
+    { slug: `reference/overview/${group.id}` },
+    ...group.names
+      .split(" ")
+      .map((name) => exportedByName.get(name))
+      .sort(
+        (a, b) =>
+          referenceRank(symbols.get(a).declaration, checker, a) -
+          referenceRank(symbols.get(b).declaration, checker, b),
+      )
+      .map((symbol) => {
+        const kind = referenceKind(
+          symbols.get(symbol).declaration,
+          checker,
+          symbol,
+        );
+        return {
+          slug: `reference/${slug(symbol)}`,
+          attrs: {
+            "data-api-kind": kind,
+            ...(group.experimental?.includes(symbol.name)
+              ? {
+                  "data-api-status": "experimental",
+                  title: "Experimental / Expérimental",
+                }
+              : {}),
+          },
+        };
+      }),
+  ],
+}));
+const navigationPath = resolve(root, "reference-content/navigation.json");
+const { format } = await import("../../node_modules/prettier/index.mjs");
+const navigationText = await format(JSON.stringify(navigation), {
+  parser: "json",
+});
+if (check) {
+  if ((await readFile(navigationPath, "utf8")) !== navigationText)
+    throw new Error("Outdated reference navigation. Run npm run docs:sync.");
+} else await writeFile(navigationPath, navigationText);
+const slugs = [...symbols.keys()].map(slug);
+if (new Set(slugs).size !== slugs.length)
+  throw new Error("Reference URL collision");
 
 for (const [symbol, { declaration, related }] of symbols) {
   const exported = publicNames.has(symbol);
@@ -145,13 +209,12 @@ for (const [symbol, { declaration, related }] of symbols) {
     [0, ""],
     [1, "fr/"],
   ]) {
-    const lead = exported
-      ? language
-        ? `Contrat public de **${symbol.name}**. Consultez le [guide ${group.title[1].toLowerCase()}](../../${group.guide}/) pour le comportement, les valeurs par défaut et des exemples.`
-        : `Public contract for **${symbol.name}**. See the [${group.title[0].toLowerCase()} guide](../../${group.guide}/) for behavior, defaults and examples.`
-      : language
-        ? "Contrat auxiliaire utilisé dans une signature publique. Il n’est pas exporté directement depuis le package ; utilisez l’inférence TypeScript ou le type public qui le référence."
-        : "Supporting contract used by a public signature. It is not directly exported from the package; use TypeScript inference or the public type that references it.";
+    const lead =
+      exported || isContract(declaration)
+        ? ""
+        : language
+          ? "Contrat auxiliaire non exporté directement ; utilisez l’inférence TypeScript ou le type public qui le référence."
+          : "Supporting contract not directly exported; use TypeScript inference or the public type that references it.";
     const imports = exported
       ? `\n\n## Import\n\n\`\`\`ts\n${publicNames
           .get(symbol)
@@ -167,10 +230,10 @@ for (const [symbol, { declaration, related }] of symbols) {
       : "";
     expected.set(
       `${locale}reference/${slug(symbol)}.md`,
-      front(symbol.name, exported ? 10 : 20) +
+      front(symbol.name, referenceRank(declaration, checker, symbol) * 10) +
         lead +
         imports +
-        explain(symbol, declaration, group, language, checker, owners) +
+        explain(symbol, declaration, group, language, checker) +
         `\n\n## ${language ? "Signature" : "Signature"}\n\n\`\`\`ts\n${code}\n\`\`\`` +
         relatedText +
         "\n",
@@ -182,29 +245,6 @@ for (const [language, locale] of [
   [0, ""],
   [1, "fr/"],
 ]) {
-  const sections = groups
-    .map(
-      (group) =>
-        `## ${group.title[language]}\n\n${group.names
-          .split(" ")
-          .map((name) => `- [${name}](./${name.toLowerCase()}/)`)
-          .join("\n")}`,
-    )
-    .join("\n\n");
-  const intro = language
-    ? "Chaque export public du package et de ses sous-chemins possède une page de référence. Les signatures sont extraites des déclarations TypeScript compilées et vérifiées en CI. Les guides expliquent les usages ; les contrats détaillent les champs exacts. Les contrats auxiliaires restent accessibles depuis les types qui les utilisent."
-    : "Every public export from the package and its subpaths has a reference page. Signatures are extracted from compiled TypeScript declarations and checked in CI. Guides explain usage; contracts list exact fields. Supporting contracts are linked from the types that use them.";
-  expected.set(
-    `${locale}reference/index.md`,
-    front(language ? "Index de l’API" : "API index", 0) +
-      intro +
-      (language
-        ? "\n\n[CLI](manual/cli/) · [Configuration](manual/configuration/) · [Authentification](manual/authentication/) · [Compatibilités](manual/compatibility/) · [Guide progressif](../guide/)"
-        : "\n\n[CLI](manual/cli/) · [Configuration](manual/configuration/) · [Authentication](manual/authentication/) · [Compatibility](manual/compatibility/) · [Learning guide](../guide/)") +
-      "\n\n" +
-      sections +
-      "\n",
-  );
   const canonicalChangelog = (
     await readFile(resolve(root, "../CHANGELOG.md"), "utf8")
   ).replace(/^# Changelog\s*/, "");
@@ -232,7 +272,6 @@ for (const [language, locale] of [
       "\n",
   );
 }
-const { format } = await import("../../node_modules/prettier/index.mjs");
 for (const [name, raw] of expected) {
   const content = await format(raw, { parser: "markdown" });
   const target = resolve(root, "src/content/docs", name);

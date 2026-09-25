@@ -114,6 +114,6 @@ node example.mts
 
 Le rapport examine l’environnement actif, dont une sonde de transfert binaire. Il n’authentifie pas un agent et ne prouve pas l’accès au modèle. Le diagnostic possède temporairement le verrou d’opération et nettoie ses sondes, mais votre script garde les ressources. Avant allocation, lancez `npx outpost doctor --provider docker --agent codex --image outpost:docs-demo`.
 
-[Contrats, options et cas particuliers](../../../reference/behavior/operations/doctor/).
+[Contrats, options et cas particuliers](../../behavior/operations/doctor/).
 
 Pour recommencer, utilisez un nouveau dossier de démonstration. Les branches nommées conservent les commits ; les worktrees sales restent disponibles pour récupération. Les scripts ne poussent aucun commit.

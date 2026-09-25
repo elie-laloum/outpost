@@ -290,6 +290,6 @@ node example.mts
 
 Check the output and effects described before the code.
 
-[Contracts, options and edge cases](../../../reference/behavior/cookbooks/pair-review/).
+[Contracts, options and edge cases](../../behavior/cookbooks/pair-review/).
 
 To start again, use a new demonstration directory. Named branches retain commits; dirty worktrees remain available for recovery. Scripts do not push commits.

@@ -1,238 +1,3171 @@
 {
-  "repository": ["Target host Git checkout.", "Checkout Git hôte ciblé."],
-  "workspace": [
-    "Caller-owned Git workspace; excludes new repository/branch choices.",
-    "Workspace Git appartenant à l’appelant ; exclut un nouveau choix de dépôt/branche."
+  "attach.options": [
+    "Workspace, provider, native agent and interactive terminal setup.",
+    "Configuration du workspace, du provider, de l’agent natif et du terminal interactif."
   ],
-  "provider": [
-    "Execution environment backend.",
-    "Backend de l’environnement d’exécution."
+  "SandboxOptions.includeUncommitted": [
+    "Include uncommitted host changes when preparing a remote repository snapshot.",
+    "Inclut les modifications hôtes non commitées dans le snapshot du dépôt distant."
   ],
-  "agent": [
+  "SandboxOptions.agent": [
     "Native coding-agent adapter.",
     "Adapter natif de l’agent de code."
   ],
-  "branch": [
-    "Git workspace policy or resulting branch identity, according to this contract.",
-    "Politique de workspace Git ou identité de branche résultante selon ce contrat."
+  "SandboxOptions.provider": [
+    "Execution environment backend.",
+    "Backend de l’environnement d’exécution."
   ],
-  "brief": [
-    "Literal text or file-based task input.",
-    "Entrée de tâche textuelle littérale ou provenant d’un fichier."
+  "SandboxOptions.workspace": [
+    "Caller-owned Git workspace; excludes new repository/branch choices.",
+    "Workspace Git appartenant à l’appelant ; exclut un nouveau choix de dépôt/branche."
   ],
-  "signal": [
-    "Cooperative cancellation for this operation.",
-    "Annulation coopérative de cette opération."
-  ],
-  "hooks": [
+  "SandboxOptions.hooks": [
     "Lifecycle commands in declared execution order.",
     "Commandes de cycle de vie dans l’ordre déclaré."
   ],
-  "variables": [
-    "Explicit environment declarations; values are strings.",
-    "Déclarations d’environnement explicites ; les valeurs sont des chaînes."
+  "SandboxOptions.signal": [
+    "Cooperative cancellation for this operation.",
+    "Annulation coopérative de cette opération."
   ],
-  "copies": [
-    "Repository-relative inputs copied into the workspace.",
-    "Entrées relatives au dépôt copiées dans le workspace."
+  "SandboxOptions.logging": [
+    "Configure the dispatch journal file and verbose event retention.",
+    "Configure le fichier journal du dispatch et la conservation des événements détaillés."
   ],
-  "passes": [
-    "Maximum agent passes; one by default.",
-    "Nombre maximal de passes d’agent ; une par défaut."
-  ],
-  "until": [
-    "Completion marker or markers; an empty list disables matching.",
-    "Marqueur(s) de fin ; une liste vide désactive la détection."
-  ],
-  "deadlineMs": [
-    "Hard operation deadline in milliseconds.",
-    "Échéance absolue de l’opération en millisecondes."
-  ],
-  "idleMs": [
-    "Maximum silent interval in milliseconds.",
-    "Intervalle silencieux maximal en millisecondes."
-  ],
-  "timeoutMs": [
-    "Time limit in milliseconds for the owning operation.",
-    "Délai en millisecondes pour l’opération concernée."
-  ],
-  "response": [
-    "Parser and validator for the tagged agent answer.",
-    "Analyseur et validateur de la réponse balisée."
-  ],
-  "observe": [
-    "Notification callback; observer failures are isolated.",
-    "Callback d’observation ; ses erreurs sont isolées."
-  ],
-  "usage": [
-    "Reported usage counters; not a currency estimate.",
-    "Compteurs d’usage rapportés ; aucune estimation monétaire."
-  ],
-  "commits": [
-    "Collected Git commit identities and subjects.",
-    "Identités et sujets des commits Git collectés."
-  ],
-  "text": [
-    "Text content; see the owning operation for its source.",
-    "Contenu textuel ; sa provenance dépend de l’opération."
-  ],
-  "value": [
-    "Typed value produced or consumed by this contract.",
-    "Valeur typée produite ou consommée par ce contrat."
-  ],
-  "completed": [
-    "Whether the configured completion marker matched.",
-    "Indique si le marqueur de fin configuré a été détecté."
-  ],
-  "conversation": [
-    "Available native conversation identity.",
-    "Identité de conversation native disponible."
-  ],
-  "transcript": [
-    "Available host path to the captured transcript.",
-    "Chemin hôte disponible du transcript capturé."
-  ],
-  "retainedDirectory": [
-    "Workspace retained for inspection or recovery.",
-    "Workspace conservé pour inspection ou récupération."
-  ],
-  "directory": [
-    "Filesystem directory used by the owning operation; see path rules.",
-    "Dossier utilisé par l’opération ; voir les règles de résolution."
-  ],
-  "key": [
-    "Stable task or cache key within its owning contract.",
-    "Clé stable de tâche ou cache dans le contrat concerné."
-  ],
-  "after": [
-    "Declared task dependencies whose values may be read.",
-    "Dépendances déclarées dont les valeurs peuvent être lues."
-  ],
-  "perform": [
-    "Task implementation; honor its cancellation signal.",
-    "Implémentation de tâche ; respecter son signal d’annulation."
-  ],
-  "condition": [
-    "Predicate evaluated before the first task attempt.",
-    "Prédicat évalué avant la première tentative."
-  ],
-  "retry": [
-    "Explicit retry policy; repeated effects require care.",
-    "Politique explicite de reprise ; les effets peuvent se répéter."
-  ],
-  "attempts": [
-    "Attempt count or admission limit, according to the owning contract.",
-    "Nombre de tentatives ou limite d’admission selon le contrat."
-  ],
-  "concurrency": [
-    "Maximum admitted concurrent tasks or candidates.",
-    "Nombre maximal de tâches ou candidats concurrents admis."
-  ],
-  "checkpoint": [
-    "Durable execution storage and replay configuration.",
-    "Stockage durable de l’exécution et configuration de rejeu."
-  ],
-  "decisions": [
-    "Explicit decisions for persisted pending gates.",
-    "Décisions explicites pour les gates persistés en attente."
-  ],
-  "runId": [
-    "Stable identity of a saved workflow execution.",
-    "Identité stable d’une exécution sauvegardée."
-  ],
-  "version": [
-    "Caller-controlled contract or graph version.",
-    "Version de contrat ou graphe contrôlée par l’appelant."
-  ],
-  "actors": [
-    "Trusted actor identifiers, not an authentication mechanism.",
-    "Identifiants d’acteurs de confiance, sans mécanisme d’authentification."
-  ],
-  "schema": [
-    "Boundary validator that narrows unknown input.",
-    "Validateur de frontière qui précise une entrée inconnue."
-  ],
-  "repairs": [
-    "Additional attempts to repair invalid structured output; zero by default.",
-    "Tentatives supplémentaires de réparation de sortie invalide ; zéro par défaut."
-  ],
-  "tag": [
-    "XML-style delimiter identifier.",
-    "Identifiant de balise de type XML."
-  ],
-  "retain": [
-    "Maximum retained tail per output stream, in bytes.",
-    "Taille maximale de la fin conservée par flux, en octets."
-  ],
-  "executable": [
-    "Program to execute without implicit shell parsing.",
-    "Programme à exécuter sans analyse shell implicite."
-  ],
-  "arguments": [
-    "Arguments passed directly to the executable.",
-    "Arguments transmis directement au programme."
-  ],
-  "stdin": ["Input supplied to the process.", "Entrée fournie au processus."],
-  "status": [
-    "Recorded process or lifecycle outcome; inspect its declared type.",
-    "Résultat enregistré du processus ou cycle de vie ; voir son type."
-  ],
-  "stdout": ["Captured standard output.", "Sortie standard capturée."],
-  "stderr": ["Captured standard error.", "Sortie d’erreur capturée."],
-  "image": [
-    "Container or guest image reference.",
-    "Référence d’image de conteneur ou d’invité."
-  ],
-  "bootstrap": [
+  "SandboxOptions.bootstrap": [
     "Whether to install a missing selected agent automatically.",
     "Indique si un agent sélectionné absent peut être installé automatiquement."
   ],
-  "conversationHome": [
+  "SandboxOptions.conversationHome": [
     "Host home used for native transcript storage.",
     "Home hôte utilisé pour le stockage des transcripts natifs."
   ],
-  "saveConversations": [
-    "Enable native transcript capture when the adapter supports it.",
-    "Activer la capture native si l’adapter la prend en charge."
+  "WorkspaceOptions.storageQuota": [
+    "Admission limits and requested reservation for storage under the repository’s .outpost directory.",
+    "Limites d’admission et réservation demandée pour le stockage dans .outpost du dépôt."
   ],
-  "model": [
-    "Native CLI model identifier; availability depends on the account.",
-    "Identifiant de modèle natif ; disponibilité selon le compte."
+  "WorkspaceOptions.repository": [
+    "Target host Git checkout.",
+    "Checkout Git hôte ciblé."
   ],
-  "producer": [
-    "Recorded artifact producer identity, not authentication.",
-    "Identité enregistrée du producteur, sans authentification."
+  "WorkspaceOptions.branch": [
+    "Select the current checkout, a retained named work branch or a branch prepared for integration.",
+    "Choisit le checkout courant, une branche de travail nommée conservée ou une branche préparée pour intégration."
   ],
-  "parents": [
-    "Ordered artifact parent references or identifiers.",
-    "Références ou identifiants parents ordonnés."
+  "WorkspaceOptions.copies": [
+    "Repository-relative inputs copied into the workspace.",
+    "Entrées relatives au dépôt copiées dans le workspace."
   ],
-  "token": [
-    "Explicit transport credential; never place it in a URL.",
-    "Identifiant de transport explicite ; jamais dans une URL."
+  "WorkspaceOptions.limits": [
+    "Timeouts for copying, Git preparation, commit collection and integration, in milliseconds.",
+    "Délais de copie, préparation Git, collecte des commits et intégration, en millisecondes."
   ],
-  "fence": [
-    "Lease generation used to reject stale queue writers.",
-    "Génération du bail utilisée pour rejeter les écritures périmées."
+  "WorkspaceOptions.label": [
+    "Human-readable label used in execution reporting.",
+    "Libellé lisible utilisé dans les rapports d’exécution."
   ],
-  "leaseMs": [
-    "Worker lease duration in milliseconds.",
-    "Durée du bail worker en millisecondes."
+  "AttachOptions.ask": [
+    "Callback that supplies missing brief variables during interactive attachment.",
+    "Callback fournissant les variables manquantes du brief lors de l’attachement interactif."
   ],
-  "store": [
-    "Caller-supplied persistence implementation.",
-    "Implémentation de persistance fournie par l’appelant."
+  "AttachOptions.brief": [
+    "Literal text or file-based task input.",
+    "Entrée de tâche textuelle littérale ou provenant d’un fichier."
   ],
-  "budget": [
+  "AttachOptions.continuation": [
+    "Native conversation ID to continue; fork requests a separate conversation derived from it.",
+    "Identifiant de conversation native à poursuivre ; fork demande une conversation distincte dérivée de celle-ci."
+  ],
+  "AttachOptions.terminal": [
+    "Input, output and error streams for real interactive terminal attachment.",
+    "Flux d’entrée, de sortie et d’erreur pour l’attachement à un terminal interactif réel."
+  ],
+  "WorkspaceOptions.signal": [
+    "Cooperative cancellation for this operation.",
+    "Annulation coopérative de cette opération."
+  ],
+  "WorkspaceOptions.hooks": [
+    "Lifecycle commands in declared execution order.",
+    "Commandes de cycle de vie dans l’ordre déclaré."
+  ],
+  "StorageReservationOptions.maxBytes": [
+    "Maximum admitted total of observed storage and active reservations, in bytes.",
+    "Total maximal admis du stockage observé et des réservations actives, en octets."
+  ],
+  "StorageReservationOptions.reserveBytes": [
+    "Additional bytes requested for admission alongside existing storage usage.",
+    "Octets supplémentaires demandés à l’admission en plus du stockage déjà utilisé."
+  ],
+  "StorageReservationOptions.maxEntries": [
+    "Maximum filesystem entries inspected before marking the inventory incomplete.",
+    "Nombre maximal d’entrées de fichiers inspectées avant de déclarer l’inventaire incomplet."
+  ],
+  "StorageReservationOptions.signal": [
+    "Cooperative cancellation for this operation.",
+    "Annulation coopérative de cette opération."
+  ],
+  "BranchPolicy.mode": [
+    "current uses the current checkout, named retains a chosen work branch, integrate prepares a branch to merge into the base.",
+    "current utilise le checkout courant, named conserve une branche de travail choisie, integrate prépare une branche à fusionner dans la base."
+  ],
+  "BranchPolicy.name": [
+    "Name of the work branch retained by named mode.",
+    "Nom de la branche de travail conservée en mode named."
+  ],
+  "BranchPolicy.from": [
+    "Git revision used as the starting point for the managed work branch.",
+    "Révision Git servant de point de départ à la branche de travail gérée."
+  ],
+  "StageLimits.copyMs": [
+    "Deadline for copying workspace inputs, in milliseconds.",
+    "Délai de copie des entrées du workspace, en millisecondes."
+  ],
+  "StageLimits.gitMs": [
+    "Deadline for Git preparation commands, in milliseconds.",
+    "Délai des commandes de préparation Git, en millisecondes."
+  ],
+  "StageLimits.collectMs": [
+    "Deadline for collecting commits after execution, in milliseconds.",
+    "Délai de collecte des commits après exécution, en millisecondes."
+  ],
+  "StageLimits.mergeMs": [
+    "Deadline for integrating the work branch, in milliseconds.",
+    "Délai d’intégration de la branche de travail, en millisecondes."
+  ],
+  "LifecycleHooks.workspaceReady": [
+    "Host commands run after workspace preparation, before sandbox allocation.",
+    "Commandes hôtes exécutées après préparation du workspace, avant allocation de la sandbox."
+  ],
+  "LifecycleHooks.hostReady": [
+    "Host commands run after environment acquisition and before sandboxReady.",
+    "Commandes hôtes exécutées après acquisition de l’environnement et avant sandboxReady."
+  ],
+  "LifecycleHooks.sandboxReady": [
+    "Commands run inside the acquired sandbox after host preparation.",
+    "Commandes exécutées dans la sandbox acquise après préparation hôte."
+  ],
+  "Command.executable": [
+    "Program to execute without implicit shell parsing.",
+    "Programme à exécuter sans analyse shell implicite."
+  ],
+  "Command.arguments": [
+    "Arguments passed directly to the executable.",
+    "Arguments transmis directement au programme."
+  ],
+  "Command.stdin": [
+    "Input supplied to the process.",
+    "Entrée fournie au processus."
+  ],
+  "Command.directory": [
+    "Working directory inside the execution environment; defaults to its workspace root.",
+    "Dossier de travail dans l’environnement d’exécution ; racine du workspace par défaut."
+  ],
+  "Command.variables": [
+    "Explicit environment declarations; values are strings.",
+    "Déclarations d’environnement explicites ; les valeurs sont des chaînes."
+  ],
+  "Command.signal": [
+    "Cooperative cancellation for this operation.",
+    "Annulation coopérative de cette opération."
+  ],
+  "Command.deadlineMs": [
+    "Maximum operation duration in milliseconds before terminating the command or transfer.",
+    "Durée maximale de l’opération en millisecondes avant arrêt de la commande ou du transfert."
+  ],
+  "Command.interactive": [
+    "Request an interactive agent invocation or process terminal.",
+    "Demande une invocation d’agent ou un terminal de processus interactif."
+  ],
+  "Command.terminal": [
+    "Input, output and error streams for real interactive terminal attachment.",
+    "Flux d’entrée, de sortie et d’erreur pour l’attachement à un terminal interactif réel."
+  ],
+  "Command.elevated": [
+    "Request elevated execution from a provider that supports it.",
+    "Demande une exécution élevée à un provider qui la prend en charge."
+  ],
+  "Command.retain": [
+    "Maximum retained tail per output stream, in bytes.",
+    "Taille maximale de la fin conservée par flux, en octets."
+  ],
+  "Command.observe": [
+    "Receive streamed stdout/stderr chunks with their channel; observer failures are isolated.",
+    "Reçoit les fragments stdout/stderr avec leur canal ; les erreurs d’observation sont isolées."
+  ],
+  "AgentAdapter.name": [
+    "Native agent identifier used in execution events and diagnostics.",
+    "Identifiant d’agent natif utilisé dans les événements et diagnostics."
+  ],
+  "AgentAdapter.bootstrap": [
+    "Shell recipe that installs the native CLI when bootstrapping is enabled.",
+    "Recette shell installant le CLI natif lorsque le bootstrap est activé."
+  ],
+  "AgentAdapter.requiresFinishedEvent": [
+    "Require the native finished protocol event before treating an agent turn as complete.",
+    "Exige l’événement natif finished avant de considérer le tour d’agent terminé."
+  ],
+  "AgentAdapter.variables": [
+    "Explicit environment declarations; values are strings.",
+    "Déclarations d’environnement explicites ; les valeurs sont des chaînes."
+  ],
+  "AgentAdapter.conversations": [
+    "Built-in native transcript format used when no custom storage is supplied.",
+    "Format natif de transcript utilisé en l’absence de stockage personnalisé."
+  ],
+  "AgentAdapter.storage": [
+    "Custom conversation persistence implementation for this adapter.",
+    "Implémentation personnalisée de persistance des conversations de cet adapter."
+  ],
+  "AgentAdapter.capture": [
+    "Whether the adapter enables native transcript capture.",
+    "Indique si l’adapter active la capture des transcripts natifs."
+  ],
+  "AgentAdapter.resumable": [
+    "Whether the adapter supports native conversation continuation.",
+    "Indique si l’adapter prend en charge la continuation native des conversations."
+  ],
+  "AgentAdapter.transcriptUsage": [
+    "Parse a native transcript to recover token usage when available.",
+    "Analyse un transcript natif pour récupérer l’usage de tokens disponible."
+  ],
+  "AgentAdapter.request": [
+    "Build the executable, arguments and environment for the supplied agent input.",
+    "Construit le programme, ses arguments et son environnement depuis l’entrée d’agent fournie."
+  ],
+  "AgentAdapter.events": [
+    "Decode one native CLI output line into normalized agent events.",
+    "Décode une ligne de sortie du CLI natif en événements d’agent normalisés."
+  ],
+  "ConversationStore.name": [
+    "Identifier of this conversation storage implementation.",
+    "Identifiant de cette implémentation de stockage de conversations."
+  ],
+  "ConversationStore.locate": [
+    "Find an existing transcript by conversation ID, repository and optional host home.",
+    "Recherche un transcript existant par identifiant, dépôt et home hôte optionnel."
+  ],
+  "ConversationStore.capture": [
+    "Capture the selected sandbox conversation into the context’s host staging directory.",
+    "Capture la conversation de sandbox choisie dans le dossier de capture hôte du contexte."
+  ],
+  "ConversationStore.restore": [
+    "Restore a transcript record into the context’s sandbox before continuation.",
+    "Restaure un transcript dans la sandbox du contexte avant continuation."
+  ],
+  "ConversationRecord.id": [
+    "Native conversation identifier used to locate or continue the session.",
+    "Identifiant de conversation native utilisé pour localiser ou poursuivre la session."
+  ],
+  "ConversationRecord.file": [
+    "Host path of the native transcript file.",
+    "Chemin hôte du fichier de transcript natif."
+  ],
+  "ConversationRecord.format": [
+    "Transcript format understood by the owning conversation store.",
+    "Format de transcript compris par le store de conversations propriétaire."
+  ],
+  "ConversationContext.repository": [
+    "Target host Git checkout.",
+    "Checkout Git hôte ciblé."
+  ],
+  "ConversationContext.sandbox": [
+    "Execution lease used to transfer transcripts into or out of the agent home.",
+    "Bail d’exécution utilisé pour transférer les transcripts vers ou depuis le home de l’agent."
+  ],
+  "ConversationContext.staging": [
+    "Host directory receiving captured or prepared transcript files.",
+    "Dossier hôte recevant les transcripts capturés ou préparés."
+  ],
+  "ConversationContext.home": [
+    "Host agent home used to locate or persist native transcripts.",
+    "Home d’agent hôte utilisé pour localiser ou persister les transcripts natifs."
+  ],
+  "ConversationContext.local": [
+    "Use host-local transcript access instead of transferring through the sandbox lease.",
+    "Utilise l’accès local hôte aux transcripts au lieu d’un transfert par le bail de sandbox."
+  ],
+  "ConversationContext.warn": [
+    "Callback receiving nonfatal execution or conversation-storage warnings.",
+    "Callback recevant les avertissements non bloquants d’exécution ou de stockage des conversations."
+  ],
+  "SandboxLease.fileTransfers": [
+    "Optional manifest and batch-transfer capabilities for remote synchronization.",
+    "Capacités optionnelles de manifeste et transfert par lot pour la synchronisation distante."
+  ],
+  "SandboxLease.root": [
+    "Repository workspace path inside the execution environment.",
+    "Chemin du workspace de dépôt à l’intérieur de l’environnement d’exécution."
+  ],
+  "SandboxLease.home": [
+    "Agent home path inside the execution environment.",
+    "Chemin du home de l’agent à l’intérieur de l’environnement d’exécution."
+  ],
+  "SandboxLease.invoke": [
+    "Execute a command in the leased environment and return its actual process exit status and captured streams.",
+    "Exécute une commande dans l’environnement loué et renvoie le statut réel du processus et ses flux capturés."
+  ],
+  "SandboxLease.upload": [
+    "Transfer host files or directory contents into the sandbox, honoring transfer cancellation and deadline.",
+    "Transfère des fichiers ou le contenu de dossiers hôtes vers la sandbox en respectant annulation et délai."
+  ],
+  "SandboxLease.download": [
+    "Transfer sandbox files or directory contents to the host, preserving supported permissions and links.",
+    "Transfère des fichiers ou le contenu de dossiers de sandbox vers l’hôte en préservant permissions et liens pris en charge."
+  ],
+  "SandboxLease.release": [
+    "Dispose of the allocated execution environment; repeated release must be safe.",
+    "Libère l’environnement d’exécution alloué ; les appels répétés doivent être sans danger."
+  ],
+  "FileTransfers.uploadBatch": [
+    "Upload the declared file-manifest entries as a batch when supported.",
+    "Envoie en lot les entrées du manifeste de fichiers déclaré si cette capacité est prise en charge."
+  ],
+  "FileTransfers.manifest": [
+    "Inspect the requested paths in the sandbox and return kind, permissions, size and SHA-256 for each entry.",
+    "Inspecte les chemins demandés en sandbox et renvoie nature, permissions, taille et SHA-256 de chaque entrée."
+  ],
+  "FileTransfers.downloadBatch": [
+    "Download the declared manifest entries as one bounded transfer batch.",
+    "Télécharge les entrées déclarées du manifeste dans un lot de transfert borné."
+  ],
+  "FileManifestEntry.path": [
+    "Relative path of this file or symbolic link within the transferred tree.",
+    "Chemin relatif de ce fichier ou lien symbolique dans l’arborescence transférée."
+  ],
+  "FileManifestEntry.kind": [
+    "Whether this manifest entry contains regular file bytes or a symbolic link target.",
+    "Indique si cette entrée contient les octets d’un fichier ordinaire ou la cible d’un lien symbolique."
+  ],
+  "FileManifestEntry.mode": [
+    "Filesystem permission bits to preserve during transfer.",
+    "Bits de permissions de fichiers à préserver pendant le transfert."
+  ],
+  "FileManifestEntry.size": [
+    "Byte size of the file contents or link target described by the manifest.",
+    "Taille en octets du contenu du fichier ou de la cible du lien décrit par le manifeste."
+  ],
+  "FileManifestEntry.sha256": [
+    "SHA-256 digest used to verify the transferred file or link contents.",
+    "Empreinte SHA-256 utilisée pour vérifier le contenu du fichier ou du lien transféré."
+  ],
+  "TransferOptions.signal": [
+    "Cooperative cancellation for this operation.",
+    "Annulation coopérative de cette opération."
+  ],
+  "TransferOptions.deadlineMs": [
+    "Maximum operation duration in milliseconds before terminating the command or transfer.",
+    "Durée maximale de l’opération en millisecondes avant arrêt de la commande ou du transfert."
+  ],
+  "CommandResult.status": [
+    "Process exit code; zero denotes success.",
+    "Code de sortie du processus ; zéro indique le succès."
+  ],
+  "CommandResult.stdout": [
+    "Captured standard output.",
+    "Sortie standard capturée."
+  ],
+  "CommandResult.stderr": [
+    "Captured standard error.",
+    "Sortie d’erreur capturée."
+  ],
+  "Usage.input": [
+    "Reported input tokens for the agent execution.",
+    "Tokens d’entrée rapportés pour l’exécution de l’agent."
+  ],
+  "Usage.cached": [
+    "Reported input tokens served from the model’s cache.",
+    "Tokens d’entrée rapportés comme servis depuis le cache du modèle."
+  ],
+  "Usage.cacheCreated": [
+    "Reported tokens written into the model’s cache, when the protocol supplies them.",
+    "Tokens rapportés comme écrits dans le cache du modèle lorsque le protocole les fournit."
+  ],
+  "Usage.output": [
+    "Reported output tokens generated by the model.",
+    "Tokens de sortie rapportés comme générés par le modèle."
+  ],
+  "AgentInput.text": [
+    "Prepared prompt passed to the native agent CLI.",
+    "Prompt préparé transmis au CLI natif de l’agent."
+  ],
+  "AgentInput.interactive": [
+    "Request an interactive agent invocation or process terminal.",
+    "Demande une invocation d’agent ou un terminal de processus interactif."
+  ],
+  "AgentInput.continuation": [
+    "Native conversation ID to continue; fork requests a separate conversation derived from it.",
+    "Identifiant de conversation native à poursuivre ; fork demande une conversation distincte dérivée de celle-ci."
+  ],
+  "AgentEvent.kind": [
+    "Discriminator selecting the event payload: phase, summary, warning, text, result, prompt, tool, conversation, usage, failure, finished or raw.",
+    "Discriminant sélectionnant les données de l’événement : phase, summary, warning, text, result, prompt, tool, conversation, usage, failure, finished ou raw."
+  ],
+  "AgentEvent.name": [
+    "Phase name for phase events or tool name for tool events.",
+    "Nom de phase pour les événements phase ou nom d’outil pour les événements tool."
+  ],
+  "AgentEvent.agent": [
+    "Agent CLI identifier to report or diagnose: claude, codex or gemini.",
+    "Identifiant du CLI d’agent à rapporter ou diagnostiquer : claude, codex ou gemini."
+  ],
+  "AgentEvent.branch": [
+    "Name of the work branch used or observed during execution.",
+    "Nom de la branche de travail utilisée ou observée pendant l’exécution."
+  ],
+  "AgentEvent.directory": [
+    "Host workspace directory used for this execution.",
+    "Dossier hôte du workspace utilisé pour cette exécution."
+  ],
+  "AgentEvent.durationMs": [
+    "Elapsed execution time in milliseconds.",
+    "Durée d’exécution écoulée en millisecondes."
+  ],
+  "AgentEvent.status": [
+    "Process exit code; zero denotes success.",
+    "Code de sortie du processus ; zéro indique le succès."
+  ],
+  "AgentEvent.tokens": [
+    "Token usage counters carried by a usage or summary event.",
+    "Compteurs d’usage de tokens portés par un événement usage ou summary."
+  ],
+  "AgentEvent.message": [
+    "Warning or failure message decoded from the agent event.",
+    "Message d’avertissement ou d’échec décodé depuis l’événement d’agent."
+  ],
+  "AgentEvent.text": [
+    "Text carried by the event: streamed text, final answer or submitted prompt according to kind.",
+    "Texte porté par l’événement : texte diffusé, réponse finale ou prompt soumis selon kind."
+  ],
+  "AgentEvent.input": [
+    "Raw arguments supplied to the tool named by this tool event.",
+    "Arguments bruts fournis à l’outil nommé par cet événement tool."
+  ],
+  "AgentEvent.id": [
+    "Native conversation identifier used to locate or continue the session.",
+    "Identifiant de conversation native utilisé pour localiser ou poursuivre la session."
+  ],
+  "AgentEvent.value": [
+    "Unrecognized raw protocol value preserved for observation.",
+    "Valeur brute de protocole non reconnue conservée pour observation."
+  ],
+  "SandboxProvider.name": [
+    "Provider identifier used in diagnostics and resource activity records.",
+    "Identifiant de provider utilisé dans les diagnostics et enregistrements d’activité."
+  ],
+  "SandboxProvider.placement": [
+    "Workspace access model: mounted host checkout, synchronized remote checkout or direct host execution.",
+    "Mode d’accès au workspace : checkout hôte monté, checkout distant synchronisé ou exécution directe sur l’hôte."
+  ],
+  "SandboxProvider.variables": [
+    "Explicit environment declarations; values are strings.",
+    "Déclarations d’environnement explicites ; les valeurs sont des chaînes."
+  ],
+  "SandboxProvider.acquire": [
+    "Allocate an execution lease for the prepared workspace context.",
+    "Alloue un bail d’exécution pour le contexte de workspace préparé."
+  ],
+  "SandboxContext.repository": [
+    "Target host Git checkout.",
+    "Checkout Git hôte ciblé."
+  ],
+  "SandboxContext.directory": [
+    "Host workspace directory used for this execution.",
+    "Dossier hôte du workspace utilisé pour cette exécution."
+  ],
+  "SandboxContext.gitDirectories": [
+    "Host Git metadata directories required to access the workspace repository.",
+    "Dossiers hôtes de métadonnées Git nécessaires à l’accès au dépôt du workspace."
+  ],
+  "SandboxContext.variables": [
+    "Explicit environment declarations; values are strings.",
+    "Déclarations d’environnement explicites ; les valeurs sont des chaînes."
+  ],
+  "SandboxContext.signal": [
+    "Cooperative cancellation for this operation.",
+    "Annulation coopérative de cette opération."
+  ],
+  "Workspace.dispatch": [
+    "Run an agent with a newly acquired sandbox while retaining this caller-owned workspace.",
+    "Exécute un agent dans une sandbox nouvellement acquise en conservant ce workspace appartenant à l’appelant."
+  ],
+  "Workspace.sandbox": [
+    "Allocate a reusable sandbox bound to this workspace.",
+    "Alloue une sandbox réutilisable liée à ce workspace."
+  ],
+  "Workspace.attach": [
+    "Open an interactive agent terminal in a newly acquired sandbox for this workspace.",
+    "Ouvre le terminal interactif d’un agent dans une sandbox nouvellement acquise pour ce workspace."
+  ],
+  "Workspace.close": [
+    "Release workspace ownership; preserve dirty or detached work and honor an explicit preserve request.",
+    "Libère la possession du workspace ; préserve le travail sale ou détaché et respecte une demande preserve explicite."
+  ],
+  "Workspace.integrate": [
+    "Explicitly integrate the managed work branch into its base branch under the workspace’s Git ownership.",
+    "Intègre explicitement la branche de travail gérée dans sa branche de base sous la possession Git du workspace."
+  ],
+  "Workspace.[Symbol.asyncDispose]": [
+    "Close this resource through JavaScript asynchronous resource disposal.",
+    "Ferme cette ressource via le mécanisme de libération asynchrone JavaScript."
+  ],
+  "WorkspaceRecord.repository": [
+    "Target host Git checkout.",
+    "Checkout Git hôte ciblé."
+  ],
+  "WorkspaceRecord.directory": [
+    "Host workspace directory used for this execution.",
+    "Dossier hôte du workspace utilisé pour cette exécution."
+  ],
+  "WorkspaceRecord.branch": [
+    "Name of the work branch used or observed during execution.",
+    "Nom de la branche de travail utilisée ou observée pendant l’exécution."
+  ],
+  "WorkspaceRecord.baseBranch": [
+    "Host branch selected as the integration target when the workspace opened.",
+    "Branche hôte choisie comme cible d’intégration à l’ouverture du workspace."
+  ],
+  "WorkspaceRecord.baseline": [
+    "Git commit used as the initial snapshot for measuring new work.",
+    "Commit Git utilisé comme état initial pour mesurer le nouveau travail."
+  ],
+  "WorkspaceRecord.gitDirectories": [
+    "Host Git metadata directories required to access the workspace repository.",
+    "Dossiers hôtes de métadonnées Git nécessaires à l’accès au dépôt du workspace."
+  ],
+  "WorkspaceRecord.policy": [
+    "Branch policy chosen when the workspace was opened.",
+    "Politique de branche choisie à l’ouverture du workspace."
+  ],
+  "DispatchOptions.agent": [
+    "Native coding-agent adapter.",
+    "Adapter natif de l’agent de code."
+  ],
+  "DispatchOptions.logging": [
+    "Configure the dispatch journal file and verbose event retention.",
+    "Configure le fichier journal du dispatch et la conservation des événements détaillés."
+  ],
+  "DispatchOptions.label": [
+    "Human-readable label used in execution reporting.",
+    "Libellé lisible utilisé dans les rapports d’exécution."
+  ],
+  "DispatchOptions.brief": [
+    "Literal text or file-based task input.",
+    "Entrée de tâche textuelle littérale ou provenant d’un fichier."
+  ],
+  "DispatchOptions.passes": [
+    "Maximum agent passes; one by default.",
+    "Nombre maximal de passes d’agent ; une par défaut."
+  ],
+  "DispatchOptions.until": [
+    "Completion marker or markers; an empty list disables matching.",
+    "Marqueur(s) de fin ; une liste vide désactive la détection."
+  ],
+  "DispatchOptions.idleMs": [
+    "Maximum silent interval in milliseconds.",
+    "Intervalle silencieux maximal en millisecondes."
+  ],
+  "DispatchOptions.idleWarningMs": [
+    "Silence interval in milliseconds before emitting an idle warning.",
+    "Intervalle de silence en millisecondes avant émission d’un avertissement d’inactivité."
+  ],
+  "DispatchOptions.settleMs": [
+    "Grace period in milliseconds after completion detection before stopping a lingering agent process.",
+    "Délai de grâce en millisecondes après détection de fin avant l’arrêt d’un processus d’agent encore actif."
+  ],
+  "DispatchOptions.deadlineMs": [
+    "Maximum duration of each agent process in milliseconds; defaults to one hour.",
+    "Durée maximale de chaque processus d’agent en millisecondes ; une heure par défaut."
+  ],
+  "DispatchOptions.expansionMs": [
+    "Deadline in milliseconds for each original shell expansion in a file brief; defaults to 30000.",
+    "Délai en millisecondes de chaque expansion shell d’origine d’un brief fichier ; 30000 par défaut."
+  ],
+  "DispatchOptions.signal": [
+    "Cooperative cancellation for this operation.",
+    "Annulation coopérative de cette opération."
+  ],
+  "DispatchOptions.continuation": [
+    "Native conversation ID to continue; fork requests a separate conversation derived from it.",
+    "Identifiant de conversation native à poursuivre ; fork demande une conversation distincte dérivée de celle-ci."
+  ],
+  "DispatchOptions.response": [
+    "Parser and validator for the tagged agent answer.",
+    "Analyseur et validateur de la réponse balisée."
+  ],
+  "DispatchOptions.observe": [
+    "Receive normalized agent observations with pass number and timestamp; observer failures are isolated.",
+    "Reçoit les observations normalisées d’agent avec numéro de passe et horodatage ; les erreurs d’observation sont isolées."
+  ],
+  "DispatchOptions.warn": [
+    "Callback receiving nonfatal execution or conversation-storage warnings.",
+    "Callback recevant les avertissements non bloquants d’exécution ou de stockage des conversations."
+  ],
+  "DispatchOptions.diagnostic": [
+    "Callback receiving execution diagnostic messages.",
+    "Callback recevant les messages de diagnostic d’exécution."
+  ],
+  "Logging.file": [
+    "Destination path of the dispatch journal.",
+    "Chemin de destination du journal du dispatch."
+  ],
+  "Logging.verbose": [
+    "Include raw protocol observations in the dispatch journal.",
+    "Inclut les observations brutes du protocole dans le journal du dispatch."
+  ],
+  "Brief.text": [
+    "Literal brief text; excludes a template file and template values.",
+    "Texte littéral du brief ; exclut un fichier modèle et des valeurs de substitution."
+  ],
+  "Brief.file": [
+    "Brief template file to load and expand; mutually exclusive with text.",
+    "Fichier modèle de brief à charger et développer ; mutuellement exclusif avec text."
+  ],
+  "Brief.values": [
+    "Values substituted into placeholders of the file brief; unavailable with literal text briefs.",
+    "Valeurs substituées aux variables du brief fichier ; indisponibles pour les briefs textuels littéraux."
+  ],
+  "ResponseSpec.tag": [
+    "XML-style delimiter identifier.",
+    "Identifiant de balise de type XML."
+  ],
+  "ResponseSpec.repairs": [
+    "Additional attempts to repair invalid structured output; zero by default.",
+    "Tentatives supplémentaires de réparation de sortie invalide ; zéro par défaut."
+  ],
+  "ResponseSpec.read": [
+    "Extract the last complete tagged answer and validate it, rejecting missing or invalid content.",
+    "Extrait la dernière réponse balisée complète et la valide ; échoue si le contenu est absent ou invalide."
+  ],
+  "AgentObservation.pass": [
+    "One-based agent pass number attached to an observation or reporter state.",
+    "Numéro de passe d’agent commençant à un, attaché à une observation ou à l’état du rapporteur."
+  ],
+  "AgentObservation.at": [
+    "ISO timestamp assigned to the agent observation.",
+    "Horodatage ISO attribué à l’observation d’agent."
+  ],
+  "DispatchResult.branch": [
+    "Name of the work branch used or observed during execution.",
+    "Nom de la branche de travail utilisée ou observée pendant l’exécution."
+  ],
+  "DispatchResult.directory": [
+    "Host workspace directory used for this execution.",
+    "Dossier hôte du workspace utilisé pour cette exécution."
+  ],
+  "DispatchResult.commits": [
+    "Collected Git commit identities and subjects.",
+    "Identités et sujets des commits Git collectés."
+  ],
+  "DispatchResult.transcript": [
+    "Available host path to the captured transcript.",
+    "Chemin hôte disponible du transcript capturé."
+  ],
+  "DispatchResult.log": [
+    "Host path of the dispatch journal, when logging produced one.",
+    "Chemin hôte du journal du dispatch lorsqu’un journal a été produit."
+  ],
+  "DispatchResult.retainedDirectory": [
+    "Workspace retained for inspection or recovery.",
+    "Workspace conservé pour inspection ou récupération."
+  ],
+  "DispatchResult.resume": [
+    "Continue this result’s conversation in a newly allocated sandbox.",
+    "Poursuit la conversation de ce résultat dans une sandbox nouvellement allouée."
+  ],
+  "DispatchResult.fork": [
+    "Fork this result’s conversation in a newly allocated sandbox.",
+    "Bifurque depuis la conversation de ce résultat dans une sandbox nouvellement allouée."
+  ],
+  "Execution.text": [
+    "Final text reported by the agent execution.",
+    "Texte final rapporté par l’exécution de l’agent."
+  ],
+  "Execution.turns": [
+    "Ordered agent-turn results, including text, status, duration and token usage for each pass.",
+    "Résultats ordonnés des tours d’agent : texte, statut, durée et usage de tokens de chaque passe."
+  ],
+  "Execution.usage": [
+    "Reported usage counters; not a currency estimate.",
+    "Compteurs d’usage rapportés ; aucune estimation monétaire."
+  ],
+  "Execution.conversation": [
+    "Available native conversation identity.",
+    "Identité de conversation native disponible."
+  ],
+  "Execution.value": [
+    "Validated structured response value; undefined when no response specification was supplied.",
+    "Valeur de réponse structurée validée ; undefined en l’absence de spécification de réponse."
+  ],
+  "Execution.completed": [
+    "Whether the configured completion marker matched.",
+    "Indique si le marqueur de fin configuré a été détecté."
+  ],
+  "Execution.completion": [
+    "Completion marker that matched the agent’s output, when one was found.",
+    "Marqueur de fin correspondant à la sortie de l’agent lorsqu’il a été trouvé."
+  ],
+  "Turn.text": [
+    "Text reported for this single agent pass.",
+    "Texte rapporté pour cette passe d’agent."
+  ],
+  "Turn.status": [
+    "Process exit code; zero denotes success.",
+    "Code de sortie du processus ; zéro indique le succès."
+  ],
+  "Turn.conversation": [
+    "Available native conversation identity.",
+    "Identité de conversation native disponible."
+  ],
+  "Turn.transcript": [
+    "Available host path to the captured transcript.",
+    "Chemin hôte disponible du transcript capturé."
+  ],
+  "Turn.usage": [
+    "Reported usage counters; not a currency estimate.",
+    "Compteurs d’usage rapportés ; aucune estimation monétaire."
+  ],
+  "Turn.durationMs": [
+    "Elapsed execution time in milliseconds.",
+    "Durée d’exécution écoulée en millisecondes."
+  ],
+  "Commit.oid": ["Git commit object ID.", "Identifiant d’objet du commit Git."],
+  "Commit.subject": [
+    "First line of the Git commit message.",
+    "Première ligne du message de commit Git."
+  ],
+  "Sandbox.diagnose": [
+    "Probe this sandbox’s commands, agent and optional transfers under its exclusive operation gate.",
+    "Sonde commandes, agent et transferts optionnels de cette sandbox sous son verrou d’opération exclusif."
+  ],
+  "Sandbox.workspace": [
+    "Workspace bound to this sandbox; its ownership determines whether sandbox closure also closes it.",
+    "Workspace lié à cette sandbox ; sa possession détermine si fermer la sandbox le ferme aussi."
+  ],
+  "Sandbox.root": [
+    "Repository workspace path inside the execution environment.",
+    "Chemin du workspace de dépôt à l’intérieur de l’environnement d’exécution."
+  ],
+  "Sandbox.dispatch": [
+    "Run an agent brief using this sandbox’s existing lease and return a warm result.",
+    "Exécute un brief d’agent sur le bail existant de cette sandbox et renvoie un résultat chaud."
+  ],
+  "Sandbox.resume": [
+    "Continue the given native conversation ID on this sandbox’s existing lease.",
+    "Poursuit l’identifiant de conversation native donné sur le bail existant de cette sandbox."
+  ],
+  "Sandbox.fork": [
+    "Fork the given native conversation ID and run a new brief on this sandbox’s lease.",
+    "Bifurque depuis l’identifiant de conversation native donné et exécute un nouveau brief sur le bail de cette sandbox."
+  ],
+  "Sandbox.attach": [
+    "Attach a real interactive agent terminal to this sandbox’s existing environment.",
+    "Attache le terminal interactif réel d’un agent à l’environnement existant de cette sandbox."
+  ],
+  "Sandbox.command": [
+    "Execute a command on this lease; return nonzero statuses without converting them into workflow task failures.",
+    "Exécute une commande sur ce bail ; renvoie les statuts non nuls sans les convertir en échecs de tâche de workflow."
+  ],
+  "Sandbox.close": [
+    "Wait for owned operations and release the sandbox; close only a workspace owned by this sandbox.",
+    "Attend les opérations possédées et libère la sandbox ; ne ferme le workspace que si cette sandbox en est propriétaire."
+  ],
+  "Sandbox.[Symbol.asyncDispose]": [
+    "Close this resource through JavaScript asynchronous resource disposal.",
+    "Ferme cette ressource via le mécanisme de libération asynchrone JavaScript."
+  ],
+  "SandboxDiagnosticOptions.agent": [
+    "Agent CLI identifier to report or diagnose: claude, codex or gemini.",
+    "Identifiant du CLI d’agent à rapporter ou diagnostiquer : claude, codex ou gemini."
+  ],
+  "SandboxDiagnosticOptions.deadlineMs": [
+    "Maximum duration of each diagnostic probe in milliseconds.",
+    "Durée maximale de chaque sonde de diagnostic en millisecondes."
+  ],
+  "SandboxDiagnosticOptions.signal": [
+    "Cooperative cancellation for this operation.",
+    "Annulation coopérative de cette opération."
+  ],
+  "SandboxDiagnosticOptions.transfers": [
+    "Enable temporary upload/download probes during sandbox diagnosis.",
+    "Active des sondes temporaires d’envoi et téléchargement pendant le diagnostic de sandbox."
+  ],
+  "SandboxDiagnosticOptions.provider": [
+    "Provider name and placement metadata used to interpret the diagnostic report.",
+    "Nom et placement du provider utilisés pour interpréter le rapport de diagnostic."
+  ],
+  "SandboxDiagnosticReport.scope": [
+    "Always owned-sandbox: checks concern the supplied execution resource.",
+    "Toujours owned-sandbox : les contrôles concernent la ressource d’exécution fournie."
+  ],
+  "SandboxDiagnosticReport.ownership": [
+    "Always caller: diagnosis does not acquire ownership of resource disposal.",
+    "Toujours caller : le diagnostic ne devient pas propriétaire de la fermeture de la ressource."
+  ],
+  "SandboxDiagnosticReport.provider": [
+    "Provider name and placement metadata used to interpret the diagnostic report.",
+    "Nom et placement du provider utilisés pour interpréter le rapport de diagnostic."
+  ],
+  "SandboxDiagnosticReport.capabilities": [
+    "Advertised and observed support for commands, transfers, batch transfers and interactive terminals.",
+    "Prise en charge annoncée et observée des commandes, transferts, transferts par lot et terminaux interactifs."
+  ],
+  "SandboxDiagnosticReport.checks": [
+    "Individual diagnostic checks with status, message and available version information.",
+    "Contrôles individuels avec statut, message et informations de version disponibles."
+  ],
+  "SandboxDiagnosticReport.modelCompatibility": [
+    "Always unverified: these diagnostics do not call a live model.",
+    "Toujours unverified : ces diagnostics n’appellent pas de modèle réel."
+  ],
+  "SandboxDiagnosticReport.hasFailures": [
+    "Whether at least one diagnostic check failed.",
+    "Indique si au moins un contrôle de diagnostic a échoué."
+  ],
+  "DiagnosticCapability.id": [
+    "Capability being assessed: command, transfers, batch transfers or interactive terminal.",
+    "Capacité évaluée : commande, transferts, transferts par lot ou terminal interactif."
+  ],
+  "DiagnosticCapability.advertised": [
+    "Whether the inspected adapter advertises this capability; unknown if it cannot be determined.",
+    "Indique si l’adapter inspecté annonce cette capacité ; unknown si cela ne peut être déterminé."
+  ],
+  "DiagnosticCapability.observed": [
+    "Probe outcome, or unverified when no probe established support.",
+    "Résultat de la sonde, ou unverified si aucune sonde n’a établi la prise en charge."
+  ],
+  "DiagnosticCheck.id": [
+    "Stable identifier of the diagnostic check in the report.",
+    "Identifiant stable du contrôle de diagnostic dans le rapport."
+  ],
+  "DiagnosticCheck.status": [
+    "Diagnostic outcome: pass, warn, fail or skipped.",
+    "Résultat du diagnostic : pass, warn, fail ou skipped."
+  ],
+  "DiagnosticCheck.message": [
+    "Human-readable explanation of the diagnostic observation.",
+    "Explication lisible de l’observation de diagnostic."
+  ],
+  "DiagnosticCheck.version": [
+    "Version detected by the diagnostic probe, when available.",
+    "Version détectée par la sonde de diagnostic lorsqu’elle est disponible."
+  ],
+  "DiagnosticCheck.referenceVersion": [
+    "CLI version against which the bundled protocol fixtures were recorded.",
+    "Version du CLI ayant servi à enregistrer les fixtures de protocole intégrées."
+  ],
+  "WarmDispatchResult.resume": [
+    "Continue this result’s conversation on the still-open original sandbox.",
+    "Poursuit la conversation de ce résultat dans sa sandbox d’origine encore ouverte."
+  ],
+  "WarmDispatchResult.fork": [
+    "Fork this result’s conversation on the still-open original sandbox.",
+    "Bifurque depuis la conversation de ce résultat dans sa sandbox d’origine encore ouverte."
+  ],
+  "AttachOptions.agent": [
+    "Native coding-agent adapter.",
+    "Adapter natif de l’agent de code."
+  ],
+  "AttachOptions.signal": [
+    "Cooperative cancellation for this operation.",
+    "Annulation coopérative de cette opération."
+  ],
+  "VariableQuestion.key": [
+    "Name of the missing brief variable whose value is requested.",
+    "Nom de la variable de brief manquante dont la valeur est demandée."
+  ],
+  "VariableQuestion.signal": [
+    "Cooperative cancellation for this operation.",
+    "Annulation coopérative de cette opération."
+  ],
+  "AttachResult.commits": [
+    "Collected Git commit identities and subjects.",
+    "Identités et sujets des commits Git collectés."
+  ],
+  "AttachResult.branch": [
+    "Name of the work branch used or observed during execution.",
+    "Nom de la branche de travail utilisée ou observée pendant l’exécution."
+  ],
+  "AttachResult.directory": [
+    "Host workspace directory used for this execution.",
+    "Dossier hôte du workspace utilisé pour cette exécution."
+  ],
+  "Disposal.retainedDirectory": [
+    "Workspace retained for inspection or recovery.",
+    "Workspace conservé pour inspection ou récupération."
+  ],
+  "RequiredAgent.agent": [
+    "Native coding-agent adapter.",
+    "Adapter natif de l’agent de code."
+  ],
+  "createSandbox.options": [
+    "Workspace ownership, provider allocation, default agent and lifecycle setup.",
+    "Configuration de possession du workspace, allocation du provider, agent par défaut et cycle de vie."
+  ],
+  "dispatch.options": [
+    "Repository and sandbox setup combined with the agent brief, response validation and execution limits.",
+    "Préparation du dépôt et de la sandbox, avec brief d’agent, validation de réponse et limites d’exécution."
+  ],
+  "openWorkspace.options": [
+    "Repository, branch policy, copied inputs, hooks and storage admission settings.",
+    "Réglages de dépôt, politique de branche, entrées copiées, hooks et admission de stockage."
+  ],
+  "WorkflowFailure.result": [
+    "Complete unsuccessful workflow result retained for task, error and usage inspection.",
+    "Résultat complet du workflow non réussi, conservé pour inspecter tâches, erreurs et usage."
+  ],
+  "Error.name": [
+    "Error class name used to distinguish this failure from other JavaScript errors.",
+    "Nom de classe d’erreur permettant de distinguer cet échec des autres erreurs JavaScript."
+  ],
+  "Error.message": [
+    "Human-readable explanation of the failure.",
+    "Explication lisible de l’échec."
+  ],
+  "Error.stack": [
+    "JavaScript stack trace for the error, when available.",
+    "Trace de pile JavaScript de l’erreur lorsqu’elle est disponible."
+  ],
+  "Error.cause": [
+    "Original failure attached to this error.",
+    "Échec d’origine attaché à cette erreur."
+  ],
+  "WorkflowResult.executionId": [
+    "Identity of the workflow execution, preserved across checkpoint resumption.",
+    "Identité de l’exécution de workflow, conservée lors de la reprise d’un checkpoint."
+  ],
+  "WorkflowResult.name": [
+    "Name of the workflow definition, included in its execution reports.",
+    "Nom de la définition de workflow, inclus dans ses rapports d’exécution."
+  ],
+  "WorkflowResult.status": [
+    "Overall execution outcome: done, failed, cancelled or paused.",
+    "Résultat global de l’exécution : done, failed, cancelled ou paused."
+  ],
+  "WorkflowResult.tasks": [
+    "Final task records with statuses, attempt counts, errors and pending gates.",
+    "États finaux des tâches avec statuts, nombres de tentatives, erreurs et gates en attente."
+  ],
+  "WorkflowResult.errors": [
+    "Task and scheduling failures collected during the workflow execution.",
+    "Échecs de tâches et d’ordonnancement collectés pendant l’exécution du workflow."
+  ],
+  "WorkflowResult.observerErrors": [
+    "Observer callback failures isolated from task outcomes.",
+    "Erreurs des callbacks d’observation isolées des résultats des tâches."
+  ],
+  "WorkflowResult.usage": [
+    "Cumulative admitted attempts and observed token usage, including restored accounting.",
+    "Tentatives admises et usage de tokens observé cumulés, y compris la comptabilité restaurée."
+  ],
+  "WorkflowResult.value": [
+    "Read a successful task’s typed output by task identity; reject unavailable outputs.",
+    "Lit la sortie typée d’une tâche réussie par identité de tâche ; rejette les sorties indisponibles."
+  ],
+  "WorkflowResult.unwrap": [
+    "Return normally for a successful run; throw WorkflowFailure for any other workflow outcome.",
+    "Revient normalement si l’exécution a réussi ; lève WorkflowFailure pour tout autre résultat de workflow."
+  ],
+  "TaskRecord.usageReceipts": [
+    "Persisted receipt IDs that prevent repeated accounting of the same usage report.",
+    "Identifiants de reçus persistés empêchant de comptabiliser plusieurs fois le même rapport d’usage."
+  ],
+  "TaskRecord.pause": [
+    "Persisted pending gate request, including its unique ID and authorized actors.",
+    "Demande de gate persistée en attente, avec son identifiant unique et ses acteurs autorisés."
+  ],
+  "TaskRecord.decision": [
+    "Validated decision recorded for the task’s gate.",
+    "Décision validée enregistrée pour la gate de la tâche."
+  ],
+  "TaskRecord.key": [
+    "Stable task key identifying the node within its workflow graph.",
+    "Clé de tâche stable identifiant le nœud dans son graphe de workflow."
+  ],
+  "TaskRecord.status": [
+    "Task lifecycle state, including waiting, active, done, failure, cancellation or gate pause/rejection.",
+    "État de cycle de vie de tâche, incluant attente, activité, réussite, échec, annulation ou pause/rejet d’une gate."
+  ],
+  "TaskRecord.attempts": [
+    "Number of attempts actually started for this task.",
+    "Nombre de tentatives réellement démarrées pour cette tâche."
+  ],
+  "TaskRecord.startedAt": [
+    "ISO timestamp when execution of this task or operation started.",
+    "Horodatage ISO du début d’exécution de cette tâche ou opération."
+  ],
+  "TaskRecord.finishedAt": [
+    "ISO timestamp when execution of this task or operation finished.",
+    "Horodatage ISO de fin d’exécution de cette tâche ou opération."
+  ],
+  "TaskRecord.error": [
+    "Recorded failure message for the task, when present.",
+    "Message d’échec enregistré pour la tâche lorsqu’il existe."
+  ],
+  "WorkflowPauseRequest.id": [
+    "Unique ID of this pending gate request; decisions must match it.",
+    "Identifiant unique de cette demande de gate en attente ; les décisions doivent lui correspondre."
+  ],
+  "WorkflowPauseRequest.requestedAt": [
+    "ISO timestamp when the gate entered its paused state.",
+    "Horodatage ISO de l’entrée de la gate en pause."
+  ],
+  "WorkflowGate.kind": [
+    "approval waits for approve; pause waits for resume. Both accept rejection.",
+    "approval attend approve ; pause attend resume. Les deux acceptent un rejet."
+  ],
+  "WorkflowGate.prompt": [
+    "Instruction explaining the approval or pause decision requested from the trusted actor.",
+    "Instruction expliquant la décision d’approbation ou de reprise demandée à l’acteur de confiance."
+  ],
+  "WorkflowGate.actors": [
+    "Nonempty list of trusted actor names allowed to decide this gate; callers authenticate actors externally.",
+    "Liste non vide des noms d’acteurs de confiance autorisés à décider cette gate ; leur authentification relève de l’appelant."
+  ],
+  "WorkflowDecisionRecord.decidedAt": [
+    "ISO timestamp assigned when the decision was validated and recorded.",
+    "Horodatage ISO attribué lors de la validation et de l’enregistrement de la décision."
+  ],
+  "WorkflowDecision.executionId": [
+    "Identity of the workflow execution, preserved across checkpoint resumption.",
+    "Identité de l’exécution de workflow, conservée lors de la reprise d’un checkpoint."
+  ],
+  "WorkflowDecision.key": [
+    "Stable task key identifying the node within its workflow graph.",
+    "Clé de tâche stable identifiant le nœud dans son graphe de workflow."
+  ],
+  "WorkflowDecision.requestId": [
+    "ID of the exact pending gate request being answered; stale requests are rejected.",
+    "Identifiant de la demande de gate précise à laquelle répondre ; les demandes périmées sont rejetées."
+  ],
+  "WorkflowDecision.action": [
+    "approve for an approval gate, resume for a pause gate, or reject to terminate either gate.",
+    "approve pour une approbation, resume pour une pause, ou reject pour terminer l’une ou l’autre par rejet."
+  ],
+  "WorkflowDecision.actor": [
+    "Trusted caller-supplied actor name that must appear in the gate’s actors list.",
+    "Nom d’acteur fourni par un appelant de confiance et devant figurer dans la liste actors de la gate."
+  ],
+  "WorkflowDecision.reason": [
+    "Nonempty explanation supplied by the trusted actor for the decision.",
+    "Explication non vide fournie par l’acteur de confiance pour sa décision."
+  ],
+  "WorkflowUsage.attempts": [
+    "Cumulative number of admitted task attempts across the workflow.",
+    "Nombre cumulé de tentatives de tâches admises dans le workflow."
+  ],
+  "WorkflowUsage.tokens": [
+    "Cumulative observed token usage across workflow attempts, including restored accounting.",
+    "Usage cumulé de tokens observé sur les tentatives, y compris la comptabilité restaurée."
+  ],
+  "Task.key": [
+    "Stable task key identifying the node within its workflow graph.",
+    "Clé de tâche stable identifiant le nœud dans son graphe de workflow."
+  ],
+  "Task.gate": [
+    "Persisted approval or pause definition; execution requires a checkpoint and a matching trusted decision.",
+    "Définition persistée d’approbation ou pause ; son exécution exige un checkpoint et une décision de confiance correspondante."
+  ],
+  "Task.after": [
+    "Declared task dependencies whose values may be read.",
+    "Dépendances déclarées dont les valeurs peuvent être lues."
+  ],
+  "Task.perform": [
+    "Callback executed for each task attempt; returns its output and must honor context.signal.",
+    "Callback exécuté à chaque tentative ; renvoie sa sortie et doit respecter context.signal."
+  ],
+  "Task.condition": [
+    "Predicate evaluated before the first task attempt.",
+    "Prédicat évalué avant la première tentative."
+  ],
+  "Task.retry": [
+    "Explicit retry policy; repeated effects require care.",
+    "Politique explicite de reprise ; les effets peuvent se répéter."
+  ],
+  "Task.timeoutMs": [
+    "Time limit in milliseconds for each task attempt; cancellation is cooperative through context.signal.",
+    "Durée maximale en millisecondes de chaque tentative ; l’annulation est coopérative via context.signal."
+  ],
+  "TaskContext.signal": [
+    "Cooperative cancellation for this operation.",
+    "Annulation coopérative de cette opération."
+  ],
+  "TaskContext.attempt": [
+    "One-based task attempt number.",
+    "Numéro de tentative de tâche commençant à un."
+  ],
+  "TaskContext.executionId": [
+    "Identity of the workflow execution, preserved across checkpoint resumption.",
+    "Identité de l’exécution de workflow, conservée lors de la reprise d’un checkpoint."
+  ],
+  "TaskContext.reportUsage": [
+    "Add token usage observed during this task attempt to the workflow’s cumulative accounting.",
+    "Ajoute l’usage de tokens observé pendant cette tentative à la comptabilité cumulée du workflow."
+  ],
+  "TaskContext.reportUsageOnce": [
+    "Add token usage only if the receipt ID has not already been recorded, including across checkpoint resumes.",
+    "Ajoute l’usage de tokens seulement si l’identifiant de reçu n’a pas déjà été enregistré, y compris après reprise d’un checkpoint."
+  ],
+  "TaskContext.checkpoint": [
+    "Persist the current workflow state when durable execution is enabled.",
+    "Persiste l’état courant du workflow lorsque l’exécution durable est activée."
+  ],
+  "TaskContext.value": [
+    "Read the completed output of a task listed in this task’s declared dependencies.",
+    "Lit la sortie terminée d’une tâche figurant dans les dépendances déclarées de cette tâche."
+  ],
+  "Retry.attempts": [
+    "Maximum total attempts, including the first execution.",
+    "Nombre maximal total de tentatives, première exécution comprise."
+  ],
+  "Retry.delayMs": [
+    "Delay in milliseconds before a retry; defaults to zero.",
+    "Délai en millisecondes avant une reprise ; zéro par défaut."
+  ],
+  "Retry.accepts": [
+    "Predicate deciding whether a failure from the given attempt may be retried.",
+    "Prédicat déterminant si l’échec de la tentative donnée autorise une reprise."
+  ],
+  "WorkflowBudgetExceeded.dimension": [
+    "Budget dimension whose admission limit was exceeded: attempts or a token counter.",
+    "Dimension du budget dont la limite d’admission a été dépassée : tentatives ou compteur de tokens."
+  ],
+  "WorkflowBudgetExceeded.limit": [
+    "Configured admission threshold for the exceeded budget dimension.",
+    "Seuil d’admission configuré pour la dimension de budget dépassée."
+  ],
+  "WorkflowBudgetExceeded.observed": [
+    "Current cumulative amount observed for the exceeded budget dimension.",
+    "Quantité cumulée courante observée pour la dimension de budget dépassée."
+  ],
+  "task.options": [
+    "Task identity, dependency edges, perform callback and attempt policy.",
+    "Identité de tâche, dépendances, callback perform et politique de tentatives."
+  ],
+  "TaskOptions.after": [
+    "Declared task dependencies whose values may be read.",
+    "Dépendances déclarées dont les valeurs peuvent être lues."
+  ],
+  "workflow.name": [
+    "Name of the workflow definition, included in its execution reports.",
+    "Nom de la définition de workflow, inclus dans ses rapports d’exécution."
+  ],
+  "workflow.tasks": [
+    "Task definitions making up the graph, including every declared dependency.",
+    "Définitions de tâches composant le graphe, comprenant toutes les dépendances déclarées."
+  ],
+  "Workflow.name": [
+    "Name of the workflow definition, included in its execution reports.",
+    "Nom de la définition de workflow, inclus dans ses rapports d’exécution."
+  ],
+  "Workflow.tasks": [
+    "Task definitions making up the graph, including every declared dependency.",
+    "Définitions de tâches composant le graphe, comprenant toutes les dépendances déclarées."
+  ],
+  "Workflow.start": [
+    "Execute the validated graph with the supplied concurrency, cancellation, budgets and checkpoint settings.",
+    "Exécute le graphe validé avec les réglages fournis de concurrence, annulation, budgets et checkpoints."
+  ],
+  "Workflow.diagram": [
+    "Return a Mermaid diagram of task keys and dependency edges without executing tasks.",
+    "Renvoie un diagramme Mermaid des clés de tâches et dépendances sans exécuter les tâches."
+  ],
+  "WorkflowOptions.decisions": [
+    "Explicit decisions for persisted pending gates.",
+    "Décisions explicites pour les gates persistés en attente."
+  ],
+  "WorkflowOptions.checkpoint": [
+    "Durable execution storage and replay configuration.",
+    "Stockage durable de l’exécution et configuration de rejeu."
+  ],
+  "WorkflowOptions.signal": [
+    "Cooperative cancellation for this operation.",
+    "Annulation coopérative de cette opération."
+  ],
+  "WorkflowOptions.concurrency": [
+    "Maximum number of workflow tasks running concurrently.",
+    "Nombre maximal de tâches de workflow exécutées simultanément."
+  ],
+  "WorkflowOptions.budget": [
     "Shared attempt and observed usage admission limits.",
     "Limites partagées de tentatives et d’usage observé."
   ],
-  "options": [
-    "Configuration object. Its fields are described in the associated options contract below.",
-    "Objet de configuration. Ses champs sont décrits dans le contrat d’options associé ci-dessous."
+  "WorkflowOptions.stopOnError": [
+    "Stop admitting new tasks after a task failure when enabled.",
+    "Arrête l’admission de nouvelles tâches après un échec lorsque cette option est activée."
   ],
-  "prompt": [
-    "Human-readable instruction presented at this boundary.",
-    "Instruction lisible présentée à cette étape."
+  "WorkflowOptions.observe": [
+    "Receive workflow state and usage events; thrown errors are collected separately in observerErrors.",
+    "Reçoit les événements d’état et d’usage du workflow ; les erreurs levées sont collectées séparément dans observerErrors."
+  ],
+  "WorkflowCheckpointOptions.store": [
+    "Persistence adapter that acquires, reads and writes workflow checkpoints.",
+    "Adapter de persistance acquérant, lisant et écrivant les checkpoints du workflow."
+  ],
+  "WorkflowCheckpointOptions.runId": [
+    "Stable identity of a saved workflow execution.",
+    "Identité stable d’une exécution sauvegardée."
+  ],
+  "WorkflowCheckpointOptions.version": [
+    "Caller-supplied graph/implementation version; change it when task code or workflow inputs change.",
+    "Version de graphe/implémentation fournie par l’appelant ; à changer lorsque le code des tâches ou les entrées changent."
+  ],
+  "WorkflowCheckpointOptions.resume": [
+    "Explicit retry-incomplete authorization to replay interrupted tasks and their possible side effects.",
+    "Autorisation explicite retry-incomplete de rejouer les tâches interrompues et leurs effets possibles."
+  ],
+  "WorkflowCheckpointStore.acquire": [
+    "Acquire exclusive checkpoint ownership for the supplied stable run ID.",
+    "Acquiert la possession exclusive du checkpoint pour l’identifiant stable d’exécution fourni."
+  ],
+  "WorkflowCheckpointLease.read": [
+    "Read the saved checkpoint as unknown for validation; return no saved value for a new run.",
+    "Lit le checkpoint sauvegardé comme valeur inconnue à valider ; ne renvoie aucune valeur sauvegardée pour une nouvelle exécution."
+  ],
+  "WorkflowCheckpointLease.write": [
+    "Atomically persist the supplied workflow checkpoint while owning the lease.",
+    "Persiste atomiquement le checkpoint fourni sous la possession du bail."
+  ],
+  "WorkflowCheckpointLease.release": [
+    "Release exclusive ownership of the checkpoint without deleting saved state.",
+    "Libère la possession exclusive du checkpoint sans supprimer l’état sauvegardé."
+  ],
+  "WorkflowCheckpoint.format": [
+    "Checkpoint serialization format version; currently 1.",
+    "Version du format de sérialisation du checkpoint ; actuellement 1."
+  ],
+  "WorkflowCheckpoint.identity": [
+    "Fingerprint binding saved state to the workflow graph and caller-supplied version.",
+    "Empreinte liant l’état sauvegardé au graphe de workflow et à la version fournie par l’appelant."
+  ],
+  "WorkflowCheckpoint.executionId": [
+    "Identity of the workflow execution, preserved across checkpoint resumption.",
+    "Identité de l’exécution de workflow, conservée lors de la reprise d’un checkpoint."
+  ],
+  "WorkflowCheckpoint.records": [
+    "Saved status, attempts, decisions and usage receipts for each task.",
+    "Statuts, tentatives, décisions et reçus d’usage sauvegardés pour chaque tâche."
+  ],
+  "WorkflowCheckpoint.values": [
+    "Saved completed task outputs indexed by task key and encoded as JSON or undefined.",
+    "Sorties terminées sauvegardées par clé de tâche et encodées en JSON ou undefined."
+  ],
+  "WorkflowCheckpoint.usage": [
+    "Cumulative admitted attempts and observed token usage, including restored accounting.",
+    "Tentatives admises et usage de tokens observé cumulés, y compris la comptabilité restaurée."
+  ],
+  "WorkflowCheckpointValue.kind": [
+    "Distinguishes an undefined task output from a lossless JSON value.",
+    "Distingue une sortie de tâche undefined d’une valeur JSON sans perte."
+  ],
+  "WorkflowCheckpointValue.value": [
+    "Lossless JSON representation of a completed task output when kind is json.",
+    "Représentation JSON sans perte d’une sortie de tâche terminée lorsque kind vaut json."
+  ],
+  "WorkflowBudget.attempts": [
+    "Maximum cumulative task attempts that the workflow may admit.",
+    "Nombre maximal cumulé de tentatives de tâches que le workflow peut admettre."
+  ],
+  "WorkflowBudget.usage": [
+    "Per-token-counter admission thresholds; observed usage may overshoot while admitted work finishes.",
+    "Seuils d’admission par compteur de tokens ; l’usage observé peut dépasser le seuil pendant la fin du travail déjà admis."
+  ],
+  "WorkflowEvent.executionId": [
+    "Identity of the workflow execution, preserved across checkpoint resumption.",
+    "Identité de l’exécution de workflow, conservée lors de la reprise d’un checkpoint."
+  ],
+  "WorkflowEvent.workflow": [
+    "Name of the workflow that emitted this event.",
+    "Nom du workflow ayant émis cet événement."
+  ],
+  "WorkflowEvent.timestamp": [
+    "ISO timestamp when the workflow event was emitted.",
+    "Horodatage ISO d’émission de l’événement de workflow."
+  ],
+  "WorkflowEvent.type": [
+    "Event category: run start/finish, task transition, attempt, retry or usage report.",
+    "Catégorie d’événement : début/fin d’exécution, transition de tâche, tentative, reprise ou rapport d’usage."
+  ],
+  "WorkflowEvent.key": [
+    "Stable task key identifying the node within its workflow graph.",
+    "Clé de tâche stable identifiant le nœud dans son graphe de workflow."
+  ],
+  "WorkflowEvent.status": [
+    "Task lifecycle state, including waiting, active, done, failure, cancellation or gate pause/rejection.",
+    "État de cycle de vie de tâche, incluant attente, activité, réussite, échec, annulation ou pause/rejet d’une gate."
+  ],
+  "WorkflowEvent.attempt": [
+    "One-based task attempt number.",
+    "Numéro de tentative de tâche commençant à un."
+  ],
+  "WorkflowEvent.usage": [
+    "Reported usage counters; not a currency estimate.",
+    "Compteurs d’usage rapportés ; aucune estimation monétaire."
+  ],
+  "WorkflowEvent.durationMs": [
+    "Elapsed execution time in milliseconds.",
+    "Durée d’exécution écoulée en millisecondes."
+  ],
+  "agentTask.options": [
+    "Task scheduling settings, existing sandbox and dispatch-request factory.",
+    "Réglages d’ordonnancement, sandbox existante et fabrique de requêtes de dispatch."
+  ],
+  "AgentTaskOptions.sandbox": [
+    "Existing caller-owned sandbox reused by the task; the task does not close it.",
+    "Sandbox existante appartenant à l’appelant et réutilisée par la tâche ; la tâche ne la ferme pas."
+  ],
+  "AgentTaskOptions.request": [
+    "Build dispatch options from task dependencies for the existing sandbox.",
+    "Construit les options de dispatch depuis les dépendances pour la sandbox existante."
+  ],
+  "commandTask.options": [
+    "Task scheduling settings, existing sandbox and command or command factory.",
+    "Réglages d’ordonnancement, sandbox existante et commande ou fabrique de commande."
+  ],
+  "CommandTaskOptions.sandbox": [
+    "Existing caller-owned sandbox reused by the task; the task does not close it.",
+    "Sandbox existante appartenant à l’appelant et réutilisée par la tâche ; la tâche ne la ferme pas."
+  ],
+  "CommandTaskOptions.command": [
+    "Command to run, or factory that builds it from task dependency values.",
+    "Commande à exécuter, ou fabrique la construisant depuis les valeurs des dépendances."
+  ],
+  "isolatedTask.options": [
+    "Task scheduling settings and request factory selecting a separate repository and sandbox for each attempt.",
+    "Réglages d’ordonnancement et fabrique de requêtes choisissant un dépôt et une sandbox distincts à chaque tentative."
+  ],
+  "IsolatedTaskOptions.request": [
+    "Build repository, provider, agent and brief options for a separately allocated dispatch at each attempt.",
+    "Construit les options de dépôt, provider, agent et brief pour un dispatch alloué séparément à chaque tentative."
+  ],
+  "claude.settings": [
+    "Claude model, reasoning, permissions, environment and transcript-capture settings.",
+    "Réglages Claude de modèle, raisonnement, permissions, environnement et capture de transcripts."
+  ],
+  "ClaudeSettings.reasoning": [
+    "Reasoning effort passed to the selected agent CLI.",
+    "Niveau d’effort de raisonnement transmis au CLI de l’agent choisi."
+  ],
+  "ClaudeSettings.permissions": [
+    "Claude Code permission mode controlling tool approval behavior.",
+    "Mode de permissions Claude Code contrôlant l’approbation des outils."
+  ],
+  "CommonAgentSettings.model": [
+    "Native CLI model identifier; availability depends on the account.",
+    "Identifiant de modèle natif ; disponibilité selon le compte."
+  ],
+  "CommonAgentSettings.variables": [
+    "Explicit environment declarations; values are strings.",
+    "Déclarations d’environnement explicites ; les valeurs sont des chaînes."
+  ],
+  "CommonAgentSettings.saveConversations": [
+    "Enable native transcript capture when the adapter supports it.",
+    "Activer la capture native si l’adapter la prend en charge."
+  ],
+  "codex.settings": [
+    "Codex model, Responses provider, reasoning, approval reviewer and transcript-capture settings.",
+    "Réglages Codex de modèle, provider Responses, raisonnement, revue d’approbation et capture de transcripts."
+  ],
+  "CodexSettings.modelProvider": [
+    "Custom Codex model endpoint configuration; requires Responses API compatibility.",
+    "Configuration d’un endpoint de modèle Codex personnalisé ; exige la compatibilité Responses API."
+  ],
+  "CodexSettings.reasoning": [
+    "Reasoning effort passed to the selected agent CLI.",
+    "Niveau d’effort de raisonnement transmis au CLI de l’agent choisi."
+  ],
+  "CodexSettings.approvalReviewer": [
+    "Codex approval reviewer: the user or automatic approval review.",
+    "Responsable de l’approbation Codex : utilisateur ou revue automatique."
+  ],
+  "CodexModelProvider.baseUrl": [
+    "Base URL of the custom Responses-compatible model endpoint.",
+    "URL de base de l’endpoint de modèle personnalisé compatible Responses."
+  ],
+  "CodexModelProvider.apiKeyEnvironment": [
+    "Environment variable containing the endpoint API key; false disables the API-key environment declaration.",
+    "Variable d’environnement contenant la clé API de l’endpoint ; false désactive la déclaration de cette variable."
+  ],
+  "gemini.settings": [
+    "Gemini model, approval mode and explicit environment settings.",
+    "Réglages Gemini de modèle, mode d’approbation et environnement explicite."
+  ],
+  "GeminiSettings.model": [
+    "Native CLI model identifier; availability depends on the account.",
+    "Identifiant de modèle natif ; disponibilité selon le compte."
+  ],
+  "GeminiSettings.variables": [
+    "Explicit environment declarations; values are strings.",
+    "Déclarations d’environnement explicites ; les valeurs sont des chaînes."
+  ],
+  "GeminiSettings.approvalMode": [
+    "Gemini CLI tool-approval mode.",
+    "Mode d’approbation des outils du CLI Gemini."
+  ],
+  "agentVersions.gemini": [
+    "Gemini CLI version used by the bundled compatibility fixtures.",
+    "Version du CLI Gemini utilisée par les fixtures de compatibilité intégrées."
+  ],
+  "agentVersions.codex": [
+    "Codex CLI version used by the bundled compatibility fixtures.",
+    "Version du CLI Codex utilisée par les fixtures de compatibilité intégrées."
+  ],
+  "agentVersions.claude": [
+    "Claude Code version used by the bundled compatibility fixtures.",
+    "Version de Claude Code utilisée par les fixtures de compatibilité intégrées."
+  ],
+  "conversations.native": [
+    "Create a native Claude or Codex ConversationStore for transcript persistence.",
+    "Crée un ConversationStore natif Claude ou Codex pour persister les transcripts."
+  ],
+  "conversations.locate": [
+    "Locate a native transcript on the host by format, ID, repository and optional home.",
+    "Localise un transcript natif sur l’hôte par format, identifiant, dépôt et home optionnel."
+  ],
+  "conversations.capture": [
+    "Capture the selected conversation from a sandbox lease into host staging.",
+    "Capture la conversation choisie depuis un bail de sandbox vers le dossier de capture hôte."
+  ],
+  "conversations.restore": [
+    "Restore a located transcript into a sandbox and relocate its repository paths.",
+    "Restaure un transcript localisé dans une sandbox et adapte ses chemins de dépôt."
+  ],
+  "conversations.rewrite": [
+    "Rewrite native transcript repository paths from source to destination without file I/O.",
+    "Réécrit les chemins de dépôt d’un transcript natif de source vers destination sans entrée/sortie fichier."
+  ],
+  "conversations.projectKey": [
+    "Encode a repository path as the Claude native project directory key.",
+    "Encode un chemin de dépôt en clé de dossier de projet natif Claude."
+  ],
+  "conversations.claudePath": [
+    "Compute the host Claude transcript file path for an ID and repository.",
+    "Calcule le chemin du transcript Claude hôte pour un identifiant et un dépôt."
+  ],
+  "conversations.directory": [
+    "Compute the host transcript directory for the selected format and repository.",
+    "Calcule le dossier hôte des transcripts pour le format et le dépôt choisis."
+  ],
+  "conversations.destination": [
+    "Compute the destination transcript path within the sandbox’s agent home.",
+    "Calcule le chemin de destination du transcript dans le home de l’agent en sandbox."
+  ],
+  "nativeConversations.format": [
+    "Native transcript layout: claude or codex.",
+    "Organisation native des transcripts : claude ou codex."
+  ],
+  "locateConversation.format": [
+    "Native transcript layout: claude or codex.",
+    "Organisation native des transcripts : claude ou codex."
+  ],
+  "locateConversation.id": [
+    "Native conversation identifier used to locate or continue the session.",
+    "Identifiant de conversation native utilisé pour localiser ou poursuivre la session."
+  ],
+  "locateConversation.repository": [
+    "Target host Git checkout.",
+    "Checkout Git hôte ciblé."
+  ],
+  "locateConversation.home": [
+    "Host agent home used to locate or persist native transcripts.",
+    "Home d’agent hôte utilisé pour localiser ou persister les transcripts natifs."
+  ],
+  "ConversationLocation.id": [
+    "Native conversation identifier used to locate or continue the session.",
+    "Identifiant de conversation native utilisé pour localiser ou poursuivre la session."
+  ],
+  "ConversationLocation.file": [
+    "Host path of the native transcript file.",
+    "Chemin hôte du fichier de transcript natif."
+  ],
+  "ConversationLocation.format": [
+    "Native transcript layout: claude or codex.",
+    "Organisation native des transcripts : claude ou codex."
+  ],
+  "captureConversation.format": [
+    "Native transcript layout: claude or codex.",
+    "Organisation native des transcripts : claude ou codex."
+  ],
+  "captureConversation.id": [
+    "Native conversation identifier used to locate or continue the session.",
+    "Identifiant de conversation native utilisé pour localiser ou poursuivre la session."
+  ],
+  "captureConversation.repository": [
+    "Target host Git checkout.",
+    "Checkout Git hôte ciblé."
+  ],
+  "captureConversation.lease": [
+    "Sandbox execution lease used to access the native agent home and transfer transcripts.",
+    "Bail d’exécution de sandbox utilisé pour accéder au home natif de l’agent et transférer les transcripts."
+  ],
+  "captureConversation.staging": [
+    "Host directory used to stage native transcript files during transfer.",
+    "Dossier hôte servant à préparer les fichiers de transcript natif pendant le transfert."
+  ],
+  "captureConversation.options": [
+    "Host transcript home, local access mode and nonfatal warning callback.",
+    "Home hôte des transcripts, mode d’accès local et callback d’avertissement non bloquant."
+  ],
+  "CaptureOptions.home": [
+    "Host agent home used to locate or persist native transcripts.",
+    "Home d’agent hôte utilisé pour localiser ou persister les transcripts natifs."
+  ],
+  "CaptureOptions.warn": [
+    "Callback receiving nonfatal execution or conversation-storage warnings.",
+    "Callback recevant les avertissements non bloquants d’exécution ou de stockage des conversations."
+  ],
+  "CaptureOptions.local": [
+    "Use host-local transcript access instead of transferring through the sandbox lease.",
+    "Utilise l’accès local hôte aux transcripts au lieu d’un transfert par le bail de sandbox."
+  ],
+  "restoreConversation.location": [
+    "Existing transcript identity, format and host file path to restore.",
+    "Identité, format et chemin hôte du transcript existant à restaurer."
+  ],
+  "restoreConversation.lease": [
+    "Sandbox execution lease used to access the native agent home and transfer transcripts.",
+    "Bail d’exécution de sandbox utilisé pour accéder au home natif de l’agent et transférer les transcripts."
+  ],
+  "restoreConversation.staging": [
+    "Host directory used to stage native transcript files during transfer.",
+    "Dossier hôte servant à préparer les fichiers de transcript natif pendant le transfert."
+  ],
+  "relocateTranscript.text": [
+    "Native transcript contents to rewrite.",
+    "Contenu du transcript natif à réécrire."
+  ],
+  "relocateTranscript.destination": [
+    "New repository path to embed in relocated transcript records.",
+    "Nouveau chemin de dépôt à inscrire dans les enregistrements du transcript relocalisé."
+  ],
+  "relocateTranscript.source": [
+    "Original repository path to replace when relocating transcript records.",
+    "Chemin de dépôt d’origine à remplacer lors de la relocalisation du transcript."
+  ],
+  "projectKey.path": [
+    "Repository path to encode for Claude’s native project directory layout.",
+    "Chemin de dépôt à encoder pour l’organisation des dossiers de projet natifs Claude."
+  ],
+  "remotePath.format": [
+    "Native transcript layout: claude or codex.",
+    "Organisation native des transcripts : claude ou codex."
+  ],
+  "remotePath.id": [
+    "Native conversation identifier used to locate or continue the session.",
+    "Identifiant de conversation native utilisé pour localiser ou poursuivre la session."
+  ],
+  "remotePath.lease": [
+    "Sandbox execution lease used to access the native agent home and transfer transcripts.",
+    "Bail d’exécution de sandbox utilisé pour accéder au home natif de l’agent et transférer les transcripts."
+  ],
+  "remotePath.original": [
+    "Original native transcript filename, when needed to preserve the Codex session filename.",
+    "Nom d’origine du fichier de transcript natif lorsque nécessaire pour conserver le nom de session Codex."
+  ],
+  "mountedProvider.definition": [
+    "Provider name, environment variables and acquire implementation to wrap with a placement contract.",
+    "Nom de provider, variables d’environnement et implémentation acquire à envelopper dans un contrat de placement."
+  ],
+  "ProviderDefinition.name": [
+    "Provider identifier used in diagnostics and resource activity records.",
+    "Identifiant de provider utilisé dans les diagnostics et enregistrements d’activité."
+  ],
+  "ProviderDefinition.variables": [
+    "Explicit environment declarations; values are strings.",
+    "Déclarations d’environnement explicites ; les valeurs sont des chaînes."
+  ],
+  "ProviderDefinition.acquire": [
+    "Allocate the lease using the prepared workspace and explicit environment variables.",
+    "Alloue le bail depuis le workspace préparé et les variables d’environnement explicites."
+  ],
+  "remoteProvider.definition": [
+    "Provider name, environment variables and acquire implementation to wrap with a placement contract.",
+    "Nom de provider, variables d’environnement et implémentation acquire à envelopper dans un contrat de placement."
+  ],
+  "ResponseError.tag": [
+    "XML-style delimiter identifier.",
+    "Identifiant de balise de type XML."
+  ],
+  "ResponseError.raw": [
+    "Raw tagged response content available when validation failed.",
+    "Contenu brut de la réponse balisée disponible lors de l’échec de validation."
+  ],
+  "OutpostError.recovery": [
+    "Metadata describing retained workspace and transfer artifacts after failure.",
+    "Métadonnées décrivant le workspace et les artefacts de transfert conservés après échec."
+  ],
+  "OutpostError.code": [
+    "Stable Outpost fault category used for programmatic failure handling.",
+    "Catégorie stable d’erreur Outpost utilisée pour le traitement programmatique des échecs."
+  ],
+  "OutpostError.details": [
+    "Structured diagnostic data attached to the fault code.",
+    "Données structurées de diagnostic attachées au code d’erreur."
+  ],
+  "response.text": [
+    "Build a validator that returns trimmed content of the last complete tag as a string.",
+    "Construit un validateur renvoyant le contenu nettoyé de la dernière balise complète sous forme de chaîne."
+  ],
+  "response.json": [
+    "Build a validator that parses tagged JSON and applies a Standard Schema validator or parsing function.",
+    "Construit un validateur analysant le JSON balisé et appliquant un validateur Standard Schema ou une fonction d’analyse."
+  ],
+  "TextResponseOptions.tag": [
+    "XML-style delimiter identifier.",
+    "Identifiant de balise de type XML."
+  ],
+  "TextResponseOptions.repairs": [
+    "Additional attempts to repair invalid structured output; zero by default.",
+    "Tentatives supplémentaires de réparation de sortie invalide ; zéro par défaut."
+  ],
+  "JsonResponseOptions.tag": [
+    "XML-style delimiter identifier.",
+    "Identifiant de balise de type XML."
+  ],
+  "JsonResponseOptions.schema": [
+    "Boundary validator that narrows unknown input.",
+    "Validateur de frontière qui précise une entrée inconnue."
+  ],
+  "JsonResponseOptions.repairs": [
+    "Additional attempts to repair invalid structured output; zero by default.",
+    "Tentatives supplémentaires de réparation de sortie invalide ; zéro par défaut."
+  ],
+  "StandardValidator.~standard": [
+    "Standard Schema validation entry point; validate returns a typed value or validation issues, optionally asynchronously.",
+    "Point d’entrée de validation Standard Schema ; validate renvoie une valeur typée ou des problèmes de validation, éventuellement de façon asynchrone."
+  ],
+  "recoveryDetails.error": [
+    "Unknown thrown value from which to extract Outpost recovery metadata.",
+    "Valeur levée inconnue dont extraire les métadonnées de récupération Outpost."
+  ],
+  "Volume.source": [
+    "Host path to mount into the sandbox.",
+    "Chemin hôte à monter dans la sandbox."
+  ],
+  "Volume.target": [
+    "Absolute destination path of the mount inside the sandbox.",
+    "Chemin absolu de destination du montage dans la sandbox."
+  ],
+  "Volume.readOnly": [
+    "Mount the volume without write access from the sandbox.",
+    "Monte le volume sans accès en écriture depuis la sandbox."
+  ],
+  "reporter.options": [
+    "Output label, verbosity, silence mode and optional custom writer.",
+    "Libellé de sortie, verbosité, mode silencieux et fonction d’écriture personnalisée optionnelle."
+  ],
+  "ReporterOptions.label": [
+    "Human-readable label used in execution reporting.",
+    "Libellé lisible utilisé dans les rapports d’exécution."
+  ],
+  "ReporterOptions.verbose": [
+    "Include detailed agent and tool events in terminal output.",
+    "Inclut les événements détaillés d’agent et d’outils dans la sortie terminal."
+  ],
+  "ReporterOptions.quiet": [
+    "Suppress all reporter output, including warnings and failures.",
+    "Masque toutes les sorties du rapporteur, y compris avertissements et échecs."
+  ],
+  "ReporterOptions.write": [
+    "Custom sink for formatted reporter output.",
+    "Fonction de destination personnalisée pour la sortie formatée du rapporteur."
+  ],
+  "ReportPass.pass": [
+    "One-based agent pass number attached to an observation or reporter state.",
+    "Numéro de passe d’agent commençant à un, attaché à une observation ou à l’état du rapporteur."
+  ],
+  "planRecoveryRetention.options": [
+    "Repository to inspect, explicit retention policy and scan bound.",
+    "Dépôt à inspecter, politique de rétention explicite et limite de parcours."
+  ],
+  "RecoveryRetentionOptions.repository": [
+    "Target host Git checkout.",
+    "Checkout Git hôte ciblé."
+  ],
+  "RecoveryRetentionOptions.policy": [
+    "Explicit storage scopes, minimum age and capacity targets used to decide retention eligibility.",
+    "Périmètres de stockage, âge minimal et cibles de capacité explicites utilisés pour déterminer l’éligibilité au nettoyage."
+  ],
+  "RecoveryRetentionOptions.maxEntries": [
+    "Maximum filesystem entries inspected before marking the inventory incomplete.",
+    "Nombre maximal d’entrées de fichiers inspectées avant de déclarer l’inventaire incomplet."
+  ],
+  "RecoveryRetentionPolicy.version": [
+    "Version of this serialized record format; currently 1.",
+    "Version de ce format d’enregistrement sérialisé ; actuellement 1."
+  ],
+  "RecoveryRetentionPolicy.scopes": [
+    "Storage classes eligible for pruning: clean workspaces and/or closed logs.",
+    "Classes de stockage éligibles au nettoyage : workspaces propres et/ou journaux fermés."
+  ],
+  "RecoveryRetentionPolicy.minAgeMs": [
+    "Minimum age in milliseconds before a retention candidate is eligible.",
+    "Âge minimal en millisecondes pour qu’un candidat à la rétention soit éligible."
+  ],
+  "RecoveryRetentionPolicy.maxBytes": [
+    "Target maximum retained storage in bytes; only eligible entries may be removed.",
+    "Taille maximale cible du stockage conservé en octets ; seules les entrées éligibles peuvent être supprimées."
+  ],
+  "RecoveryRetentionPolicy.maxWorkspaces": [
+    "Target maximum number of retained workspaces; unsafe entries remain protected.",
+    "Nombre maximal cible de workspaces conservés ; les entrées risquées restent protégées."
+  ],
+  "RecoveryRetentionPlan.repository": [
+    "Target host Git checkout.",
+    "Checkout Git hôte ciblé."
+  ],
+  "RecoveryRetentionPlan.policy": [
+    "Explicit storage scopes, minimum age and capacity targets used to decide retention eligibility.",
+    "Périmètres de stockage, âge minimal et cibles de capacité explicites utilisés pour déterminer l’éligibilité au nettoyage."
+  ],
+  "RecoveryRetentionPlan.inspectedAt": [
+    "ISO timestamp when the retention inventory was taken.",
+    "Horodatage ISO de l’inventaire de rétention."
+  ],
+  "RecoveryRetentionPlan.inspection": [
+    "Full recovery inventory on which the retention decisions are based.",
+    "Inventaire complet de récupération sur lequel reposent les décisions de rétention."
+  ],
+  "RecoveryRetentionPlan.entries": [
+    "Retention candidates with eligibility, safety reason and observed size.",
+    "Candidats au nettoyage avec éligibilité, motif de sûreté et taille observée."
+  ],
+  "RecoveryRetentionPlan.complete": [
+    "Whether all requested inspection work completed without hitting scan limits or inaccessible entries.",
+    "Indique si toute l’inspection demandée s’est terminée sans limite de parcours ni entrée inaccessible."
+  ],
+  "RecoveryRetentionPlan.usageBytes": [
+    "Total storage bytes observed before applying the retention plan.",
+    "Nombre total d’octets observés avant application du plan de rétention."
+  ],
+  "RecoveryRetentionPlan.projectedBytes": [
+    "Estimated retained bytes after removing all eligible candidates.",
+    "Estimation des octets conservés après suppression de tous les candidats éligibles."
+  ],
+  "RecoveryRetentionPlan.quota": [
+    "Whether projected usage is within the policy limit, exceeded or unknown due to incomplete inspection.",
+    "Indique si l’usage projeté respecte la limite, la dépasse ou reste inconnu faute d’inspection complète."
+  ],
+  "RecoveryInspection.repository": [
+    "Target host Git checkout.",
+    "Checkout Git hôte ciblé."
+  ],
+  "RecoveryInspection.activity": [
+    "Always unverified: filesystem inventory alone cannot prove that retained resources are inactive.",
+    "Toujours unverified : l’inventaire de fichiers seul ne prouve pas l’inactivité des ressources conservées."
+  ],
+  "RecoveryInspection.git": [
+    "Git worktree state report, present when Git inspection was requested.",
+    "Rapport d’état Git des worktrees, présent lorsque l’inspection Git a été demandée."
+  ],
+  "RecoveryInspection.locks": [
+    "Local lock ownership report, present when lock inspection was requested.",
+    "Rapport de possession locale des verrous, présent lorsque leur inspection a été demandée."
+  ],
+  "RecoveryInspection.resources": [
+    "Local sandbox activity report, present when resource inspection was requested.",
+    "Rapport d’activité locale des sandboxes, présent lorsque l’inspection des ressources a été demandée."
+  ],
+  "StorageInventory.root": [
+    "Repository-local .outpost directory whose storage was inspected.",
+    "Dossier .outpost local au dépôt dont le stockage a été inspecté."
+  ],
+  "StorageInventory.categories": [
+    "Storage grouped into recovery, logs, locks and workspaces.",
+    "Stockage regroupé en récupération, journaux, verrous et workspaces."
+  ],
+  "StorageInventory.usage": [
+    "Observed storage bytes and counts of files, directories, symbolic links and other entries.",
+    "Octets de stockage observés et nombres de fichiers, dossiers, liens symboliques et autres entrées."
+  ],
+  "StorageInventory.issues": [
+    "Filesystem, Git or ownership problems that prevented complete inspection.",
+    "Problèmes de fichiers, Git ou possession ayant empêché une inspection complète."
+  ],
+  "StorageInventory.complete": [
+    "Whether all requested inspection work completed without hitting scan limits or inaccessible entries.",
+    "Indique si toute l’inspection demandée s’est terminée sans limite de parcours ni entrée inaccessible."
+  ],
+  "StorageInventory.scannedEntries": [
+    "Number of filesystem entries visited within the inspection bound.",
+    "Nombre d’entrées de fichiers visitées dans la limite d’inspection."
+  ],
+  "StorageInventory.maxEntries": [
+    "Maximum filesystem entries inspected before marking the inventory incomplete.",
+    "Nombre maximal d’entrées de fichiers inspectées avant de déclarer l’inventaire incomplet."
+  ],
+  "StorageCategory.name": [
+    "Managed storage category represented by this inventory group.",
+    "Catégorie de stockage géré représentée par ce groupe d’inventaire."
+  ],
+  "StorageCategory.path": [
+    "Host directory containing this managed storage category.",
+    "Dossier hôte contenant cette catégorie de stockage géré."
+  ],
+  "StorageCategory.entries": [
+    "Inspected filesystem entries within this storage category.",
+    "Entrées de fichiers inspectées dans cette catégorie de stockage."
+  ],
+  "StorageEntry.name": [
+    "Filesystem basename of the inspected storage entry.",
+    "Nom de fichier de l’entrée de stockage inspectée."
+  ],
+  "StorageEntry.path": [
+    "Host path of the inspected storage entry.",
+    "Chemin hôte de l’entrée de stockage inspectée."
+  ],
+  "StorageEntry.kind": [
+    "Filesystem entry type observed without following symbolic links.",
+    "Type d’entrée de fichiers observé sans suivre les liens symboliques."
+  ],
+  "StorageEntry.modifiedAt": [
+    "ISO timestamp of the inspected entry’s last filesystem modification.",
+    "Horodatage ISO de la dernière modification de l’entrée inspectée."
+  ],
+  "StorageEntry.complete": [
+    "Whether all requested inspection work completed without hitting scan limits or inaccessible entries.",
+    "Indique si toute l’inspection demandée s’est terminée sans limite de parcours ni entrée inaccessible."
+  ],
+  "StorageEntry.bytes": [
+    "Observed byte size of this storage entry, including scanned children.",
+    "Taille observée en octets de cette entrée, y compris ses enfants parcourus."
+  ],
+  "StorageUsage.files": [
+    "Number of regular files counted in the scanned storage.",
+    "Nombre de fichiers ordinaires comptés dans le stockage parcouru."
+  ],
+  "StorageUsage.directories": [
+    "Number of directories counted in the scanned storage.",
+    "Nombre de dossiers comptés dans le stockage parcouru."
+  ],
+  "StorageUsage.symlinks": [
+    "Number of symbolic links counted without traversing their targets.",
+    "Nombre de liens symboliques comptés sans parcourir leurs cibles."
+  ],
+  "StorageUsage.other": [
+    "Number of filesystem entries that are neither regular files, directories nor symbolic links.",
+    "Nombre d’entrées qui ne sont ni fichiers ordinaires, ni dossiers, ni liens symboliques."
+  ],
+  "StorageUsage.bytes": [
+    "Total observed bytes across scanned storage entries.",
+    "Total des octets observés dans les entrées parcourues."
+  ],
+  "StorageIssue.path": [
+    "Filesystem path at which inspection encountered a problem.",
+    "Chemin de fichiers où l’inspection a rencontré un problème."
+  ],
+  "StorageIssue.code": [
+    "Filesystem or inspection error code for the inaccessible entry.",
+    "Code d’erreur de fichiers ou d’inspection de l’entrée inaccessible."
+  ],
+  "WorkspaceGitInspection.complete": [
+    "Whether all requested inspection work completed without hitting scan limits or inaccessible entries.",
+    "Indique si toute l’inspection demandée s’est terminée sans limite de parcours ni entrée inaccessible."
+  ],
+  "WorkspaceGitInspection.workspaces": [
+    "Git state observations for the repository’s managed worktrees.",
+    "Observations d’état Git des worktrees gérés du dépôt."
+  ],
+  "WorkspaceGitInspection.issues": [
+    "Filesystem, Git or ownership problems that prevented complete inspection.",
+    "Problèmes de fichiers, Git ou possession ayant empêché une inspection complète."
+  ],
+  "WorkspaceGitState.state": [
+    "Classification of the worktree’s Git state used to decide whether cleanup is safe.",
+    "Classification de l’état Git du worktree utilisée pour décider si le nettoyage est sûr."
+  ],
+  "WorkspaceGitState.head": [
+    "Git HEAD commit recorded by the inspection or snapshot.",
+    "Commit Git HEAD enregistré par l’inspection ou le snapshot."
+  ],
+  "WorkspaceGitState.branch": [
+    "Worktree branch name, or null when HEAD is detached.",
+    "Nom de branche du worktree, ou null lorsque HEAD est détaché."
+  ],
+  "WorkspaceGitState.dirty": [
+    "Whether tracked or untracked changes make the checkout dirty.",
+    "Indique si des changements suivis ou non suivis rendent le checkout sale."
+  ],
+  "WorkspaceGitState.locked": [
+    "Whether Git marks the worktree as locked.",
+    "Indique si Git marque le worktree comme verrouillé."
+  ],
+  "WorkspaceGitState.reason": [
+    "Reason Git state could not be inspected or was deliberately skipped.",
+    "Motif pour lequel l’état Git n’a pu être inspecté ou a été délibérément ignoré."
+  ],
+  "LockInspection.complete": [
+    "Whether all requested inspection work completed without hitting scan limits or inaccessible entries.",
+    "Indique si toute l’inspection demandée s’est terminée sans limite de parcours ni entrée inaccessible."
+  ],
+  "LockInspection.scope": [
+    "Always local-pid: ownership checks use local process identity.",
+    "Toujours local-pid : les contrôles de possession utilisent l’identité de processus locale."
+  ],
+  "LockInspection.entries": [
+    "Inspected lock files and their local ownership assessments.",
+    "Fichiers de verrou inspectés et évaluations de possession locale."
+  ],
+  "LockInspection.issues": [
+    "Filesystem, Git or ownership problems that prevented complete inspection.",
+    "Problèmes de fichiers, Git ou possession ayant empêché une inspection complète."
+  ],
+  "LockInspectionState.ownership": [
+    "Assessment of whether the recorded local process still owns the resource.",
+    "Évaluation de la possession actuelle de la ressource par le processus local enregistré."
+  ],
+  "LockInspectionState.state": [
+    "Whether the lock file is present, absent, unknown or deliberately skipped.",
+    "Indique si le fichier de verrou est présent, absent, inconnu ou délibérément ignoré."
+  ],
+  "LockInspectionState.pid": [
+    "Process ID parsed from the local lock file when available.",
+    "Identifiant du processus extrait du fichier de verrou local lorsqu’il est disponible."
+  ],
+  "LockInspectionState.reason": [
+    "Reason the local lock was classified with this ownership state.",
+    "Motif du classement du verrou local dans cet état de possession."
+  ],
+  "LockOwnership.status": [
+    "Whether the recorded process is active, inactive or cannot be identified confidently.",
+    "Indique si le processus enregistré est actif, inactif ou ne peut être identifié avec certitude."
+  ],
+  "LockOwnership.reason": [
+    "Reason the local lock was classified with this ownership state.",
+    "Motif du classement du verrou local dans cet état de possession."
+  ],
+  "ResourceInspection.scope": [
+    "Always recorded-sandboxes: inventory covers local activity records, not remote accounts.",
+    "Toujours recorded-sandboxes : l’inventaire couvre les enregistrements locaux, pas les comptes distants."
+  ],
+  "ResourceInspection.complete": [
+    "Whether all requested inspection work completed without hitting scan limits or inaccessible entries.",
+    "Indique si toute l’inspection demandée s’est terminée sans limite de parcours ni entrée inaccessible."
+  ],
+  "ResourceInspection.entries": [
+    "Local sandbox activity files and their ownership assessments.",
+    "Fichiers locaux d’activité de sandbox et évaluations de leur possession."
+  ],
+  "ResourceInspection.issues": [
+    "Filesystem, Git or ownership problems that prevented complete inspection.",
+    "Problèmes de fichiers, Git ou possession ayant empêché une inspection complète."
+  ],
+  "ResourceInspectionEntry.path": [
+    "Host path of the locally recorded sandbox activity file.",
+    "Chemin hôte du fichier local d’activité de sandbox."
+  ],
+  "ResourceInspectionEntry.record": [
+    "Parsed local sandbox activity record, when readable and valid.",
+    "Enregistrement local d’activité de sandbox analysé, lorsqu’il est lisible et valide."
+  ],
+  "ResourceInspectionEntry.ownership": [
+    "Assessment of whether the recorded local process still owns the resource.",
+    "Évaluation de la possession actuelle de la ressource par le processus local enregistré."
+  ],
+  "ResourceActivityRecord.version": [
+    "Version of this serialized record format; currently 1.",
+    "Version de ce format d’enregistrement sérialisé ; actuellement 1."
+  ],
+  "ResourceActivityRecord.id": [
+    "Local identity of the sandbox activity record.",
+    "Identité locale de l’enregistrement d’activité de sandbox."
+  ],
+  "ResourceActivityRecord.pid": [
+    "Host process ID that owns the recorded sandbox activity.",
+    "Identifiant du processus hôte possédant l’activité de sandbox enregistrée."
+  ],
+  "ResourceActivityRecord.identity": [
+    "Host, boot and process-start identity used to assess ownership beyond a PID alone.",
+    "Identité d’hôte, démarrage et début de processus utilisée pour évaluer la possession au-delà du seul PID."
+  ],
+  "ResourceActivityRecord.provider": [
+    "Name of the provider owning the recorded sandbox.",
+    "Nom du provider possédant la sandbox enregistrée."
+  ],
+  "ResourceActivityRecord.placement": [
+    "Workspace access model: mounted host checkout, synchronized remote checkout or direct host execution.",
+    "Mode d’accès au workspace : checkout hôte monté, checkout distant synchronisé ou exécution directe sur l’hôte."
+  ],
+  "ResourceActivityRecord.workspace": [
+    "Host path of the workspace associated with the recorded sandbox.",
+    "Chemin hôte du workspace associé à la sandbox enregistrée."
+  ],
+  "ResourceActivityRecord.createdAt": [
+    "ISO timestamp when the local resource activity record was created.",
+    "Horodatage ISO de création de l’enregistrement local d’activité."
+  ],
+  "ResourceActivityRecord.updatedAt": [
+    "ISO timestamp when the local resource activity record was last updated.",
+    "Horodatage ISO de dernière mise à jour de l’enregistrement local d’activité."
+  ],
+  "ResourceActivityRecord.phase": [
+    "Last locally recorded sandbox lifecycle phase.",
+    "Dernière phase de cycle de vie de sandbox enregistrée localement."
+  ],
+  "ResourceActivityRecord.operations": [
+    "Operations currently recorded as active for this sandbox.",
+    "Opérations actuellement enregistrées comme actives pour cette sandbox."
+  ],
+  "ResourceActivityRecord.lastOperation": [
+    "Most recently completed local operation with its outcome and timestamps.",
+    "Dernière opération locale terminée, avec son résultat et ses horodatages."
+  ],
+  "ResourceActivityRecord.lastFailure": [
+    "Most recent operation recorded as failed, retained after subsequent successes.",
+    "Dernière opération enregistrée en échec, conservée après les succès ultérieurs."
+  ],
+  "LocalProcessIdentity.host": [
+    "Host identity used to distinguish processes on different machines.",
+    "Identité d’hôte utilisée pour distinguer les processus de machines différentes."
+  ],
+  "LocalProcessIdentity.boot": [
+    "Operating-system boot identity used to detect process IDs from an earlier boot.",
+    "Identité de démarrage système utilisée pour détecter les identifiants de processus d’un démarrage précédent."
+  ],
+  "LocalProcessIdentity.namespace": [
+    "Process namespace identity used when assessing local lock ownership.",
+    "Identité d’espace de noms de processus utilisée pour évaluer la possession locale du verrou."
+  ],
+  "LocalProcessIdentity.started": [
+    "Operating-system process start identity used to detect PID reuse.",
+    "Identité système de début de processus utilisée pour détecter la réutilisation d’un PID."
+  ],
+  "ResourceOperation.count": [
+    "Monotonically increasing local operation sequence number.",
+    "Numéro de séquence local d’opération croissant."
+  ],
+  "ResourceOperation.kind": [
+    "Operation category recorded for sandbox activity tracking.",
+    "Catégorie d’opération enregistrée pour le suivi d’activité de sandbox."
+  ],
+  "ResourceOperation.startedAt": [
+    "ISO timestamp when execution of this task or operation started.",
+    "Horodatage ISO du début d’exécution de cette tâche ou opération."
+  ],
+  "ResourceOperationResult.id": [
+    "Recorded identifier of the completed resource operation.",
+    "Identifiant enregistré de l’opération de ressource terminée."
+  ],
+  "ResourceOperationResult.finishedAt": [
+    "ISO timestamp when execution of this task or operation finished.",
+    "Horodatage ISO de fin d’exécution de cette tâche ou opération."
+  ],
+  "ResourceOperationResult.outcome": [
+    "Whether the recorded operation completed or failed.",
+    "Indique si l’opération enregistrée a réussi ou échoué."
+  ],
+  "RecoveryRetentionEntry.path": [
+    "Host path of the inspected storage entry.",
+    "Chemin hôte de l’entrée de stockage inspectée."
+  ],
+  "RecoveryRetentionEntry.category": [
+    "Storage category of the retention candidate.",
+    "Catégorie de stockage du candidat à la rétention."
+  ],
+  "RecoveryRetentionEntry.bytes": [
+    "Observed bytes attributable to this retention candidate.",
+    "Octets observés attribuables à ce candidat à la rétention."
+  ],
+  "RecoveryRetentionEntry.eligible": [
+    "Whether the candidate passed retention safety, scope and age checks for removal.",
+    "Indique si le candidat a passé les contrôles de sûreté, périmètre et âge autorisant sa suppression."
+  ],
+  "RecoveryRetentionEntry.reason": [
+    "Explanation of why this retention candidate is eligible or must remain protected.",
+    "Explication de l’éligibilité du candidat au nettoyage ou de la nécessité de le protéger."
+  ],
+  "RecoveryRetentionEntry.branch": [
+    "Name of the work branch used or observed during execution.",
+    "Nom de la branche de travail utilisée ou observée pendant l’exécution."
+  ],
+  "RecoveryRetentionEntry.head": [
+    "Git HEAD commit recorded by the inspection or snapshot.",
+    "Commit Git HEAD enregistré par l’inspection ou le snapshot."
+  ],
+  "RecoveryRetentionEntry.modifiedAt": [
+    "ISO timestamp of the inspected entry’s last filesystem modification.",
+    "Horodatage ISO de la dernière modification de l’entrée inspectée."
+  ],
+  "pruneRecoveryRetention.plan": [
+    "Previously computed retention plan whose eligible entries must be revalidated before deletion.",
+    "Plan de rétention préalablement calculé dont les entrées éligibles doivent être revalidées avant suppression."
+  ],
+  "RecoveryPruneResult.removed": [
+    "Paths actually removed after ownership and safety revalidation.",
+    "Chemins réellement supprimés après revalidation de la possession et de la sûreté."
+  ],
+  "RecoveryPruneResult.retained": [
+    "Candidates left in place with the reason each could not be removed.",
+    "Candidats laissés en place avec le motif empêchant leur suppression."
+  ],
+  "RecoveryPruneResult.after": [
+    "Fresh retention plan computed after pruning, reflecting remaining storage.",
+    "Nouveau plan de rétention calculé après nettoyage, reflétant le stockage restant."
+  ],
+  "assertRecoveryQuota.options": [
+    "Repository, maximum admitted bytes, additional requested bytes and inspection bound.",
+    "Dépôt, octets admis maximaux, octets supplémentaires demandés et limite d’inspection."
+  ],
+  "RecoveryQuotaOptions.repository": [
+    "Target host Git checkout.",
+    "Checkout Git hôte ciblé."
+  ],
+  "RecoveryQuotaOptions.maxBytes": [
+    "Maximum admitted total of observed storage and active reservations, in bytes.",
+    "Total maximal admis du stockage observé et des réservations actives, en octets."
+  ],
+  "RecoveryQuotaOptions.reserveBytes": [
+    "Additional bytes requested for admission alongside existing storage usage.",
+    "Octets supplémentaires demandés à l’admission en plus du stockage déjà utilisé."
+  ],
+  "RecoveryQuotaOptions.maxEntries": [
+    "Maximum filesystem entries inspected before marking the inventory incomplete.",
+    "Nombre maximal d’entrées de fichiers inspectées avant de déclarer l’inventaire incomplet."
+  ],
+  "verifyRecoveryTransfer.path": [
+    "Retained transfer directory to verify.",
+    "Dossier de transfert conservé à vérifier."
+  ],
+  "verifyRecoveryTransfer.options": [
+    "Enable checksum and Git restorability checks and set their repository and byte bound.",
+    "Active les contrôles d’empreintes et de restauration Git et définit leur dépôt et limite d’octets."
+  ],
+  "RecoveryVerificationOptions.restorability": [
+    "Also verify that retained Git bundles and patches can reconstruct the recorded state.",
+    "Vérifie aussi que les bundles et patches Git conservés peuvent reconstruire l’état enregistré."
+  ],
+  "RecoveryVerificationOptions.repository": [
+    "Target host Git checkout.",
+    "Checkout Git hôte ciblé."
+  ],
+  "RecoveryVerificationOptions.checksums": [
+    "Compute and compare recorded payload digests during transfer verification.",
+    "Calcule et compare les empreintes enregistrées des données pendant la vérification du transfert."
+  ],
+  "RecoveryVerificationOptions.maxBytes": [
+    "Maximum payload bytes allowed for checksum verification.",
+    "Nombre maximal d’octets de données autorisé pour la vérification des empreintes."
+  ],
+  "RecoveryVerification.directory": [
+    "Host directory containing the retained transfer artifacts to verify or restore.",
+    "Dossier hôte contenant les artefacts de transfert conservés à vérifier ou restaurer."
+  ],
+  "RecoveryVerification.scope": [
+    "Whether verification covered only transfer structure or also Git restorability.",
+    "Indique si la vérification couvre seulement la structure du transfert ou aussi sa restauration Git."
+  ],
+  "RecoveryVerification.complete": [
+    "Whether all requested inspection work completed without hitting scan limits or inaccessible entries.",
+    "Indique si toute l’inspection demandée s’est terminée sans limite de parcours ni entrée inaccessible."
+  ],
+  "RecoveryVerification.integrity": [
+    "Integrity conclusion from the recorded manifest and available checksum verification.",
+    "Conclusion d’intégrité issue du manifeste enregistré et de la vérification d’empreintes disponible."
+  ],
+  "RecoveryVerification.checksums": [
+    "Detailed checksum results, byte count and integrity status when hashing was requested.",
+    "Résultats détaillés des empreintes, nombre d’octets et état d’intégrité lorsque le calcul a été demandé."
+  ],
+  "RecoveryVerification.checks": [
+    "Per-path verification results with pass/fail status and diagnostic code.",
+    "Résultats de vérification par chemin avec statut pass/fail et code de diagnostic."
+  ],
+  "RecoveryChecksumResult.integrity": [
+    "Integrity conclusion from the recorded manifest and available checksum verification.",
+    "Conclusion d’intégrité issue du manifeste enregistré et de la vérification d’empreintes disponible."
+  ],
+  "RecoveryChecksumResult.bytesChecked": [
+    "Number of payload bytes actually hashed during verification.",
+    "Nombre d’octets de données réellement hachés pendant la vérification."
+  ],
+  "RecoveryChecksumResult.maxBytes": [
+    "Maximum payload bytes allowed for checksum verification.",
+    "Nombre maximal d’octets de données autorisé pour la vérification des empreintes."
+  ],
+  "RecoveryChecksumResult.checks": [
+    "Per-path verification results with pass/fail status and diagnostic code.",
+    "Résultats de vérification par chemin avec statut pass/fail et code de diagnostic."
+  ],
+  "RecoveryStructureCheck.path": [
+    "Retained transfer entry examined by this verification check.",
+    "Entrée du transfert conservé examinée par ce contrôle."
+  ],
+  "RecoveryStructureCheck.status": [
+    "pass when the checked invariant holds, fail when it does not.",
+    "pass lorsque l’invariant contrôlé est respecté, fail sinon."
+  ],
+  "RecoveryStructureCheck.code": [
+    "Diagnostic code identifying the verified invariant or detected transfer defect.",
+    "Code de diagnostic identifiant l’invariant vérifié ou le défaut de transfert détecté."
+  ],
+  "diagnoseSandbox.target": [
+    "Caller-owned Sandbox or SandboxLease to probe without taking disposal ownership.",
+    "Sandbox ou SandboxLease appartenant à l’appelant à sonder sans devenir propriétaire de sa fermeture."
+  ],
+  "diagnoseSandbox.options": [
+    "Agent and provider metadata, transfer probes, cancellation and per-probe deadline.",
+    "Métadonnées d’agent et provider, sondes de transfert, annulation et délai par sonde."
+  ],
+  "diagnoseAgentProtocol.agent": [
+    "Agent CLI identifier to report or diagnose: claude, codex or gemini.",
+    "Identifiant du CLI d’agent à rapporter ou diagnostiquer : claude, codex ou gemini."
+  ],
+  "AgentProtocolReport.scope": [
+    "Always bundled-protocol-fixtures: checks replay recorded adapter fixtures.",
+    "Toujours bundled-protocol-fixtures : les contrôles rejouent les fixtures enregistrées d’adapter."
+  ],
+  "AgentProtocolReport.agent": [
+    "Agent CLI identifier to report or diagnose: claude, codex or gemini.",
+    "Identifiant du CLI d’agent à rapporter ou diagnostiquer : claude, codex ou gemini."
+  ],
+  "AgentProtocolReport.referenceVersion": [
+    "CLI version against which the bundled protocol fixtures were recorded.",
+    "Version du CLI ayant servi à enregistrer les fixtures de protocole intégrées."
+  ],
+  "AgentProtocolReport.installedCli": [
+    "Always unverified: bundled fixture checks do not invoke the installed CLI.",
+    "Toujours unverified : les contrôles de fixtures intégrées n’invoquent pas le CLI installé."
+  ],
+  "AgentProtocolReport.modelCompatibility": [
+    "Always unverified: these diagnostics do not call a live model.",
+    "Toujours unverified : ces diagnostics n’appellent pas de modèle réel."
+  ],
+  "AgentProtocolReport.checks": [
+    "Individual diagnostic checks with status, message and available version information.",
+    "Contrôles individuels avec statut, message et informations de version disponibles."
+  ],
+  "AgentProtocolReport.hasFailures": [
+    "Whether at least one diagnostic check failed.",
+    "Indique si au moins un contrôle de diagnostic a échoué."
+  ],
+  "reserveRecoveryStorage.options": [
+    "Repository, storage admission limit, bytes to reserve and acquisition cancellation.",
+    "Dépôt, limite d’admission du stockage, octets à réserver et annulation de l’acquisition."
+  ],
+  "RecoveryStorageReservationOptions.repository": [
+    "Target host Git checkout.",
+    "Checkout Git hôte ciblé."
+  ],
+  "StorageReservation.id": [
+    "Unique identity of this coordinated storage reservation.",
+    "Identité unique de cette réservation coordonnée de stockage."
+  ],
+  "StorageReservation.repository": [
+    "Target host Git checkout.",
+    "Checkout Git hôte ciblé."
+  ],
+  "StorageReservation.reserveBytes": [
+    "Additional bytes requested for admission alongside existing storage usage.",
+    "Octets supplémentaires demandés à l’admission en plus du stockage déjà utilisé."
+  ],
+  "StorageReservation.release": [
+    "Release this coordinated reservation so other cooperating writers can reclaim its admission capacity.",
+    "Libère cette réservation coordonnée afin que les autres écrivains coopératifs retrouvent sa capacité d’admission."
+  ],
+  "StorageReservation.[Symbol.asyncDispose]": [
+    "Close this resource through JavaScript asynchronous resource disposal.",
+    "Ferme cette ressource via le mécanisme de libération asynchrone JavaScript."
+  ],
+  "planRecoveryRestore.options": [
+    "Retained transfer source, repository, new destination, selected side and verification byte bound.",
+    "Source du transfert conservé, dépôt, nouvelle destination, côté choisi et limite d’octets de vérification."
+  ],
+  "RecoveryRestoreOptions.directory": [
+    "Host directory containing the retained transfer artifacts to verify or restore.",
+    "Dossier hôte contenant les artefacts de transfert conservés à vérifier ou restaurer."
+  ],
+  "RecoveryRestoreOptions.repository": [
+    "Target host Git checkout.",
+    "Checkout Git hôte ciblé."
+  ],
+  "RecoveryRestoreOptions.destination": [
+    "New, absent destination directory outside the source repository, Git metadata and retained transfer.",
+    "Nouveau dossier de destination absent, hors du dépôt source, de ses métadonnées Git et du transfert conservé."
+  ],
+  "RecoveryRestoreOptions.side": [
+    "Retained state to restore: previous host state or incoming remote state.",
+    "État conservé à restaurer : previous pour l’état hôte antérieur ou incoming pour l’état distant entrant."
+  ],
+  "RecoveryRestoreOptions.maxBytes": [
+    "Maximum retained payload bytes allowed when snapshotting and verifying restoration sources.",
+    "Nombre maximal d’octets de données conservées autorisé pour copier et vérifier les sources de restauration."
+  ],
+  "RecoveryRestorePlan.fingerprint": [
+    "Fingerprint binding the plan to the inspected retained source for revalidation before restoration.",
+    "Empreinte liant le plan à la source conservée inspectée pour revalidation avant restauration."
+  ],
+  "RecoveryRestorePlan.manifestSha256": [
+    "SHA-256 of the retained transfer manifest captured during restoration planning.",
+    "SHA-256 du manifeste de transfert conservé, capturé lors de la planification de restauration."
+  ],
+  "RecoveryRestorePlan.commit": [
+    "Git commit used to reconstruct the selected retained state.",
+    "Commit Git utilisé pour reconstruire l’état conservé choisi."
+  ],
+  "RecoveryRestorePlan.payloads": [
+    "Retained bundle and patch paths required to restore the selected side.",
+    "Chemins des bundles et patches conservés nécessaires pour restaurer le côté choisi."
+  ],
+  "RecoveryRestorePlan.staging": [
+    "Whether the original Git index is preserved; incoming remote state has no recoverable staging information.",
+    "Indique si l’index Git d’origine est préservé ; l’état distant entrant ne fournit pas d’information d’index récupérable."
+  ],
+  "restoreRecoveryTransfer.plan": [
+    "Restoration plan binding source, destination, selected state and integrity fingerprints.",
+    "Plan de restauration liant source, destination, état choisi et empreintes d’intégrité."
+  ],
+  "RecoveryRestoreResult.directory": [
+    "New checkout directory populated with the restored state.",
+    "Nouveau dossier de checkout rempli avec l’état restauré."
+  ],
+  "RecoveryRestoreResult.commit": [
+    "Git commit used to reconstruct the selected retained state.",
+    "Commit Git utilisé pour reconstruire l’état conservé choisi."
+  ],
+  "RecoveryRestoreResult.side": [
+    "Retained state to restore: previous host state or incoming remote state.",
+    "État conservé à restaurer : previous pour l’état hôte antérieur ou incoming pour l’état distant entrant."
+  ],
+  "RecoveryRestoreResult.staging": [
+    "Whether the original Git index is preserved; incoming remote state has no recoverable staging information.",
+    "Indique si l’index Git d’origine est préservé ; l’état distant entrant ne fournit pas d’information d’index récupérable."
+  ],
+  "RecoveryRestoreResult.sourceRetained": [
+    "Always true: restoration preserves the original recovery artifacts.",
+    "Toujours true : la restauration conserve les artefacts de récupération d’origine."
+  ],
+  "fileWorkflowCheckpointStore.options": [
+    "Directory in which to own and persist workflow checkpoint files.",
+    "Dossier dans lequel posséder et persister les fichiers de checkpoints."
+  ],
+  "FileWorkflowCheckpointOptions.directory": [
+    "Host directory used to persist checkpoint files and ownership locks.",
+    "Dossier hôte utilisé pour persister les checkpoints et leurs verrous de possession."
+  ],
+  "approvalTask.options": [
+    "Gate key, dependencies, approval prompt and trusted actors allowed to approve or reject.",
+    "Clé de gate, dépendances, demande d’approbation et acteurs de confiance autorisés à approuver ou rejeter."
+  ],
+  "WorkflowGateOptions.key": [
+    "Stable task key identifying the node within its workflow graph.",
+    "Clé de tâche stable identifiant le nœud dans son graphe de workflow."
+  ],
+  "WorkflowGateOptions.after": [
+    "Declared task dependencies whose values may be read.",
+    "Dépendances déclarées dont les valeurs peuvent être lues."
+  ],
+  "WorkflowGateOptions.prompt": [
+    "Instruction explaining the approval or pause decision requested from the trusted actor.",
+    "Instruction expliquant la décision d’approbation ou de reprise demandée à l’acteur de confiance."
+  ],
+  "WorkflowGateOptions.actors": [
+    "Nonempty list of trusted actor names allowed to decide this gate; callers authenticate actors externally.",
+    "Liste non vide des noms d’acteurs de confiance autorisés à décider cette gate ; leur authentification relève de l’appelant."
+  ],
+  "pauseTask.options": [
+    "Gate key, dependencies, pause prompt and trusted actors allowed to resume or reject.",
+    "Clé de gate, dépendances, demande de pause et acteurs de confiance autorisés à reprendre ou rejeter."
+  ],
+  "inspectRecovery.options": [
+    "Repository, scan bound and optional Git, lock and resource inspections.",
+    "Dépôt, limite de parcours et inspections optionnelles de Git, verrous et ressources."
+  ],
+  "RecoveryInspectionOptions.repository": [
+    "Target host Git checkout.",
+    "Checkout Git hôte ciblé."
+  ],
+  "RecoveryInspectionOptions.maxEntries": [
+    "Maximum filesystem entries inspected before marking the inventory incomplete.",
+    "Nombre maximal d’entrées de fichiers inspectées avant de déclarer l’inventaire incomplet."
+  ],
+  "RecoveryInspectionOptions.git": [
+    "Include Git worktree state and dirty/locked checks in the inventory.",
+    "Inclut l’état Git des worktrees et les contrôles de modifications et verrouillage dans l’inventaire."
+  ],
+  "RecoveryInspectionOptions.locks": [
+    "Include local lock-file and process-ownership inspection.",
+    "Inclut l’inspection des fichiers de verrou locaux et de leur possession par les processus."
+  ],
+  "RecoveryInspectionOptions.resources": [
+    "Include locally recorded sandbox leases and active operations.",
+    "Inclut les baux de sandbox et opérations actives enregistrés localement."
+  ],
+  "artifact.json": [
+    "Create a named JSON artifact contract that validates values during encoding and decoding.",
+    "Crée un contrat d’artefact JSON nommé qui valide les valeurs lors de l’encodage et du décodage."
+  ],
+  "artifact.binary": [
+    "Create a named binary artifact contract that copies Uint8Array payloads.",
+    "Crée un contrat d’artefact binaire nommé qui copie les données Uint8Array."
+  ],
+  "ArtifactIdentity.name": [
+    "Nonempty artifact contract name, at most 1024 characters.",
+    "Nom non vide du contrat d’artefact, de 1024 caractères au maximum."
+  ],
+  "ArtifactIdentity.version": [
+    "Nonempty caller-defined contract version, at most 1024 characters; reads require an exact match.",
+    "Version de contrat non vide définie par l’appelant, de 1024 caractères au maximum ; les lectures exigent une correspondance exacte."
+  ],
+  "JsonArtifactOptions.schema": [
+    "Boundary validator that narrows unknown input.",
+    "Validateur de frontière qui précise une entrée inconnue."
+  ],
+  "ArtifactIdentity.encoding": [
+    "Payload representation required by the artifact contract: json or binary.",
+    "Représentation des données exigée par le contrat d’artefact : json ou binary."
+  ],
+  "ArtifactContract.encode": [
+    "Validate and serialize a typed value into immutable artifact bytes.",
+    "Valide et sérialise une valeur typée en octets d’artefact immuables."
+  ],
+  "ArtifactContract.decode": [
+    "Decode stored bytes and validate them as the contract’s value type.",
+    "Décode les octets stockés et les valide comme valeur typée du contrat."
+  ],
+  "publishArtifact.store": [
+    "Artifact byte store used for immutable publication or bounded payload retrieval.",
+    "Store d’octets d’artefacts utilisé pour la publication immuable ou la lecture bornée des données."
+  ],
+  "publishArtifact.contract": [
+    "Named, versioned artifact contract that defines encoding and validation.",
+    "Contrat d’artefact nommé et versionné définissant encodage et validation."
+  ],
+  "publishArtifact.value": [
+    "Typed payload to validate, encode and publish through the artifact contract.",
+    "Données typées à valider, encoder et publier selon le contrat d’artefact."
+  ],
+  "publishArtifact.options": [
+    "Producer identity, ordered parent lineage and publication cancellation.",
+    "Identité du producteur, filiation parentale ordonnée et annulation de publication."
+  ],
+  "PublishArtifactOptions.producer": [
+    "Recorded artifact producer identity, not authentication.",
+    "Identité enregistrée du producteur, sans authentification."
+  ],
+  "PublishArtifactOptions.parents": [
+    "Ordered parent references whose IDs are recorded in the published artifact’s lineage.",
+    "Références parentes ordonnées dont les identifiants sont enregistrés dans la filiation de l’artefact publié."
+  ],
+  "PublishArtifactOptions.signal": [
+    "Cooperative cancellation for this operation.",
+    "Annulation coopérative de cette opération."
+  ],
+  "ArtifactStore.put": [
+    "Publish bytes atomically under an ID; reject conflicting bytes for an existing ID.",
+    "Publie atomiquement des octets sous un identifiant ; rejette des octets différents pour un identifiant existant."
+  ],
+  "ArtifactStore.get": [
+    "Read bounded artifact bytes by ID; reject a missing object. Integrity is checked by the caller.",
+    "Lit les octets bornés d’un artefact par identifiant ; échoue si l’objet est absent. L’appelant vérifie l’intégrité."
+  ],
+  "ArtifactProducer.executionId": [
+    "Identity of the workflow execution, preserved across checkpoint resumption.",
+    "Identité de l’exécution de workflow, conservée lors de la reprise d’un checkpoint."
+  ],
+  "ArtifactProducer.taskKey": [
+    "Key of the workflow task that published the artifact.",
+    "Clé de la tâche de workflow ayant publié l’artefact."
+  ],
+  "ArtifactProducer.attempt": [
+    "One-based task attempt number.",
+    "Numéro de tentative de tâche commençant à un."
+  ],
+  "ArtifactReference.format": [
+    "Artifact-reference metadata format version; currently 1.",
+    "Version du format des métadonnées de référence d’artefact ; actuellement 1."
+  ],
+  "ArtifactReference.id": [
+    "Content-addressed identity derived from the payload digest, contract, producer and ordered parents.",
+    "Identité adressée par contenu déduite de l’empreinte, du contrat, du producteur et des parents ordonnés."
+  ],
+  "ArtifactReference.digest": [
+    "SHA-256 digest of the encoded artifact bytes.",
+    "Empreinte SHA-256 des octets encodés de l’artefact."
+  ],
+  "ArtifactReference.size": [
+    "Exact byte length of the encoded artifact payload.",
+    "Longueur exacte en octets des données encodées de l’artefact."
+  ],
+  "ArtifactReference.contract": [
+    "Named, versioned artifact contract that defines encoding and validation.",
+    "Contrat d’artefact nommé et versionné définissant encodage et validation."
+  ],
+  "ArtifactReference.producer": [
+    "Recorded artifact producer identity, not authentication.",
+    "Identité enregistrée du producteur, sans authentification."
+  ],
+  "ArtifactReference.parents": [
+    "Ordered immutable IDs of the artifact’s parent references.",
+    "Identifiants immuables ordonnés des références parentes de l’artefact."
+  ],
+  "readStoredArtifact.store": [
+    "Artifact byte store used for immutable publication or bounded payload retrieval.",
+    "Store d’octets d’artefacts utilisé pour la publication immuable ou la lecture bornée des données."
+  ],
+  "readStoredArtifact.contract": [
+    "Named, versioned artifact contract that defines encoding and validation.",
+    "Contrat d’artefact nommé et versionné définissant encodage et validation."
+  ],
+  "readStoredArtifact.value": [
+    "Untrusted artifact reference to validate before loading and checking its stored bytes.",
+    "Référence d’artefact non validée à contrôler avant chargement et vérification des octets stockés."
+  ],
+  "readStoredArtifact.options": [
+    "Expected producer and parent lineage, plus read cancellation.",
+    "Producteur et filiation parentale attendus, avec annulation de lecture."
+  ],
+  "ReadArtifactOptions.producer": [
+    "Expected producer execution, task and attempt; a mismatch rejects the read.",
+    "Exécution, tâche et tentative du producteur attendu ; une différence fait échouer la lecture."
+  ],
+  "ReadArtifactOptions.parents": [
+    "Expected ordered parent references; a mismatching lineage rejects the read.",
+    "Références parentes ordonnées attendues ; une filiation différente fait échouer la lecture."
+  ],
+  "ReadArtifactOptions.signal": [
+    "Cooperative cancellation for this operation.",
+    "Annulation coopérative de cette opération."
+  ],
+  "artifactTask.options": [
+    "Task scheduling, artifact contract/store, value producer and parent-reference factory.",
+    "Ordonnancement de tâche, contrat/store d’artefact, production de valeur et fabrique de références parentes."
+  ],
+  "ArtifactTaskOptions.store": [
+    "Artifact byte store used for immutable publication or bounded payload retrieval.",
+    "Store d’octets d’artefacts utilisé pour la publication immuable ou la lecture bornée des données."
+  ],
+  "ArtifactTaskOptions.contract": [
+    "Named, versioned artifact contract that defines encoding and validation.",
+    "Contrat d’artefact nommé et versionné définissant encodage et validation."
+  ],
+  "ArtifactTaskOptions.produce": [
+    "Compute the typed artifact value from the task context and declared dependencies.",
+    "Calcule la valeur typée de l’artefact depuis le contexte de tâche et les dépendances déclarées."
+  ],
+  "ArtifactTaskOptions.parents": [
+    "Read parent artifact references from task dependencies to record publication lineage.",
+    "Lit les références parentes d’artefacts depuis les dépendances pour enregistrer la filiation à la publication."
+  ],
+  "readArtifact.context": [
+    "Current workflow task context used to read dependencies and propagate cancellation.",
+    "Contexte courant de tâche utilisé pour lire les dépendances et propager l’annulation."
+  ],
+  "readArtifact.dependency": [
+    "Declared task dependency whose completed output is the artifact reference to read.",
+    "Dépendance déclarée dont la sortie terminée est la référence d’artefact à lire."
+  ],
+  "readArtifact.contract": [
+    "Named, versioned artifact contract that defines encoding and validation.",
+    "Contrat d’artefact nommé et versionné définissant encodage et validation."
+  ],
+  "readArtifact.store": [
+    "Artifact byte store used for immutable publication or bounded payload retrieval.",
+    "Store d’octets d’artefacts utilisé pour la publication immuable ou la lecture bornée des données."
+  ],
+  "fileArtifactStore.options": [
+    "Artifact storage directory and maximum bytes per payload.",
+    "Dossier de stockage des artefacts et octets maximaux par données publiées."
+  ],
+  "FileArtifactStoreOptions.directory": [
+    "Host directory storing immutable artifact payloads by ID.",
+    "Dossier hôte stockant les données d’artefacts immuables par identifiant."
+  ],
+  "FileArtifactStoreOptions.maxBytes": [
+    "Maximum bytes per stored artifact; defaults to 16 MiB.",
+    "Nombre maximal d’octets par artefact stocké ; 16 Mio par défaut."
+  ],
+  "sqliteTaskQueue.path": [
+    "Host path to the SQLite queue database.",
+    "Chemin hôte de la base SQLite de la file."
+  ],
+  "DurableTaskQueue.close": [
+    "Close the owned SQLite database connection.",
+    "Ferme la connexion à la base SQLite possédée."
+  ],
+  "TaskQueue.enqueue": [
+    "Persist a JSON job request, deduplicating by ID and rejecting conflicting requests.",
+    "Persiste une demande de travail JSON, déduplique par identifiant et rejette les demandes contradictoires."
+  ],
+  "TaskQueue.get": [
+    "Return the current persisted job for an ID, or undefined if absent.",
+    "Renvoie le travail persisté courant d’un identifiant, ou undefined s’il est absent."
+  ],
+  "TaskQueue.claim": [
+    "Acquire an eligible job for one of the worker’s registered handlers with a new lease fence.",
+    "Prend en charge un travail éligible pour un gestionnaire du worker avec un nouveau jeton de bail."
+  ],
+  "TaskQueue.renew": [
+    "Extend the current worker lease; reject a stale worker or fence.",
+    "Prolonge le bail courant du worker ; rejette un worker ou jeton périmé."
+  ],
+  "TaskQueue.complete": [
+    "Persist a job result only while the worker still owns the matching fenced lease.",
+    "Persiste le résultat seulement si le worker possède encore le bail et le jeton correspondants."
+  ],
+  "TaskQueue.cancel": [
+    "Cancel a job only if its current fence matches the supplied generation.",
+    "Annule un travail seulement si son jeton courant correspond à la génération fournie."
+  ],
+  "QueueRequest.id": [
+    "Durable job identity used for deduplication and lease operations.",
+    "Identité durable du travail utilisée pour la déduplication et les opérations de bail."
+  ],
+  "QueueRequest.handler": [
+    "Registered worker handler name that will execute this JSON job.",
+    "Nom du gestionnaire enregistré du worker qui exécutera ce travail JSON."
+  ],
+  "QueueRequest.input": [
+    "Lossless JSON input supplied to the registered job handler.",
+    "Entrée JSON sans perte fournie au gestionnaire de travail enregistré."
+  ],
+  "QueueRequest.deadline": [
+    "Absolute job deadline as a Unix timestamp in milliseconds.",
+    "Échéance absolue du travail sous forme d’horodatage Unix en millisecondes."
+  ],
+  "QueueJob.status": [
+    "Durable job state: pending, active, done, failed or cancelled.",
+    "État durable du travail : pending, active, done, failed ou cancelled."
+  ],
+  "QueueJob.fence": [
+    "Lease generation used to reject stale queue writers.",
+    "Génération du bail utilisée pour rejeter les écritures périmées."
+  ],
+  "QueueJob.worker": [
+    "Identity of the worker claiming or owning the job lease.",
+    "Identité du worker prenant en charge ou possédant le bail du travail."
+  ],
+  "QueueJob.expires": [
+    "Absolute lease expiry as a Unix timestamp in milliseconds.",
+    "Expiration absolue du bail sous forme d’horodatage Unix en millisecondes."
+  ],
+  "QueueJob.result": [
+    "Persisted worker result, including JSON value, optional usage and failure message.",
+    "Résultat persisté du worker comprenant valeur JSON, usage optionnel et message d’échec."
+  ],
+  "QueueResult.value": [
+    "Lossless JSON output produced by the worker handler.",
+    "Sortie JSON sans perte produite par le gestionnaire du worker."
+  ],
+  "QueueResult.usage": [
+    "Reported usage counters; not a currency estimate.",
+    "Compteurs d’usage rapportés ; aucune estimation monétaire."
+  ],
+  "QueueResult.error": [
+    "Worker failure message; when present, completion records the job as failed.",
+    "Message d’échec du worker ; sa présence fait enregistrer le travail comme failed à la finalisation."
+  ],
+  "QueueClaim.worker": [
+    "Identity of the worker claiming or owning the job lease.",
+    "Identité du worker prenant en charge ou possédant le bail du travail."
+  ],
+  "QueueClaim.handlers": [
+    "Names of handlers this worker can execute when claiming a job.",
+    "Noms des gestionnaires que ce worker peut exécuter lors de la prise en charge."
+  ],
+  "QueueClaim.leaseMs": [
+    "Worker lease duration in milliseconds.",
+    "Durée du bail worker en millisecondes."
+  ],
+  "QueueLease.id": [
+    "Durable job identity used for deduplication and lease operations.",
+    "Identité durable du travail utilisée pour la déduplication et les opérations de bail."
+  ],
+  "QueueLease.worker": [
+    "Identity of the worker claiming or owning the job lease.",
+    "Identité du worker prenant en charge ou possédant le bail du travail."
+  ],
+  "QueueLease.fence": [
+    "Lease generation used to reject stale queue writers.",
+    "Génération du bail utilisée pour rejeter les écritures périmées."
+  ],
+  "serveTaskQueue.options": [
+    "Caller-owned queue, bearer token and HTTP bind address/port.",
+    "File appartenant à l’appelant, jeton bearer et adresse/port d’écoute HTTP."
+  ],
+  "QueueServerOptions.queue": [
+    "Task queue used to enqueue, claim and persist job state.",
+    "File de tâches utilisée pour envoyer, prendre en charge et persister l’état des travaux."
+  ],
+  "QueueServerOptions.token": [
+    "Explicit transport credential; never place it in a URL.",
+    "Identifiant de transport explicite ; jamais dans une URL."
+  ],
+  "QueueServerOptions.host": [
+    "HTTP bind address; defaults to loopback for local-only access.",
+    "Adresse d’écoute HTTP ; loopback par défaut pour un accès local uniquement."
+  ],
+  "QueueServerOptions.port": [
+    "TCP port for the queue HTTP server; zero lets the operating system choose an available port.",
+    "Port TCP du serveur HTTP de file ; zéro laisse le système choisir un port disponible."
+  ],
+  "QueueServer.url": [
+    "HTTP base URL of the task queue server.",
+    "URL HTTP de base du serveur de file de tâches."
+  ],
+  "QueueServer.close": [
+    "Stop the HTTP listener without closing the caller-owned queue.",
+    "Arrête l’écoute HTTP sans fermer la file appartenant à l’appelant."
+  ],
+  "httpTaskQueue.options": [
+    "Queue endpoint URL, bearer token and request timeout.",
+    "URL d’endpoint de file, jeton bearer et délai des requêtes."
+  ],
+  "QueueClientOptions.url": [
+    "HTTP base URL of the task queue server.",
+    "URL HTTP de base du serveur de file de tâches."
+  ],
+  "QueueClientOptions.token": [
+    "Explicit transport credential; never place it in a URL.",
+    "Identifiant de transport explicite ; jamais dans une URL."
+  ],
+  "QueueClientOptions.timeoutMs": [
+    "Time limit in milliseconds for each HTTP queue request.",
+    "Durée maximale en millisecondes de chaque requête HTTP à la file."
+  ],
+  "runQueueWorker.options": [
+    "Queue client, worker identity, handler registry, lease renewal timing and cancellation.",
+    "Client de file, identité du worker, registre de gestionnaires, durée de bail et annulation."
+  ],
+  "QueueWorkerOptions.queue": [
+    "Task queue used to enqueue, claim and persist job state.",
+    "File de tâches utilisée pour envoyer, prendre en charge et persister l’état des travaux."
+  ],
+  "QueueWorkerOptions.worker": [
+    "Identity of the worker claiming or owning the job lease.",
+    "Identité du worker prenant en charge ou possédant le bail du travail."
+  ],
+  "QueueWorkerOptions.handlers": [
+    "Registry mapping handler names to their job execution callbacks.",
+    "Registre associant noms de gestionnaires et callbacks d’exécution des travaux."
+  ],
+  "QueueWorkerOptions.signal": [
+    "Cooperative cancellation for this operation.",
+    "Annulation coopérative de cette opération."
+  ],
+  "QueueWorkerOptions.leaseMs": [
+    "Worker lease duration in milliseconds.",
+    "Durée du bail worker en millisecondes."
+  ],
+  "QueueWorkerOptions.pollMs": [
+    "Interval in milliseconds between queue polls.",
+    "Intervalle en millisecondes entre les interrogations de la file."
+  ],
+  "QueueHandler.input": [
+    "Lossless JSON input supplied to the registered job handler.",
+    "Entrée JSON sans perte fournie au gestionnaire de travail enregistré."
+  ],
+  "QueueHandler.context": [
+    "Claimed queue job and cancellation signal supplied to the registered worker handler.",
+    "Travail pris en charge et signal d’annulation fournis au gestionnaire du worker."
+  ],
+  "QueueHandlerContext.signal": [
+    "Cooperative cancellation for this operation.",
+    "Annulation coopérative de cette opération."
+  ],
+  "QueueHandlerContext.job": [
+    "Claimed persisted job, including its input and lease generation.",
+    "Travail persisté pris en charge, comprenant son entrée et sa génération de bail."
+  ],
+  "queuedTask.options": [
+    "Task scheduling, queue handler, input factory, result decoder and polling settings.",
+    "Ordonnancement de tâche, gestionnaire de file, fabrique d’entrée, décodeur de résultat et interrogation."
+  ],
+  "QueuedTaskOptions.queue": [
+    "Task queue used to enqueue, claim and persist job state.",
+    "File de tâches utilisée pour envoyer, prendre en charge et persister l’état des travaux."
+  ],
+  "QueuedTaskOptions.handler": [
+    "Registered worker handler name that will execute this JSON job.",
+    "Nom du gestionnaire enregistré du worker qui exécutera ce travail JSON."
+  ],
+  "QueuedTaskOptions.input": [
+    "Build the queued job’s JSON input from task dependencies.",
+    "Construit l’entrée JSON du travail en file depuis les dépendances de tâche."
+  ],
+  "QueuedTaskOptions.decode": [
+    "Validate and decode the worker’s JSON result into this task’s output type.",
+    "Valide et décode le résultat JSON du worker dans le type de sortie de cette tâche."
+  ],
+  "QueuedTaskOptions.deadline": [
+    "Absolute job deadline as a Unix timestamp in milliseconds.",
+    "Échéance absolue du travail sous forme d’horodatage Unix en millisecondes."
+  ],
+  "QueuedTaskOptions.pollMs": [
+    "Interval in milliseconds between queue polls.",
+    "Intervalle en millisecondes entre les interrogations de la file."
+  ],
+  "EgressPolicy.mode": [
+    "deny-all blocks outbound traffic; allowlist restricts it to declared destinations when supported.",
+    "deny-all bloque le trafic sortant ; allowlist le restreint aux destinations déclarées si pris en charge."
+  ],
+  "EgressPolicy.domains": [
+    "Allowed outbound domain names for providers supporting domain allowlists.",
+    "Noms de domaines sortants autorisés pour les providers prenant en charge ces listes."
+  ],
+  "EgressPolicy.allowCidrs": [
+    "Network ranges explicitly allowed by the provider’s egress policy.",
+    "Plages réseau explicitement autorisées par la politique sortante du provider."
+  ],
+  "EgressPolicy.denyCidrs": [
+    "Network ranges explicitly denied by the provider’s egress policy.",
+    "Plages réseau explicitement interdites par la politique sortante du provider."
+  ],
+  "speculate.options": [
+    "Repository, provider, bounded candidates, admission budget and winner-validation callback.",
+    "Dépôt, provider, candidats bornés, budget d’admission et callback de validation du gagnant."
+  ],
+  "SpeculationOptions.repository": [
+    "Target host Git checkout.",
+    "Checkout Git hôte ciblé."
+  ],
+  "SpeculationOptions.provider": [
+    "Execution environment backend.",
+    "Backend de l’environnement d’exécution."
+  ],
+  "SpeculationOptions.candidates": [
+    "Agent requests to race on separate branches; at most eight candidates.",
+    "Requêtes d’agent mises en concurrence sur des branches distinctes ; huit candidats au maximum."
+  ],
+  "SpeculationOptions.concurrency": [
+    "Maximum candidates running concurrently; defaults to two.",
+    "Nombre maximal de candidats exécutés simultanément ; deux par défaut."
+  ],
+  "SpeculationOptions.budget": [
+    "Shared attempt and observed usage admission limits.",
+    "Limites partagées de tentatives et d’usage observé."
+  ],
+  "SpeculationOptions.signal": [
+    "Cooperative cancellation for this operation.",
+    "Annulation coopérative de cette opération."
+  ],
+  "SpeculationOptions.sandbox": [
+    "Shared lifecycle, logging and storage settings applied when allocating each candidate sandbox.",
+    "Réglages communs de cycle de vie, journaux et stockage appliqués à l’allocation de chaque sandbox candidate."
+  ],
+  "SpeculationOptions.validate": [
+    "Predicate run with a candidate’s live sandbox and output; true accepts that candidate as a possible winner.",
+    "Prédicat exécuté avec la sandbox active et la sortie d’un candidat ; true l’accepte comme gagnant possible."
+  ],
+  "SpeculativeCandidate.key": [
+    "Unique candidate key used to correlate its branch, validation and final result.",
+    "Clé unique du candidat reliant sa branche, sa validation et son résultat final."
+  ],
+  "SpeculativeCandidate.agent": [
+    "Native coding-agent adapter.",
+    "Adapter natif de l’agent de code."
+  ],
+  "SpeculativeCandidate.request": [
+    "Candidate-specific brief and response settings; the race controls agent, cancellation and fresh-session behavior.",
+    "Réglages de brief et réponse propres au candidat ; la course contrôle agent, annulation et session neuve."
+  ],
+  "SpeculativeValidation.key": [
+    "Unique candidate key used to correlate its branch, validation and final result.",
+    "Clé unique du candidat reliant sa branche, sa validation et son résultat final."
+  ],
+  "SpeculativeValidation.result": [
+    "Candidate dispatch output with text, commits, usage and typed value, excluding continuation methods.",
+    "Sortie de dispatch du candidat avec texte, commits, usage et valeur typée, sans méthodes de continuation."
+  ],
+  "SpeculativeValidation.sandbox": [
+    "Live candidate sandbox available for validation commands before cleanup.",
+    "Sandbox active du candidat disponible pour les commandes de validation avant nettoyage."
+  ],
+  "SpeculativeValidation.signal": [
+    "Cooperative cancellation for this operation.",
+    "Annulation coopérative de cette opération."
+  ],
+  "SpeculationResult.id": [
+    "Unique identifier of this speculative race.",
+    "Identifiant unique de cette course spéculative."
+  ],
+  "SpeculationResult.baseline": [
+    "Git commit used as the initial snapshot for measuring new work.",
+    "Commit Git utilisé comme état initial pour mesurer le nouveau travail."
+  ],
+  "SpeculationResult.host": [
+    "Host checkout snapshots before and after the race, with change detection and any inspection error.",
+    "Snapshots du checkout hôte avant et après la course, avec détection de changements et éventuelle erreur d’inspection."
+  ],
+  "SpeculationResult.status": [
+    "Race outcome: winner, no-winner, aborted or budget-exhausted.",
+    "Résultat de la course : winner, no-winner, aborted ou budget-exhausted."
+  ],
+  "SpeculationResult.winner": [
+    "Selected candidate that passed validation and completed cleanup, when one exists.",
+    "Candidat choisi ayant passé la validation et terminé le nettoyage, lorsqu’il existe."
+  ],
+  "SpeculationResult.candidates": [
+    "Final status, branch, retained work and available output of every candidate.",
+    "Statut final, branche, travail conservé et sortie disponible de chaque candidat."
+  ],
+  "SpeculationResult.usage": [
+    "Cumulative admitted attempts and observed token usage, including restored accounting.",
+    "Tentatives admises et usage de tokens observé cumulés, y compris la comptabilité restaurée."
+  ],
+  "SpeculationResult.error": [
+    "Original failure encountered during candidate execution, validation or race cleanup.",
+    "Échec d’origine rencontré pendant l’exécution, la validation d’un candidat ou le nettoyage de la course."
+  ],
+  "SpeculativeHostSnapshot.head": [
+    "Git HEAD commit recorded by the inspection or snapshot.",
+    "Commit Git HEAD enregistré par l’inspection ou le snapshot."
+  ],
+  "SpeculativeHostSnapshot.branch": [
+    "Name of the work branch used or observed during execution.",
+    "Nom de la branche de travail utilisée ou observée pendant l’exécution."
+  ],
+  "SpeculativeHostSnapshot.fingerprint": [
+    "Digest of the host checkout state used to detect changes during the race.",
+    "Empreinte de l’état du checkout hôte utilisée pour détecter des changements pendant la course."
+  ],
+  "SpeculativeHostSnapshot.dirty": [
+    "Whether tracked or untracked changes make the checkout dirty.",
+    "Indique si des changements suivis ou non suivis rendent le checkout sale."
+  ],
+  "SpeculativeCandidateResult.key": [
+    "Unique candidate key used to correlate its branch, validation and final result.",
+    "Clé unique du candidat reliant sa branche, sa validation et son résultat final."
+  ],
+  "SpeculativeCandidateResult.branch": [
+    "Name of the work branch used or observed during execution.",
+    "Nom de la branche de travail utilisée ou observée pendant l’exécution."
+  ],
+  "SpeculativeCandidateResult.status": [
+    "Candidate outcome: winner, rejected, failed, cancelled or skipped.",
+    "Résultat du candidat : winner, rejected, failed, cancelled ou skipped."
+  ],
+  "SpeculativeCandidateResult.directory": [
+    "Host workspace directory used for this execution.",
+    "Dossier hôte du workspace utilisé pour cette exécution."
+  ],
+  "SpeculativeCandidateResult.retainedDirectory": [
+    "Workspace retained for inspection or recovery.",
+    "Workspace conservé pour inspection ou récupération."
+  ],
+  "SpeculativeCandidateResult.result": [
+    "Candidate dispatch output with text, commits, usage and typed value, excluding continuation methods.",
+    "Sortie de dispatch du candidat avec texte, commits, usage et valeur typée, sans méthodes de continuation."
+  ],
+  "SpeculativeCandidateResult.error": [
+    "Original failure encountered during candidate execution, validation or race cleanup.",
+    "Échec d’origine rencontré pendant l’exécution, la validation d’un candidat ou le nettoyage de la course."
+  ],
+  "ContainerOptions.egress": [
+    "Explicit outbound network policy; unsupported restrictions are rejected by the provider.",
+    "Politique réseau sortante explicite ; le provider rejette les restrictions non prises en charge."
+  ],
+  "ContainerOptions.repositoryMode": [
+    "mounted shares the host checkout and Git metadata; isolated uses the opt-in private repository transfer mode.",
+    "mounted partage le checkout hôte et les métadonnées Git ; isolated utilise le transfert opt-in vers un dépôt privé."
+  ],
+  "ContainerOptions.caches": [
+    "Engine-managed dependency cache volumes with independently owned lifetimes.",
+    "Volumes de cache de dépendances gérés par le moteur avec une durée de vie indépendante."
+  ],
+  "ContainerOptions.image": [
+    "Container or guest image reference.",
+    "Référence d’image de conteneur ou d’invité."
+  ],
+  "ContainerOptions.user": [
+    "UID and GID used for commands and ownership inside the container.",
+    "UID et GID utilisés pour les commandes et la possession des fichiers dans le conteneur."
+  ],
+  "ContainerOptions.volumes": [
+    "Explicit host-to-sandbox filesystem mounts.",
+    "Montages explicites de fichiers de l’hôte vers la sandbox."
+  ],
+  "ContainerOptions.variables": [
+    "Explicit environment declarations; values are strings.",
+    "Déclarations d’environnement explicites ; les valeurs sont des chaînes."
+  ],
+  "ContainerOptions.networks": [
+    "Container network name or names passed to the engine.",
+    "Nom ou noms de réseaux du conteneur transmis au moteur."
+  ],
+  "ContainerOptions.groups": [
+    "Supplementary group names or IDs granted inside the container.",
+    "Noms ou identifiants de groupes supplémentaires accordés dans le conteneur."
+  ],
+  "ContainerOptions.devices": [
+    "Host device mappings explicitly exposed to the container.",
+    "Correspondances de périphériques hôtes explicitement exposés au conteneur."
+  ],
+  "ContainerOptions.cpus": [
+    "CPU allocation limit for the execution environment.",
+    "Limite d’allocation CPU de l’environnement d’exécution."
+  ],
+  "ContainerOptions.memoryMb": [
+    "Memory allocation limit in megabytes.",
+    "Limite d’allocation mémoire en mégaoctets."
+  ],
+  "ContainerOptions.label": [
+    "SELinux relabeling for mounted paths: z shared, Z private, false disabled.",
+    "Réétiquetage SELinux des chemins montés : z partagé, Z privé, false désactivé."
+  ],
+  "ContainerOptions.retain": [
+    "Maximum retained tail per output stream, in bytes.",
+    "Taille maximale de la fin conservée par flux, en octets."
+  ],
+  "ContainerOptions.userns": [
+    "Podman user-namespace mode; keep-id preserves host user IDs and false disables this option.",
+    "Mode d’espace utilisateur Podman ; keep-id conserve les identifiants hôtes et false désactive cette option."
+  ],
+  "DependencyCache.name": [
+    "Logical cache name used in the mount path; the engine volume name is derived from repository, image, user and key.",
+    "Nom logique de cache utilisé dans le chemin de montage ; le nom du volume moteur est déduit du dépôt, de l’image, de l’utilisateur et de la clé."
+  ],
+  "DependencyCache.key": [
+    "Caller-defined cache invalidation key; changing it selects a new engine volume.",
+    "Clé d’invalidation du cache définie par l’appelant ; sa modification sélectionne un nouveau volume moteur."
+  ],
+  "docker.options": [
+    "Container image, repository mode, mounts, environment, network and resource limits.",
+    "Image de conteneur, mode de dépôt, montages, environnement, réseau et limites de ressources."
+  ],
+  "podman.options": [
+    "Container image, repository mode, mounts, environment, network and resource limits.",
+    "Image de conteneur, mode de dépôt, montages, environnement, réseau et limites de ressources."
+  ],
+  "local.options": [
+    "Explicit environment variables for unisolated host execution.",
+    "Variables d’environnement explicites pour l’exécution hôte sans isolation."
+  ],
+  "LocalOptions.variables": [
+    "Explicit environment declarations; values are strings.",
+    "Déclarations d’environnement explicites ; les valeurs sont des chaînes."
+  ],
+  "vercel.options": [
+    "Vercel sandbox creation, workspace root, egress, environment and output retention settings.",
+    "Réglages de création Vercel, racine du workspace, réseau sortant, environnement et conservation des sorties."
+  ],
+  "VercelOptions.egress": [
+    "Explicit outbound network policy; unsupported restrictions are rejected by the provider.",
+    "Politique réseau sortante explicite ; le provider rejette les restrictions non prises en charge."
+  ],
+  "VercelOptions.create": [
+    "Sandbox creation options forwarded to the provider’s SDK.",
+    "Options de création de sandbox transmises au SDK du provider."
+  ],
+  "VercelOptions.variables": [
+    "Explicit environment declarations; values are strings.",
+    "Déclarations d’environnement explicites ; les valeurs sont des chaînes."
+  ],
+  "VercelOptions.root": [
+    "Repository workspace path inside the execution environment.",
+    "Chemin du workspace de dépôt à l’intérieur de l’environnement d’exécution."
+  ],
+  "VercelOptions.retain": [
+    "Maximum retained tail per output stream, in bytes.",
+    "Taille maximale de la fin conservée par flux, en octets."
+  ],
+  "vercel.connect": [
+    "Injected SDK sandbox-creation function used instead of the default remote connection.",
+    "Fonction injectée de création de sandbox SDK remplaçant la connexion distante par défaut."
+  ],
+  "daytona.options": [
+    "Daytona client connection, sandbox creation, workspace root, environment and output retention settings.",
+    "Réglages de connexion Daytona, création de sandbox, racine du workspace, environnement et conservation des sorties."
+  ],
+  "DaytonaOptions.connection": [
+    "Daytona SDK client connection settings, separate from sandbox creation options.",
+    "Réglages de connexion du client SDK Daytona, distincts des options de création de sandbox."
+  ],
+  "DaytonaOptions.create": [
+    "Sandbox creation options forwarded to the provider’s SDK.",
+    "Options de création de sandbox transmises au SDK du provider."
+  ],
+  "DaytonaOptions.variables": [
+    "Explicit environment declarations; values are strings.",
+    "Déclarations d’environnement explicites ; les valeurs sont des chaînes."
+  ],
+  "DaytonaOptions.root": [
+    "Repository workspace path inside the execution environment.",
+    "Chemin du workspace de dépôt à l’intérieur de l’environnement d’exécution."
+  ],
+  "DaytonaOptions.retain": [
+    "Maximum retained tail per output stream, in bytes.",
+    "Taille maximale de la fin conservée par flux, en octets."
+  ],
+  "daytona.connect": [
+    "Injected factory returning a Daytona client with create/delete methods for sandbox lifecycle.",
+    "Fabrique injectée renvoyant un client Daytona avec méthodes create/delete pour le cycle de vie des sandboxes."
+  ],
+  "openTelemetry.options": [
+    "Tracer, meter and isolated error callback for workflow telemetry.",
+    "Tracer, meter et callback d’erreur isolée pour la télémétrie de workflow."
+  ],
+  "OpenTelemetryOptions.tracer": [
+    "OpenTelemetry tracer used to create execution spans.",
+    "Tracer OpenTelemetry utilisé pour créer les spans d’exécution."
+  ],
+  "OpenTelemetryOptions.meter": [
+    "OpenTelemetry meter used to record execution and token metrics.",
+    "Meter OpenTelemetry utilisé pour enregistrer les métriques d’exécution et de tokens."
+  ],
+  "OpenTelemetryOptions.onError": [
+    "Callback receiving isolated telemetry-export or observer errors.",
+    "Callback recevant les erreurs isolées de télémétrie ou d’observation."
+  ],
+  "OpenTelemetryObserver.observe": [
+    "Convert a workflow event into telemetry spans and metrics.",
+    "Convertit un événement de workflow en spans et métriques de télémétrie."
+  ],
+  "OpenTelemetryObserver.close": [
+    "Finish any outstanding execution spans owned by this observer.",
+    "Termine les spans d’exécution encore ouverts appartenant à cet observateur."
+  ],
+  "firecracker.options": [
+    "Prepared host/guest boot assets, network, SSH connection and VM resource settings.",
+    "Ressources de démarrage hôte/invité préparées, réseau, connexion SSH et ressources de VM."
+  ],
+  "FirecrackerOptions.binary": [
+    "Host executable path for Firecracker.",
+    "Chemin hôte du programme Firecracker."
+  ],
+  "FirecrackerOptions.kernel": [
+    "Host path to the prepared Firecracker guest kernel image.",
+    "Chemin hôte de l’image du noyau invité Firecracker préparée."
+  ],
+  "FirecrackerOptions.rootfs": [
+    "Host path to the prepared writable guest root filesystem image.",
+    "Chemin hôte de l’image préparée du système de fichiers racine invité inscriptible."
+  ],
+  "FirecrackerOptions.tap": [
+    "Name of the preconfigured host TAP network device for the microVM.",
+    "Nom du périphérique réseau TAP hôte préconfiguré pour la microVM."
+  ],
+  "FirecrackerOptions.guestMac": [
+    "MAC address assigned to the guest’s network interface.",
+    "Adresse MAC attribuée à l’interface réseau de l’invité."
+  ],
+  "FirecrackerOptions.bootArgs": [
+    "Kernel boot arguments supplied to Firecracker.",
+    "Arguments de démarrage du noyau transmis à Firecracker."
+  ],
+  "FirecrackerOptions.ssh": [
+    "Guest SSH connection settings, including identity file and trusted known-hosts file.",
+    "Réglages de connexion SSH à l’invité, dont le fichier d’identité et le fichier d’hôtes connus de confiance."
+  ],
+  "FirecrackerOptions.root": [
+    "Repository workspace path inside the execution environment.",
+    "Chemin du workspace de dépôt à l’intérieur de l’environnement d’exécution."
+  ],
+  "FirecrackerOptions.home": [
+    "Agent home path inside the execution environment.",
+    "Chemin du home de l’agent à l’intérieur de l’environnement d’exécution."
+  ],
+  "FirecrackerOptions.cpus": [
+    "CPU allocation limit for the execution environment.",
+    "Limite d’allocation CPU de l’environnement d’exécution."
+  ],
+  "FirecrackerOptions.memoryMb": [
+    "Memory allocation limit in megabytes.",
+    "Limite d’allocation mémoire en mégaoctets."
+  ],
+  "FirecrackerOptions.bootDeadlineMs": [
+    "Maximum time in milliseconds to wait for the guest to become reachable over SSH.",
+    "Durée maximale en millisecondes d’attente de la disponibilité SSH de l’invité."
+  ],
+  "FirecrackerOptions.variables": [
+    "Explicit environment declarations; values are strings.",
+    "Déclarations d’environnement explicites ; les valeurs sont des chaînes."
   ]
 }

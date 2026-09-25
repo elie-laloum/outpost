@@ -252,6 +252,6 @@ node example.mts
 
 The reporter shows progress; `usage` reports available raw token counts, not a currency estimate. Logs belong to the target repository’s `.outpost`. Observer failures do not change execution outcomes. Agent text and logs can contain source code or sensitive output: choose what you retain or export.
 
-[Contracts, options and edge cases](../../../reference/behavior/agents/observability/).
+[Contracts, options and edge cases](../../behavior/agents/observability/).
 
 To start again, use a new demonstration directory. Named branches retain commits; dirty worktrees remain available for recovery. Scripts do not push commits.

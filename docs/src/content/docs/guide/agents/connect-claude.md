@@ -251,6 +251,6 @@ node example.mts
 
 Select one of the Claude profiles in the preparation. A successful answer should identify `slug`; this makes a real model call. A successful container allocation alone does not verify agent credentials. API billing and account access remain separate. Keep native authentication and captured conversations separate; the private sandbox home remains ephemeral.
 
-[Contracts, options and edge cases](../../../reference/behavior/agents/connect-claude/).
+[Contracts, options and edge cases](../../behavior/agents/connect-claude/).
 
 To start again, use a new demonstration directory. Named branches retain commits; dirty worktrees remain available for recovery. Scripts do not push commits.

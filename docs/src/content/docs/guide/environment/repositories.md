@@ -115,6 +115,6 @@ node example.mts
 
 The three paths have different roles. `repository` identifies the host checkout; a named workspace has its own worktree; the sandbox sees that worktree at its runtime path. Resolving paths from `import.meta.dirname` keeps the script independent of the launch directory. Every sandbox owns one repository. Multi-repository work uses separate tasks.
 
-[Contracts, options and edge cases](../../../reference/behavior/sandboxes/repositories/).
+[Contracts, options and edge cases](../../behavior/sandboxes/repositories/).
 
 To start again, use a new demonstration directory. Named branches retain commits; dirty worktrees remain available for recovery. Scripts do not push commits.

@@ -116,6 +116,6 @@ node example.mts
 
 Le commit initial est disponible dans le checkout privé. La synchronisation valide le travail entrant et conserve les éléments récupérables en cas de conflit. C’est un prototype de recherche opt-in, pas une protection contre une évasion de conteneur ou noyau. Montages explicites, identifiants et caches partagés élargissent sa frontière. Les montages chevauchants non pris en charge sont rejetés.
 
-[Contrats, options et cas particuliers](../../../reference/behavior/providers/repository-isolation/).
+[Contrats, options et cas particuliers](../../behavior/providers/repository-isolation/).
 
 Pour recommencer, utilisez un nouveau dossier de démonstration. Les branches nommées conservent les commits ; les worktrees sales restent disponibles pour récupération. Les scripts ne poussent aucun commit.

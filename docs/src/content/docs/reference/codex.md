@@ -2,10 +2,8 @@
 title: "codex"
 description: "codex — Outpost API"
 sidebar:
-  order: 10
+  order: 0
 ---
-
-Public contract for **codex**. See the [agents guide](../../guide/agents/adapters/) for behavior, defaults and examples.
 
 ## Import
 
@@ -15,17 +13,21 @@ import { codex } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Configure native Claude Code, Codex or Gemini behavior independently of the sandbox backend.
-
-The installed CLI chooses its model when omitted. Native conversation capture defaults on for Claude/Codex. Gemini supports fresh sessions only. Account and provider credentials are separate.
+Build the Codex CLI adapter with event decoding, native conversation capture and continuation support. modelProvider selects an explicit Responses-compatible endpoint. Creating the adapter only configures execution; credentials must be available inside the selected environment.
 
 [Complete example and detailed rules](../../guide/agents/adapters/).
 
 ## Parameters and properties
 
-| Name       | Type                         | Presence | Meaning                                                                 |
-| ---------- | ---------------------------- | -------- | ----------------------------------------------------------------------- |
-| `settings` | `CodexSettings \| undefined` | Optional | See the linked contract and this family's rules for its interpretation. |
+| Name                         | Type                                                  | Presence | Meaning                                                                                        |
+| ---------------------------- | ----------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------- |
+| `settings`                   | `CodexSettings \| undefined`                          | Optional | Codex model, Responses provider, reasoning, approval reviewer and transcript-capture settings. |
+| `settings.modelProvider`     | `CodexModelProvider \| undefined`                     | Optional | Custom Codex model endpoint configuration; requires Responses API compatibility.               |
+| `settings.reasoning`         | `"low" \| "medium" \| "high" \| "xhigh" \| undefined` | Optional | Reasoning effort passed to the selected agent CLI.                                             |
+| `settings.approvalReviewer`  | `"user" \| "auto_review" \| undefined`                | Optional | Codex approval reviewer: the user or automatic approval review.                                |
+| `settings.model`             | `string \| undefined`                                 | Optional | Native CLI model identifier; availability depends on the account.                              |
+| `settings.variables`         | `Readonly<Record<string, string>> \| undefined`       | Optional | Explicit environment declarations; values are strings.                                         |
+| `settings.saveConversations` | `boolean \| undefined`                                | Optional | Enable native transcript capture when the adapter supports it.                                 |
 
 ## Returns
 

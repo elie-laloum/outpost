@@ -116,6 +116,6 @@ node example.mts
 
 The initial commit is available inside the private checkout. Synchronization validates incoming work and preserves recovery material on conflict. This is an opt-in research prototype, not protection against container/kernel escapes. Explicit mounts, credentials and shared caches still expand its boundary. Unsupported overlapping mounts are rejected.
 
-[Contracts, options and edge cases](../../../reference/behavior/providers/repository-isolation/).
+[Contracts, options and edge cases](../../behavior/providers/repository-isolation/).
 
 To start again, use a new demonstration directory. Named branches retain commits; dirty worktrees remain available for recovery. Scripts do not push commits.

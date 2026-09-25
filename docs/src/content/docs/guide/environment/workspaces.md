@@ -120,6 +120,6 @@ node example.mts
 
 You see the same branch twice. The sandbox closes at the end of each loop iteration; the workspace closes only after the loop. A caller-owned workspace is never silently disposed by a sandbox. Close environments before their workspace. A clean managed directory can be removed on closure while its named branch remains.
 
-[Contracts, options and edge cases](../../../reference/behavior/sandboxes/workspaces/).
+[Contracts, options and edge cases](../../behavior/sandboxes/workspaces/).
 
 To start again, use a new demonstration directory. Named branches retain commits; dirty worktrees remain available for recovery. Scripts do not push commits.

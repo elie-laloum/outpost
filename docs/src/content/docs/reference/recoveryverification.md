@@ -2,10 +2,8 @@
 title: "RecoveryVerification"
 description: "RecoveryVerification — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Public contract for **RecoveryVerification**. See the [recovery and retention guide](../../guide/operations/recovery/) for behavior, defaults and examples.
 
 ## Import
 
@@ -13,24 +11,16 @@ Public contract for **RecoveryVerification**. See the [recovery and retention gu
 import type { RecoveryVerification } from "@elie-laloum/outpost";
 ```
 
-## Purpose and behavior
-
-Inspect retained work and plan explicit storage retention without discarding recoverable edits.
-
-Planning does not prune. Application reacquires ownership and revalidates candidates. Quota checks observe usage rather than imposing physical filesystem limits.
-
-[Complete example and detailed rules](../../guide/operations/recovery/).
-
 ## Parameters and properties
 
-| Name        | Type                                               | Presence | Meaning                                                                 |
-| ----------- | -------------------------------------------------- | -------- | ----------------------------------------------------------------------- |
-| `directory` | `string`                                           | Required | Filesystem directory used by the owning operation; see path rules.      |
-| `scope`     | `"transfer-structure" \| "transfer-restorability"` | Required | See the linked contract and this family's rules for its interpretation. |
-| `complete`  | `boolean`                                          | Required | See the linked contract and this family's rules for its interpretation. |
-| `integrity` | `RecoveryIntegrity`                                | Required | See the linked contract and this family's rules for its interpretation. |
-| `checksums` | `RecoveryChecksumResult \| undefined`              | Optional | See the linked contract and this family's rules for its interpretation. |
-| `checks`    | `readonly RecoveryStructureCheck[]`                | Required | See the linked contract and this family's rules for its interpretation. |
+| Name        | Type                                               | Presence | Meaning                                                                                              |
+| ----------- | -------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------- |
+| `directory` | `string`                                           | Required | Host directory containing the retained transfer artifacts to verify or restore.                      |
+| `scope`     | `"transfer-structure" \| "transfer-restorability"` | Required | Whether verification covered only transfer structure or also Git restorability.                      |
+| `complete`  | `boolean`                                          | Required | Whether all requested inspection work completed without hitting scan limits or inaccessible entries. |
+| `integrity` | `RecoveryIntegrity`                                | Required | Integrity conclusion from the recorded manifest and available checksum verification.                 |
+| `checksums` | `RecoveryChecksumResult \| undefined`              | Optional | Detailed checksum results, byte count and integrity status when hashing was requested.               |
+| `checks`    | `readonly RecoveryStructureCheck[]`                | Required | Per-path verification results with pass/fail status and diagnostic code.                             |
 
 ## Signature
 

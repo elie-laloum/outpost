@@ -2,10 +2,8 @@
 title: "readStoredArtifact"
 description: "readStoredArtifact — Outpost API"
 sidebar:
-  order: 10
+  order: 0
 ---
-
-Public contract for **readStoredArtifact**. See the [typed artifacts guide](../../guide/advanced/artifacts/) for behavior, defaults and examples.
 
 ## Import
 
@@ -15,23 +13,21 @@ import { readStoredArtifact } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Publish immutable payloads and exchange small references with contract, digest and lineage validation.
-
-Filesystem payloads default to 16 MiB maximum. Callers own retention. Digests provide integrity against a trusted reference, not producer authentication or a shared transaction.
+Validate an artifact reference, load its bytes and verify contract identity, size and digest before decoding. Optional producer and parent expectations add lineage checks. Use this outside a task context or when the reference is already available.
 
 [Complete example and detailed rules](../../guide/advanced/artifacts/).
 
 ## Parameters and properties
 
-| Name               | Type                                        | Presence | Meaning                                                                                  |
-| ------------------ | ------------------------------------------- | -------- | ---------------------------------------------------------------------------------------- |
-| `store`            | `ArtifactStore`                             | Required | Caller-supplied persistence implementation.                                              |
-| `contract`         | `ArtifactContract<T>`                       | Required | See the linked contract and this family's rules for its interpretation.                  |
-| `value`            | `unknown`                                   | Required | Typed value produced or consumed by this contract.                                       |
-| `options`          | `ReadArtifactOptions \| undefined`          | Optional | Configuration object. Its fields are described in the associated options contract below. |
-| `options.producer` | `ArtifactProducer \| undefined`             | Optional | Recorded artifact producer identity, not authentication.                                 |
-| `options.parents`  | `readonly ArtifactReference[] \| undefined` | Optional | Ordered artifact parent references or identifiers.                                       |
-| `options.signal`   | `AbortSignal \| undefined`                  | Optional | Cooperative cancellation for this operation.                                             |
+| Name               | Type                                        | Presence | Meaning                                                                                |
+| ------------------ | ------------------------------------------- | -------- | -------------------------------------------------------------------------------------- |
+| `store`            | `ArtifactStore`                             | Required | Artifact byte store used for immutable publication or bounded payload retrieval.       |
+| `contract`         | `ArtifactContract<T>`                       | Required | Named, versioned artifact contract that defines encoding and validation.               |
+| `value`            | `unknown`                                   | Required | Untrusted artifact reference to validate before loading and checking its stored bytes. |
+| `options`          | `ReadArtifactOptions \| undefined`          | Optional | Expected producer and parent lineage, plus read cancellation.                          |
+| `options.producer` | `ArtifactProducer \| undefined`             | Optional | Expected producer execution, task and attempt; a mismatch rejects the read.            |
+| `options.parents`  | `readonly ArtifactReference[] \| undefined` | Optional | Expected ordered parent references; a mismatching lineage rejects the read.            |
+| `options.signal`   | `AbortSignal \| undefined`                  | Optional | Cooperative cancellation for this operation.                                           |
 
 ## Returns
 

@@ -125,6 +125,6 @@ node example.mts
 
 La sortie est `reused`. Passez un signal à l’opération à annuler. Un signal de provisionnement contrôle uniquement la création. Le dispatch d’agent dispose aussi d’une échéance absolue et d’un délai d’inactivité ; leurs rôles distincts sont détaillés dans la référence. La sortie de portée ferme la sandbox même après un échec.
 
-[Contrats, options et cas particuliers](../../../reference/behavior/agents/cancellation/).
+[Contrats, options et cas particuliers](../../behavior/agents/cancellation/).
 
 Pour recommencer, utilisez un nouveau dossier de démonstration. Les branches nommées conservent les commits ; les worktrees sales restent disponibles pour récupération. Les scripts ne poussent aucun commit.

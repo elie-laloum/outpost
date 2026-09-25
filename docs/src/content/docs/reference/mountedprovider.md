@@ -2,10 +2,8 @@
 title: "mountedProvider"
 description: "mountedProvider — Outpost API"
 sidebar:
-  order: 10
+  order: 0
 ---
-
-Public contract for **mountedProvider**. See the [providers guide](../../guide/environment/providers/overview/) for behavior, defaults and examples.
 
 ## Import
 
@@ -15,17 +13,15 @@ import { mountedProvider } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Allocate local containers, explicit host execution or remote sandboxes through dedicated package entry points.
-
-Mounted and host providers default to current branches; remote providers default to integration and reject current. Optional SDKs remain optional. Local execution provides no isolation.
+Wrap a provider definition with mounted placement. The provider exposes the host workspace through a mount and supplies its own allocation and release implementation.
 
 [Complete example and detailed rules](../../guide/environment/providers/overview/).
 
 ## Parameters and properties
 
-| Name         | Type                 | Presence | Meaning                                                                 |
-| ------------ | -------------------- | -------- | ----------------------------------------------------------------------- |
-| `definition` | `ProviderDefinition` | Required | See the linked contract and this family's rules for its interpretation. |
+| Name         | Type                 | Presence | Meaning                                                                                            |
+| ------------ | -------------------- | -------- | -------------------------------------------------------------------------------------------------- |
+| `definition` | `ProviderDefinition` | Required | Provider name, environment variables and acquire implementation to wrap with a placement contract. |
 
 ## Returns
 

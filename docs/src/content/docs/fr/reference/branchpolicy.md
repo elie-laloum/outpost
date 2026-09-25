@@ -5,27 +5,21 @@ sidebar:
   order: 10
 ---
 
-Contrat public de **BranchPolicy**. Consultez le [guide workspaces](../../guide/environment/workspaces/) pour le comportement, les valeurs par défaut et des exemples.
-
 ## Import
 
 ```ts
 import type { BranchPolicy } from "@elie-laloum/outpost";
 ```
 
-## Rôle et comportement
-
-Posséder un checkout, une branche et un verrou indépendamment de la durée de vie de la sandbox.
-
-Le dépôt vaut par défaut le dossier courant. Les branches nommées conservent les commits ; les worktrees sales ou détachés restent récupérables. Fermez la sandbox avant le workspace appartenant à l’appelant.
-
-[Exemple complet et règles détaillées](../../guide/environment/workspaces/).
-
 ## Paramètres et propriétés
 
-| Nom    | Type                                  | Présence | Rôle                                                                             |
-| ------ | ------------------------------------- | -------- | -------------------------------------------------------------------------------- |
-| `mode` | `"current" \| "named" \| "integrate"` | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
+Les champs ci-dessous couvrent toutes les variantes ; la signature précise leurs combinaisons autorisées.
+
+| Nom    | Type                                  | Présence          | Rôle                                                                                                                                        |
+| ------ | ------------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mode` | `"current" \| "named" \| "integrate"` | Requis            | current utilise le checkout courant, named conserve une branche de travail choisie, integrate prépare une branche à fusionner dans la base. |
+| `name` | `string`                              | Selon la variante | Nom de la branche de travail conservée en mode named.                                                                                       |
+| `from` | `string \| undefined`                 | Selon la variante | Révision Git servant de point de départ à la branche de travail gérée.                                                                      |
 
 ## Signature
 

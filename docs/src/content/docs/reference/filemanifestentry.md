@@ -2,10 +2,8 @@
 title: "FileManifestEntry"
 description: "FileManifestEntry — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Public contract for **FileManifestEntry**. See the [remote transfers guide](../../guide/operations/remote-transfers/) for behavior, defaults and examples.
 
 ## Import
 
@@ -13,23 +11,15 @@ Public contract for **FileManifestEntry**. See the [remote transfers guide](../.
 import type { FileManifestEntry } from "@elie-laloum/outpost";
 ```
 
-## Purpose and behavior
-
-Move binary files and validated manifests while preserving concurrent host edits.
-
-Synchronization validates and backs up before applying incoming work. Transfers preserve supported permissions and symlinks and reject unsafe destination traversal. Recovery data survives unsafe cleanup.
-
-[Complete example and detailed rules](../../guide/operations/remote-transfers/).
-
 ## Parameters and properties
 
-| Name     | Type               | Presence | Meaning                                                                 |
-| -------- | ------------------ | -------- | ----------------------------------------------------------------------- |
-| `path`   | `string`           | Required | See the linked contract and this family's rules for its interpretation. |
-| `kind`   | `"file" \| "link"` | Required | See the linked contract and this family's rules for its interpretation. |
-| `mode`   | `number`           | Required | See the linked contract and this family's rules for its interpretation. |
-| `size`   | `number`           | Required | See the linked contract and this family's rules for its interpretation. |
-| `sha256` | `string`           | Required | See the linked contract and this family's rules for its interpretation. |
+| Name     | Type               | Presence | Meaning                                                                            |
+| -------- | ------------------ | -------- | ---------------------------------------------------------------------------------- |
+| `path`   | `string`           | Required | Relative path of this file or symbolic link within the transferred tree.           |
+| `kind`   | `"file" \| "link"` | Required | Whether this manifest entry contains regular file bytes or a symbolic link target. |
+| `mode`   | `number`           | Required | Filesystem permission bits to preserve during transfer.                            |
+| `size`   | `number`           | Required | Byte size of the file contents or link target described by the manifest.           |
+| `sha256` | `string`           | Required | SHA-256 digest used to verify the transferred file or link contents.               |
 
 ## Signature
 

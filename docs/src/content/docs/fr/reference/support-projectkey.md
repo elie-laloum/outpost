@@ -2,24 +2,20 @@
 title: "projectKey"
 description: "projectKey — Outpost API"
 sidebar:
-  order: 20
+  order: 0
 ---
 
-Contrat auxiliaire utilisé dans une signature publique. Il n’est pas exporté directement depuis le package ; utilisez l’inférence TypeScript ou le type public qui le référence.
+Contrat auxiliaire non exporté directement ; utilisez l’inférence TypeScript ou le type public qui le référence.
 
 ## Rôle et comportement
 
-Localiser, capturer, restaurer et déplacer les transcripts natifs séparément de l’authentification.
-
-Le home de conversation vaut par défaut le home système. Une continuation froide exige un transcript restaurable avant allocation. Un fork ne copie pas un workspace.
-
-[Exemple complet et règles détaillées](../../guide/agents/conversations/).
+Convertit un chemin de dépôt en clé de dossier pour l’organisation native des transcripts de projet Claude. Cet utilitaire de chemins ne produit pas un identifiant de conversation.
 
 ## Paramètres et propriétés
 
-| Nom    | Type     | Présence | Rôle                                                                             |
-| ------ | -------- | -------- | -------------------------------------------------------------------------------- |
-| `path` | `string` | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
+| Nom    | Type     | Présence | Rôle                                                                                |
+| ------ | -------- | -------- | ----------------------------------------------------------------------------------- |
+| `path` | `string` | Requis   | Chemin de dépôt à encoder pour l’organisation des dossiers de projet natifs Claude. |
 
 ## Retour
 

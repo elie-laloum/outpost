@@ -115,6 +115,6 @@ node example.mts
 
 Les trois chemins ont des rôles différents. `repository` identifie le checkout hôte ; un workspace nommé possède son worktree ; la sandbox voit ce worktree à son chemin d’exécution. Résoudre depuis `import.meta.dirname` rend le script indépendant du dossier de lancement. Chaque sandbox possède un dépôt. Le travail multi-dépôts utilise des tâches séparées.
 
-[Contrats, options et cas particuliers](../../../reference/behavior/sandboxes/repositories/).
+[Contrats, options et cas particuliers](../../behavior/sandboxes/repositories/).
 
 Pour recommencer, utilisez un nouveau dossier de démonstration. Les branches nommées conservent les commits ; les worktrees sales restent disponibles pour récupération. Les scripts ne poussent aucun commit.

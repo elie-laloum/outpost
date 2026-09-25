@@ -68,4 +68,4 @@ Digest verification and pulling are explicit operator steps. Outpost does not au
 
 </details>
 
-[Detailed contract and limits](../../../../reference/behavior/providers/agent-images/).
+[Detailed contract and limits](../../../behavior/providers/agent-images/).

@@ -2,10 +2,8 @@
 title: "serveTaskQueue"
 description: "serveTaskQueue — Outpost API"
 sidebar:
-  order: 10
+  order: 0
 ---
-
-Contrat public de **serveTaskQueue**. Consultez le [guide exécution distribuée](../../guide/advanced/distributed/) pour le comportement, les valeurs par défaut et des exemples.
 
 ## Import
 
@@ -15,21 +13,19 @@ import { serveTaskQueue } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Coordonner des tâches JSON durables via SQLite, un transport HTTP authentifié et des workers enregistrés.
-
-Les effets sont au moins une fois. Un jeton périmé ne peut valider l’état de file, mais les effets externes peuvent se répéter. HTTP écoute loopback par défaut sans TLS. Un worker traite une tâche à la fois.
+Expose une file appartenant à l’appelant via HTTP avec authentification explicite par jeton bearer. Le serveur écoute loopback par défaut et ne fournit pas TLS. Fermer le serveur arrête l’écoute sans prendre possession du stockage de la file.
 
 [Exemple complet et règles détaillées](../../guide/advanced/distributed/).
 
 ## Paramètres et propriétés
 
-| Nom             | Type                  | Présence  | Rôle                                                                                          |
-| --------------- | --------------------- | --------- | --------------------------------------------------------------------------------------------- |
-| `options`       | `QueueServerOptions`  | Requis    | Objet de configuration. Ses champs sont décrits dans le contrat d’options associé ci-dessous. |
-| `options.queue` | `TaskQueue`           | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation.              |
-| `options.token` | `string`              | Requis    | Identifiant de transport explicite ; jamais dans une URL.                                     |
-| `options.host`  | `string \| undefined` | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation.              |
-| `options.port`  | `number \| undefined` | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation.              |
+| Nom             | Type                  | Présence  | Rôle                                                                                     |
+| --------------- | --------------------- | --------- | ---------------------------------------------------------------------------------------- |
+| `options`       | `QueueServerOptions`  | Requis    | File appartenant à l’appelant, jeton bearer et adresse/port d’écoute HTTP.               |
+| `options.queue` | `TaskQueue`           | Requis    | File de tâches utilisée pour envoyer, prendre en charge et persister l’état des travaux. |
+| `options.token` | `string`              | Requis    | Identifiant de transport explicite ; jamais dans une URL.                                |
+| `options.host`  | `string \| undefined` | Optionnel | Adresse d’écoute HTTP ; loopback par défaut pour un accès local uniquement.              |
+| `options.port`  | `number \| undefined` | Optionnel | Port TCP du serveur HTTP de file ; zéro laisse le système choisir un port disponible.    |
 
 ## Retour
 

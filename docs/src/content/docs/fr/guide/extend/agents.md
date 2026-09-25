@@ -63,6 +63,6 @@ node example.mts
 
 L’exemple possède ses ressources. Gardez les protocoles fournisseurs dans un adapter et les erreurs d’observateurs séparées des résultats de tâches.
 
-[Contrats, options et cas particuliers](../../../reference/behavior/extend/agents/).
+[Contrats, options et cas particuliers](../../behavior/extend/agents/).
 
 Les fichiers persistants éventuels restent dans ce dossier de démonstration.

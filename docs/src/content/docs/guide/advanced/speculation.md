@@ -267,6 +267,6 @@ node example.mts
 
 This research helper chooses the first candidate that passes validation and completes owned cleanup. It cancels competitors cooperatively and waits for cleanup. Inspect the winning branch before any merge; nothing integrates or pushes automatically. Interrupted races cannot be resumed durably, and observed usage is not a guaranteed billing cap.
 
-[Contracts, options and edge cases](../../../reference/behavior/workflows/speculation/).
+[Contracts, options and edge cases](../../behavior/workflows/speculation/).
 
 To start again, use a new demonstration directory. Named branches retain commits; dirty worktrees remain available for recovery. Scripts do not push commits.

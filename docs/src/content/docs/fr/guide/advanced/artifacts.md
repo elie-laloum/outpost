@@ -99,7 +99,7 @@ node example.mts
 
 La sortie est `/users`. La tâche produit une référence JSON tandis que les octets résident dans le store appartenant à l’appelant. La lecture vérifie le contrat et l’intégrité. Empreintes et filiation n’authentifient pas les producteurs. Conservez les objets tant que les résultats sauvegardés les utilisent. Fermer une sandbox ne supprime pas ce store.
 
-[Contrats, options et cas particuliers](../../../reference/behavior/workflows/artifacts/).
+[Contrats, options et cas particuliers](../../behavior/workflows/artifacts/).
 
 Les fichiers persistants éventuels restent dans ce dossier de démonstration.
 

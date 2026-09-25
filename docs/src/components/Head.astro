@@ -10,6 +10,15 @@ import StarlightHead from "@astrojs/starlight/components/Head.astro";
       button.setAttribute("aria-label", document.documentElement.lang === "fr" ? "Copier le code" : "Copy code");
     }
   };
+  const prepareReferenceStatus = () => {
+    const label = document.documentElement.lang === "fr" ? "Expérimental" : "Experimental";
+    for (const link of document.querySelectorAll<HTMLAnchorElement>('a[data-api-status="experimental"]')) {
+      link.title = label;
+      link.setAttribute("aria-label", `${link.textContent?.trim()} — ${label}`);
+    }
+  };
+  prepareReferenceStatus();
+  document.addEventListener("astro:page-load", prepareReferenceStatus);
   prepareCopyButtons();
   document.addEventListener("astro:page-load", prepareCopyButtons);
   document.addEventListener("keydown", (event) => {

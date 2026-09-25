@@ -2,10 +2,8 @@
 title: "SandboxProvider"
 description: "SandboxProvider — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Public contract for **SandboxProvider**. See the [providers guide](../../guide/environment/providers/overview/) for behavior, defaults and examples.
 
 ## Import
 
@@ -13,22 +11,14 @@ Public contract for **SandboxProvider**. See the [providers guide](../../guide/e
 import type { SandboxProvider } from "@elie-laloum/outpost";
 ```
 
-## Purpose and behavior
-
-Allocate local containers, explicit host execution or remote sandboxes through dedicated package entry points.
-
-Mounted and host providers default to current branches; remote providers default to integration and reject current. Optional SDKs remain optional. Local execution provides no isolation.
-
-[Complete example and detailed rules](../../guide/environment/providers/overview/).
-
 ## Parameters and properties
 
-| Name        | Type                                                 | Presence | Meaning                                                                 |
-| ----------- | ---------------------------------------------------- | -------- | ----------------------------------------------------------------------- |
-| `name`      | `string`                                             | Required | See the linked contract and this family's rules for its interpretation. |
-| `placement` | `"mounted" \| "remote" \| "host"`                    | Required | See the linked contract and this family's rules for its interpretation. |
-| `variables` | `Readonly<Record<string, string>> \| undefined`      | Optional | Explicit environment declarations; values are strings.                  |
-| `acquire`   | `(context: SandboxContext) => Promise<SandboxLease>` | Required | See the linked contract and this family's rules for its interpretation. |
+| Name        | Type                                                 | Presence | Meaning                                                                                               |
+| ----------- | ---------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------- |
+| `name`      | `string`                                             | Required | Provider identifier used in diagnostics and resource activity records.                                |
+| `placement` | `"mounted" \| "remote" \| "host"`                    | Required | Workspace access model: mounted host checkout, synchronized remote checkout or direct host execution. |
+| `variables` | `Readonly<Record<string, string>> \| undefined`      | Optional | Explicit environment declarations; values are strings.                                                |
+| `acquire`   | `(context: SandboxContext) => Promise<SandboxLease>` | Required | Allocate an execution lease for the prepared workspace context.                                       |
 
 ## Signature
 

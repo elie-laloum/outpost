@@ -125,6 +125,6 @@ node example.mts
 
 The output is `reused`. Pass a signal to the operation you want to cancel. A provisioning signal only controls creation. Agent dispatch additionally supports a hard deadline and an idle timeout; their different purposes are detailed in the reference. Scope exit disposes the sandbox even after a failure.
 
-[Contracts, options and edge cases](../../../reference/behavior/agents/cancellation/).
+[Contracts, options and edge cases](../../behavior/agents/cancellation/).
 
 To start again, use a new demonstration directory. Named branches retain commits; dirty worktrees remain available for recovery. Scripts do not push commits.

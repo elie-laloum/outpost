@@ -2,10 +2,8 @@
 title: "SandboxDiagnosticReport"
 description: "SandboxDiagnosticReport — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Contrat public de **SandboxDiagnosticReport**. Consultez le [guide diagnostics](../../guide/operations/doctor/) pour le comportement, les valeurs par défaut et des exemples.
 
 ## Import
 
@@ -13,25 +11,17 @@ Contrat public de **SandboxDiagnosticReport**. Consultez le [guide diagnostics](
 import type { SandboxDiagnosticReport } from "@elie-laloum/outpost";
 ```
 
-## Rôle et comportement
-
-Inspecter les prérequis hôtes, une sandbox possédée ou les fixtures de protocole. Les diagnostics sont des observations ; ils ne prouvent pas l’accès au compte ou au modèle.
-
-Les contrôles distinguent capacités absentes, en échec et non prises en charge. Le diagnostic de sandbox utilise son verrou d’opération et ne devient pas propriétaire de sa fermeture.
-
-[Exemple complet et règles détaillées](../../guide/operations/doctor/).
-
 ## Paramètres et propriétés
 
-| Nom                  | Type                                                        | Présence  | Rôle                                                                             |
-| -------------------- | ----------------------------------------------------------- | --------- | -------------------------------------------------------------------------------- |
-| `scope`              | `"owned-sandbox"`                                           | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `ownership`          | `"caller"`                                                  | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `provider`           | `Pick<SandboxProvider, "name" \| "placement"> \| undefined` | Optionnel | Backend de l’environnement d’exécution.                                          |
-| `capabilities`       | `readonly DiagnosticCapability[]`                           | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `checks`             | `readonly DiagnosticCheck[]`                                | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `modelCompatibility` | `"unverified"`                                              | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `hasFailures`        | `boolean`                                                   | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
+| Nom                  | Type                                                        | Présence  | Rôle                                                                                                         |
+| -------------------- | ----------------------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------ |
+| `scope`              | `"owned-sandbox"`                                           | Requis    | Toujours owned-sandbox : les contrôles concernent la ressource d’exécution fournie.                          |
+| `ownership`          | `"caller"`                                                  | Requis    | Toujours caller : le diagnostic ne devient pas propriétaire de la fermeture de la ressource.                 |
+| `provider`           | `Pick<SandboxProvider, "name" \| "placement"> \| undefined` | Optionnel | Nom et placement du provider utilisés pour interpréter le rapport de diagnostic.                             |
+| `capabilities`       | `readonly DiagnosticCapability[]`                           | Requis    | Prise en charge annoncée et observée des commandes, transferts, transferts par lot et terminaux interactifs. |
+| `checks`             | `readonly DiagnosticCheck[]`                                | Requis    | Contrôles individuels avec statut, message et informations de version disponibles.                           |
+| `modelCompatibility` | `"unverified"`                                              | Requis    | Toujours unverified : ces diagnostics n’appellent pas de modèle réel.                                        |
+| `hasFailures`        | `boolean`                                                   | Requis    | Indique si au moins un contrôle de diagnostic a échoué.                                                      |
 
 ## Signature
 

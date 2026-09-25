@@ -2,10 +2,8 @@
 title: "readArtifact"
 description: "readArtifact — Outpost API"
 sidebar:
-  order: 10
+  order: 0
 ---
-
-Public contract for **readArtifact**. See the [typed artifacts guide](../../guide/advanced/artifacts/) for behavior, defaults and examples.
 
 ## Import
 
@@ -15,20 +13,18 @@ import { readArtifact } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Publish immutable payloads and exchange small references with contract, digest and lineage validation.
-
-Filesystem payloads default to 16 MiB maximum. Callers own retention. Digests provide integrity against a trusted reference, not producer authentication or a shared transaction.
+Read an artifact reference from a declared task dependency through context.value, then load and validate its stored payload. It applies the task cancellation signal and checks the producer against the current execution and dependency key.
 
 [Complete example and detailed rules](../../guide/advanced/artifacts/).
 
 ## Parameters and properties
 
-| Name         | Type                      | Presence | Meaning                                                                 |
-| ------------ | ------------------------- | -------- | ----------------------------------------------------------------------- |
-| `context`    | `TaskContext`             | Required | See the linked contract and this family's rules for its interpretation. |
-| `dependency` | `Task<ArtifactReference>` | Required | See the linked contract and this family's rules for its interpretation. |
-| `contract`   | `ArtifactContract<T>`     | Required | See the linked contract and this family's rules for its interpretation. |
-| `store`      | `ArtifactStore`           | Required | Caller-supplied persistence implementation.                             |
+| Name         | Type                      | Presence | Meaning                                                                             |
+| ------------ | ------------------------- | -------- | ----------------------------------------------------------------------------------- |
+| `context`    | `TaskContext`             | Required | Current workflow task context used to read dependencies and propagate cancellation. |
+| `dependency` | `Task<ArtifactReference>` | Required | Declared task dependency whose completed output is the artifact reference to read.  |
+| `contract`   | `ArtifactContract<T>`     | Required | Named, versioned artifact contract that defines encoding and validation.            |
+| `store`      | `ArtifactStore`           | Required | Artifact byte store used for immutable publication or bounded payload retrieval.    |
 
 ## Returns
 
@@ -50,5 +46,5 @@ export declare function readArtifact<T>(
 - [ArtifactContract](../artifactcontract/)
 - [ArtifactReference](../artifactreference/)
 - [ArtifactStore](../artifactstore/)
-- [Task](../task/)
+- [Task](../type-task/)
 - [TaskContext](../taskcontext/)

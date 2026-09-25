@@ -2,10 +2,8 @@
 title: "ResourceActivityRecord"
 description: "ResourceActivityRecord — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Public contract for **ResourceActivityRecord**. See the [resource activity guide](../../guide/operations/recovery/) for behavior, defaults and examples.
 
 ## Import
 
@@ -13,31 +11,23 @@ Public contract for **ResourceActivityRecord**. See the [resource activity guide
 import type { ResourceActivityRecord } from "@elie-laloum/outpost";
 ```
 
-## Purpose and behavior
-
-Read locally recorded lease and operation activity.
-
-Local observations do not enumerate remote accounts and are not an authoritative cloud inventory.
-
-[Complete example and detailed rules](../../guide/operations/recovery/).
-
 ## Parameters and properties
 
-| Name            | Type                                                                                 | Presence | Meaning                                                                 |
-| --------------- | ------------------------------------------------------------------------------------ | -------- | ----------------------------------------------------------------------- |
-| `version`       | `1`                                                                                  | Required | Caller-controlled contract or graph version.                            |
-| `id`            | `string`                                                                             | Required | See the linked contract and this family's rules for its interpretation. |
-| `pid`           | `number`                                                                             | Required | See the linked contract and this family's rules for its interpretation. |
-| `identity`      | `LocalProcessIdentity \| undefined`                                                  | Optional | See the linked contract and this family's rules for its interpretation. |
-| `provider`      | `string`                                                                             | Required | Execution environment backend.                                          |
-| `placement`     | `"mounted" \| "remote" \| "host"`                                                    | Required | See the linked contract and this family's rules for its interpretation. |
-| `workspace`     | `string`                                                                             | Required | Caller-owned Git workspace; excludes new repository/branch choices.     |
-| `createdAt`     | `string`                                                                             | Required | See the linked contract and this family's rules for its interpretation. |
-| `updatedAt`     | `string`                                                                             | Required | See the linked contract and this family's rules for its interpretation. |
-| `phase`         | `"allocating" \| "ready" \| "closing" \| "cleanup-failed" \| "allocation-uncertain"` | Required | See the linked contract and this family's rules for its interpretation. |
-| `operations`    | `readonly ResourceOperation[]`                                                       | Required | See the linked contract and this family's rules for its interpretation. |
-| `lastOperation` | `ResourceOperationResult \| undefined`                                               | Optional | See the linked contract and this family's rules for its interpretation. |
-| `lastFailure`   | `ResourceOperationResult \| undefined`                                               | Optional | See the linked contract and this family's rules for its interpretation. |
+| Name            | Type                                                                                 | Presence | Meaning                                                                                               |
+| --------------- | ------------------------------------------------------------------------------------ | -------- | ----------------------------------------------------------------------------------------------------- |
+| `version`       | `1`                                                                                  | Required | Version of this serialized record format; currently 1.                                                |
+| `id`            | `string`                                                                             | Required | Local identity of the sandbox activity record.                                                        |
+| `pid`           | `number`                                                                             | Required | Host process ID that owns the recorded sandbox activity.                                              |
+| `identity`      | `LocalProcessIdentity \| undefined`                                                  | Optional | Host, boot and process-start identity used to assess ownership beyond a PID alone.                    |
+| `provider`      | `string`                                                                             | Required | Name of the provider owning the recorded sandbox.                                                     |
+| `placement`     | `"mounted" \| "remote" \| "host"`                                                    | Required | Workspace access model: mounted host checkout, synchronized remote checkout or direct host execution. |
+| `workspace`     | `string`                                                                             | Required | Host path of the workspace associated with the recorded sandbox.                                      |
+| `createdAt`     | `string`                                                                             | Required | ISO timestamp when the local resource activity record was created.                                    |
+| `updatedAt`     | `string`                                                                             | Required | ISO timestamp when the local resource activity record was last updated.                               |
+| `phase`         | `"allocating" \| "ready" \| "closing" \| "cleanup-failed" \| "allocation-uncertain"` | Required | Last locally recorded sandbox lifecycle phase.                                                        |
+| `operations`    | `readonly ResourceOperation[]`                                                       | Required | Operations currently recorded as active for this sandbox.                                             |
+| `lastOperation` | `ResourceOperationResult \| undefined`                                               | Optional | Most recently completed local operation with its outcome and timestamps.                              |
+| `lastFailure`   | `ResourceOperationResult \| undefined`                                               | Optional | Most recent operation recorded as failed, retained after subsequent successes.                        |
 
 ## Signature
 

@@ -2,10 +2,8 @@
 title: "fileArtifactStore"
 description: "fileArtifactStore — Outpost API"
 sidebar:
-  order: 10
+  order: 0
 ---
-
-Contrat public de **fileArtifactStore**. Consultez le [guide artefacts typés](../../guide/advanced/artifacts/) pour le comportement, les valeurs par défaut et des exemples.
 
 ## Import
 
@@ -15,19 +13,17 @@ import { fileArtifactStore } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Publier des données immuables et échanger des références avec validation du contrat, de l’empreinte et de la filiation.
-
-Les données du store fichier sont limitées à 16 Mio par défaut. L’appelant possède la rétention. L’empreinte fournit l’intégrité par rapport à une référence fiable, pas l’authentification du producteur ni une transaction commune.
+Crée un store fichier pour des octets d’artefact immuables, avec publication atomique et lectures bornées. maxBytes vaut 16 Mio par données publiées par défaut. Un identifiant existant ne peut recevoir des octets différents ; l’appelant gère la rétention.
 
 [Exemple complet et règles détaillées](../../guide/advanced/artifacts/).
 
 ## Paramètres et propriétés
 
-| Nom                 | Type                       | Présence  | Rôle                                                                                          |
-| ------------------- | -------------------------- | --------- | --------------------------------------------------------------------------------------------- |
-| `options`           | `FileArtifactStoreOptions` | Requis    | Objet de configuration. Ses champs sont décrits dans le contrat d’options associé ci-dessous. |
-| `options.directory` | `string`                   | Requis    | Dossier utilisé par l’opération ; voir les règles de résolution.                              |
-| `options.maxBytes`  | `number \| undefined`      | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation.              |
+| Nom                 | Type                       | Présence  | Rôle                                                                       |
+| ------------------- | -------------------------- | --------- | -------------------------------------------------------------------------- |
+| `options`           | `FileArtifactStoreOptions` | Requis    | Dossier de stockage des artefacts et octets maximaux par données publiées. |
+| `options.directory` | `string`                   | Requis    | Dossier hôte stockant les données d’artefacts immuables par identifiant.   |
+| `options.maxBytes`  | `number \| undefined`      | Optionnel | Nombre maximal d’octets par artefact stocké ; 16 Mio par défaut.           |
 
 ## Retour
 

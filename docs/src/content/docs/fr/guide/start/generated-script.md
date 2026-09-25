@@ -25,4 +25,4 @@ Un **workflow** relie des tâches et leurs résultats typés. Il peut exécuter 
 
 ## Adapter le starter
 
-Modifiez d’abord le brief. Choisissez ensuite une [politique de branche](../../environment/branches/), ajoutez un [contrat de réponse](../../agents/responses/) ou gardez une [sandbox chaude](../../environment/lifecycle/). La [référence de configuration](../../../reference/manual/configuration/) explique les chemins et priorités d’environnement.
+Modifiez d’abord le brief. Choisissez ensuite une [politique de branche](../../environment/branches/), ajoutez un [contrat de réponse](../../agents/responses/) ou gardez une [sandbox chaude](../../environment/lifecycle/). La [référence de configuration](../../manual/configuration/) explique les chemins et priorités d’environnement.

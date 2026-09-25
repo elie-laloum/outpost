@@ -269,6 +269,6 @@ node example.mts
 
 Une exécution réussie affiche `0`. Un statut de test non nul fait échouer `commandTask` ; une déclaration de réussite de l’agent ne peut pas le contourner. Les tâches partagent une sandbox, donc `after` sérialise leurs opérations. `isolatedTask` alloue et ferme son propre environnement, adapté aux branches ou dépôts indépendants.
 
-[Contrats, options et cas particuliers](../../../reference/behavior/workflows/sandbox-tasks/).
+[Contrats, options et cas particuliers](../../behavior/workflows/sandbox-tasks/).
 
 Pour recommencer, utilisez un nouveau dossier de démonstration. Les branches nommées conservent les commits ; les worktrees sales restent disponibles pour récupération. Les scripts ne poussent aucun commit.

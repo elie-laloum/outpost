@@ -2,10 +2,8 @@
 title: "FirecrackerOptions"
 description: "FirecrackerOptions — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Contrat public de **FirecrackerOptions**. Consultez le [guide prototype firecracker](../../guide/advanced/firecracker/) pour le comportement, les valeurs par défaut et des exemples.
 
 ## Import
 
@@ -13,31 +11,23 @@ Contrat public de **FirecrackerOptions**. Consultez le [guide prototype firecrac
 import type { FirecrackerOptions } from "@elie-laloum/outpost/providers/firecracker";
 ```
 
-## Rôle et comportement
-
-Allouer une microVM opt-in via un hôte et un invité préparés explicitement.
-
-Prototype de recherche avec prérequis hôte/KVM, image et réseau. Aucun repli silencieux vers l’exécution hôte. Un vrai démarrage exige une validation dédiée.
-
-[Exemple complet et règles détaillées](../../guide/advanced/firecracker/).
-
 ## Paramètres et propriétés
 
-| Nom              | Type                                                                                                                                                          | Présence  | Rôle                                                                             |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | -------------------------------------------------------------------------------- |
-| `binary`         | `string`                                                                                                                                                      | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `kernel`         | `string`                                                                                                                                                      | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `rootfs`         | `string`                                                                                                                                                      | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `tap`            | `string`                                                                                                                                                      | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `guestMac`       | `string`                                                                                                                                                      | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `bootArgs`       | `string`                                                                                                                                                      | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `ssh`            | `{ readonly host: string; readonly user: string; readonly identity: string; readonly knownHosts: string; readonly port?: number; readonly binary?: string; }` | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `root`           | `string \| undefined`                                                                                                                                         | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `home`           | `string`                                                                                                                                                      | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `cpus`           | `number \| undefined`                                                                                                                                         | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `memoryMb`       | `number \| undefined`                                                                                                                                         | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `bootDeadlineMs` | `number \| undefined`                                                                                                                                         | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `variables`      | `Readonly<Record<string, string>> \| undefined`                                                                                                               | Optionnel | Déclarations d’environnement explicites ; les valeurs sont des chaînes.          |
+| Nom              | Type                                                                                                                                                          | Présence  | Rôle                                                                                                        |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ----------------------------------------------------------------------------------------------------------- |
+| `binary`         | `string`                                                                                                                                                      | Requis    | Chemin hôte du programme Firecracker.                                                                       |
+| `kernel`         | `string`                                                                                                                                                      | Requis    | Chemin hôte de l’image du noyau invité Firecracker préparée.                                                |
+| `rootfs`         | `string`                                                                                                                                                      | Requis    | Chemin hôte de l’image préparée du système de fichiers racine invité inscriptible.                          |
+| `tap`            | `string`                                                                                                                                                      | Requis    | Nom du périphérique réseau TAP hôte préconfiguré pour la microVM.                                           |
+| `guestMac`       | `string`                                                                                                                                                      | Requis    | Adresse MAC attribuée à l’interface réseau de l’invité.                                                     |
+| `bootArgs`       | `string`                                                                                                                                                      | Requis    | Arguments de démarrage du noyau transmis à Firecracker.                                                     |
+| `ssh`            | `{ readonly host: string; readonly user: string; readonly identity: string; readonly knownHosts: string; readonly port?: number; readonly binary?: string; }` | Requis    | Réglages de connexion SSH à l’invité, dont le fichier d’identité et le fichier d’hôtes connus de confiance. |
+| `root`           | `string \| undefined`                                                                                                                                         | Optionnel | Chemin du workspace de dépôt à l’intérieur de l’environnement d’exécution.                                  |
+| `home`           | `string`                                                                                                                                                      | Requis    | Chemin du home de l’agent à l’intérieur de l’environnement d’exécution.                                     |
+| `cpus`           | `number \| undefined`                                                                                                                                         | Optionnel | Limite d’allocation CPU de l’environnement d’exécution.                                                     |
+| `memoryMb`       | `number \| undefined`                                                                                                                                         | Optionnel | Limite d’allocation mémoire en mégaoctets.                                                                  |
+| `bootDeadlineMs` | `number \| undefined`                                                                                                                                         | Optionnel | Durée maximale en millisecondes d’attente de la disponibilité SSH de l’invité.                              |
+| `variables`      | `Readonly<Record<string, string>> \| undefined`                                                                                                               | Optionnel | Déclarations d’environnement explicites ; les valeurs sont des chaînes.                                     |
 
 ## Signature
 

@@ -2,10 +2,8 @@
 title: "Sandbox"
 description: "Sandbox — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Contrat public de **Sandbox**. Consultez le [guide sandboxes](../../guide/environment/lifecycle/) pour le comportement, les valeurs par défaut et des exemples.
 
 ## Import
 
@@ -13,27 +11,20 @@ Contrat public de **Sandbox**. Consultez le [guide sandboxes](../../guide/enviro
 import type { Sandbox } from "@elie-laloum/outpost";
 ```
 
-## Rôle et comportement
-
-Acquérir un environnement d’exécution et le réutiliser pour des commandes ou tâches d’agent séquentielles.
-
-Docker est le provider par défaut. Une seule opération peut posséder une sandbox à la fois. La fermeture est idempotente ; annuler une commande ne détruit pas à elle seule une sandbox chaude.
-
-[Exemple complet et règles détaillées](../../guide/environment/lifecycle/).
-
 ## Paramètres et propriétés
 
-| Nom         | Type                                                                                         | Présence | Rôle                                                                               |
-| ----------- | -------------------------------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------- |
-| `diagnose`  | `(options?: SandboxDiagnosticOptions) => Promise<SandboxDiagnosticReport>`                   | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation.   |
-| `workspace` | `Workspace`                                                                                  | Requis   | Workspace Git appartenant à l’appelant ; exclut un nouveau choix de dépôt/branche. |
-| `root`      | `string`                                                                                     | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation.   |
-| `dispatch`  | `<T = undefined>(options: DispatchOptions<T>) => Promise<WarmDispatchResult<T>>`             | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation.   |
-| `resume`    | `<T = undefined>(id: string, options: DispatchOptions<T>) => Promise<WarmDispatchResult<T>>` | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation.   |
-| `fork`      | `<T = undefined>(id: string, options: DispatchOptions<T>) => Promise<WarmDispatchResult<T>>` | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation.   |
-| `attach`    | `(options?: AttachOptions) => Promise<AttachResult>`                                         | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation.   |
-| `command`   | `(command: Command) => Promise<CommandResult>`                                               | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation.   |
-| `close`     | `(options?: { readonly preserve?: boolean; }) => Promise<Disposal>`                          | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation.   |
+| Nom                     | Type                                                                                         | Présence | Rôle                                                                                                                   |
+| ----------------------- | -------------------------------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `diagnose`              | `(options?: SandboxDiagnosticOptions) => Promise<SandboxDiagnosticReport>`                   | Requis   | Sonde commandes, agent et transferts optionnels de cette sandbox sous son verrou d’opération exclusif.                 |
+| `workspace`             | `Workspace`                                                                                  | Requis   | Workspace lié à cette sandbox ; sa possession détermine si fermer la sandbox le ferme aussi.                           |
+| `root`                  | `string`                                                                                     | Requis   | Chemin du workspace de dépôt à l’intérieur de l’environnement d’exécution.                                             |
+| `dispatch`              | `<T = undefined>(options: DispatchOptions<T>) => Promise<WarmDispatchResult<T>>`             | Requis   | Exécute un brief d’agent sur le bail existant de cette sandbox et renvoie un résultat chaud.                           |
+| `resume`                | `<T = undefined>(id: string, options: DispatchOptions<T>) => Promise<WarmDispatchResult<T>>` | Requis   | Poursuit l’identifiant de conversation native donné sur le bail existant de cette sandbox.                             |
+| `fork`                  | `<T = undefined>(id: string, options: DispatchOptions<T>) => Promise<WarmDispatchResult<T>>` | Requis   | Bifurque depuis l’identifiant de conversation native donné et exécute un nouveau brief sur le bail de cette sandbox.   |
+| `attach`                | `(options?: AttachOptions) => Promise<AttachResult>`                                         | Requis   | Attache le terminal interactif réel d’un agent à l’environnement existant de cette sandbox.                            |
+| `command`               | `(command: Command) => Promise<CommandResult>`                                               | Requis   | Exécute une commande sur ce bail ; renvoie les statuts non nuls sans les convertir en échecs de tâche de workflow.     |
+| `close`                 | `(options?: { readonly preserve?: boolean; }) => Promise<Disposal>`                          | Requis   | Attend les opérations possédées et libère la sandbox ; ne ferme le workspace que si cette sandbox en est propriétaire. |
+| `[Symbol.asyncDispose]` | `() => Promise<void>`                                                                        | Requis   | Ferme cette ressource via le mécanisme de libération asynchrone JavaScript.                                            |
 
 ## Signature
 

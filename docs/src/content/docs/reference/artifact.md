@@ -5,8 +5,6 @@ sidebar:
   order: 10
 ---
 
-Public contract for **artifact**. See the [typed artifacts guide](../../guide/advanced/artifacts/) for behavior, defaults and examples.
-
 ## Import
 
 ```ts
@@ -15,11 +13,16 @@ import { artifact } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Publish immutable payloads and exchange small references with contract, digest and lineage validation.
-
-Filesystem payloads default to 16 MiB maximum. Callers own retention. Digests provide integrity against a trusted reference, not producer authentication or a shared transaction.
+Create named, versioned payload contracts with json or binary. JSON contracts validate both encoding and decoding and require lossless JSON; binary contracts copy Uint8Array bytes. Constructing a contract does not publish an artifact.
 
 [Complete example and detailed rules](../../guide/advanced/artifacts/).
+
+## Parameters and properties
+
+| Name     | Type                                                                 | Presence | Meaning                                                                                   |
+| -------- | -------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------- |
+| `json`   | `<T>(options: JsonArtifactOptions<T>) => ArtifactContract<T>`        | Required | Create a named JSON artifact contract that validates values during encoding and decoding. |
+| `binary` | `(options: ArtifactContractOptions) => ArtifactContract<Uint8Array>` | Required | Create a named binary artifact contract that copies Uint8Array payloads.                  |
 
 ## Signature
 

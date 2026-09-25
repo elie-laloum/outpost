@@ -2,10 +2,8 @@
 title: "SandboxLease"
 description: "SandboxLease — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Public contract for **SandboxLease**. See the [providers guide](../../guide/environment/providers/overview/) for behavior, defaults and examples.
 
 ## Import
 
@@ -13,25 +11,17 @@ Public contract for **SandboxLease**. See the [providers guide](../../guide/envi
 import type { SandboxLease } from "@elie-laloum/outpost";
 ```
 
-## Purpose and behavior
-
-Allocate local containers, explicit host execution or remote sandboxes through dedicated package entry points.
-
-Mounted and host providers default to current branches; remote providers default to integration and reject current. Optional SDKs remain optional. Local execution provides no isolation.
-
-[Complete example and detailed rules](../../guide/environment/providers/overview/).
-
 ## Parameters and properties
 
-| Name            | Type                                                                                | Presence | Meaning                                                                 |
-| --------------- | ----------------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------- |
-| `fileTransfers` | `FileTransfers \| undefined`                                                        | Optional | See the linked contract and this family's rules for its interpretation. |
-| `root`          | `string`                                                                            | Required | See the linked contract and this family's rules for its interpretation. |
-| `home`          | `string`                                                                            | Required | See the linked contract and this family's rules for its interpretation. |
-| `invoke`        | `(command: Command) => Promise<CommandResult>`                                      | Required | See the linked contract and this family's rules for its interpretation. |
-| `upload`        | `(source: string, destination: string, options?: TransferOptions) => Promise<void>` | Required | See the linked contract and this family's rules for its interpretation. |
-| `download`      | `(source: string, destination: string, options?: TransferOptions) => Promise<void>` | Required | See the linked contract and this family's rules for its interpretation. |
-| `release`       | `() => Promise<void>`                                                               | Required | See the linked contract and this family's rules for its interpretation. |
+| Name            | Type                                                                                | Presence | Meaning                                                                                                     |
+| --------------- | ----------------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------- |
+| `fileTransfers` | `FileTransfers \| undefined`                                                        | Optional | Optional manifest and batch-transfer capabilities for remote synchronization.                               |
+| `root`          | `string`                                                                            | Required | Repository workspace path inside the execution environment.                                                 |
+| `home`          | `string`                                                                            | Required | Agent home path inside the execution environment.                                                           |
+| `invoke`        | `(command: Command) => Promise<CommandResult>`                                      | Required | Execute a command in the leased environment and return its actual process exit status and captured streams. |
+| `upload`        | `(source: string, destination: string, options?: TransferOptions) => Promise<void>` | Required | Transfer host files or directory contents into the sandbox, honoring transfer cancellation and deadline.    |
+| `download`      | `(source: string, destination: string, options?: TransferOptions) => Promise<void>` | Required | Transfer sandbox files or directory contents to the host, preserving supported permissions and links.       |
+| `release`       | `() => Promise<void>`                                                               | Required | Dispose of the allocated execution environment; repeated release must be safe.                              |
 
 ## Signature
 

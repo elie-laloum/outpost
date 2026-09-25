@@ -2,10 +2,8 @@
 title: "SandboxDiagnosticReport"
 description: "SandboxDiagnosticReport — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Public contract for **SandboxDiagnosticReport**. See the [diagnostics guide](../../guide/operations/doctor/) for behavior, defaults and examples.
 
 ## Import
 
@@ -13,25 +11,17 @@ Public contract for **SandboxDiagnosticReport**. See the [diagnostics guide](../
 import type { SandboxDiagnosticReport } from "@elie-laloum/outpost";
 ```
 
-## Purpose and behavior
-
-Inspect host prerequisites, an owned sandbox or recorded agent protocol fixtures. Diagnostics report observations; they do not prove account or model access.
-
-Checks distinguish unavailable, failed and unsupported capabilities. Sandbox diagnosis uses its existing operation gate and never takes ownership of disposal.
-
-[Complete example and detailed rules](../../guide/operations/doctor/).
-
 ## Parameters and properties
 
-| Name                 | Type                                                        | Presence | Meaning                                                                 |
-| -------------------- | ----------------------------------------------------------- | -------- | ----------------------------------------------------------------------- |
-| `scope`              | `"owned-sandbox"`                                           | Required | See the linked contract and this family's rules for its interpretation. |
-| `ownership`          | `"caller"`                                                  | Required | See the linked contract and this family's rules for its interpretation. |
-| `provider`           | `Pick<SandboxProvider, "name" \| "placement"> \| undefined` | Optional | Execution environment backend.                                          |
-| `capabilities`       | `readonly DiagnosticCapability[]`                           | Required | See the linked contract and this family's rules for its interpretation. |
-| `checks`             | `readonly DiagnosticCheck[]`                                | Required | See the linked contract and this family's rules for its interpretation. |
-| `modelCompatibility` | `"unverified"`                                              | Required | See the linked contract and this family's rules for its interpretation. |
-| `hasFailures`        | `boolean`                                                   | Required | See the linked contract and this family's rules for its interpretation. |
+| Name                 | Type                                                        | Presence | Meaning                                                                                             |
+| -------------------- | ----------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------- |
+| `scope`              | `"owned-sandbox"`                                           | Required | Always owned-sandbox: checks concern the supplied execution resource.                               |
+| `ownership`          | `"caller"`                                                  | Required | Always caller: diagnosis does not acquire ownership of resource disposal.                           |
+| `provider`           | `Pick<SandboxProvider, "name" \| "placement"> \| undefined` | Optional | Provider name and placement metadata used to interpret the diagnostic report.                       |
+| `capabilities`       | `readonly DiagnosticCapability[]`                           | Required | Advertised and observed support for commands, transfers, batch transfers and interactive terminals. |
+| `checks`             | `readonly DiagnosticCheck[]`                                | Required | Individual diagnostic checks with status, message and available version information.                |
+| `modelCompatibility` | `"unverified"`                                              | Required | Always unverified: these diagnostics do not call a live model.                                      |
+| `hasFailures`        | `boolean`                                                   | Required | Whether at least one diagnostic check failed.                                                       |
 
 ## Signature
 

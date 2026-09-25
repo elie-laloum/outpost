@@ -2,32 +2,28 @@
 title: "captureConversation"
 description: "captureConversation — Outpost API"
 sidebar:
-  order: 20
+  order: 0
 ---
 
-Contrat auxiliaire utilisé dans une signature publique. Il n’est pas exporté directement depuis le package ; utilisez l’inférence TypeScript ou le type public qui le référence.
+Contrat auxiliaire non exporté directement ; utilisez l’inférence TypeScript ou le type public qui le référence.
 
 ## Rôle et comportement
 
-Localiser, capturer, restaurer et déplacer les transcripts natifs séparément de l’authentification.
-
-Le home de conversation vaut par défaut le home système. Une continuation froide exige un transcript restaurable avant allocation. Un fork ne copie pas un workspace.
-
-[Exemple complet et règles détaillées](../../guide/agents/conversations/).
+Copie un transcript natif depuis le bail de sandbox vers le dossier de capture hôte et renvoie sa localisation lorsqu’il est disponible. La capture peut signaler des avertissements via options.warn ; elle n’exporte pas d’identifiants d’authentification.
 
 ## Paramètres et propriétés
 
-| Nom             | Type                                       | Présence  | Rôle                                                                                          |
-| --------------- | ------------------------------------------ | --------- | --------------------------------------------------------------------------------------------- |
-| `format`        | `ConversationFormat`                       | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation.              |
-| `id`            | `string`                                   | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation.              |
-| `repository`    | `string`                                   | Requis    | Checkout Git hôte ciblé.                                                                      |
-| `lease`         | `SandboxLease`                             | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation.              |
-| `staging`       | `string`                                   | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation.              |
-| `options`       | `CaptureOptions \| undefined`              | Optionnel | Objet de configuration. Ses champs sont décrits dans le contrat d’options associé ci-dessous. |
-| `options.home`  | `string \| undefined`                      | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation.              |
-| `options.warn`  | `((message: string) => void) \| undefined` | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation.              |
-| `options.local` | `boolean \| undefined`                     | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation.              |
+| Nom             | Type                                       | Présence  | Rôle                                                                                                     |
+| --------------- | ------------------------------------------ | --------- | -------------------------------------------------------------------------------------------------------- |
+| `format`        | `ConversationFormat`                       | Requis    | Organisation native des transcripts : claude ou codex.                                                   |
+| `id`            | `string`                                   | Requis    | Identifiant de conversation native utilisé pour localiser ou poursuivre la session.                      |
+| `repository`    | `string`                                   | Requis    | Checkout Git hôte ciblé.                                                                                 |
+| `lease`         | `SandboxLease`                             | Requis    | Bail d’exécution de sandbox utilisé pour accéder au home natif de l’agent et transférer les transcripts. |
+| `staging`       | `string`                                   | Requis    | Dossier hôte servant à préparer les fichiers de transcript natif pendant le transfert.                   |
+| `options`       | `CaptureOptions \| undefined`              | Optionnel | Home hôte des transcripts, mode d’accès local et callback d’avertissement non bloquant.                  |
+| `options.home`  | `string \| undefined`                      | Optionnel | Home d’agent hôte utilisé pour localiser ou persister les transcripts natifs.                            |
+| `options.warn`  | `((message: string) => void) \| undefined` | Optionnel | Callback recevant les avertissements non bloquants d’exécution ou de stockage des conversations.         |
+| `options.local` | `boolean \| undefined`                     | Optionnel | Utilise l’accès local hôte aux transcripts au lieu d’un transfert par le bail de sandbox.                |
 
 ## Retour
 

@@ -1,0 +1,258 @@
+{
+  "attach": [
+    "Open a real interactive agent terminal in a newly allocated sandbox, then collect its exit status and commits and close owned resources. Prompt questions can be supplied through ask; terminal attachment does not produce a typed response.",
+    "Ouvre le terminal interactif réel d’un agent dans une nouvelle sandbox, puis collecte son statut de sortie et ses commits et ferme les ressources possédées. ask permet de fournir les réponses aux variables du brief ; le terminal ne produit pas de réponse typée."
+  ],
+  "createSandbox": [
+    "Allocate an environment around a new or caller-owned workspace. The returned sandbox supports sequential commands and agent turns on the same lease; the caller must close it. A supplied workspace keeps its independent lifetime.",
+    "Alloue un environnement autour d’un workspace nouveau ou fourni par l’appelant. La sandbox renvoyée permet d’enchaîner commandes et tours d’agent sur le même bail ; l’appelant doit la fermer. Un workspace fourni conserve sa durée de vie indépendante."
+  ],
+  "dispatch": [
+    "Run an agent brief with a sandbox allocated for this call, collect turns, validated output, usage and commits, then close owned resources. Each cold pass receives a fresh environment. The result can resume or fork a captured conversation in a later environment.",
+    "Exécute le brief d’un agent avec une sandbox allouée pour cet appel, collecte les tours, la sortie validée, l’usage et les commits, puis ferme les ressources possédées. Chaque passe froide reçoit un environnement neuf. Le résultat permet de reprendre ou de bifurquer une conversation capturée dans un environnement ultérieur."
+  ],
+  "openWorkspace": [
+    "Acquire a repository lock and prepare the checkout selected by the branch policy. The returned workspace can own several successive sandboxes and remains open until explicitly closed. integrate applies its branch changes; close preserves work that cannot safely be removed.",
+    "Prend le verrou du dépôt et prépare le checkout choisi par la politique de branche. Le workspace renvoyé peut posséder plusieurs sandboxes successives et reste ouvert jusqu’à sa fermeture explicite. integrate applique ses changements de branche ; close préserve le travail dont la suppression serait risquée."
+  ],
+  "task": [
+    "Define and freeze a workflow node whose perform callback runs when its dependencies succeed. Creating the node does not execute it or allocate a sandbox. Use context.value to read declared dependencies; isolatedTask supplies sandbox allocation around an agent dispatch instead of a custom perform callback.",
+    "Définit et fige un nœud de workflow dont le callback perform s’exécute après la réussite de ses dépendances. Créer le nœud ne l’exécute pas et n’alloue aucune sandbox. context.value lit les dépendances déclarées ; isolatedTask prend en charge l’allocation d’une sandbox autour d’un dispatch d’agent à la place d’un callback perform personnalisé."
+  ],
+  "workflow": [
+    "Validate a named task graph for duplicate keys, missing dependencies and cycles, then return a reusable workflow definition. start schedules the tasks with concurrency, cancellation and optional checkpoints; diagram renders the dependency graph as Mermaid.",
+    "Valide les clés, dépendances et cycles d’un graphe nommé, puis renvoie une définition de workflow réutilisable. start ordonnance les tâches avec concurrence, annulation et checkpoints optionnels ; diagram produit le graphe de dépendances en Mermaid."
+  ],
+  "agentTask": [
+    "Define a workflow node that dispatches an agent through an existing caller-owned sandbox. request builds the brief and dispatch options from task dependencies. Cancellation and observed usage join the workflow accounting; the node does not close the shared sandbox.",
+    "Définit un nœud de workflow qui lance un agent dans une sandbox existante appartenant à l’appelant. request construit le brief et les options depuis les dépendances. L’annulation et l’usage observé sont reliés au workflow ; le nœud ne ferme pas la sandbox partagée."
+  ],
+  "commandTask": [
+    "Define a workflow node that runs a command in an existing caller-owned sandbox. A command factory can read dependency values. A nonzero process status fails the task, allowing the workflow retry policy to apply; the sandbox remains caller-owned.",
+    "Définit un nœud qui exécute une commande dans une sandbox existante appartenant à l’appelant. Une fabrique de commande peut lire les dépendances. Un statut de processus non nul met la tâche en échec et permet d’appliquer sa politique de reprise ; la sandbox reste à la charge de l’appelant."
+  ],
+  "isolatedTask": [
+    "Define an agent workflow node whose request callback selects a repository, provider, agent and dispatch options for each attempt. It calls dispatch to allocate and close its own sandbox and returns DispatchResult. Use separate nodes to work on separate repositories; there is no shared Git transaction or automatic push.",
+    "Définit un nœud d’agent dont le callback request choisit le dépôt, le provider, l’agent et les options de dispatch à chaque tentative. Il appelle dispatch pour allouer et fermer sa propre sandbox et renvoie DispatchResult. Des nœuds distincts peuvent traiter des dépôts distincts ; aucune transaction Git commune ni aucun push automatique ne les relie."
+  ],
+  "claude": [
+    "Build the Claude Code adapter, including CLI request construction, event decoding and native conversation storage. Model, reasoning and permission settings are passed to Claude; creating the adapter does not start a process or authenticate an account.",
+    "Construit l’adapter Claude Code : préparation des commandes, décodage des événements et stockage des conversations natives. Les réglages de modèle, raisonnement et permissions sont transmis à Claude ; créer l’adapter ne démarre aucun processus et n’authentifie aucun compte."
+  ],
+  "codex": [
+    "Build the Codex CLI adapter with event decoding, native conversation capture and continuation support. modelProvider selects an explicit Responses-compatible endpoint. Creating the adapter only configures execution; credentials must be available inside the selected environment.",
+    "Construit l’adapter Codex CLI avec décodage des événements, capture native et continuation des conversations. modelProvider sélectionne un endpoint explicitement compatible Responses. La création configure l’exécution ; les identifiants doivent être disponibles dans l’environnement choisi."
+  ],
+  "gemini": [
+    "Build the Gemini CLI adapter for a fresh session. It decodes text, tool and usage events but does not offer native transcript capture, resume, fork or automatic response repairs. Model and approval settings configure the CLI invocation.",
+    "Construit l’adapter Gemini CLI pour une session neuve. Il décode les événements de texte, outils et usage, sans capture native, reprise, bifurcation ni réparation automatique des réponses. Le modèle et le mode d’approbation configurent l’invocation CLI."
+  ],
+  "agentVersions": [
+    "Expose the Claude, Codex and Gemini CLI versions used as compatibility references by bundled protocol fixtures and generated images. These values do not query the installed binaries or prove live account access.",
+    "Expose les versions des CLI Claude, Codex et Gemini servant de références aux fixtures de protocole et aux images générées. Ces valeurs n’interrogent pas les binaires installés et ne prouvent pas l’accès à un compte."
+  ],
+  "conversations": [
+    "Group native transcript operations: locate on the host, capture from a sandbox, restore before continuation and rewrite repository paths. native constructs a ConversationStore for Claude or Codex; these storage utilities do not manage agent authentication.",
+    "Regroupe les opérations sur les transcripts natifs : localisation sur l’hôte, capture depuis une sandbox, restauration avant continuation et réécriture des chemins du dépôt. native construit un ConversationStore pour Claude ou Codex ; ces outils de stockage ne gèrent pas l’authentification."
+  ],
+  "nativeConversations": [
+    "Create the native ConversationStore for the selected Claude or Codex format, binding locate, capture and restore to that format’s filesystem layout.",
+    "Crée le ConversationStore natif du format Claude ou Codex choisi, en liant localisation, capture et restauration à son organisation de fichiers."
+  ],
+  "locateConversation": [
+    "Locate an existing native transcript by format, conversation ID and repository in the selected host home. It returns the transcript identity and path and rejects when no matching transcript is found.",
+    "Localise un transcript natif existant selon son format, son identifiant et son dépôt dans le home hôte choisi. Renvoie son identité et son chemin, et échoue si aucun transcript correspondant n’est trouvé."
+  ],
+  "captureConversation": [
+    "Copy a native transcript from the sandbox lease into host staging and return its location when available. Capture can report warnings through options.warn; it does not export credentials.",
+    "Copie un transcript natif depuis le bail de sandbox vers le dossier de capture hôte et renvoie sa localisation lorsqu’il est disponible. La capture peut signaler des avertissements via options.warn ; elle n’exporte pas d’identifiants d’authentification."
+  ],
+  "restoreConversation": [
+    "Upload a previously located native transcript into the sandbox’s agent home, rewriting repository paths from the original checkout to the current workspace before continuation.",
+    "Envoie un transcript natif précédemment localisé dans le home de l’agent en sandbox, en réécrivant les chemins de l’ancien checkout vers le workspace courant avant la continuation."
+  ],
+  "relocateTranscript": [
+    "Rewrite native transcript records from a source repository path to a destination repository path while preserving conversation data. The function returns rewritten text and does not itself read or write files.",
+    "Réécrit les chemins de dépôt des enregistrements d’un transcript natif du chemin source vers le chemin destination en conservant les données de conversation. Renvoie le texte réécrit sans lire ni écrire de fichier."
+  ],
+  "projectKey": [
+    "Convert a repository path into the directory key used by Claude’s native project transcript layout. This is a path-layout helper, not a conversation identifier.",
+    "Convertit un chemin de dépôt en clé de dossier pour l’organisation native des transcripts de projet Claude. Cet utilitaire de chemins ne produit pas un identifiant de conversation."
+  ],
+  "remotePath": [
+    "Compute the native transcript path inside a sandbox lease from the format and conversation ID, using the lease’s home and workspace path.",
+    "Calcule le chemin du transcript natif à l’intérieur d’un bail de sandbox à partir du format et de l’identifiant de conversation, en utilisant son home et son chemin de workspace."
+  ],
+  "mountedProvider": [
+    "Wrap a provider definition with mounted placement. The provider exposes the host workspace through a mount and supplies its own allocation and release implementation.",
+    "Enveloppe une définition de provider avec le placement mounted. Le provider expose le workspace hôte par montage et fournit sa propre implémentation d’allocation et de libération."
+  ],
+  "remoteProvider": [
+    "Wrap a provider definition with remote placement, enabling application-managed repository upload and synchronization around the lease supplied by acquire.",
+    "Enveloppe une définition de provider avec le placement remote, pour activer l’envoi du dépôt et sa synchronisation par l’application autour du bail fourni par acquire."
+  ],
+  "response": [
+    "Construct tagged response validators with text or json. Both read the last complete matching tag; json parses its contents and applies the supplied schema. Invalid or missing content raises ResponseError, and repairs defaults to zero.",
+    "Construit des validateurs de réponse balisée avec text ou json. Tous deux lisent la dernière balise complète correspondante ; json analyse son contenu et applique le schéma fourni. Un contenu absent ou invalide lève ResponseError, et repairs vaut zéro par défaut."
+  ],
+  "recoveryDetails": [
+    "Extract recovery metadata from an unknown error when Outpost attached it. The result identifies retained work and recovery locations; absent metadata returns undefined and does not trigger cleanup or restoration.",
+    "Extrait les métadonnées de récupération d’une erreur inconnue lorsqu’Outpost les a attachées. Le résultat identifie le travail et les emplacements conservés ; sans métadonnées, renvoie undefined sans déclencher de nettoyage ni de restauration."
+  ],
+  "reporter": [
+    "Create an agent observation callback that formats progress, warnings and pass summaries for a terminal or custom writer. quiet suppresses all output and verbose includes additional events; reporting does not control execution.",
+    "Crée un callback d’observation qui formate progression, avertissements et bilans de passe pour un terminal ou une fonction d’écriture. quiet masque toutes les sorties et verbose inclut des événements supplémentaires ; le rapporteur ne pilote pas l’exécution."
+  ],
+  "planRecoveryRetention": [
+    "Inspect local recovery storage and compute which clean workspaces or closed logs satisfy the supplied age and capacity policy. Planning reports eligibility and projected usage without removing files.",
+    "Inspecte le stockage local de récupération et détermine quels workspaces propres ou journaux fermés satisfont la politique d’âge et de capacité. Le plan expose éligibilité et usage projeté sans supprimer de fichier."
+  ],
+  "pruneRecoveryRetention": [
+    "Apply a previously reviewed retention plan. Reacquire ownership and revalidate each candidate before removal; report removed paths, retained entries and a fresh plan after pruning.",
+    "Applique un plan de rétention préalablement examiné. Reprend possession et revalide chaque candidat avant suppression ; renvoie les chemins supprimés, les entrées conservées et un nouveau plan après nettoyage."
+  ],
+  "assertRecoveryQuota": [
+    "Inspect recovery storage and reject if observed bytes plus the requested reservation exceed maxBytes, or if inspection cannot establish admission. This check does not reserve space or impose a filesystem quota; reserveRecoveryStorage coordinates cooperating writers.",
+    "Inspecte le stockage de récupération et échoue si les octets observés plus la réservation demandée dépassent maxBytes, ou si l’inspection ne permet pas de décider. Ce contrôle ne réserve pas d’espace et n’impose pas de quota physique ; reserveRecoveryStorage coordonne les écrivains coopératifs."
+  ],
+  "verifyRecoveryTransfer": [
+    "Verify a retained transfer’s directory structure, optionally hashing payloads and checking Git restorability within maxBytes. Returns detailed checks and integrity status without applying incoming changes or authenticating their author.",
+    "Vérifie la structure d’un transfert conservé, avec calcul optionnel des empreintes et contrôle de restauration Git dans la limite maxBytes. Renvoie contrôles détaillés et état d’intégrité sans appliquer les changements entrants ni authentifier leur auteur."
+  ],
+  "diagnoseSandbox": [
+    "Probe a caller-owned Sandbox or SandboxLease for command execution, agent CLI and optional transfer capabilities. An owned Sandbox uses its operation gate; the function reports failures without closing the caller’s resource or making live model calls.",
+    "Sonde un Sandbox ou SandboxLease appartenant à l’appelant pour vérifier commandes, CLI d’agent et transferts optionnels. Un Sandbox utilise son verrou d’opération ; la fonction rapporte les échecs sans fermer la ressource ni appeler de modèle réel."
+  ],
+  "diagnoseAgentProtocol": [
+    "Replay bundled event fixtures through the selected agent adapter and report decoding compatibility with the recorded CLI version. It does not launch the installed CLI, validate credentials or test a live model.",
+    "Rejoue les fixtures d’événements intégrées dans l’adapter choisi et rapporte la compatibilité de décodage avec la version CLI enregistrée. Ne lance pas le CLI installé, ne valide pas les identifiants et ne teste pas de modèle réel."
+  ],
+  "reserveRecoveryStorage": [
+    "Acquire a coordinated recovery-storage reservation after checking observed usage and other active reservations. The caller must release the returned reservation; it coordinates cooperating processes without reserving physical disk blocks.",
+    "Acquiert une réservation coordonnée de stockage après contrôle de l’usage observé et des autres réservations actives. L’appelant doit libérer la réservation renvoyée ; elle coordonne les processus coopératifs sans réserver physiquement des blocs disque."
+  ],
+  "planRecoveryRestore": [
+    "Validate a retained transfer and prepare restoration of its previous or incoming side into a new destination. The plan records payloads, commit and fingerprints for later revalidation; it does not populate the destination.",
+    "Valide un transfert conservé et prépare la restauration de son état previous ou incoming dans une nouvelle destination. Le plan enregistre données, commit et empreintes pour une revalidation ultérieure ; il ne remplit pas la destination."
+  ],
+  "restoreRecoveryTransfer": [
+    "Revalidate a restoration plan and materialize the selected retained state into its new destination. Source recovery artifacts remain available, and the result reports whether staging could be preserved. Review the destination before integrating it.",
+    "Revalide un plan de restauration et matérialise l’état conservé choisi dans sa nouvelle destination. Les artefacts sources restent disponibles et le résultat indique si l’index Git a pu être préservé. Examinez la destination avant intégration."
+  ],
+  "fileWorkflowCheckpointStore": [
+    "Create a filesystem checkpoint store under directory. Acquiring a run ID owns its checkpoint exclusively; writes replace the saved JSON atomically, and releasing the lease leaves persisted results available for a later run.",
+    "Crée un store de checkpoints dans directory. Acquérir un identifiant d’exécution donne la possession exclusive de son checkpoint ; les écritures remplacent atomiquement le JSON sauvegardé et la libération du bail conserve les résultats pour une exécution ultérieure."
+  ],
+  "approvalTask": [
+    "Define a checkpoint-backed approval gate that pauses once its dependencies finish. A trusted listed actor must submit approve or reject with a reason. Approval yields the persisted decision to dependent tasks; rejection is final for that run.",
+    "Définit une gate d’approbation persistée par checkpoint qui suspend l’exécution après ses dépendances. Un acteur de confiance autorisé doit soumettre approve ou reject avec un motif. L’approbation transmet la décision persistée aux tâches dépendantes ; le rejet est définitif pour cette exécution."
+  ],
+  "pauseTask": [
+    "Define a checkpoint-backed pause that waits for an explicit resume or reject decision from a listed trusted actor. It uses no waiting timer and can survive process restarts; unlike approvalTask, its successful decision action is resume.",
+    "Définit une pause persistée par checkpoint qui attend une décision explicite resume ou reject d’un acteur de confiance autorisé. Elle n’utilise aucun timer d’attente et survit au redémarrage du processus ; contrairement à approvalTask, son action de succès est resume."
+  ],
+  "inspectRecovery": [
+    "Inventory the target repository’s .outpost storage, with optional Git, lock and locally recorded sandbox activity checks. Inspection is read-only, bounded by maxEntries, and does not enumerate cloud provider accounts.",
+    "Inventorie le stockage .outpost du dépôt cible, avec contrôles optionnels de Git, des verrous et de l’activité locale des sandboxes. L’inspection est en lecture seule, bornée par maxEntries, et n’énumère pas les comptes cloud."
+  ],
+  "artifact": [
+    "Create named, versioned payload contracts with json or binary. JSON contracts validate both encoding and decoding and require lossless JSON; binary contracts copy Uint8Array bytes. Constructing a contract does not publish an artifact.",
+    "Crée des contrats de données nommés et versionnés avec json ou binary. Les contrats JSON valident encodage et décodage et exigent du JSON sans perte ; les contrats binaires copient les octets Uint8Array. Créer un contrat ne publie pas d’artefact."
+  ],
+  "publishArtifact": [
+    "Encode a value with its contract, compute its digest and immutable identity, then atomically put its bytes in the store. Return a small reference containing producer and ordered parent lineage; producer metadata is not authentication.",
+    "Encode une valeur selon son contrat, calcule son empreinte et son identité immuable, puis publie atomiquement ses octets dans le store. Renvoie une petite référence contenant producteur et filiation parentale ordonnée ; ces métadonnées n’authentifient pas le producteur."
+  ],
+  "readStoredArtifact": [
+    "Validate an artifact reference, load its bytes and verify contract identity, size and digest before decoding. Optional producer and parent expectations add lineage checks. Use this outside a task context or when the reference is already available.",
+    "Valide une référence d’artefact, charge ses octets et vérifie contrat, taille et empreinte avant décodage. Les attentes optionnelles de producteur et parents ajoutent des contrôles de filiation. S’utilise hors contexte de tâche ou lorsque la référence est déjà disponible."
+  ],
+  "artifactTask": [
+    "Define a workflow task that produces a value and publishes it as an artifact. Derive producer identity from the workflow execution, task key and attempt, and record the declared parent references. Dependents receive an ArtifactReference rather than the full payload.",
+    "Définit une tâche qui produit une valeur et la publie comme artefact. Déduit le producteur de l’exécution, de la clé de tâche et de la tentative, et enregistre les références parentes déclarées. Les dépendants reçoivent une ArtifactReference au lieu des données complètes."
+  ],
+  "readArtifact": [
+    "Read an artifact reference from a declared task dependency through context.value, then load and validate its stored payload. It applies the task cancellation signal and checks the producer against the current execution and dependency key.",
+    "Lit une référence d’artefact depuis une dépendance déclarée via context.value, puis charge et valide ses données stockées. Applique le signal d’annulation de la tâche et vérifie le producteur par rapport à l’exécution courante et à la clé de dépendance."
+  ],
+  "fileArtifactStore": [
+    "Create a filesystem store for immutable artifact bytes with atomic publication and bounded reads. maxBytes defaults to 16 MiB per payload. Existing IDs cannot be overwritten with different bytes; the caller manages retention.",
+    "Crée un store fichier pour des octets d’artefact immuables, avec publication atomique et lectures bornées. maxBytes vaut 16 Mio par données publiées par défaut. Un identifiant existant ne peut recevoir des octets différents ; l’appelant gère la rétention."
+  ],
+  "sqliteTaskQueue": [
+    "Open a durable SQLite task queue at path. Enqueue deduplicates job identities, claims create fenced leases and stale workers cannot complete queue state. Close the returned database when finished; external effects remain at least once.",
+    "Ouvre une file de tâches SQLite durable à path. L’envoi déduplique les identités, les prises en charge créent des baux avec jeton de génération et les workers périmés ne peuvent valider l’état de file. Fermez la base renvoyée après usage ; les effets externes restent au moins une fois."
+  ],
+  "serveTaskQueue": [
+    "Expose a caller-owned task queue over HTTP with explicit bearer-token authentication. The server binds loopback by default and supplies no TLS. Closing the returned server stops listening without taking ownership of queue storage.",
+    "Expose une file appartenant à l’appelant via HTTP avec authentification explicite par jeton bearer. Le serveur écoute loopback par défaut et ne fournit pas TLS. Fermer le serveur arrête l’écoute sans prendre possession du stockage de la file."
+  ],
+  "httpTaskQueue": [
+    "Create a TaskQueue client for the supplied HTTP endpoint and bearer token. Each request is subject to timeoutMs; this client transports queue operations and does not execute handlers locally.",
+    "Crée un client TaskQueue pour l’endpoint HTTP et le jeton bearer fournis. Chaque requête est soumise à timeoutMs ; ce client transporte les opérations de file sans exécuter de gestionnaire localement."
+  ],
+  "runQueueWorker": [
+    "Poll for jobs whose handler is registered, run one job at a time and renew its fenced lease while executing. Record JSON results and observed usage, honor cancellation and deadlines, and reject stale completions; external effects may repeat after lease loss.",
+    "Interroge la file pour les gestionnaires enregistrés, traite une tâche à la fois et renouvelle son bail pendant l’exécution. Enregistre résultats JSON et usage observé, respecte annulation et échéances et rejette les validations périmées ; des effets externes peuvent se répéter après perte du bail."
+  ],
+  "queuedTask": [
+    "Define a workflow node that enqueues a durable job and polls its completion. Derive the job identity from execution and task identity, decode the JSON result and account for returned usage. A registered worker performs the remote handler.",
+    "Définit un nœud qui envoie un travail durable dans la file et interroge sa progression. Déduit son identité de l’exécution et de la tâche, décode le résultat JSON et comptabilise l’usage renvoyé. Un worker enregistré exécute le gestionnaire distant."
+  ],
+  "speculate": [
+    "Run bounded agent candidates on separate branches from one baseline and retain the first candidate accepted by validate after cleanup. Cancel losing candidates and report host changes and cumulative usage. This opt-in prototype neither integrates nor pushes the winner automatically.",
+    "Exécute des candidats agents bornés sur des branches distinctes issues d’une même base et retient le premier accepté par validate après nettoyage. Annule les perdants et rapporte changements hôtes et usage cumulé. Ce prototype opt-in n’intègre ni ne pousse automatiquement le gagnant."
+  ],
+  "docker": [
+    "Create a Docker sandbox provider. Mounted repository mode shares the workspace and Git metadata; opt-in isolated mode transfers a private checkout. Allocation is deferred until a sandbox acquires the provider; its lease owns container disposal.",
+    "Crée un provider de sandbox Docker. Le mode mounted partage workspace et métadonnées Git ; le mode isolated opt-in transfère un checkout privé. L’allocation attend l’acquisition du provider par une sandbox ; le bail possède la fermeture du conteneur."
+  ],
+  "podman": [
+    "Create a Podman sandbox provider using the container execution and streamed-transfer contracts. userns can preserve host UID mapping, and label controls SELinux mount relabeling. The provider is allocated only when acquired by a sandbox.",
+    "Crée un provider Podman avec les contrats d’exécution en conteneur et de transfert par flux. userns peut conserver la correspondance d’UID hôte et label contrôle le réétiquetage SELinux des montages. Le provider n’est alloué que lors de son acquisition par une sandbox."
+  ],
+  "local": [
+    "Create an explicitly unisolated provider that executes commands on the host in the selected workspace. No container or VM is allocated; host filesystem access and credentials remain those of the calling process.",
+    "Crée un provider explicitement sans isolation qui exécute les commandes sur l’hôte dans le workspace choisi. Aucun conteneur ni VM n’est alloué ; l’accès aux fichiers et aux identifiants reste celui du processus appelant."
+  ],
+  "vercel": [
+    "Create a remote Vercel Sandbox provider, loading the optional SDK on acquisition. Repository state is uploaded and synchronized back with host-change protection. A supplied connect function can replace SDK sandbox creation for an integration.",
+    "Crée un provider distant Vercel Sandbox, avec chargement du SDK optionnel à l’acquisition. L’état du dépôt est envoyé puis resynchronisé avec protection des modifications hôtes concurrentes. Une fonction connect fournie peut remplacer la création de sandbox du SDK pour une intégration."
+  ],
+  "daytona": [
+    "Create a remote Daytona provider with separate SDK connection and sandbox creation settings. Repository transfers use the acquired remote environment, and synchronization validates concurrent host edits before applying changes.",
+    "Crée un provider distant Daytona avec réglages distincts de connexion SDK et de création de sandbox. Les transferts utilisent l’environnement distant acquis et la synchronisation valide les modifications hôtes concurrentes avant application."
+  ],
+  "openTelemetry": [
+    "Create an observer backed by the supplied OpenTelemetry tracer and meter. It translates Outpost observations into spans and metrics while isolating telemetry errors through onError; close finishes outstanding spans. Only this entry point imports the optional telemetry API.",
+    "Crée un observateur utilisant le tracer et le meter OpenTelemetry fournis. Traduit les observations Outpost en spans et métriques et isole les erreurs via onError ; close termine les spans ouverts. Seul ce point d’entrée importe l’API de télémétrie optionnelle."
+  ],
+  "firecracker": [
+    "Create an opt-in Firecracker microVM provider from explicit kernel, rootfs, TAP and SSH settings. The host must provide KVM and a prepared guest; allocation does not fall back to host execution. The acquired lease owns VM shutdown.",
+    "Crée un provider microVM Firecracker opt-in à partir de réglages explicites de noyau, rootfs, TAP et SSH. L’hôte doit fournir KVM et un invité préparé ; l’allocation ne se replie pas sur l’exécution hôte. Le bail acquis possède l’arrêt de la VM."
+  ],
+  "WorkflowFailure": [
+    "Error thrown by WorkflowResult.unwrap when the run did not finish successfully. Its result preserves task records, errors and usage for inspection rather than discarding the workflow outcome.",
+    "Erreur levée par WorkflowResult.unwrap quand l’exécution n’a pas réussi. result conserve les états des tâches, erreurs et usage pour permettre leur inspection."
+  ],
+  "WorkflowBudgetExceeded": [
+    "Error identifying the attempt or token dimension whose admission limit was reached. limit and observed report the configured threshold and current accounting; observed model usage is not a billing cap.",
+    "Erreur identifiant la dimension de tentatives ou de tokens dont la limite d’admission a été atteinte. limit et observed exposent seuil et comptabilité courante ; l’usage observé ne constitue pas un plafond de facturation."
+  ],
+  "ResponseError": [
+    "Specialized OutpostError for missing tags, invalid JSON or schema rejection in structured answers. It preserves the expected tag, available raw content and underlying cause, and may carry dispatch recovery metadata.",
+    "OutpostError spécialisée pour balise absente, JSON invalide ou rejet par schéma des réponses structurées. Conserve la balise attendue, le contenu brut disponible et la cause, et peut porter les métadonnées de récupération du dispatch."
+  ],
+  "OutpostError": [
+    "Error with a stable fault code and structured details for execution, configuration and recovery failures. cause preserves the original failure and recovery may identify retained work; branch cleanup must respect those recovery locations.",
+    "Erreur munie d’un code stable et de détails structurés pour les échecs d’exécution, configuration et récupération. cause conserve l’échec initial et recovery peut identifier du travail conservé ; le nettoyage doit respecter ces emplacements."
+  ],
+  "resourcePhases": [
+    "List the lifecycle phases recorded in local sandbox activity files; ResourcePhase derives its allowed values from this constant.",
+    "Liste les phases de cycle de vie enregistrées dans les fichiers locaux d’activité des sandboxes ; ResourcePhase déduit ses valeurs autorisées de cette constante."
+  ],
+  "resourceOperationKinds": [
+    "List operation names accepted by local resource activity recording; ResourceOperationKind derives its allowed values from this constant.",
+    "Liste les noms d’opérations acceptés par l’enregistrement local d’activité ; ResourceOperationKind déduit ses valeurs autorisées de cette constante."
+  ]
+}

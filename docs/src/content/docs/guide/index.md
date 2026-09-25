@@ -14,4 +14,4 @@ Follow this path in order, or open any practical page independently. Its prepara
 7. [Combine the pieces](cookbook/): complete recipes for real work.
 8. [Recover deliberately](operations/troubleshooting/): diagnostics and retained work.
 
-The [Reference](../reference/) contains exhaustive contracts, options and compatibility details. You do not need to read it from beginning to end.
+The [Reference](../reference/diagnosesandbox/) contains exhaustive contracts, options and compatibility details. You do not need to read it from beginning to end.

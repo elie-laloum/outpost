@@ -95,6 +95,6 @@ node example.mts
 
 The script prints `paused`, then `done`. Run `node example.mts reject` to see rejection prevent delivery. The example deliberately supplies a trusted local actor; actor names do not authenticate a person. In an application, authenticate the caller before submitting the decision. A paused result is expected: inspect its status before calling `unwrap()`.
 
-[Contracts, options and edge cases](../../../reference/behavior/workflows/approvals/).
+[Contracts, options and edge cases](../../behavior/workflows/approvals/).
 
 Any persisted example files remain inside this demonstration directory.

@@ -2,10 +2,8 @@
 title: "StorageReservationOptions"
 description: "StorageReservationOptions — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Public contract for **StorageReservationOptions**. See the [storage reservations guide](../../guide/operations/storage-retention/) for behavior, defaults and examples.
 
 ## Import
 
@@ -13,22 +11,14 @@ Public contract for **StorageReservationOptions**. See the [storage reservations
 import type { StorageReservationOptions } from "@elie-laloum/outpost";
 ```
 
-## Purpose and behavior
-
-Coordinate cooperating writers with explicit storage reservations.
-
-Reservations are admission coordination, not physical quotas. Their owner must release them; workspace ownership can bind their lifecycle.
-
-[Complete example and detailed rules](../../guide/operations/storage-retention/).
-
 ## Parameters and properties
 
-| Name           | Type                       | Presence | Meaning                                                                 |
-| -------------- | -------------------------- | -------- | ----------------------------------------------------------------------- |
-| `maxBytes`     | `number`                   | Required | See the linked contract and this family's rules for its interpretation. |
-| `reserveBytes` | `number`                   | Required | See the linked contract and this family's rules for its interpretation. |
-| `maxEntries`   | `number \| undefined`      | Optional | See the linked contract and this family's rules for its interpretation. |
-| `signal`       | `AbortSignal \| undefined` | Optional | Cooperative cancellation for this operation.                            |
+| Name           | Type                       | Presence | Meaning                                                                       |
+| -------------- | -------------------------- | -------- | ----------------------------------------------------------------------------- |
+| `maxBytes`     | `number`                   | Required | Maximum admitted total of observed storage and active reservations, in bytes. |
+| `reserveBytes` | `number`                   | Required | Additional bytes requested for admission alongside existing storage usage.    |
+| `maxEntries`   | `number \| undefined`      | Optional | Maximum filesystem entries inspected before marking the inventory incomplete. |
+| `signal`       | `AbortSignal \| undefined` | Optional | Cooperative cancellation for this operation.                                  |
 
 ## Signature
 

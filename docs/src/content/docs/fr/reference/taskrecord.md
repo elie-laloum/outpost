@@ -2,10 +2,8 @@
 title: "TaskRecord"
 description: "TaskRecord — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Contrat public de **TaskRecord**. Consultez le [guide workflows](../../guide/workflows/graph/) pour le comportement, les valeurs par défaut et des exemples.
 
 ## Import
 
@@ -13,27 +11,19 @@ Contrat public de **TaskRecord**. Consultez le [guide workflows](../../guide/wor
 import type { TaskRecord } from "@elie-laloum/outpost";
 ```
 
-## Rôle et comportement
-
-Composer des tâches avec dépendances explicites et accès typé aux résultats.
-
-Les clés dupliquées, dépendances absentes et cycles échouent à la validation. Une dépendance en échec ou ignorée empêche ses descendants. Les reprises peuvent répéter les effets externes. Unwrap lève une erreur en cas de non-succès.
-
-[Exemple complet et règles détaillées](../../guide/workflows/graph/).
-
 ## Paramètres et propriétés
 
-| Nom             | Type                                  | Présence  | Rôle                                                                             |
-| --------------- | ------------------------------------- | --------- | -------------------------------------------------------------------------------- |
-| `usageReceipts` | `readonly string[] \| undefined`      | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `pause`         | `WorkflowPauseRequest \| undefined`   | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `decision`      | `WorkflowDecisionRecord \| undefined` | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `key`           | `string`                              | Requis    | Clé stable de tâche ou cache dans le contrat concerné.                           |
-| `status`        | `TaskStatus`                          | Requis    | Résultat enregistré du processus ou cycle de vie ; voir son type.                |
-| `attempts`      | `number`                              | Requis    | Nombre de tentatives ou limite d’admission selon le contrat.                     |
-| `startedAt`     | `string \| undefined`                 | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `finishedAt`    | `string \| undefined`                 | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `error`         | `string \| undefined`                 | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
+| Nom             | Type                                  | Présence  | Rôle                                                                                                              |
+| --------------- | ------------------------------------- | --------- | ----------------------------------------------------------------------------------------------------------------- |
+| `usageReceipts` | `readonly string[] \| undefined`      | Optionnel | Identifiants de reçus persistés empêchant de comptabiliser plusieurs fois le même rapport d’usage.                |
+| `pause`         | `WorkflowPauseRequest \| undefined`   | Optionnel | Demande de gate persistée en attente, avec son identifiant unique et ses acteurs autorisés.                       |
+| `decision`      | `WorkflowDecisionRecord \| undefined` | Optionnel | Décision validée enregistrée pour la gate de la tâche.                                                            |
+| `key`           | `string`                              | Requis    | Clé de tâche stable identifiant le nœud dans son graphe de workflow.                                              |
+| `status`        | `TaskStatus`                          | Requis    | État de cycle de vie de tâche, incluant attente, activité, réussite, échec, annulation ou pause/rejet d’une gate. |
+| `attempts`      | `number`                              | Requis    | Nombre de tentatives réellement démarrées pour cette tâche.                                                       |
+| `startedAt`     | `string \| undefined`                 | Optionnel | Horodatage ISO du début d’exécution de cette tâche ou opération.                                                  |
+| `finishedAt`    | `string \| undefined`                 | Optionnel | Horodatage ISO de fin d’exécution de cette tâche ou opération.                                                    |
+| `error`         | `string \| undefined`                 | Optionnel | Message d’échec enregistré pour la tâche lorsqu’il existe.                                                        |
 
 ## Signature
 

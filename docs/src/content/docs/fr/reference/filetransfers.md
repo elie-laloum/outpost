@@ -2,10 +2,8 @@
 title: "FileTransfers"
 description: "FileTransfers — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Contrat public de **FileTransfers**. Consultez le [guide transferts distants](../../guide/operations/remote-transfers/) pour le comportement, les valeurs par défaut et des exemples.
 
 ## Import
 
@@ -13,21 +11,13 @@ Contrat public de **FileTransfers**. Consultez le [guide transferts distants](..
 import type { FileTransfers } from "@elie-laloum/outpost";
 ```
 
-## Rôle et comportement
-
-Transférer fichiers binaires et manifestes validés en préservant les modifications hôtes concurrentes.
-
-La synchronisation valide et sauvegarde avant application. Les transferts préservent permissions et liens pris en charge et rejettent les traversées dangereuses. Les données de récupération survivent à un nettoyage risqué.
-
-[Exemple complet et règles détaillées](../../guide/operations/remote-transfers/).
-
 ## Paramètres et propriétés
 
-| Nom             | Type                                                                                                                                      | Présence  | Rôle                                                                             |
-| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | --------- | -------------------------------------------------------------------------------- |
-| `uploadBatch`   | `((source: string, entries: readonly FileManifestEntry[], destination: string, options?: TransferOptions) => Promise<void>) \| undefined` | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `manifest`      | `(source: string, paths: readonly string[], options?: TransferOptions) => Promise<readonly FileManifestEntry[]>`                          | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `downloadBatch` | `(source: string, entries: readonly FileManifestEntry[], destination: string, options?: TransferOptions) => Promise<void>`                | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
+| Nom             | Type                                                                                                                                      | Présence  | Rôle                                                                                                         |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------ |
+| `uploadBatch`   | `((source: string, entries: readonly FileManifestEntry[], destination: string, options?: TransferOptions) => Promise<void>) \| undefined` | Optionnel | Envoie en lot les entrées du manifeste de fichiers déclaré si cette capacité est prise en charge.            |
+| `manifest`      | `(source: string, paths: readonly string[], options?: TransferOptions) => Promise<readonly FileManifestEntry[]>`                          | Requis    | Inspecte les chemins demandés en sandbox et renvoie nature, permissions, taille et SHA-256 de chaque entrée. |
+| `downloadBatch` | `(source: string, entries: readonly FileManifestEntry[], destination: string, options?: TransferOptions) => Promise<void>`                | Requis    | Télécharge les entrées déclarées du manifeste dans un lot de transfert borné.                                |
 
 ## Signature
 

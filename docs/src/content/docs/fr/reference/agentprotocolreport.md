@@ -2,10 +2,8 @@
 title: "AgentProtocolReport"
 description: "AgentProtocolReport — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Contrat public de **AgentProtocolReport**. Consultez le [guide diagnostics](../../guide/operations/doctor/) pour le comportement, les valeurs par défaut et des exemples.
 
 ## Import
 
@@ -13,25 +11,17 @@ Contrat public de **AgentProtocolReport**. Consultez le [guide diagnostics](../.
 import type { AgentProtocolReport } from "@elie-laloum/outpost";
 ```
 
-## Rôle et comportement
-
-Inspecter les prérequis hôtes, une sandbox possédée ou les fixtures de protocole. Les diagnostics sont des observations ; ils ne prouvent pas l’accès au compte ou au modèle.
-
-Les contrôles distinguent capacités absentes, en échec et non prises en charge. Le diagnostic de sandbox utilise son verrou d’opération et ne devient pas propriétaire de sa fermeture.
-
-[Exemple complet et règles détaillées](../../guide/operations/doctor/).
-
 ## Paramètres et propriétés
 
-| Nom                  | Type                          | Présence | Rôle                                                                             |
-| -------------------- | ----------------------------- | -------- | -------------------------------------------------------------------------------- |
-| `scope`              | `"bundled-protocol-fixtures"` | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `agent`              | `DoctorAgent`                 | Requis   | Adapter natif de l’agent de code.                                                |
-| `referenceVersion`   | `string`                      | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `installedCli`       | `"unverified"`                | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `modelCompatibility` | `"unverified"`                | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `checks`             | `readonly DiagnosticCheck[]`  | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `hasFailures`        | `boolean`                     | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
+| Nom                  | Type                          | Présence | Rôle                                                                                             |
+| -------------------- | ----------------------------- | -------- | ------------------------------------------------------------------------------------------------ |
+| `scope`              | `"bundled-protocol-fixtures"` | Requis   | Toujours bundled-protocol-fixtures : les contrôles rejouent les fixtures enregistrées d’adapter. |
+| `agent`              | `DoctorAgent`                 | Requis   | Identifiant du CLI d’agent à rapporter ou diagnostiquer : claude, codex ou gemini.               |
+| `referenceVersion`   | `string`                      | Requis   | Version du CLI ayant servi à enregistrer les fixtures de protocole intégrées.                    |
+| `installedCli`       | `"unverified"`                | Requis   | Toujours unverified : les contrôles de fixtures intégrées n’invoquent pas le CLI installé.       |
+| `modelCompatibility` | `"unverified"`                | Requis   | Toujours unverified : ces diagnostics n’appellent pas de modèle réel.                            |
+| `checks`             | `readonly DiagnosticCheck[]`  | Requis   | Contrôles individuels avec statut, message et informations de version disponibles.               |
+| `hasFailures`        | `boolean`                     | Requis   | Indique si au moins un contrôle de diagnostic a échoué.                                          |
 
 ## Signature
 

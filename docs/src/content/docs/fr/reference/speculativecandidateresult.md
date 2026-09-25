@@ -2,10 +2,8 @@
 title: "SpeculativeCandidateResult"
 description: "SpeculativeCandidateResult — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Contrat public de **SpeculativeCandidateResult**. Consultez le [guide exécution spéculative](../../guide/advanced/speculation/) pour le comportement, les valeurs par défaut et des exemples.
 
 ## Import
 
@@ -13,25 +11,17 @@ Contrat public de **SpeculativeCandidateResult**. Consultez le [guide exécution
 import type { SpeculativeCandidateResult } from "@elie-laloum/outpost";
 ```
 
-## Rôle et comportement
-
-Mettre en concurrence des branches candidates bornées et retenir la première validée après nettoyage.
-
-Prototype de recherche : au plus huit candidats, concurrence de deux par défaut. Aucune intégration, aucun push ni reprise durable de la course automatiques. L’usage observé ne plafonne pas la facturation.
-
-[Exemple complet et règles détaillées](../../guide/advanced/speculation/).
-
 ## Paramètres et propriétés
 
-| Nom                 | Type                                                             | Présence  | Rôle                                                                             |
-| ------------------- | ---------------------------------------------------------------- | --------- | -------------------------------------------------------------------------------- |
-| `key`               | `string`                                                         | Requis    | Clé stable de tâche ou cache dans le contrat concerné.                           |
-| `branch`            | `string`                                                         | Requis    | Politique de workspace Git ou identité de branche résultante selon ce contrat.   |
-| `status`            | `"skipped" \| "failed" \| "cancelled" \| "rejected" \| "winner"` | Requis    | Résultat enregistré du processus ou cycle de vie ; voir son type.                |
-| `directory`         | `string \| undefined`                                            | Optionnel | Dossier utilisé par l’opération ; voir les règles de résolution.                 |
-| `retainedDirectory` | `string \| undefined`                                            | Optionnel | Workspace conservé pour inspection ou récupération.                              |
-| `result`            | `SpeculativeOutput<T> \| undefined`                              | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `error`             | `unknown`                                                        | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
+| Nom                 | Type                                                             | Présence  | Rôle                                                                                                      |
+| ------------------- | ---------------------------------------------------------------- | --------- | --------------------------------------------------------------------------------------------------------- |
+| `key`               | `string`                                                         | Requis    | Clé unique du candidat reliant sa branche, sa validation et son résultat final.                           |
+| `branch`            | `string`                                                         | Requis    | Nom de la branche de travail utilisée ou observée pendant l’exécution.                                    |
+| `status`            | `"skipped" \| "failed" \| "cancelled" \| "rejected" \| "winner"` | Requis    | Résultat du candidat : winner, rejected, failed, cancelled ou skipped.                                    |
+| `directory`         | `string \| undefined`                                            | Optionnel | Dossier hôte du workspace utilisé pour cette exécution.                                                   |
+| `retainedDirectory` | `string \| undefined`                                            | Optionnel | Workspace conservé pour inspection ou récupération.                                                       |
+| `result`            | `SpeculativeOutput<T> \| undefined`                              | Optionnel | Sortie de dispatch du candidat avec texte, commits, usage et valeur typée, sans méthodes de continuation. |
+| `error`             | `unknown`                                                        | Optionnel | Échec d’origine rencontré pendant l’exécution, la validation d’un candidat ou le nettoyage de la course.  |
 
 ## Signature
 

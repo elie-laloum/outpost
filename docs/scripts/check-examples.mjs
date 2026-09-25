@@ -42,9 +42,7 @@ for (const name of await readdir(contentRoot, { recursive: true })) {
   const source = await readFile(resolve(contentRoot, name), "utf8");
   if (
     source.includes("<!-- scenario:") ||
-    /^(fr\/)?reference\/(?!behavior\/|manual\/)/.test(
-      name.replaceAll("\\", "/"),
-    )
+    /^(fr\/)?reference\//.test(name.replaceAll("\\", "/"))
   )
     continue;
   let index = 0;

@@ -101,6 +101,6 @@ node example.mts
 
 Consultez les sorties et les effets décrits avant le code.
 
-[Contrats, options et cas particuliers](../../../reference/behavior/operations/telemetry/).
+[Contrats, options et cas particuliers](../../behavior/operations/telemetry/).
 
 Les fichiers persistants éventuels restent dans ce dossier de démonstration.

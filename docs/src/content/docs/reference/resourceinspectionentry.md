@@ -2,10 +2,8 @@
 title: "ResourceInspectionEntry"
 description: "ResourceInspectionEntry — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Public contract for **ResourceInspectionEntry**. See the [resource activity guide](../../guide/operations/recovery/) for behavior, defaults and examples.
 
 ## Import
 
@@ -13,21 +11,13 @@ Public contract for **ResourceInspectionEntry**. See the [resource activity guid
 import type { ResourceInspectionEntry } from "@elie-laloum/outpost";
 ```
 
-## Purpose and behavior
-
-Read locally recorded lease and operation activity.
-
-Local observations do not enumerate remote accounts and are not an authoritative cloud inventory.
-
-[Complete example and detailed rules](../../guide/operations/recovery/).
-
 ## Parameters and properties
 
-| Name        | Type                                  | Presence | Meaning                                                                 |
-| ----------- | ------------------------------------- | -------- | ----------------------------------------------------------------------- |
-| `path`      | `string`                              | Required | See the linked contract and this family's rules for its interpretation. |
-| `record`    | `ResourceActivityRecord \| undefined` | Optional | See the linked contract and this family's rules for its interpretation. |
-| `ownership` | `LockOwnership`                       | Required | See the linked contract and this family's rules for its interpretation. |
+| Name        | Type                                  | Presence | Meaning                                                                   |
+| ----------- | ------------------------------------- | -------- | ------------------------------------------------------------------------- |
+| `path`      | `string`                              | Required | Host path of the locally recorded sandbox activity file.                  |
+| `record`    | `ResourceActivityRecord \| undefined` | Optional | Parsed local sandbox activity record, when readable and valid.            |
+| `ownership` | `LockOwnership`                       | Required | Assessment of whether the recorded local process still owns the resource. |
 
 ## Signature
 

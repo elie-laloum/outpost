@@ -264,6 +264,6 @@ node example.mts
 
 Votre programme reçoit une chaîne dont la structure a été vérifiée. Une réponse mal formée peut déclencher une tentative de réparation ; un nouvel échec rejette le dispatch. Vérifiez le constat : un schéma valide ne garantit pas son exactitude. « Ne pas modifier » est une instruction de prompt, pas une permission de système de fichiers.
 
-[Contrats, options et cas particuliers](../../../reference/behavior/cookbooks/typed-report/).
+[Contrats, options et cas particuliers](../../behavior/cookbooks/typed-report/).
 
 Pour recommencer, utilisez un nouveau dossier de démonstration. Les branches nommées conservent les commits ; les worktrees sales restent disponibles pour récupération. Les scripts ne poussent aucun commit.

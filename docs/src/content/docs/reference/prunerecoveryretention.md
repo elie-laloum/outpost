@@ -2,10 +2,8 @@
 title: "pruneRecoveryRetention"
 description: "pruneRecoveryRetention — Outpost API"
 sidebar:
-  order: 10
+  order: 0
 ---
-
-Public contract for **pruneRecoveryRetention**. See the [recovery and retention guide](../../guide/operations/recovery/) for behavior, defaults and examples.
 
 ## Import
 
@@ -15,17 +13,15 @@ import { pruneRecoveryRetention } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Inspect retained work and plan explicit storage retention without discarding recoverable edits.
-
-Planning does not prune. Application reacquires ownership and revalidates candidates. Quota checks observe usage rather than imposing physical filesystem limits.
+Apply a previously reviewed retention plan. Reacquire ownership and revalidate each candidate before removal; report removed paths, retained entries and a fresh plan after pruning.
 
 [Complete example and detailed rules](../../guide/operations/recovery/).
 
 ## Parameters and properties
 
-| Name   | Type                    | Presence | Meaning                                                                 |
-| ------ | ----------------------- | -------- | ----------------------------------------------------------------------- |
-| `plan` | `RecoveryRetentionPlan` | Required | See the linked contract and this family's rules for its interpretation. |
+| Name   | Type                    | Presence | Meaning                                                                                        |
+| ------ | ----------------------- | -------- | ---------------------------------------------------------------------------------------------- |
+| `plan` | `RecoveryRetentionPlan` | Required | Previously computed retention plan whose eligible entries must be revalidated before deletion. |
 
 ## Returns
 

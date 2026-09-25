@@ -5,8 +5,6 @@ sidebar:
   order: 10
 ---
 
-Contrat public de **artifact**. Consultez le [guide artefacts typés](../../guide/advanced/artifacts/) pour le comportement, les valeurs par défaut et des exemples.
-
 ## Import
 
 ```ts
@@ -15,11 +13,16 @@ import { artifact } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Publier des données immuables et échanger des références avec validation du contrat, de l’empreinte et de la filiation.
-
-Les données du store fichier sont limitées à 16 Mio par défaut. L’appelant possède la rétention. L’empreinte fournit l’intégrité par rapport à une référence fiable, pas l’authentification du producteur ni une transaction commune.
+Crée des contrats de données nommés et versionnés avec json ou binary. Les contrats JSON valident encodage et décodage et exigent du JSON sans perte ; les contrats binaires copient les octets Uint8Array. Créer un contrat ne publie pas d’artefact.
 
 [Exemple complet et règles détaillées](../../guide/advanced/artifacts/).
+
+## Paramètres et propriétés
+
+| Nom      | Type                                                                 | Présence | Rôle                                                                                            |
+| -------- | -------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------- |
+| `json`   | `<T>(options: JsonArtifactOptions<T>) => ArtifactContract<T>`        | Requis   | Crée un contrat d’artefact JSON nommé qui valide les valeurs lors de l’encodage et du décodage. |
+| `binary` | `(options: ArtifactContractOptions) => ArtifactContract<Uint8Array>` | Requis   | Crée un contrat d’artefact binaire nommé qui copie les données Uint8Array.                      |
 
 ## Signature
 

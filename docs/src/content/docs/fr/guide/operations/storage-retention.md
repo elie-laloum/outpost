@@ -121,6 +121,6 @@ node example.mts
 
 Ce script ne supprime rien. Il nécessite Git mais pas de conteneur actif ; utilisez `--no-build` dans la préparation pour cette seule page. La réservation est libérée à la sortie de portée. Les données protégées peuvent maintenir l’usage au-dessus d’un objectif. Les réservations coordonnent les écrivains coopératifs sans quota disque physique. Appliquer un plan relu est une opération explicite séparée.
 
-[Contrats, options et cas particuliers](../../../reference/behavior/operations/storage-retention/).
+[Contrats, options et cas particuliers](../../behavior/operations/storage-retention/).
 
 Pour recommencer, utilisez un nouveau dossier de démonstration. Les branches nommées conservent les commits ; les worktrees sales restent disponibles pour récupération. Les scripts ne poussent aucun commit.

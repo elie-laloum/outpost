@@ -5,8 +5,6 @@ sidebar:
   order: 10
 ---
 
-Public contract for **agentVersions**. See the [agents guide](../../guide/agents/adapters/) for behavior, defaults and examples.
-
 ## Import
 
 ```ts
@@ -15,11 +13,17 @@ import { agentVersions } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Configure native Claude Code, Codex or Gemini behavior independently of the sandbox backend.
-
-The installed CLI chooses its model when omitted. Native conversation capture defaults on for Claude/Codex. Gemini supports fresh sessions only. Account and provider credentials are separate.
+Expose the Claude, Codex and Gemini CLI versions used as compatibility references by bundled protocol fixtures and generated images. These values do not query the installed binaries or prove live account access.
 
 [Complete example and detailed rules](../../guide/agents/adapters/).
+
+## Parameters and properties
+
+| Name     | Type        | Presence | Meaning                                                         |
+| -------- | ----------- | -------- | --------------------------------------------------------------- |
+| `gemini` | `"0.61.0"`  | Required | Gemini CLI version used by the bundled compatibility fixtures.  |
+| `codex`  | `"0.156.1"` | Required | Codex CLI version used by the bundled compatibility fixtures.   |
+| `claude` | `"2.1.280"` | Required | Claude Code version used by the bundled compatibility fixtures. |
 
 ## Signature
 

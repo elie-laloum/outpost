@@ -2,24 +2,21 @@
 title: "WorkspaceGitState"
 description: "WorkspaceGitState — Outpost API"
 sidebar:
-  order: 20
+  order: 10
 ---
-
-Supporting contract used by a public signature. It is not directly exported from the package; use TypeScript inference or the public type that references it.
-
-## Purpose and behavior
-
-Inspect retained work and plan explicit storage retention without discarding recoverable edits.
-
-Planning does not prune. Application reacquires ownership and revalidates candidates. Quota checks observe usage rather than imposing physical filesystem limits.
-
-[Complete example and detailed rules](../../guide/operations/recovery/).
 
 ## Parameters and properties
 
-| Name    | Type                                                           | Presence | Meaning                                                                 |
-| ------- | -------------------------------------------------------------- | -------- | ----------------------------------------------------------------------- |
-| `state` | `"skipped" \| "registered" \| "unregistered" \| "unavailable"` | Required | See the linked contract and this family's rules for its interpretation. |
+The fields below cover all variants; the signature specifies their allowed combinations.
+
+| Name     | Type                                                           | Presence          | Meaning                                                                            |
+| -------- | -------------------------------------------------------------- | ----------------- | ---------------------------------------------------------------------------------- |
+| `state`  | `"registered" \| "unregistered" \| "skipped" \| "unavailable"` | Required          | Classification of the worktree’s Git state used to decide whether cleanup is safe. |
+| `head`   | `string`                                                       | Variant-dependent | Git HEAD commit recorded by the inspection or snapshot.                            |
+| `branch` | `string \| null`                                               | Variant-dependent | Worktree branch name, or null when HEAD is detached.                               |
+| `dirty`  | `boolean`                                                      | Variant-dependent | Whether tracked or untracked changes make the checkout dirty.                      |
+| `locked` | `boolean`                                                      | Variant-dependent | Whether Git marks the worktree as locked.                                          |
+| `reason` | `string`                                                       | Variant-dependent | Reason Git state could not be inspected or was deliberately skipped.               |
 
 ## Signature
 

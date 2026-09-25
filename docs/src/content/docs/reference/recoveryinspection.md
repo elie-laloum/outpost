@@ -2,10 +2,8 @@
 title: "RecoveryInspection"
 description: "RecoveryInspection — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Public contract for **RecoveryInspection**. See the [resource activity guide](../../guide/operations/recovery/) for behavior, defaults and examples.
 
 ## Import
 
@@ -13,30 +11,22 @@ Public contract for **RecoveryInspection**. See the [resource activity guide](..
 import type { RecoveryInspection } from "@elie-laloum/outpost";
 ```
 
-## Purpose and behavior
-
-Read locally recorded lease and operation activity.
-
-Local observations do not enumerate remote accounts and are not an authoritative cloud inventory.
-
-[Complete example and detailed rules](../../guide/operations/recovery/).
-
 ## Parameters and properties
 
-| Name             | Type                                  | Presence | Meaning                                                                 |
-| ---------------- | ------------------------------------- | -------- | ----------------------------------------------------------------------- |
-| `repository`     | `string`                              | Required | Target host Git checkout.                                               |
-| `activity`       | `"unverified"`                        | Required | See the linked contract and this family's rules for its interpretation. |
-| `git`            | `WorkspaceGitInspection \| undefined` | Optional | See the linked contract and this family's rules for its interpretation. |
-| `locks`          | `LockInspection \| undefined`         | Optional | See the linked contract and this family's rules for its interpretation. |
-| `resources`      | `ResourceInspection \| undefined`     | Optional | See the linked contract and this family's rules for its interpretation. |
-| `root`           | `string`                              | Required | See the linked contract and this family's rules for its interpretation. |
-| `categories`     | `readonly StorageCategory[]`          | Required | See the linked contract and this family's rules for its interpretation. |
-| `usage`          | `Readonly<StorageUsage>`              | Required | Reported usage counters; not a currency estimate.                       |
-| `issues`         | `readonly StorageIssue[]`             | Required | See the linked contract and this family's rules for its interpretation. |
-| `complete`       | `boolean`                             | Required | See the linked contract and this family's rules for its interpretation. |
-| `scannedEntries` | `number`                              | Required | See the linked contract and this family's rules for its interpretation. |
-| `maxEntries`     | `number`                              | Required | See the linked contract and this family's rules for its interpretation. |
+| Name             | Type                                  | Presence | Meaning                                                                                              |
+| ---------------- | ------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------- |
+| `repository`     | `string`                              | Required | Target host Git checkout.                                                                            |
+| `activity`       | `"unverified"`                        | Required | Always unverified: filesystem inventory alone cannot prove that retained resources are inactive.     |
+| `git`            | `WorkspaceGitInspection \| undefined` | Optional | Git worktree state report, present when Git inspection was requested.                                |
+| `locks`          | `LockInspection \| undefined`         | Optional | Local lock ownership report, present when lock inspection was requested.                             |
+| `resources`      | `ResourceInspection \| undefined`     | Optional | Local sandbox activity report, present when resource inspection was requested.                       |
+| `root`           | `string`                              | Required | Repository-local .outpost directory whose storage was inspected.                                     |
+| `categories`     | `readonly StorageCategory[]`          | Required | Storage grouped into recovery, logs, locks and workspaces.                                           |
+| `usage`          | `Readonly<StorageUsage>`              | Required | Observed storage bytes and counts of files, directories, symbolic links and other entries.           |
+| `issues`         | `readonly StorageIssue[]`             | Required | Filesystem, Git or ownership problems that prevented complete inspection.                            |
+| `complete`       | `boolean`                             | Required | Whether all requested inspection work completed without hitting scan limits or inaccessible entries. |
+| `scannedEntries` | `number`                              | Required | Number of filesystem entries visited within the inspection bound.                                    |
+| `maxEntries`     | `number`                              | Required | Maximum filesystem entries inspected before marking the inventory incomplete.                        |
 
 ## Signature
 

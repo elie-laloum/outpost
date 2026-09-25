@@ -2,10 +2,8 @@
 title: "artifactTask"
 description: "artifactTask — Outpost API"
 sidebar:
-  order: 10
+  order: 0
 ---
-
-Public contract for **artifactTask**. See the [typed artifacts guide](../../guide/advanced/artifacts/) for behavior, defaults and examples.
 
 ## Import
 
@@ -15,27 +13,25 @@ import { artifactTask } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Publish immutable payloads and exchange small references with contract, digest and lineage validation.
-
-Filesystem payloads default to 16 MiB maximum. Callers own retention. Digests provide integrity against a trusted reference, not producer authentication or a shared transaction.
+Define a workflow task that produces a value and publishes it as an artifact. Derive producer identity from the workflow execution, task key and attempt, and record the declared parent references. Dependents receive an ArtifactReference rather than the full payload.
 
 [Complete example and detailed rules](../../guide/advanced/artifacts/).
 
 ## Parameters and properties
 
-| Name                | Type                                                                    | Presence | Meaning                                                                                  |
-| ------------------- | ----------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------- |
-| `options`           | `ArtifactTaskOptions<T>`                                                | Required | Configuration object. Its fields are described in the associated options contract below. |
-| `options.after`     | `readonly Task<unknown>[] \| undefined`                                 | Optional | Declared task dependencies whose values may be read.                                     |
-| `options.key`       | `string`                                                                | Required | Stable task or cache key within its owning contract.                                     |
-| `options.gate`      | `WorkflowGate \| undefined`                                             | Optional | See the linked contract and this family's rules for its interpretation.                  |
-| `options.condition` | `((context: TaskContext) => boolean \| Promise<boolean>) \| undefined`  | Optional | Predicate evaluated before the first task attempt.                                       |
-| `options.retry`     | `Retry \| undefined`                                                    | Optional | Explicit retry policy; repeated effects require care.                                    |
-| `options.timeoutMs` | `number \| undefined`                                                   | Optional | Time limit in milliseconds for the owning operation.                                     |
-| `options.store`     | `ArtifactStore`                                                         | Required | Caller-supplied persistence implementation.                                              |
-| `options.contract`  | `ArtifactContract<T>`                                                   | Required | See the linked contract and this family's rules for its interpretation.                  |
-| `options.produce`   | `(context: TaskContext) => T \| Promise<T>`                             | Required | See the linked contract and this family's rules for its interpretation.                  |
-| `options.parents`   | `((context: TaskContext) => readonly ArtifactReference[]) \| undefined` | Optional | Ordered artifact parent references or identifiers.                                       |
+| Name                | Type                                                                    | Presence | Meaning                                                                                                  |
+| ------------------- | ----------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------- |
+| `options`           | `ArtifactTaskOptions<T>`                                                | Required | Task scheduling, artifact contract/store, value producer and parent-reference factory.                   |
+| `options.after`     | `readonly Task<unknown>[] \| undefined`                                 | Optional | Declared task dependencies whose values may be read.                                                     |
+| `options.key`       | `string`                                                                | Required | Stable task key identifying the node within its workflow graph.                                          |
+| `options.gate`      | `WorkflowGate \| undefined`                                             | Optional | Persisted approval or pause definition; execution requires a checkpoint and a matching trusted decision. |
+| `options.condition` | `((context: TaskContext) => boolean \| Promise<boolean>) \| undefined`  | Optional | Predicate evaluated before the first task attempt.                                                       |
+| `options.retry`     | `Retry \| undefined`                                                    | Optional | Explicit retry policy; repeated effects require care.                                                    |
+| `options.timeoutMs` | `number \| undefined`                                                   | Optional | Time limit in milliseconds for each task attempt; cancellation is cooperative through context.signal.    |
+| `options.store`     | `ArtifactStore`                                                         | Required | Artifact byte store used for immutable publication or bounded payload retrieval.                         |
+| `options.contract`  | `ArtifactContract<T>`                                                   | Required | Named, versioned artifact contract that defines encoding and validation.                                 |
+| `options.produce`   | `(context: TaskContext) => T \| Promise<T>`                             | Required | Compute the typed artifact value from the task context and declared dependencies.                        |
+| `options.parents`   | `((context: TaskContext) => readonly ArtifactReference[]) \| undefined` | Optional | Read parent artifact references from task dependencies to record publication lineage.                    |
 
 ## Returns
 
@@ -53,4 +49,4 @@ export declare function artifactTask<T>(
 
 - [ArtifactReference](../artifactreference/)
 - [ArtifactTaskOptions](../artifacttaskoptions/)
-- [Task](../task/)
+- [Task](../type-task/)

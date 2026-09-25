@@ -14,4 +14,4 @@ Suivez ce parcours dans l’ordre ou ouvrez directement une page pratique. Sa pr
 7. [Combiner les éléments](cookbook/) : recettes complètes pour des usages concrets.
 8. [Récupérer délibérément](operations/troubleshooting/) : diagnostics et travail conservé.
 
-La [Référence](../reference/) contient les contrats exhaustifs, options et compatibilités. Elle se consulte à la demande.
+La [Référence](../reference/diagnosesandbox/) contient les contrats exhaustifs, options et compatibilités. Elle se consulte à la demande.

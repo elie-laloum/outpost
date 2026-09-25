@@ -75,6 +75,6 @@ node example.mts
 
 The output contains `hello-world` and `replayed: 0`. Run the same file again to reopen its saved result in another process. Keep graph identity and `version` stable; use a new run ID for an independent execution. Outputs must be lossless JSON. Interrupted work requires explicit replay authorization and may already have performed external effects.
 
-[Contracts, options and edge cases](../../../reference/behavior/workflows/checkpoints/).
+[Contracts, options and edge cases](../../behavior/workflows/checkpoints/).
 
 Any persisted example files remain inside this demonstration directory.

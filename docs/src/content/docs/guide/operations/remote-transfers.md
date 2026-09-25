@@ -114,6 +114,6 @@ node example.mts
 
 This local container exercise checks real transfer through the execution environment, not only an upload/download round trip. Cloud Git synchronization additionally downloads, validates and backs up incoming changes before applying them on the host. A concurrent host edit stops synchronization and preserves recovery material. Copying a transcript, moving payload bytes and integrating Git history are separate operations.
 
-[Contracts, options and edge cases](../../../reference/behavior/operations/remote-transfers/).
+[Contracts, options and edge cases](../../behavior/operations/remote-transfers/).
 
 To start again, use a new demonstration directory. Named branches retain commits; dirty worktrees remain available for recovery. Scripts do not push commits.

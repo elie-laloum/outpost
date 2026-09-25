@@ -2,10 +2,8 @@
 title: "RecoveryRestorePlan"
 description: "RecoveryRestorePlan — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Contrat public de **RecoveryRestorePlan**. Consultez le [guide restauration de récupération](../../guide/operations/recovery-restoration/) pour le comportement, les valeurs par défaut et des exemples.
 
 ## Import
 
@@ -13,28 +11,20 @@ Contrat public de **RecoveryRestorePlan**. Consultez le [guide restauration de r
 import type { RecoveryRestorePlan } from "@elie-laloum/outpost";
 ```
 
-## Rôle et comportement
-
-Planifier puis appliquer un transfert conservé vers une nouvelle destination à relire.
-
-Restaurez dans un nouveau dossier et examinez avant intégration. La vérification contrôle structure et intégrité enregistrées ; elle n’authentifie pas l’auteur.
-
-[Exemple complet et règles détaillées](../../guide/operations/recovery-restoration/).
-
 ## Paramètres et propriétés
 
-| Nom              | Type                           | Présence  | Rôle                                                                             |
-| ---------------- | ------------------------------ | --------- | -------------------------------------------------------------------------------- |
-| `fingerprint`    | `string`                       | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `manifestSha256` | `string`                       | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `commit`         | `string`                       | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `payloads`       | `readonly string[]`            | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `staging`        | `"unavailable" \| "preserved"` | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `directory`      | `string`                       | Requis    | Dossier utilisé par l’opération ; voir les règles de résolution.                 |
-| `repository`     | `string`                       | Requis    | Checkout Git hôte ciblé.                                                         |
-| `destination`    | `string`                       | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `side`           | `"previous" \| "incoming"`     | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `maxBytes`       | `number \| undefined`          | Optionnel | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
+| Nom              | Type                           | Présence  | Rôle                                                                                                                     |
+| ---------------- | ------------------------------ | --------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `fingerprint`    | `string`                       | Requis    | Empreinte liant le plan à la source conservée inspectée pour revalidation avant restauration.                            |
+| `manifestSha256` | `string`                       | Requis    | SHA-256 du manifeste de transfert conservé, capturé lors de la planification de restauration.                            |
+| `commit`         | `string`                       | Requis    | Commit Git utilisé pour reconstruire l’état conservé choisi.                                                             |
+| `payloads`       | `readonly string[]`            | Requis    | Chemins des bundles et patches conservés nécessaires pour restaurer le côté choisi.                                      |
+| `staging`        | `"unavailable" \| "preserved"` | Requis    | Indique si l’index Git d’origine est préservé ; l’état distant entrant ne fournit pas d’information d’index récupérable. |
+| `directory`      | `string`                       | Requis    | Dossier hôte contenant les artefacts de transfert conservés à vérifier ou restaurer.                                     |
+| `repository`     | `string`                       | Requis    | Checkout Git hôte ciblé.                                                                                                 |
+| `destination`    | `string`                       | Requis    | Nouveau dossier de destination absent, hors du dépôt source, de ses métadonnées Git et du transfert conservé.            |
+| `side`           | `"previous" \| "incoming"`     | Requis    | État conservé à restaurer : previous pour l’état hôte antérieur ou incoming pour l’état distant entrant.                 |
+| `maxBytes`       | `number \| undefined`          | Optionnel | Nombre maximal d’octets de données conservées autorisé pour copier et vérifier les sources de restauration.              |
 
 ## Signature
 

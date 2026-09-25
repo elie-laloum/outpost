@@ -60,6 +60,6 @@ node example.mts
 
 Le script construit le store et affiche son nom sans lire d’identifiants ni transcripts. Affectez-le à AgentAdapter.storage dans votre intégration. Capture et restauration réelles nécessitent le contexte natif et le bail. Réécrivez uniquement les métadonnées structurelles du dossier de travail, préservez l’identité en reprise et signalez clairement l’absence du transcript principal.
 
-[Contrats, options et cas particuliers](../../../reference/behavior/extend/conversations/).
+[Contrats, options et cas particuliers](../../behavior/extend/conversations/).
 
 Les fichiers persistants éventuels restent dans ce dossier de démonstration.

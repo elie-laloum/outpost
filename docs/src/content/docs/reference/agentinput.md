@@ -2,10 +2,8 @@
 title: "AgentInput"
 description: "AgentInput — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Public contract for **AgentInput**. See the [agents guide](../../guide/agents/adapters/) for behavior, defaults and examples.
 
 ## Import
 
@@ -13,21 +11,13 @@ Public contract for **AgentInput**. See the [agents guide](../../guide/agents/ad
 import type { AgentInput } from "@elie-laloum/outpost";
 ```
 
-## Purpose and behavior
-
-Configure native Claude Code, Codex or Gemini behavior independently of the sandbox backend.
-
-The installed CLI chooses its model when omitted. Native conversation capture defaults on for Claude/Codex. Gemini supports fresh sessions only. Account and provider credentials are separate.
-
-[Complete example and detailed rules](../../guide/agents/adapters/).
-
 ## Parameters and properties
 
-| Name           | Type                                                             | Presence | Meaning                                                                 |
-| -------------- | ---------------------------------------------------------------- | -------- | ----------------------------------------------------------------------- |
-| `text`         | `string \| undefined`                                            | Optional | Text content; see the owning operation for its source.                  |
-| `interactive`  | `boolean \| undefined`                                           | Optional | See the linked contract and this family's rules for its interpretation. |
-| `continuation` | `{ readonly id: string; readonly fork?: boolean; } \| undefined` | Optional | See the linked contract and this family's rules for its interpretation. |
+| Name           | Type                                                             | Presence | Meaning                                                                                    |
+| -------------- | ---------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------ |
+| `text`         | `string \| undefined`                                            | Optional | Prepared prompt passed to the native agent CLI.                                            |
+| `interactive`  | `boolean \| undefined`                                           | Optional | Request an interactive agent invocation or process terminal.                               |
+| `continuation` | `{ readonly id: string; readonly fork?: boolean; } \| undefined` | Optional | Native conversation ID to continue; fork requests a separate conversation derived from it. |
 
 ## Signature
 

@@ -68,7 +68,7 @@ node example.mts
 
 The result is `{ passed: true }`; the second response is rejected because a string is not a boolean. Pass this same specification as `response` to `dispatch` to obtain `result.value`. The schema validates data, not the truth of an agent’s claim. Use an actual test command to verify code. The typed-report recipe connects this example to a real agent.
 
-[Contracts, options and edge cases](../../../reference/behavior/agents/responses/).
+[Contracts, options and edge cases](../../behavior/agents/responses/).
 
 Any persisted example files remain inside this demonstration directory.
 

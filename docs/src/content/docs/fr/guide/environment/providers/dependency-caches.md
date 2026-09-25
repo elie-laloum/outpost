@@ -125,6 +125,6 @@ node example.mts
 
 L’exemple installe l’ensemble vide de dépendances du projet et vérifie que le cache est utilisable. Les vrais projets réutilisent leurs téléchargements. La clé est explicite ; incluez outils et formats pertinents en l’adaptant. Les volumes survivent à la sandbox et ne sont ni quotas physiques ni frontières d’intégrité. Inspectez `docker volume ls --filter label=io.outpost.cache=true` et supprimez uniquement les volumes inutilisés identifiés.
 
-[Contrats, options et cas particuliers](../../../../reference/behavior/providers/dependency-caches/).
+[Contrats, options et cas particuliers](../../../behavior/providers/dependency-caches/).
 
 Pour recommencer, utilisez un nouveau dossier de démonstration. Les branches nommées conservent les commits ; les worktrees sales restent disponibles pour récupération. Les scripts ne poussent aucun commit.

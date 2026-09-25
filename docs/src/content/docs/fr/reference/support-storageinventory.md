@@ -5,27 +5,17 @@ sidebar:
   order: 20
 ---
 
-Contrat auxiliaire utilisé dans une signature publique. Il n’est pas exporté directement depuis le package ; utilisez l’inférence TypeScript ou le type public qui le référence.
-
-## Rôle et comportement
-
-Inspecter le travail conservé et planifier explicitement sa rétention sans abandonner les modifications récupérables.
-
-Planifier ne supprime rien. L’application reprend possession et revalide les candidats. Les quotas observent l’usage plutôt que d’imposer une limite physique au système de fichiers.
-
-[Exemple complet et règles détaillées](../../guide/operations/recovery/).
-
 ## Paramètres et propriétés
 
-| Nom              | Type                         | Présence | Rôle                                                                             |
-| ---------------- | ---------------------------- | -------- | -------------------------------------------------------------------------------- |
-| `root`           | `string`                     | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `categories`     | `readonly StorageCategory[]` | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `usage`          | `Readonly<StorageUsage>`     | Requis   | Compteurs d’usage rapportés ; aucune estimation monétaire.                       |
-| `issues`         | `readonly StorageIssue[]`    | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `complete`       | `boolean`                    | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `scannedEntries` | `number`                     | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `maxEntries`     | `number`                     | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
+| Nom              | Type                         | Présence | Rôle                                                                                                  |
+| ---------------- | ---------------------------- | -------- | ----------------------------------------------------------------------------------------------------- |
+| `root`           | `string`                     | Requis   | Dossier .outpost local au dépôt dont le stockage a été inspecté.                                      |
+| `categories`     | `readonly StorageCategory[]` | Requis   | Stockage regroupé en récupération, journaux, verrous et workspaces.                                   |
+| `usage`          | `Readonly<StorageUsage>`     | Requis   | Octets de stockage observés et nombres de fichiers, dossiers, liens symboliques et autres entrées.    |
+| `issues`         | `readonly StorageIssue[]`    | Requis   | Problèmes de fichiers, Git ou possession ayant empêché une inspection complète.                       |
+| `complete`       | `boolean`                    | Requis   | Indique si toute l’inspection demandée s’est terminée sans limite de parcours ni entrée inaccessible. |
+| `scannedEntries` | `number`                     | Requis   | Nombre d’entrées de fichiers visitées dans la limite d’inspection.                                    |
+| `maxEntries`     | `number`                     | Requis   | Nombre maximal d’entrées de fichiers inspectées avant de déclarer l’inventaire incomplet.             |
 
 ## Signature
 

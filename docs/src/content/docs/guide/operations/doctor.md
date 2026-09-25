@@ -114,6 +114,6 @@ node example.mts
 
 The report checks the actual running environment, including a binary transfer probe. It does not authenticate an agent or prove model access. Diagnostics temporarily hold the operation gate and clean their probes, but ownership remains with your script. For preflight checks before allocation, run `npx outpost doctor --provider docker --agent codex --image outpost:docs-demo`.
 
-[Contracts, options and edge cases](../../../reference/behavior/operations/doctor/).
+[Contracts, options and edge cases](../../behavior/operations/doctor/).
 
 To start again, use a new demonstration directory. Named branches retain commits; dirty worktrees remain available for recovery. Scripts do not push commits.

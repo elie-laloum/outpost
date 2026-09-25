@@ -244,6 +244,6 @@ node example.mts
 
 La sortie contient les noms, jamais les valeurs secrètes. Ce script pédagogique lit explicitement le `.env` voisin. La bibliothèque lit automatiquement seulement le `.outpost/.env` du dépôt ciblé ; son `.env` racine n’est pas importé. Les variables explicites provider/adapter remplacent celles du dépôt, mais un même nom ne peut être déclaré sur les deux. Une déclaration vide hérite de la variable hôte correspondante.
 
-[Contrats, options et cas particuliers](../../../reference/behavior/agents/environment/).
+[Contrats, options et cas particuliers](../../behavior/agents/environment/).
 
 Pour recommencer, utilisez un nouveau dossier de démonstration. Les branches nommées conservent les commits ; les worktrees sales restent disponibles pour récupération. Les scripts ne poussent aucun commit.

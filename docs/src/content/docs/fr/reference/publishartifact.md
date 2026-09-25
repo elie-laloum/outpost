@@ -2,10 +2,8 @@
 title: "publishArtifact"
 description: "publishArtifact — Outpost API"
 sidebar:
-  order: 10
+  order: 0
 ---
-
-Contrat public de **publishArtifact**. Consultez le [guide artefacts typés](../../guide/advanced/artifacts/) pour le comportement, les valeurs par défaut et des exemples.
 
 ## Import
 
@@ -15,23 +13,21 @@ import { publishArtifact } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Publier des données immuables et échanger des références avec validation du contrat, de l’empreinte et de la filiation.
-
-Les données du store fichier sont limitées à 16 Mio par défaut. L’appelant possède la rétention. L’empreinte fournit l’intégrité par rapport à une référence fiable, pas l’authentification du producteur ni une transaction commune.
+Encode une valeur selon son contrat, calcule son empreinte et son identité immuable, puis publie atomiquement ses octets dans le store. Renvoie une petite référence contenant producteur et filiation parentale ordonnée ; ces métadonnées n’authentifient pas le producteur.
 
 [Exemple complet et règles détaillées](../../guide/advanced/artifacts/).
 
 ## Paramètres et propriétés
 
-| Nom                | Type                                        | Présence  | Rôle                                                                                          |
-| ------------------ | ------------------------------------------- | --------- | --------------------------------------------------------------------------------------------- |
-| `store`            | `ArtifactStore`                             | Requis    | Implémentation de persistance fournie par l’appelant.                                         |
-| `contract`         | `ArtifactContract<T>`                       | Requis    | Consultez le contrat lié et les règles de cette famille pour son interprétation.              |
-| `value`            | `T`                                         | Requis    | Valeur typée produite ou consommée par ce contrat.                                            |
-| `options`          | `PublishArtifactOptions`                    | Requis    | Objet de configuration. Ses champs sont décrits dans le contrat d’options associé ci-dessous. |
-| `options.producer` | `ArtifactProducer`                          | Requis    | Identité enregistrée du producteur, sans authentification.                                    |
-| `options.parents`  | `readonly ArtifactReference[] \| undefined` | Optionnel | Références ou identifiants parents ordonnés.                                                  |
-| `options.signal`   | `AbortSignal \| undefined`                  | Optionnel | Annulation coopérative de cette opération.                                                    |
+| Nom                | Type                                        | Présence  | Rôle                                                                                                         |
+| ------------------ | ------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------ |
+| `store`            | `ArtifactStore`                             | Requis    | Store d’octets d’artefacts utilisé pour la publication immuable ou la lecture bornée des données.            |
+| `contract`         | `ArtifactContract<T>`                       | Requis    | Contrat d’artefact nommé et versionné définissant encodage et validation.                                    |
+| `value`            | `T`                                         | Requis    | Données typées à valider, encoder et publier selon le contrat d’artefact.                                    |
+| `options`          | `PublishArtifactOptions`                    | Requis    | Identité du producteur, filiation parentale ordonnée et annulation de publication.                           |
+| `options.producer` | `ArtifactProducer`                          | Requis    | Identité enregistrée du producteur, sans authentification.                                                   |
+| `options.parents`  | `readonly ArtifactReference[] \| undefined` | Optionnel | Références parentes ordonnées dont les identifiants sont enregistrés dans la filiation de l’artefact publié. |
+| `options.signal`   | `AbortSignal \| undefined`                  | Optionnel | Annulation coopérative de cette opération.                                                                   |
 
 ## Retour
 

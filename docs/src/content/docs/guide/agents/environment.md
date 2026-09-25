@@ -244,6 +244,6 @@ node example.mts
 
 The output contains names, never their secret values. This teaching script explicitly reads `.env` next to itself. Library calls instead automatically read only the target repository’s `.outpost/.env`; its root `.env` is not imported. Explicit provider/adapter variables override repository values, but the same name cannot be declared on both. An empty declaration inherits the matching host variable.
 
-[Contracts, options and edge cases](../../../reference/behavior/agents/environment/).
+[Contracts, options and edge cases](../../behavior/agents/environment/).
 
 To start again, use a new demonstration directory. Named branches retain commits; dirty worktrees remain available for recovery. Scripts do not push commits.

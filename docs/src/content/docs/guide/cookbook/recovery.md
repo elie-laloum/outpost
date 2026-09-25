@@ -130,6 +130,6 @@ node example.mts
 
 The workspace path remains recoverable because it contains dirty work. Inspect `unfinished.txt` and Git status at the printed path before deciding whether to commit or retry. Closing the sandbox is not authorization to discard changes. Recovery metadata identifies preserved resources; it does not automatically restore or integrate them.
 
-[Contracts, options and edge cases](../../../reference/behavior/cookbooks/recovery/).
+[Contracts, options and edge cases](../../behavior/cookbooks/recovery/).
 
 To start again, use a new demonstration directory. Named branches retain commits; dirty worktrees remain available for recovery. Scripts do not push commits.

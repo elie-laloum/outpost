@@ -2,27 +2,23 @@
 title: "locateConversation"
 description: "locateConversation — Outpost API"
 sidebar:
-  order: 20
+  order: 0
 ---
 
-Supporting contract used by a public signature. It is not directly exported from the package; use TypeScript inference or the public type that references it.
+Supporting contract not directly exported; use TypeScript inference or the public type that references it.
 
 ## Purpose and behavior
 
-Locate, capture, restore and relocate native transcripts separately from authentication.
-
-The host conversation home defaults to the OS home. A cold continuation requires a restorable transcript before allocation. A fork does not copy a workspace.
-
-[Complete example and detailed rules](../../guide/agents/conversations/).
+Locate an existing native transcript by format, conversation ID and repository in the selected host home. It returns the transcript identity and path and rejects when no matching transcript is found.
 
 ## Parameters and properties
 
-| Name         | Type                  | Presence | Meaning                                                                 |
-| ------------ | --------------------- | -------- | ----------------------------------------------------------------------- |
-| `format`     | `ConversationFormat`  | Required | See the linked contract and this family's rules for its interpretation. |
-| `id`         | `string`              | Required | See the linked contract and this family's rules for its interpretation. |
-| `repository` | `string`              | Required | Target host Git checkout.                                               |
-| `home`       | `string \| undefined` | Optional | See the linked contract and this family's rules for its interpretation. |
+| Name         | Type                  | Presence | Meaning                                                                |
+| ------------ | --------------------- | -------- | ---------------------------------------------------------------------- |
+| `format`     | `ConversationFormat`  | Required | Native transcript layout: claude or codex.                             |
+| `id`         | `string`              | Required | Native conversation identifier used to locate or continue the session. |
+| `repository` | `string`              | Required | Target host Git checkout.                                              |
+| `home`       | `string \| undefined` | Optional | Host agent home used to locate or persist native transcripts.          |
 
 ## Returns
 

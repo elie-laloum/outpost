@@ -2,10 +2,8 @@
 title: "WorkflowResult"
 description: "WorkflowResult — Outpost API"
 sidebar:
-  order: 10
+  order: 20
 ---
-
-Contrat public de **WorkflowResult**. Consultez le [guide workflows](../../guide/workflows/graph/) pour le comportement, les valeurs par défaut et des exemples.
 
 ## Import
 
@@ -13,27 +11,19 @@ Contrat public de **WorkflowResult**. Consultez le [guide workflows](../../guide
 import type { WorkflowResult } from "@elie-laloum/outpost";
 ```
 
-## Rôle et comportement
-
-Composer des tâches avec dépendances explicites et accès typé aux résultats.
-
-Les clés dupliquées, dépendances absentes et cycles échouent à la validation. Une dépendance en échec ou ignorée empêche ses descendants. Les reprises peuvent répéter les effets externes. Unwrap lève une erreur en cas de non-succès.
-
-[Exemple complet et règles détaillées](../../guide/workflows/graph/).
-
 ## Paramètres et propriétés
 
-| Nom              | Type                                            | Présence | Rôle                                                                             |
-| ---------------- | ----------------------------------------------- | -------- | -------------------------------------------------------------------------------- |
-| `executionId`    | `string`                                        | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `name`           | `string`                                        | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `status`         | `"done" \| "failed" \| "cancelled" \| "paused"` | Requis   | Résultat enregistré du processus ou cycle de vie ; voir son type.                |
-| `tasks`          | `readonly Readonly<TaskRecord>[]`               | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `errors`         | `readonly unknown[]`                            | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `observerErrors` | `readonly unknown[]`                            | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
-| `usage`          | `WorkflowUsage`                                 | Requis   | Compteurs d’usage rapportés ; aucune estimation monétaire.                       |
-| `value`          | `<T>(task: Task<T>) => T`                       | Requis   | Valeur typée produite ou consommée par ce contrat.                               |
-| `unwrap`         | `() => void`                                    | Requis   | Consultez le contrat lié et les règles de cette famille pour son interprétation. |
+| Nom              | Type                                            | Présence | Rôle                                                                                                     |
+| ---------------- | ----------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------- |
+| `executionId`    | `string`                                        | Requis   | Identité de l’exécution de workflow, conservée lors de la reprise d’un checkpoint.                       |
+| `name`           | `string`                                        | Requis   | Nom de la définition de workflow, inclus dans ses rapports d’exécution.                                  |
+| `status`         | `"done" \| "failed" \| "cancelled" \| "paused"` | Requis   | Résultat global de l’exécution : done, failed, cancelled ou paused.                                      |
+| `tasks`          | `readonly Readonly<TaskRecord>[]`               | Requis   | États finaux des tâches avec statuts, nombres de tentatives, erreurs et gates en attente.                |
+| `errors`         | `readonly unknown[]`                            | Requis   | Échecs de tâches et d’ordonnancement collectés pendant l’exécution du workflow.                          |
+| `observerErrors` | `readonly unknown[]`                            | Requis   | Erreurs des callbacks d’observation isolées des résultats des tâches.                                    |
+| `usage`          | `WorkflowUsage`                                 | Requis   | Tentatives admises et usage de tokens observé cumulés, y compris la comptabilité restaurée.              |
+| `value`          | `<T>(task: Task<T>) => T`                       | Requis   | Lit la sortie typée d’une tâche réussie par identité de tâche ; rejette les sorties indisponibles.       |
+| `unwrap`         | `() => void`                                    | Requis   | Revient normalement si l’exécution a réussi ; lève WorkflowFailure pour tout autre résultat de workflow. |
 
 ## Signature
 
@@ -53,6 +43,6 @@ export interface WorkflowResult {
 
 ## Contrats associés
 
-- [Task](../task/)
+- [Task](../type-task/)
 - [TaskRecord](../taskrecord/)
 - [WorkflowUsage](../workflowusage/)
