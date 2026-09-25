@@ -8,6 +8,7 @@
 - Add `CodexModelProvider` with a custom Responses API URL and API-key environment variable; expose `--base-url`, `--api-key-env` and `--model` in initialization. Chat Completions-only endpoints are not supported. Verify the native Codex connection against a local simulated Responses endpoint in container CI.
 - Preserve Vercel allocation variables on every command, with command-level overrides. Regress generated Claude token forwarding and document that switching providers must preserve explicit model variables.
 - Add manually enabled authenticated Claude/Codex cloud campaigns with sanitized reports. Missing credentials remain skipped; adding this fixture does not establish a successful live account campaign. Scheduled runs do not make model calls.
+- Preserve Daytona’s session shell and real exit status for non-interactive commands; accept an already removed PTY during cancellation cleanup. Regress both defects found by live testing. Validate Claude OAuth workflows on Docker, Vercel and Daytona, plus Daytona terminal input, resize, exit, cancellation and reuse. Real Codex API-key validation remains outstanding.
 - Refocus the bilingual roadmap on near-term reliability and medium-term directions with explicit validation criteria.
 
 ## 4.0.0

@@ -9,6 +9,7 @@ Traduction du journal `CHANGELOG.md` conservé à la racine du dépôt. Chaque v
 
 ## 4.1.0
 
+- Préserver le shell de session Daytona et le statut réel des commandes non interactives ; accepter une PTY déjà supprimée pendant le nettoyage après annulation. Ajouter les régressions des deux défauts trouvés en tests réels. Valider les workflows Claude OAuth sur Docker, Vercel et Daytona, ainsi que la saisie, le redimensionnement, la sortie, l’annulation et la réutilisation du terminal Daytona. La validation réelle de Codex par clé API reste à effectuer.
 - Remplacer le parsing global et l’aide manuelle du CLI par les sous-commandes Commander et leurs options propres ; utiliser les sélections Clack pour l’initialisation interactive. Les options d’autres commandes auparavant ignorées sont désormais refusées. Les sorties sans terminal et JSON restent sans décoration.
 - Guider le choix du gestionnaire de paquets et de l’authentification. Vérifier la disponibilité du gestionnaire avant écriture avec `--install`. Construire automatiquement les images Docker/Podman ; `--no-build` permet de générer les fichiers sans build. Les workflows déjà générés restent inchangés.
 - Générer les parcours explicites par clé API, jeton d’abonnement Claude et session de compte Codex. Vérifier les credentials requis avant allocation ; préparer la connexion API Codex par stdin ou copier une source de credentials de compte explicitement sélectionnée dans le home privé du sandbox. Les trousseaux hôtes ne sont pas exportés.
