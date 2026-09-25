@@ -53,8 +53,10 @@ test(
           stdout: (chunk: string) => void,
           stderr: (chunk: string) => void,
         ) => {
-          stdout(output!.stdout.replace(/\nSESSION_EXIT=\d+\n$/, ""));
-          stderr(output!.stderr);
+          const text = output!.stdout.replace(/\nSESSION_EXIT=\d+\n$/, "");
+          stdout(text && !text.endsWith("\n") ? text + "\n" : text);
+          const warning = output!.stderr;
+          stderr(warning && !warning.endsWith("\n") ? warning + "\n" : warning);
         },
         getSessionCommand: async () => ({ exitCode: status }),
       },
@@ -92,6 +94,35 @@ test(
         0,
       );
       assert.equal(sessions, 0);
+      for (const text of ["path\0", "no newline", "line\n\n", "\n", "é🐱\0"]) {
+        const observed = { stdout: "", stderr: "" };
+        const streamed = await lease.invoke({
+          executable: process.execPath,
+          arguments: [
+            "-e",
+            'const data=Buffer.from(process.argv[1],"base64");process.stdout.write(data);process.stderr.write(data);process.exitCode=7',
+            Buffer.from(text).toString("base64"),
+          ],
+          deadlineMs: 3000,
+          observe(channel, chunk) {
+            observed[channel] += chunk;
+          },
+        });
+        assert.deepEqual(streamed, { status: 7, stdout: text, stderr: text });
+        assert.deepEqual(observed, { stdout: text, stderr: text });
+      }
+      const missing = await lease.invoke({
+        executable: "/outpost-missing-executable",
+        deadlineMs: 3000,
+      });
+      assert.equal(missing.status, 127);
+      assert.match(missing.stderr, /ENOENT/);
+      const terminated = await lease.invoke({
+        executable: process.execPath,
+        arguments: ["-e", 'process.kill(process.pid,"SIGTERM")'],
+        deadlineMs: 3000,
+      });
+      assert.equal(terminated.status, 143);
     } finally {
       await lease.release();
     }

@@ -28,6 +28,13 @@ export const verifyCloudLease: NonNullable<
   assert.equal(result.status, 17);
   assert.match(result.stdout, /before-close/);
   record({ name: "process-completion", status: "pass" });
+  const exact = await invoke(
+    'process.stdout.write("path\\0é🐱"); process.stderr.write("warning\\0")',
+  );
+  assert.equal(exact.status, 0);
+  assert.equal(exact.stdout, "path\0é🐱");
+  assert.equal(exact.stderr, "warning\0");
+  record({ name: "exact-command-output", status: "pass" });
   await assert.rejects(
     lease.invoke({
       executable: "node",
