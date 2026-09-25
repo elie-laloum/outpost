@@ -21,12 +21,14 @@
   outline-offset: 4px;
 }
 
-a[data-api-kind] {
+a[data-api-kind],
+a[data-reference-overview] {
   display: flex;
   align-items: baseline;
   gap: 0.5em;
 }
-a[data-api-kind]::before {
+a[data-api-kind]::before,
+a[data-reference-overview]::before {
   content: "";
   display: inline-block;
   flex: 0 0 1em;
@@ -64,4 +66,12 @@ a[data-api-status="experimental"]::after {
   margin-inline-start: auto;
   background-color: var(--sl-color-text-accent);
   mask: url("../assets/reference-experiment.svg") center / contain no-repeat;
+}
+
+a[data-reference-overview] {
+  --api-symbol-icon: url("../assets/reference-overview.svg");
+}
+
+.reference-section > ul > li > details > summary .large {
+  font-weight: 400;
 }

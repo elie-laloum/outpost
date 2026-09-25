@@ -1,0 +1,125 @@
+---
+import SidebarPersister from "@astrojs/starlight/components/SidebarPersister.astro";
+import SidebarSublist from "@astrojs/starlight/components/SidebarSublist.astro";
+import MobileMenuFooter from "starlight-theme-celestia/components/MobileMenuFooter.astro";
+import MultiSidebarTabs from "starlight-theme-celestia/components/MultiSidebarTabs.astro";
+import type { SidebarEntry } from "./sidebar.types.ts";
+
+function containsCurrentPage(entry: SidebarEntry): boolean {
+  return entry.type === "link"
+    ? entry.isCurrent
+    : entry.entries.some(containsCurrentPage);
+}
+
+const groups = Astro.locals.starlightRoute.sidebar.map((entry, index) => {
+  if (entry.type !== "group") throw new Error("Sidebar panels must be groups.");
+  return {
+    ...entry,
+    isCurrent: containsCurrentPage(entry),
+    tabId: `outpost-sidebar-tab-${index}`,
+    panelId: `outpost-sidebar-panel-${index}`,
+  };
+});
+if (groups[0] && !groups.some((group) => group.isCurrent)) groups[0].isCurrent = true;
+const [guide, reference] = groups;
+---
+
+<outpost-sidebar>
+  <MultiSidebarTabs groups={groups} />
+  <SidebarPersister>
+    {
+      groups.map((group) => (
+        <section
+          id={group.panelId}
+          role="tabpanel"
+          aria-labelledby={group.tabId}
+          hidden={!group.isCurrent}
+        >
+          {group === guide && <SidebarSublist sublist={group.entries} />}
+          {group === reference &&
+            group.entries.map((section, index) => {
+              if (section.type !== "group")
+                throw new Error("Reference sections must be groups.");
+              const titleId = `${group.panelId}-section-${index}`;
+              return (
+                <section class="reference-section" aria-labelledby={titleId}>
+                  <h2 id={titleId}>{section.label}</h2>
+                  <SidebarSublist sublist={section.entries} />
+                </section>
+              );
+            })}
+        </section>
+      ))
+    }
+  </SidebarPersister>
+  <div class="md:sl-hidden"><MobileMenuFooter /></div>
+</outpost-sidebar>
+
+<style>
+  outpost-sidebar {
+    display: contents;
+  }
+  [role="tabpanel"]:not([hidden]) {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: max-content;
+  }
+  .reference-section {
+    margin-block-start: 1.25rem;
+  }
+  .reference-section:first-child {
+    margin-block-start: 0;
+  }
+  .reference-section h2 {
+    margin: 0 0 0.5rem;
+    padding: 0 0.5rem 0.5rem;
+    border-block-end: 1px solid var(--sl-color-hairline-light);
+    color: var(--sl-color-gray-3);
+    font-size: var(--sl-text-xs);
+    font-weight: 500;
+    line-height: 1.5;
+  }
+</style>
+
+<script>
+  class OutpostSidebar extends HTMLElement {
+    connectedCallback() {
+      const panels = [
+        ...this.querySelectorAll<HTMLElement>('[role="tabpanel"]'),
+      ];
+      const tabs = [
+        ...this.querySelectorAll<HTMLAnchorElement>('[role="tab"]'),
+      ];
+      const select = (index: number) => {
+        panels.forEach((panel, position) => {
+          panel.hidden = position !== index;
+        });
+        tabs.forEach((tab, position) => {
+          tab.setAttribute("aria-selected", String(position === index));
+          tab.tabIndex = position === index ? 0 : -1;
+        });
+      };
+      tabs.forEach((tab, index) => {
+        tab.addEventListener("click", (event) => {
+          event.preventDefault();
+          select(index);
+        });
+        tab.addEventListener("keydown", (event) => {
+          const destinations: Record<string, number> = {
+            ArrowLeft: (index - 1 + tabs.length) % tabs.length,
+            ArrowRight: (index + 1) % tabs.length,
+            Home: 0,
+            End: tabs.length - 1,
+          };
+          const destination = destinations[event.key];
+          if (destination === undefined) return;
+          event.preventDefault();
+          select(destination);
+          tabs[destination]?.focus();
+        });
+      });
+    }
+  }
+  customElements.define("outpost-sidebar", OutpostSidebar);
+</script>

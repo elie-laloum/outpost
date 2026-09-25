@@ -150,7 +150,10 @@ for (const group of groups) {
 const navigation = groups.map((group) => ({
   title: group.title,
   items: [
-    { slug: `reference/overview/${group.id}` },
+    {
+      slug: `reference/overview/${group.id}`,
+      attrs: { "data-reference-overview": "" },
+    },
     ...group.names
       .split(" ")
       .map((name) => exportedByName.get(name))

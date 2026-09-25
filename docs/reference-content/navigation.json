@@ -2,7 +2,10 @@
   {
     "title": ["Storage transports", "Transports de stockage"],
     "items": [
-      { "slug": "reference/overview/storage-transports" },
+      {
+        "slug": "reference/overview/storage-transports",
+        "attrs": { "data-reference-overview": "" }
+      },
       {
         "slug": "reference/localtransport",
         "attrs": { "data-api-kind": "function" }
@@ -108,7 +111,10 @@
   {
     "title": ["Diagnostics", "Diagnostics"],
     "items": [
-      { "slug": "reference/overview/diagnostics" },
+      {
+        "slug": "reference/overview/diagnostics",
+        "attrs": { "data-reference-overview": "" }
+      },
       {
         "slug": "reference/diagnosesandbox",
         "attrs": { "data-api-kind": "function" }
@@ -147,7 +153,10 @@
   {
     "title": ["Workspaces", "Workspaces"],
     "items": [
-      { "slug": "reference/overview/workspaces" },
+      {
+        "slug": "reference/overview/workspaces",
+        "attrs": { "data-reference-overview": "" }
+      },
       {
         "slug": "reference/openworkspace",
         "attrs": { "data-api-kind": "function" }
@@ -186,7 +195,10 @@
   {
     "title": ["Sandboxes", "Sandboxes"],
     "items": [
-      { "slug": "reference/overview/sandboxes" },
+      {
+        "slug": "reference/overview/sandboxes",
+        "attrs": { "data-reference-overview": "" }
+      },
       {
         "slug": "reference/createsandbox",
         "attrs": { "data-api-kind": "function" }
@@ -204,7 +216,10 @@
   {
     "title": ["Dispatch", "Dispatch"],
     "items": [
-      { "slug": "reference/overview/dispatch" },
+      {
+        "slug": "reference/overview/dispatch",
+        "attrs": { "data-reference-overview": "" }
+      },
       {
         "slug": "reference/dispatch",
         "attrs": { "data-api-kind": "function" }
@@ -235,7 +250,10 @@
   {
     "title": ["Commands and terminal", "Commandes et terminal"],
     "items": [
-      { "slug": "reference/overview/commands" },
+      {
+        "slug": "reference/overview/commands",
+        "attrs": { "data-reference-overview": "" }
+      },
       { "slug": "reference/attach", "attrs": { "data-api-kind": "function" } },
       { "slug": "reference/channel", "attrs": { "data-api-kind": "type" } },
       {
@@ -263,7 +281,10 @@
   {
     "title": ["Agents", "Agents"],
     "items": [
-      { "slug": "reference/overview/agents" },
+      {
+        "slug": "reference/overview/agents",
+        "attrs": { "data-reference-overview": "" }
+      },
       { "slug": "reference/claude", "attrs": { "data-api-kind": "function" } },
       { "slug": "reference/codex", "attrs": { "data-api-kind": "function" } },
       { "slug": "reference/gemini", "attrs": { "data-api-kind": "function" } },
@@ -300,7 +321,10 @@
   {
     "title": ["Prompts and responses", "Prompts et réponses"],
     "items": [
-      { "slug": "reference/overview/prompts-responses" },
+      {
+        "slug": "reference/overview/prompts-responses",
+        "attrs": { "data-reference-overview": "" }
+      },
       { "slug": "reference/brief", "attrs": { "data-api-kind": "type" } },
       {
         "slug": "reference/promptvariables",
@@ -327,7 +351,10 @@
   {
     "title": ["Conversations", "Conversations"],
     "items": [
-      { "slug": "reference/overview/conversations" },
+      {
+        "slug": "reference/overview/conversations",
+        "attrs": { "data-reference-overview": "" }
+      },
       {
         "slug": "reference/conversations",
         "attrs": { "data-api-kind": "constant" }
@@ -357,7 +384,10 @@
   {
     "title": ["Observability", "Observabilité"],
     "items": [
-      { "slug": "reference/overview/observability" },
+      {
+        "slug": "reference/overview/observability",
+        "attrs": { "data-reference-overview": "" }
+      },
       {
         "slug": "reference/reporter",
         "attrs": { "data-api-kind": "function" }
@@ -390,7 +420,10 @@
   {
     "title": ["Workflows", "Workflows"],
     "items": [
-      { "slug": "reference/overview/workflows" },
+      {
+        "slug": "reference/overview/workflows",
+        "attrs": { "data-reference-overview": "" }
+      },
       { "slug": "reference/task", "attrs": { "data-api-kind": "function" } },
       {
         "slug": "reference/workflow",
@@ -460,7 +493,10 @@
   {
     "title": ["Providers", "Providers"],
     "items": [
-      { "slug": "reference/overview/providers" },
+      {
+        "slug": "reference/overview/providers",
+        "attrs": { "data-reference-overview": "" }
+      },
       { "slug": "reference/docker", "attrs": { "data-api-kind": "function" } },
       { "slug": "reference/podman", "attrs": { "data-api-kind": "function" } },
       { "slug": "reference/local", "attrs": { "data-api-kind": "function" } },
@@ -533,7 +569,10 @@
   {
     "title": ["Model providers", "Fournisseurs de modèles"],
     "items": [
-      { "slug": "reference/overview/model-providers" },
+      {
+        "slug": "reference/overview/model-providers",
+        "attrs": { "data-reference-overview": "" }
+      },
       {
         "slug": "reference/openaicompatible",
         "attrs": {
@@ -579,7 +618,10 @@
   {
     "title": ["Remote transfers", "Transferts distants"],
     "items": [
-      { "slug": "reference/overview/remote-transfers" },
+      {
+        "slug": "reference/overview/remote-transfers",
+        "attrs": { "data-reference-overview": "" }
+      },
       {
         "slug": "reference/filemanifestentry",
         "attrs": { "data-api-kind": "interface" }
@@ -593,7 +635,10 @@
   {
     "title": ["Recovery and retention", "Récupération et rétention"],
     "items": [
-      { "slug": "reference/overview/recovery-retention" },
+      {
+        "slug": "reference/overview/recovery-retention",
+        "attrs": { "data-reference-overview": "" }
+      },
       {
         "slug": "reference/planrecoveryretention",
         "attrs": { "data-api-kind": "function" }
@@ -647,7 +692,10 @@
   {
     "title": ["Errors", "Erreurs"],
     "items": [
-      { "slug": "reference/overview/errors" },
+      {
+        "slug": "reference/overview/errors",
+        "attrs": { "data-reference-overview": "" }
+      },
       {
         "slug": "reference/recoverydetails",
         "attrs": { "data-api-kind": "function" }
@@ -662,7 +710,10 @@
   {
     "title": ["Storage reservations", "Réservations de stockage"],
     "items": [
-      { "slug": "reference/overview/storage-reservations" },
+      {
+        "slug": "reference/overview/storage-reservations",
+        "attrs": { "data-reference-overview": "" }
+      },
       {
         "slug": "reference/reserverecoverystorage",
         "attrs": { "data-api-kind": "function" }
@@ -684,7 +735,10 @@
   {
     "title": ["Recovery restoration", "Restauration de récupération"],
     "items": [
-      { "slug": "reference/overview/recovery-restoration" },
+      {
+        "slug": "reference/overview/recovery-restoration",
+        "attrs": { "data-reference-overview": "" }
+      },
       {
         "slug": "reference/planrecoveryrestore",
         "attrs": { "data-api-kind": "function" }
@@ -710,7 +764,10 @@
   {
     "title": ["Resource activity", "Activité des ressources"],
     "items": [
-      { "slug": "reference/overview/resource-activity" },
+      {
+        "slug": "reference/overview/resource-activity",
+        "attrs": { "data-reference-overview": "" }
+      },
       {
         "slug": "reference/inspectrecovery",
         "attrs": { "data-api-kind": "function" }
@@ -756,7 +813,10 @@
   {
     "title": ["Workflow checkpoints", "Checkpoints de workflow"],
     "items": [
-      { "slug": "reference/overview/checkpoints" },
+      {
+        "slug": "reference/overview/checkpoints",
+        "attrs": { "data-reference-overview": "" }
+      },
       {
         "slug": "reference/fileworkflowcheckpointstore",
         "attrs": { "data-api-kind": "function" }
@@ -794,7 +854,10 @@
   {
     "title": ["Approval and pause gates", "Approbations et pauses"],
     "items": [
-      { "slug": "reference/overview/approvals" },
+      {
+        "slug": "reference/overview/approvals",
+        "attrs": { "data-reference-overview": "" }
+      },
       {
         "slug": "reference/approvaltask",
         "attrs": { "data-api-kind": "function" }
@@ -828,7 +891,10 @@
   {
     "title": ["Typed artifacts", "Artefacts typés"],
     "items": [
-      { "slug": "reference/overview/artifacts" },
+      {
+        "slug": "reference/overview/artifacts",
+        "attrs": { "data-reference-overview": "" }
+      },
       {
         "slug": "reference/publishartifact",
         "attrs": { "data-api-kind": "function" }
@@ -902,7 +968,10 @@
   {
     "title": ["Distributed execution", "Exécution distribuée"],
     "items": [
-      { "slug": "reference/overview/distributed-execution" },
+      {
+        "slug": "reference/overview/distributed-execution",
+        "attrs": { "data-reference-overview": "" }
+      },
       {
         "slug": "reference/sqlitetaskqueue",
         "attrs": { "data-api-kind": "function" }
@@ -996,7 +1065,10 @@
   {
     "title": ["Speculative execution", "Exécution spéculative"],
     "items": [
-      { "slug": "reference/overview/speculation" },
+      {
+        "slug": "reference/overview/speculation",
+        "attrs": { "data-reference-overview": "" }
+      },
       {
         "slug": "reference/speculate",
         "attrs": { "data-api-kind": "function" }

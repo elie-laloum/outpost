@@ -2,7 +2,7 @@ import { defineConfig } from "astro/config";
 import { unified } from "@astrojs/markdown-remark";
 import starlight from "@astrojs/starlight";
 import celestia from "starlight-theme-celestia";
-import apiGroups from "./reference-content/navigation.json" with { type: "json" };
+import { referenceSidebar } from "./scripts/reference-navigation.mjs";
 import { chapters } from "./scripts/navigation.mjs";
 
 const base = process.env.DOCS_BASE ?? "/outpost";
@@ -68,17 +68,13 @@ export default defineConfig({
         {
           label: "Reference",
           translations: { fr: "Référence" },
-          items: [
-            ...apiGroups.map((group) => ({
-              label: group.title[0],
-              translations: { fr: group.title[1] },
-              collapsed: true,
-              items: group.items,
-            })),
-          ],
+          items: referenceSidebar,
         },
       ],
-      components: { Head: "./src/components/Head.astro" },
+      components: {
+        Head: "./src/components/Head.astro",
+        Sidebar: "./src/components/Sidebar.astro",
+      },
       customCss: ["./src/styles/custom.css"],
       lastUpdated: false,
     }),

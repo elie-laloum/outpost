@@ -248,7 +248,16 @@ for (const [locale, label, overview] of [
       .filter({ visible: true });
     const family = firecracker.locator("xpath=ancestor::details[1]");
     await expect(family.locator("summary").first()).toContainText("Providers");
-    await expect(family.locator("a").first()).toHaveText(overview);
+    const overviewLink = family.locator("a").first();
+    await expect(overviewLink).toHaveText(overview);
+    await expect(overviewLink).toHaveAttribute("data-reference-overview", "");
+    const overviewIcon = await overviewLink.evaluate((element) => {
+      const style = getComputedStyle(element, "::before");
+      return { mask: style.maskImage, width: parseFloat(style.width) };
+    });
+    expect(overviewIcon.mask).toMatch(/^url\(/);
+    expect(overviewIcon.width).toBeGreaterThan(0);
+    await expect(page.locator("a[data-reference-overview]")).toHaveCount(24);
     for (const name of ["firecracker", "FirecrackerOptions"]) {
       const link = family.getByRole("link", {
         name: `${name} — ${label}`,
@@ -310,8 +319,8 @@ for (const [locale, label] of [
 }
 
 for (const [locale, label, familyName] of [
-  ["", "Experimental", "Model providers"],
-  ["fr/", "Expérimental", "Fournisseurs de modèles"],
+  ["", "Experimental", "Models"],
+  ["fr/", "Expérimental", "Models"],
 ]) {
   test(`direct model reference icons are accessible (${locale || "en"})`, async ({
     page,
@@ -341,4 +350,98 @@ for (const [locale, label, familyName] of [
       ).not.toBe("none");
     }
   });
+}
+
+for (const locale of ["", "fr/"]) {
+  for (const width of [1280, 390]) {
+    test(`reference categories stay visible while families collapse (${locale || "en"}, ${width}px)`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto(`${locale}reference/firecracker/`);
+      if (width < 800)
+        await page.getByRole("button", { name: "Menu", exact: true }).click();
+      const panel = page.getByRole("tabpanel").filter({ visible: true });
+      const headings = panel.locator(".reference-section > h2");
+      await expect(headings).toHaveText([
+        "Environment",
+        "Agents & models",
+        "Orchestration",
+        "Storage",
+        "Operations",
+      ]);
+      await expect(panel.locator(".reference-section")).toHaveCount(5);
+      const labels = panel.locator(
+        ".reference-section > ul > li > details > summary .large",
+      );
+      const names = await labels.allTextContents();
+      expect(names).toHaveLength(24);
+      expect(names.every((name) => !/\s/.test(name.trim()))).toBe(true);
+      expect(names).toEqual([
+        "Workspaces",
+        "Sandboxes",
+        "Providers",
+        "Commands",
+        "Transfers",
+        "Agents",
+        "Dispatch",
+        "Prompts",
+        "Conversations",
+        "Models",
+        "Workflows",
+        "Checkpoints",
+        "Gates",
+        "Artifacts",
+        "Queues",
+        "Speculation",
+        "Transports",
+        "Reservations",
+        "Diagnostics",
+        "Observability",
+        "Activity",
+        "Errors",
+        "Retention",
+        "Recovery",
+      ]);
+      const styles = await headings.first().evaluate((heading) => {
+        const section = heading.parentElement;
+        const label = section.querySelector("summary .large");
+        return {
+          titleSize: parseFloat(getComputedStyle(heading).fontSize),
+          labelSize: parseFloat(getComputedStyle(label).fontSize),
+          titleColor: getComputedStyle(heading).color,
+          labelColor: getComputedStyle(label).color,
+          border: parseFloat(getComputedStyle(heading).borderBottomWidth),
+          collapsible: Boolean(heading.closest("details")),
+        };
+      });
+      expect(styles.titleSize).toBeLessThan(styles.labelSize);
+      expect(styles.titleColor).not.toBe(styles.labelColor);
+      expect(styles.border).toBeGreaterThan(0);
+      expect(styles.collapsible).toBe(false);
+      const providers = panel
+        .locator("summary")
+        .filter({ hasText: /^Providers$/ });
+      const family = providers.locator("..");
+      await expect(family).toHaveAttribute("open", "");
+      await providers.focus();
+      await page.keyboard.press("Enter");
+      await expect(family).not.toHaveAttribute("open");
+      await expect(headings.first()).toBeVisible();
+      await page.getByRole("tab", { name: "Guide", exact: true }).click();
+      await expect(
+        page
+          .getByRole("tabpanel")
+          .filter({ visible: true })
+          .locator(".reference-section"),
+      ).toHaveCount(0);
+      await page.keyboard.press("ArrowRight");
+      await expect(headings.first()).toBeVisible();
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= window.innerWidth,
+        ),
+      ).toBe(true);
+    });
+  }
 }
