@@ -3,6 +3,7 @@
 ## Non publié
 
 - Ajout des transports objet local/S3 pour les artefacts, checkpoints à propriété exclusive, journaux segmentés, snapshots de conversations natives, archives de récupération vérifiées, réservations partagées, activités des ressources et opérations distantes d’inventaire/rétention/quotas. Conservation des stores par dossier et chemins d’exécution locaux ; le SDK AWS reste optionnel. La récupération de propriété distante est explicite et les campagnes de stockage réelles authentifiées restent à effectuer.
+- Ajouter l’adaptateur optionnel `@elie-laloum/outpost/queues/bullmq` pour Redis standalone et BullMQ 5, avec identité des jobs, résultats JSON sans perte, baux protégés par génération, annulation et échéances. Inclure la fermeture asynchrone des connexions, des tests sur Redis réel et la référence et le guide d’exploitation bilingues.
 
 ## 4.1.0
 

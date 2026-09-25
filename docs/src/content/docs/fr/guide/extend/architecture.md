@@ -52,3 +52,7 @@ Le checkout isolé des conteneurs, le provider Firecracker, les politiques rése
 `Transport` est un port du domaine pour les lectures binaires bornées, le listing de métadonnées et les mutations conditionnelles atomiques. Les implémentations locale et S3 optionnelle appartiennent à l’infrastructure ; les stores séparent intégrité des artefacts, propriété des checkpoints, ordre des journaux et formats de conversation du transport. Copies natives et vérification de récupération utilisent toujours une préparation locale. Le SDK S3 se charge uniquement via `transports/s3`.
 
 La propriété des checkpoints et les registres de réservations coopératives n’expirent pas automatiquement. Une récupération explicite exige une confirmation indépendante de l’arrêt de l’ancien propriétaire. Les activités distantes sont des observations dont la propriété n’est pas vérifiée ; elles n’autorisent jamais la récupération de workspaces Git locaux. La rétention revalide les groupes de journaux fermés et chaque révision supprimée. Voir les [transports de stockage](../../operations/storage-transports/).
+
+## File BullMQ optionnelle
+
+L’entrée `queues/bullmq` charge seule le SDK BullMQ optionnel. L’infrastructure sépare la propriété des connexions, la distribution BullMQ et les transitions atomiques Redis de l’état Outpost. Les workers applicatifs continuent de dépendre de `TaskQueue` ; les résultats conservés restent la référence pendant la récupération d’une finalisation native interrompue.

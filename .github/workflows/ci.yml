@@ -36,6 +36,32 @@ jobs:
         with:
           name: coverage-${{ matrix.os }}
           path: coverage/lcov.info
+  redis:
+    strategy:
+      fail-fast: false
+      matrix:
+        redis: [7, 8]
+    runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis:${{ matrix.redis }}-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run test:redis
   containers:
     strategy:
       fail-fast: false

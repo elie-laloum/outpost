@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Add local/S3 object transports for artifacts, exclusively owned checkpoints, segmented journals, native conversation snapshots, verified recovery archives, shared storage reservations, resource activity and remote inventory/retention/quota operations. Preserve existing directory stores and local execution paths; AWS SDK loading remains optional. Remote ownership recovery is explicit and authenticated live storage campaigns remain outstanding.
+- Add the optional `@elie-laloum/outpost/queues/bullmq` adapter for standalone Redis and BullMQ 5, preserving queue identity, lossless JSON results, fenced leases, cancellation and deadlines. Include asynchronous connection cleanup, real Redis integration tests and bilingual reference and operational guidance.
 
 ## 4.1.0
 

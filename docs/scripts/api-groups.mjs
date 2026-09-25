@@ -149,7 +149,7 @@ export const groups = [
     title: ["Distributed execution", "Exécution distribuée"],
     guide: "guide/advanced/distributed",
     names:
-      "sqliteTaskQueue serveTaskQueue httpTaskQueue runQueueWorker queuedTask QueueRequest QueueResult QueueJob QueueClaim QueueLease TaskQueue DurableTaskQueue QueueServerOptions QueueServer QueueClientOptions QueueHandlerContext QueueHandler QueueWorkerOptions QueuedTaskOptions",
+      "sqliteTaskQueue bullmqTaskQueue BullMQTaskQueue BullMQTaskQueueOptions serveTaskQueue httpTaskQueue runQueueWorker queuedTask QueueRequest QueueResult QueueJob QueueClaim QueueLease TaskQueue DurableTaskQueue QueueServerOptions QueueServer QueueClientOptions QueueHandlerContext QueueHandler QueueWorkerOptions QueuedTaskOptions",
   },
   {
     id: "outbound-networking",

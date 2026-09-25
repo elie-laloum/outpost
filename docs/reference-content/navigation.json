@@ -858,6 +858,10 @@
         "attrs": { "data-api-kind": "function" }
       },
       {
+        "slug": "reference/bullmqtaskqueue",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
         "slug": "reference/servetaskqueue",
         "attrs": { "data-api-kind": "function" }
       },
@@ -880,6 +884,14 @@
       {
         "slug": "reference/queuedtaskoptions",
         "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/type-bullmqtaskqueue",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/bullmqtaskqueueoptions",
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/queuerequest",

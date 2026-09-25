@@ -13,14 +13,14 @@ import type { AttachOptions } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name           | Type                                                                                                 | Presence | Meaning                                                                                    |
-| -------------- | ---------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------ |
-| `ask`          | `VariableQuestion \| undefined`                                                                      | Optional | Callback that supplies missing brief variables during interactive attachment.              |
-| `agent`        | `AgentAdapter \| undefined`                                                                          | Optional | Native coding-agent adapter.                                                               |
-| `brief`        | `Brief \| undefined`                                                                                 | Optional | Literal text or file-based task input.                                                     |
-| `continuation` | `{ readonly id: string; readonly fork?: boolean; } \| undefined`                                     | Optional | Native conversation ID to continue; fork requests a separate conversation derived from it. |
-| `signal`       | `AbortSignal \| undefined`                                                                           | Optional | Cooperative cancellation for this operation.                                               |
-| `terminal`     | `{ readonly input?: Readable; readonly output?: Writable; readonly error?: Writable; } \| undefined` | Optional | Input, output and error streams for real interactive terminal attachment.                  |
+| Name           | Type                                                                                                                                                    | Presence | Meaning                                                                                    |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------ |
+| `ask`          | `VariableQuestion \| undefined`                                                                                                                         | Optional | Callback that supplies missing brief variables during interactive attachment.              |
+| `agent`        | `AgentAdapter \| undefined`                                                                                                                             | Optional | Native coding-agent adapter.                                                               |
+| `brief`        | `Brief \| undefined`                                                                                                                                    | Optional | Literal text or file-based task input.                                                     |
+| `continuation` | `{ readonly id: string; readonly fork?: boolean; } \| undefined`                                                                                        | Optional | Native conversation ID to continue; fork requests a separate conversation derived from it. |
+| `signal`       | `AbortSignal \| undefined`                                                                                                                              | Optional | Cooperative cancellation for this operation.                                               |
+| `terminal`     | `{ readonly input?: import("stream").Readable; readonly output?: import("stream").Writable; readonly error?: import("stream").Writable; } \| undefined` | Optional | Input, output and error streams for real interactive terminal attachment.                  |
 
 ## Signature
 

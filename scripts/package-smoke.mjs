@@ -48,6 +48,11 @@ try {
     false,
     "Base consumers must not require the optional telemetry API",
   );
+  assert.equal(
+    existsSync(join(temporary, "node_modules", "bullmq")),
+    false,
+    "Base consumers must not require the optional BullMQ dependency",
+  );
   execFileSync(
     process.execPath,
     [
@@ -127,6 +132,7 @@ try {
     ),
   );
   assert.ok(manifest.exports["."].types);
+  assert.ok(manifest.exports["./queues/bullmq"].types);
   const consumer = join(temporary, "consumer.ts");
   writeFileSync(
     consumer,
@@ -219,6 +225,39 @@ telemetry.close();
     cwd: temporary,
     stdio: "inherit",
   });
+
+  runNpm(
+    [
+      "install",
+      "--ignore-scripts",
+      "--no-audit",
+      "--no-fund",
+      "bullmq@^5.81.5",
+    ],
+    temporary,
+  );
+  execFileSync(
+    process.execPath,
+    [
+      "--input-type=module",
+      "-e",
+      "import {bullmqTaskQueue} from '@elie-laloum/outpost/queues/bullmq'; if(typeof bullmqTaskQueue !== 'function') throw Error('Missing BullMQ adapter')",
+    ],
+    { cwd: temporary, stdio: "inherit" },
+  );
+
+  const bullmqConsumer = join(temporary, "bullmq.ts");
+  writeFileSync(
+    bullmqConsumer,
+    `import { bullmqTaskQueue, type BullMQTaskQueue, type BullMQTaskQueueOptions } from '@elie-laloum/outpost/queues/bullmq';
+import type { TaskQueue } from '@elie-laloum/outpost';
+const options: BullMQTaskQueueOptions = {name:'consumer',connection:{host:'127.0.0.1'}};
+const open: (options: BullMQTaskQueueOptions) => Promise<BullMQTaskQueue> = bullmqTaskQueue;
+function compatible(queue: BullMQTaskQueue): TaskQueue { return queue; }
+void [options, open, compatible];
+`,
+  );
+  checkTypes(bullmqConsumer);
   console.log("Packed package imports and initializes successfully.");
 } finally {
   rmSync(temporary, { recursive: true, force: true });

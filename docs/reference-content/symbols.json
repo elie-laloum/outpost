@@ -294,5 +294,9 @@
   "materializeRecoveryArchive": [
     "Download a pinned recovery archive into a new local directory, preserving supported modes and symlinks. Check chunk revisions, SHA-256 and recovery checksums. Keep the source and any partial destination on failure. Use the existing recovery planning and restoration APIs with the source repository to produce a checkout.",
     "Télécharge une archive versionnée dans un nouveau dossier local en conservant les modes et liens symboliques pris en charge. Vérifie révisions, SHA-256 et sommes de contrôle de récupération. Conserve la source et toute destination partielle en cas d’échec. Utiliser ensuite les API de planification et restauration avec le dépôt source pour produire un checkout."
+  ],
+  "bullmqTaskQueue": [
+    "Opens an optional BullMQ 5 adapter backed by standalone Redis. Implements TaskQueue for queuedTask and runQueueWorker, retaining request identity, lossless JSON results and atomic fenced leases. Owns its connections and stalled-job checks; await close() after stopping workers. Redis persistence and no-eviction settings determine durability. Import from @elie-laloum/outpost/queues/bullmq and install bullmq separately.",
+    "Ouvre un adaptateur optionnel BullMQ 5 sur Redis standalone. Implémente TaskQueue pour queuedTask et runQueueWorker, avec identité des requêtes, résultats JSON sans perte et baux atomiques protégés par génération. Possède ses connexions et contrôles de jobs bloqués ; attendre close() après avoir arrêté les workers. La persistance Redis et l’absence d’éviction déterminent la durabilité. Importer depuis @elie-laloum/outpost/queues/bullmq et installer bullmq séparément."
   ]
 }

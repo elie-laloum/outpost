@@ -263,8 +263,8 @@
       ],
       "sourceSha256": "16edfcec291b7909cd6e74ba1a6710962caf515f3559e4999445bf350d2fc34c",
       "sourceBodySha256": "0792401f978e0543460eb8556e989ba09fdfa0664ecec3eda232061217b00d26",
-      "preservedBodySha256": "0792401f978e0543460eb8556e989ba09fdfa0664ecec3eda232061217b00d26",
-      "disposition": "complete body preserved; internal links migrated"
+      "preservedBodySha256": "db50dfda17b0c7b0f685ee7931ffee693f4a6f9f28b9bb1a08adfc9e5d22ccd9",
+      "disposition": "complete body preserved; internal links migrated; reviewed addition: optional BullMQ adapter with asynchronous closure, preserving SQLite/HTTP contracts"
     },
     {
       "source": "workflows/graph.md",
@@ -1086,8 +1086,8 @@
       ],
       "sourceSha256": "c05592a80c32d250fd7cb5931cc44c14a1c316d1c28ce5826694e25140778530",
       "sourceBodySha256": "23d2cdf64ad2dcbf7168a34694b9249827a4ad18c4f6bcbdccb77ef651ce0331",
-      "preservedBodySha256": "23d2cdf64ad2dcbf7168a34694b9249827a4ad18c4f6bcbdccb77ef651ce0331",
-      "disposition": "complete body preserved; internal links migrated"
+      "preservedBodySha256": "52b8cfd173c399ed81e71bbef78ea80aa987b3f11624ef0d5fb18f313741767e",
+      "disposition": "complete body preserved; internal links migrated; reviewed addition: optional BullMQ adapter with asynchronous closure, preserving SQLite/HTTP contracts"
     },
     {
       "source": "fr/workflows/graph.md",

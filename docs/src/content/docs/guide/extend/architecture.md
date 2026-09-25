@@ -71,3 +71,7 @@ The opt-in isolated container checkout, Firecracker provider, egress policies an
 `Transport` is a domain port for bounded binary reads, metadata listing and atomic conditional mutations. Local and optional S3 implementations belong to infrastructure; object stores keep artifact integrity, checkpoint ownership, journal ordering and conversation layouts separate from the transport. Native conversation copies and recovery verification still use local staging. The S3 SDK loads only through `transports/s3`.
 
 Transport checkpoint ownership and cooperative reservation ledgers do not expire automatically. Explicit recovery must follow independent confirmation that the former owner stopped. Resource records stored remotely are observations with unverified ownership; they never authorize reclaiming local Git workspaces. Transport retention revalidates closed journal groups and each deletion revision. See [storage transports](../../operations/storage-transports/).
+
+## Optional BullMQ queue
+
+Only the `queues/bullmq` entry point loads the optional BullMQ SDK. Infrastructure separates connection ownership, BullMQ distribution and atomic Redis transitions of Outpost state. Application workers still depend on `TaskQueue`; retained results remain authoritative while interrupted native finalization is recovered.

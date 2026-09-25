@@ -101,3 +101,5 @@ The worker returns `hello-world`. This exercise uses HTTP and SQLite, but all co
 [Contracts, options and edge cases](../../behavior/workflows/distributed/).
 
 Any persisted example files remain inside this demonstration directory.
+
+To use Redis directly, follow the [BullMQ/Redis guide](../bullmq/).

@@ -67,6 +67,7 @@ export const chapters = [
       "guide/advanced/approvals",
       "guide/advanced/artifacts",
       "guide/advanced/distributed",
+      "guide/advanced/bullmq",
       "guide/advanced/telemetry",
       "guide/advanced/repository-isolation",
       "guide/advanced/egress",

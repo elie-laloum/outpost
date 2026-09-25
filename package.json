@@ -47,6 +47,10 @@
     "./transports/s3": {
       "types": "./dist/infrastructure/s3-transport.d.ts",
       "import": "./dist/infrastructure/s3-transport.js"
+    },
+    "./queues/bullmq": {
+      "types": "./dist/infrastructure/task-queue-bullmq.d.ts",
+      "import": "./dist/infrastructure/task-queue-bullmq.js"
     }
   },
   "files": [
@@ -76,7 +80,8 @@
     "docs:build": "npm run build --prefix docs",
     "docs:test": "npm run test:build --prefix docs && node docs/scripts/check-examples.mjs && node --test docs/scripts/release-channel.test.mjs",
     "docs:test:browser": "npm run test:browser --prefix docs",
-    "docs:test:container": "node docs/scripts/check-container-examples.mjs"
+    "docs:test:container": "node docs/scripts/check-container-examples.mjs",
+    "test:redis": "node --test test/redis.test.ts"
   },
   "repository": {
     "type": "git",
@@ -93,7 +98,8 @@
     "@daytona/sdk": "^0.216.0",
     "@opentelemetry/api": "^1.9.0",
     "@vercel/sandbox": "^3.3.0",
-    "@aws-sdk/client-s3": "^3.1140.0"
+    "@aws-sdk/client-s3": "^3.1140.0",
+    "bullmq": "^5.81.5"
   },
   "peerDependenciesMeta": {
     "@daytona/sdk": {
@@ -107,6 +113,9 @@
     },
     "@aws-sdk/client-s3": {
       "optional": true
+    },
+    "bullmq": {
+      "optional": true
     }
   },
   "devDependencies": {
@@ -119,7 +128,8 @@
     "@vercel/sandbox": "^3.3.0",
     "c8": "^10.1.3",
     "prettier": "^3.5.3",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "bullmq": "^5.81.5"
   },
   "homepage": "https://elie-laloum.github.io/outpost/",
   "dependencies": {

@@ -99,6 +99,7 @@ Use `node:test` and `node:assert/strict`, following the existing suite. Test obs
 
 - `test/unit/`: domain rules, protocol adapters, boundaries and isolated infrastructure behavior.
 - `test/functional/`: lifecycle, Git, synchronization, recovery, CLI and workflow behavior using temporary resources.
+- `test/redis.test.ts`: real standalone Redis 7/8 queue behavior, including concurrent claims, stale leases, cancellation and interrupted publication/finalization. Run with `npm run test:redis`; `OUTPOST_REDIS_PORT` selects a dedicated local test server.
 - `test/container.test.ts`: real Docker/Podman behavior. Mocks alone cannot validate process sessions, tmpfs, mounts, ownership or archive transfer.
 - `test/fixtures/container-terminal.ts`: real PTY input, exit status, cancellation and warm reuse.
 - `scripts/package-smoke.mjs`: the packed package as a consumer sees it, including exports and declarations.
@@ -118,6 +119,7 @@ Install root dependencies with `npm ci`; install documentation dependencies with
 | Source behavior or architecture                                       | `npm run check` (architecture, typecheck, unit/functional tests, build), then `npm run coverage`.              |
 | Public API, exports, packaging or dependencies                        | Also `npm run test:package`.                                                                                   |
 | Container commands, transfers, mounts, lifecycle or image scaffolding | Also real Docker and Podman tests and the PTY fixture using the setup in `.github/workflows/ci.yml`.           |
+| BullMQ queue state, distribution or connection ownership              | Also `npm run test:redis` against standalone Redis using the setup in `.github/workflows/ci.yml`.              |
 | API documentation or changelog sources                                | `npm run docs:sync`, then inspect generated changes.                                                           |
 | Documentation content or site configuration                           | `npm run build`, `npm run docs:check`, `npm run docs:build`, `npm run docs:test`, `npm run docs:test:browser`. |
 | Any changed tracked content                                           | Prettier check on changed files; full `npm run format:check` before release.                                   |

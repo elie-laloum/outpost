@@ -3419,5 +3419,33 @@
   "ReadJournalOptions.maxBytes": [
     "Total byte limit for journal segment payloads read into memory, default 64 MiB.",
     "Limite totale des contenus de segments lus en mémoire, 64 Mio par défaut."
+  ],
+  "bullmqTaskQueue.options": [
+    "Redis connection settings and the stable namespace shared by producers and workers.",
+    "Connexion Redis et espace de noms stable partagé par les producteurs et workers."
+  ],
+  "BullMQTaskQueueOptions.name": [
+    "Logical queue name shared by all clients; hashed internally, so colons and Unicode are supported. Different names isolate job identities.",
+    "Nom logique commun aux clients ; haché en interne, il accepte les deux-points et Unicode. Des noms différents isolent les identités des jobs."
+  ],
+  "BullMQTaskQueueOptions.connection": [
+    "BullMQ RedisOptions for standalone Redis, including host, port, db, username, password and tls. Supply settings, not a live client. The adapter owns connections and sets maxRetriesPerRequest to 1 for queue commands and null for BullMQ workers. Do not use keyPrefix.",
+    "RedisOptions BullMQ pour Redis standalone, dont host, port, db, username, password et tls. Fournir des options, pas un client connecté. L’adaptateur possède les connexions et fixe maxRetriesPerRequest à 1 pour les commandes et null pour les workers BullMQ. Ne pas utiliser keyPrefix."
+  ],
+  "BullMQTaskQueueOptions.prefix": [
+    "Redis key prefix, default outpost. Keep it stable across restarts and identical on every client; use a dedicated namespace without external BullMQ consumers or cleanup.",
+    "Préfixe des clés Redis, outpost par défaut. Le conserver au redémarrage et sur tous les clients ; réserver cet espace sans consommateurs BullMQ externes ni nettoyage tiers."
+  ],
+  "BullMQTaskQueueOptions.stalledIntervalMs": [
+    "Positive interval in milliseconds between BullMQ stalled-job checks, default 1000. Reclaiming an expired lease may require two checks; this is separate from leaseMs and pollMs.",
+    "Intervalle positif en millisecondes entre les contrôles BullMQ des jobs bloqués, 1000 par défaut. La reprise après expiration peut nécessiter deux contrôles ; distinct de leaseMs et pollMs."
+  ],
+  "BullMQTaskQueueOptions.onError": [
+    "Optional synchronous observer for connection, stalled-check and native finalization errors. Observer exceptions are ignored. Foreground queue operations still reject on failure; a committed result remains authoritative if native finalization fails.",
+    "Observateur synchrone optionnel des erreurs de connexion, de contrôle des jobs bloqués et de finalisation native. Ses exceptions sont ignorées. Les opérations de queue rejettent toujours leurs échecs ; un résultat enregistré reste la référence si la finalisation native échoue."
+  ],
+  "BullMQTaskQueue.close": [
+    "Idempotently rejects new operations, waits for admitted operations, stops stalled checks and closes owned Redis connections. Stop and await runQueueWorker first. Retains jobs, fences and results for later clients; active leases remain reclaimable.",
+    "Refuse les nouvelles opérations, attend celles admises, arrête les contrôles de jobs bloqués et ferme les connexions Redis possédées, de façon idempotente. Arrêter et attendre runQueueWorker auparavant. Conserve jobs, générations et résultats ; les baux actifs restent récupérables."
   ]
 }

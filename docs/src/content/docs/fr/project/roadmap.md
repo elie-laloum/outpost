@@ -13,6 +13,8 @@ Implémenté pour la prochaine version : les [transports de stockage local/S3](.
 
 Le socle comprend les sandboxes réutilisables, les workspaces Git, les adapters d’agents, les workflows typés et les outils de récupération. Le CLI, la configuration d’authentification et les fournisseurs Responses personnalisés sont documentés dans le [guide de démarrage](../../guide/manual/cli/). La [référence API](../../reference/diagnosesandbox/) décrit les contrats implémentés et le changelog les versions publiées. Une implémentation ou un test simulé ne prouve pas la réussite d’une campagne réelle sur un provider.
 
+L’adaptateur [BullMQ/Redis](../../guide/advanced/bullmq/) est implémenté mais pas encore publié : les tests utilisent Redis réel pour les baux, les claims concurrents et les interruptions de publication/finalisation. Les campagnes de bascule Redis en production restent à mener. RabbitMQ reste prévu pour une étape ultérieure.
+
 ## Court terme : fiabiliser l’exécution
 
 | Priorité                                                    | Résultat attendu                                                                                                                                                                                                           | Preuves nécessaires                                                                                                                                                                                                                                                               |

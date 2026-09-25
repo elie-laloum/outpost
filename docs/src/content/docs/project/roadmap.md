@@ -13,6 +13,8 @@ Implemented for the next release: [local/S3 storage transports](../../guide/oper
 
 The foundation includes reusable sandboxes, Git workspaces, agent adapters, typed workflows and recovery tools. The CLI, authentication setup and custom Responses providers are documented in the [setup guide](../../guide/manual/cli/). Use the [API reference](../../reference/diagnosesandbox/) for implemented contracts and the changelog for released versions. An implementation or simulated test is not evidence of a successful live provider campaign.
 
+The [BullMQ/Redis adapter](../../guide/advanced/bullmq/) is implemented but unreleased: tests exercise real Redis leases, concurrent claims and interrupted publication/finalization. Production Redis failover campaigns remain outstanding. RabbitMQ remains planned for a later step.
+
 ## Near term: make execution dependable
 
 | Priority                                    | Outcome                                                                                                                                                                                                          | Evidence required                                                                                                                                                                                                                   |
