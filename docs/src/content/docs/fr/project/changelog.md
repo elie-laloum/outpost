@@ -9,7 +9,7 @@ Traduction du journal `CHANGELOG.md` conservé à la racine du dépôt. Chaque v
 
 ## 4.1.0
 
-- Préserver le shell de session Daytona et le statut réel des commandes non interactives ; accepter une PTY déjà supprimée pendant le nettoyage après annulation. Ajouter les régressions des deux défauts trouvés en tests réels. Valider les workflows Claude OAuth sur Docker, Vercel et Daytona, ainsi que la saisie, le redimensionnement, la sortie, l’annulation et la réutilisation du terminal Daytona. La validation réelle de Codex par clé API reste à effectuer.
+- Préserver le shell de session Daytona et le statut réel des commandes non interactives ; accepter une PTY déjà supprimée pendant le nettoyage après annulation. Ajouter les régressions des deux défauts trouvés en tests réels. Valider les workflows Claude OAuth sur Docker, Vercel et Daytona, ainsi que la saisie, le redimensionnement, la sortie, l’annulation et la réutilisation du terminal Daytona.
 - Remplacer le parsing global et l’aide manuelle du CLI par les sous-commandes Commander et leurs options propres ; utiliser les sélections Clack pour l’initialisation interactive. Les options d’autres commandes auparavant ignorées sont désormais refusées. Les sorties sans terminal et JSON restent sans décoration.
 - Guider le choix du gestionnaire de paquets et de l’authentification. Vérifier la disponibilité du gestionnaire avant écriture avec `--install`. Construire automatiquement les images Docker/Podman ; `--no-build` permet de générer les fichiers sans build. Les workflows déjà générés restent inchangés.
 - Générer les parcours explicites par clé API, jeton d’abonnement Claude et session de compte Codex. Vérifier les credentials requis avant allocation ; préparer la connexion API Codex par stdin ou copier une source de credentials de compte explicitement sélectionnée dans le home privé du sandbox. Les trousseaux hôtes ne sont pas exportés.
@@ -17,6 +17,10 @@ Traduction du journal `CHANGELOG.md` conservé à la racine du dépôt. Chaque v
 - Conserver les variables d’allocation Vercel pour chaque commande, avec priorité aux variables de commande. Tester la transmission du jeton Claude par le script généré et documenter la conservation des variables lors d’un changement de provider.
 - Ajouter des campagnes cloud Claude/Codex authentifiées activables manuellement, avec rapports sans secrets. Les credentials absents restent ignorés ; cette fixture ne prouve pas la réussite d’une campagne sur un compte réel. Les campagnes planifiées n’appellent pas les modèles.
 - Recentrer la roadmap bilingue sur la fiabilité à court terme et les orientations à moyen terme, avec critères explicites de validation.
+
+- Préserver les sorties exactes des commandes Daytona grâce à un encodage en flux, pour corriger la synchronisation des chemins Git séparés par des octets nuls. Vérifier les sorties sans fin de ligne, l’Unicode, les statuts de sortie, l’annulation et la réutilisation.
+- Accorder confiance au workspace sélectionné pour les requêtes Gemini autonomes en mode `yolo` avec `--skip-trust` ; préserver les autres modes et documenter cette frontière. Clarifier la génération des workflows Codex par abonnement sur les providers locaux et cloud.
+- Valider les workflows authentifiés avec modification de fichier pour Codex par abonnement et Gemini par clé API sur Docker, Vercel et Daytona, ainsi qu’un endpoint Responses personnalisé sur Docker et Vercel. L’endpoint testé réinitialise les connexions HTTPS provenant de Daytona avant authentification ; cette combinaison reste non validée. Le parcours Codex par clé API n’a pas été exercé dans cette campagne.
 
 ## 4.0.0
 
