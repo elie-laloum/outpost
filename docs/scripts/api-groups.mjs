@@ -81,7 +81,7 @@ export const groups = [
     experimental: ["firecracker", "FirecrackerOptions"],
     guide: "guide/environment/providers/overview",
     names:
-      "docker podman local vercel daytona firecracker FirecrackerOptions ContainerOptions DependencyCache VercelOptions DaytonaOptions mountedProvider remoteProvider SandboxContext SandboxLease SandboxProvider TransferOptions Variables Volume",
+      "docker podman local vercel daytona firecracker FirecrackerOptions ContainerOptions DependencyCache EgressPolicy VercelOptions DaytonaOptions mountedProvider remoteProvider SandboxContext SandboxLease SandboxProvider TransferOptions Variables Volume",
   },
   {
     id: "model-providers",
@@ -164,12 +164,6 @@ export const groups = [
     guide: "guide/advanced/distributed",
     names:
       "sqliteTaskQueue bullmqTaskQueue BullMQTaskQueue BullMQTaskQueueOptions serveTaskQueue httpTaskQueue runQueueWorker queuedTask QueueRequest QueueResult QueueJob QueueClaim QueueLease TaskQueue DurableTaskQueue QueueServerOptions QueueServer QueueClientOptions QueueHandlerContext QueueHandler QueueWorkerOptions QueuedTaskOptions",
-  },
-  {
-    id: "outbound-networking",
-    title: ["Outbound networking", "Réseau sortant"],
-    guide: "guide/advanced/egress",
-    names: "EgressPolicy",
   },
   {
     id: "speculation",

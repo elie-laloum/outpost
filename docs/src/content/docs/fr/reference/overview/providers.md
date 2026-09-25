@@ -18,6 +18,8 @@ Les capacités et garanties d’isolation dépendent du backend ; les opération
 
 Les API compatibles OpenAI sont des [fournisseurs de modèles](../model-providers/), distincts des backends de sandbox. `openaiCompatible()` permet des appels textuels directs expérimentaux sans Codex ; le harness d’agent est prévu en deuxième phase.
 
+`EgressPolicy` configure l’accès au réseau sortant indépendamment des prompts de l’agent. Le provider valide et applique les restrictions demandées lors de la préparation de l’environnement. Ces capacités de recherche optionnelles dépendent du backend ; les politiques non prises en charge sont refusées explicitement. Les contrôles réseau ne remplacent ni l’isolation du dépôt ni la limitation des identifiants transmis. Le [guide du réseau sortant](../../../guide/advanced/egress/) détaille les modes pris en charge et leur vérification.
+
 ## Points d’entrée
 
 - [docker](../../docker/)
@@ -27,6 +29,7 @@ Les API compatibles OpenAI sont des [fournisseurs de modèles](../model-provider
 - [daytona](../../daytona/)
 - [firecracker](../../firecracker/)
 - [FirecrackerOptions](../../firecrackeroptions/)
+- [EgressPolicy](../../egresspolicy/)
 - [SandboxProvider](../../sandboxprovider/)
 - [SandboxLease](../../sandboxlease/)
 

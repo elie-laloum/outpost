@@ -18,6 +18,8 @@ Capabilities and isolation guarantees depend on the backend; unsupported operati
 
 OpenAI-compatible APIs are [model providers](../model-providers/), separate from sandbox backends. `openaiCompatible()` enables experimental direct text calls without Codex; the agent harness is planned for phase two.
 
+`EgressPolicy` configures outbound network access independently of agent prompts. The provider validates and applies the requested restrictions during environment setup. These opt-in research capabilities depend on backend support; unsupported policies are rejected explicitly. Network controls do not replace repository isolation or credential scoping. See the [outbound networking guide](../../../guide/advanced/egress/) for supported modes and verification.
+
 ## Entry points
 
 - [docker](../../docker/)
@@ -27,6 +29,7 @@ OpenAI-compatible APIs are [model providers](../model-providers/), separate from
 - [daytona](../../daytona/)
 - [firecracker](../../firecracker/)
 - [FirecrackerOptions](../../firecrackeroptions/)
+- [EgressPolicy](../../egresspolicy/)
 - [SandboxProvider](../../sandboxprovider/)
 - [SandboxLease](../../sandboxlease/)
 

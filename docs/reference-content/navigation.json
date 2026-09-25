@@ -482,6 +482,10 @@
         "slug": "reference/remoteprovider",
         "attrs": { "data-api-kind": "function" }
       },
+      {
+        "slug": "reference/egresspolicy",
+        "attrs": { "data-api-kind": "type" }
+      },
       { "slug": "reference/variables", "attrs": { "data-api-kind": "type" } },
       {
         "slug": "reference/firecrackeroptions",
@@ -987,13 +991,6 @@
         "slug": "reference/queueworkeroptions",
         "attrs": { "data-api-kind": "interface" }
       }
-    ]
-  },
-  {
-    "title": ["Outbound networking", "Réseau sortant"],
-    "items": [
-      { "slug": "reference/overview/outbound-networking" },
-      { "slug": "reference/egresspolicy", "attrs": { "data-api-kind": "type" } }
     ]
   },
   {
