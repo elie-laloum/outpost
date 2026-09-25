@@ -11,12 +11,12 @@ Utilisez `response.text` ou `response.json` pour transformer la réponse de l’
 import {
   agent as composeAgent,
   dispatch,
-  codex,
+  codexHarness,
   response,
 } from "@elie-laloum/outpost";
 
 const result = await dispatch({
-  agent: composeAgent({ harness: codex.harness({}) }),
+  agent: composeAgent({ harness: codexHarness({}) }),
   brief: {
     text: 'Retourne <report>{"ok": true}</report> après vérification du projet.',
   },

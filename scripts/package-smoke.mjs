@@ -58,7 +58,7 @@ try {
     [
       "--input-type=module",
       "-e",
-      "import {openaiModelProvider, gemini, response, workflow, conversations, reporter, recoveryDetails, diagnoseAgentProtocol, diagnoseSandbox, planRecoveryRetention, pruneRecoveryRetention, assertRecoveryQuota, verifyRecoveryTransfer} from '@elie-laloum/outpost'; import {dockerSandboxProvider} from '@elie-laloum/outpost/providers/docker'; import {firecrackerSandboxProvider} from '@elie-laloum/outpost/providers/firecracker'; if(typeof firecrackerSandboxProvider!=='function')throw Error('Missing Firecracker provider'); if((await response.text({tag:'ok'}).read('<ok>yes</ok>'))!=='yes'||dockerSandboxProvider().name!=='docker')throw Error('Package import failed'); for(const item of [openaiModelProvider,conversations.capture,reporter,recoveryDetails,diagnoseSandbox,planRecoveryRetention,pruneRecoveryRetention,assertRecoveryQuota,verifyRecoveryTransfer])if(typeof item!=='function')throw Error('Missing public extension'); if(diagnoseAgentProtocol('codex').hasFailures||diagnoseAgentProtocol('gemini').hasFailures)throw Error('Protocol fixtures failed'); (await workflow('empty',[]).start()).unwrap()",
+      "import {openaiModelProvider, geminiHarness, response, workflow, conversations, reporter, recoveryDetails, diagnoseAgentProtocol, diagnoseSandbox, planRecoveryRetention, pruneRecoveryRetention, assertRecoveryQuota, verifyRecoveryTransfer} from '@elie-laloum/outpost'; import {dockerSandboxProvider} from '@elie-laloum/outpost/providers/docker'; import {firecrackerSandboxProvider} from '@elie-laloum/outpost/providers/firecracker'; if(typeof firecrackerSandboxProvider!=='function')throw Error('Missing Firecracker provider'); if((await response.text({tag:'ok'}).read('<ok>yes</ok>'))!=='yes'||dockerSandboxProvider().name!=='docker')throw Error('Package import failed'); for(const item of [openaiModelProvider,conversations.capture,reporter,recoveryDetails,diagnoseSandbox,planRecoveryRetention,pruneRecoveryRetention,assertRecoveryQuota,verifyRecoveryTransfer])if(typeof item!=='function')throw Error('Missing public extension'); if(diagnoseAgentProtocol('codex').hasFailures||diagnoseAgentProtocol('gemini').hasFailures)throw Error('Protocol fixtures failed'); (await workflow('empty',[]).start()).unwrap()",
     ],
     { cwd: temporary, stdio: "inherit" },
   );
@@ -84,10 +84,10 @@ try {
       `
     import assert from 'node:assert/strict';
     import * as api from '@elie-laloum/outpost';
-    for (const name of ['customHarness','openaiCompatible','local','docker','podman','vercel','daytona','firecracker','mountedProvider','remoteProvider']) assert.equal(name in api, false, name);
+    for (const name of ['claude','codex','gemini','customHarness','openaiCompatible','local','docker','podman','vercel','daytona','firecracker','mountedProvider','remoteProvider']) assert.equal(name in api, false, name);
     for (const name of ['claude','codex','gemini']) {
-      assert.equal(typeof api[name], 'object');
-      assert.equal(api.agent({harness:api[name].harness(),model:'arbitrary-model'}).model,'arbitrary-model');
+      assert.equal(typeof api[name+'Harness'], 'function');
+      assert.equal(api.agent({harness:api[name+'Harness'](),model:'arbitrary-model'}).model,'arbitrary-model');
     }
     for (const name of ['local','docker','podman','firecracker']) {
       const exports = await import('@elie-laloum/outpost/providers/'+name);
@@ -162,7 +162,7 @@ try {
   const consumer = join(temporary, "consumer.ts");
   writeFileSync(
     consumer,
-    `import { agent as composeAgent,  dispatch, codex, gemini, response, createSandbox, type GeminiSettings, type EgressPolicy } from '@elie-laloum/outpost';
+    `import { agent as composeAgent,  dispatch, codexHarness, geminiHarness, response, createSandbox, type GeminiSettings, type EgressPolicy } from '@elie-laloum/outpost';
 import { openaiModelProvider, type OpenAIModelProviderOptions, type ModelProvider, type ModelRequest, type ModelResult, type AgentAdapter, type SandboxProvider } from '@elie-laloum/outpost';
 import { harness, anthropicModelProvider, type Agent } from '@elie-laloum/outpost';
 // @ts-expect-error The renamed factory has no compatibility export.
@@ -175,10 +175,10 @@ const custom = harness({modelProvider:anthropicModelProvider({apiKey:'unused',ma
 const composed: Agent = composeAgent({harness:custom,model:'arbitrary'});
 // @ts-expect-error Custom harness requires a model.
 composeAgent({harness:custom});
-// @ts-expect-error Presets are namespaces, not factories.
-codex();
+// @ts-expect-error The old preset namespaces are no longer exported.
+import { claude, codex, gemini } from '@elie-laloum/outpost';
 // @ts-expect-error Model selection belongs to the agent.
-codex.harness({model:'arbitrary'});
+codexHarness({model:'arbitrary'});
 console.log(composed);
 const modelOptions: OpenAIModelProviderOptions = { baseUrl: 'http://localhost/v1', apiKey: false };
 const modelProvider: ModelProvider = openaiModelProvider(modelOptions);
@@ -211,11 +211,11 @@ const batchCapability = (lease: SandboxLease): FileTransfers | undefined => leas
 console.log(batchCapability);
 await using sandbox = await createSandbox({ sandboxProvider: localSandboxProvider() });
 await sandbox.diagnose({transfers:true});
-const result = await sandbox.dispatch({ agent: composeAgent({ harness: codex.harness({}) }), brief: { text: 'Return <n>1</n>' }, response: response.json({tag:'n', schema: value => Number(value)}) });
+const result = await sandbox.dispatch({ agent: composeAgent({ harness: codexHarness({}) }), brief: { text: 'Return <n>1</n>' }, response: response.json({tag:'n', schema: value => Number(value)}) });
 const n: number = result.value;
 const geminiSettings: GeminiSettings = { approvalMode: 'plan' };
-composeAgent({ harness: gemini.harness(geminiSettings), model: "flash" });
-const once = await dispatch({agent:composeAgent({ harness: codex.harness({}) }),sandboxProvider:localSandboxProvider(),brief:{text:'hello'}});
+composeAgent({ harness: geminiHarness(geminiSettings), model: "flash" });
+const once = await dispatch({agent:composeAgent({ harness: codexHarness({}) }),sandboxProvider:localSandboxProvider(),brief:{text:'hello'}});
 await once.fork({brief:{text:'alternative'},branch:{mode:'named',name:'outpost/alternative'},hooks:{workspaceReady:[]}});
 // @ts-expect-error Warm results cannot replace their sandbox configuration.
 await result.resume({brief:{text:'continue'},branch:{mode:'named',name:'outpost/wrong'}});
@@ -265,14 +265,14 @@ console.log(n,once.commits);
     telemetryConsumer,
     `import { metrics, trace } from '@opentelemetry/api';
 import { openTelemetry, type OpenTelemetryObserver } from '@elie-laloum/outpost/opentelemetry';
-import { task, workflow, dispatch, agent as composeAgent, codex, createReporter, type DispatchTelemetry, type WorkflowTelemetry } from '@elie-laloum/outpost';
+import { task, workflow, dispatch, agent as composeAgent, codexHarness, createReporter, type DispatchTelemetry, type WorkflowTelemetry } from '@elie-laloum/outpost';
 const telemetry: OpenTelemetryObserver = openTelemetry({tracer:trace.getTracer('consumer'),meter:metrics.getMeter('consumer')});
 const step = task({key:'sample',perform(context){context.reportUsage({input:1,cached:0,output:1});return 1;}});
 const workflowTelemetry: WorkflowTelemetry = telemetry;
 (await workflow('smoke',[step]).start({budget:{attempts:1},telemetry:workflowTelemetry})).unwrap();
 const instrumentation: DispatchTelemetry = telemetry;
 const abort = AbortSignal.abort(new Error('expected cancellation'));
-try { await dispatch({agent:composeAgent({harness:codex.harness()}),brief:{text:'unused'},signal:abort,telemetry:instrumentation}); throw new Error('Expected cancellation'); }
+try { await dispatch({agent:composeAgent({harness:codexHarness()}),brief:{text:'unused'},signal:abort,telemetry:instrumentation}); throw new Error('Expected cancellation'); }
 catch(error) { if(error !== abort.reason) throw error; }
 let text = '';
 const report = createReporter({async text(event){text += event.text;}});

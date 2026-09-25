@@ -281,23 +281,22 @@ test("experimental references explain their status before the API content in bot
       assert.ok(end < body.indexOf("## Import"), item.slug);
     }
   }
-  const stable = await page("reference/codex.md");
+  const stable = await page("reference/codexharness.md");
   assert.ok(!stable.includes(":::caution[Experimental]"));
 });
 
-test("CLI namespaces expose nested harness settings and method signatures", () => {
+test("CLI harness factories expose settings without nested methods", () => {
   const get = model(`
     interface Settings { reasoning?: "high"; }
-    declare const codex: { harness(settings?: Settings): string };
+    declare function codexHarness(settings?: Settings): string;
   `);
-  const entry = get("codex");
+  const entry = get("codexHarness");
   assert.deepEqual(
     entry.entries.map((item) => item.name),
-    ["harness", "harness.settings", "harness.settings.reasoning"],
+    ["settings", "settings.reasoning"],
   );
-  assert.equal(entry.methods[0].name, "harness");
-  assert.equal(entry.methods[0].signatures.length, 1);
-  assert.equal(entry.entries[2].owner, "Settings.reasoning");
+  assert.equal(entry.signatures.length, 1);
+  assert.equal(entry.entries[1].owner, "Settings.reasoning");
 });
 
 test("callable contracts document their properties alongside their arguments", () => {

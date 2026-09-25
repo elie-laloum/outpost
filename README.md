@@ -35,11 +35,11 @@ Generated Codex API-key workflows prepare login inside the sandbox. For account 
 After preparing the selected agent credentials and provider, library calls follow this shape. For a fully runnable version with explicit authentication, use the [dispatch workshop](https://elie-laloum.github.io/outpost/guide/agents/dispatch/).
 
 ```ts
-import { agent, dispatch, codex } from "@elie-laloum/outpost";
+import { agent, dispatch, codexHarness } from "@elie-laloum/outpost";
 
 const result = await dispatch({
   repository: "/path1/repository",
-  agent: agent({ harness: codex.harness({}) }),
+  agent: agent({ harness: codexHarness({}) }),
   branch: { mode: "integrate" },
   brief: { text: "Fix the failing tests, verify and commit." },
 });

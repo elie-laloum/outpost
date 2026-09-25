@@ -22,10 +22,14 @@ Use `AbortSignal` for caller-controlled cancellation and deadlines for bounded e
 Limits must be finite positive values where accepted; a zero value does not disable the watchdog. Use a suitably large bounded value when necessary.
 
 ```ts
-import { agent as composeAgent, dispatch, codex } from "@elie-laloum/outpost";
+import {
+  agent as composeAgent,
+  dispatch,
+  codexHarness,
+} from "@elie-laloum/outpost";
 
 await dispatch({
-  agent: composeAgent({ harness: codex.harness({}) }),
+  agent: composeAgent({ harness: codexHarness({}) }),
   brief: { text: "Inspect the repository and summarize." },
   signal: AbortSignal.timeout(120_000),
   deadlineMs: 90_000,

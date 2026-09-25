@@ -11,12 +11,12 @@ Use `reporter` for readable terminal output or `observe` for structured integrat
 import {
   agent as composeAgent,
   dispatch,
-  codex,
+  codexHarness,
   reporter,
 } from "@elie-laloum/outpost";
 
 const result = await dispatch({
-  agent: composeAgent({ harness: codex.harness({}) }),
+  agent: composeAgent({ harness: codexHarness({}) }),
   brief: { text: "Inspect and summarize the repository." },
   label: "inspection",
   observe: reporter({ label: "inspection", verbose: false }),

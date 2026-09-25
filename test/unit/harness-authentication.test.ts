@@ -1,10 +1,15 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { agent, codex, claude, gemini } from "../../src/index.ts";
+import {
+  agent,
+  codexHarness,
+  claudeHarness,
+  geminiHarness,
+} from "../../src/index.ts";
 
 test("harness authentication is explicit, validated and never exposes credentials in command arguments", () => {
   const seeded = agent({
-    harness: codex.harness({
+    harness: codexHarness({
       authentication: { mode: "login", credentials: '{"tokens":{}}' },
     }),
   });
@@ -14,7 +19,7 @@ test("harness authentication is explicit, validated and never exposes credential
   assert.throws(
     () =>
       agent({
-        harness: codex.harness({
+        harness: codexHarness({
           authentication: { mode: "login", credentials: "invalid" },
         }),
       }),
@@ -22,24 +27,24 @@ test("harness authentication is explicit, validated and never exposes credential
   );
   assert.equal(
     agent({
-      harness: codex.harness({ authentication: { mode: "login" } }),
+      harness: codexHarness({ authentication: { mode: "login" } }),
     }).authenticate?.({}),
     undefined,
   );
   assert.throws(
     () =>
-      agent({ harness: gemini.harness({ authentication: { mode: "login" } }) }),
+      agent({ harness: geminiHarness({ authentication: { mode: "login" } }) }),
     /Unsupported/,
   );
   assert.throws(
     () =>
       agent({
-        harness: codex.harness({ authentication: { mode: "oauth-token" } }),
+        harness: codexHarness({ authentication: { mode: "oauth-token" } }),
       }),
     /Unsupported/,
   );
   const api = agent({
-    harness: codex.harness({
+    harness: codexHarness({
       authentication: { mode: "api-key", environment: "KEY" },
     }),
   });
@@ -48,14 +53,14 @@ test("harness authentication is explicit, validated and never exposes credential
   assert.throws(
     () =>
       agent({
-        harness: codex.harness({
+        harness: codexHarness({
           authentication: { mode: "api-key", environment: "INVALID-NAME" },
         }),
       }),
     /environment/,
   );
   const token = agent({
-    harness: claude.harness({ authentication: { mode: "oauth-token" } }),
+    harness: claudeHarness({ authentication: { mode: "oauth-token" } }),
   });
   assert.throws(
     () =>
@@ -71,7 +76,7 @@ test("harness authentication is explicit, validated and never exposes credential
   );
   const external = agent({
     model: "arbitrary",
-    harness: codex.harness({
+    harness: codexHarness({
       modelProvider: {
         baseUrl: "http://localhost/v1",
         apiKeyEnvironment: "KEY",
@@ -81,17 +86,17 @@ test("harness authentication is explicit, validated and never exposes credential
   });
   assert.equal(external.authenticate?.({ KEY: "x" }), undefined);
   const basic = agent({
-    harness: gemini.harness({ authentication: { mode: "api-key" } }),
+    harness: geminiHarness({ authentication: { mode: "api-key" } }),
   });
   assert.equal(basic.authenticate?.({ GEMINI_API_KEY: "x" }), undefined);
 });
 
 test("CLI API keys cannot silently use unsupported environment names", () => {
-  for (const preset of [claude, gemini])
+  for (const preset of [claudeHarness, geminiHarness])
     assert.throws(
       () =>
         agent({
-          harness: preset.harness({
+          harness: preset({
             authentication: { mode: "api-key", environment: "OTHER_KEY" },
           }),
         }),

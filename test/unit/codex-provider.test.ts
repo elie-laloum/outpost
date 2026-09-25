@@ -1,11 +1,11 @@
 import { agent as composeAgent } from "../../src/domain/agent.ts";
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { codex } from "../../src/index.ts";
+import { codexHarness } from "../../src/index.ts";
 
 test("custom Responses models preserve Codex execution, continuation and secret boundaries", () => {
   const adapter = composeAgent({
-    harness: codex.harness({
+    harness: codexHarness({
       modelProvider: {
         baseUrl: "https://models.example/v1",
         apiKeyEnvironment: "MODEL_API_KEY",
@@ -42,7 +42,7 @@ test("custom Responses models preserve Codex execution, continuation and secret 
   }
   assert.equal(adapter.variables?.MODEL_API_KEY, "private-test-value");
   const noKey = composeAgent({
-    harness: codex.harness({
+    harness: codexHarness({
       modelProvider: {
         baseUrl: "http://localhost:8000/v1",
         apiKeyEnvironment: false,
@@ -53,7 +53,7 @@ test("custom Responses models preserve Codex execution, continuation and secret 
   assert.ok(!noKey.arguments?.some((arg) => arg.includes("env_key")));
   assert.ok(
     composeAgent({
-      harness: codex.harness({
+      harness: codexHarness({
         modelProvider: { baseUrl: "https://models.example/v1" },
       }),
       model: "remote",
@@ -69,7 +69,7 @@ test("custom model configuration rejects missing models and unsafe URLs without 
   assert.throws(
     () =>
       composeAgent({
-        harness: codex.harness({
+        harness: codexHarness({
           modelProvider: { baseUrl: "https://models.example" },
         }),
       }),
@@ -85,7 +85,7 @@ test("custom model configuration rejects missing models and unsafe URLs without 
     assert.throws(
       () =>
         composeAgent({
-          harness: codex.harness({ modelProvider: { baseUrl } }),
+          harness: codexHarness({ modelProvider: { baseUrl } }),
           model: "test",
         }),
       (error: unknown) =>
@@ -95,7 +95,7 @@ test("custom model configuration rejects missing models and unsafe URLs without 
   assert.throws(
     () =>
       composeAgent({
-        harness: codex.harness({
+        harness: codexHarness({
           modelProvider: {
             baseUrl: "https://models.example",
             apiKeyEnvironment: "KEY=secret",

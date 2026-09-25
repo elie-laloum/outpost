@@ -11,14 +11,14 @@ Inspect the original error and its recovery metadata before deleting a workspace
 import {
   agent as composeAgent,
   dispatch,
-  codex,
+  codexHarness,
   OutpostError,
   recoveryDetails,
 } from "@elie-laloum/outpost";
 
 try {
   await dispatch({
-    agent: composeAgent({ harness: codex.harness({}) }),
+    agent: composeAgent({ harness: codexHarness({}) }),
     brief: { text: "Implement and test the fix." },
   });
 } catch (error) {

@@ -8,10 +8,14 @@ sidebar:
 Fixez un nombre maximal de passes pour laisser un agent itérer jusqu’à l’apparition d’un marqueur de fin.
 
 ```ts
-import { agent as composeAgent, dispatch, codex } from "@elie-laloum/outpost";
+import {
+  agent as composeAgent,
+  dispatch,
+  codexHarness,
+} from "@elie-laloum/outpost";
 
 const result = await dispatch({
-  agent: composeAgent({ harness: codex.harness({}) }),
+  agent: composeAgent({ harness: codexHarness({}) }),
   brief: { file: "brief.md" },
   passes: 5,
   until: ["<outpost>done</outpost>"],

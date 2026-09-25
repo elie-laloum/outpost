@@ -7,7 +7,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFile, mkdir, writeFile, readlink, lstat } from "node:fs/promises";
 import { join } from "node:path";
-import { createSandbox, codex, claude } from "../src/index.ts";
+import { createSandbox, codexHarness, claudeHarness } from "../src/index.ts";
 import { dockerSandboxProvider } from "../src/providers/docker.ts";
 import { podmanSandboxProvider } from "../src/providers/podman.ts";
 import { repository } from "./helpers.ts";
@@ -34,7 +34,7 @@ test(
         image: containerImage,
         networks: "none",
       }),
-      agent: composeAgent({ harness: codex.harness({}) }),
+      agent: composeAgent({ harness: codexHarness({}) }),
       branch: { mode: "named", name: "container-test" },
       logging: false,
     });
@@ -52,8 +52,8 @@ test(
         "container change\n",
       );
       for (const adapter of [
-        composeAgent({ harness: codex.harness({}) }),
-        composeAgent({ harness: claude.harness({}) }),
+        composeAgent({ harness: codexHarness({}) }),
+        composeAgent({ harness: claudeHarness({}) }),
       ]) {
         const version = await box.command({
           executable: adapter.name,

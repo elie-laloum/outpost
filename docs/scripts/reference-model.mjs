@@ -49,7 +49,6 @@ export function referenceModel(symbol, declaration, checker) {
       ]
     : properties(type, checker);
   const entries = [];
-  const methods = [];
   const add = (property, prefix = "", container = type) => {
     const location =
       property.valueDeclaration ?? property.declarations?.[0] ?? declaration;
@@ -91,25 +90,6 @@ export function referenceModel(symbol, declaration, checker) {
   };
   for (const member of members) {
     const fieldType = add(member);
-    if (!contract && ["codex", "claude", "gemini"].includes(symbol.name)) {
-      const calls = checker.getSignaturesOfType(
-        fieldType,
-        ts.SignatureKind.Call,
-      );
-      if (calls.length) {
-        methods.push({ name: member.name, signatures: calls });
-        for (const call of calls) {
-          for (const parameter of call.parameters) {
-            const parameterType = add(parameter, `${member.name}.`, fieldType);
-            if (["options", "settings"].includes(parameter.name)) {
-              const settings = checker.getNonNullableType(parameterType);
-              for (const property of properties(settings, checker))
-                add(property, `${member.name}.${parameter.name}.`, settings);
-            }
-          }
-        }
-      }
-    }
     if (signatures.length && ["options", "settings"].includes(member.name)) {
       const optionsType = checker.getNonNullableType(fieldType);
       for (const property of properties(optionsType, checker))
@@ -126,5 +106,5 @@ export function referenceModel(symbol, declaration, checker) {
       if (previous.type !== entry.type) previous.type += ` | ${entry.type}`;
     }
   }
-  return { contract, signatures, methods, entries: [...unique.values()] };
+  return { contract, signatures, entries: [...unique.values()] };
 }

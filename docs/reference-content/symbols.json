@@ -35,18 +35,6 @@
     "Define an agent workflow node whose request callback selects a repository, provider, agent and dispatch options for each attempt. It calls dispatch to allocate and close its own sandbox and returns DispatchResult. Use separate nodes to work on separate repositories; there is no shared Git transaction or automatic push.",
     "Définit un nœud d’agent dont le callback request choisit le dépôt, le provider, l’agent et les options de dispatch à chaque tentative. Il appelle dispatch pour allouer et fermer sa propre sandbox et renvoie DispatchResult. Des nœuds distincts peuvent traiter des dépôts distincts ; aucune transaction Git commune ni aucun push automatique ne les relie."
   ],
-  "claude": [
-    "Namespace exposing harness() to configure the Claude Code CLI. Compose the returned harness with agent({ harness, model }) to select a model independently. The CLI owns its internal model/tool loop.",
-    "Espace de noms exposant harness() pour configurer Claude Code. Composez le harness avec agent({ harness, model }) pour sélectionner séparément le modèle. La CLI possède sa boucle interne modèle/outils."
-  ],
-  "codex": [
-    "Namespace exposing harness() to configure the Codex CLI. Compose the returned harness with agent({ harness, model }) to select a model independently. The CLI owns its internal model/tool loop.",
-    "Espace de noms exposant harness() pour configurer Codex. Composez le harness avec agent({ harness, model }) pour sélectionner séparément le modèle. La CLI possède sa boucle interne modèle/outils."
-  ],
-  "gemini": [
-    "Namespace exposing harness() to configure the Gemini CLI CLI. Compose the returned harness with agent({ harness, model }) to select a model independently. The CLI owns its internal model/tool loop.",
-    "Espace de noms exposant harness() pour configurer Gemini CLI. Composez le harness avec agent({ harness, model }) pour sélectionner séparément le modèle. La CLI possède sa boucle interne modèle/outils."
-  ],
   "agentVersions": [
     "Expose the Claude, Codex and Gemini CLI versions used as compatibility references by bundled protocol fixtures and generated images. These values do not query the installed binaries or prove live account access.",
     "Expose les versions des CLI Claude, Codex et Gemini servant de références aux fixtures de protocole et aux images générées. Ces valeurs n’interrogent pas les binaires installés et ne prouvent pas l’accès à un compte."
@@ -318,5 +306,17 @@
   "anthropicModelProvider": [
     "Configure an Anthropic Messages text transport with an explicit output limit and optional system-prefix caching. The harness supplies the model per request. Cache reads and writes are normalized into usage; tool requests, streaming and incomplete responses are rejected.",
     "Configure un transport texte Anthropic Messages avec limite de sortie explicite et cache optionnel du préfixe système. Le harness fournit le modèle par requête. Les lectures et écritures de cache sont normalisées dans l’usage ; outils, streaming et réponses incomplètes sont refusés."
+  ],
+  "claudeHarness": [
+    "Create a Claude Code harness from execution, authentication and conversation settings without starting the CLI. Compose it with agent({ harness, model }) to select a model independently. The CLI owns its internal model/tool loop.",
+    "Crée un harness Claude Code à partir des réglages d’exécution, d’authentification et de conversation, sans lancer la CLI. Composez-le avec agent({ harness, model }) pour sélectionner séparément le modèle. La CLI possède sa boucle interne modèle/outils."
+  ],
+  "codexHarness": [
+    "Create a Codex harness from execution, authentication and conversation settings without starting the CLI. Compose it with agent({ harness, model }) to select a model independently. The CLI owns its internal model/tool loop.",
+    "Crée un harness Codex à partir des réglages d’exécution, d’authentification et de conversation, sans lancer la CLI. Composez-le avec agent({ harness, model }) pour sélectionner séparément le modèle. La CLI possède sa boucle interne modèle/outils."
+  ],
+  "geminiHarness": [
+    "Create a Gemini CLI harness from execution, authentication and conversation settings without starting the CLI. Compose it with agent({ harness, model }) to select a model independently. The CLI owns its internal model/tool loop.",
+    "Crée un harness Gemini CLI à partir des réglages d’exécution, d’authentification et de conversation, sans lancer la CLI. Composez-le avec agent({ harness, model }) pour sélectionner séparément le modèle. La CLI possède sa boucle interne modèle/outils."
   ]
 }

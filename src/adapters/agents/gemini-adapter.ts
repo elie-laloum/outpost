@@ -19,23 +19,23 @@ function bindGemini(settings: GeminiSettings = {}): AgentAdapter {
   } satisfies AgentAdapter);
 }
 
-export const gemini = Object.freeze({
-  harness(settings: Omit<GeminiSettings, "model"> = {}): CliHarness {
-    invariant(
-      settings && typeof settings === "object" && !("model" in settings),
-      "Set the model on agent(), not on its harness",
-    );
-    const configured = Object.freeze({
-      ...settings,
-      variables: Object.freeze({ ...settings.variables }),
-    });
-    return Object.freeze({
-      kind: "cli",
-      bind: (model?: string) =>
-        bindGemini({
-          ...configured,
-          ...(model === undefined ? {} : { model }),
-        }),
-    });
-  },
-});
+export function geminiHarness(
+  settings: Omit<GeminiSettings, "model"> = {},
+): CliHarness {
+  invariant(
+    settings && typeof settings === "object" && !("model" in settings),
+    "Set the model on agent(), not on its harness",
+  );
+  const configured = Object.freeze({
+    ...settings,
+    variables: Object.freeze({ ...settings.variables }),
+  });
+  return Object.freeze({
+    kind: "cli",
+    bind: (model?: string) =>
+      bindGemini({
+        ...configured,
+        ...(model === undefined ? {} : { model }),
+      }),
+  });
+}

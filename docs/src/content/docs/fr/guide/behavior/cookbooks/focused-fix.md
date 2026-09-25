@@ -8,10 +8,14 @@ sidebar:
 Utilisez cette recette pour un défaut bien délimité. Prérequis : [installation commune](../../../cookbook/), connexion Claude et projet npm avec lockfile et tests. Adaptez le nom de branche et la description.
 
 ```ts
-import { agent as composeAgent, dispatch, claude } from "@elie-laloum/outpost";
+import {
+  agent as composeAgent,
+  dispatch,
+  claudeHarness,
+} from "@elie-laloum/outpost";
 
 const result = await dispatch({
-  agent: composeAgent({ harness: claude.harness({}) }),
+  agent: composeAgent({ harness: claudeHarness({}) }),
   branch: { mode: "named", name: "fix/input-validation" },
   hooks: {
     sandboxReady: [

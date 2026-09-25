@@ -10,17 +10,17 @@ An adapter configures the native agent CLI. It is independent from the sandbox p
 ```ts
 import {
   agent as composeAgent,
-  claude,
-  codex,
+  claudeHarness,
+  codexHarness,
   agentVersions,
 } from "@elie-laloum/outpost";
 
 const reviewer = composeAgent({
-  harness: claude.harness({ reasoning: "high", permissions: "acceptEdits" }),
+  harness: claudeHarness({ reasoning: "high", permissions: "acceptEdits" }),
   model: "sonnet",
 });
 const implementer = composeAgent({
-  harness: codex.harness({
+  harness: codexHarness({
     reasoning: "high",
     approvalReviewer: "auto_review",
   }),

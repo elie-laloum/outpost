@@ -11,12 +11,12 @@ Utilisez `reporter` pour une sortie terminal lisible ou `observe` pour une inté
 import {
   agent as composeAgent,
   dispatch,
-  codex,
+  codexHarness,
   reporter,
 } from "@elie-laloum/outpost";
 
 const result = await dispatch({
-  agent: composeAgent({ harness: codex.harness({}) }),
+  agent: composeAgent({ harness: codexHarness({}) }),
   brief: { text: "Examine et résume le dépôt." },
   label: "inspection",
   observe: reporter({ label: "inspection", verbose: false }),

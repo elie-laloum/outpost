@@ -35,12 +35,12 @@ Mount a read-only credential seed, then copy it into the writable ephemeral home
 import {
   agent as composeAgent,
   createSandbox,
-  codex,
+  codexHarness,
 } from "@elie-laloum/outpost";
 import { dockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
 await using sandbox = await createSandbox({
-  agent: composeAgent({ harness: codex.harness({}) }),
+  agent: composeAgent({ harness: codexHarness({}) }),
   sandboxProvider: dockerSandboxProvider({
     volumes: [
       {
@@ -82,11 +82,11 @@ Declare `OPENAI_API_KEY=` in `.outpost/.env` and provide the value through the p
 import {
   agent as composeAgent,
   createSandbox,
-  codex,
+  codexHarness,
 } from "@elie-laloum/outpost";
 
 await using sandbox = await createSandbox({
-  agent: composeAgent({ harness: codex.harness({}) }),
+  agent: composeAgent({ harness: codexHarness({}) }),
   hooks: {
     sandboxReady: [
       {
@@ -122,12 +122,16 @@ Continue with [environment precedence](../../../agents/environment/) or [cookboo
 Use a custom provider for a service implementing the OpenAI Responses API, including streamed responses and Codex tool calls. Chat Completions-only endpoints are not supported. Supply the model name explicitly; model names and availability belong to that service.
 
 ```ts
-import { agent as composeAgent, codex, dispatch } from "@elie-laloum/outpost";
+import {
+  agent as composeAgent,
+  codexHarness,
+  dispatch,
+} from "@elie-laloum/outpost";
 import { dockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
 const result = await dispatch({
   agent: composeAgent({
-    harness: codex.harness({
+    harness: codexHarness({
       modelProvider: {
         baseUrl: "https://models.example.com/v1",
         apiKeyEnvironment: "MODEL_API_KEY",

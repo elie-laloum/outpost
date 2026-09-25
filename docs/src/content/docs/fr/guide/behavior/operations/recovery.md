@@ -11,14 +11,14 @@ Examinez l’erreur originale et ses informations de récupération avant de sup
 import {
   agent as composeAgent,
   dispatch,
-  codex,
+  codexHarness,
   OutpostError,
   recoveryDetails,
 } from "@elie-laloum/outpost";
 
 try {
   await dispatch({
-    agent: composeAgent({ harness: codex.harness({}) }),
+    agent: composeAgent({ harness: codexHarness({}) }),
     brief: { text: "Implémente et teste la correction." },
   });
 } catch (error) {

@@ -19,23 +19,23 @@ function bindClaude(settings: ClaudeSettings = {}): AgentAdapter {
   } satisfies AgentAdapter);
 }
 
-export const claude = Object.freeze({
-  harness(settings: Omit<ClaudeSettings, "model"> = {}): CliHarness {
-    invariant(
-      settings && typeof settings === "object" && !("model" in settings),
-      "Set the model on agent(), not on its harness",
-    );
-    const configured = Object.freeze({
-      ...settings,
-      variables: Object.freeze({ ...settings.variables }),
-    });
-    return Object.freeze({
-      kind: "cli",
-      bind: (model?: string) =>
-        bindClaude({
-          ...configured,
-          ...(model === undefined ? {} : { model }),
-        }),
-    });
-  },
-});
+export function claudeHarness(
+  settings: Omit<ClaudeSettings, "model"> = {},
+): CliHarness {
+  invariant(
+    settings && typeof settings === "object" && !("model" in settings),
+    "Set the model on agent(), not on its harness",
+  );
+  const configured = Object.freeze({
+    ...settings,
+    variables: Object.freeze({ ...settings.variables }),
+  });
+  return Object.freeze({
+    kind: "cli",
+    bind: (model?: string) =>
+      bindClaude({
+        ...configured,
+        ...(model === undefined ? {} : { model }),
+      }),
+  });
+}

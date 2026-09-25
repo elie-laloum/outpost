@@ -11,11 +11,11 @@ The release notes below are synchronized from the root `CHANGELOG.md`, the singl
 
 - Add `workflow.start({ telemetry })` with an SDK-independent `WorkflowTelemetry` contract, independent custom observers and isolated callback errors. Preserve `observe: telemetry.observe` compatibility.
 - Instrument complete dispatch operations with optional OpenTelemetry telemetry and add createReporter() with typed asynchronous handlers and explicit flush().
-- Replace agent factories with `agent({ harness, model })` and `codex.harness()`, `claude.harness()` and `gemini.harness()`. Model identifiers remain free-form strings; the selected CLI or service validates availability.
+- Replace agent factories with `agent({ harness, model })` and `codexHarness()`, `claudeHarness()` and `geminiHarness()`. Model identifiers remain free-form strings; the selected CLI or service validates availability.
 - Add `harness({ modelProvider, run })` callbacks with scoped model requests, sandbox operations, cancellation and usage accounting. Interactive attachment and native custom conversations are unsupported; the built-in model/tool loop remains planned.
 - Replace the direct text client with `openaiModelProvider` and add `anthropicModelProvider`, including explicit system-prefix caching and normalized cache usage. No authenticated service campaign is implied by local HTTP tests.
 - Rename sandbox factories to `*SandboxProvider`, configuration to `sandboxProvider` and the CLI option to `--sandbox-provider`. These are breaking API changes without compatibility aliases. Legacy resource records are reported as incompatible and are not deleted.
-- Share explicit CLI authentication preparation between library harnesses and generated workflows. Update package checks, examples and the English/French reference, including nested harness methods.
+- Share explicit CLI authentication preparation between library harnesses and generated workflows. Update package checks, examples and the English/French reference, including the direct harness factories.
 
 ## 4.2.0
 

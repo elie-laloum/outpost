@@ -8,10 +8,14 @@ sidebar:
 Un brief prend la forme `{ text }` ou `{ file, values? }`. Fournissez une seule de ces formes. Le texte inline est littéral et n’est jamais développé.
 
 ```ts
-import { agent as composeAgent, dispatch, codex } from "@elie-laloum/outpost";
+import {
+  agent as composeAgent,
+  dispatch,
+  codexHarness,
+} from "@elie-laloum/outpost";
 
 await dispatch({
-  agent: composeAgent({ harness: codex.harness({}) }),
+  agent: composeAgent({ harness: codexHarness({}) }),
   brief: {
     file: "brief.md",
     values: { OBJECTIVE: "Corriger la validation" },

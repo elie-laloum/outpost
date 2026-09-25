@@ -18,7 +18,7 @@ import { join } from "node:path";
 import {
   agent as composeAgent,
   createSandbox,
-  codex,
+  codexHarness,
 } from "@elie-laloum/outpost";
 import { dockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
@@ -27,7 +27,7 @@ const lock = await readFile(join(repository, "package-lock.json"));
 const key = `npm-v11-linux-amd64-${createHash("sha256").update(lock).digest("hex")}`;
 const box = await createSandbox({
   repository,
-  agent: composeAgent({ harness: codex.harness({}) }),
+  agent: composeAgent({ harness: codexHarness({}) }),
   sandboxProvider: dockerSandboxProvider({
     image: "outpost:project",
     caches: [{ name: "npm", key }],

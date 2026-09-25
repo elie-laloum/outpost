@@ -20,7 +20,7 @@ export function starter(options: InitOptions): string {
 import { resolve } from "node:path";
 import { homedir } from "node:os";
 import { parseEnv } from "node:util";
-import { dispatch, agent, ${agent}, OutpostError, reporter } from "@elie-laloum/outpost";
+import { dispatch, agent, ${agent}Harness, OutpostError, reporter } from "@elie-laloum/outpost";
 import { ${sandboxProvider}SandboxProvider } from "@elie-laloum/outpost/providers/${sandboxProvider}";
 
 // Paths are relative to this workflow, regardless of where Node is launched.
@@ -34,7 +34,7 @@ const variables = Object.fromEntries(
 );
 ${authenticationSource(options)}
 const runtime = {
-  agent: agent({ harness: ${agent}.harness({ authentication${modelProvider ? ", " + modelProvider : ""} }), ${model} }),
+  agent: agent({ harness: ${agent}Harness({ authentication${modelProvider ? ", " + modelProvider : ""} }), ${model} }),
   sandboxProvider: ${sandboxProvider}SandboxProvider({ ${image}variables }),
 };
 const objective = process.argv.slice(2).join(" ") || "Inspect this repository and implement one useful improvement.";

@@ -11,11 +11,11 @@ Hooks prepare resources at explicit lifecycle stages. Supply arrays of `Command`
 import {
   agent as composeAgent,
   createSandbox,
-  codex,
+  codexHarness,
 } from "@elie-laloum/outpost";
 
 await using sandbox = await createSandbox({
-  agent: composeAgent({ harness: codex.harness({}) }),
+  agent: composeAgent({ harness: codexHarness({}) }),
   copies: [".env.test"],
   hooks: {
     workspaceReady: [{ executable: "git", arguments: ["status", "--short"] }],

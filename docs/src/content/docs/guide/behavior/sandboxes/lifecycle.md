@@ -11,19 +11,19 @@ Keep a sandbox warm when sequential jobs need the same environment. Provisioning
 import {
   agent as composeAgent,
   createSandbox,
-  codex,
-  claude,
+  codexHarness,
+  claudeHarness,
 } from "@elie-laloum/outpost";
 
 await using sandbox = await createSandbox({
-  agent: composeAgent({ harness: codex.harness({}) }),
+  agent: composeAgent({ harness: codexHarness({}) }),
   branch: { mode: "named", name: "feature/validation" },
 });
 const implementation = await sandbox.dispatch({
   brief: { text: "Implement validation and commit it." },
 });
 await sandbox.dispatch({
-  agent: composeAgent({ harness: claude.harness({}) }),
+  agent: composeAgent({ harness: claudeHarness({}) }),
   brief: { text: "Review the implementation, run tests and commit any fixes." },
 });
 console.log(implementation.commits, sandbox.workspace.branch);

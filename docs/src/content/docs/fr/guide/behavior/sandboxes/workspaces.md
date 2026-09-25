@@ -11,8 +11,8 @@ Créez le workspace séparément lorsqu’il doit survivre aux sandboxes individ
 import {
   agent as composeAgent,
   openWorkspace,
-  codex,
-  claude,
+  codexHarness,
+  claudeHarness,
 } from "@elie-laloum/outpost";
 
 await using workspace = await openWorkspace({
@@ -21,11 +21,11 @@ await using workspace = await openWorkspace({
   label: "validation",
 });
 await workspace.dispatch({
-  agent: composeAgent({ harness: codex.harness({}) }),
+  agent: composeAgent({ harness: codexHarness({}) }),
   brief: { text: "Implémente la fonctionnalité et crée un commit." },
 });
 await workspace.dispatch({
-  agent: composeAgent({ harness: claude.harness({}) }),
+  agent: composeAgent({ harness: claudeHarness({}) }),
   brief: { text: "Relis les changements et commite les corrections." },
 });
 ```

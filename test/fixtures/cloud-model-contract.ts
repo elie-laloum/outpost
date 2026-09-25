@@ -1,8 +1,8 @@
 import { agent as composeAgent } from "../../src/domain/agent.ts";
 import assert from "node:assert/strict";
 import { posix } from "node:path";
-import { claude } from "../../src/adapters/agents/claude-adapter.ts";
-import { codex } from "../../src/adapters/agents/codex-adapter.ts";
+import { claudeHarness } from "../../src/adapters/agents/claude-adapter.ts";
+import { codexHarness } from "../../src/adapters/agents/codex-adapter.ts";
 import type { SandboxLease } from "../../src/domain/sandbox.types.ts";
 import type { CompatibilityCheck } from "./cloud-compatibility.types.ts";
 
@@ -62,8 +62,8 @@ export async function verifyCloudModels(
     const settings = { saveConversations: false, ...(model ? { model } : {}) };
     const adapter =
       name === "claude"
-        ? composeAgent({ harness: claude.harness(settings) })
-        : composeAgent({ harness: codex.harness(settings) });
+        ? composeAgent({ harness: claudeHarness(settings) })
+        : composeAgent({ harness: codexHarness(settings) });
     const request = adapter.request({
       text: "Reply with exactly OUTPOST_AUTH_OK. Do not use tools or modify any files.",
     });

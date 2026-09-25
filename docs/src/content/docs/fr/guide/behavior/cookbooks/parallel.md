@@ -12,7 +12,7 @@ import {
   agent as composeAgent,
   isolatedTask,
   workflow,
-  claude,
+  claudeHarness,
 } from "@elie-laloum/outpost";
 
 const run = Date.now().toString(36);
@@ -21,7 +21,7 @@ const investigations = topics.map((topic, index) =>
   isolatedTask({
     key: "audit-" + index,
     request: () => ({
-      agent: composeAgent({ harness: claude.harness({}) }),
+      agent: composeAgent({ harness: claudeHarness({}) }),
       branch: { mode: "named", name: "audit/" + run + "-" + index },
       brief: {
         text:

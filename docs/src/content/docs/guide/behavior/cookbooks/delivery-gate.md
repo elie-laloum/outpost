@@ -11,7 +11,7 @@ This recipe explicitly permits integration into the host branch after validation
 import {
   agent as composeAgent,
   createSandbox,
-  claude,
+  claudeHarness,
   agentTask,
   commandTask,
   task,
@@ -20,7 +20,7 @@ import {
 } from "@elie-laloum/outpost";
 
 await using sandbox = await createSandbox({
-  agent: composeAgent({ harness: claude.harness({}) }),
+  agent: composeAgent({ harness: claudeHarness({}) }),
   branch: { mode: "integrate" },
   hooks: {
     sandboxReady: [

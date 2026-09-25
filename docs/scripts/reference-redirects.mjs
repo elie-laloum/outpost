@@ -1,4 +1,11 @@
 export const referenceRedirects = {
+  "/reference/claude/": "/reference/claudeharness/",
+  "/reference/codex/": "/reference/codexharness/",
+  "/reference/gemini/": "/reference/geminiharness/",
+  "/fr/reference/claude/": "/fr/reference/claudeharness/",
+  "/fr/reference/codex/": "/fr/reference/codexharness/",
+  "/fr/reference/gemini/": "/fr/reference/geminiharness/",
+
   "/reference/customharness/": "/reference/function-harness/",
   "/fr/reference/customharness/": "/fr/reference/function-harness/",
   "/reference/docker/": "/reference/dockersandboxprovider/",

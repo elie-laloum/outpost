@@ -11,19 +11,19 @@ Gardez une sandbox active lorsque plusieurs tâches successives ont besoin du m�
 import {
   agent as composeAgent,
   createSandbox,
-  codex,
-  claude,
+  codexHarness,
+  claudeHarness,
 } from "@elie-laloum/outpost";
 
 await using sandbox = await createSandbox({
-  agent: composeAgent({ harness: codex.harness({}) }),
+  agent: composeAgent({ harness: codexHarness({}) }),
   branch: { mode: "named", name: "feature/validation" },
 });
 const implementation = await sandbox.dispatch({
   brief: { text: "Implémente la validation et crée un commit." },
 });
 await sandbox.dispatch({
-  agent: composeAgent({ harness: claude.harness({}) }),
+  agent: composeAgent({ harness: claudeHarness({}) }),
   brief: { text: "Relis le code, lance les tests et commite les corrections." },
 });
 console.log(implementation.commits, sandbox.workspace.branch);

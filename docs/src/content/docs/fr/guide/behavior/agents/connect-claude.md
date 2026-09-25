@@ -31,11 +31,11 @@ Déclarez plutôt `ANTHROPIC_API_KEY=` et fournissez cette variable. Choisissez 
 import {
   agent as composeAgent,
   createSandbox,
-  claude,
+  claudeHarness,
 } from "@elie-laloum/outpost";
 
 await using sandbox = await createSandbox({
-  agent: composeAgent({ harness: claude.harness({}) }),
+  agent: composeAgent({ harness: claudeHarness({}) }),
 });
 const check = await sandbox.command({
   executable: "sh",

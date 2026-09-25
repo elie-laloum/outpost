@@ -8,11 +8,15 @@ sidebar:
 `localSandboxProvider()` runs commands directly as your OS account. It is useful for trusted local automation or contract testing without a container engine.
 
 ```ts
-import { agent as composeAgent, dispatch, codex } from "@elie-laloum/outpost";
+import {
+  agent as composeAgent,
+  dispatch,
+  codexHarness,
+} from "@elie-laloum/outpost";
 import { localSandboxProvider } from "@elie-laloum/outpost/providers/local";
 
 await dispatch({
-  agent: composeAgent({ harness: codex.harness({}) }),
+  agent: composeAgent({ harness: codexHarness({}) }),
   sandboxProvider: localSandboxProvider({
     variables: { PROJECT_MODE: "test" },
   }),

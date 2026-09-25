@@ -11,13 +11,13 @@ Utilisez cette recette pour préserver un travail partiel. Préparez l’[instal
 import {
   agent as composeAgent,
   dispatch,
-  claude,
+  claudeHarness,
   recoveryDetails,
 } from "@elie-laloum/outpost";
 
 try {
   const result = await dispatch({
-    agent: composeAgent({ harness: claude.harness({}) }),
+    agent: composeAgent({ harness: claudeHarness({}) }),
     branch: { mode: "named", name: "fix/recoverable-parser" },
     brief: { text: "Fix parser errors, run tests and commit." },
     signal: AbortSignal.timeout(300_000),

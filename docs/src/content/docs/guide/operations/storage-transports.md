@@ -132,7 +132,7 @@ The bucket or compatible endpoint must support conditional PUT and DELETE, compl
 | Inspection and quotas | `inspectRecovery({ transporter, resources: true })`, `assertRecoveryQuota({ transporter, maxBytes })`                                              | Observe object payloads and resource records. Remote PID ownership remains unverified.                                                     |
 | Retention             | `planRecoveryRetention({ transporter, policy })`, then `pruneRecoveryRetention(plan, { transporter })`                                             | Only explicitly selected closed journals are eligible. Both group membership and revisions are revalidated.                                |
 
-An adapter can be composed as `{ ...agent({ harness: claude.harness() }), storage: transportConversations("claude", { transporter, namespace: "project-a" }) }`. Native authentication remains independent of transcript storage.
+An adapter can be composed as `{ ...agent({ harness: claudeHarness() }), storage: transportConversations("claude", { transporter, namespace: "project-a" }) }`. Native authentication remains independent of transcript storage.
 
 ## Ownership and interrupted writes
 

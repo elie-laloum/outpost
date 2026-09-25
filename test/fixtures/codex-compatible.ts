@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { codex } from "../../src/index.ts";
+import { codexHarness } from "../../src/index.ts";
 import { dockerSandboxProvider } from "../../src/providers/docker.ts";
 import { podmanSandboxProvider } from "../../src/providers/podman.ts";
 
@@ -24,7 +24,7 @@ try {
   });
   try {
     const request = composeAgent({
-      harness: codex.harness({
+      harness: codexHarness({
         modelProvider: {
           baseUrl: "http://127.0.0.1:18181/v1",
           apiKeyEnvironment: false,

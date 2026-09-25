@@ -3,9 +3,9 @@ import { test } from "node:test";
 import {
   agent,
   harness,
-  codex,
-  claude,
-  gemini,
+  codexHarness,
+  claudeHarness,
+  geminiHarness,
   dispatch,
   createSandbox,
   attach,
@@ -28,10 +28,10 @@ const modelProvider: ModelProvider = {
 };
 
 test("agents compose without effects and require a model only for custom harnesses", () => {
-  for (const preset of [codex, claude, gemini]) {
-    assert.equal(typeof preset, "object");
+  for (const preset of [codexHarness, claudeHarness, geminiHarness]) {
+    assert.equal(typeof preset, "function");
     const selected = agent({
-      harness: preset.harness(),
+      harness: preset(),
       model: "arbitrary-future-model",
     });
     assert.ok(
@@ -39,11 +39,8 @@ test("agents compose without effects and require a model only for custom harness
         .request({ text: "hello" })
         .arguments?.includes("arbitrary-future-model"),
     );
-    assert.equal(agent({ harness: preset.harness() }).model, undefined);
-    assert.throws(
-      () => agent({ harness: preset.harness(), model: " " }),
-      /Model name/,
-    );
+    assert.equal(agent({ harness: preset() }).model, undefined);
+    assert.throws(() => agent({ harness: preset(), model: " " }), /Model name/);
   }
   const configuredHarness = harness({
     modelProvider,
@@ -56,8 +53,8 @@ test("agents compose without effects and require a model only for custom harness
   );
   // @ts-expect-error A provider is not an executable harness.
   assert.throws(() => agent({ harness: modelProvider, model: "m" }), /harness/);
-  // @ts-expect-error The former factory call is no longer public.
-  assert.throws(() => codex(), TypeError);
+  // @ts-expect-error Presets are functions without a namespace method.
+  assert.throws(() => codexHarness.harness(), TypeError);
 });
 
 test("custom dispatch uses its sandbox and counts each provider request once", async (t) => {

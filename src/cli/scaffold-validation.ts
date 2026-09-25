@@ -1,5 +1,5 @@
 import { agent as composeAgent } from "../domain/agent.ts";
-import { codex } from "../adapters/agents/codex-adapter.ts";
+import { codexHarness } from "../adapters/agents/codex-adapter.ts";
 import { invariant } from "../domain/errors.ts";
 import { supportedAgents, supportedProviders } from "./scaffold.constants.ts";
 import type { InitOptions } from "./scaffold.types.ts";
@@ -23,7 +23,7 @@ export function validateInitialization(options: InitOptions): void {
       "Custom Responses providers require Codex and api-key authentication",
     );
     composeAgent({
-      harness: codex.harness({
+      harness: codexHarness({
         modelProvider: {
           baseUrl: options.baseUrl,
           ...(options.apiKeyEnvironment

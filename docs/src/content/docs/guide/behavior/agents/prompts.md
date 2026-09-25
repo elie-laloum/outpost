@@ -8,10 +8,14 @@ sidebar:
 A brief is either `{ text }` or `{ file, values? }`. Supply exactly one form. Inline text is literal: it is never expanded.
 
 ```ts
-import { agent as composeAgent, dispatch, codex } from "@elie-laloum/outpost";
+import {
+  agent as composeAgent,
+  dispatch,
+  codexHarness,
+} from "@elie-laloum/outpost";
 
 await dispatch({
-  agent: composeAgent({ harness: codex.harness({}) }),
+  agent: composeAgent({ harness: codexHarness({}) }),
   brief: { file: "brief.md", values: { OBJECTIVE: "Fix validation" } },
   diagnostic: console.log,
   warn: console.warn,

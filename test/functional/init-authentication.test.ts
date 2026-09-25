@@ -168,7 +168,7 @@ test("generated Vercel starter forwards a declared parent token without a workfl
     `import assert from "node:assert/strict";
 export class OutpostError extends Error {}
 export const reporter=()=>()=>{};
-export const claude={harness:()=>({name:"claude"})};
+export const claudeHarness=()=>({name:"claude"});
 export const agent=(options)=>options;
 export const vercelSandboxProvider=(options)=>options;
 export async function dispatch(options) {

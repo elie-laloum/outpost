@@ -41,7 +41,7 @@ Par exemple, `--directory /work/workflow1 --repository ../backend` cible `/work/
 import { resolve } from "node:path";
 import {
   agent as composeAgent,
-  claude,
+  claudeHarness,
   dispatch,
   reporter,
 } from "@elie-laloum/outpost";
@@ -49,7 +49,7 @@ import { dockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
 const result = await dispatch({
   repository: resolve(import.meta.dirname, "../backend"),
-  agent: composeAgent({ harness: claude.harness({}) }),
+  agent: composeAgent({ harness: claudeHarness({}) }),
   sandboxProvider: dockerSandboxProvider({ image: "outpost:workflow1" }),
   branch: { mode: "named", name: "outpost/api-change" },
   brief: { text: "Implémente le changement d’API, teste et crée un commit." },

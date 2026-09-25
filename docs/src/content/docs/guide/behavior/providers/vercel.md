@@ -12,11 +12,15 @@ npm install @vercel/sandbox
 ```
 
 ```ts
-import { agent as composeAgent, dispatch, codex } from "@elie-laloum/outpost";
+import {
+  agent as composeAgent,
+  dispatch,
+  codexHarness,
+} from "@elie-laloum/outpost";
 import { vercelSandboxProvider } from "@elie-laloum/outpost/providers/vercel";
 
 await dispatch({
-  agent: composeAgent({ harness: codex.harness({}) }),
+  agent: composeAgent({ harness: codexHarness({}) }),
   sandboxProvider: vercelSandboxProvider({
     create: { timeout: 30 * 60 * 1000 },
   }),
@@ -44,7 +48,7 @@ Vercel allocation credentials do not sign Claude Code into your account. When ch
 ```ts
 import {
   agent as composeAgent,
-  claude,
+  claudeHarness,
   createSandbox,
 } from "@elie-laloum/outpost";
 import { vercelSandboxProvider } from "@elie-laloum/outpost/providers/vercel";
@@ -52,7 +56,7 @@ import { vercelSandboxProvider } from "@elie-laloum/outpost/providers/vercel";
 const token = process.env.CLAUDE_CODE_OAUTH_TOKEN;
 if (!token) throw new Error("Set CLAUDE_CODE_OAUTH_TOKEN before allocation");
 await using sandbox = await createSandbox({
-  agent: composeAgent({ harness: claude.harness({}) }),
+  agent: composeAgent({ harness: claudeHarness({}) }),
   sandboxProvider: vercelSandboxProvider({
     create: { timeout: 300_000 },
     variables: { CLAUDE_CODE_OAUTH_TOKEN: token },

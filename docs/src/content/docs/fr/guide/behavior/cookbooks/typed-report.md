@@ -11,12 +11,12 @@ Utilisez cette recette lorsqu’un tableau de bord ou une tâche attend des donn
 import {
   agent as composeAgent,
   dispatch,
-  claude,
+  claudeHarness,
   response,
 } from "@elie-laloum/outpost";
 
 const result = await dispatch({
-  agent: composeAgent({ harness: claude.harness({}) }),
+  agent: composeAgent({ harness: claudeHarness({}) }),
   branch: { mode: "named", name: "audit/test-readiness" },
   brief: {
     text: 'Inspect the test setup without editing files. Return <report>{"ready":true,"summary":"explanation"}</report>. Use false if prerequisites are missing.',

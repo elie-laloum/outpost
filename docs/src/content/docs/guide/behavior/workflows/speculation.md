@@ -8,7 +8,11 @@ sidebar:
 `speculate()` is an opt-in research prototype for trying several agent approaches to one repository. It pins the initial host commit, creates distinct named branches and workspaces, and runs up to eight candidates with configurable concurrency (two by default). Each candidate uses the supplied provider. Worktree separation is not an adversarial security boundary; `localSandboxProvider()` explicitly executes on the host.
 
 ```ts
-import { agent as composeAgent, codex, speculate } from "@elie-laloum/outpost";
+import {
+  agent as composeAgent,
+  codexHarness,
+  speculate,
+} from "@elie-laloum/outpost";
 import { dockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
 const result = await speculate({
@@ -19,14 +23,14 @@ const result = await speculate({
   candidates: [
     {
       key: "minimal",
-      agent: composeAgent({ harness: codex.harness({}) }),
+      agent: composeAgent({ harness: codexHarness({}) }),
       request: {
         brief: { text: "Fix the bug with a small patch and commit it." },
       },
     },
     {
       key: "alternative",
-      agent: composeAgent({ harness: codex.harness({}) }),
+      agent: composeAgent({ harness: codexHarness({}) }),
       request: {
         brief: { text: "Try another solution, test it and commit it." },
       },

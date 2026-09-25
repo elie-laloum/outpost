@@ -121,9 +121,9 @@ import { resolve } from "node:path";
 import { parseEnv } from "node:util";
 import {
   agent as composeAgent,
-  codex,
-  claude,
-  gemini,
+  codexHarness,
+  claudeHarness,
+  geminiHarness,
   type AgentAuthentication,
   type LifecycleHooks,
 } from "@elie-laloum/outpost";
@@ -143,7 +143,11 @@ export async function configuration(
   name = settings.OUTPOST_AGENT ?? "codex",
   authentication = settings.OUTPOST_AUTH ?? "api-key",
 ) {
-  const factories = { codex, claude, gemini };
+  const factories = {
+    codex: codexHarness,
+    claude: claudeHarness,
+    gemini: geminiHarness,
+  };
   if (!(name === "codex" || name === "claude" || name === "gemini"))
     throw new Error("Choose codex, claude or gemini");
   const supported = {
@@ -197,7 +201,7 @@ export async function configuration(
   return {
     repository,
     agent: composeAgent({
-      harness: factories[name].harness({ authentication: selected }),
+      harness: factories[name]({ authentication: selected }),
     }),
     sandboxProvider: dockerSandboxProvider({
       image: "outpost:docs-demo",

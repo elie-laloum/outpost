@@ -10,7 +10,7 @@ Un agent compose un harness d’exécution et un identifiant de modèle. Le harn
 
 ## Fonctionnement
 
-Utilisez `agent({ harness: codex.harness(), model: "..." })`, ou les presets `claude.harness()` et `gemini.harness()`. `harness({ modelProvider, run })` relie un callback de l’appelant à un service de modèles. `sandboxProvider` choisit indépendamment où exécuter les commandes du dépôt.
+Utilisez `agent({ harness: codexHarness(), model: "..." })`, ou les presets `claudeHarness()` et `geminiHarness()`. `harness({ modelProvider, run })` relie un callback de l’appelant à un service de modèles. `sandboxProvider` choisit indépendamment où exécuter les commandes du dépôt.
 
 ## Frontières et responsabilités
 
@@ -22,9 +22,9 @@ Ces API sont implémentées mais non publiées. Les [fournisseurs de modèles](.
 
 - [agent](../../agent/)
 - [harness](../../function-harness/)
-- [claude](../../claude/)
-- [codex](../../codex/)
-- [gemini](../../gemini/)
+- [claudeHarness](../../claudeharness/)
+- [codexHarness](../../codexharness/)
+- [geminiHarness](../../geminiharness/)
 - [AgentAdapter](../../agentadapter/)
 
 [Apprendre avec le guide pratique](../../../guide/agents/adapters/).

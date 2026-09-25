@@ -3,7 +3,12 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { join } from "node:path";
 import { readFile } from "node:fs/promises";
-import { createSandbox, dispatch, gemini, response } from "../../src/index.ts";
+import {
+  createSandbox,
+  dispatch,
+  geminiHarness,
+  response,
+} from "../../src/index.ts";
 import { localSandboxProvider } from "../../src/providers/local.ts";
 import { initialize } from "../../src/cli/scaffold.ts";
 import { repository } from "../helpers.ts";
@@ -11,7 +16,7 @@ import { protocolFixtures } from "../../src/adapters/agents/protocol-fixtures.co
 import type { AgentEvent } from "../../src/index.ts";
 
 function fixture(lines: readonly string[], status = 0) {
-  const adapter = composeAgent({ harness: gemini.harness({}) });
+  const adapter = composeAgent({ harness: geminiHarness({}) });
   return {
     ...adapter,
     request: () => ({
@@ -57,7 +62,7 @@ test("Gemini rejects truncated output, protocol failure and nonzero exit while p
   await using sandbox = await createSandbox({
     repository: root,
     sandboxProvider: localSandboxProvider(),
-    agent: composeAgent({ harness: gemini.harness({}) }),
+    agent: composeAgent({ harness: geminiHarness({}) }),
     branch: { mode: "named", name: "gemini-errors" },
     logging: false,
   });
@@ -147,7 +152,7 @@ test("Gemini scaffolding selects its adapter, API key declaration and pinned ima
     await initialize({ directory, agent: "gemini", sandboxProvider });
     assert.match(
       await readFile(join(directory, "run.ts"), "utf8"),
-      /harness: gemini\.harness/,
+      /harness: geminiHarness/,
     );
     assert.equal(
       await readFile(join(directory, ".env.example"), "utf8"),
@@ -169,7 +174,7 @@ test("Gemini scaffolding selects its adapter, API key declaration and pinned ima
 
 test("Gemini completion markers wait for the authoritative final event before the settle timer", async (t) => {
   const root = await repository(t);
-  const agent = composeAgent({ harness: gemini.harness({}) });
+  const agent = composeAgent({ harness: geminiHarness({}) });
   const result = await dispatch({
     repository: root,
     sandboxProvider: localSandboxProvider(),

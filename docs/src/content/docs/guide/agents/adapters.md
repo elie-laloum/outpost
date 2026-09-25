@@ -38,16 +38,16 @@ Save **example.mts** in `outpost-example/`.
 import assert from "node:assert/strict";
 import {
   agent as composeAgent,
-  claude,
-  codex,
-  gemini,
+  claudeHarness,
+  codexHarness,
+  geminiHarness,
   agentVersions,
 } from "@elie-laloum/outpost";
 
 const agents = [
-  composeAgent({ harness: codex.harness({}) }),
-  composeAgent({ harness: claude.harness({}) }),
-  composeAgent({ harness: gemini.harness({}) }),
+  composeAgent({ harness: codexHarness({}) }),
+  composeAgent({ harness: claudeHarness({}) }),
+  composeAgent({ harness: geminiHarness({}) }),
 ];
 assert.deepEqual(
   agents.map((agent) => agent.name),

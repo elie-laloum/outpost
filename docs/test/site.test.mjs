@@ -216,6 +216,9 @@ test("reference symbol icons retain accessible names in both languages", async (
       ["WorkflowFailure", "class", "workflowfailure"],
       ["agentVersions", "constant", "agentversions"],
       ["dockerSandboxProvider", "function", "docker"],
+      ["claudeHarness", "function", "claude"],
+      ["codexHarness", "function", "codex"],
+      ["geminiHarness", "function", "gemini"],
       ["QueueHandler", "type", "queuehandler"],
     ]) {
       await page.goto(`${locale}reference/${route}/`);

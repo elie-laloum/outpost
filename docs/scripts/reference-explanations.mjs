@@ -36,7 +36,7 @@ const presence = (entry, language) => {
 };
 
 export function explain(symbol, declaration, group, language, checker) {
-  const { contract, signatures, methods, entries } = referenceModel(
+  const { contract, signatures, entries } = referenceModel(
     symbol,
     declaration,
     checker,
@@ -75,16 +75,6 @@ export function explain(symbol, declaration, group, language, checker) {
           ),
         ),
       ].join(" · ") + "\n";
-  }
-  for (const method of methods) {
-    output += `\n\n### ${method.name}()\n\n\`\`\`ts\n`;
-    output += method.signatures
-      .map(
-        (signature) =>
-          `${method.name}${checker.signatureToString(signature, declaration, ts.TypeFormatFlags.NoTruncation)}`,
-      )
-      .join("\n");
-    output += "\n```\n";
   }
   return output;
 }

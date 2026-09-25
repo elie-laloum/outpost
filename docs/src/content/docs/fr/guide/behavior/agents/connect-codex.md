@@ -35,12 +35,12 @@ Montez une source d'identifiants en lecture seule, puis copiez-la dans le home �
 import {
   agent as composeAgent,
   createSandbox,
-  codex,
+  codexHarness,
 } from "@elie-laloum/outpost";
 import { dockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
 await using sandbox = await createSandbox({
-  agent: composeAgent({ harness: codex.harness({}) }),
+  agent: composeAgent({ harness: codexHarness({}) }),
   sandboxProvider: dockerSandboxProvider({
     volumes: [
       {
@@ -82,11 +82,11 @@ Déclarez `OPENAI_API_KEY=` dans `.outpost/.env` et fournissez sa valeur par le 
 import {
   agent as composeAgent,
   createSandbox,
-  codex,
+  codexHarness,
 } from "@elie-laloum/outpost";
 
 await using sandbox = await createSandbox({
-  agent: composeAgent({ harness: codex.harness({}) }),
+  agent: composeAgent({ harness: codexHarness({}) }),
   hooks: {
     sandboxReady: [
       {
@@ -122,12 +122,16 @@ Suite : [priorité des variables](../../../agents/environment/) ou [cookbooks](.
 Utilisez un fournisseur personnalisé pour un service implémentant l’API OpenAI Responses, avec les réponses en streaming et les appels d’outils Codex. Les endpoints limités à Chat Completions ne sont pas pris en charge. Indiquez explicitement le modèle ; son nom et sa disponibilité dépendent du service.
 
 ```ts
-import { agent as composeAgent, codex, dispatch } from "@elie-laloum/outpost";
+import {
+  agent as composeAgent,
+  codexHarness,
+  dispatch,
+} from "@elie-laloum/outpost";
 import { dockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
 const result = await dispatch({
   agent: composeAgent({
-    harness: codex.harness({
+    harness: codexHarness({
       modelProvider: {
         baseUrl: "https://models.example.com/v1",
         apiKeyEnvironment: "MODEL_API_KEY",

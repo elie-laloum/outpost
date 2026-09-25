@@ -3,7 +3,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { prepareBrief, validateBrief } from "../../src/domain/prompts.ts";
 import { response, ResponseError } from "../../src/domain/response.ts";
-import { claude, codex } from "../../src/providers/agents.ts";
+import { claudeHarness, codexHarness } from "../../src/providers/agents.ts";
 import { parseEnvironment } from "../../src/infrastructure/settings.ts";
 import { OutpostError } from "../../src/domain/errors.ts";
 
@@ -69,7 +69,7 @@ test("tagged responses support async Standard Schema and take last complete tag"
 
 test("Claude adapter supports print, terminal, reasoning, resume and fork", () => {
   const agent = composeAgent({
-    harness: claude.harness({
+    harness: claudeHarness({
       reasoning: "high",
       permissions: "acceptEdits",
       saveConversations: false,
@@ -97,7 +97,7 @@ test("Claude adapter supports print, terminal, reasoning, resume and fork", () =
     true,
   );
   assert.ok(
-    composeAgent({ harness: claude.harness({}) })
+    composeAgent({ harness: claudeHarness({}) })
       .request({ text: "" })
       .arguments?.includes("--dangerously-skip-permissions"),
   );
@@ -108,8 +108,8 @@ test("Claude adapter supports print, terminal, reasoning, resume and fork", () =
 });
 
 test("agent streams normalize text, tools, sessions, usage and failures", () => {
-  const c = composeAgent({ harness: claude.harness({}) }),
-    x = composeAgent({ harness: codex.harness({}) });
+  const c = composeAgent({ harness: claudeHarness({}) }),
+    x = composeAgent({ harness: codexHarness({}) });
   const parse = (a: typeof c, value: unknown) =>
     a.events(JSON.stringify(value));
   assert.deepEqual(parse(c, { type: "system", session_id: "a" }), [
@@ -190,7 +190,7 @@ test("agent streams normalize text, tools, sessions, usage and failures", () => 
 
 test("Codex adapter selects CLI subcommands and explicit reviewer", () => {
   const agent = composeAgent({
-    harness: codex.harness({
+    harness: codexHarness({
       reasoning: "high",
       approvalReviewer: "auto_review",
     }),
@@ -209,7 +209,7 @@ test("Codex adapter selects CLI subcommands and explicit reviewer", () => {
   ]);
   assert.ok(command.arguments?.includes('approvals_reviewer="auto_review"'));
   assert.ok(
-    composeAgent({ harness: codex.harness({}) })
+    composeAgent({ harness: codexHarness({}) })
       .request({})
       .arguments?.includes("--dangerously-bypass-approvals-and-sandbox"),
   );

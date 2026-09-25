@@ -11,8 +11,8 @@ Create a workspace separately when it should outlive individual sandboxes. It ow
 import {
   agent as composeAgent,
   openWorkspace,
-  codex,
-  claude,
+  codexHarness,
+  claudeHarness,
 } from "@elie-laloum/outpost";
 
 await using workspace = await openWorkspace({
@@ -21,11 +21,11 @@ await using workspace = await openWorkspace({
   label: "validation",
 });
 await workspace.dispatch({
-  agent: composeAgent({ harness: codex.harness({}) }),
+  agent: composeAgent({ harness: codexHarness({}) }),
   brief: { text: "Implement the feature and commit." },
 });
 await workspace.dispatch({
-  agent: composeAgent({ harness: claude.harness({}) }),
+  agent: composeAgent({ harness: claudeHarness({}) }),
   brief: { text: "Review the change and commit corrections." },
 });
 ```

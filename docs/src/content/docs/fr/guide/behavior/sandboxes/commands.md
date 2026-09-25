@@ -11,11 +11,11 @@ sidebar:
 import {
   agent as composeAgent,
   createSandbox,
-  codex,
+  codexHarness,
 } from "@elie-laloum/outpost";
 
 await using sandbox = await createSandbox({
-  agent: composeAgent({ harness: codex.harness({}) }),
+  agent: composeAgent({ harness: codexHarness({}) }),
 });
 const result = await sandbox.command({
   executable: "npm",
@@ -33,10 +33,14 @@ Les arguments sont transmis directement ; les substitutions nécessitent un shel
 ## Ouvrir une session interactive
 
 ```ts
-import { agent as composeAgent, attach, claude } from "@elie-laloum/outpost";
+import {
+  agent as composeAgent,
+  attach,
+  claudeHarness,
+} from "@elie-laloum/outpost";
 
 const session = await attach({
-  agent: composeAgent({ harness: claude.harness({}) }),
+  agent: composeAgent({ harness: claudeHarness({}) }),
   branch: { mode: "named", name: "feature/interactive" },
   brief: { text: "Aide-moi à relire cette branche." },
 });

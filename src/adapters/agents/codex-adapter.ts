@@ -24,20 +24,20 @@ function bindCodex(settings: CodexSettings = {}): AgentAdapter {
   } satisfies AgentAdapter);
 }
 
-export const codex = Object.freeze({
-  harness(settings: Omit<CodexSettings, "model"> = {}): CliHarness {
-    invariant(
-      settings && typeof settings === "object" && !("model" in settings),
-      "Set the model on agent(), not on its harness",
-    );
-    const configured = Object.freeze({
-      ...settings,
-      variables: Object.freeze({ ...settings.variables }),
-    });
-    return Object.freeze({
-      kind: "cli",
-      bind: (model?: string) =>
-        bindCodex({ ...configured, ...(model === undefined ? {} : { model }) }),
-    });
-  },
-});
+export function codexHarness(
+  settings: Omit<CodexSettings, "model"> = {},
+): CliHarness {
+  invariant(
+    settings && typeof settings === "object" && !("model" in settings),
+    "Set the model on agent(), not on its harness",
+  );
+  const configured = Object.freeze({
+    ...settings,
+    variables: Object.freeze({ ...settings.variables }),
+  });
+  return Object.freeze({
+    kind: "cli",
+    bind: (model?: string) =>
+      bindCodex({ ...configured, ...(model === undefined ? {} : { model }) }),
+  });
+}

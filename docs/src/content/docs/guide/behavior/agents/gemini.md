@@ -5,7 +5,7 @@ sidebar:
   order: 7
 ---
 
-`agent({ harness: gemini.harness() })` runs the native Gemini CLI through the same sandbox providers as the other adapters. Generated Docker/Podman recipes install Gemini alongside Claude Code and Codex; remote providers bootstrap the pinned CLI when needed unless `bootstrap: false`. For `localSandboxProvider()`, install `@google/gemini-cli` yourself; this provider runs directly on the host.
+`agent({ harness: geminiHarness() })` runs the native Gemini CLI through the same sandbox providers as the other adapters. Generated Docker/Podman recipes install Gemini alongside Claude Code and Codex; remote providers bootstrap the pinned CLI when needed unless `bootstrap: false`. For `localSandboxProvider()`, install `@google/gemini-cli` yourself; this provider runs directly on the host.
 
 ## Create a workflow
 
@@ -25,7 +25,11 @@ A Gemini API key uses the Gemini API account's quotas and billing. Google accoun
 ## Configure execution
 
 ```ts
-import { agent as composeAgent, dispatch, gemini } from "@elie-laloum/outpost";
+import {
+  agent as composeAgent,
+  dispatch,
+  geminiHarness,
+} from "@elie-laloum/outpost";
 import { dockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
 const key = process.env.GEMINI_API_KEY;
@@ -33,7 +37,7 @@ if (!key) throw new Error("Supply GEMINI_API_KEY before running this workflow");
 const result = await dispatch({
   repository: "/path/to/repository",
   agent: composeAgent({
-    harness: gemini.harness({ variables: { GEMINI_API_KEY: key } }),
+    harness: geminiHarness({ variables: { GEMINI_API_KEY: key } }),
     model: "flash",
   }),
   sandboxProvider: dockerSandboxProvider(),

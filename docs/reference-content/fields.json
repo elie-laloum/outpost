@@ -1324,10 +1324,6 @@
     "Build repository, provider, agent and brief options for a separately allocated dispatch at each attempt.",
     "Construit les options de dépôt, provider, agent et brief pour un dispatch alloué séparément à chaque tentative."
   ],
-  "claude.settings": [
-    "Claude model, reasoning, permissions, environment and transcript-capture settings.",
-    "Réglages Claude de modèle, raisonnement, permissions, environnement et capture de transcripts."
-  ],
   "ClaudeSettings.reasoning": [
     "Reasoning effort passed to the selected agent CLI.",
     "Niveau d’effort de raisonnement transmis au CLI de l’agent choisi."
@@ -1348,10 +1344,6 @@
     "Enable native transcript capture when the adapter supports it.",
     "Activer la capture native si l’adapter la prend en charge."
   ],
-  "codex.settings": [
-    "Codex model, Responses provider, reasoning, approval reviewer and transcript-capture settings.",
-    "Réglages Codex de modèle, provider Responses, raisonnement, revue d’approbation et capture de transcripts."
-  ],
   "CodexSettings.modelProvider": [
     "Custom Codex model endpoint configuration; requires Responses API compatibility.",
     "Configuration d’un endpoint de modèle Codex personnalisé ; exige la compatibilité Responses API."
@@ -1371,10 +1363,6 @@
   "CodexModelProvider.apiKeyEnvironment": [
     "Environment variable containing the endpoint API key; false disables the API-key environment declaration.",
     "Variable d’environnement contenant la clé API de l’endpoint ; false désactive la déclaration de cette variable."
-  ],
-  "gemini.settings": [
-    "Gemini model, approval mode and explicit environment settings.",
-    "Réglages Gemini de modèle, mode d’approbation et environnement explicite."
   ],
   "GeminiSettings.model": [
     "Native CLI model identifier; availability depends on the account.",
@@ -3592,30 +3580,6 @@
     "Positive maximum response body size in bytes after HTTP decompression; defaults to 8388608 (8 MiB). Oversized responses fail.",
     "Taille maximale positive du corps après décompression HTTP, en octets ; 8388608 (8 Mio) par défaut. Les réponses dépassant cette limite échouent."
   ],
-  "codex.harness": [
-    "Create a Codex harness from CLI execution, authentication and conversation settings, without starting the CLI.",
-    "Crée un harness Codex à partir de ses options d’exécution, d’authentification et de conversation, sans démarrer la CLI."
-  ],
-  "codex.harness.settings": [
-    "Configuration for the Codex harness; pass the selected model to agent() instead.",
-    "Configuration du harness Codex ; transmettez le modèle choisi à agent()."
-  ],
-  "claude.harness": [
-    "Create a Claude Code harness from CLI execution, authentication and conversation settings, without starting the CLI.",
-    "Crée un harness Claude Code à partir de ses options d’exécution, d’authentification et de conversation, sans démarrer la CLI."
-  ],
-  "claude.harness.settings": [
-    "Configuration for the Claude Code harness; pass the selected model to agent() instead.",
-    "Configuration du harness Claude Code ; transmettez le modèle choisi à agent()."
-  ],
-  "gemini.harness": [
-    "Create a Gemini CLI harness from CLI execution, authentication and conversation settings, without starting the CLI.",
-    "Crée un harness Gemini CLI à partir de ses options d’exécution, d’authentification et de conversation, sans démarrer la CLI."
-  ],
-  "gemini.harness.settings": [
-    "Configuration for the Gemini CLI harness; pass the selected model to agent() instead.",
-    "Configuration du harness Gemini CLI ; transmettez le modèle choisi à agent()."
-  ],
   "agent.options": [
     "Harness and model selection to bind into one executable agent.",
     "Harness et sélection de modèle à composer en un agent exécutable."
@@ -3875,5 +3839,17 @@
   "WorkflowTelemetry.observe": [
     "Synchronously receive each workflow lifecycle and usage event with the adapter as receiver. Thrown errors are collected in WorkflowResult.observerErrors without affecting tasks or the separate observe callback.",
     "Reçoit de manière synchrone chaque événement de cycle de vie et d’usage du workflow, avec l’adaptateur comme receveur. Les erreurs levées sont collectées dans WorkflowResult.observerErrors sans affecter les tâches ni le callback observe séparé."
+  ],
+  "claudeHarness.settings": [
+    "Configuration for the Claude Code harness; pass the selected model to agent() instead.",
+    "Configuration du harness Claude Code ; transmettez le modèle choisi à agent()."
+  ],
+  "codexHarness.settings": [
+    "Configuration for the Codex harness; pass the selected model to agent() instead.",
+    "Configuration du harness Codex ; transmettez le modèle choisi à agent()."
+  ],
+  "geminiHarness.settings": [
+    "Configuration for the Gemini CLI harness; pass the selected model to agent() instead.",
+    "Configuration du harness Gemini CLI ; transmettez le modèle choisi à agent()."
   ]
 }

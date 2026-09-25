@@ -11,12 +11,12 @@ Reuse one sandbox across implementation and review. Declare **OPENAI_API_KEY=** 
 import {
   agent as composeAgent,
   createSandbox,
-  codex,
-  claude,
+  codexHarness,
+  claudeHarness,
 } from "@elie-laloum/outpost";
 
 await using sandbox = await createSandbox({
-  agent: composeAgent({ harness: codex.harness({}) }),
+  agent: composeAgent({ harness: codexHarness({}) }),
   branch: { mode: "named", name: "feature/parser-review" },
   hooks: {
     sandboxReady: [
@@ -36,7 +36,7 @@ const implementation = await sandbox.dispatch({
   deadlineMs: 600_000,
 });
 const review = await sandbox.dispatch({
-  agent: composeAgent({ harness: claude.harness({}) }),
+  agent: composeAgent({ harness: claudeHarness({}) }),
   brief: {
     text:
       "Review the diff against " +

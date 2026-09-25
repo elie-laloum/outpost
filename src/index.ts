@@ -95,7 +95,11 @@ export type {
 
 export { agentTask, commandTask, isolatedTask } from "./application/tasks.ts";
 
-export { claude, codex, gemini } from "./providers/agents.ts";
+export {
+  claudeHarness,
+  codexHarness,
+  geminiHarness,
+} from "./providers/agents.ts";
 
 export { agentVersions } from "./providers/versions.ts";
 

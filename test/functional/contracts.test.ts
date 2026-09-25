@@ -4,8 +4,8 @@ import assert from "node:assert/strict";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import {
-  claude,
-  codex,
+  claudeHarness,
+  codexHarness,
   conversations,
   dispatch,
   attach,
@@ -35,7 +35,7 @@ test("final Claude results are authoritative without duplicating streamed text",
       { type: "result", result: "answer", is_error: false },
     ];
     const native = composeAgent({
-      harness: claude.harness({ saveConversations: false }),
+      harness: claudeHarness({ saveConversations: false }),
     });
     const agent = {
       ...native,
@@ -176,7 +176,7 @@ test("Claude transcript usage retains four independent counters from the last as
       .map((item) => JSON.stringify(item))
       .join("\n") + "\ninvalid";
   assert.deepEqual(
-    composeAgent({ harness: claude.harness({}) }).transcriptUsage?.(content),
+    composeAgent({ harness: claudeHarness({}) }).transcriptUsage?.(content),
     {
       input: 2,
       cacheCreated: 3,
@@ -185,11 +185,11 @@ test("Claude transcript usage retains four independent counters from the last as
     },
   );
   assert.equal(
-    composeAgent({ harness: claude.harness({}) }).transcriptUsage?.("invalid"),
+    composeAgent({ harness: claudeHarness({}) }).transcriptUsage?.("invalid"),
     undefined,
   );
   assert.equal(
-    composeAgent({ harness: codex.harness({}) }).events(
+    composeAgent({ harness: codexHarness({}) }).events(
       JSON.stringify({ type: "error", error: "native failure" }),
     )[0]?.kind,
     "failure",

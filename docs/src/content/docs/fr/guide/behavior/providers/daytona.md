@@ -12,13 +12,17 @@ npm install @daytona/sdk
 ```
 
 ```ts
-import { agent as composeAgent, dispatch, claude } from "@elie-laloum/outpost";
+import {
+  agent as composeAgent,
+  dispatch,
+  claudeHarness,
+} from "@elie-laloum/outpost";
 import { daytonaSandboxProvider } from "@elie-laloum/outpost/providers/daytona";
 
 const apiKey = process.env.DAYTONA_API_KEY;
 if (!apiKey) throw new Error("Set DAYTONA_API_KEY");
 await dispatch({
-  agent: composeAgent({ harness: claude.harness({}) }),
+  agent: composeAgent({ harness: claudeHarness({}) }),
   sandboxProvider: daytonaSandboxProvider({
     connection: { apiKey },
     create: { language: "typescript" },

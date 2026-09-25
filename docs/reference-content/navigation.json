@@ -290,6 +290,18 @@
         "slug": "reference/function-harness",
         "attrs": { "data-api-kind": "function" }
       },
+      {
+        "slug": "reference/claudeharness",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/codexharness",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/geminiharness",
+        "attrs": { "data-api-kind": "function" }
+      },
       { "slug": "reference/type-agent", "attrs": { "data-api-kind": "type" } },
       {
         "slug": "reference/agentoptions",
@@ -301,9 +313,6 @@
         "slug": "reference/agentauthentication",
         "attrs": { "data-api-kind": "type" }
       },
-      { "slug": "reference/claude", "attrs": { "data-api-kind": "constant" } },
-      { "slug": "reference/codex", "attrs": { "data-api-kind": "constant" } },
-      { "slug": "reference/gemini", "attrs": { "data-api-kind": "constant" } },
       {
         "slug": "reference/agentversions",
         "attrs": { "data-api-kind": "constant" }

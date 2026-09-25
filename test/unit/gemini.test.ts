@@ -1,7 +1,7 @@
 import { agent as composeAgent } from "../../src/domain/agent.ts";
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { gemini } from "../../src/index.ts";
+import { geminiHarness } from "../../src/index.ts";
 import { prepareAdapter } from "../../src/application/agent-bootstrap.ts";
 import { diagnoseAgentCli } from "../../src/application/doctor-agent.ts";
 import { geminiDiagnostics } from "../../src/adapters/agents/gemini-diagnostics.ts";
@@ -10,7 +10,7 @@ import type { SandboxLease } from "../../src/domain/sandbox.types.ts";
 test("Gemini requests preserve stdin and terminal boundaries, model, variables and approval choices", () => {
   const variables = { GEMINI_API_KEY: "fixture" };
   const agent = composeAgent({
-    harness: gemini.harness({ variables }),
+    harness: geminiHarness({ variables }),
     model: "flash",
   });
   variables.GEMINI_API_KEY = "changed";
@@ -35,7 +35,7 @@ test("Gemini requests preserve stdin and terminal boundaries, model, variables a
     stdin: "-literal\nsecond line",
   });
   assert.deepEqual(
-    composeAgent({ harness: gemini.harness({}) }).request({
+    composeAgent({ harness: geminiHarness({}) }).request({
       interactive: true,
     }),
     {
@@ -45,12 +45,10 @@ test("Gemini requests preserve stdin and terminal boundaries, model, variables a
     },
   );
   assert.deepEqual(
-    composeAgent({ harness: gemini.harness({ approvalMode: "plan" }) }).request(
-      {
-        interactive: true,
-        text: "Inspect",
-      },
-    ),
+    composeAgent({ harness: geminiHarness({ approvalMode: "plan" }) }).request({
+      interactive: true,
+      text: "Inspect",
+    }),
     {
       executable: "gemini",
       arguments: ["--approval-mode", "plan", "--prompt-interactive", "Inspect"],
@@ -59,12 +57,12 @@ test("Gemini requests preserve stdin and terminal boundaries, model, variables a
   );
   assert.deepEqual(
     composeAgent({
-      harness: gemini.harness({ approvalMode: "auto_edit" }),
+      harness: geminiHarness({ approvalMode: "auto_edit" }),
     }).request({}).arguments,
     ["--approval-mode", "auto_edit", "--output-format", "stream-json"],
   );
   assert.equal(
-    composeAgent({ harness: gemini.harness({}) }).request({}).stdin,
+    composeAgent({ harness: geminiHarness({}) }).request({}).stdin,
     "",
   );
   for (const fork of [true, false])
@@ -76,19 +74,19 @@ test("Gemini requests preserve stdin and terminal boundaries, model, variables a
 
 test("Gemini only grants workspace trust for unattended yolo execution", () => {
   assert.ok(
-    composeAgent({ harness: gemini.harness({ approvalMode: "yolo" }) })
+    composeAgent({ harness: geminiHarness({ approvalMode: "yolo" }) })
       .request({})
       .arguments?.includes("--skip-trust"),
   );
   for (const approvalMode of ["default", "auto_edit", "plan"] as const)
     assert.equal(
-      composeAgent({ harness: gemini.harness({ approvalMode }) })
+      composeAgent({ harness: geminiHarness({ approvalMode }) })
         .request({})
         .arguments?.includes("--skip-trust"),
       false,
     );
   assert.equal(
-    composeAgent({ harness: gemini.harness({ approvalMode: "yolo" }) })
+    composeAgent({ harness: geminiHarness({ approvalMode: "yolo" }) })
       .request({ interactive: true })
       .arguments?.includes("--skip-trust"),
     false,
@@ -96,7 +94,7 @@ test("Gemini only grants workspace trust for unattended yolo execution", () => {
 });
 
 test("Gemini decodes assistant deltas and final totals while retaining tool results and unknown payloads", () => {
-  const agent = composeAgent({ harness: gemini.harness({}) });
+  const agent = composeAgent({ harness: geminiHarness({}) });
   const decode = (value: unknown) => agent.events(JSON.stringify(value));
   assert.deepEqual(
     decode({
@@ -184,7 +182,7 @@ test("Gemini CLI help diagnostics inspect only the supported fresh-session invoc
 });
 
 test("Gemini remote bootstrap is independent of native transcript storage", async () => {
-  const agent = composeAgent({ harness: gemini.harness({}) });
+  const agent = composeAgent({ harness: geminiHarness({}) });
   const lease: SandboxLease = {
     root: "/workspace",
     home: "/home/agent",

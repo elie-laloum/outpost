@@ -2,16 +2,22 @@ import assert from "node:assert/strict";
 import { fileURLToPath } from "node:url";
 import { test } from "node:test";
 import {
-  claude,
-  codex,
-  gemini,
+  claudeHarness,
+  codexHarness,
+  geminiHarness,
   diagnoseAgentProtocol,
 } from "../../src/index.ts";
 import { protocolFixtures } from "../../src/adapters/agents/protocol-fixtures.constants.ts";
 import { executeProcess } from "../../src/infrastructure/process.ts";
 
 for (const name of ["claude", "codex", "gemini"] as const) {
-  const agent = { claude, codex, gemini }[name].harness().bind();
+  const agent = {
+    claude: claudeHarness,
+    codex: codexHarness,
+    gemini: geminiHarness,
+  }
+    [name]()
+    .bind();
   test(`${name} reports only synthetic structural compatibility`, () => {
     const report = diagnoseAgentProtocol(name);
     assert.equal(report.hasFailures, false);
