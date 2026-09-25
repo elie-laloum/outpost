@@ -5,6 +5,8 @@ import type { SandboxLease } from "../domain/sandbox.types.ts";
 import { interruptible } from "../infrastructure/abort.ts";
 import { quote } from "../infrastructure/process.ts";
 import { cloudDefaults } from "./cloud.constants.ts";
+import { daytonaCommandScript } from "./daytona-command.constants.ts";
+import { daytonaOutput } from "./daytona-output.ts";
 import { daytonaTerminal } from "./daytona-terminal.ts";
 import type { DaytonaRuntime } from "./daytona.types.ts";
 
@@ -42,7 +44,7 @@ export function daytonaCommand(
       .map(([key, value]) => quote(`${key}=${value}`))
       .join(
         " ",
-      )} setsid --wait sh -c ${quote(`echo $$ > ${quote(pid)}; test ! -f ${quote(pid + ".cancel")} || exit 130; exec ${program}${command.stdin === undefined ? "" : ` < ${quote(input)}`}`)}`;
+      )} setsid --wait sh -c ${quote(`echo $$ > ${quote(pid)}; test ! -f ${quote(pid + ".cancel")} || exit 130; exec node -e ${quote(daytonaCommandScript)} -- ${program}${command.stdin === undefined ? "" : ` < ${quote(input)}`}`)}`;
     const output = { stdout: "", stderr: "" };
     let cancellation: Promise<unknown> | undefined;
     const cancel = () => {
@@ -74,15 +76,19 @@ export function daytonaCommand(
         );
         command.observe?.(channel, chunk);
       };
+      const stdout = daytonaOutput(consume("stdout"));
+      const stderr = daytonaOutput(consume("stderr"));
       await interruptible(
         sandbox.process.getSessionCommandLogs(
           id,
           response.cmdId,
-          consume("stdout"),
-          consume("stderr"),
+          stdout.write,
+          stderr.write,
         ),
         signal,
       );
+      stdout.close();
+      stderr.close();
       if (cancellation) await cancellation;
       signal.throwIfAborted();
       while (true) {

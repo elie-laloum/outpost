@@ -1,0 +1,12 @@
+export const daytonaOutputPrefix = "outpost-output:";
+export const daytonaCommandScript = `const {spawn}=require("node:child_process");
+const {constants}=require("node:os");
+const {Transform}=require("node:stream");
+const frame=data=>${JSON.stringify(daytonaOutputPrefix)}+data.toString("base64")+"\\n";
+const encode=()=>new Transform({transform(data,encoding,done){done(null,frame(data))}});
+const child=spawn(process.argv[1],process.argv.slice(2),{stdio:["inherit","pipe","pipe"]});
+let failed;
+child.stdout.pipe(encode()).pipe(process.stdout);
+child.stderr.pipe(encode()).pipe(process.stderr);
+child.on("error",error=>{failed=error.code==="ENOENT"?127:126;process.stderr.write(frame(Buffer.from(error.message)))});
+child.on("close",(code,signal)=>{process.exitCode=failed??code??(signal?128+(constants.signals[signal]??0):127)});`;
