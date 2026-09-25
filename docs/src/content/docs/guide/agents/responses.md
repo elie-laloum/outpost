@@ -71,3 +71,5 @@ The result is `{ passed: true }`; the second response is rejected because a stri
 [Contracts, options and edge cases](../../../reference/behavior/agents/responses/).
 
 Any persisted example files remain inside this demonstration directory.
+
+Use [Zod, Valibot or Ajv schemas](../schemas/) to replace manual checks and share a schema with JSON artifacts.

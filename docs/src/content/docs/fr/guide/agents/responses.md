@@ -71,3 +71,5 @@ Le résultat est `{ passed: true }` ; la seconde réponse est rejetée car une c
 [Contrats, options et cas particuliers](../../../reference/behavior/agents/responses/).
 
 Les fichiers persistants éventuels restent dans ce dossier de démonstration.
+
+Utilisez des [schémas Zod, Valibot ou Ajv](../schemas/) pour remplacer les vérifications manuelles et partager un schéma avec les artefacts JSON.

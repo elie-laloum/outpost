@@ -18,6 +18,7 @@ export const chapters = [
       "guide/agents/adapters",
       "guide/agents/prompts",
       "guide/agents/responses",
+      "guide/agents/schemas",
       "guide/agents/observability",
       "guide/agents/cancellation",
       "guide/agents/iteration",

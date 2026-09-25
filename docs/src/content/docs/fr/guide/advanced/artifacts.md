@@ -102,3 +102,5 @@ La sortie est `/users`. La tâche produit une référence JSON tandis que les oc
 [Contrats, options et cas particuliers](../../../reference/behavior/workflows/artifacts/).
 
 Les fichiers persistants éventuels restent dans ce dossier de démonstration.
+
+Consultez les [schémas Zod, Valibot et Ajv](../../agents/schemas/) pour partager un validateur réutilisable entre `artifact.json` et `response.json`.

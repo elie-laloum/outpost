@@ -102,3 +102,5 @@ The output is `/users`. The task output is a JSON reference while bytes live in 
 [Contracts, options and edge cases](../../../reference/behavior/workflows/artifacts/).
 
 Any persisted example files remain inside this demonstration directory.
+
+See [Zod, Valibot and Ajv schemas](../../agents/schemas/) for reusable validators shared by `artifact.json` and `response.json`.
