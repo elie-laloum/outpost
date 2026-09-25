@@ -15,9 +15,7 @@ import type { ClaudeSettings } from "@elie-laloum/outpost";
 
 | Nom                 | Type                                                                                              | Présence  | Rôle                                                                                                                                             |
 | ------------------- | ------------------------------------------------------------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `reasoning`         | `"low" \| "medium" \| "high" \| "xhigh" \| "max" \| undefined`                                    | Optionnel | Niveau d’effort de raisonnement transmis au CLI de l’agent choisi.                                                                               |
 | `permissions`       | `"default" \| "acceptEdits" \| "plan" \| "auto" \| "dontAsk" \| "bypassPermissions" \| undefined` | Optionnel | Mode de permissions Claude Code contrôlant l’approbation des outils.                                                                             |
-| `model`             | `string \| undefined`                                                                             | Optionnel | Identifiant de modèle natif ; disponibilité selon le compte.                                                                                     |
 | `authentication`    | `AgentAuthentication \| undefined`                                                                | Optionnel | Préparation explicite de l’authentification de ce harness CLI. Son absence conserve l’accès déjà configuré sans rechercher des credentials hôte. |
 | `variables`         | `Readonly<Record<string, string>> \| undefined`                                                   | Optionnel | Déclarations d’environnement explicites ; les valeurs sont des chaînes.                                                                          |
 | `saveConversations` | `boolean \| undefined`                                                                            | Optionnel | Activer la capture native si l’adapter la prend en charge.                                                                                       |
@@ -26,7 +24,6 @@ import type { ClaudeSettings } from "@elie-laloum/outpost";
 
 ```ts
 export interface ClaudeSettings extends CommonAgentSettings {
-  readonly reasoning?: "low" | "medium" | "high" | "xhigh" | "max";
   readonly permissions?:
     | "default"
     | "acceptEdits"

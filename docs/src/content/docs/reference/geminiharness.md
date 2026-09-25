@@ -21,7 +21,7 @@ Create a Gemini CLI harness from execution, authentication and conversation sett
 
 | Name                      | Type                                                        | Presence | Meaning                                                                                                                                      |
 | ------------------------- | ----------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `settings`                | `Omit<GeminiSettings, "model"> \| undefined`                | Optional | Configuration for the Gemini CLI harness; pass the selected model to agent() instead.                                                        |
+| `settings`                | `GeminiSettings \| undefined`                               | Optional | Configuration for the Gemini CLI harness; pass the selected model to agent() instead.                                                        |
 | `settings.authentication` | `AgentAuthentication \| undefined`                          | Optional | Explicit authentication preparation for this CLI harness. Omission preserves already-configured access without discovering host credentials. |
 | `settings.variables`      | `Readonly<Record<string, string>> \| undefined`             | Optional | Explicit environment declarations; values are strings.                                                                                       |
 | `settings.approvalMode`   | `"default" \| "plan" \| "auto_edit" \| "yolo" \| undefined` | Optional | Gemini CLI tool-approval mode.                                                                                                               |
@@ -33,9 +33,7 @@ Create a Gemini CLI harness from execution, authentication and conversation sett
 ## Signature
 
 ```ts
-export declare function geminiHarness(
-  settings?: Omit<GeminiSettings, "model">,
-): CliHarness;
+export declare function geminiHarness(settings?: GeminiSettings): CliHarness;
 ```
 
 ## Related contracts

@@ -21,7 +21,7 @@ Crée un harness Gemini CLI à partir des réglages d’exécution, d’authenti
 
 | Nom                       | Type                                                        | Présence  | Rôle                                                                                                                                             |
 | ------------------------- | ----------------------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `settings`                | `Omit<GeminiSettings, "model"> \| undefined`                | Optionnel | Configuration du harness Gemini CLI ; transmettez le modèle choisi à agent().                                                                    |
+| `settings`                | `GeminiSettings \| undefined`                               | Optionnel | Configuration du harness Gemini CLI ; transmettez le modèle choisi à agent().                                                                    |
 | `settings.authentication` | `AgentAuthentication \| undefined`                          | Optionnel | Préparation explicite de l’authentification de ce harness CLI. Son absence conserve l’accès déjà configuré sans rechercher des credentials hôte. |
 | `settings.variables`      | `Readonly<Record<string, string>> \| undefined`             | Optionnel | Déclarations d’environnement explicites ; les valeurs sont des chaînes.                                                                          |
 | `settings.approvalMode`   | `"default" \| "plan" \| "auto_edit" \| "yolo" \| undefined` | Optionnel | Mode d’approbation des outils du CLI Gemini.                                                                                                     |
@@ -33,9 +33,7 @@ Crée un harness Gemini CLI à partir des réglages d’exécution, d’authenti
 ## Signature
 
 ```ts
-export declare function geminiHarness(
-  settings?: Omit<GeminiSettings, "model">,
-): CliHarness;
+export declare function geminiHarness(settings?: GeminiSettings): CliHarness;
 ```
 
 ## Contrats associés

@@ -1,12 +1,15 @@
-import { invariant } from "../../domain/errors.ts";
+import type { AgentModel } from "../../domain/model.types.ts";
 import { authenticationCommand } from "./authentication.ts";
 import type { AgentAdapter, CliHarness } from "../../domain/agent.types.ts";
 import { codexProvider } from "./codex-provider.ts";
 import { codexEvents } from "./codex-events.ts";
 import { codexRequest } from "./codex-request.ts";
-import type { CodexSettings } from "./settings.types.ts";
+import { codexModelSupport } from "./model-support.constants.ts";
+import { harnessSettings, supportModel } from "./model-support.ts";
+import type { Bound, CodexSettings } from "./settings.types.ts";
 
-function bindCodex(settings: CodexSettings = {}): AgentAdapter {
+function bindCodex(settings: Bound<CodexSettings>): AgentAdapter {
+  supportModel(codexModelSupport, settings.model);
   codexProvider(settings);
   return Object.freeze({
     name: "codex",
@@ -24,20 +27,15 @@ function bindCodex(settings: CodexSettings = {}): AgentAdapter {
   } satisfies AgentAdapter);
 }
 
-export function codexHarness(
-  settings: Omit<CodexSettings, "model"> = {},
-): CliHarness {
-  invariant(
-    settings && typeof settings === "object" && !("model" in settings),
-    "Set the model on agent(), not on its harness",
-  );
+export function codexHarness(settings: CodexSettings = {}): CliHarness {
+  harnessSettings(settings);
   const configured = Object.freeze({
     ...settings,
     variables: Object.freeze({ ...settings.variables }),
   });
   return Object.freeze({
     kind: "cli",
-    bind: (model?: string) =>
+    bind: (model?: AgentModel) =>
       bindCodex({ ...configured, ...(model === undefined ? {} : { model }) }),
   });
 }

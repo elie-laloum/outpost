@@ -6,5 +6,6 @@ export const MODEL_REQUEST_FIELDS = new Set([
   "prompt",
   "system",
   "maxOutputTokens",
+  "reasoning",
   "signal",
 ]);

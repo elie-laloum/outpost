@@ -16,28 +16,34 @@ import {
 } from "@elie-laloum/outpost";
 
 const reviewer = composeAgent({
-  harness: claudeHarness({ reasoning: "high", permissions: "acceptEdits" }),
-  model: "sonnet",
+  harness: claudeHarness({ permissions: "acceptEdits" }),
+  model: { name: "sonnet", reasoning: "high", maxOutputTokens: 32_000 },
 });
 const implementer = composeAgent({
-  harness: codexHarness({
-    reasoning: "high",
-    approvalReviewer: "auto_review",
-  }),
+  harness: codexHarness({ approvalReviewer: "auto_review" }),
+  model: { name: "gpt-5.5", reasoning: "high" },
 });
 console.log(reviewer.name, implementer.name, agentVersions);
 ```
 
-| Setting             | Claude Code                                                              | Codex                            |
+The model belongs to `agent()`, not to the harness. Pass a name, or an object with `name`, `reasoning` and `maxOutputTokens`:
+
+| Model field       | Claude Code                                         | Codex                                                             |
+| ----------------- | --------------------------------------------------- | ----------------------------------------------------------------- |
+| `name`            | `--model`                                           | `--model`                                                         |
+| `reasoning`       | `--effort`: `low`, `medium`, `high`, `xhigh`, `max` | `model_reasoning_effort`: `low`, `medium`, `high`, `xhigh`, `max` |
+| `maxOutputTokens` | `CLAUDE_CODE_MAX_OUTPUT_TOKENS`                     | Rejected: Codex has no output limit                               |
+
+`agent()` rejects a reasoning level or output limit that the selected CLI cannot express, such as `none` or `minimal`. It never ignores or converts it. Claude Code lowers `CLAUDE_CODE_MAX_OUTPUT_TOKENS` to the model's own cap; do not also set that variable in `variables`.
+
+| Harness setting     | Claude Code                                                              | Codex                            |
 | ------------------- | ------------------------------------------------------------------------ | -------------------------------- |
-| `model`             | Optional CLI model name                                                  | Optional CLI model name          |
-| `reasoning`         | `low`, `medium`, `high`, `xhigh`, `max`                                  | `low`, `medium`, `high`, `xhigh` |
 | `permissions`       | `default`, `acceptEdits`, `plan`, `auto`, `dontAsk`, `bypassPermissions` | Not applicable                   |
 | `approvalReviewer`  | Not applicable                                                           | `user` or `auto_review`          |
 | `variables`         | Environment map for this adapter                                         | Environment map for this adapter |
 | `saveConversations` | Default `true`                                                           | Default `true`                   |
 
-Without `model`, the installed CLI chooses its default. Actual model availability and supported reasoning levels depend on that CLI and your account. `agentVersions` exposes the pinned CLI versions used by generated images; rebuild old images when those pins change.
+Without `model`, the installed CLI chooses its default. Actual model availability and the reasoning levels a given model accepts depend on that CLI and your account. `agentVersions` exposes the pinned CLI versions used by generated images; rebuild old images when those pins change.
 
 Noninteractive defaults avoid blocking on permission prompts and rely on the selected execution boundary. Choose permissions deliberately when using host execution. Interactive attachment uses the native terminal behavior.
 

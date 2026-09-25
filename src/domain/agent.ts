@@ -1,3 +1,4 @@
+import { agentModel } from "./agent-model.ts";
 import { invariant } from "./errors.ts";
 import type {
   Agent,
@@ -18,15 +19,13 @@ export function agent(options: AgentOptions): Agent {
     options && typeof options === "object",
     "Agent options must be an object",
   );
-  const { harness, model } = options;
+  const { harness } = options;
   invariant(
     harness && (harness.kind === "cli" || harness.kind === "custom"),
     "Provide a supported harness",
   );
-  invariant(
-    model === undefined || (typeof model === "string" && model.trim()),
-    "Model name must be nonempty text",
-  );
+  const model =
+    options.model === undefined ? undefined : agentModel(options.model);
   if (harness.kind === "cli") {
     invariant(
       typeof harness.bind === "function",
@@ -39,15 +38,13 @@ export function agent(options: AgentOptions): Agent {
       ...(model === undefined ? {} : { model }),
     });
   }
-  invariant(
-    typeof model === "string" && model.trim(),
-    "Custom harness requires a model name",
-  );
+  invariant(model, "Custom harness requires a model name");
   invariant(
     typeof harness.run === "function" &&
       typeof harness.modelProvider?.request === "function",
     "Custom harness requires a model provider and run function",
   );
+  harness.modelProvider.validate?.(model);
   return Object.freeze({
     kind: "custom",
     name: "custom",
@@ -66,6 +63,11 @@ export function harness(options: CustomHarnessOptions): CustomHarness {
   invariant(
     typeof options.modelProvider?.request === "function",
     "Custom harness requires a model provider",
+  );
+  invariant(
+    options.modelProvider.validate === undefined ||
+      typeof options.modelProvider.validate === "function",
+    "Model provider validate must be a function",
   );
   return Object.freeze({
     kind: "custom",

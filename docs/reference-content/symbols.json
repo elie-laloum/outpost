@@ -296,16 +296,16 @@
     "Configure un transport texte réutilisable utilisant Chat Completions ou Responses. Le harness fournit le modèle à chaque requête. La construction valide localement ; les requêtes appliquent annulation, taille et délais sans retry ni changement de protocole."
   ],
   "agent": [
-    "Compose a harness and a model identifier without starting a process or making a network request. CLI harnesses may keep their native default model; a custom harness requires a nonempty model.",
-    "Compose un harness et un identifiant de modèle sans lancer de processus ni requête réseau. Un harness CLI peut conserver son modèle par défaut ; un harness personnalisé exige un modèle non vide."
+    "Compose a harness and a model without starting a process or making a network request. The model is a name or an AgentModel object; the harness or its model provider rejects unsupported reasoning levels and output limits immediately. CLI harnesses may keep their native default model; a custom harness requires one.",
+    "Compose un harness et un modèle sans lancer de processus ni requête réseau. Le modèle est un nom ou un objet AgentModel ; le harness ou son fournisseur refuse immédiatement un niveau de raisonnement ou une limite de sortie non pris en charge. Un harness CLI peut conserver son modèle par défaut ; un harness personnalisé en exige un."
   ],
   "harness": [
     "Define a caller-supplied execution callback backed by a model provider. The callback runs in the Outpost process and uses the supplied sandbox for repository operations. No tool loop, native conversation storage or interactive terminal is provided.",
     "Définit un callback fourni par l’appelant et relié à un fournisseur de modèles. Le callback tourne dans le processus Outpost et utilise le sandbox fourni pour le dépôt. Aucune boucle d’outils, conversation native ou session terminal n’est fournie."
   ],
   "anthropicModelProvider": [
-    "Configure an Anthropic Messages text transport with an explicit output limit and optional system-prefix caching. The harness supplies the model per request. Cache reads and writes are normalized into usage; tool requests, streaming and incomplete responses are rejected.",
-    "Configure un transport texte Anthropic Messages avec limite de sortie explicite et cache optionnel du préfixe système. Le harness fournit le modèle par requête. Les lectures et écritures de cache sont normalisées dans l’usage ; outils, streaming et réponses incomplètes sont refusés."
+    "Configure an Anthropic Messages text transport with optional system-prefix caching. The harness supplies the model per request; the agent model must set maxOutputTokens, and reasoning maps to adaptive or disabled thinking. Cache reads and writes are normalized into usage; tool requests, streaming and incomplete responses are rejected.",
+    "Configure un transport texte Anthropic Messages avec cache optionnel du préfixe système. Le harness fournit le modèle par requête ; le modèle de l’agent doit fixer maxOutputTokens, et le raisonnement se traduit en réflexion adaptative ou désactivée. Les lectures et écritures de cache sont normalisées dans l’usage ; outils, streaming et réponses incomplètes sont refusés."
   ],
   "claudeHarness": [
     "Create a Claude Code harness from execution, authentication and conversation settings without starting the CLI. Compose it with agent({ harness, model }) to select a model independently. The CLI owns its internal model/tool loop.",

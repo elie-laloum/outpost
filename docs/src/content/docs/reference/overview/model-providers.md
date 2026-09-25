@@ -18,7 +18,7 @@ Configure the endpoint, explicit credentials and request bounds, then pass the p
 
 ## Boundaries and responsibilities
 
-Identifiers are arbitrary nonempty strings. The service validates model availability when called; there is no local catalog, retry or protocol fallback. These transports reject tool responses and incomplete output. Local HTTP fixtures validate the contracts without proving authenticated compatibility with every service.
+The agent model is a nonempty name, optionally with `reasoning` and `maxOutputTokens` that the provider validates when the agent is composed. The service validates model availability when called; there is no local catalog, retry or protocol fallback. These transports reject tool responses and incomplete output. Local HTTP fixtures validate the contracts without proving authenticated compatibility with every service.
 
 ## Entry points
 

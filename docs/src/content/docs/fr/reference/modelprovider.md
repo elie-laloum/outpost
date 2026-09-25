@@ -17,21 +17,24 @@ import type { ModelProvider } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom       | Type                                              | Présence | Rôle                                                                                                                                          |
-| --------- | ------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`    | `string`                                          | Requis   | Identité du fournisseur ; le client direct intégré indique openai-compatible.                                                                 |
-| `request` | `(request: ModelRequest) => Promise<ModelResult>` | Requis   | Exécute une requête texte bornée pour le modèle fourni. Le wrapper du harness propage l’annulation et comptabilise une fois l’usage rapporté. |
+| Nom        | Type                                              | Présence  | Rôle                                                                                                                                                                                                |
+| ---------- | ------------------------------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`     | `string`                                          | Requis    | Identité du fournisseur ; le client direct intégré indique openai-compatible.                                                                                                                       |
+| `validate` | `((model: AgentModel) => void) \| undefined`      | Optionnel | Contrôle optionnel appelé par agent() avec l’AgentModel normalisé ; lever une erreur pour refuser un niveau de raisonnement non pris en charge ou une limite de sortie absente avant toute requête. |
+| `request`  | `(request: ModelRequest) => Promise<ModelResult>` | Requis    | Exécute une requête texte bornée pour le modèle fourni. Le wrapper du harness propage l’annulation et comptabilise une fois l’usage rapporté.                                                       |
 
 ## Signature
 
 ```ts
 export interface ModelProvider {
   readonly name: string;
+  validate?(model: AgentModel): void;
   request(request: ModelRequest): Promise<ModelResult>;
 }
 ```
 
 ## Contrats associés
 
+- [AgentModel](../agentmodel/)
 - [ModelRequest](../modelrequest/)
 - [ModelResult](../modelresult/)

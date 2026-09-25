@@ -56,12 +56,15 @@ export async function customTurn(
         (async () => {
           signal.throwIfAborted();
           invariant(
-            request.model === agent.model,
+            request.model === agent.model.name,
             "Harness request model must match its agent",
           );
+          const { reasoning, maxOutputTokens } = agent.model;
           const result = await agent.harness.modelProvider.request({
+            ...(reasoning === undefined ? {} : { reasoning }),
+            ...(maxOutputTokens === undefined ? {} : { maxOutputTokens }),
             ...request,
-            model: agent.model,
+            model: agent.model.name,
             signal: request.signal
               ? AbortSignal.any([request.signal, signal])
               : signal,
@@ -135,7 +138,7 @@ export async function customTurn(
     watchdog.refresh(false);
     const result = await agent.harness.run(
       { prompt },
-      { model: agent.model, modelProvider, sandbox, signal, observe },
+      { model: agent.model.name, modelProvider, sandbox, signal, observe },
     );
     signal.throwIfAborted();
     invariant(

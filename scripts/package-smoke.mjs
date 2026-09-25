@@ -87,17 +87,18 @@ try {
     for (const name of ['claude','codex','gemini','customHarness','openaiCompatible','local','docker','podman','vercel','daytona','firecracker','mountedProvider','remoteProvider']) assert.equal(name in api, false, name);
     for (const name of ['claude','codex','gemini']) {
       assert.equal(typeof api[name+'Harness'], 'function');
-      assert.equal(api.agent({harness:api[name+'Harness'](),model:'arbitrary-model'}).model,'arbitrary-model');
+      assert.equal(api.agent({harness:api[name+'Harness'](),model:'arbitrary-model'}).model.name,'arbitrary-model');
     }
     for (const name of ['local','docker','podman','firecracker']) {
       const exports = await import('@elie-laloum/outpost/providers/'+name);
       assert.equal(name in exports,false,name);
       assert.equal(typeof exports[name+'SandboxProvider'],'function');
     }
-    const modelProvider=api.anthropicModelProvider({apiKey:'unused',maxOutputTokens:100});
+    const modelProvider=api.anthropicModelProvider({apiKey:'unused'});
     assert.equal('generate' in modelProvider,false);
     assert.equal('model' in modelProvider,false);
-    assert.equal(api.agent({harness:api.harness({modelProvider,run:async()=>({text:'done'})}),model:'arbitrary'}).kind,'custom');
+    assert.equal(api.agent({harness:api.harness({modelProvider,run:async()=>({text:'done'})}),model:{name:'arbitrary',maxOutputTokens:100}}).kind,'custom');
+    assert.throws(()=>api.agent({harness:api.harness({modelProvider,run:async()=>({text:'done'})}),model:'arbitrary'}),/maxOutputTokens/);
   `,
     ],
     { cwd: temporary, stdio: "inherit" },
@@ -164,21 +165,27 @@ try {
     consumer,
     `import { agent as composeAgent,  dispatch, codexHarness, geminiHarness, response, createSandbox, type GeminiSettings, type EgressPolicy } from '@elie-laloum/outpost';
 import { openaiModelProvider, type OpenAIModelProviderOptions, type ModelProvider, type ModelRequest, type ModelResult, type AgentAdapter, type SandboxProvider } from '@elie-laloum/outpost';
-import { harness, anthropicModelProvider, type Agent } from '@elie-laloum/outpost';
+import { harness, anthropicModelProvider, type Agent, type AgentModel, type ModelReasoning } from '@elie-laloum/outpost';
 // @ts-expect-error The renamed factory has no compatibility export.
 import { customHarness } from '@elie-laloum/outpost';
 // @ts-expect-error Removed API has no compatibility export.
 import { openaiCompatible } from '@elie-laloum/outpost';
 // @ts-expect-error Removed sandbox factory has no alias.
 import { local } from '@elie-laloum/outpost/providers/local';
-const custom = harness({modelProvider:anthropicModelProvider({apiKey:'unused',maxOutputTokens:10}),run:async(input,context)=>context.modelProvider.request({model:context.model,prompt:input.prompt,signal:context.signal})});
-const composed: Agent = composeAgent({harness:custom,model:'arbitrary'});
+const custom = harness({modelProvider:anthropicModelProvider({apiKey:'unused'}),run:async(input,context)=>context.modelProvider.request({model:context.model,prompt:input.prompt,signal:context.signal})});
+const reasoning: ModelReasoning = 'high';
+const selectedModel: AgentModel = {name:'arbitrary',reasoning,maxOutputTokens:10};
+const composed: Agent = composeAgent({harness:custom,model:selectedModel});
 // @ts-expect-error Custom harness requires a model.
 composeAgent({harness:custom});
 // @ts-expect-error The old preset namespaces are no longer exported.
 import { claude, codex, gemini } from '@elie-laloum/outpost';
 // @ts-expect-error Model selection belongs to the agent.
 codexHarness({model:'arbitrary'});
+// @ts-expect-error Reasoning belongs to the agent model.
+codexHarness({reasoning:'high'});
+// @ts-expect-error Output limits belong to the agent model.
+anthropicModelProvider({apiKey:'unused',maxOutputTokens:10});
 console.log(composed);
 const modelOptions: OpenAIModelProviderOptions = { baseUrl: 'http://localhost/v1', apiKey: false };
 const modelProvider: ModelProvider = openaiModelProvider(modelOptions);

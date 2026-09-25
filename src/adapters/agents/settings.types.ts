@@ -1,15 +1,14 @@
 import type { AgentAuthentication } from "../../domain/agent.types.ts";
 import type { Variables } from "../../domain/command.types.ts";
+import type { AgentModel, ModelReasoning } from "../../domain/model.types.ts";
 
 export interface CommonAgentSettings {
-  readonly model?: string;
   readonly authentication?: AgentAuthentication;
   readonly variables?: Variables;
   readonly saveConversations?: boolean;
 }
 
 export interface ClaudeSettings extends CommonAgentSettings {
-  readonly reasoning?: "low" | "medium" | "high" | "xhigh" | "max";
   readonly permissions?:
     | "default"
     | "acceptEdits"
@@ -26,6 +25,13 @@ export interface CodexModelProvider {
 
 export interface CodexSettings extends CommonAgentSettings {
   readonly modelProvider?: CodexModelProvider;
-  readonly reasoning?: "low" | "medium" | "high" | "xhigh";
   readonly approvalReviewer?: "user" | "auto_review";
+}
+
+export type Bound<Settings> = Settings & { readonly model?: AgentModel };
+
+export interface CliModelSupport {
+  readonly agent: string;
+  readonly reasoning: ReadonlySet<ModelReasoning>;
+  readonly maxOutputTokens: boolean;
 }

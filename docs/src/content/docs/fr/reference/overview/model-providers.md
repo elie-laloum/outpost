@@ -18,7 +18,7 @@ Configurez endpoint, credentials explicites et limites, puis transmettez le four
 
 ## Frontières et responsabilités
 
-Les identifiants sont des chaînes non vides arbitraires. Le service vérifie la disponibilité lors de l’appel ; aucun catalogue local, retry ni repli de protocole. Ces transports refusent les réponses d’outils et sorties incomplètes. Les fixtures HTTP locales valident les contrats sans prouver la compatibilité authentifiée de tous les services.
+Le modèle de l’agent est un nom non vide, éventuellement accompagné de `reasoning` et `maxOutputTokens` que le fournisseur valide à la composition. Le service vérifie la disponibilité lors de l’appel ; aucun catalogue local, retry ni repli de protocole. Ces transports refusent les réponses d’outils et sorties incomplètes. Les fixtures HTTP locales valident les contrats sans prouver la compatibilité authentifiée de tous les services.
 
 ## Points d’entrée
 

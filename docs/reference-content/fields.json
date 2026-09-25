@@ -1324,17 +1324,9 @@
     "Build repository, provider, agent and brief options for a separately allocated dispatch at each attempt.",
     "Construit les options de dépôt, provider, agent et brief pour un dispatch alloué séparément à chaque tentative."
   ],
-  "ClaudeSettings.reasoning": [
-    "Reasoning effort passed to the selected agent CLI.",
-    "Niveau d’effort de raisonnement transmis au CLI de l’agent choisi."
-  ],
   "ClaudeSettings.permissions": [
     "Claude Code permission mode controlling tool approval behavior.",
     "Mode de permissions Claude Code contrôlant l’approbation des outils."
-  ],
-  "CommonAgentSettings.model": [
-    "Native CLI model identifier; availability depends on the account.",
-    "Identifiant de modèle natif ; disponibilité selon le compte."
   ],
   "CommonAgentSettings.variables": [
     "Explicit environment declarations; values are strings.",
@@ -1348,10 +1340,6 @@
     "Custom Codex model endpoint configuration; requires Responses API compatibility.",
     "Configuration d’un endpoint de modèle Codex personnalisé ; exige la compatibilité Responses API."
   ],
-  "CodexSettings.reasoning": [
-    "Reasoning effort passed to the selected agent CLI.",
-    "Niveau d’effort de raisonnement transmis au CLI de l’agent choisi."
-  ],
   "CodexSettings.approvalReviewer": [
     "Codex approval reviewer: the user or automatic approval review.",
     "Responsable de l’approbation Codex : utilisateur ou revue automatique."
@@ -1363,10 +1351,6 @@
   "CodexModelProvider.apiKeyEnvironment": [
     "Environment variable containing the endpoint API key; false disables the API-key environment declaration.",
     "Variable d’environnement contenant la clé API de l’endpoint ; false désactive la déclaration de cette variable."
-  ],
-  "GeminiSettings.model": [
-    "Native CLI model identifier; availability depends on the account.",
-    "Identifiant de modèle natif ; disponibilité selon le compte."
   ],
   "GeminiSettings.variables": [
     "Explicit environment declarations; values are strings.",
@@ -3389,8 +3373,8 @@
     "Texte optionnel envoyé comme message system de Chat Completions ou instructions de Responses."
   ],
   "ModelRequest.maxOutputTokens": [
-    "Positive output token limit sent as max_completion_tokens or max_output_tokens; omitted by default. Availability and reasoning-token accounting depend on the service.",
-    "Limite positive de tokens de sortie transmise dans max_completion_tokens ou max_output_tokens ; omise par défaut. La disponibilité et le décompte du raisonnement dépendent du service."
+    "Positive output token limit sent as max_completion_tokens, max_output_tokens or max_tokens. Optional for OpenAI, required by Anthropic. Inside a custom harness it defaults to the agent model limit.",
+    "Limite positive de tokens de sortie transmise dans max_completion_tokens, max_output_tokens ou max_tokens. Optionnelle pour OpenAI, exigée par Anthropic. Dans un harness personnalisé, elle reprend par défaut la limite du modèle de l’agent."
   ],
   "ModelRequest.signal": [
     "Caller-owned cancellation signal for this request, combined with the provider deadline. Cancellation does not dispose the reusable client.",
@@ -3593,48 +3577,48 @@
     "Harness d’exécution ; sa variante sélectionne une CLI ou un callback personnalisé."
   ],
   "AgentOptions.model": [
-    "Model identifier passed unchanged to the harness. Required for custom harnesses; optional for CLI defaults.",
-    "Identifiant transmis tel quel au harness. Requis pour un harness personnalisé ; optionnel pour le défaut CLI."
+    "Model name, or an AgentModel object with optional reasoning and output limit. The executing harness or provider validates supported values when the agent is composed. Required for custom harnesses; optional for CLI defaults.",
+    "Nom du modèle, ou objet AgentModel avec raisonnement et limite de sortie optionnels. Le harness ou le fournisseur qui exécute valide les valeurs prises en charge à la composition de l’agent. Requis pour un harness personnalisé ; optionnel pour le défaut CLI."
   ],
   "CliAgentOptions.harness": [
     "CLI execution preset to bind to the selected model.",
     "Preset CLI à associer au modèle sélectionné."
   ],
   "CliAgentOptions.model": [
-    "Nonempty model identifier forwarded unchanged; omission selects the native CLI default.",
-    "Identifiant non vide transmis tel quel ; son absence conserve le défaut de la CLI."
+    "Model name, or an AgentModel object with optional reasoning and output limit. The executing harness or provider validates supported values when the agent is composed. Omission selects the native CLI default model.",
+    "Nom du modèle, ou objet AgentModel avec raisonnement et limite de sortie optionnels. Le harness ou le fournisseur qui exécute valide les valeurs prises en charge à la composition de l’agent. Son absence conserve le modèle par défaut de la CLI."
   ],
   "CustomAgentOptions.harness": [
     "Custom callback harness with its configured model provider.",
     "Harness personnalisé avec son fournisseur de modèles."
   ],
   "CustomAgentOptions.model": [
-    "Required nonempty model identifier passed to the provider; availability is checked by the service.",
-    "Identifiant non vide requis transmis au fournisseur ; le service vérifie sa disponibilité."
+    "Required model name or AgentModel object. The model provider validates reasoning and output limits when the agent is composed; model availability is checked by the service.",
+    "Nom de modèle ou objet AgentModel requis. Le fournisseur de modèles valide le raisonnement et la limite de sortie à la composition de l’agent ; le service vérifie la disponibilité du modèle."
   ],
   "Agent.harness": [
     "Execution harness; its kind selects CLI supervision or a custom callback.",
     "Harness d’exécution ; sa variante sélectionne une CLI ou un callback personnalisé."
   ],
   "Agent.model": [
-    "Model identifier passed unchanged to the harness. Required for custom harnesses; optional for CLI defaults.",
-    "Identifiant transmis tel quel au harness. Requis pour un harness personnalisé ; optionnel pour le défaut CLI."
+    "Normalized frozen AgentModel of the composed agent; absent when a CLI harness keeps its native default.",
+    "AgentModel normalisé et figé de l’agent composé ; absent quand un harness CLI conserve son défaut natif."
   ],
   "CliAgent.harness": [
     "CLI execution preset to bind to the selected model.",
     "Preset CLI à associer au modèle sélectionné."
   ],
   "CliAgent.model": [
-    "Nonempty model identifier forwarded unchanged; omission selects the native CLI default.",
-    "Identifiant non vide transmis tel quel ; son absence conserve le défaut de la CLI."
+    "Normalized frozen AgentModel bound to the CLI command; absent when the native CLI default is kept.",
+    "AgentModel normalisé et figé lié à la commande CLI ; absent quand le défaut natif de la CLI est conservé."
   ],
   "CustomAgent.harness": [
     "Custom callback harness with its configured model provider.",
     "Harness personnalisé avec son fournisseur de modèles."
   ],
   "CustomAgent.model": [
-    "Required nonempty model identifier passed to the provider; availability is checked by the service.",
-    "Identifiant non vide requis transmis au fournisseur ; le service vérifie sa disponibilité."
+    "Normalized frozen AgentModel whose name, reasoning and output limit are applied to model requests by default.",
+    "AgentModel normalisé et figé dont le nom, le raisonnement et la limite de sortie s’appliquent par défaut aux requêtes du modèle."
   ],
   "CliHarness.kind": [
     "Execution discriminator: cli.",
@@ -3661,8 +3645,8 @@
     "Discriminant d’exécution : cli or custom."
   ],
   "CliHarness.bind": [
-    "Build the CLI adapter for an optional model identifier without launching the program.",
-    "Construit l’adaptateur CLI pour un modèle optionnel sans lancer le programme."
+    "Build the CLI adapter for an optional normalized AgentModel without launching the program; unsupported reasoning or output limits are rejected here.",
+    "Construit l’adaptateur CLI pour un AgentModel normalisé optionnel sans lancer le programme ; un raisonnement ou une limite de sortie non pris en charge est refusé ici."
   ],
   "CustomHarnessOptions.modelProvider": [
     "Reusable request transport used by the execution callback; no model catalog is imposed.",
@@ -3741,8 +3725,8 @@
     "Accès au modèle, sandbox, signal d’annulation et callback d’observation isolé propres à l’opération."
   ],
   "HarnessContext.model": [
-    "Model identifier selected on the composed agent.",
-    "Identifiant de modèle sélectionné sur l’agent composé."
+    "Model name selected on the composed agent; requests inherit its reasoning and output limit unless they set their own.",
+    "Nom du modèle sélectionné sur l’agent composé ; les requêtes héritent de son raisonnement et de sa limite de sortie sauf si elles fixent les leurs."
   ],
   "HarnessContext.modelProvider": [
     "Request wrapper bound to this agent’s model and cancellation; reported usage is accumulated across calls.",
@@ -3797,8 +3781,8 @@
     "Taille maximale positive du corps après décompression HTTP, en octets ; 8388608 (8 Mio) par défaut. Les réponses dépassant cette limite échouent."
   ],
   "anthropicModelProvider.options": [
-    "Anthropic endpoint, explicit API key, default output bound and optional system-prefix cache.",
-    "Endpoint Anthropic, clé API explicite, limite de sortie par défaut et cache optionnel du préfixe système."
+    "Anthropic endpoint, explicit API key, bounds and optional system-prefix cache; output limits belong to the agent model.",
+    "Endpoint Anthropic, clé API explicite, limites de transport et cache optionnel du préfixe système ; la limite de sortie appartient au modèle de l’agent."
   ],
   "AnthropicModelProviderOptions.apiKey": [
     "Explicit Anthropic API key sent in x-api-key; no CLI account or host credential discovery.",
@@ -3807,10 +3791,6 @@
   "AnthropicModelProviderOptions.baseUrl": [
     "Messages API base URL including its version prefix; defaults to https://api.anthropic.com/v1.",
     "URL de base de Messages avec son préfixe de version ; défaut : https://api.anthropic.com/v1."
-  ],
-  "AnthropicModelProviderOptions.maxOutputTokens": [
-    "Required positive default output-token bound; each request may override it.",
-    "Limite positive de tokens de sortie par défaut requise ; chaque requête peut la remplacer."
   ],
   "AnthropicModelProviderOptions.cacheSystem": [
     "Opt in to an ephemeral cache breakpoint on the system text. Requests must contain system instructions; a cache hit is not guaranteed.",
@@ -3851,5 +3831,25 @@
   "geminiHarness.settings": [
     "Configuration for the Gemini CLI harness; pass the selected model to agent() instead.",
     "Configuration du harness Gemini CLI ; transmettez le modèle choisi à agent()."
+  ],
+  "AgentModel.name": [
+    "Nonempty model identifier passed unchanged to the CLI or model service; no local catalog is consulted.",
+    "Identifiant de modèle non vide transmis tel quel à la CLI ou au service ; aucun catalogue local n’est consulté."
+  ],
+  "AgentModel.reasoning": [
+    "Optional reasoning effort. Each harness or provider accepts only the levels it can express and rejects the others when the agent is composed; omission keeps the model default.",
+    "Effort de raisonnement optionnel. Chaque harness ou fournisseur n’accepte que les niveaux qu’il sait exprimer et refuse les autres à la composition de l’agent ; son absence conserve le défaut du modèle."
+  ],
+  "AgentModel.maxOutputTokens": [
+    "Optional positive output-token limit for each model response. Claude Code receives it as CLAUDE_CODE_MAX_OUTPUT_TOKENS; Codex and Gemini CLI reject it; the Anthropic provider requires it.",
+    "Limite positive optionnelle de tokens de sortie pour chaque réponse du modèle. Claude Code la reçoit via CLAUDE_CODE_MAX_OUTPUT_TOKENS ; Codex et Gemini CLI la refusent ; le fournisseur Anthropic l’exige."
+  ],
+  "ModelProvider.validate": [
+    "Optional check called by agent() with the normalized AgentModel; throw to reject unsupported reasoning levels or missing output limits before any request.",
+    "Contrôle optionnel appelé par agent() avec l’AgentModel normalisé ; lever une erreur pour refuser un niveau de raisonnement non pris en charge ou une limite de sortie absente avant toute requête."
+  ],
+  "ModelRequest.reasoning": [
+    "Optional reasoning effort for this request. OpenAI sends it as reasoning_effort or reasoning.effort; Anthropic maps none to disabled thinking and low to max to adaptive thinking with that effort, and rejects minimal.",
+    "Effort de raisonnement optionnel pour cette requête. OpenAI l’envoie dans reasoning_effort ou reasoning.effort ; Anthropic traduit none en réflexion désactivée et low à max en réflexion adaptative avec cet effort, et refuse minimal."
   ]
 }

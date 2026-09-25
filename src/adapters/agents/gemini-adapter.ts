@@ -1,11 +1,15 @@
-import { invariant } from "../../domain/errors.ts";
+import type { AgentModel } from "../../domain/model.types.ts";
 import { authenticationCommand } from "./authentication.ts";
 import type { AgentAdapter, CliHarness } from "../../domain/agent.types.ts";
 import { geminiEvents } from "./gemini-events.ts";
 import { geminiRequest } from "./gemini-request.ts";
 import type { GeminiSettings } from "./gemini.types.ts";
+import { geminiModelSupport } from "./model-support.constants.ts";
+import { harnessSettings, supportModel } from "./model-support.ts";
+import type { Bound } from "./settings.types.ts";
 
-function bindGemini(settings: GeminiSettings = {}): AgentAdapter {
+function bindGemini(settings: Bound<GeminiSettings>): AgentAdapter {
+  supportModel(geminiModelSupport, settings.model);
   return Object.freeze({
     name: "gemini",
     authenticate: authenticationCommand("gemini", settings.authentication),
@@ -19,20 +23,15 @@ function bindGemini(settings: GeminiSettings = {}): AgentAdapter {
   } satisfies AgentAdapter);
 }
 
-export function geminiHarness(
-  settings: Omit<GeminiSettings, "model"> = {},
-): CliHarness {
-  invariant(
-    settings && typeof settings === "object" && !("model" in settings),
-    "Set the model on agent(), not on its harness",
-  );
+export function geminiHarness(settings: GeminiSettings = {}): CliHarness {
+  harnessSettings(settings);
   const configured = Object.freeze({
     ...settings,
     variables: Object.freeze({ ...settings.variables }),
   });
   return Object.freeze({
     kind: "cli",
-    bind: (model?: string) =>
+    bind: (model?: AgentModel) =>
       bindGemini({
         ...configured,
         ...(model === undefined ? {} : { model }),

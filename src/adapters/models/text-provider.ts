@@ -57,6 +57,7 @@ export function textProvider(
   );
   return Object.freeze({
     name,
+    ...(protocol.validate ? { validate: protocol.validate } : {}),
     async request(request: ModelRequest) {
       validateModelRequest(request);
       const deadline = new AbortController();

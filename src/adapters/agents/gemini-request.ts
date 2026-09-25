@@ -2,9 +2,10 @@ import type { AgentInput } from "../../domain/agent.types.ts";
 import type { Command } from "../../domain/command.types.ts";
 import { invariant } from "../../domain/errors.ts";
 import type { GeminiSettings } from "./gemini.types.ts";
+import type { Bound } from "./settings.types.ts";
 
 export function geminiRequest(
-  settings: GeminiSettings,
+  settings: Bound<GeminiSettings>,
   input: AgentInput,
 ): Command {
   invariant(
@@ -12,7 +13,7 @@ export function geminiRequest(
     "Gemini does not support continuation or fork in Outpost",
   );
   const args: string[] = [];
-  if (settings.model) args.push("--model", settings.model);
+  if (settings.model) args.push("--model", settings.model.name);
   const approvalMode =
     settings.approvalMode ?? (input.interactive ? "default" : "yolo");
   args.push("--approval-mode", approvalMode);

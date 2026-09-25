@@ -329,9 +329,12 @@ export type {
 export { openaiModelProvider } from "./adapters/models/openai-model-provider.ts";
 export type { OpenAIModelProviderOptions } from "./adapters/models/openai-model-provider.types.ts";
 export type {
+  AgentModel,
   ModelProvider,
+  ModelReasoning,
   ModelRequest,
   ModelResult,
+  ModelSpec,
 } from "./domain/model.types.ts";
 export { anthropicModelProvider } from "./adapters/models/anthropic-model-provider.ts";
 export type { AnthropicModelProviderOptions } from "./adapters/models/anthropic-model-provider.types.ts";

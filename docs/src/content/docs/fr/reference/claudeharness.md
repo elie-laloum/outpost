@@ -21,8 +21,7 @@ Crée un harness Claude Code à partir des réglages d’exécution, d’authent
 
 | Nom                          | Type                                                                                              | Présence  | Rôle                                                                                                                                             |
 | ---------------------------- | ------------------------------------------------------------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `settings`                   | `Omit<ClaudeSettings, "model"> \| undefined`                                                      | Optionnel | Configuration du harness Claude Code ; transmettez le modèle choisi à agent().                                                                   |
-| `settings.reasoning`         | `"low" \| "medium" \| "high" \| "xhigh" \| "max" \| undefined`                                    | Optionnel | Niveau d’effort de raisonnement transmis au CLI de l’agent choisi.                                                                               |
+| `settings`                   | `ClaudeSettings \| undefined`                                                                     | Optionnel | Configuration du harness Claude Code ; transmettez le modèle choisi à agent().                                                                   |
 | `settings.permissions`       | `"default" \| "acceptEdits" \| "plan" \| "auto" \| "dontAsk" \| "bypassPermissions" \| undefined` | Optionnel | Mode de permissions Claude Code contrôlant l’approbation des outils.                                                                             |
 | `settings.authentication`    | `AgentAuthentication \| undefined`                                                                | Optionnel | Préparation explicite de l’authentification de ce harness CLI. Son absence conserve l’accès déjà configuré sans rechercher des credentials hôte. |
 | `settings.variables`         | `Readonly<Record<string, string>> \| undefined`                                                   | Optionnel | Déclarations d’environnement explicites ; les valeurs sont des chaînes.                                                                          |
@@ -35,9 +34,7 @@ Crée un harness Claude Code à partir des réglages d’exécution, d’authent
 ## Signature
 
 ```ts
-export declare function claudeHarness(
-  settings?: Omit<ClaudeSettings, "model">,
-): CliHarness;
+export declare function claudeHarness(settings?: ClaudeSettings): CliHarness;
 ```
 
 ## Contrats associés

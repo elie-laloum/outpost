@@ -1,11 +1,13 @@
 import { invariant } from "../../domain/errors.ts";
-import type { CodexSettings } from "./settings.types.ts";
+import type { Bound, CodexSettings } from "./settings.types.ts";
 
-export function codexProvider(settings: CodexSettings): readonly string[] {
+export function codexProvider(
+  settings: Bound<CodexSettings>,
+): readonly string[] {
   const provider = settings.modelProvider;
   if (!provider) return [];
   invariant(
-    settings.model?.trim(),
+    settings.model?.name.trim(),
     "A custom model provider requires a model name",
   );
   let url: URL;

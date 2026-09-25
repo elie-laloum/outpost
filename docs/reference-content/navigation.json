@@ -291,12 +291,21 @@
         "slug": "reference/agentoptions",
         "attrs": { "data-api-kind": "type" }
       },
+      { "slug": "reference/modelspec", "attrs": { "data-api-kind": "type" } },
+      {
+        "slug": "reference/modelreasoning",
+        "attrs": { "data-api-kind": "type" }
+      },
       {
         "slug": "reference/cliagent",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/customagent",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/agentmodel",
         "attrs": { "data-api-kind": "interface" }
       }
     ]

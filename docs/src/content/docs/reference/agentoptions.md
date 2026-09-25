@@ -15,10 +15,10 @@ import type { AgentOptions } from "@elie-laloum/outpost";
 
 The fields below cover all variants; the signature specifies their allowed combinations.
 
-| Name      | Type                            | Presence          | Meaning                                                                                                     |
-| --------- | ------------------------------- | ----------------- | ----------------------------------------------------------------------------------------------------------- |
-| `harness` | `CliHarness \| CustomHarness`   | Required          | Execution harness; its kind selects CLI supervision or a custom callback.                                   |
-| `model`   | `string \| undefined \| string` | Variant-dependent | Model identifier passed unchanged to the harness. Required for custom harnesses; optional for CLI defaults. |
+| Name      | Type                                  | Presence          | Meaning                                                                                                                                                                                                                          |
+| --------- | ------------------------------------- | ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `harness` | `CliHarness \| CustomHarness`         | Required          | Execution harness; its kind selects CLI supervision or a custom callback.                                                                                                                                                        |
+| `model`   | `ModelSpec \| undefined \| ModelSpec` | Variant-dependent | Model name, or an AgentModel object with optional reasoning and output limit. The executing harness or provider validates supported values when the agent is composed. Required for custom harnesses; optional for CLI defaults. |
 
 ## Signature
 

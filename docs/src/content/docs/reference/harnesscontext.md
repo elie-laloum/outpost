@@ -15,7 +15,7 @@ import type { HarnessContext } from "@elie-laloum/outpost";
 
 | Name            | Type                          | Presence | Meaning                                                                                                                                                                   |
 | --------------- | ----------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `model`         | `string`                      | Required | Model identifier selected on the composed agent.                                                                                                                          |
+| `model`         | `string`                      | Required | Model name selected on the composed agent; requests inherit its reasoning and output limit unless they set their own.                                                     |
 | `modelProvider` | `ModelProvider`               | Required | Request wrapper bound to this agent’s model and cancellation; reported usage is accumulated across calls.                                                                 |
 | `sandbox`       | `SandboxLease`                | Required | Borrowed sandbox capabilities for commands and transfers. The harness cannot release the lease; operations inherit turn cancellation.                                     |
 | `signal`        | `AbortSignal`                 | Required | Combined external cancellation and execution deadline; callbacks must cooperate with this signal.                                                                         |

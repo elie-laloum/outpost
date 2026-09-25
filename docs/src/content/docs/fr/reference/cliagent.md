@@ -17,7 +17,7 @@ import type { CliAgent } from "@elie-laloum/outpost";
 | ----------------------- | -------------------------------------------------------------------------------------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `kind`                  | `"cli"`                                                                                | Requis    | Discriminant d’exécution : cli.                                                                                                                                            |
 | `harness`               | `CliHarness`                                                                           | Requis    | Preset CLI à associer au modèle sélectionné.                                                                                                                               |
-| `model`                 | `string \| undefined`                                                                  | Optionnel | Identifiant non vide transmis tel quel ; son absence conserve le défaut de la CLI.                                                                                         |
+| `model`                 | `AgentModel \| undefined`                                                              | Optionnel | AgentModel normalisé et figé lié à la commande CLI ; absent quand le défaut natif de la CLI est conservé.                                                                  |
 | `authenticate`          | `((variables: Readonly<Record<string, string>>) => Command \| undefined) \| undefined` | Optionnel | Construit une commande d’authentification optionnelle depuis les variables résolues explicitement ; réactivée lorsque la configuration sélectionnée pour cette CLI change. |
 | `request`               | `(input: AgentInput) => Command`                                                       | Requis    | Construit le programme, ses arguments et son environnement depuis l’entrée d’agent fournie.                                                                                |
 | `events`                | `(line: string) => readonly AgentEvent[]`                                              | Requis    | Décode une ligne de sortie du CLI natif en événements d’agent normalisés.                                                                                                  |
@@ -37,11 +37,12 @@ import type { CliAgent } from "@elie-laloum/outpost";
 export interface CliAgent extends AgentAdapter {
   readonly kind: "cli";
   readonly harness: CliHarness;
-  readonly model?: string;
+  readonly model?: AgentModel;
 }
 ```
 
 ## Contrats associés
 
 - [AgentAdapter](../agentadapter/)
+- [AgentModel](../agentmodel/)
 - [CliHarness](../cliharness/)

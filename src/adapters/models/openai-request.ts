@@ -17,6 +17,9 @@ export const modelProtocols: Readonly<Record<string, ModelProtocol>> = {
       ...(request.maxOutputTokens === undefined
         ? {}
         : { max_completion_tokens: request.maxOutputTokens }),
+      ...(request.reasoning === undefined
+        ? {}
+        : { reasoning_effort: request.reasoning }),
     }),
     read: readChatCompletion,
   },
@@ -31,6 +34,9 @@ export const modelProtocols: Readonly<Record<string, ModelProtocol>> = {
       ...(request.maxOutputTokens === undefined
         ? {}
         : { max_output_tokens: request.maxOutputTokens }),
+      ...(request.reasoning === undefined
+        ? {}
+        : { reasoning: { effort: request.reasoning } }),
     }),
     read: readModelResponse,
   },

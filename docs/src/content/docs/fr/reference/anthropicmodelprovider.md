@@ -17,7 +17,7 @@ import { anthropicModelProvider } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Configure un transport texte Anthropic Messages avec limite de sortie explicite et cache optionnel du préfixe système. Le harness fournit le modèle par requête. Les lectures et écritures de cache sont normalisées dans l’usage ; outils, streaming et réponses incomplètes sont refusés.
+Configure un transport texte Anthropic Messages avec cache optionnel du préfixe système. Le harness fournit le modèle par requête ; le modèle de l’agent doit fixer maxOutputTokens, et le raisonnement se traduit en réflexion adaptative ou désactivée. Les lectures et écritures de cache sont normalisées dans l’usage ; outils, streaming et réponses incomplètes sont refusés.
 
 [Exemple complet et règles détaillées](../../guide/advanced/model-providers/).
 
@@ -25,10 +25,9 @@ Configure un transport texte Anthropic Messages avec limite de sortie explicite 
 
 | Nom                        | Type                            | Présence  | Rôle                                                                                                                                                      |
 | -------------------------- | ------------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `options`                  | `AnthropicModelProviderOptions` | Requis    | Endpoint Anthropic, clé API explicite, limite de sortie par défaut et cache optionnel du préfixe système.                                                 |
+| `options`                  | `AnthropicModelProviderOptions` | Requis    | Endpoint Anthropic, clé API explicite, limites de transport et cache optionnel du préfixe système ; la limite de sortie appartient au modèle de l’agent.  |
 | `options.apiKey`           | `string`                        | Requis    | Clé API Anthropic explicite envoyée dans x-api-key ; aucune session CLI ni recherche de credentials hôte.                                                 |
 | `options.baseUrl`          | `string \| undefined`           | Optionnel | URL de base de Messages avec son préfixe de version ; défaut : https://api.anthropic.com/v1.                                                              |
-| `options.maxOutputTokens`  | `number`                        | Requis    | Limite positive de tokens de sortie par défaut requise ; chaque requête peut la remplacer.                                                                |
 | `options.cacheSystem`      | `boolean \| undefined`          | Optionnel | Active un point de cache éphémère sur le texte système. Les requêtes doivent contenir des instructions système ; une lecture de cache n’est pas garantie. |
 | `options.timeoutMs`        | `number \| undefined`           | Optionnel | Délai positif en millisecondes couvrant les en-têtes et le corps complet ; 120000 par défaut, maximum 2147483647.                                         |
 | `options.maxResponseBytes` | `number \| undefined`           | Optionnel | Taille maximale positive du corps après décompression HTTP, en octets ; 8388608 (8 Mio) par défaut. Les réponses dépassant cette limite échouent.         |

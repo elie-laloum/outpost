@@ -42,7 +42,7 @@ Ces orientations s’appuient sur les [workflows durables](../../guide/advanced/
 
 ## Composition de harness non publiée et moteur d’outils restant
 
-L’arbre de travail implémente `agent({ harness, model })`, les presets CLI, les callbacks `harness({ modelProvider, run })`, `openaiModelProvider` et `anthropicModelProvider`. Ces ruptures ne sont pas publiées ; l’API publiée en 4.2.0 reste inchangée. Les identifiants de modèle sont des chaînes, sans catalogue local de disponibilité.
+L’arbre de travail implémente `agent({ harness, model })`, les presets CLI, les callbacks `harness({ modelProvider, run })`, `openaiModelProvider` et `anthropicModelProvider`. Ces ruptures ne sont pas publiées ; l’API publiée en 4.2.0 reste inchangée. Les modèles sont des noms ou des objets `{ name, reasoning, maxOutputTokens }` validés par le harness ou le fournisseur qui exécute, sans catalogue local de disponibilité.
 
 Le callback personnalisé tourne dans le processus Outpost et emprunte les opérations du sandbox. Les requêtes propagent l’annulation et cumulent l’usage rapporté. Anthropic propose un cache explicite du préfixe système ; les tests utilisent des services HTTP locaux simulés. Les conversations natives personnalisées, le terminal interactif et le streaming sont absents.
 

@@ -1,4 +1,8 @@
-import type { ModelRequest, ModelResult } from "../../domain/model.types.ts";
+import type {
+  AgentModel,
+  ModelRequest,
+  ModelResult,
+} from "../../domain/model.types.ts";
 
 export interface HttpModelOptions {
   readonly baseUrl: string;
@@ -9,6 +13,7 @@ export interface HttpModelOptions {
 
 export interface ModelProtocol {
   readonly path: string;
+  validate?(model: AgentModel): void;
   build(model: string, request: ModelRequest): Record<string, unknown>;
   read(value: unknown): ModelResult;
 }

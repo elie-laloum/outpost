@@ -1,3 +1,4 @@
+import { isModelReasoning } from "../../domain/agent-model.ts";
 import { invariant, positive } from "../../domain/errors.ts";
 import type { ModelRequest } from "../../domain/model.types.ts";
 import { MODEL_REQUEST_FIELDS } from "./model.constants.ts";
@@ -22,6 +23,10 @@ export function validateModelRequest(request: ModelRequest): void {
   invariant(
     request.system === undefined || typeof request.system === "string",
     "Model system instructions must be text",
+  );
+  invariant(
+    request.reasoning === undefined || isModelReasoning(request.reasoning),
+    "Unsupported model reasoning level",
   );
   if (request.maxOutputTokens !== undefined)
     positive(request.maxOutputTokens, "Model maxOutputTokens");

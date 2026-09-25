@@ -44,7 +44,8 @@ export const groups = [
     id: "agents",
     title: ["Agents", "Agents"],
     guide: "guide/agents/adapters",
-    names: "agent Agent AgentOptions CliAgent CustomAgent",
+    names:
+      "agent Agent AgentOptions CliAgent CustomAgent AgentModel ModelSpec ModelReasoning",
   },
   {
     id: "harness",

@@ -93,6 +93,7 @@ test("direct model HTTP contracts, cancellation, deadlines and reuse", async (t)
       prompt: "hello",
       system: "brief",
       maxOutputTokens: 12,
+      reasoning: "low",
     }),
     { text: " Héllo\n", usage: { input: 5, output: 3, cached: 0 } },
   );
@@ -108,6 +109,7 @@ test("direct model HTTP contracts, cancellation, deadlines and reuse", async (t)
       stream: false,
       store: false,
       max_completion_tokens: 12,
+      reasoning_effort: "low",
     },
   });
   mode = "responses";
@@ -124,6 +126,7 @@ test("direct model HTTP contracts, cancellation, deadlines and reuse", async (t)
         prompt: "question",
         system: "instructions",
         maxOutputTokens: 8,
+        reasoning: "none",
       })
     ).text,
     "direct",
@@ -138,6 +141,7 @@ test("direct model HTTP contracts, cancellation, deadlines and reuse", async (t)
       stream: false,
       store: false,
       max_output_tokens: 8,
+      reasoning: { effort: "none" },
     },
   });
   await direct.request({ model: "model", prompt: "minimal" });

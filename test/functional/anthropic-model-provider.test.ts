@@ -49,7 +49,6 @@ test("Anthropic sends model per request with explicit system cache and normalize
   const options = {
     baseUrl: `http://127.0.0.1:${address.port}/v1`,
     apiKey: "secret",
-    maxOutputTokens: 64,
   };
   const provider = anthropicModelProvider({ ...options, cacheSystem: true });
   assert.equal(requests.length, 0);
@@ -82,19 +81,58 @@ test("Anthropic sends model per request with explicit system cache and normalize
     /System cache/,
   );
   const uncached = anthropicModelProvider(options);
-  await uncached.request({ model: "other", prompt: "hello", system: "plain" });
+  await uncached.request({
+    model: "other",
+    prompt: "hello",
+    system: "plain",
+    maxOutputTokens: 64,
+    reasoning: "xhigh",
+  });
   assert.deepEqual(requests.at(-1)?.body, {
     model: "other",
     max_tokens: 64,
+    thinking: { type: "adaptive" },
+    output_config: { effort: "xhigh" },
     stream: false,
     messages: [{ role: "user", content: "hello" }],
     system: "plain",
   });
-  await uncached.request({ model: "other", prompt: "hello" });
+  await uncached.request({
+    model: "other",
+    prompt: "hello",
+    maxOutputTokens: 8,
+    reasoning: "none",
+  });
+  assert.deepEqual(requests.at(-1)?.body, {
+    model: "other",
+    max_tokens: 8,
+    thinking: { type: "disabled" },
+    stream: false,
+    messages: [{ role: "user", content: "hello" }],
+  });
+  const sent = requests.length;
+  await assert.rejects(
+    uncached.request({ model: "other", prompt: "hello" }),
+    /maxOutputTokens/,
+  );
+  await assert.rejects(
+    uncached.request({
+      model: "other",
+      prompt: "hello",
+      maxOutputTokens: 8,
+      reasoning: "minimal",
+    }),
+    /reasoning "minimal"/,
+  );
+  assert.equal(requests.length, sent);
   for (const code of [401, 404, 429]) {
     status = code;
     await assert.rejects(
-      uncached.request({ model: "missing", prompt: "private" }),
+      uncached.request({
+        model: "missing",
+        prompt: "private",
+        maxOutputTokens: 1,
+      }),
       (error) => {
         assert.ok(error instanceof Error);
         assert.match(error.message, new RegExp(`HTTP ${code}`));
@@ -106,32 +144,58 @@ test("Anthropic sends model per request with explicit system cache and normalize
   status = 200;
   const count = requests.length;
   await assert.rejects(
-    uncached.request({ model: "m", prompt: "hi", signal: AbortSignal.abort() }),
+    uncached.request({
+      model: "m",
+      prompt: "hi",
+      maxOutputTokens: 1,
+      signal: AbortSignal.abort(),
+    }),
     { code: "aborted" },
   );
   assert.equal(requests.length, count);
   assert.equal(
-    (await uncached.request({ model: "reused", prompt: "hi" })).text,
+    (
+      await uncached.request({
+        model: "reused",
+        prompt: "hi",
+        maxOutputTokens: 1,
+      })
+    ).text,
     "answer",
   );
 });
 
 test("Anthropic rejects invalid configuration and unsupported or incomplete responses", () => {
-  for (const value of [0, -1, 1.5, Infinity])
-    assert.throws(
-      () => anthropicModelProvider({ apiKey: "key", maxOutputTokens: value }),
-      /maxOutputTokens/,
-    );
+  const provider = anthropicModelProvider({ apiKey: "key" });
   assert.throws(
-    () => anthropicModelProvider({ apiKey: "", maxOutputTokens: 1 }),
-    /apiKey/,
+    () => provider.validate?.({ name: "model" }),
+    /maxOutputTokens on the agent model/,
   );
+  assert.throws(
+    () =>
+      provider.validate?.({
+        name: "model",
+        maxOutputTokens: 1,
+        reasoning: "minimal",
+      }),
+    /reasoning "minimal"/,
+  );
+  provider.validate?.({ name: "model", maxOutputTokens: 1, reasoning: "max" });
+  assert.throws(
+    () =>
+      anthropicModelProvider({
+        apiKey: "key",
+        // @ts-expect-error Output limits belong to the agent model.
+        maxOutputTokens: 1,
+      }),
+    /Unsupported/,
+  );
+  assert.throws(() => anthropicModelProvider({ apiKey: "" }), /apiKey/);
   assert.throws(
     () =>
       anthropicModelProvider({
         // @ts-expect-error No implicit unauthenticated Anthropic calls.
         apiKey: false,
-        maxOutputTokens: 1,
       }),
     /API key/,
   );
@@ -139,7 +203,6 @@ test("Anthropic rejects invalid configuration and unsupported or incomplete resp
     () =>
       anthropicModelProvider({
         apiKey: "key",
-        maxOutputTokens: 1,
         // @ts-expect-error Cache configuration is validated for JavaScript callers.
         cacheSystem: "yes",
       }),
@@ -149,7 +212,6 @@ test("Anthropic rejects invalid configuration and unsupported or incomplete resp
     () =>
       anthropicModelProvider({
         apiKey: "key",
-        maxOutputTokens: 1,
         // @ts-expect-error Unsupported options must not be silently ignored.
         tools: [],
       }),

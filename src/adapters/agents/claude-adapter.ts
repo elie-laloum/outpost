@@ -1,38 +1,51 @@
 import { invariant } from "../../domain/errors.ts";
+import type { AgentModel } from "../../domain/model.types.ts";
 import { authenticationCommand } from "./authentication.ts";
 import type { AgentAdapter, CliHarness } from "../../domain/agent.types.ts";
 import { claudeEvents, claudeTranscriptUsage } from "./claude-events.ts";
 import { claudeRequest } from "./claude-request.ts";
-import type { ClaudeSettings } from "./settings.types.ts";
+import {
+  CLAUDE_MAX_OUTPUT_VARIABLE,
+  claudeModelSupport,
+} from "./model-support.constants.ts";
+import { harnessSettings, supportModel } from "./model-support.ts";
+import type { Bound, ClaudeSettings } from "./settings.types.ts";
 
-function bindClaude(settings: ClaudeSettings = {}): AgentAdapter {
+function bindClaude(settings: Bound<ClaudeSettings>): AgentAdapter {
+  supportModel(claudeModelSupport, settings.model);
+  const maxOutputTokens = settings.model?.maxOutputTokens;
+  invariant(
+    maxOutputTokens === undefined ||
+      !Object.hasOwn(settings.variables ?? {}, CLAUDE_MAX_OUTPUT_VARIABLE),
+    `Set maxOutputTokens on the agent model or ${CLAUDE_MAX_OUTPUT_VARIABLE}, not both`,
+  );
   return Object.freeze({
     name: "claude",
     authenticate: authenticationCommand("claude", settings.authentication),
     conversations: "claude",
     resumable: true,
     capture: settings.saveConversations ?? true,
-    variables: Object.freeze({ ...settings.variables }),
+    variables: Object.freeze({
+      ...settings.variables,
+      ...(maxOutputTokens === undefined
+        ? {}
+        : { [CLAUDE_MAX_OUTPUT_VARIABLE]: String(maxOutputTokens) }),
+    }),
     request: (input) => claudeRequest(settings, input),
     events: claudeEvents,
     transcriptUsage: claudeTranscriptUsage,
   } satisfies AgentAdapter);
 }
 
-export function claudeHarness(
-  settings: Omit<ClaudeSettings, "model"> = {},
-): CliHarness {
-  invariant(
-    settings && typeof settings === "object" && !("model" in settings),
-    "Set the model on agent(), not on its harness",
-  );
+export function claudeHarness(settings: ClaudeSettings = {}): CliHarness {
+  harnessSettings(settings);
   const configured = Object.freeze({
     ...settings,
     variables: Object.freeze({ ...settings.variables }),
   });
   return Object.freeze({
     kind: "cli",
-    bind: (model?: string) =>
+    bind: (model?: AgentModel) =>
       bindClaude({
         ...configured,
         ...(model === undefined ? {} : { model }),

@@ -1,4 +1,9 @@
-import type { ModelProvider, ModelResult } from "./model.types.ts";
+import type {
+  AgentModel,
+  ModelProvider,
+  ModelResult,
+  ModelSpec,
+} from "./model.types.ts";
 import type { SandboxLease } from "./sandbox.types.ts";
 import type { Command, Variables } from "./command.types.ts";
 import type { ConversationStore } from "./conversation.types.ts";
@@ -78,7 +83,7 @@ export interface RequiredAgent {
 
 export interface CliHarness {
   readonly kind: "cli";
-  bind(model?: string): AgentAdapter;
+  bind(model?: AgentModel): AgentAdapter;
 }
 
 export interface CustomHarness {
@@ -114,7 +119,7 @@ export interface CustomHarnessOptions {
 export interface CliAgent extends AgentAdapter {
   readonly kind: "cli";
   readonly harness: CliHarness;
-  readonly model?: string;
+  readonly model?: AgentModel;
 }
 
 export interface CustomAgent extends AgentFeatures {
@@ -122,18 +127,18 @@ export interface CustomAgent extends AgentFeatures {
   readonly capture: false;
   readonly kind: "custom";
   readonly harness: CustomHarness;
-  readonly model: string;
+  readonly model: AgentModel;
 }
 
 export type Agent = CliAgent | CustomAgent;
 
 export interface CliAgentOptions {
   readonly harness: CliHarness;
-  readonly model?: string;
+  readonly model?: ModelSpec;
 }
 export interface CustomAgentOptions {
   readonly harness: CustomHarness;
-  readonly model: string;
+  readonly model: ModelSpec;
 }
 export type AgentOptions = CliAgentOptions | CustomAgentOptions;
 

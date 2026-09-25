@@ -9,7 +9,7 @@ sidebar:
 This working-tree API replaces the experimental direct client from 4.2.0. Use a package built from this checkout. It provides bounded text requests and a custom callback, without a built-in tool loop, streaming or native custom conversations.
 :::
 
-`openaiModelProvider()` configures an HTTP service using Chat Completions or Responses. `anthropicModelProvider()` uses Anthropic Messages. The harness owns the provider; the agent selects the model with a string. An unknown or inaccessible model fails when the service is called, without catalog lookup or model substitution.
+`openaiModelProvider()` configures an HTTP service using Chat Completions or Responses. `anthropicModelProvider()` uses Anthropic Messages. The harness owns the provider; the agent selects the model with a name or a `{ name, reasoning, maxOutputTokens }` object. An unknown or inaccessible model fails when the service is called, without catalog lookup or model substitution.
 
 A `sandboxProvider` allocates the execution environment. Its constructors have explicit names such as `dockerSandboxProvider()` and `localSandboxProvider()`. Model providers do not allocate sandboxes.
 
@@ -50,7 +50,7 @@ if (!baseUrl || !model || !apiKey) {
 }
 
 const worker = agent({
-  model,
+  model: { name: model, reasoning: "low", maxOutputTokens: 512 },
   harness: harness({
     modelProvider: openaiModelProvider({ baseUrl, apiKey }),
     async run(input, context) {
@@ -58,7 +58,6 @@ const worker = agent({
         model: context.model,
         system: "Answer concisely.",
         prompt: input.prompt,
-        maxOutputTokens: 512,
       });
     },
   }),
@@ -78,6 +77,18 @@ Run `node --env-file=.env example.mts`. The command prints the answer and accumu
 
 </details>
 
+## Reasoning and output limits
+
+`reasoning` and `maxOutputTokens` belong to the agent model. `agent()` calls the provider's `validate()` first, so an unsupported setting fails before any sandbox or request exists. Requests through `context.modelProvider` inherit both values unless the request sets its own.
+
+| Provider                | `reasoning`                                                                                            | `maxOutputTokens`       |
+| ----------------------- | ------------------------------------------------------------------------------------------------------ | ----------------------- |
+| OpenAI Chat Completions | `reasoning_effort`, any of the seven levels                                                            | `max_completion_tokens` |
+| OpenAI Responses        | `reasoning.effort`, any of the seven levels                                                            | `max_output_tokens`     |
+| Anthropic Messages      | `none` disables thinking; `low` to `max` use adaptive thinking with that effort; `minimal` is rejected | `max_tokens`, required  |
+
+The seven levels are `none`, `minimal`, `low`, `medium`, `high`, `xhigh` and `max`. OpenAI forwards them unchanged, so the service decides which levels a given model accepts. Some Anthropic models cannot disable thinking and reject `none`.
+
 ## Request ownership and bounds
 
 The callback executes in the Outpost process. Use `context.sandbox` for repository commands and transfers, and await all operations. It borrows the lease and cannot release it. Commands and requests inherit turn cancellation; arbitrary JavaScript callbacks must cooperate with `context.signal`. Outpost waits for its tracked operations to settle before ending the turn.
@@ -88,8 +99,8 @@ The OpenAI protocol defaults to `chat-completions`; select `api: "responses"` ex
 
 ## Anthropic and system cache
 
-Configure `anthropicModelProvider({ apiKey, maxOutputTokens: 512, cacheSystem: true })` as the harness's provider. Each request must then include system instructions. The provider places an ephemeral cache breakpoint on that system text. Cache eligibility and hits remain service-dependent. This follows [Anthropic's prompt caching contract](https://platform.claude.com/docs/en/build-with-claude/prompt-caching).
+Configure `anthropicModelProvider({ apiKey, cacheSystem: true })` as the harness's provider, and set `maxOutputTokens` on the agent model. Each request must then include system instructions. The provider places an ephemeral cache breakpoint on that system text. Cache eligibility and hits remain service-dependent. This follows [Anthropic's prompt caching contract](https://platform.claude.com/docs/en/build-with-claude/prompt-caching).
 
-Reported `usage.input` includes uncached input, cache creation and cache reads; `cached` and `cacheCreated` are subsets, not additional totals. The provider uses the [Messages API](https://platform.claude.com/docs/en/api/messages/create), with a required positive default output bound that requests can override. Tool responses, refusals and incomplete output are rejected.
+Reported `usage.input` includes uncached input, cache creation and cache reads; `cached` and `cacheCreated` are subsets, not additional totals. The provider uses the [Messages API](https://platform.claude.com/docs/en/api/messages/create), with the output limit taken from the request or the agent model. Tool responses, refusals and incomplete output are rejected.
 
 [Model providers reference](../../../reference/overview/model-providers/) · [Remaining tool engine work](../../../project/roadmap/#direct-model-harness)

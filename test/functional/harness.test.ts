@@ -39,6 +39,7 @@ test("agents compose without effects and require a model only for custom harness
         .request({ text: "hello" })
         .arguments?.includes("arbitrary-future-model"),
     );
+    assert.deepEqual(selected.model, { name: "arbitrary-future-model" });
     assert.equal(agent({ harness: preset() }).model, undefined);
     assert.throws(() => agent({ harness: preset(), model: " " }), /Model name/);
   }
@@ -50,6 +51,37 @@ test("agents compose without effects and require a model only for custom harness
     // @ts-expect-error A custom harness requires an explicit model.
     () => agent({ harness: configuredHarness }),
     /requires a model/,
+  );
+  const validated: string[] = [];
+  const validating = harness({
+    modelProvider: {
+      ...modelProvider,
+      validate(model) {
+        validated.push(model.name);
+        if (model.reasoning === "max") throw new Error("unsupported max");
+      },
+    },
+    run: async () => ({ text: "ok" }),
+  });
+  assert.equal(
+    agent({ harness: validating, model: { name: "m", reasoning: "low" } }).model
+      .reasoning,
+    "low",
+  );
+  assert.throws(
+    () =>
+      agent({ harness: validating, model: { name: "m", reasoning: "max" } }),
+    /unsupported max/,
+  );
+  assert.deepEqual(validated, ["m", "m"]);
+  assert.throws(
+    () =>
+      harness({
+        // @ts-expect-error Provider validation must be callable.
+        modelProvider: { ...modelProvider, validate: true },
+        run: async () => ({ text: "ok" }),
+      }),
+    /validate must be a function/,
   );
   // @ts-expect-error A provider is not an executable harness.
   assert.throws(() => agent({ harness: modelProvider, model: "m" }), /harness/);
@@ -343,4 +375,55 @@ test("switching CLI configurations reactivates authentication without repeating 
   for (const chosen of [first, first, second, first])
     await sandbox.dispatch({ agent: chosen, brief: { text: "run" } });
   assert.deepEqual(selected, ["first", "second", "first"]);
+});
+
+test("custom harness requests inherit the agent model settings", async (t) => {
+  const root = await repository(t);
+  const requests: unknown[] = [];
+  const recorder: ModelProvider = {
+    name: "recorder",
+    async request(request) {
+      const { signal: _signal, ...sent } = request;
+      requests.push(sent);
+      return { text: "<outpost>done</outpost>" };
+    },
+  };
+  await dispatch({
+    repository: root,
+    sandboxProvider: localSandboxProvider(),
+    agent: agent({
+      model: { name: "tuned", reasoning: "high", maxOutputTokens: 256 },
+      harness: harness({
+        modelProvider: recorder,
+        async run(input, context) {
+          await context.modelProvider.request({
+            model: context.model,
+            prompt: input.prompt,
+          });
+          return context.modelProvider.request({
+            model: context.model,
+            prompt: "override",
+            reasoning: "low",
+            maxOutputTokens: 8,
+          });
+        },
+      }),
+    }),
+    brief: { text: "inspect" },
+    logging: false,
+  });
+  assert.deepEqual(requests, [
+    {
+      reasoning: "high",
+      maxOutputTokens: 256,
+      model: "tuned",
+      prompt: "inspect",
+    },
+    {
+      reasoning: "low",
+      maxOutputTokens: 8,
+      model: "tuned",
+      prompt: "override",
+    },
+  ]);
 });

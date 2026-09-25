@@ -15,7 +15,7 @@ import type { HarnessContext } from "@elie-laloum/outpost";
 
 | Nom             | Type                          | Présence | Rôle                                                                                                                                                                            |
 | --------------- | ----------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `model`         | `string`                      | Requis   | Identifiant de modèle sélectionné sur l’agent composé.                                                                                                                          |
+| `model`         | `string`                      | Requis   | Nom du modèle sélectionné sur l’agent composé ; les requêtes héritent de son raisonnement et de sa limite de sortie sauf si elles fixent les leurs.                             |
 | `modelProvider` | `ModelProvider`               | Requis   | Wrapper de requêtes lié au modèle de cet agent et à son annulation ; l’usage rapporté est cumulé entre les appels.                                                              |
 | `sandbox`       | `SandboxLease`                | Requis   | Capacités empruntées du sandbox pour commandes et transferts. Le harness ne peut pas libérer le lease ; les opérations héritent de l’annulation.                                |
 | `signal`        | `AbortSignal`                 | Requis   | Annulation externe et délai d’exécution combinés ; les callbacks doivent respecter ce signal.                                                                                   |

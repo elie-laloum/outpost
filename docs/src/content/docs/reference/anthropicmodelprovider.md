@@ -17,7 +17,7 @@ import { anthropicModelProvider } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Configure an Anthropic Messages text transport with an explicit output limit and optional system-prefix caching. The harness supplies the model per request. Cache reads and writes are normalized into usage; tool requests, streaming and incomplete responses are rejected.
+Configure an Anthropic Messages text transport with optional system-prefix caching. The harness supplies the model per request; the agent model must set maxOutputTokens, and reasoning maps to adaptive or disabled thinking. Cache reads and writes are normalized into usage; tool requests, streaming and incomplete responses are rejected.
 
 [Complete example and detailed rules](../../guide/advanced/model-providers/).
 
@@ -25,10 +25,9 @@ Configure an Anthropic Messages text transport with an explicit output limit and
 
 | Name                       | Type                            | Presence | Meaning                                                                                                                               |
 | -------------------------- | ------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `options`                  | `AnthropicModelProviderOptions` | Required | Anthropic endpoint, explicit API key, default output bound and optional system-prefix cache.                                          |
+| `options`                  | `AnthropicModelProviderOptions` | Required | Anthropic endpoint, explicit API key, bounds and optional system-prefix cache; output limits belong to the agent model.               |
 | `options.apiKey`           | `string`                        | Required | Explicit Anthropic API key sent in x-api-key; no CLI account or host credential discovery.                                            |
 | `options.baseUrl`          | `string \| undefined`           | Optional | Messages API base URL including its version prefix; defaults to https://api.anthropic.com/v1.                                         |
-| `options.maxOutputTokens`  | `number`                        | Required | Required positive default output-token bound; each request may override it.                                                           |
 | `options.cacheSystem`      | `boolean \| undefined`          | Optional | Opt in to an ephemeral cache breakpoint on the system text. Requests must contain system instructions; a cache hit is not guaranteed. |
 | `options.timeoutMs`        | `number \| undefined`           | Optional | Positive request deadline in milliseconds, covering headers and the complete body; defaults to 120000 and cannot exceed 2147483647.   |
 | `options.maxResponseBytes` | `number \| undefined`           | Optional | Positive maximum response body size in bytes after HTTP decompression; defaults to 8388608 (8 MiB). Oversized responses fail.         |
