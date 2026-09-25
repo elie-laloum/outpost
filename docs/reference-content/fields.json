@@ -3507,5 +3507,97 @@
   "ModelResult.usage": [
     "Token counts reported by the service, when present. Missing usage stays absent; missing cached-token details become zero. This is not a billing estimate or automatic workflow usage report.",
     "Comptes de tokens déclarés par le service, si présents. Une consommation absente reste absente ; un détail de cache absent vaut zéro. Ce n’est ni une estimation de facturation ni une déclaration automatique au workflow."
+  ],
+  "DispatchOptions.telemetry": [
+    "Optional instrumentation of the complete dispatch, including preparation, synchronization and cleanup; telemetry failures do not change its outcome.",
+    "Instrumentation optionnelle du dispatch complet, préparation, synchronisation et nettoyage compris ; ses erreurs ne changent pas le résultat."
+  ],
+  "DispatchTelemetry.startDispatch": [
+    "Start an independent session for one public dispatch invocation; called before validation.",
+    "Ouvre une session indépendante pour un appel public de dispatch, avant validation."
+  ],
+  "DispatchTelemetrySession.finish": [
+    "Finish this session with the settled dispatch outcome and known token totals.",
+    "Termine cette session avec le résultat définitif du dispatch et les totaux de tokens connus."
+  ],
+  "DispatchTelemetryOutcome.status": [
+    "done when the dispatch resolves, cancelled for explicit cancellation, or failed for other rejections including deadlines.",
+    "done quand le dispatch se résout, cancelled pour une annulation explicite, failed pour les autres rejets dont les délais dépassés."
+  ],
+  "DispatchTelemetryOutcome.usage": [
+    "Authoritative result totals on success, or known reconciled consumption on failure.",
+    "Totaux du résultat en cas de succès, consommation connue réconciliée en cas d’échec."
+  ],
+  "DispatchTelemetryOutcome.completed": [
+    "Whether the successful dispatch satisfied its completion condition; absent when the operation rejected.",
+    "Indique si le dispatch réussi a satisfait sa condition de complétion ; absent en cas de rejet."
+  ],
+  "createReporter.handlers": [
+    "Optional handlers keyed by agent event kind, executed serially in arrival order; omitted kinds are ignored.",
+    "Handlers optionnels par type d’événement agent, exécutés séquentiellement dans l’ordre d’arrivée ; les types absents sont ignorés."
+  ],
+  "createReporter.options": [
+    "Error diagnostics for the custom reporter; no terminal output or resource ownership is added.",
+    "Diagnostic des erreurs du reporter personnalisé ; aucun affichage terminal ni prise de propriété des ressources."
+  ],
+  "CustomReporterOptions.onError": [
+    "Called for each failed handler with its error and event; diagnostic failures are isolated and the first handler failure remains observable through flush().",
+    "Appelé pour chaque handler en échec avec son erreur et son événement ; les erreurs du diagnostic sont isolées et la première erreur reste accessible via flush()."
+  ],
+  "CustomReporter.event": [
+    "Normalized agent observation to enqueue; returns immediately without waiting for its handler.",
+    "Observation agent normalisée à mettre en file ; retourne immédiatement sans attendre son handler."
+  ],
+  "CustomReporter.flush": [
+    "Wait for events received before this call; reject with the first handler failure, including on subsequent calls, without closing external resources.",
+    "Attend les événements reçus avant cet appel ; rejette la première erreur de handler, y compris aux appels suivants, sans fermer les ressources externes."
+  ],
+  "ReporterHandlers.phase": [
+    "Handle the execution phase and available agent/workspace metadata; receives pass and at metadata and may return a promise.",
+    "Traite : phase d’exécution et métadonnées disponibles de l’agent et du workspace ; reçoit pass et at et peut retourner une promesse."
+  ],
+  "ReporterHandlers.summary": [
+    "Handle the completed pass duration, exit status and authoritative token totals; receives pass and at metadata and may return a promise.",
+    "Traite : durée, statut de sortie et totaux de tokens de la passe terminée ; reçoit pass et at et peut retourner une promesse."
+  ],
+  "ReporterHandlers.warning": [
+    "Handle the non-fatal warning message; receives pass and at metadata and may return a promise.",
+    "Traite : message d’avertissement non fatal ; reçoit pass et at et peut retourner une promesse."
+  ],
+  "ReporterHandlers.text": [
+    "Handle the agent text fragment; receives pass and at metadata and may return a promise.",
+    "Traite : fragment de texte de l’agent ; reçoit pass et at et peut retourner une promesse."
+  ],
+  "ReporterHandlers.result": [
+    "Handle the final agent response text; receives pass and at metadata and may return a promise.",
+    "Traite : texte de réponse finale de l’agent ; reçoit pass et at et peut retourner une promesse."
+  ],
+  "ReporterHandlers.prompt": [
+    "Handle the rendered prompt sent to the agent; receives pass and at metadata and may return a promise.",
+    "Traite : prompt rendu envoyé à l’agent ; reçoit pass et at et peut retourner une promesse."
+  ],
+  "ReporterHandlers.tool": [
+    "Handle the tool name and input reported by the agent; receives pass and at metadata and may return a promise.",
+    "Traite : nom et entrée d’outil signalés par l’agent ; reçoit pass et at et peut retourner une promesse."
+  ],
+  "ReporterHandlers.conversation": [
+    "Handle the native conversation identifier; receives pass and at metadata and may return a promise.",
+    "Traite : identifiant de conversation native ; reçoit pass et at et peut retourner une promesse."
+  ],
+  "ReporterHandlers.usage": [
+    "Handle the reported incremental token consumption; receives pass and at metadata and may return a promise.",
+    "Traite : consommation incrémentale de tokens déclarée ; reçoit pass et at et peut retourner une promesse."
+  ],
+  "ReporterHandlers.failure": [
+    "Handle the failure message emitted by the agent protocol, not every dispatch rejection; receives pass and at metadata and may return a promise.",
+    "Traite : message d’échec émis par le protocole agent, et non tous les rejets du dispatch ; reçoit pass et at et peut retourner une promesse."
+  ],
+  "ReporterHandlers.finished": [
+    "Handle the agent protocol completion, before dispatch synchronization and cleanup; receives pass and at metadata and may return a promise.",
+    "Traite : fin du protocole agent, avant synchronisation et nettoyage du dispatch ; reçoit pass et at et peut retourner une promesse."
+  ],
+  "ReporterHandlers.raw": [
+    "Handle the raw protocol data, which may contain sensitive content; receives pass and at metadata and may return a promise.",
+    "Traite : données brutes du protocole, pouvant contenir des informations sensibles ; reçoit pass et at et peut retourner une promesse."
   ]
 }

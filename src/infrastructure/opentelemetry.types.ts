@@ -1,4 +1,5 @@
 import type { Context, Meter, Span, Tracer } from "@opentelemetry/api";
+import type { DispatchTelemetry } from "../domain/dispatch-telemetry.types.ts";
 import type { WorkflowEvent } from "../domain/workflow.types.ts";
 
 export interface OpenTelemetryOptions {
@@ -7,7 +8,7 @@ export interface OpenTelemetryOptions {
   readonly onError?: (error: unknown) => void;
 }
 
-export interface OpenTelemetryObserver {
+export interface OpenTelemetryObserver extends DispatchTelemetry {
   observe(event: WorkflowEvent): void;
   close(): void;
 }

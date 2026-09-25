@@ -4,6 +4,7 @@ import type {
   AgentObservation,
   Usage,
 } from "../domain/agent.types.ts";
+import type { DispatchTelemetry } from "../domain/dispatch-telemetry.types.ts";
 import type { Brief } from "../domain/prompts.types.ts";
 import type { ResponseSpec } from "../domain/response.types.ts";
 import type { Logging } from "../infrastructure/journal.types.ts";
@@ -23,6 +24,7 @@ export interface DispatchOptions<T = undefined> {
   readonly signal?: AbortSignal;
   readonly continuation?: { readonly id: string; readonly fork?: boolean };
   readonly response?: ResponseSpec<T>;
+  readonly telemetry?: DispatchTelemetry;
   readonly observe?: (event: AgentObservation) => void;
   readonly warn?: (message: string) => void;
   readonly diagnostic?: (message: string) => void;

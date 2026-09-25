@@ -7,6 +7,10 @@ sidebar:
 
 The release notes below are synchronized from the root `CHANGELOG.md`, the single source of release history.
 
+## Unreleased
+
+- Instrument complete dispatch operations with optional OpenTelemetry telemetry and add createReporter() with typed asynchronous handlers and explicit flush().
+
 ## 4.2.0
 
 - Add experimental `openaiCompatible()` and typed model-provider contracts for direct, non-streaming Chat Completions or Responses calls without Codex. Bound requests and response sizes, support cancellation and optional reported usage, and reject incomplete or unsupported outputs. Tool execution and the agent harness remain planned for phase two; live service compatibility is unvalidated.

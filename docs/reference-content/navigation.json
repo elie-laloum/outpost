@@ -393,8 +393,16 @@
         "attrs": { "data-api-kind": "function" }
       },
       {
+        "slug": "reference/createreporter",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
         "slug": "reference/opentelemetry",
         "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/reporterhandlers",
+        "attrs": { "data-api-kind": "type" }
       },
       { "slug": "reference/logging", "attrs": { "data-api-kind": "type" } },
       { "slug": "reference/agentevent", "attrs": { "data-api-kind": "type" } },
@@ -404,6 +412,26 @@
       },
       {
         "slug": "reference/reporteroptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/customreporter",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/customreporteroptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/dispatchtelemetry",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/dispatchtelemetrysession",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/dispatchtelemetryoutcome",
         "attrs": { "data-api-kind": "interface" }
       },
       { "slug": "reference/usage", "attrs": { "data-api-kind": "interface" } },

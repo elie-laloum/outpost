@@ -74,7 +74,7 @@ try {
 
 Un adaptateur peut recevoir plusieurs exécutions concurrentes. Chaque workflow possède un span `outpost.workflow`, des enfants `outpost.task`, et des enfants de tentative `outpost.task.attempt`. Le contexte OpenTelemetry actif à l’événement `start` devient le parent du workflow. L’adaptateur établit ses propres parents explicitement ; il n’active pas les spans des tâches pour l’instrumentation arbitraire dans `perform`. Une tentative échouée ferme son span lors du retry ; fin et annulation ferment tous les spans. Une tâche normalement ignorée conserve un statut OpenTelemetry non défini ; échecs et annulations utilisent le statut d’erreur. `close()` est idempotent, ferme les spans inachevés comme annulés et refuse ensuite les événements. Il ne vide ni n’arrête votre SDK.
 
-Utilisez `agentTask` et `isolatedTask` pour comptabiliser automatiquement le modèle ; un `dispatch()` direct hors workflow n’alimente pas cet adaptateur. Consultez les [budgets de consommation](../../../workflows/budgets/) pour les rapports personnalisés et les corrections des résumés.
+Utilisez `agentTask` et `isolatedTask` pour comptabiliser automatiquement le modèle ; un `dispatch()` direct utilise l’option distincte `telemetry`. Consultez les [budgets de consommation](../../../workflows/budgets/) pour les rapports personnalisés et les corrections des résumés.
 
 ## Métriques et confidentialité
 
@@ -94,3 +94,13 @@ L’adaptateur n’exporte jamais noms de workflows, clés de tâches, identifia
 Les erreurs de l’API de télémétrie sont isolées, y compris celles du callback facultatif `onError(error)`. Un instrument défectueux peut perdre de la télémétrie sans faire échouer le workflow. Diagnostiquez la livraison via votre SDK et appelez ses opérations de vidage/arrêt avant la sortie du processus. Le [guide officiel d’instrumentation JavaScript OpenTelemetry](https://opentelemetry.io/docs/languages/js/instrumentation/) décrit la configuration du SDK et des exportateurs.
 
 Les contributeurs peuvent exécuter `node test/fixtures/workflow-observability.ts` après `npm ci`. Ce scénario vérifie nouvelles tentatives, budget de consommation, vrais exportateurs SDK en mémoire et cycle de vie, sans appel payant ni service externe.
+
+## Télémétrie du dispatch complet
+
+Passez `telemetry: openTelemetry({ tracer, meter })` à `dispatch()`, `workspace.dispatch()` ou `sandbox.dispatch()`. Conservez `observe` pour les événements agent et les reporters. Chaque appel public possède un span `outpost.dispatch`, incluant passes et réparations internes. Un appel warm exclut la création du sandbox et sa fermeture ultérieure. Resume et fork ouvrent des sessions indépendantes lorsque la télémétrie est configurée.
+
+Le span se termine après le règlement complet de l’opération, erreurs de nettoyage comprises. Le statut est `done` pour un appel résolu, `cancelled` pour une annulation explicite et `failed` pour les autres rejets, dont les délais dépassés. `outpost.completed` indique séparément la complétion en cas de succès. Le succès utilise les tokens du résultat ; l’échec conserve la consommation connue en réconciliant les bilans de passe avec les événements incrémentaux. Aucune consommation manquante n’est estimée.
+
+Les métriques sont `outpost.dispatch.executions`, `outpost.dispatch.duration` (secondes) et `outpost.dispatch.tokens` (input, cached, cacheCreated, output). Elles sont séparées de celles des workflows : ne cumulez pas les deux pour le même travail. Aucun contenu, chemin, entrée d’outil ou message d’erreur n’est exporté. Seul le contexte OpenTelemetry actif fournit un parent ; aucune activation automatique des tâches du workflow n’est ajoutée.
+
+`close()` termine également les sessions de dispatch ouvertes comme annulées et ignore leurs terminaisons ultérieures. Fermez l’adaptateur après avoir attendu les dispatchs ; une fermeture anticipée ne peut inclure les tokens non encore transmis à la fin de l’appel. Videz et fermez votre SDK séparément. Voir l’[exemple de dispatch exécutable](../../../advanced/telemetry/#instrumenter-un-dispatch-complet).

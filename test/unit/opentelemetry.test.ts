@@ -308,3 +308,99 @@ test("paused workflows end neutral spans and rejected gates end error spans", as
     ),
   );
 });
+
+test("dispatch sessions export independent spans and metrics and close exactly once", async (t) => {
+  const sdk = telemetry();
+  t.after(async () => {
+    sdk.observer.close();
+    await sdk.tracer.shutdown();
+    await sdk.meter.shutdown();
+  });
+  const first = sdk.observer.startDispatch();
+  const second = sdk.observer.startDispatch();
+  const outcome = {
+    status: "done" as const,
+    completed: false,
+    usage: { input: 4, cached: 1, cacheCreated: 2, output: 3 },
+  };
+  first.finish(outcome);
+  first.finish(outcome);
+  sdk.observer.close();
+  sdk.observer.close();
+  second.finish(outcome);
+  sdk.observer.startDispatch().finish(outcome);
+  await sdk.tracer.forceFlush();
+  await sdk.meter.forceFlush();
+  const spans = sdk.spans.getFinishedSpans();
+  assert.deepEqual(
+    spans.map((span) => span.name),
+    ["outpost.dispatch", "outpost.dispatch"],
+  );
+  assert.deepEqual(
+    spans.map((span) => span.status.code),
+    [SpanStatusCode.OK, SpanStatusCode.ERROR],
+  );
+  assert.equal(spans[0]?.attributes["outpost.completed"], false);
+  assert.equal(spans[1]?.attributes["outpost.status"], "cancelled");
+  const metrics = sdk.metrics
+    .getMetrics()
+    .flatMap((batch) => batch.scopeMetrics.flatMap((scope) => scope.metrics));
+  const tokens = metrics.find(
+    (metric) => metric.descriptor.name === "outpost.dispatch.tokens",
+  )!;
+  assert.deepEqual(
+    Object.fromEntries(
+      tokens.dataPoints.map((point) => [
+        point.attributes["outpost.token.type"],
+        point.value,
+      ]),
+    ),
+    { input: 4, cached: 1, cacheCreated: 2, output: 3 },
+  );
+  const executions = metrics.find(
+    (metric) => metric.descriptor.name === "outpost.dispatch.executions",
+  )!;
+  assert.equal(executions.dataPoints.length, 2);
+  const durations = metrics.find(
+    (metric) => metric.descriptor.name === "outpost.dispatch.duration",
+  )!;
+  assert.equal(durations.descriptor.unit, "s");
+  assert.equal(
+    metrics.some((metric) => metric.descriptor.name === "outpost.agent.tokens"),
+    false,
+  );
+});
+
+test("dispatch telemetry isolates broken instruments and span methods", async (t) => {
+  const sdk = telemetry();
+  t.after(async () => {
+    sdk.observer.close();
+    await sdk.tracer.shutdown();
+    await sdk.meter.shutdown();
+  });
+  const tracer = sdk.tracer.getTracer("broken-dispatch");
+  let errors = 0;
+  const observer = openTelemetry({
+    tracer: {
+      startActiveSpan: tracer.startActiveSpan.bind(tracer),
+      startSpan(...args) {
+        const span = tracer.startSpan(...args);
+        span.setStatus = () => {
+          throw new Error("status");
+        };
+        return span;
+      },
+    },
+    meter: sdk.meter.getMeter("broken-dispatch"),
+    onError() {
+      errors++;
+      throw new Error("diagnostic");
+    },
+  });
+  observer
+    .startDispatch()
+    .finish({ status: "failed", usage: { input: NaN, cached: 0, output: -1 } });
+  observer.close();
+  assert.equal(errors, 1);
+  assert.equal(sdk.spans.getFinishedSpans().length, 1);
+});

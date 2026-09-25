@@ -12,10 +12,21 @@ import type {
   DispatchResult,
   SandboxOptions,
 } from "./outpost.types.ts";
+import { observeDispatch } from "./dispatch-observation.ts";
 import { createSandbox } from "./sandbox.ts";
 
 export async function dispatch<T = undefined>(
   options: SandboxOptions & DispatchOptions<T> & RequiredAgent,
+): Promise<DispatchResult<T>> {
+  const { telemetry: _telemetry, ...configuration } = options;
+  return observeDispatch(options, (observed) =>
+    dispatchOperation({ ...configuration, ...observed }, options),
+  );
+}
+
+async function dispatchOperation<T>(
+  options: SandboxOptions & DispatchOptions<T> & RequiredAgent,
+  original: SandboxOptions & DispatchOptions<T> & RequiredAgent,
 ): Promise<DispatchResult<T>> {
   options.signal?.throwIfAborted();
   await preflightDispatch(
@@ -27,12 +38,15 @@ export async function dispatch<T = undefined>(
     const outputs: DispatchResult<T>[] = [];
     for (let index = 0; index < options.passes!; index++) {
       options.signal?.throwIfAborted();
-      const output = await dispatch({
-        ...options,
-        passes: 1,
-        observe: (event) =>
-          notify(options.observe, { ...event, pass: index + 1 }),
-      });
+      const output = await dispatchOperation(
+        {
+          ...options,
+          passes: 1,
+          observe: (event) =>
+            notify(options.observe, { ...event, pass: index + 1 }),
+        },
+        original,
+      );
       outputs.push(output);
       if (output.completed) break;
     }
@@ -65,7 +79,7 @@ export async function dispatch<T = undefined>(
     continuation: _continuation,
     passes: _passes,
     ...configuration
-  } = options;
+  } = original;
   let successful = false;
   try {
     const output = await sandbox.dispatch(options);

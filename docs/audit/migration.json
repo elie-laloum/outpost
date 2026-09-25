@@ -119,8 +119,8 @@
       "sections": ["Events", "Logging", "Token accounting"],
       "sourceSha256": "9c842df34af96392683aebbc49283f2a02698138f7d16a10dcbde1d2b712ccd1",
       "sourceBodySha256": "35673e03808af158e6e43e39a454b944bf0fffc5dbb1d9509599b5a3702993ff",
-      "preservedBodySha256": "35673e03808af158e6e43e39a454b944bf0fffc5dbb1d9509599b5a3702993ff",
-      "disposition": "complete body preserved; internal links migrated"
+      "preservedBodySha256": "c729b71441de2c6b49f3b0bac55cb7287a5dbf73cdc64f1d1e9f5641268b1cff",
+      "disposition": "complete body preserved; internal links migrated; added typed asynchronous reporters and complete dispatch telemetry contracts"
     },
     {
       "source": "agents/adapters.md",
@@ -602,8 +602,8 @@
       "sections": ["OpenTelemetry", "Metrics and privacy"],
       "sourceSha256": "ce27d8936f0523df9a1753c4f6be4f56a8c1dcf19d5e5d797796f5325fb856f4",
       "sourceBodySha256": "0349ff4c794b0fc1ab3d637cb1394d9ec81e3e22a78c7a5284c7d9137d5aa45f",
-      "preservedBodySha256": "0349ff4c794b0fc1ab3d637cb1394d9ec81e3e22a78c7a5284c7d9137d5aa45f",
-      "disposition": "complete body preserved; internal links migrated"
+      "preservedBodySha256": "87a72b1f529441c7a09cc12232ae7f24133b3e318eab913f5e91393d9d7f19ea",
+      "disposition": "complete body preserved; internal links migrated; added typed asynchronous reporters and complete dispatch telemetry contracts"
     },
     {
       "source": "project/architecture.md",
@@ -942,8 +942,8 @@
       "sections": ["Événements", "Journalisation", "Comptage des tokens"],
       "sourceSha256": "dcb304daefc3adf961a9c69dfdb470bfc48f1e7efb81cc9f18e577c066d1db05",
       "sourceBodySha256": "6c7e1692ba73ac0737c8a7350332de075be815197d88b1ec6ac7ddf23ab868e8",
-      "preservedBodySha256": "6c7e1692ba73ac0737c8a7350332de075be815197d88b1ec6ac7ddf23ab868e8",
-      "disposition": "complete body preserved; internal links migrated"
+      "preservedBodySha256": "ba0fad4a7eb47d52d4545a7fb0effdd9ca01e1eda0e634377abe345cdcc98e0b",
+      "disposition": "complete body preserved; internal links migrated; added typed asynchronous reporters and complete dispatch telemetry contracts"
     },
     {
       "source": "fr/agents/adapters.md",
@@ -1422,8 +1422,8 @@
       "sections": ["OpenTelemetry", "Métriques et confidentialité"],
       "sourceSha256": "55a367b01a0e3ef4042a2c33e215e67c8539817dfd7c383424bc20e90c21f5dc",
       "sourceBodySha256": "15dcb6b28691e8d19d486905753baeb51c09e2afda68215020a9be88862650df",
-      "preservedBodySha256": "15dcb6b28691e8d19d486905753baeb51c09e2afda68215020a9be88862650df",
-      "disposition": "complete body preserved; internal links migrated"
+      "preservedBodySha256": "ad0dc412c4e19cc62b4f307e1673827c0d3efc4508b4959c3f0b7336f8fe75db",
+      "disposition": "complete body preserved; internal links migrated; added typed asynchronous reporters and complete dispatch telemetry contracts"
     },
     {
       "source": "fr/project/architecture.md",

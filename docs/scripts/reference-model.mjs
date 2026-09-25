@@ -43,7 +43,10 @@ export function referenceModel(symbol, declaration, checker) {
       : checker.getTypeOfSymbolAtLocation(symbol, declaration);
   const signatures = checker.getSignaturesOfType(type, ts.SignatureKind.Call);
   const members = signatures.length
-    ? signatures.flatMap((signature) => signature.parameters)
+    ? [
+        ...signatures.flatMap((signature) => signature.parameters),
+        ...properties(type, checker),
+      ]
     : properties(type, checker);
   const entries = [];
   const add = (property, prefix = "", container = type) => {

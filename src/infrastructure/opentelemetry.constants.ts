@@ -1,4 +1,7 @@
 export const telemetryNames = {
+  dispatches: "outpost.dispatch.executions",
+  dispatchDuration: "outpost.dispatch.duration",
+  dispatchTokens: "outpost.dispatch.tokens",
   workflows: "outpost.workflow.executions",
   tasks: "outpost.task.executions",
   attempts: "outpost.task.attempts",

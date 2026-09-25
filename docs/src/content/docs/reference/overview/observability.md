@@ -19,6 +19,8 @@ Reported usage is not a monetary invoice, and local activity is not an inventory
 ## Entry points
 
 - [reporter](../../reporter/)
+- [createReporter](../../createreporter/)
+- [DispatchTelemetry](../../dispatchtelemetry/)
 - [AgentEvent](../../agentevent/)
 - [AgentObservation](../../agentobservation/)
 - [Usage](../../usage/)

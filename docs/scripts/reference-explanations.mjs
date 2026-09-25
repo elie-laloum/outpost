@@ -64,7 +64,7 @@ export function explain(symbol, declaration, group, language, checker) {
       output += `| \`${escape(entry.name)}\` | \`${escape(entry.type)}\` | ${presence(entry, language)} | ${escape(description)} |\n`;
     }
   }
-  if (signatures.length) {
+  if (signatures.length && !ts.isInterfaceDeclaration(declaration)) {
     output += `\n\n## ${fr ? "Retour" : "Returns"}\n\n`;
     output +=
       [

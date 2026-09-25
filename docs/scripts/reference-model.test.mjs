@@ -284,3 +284,13 @@ test("experimental references explain their status before the API content in bot
   const stable = await page("reference/codex.md");
   assert.ok(!stable.includes(":::caution[Experimental]"));
 });
+
+test("callable contracts document their properties alongside their arguments", () => {
+  const get = model(
+    "interface Reporter { (event: string): void; flush(): void; }",
+  );
+  assert.deepEqual(
+    get("Reporter").entries.map(({ name }) => name),
+    ["event", "flush"],
+  );
+});

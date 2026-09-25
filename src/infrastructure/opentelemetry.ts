@@ -1,3 +1,4 @@
+import { dispatchTelemetry } from "./opentelemetry-dispatch.ts";
 import { context, trace, SpanStatusCode } from "@opentelemetry/api";
 import type { Context, Histogram } from "@opentelemetry/api";
 import type { WorkflowEvent } from "../domain/workflow.types.ts";
@@ -18,6 +19,7 @@ export type {
 export function openTelemetry(
   options: OpenTelemetryOptions,
 ): OpenTelemetryObserver {
+  const dispatches = dispatchTelemetry(options);
   function safe<T>(action: () => T): T | undefined {
     try {
       return action();
@@ -102,6 +104,7 @@ export function openTelemetry(
     safe(() => counters.workflows?.add(1, { "outpost.status": status }));
   }
   return {
+    startDispatch: dispatches.startDispatch,
     observe(event: WorkflowEvent) {
       if (closed) return;
       const at = Date.parse(event.timestamp);
@@ -185,6 +188,7 @@ export function openTelemetry(
     close() {
       if (closed) return;
       closed = true;
+      dispatches.close();
       for (const execution of executions.values())
         complete(execution, "cancelled", Date.now());
       executions.clear();

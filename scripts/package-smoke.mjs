@@ -223,10 +223,19 @@ console.log(n,once.commits);
     telemetryConsumer,
     `import { metrics, trace } from '@opentelemetry/api';
 import { openTelemetry, type OpenTelemetryObserver } from '@elie-laloum/outpost/opentelemetry';
-import { task, workflow } from '@elie-laloum/outpost';
+import { task, workflow, dispatch, codex, createReporter, type DispatchTelemetry } from '@elie-laloum/outpost';
 const telemetry: OpenTelemetryObserver = openTelemetry({tracer:trace.getTracer('consumer'),meter:metrics.getMeter('consumer')});
 const step = task({key:'sample',perform(context){context.reportUsage({input:1,cached:0,output:1});return 1;}});
 (await workflow('smoke',[step]).start({budget:{attempts:1},observe:telemetry.observe})).unwrap();
+const instrumentation: DispatchTelemetry = telemetry;
+const abort = AbortSignal.abort(new Error('expected cancellation'));
+try { await dispatch({agent:codex(),brief:{text:'unused'},signal:abort,telemetry:instrumentation}); throw new Error('Expected cancellation'); }
+catch(error) { if(error !== abort.reason) throw error; }
+let text = '';
+const report = createReporter({async text(event){text += event.text;}});
+report({kind:'text',text:'written',pass:1,at:new Date().toISOString()});
+await report.flush();
+if(text !== 'written') throw new Error('Reporter did not flush');
 telemetry.close();
 `,
   );

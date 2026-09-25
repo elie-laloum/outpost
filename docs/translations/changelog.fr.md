@@ -1,5 +1,9 @@
 # Historique des versions
 
+## Non publié
+
+- Instrumenter les dispatchs complets avec la télémétrie OpenTelemetry optionnelle et ajouter createReporter() avec handlers asynchrones typés et flush() explicite.
+
 ## 4.2.0
 
 - Ajouter `openaiCompatible()` et les contrats typés expérimentaux de fournisseurs de modèles pour des appels directs sans streaming à Chat Completions ou Responses, sans Codex. Borner les requêtes et la taille des réponses, gérer l’annulation et la consommation déclarée si présente, et refuser les sorties incomplètes ou non prises en charge. L’exécution d’outils et le harness d’agent restent prévus en deuxième phase ; la compatibilité avec les services réels n’est pas validée.

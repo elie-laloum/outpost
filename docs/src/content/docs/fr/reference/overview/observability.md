@@ -19,6 +19,8 @@ L’usage rapporté n’est pas une facture, et l’activité locale n’est pas
 ## Points d’entrée
 
 - [reporter](../../reporter/)
+- [createReporter](../../createreporter/)
+- [DispatchTelemetry](../../dispatchtelemetry/)
 - [AgentEvent](../../agentevent/)
 - [AgentObservation](../../agentobservation/)
 - [Usage](../../usage/)

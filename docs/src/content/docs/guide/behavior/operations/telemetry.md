@@ -74,7 +74,7 @@ try {
 
 Use one adapter for multiple concurrent workflow executions. Each workflow has a span named `outpost.workflow`, children named `outpost.task`, and attempt children named `outpost.task.attempt`. A workflow span uses the active OpenTelemetry context at the `start` event as its parent. The adapter explicitly parents its own spans; it does not activate task spans for arbitrary instrumentation inside `perform`. Failed attempts close on retry, and all spans close on completion or cancellation. Ordinary skipped tasks retain an unset OpenTelemetry status; failures and cancellation use error status. `close()` is idempotent, closes unfinished spans as cancelled and stops accepting events. It does not flush or shut down your SDK.
 
-Use `agentTask` and `isolatedTask` to include automatic model usage; a direct `dispatch()` outside a workflow does not feed this workflow adapter. See [usage budgets](../../../workflows/budgets/) for reporting custom task usage and understanding summary corrections.
+Use `agentTask` and `isolatedTask` to include automatic model usage; a direct `dispatch()` uses the separate `telemetry` option. See [usage budgets](../../../workflows/budgets/) for reporting custom task usage and understanding summary corrections.
 
 ## Metrics and privacy
 
@@ -94,3 +94,13 @@ The adapter never exports workflow names, task keys, execution IDs, prompts, tra
 Telemetry API failures are isolated, including optional `onError(error)` failures. A broken instrument can lose telemetry without failing the workflow. Diagnose exporter delivery through your SDK, and call its flush/shutdown operations before process exit. See the official [OpenTelemetry JavaScript instrumentation guide](https://opentelemetry.io/docs/languages/js/instrumentation/) for SDK and exporter configuration.
 
 Repository contributors can run `node test/fixtures/workflow-observability.ts` after `npm ci`. It exercises retries, a usage budget, real in-memory SDK exporters and lifecycle assertions without paid calls or external services.
+
+## Complete dispatch telemetry
+
+Pass `telemetry: openTelemetry({ tracer, meter })` to `dispatch()`, `workspace.dispatch()` or `sandbox.dispatch()`. Keep `observe` for agent events and reporters. Each public call owns one `outpost.dispatch` span, including all internal passes and repairs. A warm call excludes sandbox creation and later closure. Resume and fork start independent sessions when telemetry is configured.
+
+The span ends after the operation settles, including cleanup errors. Status is `done` for resolved calls, `cancelled` for explicit cancellation, or `failed` for other rejections, including deadlines. `outpost.completed` records completion separately on success. Success uses result token totals; failures retain known consumption, reconciling pass summaries against streamed usage. Missing consumption is not estimated.
+
+Dispatch metrics are `outpost.dispatch.executions`, `outpost.dispatch.duration` (seconds), and `outpost.dispatch.tokens` (input, cached, cacheCreated, output). They are separate from workflow metrics: do not sum dispatch and workflow tokens for the same work. No content, paths, tool inputs or error messages are exported. Only the active OpenTelemetry context supplies a parent; no automatic workflow task activation is added.
+
+`close()` also closes unfinished dispatch sessions as cancelled and ignores later finishes. Close the adapter after awaited dispatches; early closure cannot include usage not yet supplied at completion. Flush and shut down your SDK separately. See the [executable dispatch example](../../../advanced/telemetry/#instrument-a-complete-dispatch).

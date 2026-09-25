@@ -1,5 +1,5 @@
 ---
-title: "Observe a workflow with OpenTelemetry"
+title: "Observe workflows and dispatch with OpenTelemetry"
 description: "Run the complete example below, then inspect its output and compare it with the detailed contract."
 ---
 
@@ -91,6 +91,8 @@ try {
   await tracer.shutdown();
   await meter.shutdown();
 }
+
+await import("./dispatch.mts");
 ```
 
 ```sh
@@ -104,3 +106,103 @@ Check the output and effects described before the code.
 [Contracts, options and edge cases](../../behavior/operations/telemetry/).
 
 Any persisted example files remain inside this demonstration directory.
+
+## Instrument a complete dispatch
+
+With the same dependencies, save **dispatch.mts**. This example creates a temporary repository and runs a local fixture without model calls or credentials. `local()` executes on the host.
+
+```ts file=dispatch.mts
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { execFileSync } from "node:child_process";
+import { dispatch, reporter } from "@elie-laloum/outpost";
+import { local } from "@elie-laloum/outpost/providers/local";
+import { openTelemetry } from "@elie-laloum/outpost/opentelemetry";
+import {
+  BasicTracerProvider,
+  InMemorySpanExporter,
+  SimpleSpanProcessor,
+} from "@opentelemetry/sdk-trace-base";
+import {
+  AggregationTemporality,
+  InMemoryMetricExporter,
+  MeterProvider,
+  PeriodicExportingMetricReader,
+} from "@opentelemetry/sdk-metrics";
+
+const spans = new InMemorySpanExporter();
+const metrics = new InMemoryMetricExporter(AggregationTemporality.CUMULATIVE);
+const traces = new BasicTracerProvider({
+  spanProcessors: [new SimpleSpanProcessor(spans)],
+});
+const meters = new MeterProvider({
+  readers: [
+    new PeriodicExportingMetricReader({
+      exporter: metrics,
+      exportIntervalMillis: 60_000,
+    }),
+  ],
+});
+const telemetry = openTelemetry({
+  tracer: traces.getTracer("dispatch-example"),
+  meter: meters.getMeter("dispatch-example"),
+});
+const repository = await mkdtemp(join(tmpdir(), "outpost-telemetry-"));
+try {
+  execFileSync("git", ["init", "-b", "main", repository]);
+  await writeFile(join(repository, "README.md"), "Telemetry fixture\n");
+  execFileSync("git", ["-C", repository, "add", "."]);
+  execFileSync("git", [
+    "-C",
+    repository,
+    "-c",
+    "user.name=Example",
+    "-c",
+    "user.email=example@example.test",
+    "commit",
+    "-m",
+    "Initial",
+  ]);
+  const result = await dispatch({
+    repository,
+    provider: local(),
+    logging: false,
+    agent: {
+      name: "offline-fixture",
+      request() {
+        return {
+          executable: process.execPath,
+          arguments: ["-e", 'console.log("done")'],
+        };
+      },
+      events(line) {
+        return [{ kind: "text", text: line }];
+      },
+    },
+    brief: { text: "Offline telemetry demonstration" },
+    until: "done",
+    telemetry,
+    observe: reporter(),
+  });
+  console.log(result.completed);
+  await Promise.all([traces.forceFlush(), meters.forceFlush()]);
+  console.log(spans.getFinishedSpans().map((span) => span.name));
+  console.log(metrics.getMetrics());
+} finally {
+  telemetry.close();
+  try {
+    await Promise.all([traces.shutdown(), meters.shutdown()]);
+  } finally {
+    await rm(repository, { recursive: true, force: true });
+  }
+}
+```
+
+```sh
+node dispatch.mts
+```
+
+Expect `true`, one `outpost.dispatch` span and dispatch metrics. The span includes validation, allocation, execution, synchronization and cleanup. `observe` independently controls terminal output.
+
+The same adapter can be passed to a workflow as `observe: telemetry.observe` and to its agent requests as `telemetry`. Workflow tokens use `outpost.agent.tokens`; dispatch tokens use `outpost.dispatch.tokens`. Do not sum both for the same work. Dispatch spans inherit the active OpenTelemetry context; workflow task spans are not automatically activated inside task functions.

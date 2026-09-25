@@ -9,6 +9,7 @@ import { operationGate } from "./operation-gate.ts";
 import type { Sandbox, SandboxOptions } from "./outpost.types.ts";
 import { sandboxAgents } from "./sandbox-agents.ts";
 import { attachInSandbox } from "./sandbox-attach.ts";
+import { observeDispatch } from "./dispatch-observation.ts";
 import { dispatchInSandbox } from "./sandbox-dispatch.ts";
 import { provisionSandbox } from "./sandbox-provision.ts";
 
@@ -28,10 +29,12 @@ export async function createSandbox(
     workspace,
     root: runtime.root,
     dispatch(settings) {
-      validateDispatch(settings);
-      return exclusive("dispatch", () =>
-        dispatchInSandbox(context, agents, result, settings),
-      );
+      return observeDispatch(settings, (observed) => {
+        validateDispatch(observed);
+        return exclusive("dispatch", () =>
+          dispatchInSandbox(context, agents, result, observed),
+        );
+      });
     },
     resume(id, settings) {
       return result.dispatch({ ...settings, continuation: { id } });

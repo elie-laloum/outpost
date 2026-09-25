@@ -139,6 +139,17 @@ export type { Brief, PromptVariables } from "./domain/prompts.ts";
 
 export type { Logging } from "./infrastructure/journal.ts";
 
+export { createReporter } from "./infrastructure/custom-reporter.ts";
+export type {
+  CustomReporter,
+  CustomReporterOptions,
+  ReporterHandlers,
+} from "./infrastructure/custom-reporter.types.ts";
+export type {
+  DispatchTelemetry,
+  DispatchTelemetrySession,
+  DispatchTelemetryOutcome,
+} from "./domain/dispatch-telemetry.types.ts";
 export { reporter } from "./infrastructure/reporter.ts";
 
 export type { ReporterOptions } from "./infrastructure/reporter.ts";

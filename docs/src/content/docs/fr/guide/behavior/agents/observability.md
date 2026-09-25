@@ -42,3 +42,7 @@ Les logs et transcripts peuvent contenir sources et prompts privés. Gérez leur
 Les [budgets](../../../workflows/budgets/) et [OpenTelemetry](../../../advanced/telemetry/) décrivent les limites de consommation et les métriques respectant la confidentialité.
 
 Voir les [politiques de rétention et quotas](../../../operations/storage-retention/) pour le nettoyage explicite des journaux fermés.
+
+## Handlers personnalisés
+
+`createReporter(handlers, { onError })` retourne un observateur appelable avec `flush()`. Chaque handler reçoit son `AgentObservation` précis, avec `pass` et `at`. Les handlers s’exécutent séquentiellement, acceptent les promesses et ignorent les types absents. Attendez toujours `flush()` avant de fermer les destinations ; le dispatch n’attend pas les handlers. La première erreur est conservée et rejetée par chaque flush ; les handlers suivants continuent. Voir l’[exemple Winston, console et fichier](../../../agents/observability/#créer-son-propre-reporter). Les callbacks observe ordinaires restent synchrones et leurs promesses retournées ne sont pas gérées.

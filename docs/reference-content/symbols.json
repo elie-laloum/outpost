@@ -224,8 +224,8 @@
     "Crée un provider distant Daytona avec réglages distincts de connexion SDK et de création de sandbox. Les transferts utilisent l’environnement distant acquis et la synchronisation valide les modifications hôtes concurrentes avant application."
   ],
   "openTelemetry": [
-    "Create an observer backed by the supplied OpenTelemetry tracer and meter. It translates Outpost observations into spans and metrics while isolating telemetry errors through onError; close finishes outstanding spans. Only this entry point imports the optional telemetry API.",
-    "Crée un observateur utilisant le tracer et le meter OpenTelemetry fournis. Traduit les observations Outpost en spans et métriques et isole les erreurs via onError ; close termine les spans ouverts. Seul ce point d’entrée importe l’API de télémétrie optionnelle."
+    "Create workflow observation and complete dispatch instrumentation from an injected tracer and meter. Pass the result as dispatch telemetry, or its observe method to a workflow. Errors are isolated through onError; close finishes outstanding spans without flushing or shutting down the SDK. Only this optional entry point loads OpenTelemetry.",
+    "Crée une observation de workflow et une instrumentation du dispatch complet à partir d’un tracer et d’un meter injectés. Passez le résultat dans telemetry du dispatch, ou sa méthode observe à un workflow. Les erreurs sont isolées via onError ; close termine les spans ouverts sans vider ni fermer le SDK. Seul ce point d’entrée optionnel charge OpenTelemetry."
   ],
   "firecracker": [
     "Create an opt-in Firecracker microVM provider from explicit kernel, rootfs, TAP and SSH settings. The host must provide KVM and a prepared guest; allocation does not fall back to host execution. The acquired lease owns VM shutdown.",
@@ -302,5 +302,9 @@
   "openaiCompatible": [
     "Create a reusable experimental model client that sends one text request over the selected Chat Completions or Responses protocol. Construction validates configuration without network access. generate runs in the calling process, returns complete text and optional reported usage, and owns its request deadline. No sandbox, agent CLI, tools, automatic retries or conversation storage are involved.",
     "Crée un client de modèles expérimental réutilisable qui envoie une requête textuelle avec le protocole Chat Completions ou Responses choisi. La construction valide la configuration sans accès réseau. generate s’exécute dans le processus appelant, renvoie le texte complet et la consommation déclarée si disponible, et gère son délai. Aucune sandbox, CLI d’agent, outil, répétition automatique ou persistance de conversation n’intervient."
+  ],
+  "createReporter": [
+    "Create a callable observer with typed event handlers and an explicit flush barrier. Handlers run serially without blocking dispatch; failures are reported through onError and the first remains observable through every flush. The caller owns files, loggers and their shutdown.",
+    "Crée un observateur appelable avec des handlers typés et une barrière flush explicite. Les handlers s’exécutent séquentiellement sans bloquer le dispatch ; onError signale les erreurs et la première reste accessible à chaque flush. Les fichiers, loggers et leur fermeture appartiennent à l’appelant."
   ]
 }

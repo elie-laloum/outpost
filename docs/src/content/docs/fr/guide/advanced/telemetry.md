@@ -1,5 +1,5 @@
 ---
-title: "Observer un workflow avec OpenTelemetry"
+title: "Observer les workflows et dispatch avec OpenTelemetry"
 description: "Exécutez l’exemple complet, puis examinez sa sortie et comparez-la au contrat détaillé."
 ---
 
@@ -91,6 +91,8 @@ try {
   await tracer.shutdown();
   await meter.shutdown();
 }
+
+await import("./dispatch.mts");
 ```
 
 ```sh
@@ -104,3 +106,103 @@ Consultez les sorties et les effets décrits avant le code.
 [Contrats, options et cas particuliers](../../behavior/operations/telemetry/).
 
 Les fichiers persistants éventuels restent dans ce dossier de démonstration.
+
+## Instrumenter un dispatch complet
+
+Avec les mêmes dépendances, enregistrez **dispatch.mts**. Cet exemple crée un dépôt temporaire et exécute une fixture locale sans appel modèle ni credentials. `local()` exécute sur l’hôte.
+
+```ts file=dispatch.mts
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { execFileSync } from "node:child_process";
+import { dispatch, reporter } from "@elie-laloum/outpost";
+import { local } from "@elie-laloum/outpost/providers/local";
+import { openTelemetry } from "@elie-laloum/outpost/opentelemetry";
+import {
+  BasicTracerProvider,
+  InMemorySpanExporter,
+  SimpleSpanProcessor,
+} from "@opentelemetry/sdk-trace-base";
+import {
+  AggregationTemporality,
+  InMemoryMetricExporter,
+  MeterProvider,
+  PeriodicExportingMetricReader,
+} from "@opentelemetry/sdk-metrics";
+
+const spans = new InMemorySpanExporter();
+const metrics = new InMemoryMetricExporter(AggregationTemporality.CUMULATIVE);
+const traces = new BasicTracerProvider({
+  spanProcessors: [new SimpleSpanProcessor(spans)],
+});
+const meters = new MeterProvider({
+  readers: [
+    new PeriodicExportingMetricReader({
+      exporter: metrics,
+      exportIntervalMillis: 60_000,
+    }),
+  ],
+});
+const telemetry = openTelemetry({
+  tracer: traces.getTracer("dispatch-example"),
+  meter: meters.getMeter("dispatch-example"),
+});
+const repository = await mkdtemp(join(tmpdir(), "outpost-telemetry-"));
+try {
+  execFileSync("git", ["init", "-b", "main", repository]);
+  await writeFile(join(repository, "README.md"), "Telemetry fixture\n");
+  execFileSync("git", ["-C", repository, "add", "."]);
+  execFileSync("git", [
+    "-C",
+    repository,
+    "-c",
+    "user.name=Example",
+    "-c",
+    "user.email=example@example.test",
+    "commit",
+    "-m",
+    "Initial",
+  ]);
+  const result = await dispatch({
+    repository,
+    provider: local(),
+    logging: false,
+    agent: {
+      name: "offline-fixture",
+      request() {
+        return {
+          executable: process.execPath,
+          arguments: ["-e", 'console.log("done")'],
+        };
+      },
+      events(line) {
+        return [{ kind: "text", text: line }];
+      },
+    },
+    brief: { text: "Offline telemetry demonstration" },
+    until: "done",
+    telemetry,
+    observe: reporter(),
+  });
+  console.log(result.completed);
+  await Promise.all([traces.forceFlush(), meters.forceFlush()]);
+  console.log(spans.getFinishedSpans().map((span) => span.name));
+  console.log(metrics.getMetrics());
+} finally {
+  telemetry.close();
+  try {
+    await Promise.all([traces.shutdown(), meters.shutdown()]);
+  } finally {
+    await rm(repository, { recursive: true, force: true });
+  }
+}
+```
+
+```sh
+node dispatch.mts
+```
+
+Le résultat attendu est `true`, un span `outpost.dispatch` et des métriques de dispatch. Le span couvre validation, allocation, exécution, synchronisation et nettoyage. `observe` contrôle indépendamment l’affichage terminal.
+
+Le même adaptateur peut être passé au workflow avec `observe: telemetry.observe` et à ses requêtes agent avec `telemetry`. Les tokens du workflow utilisent `outpost.agent.tokens` ; ceux du dispatch utilisent `outpost.dispatch.tokens`. Ne les additionnez pas pour le même travail. Les spans de dispatch héritent du contexte OpenTelemetry actif ; les spans de tâche ne sont pas automatiquement activés dans les fonctions de tâche.

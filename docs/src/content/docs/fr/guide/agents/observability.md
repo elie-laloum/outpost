@@ -255,3 +255,84 @@ Le reporter affiche la progression ; `usage` contient les comptes de tokens disp
 [Contrats, options et cas particuliers](../../behavior/agents/observability/).
 
 Pour recommencer, utilisez un nouveau dossier de démonstration. Les branches nommées conservent les commits ; les worktrees sales restent disponibles pour récupération. Les scripts ne poussent aucun commit.
+
+## Créer son propre reporter
+
+Un callback `observe(event)` permet déjà les intégrations personnalisées. Utilisez `createReporter()` pour des handlers typés par événement et des écritures asynchrones ordonnées. `reporter()` reste l’affichage terminal prêt à l’emploi.
+
+Reprenez la préparation ci-dessus et installez Winston dans `workflow/` :
+
+```sh
+npm install winston@3
+```
+
+Enregistrez **reporter.mts** pour les handlers réutilisables :
+
+```ts file=reporter.mts
+import type { FileHandle } from "node:fs/promises";
+import { createReporter } from "@elie-laloum/outpost";
+
+export function applicationReporter(
+  logger: { info(message: string): unknown },
+  file: FileHandle,
+) {
+  return createReporter(
+    {
+      phase(event) {
+        logger.info(event.name);
+      },
+      tool(event) {
+        console.log(event.name, event.input);
+      },
+      async text(event) {
+        await file.write(event.text);
+      },
+    },
+    { onError: (error) => console.error("Reporter:", error) },
+  );
+}
+```
+
+Enregistrez **custom.mjs** pour connecter Winston, la console et un fichier :
+
+```js file=custom.mjs
+import { open } from "node:fs/promises";
+import { finished } from "node:stream/promises";
+import winston from "winston";
+import { dispatch } from "@elie-laloum/outpost";
+import { configuration } from "./runtime.mts";
+import { applicationReporter } from "./reporter.mts";
+
+const runtime = await configuration();
+const file = await open("agent-text.log", "a", 0o600);
+const logger = winston.createLogger({
+  transports: [new winston.transports.Console()],
+});
+const report = applicationReporter(logger, file);
+try {
+  await dispatch({
+    ...runtime,
+    branch: { mode: "named", name: "workshop/custom-reporter" },
+    brief: { text: "Summarize this repository. Do not edit files." },
+    observe: report,
+  });
+} finally {
+  try {
+    await report.flush();
+  } finally {
+    const logsFinished = finished(logger, { readable: false });
+    logger.end();
+    await Promise.all([file.close(), logsFinished]);
+  }
+}
+```
+
+```sh
+node custom.mjs
+```
+
+Les phases apparaissent via Winston, les outils via `console.log` et les fragments de texte sont ajoutés à `agent-text.log`. Les types d’événement sans handler sont ignorés. `flush()` attend les événements déjà reçus avant de fermer fichier et logger. Winston possède son propre [cycle de fin des logs](https://github.com/winstonjs/winston#awaiting-logs-to-be-written-in-winston).
+
+Les handlers s’exécutent séquentiellement et peuvent retourner des promesses. Le dispatch ne les attend pas. Une destination lente peut faire croître la file en mémoire ; le helper ne supprime aucun événement et ne ralentit pas l’agent. Les erreurs de handler appellent `onError` sans empêcher les traitements suivants ; chaque `flush()` rejette la première erreur après avoir drainé les événements reçus avant son appel. Les erreurs du diagnostic sont isolées. Le helper ne ferme jamais vos destinations.
+
+Pour les spans et métriques du dispatch, utilisez l’option distincte `telemetry` décrite dans [OpenTelemetry](../../advanced/telemetry/).

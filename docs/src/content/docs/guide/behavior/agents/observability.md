@@ -42,3 +42,7 @@ Logs and transcripts may include source and private prompts. Choose retention se
 Workflow usage budgets and privacy-preserving metrics are covered in [budgets](../../../workflows/budgets/) and [OpenTelemetry](../../../advanced/telemetry/).
 
 See [retention policies and quotas](../../../operations/storage-retention/) for explicit pruning of closed journals.
+
+## Custom handlers
+
+`createReporter(handlers, { onError })` returns a callable observer with `flush()`. Handlers receive the narrowed `AgentObservation`, including `pass` and `at`. They run serially, accept promises and ignore unhandled kinds. Always await `flush()` before closing destinations; dispatch does not await handlers. The first handler failure is retained and rejected by every flush; later handlers continue. See the [Winston, console and file example](../../../agents/observability/#create-your-own-reporter). Plain observe callbacks remain synchronous and their returned promises are not managed.

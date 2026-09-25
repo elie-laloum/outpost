@@ -13,7 +13,7 @@ import { openTelemetry } from "@elie-laloum/outpost/opentelemetry";
 
 ## Rôle et comportement
 
-Crée un observateur utilisant le tracer et le meter OpenTelemetry fournis. Traduit les observations Outpost en spans et métriques et isole les erreurs via onError ; close termine les spans ouverts. Seul ce point d’entrée importe l’API de télémétrie optionnelle.
+Crée une observation de workflow et une instrumentation du dispatch complet à partir d’un tracer et d’un meter injectés. Passez le résultat dans telemetry du dispatch, ou sa méthode observe à un workflow. Les erreurs sont isolées via onError ; close termine les spans ouverts sans vider ni fermer le SDK. Seul ce point d’entrée optionnel charge OpenTelemetry.
 
 [Exemple complet et règles détaillées](../../guide/agents/observability/).
 
