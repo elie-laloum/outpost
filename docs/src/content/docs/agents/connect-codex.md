@@ -13,6 +13,18 @@ Run `codex login`, complete the browser flow, then run `codex login status`. On 
 
 With `local()`, Codex uses host credentials. Docker/Podman start with a private home: host login alone is insufficient.
 
+## Generate a workflow using your subscription
+
+Use the account login option when initializing a workflow:
+
+```sh
+outpost init --agent codex --provider docker --authentication login --repository /path/to/repository
+```
+
+Sign in on the host with file credential storage as described below. The generated workflow reads `auth.json` from `CODEX_HOME` (or `~/.codex`) and sends a copy through stdin to the private sandbox home with mode `0600`. This works with Docker, Podman, Vercel and Daytona; change `--provider` accordingly. It uses your ChatGPT account access and does not require an OpenAI API key. Cloud allocation credentials are still required for Vercel and Daytona.
+
+With `--provider local`, the workflow uses the existing host login directly. Account limits and model access still apply. The generated workflow does not export the OS keychain or copy other host Codex settings.
+
 ## Use your ChatGPT account in a container
 
 This recipe requires `~/.codex/auth.json`. If credentials are in the OS keychain, select `cli_auth_credentials_store = "file"` in `~/.codex/config.toml` and sign in again, where policy permits. See [credential storage](https://developers.openai.com/codex/auth#credential-storage).
@@ -93,7 +105,7 @@ The hook runs once per sandbox. Keep dependent setup in the same command: sandbo
 
 ## Troubleshooting
 
-Run `codex login status` inside the sandbox. Check missing/expired seed files, keychain-only login and undeclared variables. These examples only check authentication; dispatching makes model calls. For cloud providers, use the API-key hook with explicit variables; local mounts apply only to Docker/Podman. Provider allocation credentials do not authenticate Codex.
+Run `codex login status` inside the sandbox. Check missing/expired seed files, keychain-only login and undeclared variables. These examples only check authentication; dispatching makes model calls. For cloud providers, generate a workflow with `--authentication login` to copy the account credential seed, or use the API-key hook with explicit variables. Local mounts apply only to Docker/Podman. Provider allocation credentials do not authenticate Codex.
 
 Continue with [environment precedence](../environment/) or [cookbooks](../../cookbooks/).
 
