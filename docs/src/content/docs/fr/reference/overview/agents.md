@@ -14,17 +14,16 @@ Utilisez `agent({ harness: codexHarness(), model: "..." })`, ou les presets `cla
 
 ## Frontières et responsabilités
 
-La CLI possède sa boucle interne modèle/outils. Claude et Codex conservent capture, reprise et fork natifs ; Gemini prend en charge les sessions neuves. Un callback personnalisé tourne dans le processus Outpost, emprunte son sandbox et respecte l’annulation. Il n’a ni conversations natives, ni réparations automatiques, ni terminal interactif. Le moteur d’outils intégré reste prévu.
+Un agent associe une configuration d’exécution et une sélection de modèle. La famille [Harness](../harness/) regroupe les presets CLI, les callbacks personnalisés, les réglages d’authentification et les capacités d’exécution. Les [fournisseurs de modèles](../model-providers/) fournissent les transports HTTP aux harness personnalisés, tandis que `sandboxProvider` choisit indépendamment l’environnement d’exécution.
 
-Ces API sont implémentées mais non publiées. Les [fournisseurs de modèles](../model-providers/) traitent les requêtes texte bornées ; ils n’allouent pas de sandbox.
+Ces API de composition sont implémentées mais non publiées. Utilisez l’agent avec dispatch, un sandbox ou une tâche de workflow ; sa construction ne déclenche aucune exécution.
 
 ## Points d’entrée
 
 - [agent](../../agent/)
-- [harness](../../function-harness/)
-- [claudeHarness](../../claudeharness/)
-- [codexHarness](../../codexharness/)
-- [geminiHarness](../../geminiharness/)
-- [AgentAdapter](../../agentadapter/)
+- [Agent](../../type-agent/)
+- [AgentOptions](../../agentoptions/)
+- [CliAgent](../../cliagent/)
+- [CustomAgent](../../customagent/)
 
 [Apprendre avec le guide pratique](../../../guide/agents/adapters/).

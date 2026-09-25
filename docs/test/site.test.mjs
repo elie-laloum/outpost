@@ -270,7 +270,7 @@ for (const [locale, label, overview] of [
     });
     expect(overviewIcon.mask).toMatch(/^url\(/);
     expect(overviewIcon.width).toBeGreaterThan(0);
-    await expect(page.locator("a[data-reference-overview]")).toHaveCount(23);
+    await expect(page.locator("a[data-reference-overview]")).toHaveCount(24);
     for (const name of ["firecrackerSandboxProvider", "FirecrackerOptions"]) {
       const link = family.getByRole("link", {
         name: `${name} — ${label}`,
@@ -393,7 +393,7 @@ for (const locale of ["", "fr/"]) {
         ".reference-section > ul > li > details > summary .large",
       );
       const names = await labels.allTextContents();
-      expect(names).toHaveLength(23);
+      expect(names).toHaveLength(24);
       expect(names.every((name) => !/\s/.test(name.trim()))).toBe(true);
       expect(names).toEqual([
         "Workspaces",
@@ -401,6 +401,7 @@ for (const locale of ["", "fr/"]) {
         "Providers",
         "Commands",
         "Agents",
+        "Harness",
         "Dispatch",
         "Prompts",
         "Conversations",
@@ -461,4 +462,44 @@ for (const locale of ["", "fr/"]) {
       ).toBe(true);
     });
   }
+}
+
+for (const [locale, overview] of [
+  ["", "Overview"],
+  ["fr/", "Vue d’ensemble"],
+]) {
+  test(`Harness is a first-level family in Agents & models (${locale || "en"})`, async ({
+    page,
+  }) => {
+    await page.goto(`${locale}reference/codexharness/`);
+    const preset = page
+      .getByRole("link", { name: "codexHarness", exact: true })
+      .filter({ visible: true });
+    const family = preset.locator("xpath=ancestor::details[1]");
+    await expect(family.locator("summary").first()).toHaveText("Harness");
+    await expect(family.locator("xpath=ancestor::details")).toHaveCount(0);
+    const section = family.locator(
+      'xpath=ancestor::*[contains(@class,"reference-section")][1]',
+    );
+    await expect(section.locator("h2")).toHaveText("Agents & models");
+    for (const name of [
+      "harness",
+      "claudeHarness",
+      "codexHarness",
+      "geminiHarness",
+      "HarnessContext",
+      "AgentAuthentication",
+    ]) {
+      await expect(family.getByRole("link", { name, exact: true })).toHaveCount(
+        1,
+      );
+    }
+    await family.getByRole("link", { name: overview, exact: true }).click();
+    await expect(page).toHaveURL(
+      new RegExp(`/${locale}reference/overview/harness/$`),
+    );
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+      `Harness — ${overview}`,
+    );
+  });
 }

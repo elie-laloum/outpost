@@ -286,6 +286,28 @@
         "attrs": { "data-reference-overview": "" }
       },
       { "slug": "reference/agent", "attrs": { "data-api-kind": "function" } },
+      { "slug": "reference/type-agent", "attrs": { "data-api-kind": "type" } },
+      {
+        "slug": "reference/agentoptions",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/cliagent",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/customagent",
+        "attrs": { "data-api-kind": "interface" }
+      }
+    ]
+  },
+  {
+    "title": ["Harness", "Harness"],
+    "items": [
+      {
+        "slug": "reference/overview/harness",
+        "attrs": { "data-reference-overview": "" }
+      },
       {
         "slug": "reference/function-harness",
         "attrs": { "data-api-kind": "function" }
@@ -301,11 +323,6 @@
       {
         "slug": "reference/geminiharness",
         "attrs": { "data-api-kind": "function" }
-      },
-      { "slug": "reference/type-agent", "attrs": { "data-api-kind": "type" } },
-      {
-        "slug": "reference/agentoptions",
-        "attrs": { "data-api-kind": "type" }
       },
       { "slug": "reference/harness", "attrs": { "data-api-kind": "type" } },
       { "slug": "reference/harnessrun", "attrs": { "data-api-kind": "type" } },
@@ -323,14 +340,6 @@
       },
       {
         "slug": "reference/type-customharness",
-        "attrs": { "data-api-kind": "interface" }
-      },
-      {
-        "slug": "reference/cliagent",
-        "attrs": { "data-api-kind": "interface" }
-      },
-      {
-        "slug": "reference/customagent",
         "attrs": { "data-api-kind": "interface" }
       },
       {

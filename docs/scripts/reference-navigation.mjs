@@ -14,6 +14,7 @@ const sections = [
     "Agents & models",
     [
       ["agents", "Agents"],
+      ["harness", "Harness"],
       ["dispatch", "Dispatch"],
       ["prompts-responses", "Prompts"],
       ["conversations", "Conversations"],
