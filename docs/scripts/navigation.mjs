@@ -73,6 +73,7 @@ export const chapters = [
       "guide/advanced/egress",
       "guide/advanced/speculation",
       "guide/advanced/firecracker",
+      "guide/advanced/model-providers",
     ],
   ],
   [

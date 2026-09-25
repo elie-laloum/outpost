@@ -3447,5 +3447,65 @@
   "BullMQTaskQueue.close": [
     "Idempotently rejects new operations, waits for admitted operations, stops stalled checks and closes owned Redis connections. Stop and await runQueueWorker first. Retains jobs, fences and results for later clients; active leases remain reclaimable.",
     "Refuse les nouvelles opérations, attend celles admises, arrête les contrôles de jobs bloqués et ferme les connexions Redis possédées, de façon idempotente. Arrêter et attendre runQueueWorker auparavant. Conserve jobs, générations et résultats ; les baux actifs restent récupérables."
+  ],
+  "openaiCompatible.options": [
+    "Explicit endpoint, model, authentication, protocol and request bounds for direct model calls.",
+    "Endpoint, modèle, authentification, protocole et limites explicites des appels directs au modèle."
+  ],
+  "OpenAICompatibleOptions.baseUrl": [
+    "Absolute HTTP(S) API base URL, including any /v1 prefix; excludes credentials, query and fragment. The selected protocol path is appended.",
+    "URL HTTP(S) absolue de base de l’API, avec son éventuel préfixe /v1 ; sans identifiants, requête ni fragment. Le chemin du protocole choisi est ajouté."
+  ],
+  "OpenAICompatibleOptions.model": [
+    "Nonempty model identifier understood by the selected service; no default model is inferred.",
+    "Identifiant non vide de modèle reconnu par le service choisi ; aucun modèle par défaut n’est déduit."
+  ],
+  "OpenAICompatibleOptions.apiKey": [
+    "Explicit bearer API key, or false for an unauthenticated endpoint. No environment variable or account login is read automatically.",
+    "Clé API bearer explicite, ou false pour un endpoint sans authentification. Aucune variable d’environnement ni connexion de compte n’est lue automatiquement."
+  ],
+  "OpenAICompatibleOptions.api": [
+    "HTTP protocol: chat-completions by default, or responses. No automatic protocol fallback.",
+    "Protocole HTTP : chat-completions par défaut, ou responses. Aucun repli automatique entre protocoles."
+  ],
+  "OpenAICompatibleOptions.timeoutMs": [
+    "Positive request deadline in milliseconds, covering headers and the complete body; defaults to 120000 and cannot exceed 2147483647.",
+    "Délai positif en millisecondes couvrant les en-têtes et le corps complet ; 120000 par défaut, maximum 2147483647."
+  ],
+  "OpenAICompatibleOptions.maxResponseBytes": [
+    "Positive maximum response body size in bytes after HTTP decompression; defaults to 8388608 (8 MiB). Oversized responses fail.",
+    "Taille maximale positive du corps après décompression HTTP, en octets ; 8388608 (8 Mio) par défaut. Les réponses dépassant cette limite échouent."
+  ],
+  "ModelProvider.name": [
+    "Provider identity; the built-in direct client reports openai-compatible.",
+    "Identité du fournisseur ; le client direct intégré indique openai-compatible."
+  ],
+  "ModelProvider.generate": [
+    "Send one independent text request and resolve with complete text and optional observed usage. Reject on invalid input, HTTP failure, cancellation, deadline, malformed output, refusal, truncation or tool calls; no retry or tool execution occurs.",
+    "Envoie une requête textuelle indépendante et renvoie le texte complet et la consommation observée si présente. Rejette les entrées invalides, erreurs HTTP, annulations, délais dépassés, sorties invalides, refus, troncatures et appels d’outils ; aucune répétition ni exécution d’outil."
+  ],
+  "ModelRequest.prompt": [
+    "Nonempty text sent as this request’s user input; no repository content is collected automatically.",
+    "Texte non vide envoyé comme entrée utilisateur de cette requête ; aucun contenu du dépôt n’est collecté automatiquement."
+  ],
+  "ModelRequest.system": [
+    "Optional text sent as a Chat Completions system message or Responses instructions.",
+    "Texte optionnel envoyé comme message system de Chat Completions ou instructions de Responses."
+  ],
+  "ModelRequest.maxOutputTokens": [
+    "Positive output token limit sent as max_completion_tokens or max_output_tokens; omitted by default. Availability and reasoning-token accounting depend on the service.",
+    "Limite positive de tokens de sortie transmise dans max_completion_tokens ou max_output_tokens ; omise par défaut. La disponibilité et le décompte du raisonnement dépendent du service."
+  ],
+  "ModelRequest.signal": [
+    "Caller-owned cancellation signal for this request, combined with the provider deadline. Cancellation does not dispose the reusable client.",
+    "Signal d’annulation de l’appelant pour cette requête, combiné au délai du fournisseur. L’annulation ne détruit pas le client réutilisable."
+  ],
+  "ModelResult.text": [
+    "Complete assistant text, preserving whitespace; Responses output_text parts are concatenated in order. Incomplete or unsupported outputs reject instead of returning partial success.",
+    "Texte complet de l’assistant, espaces préservés ; les parties output_text de Responses sont concaténées dans l’ordre. Les sorties incomplètes ou non prises en charge échouent sans succès partiel."
+  ],
+  "ModelResult.usage": [
+    "Token counts reported by the service, when present. Missing usage stays absent; missing cached-token details become zero. This is not a billing estimate or automatic workflow usage report.",
+    "Comptes de tokens déclarés par le service, si présents. Une consommation absente reste absente ; un détail de cache absent vaut zéro. Ce n’est ni une estimation de facturation ni une déclaration automatique au workflow."
   ]
 }

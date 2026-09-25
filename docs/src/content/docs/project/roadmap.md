@@ -38,6 +38,16 @@ Start with [cloud compatibility campaigns](../../guide/extend/cloud-compatibilit
 
 These directions build on [durable workflows](../../guide/advanced/distributed/), [Gemini](../../guide/agents/gemini/), [repository isolation](../../guide/advanced/repository-isolation/), [Firecracker](../../guide/advanced/firecracker/), [egress policies](../../guide/advanced/egress/) and [speculation](../../guide/advanced/speculation/). Their documented limits remain in force until the corresponding evidence exists. Container allowlists, dynamic network policies, microVM snapshots and stronger artifact trust are candidates for this horizon, not current guarantees.
 
+<a id="direct-model-harness"></a>
+
+## Experimental direct provider: harness in phase two
+
+Phase one is implemented but unreleased: [openaiCompatible](../../reference/openaicompatible/) makes independent text calls through Chat Completions or Responses without Codex. It includes explicit authentication, cancellation, bounded deadlines and response sizes, and reported usage when available. Tests use simulated local HTTP endpoints; authenticated service compatibility remains to be validated.
+
+Phase two will build the agent harness: the model/tool loop, repository reading and editing, commands through sandbox leases, context management, conversation persistence/resume and dispatch integration. It must preserve cancellation, budget, recovery and structured-response contracts. The current direct provider executes no tools and does not replace an agent adapter.
+
+Before promotion: authenticated campaigns per service and protocol, failure and limit tests, tool execution boundary checks and complete repository-editing scenarios with recovery. No delivery date or universal compatibility is promised. The [experimental guide](../../guide/advanced/model-providers/) describes the current scope.
+
 ## How priorities change
 
 Reproducible failures, security boundaries and recovery of user work take precedence over new features. Promote a capability when its contract, failure behavior, tests and bilingual documentation agree. Keep work experimental when it depends on unvalidated infrastructure or unstable upstream behavior. Revisit the ordering after each release using observed failures and performance measurements; move delivered items into the changelog instead of growing a historical catalogue here.

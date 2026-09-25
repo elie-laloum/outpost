@@ -38,6 +38,16 @@ Commencer par les [campagnes cloud](../../guide/extend/cloud-compatibility/), le
 
 Ces orientations s’appuient sur les [workflows durables](../../guide/advanced/distributed/), [Gemini](../../guide/agents/gemini/), [l’isolation Git](../../guide/advanced/repository-isolation/), [Firecracker](../../guide/advanced/firecracker/), les [politiques réseau](../../guide/advanced/egress/) et la [spéculation](../../guide/advanced/speculation/). Leurs limites documentées restent applicables tant que les preuves correspondantes manquent. Les listes d’autorisation container, politiques réseau dynamiques, snapshots microVM et garanties renforcées de confiance des artefacts sont des pistes pour cet horizon, pas des garanties actuelles.
 
+<a id="direct-model-harness"></a>
+
+## Fournisseur direct expérimental : le harness en deuxième phase
+
+La première phase est implémentée mais non publiée : [openaiCompatible](../../reference/openaicompatible/) effectue des appels textuels indépendants via Chat Completions ou Responses, sans Codex. Elle inclut l’authentification explicite, l’annulation, des délais et des tailles de réponse bornés, et la consommation déclarée lorsqu’elle est présente. Les tests utilisent des endpoints HTTP locaux simulés ; la compatibilité avec des services authentifiés reste à valider.
+
+La deuxième phase construira le harness d’agent : boucle modèle/outils, lecture et modification du dépôt, commandes via les baux de sandbox, gestion du contexte, persistance/reprise des conversations et intégration au dispatch. Elle devra préserver les contrats d’annulation, de budgets, de récupération et de réponses structurées. Le fournisseur direct actuel n’exécute aucun outil et ne remplace pas un adapter d’agent.
+
+Avant promotion : campagnes authentifiées par service et protocole, tests de pannes et de limites, contrôle des frontières d’exécution des outils et scénarios complets de modification du dépôt avec récupération. Aucun calendrier de livraison ni compatibilité universelle n’est promis. Le [guide expérimental](../../guide/advanced/model-providers/) décrit le périmètre actuel.
+
 ## Évolution des priorités
 
 Les défauts reproductibles, les frontières de sécurité et la récupération du travail utilisateur passent avant les nouveautés. Promouvoir une capacité lorsque son contrat, ses échecs, ses tests et sa documentation bilingue concordent. Conserver un statut expérimental lorsqu’elle dépend d’une infrastructure non validée ou d’un protocole amont instable. Revoir l’ordre après chaque release à partir des échecs observés et des mesures ; déplacer les éléments livrés dans le changelog au lieu d’accumuler ici un catalogue historique.

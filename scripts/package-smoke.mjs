@@ -58,7 +58,7 @@ try {
     [
       "--input-type=module",
       "-e",
-      "import {gemini, response, workflow, conversations, reporter, recoveryDetails, diagnoseAgentProtocol, diagnoseSandbox, planRecoveryRetention, pruneRecoveryRetention, assertRecoveryQuota, verifyRecoveryTransfer} from '@elie-laloum/outpost'; import {docker} from '@elie-laloum/outpost/providers/docker'; import {firecracker} from '@elie-laloum/outpost/providers/firecracker'; if(typeof firecracker!=='function')throw Error('Missing Firecracker provider'); if((await response.text({tag:'ok'}).read('<ok>yes</ok>'))!=='yes'||docker().name!=='docker')throw Error('Package import failed'); for(const item of [gemini,conversations.capture,reporter,recoveryDetails,diagnoseSandbox,planRecoveryRetention,pruneRecoveryRetention,assertRecoveryQuota,verifyRecoveryTransfer])if(typeof item!=='function')throw Error('Missing public extension'); if(diagnoseAgentProtocol('codex').hasFailures||diagnoseAgentProtocol('gemini').hasFailures)throw Error('Protocol fixtures failed'); (await workflow('empty',[]).start()).unwrap()",
+      "import {openaiCompatible, gemini, response, workflow, conversations, reporter, recoveryDetails, diagnoseAgentProtocol, diagnoseSandbox, planRecoveryRetention, pruneRecoveryRetention, assertRecoveryQuota, verifyRecoveryTransfer} from '@elie-laloum/outpost'; import {docker} from '@elie-laloum/outpost/providers/docker'; import {firecracker} from '@elie-laloum/outpost/providers/firecracker'; if(typeof firecracker!=='function')throw Error('Missing Firecracker provider'); if((await response.text({tag:'ok'}).read('<ok>yes</ok>'))!=='yes'||docker().name!=='docker')throw Error('Package import failed'); for(const item of [openaiCompatible,gemini,conversations.capture,reporter,recoveryDetails,diagnoseSandbox,planRecoveryRetention,pruneRecoveryRetention,assertRecoveryQuota,verifyRecoveryTransfer])if(typeof item!=='function')throw Error('Missing public extension'); if(diagnoseAgentProtocol('codex').hasFailures||diagnoseAgentProtocol('gemini').hasFailures)throw Error('Protocol fixtures failed'); (await workflow('empty',[]).start()).unwrap()",
     ],
     { cwd: temporary, stdio: "inherit" },
   );
@@ -137,6 +137,16 @@ try {
   writeFileSync(
     consumer,
     `import { dispatch, codex, gemini, response, createSandbox, type GeminiSettings, type EgressPolicy } from '@elie-laloum/outpost';
+import { openaiCompatible, type OpenAICompatibleOptions, type ModelProvider, type ModelRequest, type ModelResult, type AgentAdapter, type SandboxProvider } from '@elie-laloum/outpost';
+const modelOptions: OpenAICompatibleOptions = { baseUrl: 'http://localhost/v1', model: 'test', apiKey: false };
+const modelProvider: ModelProvider = openaiCompatible(modelOptions);
+const modelInput: ModelRequest = { prompt: 'hello' };
+const generate: Promise<ModelResult> = modelProvider.generate(modelInput);
+// @ts-expect-error A model client is not a coding agent without its harness.
+const agent: AgentAdapter = modelProvider;
+// @ts-expect-error A model client does not allocate sandboxes.
+const backend: SandboxProvider = modelProvider;
+console.log(generate, agent, backend);
 import { local } from '@elie-laloum/outpost/providers/local';
 import { firecracker, type FirecrackerOptions } from '@elie-laloum/outpost/providers/firecracker';
 const microvm: typeof firecracker = (options: FirecrackerOptions) => firecracker(options);

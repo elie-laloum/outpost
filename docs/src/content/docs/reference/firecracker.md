@@ -5,6 +5,10 @@ sidebar:
   order: 0
 ---
 
+:::caution[Experimental]
+This research provider requires a prepared Linux/KVM host and guest. Jailer integration and cgroup isolation are not implemented; real boot, cleanup and adversarial validation remain prerequisites for production support. See the [prototype limits](../../guide/advanced/firecracker/).
+:::
+
 ## Import
 
 ```ts

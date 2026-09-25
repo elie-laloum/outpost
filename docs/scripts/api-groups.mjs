@@ -84,6 +84,20 @@ export const groups = [
       "docker podman local vercel daytona firecracker FirecrackerOptions ContainerOptions DependencyCache VercelOptions DaytonaOptions mountedProvider remoteProvider SandboxContext SandboxLease SandboxProvider TransferOptions Variables Volume",
   },
   {
+    id: "model-providers",
+    title: ["Model providers", "Fournisseurs de modèles"],
+    experimental: [
+      "openaiCompatible",
+      "OpenAICompatibleOptions",
+      "ModelProvider",
+      "ModelRequest",
+      "ModelResult",
+    ],
+    guide: "guide/advanced/model-providers",
+    names:
+      "openaiCompatible OpenAICompatibleOptions ModelProvider ModelRequest ModelResult",
+  },
+  {
     id: "remote-transfers",
     title: ["Remote transfers", "Transferts distants"],
     guide: "guide/operations/remote-transfers",

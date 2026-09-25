@@ -12,6 +12,9 @@ import {
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const check = process.argv.includes("--check");
+const experimental = JSON.parse(
+  await readFile(resolve(root, "reference-content/experimental.json"), "utf8"),
+);
 const manifest = JSON.parse(
   await readFile(resolve(root, "../package.json"), "utf8"),
 );
@@ -124,6 +127,15 @@ for (const group of groups)
       throw new Error(`Stale API entry: ${name}`);
 
 for (const group of groups) {
+  for (const name of group.experimental ?? []) {
+    if (!group.names.split(" ").includes(name))
+      throw new Error(`Experimental symbol missing from its family: ${name}`);
+    for (const language of [0, 1])
+      if (!experimental[name]?.[language]?.trim())
+        throw new Error(
+          `Missing experimental explanation: ${name} (${language})`,
+        );
+  }
   for (const locale of ["", "fr/"]) {
     const overview = `${locale}reference/overview/${group.id}.md`;
     const text = await readFile(
@@ -216,6 +228,9 @@ for (const [symbol, { declaration, related }] of symbols) {
     [0, ""],
     [1, "fr/"],
   ]) {
+    const warning = group?.experimental?.includes(symbol.name)
+      ? `:::caution[${language ? "Expérimental" : "Experimental"}]\n${experimental[symbol.name][language]}\n:::\n\n`
+      : "";
     const lead =
       exported || isContract(declaration)
         ? ""
@@ -238,6 +253,7 @@ for (const [symbol, { declaration, related }] of symbols) {
     expected.set(
       `${locale}reference/${slug(symbol)}.md`,
       front(symbol.name, referenceRank(declaration, checker, symbol) * 10) +
+        warning +
         lead +
         imports +
         explain(symbol, declaration, group, language, checker) +

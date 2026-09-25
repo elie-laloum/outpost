@@ -5,6 +5,10 @@ sidebar:
   order: 20
 ---
 
+:::caution[Experimental]
+These options configure the experimental Firecracker provider and require manually prepared kernel, root filesystem, networking and SSH access. They do not enable jailer or cgroup isolation; production validation remains incomplete. See the [prerequisites and limits](../../guide/advanced/firecracker/).
+:::
+
 ## Import
 
 ```ts

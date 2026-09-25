@@ -276,3 +276,69 @@ for (const [locale, label, overview] of [
     );
   });
 }
+
+for (const [locale, label] of [
+  ["", "Experimental"],
+  ["fr/", "Expérimental"],
+]) {
+  for (const name of [
+    "firecracker",
+    "firecrackeroptions",
+    "openaicompatible",
+    "openaicompatibleoptions",
+    "modelprovider",
+    "modelrequest",
+    "modelresult",
+  ]) {
+    test(`experimental warning precedes API content (${locale}${name})`, async ({
+      page,
+    }) => {
+      await page.goto(`${locale}reference/${name}/`);
+      const content = page.locator(".sl-markdown-content");
+      const warning = content.locator(":scope > .starlight-aside").first();
+      await expect(warning).toBeVisible();
+      await expect(warning).toHaveClass(/starlight-aside--caution/);
+      await expect(warning).toContainText(label);
+      await expect(warning).toContainText(/jailer|harness/i);
+      expect(
+        await warning.evaluate(
+          (element) => element.previousElementSibling === null,
+        ),
+      ).toBe(true);
+    });
+  }
+}
+
+for (const [locale, label, familyName] of [
+  ["", "Experimental", "Model providers"],
+  ["fr/", "Expérimental", "Fournisseurs de modèles"],
+]) {
+  test(`direct model reference icons are accessible (${locale || "en"})`, async ({
+    page,
+  }) => {
+    await page.goto(`${locale}reference/openaicompatible/`);
+    const factory = page
+      .getByRole("link", { name: `openaiCompatible — ${label}`, exact: true })
+      .filter({ visible: true });
+    const family = factory.locator("xpath=ancestor::details[1]");
+    await expect(family.locator("summary").first()).toContainText(familyName);
+    for (const name of [
+      "openaiCompatible",
+      "OpenAICompatibleOptions",
+      "ModelProvider",
+      "ModelRequest",
+      "ModelResult",
+    ]) {
+      const link = family.getByRole("link", {
+        name: `${name} — ${label}`,
+        exact: true,
+      });
+      await expect(link).toHaveAttribute("data-api-status", "experimental");
+      expect(
+        await link.evaluate(
+          (element) => getComputedStyle(element, "::after").maskImage,
+        ),
+      ).not.toBe("none");
+    }
+  });
+}

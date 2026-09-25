@@ -5,6 +5,10 @@ sidebar:
   order: 20
 ---
 
+:::caution[Expérimental]
+Ces options configurent le provider Firecracker expérimental et exigent un noyau, un système de fichiers racine, un réseau et un accès SSH préparés manuellement. Elles n’activent ni le jailer ni l’isolation par cgroups ; la validation pour la production reste incomplète. Consultez les [prérequis et limites](../../guide/advanced/firecracker/).
+:::
+
 ## Import
 
 ```ts

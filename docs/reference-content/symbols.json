@@ -298,5 +298,9 @@
   "bullmqTaskQueue": [
     "Opens an optional BullMQ 5 adapter backed by standalone Redis. Implements TaskQueue for queuedTask and runQueueWorker, retaining request identity, lossless JSON results and atomic fenced leases. Owns its connections and stalled-job checks; await close() after stopping workers. Redis persistence and no-eviction settings determine durability. Import from @elie-laloum/outpost/queues/bullmq and install bullmq separately.",
     "Ouvre un adaptateur optionnel BullMQ 5 sur Redis standalone. Implémente TaskQueue pour queuedTask et runQueueWorker, avec identité des requêtes, résultats JSON sans perte et baux atomiques protégés par génération. Possède ses connexions et contrôles de jobs bloqués ; attendre close() après avoir arrêté les workers. La persistance Redis et l’absence d’éviction déterminent la durabilité. Importer depuis @elie-laloum/outpost/queues/bullmq et installer bullmq séparément."
+  ],
+  "openaiCompatible": [
+    "Create a reusable experimental model client that sends one text request over the selected Chat Completions or Responses protocol. Construction validates configuration without network access. generate runs in the calling process, returns complete text and optional reported usage, and owns its request deadline. No sandbox, agent CLI, tools, automatic retries or conversation storage are involved.",
+    "Crée un client de modèles expérimental réutilisable qui envoie une requête textuelle avec le protocole Chat Completions ou Responses choisi. La construction valide la configuration sans accès réseau. generate s’exécute dans le processus appelant, renvoie le texte complet et la consommation déclarée si disponible, et gère son délai. Aucune sandbox, CLI d’agent, outil, répétition automatique ou persistance de conversation n’intervient."
   ]
 }

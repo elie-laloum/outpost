@@ -16,6 +16,8 @@ L’agent reste indépendant de son environnement. `codex()`, `claude()` et `gem
 
 Les adapters exposent les capacités natives réelles sans prétendre que toutes les CLI fonctionnent à l’identique. Claude et Codex permettent la persistance et la continuation natives des conversations. Gemini prend actuellement en charge les sessions neuves, sans capture native, reprise, fork ni réparation automatique des réponses. Les identifiants doivent être explicitement disponibles dans l’environnement d’exécution.
 
+Pour appeler directement une API sans CLI d’agent, consultez les [fournisseurs de modèles expérimentaux](../model-providers/). Leur première phase ne comprend pas le harness requis pour exécuter les outils d’un agent.
+
 ## Points d’entrée
 
 - [claude](../../claude/)

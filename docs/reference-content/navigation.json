@@ -527,6 +527,52 @@
     ]
   },
   {
+    "title": ["Model providers", "Fournisseurs de modèles"],
+    "items": [
+      { "slug": "reference/overview/model-providers" },
+      {
+        "slug": "reference/openaicompatible",
+        "attrs": {
+          "data-api-kind": "function",
+          "data-api-status": "experimental",
+          "title": "Experimental / Expérimental"
+        }
+      },
+      {
+        "slug": "reference/openaicompatibleoptions",
+        "attrs": {
+          "data-api-kind": "interface",
+          "data-api-status": "experimental",
+          "title": "Experimental / Expérimental"
+        }
+      },
+      {
+        "slug": "reference/modelprovider",
+        "attrs": {
+          "data-api-kind": "interface",
+          "data-api-status": "experimental",
+          "title": "Experimental / Expérimental"
+        }
+      },
+      {
+        "slug": "reference/modelrequest",
+        "attrs": {
+          "data-api-kind": "interface",
+          "data-api-status": "experimental",
+          "title": "Experimental / Expérimental"
+        }
+      },
+      {
+        "slug": "reference/modelresult",
+        "attrs": {
+          "data-api-kind": "interface",
+          "data-api-status": "experimental",
+          "title": "Experimental / Expérimental"
+        }
+      }
+    ]
+  },
+  {
     "title": ["Remote transfers", "Transferts distants"],
     "items": [
       { "slug": "reference/overview/remote-transfers" },

@@ -2,6 +2,8 @@
 
 ## Non publié
 
+- Ajouter `openaiCompatible()` et les contrats typés expérimentaux de fournisseurs de modèles pour des appels directs sans streaming à Chat Completions ou Responses, sans Codex. Borner les requêtes et la taille des réponses, gérer l’annulation et la consommation déclarée si présente, et refuser les sorties incomplètes ou non prises en charge. L’exécution d’outils et le harness d’agent restent prévus en deuxième phase ; la compatibilité avec les services réels n’est pas validée.
+- Ajouter une famille bilingue Fournisseurs de modèles dans la référence, avec icônes expérimentales et bandeaux générés expliquant les limites. Ajouter les mêmes avertissements à Firecracker et FirecrackerOptions.
 - Ajout des transports objet local/S3 pour les artefacts, checkpoints à propriété exclusive, journaux segmentés, snapshots de conversations natives, archives de récupération vérifiées, réservations partagées, activités des ressources et opérations distantes d’inventaire/rétention/quotas. Conservation des stores par dossier et chemins d’exécution locaux ; le SDK AWS reste optionnel. La récupération de propriété distante est explicite et les campagnes de stockage réelles authentifiées restent à effectuer.
 - Ajouter l’adaptateur optionnel `@elie-laloum/outpost/queues/bullmq` pour Redis standalone et BullMQ 5, avec identité des jobs, résultats JSON sans perte, baux protégés par génération, annulation et échéances. Inclure la fermeture asynchrone des connexions, des tests sur Redis réel et la référence et le guide d’exploitation bilingues.
 

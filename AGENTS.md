@@ -10,6 +10,7 @@ Outpost is a TypeScript library and CLI for running coding agents in sandboxes, 
 - Make code understandable through names, small responsibilities and explicit contracts.
 - Use domain-driven design and ports and adapters pragmatically. Introduce abstractions for real responsibilities and variations, not speculative flexibility.
 - Keep agent protocols independent of sandbox backends. Claude Code, Codex and Gemini CLI have adapters; Gemini currently supports fresh sessions without native conversation capture, resume, fork or automatic response repairs. Additional agents belong behind the existing ports.
+- Direct model calls use the experimental `ModelProvider` contract and `openaiCompatible()` in `src/adapters/models/`, independently of sandbox providers and CLI agent adapters. Phase one supports bounded, non-streaming text calls only; the tool harness remains planned.
 - Preserve existing features and public contracts during refactoring. Architecture changes must not silently change execution behavior.
 - Prefer explicit ownership, predictable failure modes and recoverable state over hidden automation.
 - Distinguish released behavior, implemented but unreleased additions, and opt-in research prototypes. Keep remaining work and live-validation prerequisites in the roadmap; do not imply publication from a local implementation.
@@ -137,6 +138,7 @@ CI checks Windows, macOS and Linux, real Docker/Podman execution, package consum
 - Examples must match the public API and be usable in their stated environment. Explain expected results, resource ownership, authentication and failure behavior where relevant.
 - Cookbooks progress from small tasks to advanced orchestration. Keep complete examples and distinguish instructions to an agent from enforced workflow gates.
 - Keep account/subscription login and API-key authentication clearly separated, including billing implications and host-versus-sandbox credential locations. Check current official vendor documentation when modifying authentication guidance.
+- Experimental reference symbols are marked in `docs/scripts/api-groups.mjs`; their bilingual warning explanations live in `docs/reference-content/experimental.json`. Regeneration must preserve a warning before the API content for every marked symbol.
 - The API reference and both documentation changelogs are synchronized by `docs/scripts/sync-reference.mjs`. Update their sources and regenerate; do not patch generated output as the source of truth. Changelog sources are root `CHANGELOG.md` and `docs/translations/changelog.fr.md`.
 - Keep `CHANGELOG.md` at the root and in the documentation. The roadmap belongs in the documentation. Do not reintroduce a root French README, `CONTRIBUTING.md`, root roadmap or migration guides without a new requirement.
 - When API is updated and docs is updated as well always update docs/references with changes.

@@ -5,6 +5,10 @@ sidebar:
   order: 0
 ---
 
+:::caution[Expérimental]
+Ce provider de recherche exige un hôte Linux/KVM et un invité préparés. L’intégration du jailer et l’isolation par cgroups ne sont pas implémentées ; les validations réelles de démarrage, de nettoyage et de résistance aux attaques restent nécessaires avant une prise en charge en production. Consultez les [limites du prototype](../../guide/advanced/firecracker/).
+:::
+
 ## Import
 
 ```ts

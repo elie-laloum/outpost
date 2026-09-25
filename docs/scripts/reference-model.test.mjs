@@ -262,3 +262,25 @@ test("Firecracker is classified only under Providers and marked experimental", (
     assert.equal(entries[0].attrs["data-api-status"], "experimental");
   }
 });
+
+test("experimental references explain their status before the API content in both languages", async () => {
+  const experimental = navigation
+    .flatMap((group) => group.items)
+    .filter((item) => item.attrs?.["data-api-status"] === "experimental");
+  assert.ok(experimental.length > 0);
+  for (const item of experimental) {
+    for (const [locale, label] of [
+      ["", "Experimental"],
+      ["fr/", "Expérimental"],
+    ]) {
+      const source = await page(`${locale}${item.slug}.md`);
+      const body = source.replace(/^---\n[\s\S]*?\n---\n/, "").trimStart();
+      assert.ok(body.startsWith(`:::caution[${label}]`), item.slug);
+      const end = body.indexOf("\n:::");
+      assert.ok(end > body.indexOf("\n") + 1, item.slug);
+      assert.ok(end < body.indexOf("## Import"), item.slug);
+    }
+  }
+  const stable = await page("reference/codex.md");
+  assert.ok(!stable.includes(":::caution[Experimental]"));
+});

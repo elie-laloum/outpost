@@ -291,3 +291,11 @@ export type {
   SpeculativeHostSnapshot,
   SpeculativeValidation,
 } from "./application/speculation.types.ts";
+
+export { openaiCompatible } from "./adapters/models/openai-compatible.ts";
+export type { OpenAICompatibleOptions } from "./adapters/models/openai-compatible.types.ts";
+export type {
+  ModelProvider,
+  ModelRequest,
+  ModelResult,
+} from "./domain/model.types.ts";

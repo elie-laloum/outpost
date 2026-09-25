@@ -1,4 +1,5 @@
 import { defineConfig } from "astro/config";
+import { unified } from "@astrojs/markdown-remark";
 import starlight from "@astrojs/starlight";
 import celestia from "starlight-theme-celestia";
 import apiGroups from "./reference-content/navigation.json" with { type: "json" };
@@ -9,6 +10,7 @@ export default defineConfig({
   site: "https://elie-laloum.github.io",
   base,
   trailingSlash: "always",
+  markdown: { processor: unified() },
   integrations: [
     starlight({
       title: "Outpost",
