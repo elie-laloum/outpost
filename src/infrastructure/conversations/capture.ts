@@ -66,7 +66,11 @@ export async function captureConversation(
     await rm(temporary, { force: true });
   }
   if (layout.sidecars) {
-    const remoteSidecars = posix.join(posix.dirname(remote), id, "subagents");
+    const remoteSidecars = posix.join(
+      posix.dirname(remote.replaceAll("\\", "/")),
+      id,
+      "subagents",
+    );
     const listed = options.local
       ? {
           status: 0,

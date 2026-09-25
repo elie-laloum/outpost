@@ -437,6 +437,18 @@ for (const [name, factory] of Object.entries(adapters)) {
       local: true,
     });
     assert.ok(captured.reference);
+    assert.deepEqual(
+      JSON.parse(
+        await readFile(
+          join(
+            captured.file.slice(0, -".jsonl".length),
+            "subagents/child.jsonl",
+          ),
+          "utf8",
+        ),
+      ),
+      { cwd: repo, text: "child" },
+    );
     await rm(home, { recursive: true });
     const elsewhere = join(root, "elsewhere");
     await mkdir(elsewhere);
