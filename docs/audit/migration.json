@@ -2225,6 +2225,14 @@
     {
       "source": "fr/reference/index.md",
       "destination": "fr/reference/diagnosesandbox.md"
+    },
+    {
+      "source": "reference/overview/remote-transfers.md",
+      "destination": "reference/overview/providers.md"
+    },
+    {
+      "source": "fr/reference/overview/remote-transfers.md",
+      "destination": "fr/reference/overview/providers.md"
     }
   ],
   "examples": [

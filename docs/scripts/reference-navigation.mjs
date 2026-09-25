@@ -8,7 +8,6 @@ const sections = [
       ["sandboxes", "Sandboxes"],
       ["providers", "Providers"],
       ["commands", "Commands"],
-      ["remote-transfers", "Transfers"],
     ],
   ],
   [

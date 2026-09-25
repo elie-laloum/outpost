@@ -27,7 +27,7 @@ const french = Astro.props.target.startsWith("fr/");
   <body data-pagefind-ignore>
     <main>
       <h1>{french ? "Cette page a été déplacée" : "This page has moved"}</h1>
-      <p><a href={target}>{french ? "Ouvrir le guide" : "Open the guide"}</a></p>
+      <p><a href={target}>{french ? "Ouvrir la page" : "Open the page"}</a></p>
       <p><a href={details}>{french ? "Consulter les sections détaillées" : "Read the detailed sections"}</a></p>
     </main>
     <script is:inline define:vars={{ target, details }}>

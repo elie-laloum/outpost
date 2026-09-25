@@ -81,7 +81,7 @@ export const groups = [
     experimental: ["firecracker", "FirecrackerOptions"],
     guide: "guide/environment/providers/overview",
     names:
-      "docker podman local vercel daytona firecracker FirecrackerOptions ContainerOptions DependencyCache EgressPolicy VercelOptions DaytonaOptions mountedProvider remoteProvider SandboxContext SandboxLease SandboxProvider TransferOptions Variables Volume",
+      "docker podman local vercel daytona firecracker FirecrackerOptions ContainerOptions DependencyCache EgressPolicy VercelOptions DaytonaOptions mountedProvider remoteProvider SandboxContext SandboxLease SandboxProvider TransferOptions FileTransfers FileManifestEntry Variables Volume",
   },
   {
     id: "model-providers",
@@ -96,12 +96,6 @@ export const groups = [
     guide: "guide/advanced/model-providers",
     names:
       "openaiCompatible OpenAICompatibleOptions ModelProvider ModelRequest ModelResult",
-  },
-  {
-    id: "remote-transfers",
-    title: ["Remote transfers", "Transferts distants"],
-    guide: "guide/operations/remote-transfers",
-    names: "FileManifestEntry FileTransfers",
   },
   {
     id: "recovery-retention",

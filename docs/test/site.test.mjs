@@ -257,7 +257,7 @@ for (const [locale, label, overview] of [
     });
     expect(overviewIcon.mask).toMatch(/^url\(/);
     expect(overviewIcon.width).toBeGreaterThan(0);
-    await expect(page.locator("a[data-reference-overview]")).toHaveCount(24);
+    await expect(page.locator("a[data-reference-overview]")).toHaveCount(23);
     for (const name of ["firecracker", "FirecrackerOptions"]) {
       const link = family.getByRole("link", {
         name: `${name} — ${label}`,
@@ -375,14 +375,13 @@ for (const locale of ["", "fr/"]) {
         ".reference-section > ul > li > details > summary .large",
       );
       const names = await labels.allTextContents();
-      expect(names).toHaveLength(24);
+      expect(names).toHaveLength(23);
       expect(names.every((name) => !/\s/.test(name.trim()))).toBe(true);
       expect(names).toEqual([
         "Workspaces",
         "Sandboxes",
         "Providers",
         "Commands",
-        "Transfers",
         "Agents",
         "Dispatch",
         "Prompts",

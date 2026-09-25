@@ -591,6 +591,14 @@
         "slug": "reference/transferoptions",
         "attrs": { "data-api-kind": "interface" }
       },
+      {
+        "slug": "reference/filetransfers",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/filemanifestentry",
+        "attrs": { "data-api-kind": "interface" }
+      },
       { "slug": "reference/volume", "attrs": { "data-api-kind": "interface" } }
     ]
   },
@@ -640,23 +648,6 @@
           "data-api-status": "experimental",
           "title": "Experimental / Expérimental"
         }
-      }
-    ]
-  },
-  {
-    "title": ["Remote transfers", "Transferts distants"],
-    "items": [
-      {
-        "slug": "reference/overview/remote-transfers",
-        "attrs": { "data-reference-overview": "" }
-      },
-      {
-        "slug": "reference/filemanifestentry",
-        "attrs": { "data-api-kind": "interface" }
-      },
-      {
-        "slug": "reference/filetransfers",
-        "attrs": { "data-api-kind": "interface" }
       }
     ]
   },
