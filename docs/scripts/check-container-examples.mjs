@@ -31,8 +31,8 @@ for (const scenario of selected) {
       const content =
         engine === "podman" && !scenario.name.includes("providers/containers")
           ? source.replace(
-              'import { docker } from "@elie-laloum/outpost/providers/docker";',
-              'import { podman as docker } from "@elie-laloum/outpost/providers/podman";',
+              'import { dockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";',
+              'import { podmanSandboxProvider as dockerSandboxProvider } from "@elie-laloum/outpost/providers/podman";',
             )
           : source;
       await writeFile(resolve(target, name), content);

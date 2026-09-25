@@ -9,6 +9,7 @@ Cette recette autorise explicitement l’intégration dans la branche hôte apr�
 
 ```ts
 import {
+  agent as composeAgent,
   createSandbox,
   claude,
   agentTask,
@@ -19,7 +20,7 @@ import {
 } from "@elie-laloum/outpost";
 
 await using sandbox = await createSandbox({
-  agent: claude(),
+  agent: composeAgent({ harness: claude.harness({}) }),
   branch: { mode: "integrate" },
   hooks: {
     sandboxReady: [

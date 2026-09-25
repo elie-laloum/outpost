@@ -6,7 +6,7 @@ export interface SandboxDiagnosticOptions {
   readonly deadlineMs?: number;
   readonly signal?: AbortSignal;
   readonly transfers?: boolean;
-  readonly provider?: Pick<SandboxProvider, "name" | "placement">;
+  readonly sandboxProvider?: Pick<SandboxProvider, "name" | "placement">;
 }
 
 export interface DiagnosticCapability {
@@ -19,7 +19,7 @@ export interface DiagnosticCapability {
 export interface SandboxDiagnosticReport {
   readonly scope: "owned-sandbox";
   readonly ownership: "caller";
-  readonly provider?: Pick<SandboxProvider, "name" | "placement">;
+  readonly sandboxProvider?: Pick<SandboxProvider, "name" | "placement">;
   readonly capabilities: readonly DiagnosticCapability[];
   readonly checks: readonly DiagnosticCheck[];
   readonly modelCompatibility: "unverified";

@@ -92,13 +92,13 @@ Enregistrez le fichier **example.mts** dans `workflow/`.
 ```ts file=example.mts
 import assert from "node:assert/strict";
 import { createSandbox, inspectRecovery } from "@elie-laloum/outpost";
-import { docker } from "@elie-laloum/outpost/providers/docker";
+import { dockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 import { resolve } from "node:path";
 
 const repository = resolve(import.meta.dirname, "../repository");
 const sandbox = await createSandbox({
   repository,
-  provider: docker({ image: "outpost:docs-demo" }),
+  sandboxProvider: dockerSandboxProvider({ image: "outpost:docs-demo" }),
   branch: { mode: "named", name: "workshop/recovery" },
 });
 try {

@@ -15,7 +15,7 @@ import type { DispatchOptions } from "@elie-laloum/outpost";
 
 | Name            | Type                                                             | Presence | Meaning                                                                                                                                              |
 | --------------- | ---------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `agent`         | `AgentAdapter \| undefined`                                      | Optional | Native coding-agent adapter.                                                                                                                         |
+| `agent`         | `Agent \| undefined`                                             | Optional | Native coding-agent adapter.                                                                                                                         |
 | `logging`       | `Logging \| undefined`                                           | Optional | Configure the dispatch journal file and verbose event retention.                                                                                     |
 | `label`         | `string \| undefined`                                            | Optional | Human-readable label used in execution reporting.                                                                                                    |
 | `brief`         | `Brief`                                                          | Required | Literal text or file-based task input.                                                                                                               |
@@ -38,7 +38,7 @@ import type { DispatchOptions } from "@elie-laloum/outpost";
 
 ```ts
 export interface DispatchOptions<T = undefined> {
-  readonly agent?: AgentAdapter;
+  readonly agent?: Agent;
   readonly logging?: Logging;
   readonly label?: string;
   readonly brief: Brief;
@@ -64,7 +64,7 @@ export interface DispatchOptions<T = undefined> {
 
 ## Related contracts
 
-- [AgentAdapter](../agentadapter/)
+- [Agent](../type-agent/)
 - [AgentObservation](../agentobservation/)
 - [Brief](../brief/)
 - [DispatchTelemetry](../dispatchtelemetry/)

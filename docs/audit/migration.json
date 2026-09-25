@@ -18,7 +18,7 @@
       "sections": ["Optional capabilities"],
       "sourceSha256": "9461ff73d43ab2d68a54a3f1545262e8446e096f6c3c8480fff6281261014112",
       "sourceBodySha256": "4116cc676b5f2143eb12f94a16dc324f2dd654cb95dad8c837850c385ae4266b",
-      "preservedBodySha256": "4116cc676b5f2143eb12f94a16dc324f2dd654cb95dad8c837850c385ae4266b",
+      "preservedBodySha256": "a48b2d7e87cd1c2923c0e766b7be643ff66fdb6ab994f5d25a8f4f28b887e688",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -28,7 +28,7 @@
       "sections": [],
       "sourceSha256": "c40f4d7efbb3001f23790a500a0c94a9811795a51fae11485eec8e1c09414d84",
       "sourceBodySha256": "d1e2e37572d2a04d1cbdc4a66282b2fa0429e7689c7d5d3a6983a18b7ddc5e5f",
-      "preservedBodySha256": "d1e2e37572d2a04d1cbdc4a66282b2fa0429e7689c7d5d3a6983a18b7ddc5e5f",
+      "preservedBodySha256": "621d7d8d1d22a1c3cb129dd09fd8a431bbaf3f6fbdb69480d628cba5ccbe5c4f",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -48,7 +48,7 @@
       "sections": ["Read the result"],
       "sourceSha256": "9e745005fefa8d8b2322e044ec5361ddcc72d2da0e6f4035abcb59af2be21f3a",
       "sourceBodySha256": "b1a1b8827596004c2a574303e911d1a3601ed4c9d7a77ebb92c87db0684b275a",
-      "preservedBodySha256": "b1a1b8827596004c2a574303e911d1a3601ed4c9d7a77ebb92c87db0684b275a",
+      "preservedBodySha256": "bae2b34fa08c818d0a14fedcac216a8fcb8271561ed9e5a0ec0b459c2deba3c7",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -58,7 +58,7 @@
       "sections": ["Cold versus warm"],
       "sourceSha256": "6f912f2299d50a7558aa37a94a1d9b9a2a10adcb00e3e1356d9bb144c659dd53",
       "sourceBodySha256": "99ff92635d42b1a930406100f05c888b69841f0874344a3984d9f200690c22b0",
-      "preservedBodySha256": "99ff92635d42b1a930406100f05c888b69841f0874344a3984d9f200690c22b0",
+      "preservedBodySha256": "1198f76a650caf438e1390ee774875d35b26681ce8d2214859a66c616f213cb3",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -72,7 +72,7 @@
       ],
       "sourceSha256": "20fefa00bb07ec6e6912b513adec8da3ef5c23ab0fd2e75cea8abecd7fff057c",
       "sourceBodySha256": "b38eee825550f2eca5e9a85d878c2c6ebbddc794772eee80e58f9455a4477d79",
-      "preservedBodySha256": "b38eee825550f2eca5e9a85d878c2c6ebbddc794772eee80e58f9455a4477d79",
+      "preservedBodySha256": "08678fa20a2468a83409e0970a85354bf18f81456cff575ac150847954076078",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -82,7 +82,7 @@
       "sections": ["Resolution rules"],
       "sourceSha256": "7da6624b8268034d19d92e4633005c9ca0601f2b23ebeaf40489a8b1cad93cf0",
       "sourceBodySha256": "ab42c9cd6c99fc92e47c04f83b7d0f60edfdcc6b9553a8194049616adfca73ec",
-      "preservedBodySha256": "ab42c9cd6c99fc92e47c04f83b7d0f60edfdcc6b9553a8194049616adfca73ec",
+      "preservedBodySha256": "4e76f70eb2e3eab9f69d0048bbf44a9ea1f07b1f9dea05f01c24e9a495c08674",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -92,7 +92,7 @@
       "sections": ["Precedence", "Credential choices", "Connect an account"],
       "sourceSha256": "d6eaf997b99c508d39669d1320b4f366b21e4ba88b46e99c305c40e397603394",
       "sourceBodySha256": "ec13fe5af4ecae69146c6a0e5807564668b342eae2a91719996864b1fd06e320",
-      "preservedBodySha256": "ec13fe5af4ecae69146c6a0e5807564668b342eae2a91719996864b1fd06e320",
+      "preservedBodySha256": "a8685a3e515dded1eb192a4cf41150495ef25fbc338d869273cc43e2e1313054",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -109,7 +109,7 @@
       ],
       "sourceSha256": "b3112f66c0717f7ef43dbe5a8c35749ed9a8930555701e21e31876d76a783f17",
       "sourceBodySha256": "171b9003c1a210ce2abe5b1ecf457cc724cba128ccdd2f963dcfc6eddffcbfb5",
-      "preservedBodySha256": "171b9003c1a210ce2abe5b1ecf457cc724cba128ccdd2f963dcfc6eddffcbfb5",
+      "preservedBodySha256": "061e117779a24460f816f679917b0cb74488d1a5ffb22c286f670dfb72790460",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -119,7 +119,7 @@
       "sections": ["Events", "Logging", "Token accounting"],
       "sourceSha256": "9c842df34af96392683aebbc49283f2a02698138f7d16a10dcbde1d2b712ccd1",
       "sourceBodySha256": "35673e03808af158e6e43e39a454b944bf0fffc5dbb1d9509599b5a3702993ff",
-      "preservedBodySha256": "c729b71441de2c6b49f3b0bac55cb7287a5dbf73cdc64f1d1e9f5641268b1cff",
+      "preservedBodySha256": "dca00c6220f670e79ecf36a6aa5a230578ea2e525c3bd8faca8d0455b3f3145a",
       "disposition": "complete body preserved; internal links migrated; added typed asynchronous reporters and complete dispatch telemetry contracts"
     },
     {
@@ -129,7 +129,7 @@
       "sections": [],
       "sourceSha256": "7d108ccace3ab55d4144ddab72819f3ebf2c531cefcdf612185c76017a5263c1",
       "sourceBodySha256": "10c1574c8a706cded9c72eb1217a343e92034573a754b945a3fce50718ccbf2e",
-      "preservedBodySha256": "10c1574c8a706cded9c72eb1217a343e92034573a754b945a3fce50718ccbf2e",
+      "preservedBodySha256": "5be397bcfa202c3f3ee93521e032a03178b2fa526a30b4a7caa004d09b7c564a",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -146,7 +146,7 @@
       ],
       "sourceSha256": "90f392d51b07a0affe9737b7531bcd405bbb497824c92ddc7a4533c200130024",
       "sourceBodySha256": "e8386f9317c162ee278ac5a9fd4c952c357392a29e47e9eee90a397f1e13488e",
-      "preservedBodySha256": "e8386f9317c162ee278ac5a9fd4c952c357392a29e47e9eee90a397f1e13488e",
+      "preservedBodySha256": "965a1d91516f82d33b3e0c4be83fd72565e9fb7d5ce56fc4a9feda20036c2dd9",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -156,7 +156,7 @@
       "sections": ["Continuation choices", "Storage and capture failures"],
       "sourceSha256": "98aa797c7e3cc81543cdd73a07bb3fb51c854065eb9755eafb2ffcb2e5a5cf69",
       "sourceBodySha256": "88a7a026aeca2784623f4f6e431b79c9b6a0e46cc6dac9854a448db88f8873f4",
-      "preservedBodySha256": "88a7a026aeca2784623f4f6e431b79c9b6a0e46cc6dac9854a448db88f8873f4",
+      "preservedBodySha256": "5cb36bc740a54af8e3859ccadf4a4dfca7a84c03bd7c5ff018bd01fad24dfd84",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -166,7 +166,7 @@
       "sections": ["Parsing rules", "Repair and recovery"],
       "sourceSha256": "f1e6584a9e3a9eebdbc307235391c5c7139003cbee16bd56e808718f94b9ad5c",
       "sourceBodySha256": "6145d944c421ab88c7b2c8e1a5d2cba283c293575ac77df281b5f1025fd11e02",
-      "preservedBodySha256": "6145d944c421ab88c7b2c8e1a5d2cba283c293575ac77df281b5f1025fd11e02",
+      "preservedBodySha256": "2585706bdb4110dc148fce0261b5d3b85a0cd4f219eb966ba923bd03f448d73d",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -176,7 +176,7 @@
       "sections": [],
       "sourceSha256": "dc4788728c49770b7fa90b68c4130d29f17211f47c6ffc136ab44cf33a40d587",
       "sourceBodySha256": "b9909a9fcea48af172bab4ce5cdedd682a6642e8c1312dcfb2744839f6107b5c",
-      "preservedBodySha256": "b9909a9fcea48af172bab4ce5cdedd682a6642e8c1312dcfb2744839f6107b5c",
+      "preservedBodySha256": "cc33340cb81798bada28babffe1bce5c1ef7a47f9a3df392f4ff3f9c59dd24aa",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -186,7 +186,7 @@
       "sections": ["Budgets and recovery"],
       "sourceSha256": "52d0eb7ce852cdb324281b7e3fb045c5c6ce817c9c3658bab44c84435f4dec27",
       "sourceBodySha256": "d997bdf740ff70bc63ea2b94337bcece4f5e46480487107e8caeecb87a4ef5c9",
-      "preservedBodySha256": "d997bdf740ff70bc63ea2b94337bcece4f5e46480487107e8caeecb87a4ef5c9",
+      "preservedBodySha256": "e626f931d99285b24783a0249aaa3c70edd5917d23f555921e0e62d89144c354",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -210,7 +210,7 @@
       "sections": ["Multiple repositories"],
       "sourceSha256": "0ceff74e19657551b120c81ba040708ede8eb01984826eb7a0ff302528488352",
       "sourceBodySha256": "e7924574fbff0ba4b72e7acdc464031c44a41fff871cd935978dc69757a51de8",
-      "preservedBodySha256": "e7924574fbff0ba4b72e7acdc464031c44a41fff871cd935978dc69757a51de8",
+      "preservedBodySha256": "ea1354f750ddf8ce2ee68d50da52672eaa761fb2fd77ea55632ea7a540bc6daa",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -298,7 +298,7 @@
       ],
       "sourceSha256": "ac9d588d66dd491b7971bd49ed61e79b402535319bbd0557cb6ea003beb07d2e",
       "sourceBodySha256": "03e1572697f5241ebc440a765fcaae3af8ab8c4867a1b29f14e69eb2ef9e5ce2",
-      "preservedBodySha256": "af125aa71cc49a583855cf56fe8b5ff4a22fb1838227b868f17377d175eba84c",
+      "preservedBodySha256": "a9718de7d7c2822adddc7453843cece2ca46760bf147e51f05b02ecf91a1bb32",
       "disposition": "corrected with implementation evidence"
     },
     {
@@ -336,7 +336,7 @@
       ],
       "sourceSha256": "e19643ec058666507d1ae22842c02e409798a048a8661e316cb2dc397fce30a8",
       "sourceBodySha256": "39dd6354ffaf2ff38dc67b6d4dc6d8fa91bf61a48b83dfac057197bf03bf9d8e",
-      "preservedBodySha256": "39dd6354ffaf2ff38dc67b6d4dc6d8fa91bf61a48b83dfac057197bf03bf9d8e",
+      "preservedBodySha256": "feec095fbf8d4b5161beffcb41d082d141d800fccb4d9854cda11fc238cb72b9",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -371,7 +371,7 @@
       "sections": ["Execution order"],
       "sourceSha256": "3e7a5bdf1259ed506fc0b16e2fceb35b22fc458918ba02e17a740a778f886ec5",
       "sourceBodySha256": "18093b52b1807346334b3b005ac9b0da0ad158301fb00fed99eb483bd9fec71e",
-      "preservedBodySha256": "18093b52b1807346334b3b005ac9b0da0ad158301fb00fed99eb483bd9fec71e",
+      "preservedBodySha256": "fad95070abed8d7110fcb5d6ba7d9ee40a5278b379e083a563cca2eb83e56bb9",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -381,7 +381,7 @@
       "sections": ["Closing and cancellation"],
       "sourceSha256": "0ba691745aa0ca93d2b0660c15f89959904c9e4d1aca6a80646f0165cad15174",
       "sourceBodySha256": "c0d23e169bf69eb43439303fd746a8ea3a88dc2dbb8efe6549a1976cfa34d4d8",
-      "preservedBodySha256": "c0d23e169bf69eb43439303fd746a8ea3a88dc2dbb8efe6549a1976cfa34d4d8",
+      "preservedBodySha256": "db385de71f8093822b67d649acea5601eb19715b3b2a059cc91c7a721bec1a13",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -395,7 +395,7 @@
       ],
       "sourceSha256": "e4a7d4fd26ca6c500dc0f7ce93ea5dd0914038b4e2cb74e3f51dca60b981c2ab",
       "sourceBodySha256": "74aaef2c41ab2a3f20e732170b6d07ea78b3e65013633f0730ccc998547c6822",
-      "preservedBodySha256": "74aaef2c41ab2a3f20e732170b6d07ea78b3e65013633f0730ccc998547c6822",
+      "preservedBodySha256": "686ab74ec49e295c0f036fc9669b2f998319ca39a8ba02331640632db81656ea",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -405,7 +405,7 @@
       "sections": ["Configuration"],
       "sourceSha256": "d2f7864f49400c441dc37c76b740d1fbf96fa185e92928617333cadb78bb5311",
       "sourceBodySha256": "2def9fbc6a1fabe3b8e04c98afe9d0319f4c6e9f02232dc96238b05cf9bbddbe",
-      "preservedBodySha256": "2def9fbc6a1fabe3b8e04c98afe9d0319f4c6e9f02232dc96238b05cf9bbddbe",
+      "preservedBodySha256": "ac5de4c95c31c8c3892f724d6b0a332e240bc704f208f26178640a587276d9c0",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -415,7 +415,7 @@
       "sections": ["Attach an agent"],
       "sourceSha256": "44338f9f585753bb577765ce178020f83c576f1077ae68bac9bf499988794541",
       "sourceBodySha256": "a5afbf6a8e2335a2f7141a6c054924e85e0332abf4e102f6d85b4c84a0d5ffbc",
-      "preservedBodySha256": "a5afbf6a8e2335a2f7141a6c054924e85e0332abf4e102f6d85b4c84a0d5ffbc",
+      "preservedBodySha256": "b0df0dfa29a0a5017ae9781998d4699b6ffed9065b4e23780c793a80096aa97d",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -425,7 +425,7 @@
       "sections": ["Run an offline command", "Select Vercel destinations"],
       "sourceSha256": "c863ad8595f48fbcef5712bbf3a9784b5e29899b4ec603a16379812b7fe73586",
       "sourceBodySha256": "b8c6442d37ec8e4bd23307de090332785a613a4f42877329c05feb2779000c56",
-      "preservedBodySha256": "b8c6442d37ec8e4bd23307de090332785a613a4f42877329c05feb2779000c56",
+      "preservedBodySha256": "ef2f845929585d2e3138f32636cd4b2a0926a9a3df0918dab2877b21fd3c08eb",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -455,7 +455,7 @@
       "sections": ["Handle sensitive artifacts"],
       "sourceSha256": "861a33d0f8c131c4b34ca456d4fbee095312c6e9f5170b2ba975370dcbf89c6c",
       "sourceBodySha256": "10fb146f7e0f38f7208d8a600e43fec48b39231ae1705bcfb6ec5b575f0d371d",
-      "preservedBodySha256": "10fb146f7e0f38f7208d8a600e43fec48b39231ae1705bcfb6ec5b575f0d371d",
+      "preservedBodySha256": "f57185955274abe8e5b8f990ed2c48072681d3c6756dcfdab9a7221fa82592df",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -521,7 +521,7 @@
       ],
       "sourceSha256": "23be68e3d531a7dc9e6bdab149e7003c4cfe1a72e315bd57cefca5fc133103d9",
       "sourceBodySha256": "b8d7da2e4c2a514a33cf3b285abed493bcb53ec187a09486ecb75166f3a9164b",
-      "preservedBodySha256": "fa9948072173cd4fdfb78d384f88b78b1d85c220db55fbeaee5c1268a636025f",
+      "preservedBodySha256": "955c895ae705061bdbddb36d6e30738d7e1dd37f7c845e472a44936168a338a2",
       "disposition": "corrected with implementation evidence"
     },
     {
@@ -592,7 +592,7 @@
       ],
       "sourceSha256": "abee68a7193d4682b5012110b34798860551b0ecd71e16331c7b087791088962",
       "sourceBodySha256": "bf922a50dcc097f1a2a50e2f41683893042b953fa1930a9a0b302db506c53ceb",
-      "preservedBodySha256": "bf922a50dcc097f1a2a50e2f41683893042b953fa1930a9a0b302db506c53ceb",
+      "preservedBodySha256": "911882cfb3e0598fef4b79280c69be3924893e53fbf7c6951947a5d2d89a8c61",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -666,7 +666,7 @@
       "sections": ["Validation boundary", "Invalid responses"],
       "sourceSha256": "c2401d2ec76d8bbd24010f6e7e0184372c03021fb78fd75cacbe6c9ed95bdcbb",
       "sourceBodySha256": "e23df11d94edff8e6b94a9cbbeb4216a35a183c6f9975c5a960f2466bb4965ed",
-      "preservedBodySha256": "e23df11d94edff8e6b94a9cbbeb4216a35a183c6f9975c5a960f2466bb4965ed",
+      "preservedBodySha256": "608aa42476a2a20d78c4da2a7f9ed5dc5ab5a5d0d2471e48c839ef5a9ff4b6f6",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -686,7 +686,7 @@
       "sections": ["Gate behavior", "Extend carefully"],
       "sourceSha256": "519313302fcdd868b2e14bc56141ece79a441b0622ae44566b51a8ebda8f5487",
       "sourceBodySha256": "5a71cd5bad2ec6f8e2b80bf6d5b04441946797788c0781b54bd221db5fb37b34",
-      "preservedBodySha256": "5a71cd5bad2ec6f8e2b80bf6d5b04441946797788c0781b54bd221db5fb37b34",
+      "preservedBodySha256": "cdd8a086c26f10e3a617d046322254143db47536df513e73225c6cf077043452",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -696,7 +696,7 @@
       "sections": ["Expected outcome", "Failure and repetition"],
       "sourceSha256": "cd1e75532fe12740b5f3d487d5ba692beb02939eb607fb651f7c918e9405a2f4",
       "sourceBodySha256": "db3ea89930a3c30bf2ac4bab41bf972ffb0bbec14377e5fb857789738d235f7d",
-      "preservedBodySha256": "db3ea89930a3c30bf2ac4bab41bf972ffb0bbec14377e5fb857789738d235f7d",
+      "preservedBodySha256": "ee46f7151e5b063044022dc0ee3874ba9b54a76f7248f696c8926151241be9a9",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -706,7 +706,7 @@
       "sections": ["Isolation", "Partial failures"],
       "sourceSha256": "e752db6c7bf66de4ec01fd3e4fa8d6359641e2a80f1025da9f845f2d74a7150d",
       "sourceBodySha256": "7945af3663bc9c3d9454d2ed808d11879e9ba49666e0c0798ce07030a205085d",
-      "preservedBodySha256": "7945af3663bc9c3d9454d2ed808d11879e9ba49666e0c0798ce07030a205085d",
+      "preservedBodySha256": "046a46f6d591ac0cd9c4d2df89c978031f73b28647f372ce8cba93243554f696",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -716,7 +716,7 @@
       "sections": ["Agent handoff", "Review before delivery"],
       "sourceSha256": "eaaa753d176763ee219653b6857c09d770851d4460d34c484e463cd0079b8d3c",
       "sourceBodySha256": "bf56bdcbfa23acd5e201dbea7d80f8bc91da67ab4d8002fd58e0793540a4e8f8",
-      "preservedBodySha256": "bf56bdcbfa23acd5e201dbea7d80f8bc91da67ab4d8002fd58e0793540a4e8f8",
+      "preservedBodySha256": "3df2f9e50e9fe5688623a686b86c3d7590ed457408dd03e20335f54db76110ba",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -726,7 +726,7 @@
       "sections": ["Inspect before retrying", "Resume deliberately"],
       "sourceSha256": "aaa7731486fc8a6548cbe2a27e459d6b959d762b88fe82bf8e8ad712516374a5",
       "sourceBodySha256": "5f1815a78fd782d8b7440c482f03dd6b503270a5b1422a5197314bfc9f5b8feb",
-      "preservedBodySha256": "5f1815a78fd782d8b7440c482f03dd6b503270a5b1422a5197314bfc9f5b8feb",
+      "preservedBodySha256": "dd326bbbabc845dafce8405d68b81cf1c011fbf15798a42e07b279e032fc4d50",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -740,7 +740,7 @@
       ],
       "sourceSha256": "1c9467f6cc037419db0d1f3f5ca1e16e34f05caca333f2fdb8fc9914b2a914ed",
       "sourceBodySha256": "4ccece5b9be99b9af41b6835ee8f7551cc2efdd4751d44898814677f294c4f54",
-      "preservedBodySha256": "4ccece5b9be99b9af41b6835ee8f7551cc2efdd4751d44898814677f294c4f54",
+      "preservedBodySha256": "a37029765c11bbe23a70d9e254dd999ae53819a51414396a6adf70b002dadd51",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -750,7 +750,7 @@
       "sections": ["Agent authentication"],
       "sourceSha256": "70e0187988107f257a418a532b2486b04c5fc4f1ddf52209a2f49e72c36049fd",
       "sourceBodySha256": "fcdc0769b2c914c0a676083756d13bd0079d7f5ba5f56a274443e3e2ef9afa4e",
-      "preservedBodySha256": "fcdc0769b2c914c0a676083756d13bd0079d7f5ba5f56a274443e3e2ef9afa4e",
+      "preservedBodySha256": "36208b5adf952aa6e57aad678b564ff517850d71c52791fd22afff7c44e64460",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -760,7 +760,7 @@
       "sections": [],
       "sourceSha256": "4d4aa16605fb953ea77a775d337b5f5d7108c9b76e1b3da2433f1992660ce38a",
       "sourceBodySha256": "aaa9c364e348378d5ae0c61e343a56dda20f85528e55aa15bf3870ca9b50e578",
-      "preservedBodySha256": "aaa9c364e348378d5ae0c61e343a56dda20f85528e55aa15bf3870ca9b50e578",
+      "preservedBodySha256": "4fddabeaebc403c1363c9baac57d9f38f7d6bbd926e141667acc174093034633",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -773,7 +773,7 @@
       ],
       "sourceSha256": "229eb57644624f0fee5a5be271a7296c7924b90e39384ce27f78c4c8f6889c7f",
       "sourceBodySha256": "985edcc969dc6e8600dba91adbf5717e22966eb1e6f7d432a779734643045068",
-      "preservedBodySha256": "985edcc969dc6e8600dba91adbf5717e22966eb1e6f7d432a779734643045068",
+      "preservedBodySha256": "1b9fe7726a40814be127c525e28e0916320f5f407de6fab4b2f98c59dce6c3e0",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -797,7 +797,7 @@
       "sections": [],
       "sourceSha256": "6cfdbe2946173721171a21a6fe229b6bf3af2c5274e2940cb57d1cdb3f7801e0",
       "sourceBodySha256": "475c3cb8f0dc376fcdbbf9c022b633bc99f0f4d75aa1fcc750fae2b72583f8c1",
-      "preservedBodySha256": "475c3cb8f0dc376fcdbbf9c022b633bc99f0f4d75aa1fcc750fae2b72583f8c1",
+      "preservedBodySha256": "8fb0a2337c807c7cfc94b0ffd051fb535e0835dc1512ea8685b92286dd3dd89b",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -807,7 +807,7 @@
       "sections": ["Options", "Platform differences", "File transfers"],
       "sourceSha256": "dad685c0458ab232d8cd8ec43b02497a768c7ef397cc45c6e539eb33877b62ee",
       "sourceBodySha256": "92b956e21cbb8979a6995c2475d049fefd190d15816ffb400321489d5a34448d",
-      "preservedBodySha256": "92b956e21cbb8979a6995c2475d049fefd190d15816ffb400321489d5a34448d",
+      "preservedBodySha256": "d65eb474c9f4edbbaa6e0e2ab602c73675cefe773b389c1b60d969a4da7158d7",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -817,7 +817,7 @@
       "sections": [],
       "sourceSha256": "492b316efb13b3263475343223a69e62b9e34e35d1c478f9f85678deca475647",
       "sourceBodySha256": "85a4b26b110c310536866d3de3c1a3bfc96ac4c99b6249c43ffc7e2106fb51b2",
-      "preservedBodySha256": "85a4b26b110c310536866d3de3c1a3bfc96ac4c99b6249c43ffc7e2106fb51b2",
+      "preservedBodySha256": "8f7c308b1cef85003ea3935d99aa9cbe6d5587c40a5912532d21c93401bdcc85",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -827,7 +827,7 @@
       "sections": ["Synchronization and ownership", "Mounts and limits"],
       "sourceSha256": "47ec4be3b8bd8d7a6c1664b58d20d1670482332df6e4f2fe82315e8804000836",
       "sourceBodySha256": "fc7311a0b2f29e0816cad1b0e63ed401e814d23064fa3017dc163c51eb8b18fe",
-      "preservedBodySha256": "fc7311a0b2f29e0816cad1b0e63ed401e814d23064fa3017dc163c51eb8b18fe",
+      "preservedBodySha256": "a25b77bd5c0666cb99df67b1d22a176046021a0020faab692353992801a53eae",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -837,7 +837,7 @@
       "sections": ["Capacités facultatives"],
       "sourceSha256": "909f3a7257f9d6702ab10840e6d1362cf8c9a1293f337b8d5d94d00e01a694e4",
       "sourceBodySha256": "05a2ea12598ac9cca4992c0ccd391920960aeba8eadff9802b03cd2667051297",
-      "preservedBodySha256": "05a2ea12598ac9cca4992c0ccd391920960aeba8eadff9802b03cd2667051297",
+      "preservedBodySha256": "9aa3d7b26664659549e81a73ddcbfeaf1fdaa1b9b98c3d27a6f623b19af120d0",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -847,7 +847,7 @@
       "sections": [],
       "sourceSha256": "fe3d2bd653c9e629ce52aa412f1fa58e65b6d182076a148fa71079a61c8c1a3b",
       "sourceBodySha256": "ce6cd35469f9c717dfedea1ab0d359586fd5b78a4a48486e08456a2db98d2e88",
-      "preservedBodySha256": "ce6cd35469f9c717dfedea1ab0d359586fd5b78a4a48486e08456a2db98d2e88",
+      "preservedBodySha256": "85227e1af9603e393c5fa741632e9056f2f87eaf0f061bd2fe4928dd34dc0003",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -867,7 +867,7 @@
       "sections": ["Lire le résultat"],
       "sourceSha256": "12334c4db40fba9d826007ff951a2914fdbdc5800eb5d36021e32c404d304de5",
       "sourceBodySha256": "75c20da265035ddc38502e2f0f8b86355ad68b53c34bda7b22510dbf6af8b227",
-      "preservedBodySha256": "75c20da265035ddc38502e2f0f8b86355ad68b53c34bda7b22510dbf6af8b227",
+      "preservedBodySha256": "323740169c865daf65765b028196beb86d1e88ae044821ffb35129bfa06a3818",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -877,7 +877,7 @@
       "sections": ["Environnement recréé ou réutilisé"],
       "sourceSha256": "47092b2db25d23a9927ec4a6ed41b8aeea0904df9be563c1095410660a8bd3ff",
       "sourceBodySha256": "c3265063caacebbc4cb8ff62964298c2dfa2eb282100a9c897a46bfce36c5bad",
-      "preservedBodySha256": "c3265063caacebbc4cb8ff62964298c2dfa2eb282100a9c897a46bfce36c5bad",
+      "preservedBodySha256": "4aa29a4cedc6bc92dde2cd62fbde55a4ed5a53691bafeacd0cb7dac5185a43ae",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -891,7 +891,7 @@
       ],
       "sourceSha256": "c3db829edc691bca522b65ab5648ea5f126fa700edaadf74984eb7add65060d2",
       "sourceBodySha256": "3b0beb7713762f9d2bf93f0a778b8b1720ccfba2dc4451e43dbf56f16dcf5876",
-      "preservedBodySha256": "3b0beb7713762f9d2bf93f0a778b8b1720ccfba2dc4451e43dbf56f16dcf5876",
+      "preservedBodySha256": "edfe77e61edc647c466251061dd9d0817d3cd98f2b000a30c98ff79da7ab7171",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -901,7 +901,7 @@
       "sections": ["Règles de résolution"],
       "sourceSha256": "5ca533bae47ccbbd225a501c67b4ae6a322b7b505cce27fbba9e106e2bb233a1",
       "sourceBodySha256": "333746b0e2d58f109d61df49f532659ea7a5a78a4e7f79c2748fe95633cfc301",
-      "preservedBodySha256": "333746b0e2d58f109d61df49f532659ea7a5a78a4e7f79c2748fe95633cfc301",
+      "preservedBodySha256": "89de61525fd798ec4fd438d0f2fed50f5d2bf6eb1e4de0c16640e6aab227241d",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -915,7 +915,7 @@
       ],
       "sourceSha256": "32edb11e2559ca06d45e2027d392989d9cf053e3c1af60d6c729488a2ecb774f",
       "sourceBodySha256": "d2668b2e02455ac9de35ebb9dc69a68307344307131b6c406fb93ffb4a061793",
-      "preservedBodySha256": "d2668b2e02455ac9de35ebb9dc69a68307344307131b6c406fb93ffb4a061793",
+      "preservedBodySha256": "43c70faa7859a4edfbe967e8c713a8392b63a7790ec461a61e17fd1523a08468",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -932,7 +932,7 @@
       ],
       "sourceSha256": "c97b2f0d7af5799b9f8696bb7d18f72d12d08e097f3213b076092db287a38e9b",
       "sourceBodySha256": "c4291648239901f6ba96b9ec7c90dd81840f20f8eb6636671c25fc28f19f6da9",
-      "preservedBodySha256": "c4291648239901f6ba96b9ec7c90dd81840f20f8eb6636671c25fc28f19f6da9",
+      "preservedBodySha256": "5956fc8044d85d1ee4f341f42311a100aeb3465f8a32636a525fd79ee336c1f9",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -942,7 +942,7 @@
       "sections": ["Événements", "Journalisation", "Comptage des tokens"],
       "sourceSha256": "dcb304daefc3adf961a9c69dfdb470bfc48f1e7efb81cc9f18e577c066d1db05",
       "sourceBodySha256": "6c7e1692ba73ac0737c8a7350332de075be815197d88b1ec6ac7ddf23ab868e8",
-      "preservedBodySha256": "ba0fad4a7eb47d52d4545a7fb0effdd9ca01e1eda0e634377abe345cdcc98e0b",
+      "preservedBodySha256": "9456b8ecad1949051b35bec3d03a9df49e0bd6c72bbc0a48116ec985ce50a73c",
       "disposition": "complete body preserved; internal links migrated; added typed asynchronous reporters and complete dispatch telemetry contracts"
     },
     {
@@ -952,7 +952,7 @@
       "sections": [],
       "sourceSha256": "f160c02a2615533d5d5966ec7052e4a138aa82d5f2315330ece701c5aa562b98",
       "sourceBodySha256": "099959b7d5b86d565b59bdb683abfc52feb9f3e8ce15dde689fcb5747c5d6e28",
-      "preservedBodySha256": "099959b7d5b86d565b59bdb683abfc52feb9f3e8ce15dde689fcb5747c5d6e28",
+      "preservedBodySha256": "867e71a8dd83965998cfd550b047cc94c9aa067f363cd35e2855dc333221842f",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -969,7 +969,7 @@
       ],
       "sourceSha256": "25532ca480fc079faf75157ab3b6bb2a8a2cb66db9a453a420eccf4bd1e49ff6",
       "sourceBodySha256": "d9059bc4fd487fe609cb4ac6f45deeba861d30e0838bcbefb0652b0b7eb2b772",
-      "preservedBodySha256": "d9059bc4fd487fe609cb4ac6f45deeba861d30e0838bcbefb0652b0b7eb2b772",
+      "preservedBodySha256": "4c28281e8d70b86fb3c57ed5eb20c8b27e32a338730b05c2a68fd19240d8476a",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -979,7 +979,7 @@
       "sections": ["Choisir la continuation", "Stockage et échecs de capture"],
       "sourceSha256": "e87f5c758fe3fd0a4c8723ce1a7fdf483d80be947bdf95f72f1c605729fef9d4",
       "sourceBodySha256": "02f7d91a7b3c9f2d7b0de28e0b952c6051f5ad1d2e3ae4c8c63fea92d0449d46",
-      "preservedBodySha256": "02f7d91a7b3c9f2d7b0de28e0b952c6051f5ad1d2e3ae4c8c63fea92d0449d46",
+      "preservedBodySha256": "fd8c80f1872a7574fd3bdb3ee29c2f098c171e82728c8d56802a251609e50dd2",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -989,7 +989,7 @@
       "sections": ["Règles de lecture", "Réparation et récupération"],
       "sourceSha256": "508b82c5589b2d63735e584c3a1ecf9012f4729d8d8224c65ae368a47d27119f",
       "sourceBodySha256": "13b428b093769de267be5286a24112d5e003283344c061e1dcad41577dd0f91e",
-      "preservedBodySha256": "13b428b093769de267be5286a24112d5e003283344c061e1dcad41577dd0f91e",
+      "preservedBodySha256": "2702bd9ab23b0795a70f69c9bf5d3d785c6b9c3d2354b624429a19f8235558f8",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -999,7 +999,7 @@
       "sections": [],
       "sourceSha256": "4809b51d1cd062a7298eb282f83b9eaee4a196cdad828eb3e7f5b955c3fec5ec",
       "sourceBodySha256": "eeeaf50fb5b064c95af56d54ef4610a452dc4803a53dd7e4f45753c489d0c526",
-      "preservedBodySha256": "eeeaf50fb5b064c95af56d54ef4610a452dc4803a53dd7e4f45753c489d0c526",
+      "preservedBodySha256": "b0631700631591cdcccb2f9557d298d0f7e56e7f8965fd7193358c88e87ec0c0",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -1009,7 +1009,7 @@
       "sections": ["Budgets et récupération"],
       "sourceSha256": "f7e075733c4efa90d7e0a22b3b5c78a5a01bb97a5d251d802405e9313887b9b6",
       "sourceBodySha256": "bd2117543d63222774bbb3f3063a93f91d64fc400db5543d04d970d57fb1b47f",
-      "preservedBodySha256": "bd2117543d63222774bbb3f3063a93f91d64fc400db5543d04d970d57fb1b47f",
+      "preservedBodySha256": "fd3f5f5daf3116156dafd82f2658c160467d790cd2eb2a0dca1fdb3e26c39a7f",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -1033,7 +1033,7 @@
       "sections": ["Plusieurs dépôts"],
       "sourceSha256": "7b56e0c72d30403e51acb3bb52da4b7147797b0504271e70a0da261d3b624b23",
       "sourceBodySha256": "449e0a543d73930ba4b690f4c7b6a95a9813e82ae88b7ef292adb2628c08b7f0",
-      "preservedBodySha256": "449e0a543d73930ba4b690f4c7b6a95a9813e82ae88b7ef292adb2628c08b7f0",
+      "preservedBodySha256": "9103b3637a741cc20dca7bf2a64af11e31160dd64a9a1f78a2899de6a8776164",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -1159,7 +1159,7 @@
       ],
       "sourceSha256": "4a837dbd42217e7a62290c3b1d36db829a3798059c11cca8e53e422e111350ab",
       "sourceBodySha256": "1af32c5524a6faa0ac74fe59be83036eb15627b7a60fec1de610837c83563f28",
-      "preservedBodySha256": "1af32c5524a6faa0ac74fe59be83036eb15627b7a60fec1de610837c83563f28",
+      "preservedBodySha256": "ec2ee28d10721e5c0842da5fd346aa59b2923c030f52b714aa8317c1cdb8584f",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -1184,7 +1184,7 @@
       "sections": ["Ordre d’exécution"],
       "sourceSha256": "308b875c9ee934ff8031efae804b41bab1cf1fec8981d3bf9c3aecdbb7bfe2f2",
       "sourceBodySha256": "75203119b5bb78b77a240ae16d8aa8d4a2ba3cca1316de3a41d5e0984d838bac",
-      "preservedBodySha256": "75203119b5bb78b77a240ae16d8aa8d4a2ba3cca1316de3a41d5e0984d838bac",
+      "preservedBodySha256": "5f4b41105daf745d3d7678fbd2ef564ad0a3753695a496b3228063df8fe7b8b5",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -1194,7 +1194,7 @@
       "sections": ["Fermeture et annulation"],
       "sourceSha256": "49d3e35ca5e1b7eaea450b5b17cd93331129c724780c920b775d5b2e45071dae",
       "sourceBodySha256": "d05e995f997f61c7c2768fe9df8f1dc704ae83552c8558a10e8b1a6ce241f758",
-      "preservedBodySha256": "d05e995f997f61c7c2768fe9df8f1dc704ae83552c8558a10e8b1a6ce241f758",
+      "preservedBodySha256": "cf99c6eef1b7854257bff01adebfe165bdc722a40cd212bde631db1ff81f88a2",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -1208,7 +1208,7 @@
       ],
       "sourceSha256": "35d2d2abc1f0eb9bf45c52014a1dd40fd3aae6a77523f73900d00fcdfc7b4601",
       "sourceBodySha256": "2439ec2273eb84cb87c9325bf87fffb32a4302f0e41093a0e65f1ac6baed74aa",
-      "preservedBodySha256": "2439ec2273eb84cb87c9325bf87fffb32a4302f0e41093a0e65f1ac6baed74aa",
+      "preservedBodySha256": "444972bd940ee8d3508c651217df1a12f930161bc049ad0bc3de48e1ff514e1e",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -1218,7 +1218,7 @@
       "sections": ["Configuration"],
       "sourceSha256": "25e0a1ddd4e5a406a34c392e2aef84ef5269a479bb89828c8a9669c819bcac22",
       "sourceBodySha256": "da8e369905bd4dd62b3b9fe40a6d07fdd66a7a610a41868b669ab92292fd184d",
-      "preservedBodySha256": "da8e369905bd4dd62b3b9fe40a6d07fdd66a7a610a41868b669ab92292fd184d",
+      "preservedBodySha256": "5ad4413fe6062311c7a5833236286c6a92cf5ed81dca4844142280a9f39f316f",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -1228,7 +1228,7 @@
       "sections": ["Ouvrir une session interactive"],
       "sourceSha256": "0984ef111929f57447d61f30457fe11d43111879b0fb368a15a33ef906c82cf2",
       "sourceBodySha256": "293d71c0a21e79d1499efebaa3e81d158ac7a565ae90aa378d819b69791c2113",
-      "preservedBodySha256": "293d71c0a21e79d1499efebaa3e81d158ac7a565ae90aa378d819b69791c2113",
+      "preservedBodySha256": "6efad7ac7fa345b7d809adf4a815dc49dec13b610d8d742047558406bd36f1c3",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -1241,7 +1241,7 @@
       ],
       "sourceSha256": "ef149a39aa59950f441fb5df779b65679b46129927d91a275facc5df681fd9ca",
       "sourceBodySha256": "04addb3184667fdbec7584d89abbf049fcbfe96166ab4830c72ad3da1db0cae2",
-      "preservedBodySha256": "04addb3184667fdbec7584d89abbf049fcbfe96166ab4830c72ad3da1db0cae2",
+      "preservedBodySha256": "82747ca5797742b8379793b6d746b8213d0897a855f1eadebc9dab861d8ea3e1",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -1275,7 +1275,7 @@
       "sections": ["Protéger les artefacts sensibles"],
       "sourceSha256": "75299796a292d904acb05d46f3c5337b888306ef32c5b98b97c06456bb10ff75",
       "sourceBodySha256": "dabae224c4c697aba39d641e541e96e4508149b7299673aa896ea56b39b2c4ff",
-      "preservedBodySha256": "dabae224c4c697aba39d641e541e96e4508149b7299673aa896ea56b39b2c4ff",
+      "preservedBodySha256": "d92f83f58e5d8b19d777deeb4e881fed8c77d0331b231454d8bcf93c3be0aa11",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -1341,7 +1341,7 @@
       ],
       "sourceSha256": "d945f2d89e444168f4dbd05bf6727d00f4df3a697c41e122952bca7157138dcd",
       "sourceBodySha256": "8f40f3dfb076992999bd35ddedfe478e732a72444874d84fe66badd88dad21d1",
-      "preservedBodySha256": "43dbbb577270f98c52eda22941679efc0c75650db5967c400b779ac20d840c19",
+      "preservedBodySha256": "46eb5113a5247b2649a5db2238773ebacc9e154b604f26a899dd537249ec4258",
       "disposition": "corrected with implementation evidence"
     },
     {
@@ -1412,7 +1412,7 @@
       ],
       "sourceSha256": "301d8be602af3a3ab4d0cb47887d0ab3fd1ece92daa1aaf55a47ee691978c8d1",
       "sourceBodySha256": "bb858b5f78ee51dc43568aa0d880e0d6851cda460ad2b36ad6f8dd8dbfa77d5a",
-      "preservedBodySha256": "bb858b5f78ee51dc43568aa0d880e0d6851cda460ad2b36ad6f8dd8dbfa77d5a",
+      "preservedBodySha256": "88e6fc7fbadca18ebca404b778f856a870e6123d379871026c582d4f3adc30ca",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -1482,7 +1482,7 @@
       "sections": ["Limite de la validation", "Réponses invalides"],
       "sourceSha256": "fb5e802dc1806a33e6787de5e88353b76229bffc1c82ece61fc835a024768768",
       "sourceBodySha256": "7d0fdc7d1e89c614dddf0b8cfffd23c6693195396c603d29a077941810b318b6",
-      "preservedBodySha256": "7d0fdc7d1e89c614dddf0b8cfffd23c6693195396c603d29a077941810b318b6",
+      "preservedBodySha256": "13809abf6ed0ec9542a8c1c510d126ee0d1d164afbebc64654dec3b9239a6e55",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -1502,7 +1502,7 @@
       "sections": ["Fonctionnement des contrôles", "Étendre avec précaution"],
       "sourceSha256": "e41dce27c95c3ff487cffe23a46755a17db20becc34b7a912c37599d42b95547",
       "sourceBodySha256": "d4be5ab48a5d6b50a4aaa73e7e59f531f43fb70682e8ddb65ee01ba03f1d9789",
-      "preservedBodySha256": "d4be5ab48a5d6b50a4aaa73e7e59f531f43fb70682e8ddb65ee01ba03f1d9789",
+      "preservedBodySha256": "46d6daa24bb92843cd96a7afb83c609e78e3dedcca22b1bcc429d7fa39a922ad",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -1512,7 +1512,7 @@
       "sections": ["Résultat attendu", "Échec et répétition"],
       "sourceSha256": "4c81b1cda0728f950e7526d30c91eab0a0b6b38d249e2ee930f3a70082362002",
       "sourceBodySha256": "69f28e78653b8ab809cb445e3787801745244c57a38c4872e73952b8455b6968",
-      "preservedBodySha256": "69f28e78653b8ab809cb445e3787801745244c57a38c4872e73952b8455b6968",
+      "preservedBodySha256": "00af038020db542542e5010b265b72df63c192c894449e4e34514c3b20121f17",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -1522,7 +1522,7 @@
       "sections": ["Isolation", "Échecs partiels"],
       "sourceSha256": "220aa6aa60d4e5c0f9f502b07119f23e07c938012ea92d1d3c566fa9f93ceb87",
       "sourceBodySha256": "bb7f8342a2ab780cb1ca20db0b56972b3cb5215bdfcd3f7bdda16fc979730411",
-      "preservedBodySha256": "bb7f8342a2ab780cb1ca20db0b56972b3cb5215bdfcd3f7bdda16fc979730411",
+      "preservedBodySha256": "78ac3eb310fc2894bd3910b81489d74035f13a3d99cc43a582e61d3f5bd3ea18",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -1532,7 +1532,7 @@
       "sections": ["Passage entre agents", "Relire avant livraison"],
       "sourceSha256": "34a8d670193964a1d8e7e4564ced35b54c24d1e8a5ec9f92192e6fd0ebc0df32",
       "sourceBodySha256": "423821c3c164f21b42c0edf5fe3ceb6c5050ea0af587b6d2bcc7527d4b49bd33",
-      "preservedBodySha256": "423821c3c164f21b42c0edf5fe3ceb6c5050ea0af587b6d2bcc7527d4b49bd33",
+      "preservedBodySha256": "478490fd66cdfba5c0d82fdcaee74f20fb576da920318c08a96cc43006eb9d80",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -1542,7 +1542,7 @@
       "sections": ["Inspecter avant de relancer", "Reprendre volontairement"],
       "sourceSha256": "6c24828ed1fd9acc9671ffdc599c72dc33ed73dd96e0bcc5765793feebbb9fb6",
       "sourceBodySha256": "4e6b550a978ca4e9f2605ceebd7a0b107e9ed8f51f983cae8f0a382e4195d753",
-      "preservedBodySha256": "4e6b550a978ca4e9f2605ceebd7a0b107e9ed8f51f983cae8f0a382e4195d753",
+      "preservedBodySha256": "9c8776a8a974f3a00360a49beba89bdb140360f7e01986431c4df351953b64cd",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -1556,7 +1556,7 @@
       ],
       "sourceSha256": "7f96c79e09f945014c7d23eca3c5af5b03eb75c22cf6c6a76e5c6813c06c7fc7",
       "sourceBodySha256": "32d1130309a944d598f94ee90096c51c7b619b7f6500a3fe3b889fd230fb58b8",
-      "preservedBodySha256": "32d1130309a944d598f94ee90096c51c7b619b7f6500a3fe3b889fd230fb58b8",
+      "preservedBodySha256": "31182953ba85445cff3e478541d3cb677621029a9817748c3ae2a1360e1c581a",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -1566,7 +1566,7 @@
       "sections": ["Authentification de l’agent"],
       "sourceSha256": "9cb6d20956392190ec1b85cee5d8dcc2234d78fcececb4ff27d81f75e10f510c",
       "sourceBodySha256": "cf95fee26a52245a7db777837d4363d404a4c28359029932a2989c1c597d25be",
-      "preservedBodySha256": "cf95fee26a52245a7db777837d4363d404a4c28359029932a2989c1c597d25be",
+      "preservedBodySha256": "66f89fd3f2cbff97c383d7b9a76b957773d29534d8add18fd51b751615df39ac",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -1576,7 +1576,7 @@
       "sections": [],
       "sourceSha256": "5e58898063d26ede9f1d43574f799199500b870669e4381d3de074081321dbb3",
       "sourceBodySha256": "73826c155152a632e176a09a7ccb1fd5d79ccfe09d92229286069b86a02ed9aa",
-      "preservedBodySha256": "73826c155152a632e176a09a7ccb1fd5d79ccfe09d92229286069b86a02ed9aa",
+      "preservedBodySha256": "2d1f16d5a169a609e5bacc534e0b44d7f39c852a14aab243bc17ae5eb51c9fcf",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -1589,7 +1589,7 @@
       ],
       "sourceSha256": "ca17c323b43a6f8e2302fa2a6ba87f48cf10044bb383d106b8c33b5f70e0c26e",
       "sourceBodySha256": "c320c21c88b86414a446593a82ae3457deaf16e3a179f40d843d35d991bbabd6",
-      "preservedBodySha256": "c320c21c88b86414a446593a82ae3457deaf16e3a179f40d843d35d991bbabd6",
+      "preservedBodySha256": "ec8617baa705c97c47742ef8076955d24b94629fc007919f6d495a0670ccc04f",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -1613,7 +1613,7 @@
       "sections": [],
       "sourceSha256": "99094d9169b46f5cabea78692d40c40771e4e11bbdd510b122a2d660502bacf2",
       "sourceBodySha256": "c287edc88a81bd508f683fbeeb6540f45ad83cdd72623906a4361f31e03374c2",
-      "preservedBodySha256": "c287edc88a81bd508f683fbeeb6540f45ad83cdd72623906a4361f31e03374c2",
+      "preservedBodySha256": "f6921d694ce35a003eafbdf7cf96234c455fd06d684683b8eb7311f7da92a1fc",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -1627,7 +1627,7 @@
       ],
       "sourceSha256": "f2a395657052720fa0b7d14e3405f72516d8f98adbd9fb3ebf2fc5d8a05ff13a",
       "sourceBodySha256": "ffcedf8c8d1ced0e8a216c4ed297a53f1c5dd887c370a5c109967abc6f27a49c",
-      "preservedBodySha256": "ffcedf8c8d1ced0e8a216c4ed297a53f1c5dd887c370a5c109967abc6f27a49c",
+      "preservedBodySha256": "d666c0f95b83c121a358638f6041867db484581208037cf6239b66902cd3523f",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -1637,7 +1637,7 @@
       "sections": [],
       "sourceSha256": "1a7399595beaf885f08f2fb281c65f893bd910766be4f16e7ad6e91f1d4de5ad",
       "sourceBodySha256": "6a7c2bbb919ce5104985810c39cd8a96f4dd17700ae403d2b5486cda3f66ec75",
-      "preservedBodySha256": "6a7c2bbb919ce5104985810c39cd8a96f4dd17700ae403d2b5486cda3f66ec75",
+      "preservedBodySha256": "26b1cbc99d34569aeea4479d09e1244203cefe722ae0c70a1efb2dc0bf429381",
       "disposition": "complete body preserved; internal links migrated"
     },
     {
@@ -1647,7 +1647,7 @@
       "sections": ["Synchronisation et propriété", "Montages et limites"],
       "sourceSha256": "cb3f1e7067cea91e69b972d35fca7a3f14bb72681503df60ce736fb7a6ec02f2",
       "sourceBodySha256": "b149cb5ab0c18affa15ff14a236b25878f9146e7f4d43c5f2fae061d048f60ad",
-      "preservedBodySha256": "b149cb5ab0c18affa15ff14a236b25878f9146e7f4d43c5f2fae061d048f60ad",
+      "preservedBodySha256": "44b808fdf389c17f946fd7d54b3694b8aa93e363da085a6b89642cf5f9e017fa",
       "disposition": "complete body preserved; internal links migrated"
     },
     {

@@ -23,7 +23,7 @@ Les identifiants Vercel et Daytona autorisent l’allocation de sandbox, indépe
 
 ## Diagnostiquer une connexion en échec
 
-Un contrôle `doctor` ou une allocation réussie ne prouve pas qu’un modèle accepte les identifiants. Vérifiez la méthode choisie, la variable déclarée, l’accès abonnement/API et l’emplacement du fichier Codex avant de réessayer. Un programme écrit directement avec l’API configure explicitement l’authentification ; le script Codex généré par la CLI contient déjà son hook de connexion.
+Un contrôle `doctor` ou une allocation réussie ne prouve pas qu’un modèle accepte les identifiants. Vérifiez la méthode choisie, la variable déclarée, l’accès abonnement/API et l’emplacement du fichier Codex avant de réessayer. Un programme écrit directement avec l’API configure explicitement l’authentification ; le script Codex généré par la CLI configure déjà l’authentification dans son harness.
 
 Contrats détaillés et exemples exécutables : [Codex](../../agents/connect-codex/), [Claude](../../agents/connect-claude/), [Gemini](../../agents/gemini/). Les providers de modèle Codex personnalisés nécessitent un endpoint compatible Responses ; voir le [contrat du provider](../../behavior/agents/connect-codex/#fournisseurs-de-modèles-compatibles-openai).
 

@@ -1,0 +1,24 @@
+export const referenceRedirects = {
+  "/reference/docker/": "/reference/dockersandboxprovider/",
+  "/fr/reference/docker/": "/fr/reference/dockersandboxprovider/",
+  "/reference/podman/": "/reference/podmansandboxprovider/",
+  "/fr/reference/podman/": "/fr/reference/podmansandboxprovider/",
+  "/reference/local/": "/reference/localsandboxprovider/",
+  "/fr/reference/local/": "/fr/reference/localsandboxprovider/",
+  "/reference/vercel/": "/reference/vercelsandboxprovider/",
+  "/fr/reference/vercel/": "/fr/reference/vercelsandboxprovider/",
+  "/reference/daytona/": "/reference/daytonasandboxprovider/",
+  "/fr/reference/daytona/": "/fr/reference/daytonasandboxprovider/",
+  "/reference/firecracker/": "/reference/firecrackersandboxprovider/",
+  "/fr/reference/firecracker/": "/fr/reference/firecrackersandboxprovider/",
+  "/reference/mountedprovider/": "/reference/mountedsandboxprovider/",
+  "/fr/reference/mountedprovider/": "/fr/reference/mountedsandboxprovider/",
+  "/reference/remoteprovider/": "/reference/remotesandboxprovider/",
+  "/fr/reference/remoteprovider/": "/fr/reference/remotesandboxprovider/",
+  "/reference/openaicompatible/": "/reference/openaimodelprovider/",
+  "/fr/reference/openaicompatible/": "/fr/reference/openaimodelprovider/",
+  "/reference/openaicompatibleoptions/":
+    "/reference/openaimodelprovideroptions/",
+  "/fr/reference/openaicompatibleoptions/":
+    "/fr/reference/openaimodelprovideroptions/",
+};

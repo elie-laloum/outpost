@@ -36,16 +36,16 @@
     "Définit un nœud d’agent dont le callback request choisit le dépôt, le provider, l’agent et les options de dispatch à chaque tentative. Il appelle dispatch pour allouer et fermer sa propre sandbox et renvoie DispatchResult. Des nœuds distincts peuvent traiter des dépôts distincts ; aucune transaction Git commune ni aucun push automatique ne les relie."
   ],
   "claude": [
-    "Build the Claude Code adapter, including CLI request construction, event decoding and native conversation storage. Model, reasoning and permission settings are passed to Claude; creating the adapter does not start a process or authenticate an account.",
-    "Construit l’adapter Claude Code : préparation des commandes, décodage des événements et stockage des conversations natives. Les réglages de modèle, raisonnement et permissions sont transmis à Claude ; créer l’adapter ne démarre aucun processus et n’authentifie aucun compte."
+    "Namespace exposing harness() to configure the Claude Code CLI. Compose the returned harness with agent({ harness, model }) to select a model independently. The CLI owns its internal model/tool loop.",
+    "Espace de noms exposant harness() pour configurer Claude Code. Composez le harness avec agent({ harness, model }) pour sélectionner séparément le modèle. La CLI possède sa boucle interne modèle/outils."
   ],
   "codex": [
-    "Build the Codex CLI adapter with event decoding, native conversation capture and continuation support. modelProvider selects an explicit Responses-compatible endpoint. Creating the adapter only configures execution; credentials must be available inside the selected environment.",
-    "Construit l’adapter Codex CLI avec décodage des événements, capture native et continuation des conversations. modelProvider sélectionne un endpoint explicitement compatible Responses. La création configure l’exécution ; les identifiants doivent être disponibles dans l’environnement choisi."
+    "Namespace exposing harness() to configure the Codex CLI. Compose the returned harness with agent({ harness, model }) to select a model independently. The CLI owns its internal model/tool loop.",
+    "Espace de noms exposant harness() pour configurer Codex. Composez le harness avec agent({ harness, model }) pour sélectionner séparément le modèle. La CLI possède sa boucle interne modèle/outils."
   ],
   "gemini": [
-    "Build the Gemini CLI adapter for a fresh session. It decodes text, tool and usage events but does not offer native transcript capture, resume, fork or automatic response repairs. Model and approval settings configure the CLI invocation.",
-    "Construit l’adapter Gemini CLI pour une session neuve. Il décode les événements de texte, outils et usage, sans capture native, reprise, bifurcation ni réparation automatique des réponses. Le modèle et le mode d’approbation configurent l’invocation CLI."
+    "Namespace exposing harness() to configure the Gemini CLI CLI. Compose the returned harness with agent({ harness, model }) to select a model independently. The CLI owns its internal model/tool loop.",
+    "Espace de noms exposant harness() pour configurer Gemini CLI. Composez le harness avec agent({ harness, model }) pour sélectionner séparément le modèle. La CLI possède sa boucle interne modèle/outils."
   ],
   "agentVersions": [
     "Expose the Claude, Codex and Gemini CLI versions used as compatibility references by bundled protocol fixtures and generated images. These values do not query the installed binaries or prove live account access.",
@@ -82,14 +82,6 @@
   "remotePath": [
     "Compute the native transcript path inside a sandbox lease from the format and conversation ID, using the lease’s home and workspace path.",
     "Calcule le chemin du transcript natif à l’intérieur d’un bail de sandbox à partir du format et de l’identifiant de conversation, en utilisant son home et son chemin de workspace."
-  ],
-  "mountedProvider": [
-    "Wrap a provider definition with mounted placement. The provider exposes the host workspace through a mount and supplies its own allocation and release implementation.",
-    "Enveloppe une définition de provider avec le placement mounted. Le provider expose le workspace hôte par montage et fournit sa propre implémentation d’allocation et de libération."
-  ],
-  "remoteProvider": [
-    "Wrap a provider definition with remote placement, enabling application-managed repository upload and synchronization around the lease supplied by acquire.",
-    "Enveloppe une définition de provider avec le placement remote, pour activer l’envoi du dépôt et sa synchronisation par l’application autour du bail fourni par acquire."
   ],
   "response": [
     "Construct tagged response validators with text or json. Both read the last complete matching tag; json parses its contents and applies the supplied schema. Invalid or missing content raises ResponseError, and repairs defaults to zero.",
@@ -203,33 +195,9 @@
     "Run bounded agent candidates on separate branches from one baseline and retain the first candidate accepted by validate after cleanup. Cancel losing candidates and report host changes and cumulative usage. This opt-in prototype neither integrates nor pushes the winner automatically.",
     "Exécute des candidats agents bornés sur des branches distinctes issues d’une même base et retient le premier accepté par validate après nettoyage. Annule les perdants et rapporte changements hôtes et usage cumulé. Ce prototype opt-in n’intègre ni ne pousse automatiquement le gagnant."
   ],
-  "docker": [
-    "Create a Docker sandbox provider. Mounted repository mode shares the workspace and Git metadata; opt-in isolated mode transfers a private checkout. Allocation is deferred until a sandbox acquires the provider; its lease owns container disposal.",
-    "Crée un provider de sandbox Docker. Le mode mounted partage workspace et métadonnées Git ; le mode isolated opt-in transfère un checkout privé. L’allocation attend l’acquisition du provider par une sandbox ; le bail possède la fermeture du conteneur."
-  ],
-  "podman": [
-    "Create a Podman sandbox provider using the container execution and streamed-transfer contracts. userns can preserve host UID mapping, and label controls SELinux mount relabeling. The provider is allocated only when acquired by a sandbox.",
-    "Crée un provider Podman avec les contrats d’exécution en conteneur et de transfert par flux. userns peut conserver la correspondance d’UID hôte et label contrôle le réétiquetage SELinux des montages. Le provider n’est alloué que lors de son acquisition par une sandbox."
-  ],
-  "local": [
-    "Create an explicitly unisolated provider that executes commands on the host in the selected workspace. No container or VM is allocated; host filesystem access and credentials remain those of the calling process.",
-    "Crée un provider explicitement sans isolation qui exécute les commandes sur l’hôte dans le workspace choisi. Aucun conteneur ni VM n’est alloué ; l’accès aux fichiers et aux identifiants reste celui du processus appelant."
-  ],
-  "vercel": [
-    "Create a remote Vercel Sandbox provider, loading the optional SDK on acquisition. Repository state is uploaded and synchronized back with host-change protection. A supplied connect function can replace SDK sandbox creation for an integration.",
-    "Crée un provider distant Vercel Sandbox, avec chargement du SDK optionnel à l’acquisition. L’état du dépôt est envoyé puis resynchronisé avec protection des modifications hôtes concurrentes. Une fonction connect fournie peut remplacer la création de sandbox du SDK pour une intégration."
-  ],
-  "daytona": [
-    "Create a remote Daytona provider with separate SDK connection and sandbox creation settings. Repository transfers use the acquired remote environment, and synchronization validates concurrent host edits before applying changes.",
-    "Crée un provider distant Daytona avec réglages distincts de connexion SDK et de création de sandbox. Les transferts utilisent l’environnement distant acquis et la synchronisation valide les modifications hôtes concurrentes avant application."
-  ],
   "openTelemetry": [
     "Create workflow observation and complete dispatch instrumentation from an injected tracer and meter. Pass the result as dispatch telemetry, or its observe method to a workflow. Errors are isolated through onError; close finishes outstanding spans without flushing or shutting down the SDK. Only this optional entry point loads OpenTelemetry.",
     "Crée une observation de workflow et une instrumentation du dispatch complet à partir d’un tracer et d’un meter injectés. Passez le résultat dans telemetry du dispatch, ou sa méthode observe à un workflow. Les erreurs sont isolées via onError ; close termine les spans ouverts sans vider ni fermer le SDK. Seul ce point d’entrée optionnel charge OpenTelemetry."
-  ],
-  "firecracker": [
-    "Create an opt-in Firecracker microVM provider from explicit kernel, rootfs, TAP and SSH settings. The host must provide KVM and a prepared guest; allocation does not fall back to host execution. The acquired lease owns VM shutdown.",
-    "Crée un provider microVM Firecracker opt-in à partir de réglages explicites de noyau, rootfs, TAP et SSH. L’hôte doit fournir KVM et un invité préparé ; l’allocation ne se replie pas sur l’exécution hôte. Le bail acquis possède l’arrêt de la VM."
   ],
   "WorkflowFailure": [
     "Error thrown by WorkflowResult.unwrap when the run did not finish successfully. Its result preserves task records, errors and usage for inspection rather than discarding the workflow outcome.",
@@ -299,12 +267,56 @@
     "Opens an optional BullMQ 5 adapter backed by standalone Redis. Implements TaskQueue for queuedTask and runQueueWorker, retaining request identity, lossless JSON results and atomic fenced leases. Owns its connections and stalled-job checks; await close() after stopping workers. Redis persistence and no-eviction settings determine durability. Import from @elie-laloum/outpost/queues/bullmq and install bullmq separately.",
     "Ouvre un adaptateur optionnel BullMQ 5 sur Redis standalone. Implémente TaskQueue pour queuedTask et runQueueWorker, avec identité des requêtes, résultats JSON sans perte et baux atomiques protégés par génération. Possède ses connexions et contrôles de jobs bloqués ; attendre close() après avoir arrêté les workers. La persistance Redis et l’absence d’éviction déterminent la durabilité. Importer depuis @elie-laloum/outpost/queues/bullmq et installer bullmq séparément."
   ],
-  "openaiCompatible": [
-    "Create a reusable experimental model client that sends one text request over the selected Chat Completions or Responses protocol. Construction validates configuration without network access. generate runs in the calling process, returns complete text and optional reported usage, and owns its request deadline. No sandbox, agent CLI, tools, automatic retries or conversation storage are involved.",
-    "Crée un client de modèles expérimental réutilisable qui envoie une requête textuelle avec le protocole Chat Completions ou Responses choisi. La construction valide la configuration sans accès réseau. generate s’exécute dans le processus appelant, renvoie le texte complet et la consommation déclarée si disponible, et gère son délai. Aucune sandbox, CLI d’agent, outil, répétition automatique ou persistance de conversation n’intervient."
-  ],
   "createReporter": [
     "Create a callable observer with typed event handlers and an explicit flush barrier. Handlers run serially without blocking dispatch; failures are reported through onError and the first remains observable through every flush. The caller owns files, loggers and their shutdown.",
     "Crée un observateur appelable avec des handlers typés et une barrière flush explicite. Les handlers s’exécutent séquentiellement sans bloquer le dispatch ; onError signale les erreurs et la première reste accessible à chaque flush. Les fichiers, loggers et leur fermeture appartiennent à l’appelant."
+  ],
+  "mountedSandboxProvider": [
+    "Wrap a provider definition with mounted placement. The provider exposes the host workspace through a mount and supplies its own allocation and release implementation.",
+    "Enveloppe une définition de provider avec le placement mounted. Le provider expose le workspace hôte par montage et fournit sa propre implémentation d’allocation et de libération."
+  ],
+  "remoteSandboxProvider": [
+    "Wrap a provider definition with remote placement, enabling application-managed repository upload and synchronization around the lease supplied by acquire.",
+    "Enveloppe une définition de provider avec le placement remote, pour activer l’envoi du dépôt et sa synchronisation par l’application autour du bail fourni par acquire."
+  ],
+  "dockerSandboxProvider": [
+    "Create a Docker sandbox provider. Mounted repository mode shares the workspace and Git metadata; opt-in isolated mode transfers a private checkout. Allocation is deferred until a sandbox acquires the provider; its lease owns container disposal.",
+    "Crée un provider de sandbox Docker. Le mode mounted partage workspace et métadonnées Git ; le mode isolated opt-in transfère un checkout privé. L’allocation attend l’acquisition du provider par une sandbox ; le bail possède la fermeture du conteneur."
+  ],
+  "podmanSandboxProvider": [
+    "Create a Podman sandbox provider using the container execution and streamed-transfer contracts. userns can preserve host UID mapping, and label controls SELinux mount relabeling. The provider is allocated only when acquired by a sandbox.",
+    "Crée un provider Podman avec les contrats d’exécution en conteneur et de transfert par flux. userns peut conserver la correspondance d’UID hôte et label contrôle le réétiquetage SELinux des montages. Le provider n’est alloué que lors de son acquisition par une sandbox."
+  ],
+  "localSandboxProvider": [
+    "Create an explicitly unisolated provider that executes commands on the host in the selected workspace. No container or VM is allocated; host filesystem access and credentials remain those of the calling process.",
+    "Crée un provider explicitement sans isolation qui exécute les commandes sur l’hôte dans le workspace choisi. Aucun conteneur ni VM n’est alloué ; l’accès aux fichiers et aux identifiants reste celui du processus appelant."
+  ],
+  "vercelSandboxProvider": [
+    "Create a remote Vercel Sandbox provider, loading the optional SDK on acquisition. Repository state is uploaded and synchronized back with host-change protection. A supplied connect function can replace SDK sandbox creation for an integration.",
+    "Crée un provider distant Vercel Sandbox, avec chargement du SDK optionnel à l’acquisition. L’état du dépôt est envoyé puis resynchronisé avec protection des modifications hôtes concurrentes. Une fonction connect fournie peut remplacer la création de sandbox du SDK pour une intégration."
+  ],
+  "daytonaSandboxProvider": [
+    "Create a remote Daytona provider with separate SDK connection and sandbox creation settings. Repository transfers use the acquired remote environment, and synchronization validates concurrent host edits before applying changes.",
+    "Crée un provider distant Daytona avec réglages distincts de connexion SDK et de création de sandbox. Les transferts utilisent l’environnement distant acquis et la synchronisation valide les modifications hôtes concurrentes avant application."
+  ],
+  "firecrackerSandboxProvider": [
+    "Create an opt-in Firecracker microVM provider from explicit kernel, rootfs, TAP and SSH settings. The host must provide KVM and a prepared guest; allocation does not fall back to host execution. The acquired lease owns VM shutdown.",
+    "Crée un provider microVM Firecracker opt-in à partir de réglages explicites de noyau, rootfs, TAP et SSH. L’hôte doit fournir KVM et un invité préparé ; l’allocation ne se replie pas sur l’exécution hôte. Le bail acquis possède l’arrêt de la VM."
+  ],
+  "openaiModelProvider": [
+    "Configure a reusable text request transport using Chat Completions or Responses. The harness supplies the model on each request. Construction performs local validation only; requests enforce cancellation, response size and deadlines without retries or protocol fallback.",
+    "Configure un transport texte réutilisable utilisant Chat Completions ou Responses. Le harness fournit le modèle à chaque requête. La construction valide localement ; les requêtes appliquent annulation, taille et délais sans retry ni changement de protocole."
+  ],
+  "agent": [
+    "Compose a harness and a model identifier without starting a process or making a network request. CLI harnesses may keep their native default model; a custom harness requires a nonempty model.",
+    "Compose un harness et un identifiant de modèle sans lancer de processus ni requête réseau. Un harness CLI peut conserver son modèle par défaut ; un harness personnalisé exige un modèle non vide."
+  ],
+  "customHarness": [
+    "Define a caller-supplied execution callback backed by a model provider. The callback runs in the Outpost process and uses the supplied sandbox for repository operations. No tool loop, native conversation storage or interactive terminal is provided.",
+    "Définit un callback fourni par l’appelant et relié à un fournisseur de modèles. Le callback tourne dans le processus Outpost et utilise le sandbox fourni pour le dépôt. Aucune boucle d’outils, conversation native ou session terminal n’est fournie."
+  ],
+  "anthropicModelProvider": [
+    "Configure an Anthropic Messages text transport with an explicit output limit and optional system-prefix caching. The harness supplies the model per request. Cache reads and writes are normalized into usage; tool requests, streaming and incomplete responses are rejected.",
+    "Configure un transport texte Anthropic Messages avec limite de sortie explicite et cache optionnel du préfixe système. Le harness fournit le modèle par requête. Les lectures et écritures de cache sont normalisées dans l’usage ; outils, streaming et réponses incomplètes sont refusés."
   ]
 }

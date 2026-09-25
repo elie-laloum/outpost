@@ -6,6 +6,8 @@ Outpost is a TypeScript library for running coding agents in reusable sandboxes,
 
 Version 4.2.0 adds local/S3 storage transports, an optional BullMQ/Redis task queue and experimental direct text model calls. The bilingual documentation now separates practical guides from the API reference. Direct model calls do not yet execute tools or edit repositories. See the [changelog](CHANGELOG.md#420) for details and the [roadmap](https://elie-laloum.github.io/outpost/project/roadmap/) for remaining validation and upcoming priorities.
 
+The working tree also contains the **unreleased agent/harness API refactor** shown in the library examples below. It requires a package built from this checkout; the published 4.2.0 API has not been replaced. See the Unreleased changelog entry.
+
 ## Get started
 
 New to Outpost? Follow the [complete first-run workshop](https://elie-laloum.github.io/outpost/guide/start/quickstart/): choose Codex or Claude and account or API-key access, create a disposable TypeScript repository, then fix and verify a real test. The [Guide](https://elie-laloum.github.io/outpost/guide/) teaches the concepts; the [Reference](https://elie-laloum.github.io/outpost/reference/) explains exact contracts. Every [cookbook recipe](https://elie-laloum.github.io/outpost/guide/cookbook/) includes its own preparation and runnable code.
@@ -33,11 +35,11 @@ Generated Codex API-key workflows prepare login inside the sandbox. For account 
 After preparing the selected agent credentials and provider, library calls follow this shape. For a fully runnable version with explicit authentication, use the [dispatch workshop](https://elie-laloum.github.io/outpost/guide/agents/dispatch/).
 
 ```ts
-import { dispatch, codex } from "@elie-laloum/outpost";
+import { agent, dispatch, codex } from "@elie-laloum/outpost";
 
 const result = await dispatch({
   repository: "/path1/repository",
-  agent: codex(),
+  agent: agent({ harness: codex.harness({}) }),
   branch: { mode: "integrate" },
   brief: { text: "Fix the failing tests, verify and commit." },
 });

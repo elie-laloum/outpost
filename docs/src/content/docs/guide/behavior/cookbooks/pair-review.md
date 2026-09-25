@@ -8,10 +8,15 @@ sidebar:
 Reuse one sandbox across implementation and review. Declare **OPENAI_API_KEY=** and one Claude credential in **.outpost/.env**, and supply both values through your environment. This uses API-key login for Codex; the [account-cache hook](../../../agents/connect-codex/) is an alternative.
 
 ```ts
-import { createSandbox, codex, claude } from "@elie-laloum/outpost";
+import {
+  agent as composeAgent,
+  createSandbox,
+  codex,
+  claude,
+} from "@elie-laloum/outpost";
 
 await using sandbox = await createSandbox({
-  agent: codex(),
+  agent: composeAgent({ harness: codex.harness({}) }),
   branch: { mode: "named", name: "feature/parser-review" },
   hooks: {
     sandboxReady: [
@@ -31,7 +36,7 @@ const implementation = await sandbox.dispatch({
   deadlineMs: 600_000,
 });
 const review = await sandbox.dispatch({
-  agent: claude(),
+  agent: composeAgent({ harness: claude.harness({}) }),
   brief: {
     text:
       "Review the diff against " +

@@ -1,15 +1,18 @@
+import { agent as composeAgent } from "../../src/domain/agent.ts";
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { codex } from "../../src/index.ts";
 
 test("custom Responses models preserve Codex execution, continuation and secret boundaries", () => {
-  const adapter = codex({
+  const adapter = composeAgent({
+    harness: codex.harness({
+      modelProvider: {
+        baseUrl: "https://models.example/v1",
+        apiKeyEnvironment: "MODEL_API_KEY",
+      },
+      variables: { MODEL_API_KEY: "private-test-value" },
+    }),
     model: "vendor/model",
-    modelProvider: {
-      baseUrl: "https://models.example/v1",
-      apiKeyEnvironment: "MODEL_API_KEY",
-    },
-    variables: { MODEL_API_KEY: "private-test-value" },
   });
   for (const input of [
     { text: "hello" },
@@ -38,18 +41,22 @@ test("custom Responses models preserve Codex execution, continuation and secret 
     if ("continuation" in input) assert.ok(args.includes("fork"));
   }
   assert.equal(adapter.variables?.MODEL_API_KEY, "private-test-value");
-  const noKey = codex({
+  const noKey = composeAgent({
+    harness: codex.harness({
+      modelProvider: {
+        baseUrl: "http://localhost:8000/v1",
+        apiKeyEnvironment: false,
+      },
+    }),
     model: "local",
-    modelProvider: {
-      baseUrl: "http://localhost:8000/v1",
-      apiKeyEnvironment: false,
-    },
   }).request({});
   assert.ok(!noKey.arguments?.some((arg) => arg.includes("env_key")));
   assert.ok(
-    codex({
+    composeAgent({
+      harness: codex.harness({
+        modelProvider: { baseUrl: "https://models.example/v1" },
+      }),
       model: "remote",
-      modelProvider: { baseUrl: "https://models.example/v1" },
     })
       .request({})
       .arguments?.includes(
@@ -60,7 +67,12 @@ test("custom Responses models preserve Codex execution, continuation and secret 
 
 test("custom model configuration rejects missing models and unsafe URLs without exposing input", () => {
   assert.throws(
-    () => codex({ modelProvider: { baseUrl: "https://models.example" } }),
+    () =>
+      composeAgent({
+        harness: codex.harness({
+          modelProvider: { baseUrl: "https://models.example" },
+        }),
+      }),
     /model name/,
   );
   for (const baseUrl of [
@@ -71,19 +83,25 @@ test("custom model configuration rejects missing models and unsafe URLs without 
     "https://models.example/#secret",
   ]) {
     assert.throws(
-      () => codex({ model: "test", modelProvider: { baseUrl } }),
+      () =>
+        composeAgent({
+          harness: codex.harness({ modelProvider: { baseUrl } }),
+          model: "test",
+        }),
       (error: unknown) =>
         error instanceof Error && !error.message.includes("secret"),
     );
   }
   assert.throws(
     () =>
-      codex({
+      composeAgent({
+        harness: codex.harness({
+          modelProvider: {
+            baseUrl: "https://models.example",
+            apiKeyEnvironment: "KEY=secret",
+          },
+        }),
         model: "test",
-        modelProvider: {
-          baseUrl: "https://models.example",
-          apiKeyEnvironment: "KEY=secret",
-        },
       }),
     /environment variable/,
   );

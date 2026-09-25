@@ -8,7 +8,7 @@ import {
   task,
   workflow,
 } from "../../src/index.ts";
-import { local } from "../../src/providers/local.ts";
+import { localSandboxProvider } from "../../src/providers/local.ts";
 import { emit, repository, scripted } from "../helpers.ts";
 
 const usage = (input: number) =>
@@ -18,7 +18,7 @@ test("warm agent tasks account each pass once and preserve observer isolation", 
   const repo = await repository(t);
   await using sandbox = await createSandbox({
     repository: repo,
-    provider: local(),
+    sandboxProvider: localSandboxProvider(),
     agent: scripted(`${usage(3)} ${emit("not finished")}`),
   });
   const events: string[] = [];
@@ -50,7 +50,7 @@ test("isolated task streaming usage cancels the running process, blocks retries 
     retry: { attempts: 3 },
     request: () => ({
       repository: repo,
-      provider: local(),
+      sandboxProvider: localSandboxProvider(),
       agent: scripted(`${usage(5)} setTimeout(() => {}, 60_000);`),
       brief: { text: "fixture" },
     }),
@@ -76,7 +76,7 @@ test("failed agent attempts remain accounted across workflow retries", async (t)
     retry: { attempts: 2 },
     request: () => ({
       repository: repo,
-      provider: local(),
+      sandboxProvider: localSandboxProvider(),
       agent: scripted(`${usage(3)} process.exitCode = 7;`),
       brief: { text: "fixture" },
     }),
@@ -97,7 +97,7 @@ test("structured repair turns share a task admission and count each turn once", 
   );
   await using sandbox = await createSandbox({
     repository: repo,
-    provider: local(),
+    sandboxProvider: localSandboxProvider(),
     agent,
   });
   const run = agentTask({
@@ -122,7 +122,7 @@ test("budget cancellation keeps a warm sandbox reusable", async (t) => {
   const repo = await repository(t);
   await using sandbox = await createSandbox({
     repository: repo,
-    provider: local(),
+    sandboxProvider: localSandboxProvider(),
     agent: scripted(`${usage(5)} setTimeout(() => {}, 60_000);`),
   });
   const run = agentTask({

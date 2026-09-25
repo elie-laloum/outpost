@@ -91,12 +91,12 @@ Enregistrez le fichier **example.mts** dans `workflow/`.
 
 ```ts file=example.mts
 import { createSandbox } from "@elie-laloum/outpost";
-import { docker } from "@elie-laloum/outpost/providers/docker";
+import { dockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 import { resolve } from "node:path";
 
 await using sandbox = await createSandbox({
   repository: resolve(import.meta.dirname, "../repository"),
-  provider: docker({ image: "outpost:docs-demo" }),
+  sandboxProvider: dockerSandboxProvider({ image: "outpost:docs-demo" }),
   branch: { mode: "named", name: "workshop/commands" },
 });
 
@@ -112,7 +112,7 @@ node example.mts
 
 ## Comprendre le résultat
 
-Le rapport examine l’environnement actif, dont une sonde de transfert binaire. Il n’authentifie pas un agent et ne prouve pas l’accès au modèle. Le diagnostic possède temporairement le verrou d’opération et nettoie ses sondes, mais votre script garde les ressources. Avant allocation, lancez `npx outpost doctor --provider docker --agent codex --image outpost:docs-demo`.
+Le rapport examine l’environnement actif, dont une sonde de transfert binaire. Il n’authentifie pas un agent et ne prouve pas l’accès au modèle. Le diagnostic possède temporairement le verrou d’opération et nettoie ses sondes, mais votre script garde les ressources. Avant allocation, lancez `npx outpost doctor --sandbox-provider docker --agent codex --image outpost:docs-demo`.
 
 [Contrats, options et cas particuliers](../../behavior/operations/doctor/).
 

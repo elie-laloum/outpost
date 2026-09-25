@@ -1,5 +1,5 @@
 import { posix } from "node:path";
-import type { AgentAdapter } from "../domain/agent.types.ts";
+import type { Agent } from "../domain/agent.types.ts";
 import { invariant } from "../domain/errors.ts";
 import type { SandboxLease } from "../domain/sandbox.types.ts";
 import { quote, requireSuccess } from "../infrastructure/process.ts";
@@ -10,10 +10,11 @@ function isBootstrapAgent(name: string): name is keyof typeof agentPackages {
 }
 
 export async function prepareAdapter(
-  agent: AgentAdapter,
+  agent: Agent,
   runtime: SandboxLease,
   signal: AbortSignal,
-): Promise<AgentAdapter> {
+): Promise<Agent> {
+  if (agent.kind !== "cli") return agent;
   const executable = agent.bootstrap ?? agent.conversations;
   if (!executable) return agent;
   invariant(

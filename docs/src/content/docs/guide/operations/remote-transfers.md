@@ -91,12 +91,12 @@ Save **example.mts** in `workflow/`.
 
 ```ts file=example.mts
 import { createSandbox } from "@elie-laloum/outpost";
-import { docker } from "@elie-laloum/outpost/providers/docker";
+import { dockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 import { resolve } from "node:path";
 
 await using sandbox = await createSandbox({
   repository: resolve(import.meta.dirname, "../repository"),
-  provider: docker({ image: "outpost:docs-demo" }),
+  sandboxProvider: dockerSandboxProvider({ image: "outpost:docs-demo" }),
   branch: { mode: "named", name: "workshop/commands" },
 });
 

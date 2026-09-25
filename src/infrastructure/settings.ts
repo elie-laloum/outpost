@@ -32,11 +32,11 @@ export function parseEnvironment(text: string): Record<string, string> {
 export async function resolveVariables(
   repository: string,
   agent: Variables = {},
-  provider: Variables = {},
+  sandboxProvider: Variables = {},
   environment: NodeJS.ProcessEnv = process.env,
 ): Promise<Variables> {
   const overlap = Object.keys(agent).filter((key) =>
-    Object.hasOwn(provider, key),
+    Object.hasOwn(sandboxProvider, key),
   );
   if (overlap.length)
     throw new OutpostError(
@@ -55,5 +55,5 @@ export async function resolveVariables(
   for (const key of Object.keys(variables))
     if (!variables[key] && environment[key] !== undefined)
       variables[key] = environment[key]!;
-  return Object.freeze({ ...variables, ...provider, ...agent });
+  return Object.freeze({ ...variables, ...sandboxProvider, ...agent });
 }

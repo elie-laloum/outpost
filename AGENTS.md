@@ -10,7 +10,7 @@ Outpost is a TypeScript library and CLI for running coding agents in sandboxes, 
 - Make code understandable through names, small responsibilities and explicit contracts.
 - Use domain-driven design and ports and adapters pragmatically. Introduce abstractions for real responsibilities and variations, not speculative flexibility.
 - Keep agent protocols independent of sandbox backends. Claude Code, Codex and Gemini CLI have adapters; Gemini currently supports fresh sessions without native conversation capture, resume, fork or automatic response repairs. Additional agents belong behind the existing ports.
-- Direct model calls use the experimental `ModelProvider` contract and `openaiCompatible()` in `src/adapters/models/`, independently of sandbox providers and CLI agent adapters. Phase one supports bounded, non-streaming text calls only; the tool harness remains planned.
+- Harness model requests use the experimental `ModelProvider` contract and `openaiModelProvider()` / `anthropicModelProvider()` in `src/adapters/models/`, independently of sandbox providers and CLI agent adapters. Phase one supports bounded, non-streaming text calls only; the tool harness remains planned.
 - Preserve existing features and public contracts during refactoring. Architecture changes must not silently change execution behavior.
 - Prefer explicit ownership, predictable failure modes and recoverable state over hidden automation.
 - Distinguish released behavior, implemented but unreleased additions, and opt-in research prototypes. Keep remaining work and live-validation prerequisites in the roadmap; do not imply publication from a local implementation.
@@ -52,7 +52,7 @@ These are allowed boundaries, not a reason to add unnecessary dependencies. Keep
 
 Apply SRP throughout the codebase: allocation, request building, event decoding, process supervision, transfer, storage and cleanup have different reasons to change. Split them accordingly. Do not centralize Claude and Codex implementations in a provider file. Compatibility facades such as `providers/agents.ts` re-export; internal services import their owning modules directly.
 
-Use `AgentAdapter` for agent behavior, `SandboxProvider`/`SandboxLease` for execution environments and `ConversationStore` for transcript persistence. Prefer composition and injected capabilities to inheritance or branching on provider names throughout the application. Extend the relevant adapter or strategy when introducing a variant.
+Compose agents with `agent({ harness, model })`; `codex.harness()`, `claude.harness()` and `gemini.harness()` are CLI presets. `customHarness({ modelProvider, run })` supplies an application callback, not a built-in tool loop. Model identifiers are strings validated by the executing service. Use `AgentAdapter` only for CLI protocol behavior, `SandboxProvider`/`SandboxLease` and explicit `*SandboxProvider()` factories for execution environments and `ConversationStore` for transcript persistence. Prefer composition and injected capabilities to inheritance or branching on provider names throughout the application. Extend the relevant adapter or strategy when introducing a variant.
 
 ## Workflow projects and repositories
 
@@ -92,7 +92,7 @@ Treat these as review and regression-test obligations when changing the affected
 - Resource activity is an observation, and storage reservations coordinate cooperating writers rather than imposing physical quotas. Transport-backed activity must not infer remote liveness from a PID. Transport checkpoint ownership and abandoned reservations require explicit recovery; conditional mutations must fence stale writers. Opt-in research providers and policies must reject unsupported capabilities explicitly.
 - Protect concurrent host edits during remote synchronization. Validate and back up before applying incoming changes. Preserve recovery artifacts whenever cleanup would discard recoverable work.
 - Keep branch integration explicit and correctly ordered. Never discard dirty or detached worktrees as routine cleanup.
-- Do not silently fall back from an isolated provider to host execution. `local()` is explicitly unisolated; mounted Git metadata is not an adversarial security boundary.
+- Do not silently fall back from an isolated provider to host execution. `localSandboxProvider()` is explicitly unisolated; mounted Git metadata is not an adversarial security boundary.
 
 ## Tests and coverage
 

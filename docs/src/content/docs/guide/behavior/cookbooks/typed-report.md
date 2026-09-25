@@ -8,10 +8,15 @@ sidebar:
 Use this when a dashboard or another task needs structured data. Complete [Claude authentication](../../../agents/connect-claude/) and the [shared setup](../../../cookbook/).
 
 ```ts
-import { dispatch, claude, response } from "@elie-laloum/outpost";
+import {
+  agent as composeAgent,
+  dispatch,
+  claude,
+  response,
+} from "@elie-laloum/outpost";
 
 const result = await dispatch({
-  agent: claude(),
+  agent: composeAgent({ harness: claude.harness({}) }),
   branch: { mode: "named", name: "audit/test-readiness" },
   brief: {
     text: 'Inspect the test setup without editing files. Return <report>{"ready":true,"summary":"explanation"}</report>. Use false if prerequisites are missing.',

@@ -2,13 +2,15 @@ import assert from "node:assert/strict";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { docker } from "../../src/providers/docker.ts";
-import { podman } from "../../src/providers/podman.ts";
+import { dockerSandboxProvider } from "../../src/providers/docker.ts";
+import { podmanSandboxProvider } from "../../src/providers/podman.ts";
 
 assert.ok(process.stdin.isTTY, "Run this fixture inside a pseudo-terminal");
 const root = await mkdtemp(join(tmpdir(), "outpost-terminal-"));
 const factory =
-  process.env.OUTPOST_CONTAINER_ENGINE === "podman" ? podman : docker;
+  process.env.OUTPOST_CONTAINER_ENGINE === "podman"
+    ? podmanSandboxProvider
+    : dockerSandboxProvider;
 const lease = await factory({
   image: process.env.OUTPOST_CONTAINER_IMAGE ?? "outpost-ci:latest",
   networks: "none",

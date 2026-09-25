@@ -8,10 +8,15 @@ sidebar:
 Use `response.text` or `response.json` to turn the agent’s answer into a typed value. The prompt must request the matching XML-style tag.
 
 ```ts
-import { dispatch, codex, response } from "@elie-laloum/outpost";
+import {
+  agent as composeAgent,
+  dispatch,
+  codex,
+  response,
+} from "@elie-laloum/outpost";
 
 const result = await dispatch({
-  agent: codex(),
+  agent: composeAgent({ harness: codex.harness({}) }),
   brief: {
     text: 'Return <report>{"ok": true}</report> after checking the project.',
   },

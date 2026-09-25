@@ -16,7 +16,7 @@ import type { SpeculativeCandidate } from "@elie-laloum/outpost";
 | Name      | Type                                                              | Presence | Meaning                                                                                                           |
 | --------- | ----------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------- |
 | `key`     | `string`                                                          | Required | Unique candidate key used to correlate its branch, validation and final result.                                   |
-| `agent`   | `AgentAdapter`                                                    | Required | Native coding-agent adapter.                                                                                      |
+| `agent`   | `Agent`                                                           | Required | Native coding-agent adapter.                                                                                      |
 | `request` | `Omit<DispatchOptions<T>, "signal" \| "agent" \| "continuation">` | Required | Candidate-specific brief and response settings; the race controls agent, cancellation and fresh-session behavior. |
 
 ## Signature
@@ -24,7 +24,7 @@ import type { SpeculativeCandidate } from "@elie-laloum/outpost";
 ```ts
 export interface SpeculativeCandidate<T = undefined> {
   readonly key: string;
-  readonly agent: AgentAdapter;
+  readonly agent: Agent;
   readonly request: Omit<
     DispatchOptions<T>,
     "agent" | "signal" | "continuation"
@@ -34,5 +34,5 @@ export interface SpeculativeCandidate<T = undefined> {
 
 ## Related contracts
 
-- [AgentAdapter](../agentadapter/)
+- [Agent](../type-agent/)
 - [DispatchOptions](../dispatchoptions/)

@@ -1,4 +1,4 @@
-import type { AgentAdapter } from "../domain/agent.types.ts";
+import type { Agent } from "../domain/agent.types.ts";
 import type { Command } from "../domain/command.types.ts";
 import type { TaskContext } from "../domain/workflow.types.ts";
 import type { DispatchOptions } from "./execution.types.ts";
@@ -21,4 +21,4 @@ export type AgentTaskOptions<T> = {
 };
 
 export type IsolatedTaskRequest<T> = SandboxOptions &
-  DispatchOptions<T> & { readonly agent: AgentAdapter };
+  DispatchOptions<T> & { readonly agent: Agent };

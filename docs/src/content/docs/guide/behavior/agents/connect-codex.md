@@ -11,19 +11,19 @@ Choose ChatGPT account access or an API key. Outpost does not forward your brows
 
 Run `codex login`, complete the browser flow, then run `codex login status`. On a headless device, `codex login --device-auth` is available when your account or administrator permits it. See [OpenAI authentication](https://developers.openai.com/codex/auth).
 
-With `local()`, Codex uses host credentials. Docker/Podman start with a private home: host login alone is insufficient.
+With `localSandboxProvider()`, Codex uses host credentials. Docker/Podman start with a private home: host login alone is insufficient.
 
 ## Generate a workflow using your subscription
 
 Use the account login option when initializing a workflow:
 
 ```sh
-outpost init --agent codex --provider docker --authentication login --repository /path/to/repository
+outpost init --agent codex --sandbox-provider docker --authentication login --repository /path/to/repository
 ```
 
-Sign in on the host with file credential storage as described below. The generated workflow reads `auth.json` from `CODEX_HOME` (or `~/.codex`) and sends a copy through stdin to the private sandbox home with mode `0600`. This works with Docker, Podman, Vercel and Daytona; change `--provider` accordingly. It uses your ChatGPT account access and does not require an OpenAI API key. Cloud allocation credentials are still required for Vercel and Daytona.
+Sign in on the host with file credential storage as described below. The generated workflow reads `auth.json` from `CODEX_HOME` (or `~/.codex`) and sends a copy through stdin to the private sandbox home with mode `0600`. This works with Docker, Podman, Vercel and Daytona; change `--sandbox-provider` accordingly. It uses your ChatGPT account access and does not require an OpenAI API key. Cloud allocation credentials are still required for Vercel and Daytona.
 
-With `--provider local`, the workflow uses the existing host login directly. Account limits and model access still apply. The generated workflow does not export the OS keychain or copy other host Codex settings.
+With `--sandbox-provider local`, the workflow uses the existing host login directly. Account limits and model access still apply. The generated workflow does not export the OS keychain or copy other host Codex settings.
 
 ## Use your ChatGPT account in a container
 
@@ -32,12 +32,16 @@ This recipe requires `~/.codex/auth.json`. If credentials are in the OS keychain
 Mount a read-only credential seed, then copy it into the writable ephemeral home:
 
 ```ts
-import { createSandbox, codex } from "@elie-laloum/outpost";
-import { docker } from "@elie-laloum/outpost/providers/docker";
+import {
+  agent as composeAgent,
+  createSandbox,
+  codex,
+} from "@elie-laloum/outpost";
+import { dockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
 await using sandbox = await createSandbox({
-  agent: codex(),
-  provider: docker({
+  agent: composeAgent({ harness: codex.harness({}) }),
+  sandboxProvider: dockerSandboxProvider({
     volumes: [
       {
         source: "~/.codex/auth.json",
@@ -75,10 +79,14 @@ Refreshes update the sandbox copy, not the host seed. Re-authenticate the seed i
 Declare `OPENAI_API_KEY=` in `.outpost/.env` and provide the value through the parent process or secret manager. Initialize the native CLI through stdin:
 
 ```ts
-import { createSandbox, codex } from "@elie-laloum/outpost";
+import {
+  agent as composeAgent,
+  createSandbox,
+  codex,
+} from "@elie-laloum/outpost";
 
 await using sandbox = await createSandbox({
-  agent: codex(),
+  agent: composeAgent({ harness: codex.harness({}) }),
   hooks: {
     sandboxReady: [
       {
@@ -114,19 +122,21 @@ Continue with [environment precedence](../../../agents/environment/) or [cookboo
 Use a custom provider for a service implementing the OpenAI Responses API, including streamed responses and Codex tool calls. Chat Completions-only endpoints are not supported. Supply the model name explicitly; model names and availability belong to that service.
 
 ```ts
-import { codex, dispatch } from "@elie-laloum/outpost";
-import { docker } from "@elie-laloum/outpost/providers/docker";
+import { agent as composeAgent, codex, dispatch } from "@elie-laloum/outpost";
+import { dockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
 const result = await dispatch({
-  agent: codex({
+  agent: composeAgent({
+    harness: codex.harness({
+      modelProvider: {
+        baseUrl: "https://models.example.com/v1",
+        apiKeyEnvironment: "MODEL_API_KEY",
+      },
+      variables: { MODEL_API_KEY: process.env.MODEL_API_KEY! },
+    }),
     model: "vendor/model",
-    modelProvider: {
-      baseUrl: "https://models.example.com/v1",
-      apiKeyEnvironment: "MODEL_API_KEY",
-    },
-    variables: { MODEL_API_KEY: process.env.MODEL_API_KEY! },
   }),
-  provider: docker(),
+  sandboxProvider: dockerSandboxProvider(),
   brief: {
     text: "Inspect the repository and describe the next useful change.",
   },

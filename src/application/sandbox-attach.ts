@@ -1,3 +1,4 @@
+import { invariant } from "../domain/errors.ts";
 import type { CommandResult } from "../domain/command.types.ts";
 import { git } from "../infrastructure/git/command.ts";
 import { commits } from "../infrastructure/git/history.ts";
@@ -16,7 +17,11 @@ export async function attachInSandbox(
   agents: SandboxAgents,
   settings: AttachOptions,
 ): Promise<AttachResult> {
-  const { options, provider, workspace, sync, stop } = context;
+  const { options, sandboxProvider, workspace, sync, stop } = context;
+  invariant(
+    (settings.agent ?? options.agent)?.kind === "cli",
+    "This harness does not support interactive attachment",
+  );
   const { selectAgent, restore } = agents;
   const signal = settings.signal
     ? AbortSignal.any([settings.signal, stop.signal])
@@ -32,10 +37,14 @@ export async function attachInSandbox(
         brief,
         workspace,
         executionLease,
-        provider.placement === "host",
+        sandboxProvider.placement === "host",
         settings,
       )
     : undefined;
+  invariant(
+    adapter.kind === "cli",
+    "This harness does not support interactive attachment",
+  );
   const command = adapter.request({
     interactive: true,
     ...(text === undefined ? {} : { text }),

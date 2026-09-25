@@ -1,25 +1,6 @@
-import { OutpostError } from "../../domain/errors.ts";
+import { object, tokens, requireResponse } from "./model-response.ts";
 import type { ModelResult } from "../../domain/model.types.ts";
 import type { Usage } from "../../domain/agent.types.ts";
-
-function requireResponse(condition: unknown): asserts condition {
-  if (!condition)
-    throw new OutpostError("response", "Invalid or unsupported model response");
-}
-
-function object(value: unknown): Record<string, unknown> {
-  requireResponse(
-    value !== null && typeof value === "object" && !Array.isArray(value),
-  );
-  return value as Record<string, unknown>;
-}
-
-function tokens(value: unknown): number {
-  requireResponse(
-    typeof value === "number" && Number.isSafeInteger(value) && value >= 0,
-  );
-  return value;
-}
 
 function usage(
   value: unknown,

@@ -3,7 +3,7 @@ import { test } from "node:test";
 import { mkdir, readFile, stat, symlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { Sandbox as VercelSandbox } from "@vercel/sandbox";
-import { vercel } from "../../src/providers/vercel.ts";
+import { vercelSandboxProvider } from "../../src/providers/vercel.ts";
 import { executeProcess } from "../../src/infrastructure/process.ts";
 import { repository } from "../helpers.ts";
 
@@ -36,7 +36,7 @@ test(
         stopped++;
       },
     };
-    const provider = vercel(
+    const sandboxProvider = vercelSandboxProvider(
       { root },
       async () => sandbox as unknown as VercelSandbox,
     );
@@ -47,7 +47,7 @@ test(
       variables: {},
     };
     for (let attempt = 0; attempt < 2; attempt++) {
-      const lease = await provider.acquire(context);
+      const lease = await sandboxProvider.acquire(context);
       try {
         assert.ok((await stat(root)).isDirectory());
         const source = join(directory, "source");
@@ -85,9 +85,12 @@ test("Vercel stops allocation when recursive workspace creation fails", async ()
       stopped++;
     },
   };
-  const provider = vercel({}, async () => sandbox as unknown as VercelSandbox);
+  const sandboxProvider = vercelSandboxProvider(
+    {},
+    async () => sandbox as unknown as VercelSandbox,
+  );
   await assert.rejects(
-    provider.acquire({
+    sandboxProvider.acquire({
       repository: "/unused",
       directory: "/unused",
       gitDirectories: [],

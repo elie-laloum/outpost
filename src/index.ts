@@ -1,3 +1,18 @@
+export { agent, customHarness } from "./domain/agent.ts";
+export type {
+  AgentAuthentication,
+  Agent,
+  AgentOptions,
+  Harness,
+  CliHarness,
+  CustomHarness,
+  CliAgent,
+  CustomAgent,
+  CustomHarnessOptions,
+  HarnessInput,
+  HarnessContext,
+  HarnessRun,
+} from "./domain/agent.types.ts";
 export { TransportConflict } from "./domain/transport.ts";
 export type {
   Transport,
@@ -97,7 +112,10 @@ export type {
   GeminiSettings,
 } from "./providers/agents.ts";
 
-export { mountedProvider, remoteProvider } from "./providers/factories.ts";
+export {
+  mountedSandboxProvider,
+  remoteSandboxProvider,
+} from "./providers/factories.ts";
 
 export { ResponseError, response } from "./domain/response.ts";
 
@@ -303,10 +321,12 @@ export type {
   SpeculativeValidation,
 } from "./application/speculation.types.ts";
 
-export { openaiCompatible } from "./adapters/models/openai-compatible.ts";
-export type { OpenAICompatibleOptions } from "./adapters/models/openai-compatible.types.ts";
+export { openaiModelProvider } from "./adapters/models/openai-model-provider.ts";
+export type { OpenAIModelProviderOptions } from "./adapters/models/openai-model-provider.types.ts";
 export type {
   ModelProvider,
   ModelRequest,
   ModelResult,
 } from "./domain/model.types.ts";
+export { anthropicModelProvider } from "./adapters/models/anthropic-model-provider.ts";
+export type { AnthropicModelProviderOptions } from "./adapters/models/anthropic-model-provider.types.ts";

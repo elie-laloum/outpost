@@ -26,7 +26,7 @@ test("initialization defaults to TypeScript and preserves existing module format
     const result = await initialize({
       directory: path,
       model: 'model"quoted',
-      provider: "docker",
+      sandboxProvider: "docker",
     });
     const extension = type === "commonjs" ? "mts" : "ts";
     assert.equal(result.run, `node run.${extension}`);
@@ -59,7 +59,7 @@ test("initialization supports cloud peers and requested package manager", async 
     {
       directory: root,
       agent: "claude",
-      provider: "vercel",
+      sandboxProvider: "vercel",
       manager: "pnpm",
       install: true,
     },
@@ -77,11 +77,11 @@ test("initialization supports cloud peers and requested package manager", async 
     await readFile(join(root, ".env.example"), "utf8"),
     "ANTHROPIC_API_KEY=\n",
   );
-  for (const provider of ["daytona", "podman", "local"] as const) {
-    const folder = join(root, provider);
+  for (const sandboxProvider of ["daytona", "podman", "local"] as const) {
+    const folder = join(root, sandboxProvider);
     await mkdir(folder);
     await initialize(
-      { directory: folder, provider, install: true, manager: "yarn" },
+      { directory: folder, sandboxProvider, install: true, manager: "yarn" },
       executor,
     );
   }
@@ -125,7 +125,7 @@ test("generated starter uses an external repository, workflow credentials and br
   await initialize({
     directory: folder,
     repository: relative(folder, root),
-    provider: "local",
+    sandboxProvider: "local",
     agent: "codex",
     authentication: "login",
   });
@@ -143,7 +143,7 @@ test("generated starter uses an external repository, workflow credentials and br
   const helper = new URL("../helpers.ts", import.meta.url).href;
   await writeFile(
     bridge,
-    `export { dispatch, OutpostError, reporter } from ${JSON.stringify(source)}; import {scripted} from ${JSON.stringify(helper)}; export const codex = () => scripted(input => { if (!input.text.includes('Ship generated feature')) throw Error('Missing objective'); return ${JSON.stringify("import {writeFileSync} from 'node:fs'; import {execFileSync} from 'node:child_process'; if (process.env.WORKFLOW_VALUE !== 'from-workflow' || process.env.INHERITED_VALUE !== 'from-process') throw Error('Wrong environment'); writeFileSync('generated.txt', 'implemented'); execFileSync('git',['add','generated.txt']); execFileSync('git',['commit','-m','generated feature']);" + emit("<outpost>done</outpost>"))}; });`,
+    `export { agent, dispatch, OutpostError, reporter } from ${JSON.stringify(source)}; import {scripted} from ${JSON.stringify(helper)}; const fixture = () => scripted(input => { if (!input.text.includes('Ship generated feature')) throw Error('Missing objective'); return ${JSON.stringify("import {writeFileSync} from 'node:fs'; import {execFileSync} from 'node:child_process'; if (process.env.WORKFLOW_VALUE !== 'from-workflow' || process.env.INHERITED_VALUE !== 'from-process') throw Error('Wrong environment'); writeFileSync('generated.txt', 'implemented'); execFileSync('git',['add','generated.txt']); execFileSync('git',['commit','-m','generated feature']);" + emit("<outpost>done</outpost>"))}; }); export const codex = { harness: () => ({ kind: "cli", bind: fixture }) };`,
   );
   const runner = join(folder, "run.ts");
   let content = await readFile(runner, "utf8");
@@ -179,7 +179,10 @@ test("initialization creates a standalone package with provider dependencies and
   const folder = join(temporary, "nested", "workflow");
   await mkdir(folder, { recursive: true });
   await writeFile(join(folder, ".gitignore"), "custom/\n.env");
-  const result = await initialize({ directory: folder, provider: "daytona" });
+  const result = await initialize({
+    directory: folder,
+    sandboxProvider: "daytona",
+  });
   assert.deepEqual((await readdir(folder)).sort(), [
     ".env.example",
     ".gitignore",
@@ -210,7 +213,7 @@ test("initialization creates a standalone package with provider dependencies and
   );
   assert.ok(result.files.includes(join(folder, "package.json")));
   const fresh = join(temporary, "new-workflow");
-  await initialize({ directory: fresh, provider: "local" });
+  await initialize({ directory: fresh, sandboxProvider: "local" });
   assert.ok((await readdir(fresh)).includes("run.ts"));
 });
 
@@ -228,18 +231,18 @@ test("initialization checks all collisions before writing or updating files", as
 test("generated container starter uses the image built in the workflow directory", async (t) => {
   const temporary = await mkdtemp(join(tmpdir(), "outpost-image-"));
   t.after(() => rm(temporary, { recursive: true, force: true }));
-  for (const provider of ["docker", "podman"] as const) {
+  for (const sandboxProvider of ["docker", "podman"] as const) {
     for (const image of [undefined, "outpost:custom"]) {
       const folder = join(
         temporary,
-        `${provider}-${image ? "custom" : "default"}`,
+        `${sandboxProvider}-${image ? "custom" : "default"}`,
       );
       const calls: Command[] = [];
       await initialize(
         {
           directory: folder,
           repository: "/external/repository",
-          provider,
+          sandboxProvider,
           build: true,
           ...(image ? { image } : {}),
         },
@@ -254,7 +257,10 @@ test("generated container starter uses the image built in the workflow directory
       assert.ok(source.includes(`image: ${JSON.stringify(tag)}`));
       assert.ok(
         build.arguments!.includes(
-          join(folder, provider === "docker" ? "Dockerfile" : "Containerfile"),
+          join(
+            folder,
+            sandboxProvider === "docker" ? "Dockerfile" : "Containerfile",
+          ),
         ),
       );
       assert.equal(build.directory, folder);

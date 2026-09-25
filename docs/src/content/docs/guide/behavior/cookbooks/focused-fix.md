@@ -8,10 +8,10 @@ sidebar:
 Use this for one well-defined defect. Prerequisites: [shared setup](../../../cookbook/), Claude authentication and an npm project with a lockfile/test script. Adapt the branch name and defect description.
 
 ```ts
-import { dispatch, claude } from "@elie-laloum/outpost";
+import { agent as composeAgent, dispatch, claude } from "@elie-laloum/outpost";
 
 const result = await dispatch({
-  agent: claude(),
+  agent: composeAgent({ harness: claude.harness({}) }),
   branch: { mode: "named", name: "fix/input-validation" },
   hooks: {
     sandboxReady: [

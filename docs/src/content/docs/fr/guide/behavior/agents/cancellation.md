@@ -22,10 +22,10 @@ Utilisez `AbortSignal` pour une annulation pilotée par l’appelant et les dél
 Les limites acceptées doivent être finies et strictement positives ; zéro ne désactive pas la surveillance. Choisissez une valeur suffisamment grande lorsque nécessaire.
 
 ```ts
-import { dispatch, codex } from "@elie-laloum/outpost";
+import { agent as composeAgent, dispatch, codex } from "@elie-laloum/outpost";
 
 await dispatch({
-  agent: codex(),
+  agent: composeAgent({ harness: codex.harness({}) }),
   brief: { text: "Examine le dépôt et résume tes observations." },
   signal: AbortSignal.timeout(120_000),
   deadlineMs: 90_000,

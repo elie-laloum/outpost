@@ -14,7 +14,7 @@ import {
   response,
   workflow,
 } from "../../src/index.ts";
-import { local } from "../../src/providers/local.ts";
+import { localSandboxProvider } from "../../src/providers/local.ts";
 import { emit, repository, scripted } from "../helpers.ts";
 
 function schema(value: unknown): { endpoint: string } {
@@ -38,7 +38,7 @@ test("isolated repositories exchange validated artifacts and resume references i
     key: "backend",
     request: () => ({
       repository: backendRepository,
-      provider: local(),
+      sandboxProvider: localSandboxProvider(),
       agent: scripted(emit('<api>{"endpoint":"/users"}</api>')),
       brief: { text: "Describe API as <api>{...}</api>" },
       response: response.json({ tag: "api", schema }),
@@ -63,7 +63,7 @@ test("isolated repositories exchange validated artifacts and resume references i
       );
       return {
         repository: frontendRepository,
-        provider: local(),
+        sandboxProvider: localSandboxProvider(),
         branch: { mode: "integrate" },
         brief: { text: api.endpoint },
         agent: scripted(

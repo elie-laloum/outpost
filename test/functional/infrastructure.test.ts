@@ -15,7 +15,7 @@ import {
   relocateTranscript,
   restoreConversation,
 } from "../../src/infrastructure/conversations.ts";
-import { local } from "../../src/providers/local.ts";
+import { localSandboxProvider } from "../../src/providers/local.ts";
 import {
   copySelected,
   safeDestination,
@@ -112,7 +112,7 @@ test("native conversation transfer rewrites cwd without changing message text", 
   await writeFile(join(folder, `${id}.jsonl`), native);
   await writeFile(join(folder, id, "subagents", "agent-child.jsonl"), native);
   const found = await locateConversation("claude", id, root, home);
-  const base = await local().acquire({
+  const base = await localSandboxProvider().acquire({
     repository: root,
     directory: remote,
     gitDirectories: [],

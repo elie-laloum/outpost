@@ -12,16 +12,16 @@ export interface DiagnosticCheck {
 }
 export interface DoctorOptions {
   readonly image?: string;
-  readonly provider: DoctorProvider;
+  readonly sandboxProvider: DoctorProvider;
   readonly agent: DoctorAgent;
 }
 export interface DoctorImageOptions {
-  readonly provider: "docker" | "podman";
+  readonly sandboxProvider: "docker" | "podman";
   readonly agent: DoctorAgent;
   readonly image: string;
 }
 export interface DoctorReport {
-  readonly provider: DoctorProvider;
+  readonly sandboxProvider: DoctorProvider;
   readonly agent: DoctorAgent;
   readonly scope: "host" | "host-and-image";
   readonly image?: string;

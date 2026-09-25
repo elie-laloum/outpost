@@ -1,11 +1,14 @@
-import type { AgentAdapter } from "../../domain/agent.types.ts";
+import { invariant } from "../../domain/errors.ts";
+import { authenticationCommand } from "./authentication.ts";
+import type { AgentAdapter, CliHarness } from "../../domain/agent.types.ts";
 import { claudeEvents, claudeTranscriptUsage } from "./claude-events.ts";
 import { claudeRequest } from "./claude-request.ts";
 import type { ClaudeSettings } from "./settings.types.ts";
 
-export function claude(settings: ClaudeSettings = {}): AgentAdapter {
+function bindClaude(settings: ClaudeSettings = {}): AgentAdapter {
   return Object.freeze({
     name: "claude",
+    authenticate: authenticationCommand("claude", settings.authentication),
     conversations: "claude",
     resumable: true,
     capture: settings.saveConversations ?? true,
@@ -15,3 +18,24 @@ export function claude(settings: ClaudeSettings = {}): AgentAdapter {
     transcriptUsage: claudeTranscriptUsage,
   } satisfies AgentAdapter);
 }
+
+export const claude = Object.freeze({
+  harness(settings: Omit<ClaudeSettings, "model"> = {}): CliHarness {
+    invariant(
+      settings && typeof settings === "object" && !("model" in settings),
+      "Set the model on agent(), not on its harness",
+    );
+    const configured = Object.freeze({
+      ...settings,
+      variables: Object.freeze({ ...settings.variables }),
+    });
+    return Object.freeze({
+      kind: "cli",
+      bind: (model?: string) =>
+        bindClaude({
+          ...configured,
+          ...(model === undefined ? {} : { model }),
+        }),
+    });
+  },
+});

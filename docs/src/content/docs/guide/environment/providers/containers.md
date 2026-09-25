@@ -93,16 +93,21 @@ Save **example.mts** in `workflow/`.
 import assert from "node:assert/strict";
 import { resolve } from "node:path";
 import { createSandbox } from "@elie-laloum/outpost";
-import { docker } from "@elie-laloum/outpost/providers/docker";
-import { podman } from "@elie-laloum/outpost/providers/podman";
+import { dockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
+import { podmanSandboxProvider } from "@elie-laloum/outpost/providers/podman";
 
 const engine = process.argv[2] ?? "docker";
 if (engine !== "docker" && engine !== "podman")
   throw new Error("Choose docker or podman");
-const factory = engine === "docker" ? docker : podman;
+const factory =
+  engine === "docker" ? dockerSandboxProvider : podmanSandboxProvider;
 await using sandbox = await createSandbox({
   repository: resolve(import.meta.dirname, "../repository"),
-  provider: factory({ image: "outpost:docs-demo", cpus: 1, memoryMb: 1024 }),
+  sandboxProvider: factory({
+    image: "outpost:docs-demo",
+    cpus: 1,
+    memoryMb: 1024,
+  }),
   branch: { mode: "named", name: "workshop/engine" },
 });
 const result = await sandbox.command({
@@ -120,7 +125,7 @@ node example.mts
 
 ## Understand the result
 
-Docker is the default in this page’s preparation. For Podman, select `--provider podman` during initialization, then run `node example.mts podman`; engine image stores are separate. Outpost does not switch to the host if the engine fails. Bind mounts and writable Git metadata are not a hostile-code security boundary. The sandbox’s private home is ephemeral.
+Docker is the default in this page’s preparation. For Podman, select `--sandbox-provider podman` during initialization, then run `node example.mts podman`; engine image stores are separate. Outpost does not switch to the host if the engine fails. Bind mounts and writable Git metadata are not a hostile-code security boundary. The sandbox’s private home is ephemeral.
 
 [Contracts, options and edge cases](../../../behavior/providers/containers/).
 

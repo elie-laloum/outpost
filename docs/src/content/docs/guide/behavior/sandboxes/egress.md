@@ -19,11 +19,11 @@ Use an existing Git repository and a previously built Outpost image. This exampl
 
 ```ts
 import { createSandbox } from "@elie-laloum/outpost";
-import { docker } from "@elie-laloum/outpost/providers/docker";
+import { dockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
 const box = await createSandbox({
   repository: "/path/to/repository",
-  provider: docker({
+  sandboxProvider: dockerSandboxProvider({
     image: "outpost:my-project",
     egress: { mode: "deny-all" },
   }),
@@ -48,14 +48,14 @@ Configure [Vercel prerequisites](../../../environment/providers/vercel/) before 
 
 ```ts
 import type { EgressPolicy } from "@elie-laloum/outpost";
-import { vercel } from "@elie-laloum/outpost/providers/vercel";
+import { vercelSandboxProvider } from "@elie-laloum/outpost/providers/vercel";
 
 const policy: EgressPolicy = {
   mode: "allowlist",
   domains: ["registry.npmjs.org", "api.example.com", "*.packages.example.com"],
   denyCidrs: ["10.0.0.0/8"],
 };
-const provider = vercel({ egress: policy });
+const sandboxProvider = vercelSandboxProvider({ egress: policy });
 ```
 
 Pass `provider` to `createSandbox` and close the sandbox in `finally`. Adjust destinations for your actual workflow; the example is not a complete agent login or package registry allowlist. Requests to missing destinations fail instead of opening access automatically.

@@ -1,3 +1,4 @@
+import { agent as composeAgent } from "../domain/agent.ts";
 import { codex } from "../adapters/agents/codex-adapter.ts";
 import { invariant } from "../domain/errors.ts";
 import { supportedAgents, supportedProviders } from "./scaffold.constants.ts";
@@ -5,9 +6,12 @@ import type { InitOptions } from "./scaffold.types.ts";
 
 export function validateInitialization(options: InitOptions): void {
   const agent = options.agent ?? "codex",
-    provider = options.provider ?? "docker";
+    sandboxProvider = options.sandboxProvider ?? "docker";
   invariant(supportedAgents.includes(agent), "Choose codex, claude or gemini");
-  invariant(supportedProviders.includes(provider), "Unknown sandbox provider");
+  invariant(
+    supportedProviders.includes(sandboxProvider),
+    "Unknown sandbox provider",
+  );
   invariant(
     !options.apiKeyEnvironment || options.baseUrl,
     "--api-key-env requires --base-url",
@@ -18,14 +22,16 @@ export function validateInitialization(options: InitOptions): void {
         (!options.authentication || options.authentication === "api-key"),
       "Custom Responses providers require Codex and api-key authentication",
     );
-    codex({
+    composeAgent({
+      harness: codex.harness({
+        modelProvider: {
+          baseUrl: options.baseUrl,
+          ...(options.apiKeyEnvironment
+            ? { apiKeyEnvironment: options.apiKeyEnvironment }
+            : {}),
+        },
+      }),
       ...(options.model ? { model: options.model } : {}),
-      modelProvider: {
-        baseUrl: options.baseUrl,
-        ...(options.apiKeyEnvironment
-          ? { apiKeyEnvironment: options.apiKeyEnvironment }
-          : {}),
-      },
     });
   }
   const authentication = options.authentication ?? "api-key";

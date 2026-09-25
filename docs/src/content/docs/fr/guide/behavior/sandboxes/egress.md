@@ -19,11 +19,11 @@ Utilisez un dépôt Git existant et une image Outpost déjà construite. Cet exe
 
 ```ts
 import { createSandbox } from "@elie-laloum/outpost";
-import { docker } from "@elie-laloum/outpost/providers/docker";
+import { dockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
 const box = await createSandbox({
   repository: "/path/to/repository",
-  provider: docker({
+  sandboxProvider: dockerSandboxProvider({
     image: "outpost:my-project",
     egress: { mode: "deny-all" },
   }),
@@ -48,14 +48,14 @@ Configurez les [prérequis Vercel](../../../environment/providers/vercel/) avant
 
 ```ts
 import type { EgressPolicy } from "@elie-laloum/outpost";
-import { vercel } from "@elie-laloum/outpost/providers/vercel";
+import { vercelSandboxProvider } from "@elie-laloum/outpost/providers/vercel";
 
 const policy: EgressPolicy = {
   mode: "allowlist",
   domains: ["registry.npmjs.org", "api.example.com", "*.packages.example.com"],
   denyCidrs: ["10.0.0.0/8"],
 };
-const provider = vercel({ egress: policy });
+const sandboxProvider = vercelSandboxProvider({ egress: policy });
 ```
 
 Passez `provider` à `createSandbox` et fermez la sandbox dans `finally`. Adaptez les destinations au workflow réel ; cet exemple ne constitue pas une liste complète pour l'authentification d'un agent ou un registre de paquets. Une destination manquante provoque un échec sans ouverture automatique du réseau.

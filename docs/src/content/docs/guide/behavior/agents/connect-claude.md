@@ -9,7 +9,7 @@ Outpost runs the native Claude Code CLI and does not create a separate account. 
 
 ## Local login
 
-Run `claude` and follow the login flow; `/login` changes accounts. With `local()`, host credentials are available. Containers do not inherit the host keychain. See [Claude authentication](https://code.claude.com/docs/en/authentication).
+Run `claude` and follow the login flow; `/login` changes accounts. With `localSandboxProvider()`, host credentials are available. Containers do not inherit the host keychain. See [Claude authentication](https://code.claude.com/docs/en/authentication).
 
 ## Subscription token for sandboxes
 
@@ -28,9 +28,15 @@ Declare `ANTHROPIC_API_KEY=` instead and supply that variable. Choose one method
 ## Check and run
 
 ```ts
-import { createSandbox, claude } from "@elie-laloum/outpost";
+import {
+  agent as composeAgent,
+  createSandbox,
+  claude,
+} from "@elie-laloum/outpost";
 
-await using sandbox = await createSandbox({ agent: claude() });
+await using sandbox = await createSandbox({
+  agent: composeAgent({ harness: claude.harness({}) }),
+});
 const check = await sandbox.command({
   executable: "sh",
   arguments: [

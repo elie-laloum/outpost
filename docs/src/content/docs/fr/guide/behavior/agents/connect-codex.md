@@ -11,19 +11,19 @@ Choisissez le compte ChatGPT ou une clé API. Outpost ne transmet ni la session 
 
 Lancez `codex login`, terminez la connexion dans le navigateur, puis lancez `codex login status`. Sans navigateur, `codex login --device-auth` est disponible si le compte ou l'administrateur l'autorise. Voir [l'authentification OpenAI](https://developers.openai.com/codex/auth).
 
-Avec `local()`, Codex utilise les identifiants de l'hôte. Docker/Podman démarrent avec un home privé : la connexion locale ne suffit pas.
+Avec `localSandboxProvider()`, Codex utilise les identifiants de l'hôte. Docker/Podman démarrent avec un home privé : la connexion locale ne suffit pas.
 
 ## Générer un workflow avec son abonnement
 
 Sélectionnez la connexion au compte lors de l’initialisation :
 
 ```sh
-outpost init --agent codex --provider docker --authentication login --repository /path/to/repository
+outpost init --agent codex --sandbox-provider docker --authentication login --repository /path/to/repository
 ```
 
-Connectez-vous sur l’hôte avec le stockage des identifiants dans un fichier, comme indiqué ci-dessous. Le workflow généré lit `auth.json` dans `CODEX_HOME` (ou `~/.codex`) et transmet une copie par stdin dans le home privé de la sandbox avec le mode `0600`. Ce parcours fonctionne avec Docker, Podman, Vercel et Daytona ; adaptez `--provider`. Il utilise votre accès par compte ChatGPT et ne nécessite pas de clé API OpenAI. Les identifiants d’allocation cloud restent nécessaires pour Vercel et Daytona.
+Connectez-vous sur l’hôte avec le stockage des identifiants dans un fichier, comme indiqué ci-dessous. Le workflow généré lit `auth.json` dans `CODEX_HOME` (ou `~/.codex`) et transmet une copie par stdin dans le home privé de la sandbox avec le mode `0600`. Ce parcours fonctionne avec Docker, Podman, Vercel et Daytona ; adaptez `--sandbox-provider`. Il utilise votre accès par compte ChatGPT et ne nécessite pas de clé API OpenAI. Les identifiants d’allocation cloud restent nécessaires pour Vercel et Daytona.
 
-Avec `--provider local`, le workflow utilise directement la connexion existante sur l’hôte. Les limites du compte et l’accès aux modèles restent applicables. Le workflow généré n’exporte ni le trousseau système ni les autres réglages Codex de l’hôte.
+Avec `--sandbox-provider local`, le workflow utilise directement la connexion existante sur l’hôte. Les limites du compte et l’accès aux modèles restent applicables. Le workflow généré n’exporte ni le trousseau système ni les autres réglages Codex de l’hôte.
 
 ## Utiliser son compte ChatGPT dans un conteneur
 
@@ -32,12 +32,16 @@ Cette recette nécessite `~/.codex/auth.json`. Si les identifiants sont dans le 
 Montez une source d'identifiants en lecture seule, puis copiez-la dans le home éphémère inscriptible :
 
 ```ts
-import { createSandbox, codex } from "@elie-laloum/outpost";
-import { docker } from "@elie-laloum/outpost/providers/docker";
+import {
+  agent as composeAgent,
+  createSandbox,
+  codex,
+} from "@elie-laloum/outpost";
+import { dockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
 await using sandbox = await createSandbox({
-  agent: codex(),
-  provider: docker({
+  agent: composeAgent({ harness: codex.harness({}) }),
+  sandboxProvider: dockerSandboxProvider({
     volumes: [
       {
         source: "~/.codex/auth.json",
@@ -75,10 +79,14 @@ Le rafraîchissement modifie la copie dans la sandbox, pas la source locale. Rec
 Déclarez `OPENAI_API_KEY=` dans `.outpost/.env` et fournissez sa valeur par le processus parent ou le gestionnaire de secrets. Initialisez la CLI native par stdin :
 
 ```ts
-import { createSandbox, codex } from "@elie-laloum/outpost";
+import {
+  agent as composeAgent,
+  createSandbox,
+  codex,
+} from "@elie-laloum/outpost";
 
 await using sandbox = await createSandbox({
-  agent: codex(),
+  agent: composeAgent({ harness: codex.harness({}) }),
   hooks: {
     sandboxReady: [
       {
@@ -114,19 +122,21 @@ Suite : [priorité des variables](../../../agents/environment/) ou [cookbooks](.
 Utilisez un fournisseur personnalisé pour un service implémentant l’API OpenAI Responses, avec les réponses en streaming et les appels d’outils Codex. Les endpoints limités à Chat Completions ne sont pas pris en charge. Indiquez explicitement le modèle ; son nom et sa disponibilité dépendent du service.
 
 ```ts
-import { codex, dispatch } from "@elie-laloum/outpost";
-import { docker } from "@elie-laloum/outpost/providers/docker";
+import { agent as composeAgent, codex, dispatch } from "@elie-laloum/outpost";
+import { dockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
 const result = await dispatch({
-  agent: codex({
+  agent: composeAgent({
+    harness: codex.harness({
+      modelProvider: {
+        baseUrl: "https://models.example.com/v1",
+        apiKeyEnvironment: "MODEL_API_KEY",
+      },
+      variables: { MODEL_API_KEY: process.env.MODEL_API_KEY! },
+    }),
     model: "vendor/model",
-    modelProvider: {
-      baseUrl: "https://models.example.com/v1",
-      apiKeyEnvironment: "MODEL_API_KEY",
-    },
-    variables: { MODEL_API_KEY: process.env.MODEL_API_KEY! },
   }),
-  provider: docker(),
+  sandboxProvider: dockerSandboxProvider(),
   brief: {
     text: "Inspect the repository and describe the next useful change.",
   },

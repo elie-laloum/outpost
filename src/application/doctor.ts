@@ -15,10 +15,10 @@ export async function diagnose(
   options: DoctorOptions,
   execute: Executor = executeProcess,
 ): Promise<DoctorReport> {
-  const { provider, agent, image } = options;
+  const { sandboxProvider, agent, image } = options;
   if (image !== undefined) {
     invariant(
-      provider === "docker" || provider === "podman",
+      sandboxProvider === "docker" || sandboxProvider === "podman",
       "--image requires docker or podman.",
     );
     invariant(
@@ -28,7 +28,7 @@ export async function diagnose(
       "Invalid diagnostic image name.",
     );
   }
-  const capabilities = providerDiagnostics[provider];
+  const capabilities = providerDiagnostics[sandboxProvider];
   const checks: DiagnosticCheck[] = [
     {
       id: "host.node",
@@ -57,9 +57,9 @@ export async function diagnose(
     const engine = await diagnosticProbe(
       {
         id: "provider.cli",
-        command: { executable: provider, arguments: ["--version"] },
+        command: { executable: sandboxProvider, arguments: ["--version"] },
         failureStatus: "fail",
-        remedy: `Install ${provider} and make it available on PATH.`,
+        remedy: `Install ${sandboxProvider} and make it available on PATH.`,
         readVersion: true,
       },
       execute,
@@ -71,11 +71,11 @@ export async function diagnose(
           {
             id: "provider.connection",
             command: {
-              executable: provider,
+              executable: sandboxProvider,
               arguments: ["info"],
             },
             failureStatus: "fail",
-            remedy: `Check ${provider} is running and accessible to this user; on macOS, start its virtual machine.`,
+            remedy: `Check ${sandboxProvider} is running and accessible to this user; on macOS, start its virtual machine.`,
           },
           execute,
         ),
@@ -113,13 +113,16 @@ export async function diagnose(
       execute,
     ),
   );
-  if (image !== undefined && (provider === "docker" || provider === "podman")) {
+  if (
+    image !== undefined &&
+    (sandboxProvider === "docker" || sandboxProvider === "podman")
+  ) {
     const connected = checks.some(
       (check) => check.id === "provider.connection" && check.status === "pass",
     );
     if (connected)
       checks.push(
-        ...(await diagnoseImage({ provider, agent, image }, execute)),
+        ...(await diagnoseImage({ sandboxProvider, agent, image }, execute)),
       );
     else
       checks.push({

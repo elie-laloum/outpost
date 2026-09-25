@@ -1,5 +1,5 @@
 import type { ResourceActivity } from "../infrastructure/resource-activity.types.ts";
-import type { AgentAdapter } from "../domain/agent.types.ts";
+import type { Agent } from "../domain/agent.types.ts";
 import type { SandboxLease, SandboxProvider } from "../domain/sandbox.types.ts";
 import type { LifecycleHooks } from "../domain/workspace.types.ts";
 import type { WorkspaceLease } from "../infrastructure/git/workspace.types.ts";
@@ -15,7 +15,7 @@ export interface WorkspaceState {
 
 export interface ProvisionedSandbox {
   readonly options: SandboxOptions;
-  readonly provider: SandboxProvider;
+  readonly sandboxProvider: SandboxProvider;
   readonly workspace: Workspace;
   readonly state: WorkspaceState;
   readonly owned: boolean;
@@ -23,23 +23,23 @@ export interface ProvisionedSandbox {
   readonly runtime: SandboxLease;
   readonly activity: ResourceActivity;
   readonly sync: RemoteSync | undefined;
-  readonly prepared: Map<AgentAdapter, AgentAdapter>;
+  readonly prepared: Map<Agent, Agent>;
   readonly staging: string;
 }
 
 export interface SelectedAgent {
-  readonly selected: AgentAdapter;
-  readonly adapter: AgentAdapter;
+  readonly selected: Agent;
+  readonly adapter: Agent;
   readonly executionLease: SandboxLease;
 }
 
 export interface SandboxAgents {
   selectAgent(
-    agent: AgentAdapter | undefined,
+    agent: Agent | undefined,
     signal: AbortSignal,
   ): Promise<SelectedAgent>;
-  restore(id: string, agent: AgentAdapter): Promise<void>;
-  remember(agent: AgentAdapter, id: string): void;
+  restore(id: string, agent: Agent): Promise<void>;
+  remember(agent: Agent, id: string): void;
 }
 
 export interface OperationGate {

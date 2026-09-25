@@ -128,11 +128,11 @@ export async function diagnoseSandbox(
   return {
     scope: "owned-sandbox",
     ownership: "caller",
-    ...(options.provider
+    ...(options.sandboxProvider
       ? {
-          provider: {
-            name: options.provider.name,
-            placement: options.provider.placement,
+          sandboxProvider: {
+            name: options.sandboxProvider.name,
+            placement: options.sandboxProvider.placement,
           },
         }
       : {}),

@@ -22,7 +22,7 @@ export async function dispatchInSandbox<T>(
   result: Sandbox,
   dispatch: DispatchOptions<T>,
 ): Promise<WarmDispatchResult<T>> {
-  const { options, provider, workspace, runtime, sync, stop, staging } =
+  const { options, sandboxProvider, workspace, runtime, sync, stop, staging } =
     context;
   const { selectAgent, restore } = agents;
   await preflightDispatch(
@@ -61,7 +61,7 @@ export async function dispatchInSandbox<T>(
       staging,
       ...(options.conversationHome ? { home: options.conversationHome } : {}),
       ...(dispatch.warn ? { warn: dispatch.warn } : {}),
-      local: provider.placement === "host",
+      local: sandboxProvider.placement === "host",
     });
     captured.set(id, location);
     transcript = location;
@@ -72,7 +72,7 @@ export async function dispatchInSandbox<T>(
       workspace,
       executionLease,
       adapter,
-      provider.placement === "host",
+      sandboxProvider.placement === "host",
       {
         ...dispatch,
         signal,

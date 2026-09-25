@@ -1,36 +1,46 @@
 ---
-title: Fournisseurs de modèles directs (expérimental)
-description: Appeler des API textuelles compatibles sans Codex ; le harness d’agent est prévu séparément.
+title: Fournisseurs de modèles et harness personnalisés (expérimental)
+description: Composer un transport de requêtes modèle avec un harness fourni par l’appelant.
 sidebar:
   order: 8
 ---
 
-:::caution[Expérimental — première phase]
-`openaiCompatible()` implémente la génération directe de texte sans Codex. Il ne dispose pas de harness d’agent : outils, modifications du dépôt, collecte automatique du contexte et persistance des conversations ne sont pas implémentés. Son API peut évoluer. Disponible depuis Outpost 4.2.0 sous forme d’API expérimentale.
+:::caution[API non publiée]
+Cette API de l’arbre de travail remplace le client direct expérimental de 4.2.0. Utilisez un package construit depuis ce checkout. Elle fournit des requêtes texte bornées et un callback personnalisé, sans boucle d’outils intégrée, streaming ni conversations natives personnalisées.
 :::
 
-Un fournisseur de modèles choisit le service HTTP qui génère le texte. Un [provider de sandbox](../../environment/providers/overview/) choisit où les commandes s’exécutent. Ce client s’exécute dans le processus qui appelle `generate()` et n’alloue aucune sandbox. Il ne peut pas être passé comme `agent` ou `provider` à `dispatch()` ou `createSandbox()`.
+`openaiModelProvider()` configure un service HTTP utilisant Chat Completions ou Responses. `anthropicModelProvider()` utilise Anthropic Messages. Le harness porte le fournisseur ; l’agent sélectionne son modèle avec une chaîne. Un modèle inconnu ou inaccessible échoue lors de l’appel au service, sans catalogue ni substitution.
 
-## Effectuer un appel direct
+Un `sandboxProvider` alloue l’environnement d’exécution. Ses constructeurs sont explicites, comme `dockerSandboxProvider()` et `localSandboxProvider()`. Les fournisseurs de modèles n’allouent pas de sandbox.
+
+## Exécuter un harness personnalisé
 
 <details>
 <summary>Préparation complète et exemple exécutable</summary>
 
-Utilisez Node.js 24+ et npm. Installez Outpost 4.2.0 ou ultérieur dans un nouveau répertoire d’exemple :
+Utilisez Node.js 24+, npm et Git. Construisez ce checkout avec `npm ci` et `npm run build`. Dans un nouveau dossier, installez ce package local :
 
 ```sh
 mkdir model-example
 cd model-example
 npm init -y
-npm install '@elie-laloum/outpost@^4.2.0'
+npm install /absolute/path/to/outpost
+git init
+git -c user.name=Example -c user.email=example@example.test commit --allow-empty -m "Initial"
 ```
 
-Créez un fichier `.env` ignoré déclarant `MODEL_BASE_URL`, `MODEL_NAME` et `MODEL_API_KEY`. Utilisez l’URL de base de l’API du service choisi, avec son préfixe de version, et un identifiant de modèle disponible. L’appel envoie le prompt et la clé à ce service et peut entraîner sa facturation API. Aucune session de compte Codex ou ChatGPT n’intervient. Ne commitez pas la clé.
+Créez un fichier `.env` ignoré contenant `MODEL_BASE_URL`, `MODEL_NAME` et `MODEL_API_KEY`. Le service reçoit le prompt et peut facturer l’usage API ; les credentials d’abonnement CLI ne sont pas utilisés.
 
-Enregistrez ce fichier sous `example.mts` :
+Enregistrez **example.mts** :
 
 ```ts
-import { openaiCompatible } from "@elie-laloum/outpost";
+import {
+  agent,
+  customHarness,
+  dispatch,
+  openaiModelProvider,
+} from "@elie-laloum/outpost";
+import { localSandboxProvider } from "@elie-laloum/outpost/providers/local";
 
 const baseUrl = process.env.MODEL_BASE_URL;
 const model = process.env.MODEL_NAME;
@@ -39,50 +49,47 @@ if (!baseUrl || !model || !apiKey) {
   throw new Error("Set MODEL_BASE_URL, MODEL_NAME and MODEL_API_KEY");
 }
 
-const provider = openaiCompatible({
-  baseUrl,
+const worker = agent({
   model,
-  apiKey,
-  api: "chat-completions",
-  timeoutMs: 60_000,
+  harness: customHarness({
+    modelProvider: openaiModelProvider({ baseUrl, apiKey }),
+    async run(input, context) {
+      return context.modelProvider.request({
+        model: context.model,
+        system: "Answer concisely.",
+        prompt: input.prompt,
+        maxOutputTokens: 512,
+      });
+    },
+  }),
 });
-const result = await provider.generate({
-  system: "Answer concisely.",
-  prompt: "Explain the difference between a model API and a coding agent.",
-  maxOutputTokens: 512,
+
+const result = await dispatch({
+  repository: import.meta.dirname,
+  sandboxProvider: localSandboxProvider(),
+  agent: worker,
+  brief: { text: "Explain the difference between a model and a harness." },
 });
 console.log(result.text);
-console.log(result.usage ?? "Usage was not reported by the service");
+console.log(result.usage);
 ```
 
-Lancez :
-
-```sh
-node --env-file=.env example.mts
-```
-
-Le programme affiche la réponse complète et la consommation en tokens si le service la fournit. Aucun fichier du dépôt n’est inspecté ni modifié. Une requête infructueuse est rejetée et la commande se termine en erreur.
+Lancez `node --env-file=.env example.mts`. La commande affiche la réponse et l’usage cumulé rapporté, puis ferme son sandbox. Ce callback n’exécute aucune commande de dépôt. `localSandboxProvider()` exécute sur l’hôte sans isolation.
 
 </details>
 
-## Protocole et authentification
+## Propriété et limites des requêtes
 
-Choisissez `api: "chat-completions"` (par défaut) pour `POST <baseUrl>/chat/completions`, ou `api: "responses"` pour `POST <baseUrl>/responses`. Le choix est explicite ; le client ne retente jamais avec un autre protocole. Le [guide officiel de migration API](https://developers.openai.com/api/docs/guides/migrate-to-responses) explique les deux formats de messages. Cette implémentation traite uniquement le texte sans streaming et transmet `store: false` ; les règles de conservation du service restent applicables.
+Le callback tourne dans le processus Outpost. Utilisez `context.sandbox` pour les commandes et transferts du dépôt, et attendez toutes les opérations. Le lease est emprunté et ne peut pas être libéré par le harness. Commandes et requêtes héritent de l’annulation de la passe ; le JavaScript arbitraire doit respecter `context.signal`. Outpost attend la fin des opérations suivies avant de terminer la passe.
 
-Passez explicitement la clé bearer dans `apiKey` ; aucune variable d’environnement hôte, aucun trousseau ni login CLI n’est découvert. Utilisez `apiKey: false` uniquement pour un endpoint volontairement sans authentification. Les URL ne peuvent contenir ni identifiants, ni requête, ni fragment, et les redirections sont refusées. `localhost` désigne la machine exécutant cet appel. Aucun nouveau SDK fournisseur n’est requis.
+Les requêtes via `context.modelProvider` utilisent le modèle de l’agent et cumulent une seule fois l’usage rapporté, même si le résultat final répète l’usage du dernier appel. Sans ces rapports, le callback peut renvoyer son propre usage. Les observations ne remplacent pas le résultat comptabilisé et ne créent pas de conversations. Reprise, fork, réparations automatiques et terminal interactif sont absents pour les harness personnalisés.
 
-Le service doit accepter les champs du protocole choisi, notamment `max_completion_tokens` pour Chat Completions ou `max_output_tokens` pour Responses lorsque `maxOutputTokens` est défini. La sortie Responses doit contenir des messages d’assistant terminés. La mention « compatible OpenAI » ne prouve pas que chaque protocole ou modèle accepte ce sous-ensemble. La [configuration de modèle Codex](../../behavior/agents/connect-codex/#fournisseurs-de-modèles-compatibles-openai) existante reste un parcours distinct, limité à Responses et doté du harness Codex.
+Le protocole OpenAI utilise `chat-completions` par défaut ; sélectionnez explicitement `api: "responses"` si nécessaire. Aucun retry automatique, suivi de redirection ni repli de protocole. Les clés sont explicites, les URL ne peuvent pas embarquer de credentials et les erreurs omettent les corps distants. `localhost` désigne le processus Outpost, même lorsque les commandes du dépôt tournent dans un sandbox distant. Une annulation ne prouve pas l’arrêt de la génération ni de la facturation distante.
 
-## Limites, résultats et erreurs
+## Anthropic et cache système
 
-Chaque appel est indépendant. Passez `signal` pour l’annuler ; `timeoutMs` vaut 120 secondes par défaut et couvre le corps complet de la réponse. `maxResponseBytes` vaut 8 Mio par défaut après décompression HTTP. Le client reste réutilisable après annulation ou échec et ne possède aucune sandbox à libérer.
+Configurez `anthropicModelProvider({ apiKey, maxOutputTokens: 512, cacheSystem: true })` comme fournisseur du harness. Chaque requête doit alors fournir des instructions système. Le fournisseur place un point de cache éphémère sur ce texte. Éligibilité et lectures effectives dépendent du service, selon le [contrat de cache Anthropic](https://platform.claude.com/docs/en/build-with-claude/prompt-caching).
 
-Les erreurs HTTP, de transport ou de JSON, les sorties tronquées, les refus et les appels d’outils sont rejetés. Les champs de requête non pris en charge, dont les outils et le streaming, sont également refusés. Les erreurs omettent le corps distant et les identifiants. Aucune répétition automatique ne risque de doubler un appel facturable. La consommation reste absente si le service l’omet ; elle n’est ni une estimation de facturation ni une déclaration automatique aux budgets de workflow. L’annulation HTTP ne prouve pas que le service distant a arrêté la génération ou sa facturation.
+`usage.input` inclut l’entrée non cachée, la création et la lecture de cache ; `cached` et `cacheCreated` en sont des sous-ensembles, pas des totaux supplémentaires. Le fournisseur utilise [Messages](https://platform.claude.com/docs/en/api/messages/create), avec une limite positive de sortie par défaut obligatoire et remplaçable par requête. Les réponses d’outils, refus et sorties incomplètes sont rejetés.
 
-## Deuxième phase : le harness d’agent
-
-Le harness prévu reliera les tours du modèle à des outils contrôlés : lecture et modification de fichiers, commandes via les baux de sandbox, retour des résultats d’outils au modèle, gestion du contexte et des conversations, budgets d’exécution et annulation. L’intégration au dispatch, à la récupération et aux réponses structurées nécessite ses propres contrats et validations. Aucune de ces capacités n’est incluse dans la première phase.
-
-Les tests actuels couvrent des endpoints HTTP locaux simulés. La compatibilité avec des services authentifiés et le harness restent des travaux de validation distincts dans la [feuille de route](../../../project/roadmap/#direct-model-harness).
-
-[Référence des fournisseurs de modèles](../../../reference/overview/model-providers/) · [openaiCompatible](../../../reference/openaicompatible/)
+[Référence des fournisseurs de modèles](../../../reference/overview/model-providers/) · [Moteur d’outils restant](../../../project/roadmap/#direct-model-harness)

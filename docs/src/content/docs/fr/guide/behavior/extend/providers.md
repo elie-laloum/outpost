@@ -17,7 +17,7 @@ Implémentez `SandboxProvider` et retournez un `SandboxLease` depuis `acquire(co
 | `download(source, destination, options?)` | Transférer fichiers/répertoires de l’environnement vers l’hôte.                          |
 | `release()`                               | Nettoyage idempotent, y compris des processus et sessions en cours.                      |
 
-Choisissez le placement : `mounted` partage le worktree, `remote` active la synchronisation Git, `host` exécute directement. `mountedProvider({ name, variables?, acquire })` et `remoteProvider(...)` ajoutent le placement et figent la définition ; ils n’implémentent pas le transport.
+Choisissez le placement : `mounted` partage le worktree, `remote` active la synchronisation Git, `host` exécute directement. `mountedSandboxProvider({ name, variables?, acquire })` et `remoteSandboxProvider(...)` ajoutent le placement et figent la définition ; ils n’implémentent pas le transport.
 
 Les transferts acceptent `signal` et `deadlineMs`. Gérez données binaires et répertoires imbriqués. L’annulation doit arrêter les commandes sans détruire l’environnement réutilisable. Refusez explicitement l’interactivité ou l’élévation non prises en charge.
 

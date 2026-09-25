@@ -8,7 +8,12 @@ sidebar:
 Utilisez cette recette pour des tâches indépendantes des modifications des autres. Chacune reçoit sa branche, son worktree et sa sandbox. Préparez l’[installation commune](../../../cookbook/) ; vérifiez que machine et compte supportent deux agents simultanés.
 
 ```ts
-import { isolatedTask, workflow, claude } from "@elie-laloum/outpost";
+import {
+  agent as composeAgent,
+  isolatedTask,
+  workflow,
+  claude,
+} from "@elie-laloum/outpost";
 
 const run = Date.now().toString(36);
 const topics = ["dependency risks", "missing parser tests"];
@@ -16,7 +21,7 @@ const investigations = topics.map((topic, index) =>
   isolatedTask({
     key: "audit-" + index,
     request: () => ({
-      agent: claude(),
+      agent: composeAgent({ harness: claude.harness({}) }),
       branch: { mode: "named", name: "audit/" + run + "-" + index },
       brief: {
         text:

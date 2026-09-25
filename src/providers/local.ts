@@ -10,7 +10,9 @@ import type {
 import { executeProcess } from "../infrastructure/process.ts";
 import type { LocalOptions } from "./local.types.ts";
 
-export function local(options: LocalOptions = {}): SandboxProvider {
+export function localSandboxProvider(
+  options: LocalOptions = {},
+): SandboxProvider {
   invariant(
     !("egress" in options) || options.egress === undefined,
     "Local execution cannot enforce egress policies",

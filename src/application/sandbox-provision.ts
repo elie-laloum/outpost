@@ -1,6 +1,6 @@
 import { lstat } from "node:fs/promises";
 import { join, posix } from "node:path";
-import type { AgentAdapter } from "../domain/agent.types.ts";
+import type { Agent } from "../domain/agent.types.ts";
 import { invariant } from "../domain/errors.ts";
 import type { SandboxLease } from "../domain/sandbox.types.ts";
 import { git } from "../infrastructure/git/command.ts";
@@ -10,7 +10,7 @@ import { registerResourceActivity } from "../infrastructure/resource-activity.ts
 import type { ResourceActivity } from "../infrastructure/resource-activity.types.ts";
 import { trackedSandboxLease } from "./sandbox-activity.ts";
 import { boundedTransfers } from "../infrastructure/transfer.ts";
-import { docker } from "../providers/docker.ts";
+import { dockerSandboxProvider } from "../providers/docker.ts";
 import { prepareAdapter } from "./agent-bootstrap.ts";
 import { hooks } from "./lifecycle-hooks.ts";
 import type { SandboxOptions } from "./outpost.types.ts";
@@ -25,9 +25,17 @@ import { openWorkspace } from "./workspace.ts";
 export async function provisionSandbox(
   options: SandboxOptions,
 ): Promise<ProvisionedSandbox> {
+  invariant(
+    !("provider" in options),
+    "Use sandboxProvider instead of provider",
+  );
   options.signal?.throwIfAborted();
-  const provider = options.provider ?? docker();
-  if (provider.placement === "remote" && !options.workspace && !options.branch)
+  const sandboxProvider = options.sandboxProvider ?? dockerSandboxProvider();
+  if (
+    sandboxProvider.placement === "remote" &&
+    !options.workspace &&
+    !options.branch
+  )
     options = { ...options, branch: { mode: "integrate" } };
   invariant(
     !options.workspace ||
@@ -39,7 +47,7 @@ export async function provisionSandbox(
   );
   const owned = !options.workspace;
   invariant(
-    provider.placement !== "remote" ||
+    sandboxProvider.placement !== "remote" ||
       ((options.workspace?.policy ?? options.branch)?.mode !== "current" &&
         (options.workspace || options.branch)),
     "Remote providers require a named or integration workspace",
@@ -59,7 +67,7 @@ export async function provisionSandbox(
   let lease: SandboxLease | undefined, sync: RemoteSync | undefined;
   let activity: ResourceActivity | undefined;
   let acquisitionStarted = false;
-  const prepared = new Map<AgentAdapter, AgentAdapter>();
+  const prepared = new Map<Agent, Agent>();
   const staging = join(
     workspace.repository,
     ".outpost",
@@ -73,13 +81,13 @@ export async function provisionSandbox(
         ? { transporter: options.activityTransport }
         : {}),
       workspace: workspace.directory,
-      provider: provider.name,
-      placement: provider.placement,
+      sandboxProvider: sandboxProvider.name,
+      placement: sandboxProvider.placement,
     });
     const configured = await resolveVariables(
       workspace.repository,
       {},
-      provider.variables,
+      sandboxProvider.variables,
     );
     const name = (
       await git(workspace.repository, ["config", "--get", "user.name"]).catch(
@@ -101,7 +109,7 @@ export async function provisionSandbox(
     acquisitionStarted = true;
     lease = boundedTransfers(
       trackedSandboxLease(
-        await provider.acquire({
+        await sandboxProvider.acquire({
           repository: workspace.repository,
           directory: workspace.directory,
           gitDirectories: workspace.gitDirectories,
@@ -116,7 +124,7 @@ export async function provisionSandbox(
           : {}),
       },
     );
-    if (provider.placement === "remote") {
+    if (sandboxProvider.placement === "remote") {
       sync = await seedRemote(workspace, lease, {
         ...(options.recoveryTransport
           ? { recoveryTransport: options.recoveryTransport }
@@ -205,7 +213,7 @@ export async function provisionSandbox(
 
   return {
     options,
-    provider,
+    sandboxProvider,
     workspace,
     state,
     owned,

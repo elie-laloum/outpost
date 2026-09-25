@@ -44,7 +44,7 @@ import { journal } from "../../src/infrastructure/journal.ts";
 import { registerResourceActivity } from "../../src/infrastructure/resource-activity.ts";
 import { reserveTransportStorage } from "../../src/infrastructure/transport-reservations.ts";
 import { captureRecoveryChecksums } from "../../src/application/recovery-checksum-capture.ts";
-import { local } from "../../src/providers/local.ts";
+import { localSandboxProvider } from "../../src/providers/local.ts";
 import { s3Fixture } from "../fixtures/s3-transport-server.ts";
 import { repository, scripted, emit } from "../helpers.ts";
 
@@ -304,7 +304,7 @@ for (const [name, factory] of Object.entries(adapters)) {
       transporter,
       repository: "",
       workspace: "/workspace",
-      provider: "test",
+      sandboxProvider: "test",
       placement: "remote",
     });
     await activity.phase("ready");
@@ -326,7 +326,7 @@ for (const [name, factory] of Object.entries(adapters)) {
       transporter,
       repository: "",
       workspace: "/workspace",
-      provider: "test",
+      sandboxProvider: "test",
       placement: "remote",
     });
     const [entry] = await collect(transporter.list("resources/"));
@@ -424,8 +424,8 @@ for (const [name, factory] of Object.entries(adapters)) {
       transporter,
       namespace: "shared-project",
     });
-    const provider = local();
-    const lease = await provider.acquire({
+    const sandboxProvider = localSandboxProvider();
+    const lease = await sandboxProvider.acquire({
       repository: repo,
       directory: repo,
       gitDirectories: [],
@@ -489,7 +489,7 @@ test("dispatch integrates transport journals, activity and workspace reservation
     });
   const sandbox = await createSandbox({
     repository: root,
-    provider: local(),
+    sandboxProvider: localSandboxProvider(),
     agent: scripted(emit("ok")),
     activityTransport: transporter,
     storageQuota: { transporter, maxBytes: 1_000_000, reserveBytes: 100 },
@@ -527,7 +527,7 @@ test("transport failures preserve host recovery and do not apply incoming change
   t.after(() => workspace.close({ preserve: true }));
   const remote = join(await temporary(t), "remote");
   await mkdir(remote);
-  const lease = await local().acquire({
+  const lease = await localSandboxProvider().acquire({
     repository: remote,
     directory: remote,
     gitDirectories: [],

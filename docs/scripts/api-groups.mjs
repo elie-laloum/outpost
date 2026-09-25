@@ -45,7 +45,7 @@ export const groups = [
     title: ["Agents", "Agents"],
     guide: "guide/agents/adapters",
     names:
-      "claude codex gemini ClaudeSettings CodexSettings CodexModelProvider GeminiSettings agentVersions AgentAdapter AgentInput",
+      "agent customHarness Agent AgentOptions Harness CliHarness CustomHarness CliAgent CustomAgent CustomHarnessOptions HarnessInput HarnessContext HarnessRun AgentAuthentication claude codex gemini ClaudeSettings CodexSettings CodexModelProvider GeminiSettings agentVersions AgentAdapter AgentInput",
   },
   {
     id: "prompts-responses",
@@ -78,24 +78,26 @@ export const groups = [
   {
     id: "providers",
     title: ["Providers", "Providers"],
-    experimental: ["firecracker", "FirecrackerOptions"],
+    experimental: ["firecrackerSandboxProvider", "FirecrackerOptions"],
     guide: "guide/environment/providers/overview",
     names:
-      "docker podman local vercel daytona firecracker FirecrackerOptions ContainerOptions DependencyCache EgressPolicy VercelOptions DaytonaOptions mountedProvider remoteProvider SandboxContext SandboxLease SandboxProvider TransferOptions FileTransfers FileManifestEntry Variables Volume",
+      "dockerSandboxProvider podmanSandboxProvider localSandboxProvider vercelSandboxProvider daytonaSandboxProvider firecrackerSandboxProvider FirecrackerOptions ContainerOptions DependencyCache EgressPolicy VercelOptions DaytonaOptions mountedSandboxProvider remoteSandboxProvider SandboxContext SandboxLease SandboxProvider TransferOptions FileTransfers FileManifestEntry Variables Volume",
   },
   {
     id: "model-providers",
     title: ["Model providers", "Fournisseurs de modèles"],
     experimental: [
-      "openaiCompatible",
-      "OpenAICompatibleOptions",
+      "openaiModelProvider",
+      "anthropicModelProvider",
+      "AnthropicModelProviderOptions",
+      "OpenAIModelProviderOptions",
       "ModelProvider",
       "ModelRequest",
       "ModelResult",
     ],
     guide: "guide/advanced/model-providers",
     names:
-      "openaiCompatible OpenAICompatibleOptions ModelProvider ModelRequest ModelResult",
+      "openaiModelProvider anthropicModelProvider AnthropicModelProviderOptions OpenAIModelProviderOptions ModelProvider ModelRequest ModelResult",
   },
   {
     id: "recovery-retention",

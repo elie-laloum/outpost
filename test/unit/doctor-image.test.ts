@@ -70,10 +70,10 @@ function fixture() {
 }
 
 test("image diagnostics use an isolated temporary workspace, pinned image and cleanup for both engines", async () => {
-  for (const provider of ["docker", "podman"] as const) {
+  for (const sandboxProvider of ["docker", "podman"] as const) {
     const runtime = fixture();
     const report = await diagnose(
-      { provider, agent: "codex", image: "outpost:test" },
+      { sandboxProvider, agent: "codex", image: "outpost:test" },
       runtime.execute,
     );
     assert.equal(report.scope, "host-and-image");
@@ -120,7 +120,7 @@ test("failed, timed-out and unrecognized agent commands still remove the diagnos
   for (const failure of ["exit", "timeout", "version"] as const) {
     const runtime = fixture();
     const checks = await diagnoseImage(
-      { provider: "docker", agent: "claude", image: "outpost:test" },
+      { sandboxProvider: "docker", agent: "claude", image: "outpost:test" },
       async (command) => {
         const args = command.arguments ?? [];
         if (args[args.indexOf("outpost") + 1] === "claude") {
@@ -155,7 +155,7 @@ test("failed, timed-out and unrecognized agent commands still remove the diagnos
 test("image startup errors clean up partial allocation and do not execute probes", async () => {
   const runtime = fixture();
   const checks = await diagnoseImage(
-    { provider: "docker", agent: "codex", image: "outpost:test" },
+    { sandboxProvider: "docker", agent: "codex", image: "outpost:test" },
     async (command) => {
       const result = await runtime.execute(command);
       if (command.arguments?.[0] === "start")
@@ -176,7 +176,7 @@ test("cleanup failures report the owned container and preserve its temporary wor
   for (const failStartup of [false, true]) {
     const runtime = fixture();
     const checks = await diagnoseImage(
-      { provider: "docker", agent: "codex", image: "outpost:test" },
+      { sandboxProvider: "docker", agent: "codex", image: "outpost:test" },
       async (command) => {
         const result = await runtime.execute(command);
         if (
@@ -199,7 +199,7 @@ test("cleanup failures report the owned container and preserve its temporary wor
 test("missing image and disconnected engine do not attempt allocation", async () => {
   const runtime = fixture();
   const checks = await diagnoseImage(
-    { provider: "docker", agent: "codex", image: "missing:image" },
+    { sandboxProvider: "docker", agent: "codex", image: "missing:image" },
     async (command) => {
       const result = await runtime.execute(command);
       return { ...result, status: 1 };
@@ -210,7 +210,7 @@ test("missing image and disconnected engine do not attempt allocation", async ()
     !runtime.calls.some((command) => command.arguments?.[0] === "create"),
   );
   const report = await diagnose(
-    { provider: "docker", agent: "codex", image: "outpost:test" },
+    { sandboxProvider: "docker", agent: "codex", image: "outpost:test" },
     async (command) => {
       if (command.arguments?.[0] === "info")
         return { status: 1, stdout: "", stderr: "" };
@@ -228,7 +228,7 @@ test("missing image and disconnected engine do not attempt allocation", async ()
 
 test("image CLI validates its selection before commands and includes image checks in human output", async () => {
   for (const values of [
-    { provider: "local", image: "outpost:test" },
+    { sandboxProvider: "local", image: "outpost:test" },
     { image: "" },
     { image: "--privileged" },
     { image: "image\ninjected" },

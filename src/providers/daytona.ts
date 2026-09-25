@@ -11,7 +11,7 @@ import type { DaytonaOptions } from "./daytona.types.ts";
 
 export type { DaytonaOptions } from "./daytona.types.ts";
 
-export function daytona(
+export function daytonaSandboxProvider(
   options: DaytonaOptions = {},
   connect: (
     config?: DaytonaConfig,

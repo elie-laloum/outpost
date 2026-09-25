@@ -2,7 +2,7 @@ import { invariant } from "../domain/errors.ts";
 import type { SandboxProvider } from "../domain/sandbox.types.ts";
 import type { ProviderDefinition } from "./factories.types.ts";
 
-function provider(
+function sandboxProvider(
   placement: "mounted" | "remote",
   definition: ProviderDefinition,
 ): SandboxProvider {
@@ -14,10 +14,10 @@ function provider(
   });
 }
 
-export const mountedProvider = (
+export const mountedSandboxProvider = (
   definition: ProviderDefinition,
-): SandboxProvider => provider("mounted", definition);
+): SandboxProvider => sandboxProvider("mounted", definition);
 
-export const remoteProvider = (
+export const remoteSandboxProvider = (
   definition: ProviderDefinition,
-): SandboxProvider => provider("remote", definition);
+): SandboxProvider => sandboxProvider("remote", definition);

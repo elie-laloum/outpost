@@ -8,7 +8,7 @@ import type { AgentProtocolReport } from "./doctor-protocol.types.ts";
 import type { DiagnosticCheck, DoctorAgent } from "./doctor.types.ts";
 
 export function diagnoseAgentProtocol(agent: DoctorAgent): AgentProtocolReport {
-  const adapter = { claude, codex, gemini }[agent]();
+  const adapter = { claude, codex, gemini }[agent].harness().bind();
   const checks: DiagnosticCheck[] = protocolFixtures[agent].map((fixture) => {
     const events = fixture.lines.flatMap((line) => adapter.events(line));
     const passed = isDeepStrictEqual(events, fixture.expected);

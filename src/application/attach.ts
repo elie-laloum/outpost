@@ -16,6 +16,10 @@ export async function attach(
   options: SandboxOptions & AttachOptions & RequiredAgent,
 ): Promise<AttachResult> {
   options.signal?.throwIfAborted();
+  invariant(
+    options.agent.kind === "cli",
+    "This harness does not support interactive attachment",
+  );
   validateBrief(options.brief, true);
   const brief = await completeBrief(options.brief, options.signal, options.ask);
   if (brief) options = { ...options, brief };

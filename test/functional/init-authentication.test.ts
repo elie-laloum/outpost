@@ -14,7 +14,7 @@ import {
   authenticationInstructions,
   authenticationSource,
 } from "../../src/cli/init-authentication.ts";
-import { authenticationRecipes } from "../../src/cli/init-authentication.constants.ts";
+import { authenticationRecipes } from "../../src/adapters/agents/authentication.constants.ts";
 import { initialize } from "../../src/cli/scaffold.ts";
 import { executeProcess } from "../../src/infrastructure/process.ts";
 import { repository } from "../helpers.ts";
@@ -62,12 +62,15 @@ test("authentication choices declare only the selected credential and explain it
   );
   assert.match(authenticationInstructions({}), /billed separately/);
   assert.match(
-    authenticationSource({ authentication: "login", provider: "vercel" }),
+    authenticationSource({
+      authentication: "login",
+      sandboxProvider: "vercel",
+    }),
     /auth.json/,
   );
   assert.equal(
-    authenticationSource({ authentication: "login", provider: "local" }),
-    "const authentication = {};",
+    authenticationSource({ authentication: "login", sandboxProvider: "local" }),
+    'const authentication = { mode: "login" as const };',
   );
   assert.match(
     authenticationSource({ agent: "claude", authentication: "oauth-token" }),
@@ -123,7 +126,7 @@ test("custom Responses starters use the selected key without performing OpenAI l
   await initialize({
     directory,
     agent: "codex",
-    provider: "vercel",
+    sandboxProvider: "vercel",
     baseUrl: "https://models.example/v1",
     model: "vendor/model",
     apiKeyEnvironment: "VENDOR_API_KEY",
@@ -157,7 +160,7 @@ test("generated Vercel starter forwards a declared parent token without a workfl
   await initialize({
     directory,
     agent: "claude",
-    provider: "vercel",
+    sandboxProvider: "vercel",
     authentication: "oauth-token",
   });
   await writeFile(
@@ -165,12 +168,13 @@ test("generated Vercel starter forwards a declared parent token without a workfl
     `import assert from "node:assert/strict";
 export class OutpostError extends Error {}
 export const reporter=()=>()=>{};
-export const claude=()=>({name:"claude"});
-export const vercel=(options)=>options;
+export const claude={harness:()=>({name:"claude"})};
+export const agent=(options)=>options;
+export const vercelSandboxProvider=(options)=>options;
 export async function dispatch(options) {
- assert.equal(options.provider.variables.CLAUDE_CODE_OAUTH_TOKEN,"fixture-subscription-token");
- assert.equal(options.provider.variables.UNDECLARED_SECRET,undefined);
- assert.equal(options.provider.variables.ANTHROPIC_API_KEY,undefined);
+ assert.equal(options.sandboxProvider.variables.CLAUDE_CODE_OAUTH_TOKEN,"fixture-subscription-token");
+ assert.equal(options.sandboxProvider.variables.UNDECLARED_SECRET,undefined);
+ assert.equal(options.sandboxProvider.variables.ANTHROPIC_API_KEY,undefined);
  return {branch:"checked",commits:[]};
 }`,
   );

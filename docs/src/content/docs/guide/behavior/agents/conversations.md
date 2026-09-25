@@ -8,10 +8,10 @@ sidebar:
 Native conversation capture is enabled by default for Claude Code and Codex. [Gemini](../../../agents/gemini/) has no native capture, resume or fork support in Outpost. The transcript is copied to the agent’s host storage and working-directory fields are rewritten so native host resumption targets the right repository.
 
 ```ts
-import { dispatch, codex } from "@elie-laloum/outpost";
+import { agent as composeAgent, dispatch, codex } from "@elie-laloum/outpost";
 
 const first = await dispatch({
-  agent: codex(),
+  agent: composeAgent({ harness: codex.harness({}) }),
   brief: { text: "Inspect the validation code." },
 });
 await first.resume({ brief: { text: "Now add focused tests." } });

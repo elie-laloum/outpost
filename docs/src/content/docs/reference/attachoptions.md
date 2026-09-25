@@ -16,7 +16,7 @@ import type { AttachOptions } from "@elie-laloum/outpost";
 | Name           | Type                                                                                                                                                    | Presence | Meaning                                                                                    |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------ |
 | `ask`          | `VariableQuestion \| undefined`                                                                                                                         | Optional | Callback that supplies missing brief variables during interactive attachment.              |
-| `agent`        | `AgentAdapter \| undefined`                                                                                                                             | Optional | Native coding-agent adapter.                                                               |
+| `agent`        | `Agent \| undefined`                                                                                                                                    | Optional | Native coding-agent adapter.                                                               |
 | `brief`        | `Brief \| undefined`                                                                                                                                    | Optional | Literal text or file-based task input.                                                     |
 | `continuation` | `{ readonly id: string; readonly fork?: boolean; } \| undefined`                                                                                        | Optional | Native conversation ID to continue; fork requests a separate conversation derived from it. |
 | `signal`       | `AbortSignal \| undefined`                                                                                                                              | Optional | Cooperative cancellation for this operation.                                               |
@@ -27,7 +27,7 @@ import type { AttachOptions } from "@elie-laloum/outpost";
 ```ts
 export interface AttachOptions {
   readonly ask?: VariableQuestion;
-  readonly agent?: AgentAdapter;
+  readonly agent?: Agent;
   readonly brief?: Brief;
   readonly continuation?: {
     readonly id: string;
@@ -40,7 +40,7 @@ export interface AttachOptions {
 
 ## Related contracts
 
-- [AgentAdapter](../agentadapter/)
+- [Agent](../type-agent/)
 - [Brief](../brief/)
 - [Command](../command/)
 - [VariableQuestion](../variablequestion/)

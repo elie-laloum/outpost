@@ -8,9 +8,15 @@ sidebar:
 `sandbox.command()` runs an executable and returns its status and captured output. A nonzero status is returned, not thrown as an agent failure.
 
 ```ts
-import { createSandbox, codex } from "@elie-laloum/outpost";
+import {
+  agent as composeAgent,
+  createSandbox,
+  codex,
+} from "@elie-laloum/outpost";
 
-await using sandbox = await createSandbox({ agent: codex() });
+await using sandbox = await createSandbox({
+  agent: composeAgent({ harness: codex.harness({}) }),
+});
 const result = await sandbox.command({
   executable: "npm",
   arguments: ["test"],
@@ -27,10 +33,10 @@ Arguments are passed directly; shell substitutions require an explicit shell suc
 ## Attach an agent
 
 ```ts
-import { attach, claude } from "@elie-laloum/outpost";
+import { agent as composeAgent, attach, claude } from "@elie-laloum/outpost";
 
 const session = await attach({
-  agent: claude(),
+  agent: composeAgent({ harness: claude.harness({}) }),
   branch: { mode: "named", name: "feature/interactive" },
   brief: { text: "Help me review this branch." },
 });

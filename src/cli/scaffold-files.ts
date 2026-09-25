@@ -9,7 +9,7 @@ export async function scaffoldFiles(
   hasPackage: boolean,
   extension: "ts" | "mts",
 ): Promise<Record<string, string>> {
-  const provider = options.provider ?? "docker";
+  const sandboxProvider = options.sandboxProvider ?? "docker";
   const files: Record<string, string> = {
     [`run.${extension}`]: starter(options),
     "brief.md":
@@ -18,8 +18,9 @@ export async function scaffoldFiles(
     ".gitignore":
       "node_modules/\n.env\n.outpost/workspaces/\n.outpost/locks/\n.outpost/recovery/\n.outpost/logs/\n",
   };
-  if (provider === "docker" || provider === "podman")
-    files[provider === "docker" ? "Dockerfile" : "Containerfile"] = imageRecipe;
+  if (sandboxProvider === "docker" || sandboxProvider === "podman")
+    files[sandboxProvider === "docker" ? "Dockerfile" : "Containerfile"] =
+      imageRecipe;
 
   if (!hasPackage) {
     const manifest = JSON.parse(
@@ -35,7 +36,7 @@ export async function scaffoldFiles(
           devDependencies: {
             "@elie-laloum/outpost": `^${manifest.version}`,
             ...Object.fromEntries(
-              providerPackages[provider].map((name) => [
+              providerPackages[sandboxProvider].map((name) => [
                 name,
                 manifest.peerDependencies[name],
               ]),

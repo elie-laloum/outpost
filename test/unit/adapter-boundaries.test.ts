@@ -1,3 +1,4 @@
+import { agent as composeAgent } from "../../src/domain/agent.ts";
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { claude, codex, gemini } from "../../src/providers/agents.ts";
@@ -5,7 +6,11 @@ import { agentOutput } from "../../src/application/agent-output.ts";
 import { operationGate } from "../../src/application/operation-gate.ts";
 import { addUsage } from "../../src/domain/usage.ts";
 
-for (const adapter of [claude(), codex(), gemini()]) {
+for (const adapter of [
+  composeAgent({ harness: claude.harness({}) }),
+  composeAgent({ harness: codex.harness({}) }),
+  composeAgent({ harness: gemini.harness({}) }),
+]) {
   test(`${adapter.name} preserves unknown protocol events without invoking inherited handlers`, () => {
     for (const type of [
       "future.event",
@@ -26,7 +31,7 @@ for (const adapter of [claude(), codex(), gemini()]) {
 test("agent output handles split lines and an authoritative final result", () => {
   const observed: string[] = [];
   const output = agentOutput(
-    claude(),
+    composeAgent({ harness: claude.harness({}) }),
     { brief: { text: "go" }, observe: (event) => observed.push(event.kind) },
     ["done"],
     1,

@@ -40,13 +40,13 @@ Ces orientations s’appuient sur les [workflows durables](../../guide/advanced/
 
 <a id="direct-model-harness"></a>
 
-## Fournisseur direct expérimental : le harness en deuxième phase
+## Composition de harness non publiée et moteur d’outils restant
 
-La première phase est disponible sous forme d’API expérimentale depuis la version 4.2.0 : [openaiCompatible](../../reference/openaicompatible/) effectue des appels textuels indépendants via Chat Completions ou Responses, sans Codex. Elle inclut l’authentification explicite, l’annulation, des délais et des tailles de réponse bornés, et la consommation déclarée lorsqu’elle est présente. Les tests utilisent des endpoints HTTP locaux simulés ; la compatibilité avec des services authentifiés reste à valider.
+L’arbre de travail implémente `agent({ harness, model })`, les presets CLI, les callbacks `customHarness({ modelProvider, run })`, `openaiModelProvider` et `anthropicModelProvider`. Ces ruptures ne sont pas publiées ; l’API publiée en 4.2.0 reste inchangée. Les identifiants de modèle sont des chaînes, sans catalogue local de disponibilité.
 
-La deuxième phase construira le harness d’agent : boucle modèle/outils, lecture et modification du dépôt, commandes via les baux de sandbox, gestion du contexte, persistance/reprise des conversations et intégration au dispatch. Elle devra préserver les contrats d’annulation, de budgets, de récupération et de réponses structurées. Le fournisseur direct actuel n’exécute aucun outil et ne remplace pas un adapter d’agent.
+Le callback personnalisé tourne dans le processus Outpost et emprunte les opérations du sandbox. Les requêtes propagent l’annulation et cumulent l’usage rapporté. Anthropic propose un cache explicite du préfixe système ; les tests utilisent des services HTTP locaux simulés. Les conversations natives personnalisées, le terminal interactif et le streaming sont absents.
 
-Avant promotion : campagnes authentifiées par service et protocole, tests de pannes et de limites, contrôle des frontières d’exécution des outils et scénarios complets de modification du dépôt avec récupération. Aucun calendrier de livraison ni compatibilité universelle n’est promis. Le [guide expérimental](../../guide/advanced/model-providers/) décrit le périmètre actuel.
+Restent prévus : la boucle modèle/outils intégrée, les outils de dépôt, la gestion automatique du contexte et les conversations personnalisées durables avec reprise/fork. Des campagnes authentifiées et des scénarios complets d’édition de dépôt restent nécessaires pour élargir les garanties de compatibilité. Aucune date de publication n’est promise.
 
 ## Évolution des priorités
 

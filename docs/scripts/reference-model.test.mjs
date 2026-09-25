@@ -254,7 +254,7 @@ test("Firecracker is classified only under Providers and marked experimental", (
   assert.ok(providers);
   assert.ok(!navigation.some((group) => /Firecracker/.test(group.title[0])));
   const all = navigation.flatMap((group) => group.items);
-  for (const name of ["firecracker", "firecrackeroptions"]) {
+  for (const name of ["firecrackersandboxprovider", "firecrackeroptions"]) {
     const route = `reference/${name}`;
     const entries = all.filter((item) => item.slug === route);
     assert.equal(entries.length, 1);
@@ -283,6 +283,21 @@ test("experimental references explain their status before the API content in bot
   }
   const stable = await page("reference/codex.md");
   assert.ok(!stable.includes(":::caution[Experimental]"));
+});
+
+test("CLI namespaces expose nested harness settings and method signatures", () => {
+  const get = model(`
+    interface Settings { reasoning?: "high"; }
+    declare const codex: { harness(settings?: Settings): string };
+  `);
+  const entry = get("codex");
+  assert.deepEqual(
+    entry.entries.map((item) => item.name),
+    ["harness", "harness.settings", "harness.settings.reasoning"],
+  );
+  assert.equal(entry.methods[0].name, "harness");
+  assert.equal(entry.methods[0].signatures.length, 1);
+  assert.equal(entry.entries[2].owner, "Settings.reasoning");
 });
 
 test("callable contracts document their properties alongside their arguments", () => {

@@ -19,10 +19,10 @@ const available = async (command: Command) => ({
 });
 
 test("host diagnostics inspect only the selected container engine and bound every command", async () => {
-  for (const provider of ["docker", "podman"] as const) {
+  for (const sandboxProvider of ["docker", "podman"] as const) {
     const calls: Command[] = [];
     const report = await diagnose(
-      { provider, agent: "codex" },
+      { sandboxProvider, agent: "codex" },
       async (command) => {
         calls.push(command);
         return available(command);
@@ -35,8 +35,8 @@ test("host diagnostics inspect only the selected container engine and bound ever
       calls.map(({ executable, arguments: args }) => [executable, args]),
       [
         ["git", ["--version"]],
-        [provider, ["--version"]],
-        [provider, ["info"]],
+        [sandboxProvider, ["--version"]],
+        [sandboxProvider, ["info"]],
         ["tar", ["--version"]],
         ["codex", ["--version"]],
       ],
@@ -62,7 +62,7 @@ test("host diagnostics inspect only the selected container engine and bound ever
 test("missing engines skip connection attempts while all other diagnostics continue", async () => {
   const calls: string[] = [];
   const report = await diagnose(
-    { provider: "docker", agent: "claude" },
+    { sandboxProvider: "docker", agent: "claude" },
     async (command) => {
       calls.push(command.executable);
       if (command.executable === "docker" || command.executable === "claude")
@@ -81,7 +81,7 @@ test("missing engines skip connection attempts while all other diagnostics conti
 
 test("unreachable engine is a failure even when its CLI works", async () => {
   const report = await diagnose(
-    { provider: "podman", agent: "codex" },
+    { sandboxProvider: "podman", agent: "codex" },
     async (command) => {
       if (command.arguments?.[0] === "info")
         return { status: 125, stdout: "", stderr: "private engine config" };
@@ -97,10 +97,10 @@ test("unreachable engine is a failure even when its CLI works", async () => {
 });
 
 test("local and cloud diagnostics never allocate a sandbox or require unrelated tools", async () => {
-  for (const provider of ["local", "vercel", "daytona"] as const) {
+  for (const sandboxProvider of ["local", "vercel", "daytona"] as const) {
     const calls: string[] = [];
     const report = await diagnose(
-      { provider, agent: "claude" },
+      { sandboxProvider, agent: "claude" },
       async (command) => {
         calls.push(command.executable);
         return available(command);
@@ -108,12 +108,12 @@ test("local and cloud diagnostics never allocate a sandbox or require unrelated 
     );
     assert.deepEqual(calls, ["git", "claude"]);
     assert.equal(report.hasFailures, false);
-    assert.equal(report.interactiveTerminal, provider !== "vercel");
+    assert.equal(report.interactiveTerminal, sandboxProvider !== "vercel");
     assert.equal(
       report.checks.some(
         (check) => check.id === "provider.cloud" && check.status === "skipped",
       ),
-      provider !== "local",
+      sandboxProvider !== "local",
     );
     assert.equal(
       report.checks.find((check) => check.id === "agent.host")?.status,
@@ -191,7 +191,7 @@ test("doctor formats human and JSON reports and reserves failure exit status for
   await doctorCommand(
     {
       positionals: ["doctor"],
-      values: { provider: "vercel", agent: "claude" },
+      values: { sandboxProvider: "vercel", agent: "claude" },
     },
     available,
     write,
@@ -199,7 +199,10 @@ test("doctor formats human and JSON reports and reserves failure exit status for
   assert.match(output, /interactive terminal: unsupported/);
   output = "";
   await doctorCommand(
-    { positionals: ["doctor"], values: { provider: "local", json: true } },
+    {
+      positionals: ["doctor"],
+      values: { sandboxProvider: "local", json: true },
+    },
     available,
     write,
   );
@@ -224,7 +227,7 @@ test("doctor formats human and JSON reports and reserves failure exit status for
 
 test("doctor rejects invalid selections and unrelated options before probing", async () => {
   for (const values of [
-    { provider: "constructor" },
+    { sandboxProvider: "constructor" },
     { agent: "constructor" },
     { directory: "directory" },
   ]) {

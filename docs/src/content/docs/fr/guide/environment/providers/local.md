@@ -41,7 +41,7 @@ import { mkdtemp, writeFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createSandbox } from "@elie-laloum/outpost";
-import { local } from "@elie-laloum/outpost/providers/local";
+import { localSandboxProvider } from "@elie-laloum/outpost/providers/local";
 
 const repository = await mkdtemp(join(tmpdir(), "outpost-local-"));
 try {
@@ -62,7 +62,7 @@ try {
   {
     await using sandbox = await createSandbox({
       repository,
-      provider: local(),
+      sandboxProvider: localSandboxProvider(),
     });
     const result = await sandbox.command({
       executable: process.execPath,

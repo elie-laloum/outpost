@@ -2,7 +2,7 @@
 title: "codex"
 description: "codex — Outpost API"
 sidebar:
-  order: 0
+  order: 10
 ---
 
 ## Import
@@ -13,33 +13,38 @@ import { codex } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Build the Codex CLI adapter with event decoding, native conversation capture and continuation support. modelProvider selects an explicit Responses-compatible endpoint. Creating the adapter only configures execution; credentials must be available inside the selected environment.
+Namespace exposing harness() to configure the Codex CLI. Compose the returned harness with agent({ harness, model }) to select a model independently. The CLI owns its internal model/tool loop.
 
 [Complete example and detailed rules](../../guide/agents/adapters/).
 
 ## Parameters and properties
 
-| Name                         | Type                                                  | Presence | Meaning                                                                                        |
-| ---------------------------- | ----------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------- |
-| `settings`                   | `CodexSettings \| undefined`                          | Optional | Codex model, Responses provider, reasoning, approval reviewer and transcript-capture settings. |
-| `settings.modelProvider`     | `CodexModelProvider \| undefined`                     | Optional | Custom Codex model endpoint configuration; requires Responses API compatibility.               |
-| `settings.reasoning`         | `"low" \| "medium" \| "high" \| "xhigh" \| undefined` | Optional | Reasoning effort passed to the selected agent CLI.                                             |
-| `settings.approvalReviewer`  | `"user" \| "auto_review" \| undefined`                | Optional | Codex approval reviewer: the user or automatic approval review.                                |
-| `settings.model`             | `string \| undefined`                                 | Optional | Native CLI model identifier; availability depends on the account.                              |
-| `settings.variables`         | `Readonly<Record<string, string>> \| undefined`       | Optional | Explicit environment declarations; values are strings.                                         |
-| `settings.saveConversations` | `boolean \| undefined`                                | Optional | Enable native transcript capture when the adapter supports it.                                 |
+| Name                                 | Type                                                      | Presence | Meaning                                                                                                                                      |
+| ------------------------------------ | --------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `harness`                            | `(settings?: Omit<CodexSettings, "model">) => CliHarness` | Required | Create a Codex harness from CLI execution, authentication and conversation settings, without starting the CLI.                               |
+| `harness.settings`                   | `Omit<CodexSettings, "model"> \| undefined`               | Optional | Configuration for the Codex harness; pass the selected model to agent() instead.                                                             |
+| `harness.settings.reasoning`         | `"low" \| "medium" \| "high" \| "xhigh" \| undefined`     | Optional | Reasoning effort passed to the selected agent CLI.                                                                                           |
+| `harness.settings.authentication`    | `AgentAuthentication \| undefined`                        | Optional | Explicit authentication preparation for this CLI harness. Omission preserves already-configured access without discovering host credentials. |
+| `harness.settings.variables`         | `Readonly<Record<string, string>> \| undefined`           | Optional | Explicit environment declarations; values are strings.                                                                                       |
+| `harness.settings.saveConversations` | `boolean \| undefined`                                    | Optional | Enable native transcript capture when the adapter supports it.                                                                               |
+| `harness.settings.modelProvider`     | `CodexModelProvider \| undefined`                         | Optional | Custom Codex model endpoint configuration; requires Responses API compatibility.                                                             |
+| `harness.settings.approvalReviewer`  | `"user" \| "auto_review" \| undefined`                    | Optional | Codex approval reviewer: the user or automatic approval review.                                                                              |
 
-## Returns
+### harness()
 
-`AgentAdapter`
+```ts
+harness(settings?: Omit<CodexSettings, "model">): CliHarness
+```
 
 ## Signature
 
 ```ts
-export declare function codex(settings?: CodexSettings): AgentAdapter;
+export declare const codex: Readonly<{
+  harness(settings?: Omit<CodexSettings, "model">): CliHarness;
+}>;
 ```
 
 ## Related contracts
 
-- [AgentAdapter](../agentadapter/)
+- [CliHarness](../cliharness/)
 - [CodexSettings](../codexsettings/)

@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { test } from "node:test";
 import { speculate } from "../../src/index.ts";
 import { git } from "../../src/infrastructure/git.ts";
-import { local } from "../../src/providers/local.ts";
+import { localSandboxProvider } from "../../src/providers/local.ts";
 import { emit, repository, scripted } from "../helpers.ts";
 
 const usage = `console.log(JSON.stringify({ kind: "usage", tokens: { input: 3, cached: 0, output: 1 } }));`;
@@ -21,13 +21,13 @@ test("speculation selects a validated candidate, cancels dirty loser and awaits 
     markReady = resolve;
   });
   const released: string[] = [];
-  const provider = local();
+  const sandboxProvider = localSandboxProvider();
   const result = await speculate({
     repository: repo,
-    provider: {
-      ...provider,
+    sandboxProvider: {
+      ...sandboxProvider,
       async acquire(context) {
-        const lease = await provider.acquire(context);
+        const lease = await sandboxProvider.acquire(context);
         return {
           ...lease,
           async release() {
@@ -105,7 +105,7 @@ test("sequential candidates keep the initial commit despite concurrent host edit
   const baselines: string[] = [];
   const result = await speculate({
     repository: repo,
-    provider: local(),
+    sandboxProvider: localSandboxProvider(),
     concurrency: 1,
     candidates: [candidate("first"), candidate("second")],
     budget: {},
@@ -137,7 +137,7 @@ test("validation rejection, exceptions and agent failures produce no winner with
   const repo = await repository(t);
   const result = await speculate({
     repository: repo,
-    provider: local(),
+    sandboxProvider: localSandboxProvider(),
     concurrency: 1,
     candidates: [
       candidate("rejected"),
@@ -165,7 +165,7 @@ test("streaming usage cancels admitted work and counts failed attempts", async (
   const repo = await repository(t);
   const result = await speculate({
     repository: repo,
-    provider: local(),
+    sandboxProvider: localSandboxProvider(),
     concurrency: 1,
     candidates: [
       candidate("expensive", `${usage} setInterval(() => {}, 1000);`),
@@ -184,7 +184,7 @@ test("attempt caps stop admission without cancelling an admitted candidate", asy
   const repo = await repository(t);
   const result = await speculate({
     repository: repo,
-    provider: local(),
+    sandboxProvider: localSandboxProvider(),
     candidates: [candidate("first"), candidate("second")],
     budget: { attempts: 1 },
     validate: () => true,
@@ -194,7 +194,7 @@ test("attempt caps stop admission without cancelling an admitted candidate", asy
   assert.equal(result.candidates[1]?.status, "skipped");
   const empty = await speculate({
     repository: repo,
-    provider: local(),
+    sandboxProvider: localSandboxProvider(),
     candidates: [candidate("blocked")],
     budget: { attempts: 0 },
     validate: () => true,
@@ -208,7 +208,7 @@ test("external abort returns owned recovery after cancelling a running command",
   const controller = new AbortController();
   const result = await speculate({
     repository: repo,
-    provider: local(),
+    sandboxProvider: localSandboxProvider(),
     signal: controller.signal,
     candidates: [
       {
@@ -231,13 +231,13 @@ test("external abort returns owned recovery after cancelling a running command",
 
 test("cleanup failure prevents selection and preserves output and workspace", async (t) => {
   const repo = await repository(t);
-  const provider = local();
+  const sandboxProvider = localSandboxProvider();
   const result = await speculate({
     repository: repo,
-    provider: {
-      ...provider,
+    sandboxProvider: {
+      ...sandboxProvider,
       async acquire(context) {
-        const lease = await provider.acquire(context);
+        const lease = await sandboxProvider.acquire(context);
         return {
           ...lease,
           async release() {
@@ -262,7 +262,7 @@ test("speculation validates bounded candidate definitions before allocation", as
   const repo = await repository(t);
   const options = {
     repository: repo,
-    provider: local(),
+    sandboxProvider: localSandboxProvider(),
     candidates: [candidate("first")],
     budget: {},
     validate: () => true,
@@ -292,7 +292,7 @@ test("validation rejection preserves its dirty test output", async (t) => {
   const repo = await repository(t);
   const result = await speculate({
     repository: repo,
-    provider: local(),
+    sandboxProvider: localSandboxProvider(),
     candidates: [candidate("rejected")],
     budget: {},
     async validate({ sandbox }) {
@@ -319,13 +319,13 @@ test("loser cleanup failures stay visible after another candidate wins", async (
   const ready = new Promise<void>((resolve) => {
     markReady = resolve;
   });
-  const provider = local();
+  const sandboxProvider = localSandboxProvider();
   const result = await speculate({
     repository: repo,
-    provider: {
-      ...provider,
+    sandboxProvider: {
+      ...sandboxProvider,
       async acquire(context) {
-        const lease = await provider.acquire(context);
+        const lease = await sandboxProvider.acquire(context);
         const branch = (
           await git(context.directory, ["branch", "--show-current"])
         ).trim();

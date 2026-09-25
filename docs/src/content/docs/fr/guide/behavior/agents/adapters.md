@@ -8,16 +8,22 @@ sidebar:
 Un adapter configure le CLI natif de l’agent. Il est indépendant du provider de sandbox et réutilisable entre les appels.
 
 ```ts
-import { claude, codex, agentVersions } from "@elie-laloum/outpost";
+import {
+  agent as composeAgent,
+  claude,
+  codex,
+  agentVersions,
+} from "@elie-laloum/outpost";
 
-const reviewer = claude({
+const reviewer = composeAgent({
+  harness: claude.harness({ reasoning: "high", permissions: "acceptEdits" }),
   model: "sonnet",
-  reasoning: "high",
-  permissions: "acceptEdits",
 });
-const implementer = codex({
-  reasoning: "high",
-  approvalReviewer: "auto_review",
+const implementer = composeAgent({
+  harness: codex.harness({
+    reasoning: "high",
+    approvalReviewer: "auto_review",
+  }),
 });
 console.log(reviewer.name, implementer.name, agentVersions);
 ```

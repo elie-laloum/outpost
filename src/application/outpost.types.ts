@@ -2,7 +2,7 @@ import type {
   Transport,
   TransportReference,
 } from "../domain/transport.types.ts";
-import type { AgentAdapter } from "../domain/agent.types.ts";
+import type { Agent } from "../domain/agent.types.ts";
 import type { Command, CommandResult } from "../domain/command.types.ts";
 import type { Brief } from "../domain/prompts.types.ts";
 import type { SandboxProvider } from "../domain/sandbox.types.ts";
@@ -40,7 +40,7 @@ export interface Workspace extends WorkspaceRecord {
       SandboxOptions,
       Exclude<keyof WorkspaceOptions, "hooks" | "label"> | "workspace"
     > &
-      DispatchOptions<T> & { readonly agent: AgentAdapter },
+      DispatchOptions<T> & { readonly agent: Agent },
   ): Promise<DispatchResult<T>>;
   sandbox(
     options?: Omit<
@@ -53,7 +53,7 @@ export interface Workspace extends WorkspaceRecord {
       SandboxOptions,
       Exclude<keyof WorkspaceOptions, "hooks" | "label"> | "workspace"
     > &
-      AttachOptions & { readonly agent: AgentAdapter },
+      AttachOptions & { readonly agent: Agent },
   ): Promise<AttachResult>;
   close(options?: { readonly preserve?: boolean }): Promise<Disposal>;
   integrate(): Promise<void>;
@@ -62,8 +62,8 @@ export interface Workspace extends WorkspaceRecord {
 
 export interface SandboxOptions extends WorkspaceOptions {
   readonly includeUncommitted?: boolean;
-  readonly agent?: AgentAdapter;
-  readonly provider?: SandboxProvider;
+  readonly agent?: Agent;
+  readonly sandboxProvider?: SandboxProvider;
   readonly workspace?: Workspace;
   readonly hooks?: LifecycleHooks;
   readonly signal?: AbortSignal;
@@ -76,7 +76,7 @@ export interface SandboxOptions extends WorkspaceOptions {
 
 export interface AttachOptions {
   readonly ask?: VariableQuestion;
-  readonly agent?: AgentAdapter;
+  readonly agent?: Agent;
   readonly brief?: Brief;
   readonly continuation?: { readonly id: string; readonly fork?: boolean };
   readonly signal?: AbortSignal;

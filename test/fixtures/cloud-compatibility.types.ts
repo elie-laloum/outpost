@@ -11,7 +11,7 @@ export interface CompatibilityCheck {
   readonly version?: string;
 }
 export interface CompatibilityReport {
-  readonly provider: CloudName;
+  readonly sandboxProvider: CloudName;
   readonly status: "pass" | "fail" | "skipped";
   readonly checks: readonly CompatibilityCheck[];
 }

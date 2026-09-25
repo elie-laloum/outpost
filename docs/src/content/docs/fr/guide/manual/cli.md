@@ -8,22 +8,22 @@ sidebar:
 `outpost init` crée un projet de workflow dans le dossier courant ou celui indiqué par `--directory`. Ce dossier peut être indépendant des dépôts Git ciblés. Le mode interactif demande les choix ; en automatisation, passez `--yes` ou tous les choix requis.
 
 ```sh
-npx @elie-laloum/outpost init --yes --agent claude --provider podman --repository /path1/repository --install
+npx @elie-laloum/outpost init --yes --agent claude --sandbox-provider podman --repository /path1/repository --install
 ```
 
-| Option         | Valeurs / comportement                                                            |
-| -------------- | --------------------------------------------------------------------------------- |
-| `--yes`, `-y`  | Accepter les défauts sans question.                                               |
-| `--agent`      | `codex` (défaut), `claude` ou `gemini`.                                           |
-| `--provider`   | `docker` (défaut), `podman`, `local`, `vercel`, `daytona`.                        |
-| `--manager`    | `npm`, `pnpm`, `yarn`, `bun` ; sinon détection via métadonnées/lockfiles.         |
-| `--model`      | Nom du modèle inscrit dans l’adapter généré.                                      |
-| `--install`    | Installer Outpost et le SDK optionnel sélectionné.                                |
-| `--build`      | Construire l’image (automatique pour Docker/Podman).                              |
-| `--image`      | Remplacer le nom d’image généré.                                                  |
-| `--directory`  | Répertoire du workflow, courant par défaut.                                       |
-| `--repository` | Dépôt Git ciblé ; chemin relatif au dossier du workflow, ou absolu. Défaut : `.`. |
-| `--help`, `-h` | Afficher l’aide.                                                                  |
+| Option               | Valeurs / comportement                                                            |
+| -------------------- | --------------------------------------------------------------------------------- |
+| `--yes`, `-y`        | Accepter les défauts sans question.                                               |
+| `--agent`            | `codex` (défaut), `claude` ou `gemini`.                                           |
+| `--sandbox-provider` | `docker` (défaut), `podman`, `local`, `vercel`, `daytona`.                        |
+| `--manager`          | `npm`, `pnpm`, `yarn`, `bun` ; sinon détection via métadonnées/lockfiles.         |
+| `--model`            | Nom du modèle inscrit dans l’adapter généré.                                      |
+| `--install`          | Installer Outpost et le SDK optionnel sélectionné.                                |
+| `--build`            | Construire l’image (automatique pour Docker/Podman).                              |
+| `--image`            | Remplacer le nom d’image généré.                                                  |
+| `--directory`        | Répertoire du workflow, courant par défaut.                                       |
+| `--repository`       | Dépôt Git ciblé ; chemin relatif au dossier du workflow, ou absolu. Défaut : `.`. |
+| `--help`, `-h`       | Afficher l’aide.                                                                  |
 
 L’initialisation crée `run.ts`, `brief.md`, `.env.example`, `.gitignore`, un `package.json` et les fichiers spécifiques au provider directement dans ce dossier. Le manifeste contient un script `start`, Outpost et le SDK cloud éventuel ; `--install` installe ces dépendances. Un `package.json` existant est conservé et les règles manquantes sont ajoutées au `.gitignore`. Tout conflit avec les autres fichiers générés fait échouer l’initialisation avant écriture.
 
@@ -58,7 +58,7 @@ Les images Docker/Podman sont construites automatiquement. Utilisez `--no-build`
 Pour un modèle Codex servi par une API compatible OpenAI Responses :
 
 ```sh
-npx @elie-laloum/outpost init --yes --agent codex --provider docker --model vendor/model --base-url https://models.example.com/v1 --api-key-env MODEL_API_KEY --install
+npx @elie-laloum/outpost init --yes --agent codex --sandbox-provider docker --model vendor/model --base-url https://models.example.com/v1 --api-key-env MODEL_API_KEY --install
 ```
 
 Définissez `MODEL_API_KEY` dans le processus parent ou le `.env` du workflow avant son lancement. `--api-key-env` vaut `OPENAI_API_KEY` par défaut et nécessite `--base-url` ; l’endpoint personnalisé nécessite `--model`. Ce parcours utilise directement le fournisseur personnalisé sans connexion à un compte OpenAI. Les endpoints limités à Chat Completions ne sont pas pris en charge. Voir [les fournisseurs personnalisés](../../behavior/agents/connect-codex/#fournisseurs-de-modèles-compatibles-openai).

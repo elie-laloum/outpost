@@ -12,7 +12,7 @@ import { localProcessIdentity } from "../../src/infrastructure/git/process-ident
 import { storageMutationLockDefaults } from "../../src/infrastructure/storage-mutation-lock.constants.ts";
 import { storageReservationDefaults } from "../../src/infrastructure/storage-reservations.constants.ts";
 import { repository } from "../helpers.ts";
-import { local } from "../../src/providers/local.ts";
+import { localSandboxProvider } from "../../src/providers/local.ts";
 
 const options = { maxBytes: 1_100_000, reserveBytes: 1_000_000 };
 const records = (root: string) =>
@@ -219,7 +219,9 @@ test("workspace reservations span warm ownership and release on close while pres
     createSandbox({ workspace, storageQuota: options }),
     /owns its repository/,
   );
-  const sandbox = await workspace.sandbox({ provider: local() });
+  const sandbox = await workspace.sandbox({
+    sandboxProvider: localSandboxProvider(),
+  });
   await assert.rejects(workspace.close(), /Close the sandbox/);
   assert.equal((await readdir(records(root))).length, 1);
   await sandbox.close();
@@ -264,7 +266,7 @@ test("workspace allocation and startup hook failures release reservations", asyn
     createSandbox({
       repository: root,
       storageQuota: options,
-      provider: {
+      sandboxProvider: {
         name: "broken",
         placement: "mounted",
         acquire: async () => {

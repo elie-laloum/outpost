@@ -75,3 +75,7 @@ Transport checkpoint ownership and cooperative reservation ledgers do not expire
 ## Optional BullMQ queue
 
 Only the `queues/bullmq` entry point loads the optional BullMQ SDK. Infrastructure separates connection ownership, BullMQ distribution and atomic Redis transitions of Outpost state. Application workers still depend on `TaskQueue`; retained results remain authoritative while interrupted native finalization is recovered.
+
+## Harness composition
+
+The unreleased API composes `agent({ harness, model })`. A CLI harness binds a command/protocol adapter; a custom harness supplies a model provider and an execution callback. Application supervision owns deadlines, scoped requests, sandbox operations and usage. Model identifiers are strings validated by the executing service. `sandboxProvider` selects allocation independently; a model provider never owns a sandbox. Custom callbacks run in the Outpost process and must cooperate with cancellation.

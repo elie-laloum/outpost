@@ -2,8 +2,8 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import type { Daytona, Sandbox } from "@daytona/sdk";
 import type { Sandbox as VercelSandbox } from "@vercel/sandbox";
-import { vercel } from "../../src/providers/vercel.ts";
-import { daytona } from "../../src/providers/daytona.ts";
+import { vercelSandboxProvider } from "../../src/providers/vercel.ts";
+import { daytonaSandboxProvider } from "../../src/providers/daytona.ts";
 
 const context = {
   repository: "/unused",
@@ -19,7 +19,7 @@ test("Daytona deletes an allocated sandbox when home discovery fails", async () 
       throw new Error("home unavailable");
     },
   };
-  const provider = daytona(
+  const sandboxProvider = daytonaSandboxProvider(
     {},
     async () =>
       ({
@@ -29,7 +29,7 @@ test("Daytona deletes an allocated sandbox when home discovery fails", async () 
         },
       }) as unknown as Pick<Daytona, "create" | "delete">,
   );
-  await assert.rejects(provider.acquire(context), /home unavailable/);
+  await assert.rejects(sandboxProvider.acquire(context), /home unavailable/);
   assert.equal(deleted, 1);
 });
 
@@ -59,7 +59,7 @@ test("Daytona waits for nonzero process completion after output closes and remai
       getSessionCommand: async () => (++polls === 1 ? {} : { exitCode: 17 }),
     },
   };
-  const lease = await daytona(
+  const lease = await daytonaSandboxProvider(
     {},
     async () =>
       ({
@@ -95,7 +95,7 @@ test("Daytona setup preserves both initialization and cleanup failures", async (
   const failure = new Error("home unavailable");
   const cleanup = new Error("delete unavailable");
   let attempts = 0;
-  const provider = daytona(
+  const sandboxProvider = daytonaSandboxProvider(
     {},
     async () =>
       ({
@@ -110,7 +110,7 @@ test("Daytona setup preserves both initialization and cleanup failures", async (
       }) as unknown as Pick<Daytona, "create" | "delete">,
   );
   await assert.rejects(
-    provider.acquire(context),
+    sandboxProvider.acquire(context),
     (error: unknown) =>
       error instanceof AggregateError &&
       error.errors[0] === failure &&
@@ -165,7 +165,7 @@ test("Vercel retains final status after log closure, cleans stdin and reuses aft
       };
     },
   };
-  const lease = await vercel(
+  const lease = await vercelSandboxProvider(
     {},
     async () => sandbox as unknown as VercelSandbox,
   ).acquire(context);

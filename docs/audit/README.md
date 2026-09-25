@@ -32,3 +32,7 @@ Local validation uses Node.js 24 and real Docker. Podman is unavailable on this 
 Browser tests use a dedicated production preview and cover Guide/Reference, corresponding languages, search after navigation, keyboard preparation/copy, mobile layout, themes, long signatures and legacy anchors. The Head override keeps Starlight page loading because Celestia 0.3.2's ClientRouter leaves search uninitialized after navigation; it also makes the theme's copy controls keyboard accessible. Theme styling remains native.
 
 No public Outpost API, runtime behavior, package version, release tag or deployment is changed by this migration.
+
+## Unreleased harness API update
+
+The harness refactor intentionally updates preserved examples to compose agents, separates model transports from sandbox allocation, renames sandbox factories and the CLI selector, and shares explicit authentication preparation. The preserved-body digests were reviewed and refreshed; original source digests remain unchanged. Renamed reference symbols retain explicit redirects validated against their generated destinations. This update changes the public API without compatibility aliases and has not been published.

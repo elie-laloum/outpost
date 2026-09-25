@@ -1,15 +1,15 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { openaiCompatible, OutpostError } from "../../src/index.ts";
+import { openaiModelProvider, OutpostError } from "../../src/index.ts";
 import {
   readChatCompletion,
   readModelResponse,
 } from "../../src/adapters/models/openai-response.ts";
-import { modelJson } from "../../src/adapters/models/openai-http.ts";
+import { modelJson } from "../../src/adapters/models/model-http.ts";
 
 const options = {
   baseUrl: "http://localhost/v1",
-  model: "model",
+
   apiKey: false,
 } as const;
 const chat = (content: unknown = "hello") => ({
@@ -34,48 +34,55 @@ test("model provider rejects invalid configuration before networking", () => {
     "https://host?key=x",
     "https://host#x",
   ])
-    assert.throws(() => openaiCompatible({ ...options, baseUrl }), {
+    assert.throws(() => openaiModelProvider({ ...options, baseUrl }), {
       code: "configuration",
     });
-  for (const model of ["", "  "])
-    assert.throws(() => openaiCompatible({ ...options, model }), /Model name/);
+
   for (const apiKey of ["", " ", "secret\nheader"])
-    assert.throws(() => openaiCompatible({ ...options, apiKey }), /apiKey/);
+    assert.throws(() => openaiModelProvider({ ...options, apiKey }), /apiKey/);
   for (const timeoutMs of [0, -1, Infinity, 1.5, 2 ** 31])
     assert.throws(
-      () => openaiCompatible({ ...options, timeoutMs }),
+      () => openaiModelProvider({ ...options, timeoutMs }),
       /timeoutMs/,
     );
   assert.throws(
-    () => openaiCompatible({ ...options, maxResponseBytes: 0 }),
+    () => openaiModelProvider({ ...options, maxResponseBytes: 0 }),
     /maxResponseBytes/,
   );
   assert.throws(
     // @ts-expect-error Unsupported protocols must also fail for JavaScript callers.
-    () => openaiCompatible({ ...options, api: "toString" }),
+    () => openaiModelProvider({ ...options, api: "toString" }),
     /protocol/,
   );
 });
 
 test("text-only requests reject unsupported capabilities and invalid input", async () => {
-  const provider = openaiCompatible(options);
-  await assert.rejects(provider.generate({ prompt: " " }), /prompt/);
+  const provider = openaiModelProvider(options);
+  for (const model of ["", "  "])
+    await assert.rejects(
+      provider.request({ model, prompt: "hi" }),
+      /Model name/,
+    );
   await assert.rejects(
-    provider.generate({ prompt: "hi", maxOutputTokens: 0 }),
+    provider.request({ model: "model", prompt: " " }),
+    /prompt/,
+  );
+  await assert.rejects(
+    provider.request({ model: "model", prompt: "hi", maxOutputTokens: 0 }),
     /maxOutputTokens/,
   );
   await assert.rejects(
     // @ts-expect-error Runtime JavaScript callers cannot silently request tools.
-    provider.generate({ prompt: "hi", tools: [] }),
+    provider.request({ model: "model", prompt: "hi", tools: [] }),
     /Unsupported/,
   );
   await assert.rejects(
     // @ts-expect-error Runtime input validation must reject non-text instructions.
-    provider.generate({ prompt: "hi", system: 2 }),
+    provider.request({ model: "model", prompt: "hi", system: 2 }),
     /instructions/,
   );
   // @ts-expect-error Runtime input validation must reject null.
-  await assert.rejects(provider.generate(null), /object/);
+  await assert.rejects(provider.request(null), /object/);
 });
 
 test("Chat Completions preserves text and optional reported usage", () => {

@@ -2,7 +2,7 @@ export const hookDeadlineMs = 600_000;
 export const warmConfigurationKeys = [
   "repository",
   "branch",
-  "provider",
+  "sandboxProvider",
   "workspace",
   "copies",
   "hooks",

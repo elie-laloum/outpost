@@ -3,21 +3,21 @@ import { readdir, writeFile } from "node:fs/promises";
 import { test } from "node:test";
 import { createSandbox, diagnoseSandbox } from "../../src/index.ts";
 import type { TransferOptions } from "../../src/domain/sandbox.types.ts";
-import { local } from "../../src/providers/local.ts";
+import { localSandboxProvider } from "../../src/providers/local.ts";
 import { repository } from "../helpers.ts";
 
 test("owned sandbox diagnostics preserve ownership, exclusivity and reuse with optional binary probes", async (t) => {
   const root = await repository(t);
-  const provider = local();
+  const sandboxProvider = localSandboxProvider();
   let released = 0;
   let acquired = 0;
   const sandbox = await createSandbox({
     repository: root,
-    provider: {
-      ...provider,
+    sandboxProvider: {
+      ...sandboxProvider,
       async acquire(context) {
         acquired++;
-        const lease = await provider.acquire(context);
+        const lease = await sandboxProvider.acquire(context);
         return {
           ...lease,
           async release() {
@@ -37,7 +37,10 @@ test("owned sandbox diagnostics preserve ownership, exclusivity and reuse with o
   );
   const report = await pending;
   assert.equal(report.hasFailures, false, JSON.stringify(report));
-  assert.deepEqual(report.provider, { name: "local", placement: "host" });
+  assert.deepEqual(report.sandboxProvider, {
+    name: "local",
+    placement: "host",
+  });
   assert.equal(report.ownership, "caller");
   assert.equal(
     report.capabilities.find((item) => item.id === "transfers")?.observed,
@@ -61,7 +64,7 @@ test("owned sandbox diagnostics preserve ownership, exclusivity and reuse with o
 
 test("caller owned lease diagnostics are read-only by default and never release or allocate", async (t) => {
   const root = await repository(t);
-  const lease = await local().acquire({
+  const lease = await localSandboxProvider().acquire({
     repository: root,
     directory: root,
     gitDirectories: [],
@@ -85,12 +88,12 @@ test("caller owned lease diagnostics are read-only by default and never release 
     report.capabilities.find((item) => item.id === "transfers")?.observed,
     "unverified",
   );
-  assert.equal(report.provider, undefined);
+  assert.equal(report.sandboxProvider, undefined);
 });
 
 test("response loss after remote directory creation still cleans the unique probe directory", async (t) => {
   const root = await repository(t);
-  const lease = await local().acquire({
+  const lease = await localSandboxProvider().acquire({
     repository: root,
     directory: root,
     gitDirectories: [],
@@ -130,13 +133,13 @@ test("response loss after remote directory creation still cleans the unique prob
 
 test("deadline stops an owned probe process while keeping the sandbox reusable", async (t) => {
   const root = await repository(t);
-  const provider = local();
+  const sandboxProvider = localSandboxProvider();
   const sandbox = await createSandbox({
     repository: root,
-    provider: {
-      ...provider,
+    sandboxProvider: {
+      ...sandboxProvider,
       async acquire(context) {
-        const lease = await provider.acquire(context);
+        const lease = await sandboxProvider.acquire(context);
         return {
           ...lease,
           invoke(command) {
@@ -164,7 +167,7 @@ test("deadline stops an owned probe process while keeping the sandbox reusable",
 for (const direction of ["upload", "download"] as const) {
   test(`binary corruption during ${direction} fails the observed transfer probe and cleans files`, async (t) => {
     const root = await repository(t);
-    const lease = await local().acquire({
+    const lease = await localSandboxProvider().acquire({
       repository: root,
       directory: root,
       gitDirectories: [],

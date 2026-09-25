@@ -7,7 +7,7 @@ import type { Sandbox as VercelSandbox } from "@vercel/sandbox";
 import type { Sandbox as DaytonaSandbox } from "@daytona/sdk";
 import { vercelFiles } from "../../src/providers/vercel-files.ts";
 import { daytonaFiles } from "../../src/providers/daytona-files.ts";
-import { local } from "../../src/providers/local.ts";
+import { localSandboxProvider } from "../../src/providers/local.ts";
 import { fileBatches } from "../../src/providers/file-batches.ts";
 import { executeProcess } from "../../src/infrastructure/process.ts";
 import { verifyCloudAgents } from "../fixtures/cloud-agent-contract.ts";
@@ -46,13 +46,13 @@ for (const backend of ["vercel", "daytona"])
           : false,
     },
     async () => {
-      const provider = local();
+      const sandboxProvider = localSandboxProvider();
       const reports = await runCloudCompatibility({
         environment,
         create: () => ({
-          ...provider,
+          ...sandboxProvider,
           acquire: async (context) => {
-            const lease = await provider.acquire(context);
+            const lease = await sandboxProvider.acquire(context);
             const files =
               backend === "vercel"
                 ? vercelFiles({
@@ -127,11 +127,11 @@ for (const backend of ["vercel", "daytona"])
 
 test("cloud runner cleans partial failures and never exposes exception contents", async () => {
   let released = 0;
-  const provider = local();
+  const sandboxProvider = localSandboxProvider();
   const create: CompatibilityOptions["create"] = () => ({
-    ...provider,
+    ...sandboxProvider,
     acquire: async (context) => {
-      const lease = await provider.acquire(context);
+      const lease = await sandboxProvider.acquire(context);
       return {
         ...lease,
         release: async () => {
@@ -161,13 +161,13 @@ test("cloud runner cleans partial failures and never exposes exception contents"
 });
 
 test("cloud runner reports cleanup failure even after successful checks", async () => {
-  const provider = local();
+  const sandboxProvider = localSandboxProvider();
   const reports = await runCloudCompatibility({
     environment,
     create: () => ({
-      ...provider,
+      ...sandboxProvider,
       acquire: async (context) => {
-        const lease = await provider.acquire(context);
+        const lease = await sandboxProvider.acquire(context);
         return {
           ...lease,
           release: async () => {
@@ -188,10 +188,10 @@ test("cloud runner reports cleanup failure even after successful checks", async 
 });
 
 test("cloud runner bounds stuck verification and releases a late acquisition", async () => {
-  const provider = local();
+  const sandboxProvider = localSandboxProvider();
   const stuck = await runCloudCompatibility({
     environment,
-    create: () => provider,
+    create: () => sandboxProvider,
     deadlineMs: 20,
     verify: async () => new Promise(() => {}),
   });
@@ -206,7 +206,7 @@ test("cloud runner bounds stuck verification and releases a late acquisition", a
     environment,
     deadlineMs: 20,
     create: () => ({
-      ...provider,
+      ...sandboxProvider,
       acquire: () =>
         new Promise((resolve) => {
           resolveLease = resolve;
@@ -243,7 +243,8 @@ test("standalone cloud runner reports skipped with exit 2 when disabled", async 
   assert.ok(Number.isFinite(Date.parse(report.startedAt)));
   assert.ok(
     report.reports.every(
-      (provider: { status: string }) => provider.status === "skipped",
+      (sandboxProvider: { status: string }) =>
+        sandboxProvider.status === "skipped",
     ),
   );
 });

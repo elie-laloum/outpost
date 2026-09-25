@@ -8,10 +8,10 @@ sidebar:
 La capture native des conversations est active par défaut pour Claude Code et Codex. [Gemini](../../../agents/gemini/) ne prend en charge ni capture native, ni reprise, ni fork dans Outpost. Le transcript est copié dans le stockage de l’agent sur l’hôte ; ses chemins de travail sont réécrits pour permettre une reprise native dans le bon dépôt.
 
 ```ts
-import { dispatch, codex } from "@elie-laloum/outpost";
+import { agent as composeAgent, dispatch, codex } from "@elie-laloum/outpost";
 
 const first = await dispatch({
-  agent: codex(),
+  agent: composeAgent({ harness: codex.harness({}) }),
   brief: { text: "Examine le code de validation." },
 });
 await first.resume({ brief: { text: "Ajoute maintenant des tests ciblés." } });

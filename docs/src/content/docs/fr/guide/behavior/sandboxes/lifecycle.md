@@ -8,17 +8,22 @@ sidebar:
 Gardez une sandbox active lorsque plusieurs tâches successives ont besoin du même environnement. L’allocation, l’installation et les hooks de préparation ne s’exécutent qu’une fois pour cette sandbox.
 
 ```ts
-import { createSandbox, codex, claude } from "@elie-laloum/outpost";
+import {
+  agent as composeAgent,
+  createSandbox,
+  codex,
+  claude,
+} from "@elie-laloum/outpost";
 
 await using sandbox = await createSandbox({
-  agent: codex(),
+  agent: composeAgent({ harness: codex.harness({}) }),
   branch: { mode: "named", name: "feature/validation" },
 });
 const implementation = await sandbox.dispatch({
   brief: { text: "Implémente la validation et crée un commit." },
 });
 await sandbox.dispatch({
-  agent: claude(),
+  agent: composeAgent({ harness: claude.harness({}) }),
   brief: { text: "Relis le code, lance les tests et commite les corrections." },
 });
 console.log(implementation.commits, sandbox.workspace.branch);

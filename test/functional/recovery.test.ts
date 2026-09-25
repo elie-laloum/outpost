@@ -15,7 +15,7 @@ import {
   isolatedTask,
   workflow,
 } from "../../src/index.ts";
-import { local } from "../../src/providers/local.ts";
+import { localSandboxProvider } from "../../src/providers/local.ts";
 import { shell } from "../../src/infrastructure/process.ts";
 import { repository, scripted, emit } from "../helpers.ts";
 
@@ -23,8 +23,8 @@ test("multi-pass dispatch saves every native conversation before releasing its w
   const root = await realpath(await repository(t)),
     home = join(root, ".outpost", "recovery", "history");
   await mkdir(home, { recursive: true });
-  const host = local();
-  const provider = {
+  const host = localSandboxProvider();
+  const sandboxProvider = {
     ...host,
     async acquire(context: Parameters<typeof host.acquire>[0]) {
       return { ...(await host.acquire(context)), home };
@@ -40,7 +40,7 @@ test("multi-pass dispatch saves every native conversation before releasing its w
   };
   const result = await dispatch({
     repository: root,
-    provider,
+    sandboxProvider,
     agent,
     conversationHome: home,
     branch: { mode: "named", name: "history" },
@@ -65,8 +65,8 @@ test("cold result resume and fork round-trip native transcripts while preserving
   const root = await repository(t),
     home = join(root, ".outpost", "recovery", "native-home");
   await mkdir(home, { recursive: true });
-  const host = local();
-  const provider = {
+  const host = localSandboxProvider();
+  const sandboxProvider = {
     ...host,
     async acquire(context: Parameters<typeof host.acquire>[0]) {
       return { ...(await host.acquire(context)), home };
@@ -81,7 +81,7 @@ test("cold result resume and fork round-trip native transcripts while preserving
   };
   const first = await dispatch({
     repository: root,
-    provider,
+    sandboxProvider,
     agent,
     conversationHome: home,
     branch: { mode: "named", name: "native-sessions" },
@@ -135,7 +135,7 @@ test("idle and completion watchdogs have distinct outcomes and allow reuse", asy
   let complete = false;
   const box = await createSandbox({
     repository: root,
-    provider: local(),
+    sandboxProvider: localSandboxProvider(),
     agent: scripted(
       () =>
         (complete ? emit("finished-marker") : "") + "setInterval(()=>{},1000)",
@@ -174,7 +174,7 @@ test("prompt commands run after hooks and fail with diagnostics", async (t) => {
   );
   const box = await createSandbox({
     repository: root,
-    provider: local(),
+    sandboxProvider: localSandboxProvider(),
     agent,
     logging: false,
     hooks: {
@@ -213,7 +213,7 @@ test("structured failures retain recovery metadata and release workspace locks",
   await assert.rejects(
     dispatch({
       repository: root,
-      provider: local(),
+      sandboxProvider: localSandboxProvider(),
       agent: scripted(emit("invalid")),
       logging: false,
       branch: { mode: "named", name: "invalid-result" },
@@ -235,7 +235,7 @@ test("structured failures retain recovery metadata and release workspace locks",
   await assert.rejects(
     createSandbox({
       repository: root,
-      provider: local(),
+      sandboxProvider: localSandboxProvider(),
       agent: scripted(""),
       hooks: {
         sandboxReady: [
@@ -256,7 +256,7 @@ test("workflow convenience tasks share sequential sandboxes and isolate fanout",
   const root = await repository(t),
     box = await createSandbox({
       repository: root,
-      provider: local(),
+      sandboxProvider: localSandboxProvider(),
       agent: scripted(emit("answer")),
       logging: false,
     });
@@ -279,7 +279,7 @@ test("workflow convenience tasks share sequential sandboxes and isolate fanout",
     key: "isolated",
     request: () => ({
       repository: root,
-      provider: local(),
+      sandboxProvider: localSandboxProvider(),
       agent: scripted(emit("isolated")),
       logging: false,
       branch: { mode: "named", name: "isolated-task" },
@@ -306,8 +306,8 @@ test("native cold continuation preflight happens before provisioning", async (t)
     home = join(root, "home");
   await mkdir(home);
   let acquired = false;
-  const provider = {
-    ...local(),
+  const sandboxProvider = {
+    ...localSandboxProvider(),
     async acquire() {
       acquired = true;
       throw new Error("must not provision");
@@ -316,7 +316,7 @@ test("native cold continuation preflight happens before provisioning", async (t)
   await assert.rejects(
     dispatch({
       repository: root,
-      provider,
+      sandboxProvider,
       agent: { ...scripted(""), conversations: "codex" },
       conversationHome: home,
       brief: { text: "hello" },

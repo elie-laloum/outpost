@@ -5,28 +5,28 @@ sidebar:
   order: 12
 ---
 
-`speculate()` est un prototype de recherche facultatif pour essayer plusieurs approches d’agent sur un dépôt. Il fixe le commit initial de l’hôte, crée des branches nommées et des worktrees distincts, puis exécute jusqu’à huit candidats avec une concurrence configurable (deux par défaut). Chaque candidat utilise le fournisseur indiqué. Les worktrees ne constituent pas une frontière de sécurité face à un agent hostile ; `local()` exécute explicitement sur l’hôte.
+`speculate()` est un prototype de recherche facultatif pour essayer plusieurs approches d’agent sur un dépôt. Il fixe le commit initial de l’hôte, crée des branches nommées et des worktrees distincts, puis exécute jusqu’à huit candidats avec une concurrence configurable (deux par défaut). Chaque candidat utilise le fournisseur indiqué. Les worktrees ne constituent pas une frontière de sécurité face à un agent hostile ; `localSandboxProvider()` exécute explicitement sur l’hôte.
 
 ```ts
-import { codex, speculate } from "@elie-laloum/outpost";
-import { docker } from "@elie-laloum/outpost/providers/docker";
+import { agent as composeAgent, codex, speculate } from "@elie-laloum/outpost";
+import { dockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
 const result = await speculate({
   repository: "/path/to/repository",
-  provider: docker({ image: "outpost-agent:local" }),
+  sandboxProvider: dockerSandboxProvider({ image: "outpost-agent:local" }),
   concurrency: 2,
   budget: { attempts: 2, usage: { input: 100_000, output: 20_000 } },
   candidates: [
     {
       key: "minimal",
-      agent: codex(),
+      agent: composeAgent({ harness: codex.harness({}) }),
       request: {
         brief: { text: "Fix the bug with a small patch and commit it." },
       },
     },
     {
       key: "alternative",
-      agent: codex(),
+      agent: composeAgent({ harness: codex.harness({}) }),
       request: {
         brief: { text: "Try another solution, test it and commit it." },
       },

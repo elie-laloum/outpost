@@ -56,3 +56,7 @@ La propriété des checkpoints et les registres de réservations coopératives n
 ## File BullMQ optionnelle
 
 L’entrée `queues/bullmq` charge seule le SDK BullMQ optionnel. L’infrastructure sépare la propriété des connexions, la distribution BullMQ et les transitions atomiques Redis de l’état Outpost. Les workers applicatifs continuent de dépendre de `TaskQueue` ; les résultats conservés restent la référence pendant la récupération d’une finalisation native interrompue.
+
+## Harness composition
+
+L’API non publiée compose `agent({ harness, model })`. Un harness CLI associe un adaptateur de commandes/protocole ; un harness personnalisé fournit un fournisseur de modèles et un callback. La supervision applicative porte délais, requêtes, opérations sandbox et usage. Les identifiants sont des chaînes validées par le service exécutant. `sandboxProvider` sélectionne indépendamment l’allocation ; un fournisseur de modèles ne possède jamais le sandbox. Les callbacks tournent dans le processus Outpost et doivent respecter l’annulation.

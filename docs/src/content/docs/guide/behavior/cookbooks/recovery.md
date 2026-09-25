@@ -8,11 +8,16 @@ sidebar:
 Use this when partial work matters. Complete the [shared setup](../../../cookbook/) and Claude authentication. Cleanup and transcript collection can continue beyond the request timeout.
 
 ```ts
-import { dispatch, claude, recoveryDetails } from "@elie-laloum/outpost";
+import {
+  agent as composeAgent,
+  dispatch,
+  claude,
+  recoveryDetails,
+} from "@elie-laloum/outpost";
 
 try {
   const result = await dispatch({
-    agent: claude(),
+    agent: composeAgent({ harness: claude.harness({}) }),
     branch: { mode: "named", name: "fix/recoverable-parser" },
     brief: { text: "Fix parser errors, run tests and commit." },
     signal: AbortSignal.timeout(300_000),

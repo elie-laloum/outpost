@@ -8,10 +8,10 @@ sidebar:
 Set a bounded number of passes when an agent should iterate until a completion marker appears.
 
 ```ts
-import { dispatch, codex } from "@elie-laloum/outpost";
+import { agent as composeAgent, dispatch, codex } from "@elie-laloum/outpost";
 
 const result = await dispatch({
-  agent: codex(),
+  agent: composeAgent({ harness: codex.harness({}) }),
   brief: { file: "brief.md" },
   passes: 5,
   until: ["<outpost>done</outpost>"],

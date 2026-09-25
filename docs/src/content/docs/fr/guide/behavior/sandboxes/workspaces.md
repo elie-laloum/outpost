@@ -8,7 +8,12 @@ sidebar:
 Créez le workspace séparément lorsqu’il doit survivre aux sandboxes individuelles. Il possède la branche, le worktree, les fichiers copiés et le verrou Git.
 
 ```ts
-import { openWorkspace, codex, claude } from "@elie-laloum/outpost";
+import {
+  agent as composeAgent,
+  openWorkspace,
+  codex,
+  claude,
+} from "@elie-laloum/outpost";
 
 await using workspace = await openWorkspace({
   branch: { mode: "named", name: "feature/shared" },
@@ -16,11 +21,11 @@ await using workspace = await openWorkspace({
   label: "validation",
 });
 await workspace.dispatch({
-  agent: codex(),
+  agent: composeAgent({ harness: codex.harness({}) }),
   brief: { text: "Implémente la fonctionnalité et crée un commit." },
 });
 await workspace.dispatch({
-  agent: claude(),
+  agent: composeAgent({ harness: claude.harness({}) }),
   brief: { text: "Relis les changements et commite les corrections." },
 });
 ```

@@ -23,19 +23,19 @@ export async function runCloudCompatibility(
   const reports: CompatibilityReport[] = [];
   const selected =
     options.environment.OUTPOST_CLOUD_PROVIDERS?.split(",") ?? [];
-  for (const provider of cloudNames) {
+  for (const sandboxProvider of cloudNames) {
     const checks: CompatibilityCheck[] = [];
-    const missing = requiredCredentials[provider].some(
+    const missing = requiredCredentials[sandboxProvider].some(
       (key) => !options.environment[key],
     );
     if (
       options.environment.OUTPOST_CLOUD_LIVE !== "1" ||
-      !selected.includes(provider) ||
+      !selected.includes(sandboxProvider) ||
       missing
     ) {
       const reason = missing ? "credentials-unavailable" : "not-opted-in";
       reports.push({
-        provider,
+        sandboxProvider,
         status: "skipped",
         checks: [{ name: "allocation", status: "skipped", reason }],
       });
@@ -50,7 +50,7 @@ export async function runCloudCompatibility(
     let lease: SandboxLease | undefined;
     let stage = "allocation";
     try {
-      const acquiring = options.create(provider).acquire({
+      const acquiring = options.create(sandboxProvider).acquire({
         repository: directory,
         directory,
         gitDirectories: [],
@@ -138,7 +138,7 @@ export async function runCloudCompatibility(
       await rm(directory, { recursive: true, force: true });
     }
     reports.push({
-      provider,
+      sandboxProvider,
       status: checks.some((check) => check.status === "fail") ? "fail" : "pass",
       checks,
     });

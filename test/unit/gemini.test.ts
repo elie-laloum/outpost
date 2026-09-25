@@ -1,3 +1,4 @@
+import { agent as composeAgent } from "../../src/domain/agent.ts";
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { gemini } from "../../src/index.ts";
@@ -8,7 +9,10 @@ import type { SandboxLease } from "../../src/domain/sandbox.types.ts";
 
 test("Gemini requests preserve stdin and terminal boundaries, model, variables and approval choices", () => {
   const variables = { GEMINI_API_KEY: "fixture" };
-  const agent = gemini({ model: "flash", variables });
+  const agent = composeAgent({
+    harness: gemini.harness({ variables }),
+    model: "flash",
+  });
   variables.GEMINI_API_KEY = "changed";
   assert.equal(agent.variables?.GEMINI_API_KEY, "fixture");
   assert.ok(Object.isFrozen(agent));
@@ -30,16 +34,23 @@ test("Gemini requests preserve stdin and terminal boundaries, model, variables a
     ],
     stdin: "-literal\nsecond line",
   });
-  assert.deepEqual(gemini().request({ interactive: true }), {
-    executable: "gemini",
-    arguments: ["--approval-mode", "default"],
-    interactive: true,
-  });
   assert.deepEqual(
-    gemini({ approvalMode: "plan" }).request({
+    composeAgent({ harness: gemini.harness({}) }).request({
       interactive: true,
-      text: "Inspect",
     }),
+    {
+      executable: "gemini",
+      arguments: ["--approval-mode", "default"],
+      interactive: true,
+    },
+  );
+  assert.deepEqual(
+    composeAgent({ harness: gemini.harness({ approvalMode: "plan" }) }).request(
+      {
+        interactive: true,
+        text: "Inspect",
+      },
+    ),
     {
       executable: "gemini",
       arguments: ["--approval-mode", "plan", "--prompt-interactive", "Inspect"],
@@ -47,10 +58,15 @@ test("Gemini requests preserve stdin and terminal boundaries, model, variables a
     },
   );
   assert.deepEqual(
-    gemini({ approvalMode: "auto_edit" }).request({}).arguments,
+    composeAgent({
+      harness: gemini.harness({ approvalMode: "auto_edit" }),
+    }).request({}).arguments,
     ["--approval-mode", "auto_edit", "--output-format", "stream-json"],
   );
-  assert.equal(gemini().request({}).stdin, "");
+  assert.equal(
+    composeAgent({ harness: gemini.harness({}) }).request({}).stdin,
+    "",
+  );
   for (const fork of [true, false])
     assert.throws(
       () => agent.request({ continuation: { id: "session", fork } }),
@@ -60,17 +76,19 @@ test("Gemini requests preserve stdin and terminal boundaries, model, variables a
 
 test("Gemini only grants workspace trust for unattended yolo execution", () => {
   assert.ok(
-    gemini({ approvalMode: "yolo" })
+    composeAgent({ harness: gemini.harness({ approvalMode: "yolo" }) })
       .request({})
       .arguments?.includes("--skip-trust"),
   );
   for (const approvalMode of ["default", "auto_edit", "plan"] as const)
     assert.equal(
-      gemini({ approvalMode }).request({}).arguments?.includes("--skip-trust"),
+      composeAgent({ harness: gemini.harness({ approvalMode }) })
+        .request({})
+        .arguments?.includes("--skip-trust"),
       false,
     );
   assert.equal(
-    gemini({ approvalMode: "yolo" })
+    composeAgent({ harness: gemini.harness({ approvalMode: "yolo" }) })
       .request({ interactive: true })
       .arguments?.includes("--skip-trust"),
     false,
@@ -78,7 +96,7 @@ test("Gemini only grants workspace trust for unattended yolo execution", () => {
 });
 
 test("Gemini decodes assistant deltas and final totals while retaining tool results and unknown payloads", () => {
-  const agent = gemini();
+  const agent = composeAgent({ harness: gemini.harness({}) });
   const decode = (value: unknown) => agent.events(JSON.stringify(value));
   assert.deepEqual(
     decode({
@@ -166,7 +184,7 @@ test("Gemini CLI help diagnostics inspect only the supported fresh-session invoc
 });
 
 test("Gemini remote bootstrap is independent of native transcript storage", async () => {
-  const agent = gemini();
+  const agent = composeAgent({ harness: gemini.harness({}) });
   const lease: SandboxLease = {
     root: "/workspace",
     home: "/home/agent",
@@ -190,6 +208,8 @@ test("Gemini remote bootstrap is independent of native transcript storage", asyn
     lease,
     new AbortController().signal,
   );
+  assert.equal(prepared.kind, "cli");
+  if (prepared.kind !== "cli") throw new Error("Expected CLI harness");
   assert.equal(
     prepared.request({ text: "hello" }).executable,
     "/home/agent/.outpost-tools/bin/gemini",

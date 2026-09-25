@@ -12,7 +12,7 @@ import {
 } from "node:fs/promises";
 import { join } from "node:path";
 import { gzipSync, gunzipSync } from "node:zlib";
-import { local } from "../../src/providers/local.ts";
+import { localSandboxProvider } from "../../src/providers/local.ts";
 import { fileBatches } from "../../src/providers/file-batches.ts";
 import { fileBatchLimits } from "../../src/providers/file-batches.constants.ts";
 import {
@@ -25,7 +25,7 @@ import { repository } from "../helpers.ts";
 
 test("batches compress binary payloads, preserve links/modes, and transfer oversized inputs through the fallback", async (t) => {
   const root = await repository(t);
-  const base = await local().acquire({
+  const base = await localSandboxProvider().acquire({
     repository: root,
     directory: root,
     gitDirectories: [],
@@ -75,7 +75,7 @@ test("batches compress binary payloads, preserve links/modes, and transfer overs
 
 test("remote manifest and batch reject traversal, unsupported files and source mutation", async (t) => {
   const root = await repository(t);
-  const base = await local().acquire({
+  const base = await localSandboxProvider().acquire({
     repository: root,
     directory: root,
     gitDirectories: [],
@@ -131,7 +131,7 @@ test("remote manifest and batch reject traversal, unsupported files and source m
 
 test("compressed payload corruption, invalid metadata and local symlink traversal fail before acceptance", async (t) => {
   const root = await repository(t);
-  const base = await local().acquire({
+  const base = await localSandboxProvider().acquire({
     repository: root,
     directory: root,
     gitDirectories: [],
@@ -190,7 +190,7 @@ test("compressed payload corruption, invalid metadata and local symlink traversa
 
 test("batch cancellation and bounded lease deadlines propagate without losing the reusable lease", async (t) => {
   const root = await repository(t);
-  const base = await local().acquire({
+  const base = await localSandboxProvider().acquire({
     repository: root,
     directory: root,
     gitDirectories: [],
@@ -247,7 +247,7 @@ test("batch cancellation and bounded lease deadlines propagate without losing th
 
 test("batches split at the data limit and reject oversized compressed envelopes", async (t) => {
   const root = await repository(t);
-  const base = await local().acquire({
+  const base = await localSandboxProvider().acquire({
     repository: root,
     directory: root,
     gitDirectories: [],

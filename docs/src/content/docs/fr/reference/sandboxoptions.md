@@ -16,8 +16,8 @@ import type { SandboxOptions } from "@elie-laloum/outpost";
 | Nom                  | Type                                                     | Présence  | Rôle                                                                                                                                                                                                 |
 | -------------------- | -------------------------------------------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `includeUncommitted` | `boolean \| undefined`                                   | Optionnel | Inclut les modifications hôtes non commitées dans le snapshot du dépôt distant.                                                                                                                      |
-| `agent`              | `AgentAdapter \| undefined`                              | Optionnel | Adapter natif de l’agent de code.                                                                                                                                                                    |
-| `provider`           | `SandboxProvider \| undefined`                           | Optionnel | Backend de l’environnement d’exécution.                                                                                                                                                              |
+| `agent`              | `Agent \| undefined`                                     | Optionnel | Adapter natif de l’agent de code.                                                                                                                                                                    |
+| `sandboxProvider`    | `SandboxProvider \| undefined`                           | Optionnel | Backend de l’environnement d’exécution.                                                                                                                                                              |
 | `workspace`          | `Workspace \| undefined`                                 | Optionnel | Workspace Git appartenant à l’appelant ; exclut un nouveau choix de dépôt/branche.                                                                                                                   |
 | `hooks`              | `LifecycleHooks \| undefined`                            | Optionnel | Commandes de cycle de vie dans l’ordre déclaré.                                                                                                                                                      |
 | `signal`             | `AbortSignal \| undefined`                               | Optionnel | Annulation coopérative de cette opération.                                                                                                                                                           |
@@ -38,8 +38,8 @@ import type { SandboxOptions } from "@elie-laloum/outpost";
 ```ts
 export interface SandboxOptions extends WorkspaceOptions {
   readonly includeUncommitted?: boolean;
-  readonly agent?: AgentAdapter;
-  readonly provider?: SandboxProvider;
+  readonly agent?: Agent;
+  readonly sandboxProvider?: SandboxProvider;
   readonly workspace?: Workspace;
   readonly hooks?: LifecycleHooks;
   readonly signal?: AbortSignal;
@@ -53,7 +53,7 @@ export interface SandboxOptions extends WorkspaceOptions {
 
 ## Contrats associés
 
-- [AgentAdapter](../agentadapter/)
+- [Agent](../type-agent/)
 - [LifecycleHooks](../lifecyclehooks/)
 - [Logging](../logging/)
 - [SandboxProvider](../sandboxprovider/)

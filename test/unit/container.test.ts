@@ -2,11 +2,11 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { join } from "node:path";
 import { containerProvider, imageName } from "../../src/providers/container.ts";
-import { docker } from "../../src/providers/docker.ts";
-import { podman } from "../../src/providers/podman.ts";
+import { dockerSandboxProvider } from "../../src/providers/docker.ts";
+import { podmanSandboxProvider } from "../../src/providers/podman.ts";
 import {
-  mountedProvider,
-  remoteProvider,
+  mountedSandboxProvider,
+  remoteSandboxProvider,
 } from "../../src/providers/factories.ts";
 import type { Command } from "../../src/domain/ports.ts";
 import { repository } from "../helpers.ts";
@@ -14,7 +14,7 @@ import { repository } from "../helpers.ts";
 test("container contract maps Git metadata, mounts, limits, credentials and invocation separately", async (t) => {
   const root = await repository(t),
     calls: Command[] = [];
-  const provider = containerProvider(
+  const sandboxProvider = containerProvider(
     "docker",
     {
       image: "test:1",
@@ -38,7 +38,7 @@ test("container contract maps Git metadata, mounts, limits, credentials and invo
       };
     },
   );
-  const lease = await provider.acquire({
+  const lease = await sandboxProvider.acquire({
     repository: root,
     directory: root,
     gitDirectories: [join(root, ".git")],
@@ -124,8 +124,8 @@ test("container preflight validates UID, options and missing volumes", async (t)
       gitDirectories: [],
       variables: {},
     };
-  assert.throws(() => docker({ cpus: 0 }), /cpus/);
-  assert.throws(() => podman({ memoryMb: 1 }), /memory/);
+  assert.throws(() => dockerSandboxProvider({ cpus: 0 }), /cpus/);
+  assert.throws(() => podmanSandboxProvider({ memoryMb: 1 }), /memory/);
   await assert.rejects(
     containerProvider("docker", {}, async () => ({
       status: 0,
@@ -160,9 +160,12 @@ test("custom providers retain their explicit placement", () => {
     throw new Error("unused");
   };
   assert.equal(
-    mountedProvider({ name: "custom", acquire }).placement,
+    mountedSandboxProvider({ name: "custom", acquire }).placement,
     "mounted",
   );
-  assert.equal(remoteProvider({ name: "custom", acquire }).placement, "remote");
-  assert.throws(() => remoteProvider({ name: "", acquire }));
+  assert.equal(
+    remoteSandboxProvider({ name: "custom", acquire }).placement,
+    "remote",
+  );
+  assert.throws(() => remoteSandboxProvider({ name: "", acquire }));
 });

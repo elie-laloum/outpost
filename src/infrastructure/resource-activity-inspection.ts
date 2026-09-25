@@ -83,7 +83,11 @@ export function resourceRecord(value: unknown): ResourceActivityRecord {
   object(value);
   invariant(value.version === 1, "Unknown activity version");
   text(value.id);
-  text(value.provider);
+  invariant(
+    value.sandboxProvider !== undefined || value.provider === undefined,
+    "Legacy activity record uses provider; sandboxProvider is required",
+  );
+  text(value.sandboxProvider);
   text(value.workspace);
   date(value.createdAt);
   date(value.updatedAt);
@@ -113,7 +117,7 @@ export function resourceRecord(value: unknown): ResourceActivityRecord {
     id: value.id,
     pid: value.pid,
     ...(owner ? { identity: owner } : {}),
-    provider: value.provider,
+    sandboxProvider: value.sandboxProvider,
     placement: value.placement,
     workspace: value.workspace,
     createdAt: value.createdAt,

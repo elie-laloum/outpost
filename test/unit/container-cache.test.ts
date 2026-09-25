@@ -94,7 +94,7 @@ test("engines mount only opted-in persistent caches and retain them after dispos
   for (const engine of ["docker", "podman"] as const) {
     const calls: Command[] = [];
     const caches = [{ name: "npm", key: "lock-v1" }];
-    const provider = containerProvider(
+    const sandboxProvider = containerProvider(
       engine,
       { caches, user: { uid: 1000, gid: 1000 } },
       async (command) => {
@@ -104,7 +104,7 @@ test("engines mount only opted-in persistent caches and retain them after dispos
       "linux",
     );
     caches[0]!.key = "mutated";
-    const lease = await provider.acquire({
+    const lease = await sandboxProvider.acquire({
       repository: root,
       directory: root,
       gitDirectories: [],
@@ -199,7 +199,7 @@ test("cancelling cache initialization releases the container but keeps persisten
 test("Podman reuses an existing cache volume without recreating or deleting it", async (t) => {
   const root = await repository(t);
   const volumes = new Set<string>();
-  const provider = containerProvider(
+  const sandboxProvider = containerProvider(
     "podman",
     {
       caches: [{ name: "npm", key: "stable" }],
@@ -219,7 +219,7 @@ test("Podman reuses an existing cache volume without recreating or deleting it",
     "linux",
   );
   for (let attempt = 0; attempt < 2; attempt++) {
-    const lease = await provider.acquire({
+    const lease = await sandboxProvider.acquire({
       repository: root,
       directory: root,
       gitDirectories: [],

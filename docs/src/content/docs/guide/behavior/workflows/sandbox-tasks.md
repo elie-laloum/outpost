@@ -15,6 +15,7 @@ Three task factories connect graph execution to sandbox operations. They forward
 
 ```ts
 import {
+  agent as composeAgent,
   createSandbox,
   codex,
   agentTask,
@@ -22,7 +23,9 @@ import {
   workflow,
 } from "@elie-laloum/outpost";
 
-await using sandbox = await createSandbox({ agent: codex() });
+await using sandbox = await createSandbox({
+  agent: composeAgent({ harness: codex.harness({}) }),
+});
 const implement = agentTask({
   key: "implement",
   sandbox,

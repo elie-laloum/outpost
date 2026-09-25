@@ -8,9 +8,9 @@ sidebar:
 Docker et Podman partagent leur configuration. Construisez l’image du projet avec [le CLI d’images](../../../manual/cli-images/) avant d’allouer une sandbox.
 
 ```ts
-import { docker } from "@elie-laloum/outpost/providers/docker";
+import { dockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
-const provider = docker({
+const sandboxProvider = dockerSandboxProvider({
   image: "outpost:project",
   cpus: 2,
   memoryMb: 4096,
@@ -24,7 +24,7 @@ const provider = docker({
   ],
   variables: { PROJECT_MODE: "test" },
 });
-console.log(provider.name);
+console.log(sandboxProvider.name);
 ```
 
 ## Options

@@ -1,6 +1,7 @@
 import type { Usage } from "./agent.types.ts";
 
 export interface ModelRequest {
+  readonly model: string;
   readonly prompt: string;
   readonly system?: string;
   readonly maxOutputTokens?: number;
@@ -14,5 +15,5 @@ export interface ModelResult {
 
 export interface ModelProvider {
   readonly name: string;
-  generate(request: ModelRequest): Promise<ModelResult>;
+  request(request: ModelRequest): Promise<ModelResult>;
 }

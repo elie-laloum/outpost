@@ -7,18 +7,18 @@ sidebar:
 
 ## Paramètres et propriétés
 
-| Nom     | Type           | Présence | Rôle                              |
-| ------- | -------------- | -------- | --------------------------------- |
-| `agent` | `AgentAdapter` | Requis   | Adapter natif de l’agent de code. |
+| Nom     | Type    | Présence | Rôle                              |
+| ------- | ------- | -------- | --------------------------------- |
+| `agent` | `Agent` | Requis   | Adapter natif de l’agent de code. |
 
 ## Signature
 
 ```ts
 export interface RequiredAgent {
-  readonly agent: AgentAdapter;
+  readonly agent: Agent;
 }
 ```
 
 ## Contrats associés
 
-- [AgentAdapter](../agentadapter/)
+- [Agent](../type-agent/)

@@ -93,16 +93,21 @@ Enregistrez le fichier **example.mts** dans `workflow/`.
 import assert from "node:assert/strict";
 import { resolve } from "node:path";
 import { createSandbox } from "@elie-laloum/outpost";
-import { docker } from "@elie-laloum/outpost/providers/docker";
-import { podman } from "@elie-laloum/outpost/providers/podman";
+import { dockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
+import { podmanSandboxProvider } from "@elie-laloum/outpost/providers/podman";
 
 const engine = process.argv[2] ?? "docker";
 if (engine !== "docker" && engine !== "podman")
   throw new Error("Choose docker or podman");
-const factory = engine === "docker" ? docker : podman;
+const factory =
+  engine === "docker" ? dockerSandboxProvider : podmanSandboxProvider;
 await using sandbox = await createSandbox({
   repository: resolve(import.meta.dirname, "../repository"),
-  provider: factory({ image: "outpost:docs-demo", cpus: 1, memoryMb: 1024 }),
+  sandboxProvider: factory({
+    image: "outpost:docs-demo",
+    cpus: 1,
+    memoryMb: 1024,
+  }),
   branch: { mode: "named", name: "workshop/engine" },
 });
 const result = await sandbox.command({
@@ -120,7 +125,7 @@ node example.mts
 
 ## Comprendre le résultat
 
-Docker est le défaut de cette préparation. Pour Podman, choisissez `--provider podman` à l’initialisation puis lancez `node example.mts podman` ; les moteurs ont des stores d’images séparés. Outpost ne bascule pas vers l’hôte en cas d’échec. Montages et métadonnées Git modifiables ne constituent pas une frontière contre du code hostile. Le home privé est éphémère.
+Docker est le défaut de cette préparation. Pour Podman, choisissez `--sandbox-provider podman` à l’initialisation puis lancez `node example.mts podman` ; les moteurs ont des stores d’images séparés. Outpost ne bascule pas vers l’hôte en cas d’échec. Montages et métadonnées Git modifiables ne constituent pas une frontière contre du code hostile. Le home privé est éphémère.
 
 [Contrats, options et cas particuliers](../../../behavior/providers/containers/).
 

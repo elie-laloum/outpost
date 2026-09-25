@@ -1,3 +1,4 @@
+import { agent as composeAgent } from "../../src/domain/agent.ts";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { prepareBrief, validateBrief } from "../../src/domain/prompts.ts";
@@ -67,12 +68,14 @@ test("tagged responses support async Standard Schema and take last complete tag"
 });
 
 test("Claude adapter supports print, terminal, reasoning, resume and fork", () => {
-  const agent = claude({
+  const agent = composeAgent({
+    harness: claude.harness({
+      reasoning: "high",
+      permissions: "acceptEdits",
+      saveConversations: false,
+      variables: { TOKEN: "value" },
+    }),
     model: "model",
-    reasoning: "high",
-    permissions: "acceptEdits",
-    saveConversations: false,
-    variables: { TOKEN: "value" },
   });
   const command = agent.request({
     text: "literal",
@@ -94,7 +97,7 @@ test("Claude adapter supports print, terminal, reasoning, resume and fork", () =
     true,
   );
   assert.ok(
-    claude()
+    composeAgent({ harness: claude.harness({}) })
       .request({ text: "" })
       .arguments?.includes("--dangerously-skip-permissions"),
   );
@@ -105,8 +108,8 @@ test("Claude adapter supports print, terminal, reasoning, resume and fork", () =
 });
 
 test("agent streams normalize text, tools, sessions, usage and failures", () => {
-  const c = claude(),
-    x = codex();
+  const c = composeAgent({ harness: claude.harness({}) }),
+    x = composeAgent({ harness: codex.harness({}) });
   const parse = (a: typeof c, value: unknown) =>
     a.events(JSON.stringify(value));
   assert.deepEqual(parse(c, { type: "system", session_id: "a" }), [
@@ -186,10 +189,12 @@ test("agent streams normalize text, tools, sessions, usage and failures", () => 
 });
 
 test("Codex adapter selects CLI subcommands and explicit reviewer", () => {
-  const agent = codex({
+  const agent = composeAgent({
+    harness: codex.harness({
+      reasoning: "high",
+      approvalReviewer: "auto_review",
+    }),
     model: "model",
-    reasoning: "high",
-    approvalReviewer: "auto_review",
   });
   const command = agent.request({
     text: "hi",
@@ -204,7 +209,7 @@ test("Codex adapter selects CLI subcommands and explicit reviewer", () => {
   ]);
   assert.ok(command.arguments?.includes('approvals_reviewer="auto_review"'));
   assert.ok(
-    codex()
+    composeAgent({ harness: codex.harness({}) })
       .request({})
       .arguments?.includes("--dangerously-bypass-approvals-and-sandbox"),
   );

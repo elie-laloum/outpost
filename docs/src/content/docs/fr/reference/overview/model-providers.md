@@ -1,31 +1,31 @@
 ---
-title: "Fournisseurs de modèles — Vue d’ensemble"
-description: "Un fournisseur de modèles envoie du texte directement à une API, indépendamment de l’allocation de sandbox."
+title: "Model providers — Vue d’ensemble"
+description: "Un fournisseur de modèles porte le transport de requêtes utilisé par un harness personnalisé."
 sidebar:
   label: Vue d’ensemble
   order: 0
 ---
 
-:::caution[Expérimental]
-Cette famille expose uniquement des appels textuels directs. Le harness d’agent pour les outils, les modifications du dépôt et les conversations est prévu en deuxième phase ; ces contrats peuvent évoluer.
+:::caution[Expérimental — refonte non publiée]
+Les requêtes texte bornées et les callbacks personnalisés sont implémentés. La boucle d’outils intégrée, le streaming et les conversations natives personnalisées restent prévus.
 :::
 
-Un fournisseur de modèles envoie des requêtes textuelles directement à une API. La première implémentation expérimentale, `openaiCompatible()`, fonctionne sans Codex via Chat Completions ou Responses. Un provider de sandbox possède séparément l’environnement où les commandes s’exécutent.
+Un fournisseur de modèles porte le transport de requêtes utilisé par un harness personnalisé. `openaiModelProvider()` prend en charge les services Chat Completions et Responses ; `anthropicModelProvider()` utilise Anthropic Messages avec cache optionnel du préfixe système. L’allocation du sandbox est indépendante.
 
-## Fonctionnement et philosophie
+## Fonctionnement
 
-Créez le client avec une URL de base d’API, un modèle et une clé bearer explicites (ou false sans authentification), puis appelez `generate()` avec du texte. Chaque appel s’exécute dans le processus appelant, gère son délai et renvoie le texte complet et la consommation déclarée si présente. Aucune sandbox n’est allouée.
+Configurez endpoint, credentials explicites et limites, puis transmettez le fournisseur à `customHarness({ modelProvider, run })`. Le callback utilise `context.modelProvider.request()` avec le modèle de l’agent. Les requêtes tournent dans le processus Outpost et héritent de l’annulation ; l’usage rapporté est cumulé une fois par appel.
 
-## Limites et responsabilités
+## Frontières et responsabilités
 
-La première phase accepte uniquement le texte sans streaming. L’exécution d’outils, la modification du dépôt, la persistance des conversations et l’intégration au dispatch attendent le harness d’agent en deuxième phase. Le client refuse les réponses non prises en charge et ne répète aucun appel automatiquement. Ses contrats publics restent expérimentaux ; les fixtures HTTP locales ne prouvent pas la compatibilité avec un service réel.
+Les identifiants sont des chaînes non vides arbitraires. Le service vérifie la disponibilité lors de l’appel ; aucun catalogue local, retry ni repli de protocole. Ces transports refusent les réponses d’outils et sorties incomplètes. Les fixtures HTTP locales valident les contrats sans prouver la compatibilité authentifiée de tous les services.
 
 ## Points d’entrée
 
-- [openaiCompatible](../../openaicompatible/)
-- [OpenAICompatibleOptions](../../openaicompatibleoptions/)
+- [openaiModelProvider](../../openaimodelprovider/)
+- [anthropicModelProvider](../../anthropicmodelprovider/)
 - [ModelProvider](../../modelprovider/)
 - [ModelRequest](../../modelrequest/)
 - [ModelResult](../../modelresult/)
 
-[Passer à la pratique avec le Guide](../../../guide/advanced/model-providers/).
+[Apprendre avec le guide pratique](../../../guide/advanced/model-providers/).

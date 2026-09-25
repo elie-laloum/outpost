@@ -23,7 +23,7 @@ Vercel and Daytona credentials authorize sandbox allocation and remain independe
 
 ## Diagnose a failed login
 
-A successful `doctor` check or sandbox allocation does not prove that a model accepts the credentials. Check the selected mode, declared variable, subscription/API access and the location of a Codex file seed before retrying. A handwritten API program must configure authentication explicitly; the CLI-generated Codex script already includes its login hook.
+A successful `doctor` check or sandbox allocation does not prove that a model accepts the credentials. Check the selected mode, declared variable, subscription/API access and the location of a Codex file seed before retrying. A handwritten API program must configure authentication explicitly; the CLI-generated Codex script already configures authentication on its harness.
 
 Detailed contracts and runnable examples: [Codex](../../agents/connect-codex/), [Claude](../../agents/connect-claude/), [Gemini](../../agents/gemini/). Custom Codex model providers require a Responses-compatible endpoint; see the [provider contract](../../behavior/agents/connect-codex/#openai-compatible-model-providers).
 

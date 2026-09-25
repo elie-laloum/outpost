@@ -16,7 +16,7 @@ import type { AttachOptions } from "@elie-laloum/outpost";
 | Nom            | Type                                                                                                                                                    | Présence  | Rôle                                                                                                           |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | -------------------------------------------------------------------------------------------------------------- |
 | `ask`          | `VariableQuestion \| undefined`                                                                                                                         | Optionnel | Callback fournissant les variables manquantes du brief lors de l’attachement interactif.                       |
-| `agent`        | `AgentAdapter \| undefined`                                                                                                                             | Optionnel | Adapter natif de l’agent de code.                                                                              |
+| `agent`        | `Agent \| undefined`                                                                                                                                    | Optionnel | Adapter natif de l’agent de code.                                                                              |
 | `brief`        | `Brief \| undefined`                                                                                                                                    | Optionnel | Entrée de tâche textuelle littérale ou provenant d’un fichier.                                                 |
 | `continuation` | `{ readonly id: string; readonly fork?: boolean; } \| undefined`                                                                                        | Optionnel | Identifiant de conversation native à poursuivre ; fork demande une conversation distincte dérivée de celle-ci. |
 | `signal`       | `AbortSignal \| undefined`                                                                                                                              | Optionnel | Annulation coopérative de cette opération.                                                                     |
@@ -27,7 +27,7 @@ import type { AttachOptions } from "@elie-laloum/outpost";
 ```ts
 export interface AttachOptions {
   readonly ask?: VariableQuestion;
-  readonly agent?: AgentAdapter;
+  readonly agent?: Agent;
   readonly brief?: Brief;
   readonly continuation?: {
     readonly id: string;
@@ -40,7 +40,7 @@ export interface AttachOptions {
 
 ## Contrats associés
 
-- [AgentAdapter](../agentadapter/)
+- [Agent](../type-agent/)
 - [Brief](../brief/)
 - [Command](../command/)
 - [VariableQuestion](../variablequestion/)

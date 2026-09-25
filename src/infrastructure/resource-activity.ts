@@ -31,7 +31,7 @@ async function activityDirectory(repository: string): Promise<string> {
 export async function registerResourceActivity(
   options: ResourceActivityOptions,
 ): Promise<ResourceActivity> {
-  for (const text of [options.workspace, options.provider])
+  for (const text of [options.workspace, options.sandboxProvider])
     invariant(
       text.length > 0 && text.length <= defaults.maxText,
       "Resource activity metadata exceeds its size limit",
@@ -48,7 +48,7 @@ export async function registerResourceActivity(
     id,
     pid: process.pid,
     ...(identity ? { identity } : {}),
-    provider: options.provider,
+    sandboxProvider: options.sandboxProvider,
     placement: options.placement,
     workspace: options.workspace,
     createdAt,

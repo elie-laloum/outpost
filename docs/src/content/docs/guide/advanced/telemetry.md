@@ -109,15 +109,15 @@ Any persisted example files remain inside this demonstration directory.
 
 ## Instrument a complete dispatch
 
-With the same dependencies, save **dispatch.mts**. This example creates a temporary repository and runs a local fixture without model calls or credentials. `local()` executes on the host.
+With the same dependencies, save **dispatch.mts**. This example creates a temporary repository and runs a local fixture without model calls or credentials. `localSandboxProvider()` executes on the host.
 
 ```ts file=dispatch.mts
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { execFileSync } from "node:child_process";
-import { dispatch, reporter } from "@elie-laloum/outpost";
-import { local } from "@elie-laloum/outpost/providers/local";
+import { dispatch, reporter, agent } from "@elie-laloum/outpost";
+import { localSandboxProvider as local } from "@elie-laloum/outpost/providers/local";
 import { openTelemetry } from "@elie-laloum/outpost/opentelemetry";
 import {
   BasicTracerProvider,
@@ -166,20 +166,27 @@ try {
   ]);
   const result = await dispatch({
     repository,
-    provider: local(),
+    sandboxProvider: local(),
     logging: false,
-    agent: {
-      name: "offline-fixture",
-      request() {
-        return {
-          executable: process.execPath,
-          arguments: ["-e", 'console.log("done")'],
-        };
+    agent: agent({
+      harness: {
+        kind: "cli",
+        bind() {
+          return {
+            name: "offline-fixture",
+            request() {
+              return {
+                executable: process.execPath,
+                arguments: ["-e", 'console.log("done")'],
+              };
+            },
+            events(line) {
+              return [{ kind: "text", text: line }];
+            },
+          };
+        },
       },
-      events(line) {
-        return [{ kind: "text", text: line }];
-      },
-    },
+    }),
     brief: { text: "Offline telemetry demonstration" },
     until: "done",
     telemetry,

@@ -37,7 +37,7 @@ test("CLI initializes a project noninteractively and refuses overwrites", async 
     "init",
     "--agent",
     "codex",
-    "--provider",
+    "--sandbox-provider",
     "local",
     "--directory",
     directory,
@@ -63,7 +63,7 @@ test("doctor CLI emits a complete JSON report and exits nonzero when Git is abse
     arguments: [
       cli,
       "doctor",
-      "--provider",
+      "--sandbox-provider",
       "local",
       "--agent",
       "codex",
@@ -89,7 +89,7 @@ test("doctor CLI emits a complete JSON report and exits nonzero when Git is abse
         check.id === "execution" && check.status === "skipped",
     ),
   );
-  const invalid = await run(["doctor", "--provider", "constructor"]);
+  const invalid = await run(["doctor", "--sandbox-provider", "constructor"]);
   assert.equal(invalid.status, 1);
   assert.match(invalid.stderr, /Unknown provider/);
 });
@@ -119,7 +119,7 @@ test("CLI allows opting out of the default image build and declares subscription
   const result = await run([
     "init",
     "--yes",
-    "--provider",
+    "--sandbox-provider",
     "docker",
     "--agent",
     "claude",

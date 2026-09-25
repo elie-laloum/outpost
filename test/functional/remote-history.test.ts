@@ -13,7 +13,7 @@ import {
 } from "../../src/index.ts";
 import { seedRemote } from "../../src/application/remote-workspace.ts";
 import { git } from "../../src/infrastructure/git.ts";
-import { local } from "../../src/providers/local.ts";
+import { localSandboxProvider } from "../../src/providers/local.ts";
 import { repository } from "../helpers.ts";
 
 async function fixture(t: TestContext) {
@@ -25,7 +25,7 @@ async function fixture(t: TestContext) {
   t.after(() => workspace.close({ preserve: true }));
   const remote = join(root, ".outpost", "recovery", "remote");
   await mkdir(remote, { recursive: true });
-  const lease = await local().acquire({
+  const lease = await localSandboxProvider().acquire({
     repository: remote,
     directory: remote,
     gitDirectories: [],

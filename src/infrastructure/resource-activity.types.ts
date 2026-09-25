@@ -26,7 +26,7 @@ export interface ResourceActivityRecord {
   readonly id: string;
   readonly pid: number;
   readonly identity?: LocalProcessIdentity;
-  readonly provider: string;
+  readonly sandboxProvider: string;
   readonly placement: "mounted" | "remote" | "host";
   readonly workspace: string;
   readonly createdAt: string;
@@ -46,7 +46,7 @@ export interface ResourceActivityOptions {
   readonly transporter?: Transport;
   readonly repository: string;
   readonly workspace: string;
-  readonly provider: string;
+  readonly sandboxProvider: string;
   readonly placement: ResourceActivityRecord["placement"];
 }
 export interface ResourceInspectionEntry {

@@ -17,7 +17,7 @@ Implement `SandboxProvider` and return a `SandboxLease` from `acquire(context)`.
 | `download(source, destination, options?)` | Transfer environment files/directories to the host.                                            |
 | `release()`                               | Idempotent cleanup, including pending process/session resources.                               |
 
-Choose placement deliberately: `mounted` shares the worktree, `remote` uses Git synchronization, and `host` executes directly. The `mountedProvider({ name, variables?, acquire })` and `remoteProvider(...)` factories add the placement and freeze the provider definition; they do not implement transport for you.
+Choose placement deliberately: `mounted` shares the worktree, `remote` uses Git synchronization, and `host` executes directly. The `mountedSandboxProvider({ name, variables?, acquire })` and `remoteSandboxProvider(...)` factories add the placement and freeze the provider definition; they do not implement transport for you.
 
 Transfers receive optional `signal` and `deadlineMs`. Support binary data and nested directories. Stop active command groups on cancellation without destroying a reusable environment. If interactive execution or elevation is unsupported, reject it explicitly rather than pretending it succeeded.
 

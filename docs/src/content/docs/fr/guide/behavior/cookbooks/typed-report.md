@@ -8,10 +8,15 @@ sidebar:
 Utilisez cette recette lorsqu’un tableau de bord ou une tâche attend des données structurées. Préparez la [connexion Claude](../../../agents/connect-claude/) et l’[installation commune](../../../cookbook/).
 
 ```ts
-import { dispatch, claude, response } from "@elie-laloum/outpost";
+import {
+  agent as composeAgent,
+  dispatch,
+  claude,
+  response,
+} from "@elie-laloum/outpost";
 
 const result = await dispatch({
-  agent: claude(),
+  agent: composeAgent({ harness: claude.harness({}) }),
   branch: { mode: "named", name: "audit/test-readiness" },
   brief: {
     text: 'Inspect the test setup without editing files. Return <report>{"ready":true,"summary":"explanation"}</report>. Use false if prerequisites are missing.',

@@ -8,7 +8,7 @@ sidebar:
 Implement `AgentAdapter` to connect a different native CLI without changing sandbox allocation or workflows. Keep command construction and protocol decoding in separate modules as the adapter grows.
 
 ```ts
-import type { AgentAdapter } from "@elie-laloum/outpost";
+import { agent, type AgentAdapter } from "@elie-laloum/outpost";
 
 const adapter: AgentAdapter = {
   name: "example",
@@ -25,10 +25,11 @@ const adapter: AgentAdapter = {
     return [{ kind: "text", text: line }];
   },
 };
-console.log(adapter.name);
+const worker = agent({ harness: { kind: "cli", bind: () => adapter } });
+console.log(worker.name);
 ```
 
-This illustrates the port, not an installed provider: supply your real executable and protocol. `request(input)` receives optional text, interactive mode and continuation metadata and returns a `Command`. `events(line)` returns zero or more normalized events. Preserve unknown messages as `raw` when they are useful for diagnostics; do not invent token counts or conversation IDs.
+This illustrates the port, not an installed CLI: supply your real executable and protocol. `request(input)` receives optional text, interactive mode and continuation metadata and returns a `Command`. `events(line)` returns zero or more normalized events. Preserve unknown messages as `raw` when they are useful for diagnostics; do not invent token counts or conversation IDs.
 
 ## Optional capabilities
 

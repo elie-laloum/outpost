@@ -58,7 +58,7 @@ try {
     [
       "--input-type=module",
       "-e",
-      "import {openaiCompatible, gemini, response, workflow, conversations, reporter, recoveryDetails, diagnoseAgentProtocol, diagnoseSandbox, planRecoveryRetention, pruneRecoveryRetention, assertRecoveryQuota, verifyRecoveryTransfer} from '@elie-laloum/outpost'; import {docker} from '@elie-laloum/outpost/providers/docker'; import {firecracker} from '@elie-laloum/outpost/providers/firecracker'; if(typeof firecracker!=='function')throw Error('Missing Firecracker provider'); if((await response.text({tag:'ok'}).read('<ok>yes</ok>'))!=='yes'||docker().name!=='docker')throw Error('Package import failed'); for(const item of [openaiCompatible,gemini,conversations.capture,reporter,recoveryDetails,diagnoseSandbox,planRecoveryRetention,pruneRecoveryRetention,assertRecoveryQuota,verifyRecoveryTransfer])if(typeof item!=='function')throw Error('Missing public extension'); if(diagnoseAgentProtocol('codex').hasFailures||diagnoseAgentProtocol('gemini').hasFailures)throw Error('Protocol fixtures failed'); (await workflow('empty',[]).start()).unwrap()",
+      "import {openaiModelProvider, gemini, response, workflow, conversations, reporter, recoveryDetails, diagnoseAgentProtocol, diagnoseSandbox, planRecoveryRetention, pruneRecoveryRetention, assertRecoveryQuota, verifyRecoveryTransfer} from '@elie-laloum/outpost'; import {dockerSandboxProvider} from '@elie-laloum/outpost/providers/docker'; import {firecrackerSandboxProvider} from '@elie-laloum/outpost/providers/firecracker'; if(typeof firecrackerSandboxProvider!=='function')throw Error('Missing Firecracker provider'); if((await response.text({tag:'ok'}).read('<ok>yes</ok>'))!=='yes'||dockerSandboxProvider().name!=='docker')throw Error('Package import failed'); for(const item of [openaiModelProvider,conversations.capture,reporter,recoveryDetails,diagnoseSandbox,planRecoveryRetention,pruneRecoveryRetention,assertRecoveryQuota,verifyRecoveryTransfer])if(typeof item!=='function')throw Error('Missing public extension'); if(diagnoseAgentProtocol('codex').hasFailures||diagnoseAgentProtocol('gemini').hasFailures)throw Error('Protocol fixtures failed'); (await workflow('empty',[]).start()).unwrap()",
     ],
     { cwd: temporary, stdio: "inherit" },
   );
@@ -76,6 +76,32 @@ try {
     ],
     { cwd: temporary, stdio: "inherit" },
   );
+  execFileSync(
+    process.execPath,
+    [
+      "--input-type=module",
+      "-e",
+      `
+    import assert from 'node:assert/strict';
+    import * as api from '@elie-laloum/outpost';
+    for (const name of ['openaiCompatible','local','docker','podman','vercel','daytona','firecracker','mountedProvider','remoteProvider']) assert.equal(name in api, false, name);
+    for (const name of ['claude','codex','gemini']) {
+      assert.equal(typeof api[name], 'object');
+      assert.equal(api.agent({harness:api[name].harness(),model:'arbitrary-model'}).model,'arbitrary-model');
+    }
+    for (const name of ['local','docker','podman','firecracker']) {
+      const exports = await import('@elie-laloum/outpost/providers/'+name);
+      assert.equal(name in exports,false,name);
+      assert.equal(typeof exports[name+'SandboxProvider'],'function');
+    }
+    const modelProvider=api.anthropicModelProvider({apiKey:'unused',maxOutputTokens:100});
+    assert.equal('generate' in modelProvider,false);
+    assert.equal('model' in modelProvider,false);
+    assert.equal(api.agent({harness:api.customHarness({modelProvider,run:async()=>({text:'done'})}),model:'arbitrary'}).kind,'custom');
+  `,
+    ],
+    { cwd: temporary, stdio: "inherit" },
+  );
   const cli = join(
     temporary,
     "node_modules",
@@ -87,7 +113,7 @@ try {
   );
   execFileSync(
     process.execPath,
-    [cli, "init", "--yes", "--provider", "local"],
+    [cli, "init", "--yes", "--sandbox-provider", "local"],
     { cwd: temporary, stdio: "inherit" },
   );
   execFileSync(process.execPath, ["--check", join(temporary, "run.ts")], {
@@ -101,7 +127,7 @@ try {
       cli,
       "init",
       "--yes",
-      "--provider",
+      "--sandbox-provider",
       "vercel",
       "--directory",
       standalone,
@@ -136,30 +162,44 @@ try {
   const consumer = join(temporary, "consumer.ts");
   writeFileSync(
     consumer,
-    `import { dispatch, codex, gemini, response, createSandbox, type GeminiSettings, type EgressPolicy } from '@elie-laloum/outpost';
-import { openaiCompatible, type OpenAICompatibleOptions, type ModelProvider, type ModelRequest, type ModelResult, type AgentAdapter, type SandboxProvider } from '@elie-laloum/outpost';
-const modelOptions: OpenAICompatibleOptions = { baseUrl: 'http://localhost/v1', model: 'test', apiKey: false };
-const modelProvider: ModelProvider = openaiCompatible(modelOptions);
-const modelInput: ModelRequest = { prompt: 'hello' };
-const generate: Promise<ModelResult> = modelProvider.generate(modelInput);
+    `import { agent as composeAgent,  dispatch, codex, gemini, response, createSandbox, type GeminiSettings, type EgressPolicy } from '@elie-laloum/outpost';
+import { openaiModelProvider, type OpenAIModelProviderOptions, type ModelProvider, type ModelRequest, type ModelResult, type AgentAdapter, type SandboxProvider } from '@elie-laloum/outpost';
+import { customHarness, anthropicModelProvider, type Agent } from '@elie-laloum/outpost';
+// @ts-expect-error Removed API has no compatibility export.
+import { openaiCompatible } from '@elie-laloum/outpost';
+// @ts-expect-error Removed sandbox factory has no alias.
+import { local } from '@elie-laloum/outpost/providers/local';
+const custom = customHarness({modelProvider:anthropicModelProvider({apiKey:'unused',maxOutputTokens:10}),run:async(input,context)=>context.modelProvider.request({model:context.model,prompt:input.prompt,signal:context.signal})});
+const composed: Agent = composeAgent({harness:custom,model:'arbitrary'});
+// @ts-expect-error Custom harness requires a model.
+composeAgent({harness:custom});
+// @ts-expect-error Presets are namespaces, not factories.
+codex();
+// @ts-expect-error Model selection belongs to the agent.
+codex.harness({model:'arbitrary'});
+console.log(composed);
+const modelOptions: OpenAIModelProviderOptions = { baseUrl: 'http://localhost/v1', apiKey: false };
+const modelProvider: ModelProvider = openaiModelProvider(modelOptions);
+const modelInput: ModelRequest = { model: 'test', prompt: 'hello' };
+const generate: Promise<ModelResult> = modelProvider.request(modelInput);
 // @ts-expect-error A model client is not a coding agent without its harness.
 const agent: AgentAdapter = modelProvider;
 // @ts-expect-error A model client does not allocate sandboxes.
 const backend: SandboxProvider = modelProvider;
 console.log(generate, agent, backend);
-import { local } from '@elie-laloum/outpost/providers/local';
-import { firecracker, type FirecrackerOptions } from '@elie-laloum/outpost/providers/firecracker';
-const microvm: typeof firecracker = (options: FirecrackerOptions) => firecracker(options);
+import { localSandboxProvider } from '@elie-laloum/outpost/providers/local';
+import { firecrackerSandboxProvider, type FirecrackerOptions } from '@elie-laloum/outpost/providers/firecracker';
+const microvm: typeof firecrackerSandboxProvider = (options: FirecrackerOptions) => firecrackerSandboxProvider(options);
 console.log(microvm);
-import { docker, type DependencyCache } from '@elie-laloum/outpost/providers/docker';
-import { podman } from '@elie-laloum/outpost/providers/podman';
+import { dockerSandboxProvider, type DependencyCache } from '@elie-laloum/outpost/providers/docker';
+import { podmanSandboxProvider } from '@elie-laloum/outpost/providers/podman';
 import { planRecoveryRetention, pruneRecoveryRetention, assertRecoveryQuota, verifyRecoveryTransfer, type RecoveryRetentionPolicy, type FileTransfers, type SandboxLease } from '@elie-laloum/outpost';
 const egress: EgressPolicy = { mode: 'deny-all' };
-docker({egress});
-podman({egress});
+dockerSandboxProvider({egress});
+podmanSandboxProvider({egress});
 const cache: DependencyCache = {name:'npm', key:'lock-v1'};
-docker({caches:[cache]});
-podman({caches:[cache]});
+dockerSandboxProvider({caches:[cache]});
+podmanSandboxProvider({caches:[cache]});
 const policy: RecoveryRetentionPolicy = {version:1, scopes:['closed-logs'], minAgeMs:1000};
 const plan = await planRecoveryRetention({policy});
 await pruneRecoveryRetention(plan);
@@ -167,13 +207,13 @@ await assertRecoveryQuota({maxBytes:1024});
 await verifyRecoveryTransfer('/tmp/transfer', {checksums:true});
 const batchCapability = (lease: SandboxLease): FileTransfers | undefined => lease.fileTransfers;
 console.log(batchCapability);
-await using sandbox = await createSandbox({ provider: local() });
+await using sandbox = await createSandbox({ sandboxProvider: localSandboxProvider() });
 await sandbox.diagnose({transfers:true});
-const result = await sandbox.dispatch({ agent: codex(), brief: { text: 'Return <n>1</n>' }, response: response.json({tag:'n', schema: value => Number(value)}) });
+const result = await sandbox.dispatch({ agent: composeAgent({ harness: codex.harness({}) }), brief: { text: 'Return <n>1</n>' }, response: response.json({tag:'n', schema: value => Number(value)}) });
 const n: number = result.value;
-const geminiSettings: GeminiSettings = { model: 'flash', approvalMode: 'plan' };
-gemini(geminiSettings);
-const once = await dispatch({agent:codex(),provider:local(),brief:{text:'hello'}});
+const geminiSettings: GeminiSettings = { approvalMode: 'plan' };
+composeAgent({ harness: gemini.harness(geminiSettings), model: "flash" });
+const once = await dispatch({agent:composeAgent({ harness: codex.harness({}) }),sandboxProvider:localSandboxProvider(),brief:{text:'hello'}});
 await once.fork({brief:{text:'alternative'},branch:{mode:'named',name:'outpost/alternative'},hooks:{workspaceReady:[]}});
 // @ts-expect-error Warm results cannot replace their sandbox configuration.
 await result.resume({brief:{text:'continue'},branch:{mode:'named',name:'outpost/wrong'}});
@@ -223,13 +263,13 @@ console.log(n,once.commits);
     telemetryConsumer,
     `import { metrics, trace } from '@opentelemetry/api';
 import { openTelemetry, type OpenTelemetryObserver } from '@elie-laloum/outpost/opentelemetry';
-import { task, workflow, dispatch, codex, createReporter, type DispatchTelemetry } from '@elie-laloum/outpost';
+import { task, workflow, dispatch, agent as composeAgent, codex, createReporter, type DispatchTelemetry } from '@elie-laloum/outpost';
 const telemetry: OpenTelemetryObserver = openTelemetry({tracer:trace.getTracer('consumer'),meter:metrics.getMeter('consumer')});
 const step = task({key:'sample',perform(context){context.reportUsage({input:1,cached:0,output:1});return 1;}});
 (await workflow('smoke',[step]).start({budget:{attempts:1},observe:telemetry.observe})).unwrap();
 const instrumentation: DispatchTelemetry = telemetry;
 const abort = AbortSignal.abort(new Error('expected cancellation'));
-try { await dispatch({agent:codex(),brief:{text:'unused'},signal:abort,telemetry:instrumentation}); throw new Error('Expected cancellation'); }
+try { await dispatch({agent:composeAgent({harness:codex.harness()}),brief:{text:'unused'},signal:abort,telemetry:instrumentation}); throw new Error('Expected cancellation'); }
 catch(error) { if(error !== abort.reason) throw error; }
 let text = '';
 const report = createReporter({async text(event){text += event.text;}});

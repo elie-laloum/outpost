@@ -16,7 +16,7 @@ import {
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { executeProcess } from "../../src/infrastructure/process.ts";
-import { firecracker } from "../../src/providers/firecracker.ts";
+import { firecrackerSandboxProvider } from "../../src/providers/firecracker.ts";
 import {
   firecrackerCommand,
   firecrackerSsh,
@@ -202,18 +202,21 @@ test(
   async () => {
     const f = await fixture();
     try {
-      assert.equal(firecracker(f.options).placement, "remote");
+      assert.equal(firecrackerSandboxProvider(f.options).placement, "remote");
       const networkOptions = { ...f.options, egress: { mode: "deny-all" } };
-      assert.throws(() => firecracker(networkOptions), /egress/);
+      assert.throws(() => firecrackerSandboxProvider(networkOptions), /egress/);
       assert.throws(
-        () => firecracker({ ...f.options, kernel: "relative" }),
+        () => firecrackerSandboxProvider({ ...f.options, kernel: "relative" }),
         /absolute/,
       );
       assert.throws(
-        () => firecracker({ ...f.options, tap: "invalid name" }),
+        () => firecrackerSandboxProvider({ ...f.options, tap: "invalid name" }),
         /TAP/,
       );
-      assert.throws(() => firecracker({ ...f.options, cpus: 0 }), /positive/);
+      assert.throws(
+        () => firecrackerSandboxProvider({ ...f.options, cpus: 0 }),
+        /positive/,
+      );
       await assert.rejects(firecrackerMachine(f.options, AbortSignal.abort()));
     } finally {
       await f.cleanup();
@@ -258,15 +261,15 @@ test(
       }
       assert.equal(machine.isClosed(), true);
       await assert.rejects(lstat(machine.directory), /ENOENT/);
-      const provider = firecracker(f.options);
+      const sandboxProvider = firecrackerSandboxProvider(f.options);
       const context = {
         repository: f.root,
         directory: f.root,
         gitDirectories: [],
         variables: {},
       };
-      const lease = await provider.acquire(context);
-      await assert.rejects(provider.acquire(context), /already owns/);
+      const lease = await sandboxProvider.acquire(context);
+      await assert.rejects(sandboxProvider.acquire(context), /already owns/);
       assert.equal((await lease.invoke({ executable: "true" })).status, 0);
       await lease.upload(f.options.kernel, `${lease.root}/uploaded`);
       await lease.download(
@@ -282,13 +285,13 @@ test(
       await new Promise((resolve) => setTimeout(resolve, 30));
       await lease.release();
       await rejected;
-      const next = await provider.acquire(context);
+      const next = await sandboxProvider.acquire(context);
       await lease.release();
-      await assert.rejects(provider.acquire(context), /already owns/);
+      await assert.rejects(sandboxProvider.acquire(context), /already owns/);
       await next.release();
       await assert.rejects(lease.invoke({ executable: "true" }), /closed/);
       await writeFile(f.options.binary, "#!/bin/sh\nexit 7\n", { mode: 0o700 });
-      await assert.rejects(provider.acquire(context), /exited|ready/);
+      await assert.rejects(sandboxProvider.acquire(context), /exited|ready/);
     } finally {
       t.mock.restoreAll();
       syncBuiltinESMExports();

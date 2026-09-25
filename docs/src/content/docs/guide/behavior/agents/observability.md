@@ -8,10 +8,15 @@ sidebar:
 Use `reporter` for readable terminal output or `observe` for structured integration.
 
 ```ts
-import { dispatch, codex, reporter } from "@elie-laloum/outpost";
+import {
+  agent as composeAgent,
+  dispatch,
+  codex,
+  reporter,
+} from "@elie-laloum/outpost";
 
 const result = await dispatch({
-  agent: codex(),
+  agent: composeAgent({ harness: codex.harness({}) }),
   brief: { text: "Inspect and summarize the repository." },
   label: "inspection",
   observe: reporter({ label: "inspection", verbose: false }),

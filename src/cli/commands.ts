@@ -34,7 +34,7 @@ export async function runCli(
       const short = "short" in configuration ? `-${configuration.short}, ` : "";
       command.addOption(
         new Option(
-          `${short}--${key}${configuration.type === "string" ? " <value>" : ""}`,
+          `${short}--${key === "sandboxProvider" ? "sandbox-provider" : key}${configuration.type === "string" ? " <value>" : ""}`,
           configuration.description,
         ),
       );
@@ -52,7 +52,11 @@ export async function runCli(
       for (const option of command.options) {
         const value = parsed[option.attributeName()];
         if (typeof value === "string" || typeof value === "boolean")
-          values[option.long!.replace(/^--(?:no-)?/, "")] = value;
+          values[
+            option.long === "--sandbox-provider"
+              ? "sandboxProvider"
+              : option.long!.replace(/^--(?:no-)?/, "")
+          ] = value;
       }
       await handlers[path[0]!]!({
         values: values as CliValues,

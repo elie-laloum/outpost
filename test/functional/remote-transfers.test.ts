@@ -14,7 +14,7 @@ import {
 import { join } from "node:path";
 import { openWorkspace, OutpostError } from "../../src/index.ts";
 import { seedRemote } from "../../src/application/remote-workspace.ts";
-import { local } from "../../src/providers/local.ts";
+import { localSandboxProvider } from "../../src/providers/local.ts";
 import { fileBatches } from "../../src/providers/file-batches.ts";
 import { git } from "../../src/infrastructure/git.ts";
 import { repository } from "../helpers.ts";
@@ -28,7 +28,7 @@ test("incremental remote batches reuse verified bytes and preserve binary, mode,
   t.after(() => workspace.close({ preserve: true }));
   const remote = join(root, ".outpost", "recovery", "remote");
   await mkdir(remote, { recursive: true });
-  const localLease = await local().acquire({
+  const localLease = await localSandboxProvider().acquire({
     repository: remote,
     directory: remote,
     gitDirectories: [],
@@ -129,7 +129,7 @@ test("partial batch failure retains recovery artifacts, leaves the host intact a
   t.after(() => workspace.close({ preserve: true }));
   const remote = join(root, ".outpost", "recovery", "remote");
   await mkdir(remote, { recursive: true });
-  const base = await local().acquire({
+  const base = await localSandboxProvider().acquire({
     repository: remote,
     directory: remote,
     gitDirectories: [],
@@ -198,7 +198,7 @@ test("incremental reuse rejects concurrent host edits and ignored-file overlaps"
   t.after(() => workspace.close({ preserve: true }));
   const remote = join(root, ".outpost", "recovery", "remote");
   await mkdir(remote, { recursive: true });
-  const base = await local().acquire({
+  const base = await localSandboxProvider().acquire({
     repository: remote,
     directory: remote,
     gitDirectories: [],
@@ -249,7 +249,7 @@ test("a failed apply retains complete checksummed recovery including reused payl
   t.after(() => workspace.close({ preserve: true }));
   const remote = join(root, ".outpost", "recovery", "remote");
   await mkdir(remote, { recursive: true });
-  const base = await local().acquire({
+  const base = await localSandboxProvider().acquire({
     repository: remote,
     directory: remote,
     gitDirectories: [],
@@ -312,7 +312,7 @@ test("a truncated remote file listing fails safely before any host mutation", as
   t.after(() => workspace.close({ preserve: true }));
   const remote = join(root, ".outpost", "recovery", "remote");
   await mkdir(remote, { recursive: true });
-  const base = await local().acquire({
+  const base = await localSandboxProvider().acquire({
     repository: remote,
     directory: remote,
     gitDirectories: [],

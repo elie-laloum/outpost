@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import type { AgentAdapter } from "../domain/agent.types.ts";
+import type { Agent } from "../domain/agent.types.ts";
 import { invariant, positive } from "../domain/errors.ts";
 import { validateBrief } from "../domain/prompts.ts";
 import { dispatchDeadlines, executionDefaults } from "./execution.constants.ts";
@@ -36,7 +36,7 @@ export function validateDispatch(options: DispatchOptions<unknown>): void {
 export async function preflightDispatch(
   options: DispatchOptions<unknown>,
   _repository: string,
-  agent?: AgentAdapter,
+  agent?: Agent,
 ): Promise<void> {
   validateDispatch(options);
   if (options.continuation)

@@ -83,7 +83,7 @@ export async function speculate<T = undefined>(
         sandbox = await createSandbox({
           ...options.sandbox,
           repository: options.repository,
-          provider: options.provider,
+          sandboxProvider: options.sandboxProvider,
           branch: { mode: "named", name: initial.branch, from: baseline },
           agent: candidate.agent,
           signal,

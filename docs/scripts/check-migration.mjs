@@ -1,3 +1,4 @@
+import { referenceRedirects } from "./reference-redirects.mjs";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { readFile, access } from "node:fs/promises";
@@ -39,7 +40,15 @@ for (const page of migration.pages) {
 }
 for (const route of migration.publicRoutes)
   for (const locale of ["", "fr/"])
-    await access(resolve(content, locale + route));
+    await access(resolve(content, locale + route)).catch(async () => {
+      const target =
+        referenceRedirects["/" + locale + route.replace(/\.md$/, "/")];
+      assert.ok(
+        target,
+        `Missing preserved route or explicit redirect: ${locale}${route}`,
+      );
+      await access(resolve(content, target.slice(1).replace(/\/$/, ".md")));
+    });
 for (const example of migration.examples)
   for (const locale of ["", "fr/"])
     await access(resolve(content, `${locale}${example.destination}.md`));

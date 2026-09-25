@@ -104,7 +104,7 @@ export async function recoveryCommand({
       );
       for (const entry of report.resources.entries) {
         const detail = entry.record
-          ? `${JSON.stringify(entry.record.provider)} | ${entry.record.phase} | ${entry.record.operations.map((operation) => `${operation.kind} (${operation.count})`).join(", ") || "idle"}`
+          ? `${JSON.stringify(entry.record.sandboxProvider)} | ${entry.record.phase} | ${entry.record.operations.map((operation) => `${operation.kind} (${operation.count})`).join(", ") || "idle"}`
           : "unreadable";
         process.stdout.write(
           `  ${JSON.stringify(entry.path)} | ${detail} | ownership ${entry.ownership.status}: ${entry.ownership.reason}\n`,

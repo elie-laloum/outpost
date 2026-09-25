@@ -21,7 +21,7 @@ PROJECT_MODE=test
 2. An empty declaration inherits the matching host process value, if available.
 3. Explicit provider or adapter `variables` override the project values.
 
-The same name cannot be declared by both provider and adapter. Put shared environment in the provider and agent-specific credentials in the adapter. A warm sandbox resolves each job’s adapter variables independently. Isolated environments import only declared process variables; `local()` runs as your host process and is not an environment isolation boundary.
+The same name cannot be declared by both provider and adapter. Put shared environment in the provider and agent-specific credentials in the adapter. A warm sandbox resolves each job’s adapter variables independently. Isolated environments import only declared process variables; `localSandboxProvider()` runs as your host process and is not an environment isolation boundary.
 
 ## Credential choices
 

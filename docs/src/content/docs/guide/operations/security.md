@@ -9,7 +9,7 @@ Outpost runs coding agents that execute project commands. Select repositories, m
 
 Docker/Podman expose the selected checkout, required Git metadata and explicit volumes. Containers use a chosen UID/GID, reduced capabilities, no-new-privileges and a private home. Extra devices, writable mounts and elevated hooks deliberately widen that boundary.
 
-Shared Git metadata remains writable. A mounted sandbox is not a hostile-agent boundary protecting the host repository or its configuration. Outpost disables host Git hooks for its own Git commands, but repository tooling can execute other code. `local()` has no filesystem isolation.
+Shared Git metadata remains writable. A mounted sandbox is not a hostile-agent boundary protecting the host repository or its configuration. Outpost disables host Git hooks for its own Git commands, but repository tooling can execute other code. `localSandboxProvider()` has no filesystem isolation.
 
 Remote providers upload history and selected files to your cloud account. Review that provider’s storage/network policies. Credentials explicitly sent to the environment are available to code running there.
 

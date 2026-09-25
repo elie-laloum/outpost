@@ -12,7 +12,7 @@ test("isolated containers use remote placement and private writable Git storage"
   const root = await repository(t);
   for (const engine of ["docker", "podman"] as const) {
     const calls: Command[] = [];
-    const provider = containerProvider(
+    const sandboxProvider = containerProvider(
       engine,
       {
         repositoryMode: "isolated",
@@ -28,8 +28,8 @@ test("isolated containers use remote placement and private writable Git storage"
         };
       },
     );
-    assert.equal(provider.placement, "remote");
-    const lease = await provider.acquire({
+    assert.equal(sandboxProvider.placement, "remote");
+    const lease = await sandboxProvider.acquire({
       repository: root,
       directory: root,
       gitDirectories: [join(root, ".git")],

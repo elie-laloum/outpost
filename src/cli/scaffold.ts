@@ -26,7 +26,7 @@ export async function initialize(
   executor?: Executor,
 ): Promise<ScaffoldResult> {
   const root = resolve(options.directory ?? process.cwd());
-  const provider = options.provider ?? "docker";
+  const sandboxProvider = options.sandboxProvider ?? "docker";
   validateInitialization(options);
   const { hasPackage, manager, extension } = await projectSettings(
     root,
@@ -92,7 +92,10 @@ export async function initialize(
     }
   }
   if (options.install) {
-    const packages = ["@elie-laloum/outpost", ...providerPackages[provider]];
+    const packages = [
+      "@elie-laloum/outpost",
+      ...providerPackages[sandboxProvider],
+    ];
     const args =
       manager === "npm"
         ? ["install", "--save-dev", ...packages]
@@ -108,12 +111,15 @@ export async function initialize(
       executor,
     );
   }
-  if (options.build && (provider === "docker" || provider === "podman"))
+  if (
+    options.build &&
+    (sandboxProvider === "docker" || sandboxProvider === "podman")
+  )
     await manageImage(
       "build",
       {
         directory: root,
-        engine: provider,
+        engine: sandboxProvider,
         ...(options.image ? { image: options.image } : {}),
       },
       executor,

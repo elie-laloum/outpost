@@ -8,11 +8,16 @@ sidebar:
 Utilisez cette recette pour préserver un travail partiel. Préparez l’[installation commune](../../../cookbook/) et la connexion Claude. Nettoyage et collecte peuvent continuer après le délai de la demande.
 
 ```ts
-import { dispatch, claude, recoveryDetails } from "@elie-laloum/outpost";
+import {
+  agent as composeAgent,
+  dispatch,
+  claude,
+  recoveryDetails,
+} from "@elie-laloum/outpost";
 
 try {
   const result = await dispatch({
-    agent: claude(),
+    agent: composeAgent({ harness: claude.harness({}) }),
     branch: { mode: "named", name: "fix/recoverable-parser" },
     brief: { text: "Fix parser errors, run tests and commit." },
     signal: AbortSignal.timeout(300_000),

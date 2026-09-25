@@ -7,7 +7,7 @@ import { repository } from "../helpers.ts";
 test("file mounts resolve the agent home and prepare writable parents without broad capabilities", async (t) => {
   const root = await repository(t),
     calls: Command[] = [];
-  const provider = containerProvider(
+  const sandboxProvider = containerProvider(
     "docker",
     {
       label: false,
@@ -21,7 +21,7 @@ test("file mounts resolve the agent home and prepare writable parents without br
       return { status: 0, stdout: "1000:1000", stderr: "" };
     },
   );
-  const lease = await provider.acquire({
+  const lease = await sandboxProvider.acquire({
     repository: root,
     directory: root,
     gitDirectories: [],

@@ -9,7 +9,7 @@ import {
   recoveryDetails,
   openWorkspace,
 } from "../../src/index.ts";
-import { local } from "../../src/providers/local.ts";
+import { localSandboxProvider } from "../../src/providers/local.ts";
 import { transfer } from "../../src/infrastructure/transfer.ts";
 import { downloadTree } from "../../src/providers/cloud-files.ts";
 import { seedRemote } from "../../src/application/remote-workspace.ts";
@@ -69,7 +69,7 @@ test("idle diagnostics repeat before timeout and error recovery preserves the jo
   await assert.rejects(
     dispatch({
       repository: root,
-      provider: local(),
+      sandboxProvider: localSandboxProvider(),
       agent: scripted("setTimeout(()=>{},10000)"),
       branch: { mode: "named", name: "idle-test" },
       brief: { text: "wait" },
@@ -93,7 +93,7 @@ test("preparation errors are journaled and sibling hooks are cancelled", async (
   try {
     await createSandbox({
       repository: root,
-      provider: local(),
+      sandboxProvider: localSandboxProvider(),
       branch: { mode: "named", name: "hook-errors" },
       hooks: {
         hostReady: [
@@ -164,7 +164,7 @@ test("remote provisioning bounds uploads and retries only transient Git setup fa
     createSandbox({
       repository: root,
       limits: { copyMs: 15 },
-      provider: {
+      sandboxProvider: {
         name: "stalled",
         placement: "remote",
         async acquire() {
@@ -193,7 +193,7 @@ test("remote provisioning bounds uploads and retries only transient Git setup fa
   t.after(() => workspace.close());
   const remote = join(root, ".outpost", "recovery", "retry-remote");
   await mkdir(remote, { recursive: true });
-  const lease = await local().acquire({
+  const lease = await localSandboxProvider().acquire({
     repository: remote,
     directory: remote,
     variables: {},
@@ -245,7 +245,7 @@ test("scaffolding falls back for malformed metadata and detects the package mana
   await writeFile(join(unknown, "pnpm-lock.yaml"), "");
   const commands: string[] = [];
   await initialize(
-    { directory: unknown, provider: "docker", install: true },
+    { directory: unknown, sandboxProvider: "docker", install: true },
     async (command) => {
       commands.push(command.executable + " " + command.arguments?.join(" "));
       return { status: 0, stdout: "", stderr: "" };
@@ -258,7 +258,7 @@ test("local elevated commands run as the current account without escalation", as
   const root = await repository(t);
   const box = await createSandbox({
     repository: root,
-    provider: local(),
+    sandboxProvider: localSandboxProvider(),
     logging: false,
   });
   try {

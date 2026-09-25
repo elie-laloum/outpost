@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { createServer } from "node:http";
 import { once } from "node:events";
 import { test } from "node:test";
-import { openaiCompatible } from "../../src/index.ts";
+import { openaiModelProvider } from "../../src/index.ts";
 
 const completion = {
   choices: [
@@ -81,14 +81,15 @@ test("direct model HTTP contracts, cancellation, deadlines and reuse", async (t)
   const address = server.address();
   assert.ok(address && typeof address !== "string");
   const baseUrl = `http://127.0.0.1:${address.port}/prefix/v1/`;
-  const provider = openaiCompatible({
+  const provider = openaiModelProvider({
     baseUrl,
-    model: "vendor/model",
+
     apiKey: "secret-key",
     timeoutMs: 2_000,
   });
   assert.deepEqual(
-    await provider.generate({
+    await provider.request({
+      model: "vendor/model",
       prompt: "hello",
       system: "brief",
       maxOutputTokens: 12,
@@ -110,15 +111,16 @@ test("direct model HTTP contracts, cancellation, deadlines and reuse", async (t)
     },
   });
   mode = "responses";
-  const direct = openaiCompatible({
+  const direct = openaiModelProvider({
     baseUrl,
-    model: "model",
+
     apiKey: false,
     api: "responses",
   });
   assert.equal(
     (
-      await direct.generate({
+      await direct.request({
+        model: "model",
         prompt: "question",
         system: "instructions",
         maxOutputTokens: 8,
@@ -138,7 +140,7 @@ test("direct model HTTP contracts, cancellation, deadlines and reuse", async (t)
       max_output_tokens: 8,
     },
   });
-  await direct.generate({ prompt: "minimal" });
+  await direct.request({ model: "model", prompt: "minimal" });
   assert.deepEqual(requests.at(-1)?.body, {
     model: "model",
     input: "minimal",
@@ -147,7 +149,8 @@ test("direct model HTTP contracts, cancellation, deadlines and reuse", async (t)
   });
   const beforeAbort = requests.length;
   await assert.rejects(
-    provider.generate({
+    provider.request({
+      model: "vendor/model",
       prompt: "never sent",
       signal: AbortSignal.abort("secret-key"),
     }),
@@ -158,7 +161,7 @@ test("direct model HTTP contracts, cancellation, deadlines and reuse", async (t)
     mode = failure;
     const before = requests.length;
     await assert.rejects(
-      provider.generate({ prompt: "secret prompt" }),
+      provider.request({ model: "vendor/model", prompt: "secret prompt" }),
       (error: unknown) => {
         assert.ok(error instanceof Error);
         assert.doesNotMatch(
@@ -177,18 +180,22 @@ test("direct model HTTP contracts, cancellation, deadlines and reuse", async (t)
   }
   for (const hanging of ["hang", "partial"]) {
     mode = hanging;
-    const bounded = openaiCompatible({
+    const bounded = openaiModelProvider({
       baseUrl,
-      model: "model",
+
       apiKey: false,
       timeoutMs: 50,
     });
-    await assert.rejects(bounded.generate({ prompt: "timeout" }), {
-      code: "timeout",
-    });
+    await assert.rejects(
+      bounded.request({ model: "model", prompt: "timeout" }),
+      {
+        code: "timeout",
+      },
+    );
     const controller = new AbortController();
     const started = once(server, "request");
-    const pending = provider.generate({
+    const pending = provider.request({
+      model: "vendor/model",
       prompt: "cancel",
       signal: controller.signal,
     });
@@ -198,21 +205,24 @@ test("direct model HTTP contracts, cancellation, deadlines and reuse", async (t)
     await rejected;
   }
   mode = "success";
-  assert.equal((await provider.generate({ prompt: "reuse" })).text, " Héllo\n");
+  assert.equal(
+    (await provider.request({ model: "vendor/model", prompt: "reuse" })).text,
+    " Héllo\n",
+  );
   assert.deepEqual(requests.at(-1)?.body, {
     model: "vendor/model",
     messages: [{ role: "user", content: "reuse" }],
     stream: false,
     store: false,
   });
-  const bounded = openaiCompatible({
+  const bounded = openaiModelProvider({
     baseUrl,
-    model: "model",
+
     apiKey: false,
     maxResponseBytes: 5,
   });
   await assert.rejects(
-    bounded.generate({ prompt: "too big" }),
+    bounded.request({ model: "model", prompt: "too big" }),
     /maxResponseBytes/,
   );
 });

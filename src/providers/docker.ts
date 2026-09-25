@@ -3,7 +3,7 @@ import type { ContainerOptions } from "./container.types.ts";
 
 export type { ContainerOptions } from "./container.ts";
 
-export const docker = (options: ContainerOptions = {}) =>
+export const dockerSandboxProvider = (options: ContainerOptions = {}) =>
   containerProvider("docker", options);
 
 export type { DependencyCache } from "./container-cache.types.ts";

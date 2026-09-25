@@ -2,9 +2,9 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { validateEgress } from "../../src/domain/egress.ts";
 import { containerProvider } from "../../src/providers/container.ts";
-import { local } from "../../src/providers/local.ts";
-import { daytona } from "../../src/providers/daytona.ts";
-import { vercel } from "../../src/providers/vercel.ts";
+import { localSandboxProvider } from "../../src/providers/local.ts";
+import { daytonaSandboxProvider } from "../../src/providers/daytona.ts";
+import { vercelSandboxProvider } from "../../src/providers/vercel.ts";
 import { vercelNetworkPolicy } from "../../src/providers/vercel-network.ts";
 import type { VercelOptions } from "../../src/providers/vercel.types.ts";
 import type { Command } from "../../src/index.ts";
@@ -78,7 +78,7 @@ test("container deny-all is enforced at creation and survives caller mutation", 
   for (const engine of ["docker", "podman"] as const) {
     const calls: Command[] = [];
     const networks = ["none"];
-    const provider = containerProvider(
+    const sandboxProvider = containerProvider(
       engine,
       { egress: { mode: "deny-all" }, networks },
       async (command) => {
@@ -88,7 +88,7 @@ test("container deny-all is enforced at creation and survives caller mutation", 
       "linux",
     );
     networks.push("host");
-    const lease = await provider.acquire({
+    const lease = await sandboxProvider.acquire({
       repository: root,
       directory: root,
       gitDirectories: [],
@@ -131,7 +131,7 @@ test("Vercel preserves native configuration and translates restricted policies",
   );
   assert.throws(
     () =>
-      vercel({
+      vercelSandboxProvider({
         egress: { mode: "deny-all" },
         create: { networkPolicy: "allow-all" },
       }),
@@ -158,7 +158,7 @@ test("Vercel preserves native configuration and translates restricted policies",
 test("Vercel sends egress before allocation and snapshots the caller policy", async () => {
   const domains = ["example.com"];
   let received: VercelOptions["create"];
-  const provider = vercel(
+  const sandboxProvider = vercelSandboxProvider(
     {
       egress: { mode: "allowlist", domains },
       create: { env: { PRESET: "yes" } },
@@ -170,7 +170,7 @@ test("Vercel sends egress before allocation and snapshots the caller policy", as
   );
   domains.push("*.other.com");
   await assert.rejects(
-    provider.acquire({
+    sandboxProvider.acquire({
       repository: "/repo",
       directory: "/repo",
       gitDirectories: [],
@@ -187,6 +187,9 @@ test("Vercel sends egress before allocation and snapshots the caller policy", as
 
 test("unsupported providers reject policies supplied through shared configuration", () => {
   const options = { variables: {}, egress: { mode: "deny-all" } };
-  assert.throws(() => local(options), /cannot enforce egress/);
-  assert.throws(() => daytona(options), /does not support Outpost egress/);
+  assert.throws(() => localSandboxProvider(options), /cannot enforce egress/);
+  assert.throws(
+    () => daytonaSandboxProvider(options),
+    /does not support Outpost egress/,
+  );
 });

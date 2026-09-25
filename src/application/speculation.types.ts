@@ -1,4 +1,4 @@
-import type { AgentAdapter } from "../domain/agent.types.ts";
+import type { Agent } from "../domain/agent.types.ts";
 import type {
   WorkflowBudget,
   WorkflowUsage,
@@ -12,7 +12,7 @@ import type {
 
 export interface SpeculativeCandidate<T = undefined> {
   readonly key: string;
-  readonly agent: AgentAdapter;
+  readonly agent: Agent;
   readonly request: Omit<
     DispatchOptions<T>,
     "agent" | "signal" | "continuation"
@@ -33,7 +33,7 @@ export interface SpeculativeValidation<T> {
 
 export interface SpeculationOptions<T = undefined> {
   readonly repository: string;
-  readonly provider: NonNullable<SandboxOptions["provider"]>;
+  readonly sandboxProvider: NonNullable<SandboxOptions["sandboxProvider"]>;
   readonly candidates: readonly SpeculativeCandidate<T>[];
   readonly concurrency?: number;
   readonly budget: WorkflowBudget;

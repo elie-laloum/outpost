@@ -1,6 +1,6 @@
 import type { DoctorProvider, DoctorReport } from "./doctor.types.ts";
 export const doctorDefaults = Object.freeze({
-  provider: "docker",
+  sandboxProvider: "docker",
   agent: "codex",
   deadlineMs: 5_000,
   retain: 4_096,

@@ -19,15 +19,15 @@ Sonde un Sandbox ou SandboxLease appartenant à l’appelant pour vérifier comm
 
 ## Paramètres et propriétés
 
-| Nom                  | Type                                                        | Présence  | Rôle                                                                                                 |
-| -------------------- | ----------------------------------------------------------- | --------- | ---------------------------------------------------------------------------------------------------- |
-| `target`             | `SandboxLease \| Sandbox`                                   | Requis    | Sandbox ou SandboxLease appartenant à l’appelant à sonder sans devenir propriétaire de sa fermeture. |
-| `options`            | `SandboxDiagnosticOptions \| undefined`                     | Optionnel | Métadonnées d’agent et provider, sondes de transfert, annulation et délai par sonde.                 |
-| `options.agent`      | `DoctorAgent \| undefined`                                  | Optionnel | Identifiant du CLI d’agent à rapporter ou diagnostiquer : claude, codex ou gemini.                   |
-| `options.deadlineMs` | `number \| undefined`                                       | Optionnel | Durée maximale de chaque sonde de diagnostic en millisecondes.                                       |
-| `options.signal`     | `AbortSignal \| undefined`                                  | Optionnel | Annulation coopérative de cette opération.                                                           |
-| `options.transfers`  | `boolean \| undefined`                                      | Optionnel | Active des sondes temporaires d’envoi et téléchargement pendant le diagnostic de sandbox.            |
-| `options.provider`   | `Pick<SandboxProvider, "name" \| "placement"> \| undefined` | Optionnel | Nom et placement du provider utilisés pour interpréter le rapport de diagnostic.                     |
+| Nom                       | Type                                                        | Présence  | Rôle                                                                                                 |
+| ------------------------- | ----------------------------------------------------------- | --------- | ---------------------------------------------------------------------------------------------------- |
+| `target`                  | `SandboxLease \| Sandbox`                                   | Requis    | Sandbox ou SandboxLease appartenant à l’appelant à sonder sans devenir propriétaire de sa fermeture. |
+| `options`                 | `SandboxDiagnosticOptions \| undefined`                     | Optionnel | Métadonnées d’agent et provider, sondes de transfert, annulation et délai par sonde.                 |
+| `options.agent`           | `DoctorAgent \| undefined`                                  | Optionnel | Identifiant du CLI d’agent à rapporter ou diagnostiquer : claude, codex ou gemini.                   |
+| `options.deadlineMs`      | `number \| undefined`                                       | Optionnel | Durée maximale de chaque sonde de diagnostic en millisecondes.                                       |
+| `options.signal`          | `AbortSignal \| undefined`                                  | Optionnel | Annulation coopérative de cette opération.                                                           |
+| `options.transfers`       | `boolean \| undefined`                                      | Optionnel | Active des sondes temporaires d’envoi et téléchargement pendant le diagnostic de sandbox.            |
+| `options.sandboxProvider` | `Pick<SandboxProvider, "name" \| "placement"> \| undefined` | Optionnel | Nom et placement du provider utilisés pour interpréter le rapport de diagnostic.                     |
 
 ## Retour
 

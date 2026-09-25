@@ -16,7 +16,7 @@ for (const signal of ["SIGINT", "SIGTERM", undefined] as const) {
     const initialized = await initialize({
       directory: folder,
       repository: root,
-      provider: "local",
+      sandboxProvider: "local",
       authentication: "login",
     });
     const bridge = join(folder, "bridge.mts");
@@ -29,9 +29,10 @@ for (const signal of ["SIGINT", "SIGTERM", undefined] as const) {
     await writeFile(
       bridge,
       `import { dispatch as run } from ${JSON.stringify(new URL("../../src/index.ts", import.meta.url).href)};
-       export { OutpostError, reporter } from ${JSON.stringify(new URL("../../src/index.ts", import.meta.url).href)};
+       export { agent, OutpostError, reporter } from ${JSON.stringify(new URL("../../src/index.ts", import.meta.url).href)};
        import { scripted } from ${JSON.stringify(new URL("../helpers.ts", import.meta.url).href)};
-       export const codex = () => scripted(${JSON.stringify(script)});
+       const fixture = () => scripted(${JSON.stringify(script)});
+       export const codex = { harness: () => ({ kind: "cli", bind: fixture }) };
        export const dispatch = (options) => run({
          ...options,
          observe(event) {

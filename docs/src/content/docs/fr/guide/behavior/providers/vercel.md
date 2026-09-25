@@ -12,12 +12,14 @@ npm install @vercel/sandbox
 ```
 
 ```ts
-import { dispatch, codex } from "@elie-laloum/outpost";
-import { vercel } from "@elie-laloum/outpost/providers/vercel";
+import { agent as composeAgent, dispatch, codex } from "@elie-laloum/outpost";
+import { vercelSandboxProvider } from "@elie-laloum/outpost/providers/vercel";
 
 await dispatch({
-  agent: codex(),
-  provider: vercel({ create: { timeout: 30 * 60 * 1000 } }),
+  agent: composeAgent({ harness: codex.harness({}) }),
+  sandboxProvider: vercelSandboxProvider({
+    create: { timeout: 30 * 60 * 1000 },
+  }),
   branch: { mode: "named", name: "cloud/vercel-task" },
   brief: { text: "Ajoute des tests de validation et commite-les." },
 });
@@ -40,14 +42,18 @@ Les tests de contrat du SDK utilisent des doubles contrôlés. Disponibilité, q
 Les credentials d’allocation Vercel ne connectent pas Claude Code à votre compte. En changeant de provider, conservez explicitement les variables du modèle :
 
 ```ts
-import { claude, createSandbox } from "@elie-laloum/outpost";
-import { vercel } from "@elie-laloum/outpost/providers/vercel";
+import {
+  agent as composeAgent,
+  claude,
+  createSandbox,
+} from "@elie-laloum/outpost";
+import { vercelSandboxProvider } from "@elie-laloum/outpost/providers/vercel";
 
 const token = process.env.CLAUDE_CODE_OAUTH_TOKEN;
 if (!token) throw new Error("Set CLAUDE_CODE_OAUTH_TOKEN before allocation");
 await using sandbox = await createSandbox({
-  agent: claude(),
-  provider: vercel({
+  agent: composeAgent({ harness: claude.harness({}) }),
+  sandboxProvider: vercelSandboxProvider({
     create: { timeout: 300_000 },
     variables: { CLAUDE_CODE_OAUTH_TOKEN: token },
   }),

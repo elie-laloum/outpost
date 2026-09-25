@@ -6,7 +6,7 @@ sidebar:
 ---
 
 :::caution[Expérimental]
-Cette première phase effectue des appels HTTP textuels sans Codex. Le harness d’agent est prévu en phase deux : l’exécution d’outils, la modification du dépôt et la persistance des conversations ne sont pas implémentées. Cette API ne peut pas servir d’agent de dispatch ni de provider de sandbox ; son contrat peut évoluer. Consultez le [périmètre implémenté et le harness prévu](../../guide/advanced/model-providers/).
+Expérimental : requêtes texte bornées et exécution de harness fournie par l’appelant. Sans boucle d’outils intégrée, streaming ni persistance native des conversations personnalisées.
 :::
 
 ## Import
@@ -19,6 +19,7 @@ import type { ModelRequest } from "@elie-laloum/outpost";
 
 | Nom               | Type                       | Présence  | Rôle                                                                                                                                                                                    |
 | ----------------- | -------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `model`           | `string`                   | Requis    | Identifiant de modèle non vide propre au service ; aucun catalogue local ni sonde de disponibilité.                                                                                     |
 | `prompt`          | `string`                   | Requis    | Texte non vide envoyé comme entrée utilisateur de cette requête ; aucun contenu du dépôt n’est collecté automatiquement.                                                                |
 | `system`          | `string \| undefined`      | Optionnel | Texte optionnel envoyé comme message system de Chat Completions ou instructions de Responses.                                                                                           |
 | `maxOutputTokens` | `number \| undefined`      | Optionnel | Limite positive de tokens de sortie transmise dans max_completion_tokens ou max_output_tokens ; omise par défaut. La disponibilité et le décompte du raisonnement dépendent du service. |
@@ -28,6 +29,7 @@ import type { ModelRequest } from "@elie-laloum/outpost";
 
 ```ts
 export interface ModelRequest {
+  readonly model: string;
   readonly prompt: string;
   readonly system?: string;
   readonly maxOutputTokens?: number;

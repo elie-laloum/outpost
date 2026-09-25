@@ -8,9 +8,15 @@ sidebar:
 `sandbox.command()` exécute un programme et retourne son statut et sa sortie capturée. Un statut non nul est retourné ; il n’est pas levé comme un échec d’agent.
 
 ```ts
-import { createSandbox, codex } from "@elie-laloum/outpost";
+import {
+  agent as composeAgent,
+  createSandbox,
+  codex,
+} from "@elie-laloum/outpost";
 
-await using sandbox = await createSandbox({ agent: codex() });
+await using sandbox = await createSandbox({
+  agent: composeAgent({ harness: codex.harness({}) }),
+});
 const result = await sandbox.command({
   executable: "npm",
   arguments: ["test"],
@@ -27,10 +33,10 @@ Les arguments sont transmis directement ; les substitutions nécessitent un shel
 ## Ouvrir une session interactive
 
 ```ts
-import { attach, claude } from "@elie-laloum/outpost";
+import { agent as composeAgent, attach, claude } from "@elie-laloum/outpost";
 
 const session = await attach({
-  agent: claude(),
+  agent: composeAgent({ harness: claude.harness({}) }),
   branch: { mode: "named", name: "feature/interactive" },
   brief: { text: "Aide-moi à relire cette branche." },
 });

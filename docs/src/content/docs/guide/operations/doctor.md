@@ -91,12 +91,12 @@ Save **example.mts** in `workflow/`.
 
 ```ts file=example.mts
 import { createSandbox } from "@elie-laloum/outpost";
-import { docker } from "@elie-laloum/outpost/providers/docker";
+import { dockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 import { resolve } from "node:path";
 
 await using sandbox = await createSandbox({
   repository: resolve(import.meta.dirname, "../repository"),
-  provider: docker({ image: "outpost:docs-demo" }),
+  sandboxProvider: dockerSandboxProvider({ image: "outpost:docs-demo" }),
   branch: { mode: "named", name: "workshop/commands" },
 });
 
@@ -112,7 +112,7 @@ node example.mts
 
 ## Understand the result
 
-The report checks the actual running environment, including a binary transfer probe. It does not authenticate an agent or prove model access. Diagnostics temporarily hold the operation gate and clean their probes, but ownership remains with your script. For preflight checks before allocation, run `npx outpost doctor --provider docker --agent codex --image outpost:docs-demo`.
+The report checks the actual running environment, including a binary transfer probe. It does not authenticate an agent or prove model access. Diagnostics temporarily hold the operation gate and clean their probes, but ownership remains with your script. For preflight checks before allocation, run `npx outpost doctor --sandbox-provider docker --agent codex --image outpost:docs-demo`.
 
 [Contracts, options and edge cases](../../behavior/operations/doctor/).
 

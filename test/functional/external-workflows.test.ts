@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { test } from "node:test";
 import { isolatedTask, workflow } from "../../src/index.ts";
-import { local } from "../../src/providers/local.ts";
+import { localSandboxProvider } from "../../src/providers/local.ts";
 import { emit, repository, scripted } from "../helpers.ts";
 
 test("one workflow coordinates commits in two external repositories", async (t) => {
@@ -24,7 +24,7 @@ test("one workflow coordinates commits in two external repositories", async (t) 
     key: "backend",
     request: () => ({
       repository: backendRepository,
-      provider: local(),
+      sandboxProvider: localSandboxProvider(),
       agent: change("backend.txt"),
       branch: { mode: "integrate" },
       brief: { text: "Backend change" },
@@ -35,7 +35,7 @@ test("one workflow coordinates commits in two external repositories", async (t) 
     after: [backend],
     request: (context) => ({
       repository: frontendRepository,
-      provider: local(),
+      sandboxProvider: localSandboxProvider(),
       agent: change("frontend.txt"),
       branch: { mode: "integrate" },
       brief: { text: `Adapt to ${context.value(backend).commits[0]!.oid}` },

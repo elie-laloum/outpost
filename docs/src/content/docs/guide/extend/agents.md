@@ -35,7 +35,7 @@ Save the example as **example.mts** in this directory. No account, API key or co
 Save **example.mts** in `outpost-example/`.
 
 ```ts file=example.mts
-import type { AgentAdapter } from "@elie-laloum/outpost";
+import { agent, type AgentAdapter } from "@elie-laloum/outpost";
 
 const adapter: AgentAdapter = {
   name: "example",
@@ -52,7 +52,8 @@ const adapter: AgentAdapter = {
     return [{ kind: "text", text: line }];
   },
 };
-console.log(adapter.name);
+const worker = agent({ harness: { kind: "cli", bind: () => adapter } });
+console.log(worker.name);
 ```
 
 ```sh

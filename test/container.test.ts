@@ -1,3 +1,4 @@
+import { agent as composeAgent } from "../src/domain/agent.ts";
 import { spawn } from "node:child_process";
 import { once } from "node:events";
 import { diagnoseImage } from "../src/application/doctor-image.ts";
@@ -7,8 +8,8 @@ import assert from "node:assert/strict";
 import { readFile, mkdir, writeFile, readlink, lstat } from "node:fs/promises";
 import { join } from "node:path";
 import { createSandbox, codex, claude } from "../src/index.ts";
-import { docker } from "../src/providers/docker.ts";
-import { podman } from "../src/providers/podman.ts";
+import { dockerSandboxProvider } from "../src/providers/docker.ts";
+import { podmanSandboxProvider } from "../src/providers/podman.ts";
 import { repository } from "./helpers.ts";
 import type { AgentEvent } from "../src/index.ts";
 import { conversations } from "../src/index.ts";
@@ -23,12 +24,17 @@ test(
   { skip: !process.env.OUTPOST_CONTAINER_ENGINE },
   async (t) => {
     const root = await repository(t),
-      provider =
-        process.env.OUTPOST_CONTAINER_ENGINE === "podman" ? podman : docker;
+      sandboxProvider =
+        process.env.OUTPOST_CONTAINER_ENGINE === "podman"
+          ? podmanSandboxProvider
+          : dockerSandboxProvider;
     const box = await createSandbox({
       repository: root,
-      provider: provider({ image: containerImage, networks: "none" }),
-      agent: codex(),
+      sandboxProvider: sandboxProvider({
+        image: containerImage,
+        networks: "none",
+      }),
+      agent: composeAgent({ harness: codex.harness({}) }),
       branch: { mode: "named", name: "container-test" },
       logging: false,
     });
@@ -45,7 +51,10 @@ test(
         await readFile(join(box.workspace.directory, "base.txt"), "utf8"),
         "container change\n",
       );
-      for (const adapter of [codex(), claude()]) {
+      for (const adapter of [
+        composeAgent({ harness: codex.harness({}) }),
+        composeAgent({ harness: claude.harness({}) }),
+      ]) {
         const version = await box.command({
           executable: adapter.name,
           arguments: ["--version"],
@@ -94,6 +103,13 @@ test(
       assert.equal(env.stdout.trim(), "injected");
       const output = await box.dispatch({
         agent: {
+          kind: "cli" as const,
+          harness: {
+            kind: "cli" as const,
+            bind() {
+              throw new Error("Already bound fixture");
+            },
+          },
           name: "protocol-fixture",
           request: () => ({
             executable: "node",
@@ -119,7 +135,9 @@ test(
   async (t) => {
     const root = await repository(t),
       factory =
-        process.env.OUTPOST_CONTAINER_ENGINE === "podman" ? podman : docker;
+        process.env.OUTPOST_CONTAINER_ENGINE === "podman"
+          ? podmanSandboxProvider
+          : dockerSandboxProvider;
     const input = join(root, "transfer inputs");
     await mkdir(join(input, "nested folder"), { recursive: true });
     const bytes = Buffer.from([0, 1, 2, 255, 128, 10, 13, 0]);
@@ -188,7 +206,9 @@ test(
   async (t) => {
     const root = await repository(t);
     const factory =
-      process.env.OUTPOST_CONTAINER_ENGINE === "podman" ? podman : docker;
+      process.env.OUTPOST_CONTAINER_ENGINE === "podman"
+        ? podmanSandboxProvider
+        : dockerSandboxProvider;
     const lease = await factory({
       image: containerImage,
       networks: "none",
@@ -278,7 +298,9 @@ test(
   async (t) => {
     const root = await repository(t);
     const factory =
-      process.env.OUTPOST_CONTAINER_ENGINE === "podman" ? podman : docker;
+      process.env.OUTPOST_CONTAINER_ENGINE === "podman"
+        ? podmanSandboxProvider
+        : dockerSandboxProvider;
     const lease = await factory({
       image: containerImage,
       networks: "none",
@@ -424,7 +446,7 @@ test(
     for (const agent of ["codex", "claude", "gemini"] as const) {
       let name = "";
       const checks = await diagnoseImage(
-        { provider: engine, agent, image: containerImage },
+        { sandboxProvider: engine, agent, image: containerImage },
         async (command) => {
           const args = command.arguments ?? [];
           if (args[0] === "create") name = args[args.indexOf("--name") + 1]!;
@@ -464,7 +486,7 @@ test(
     }
     let name = "";
     const checks = await diagnoseImage(
-      { provider: engine, agent: "codex", image: containerImage },
+      { sandboxProvider: engine, agent: "codex", image: containerImage },
       async (command) => {
         const args = command.arguments ?? [];
         if (args[0] === "create") name = args[args.indexOf("--name") + 1]!;
@@ -548,7 +570,8 @@ test(
     const root = await repository(t);
     const engine =
       process.env.OUTPOST_CONTAINER_ENGINE === "podman" ? "podman" : "docker";
-    const factory = engine === "podman" ? podman : docker;
+    const factory =
+      engine === "podman" ? podmanSandboxProvider : dockerSandboxProvider;
     const { cacheMounts } = await import("../src/providers/container-cache.ts");
     const user = {
       uid: process.getuid?.() ?? 1000,
@@ -635,7 +658,9 @@ test(
     const { git } = await import("../src/infrastructure/git.ts");
     const root = await repository(t);
     const factory =
-      process.env.OUTPOST_CONTAINER_ENGINE === "podman" ? podman : docker;
+      process.env.OUTPOST_CONTAINER_ENGINE === "podman"
+        ? podmanSandboxProvider
+        : dockerSandboxProvider;
     await git(root, ["config", "outpost.hostOnly", "private"]);
     const hook = join(root, ".git", "hooks", "pre-commit");
     await writeFile(hook, "host hook sentinel\n");
@@ -643,7 +668,7 @@ test(
     const main = await git(root, ["rev-parse", "main"]);
     const box = await createSandbox({
       repository: root,
-      provider: factory({
+      sandboxProvider: factory({
         image: "outpost-ci:latest",
         networks: "none",
         repositoryMode: "isolated",
@@ -717,7 +742,9 @@ test(
     const { openWorkspace } = await import("../src/index.ts");
     const root = await repository(t);
     const factory =
-      process.env.OUTPOST_CONTAINER_ENGINE === "podman" ? podman : docker;
+      process.env.OUTPOST_CONTAINER_ENGINE === "podman"
+        ? podmanSandboxProvider
+        : dockerSandboxProvider;
     for (const concurrent of [false, true]) {
       const workspace = await openWorkspace({
         repository: root,
@@ -729,7 +756,7 @@ test(
       if (!concurrent)
         await writeFile(join(workspace.directory, "base.txt"), "host edit\n");
       const box = await workspace.sandbox({
-        provider: factory({
+        sandboxProvider: factory({
           image: "outpost-ci:latest",
           networks: "none",
           repositoryMode: "isolated",
@@ -768,7 +795,9 @@ test(
   async (t) => {
     const root = await repository(t);
     const factory =
-      process.env.OUTPOST_CONTAINER_ENGINE === "podman" ? podman : docker;
+      process.env.OUTPOST_CONTAINER_ENGINE === "podman"
+        ? podmanSandboxProvider
+        : dockerSandboxProvider;
     const lease = await factory({
       image: "outpost-ci:latest",
       egress: { mode: "deny-all" },

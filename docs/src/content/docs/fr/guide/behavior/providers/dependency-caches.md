@@ -5,7 +5,7 @@ sidebar:
   order: 3
 ---
 
-Docker et Podman acceptent l'option explicite `caches` dans leur configuration. Chaque cache est un volume persistant du moteur, monté dans `/outpost/cache/<name>`. Sans cette option, Outpost ne crée aucun cache persistant de dépendances. Vercel, Daytona et `local()` n'implémentent pas cette option ; utilisez séparément leurs capacités explicites de système de fichiers.
+Docker et Podman acceptent l'option explicite `caches` dans leur configuration. Chaque cache est un volume persistant du moteur, monté dans `/outpost/cache/<name>`. Sans cette option, Outpost ne crée aucun cache persistant de dépendances. Vercel, Daytona et `localSandboxProvider()` n'implémentent pas cette option ; utilisez séparément leurs capacités explicites de système de fichiers.
 
 ## Mettre en cache les téléchargements
 
@@ -15,16 +15,20 @@ Choisissez une clé à partir du lockfile, de la version du gestionnaire de paqu
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { createSandbox, codex } from "@elie-laloum/outpost";
-import { docker } from "@elie-laloum/outpost/providers/docker";
+import {
+  agent as composeAgent,
+  createSandbox,
+  codex,
+} from "@elie-laloum/outpost";
+import { dockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
 const repository = "/path/to/repository";
 const lock = await readFile(join(repository, "package-lock.json"));
 const key = `npm-v11-linux-amd64-${createHash("sha256").update(lock).digest("hex")}`;
 const box = await createSandbox({
   repository,
-  agent: codex(),
-  provider: docker({
+  agent: composeAgent({ harness: codex.harness({}) }),
+  sandboxProvider: dockerSandboxProvider({
     image: "outpost:project",
     caches: [{ name: "npm", key }],
     variables: { NPM_CONFIG_CACHE: "/outpost/cache/npm" },

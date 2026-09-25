@@ -31,11 +31,11 @@ L'authentification de l'agent auprès de son service est indépendante du transp
 
 ```ts
 import { createSandbox } from "@elie-laloum/outpost";
-import { firecracker } from "@elie-laloum/outpost/providers/firecracker";
+import { firecrackerSandboxProvider } from "@elie-laloum/outpost/providers/firecracker";
 
 await using sandbox = await createSandbox({
   repository: "/work/project",
-  provider: firecracker({
+  sandboxProvider: firecrackerSandboxProvider({
     binary: "/opt/firecracker/firecracker",
     kernel: "/opt/firecracker/vmlinux",
     rootfs: "/opt/firecracker/outpost.ext4",

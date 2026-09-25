@@ -8,13 +8,13 @@ sidebar:
 Use a one-shot dispatch when the library should own provisioning and cleanup.
 
 ```ts
-import { dispatch, codex } from "@elie-laloum/outpost";
-import { docker } from "@elie-laloum/outpost/providers/docker";
+import { agent as composeAgent, dispatch, codex } from "@elie-laloum/outpost";
+import { dockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
 const result = await dispatch({
   repository: "/work/backend",
-  agent: codex(),
-  provider: docker(),
+  agent: composeAgent({ harness: codex.harness({}) }),
+  sandboxProvider: dockerSandboxProvider(),
   branch: { mode: "integrate" },
   brief: { text: "Fix the tests, verify the result and commit it." },
 });

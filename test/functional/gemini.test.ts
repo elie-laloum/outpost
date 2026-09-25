@@ -1,16 +1,17 @@
+import { agent as composeAgent } from "../../src/domain/agent.ts";
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { join } from "node:path";
 import { readFile } from "node:fs/promises";
 import { createSandbox, dispatch, gemini, response } from "../../src/index.ts";
-import { local } from "../../src/providers/local.ts";
+import { localSandboxProvider } from "../../src/providers/local.ts";
 import { initialize } from "../../src/cli/scaffold.ts";
 import { repository } from "../helpers.ts";
 import { protocolFixtures } from "../../src/adapters/agents/protocol-fixtures.constants.ts";
 import type { AgentEvent } from "../../src/index.ts";
 
 function fixture(lines: readonly string[], status = 0) {
-  const adapter = gemini();
+  const adapter = composeAgent({ harness: gemini.harness({}) });
   return {
     ...adapter,
     request: () => ({
@@ -29,7 +30,7 @@ test("Gemini dispatch aggregates a real streamed process, preserves observation 
   const observed: AgentEvent[] = [];
   const result = await dispatch({
     repository: root,
-    provider: local(),
+    sandboxProvider: localSandboxProvider(),
     agent: fixture(protocolFixtures.gemini[0]!.lines),
     branch: { mode: "named", name: "gemini-fixture" },
     logging: false,
@@ -55,8 +56,8 @@ test("Gemini rejects truncated output, protocol failure and nonzero exit while p
   const root = await repository(t);
   await using sandbox = await createSandbox({
     repository: root,
-    provider: local(),
-    agent: gemini(),
+    sandboxProvider: localSandboxProvider(),
+    agent: composeAgent({ harness: gemini.harness({}) }),
     branch: { mode: "named", name: "gemini-errors" },
     logging: false,
   });
@@ -135,29 +136,29 @@ test("Gemini rejects truncated output, protocol failure and nonzero exit while p
 
 test("Gemini scaffolding selects its adapter, API key declaration and pinned image installation", async (t) => {
   const root = await repository(t);
-  for (const provider of [
+  for (const sandboxProvider of [
     "docker",
     "podman",
     "local",
     "vercel",
     "daytona",
   ] as const) {
-    const directory = join(root, provider);
-    await initialize({ directory, agent: "gemini", provider });
+    const directory = join(root, sandboxProvider);
+    await initialize({ directory, agent: "gemini", sandboxProvider });
     assert.match(
       await readFile(join(directory, "run.ts"), "utf8"),
-      /agent: gemini/,
+      /harness: gemini\.harness/,
     );
     assert.equal(
       await readFile(join(directory, ".env.example"), "utf8"),
       "GEMINI_API_KEY=\n",
     );
-    if (provider === "docker" || provider === "podman")
+    if (sandboxProvider === "docker" || sandboxProvider === "podman")
       assert.match(
         await readFile(
           join(
             directory,
-            provider === "docker" ? "Dockerfile" : "Containerfile",
+            sandboxProvider === "docker" ? "Dockerfile" : "Containerfile",
           ),
           "utf8",
         ),
@@ -168,10 +169,10 @@ test("Gemini scaffolding selects its adapter, API key declaration and pinned ima
 
 test("Gemini completion markers wait for the authoritative final event before the settle timer", async (t) => {
   const root = await repository(t);
-  const agent = gemini();
+  const agent = composeAgent({ harness: gemini.harness({}) });
   const result = await dispatch({
     repository: root,
-    provider: local(),
+    sandboxProvider: localSandboxProvider(),
     logging: false,
     branch: { mode: "named", name: "gemini-final" },
     agent: {

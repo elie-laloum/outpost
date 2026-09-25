@@ -39,7 +39,7 @@ export const cliOptions = {
   "max-bytes": { type: "string", description: "Maximum bytes to inspect" },
   "max-entries": { type: "string", description: "Maximum inventory entries" },
   agent: { type: "string", description: "Agent: codex, claude or gemini" },
-  provider: {
+  sandboxProvider: {
     type: "string",
     description: "Provider: docker, podman, local, vercel or daytona",
   },
@@ -68,7 +68,7 @@ export const commandOptions = {
     options: [
       "yes",
       "agent",
-      "provider",
+      "sandboxProvider",
       "manager",
       "authentication",
       "model",
@@ -83,7 +83,7 @@ export const commandOptions = {
   },
   doctor: {
     description: "Diagnose host and sandbox prerequisites",
-    options: ["provider", "agent", "image", "json"],
+    options: ["sandboxProvider", "agent", "image", "json"],
   },
   "image build": {
     description: "Build a container image",
@@ -133,7 +133,7 @@ export const initializationQuestions = [
     choices: ["codex", "claude", "gemini"],
   },
   {
-    key: "provider",
+    key: "sandboxProvider",
     message: "Sandbox provider",
     choices: ["docker", "podman", "vercel", "daytona", "local"],
   },

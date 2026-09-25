@@ -10,7 +10,7 @@ import {
   openWorkspace,
   attach,
 } from "../../src/index.ts";
-import { local } from "../../src/providers/local.ts";
+import { localSandboxProvider } from "../../src/providers/local.ts";
 import { executeProcess } from "../../src/infrastructure/process.ts";
 import { git } from "../../src/infrastructure/git.ts";
 import { restoreTerminal } from "../../src/infrastructure/terminal.ts";
@@ -18,10 +18,10 @@ import { repository, scripted, emit } from "../helpers.ts";
 
 test("cold passes acquire distinct sandboxes while warm dispatch keeps its lease", async (t) => {
   const root = await repository(t),
-    base = local();
+    base = localSandboxProvider();
   let acquired = 0,
     released = 0;
-  const provider = {
+  const sandboxProvider = {
     ...base,
     async acquire(context: Parameters<typeof base.acquire>[0]) {
       acquired++;
@@ -37,7 +37,7 @@ test("cold passes acquire distinct sandboxes while warm dispatch keeps its lease
   };
   await dispatch({
     repository: root,
-    provider,
+    sandboxProvider,
     agent: scripted(emit("continue")),
     brief: { text: "go" },
     passes: 2,
@@ -47,7 +47,7 @@ test("cold passes acquire distinct sandboxes while warm dispatch keeps its lease
   assert.equal(released, 2);
   const box = await createSandbox({
     repository: root,
-    provider,
+    sandboxProvider,
     agent: scripted(emit("continue")),
     logging: false,
   });
@@ -87,7 +87,9 @@ test("workspace hooks run immediately once and sandbox hooks start concurrently"
     },
   });
   assert.equal(await readFile(join(root, "ready.txt"), "utf8"), "once");
-  const box = await workspace.sandbox({ provider: local() });
+  const box = await workspace.sandbox({
+    sandboxProvider: localSandboxProvider(),
+  });
   await box.close();
   await workspace.close();
   assert.equal(await readFile(join(root, "ready.txt"), "utf8"), "once");
@@ -95,8 +97,8 @@ test("workspace hooks run immediately once and sandbox hooks start concurrently"
 
 test("failed allocation preserves a clean owned workspace when provider cleanup is uncertain", async (t) => {
   const root = await repository(t);
-  const provider = {
-    ...local(),
+  const sandboxProvider = {
+    ...localSandboxProvider(),
     async acquire() {
       throw new Error("provision failure");
     },
@@ -104,7 +106,7 @@ test("failed allocation preserves a clean owned workspace when provider cleanup 
   await assert.rejects(
     createSandbox({
       repository: root,
-      provider,
+      sandboxProvider,
       branch: { mode: "named", name: "broken-start" },
     }),
     /provision failure/,
@@ -125,7 +127,7 @@ test("relative prompts resolve from the caller directory even with another repos
   );
   const result = await dispatch({
     repository: root,
-    provider: local(),
+    sandboxProvider: localSandboxProvider(),
     agent,
     brief: { file: relative(process.cwd(), prompt) },
     logging: false,
@@ -143,7 +145,7 @@ test("interactive prompt collection asks once per missing variable and retains s
   const requested: string[] = [];
   const result = await attach({
     repository: root,
-    provider: local(),
+    sandboxProvider: localSandboxProvider(),
     agent: scripted((input) => `console.log(${JSON.stringify(input.text)})`),
     brief: { file: prompt, values: { GIVEN: "existing" } },
     ask: async (key) => {

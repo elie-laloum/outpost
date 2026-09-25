@@ -18,7 +18,7 @@ import {
   pruneRecoveryRetention,
   reserveRecoveryStorage,
 } from "../../src/index.ts";
-import { local } from "../../src/providers/local.ts";
+import { localSandboxProvider } from "../../src/providers/local.ts";
 import { executeProcess } from "../../src/infrastructure/process.ts";
 import { localProcessIdentity } from "../../src/infrastructure/git/process-identity.ts";
 import { registerResourceActivity } from "../../src/infrastructure/resource-activity.ts";
@@ -39,13 +39,13 @@ const inspect = async (root: string) =>
 test("real owned commands publish live operation ownership and preserve exclusivity, cancellation, exit status and warm reuse", async (t) => {
   const root = await repository(t);
   const entered = deferred();
-  const provider = local();
+  const sandboxProvider = localSandboxProvider();
   const sandbox = await createSandbox({
     repository: root,
-    provider: {
-      ...provider,
+    sandboxProvider: {
+      ...sandboxProvider,
       async acquire(context) {
-        const lease = await provider.acquire(context);
+        const lease = await sandboxProvider.acquire(context);
         return {
           ...lease,
           invoke(command) {
@@ -112,13 +112,13 @@ test("owned diagnostics expose in-flight transfers and complete without losing t
   const root = await repository(t);
   const entered = deferred();
   const proceed = deferred();
-  const provider = local();
+  const sandboxProvider = localSandboxProvider();
   const sandbox = await createSandbox({
     repository: root,
-    provider: {
-      ...provider,
+    sandboxProvider: {
+      ...sandboxProvider,
       async acquire(context) {
-        const lease = await provider.acquire(context);
+        const lease = await sandboxProvider.acquire(context);
         return {
           ...lease,
           async upload(source, destination, options) {
@@ -160,14 +160,14 @@ test("allocation and closure are observable while independent workspaces outlive
   const acquired = deferred();
   const releasing = deferred();
   const released = deferred();
-  const provider = local();
+  const sandboxProvider = localSandboxProvider();
   const pending = workspace.sandbox({
-    provider: {
-      ...provider,
+    sandboxProvider: {
+      ...sandboxProvider,
       async acquire(context) {
         acquiring.resolve();
         await acquired.promise;
-        const lease = await provider.acquire(context);
+        const lease = await sandboxProvider.acquire(context);
         return {
           ...lease,
           async release() {
@@ -189,7 +189,9 @@ test("allocation and closure are observable while independent workspaces outlive
   assert.equal(sandbox.close(), closing);
   released.resolve();
   await closing;
-  const replacement = await workspace.sandbox({ provider: local() });
+  const replacement = await workspace.sandbox({
+    sandboxProvider: localSandboxProvider(),
+  });
   await replacement.close();
   await workspace.close();
   assert.equal((await inspect(root)).entries.length, 0);
@@ -197,14 +199,14 @@ test("allocation and closure are observable while independent workspaces outlive
 
 test("failed provider cleanup keeps bounded records and protects the associated workspace from retention", async (t) => {
   const root = await repository(t);
-  const provider = local();
+  const sandboxProvider = localSandboxProvider();
   const sandbox = await createSandbox({
     repository: root,
     branch: { mode: "named", name: "retained-provider" },
-    provider: {
-      ...provider,
+    sandboxProvider: {
+      ...sandboxProvider,
       async acquire(context) {
-        const lease = await provider.acquire(context);
+        const lease = await sandboxProvider.acquire(context);
         return {
           ...lease,
           async release() {
@@ -250,8 +252,8 @@ test("startup failure retains uncertain allocations and failed releases while pr
     createSandbox({
       repository: root,
       branch: { mode: "named", name: "before-allocation" },
-      provider: {
-        ...local(),
+      sandboxProvider: {
+        ...localSandboxProvider(),
         name: "x".repeat(resourceActivityDefaults.maxText + 1),
         async acquire() {
           assert.fail("must not acquire");
@@ -275,8 +277,8 @@ test("startup failure retains uncertain allocations and failed releases while pr
           mode: "named",
           name: `uncertain-${cause instanceof AggregateError ? "aggregate" : "plain"}`,
         },
-        provider: {
-          ...local(),
+        sandboxProvider: {
+          ...localSandboxProvider(),
           async acquire() {
             throw cause;
           },
@@ -291,7 +293,7 @@ test("startup failure retains uncertain allocations and failed releases while pr
     assert.equal(entry.record?.phase, "allocation-uncertain");
     assert.equal((await lstat(entry.record!.workspace)).isDirectory(), true);
   }
-  const provider = local();
+  const sandboxProvider = localSandboxProvider();
   await assert.rejects(
     createSandbox({
       repository: root,
@@ -304,10 +306,10 @@ test("startup failure retains uncertain allocations and failed releases while pr
           },
         ],
       },
-      provider: {
-        ...provider,
+      sandboxProvider: {
+        ...sandboxProvider,
         async acquire(context) {
-          const lease = await provider.acquire(context);
+          const lease = await sandboxProvider.acquire(context);
           return {
             ...lease,
             async release() {
@@ -336,7 +338,7 @@ test("parallel sandboxes and storage reservations keep distinct private ownershi
     ["first", "second"].map((name) =>
       createSandbox({
         repository: root,
-        provider: local(),
+        sandboxProvider: localSandboxProvider(),
         branch: { mode: "named", name },
       }),
     ),
@@ -361,7 +363,7 @@ test("resource inspection is read-only, bounded and conservative for stale, fore
   const handle = await registerResourceActivity({
     repository: root,
     workspace: root,
-    provider: "fixture",
+    sandboxProvider: "fixture",
     placement: "remote",
   });
   const entry = (await inspect(root)).entries[0]!;
@@ -421,7 +423,10 @@ test("resource inspection is read-only, bounded and conservative for stale, fore
 
 test("resource CLI reports live records in JSON and text and fails honestly on malformed records", async (t) => {
   const root = await repository(t);
-  const sandbox = await createSandbox({ repository: root, provider: local() });
+  const sandbox = await createSandbox({
+    repository: root,
+    sandboxProvider: localSandboxProvider(),
+  });
   t.after(() => sandbox.close());
   const run = (...args: string[]) =>
     executeProcess({
@@ -460,7 +465,7 @@ test("tracking bounds concurrent operations, rejects replacement ownership and k
   const handle = await registerResourceActivity({
     repository: root,
     workspace: root,
-    provider: "fixture",
+    sandboxProvider: "fixture",
     placement: "host",
   });
   const proceed = deferred();
@@ -505,8 +510,8 @@ test("symlinked activity storage and excessive metadata refuse allocation before
   await assert.rejects(
     createSandbox({
       repository: root,
-      provider: {
-        ...local(),
+      sandboxProvider: {
+        ...localSandboxProvider(),
         async acquire() {
           assert.fail("should not acquire");
         },
@@ -520,7 +525,7 @@ test("symlinked activity storage and excessive metadata refuse allocation before
     registerResourceActivity({
       repository: root,
       workspace: root,
-      provider: "x".repeat(resourceActivityDefaults.maxText + 1),
+      sandboxProvider: "x".repeat(resourceActivityDefaults.maxText + 1),
       placement: "host",
     }),
     /size limit/,
@@ -532,7 +537,7 @@ test("activity update failure does not replace the primary execution error", asy
   const handle = await registerResourceActivity({
     repository: root,
     workspace: root,
-    provider: "fixture",
+    sandboxProvider: "fixture",
     placement: "host",
   });
   const entry = (await inspect(root)).entries[0]!;
@@ -549,16 +554,16 @@ test("activity update failure does not replace the primary execution error", asy
 
 test("a timed out transfer that ignores cancellation retains its owned workspace after release", async (t) => {
   const root = await repository(t);
-  const provider = local();
+  const sandboxProvider = localSandboxProvider();
   const finish = deferred();
   const entered = deferred();
   const sandbox = await createSandbox({
     repository: root,
     branch: { mode: "named", name: "unsettled-copy" },
-    provider: {
-      ...provider,
+    sandboxProvider: {
+      ...sandboxProvider,
       async acquire(context) {
-        const lease = await provider.acquire(context);
+        const lease = await sandboxProvider.acquire(context);
         return {
           ...lease,
           async upload() {
@@ -583,13 +588,13 @@ test("a timed out transfer that ignores cancellation retains its owned workspace
 test("an abruptly terminated owner leaves inspectable resources without reclamation", async (t) => {
   const root = await repository(t);
   const facade = pathToFileURL(resolve("src/index.ts")).href;
-  const provider = pathToFileURL(resolve("src/providers/local.ts")).href;
+  const sandboxProvider = pathToFileURL(resolve("src/providers/local.ts")).href;
   const result = await executeProcess({
     executable: process.execPath,
     arguments: [
       "--input-type=module",
       "-e",
-      `import { createSandbox } from ${JSON.stringify(facade)}; import { local } from ${JSON.stringify(provider)}; await createSandbox({ repository: ${JSON.stringify(root)}, provider: local(), branch: { mode: "named", name: "crashed-owner" } }); process.kill(process.pid, "SIGKILL");`,
+      `import { createSandbox } from ${JSON.stringify(facade)}; import { localSandboxProvider } from ${JSON.stringify(sandboxProvider)}; await createSandbox({ repository: ${JSON.stringify(root)}, sandboxProvider: localSandboxProvider(), branch: { mode: "named", name: "crashed-owner" } }); process.kill(process.pid, "SIGKILL");`,
     ],
     deadlineMs: 10_000,
   });

@@ -40,13 +40,13 @@ These directions build on [durable workflows](../../guide/advanced/distributed/)
 
 <a id="direct-model-harness"></a>
 
-## Experimental direct provider: harness in phase two
+## Unreleased harness composition and remaining tool engine
 
-Phase one is available as an experimental API since 4.2.0: [openaiCompatible](../../reference/openaicompatible/) makes independent text calls through Chat Completions or Responses without Codex. It includes explicit authentication, cancellation, bounded deadlines and response sizes, and reported usage when available. Tests use simulated local HTTP endpoints; authenticated service compatibility remains to be validated.
+The working tree implements `agent({ harness, model })`, CLI harness presets, caller-supplied `customHarness({ modelProvider, run })` callbacks, `openaiModelProvider` and `anthropicModelProvider`. These are unreleased breaking changes; the published 4.2.0 API remains unchanged. Model identifiers are strings, without a local availability catalog.
 
-Phase two will build the agent harness: the model/tool loop, repository reading and editing, commands through sandbox leases, context management, conversation persistence/resume and dispatch integration. It must preserve cancellation, budget, recovery and structured-response contracts. The current direct provider executes no tools and does not replace an agent adapter.
+The custom callback runs in the Outpost process and borrows sandbox operations. Scoped requests propagate cancellation and accumulate reported usage. Anthropic supports an explicit system-prefix cache; tests use local simulated HTTP services. Native custom conversations, interactive attachment and streaming are unavailable.
 
-Before promotion: authenticated campaigns per service and protocol, failure and limit tests, tool execution boundary checks and complete repository-editing scenarios with recovery. No delivery date or universal compatibility is promised. The [experimental guide](../../guide/advanced/model-providers/) describes the current scope.
+Still planned: the built-in model/tool loop, repository tools, automatic context management and durable custom conversations with resume/fork. Authenticated service campaigns and complete repository-editing scenarios remain prerequisites for broader compatibility claims. No release date is promised.
 
 ## How priorities change
 

@@ -7,7 +7,7 @@ import type {
   PtyConnectOptions,
   PtyResult,
 } from "@daytona/sdk";
-import { daytona } from "../../src/providers/daytona.ts";
+import { daytonaSandboxProvider } from "../../src/providers/daytona.ts";
 
 function fixture() {
   const input = new PassThrough();
@@ -94,7 +94,7 @@ function fixture() {
     sizes,
     uploaded,
     acquire: () =>
-      daytona(
+      daytonaSandboxProvider(
         {},
         async () =>
           ({

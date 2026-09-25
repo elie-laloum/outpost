@@ -285,12 +285,56 @@
         "slug": "reference/overview/agents",
         "attrs": { "data-reference-overview": "" }
       },
-      { "slug": "reference/claude", "attrs": { "data-api-kind": "function" } },
-      { "slug": "reference/codex", "attrs": { "data-api-kind": "function" } },
-      { "slug": "reference/gemini", "attrs": { "data-api-kind": "function" } },
+      { "slug": "reference/agent", "attrs": { "data-api-kind": "function" } },
+      {
+        "slug": "reference/customharness",
+        "attrs": { "data-api-kind": "function" }
+      },
+      { "slug": "reference/type-agent", "attrs": { "data-api-kind": "type" } },
+      {
+        "slug": "reference/agentoptions",
+        "attrs": { "data-api-kind": "type" }
+      },
+      { "slug": "reference/harness", "attrs": { "data-api-kind": "type" } },
+      { "slug": "reference/harnessrun", "attrs": { "data-api-kind": "type" } },
+      {
+        "slug": "reference/agentauthentication",
+        "attrs": { "data-api-kind": "type" }
+      },
+      { "slug": "reference/claude", "attrs": { "data-api-kind": "constant" } },
+      { "slug": "reference/codex", "attrs": { "data-api-kind": "constant" } },
+      { "slug": "reference/gemini", "attrs": { "data-api-kind": "constant" } },
       {
         "slug": "reference/agentversions",
         "attrs": { "data-api-kind": "constant" }
+      },
+      {
+        "slug": "reference/cliharness",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/type-customharness",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/cliagent",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/customagent",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/customharnessoptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/harnessinput",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/harnesscontext",
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/claudesettings",
@@ -525,13 +569,28 @@
         "slug": "reference/overview/providers",
         "attrs": { "data-reference-overview": "" }
       },
-      { "slug": "reference/docker", "attrs": { "data-api-kind": "function" } },
-      { "slug": "reference/podman", "attrs": { "data-api-kind": "function" } },
-      { "slug": "reference/local", "attrs": { "data-api-kind": "function" } },
-      { "slug": "reference/vercel", "attrs": { "data-api-kind": "function" } },
-      { "slug": "reference/daytona", "attrs": { "data-api-kind": "function" } },
       {
-        "slug": "reference/firecracker",
+        "slug": "reference/dockersandboxprovider",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/podmansandboxprovider",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/localsandboxprovider",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/vercelsandboxprovider",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/daytonasandboxprovider",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/firecrackersandboxprovider",
         "attrs": {
           "data-api-kind": "function",
           "data-api-status": "experimental",
@@ -539,11 +598,11 @@
         }
       },
       {
-        "slug": "reference/mountedprovider",
+        "slug": "reference/mountedsandboxprovider",
         "attrs": { "data-api-kind": "function" }
       },
       {
-        "slug": "reference/remoteprovider",
+        "slug": "reference/remotesandboxprovider",
         "attrs": { "data-api-kind": "function" }
       },
       {
@@ -610,7 +669,7 @@
         "attrs": { "data-reference-overview": "" }
       },
       {
-        "slug": "reference/openaicompatible",
+        "slug": "reference/openaimodelprovider",
         "attrs": {
           "data-api-kind": "function",
           "data-api-status": "experimental",
@@ -618,7 +677,23 @@
         }
       },
       {
-        "slug": "reference/openaicompatibleoptions",
+        "slug": "reference/anthropicmodelprovider",
+        "attrs": {
+          "data-api-kind": "function",
+          "data-api-status": "experimental",
+          "title": "Experimental / Expérimental"
+        }
+      },
+      {
+        "slug": "reference/anthropicmodelprovideroptions",
+        "attrs": {
+          "data-api-kind": "interface",
+          "data-api-status": "experimental",
+          "title": "Experimental / Expérimental"
+        }
+      },
+      {
+        "slug": "reference/openaimodelprovideroptions",
         "attrs": {
           "data-api-kind": "interface",
           "data-api-status": "experimental",

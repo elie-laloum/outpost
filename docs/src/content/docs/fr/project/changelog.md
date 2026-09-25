@@ -10,6 +10,11 @@ Traduction du journal `CHANGELOG.md` conservé à la racine du dépôt. Chaque v
 ## Non publié
 
 - Instrumenter les dispatchs complets avec la télémétrie OpenTelemetry optionnelle et ajouter createReporter() avec handlers asynchrones typés et flush() explicite.
+- Remplace les factories d’agents par `agent({ harness, model })` et `codex.harness()`, `claude.harness()` et `gemini.harness()`. Les identifiants restent des chaînes libres ; la CLI ou le service valide leur disponibilité.
+- Ajoute des callbacks de harness personnalisés avec requêtes modèle, opérations sandbox, annulation et comptabilisation de l’usage propres à l’exécution. Le terminal interactif et les conversations natives personnalisées sont absents ; la boucle modèle/outils intégrée reste prévue.
+- Remplace le client texte direct par `openaiModelProvider` et ajoute `anthropicModelProvider`, avec cache explicite du préfixe système et normalisation de son usage. Les tests HTTP locaux ne constituent pas une campagne authentifiée.
+- Renomme les factories de sandbox en `*SandboxProvider`, la configuration en `sandboxProvider` et l’option CLI en `--sandbox-provider`. Ces ruptures d’API n’ont pas d’alias de compatibilité. Les anciens enregistrements de ressources sont signalés incompatibles sans suppression.
+- Mutualise la préparation explicite de l’authentification CLI entre harness et workflows générés. Actualise les vérifications du package, exemples et références bilingues, y compris les méthodes de harness imbriquées.
 
 ## 4.2.0
 

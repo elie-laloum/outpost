@@ -12,7 +12,7 @@ import type { VercelOptions } from "./vercel.types.ts";
 
 export type { VercelOptions } from "./vercel.types.ts";
 
-export function vercel(
+export function vercelSandboxProvider(
   options: VercelOptions = {},
   connect: (config: VercelOptions["create"]) => Promise<Sandbox> = async (
     config,

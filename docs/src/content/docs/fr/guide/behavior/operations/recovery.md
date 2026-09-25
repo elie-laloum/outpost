@@ -9,6 +9,7 @@ Examinez l’erreur originale et ses informations de récupération avant de sup
 
 ```ts
 import {
+  agent as composeAgent,
   dispatch,
   codex,
   OutpostError,
@@ -17,7 +18,7 @@ import {
 
 try {
   await dispatch({
-    agent: codex(),
+    agent: composeAgent({ harness: codex.harness({}) }),
     brief: { text: "Implémente et teste la correction." },
   });
 } catch (error) {

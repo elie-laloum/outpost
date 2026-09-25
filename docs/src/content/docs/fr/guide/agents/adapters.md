@@ -36,9 +36,19 @@ Enregistrez le fichier **example.mts** dans `outpost-example/`.
 
 ```ts file=example.mts
 import assert from "node:assert/strict";
-import { claude, codex, gemini, agentVersions } from "@elie-laloum/outpost";
+import {
+  agent as composeAgent,
+  claude,
+  codex,
+  gemini,
+  agentVersions,
+} from "@elie-laloum/outpost";
 
-const agents = [codex(), claude(), gemini()];
+const agents = [
+  composeAgent({ harness: codex.harness({}) }),
+  composeAgent({ harness: claude.harness({}) }),
+  composeAgent({ harness: gemini.harness({}) }),
+];
 assert.deepEqual(
   agents.map((agent) => agent.name),
   ["codex", "claude", "gemini"],
@@ -53,7 +63,7 @@ node example.mts
 
 ## Comprendre le résultat
 
-Les adapters choisissent le comportement de la CLI native. Les providers choisissent l’environnement. Construire un adapter ne l’authentifie pas et n’appelle pas de modèle. Passez-le au dispatch et changez indépendamment le provider. Sans modèle explicite, la CLI utilise son défaut. Gemini prend en charge les nouvelles sessions ; Claude et Codex permettent capture et reprise natives.
+Les presets de harness choisissent le comportement de la CLI native. Composez un agent avec son modèle et transmettez cet agent au dispatch ; choisissez indépendamment l’environnement avec sandboxProvider. La construction ne déclenche ni authentification ni requête modèle. Sans modèle explicite, la CLI utilise son défaut. Gemini prend en charge les nouvelles sessions ; Claude et Codex permettent capture et reprise natives.
 
 [Contrats, options et cas particuliers](../../behavior/agents/adapters/).
 

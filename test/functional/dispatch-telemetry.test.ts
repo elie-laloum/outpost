@@ -11,7 +11,7 @@ import type {
   DispatchTelemetryOutcome,
   SandboxProvider,
 } from "../../src/index.ts";
-import { local } from "../../src/providers/local.ts";
+import { localSandboxProvider as local } from "../../src/providers/local.ts";
 import { repository, scripted, emit } from "../helpers.ts";
 
 function recording() {
@@ -43,7 +43,7 @@ test("cold passes share one session and report exact usage after disposal", asyn
   const record = recording();
   let released = 0;
   const base = local();
-  const provider: SandboxProvider = {
+  const sandboxProvider: SandboxProvider = {
     ...base,
     async acquire(request) {
       const lease = await base.acquire(request);
@@ -59,7 +59,7 @@ test("cold passes share one session and report exact usage after disposal", asyn
   const report = createReporter({ text: async () => {} });
   const result = await dispatch({
     repository: root,
-    provider,
+    sandboxProvider,
     agent: scripted(usageScript + emit("unfinished")),
     brief: { text: "test" },
     passes: 2,
@@ -98,9 +98,9 @@ test("warm and workspace dispatches retain separate sessions and reusable owners
     telemetry: record.telemetry,
   };
   await using workspace = await openWorkspace({ repository: root });
-  await workspace.dispatch({ ...options, provider: local() });
+  await workspace.dispatch({ ...options, sandboxProvider: local() });
   await using box = await workspace.sandbox({
-    provider: local(),
+    sandboxProvider: local(),
     logging: false,
   });
   await box.dispatch(options);
@@ -125,7 +125,7 @@ test("validation, allocation and cleanup failures terminate telemetry without ch
   const record = recording();
   const base = {
     repository: root,
-    provider: local(),
+    sandboxProvider: local(),
     agent: scripted(emit("<outpost>done</outpost>")),
     brief: { text: "test" },
     telemetry: record.telemetry,
@@ -136,7 +136,7 @@ test("validation, allocation and cleanup failures terminate telemetry without ch
   await assert.rejects(
     dispatch({
       ...base,
-      provider: {
+      sandboxProvider: {
         ...local(),
         acquire: async () => {
           throw allocation;
@@ -150,7 +150,7 @@ test("validation, allocation and cleanup failures terminate telemetry without ch
   await assert.rejects(
     dispatch({
       ...base,
-      provider: {
+      sandboxProvider: {
         ...provider,
         async acquire(request) {
           const lease = await provider.acquire(request);
@@ -179,7 +179,7 @@ test("pre-aborted and running cancellation are cancelled while deadlines are fai
   const abort = new AbortController();
   const options = {
     repository: root,
-    provider: local(),
+    sandboxProvider: local(),
     agent: scripted("setTimeout(() => {}, 10000)"),
     brief: { text: "test" },
     telemetry: record.telemetry,
@@ -212,7 +212,7 @@ test("broken telemetry and reporters cannot change dispatch success", async (t) 
   const root = await repository(t);
   const options = {
     repository: root,
-    provider: local(),
+    sandboxProvider: local(),
     agent: scripted(emit("<outpost>done</outpost>")),
     brief: { text: "test" },
     logging: false as const,
@@ -275,7 +275,7 @@ test("repairs, resume and fork start fresh sessions without losing telemetry con
   };
   const result = await dispatch({
     repository: root,
-    provider: local(),
+    sandboxProvider: local(),
     agent,
     brief: { text: "Return <answer>ok</answer>" },
     response: response.text({ tag: "answer", repairs: 1 }),
@@ -305,7 +305,7 @@ test("integration and remote synchronization errors remain inside the dispatch s
   await assert.rejects(
     dispatch({
       workspace,
-      provider: local(),
+      sandboxProvider: local(),
       agent: scripted(usageScript + emit("done")),
       brief: { text: "test" },
       logging: false,
@@ -324,7 +324,7 @@ test("integration and remote synchronization errors remain inside the dispatch s
   await assert.rejects(
     dispatch({
       repository: root,
-      provider: {
+      sandboxProvider: {
         name: "fake-remote",
         placement: "remote",
         async acquire() {

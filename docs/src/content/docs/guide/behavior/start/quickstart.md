@@ -41,6 +41,6 @@ Review Git status and history, the returned commits and the logs under the targe
 
 To control the lifecycle yourself, read [one-shot dispatch](../../../agents/dispatch/) and [branch policies](../../../environment/branches/). To automate several steps, continue with [workflows](../../../workflows/graph/).
 
-For account-based access, follow [Connect Codex](../../../agents/connect-codex/) or [Connect Claude](../../../agents/connect-claude/). The CLI already includes the Codex API-key login hook in generated scripts; manual API compositions must configure it explicitly.
+For account-based access, follow [Connect Codex](../../../agents/connect-codex/) or [Connect Claude](../../../agents/connect-claude/). The CLI already configures Codex API-key authentication on the generated harness; manual API compositions must configure it explicitly.
 
 See [choose a repository](../../../environment/repositories/) for workflow directories, target repositories and relative paths.

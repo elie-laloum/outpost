@@ -1,29 +1,29 @@
 ---
 title: "Model providers — Overview"
-description: "A model provider sends text requests directly to a model API, independently of sandbox allocation."
+description: "A model provider supplies the request transport used by a custom harness."
 sidebar:
   label: Overview
   order: 0
 ---
 
-:::caution[Experimental]
-This family exposes direct text calls only. The agent harness for tools, repository edits and conversations is planned for phase two; these contracts may change.
+:::caution[Experimental — unreleased refactor]
+Bounded text requests and custom callbacks are implemented. The built-in tool loop, streaming and native custom conversations remain planned.
 :::
 
-A model provider sends text requests directly to a model API. The experimental first implementation, `openaiCompatible()`, works without Codex through Chat Completions or Responses. A sandbox provider separately owns the environment where commands execute.
+A model provider supplies the request transport used by a custom harness. `openaiModelProvider()` supports Chat Completions and Responses services; `anthropicModelProvider()` supports Anthropic Messages and optional system-prefix caching. Sandbox allocation is independent.
 
 ## How it works
 
-Create the client with an explicit API base URL, model and bearer key (or false for no authentication), then call `generate()` with text. Each call runs in the calling process, owns its deadline and returns complete text plus optional reported usage. No sandbox is allocated.
+Configure the endpoint, explicit credentials and request bounds, then pass the provider to `customHarness({ modelProvider, run })`. The callback uses `context.modelProvider.request()` with the agent's model. Requests run in the Outpost process and inherit cancellation; reported usage is accumulated once per call.
 
 ## Boundaries and responsibilities
 
-Phase one supports non-streaming text only. Tool execution, repository editing, conversation storage and dispatch integration await the agent harness in phase two. The client rejects unsupported responses and performs no automatic retries. Its public contracts remain experimental; local HTTP fixtures do not establish live service compatibility.
+Identifiers are arbitrary nonempty strings. The service validates model availability when called; there is no local catalog, retry or protocol fallback. These transports reject tool responses and incomplete output. Local HTTP fixtures validate the contracts without proving authenticated compatibility with every service.
 
 ## Entry points
 
-- [openaiCompatible](../../openaicompatible/)
-- [OpenAICompatibleOptions](../../openaicompatibleoptions/)
+- [openaiModelProvider](../../openaimodelprovider/)
+- [anthropicModelProvider](../../anthropicmodelprovider/)
 - [ModelProvider](../../modelprovider/)
 - [ModelRequest](../../modelrequest/)
 - [ModelResult](../../modelresult/)

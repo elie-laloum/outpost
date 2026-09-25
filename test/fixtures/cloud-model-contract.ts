@@ -1,3 +1,4 @@
+import { agent as composeAgent } from "../../src/domain/agent.ts";
 import assert from "node:assert/strict";
 import { posix } from "node:path";
 import { claude } from "../../src/adapters/agents/claude-adapter.ts";
@@ -59,7 +60,10 @@ export async function verifyCloudModels(
         name === "claude" ? "OUTPOST_CLAUDE_MODEL" : "OUTPOST_CODEX_MODEL"
       ];
     const settings = { saveConversations: false, ...(model ? { model } : {}) };
-    const adapter = name === "claude" ? claude(settings) : codex(settings);
+    const adapter =
+      name === "claude"
+        ? composeAgent({ harness: claude.harness(settings) })
+        : composeAgent({ harness: codex.harness(settings) });
     const request = adapter.request({
       text: "Reply with exactly OUTPOST_AUTH_OK. Do not use tools or modify any files.",
     });

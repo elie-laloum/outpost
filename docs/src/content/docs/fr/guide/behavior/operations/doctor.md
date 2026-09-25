@@ -8,20 +8,20 @@ sidebar:
 `outpost doctor` inspecte l’hôte par défaut. Ajoutez `--image` pour inspecter aussi une image Docker/Podman locale dans une sandbox temporaire. Aucun des deux modes n’installe d’outil ni n’appelle de modèle. Les diagnostics hôte et image sont disponibles depuis 3.0.0 ; les contrôles Gemini sont disponibles depuis 4.0.0.
 
 ```sh
-outpost doctor --provider docker --agent codex
-outpost doctor --provider podman --agent claude --json
-outpost doctor --provider docker --agent codex --image outpost:mon-workflow
+outpost doctor --sandbox-provider docker --agent codex
+outpost doctor --sandbox-provider podman --agent claude --json
+outpost doctor --sandbox-provider docker --agent codex --image outpost:mon-workflow
 ```
 
 Depuis les sources, utilisez Node.js 24+ :
 
 ```sh
-node src/cli/main.ts doctor --provider docker --agent codex
+node src/cli/main.ts doctor --sandbox-provider docker --agent codex
 ```
 
 ## Choisir l’environnement
 
-`--provider` accepte `docker` (défaut), `podman`, `local`, `vercel` ou `daytona`. `--agent` accepte `codex` (défaut), `claude` ou `gemini`. Les options sont explicites : la commande ne lit ni le script de workflow ni ses fichiers d’environnement. Elle ne nécessite pas de dépôt Git.
+`--sandbox-provider` accepte `docker` (défaut), `podman`, `local`, `vercel` ou `daytona`. `--agent` accepte `codex` (défaut), `claude` ou `gemini`. Les options sont explicites : la commande ne lit ni le script de workflow ni ses fichiers d’environnement. Elle ne nécessite pas de dépôt Git.
 
 Chaque rapport vérifie la version de Node.js en cours, Git sur le PATH et le CLI hôte de l’agent choisi. Docker/Podman vérifient aussi le CLI du moteur, son accès via `info` et la disponibilité de tar sur l’hôte. Chaque commande externe dispose d’un délai de cinq secondes et d’une sortie bornée.
 
@@ -32,7 +32,7 @@ Le rapport décrit le placement et le support du terminal interactif du provider
 `--image NOM` est disponible uniquement avec Docker/Podman. L’image doit déjà exister dans le moteur choisi ; doctor ne la télécharge ni ne la construit. Utilisez la même image que votre workflow, par exemple :
 
 ```sh
-node src/cli/main.ts doctor --provider docker --agent codex --image outpost:mon-workflow
+node src/cli/main.ts doctor --sandbox-provider docker --agent codex --image outpost:mon-workflow
 ```
 
 La commande démarre un container séparé avec réseau désactivé, workspace temporaire vide et home privé éphémère. Elle ne monte pas votre dépôt et ne transmet pas les identifiants de l’hôte. Elle utilise l’utilisateur et l’adapter d’exécution habituels d’Outpost : un UID d’image incompatible ou des outils d’exécution manquants font échouer le démarrage. Les montages, variables d’environnement et personnalisations utilisateur propres au workflow ne sont pas reproduits.
@@ -72,11 +72,11 @@ Appelez `sandbox.diagnose()` ou `diagnoseSandbox(sandbox)` dans le workflow qui 
 
 ```ts
 import { createSandbox, diagnoseSandbox } from "@elie-laloum/outpost";
-import { docker } from "@elie-laloum/outpost/providers/docker";
+import { dockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
 const sandbox = await createSandbox({
   repository: "/path/to/repository",
-  provider: docker({ image: "outpost:my-workflow" }),
+  sandboxProvider: dockerSandboxProvider({ image: "outpost:my-workflow" }),
 });
 try {
   const report = await diagnoseSandbox(sandbox, {
@@ -95,7 +95,7 @@ Les commandes conservent une sortie bornée et disposent chacune de cinq seconde
 
 ### Sondes cloud et transferts explicites
 
-`diagnoseSandbox(lease, options)` accepte une `SandboxLease` existante, notamment une lease cloud explicitement acquise par votre code. Doctor ne déclenche aucune allocation cloud ; votre workflow choisit le provider, les identifiants, le coût des ressources et leur libération. Vous devez conserver l’exclusivité d’une lease fournie directement pendant l’inspection et la libérer vous-même. Vous pouvez fournir `{ provider: { name, placement } }` comme métadonnées annoncées ; les diagnostics ne les vérifient pas. Une `Sandbox` fournit automatiquement son provider configuré.
+`diagnoseSandbox(lease, options)` accepte une `SandboxLease` existante, notamment une lease cloud explicitement acquise par votre code. Doctor ne déclenche aucune allocation cloud ; votre workflow choisit le provider, les identifiants, le coût des ressources et leur libération. Vous devez conserver l’exclusivité d’une lease fournie directement pendant l’inspection et la libérer vous-même. Vous pouvez fournir `{ sandboxProvider: { name, placement } }` comme métadonnées annoncées ; les diagnostics ne les vérifient pas. Une `Sandbox` fournit automatiquement son provider configuré.
 
 Activez `transfers: true` pour tester l’envoi et le téléchargement binaires. La sonde crée un répertoire temporaire unique sous la racine de la lease, vérifie les octets envoyés via un processus Node.js dans la sandbox, puis compare le téléchargement sur l’hôte. Le nettoyage utilise un signal borné indépendant, même après annulation. Vérifiez `sandbox.transfers.cleanup` ; un échec indique le chemin conservé et laisse la propriété à l’appelant. Les sondes réussies suppriment leurs fichiers temporaires sur l’hôte et dans la sandbox. Par défaut, aucun fichier de transfert n’est créé.
 
@@ -114,4 +114,4 @@ Ce rapport synchrone et hors ligne décode des événements synthétiques intég
 
 Les fixtures exécutables déterministes dans `test/fixtures/agent-protocol.ts` exercent également les arguments et l’entrée standard des requêtes start/resume/fork par défaut avec une sortie JSON par lignes fragmentée. Lancez-les depuis les sources avec `node --test test/functional/doctor-protocol.test.ts`. Elles n’utilisent ni CLI d’agent installée ni identifiants.
 
-Lancez `node test/fixtures/sandbox-diagnostics.ts` depuis les sources pour une démonstration locale complète. Elle crée un dépôt Git temporaire, diagnostique une sandbox `local()` explicite avec sondes binaires, vérifie sa réutilisation par une commande, contrôle les deux protocoles intégrés puis supprime ses ressources temporaires. Elle n’invoque jamais d’agent réel. Pour exercer une image de conteneur locale existante, définissez `OUTPOST_CONTAINER_ENGINE=docker` ou `podman` ; `OUTPOST_CONTAINER_IMAGE` vaut `outpost-ci:latest` par défaut. La fixture conserve son dépôt temporaire si le nettoyage de la sandbox ne peut pas être confirmé.
+Lancez `node test/fixtures/sandbox-diagnostics.ts` depuis les sources pour une démonstration locale complète. Elle crée un dépôt Git temporaire, diagnostique une sandbox `localSandboxProvider()` explicite avec sondes binaires, vérifie sa réutilisation par une commande, contrôle les deux protocoles intégrés puis supprime ses ressources temporaires. Elle n’invoque jamais d’agent réel. Pour exercer une image de conteneur locale existante, définissez `OUTPOST_CONTAINER_ENGINE=docker` ou `podman` ; `OUTPOST_CONTAINER_IMAGE` vaut `outpost-ci:latest` par défaut. La fixture conserve son dépôt temporaire si le nettoyage de la sandbox ne peut pas être confirmé.

@@ -13,7 +13,7 @@ import { openWorkspace } from "../../src/index.ts";
 import { seedRemote } from "../../src/application/remote-workspace.ts";
 import { git } from "../../src/infrastructure/git/command.ts";
 import { fileBatches } from "../../src/providers/file-batches.ts";
-import { local } from "../../src/providers/local.ts";
+import { localSandboxProvider } from "../../src/providers/local.ts";
 
 const root = await mkdtemp(join(tmpdir(), "outpost-transfer-fixture-"));
 await git(root, ["init", "-b", "main"]);
@@ -28,7 +28,7 @@ const workspace = await openWorkspace({
 });
 const remote = join(root, ".outpost", "recovery", "fixture-remote");
 await mkdir(remote, { recursive: true });
-const base = await local().acquire({
+const base = await localSandboxProvider().acquire({
   repository: remote,
   directory: remote,
   gitDirectories: [],

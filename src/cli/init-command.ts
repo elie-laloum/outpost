@@ -33,10 +33,10 @@ export async function initializeCommand({
   if (
     !values.yes &&
     !process.stdin.isTTY &&
-    (!values.agent || !values.provider)
+    (!values.agent || !values.sandboxProvider)
   )
     throw new Error(
-      "Headless initialization requires --yes for defaults, or --agent and --provider.",
+      "Headless initialization requires --yes for defaults, or --agent and --sandbox-provider.",
     );
   if (!values.yes && process.stdin.isTTY) {
     intro("Create an Outpost workflow");
@@ -87,7 +87,7 @@ export async function initializeCommand({
     }
   }
   options.build ??= ["docker", "podman"].includes(
-    String(options.provider ?? "docker"),
+    String(options.sandboxProvider ?? "docker"),
   );
   const progress = !values.yes && process.stdin.isTTY ? spinner() : undefined;
   progress?.start(

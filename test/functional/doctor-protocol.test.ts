@@ -11,7 +11,7 @@ import { protocolFixtures } from "../../src/adapters/agents/protocol-fixtures.co
 import { executeProcess } from "../../src/infrastructure/process.ts";
 
 for (const name of ["claude", "codex", "gemini"] as const) {
-  const agent = { claude, codex, gemini }[name]();
+  const agent = { claude, codex, gemini }[name].harness().bind();
   test(`${name} reports only synthetic structural compatibility`, () => {
     const report = diagnoseAgentProtocol(name);
     assert.equal(report.hasFailures, false);

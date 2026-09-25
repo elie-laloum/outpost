@@ -9,7 +9,7 @@ Outpost lance des agents exécutant les commandes du projet. Choisissez dépôts
 
 Docker/Podman exposent la copie sélectionnée, les métadonnées Git nécessaires et les volumes explicites. Les containers utilisent UID/GID choisi, capacités réduites, no-new-privileges et home privé. Périphériques supplémentaires, montages inscriptibles et hooks élevés élargissent volontairement cette frontière.
 
-Les métadonnées Git partagées restent inscriptibles. Une sandbox montée ne protège pas le dépôt hôte ou sa configuration contre un agent hostile. Outpost désactive les hooks pour ses propres commandes Git, mais les outils du dépôt peuvent exécuter d’autres programmes. `local()` n’isole pas les fichiers.
+Les métadonnées Git partagées restent inscriptibles. Une sandbox montée ne protège pas le dépôt hôte ou sa configuration contre un agent hostile. Outpost désactive les hooks pour ses propres commandes Git, mais les outils du dépôt peuvent exécuter d’autres programmes. `localSandboxProvider()` n’isole pas les fichiers.
 
 Les providers distants envoient historique et fichiers sélectionnés à votre compte cloud. Consultez leurs politiques réseau et de stockage. Les identifiants envoyés sont accessibles au code exécuté dans l’environnement.
 

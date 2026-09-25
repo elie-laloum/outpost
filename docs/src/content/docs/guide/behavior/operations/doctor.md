@@ -8,20 +8,20 @@ sidebar:
 `outpost doctor` inspects the host by default. Add `--image` to also inspect a local Docker/Podman image in a temporary sandbox. Neither mode installs tools or makes a model call. Host and image diagnostics are available since 3.0.0; Gemini checks are available since 4.0.0.
 
 ```sh
-outpost doctor --provider docker --agent codex
-outpost doctor --provider podman --agent claude --json
-outpost doctor --provider docker --agent codex --image outpost:my-workflow
+outpost doctor --sandbox-provider docker --agent codex
+outpost doctor --sandbox-provider podman --agent claude --json
+outpost doctor --sandbox-provider docker --agent codex --image outpost:my-workflow
 ```
 
 From a source checkout, use Node.js 24+:
 
 ```sh
-node src/cli/main.ts doctor --provider docker --agent codex
+node src/cli/main.ts doctor --sandbox-provider docker --agent codex
 ```
 
 ## Select the environment
 
-`--provider` accepts `docker` (default), `podman`, `local`, `vercel` or `daytona`. `--agent` accepts `codex` (default), `claude` or `gemini`. Options are explicit: the command does not read the workflow script or its environment files. It does not require a Git checkout.
+`--sandbox-provider` accepts `docker` (default), `podman`, `local`, `vercel` or `daytona`. `--agent` accepts `codex` (default), `claude` or `gemini`. Options are explicit: the command does not read the workflow script or its environment files. It does not require a Git checkout.
 
 Every report checks the running Node.js version, Git on PATH and the selected agent's host CLI. Docker/Podman also check the engine CLI, access through `info` and host tar availability. Each external command has a five-second deadline and bounded output.
 
@@ -32,7 +32,7 @@ The report describes the selected built-in provider's placement and interactive-
 `--image NAME` is supported only with Docker/Podman. The image must already exist in the selected engine; doctor never downloads or builds it. Use the same image as your workflow, for example:
 
 ```sh
-node src/cli/main.ts doctor --provider docker --agent codex --image outpost:my-workflow
+node src/cli/main.ts doctor --sandbox-provider docker --agent codex --image outpost:my-workflow
 ```
 
 The command starts a separate container with networking disabled, an empty temporary workspace and a private ephemeral home. It does not mount your repository or pass host credentials. It uses Outpost's normal container user and execution adapter, so image UID mismatches and missing runtime tools fail startup. Workflow-specific mounts, environment variables and user overrides are not reproduced.
@@ -72,11 +72,11 @@ Call `sandbox.diagnose()` or `diagnoseSandbox(sandbox)` in the workflow that own
 
 ```ts
 import { createSandbox, diagnoseSandbox } from "@elie-laloum/outpost";
-import { docker } from "@elie-laloum/outpost/providers/docker";
+import { dockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
 const sandbox = await createSandbox({
   repository: "/path/to/repository",
-  provider: docker({ image: "outpost:my-workflow" }),
+  sandboxProvider: dockerSandboxProvider({ image: "outpost:my-workflow" }),
 });
 try {
   const report = await diagnoseSandbox(sandbox, {
@@ -95,7 +95,7 @@ Commands retain bounded output and have a deadline of five seconds each by defau
 
 ### Explicit cloud and transfer probes
 
-`diagnoseSandbox(lease, options)` accepts an existing `SandboxLease`, including a cloud lease explicitly acquired by your code. No cloud allocation is triggered by doctor; your workflow chooses the provider, credentials, resource cost and cleanup. You must hold exclusive ownership of a directly supplied lease during inspection and release it yourself. You can provide `{ provider: { name, placement } }` as advertised metadata; diagnostics do not verify that metadata. A `Sandbox` supplies its actual configured provider automatically.
+`diagnoseSandbox(lease, options)` accepts an existing `SandboxLease`, including a cloud lease explicitly acquired by your code. No cloud allocation is triggered by doctor; your workflow chooses the provider, credentials, resource cost and cleanup. You must hold exclusive ownership of a directly supplied lease during inspection and release it yourself. You can provide `{ sandboxProvider: { name, placement } }` as advertised metadata; diagnostics do not verify that metadata. A `Sandbox` supplies its actual configured provider automatically.
 
 Opt into `transfers: true` to test binary upload and download. This writes a unique temporary directory under the lease root, verifies the uploaded bytes through a Node.js process inside the sandbox, and compares the download on the host. Cleanup runs with a separate bounded signal even after cancellation. Check `sandbox.transfers.cleanup`; a failure includes the retained probe path and leaves ownership with the caller. Successful probes remove their temporary host and sandbox files. The default does not create transfer files.
 
@@ -114,4 +114,4 @@ This synchronous, offline report decodes bundled synthetic events for conversati
 
 The deterministic executable fixtures in `test/fixtures/agent-protocol.ts` additionally exercise the default start/resume/fork request arguments and stdin with chunked JSON-line output. Run them from a source checkout with `node --test test/functional/doctor-protocol.test.ts`. They do not use installed agent CLIs or credentials.
 
-Run `node test/fixtures/sandbox-diagnostics.ts` from a source checkout for a complete local demonstration. It creates a temporary Git repository, diagnoses an explicit `local()` sandbox with binary transfer probes, verifies subsequent command reuse, checks both bundled protocols and removes its temporary resources. It never invokes a real agent. To exercise an existing local container image instead, set `OUTPOST_CONTAINER_ENGINE=docker` or `podman`; `OUTPOST_CONTAINER_IMAGE` defaults to `outpost-ci:latest`. The fixture retains its temporary repository if sandbox cleanup cannot be confirmed.
+Run `node test/fixtures/sandbox-diagnostics.ts` from a source checkout for a complete local demonstration. It creates a temporary Git repository, diagnoses an explicit `localSandboxProvider()` sandbox with binary transfer probes, verifies subsequent command reuse, checks both bundled protocols and removes its temporary resources. It never invokes a real agent. To exercise an existing local container image instead, set `OUTPOST_CONTAINER_ENGINE=docker` or `podman`; `OUTPOST_CONTAINER_IMAGE` defaults to `outpost-ci:latest`. The fixture retains its temporary repository if sandbox cleanup cannot be confirmed.

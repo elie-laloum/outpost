@@ -20,17 +20,18 @@ export async function doctorCommand(
 ): Promise<void> {
   invariant(
     positionals.length === 1,
-    "Usage: outpost doctor [--provider NAME] [--agent NAME] [--image NAME] [--json]",
+    "Usage: outpost doctor [--sandbox-provider NAME] [--agent NAME] [--image NAME] [--json]",
   );
   for (const key of Object.keys(values))
     invariant(
-      ["provider", "agent", "image", "json"].includes(key),
+      ["sandboxProvider", "agent", "image", "json"].includes(key),
       `Unsupported doctor option: --${key}`,
     );
-  const provider = values.provider ?? doctorDefaults.provider;
+  const sandboxProvider =
+    values.sandboxProvider ?? doctorDefaults.sandboxProvider;
   const agent = values.agent ?? doctorDefaults.agent;
   invariant(
-    isProvider(provider),
+    isProvider(sandboxProvider),
     "Unknown provider. Choose docker, podman, local, vercel or daytona.",
   );
   invariant(
@@ -39,7 +40,7 @@ export async function doctorCommand(
   );
   const report = await diagnose(
     {
-      provider,
+      sandboxProvider,
       agent,
       ...(values.image !== undefined ? { image: values.image } : {}),
     },
@@ -48,7 +49,7 @@ export async function doctorCommand(
   if (values.json) write(`${JSON.stringify(report, null, 2)}\n`);
   else {
     write(
-      `Outpost doctor — ${report.scope === "host" ? "host checks" : "host and image checks"} (${provider}, ${agent})\n`,
+      `Outpost doctor — ${report.scope === "host" ? "host checks" : "host and image checks"} (${sandboxProvider}, ${agent})\n`,
     );
     write(
       `Provider contract: ${report.placement}; interactive terminal: ${report.interactiveTerminal ? "supported" : "unsupported"}. Workflow execution is not tested.\n`,

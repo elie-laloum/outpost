@@ -2,10 +2,10 @@ import assert from "node:assert/strict";
 import { diagnoseImage } from "../../src/application/doctor-image.ts";
 import { executeProcess } from "../../src/infrastructure/process.ts";
 
-const provider = process.argv[2];
-assert.ok(provider === "docker" || provider === "podman");
+const sandboxProvider = process.argv[2];
+assert.ok(sandboxProvider === "docker" || sandboxProvider === "podman");
 await diagnoseImage(
-  { provider, agent: "codex", image: "outpost-ci:latest" },
+  { sandboxProvider, agent: "codex", image: "outpost-ci:latest" },
   async (command) => {
     const args = command.arguments ?? [];
     if (args[0] === "create")

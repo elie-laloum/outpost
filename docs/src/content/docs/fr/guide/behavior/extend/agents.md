@@ -8,7 +8,7 @@ sidebar:
 Implémentez `AgentAdapter` pour connecter un autre CLI natif sans changer l’allocation des sandboxes ni les workflows. Séparez construction des commandes et décodage du protocole lorsque l’adapter grandit.
 
 ```ts
-import type { AgentAdapter } from "@elie-laloum/outpost";
+import { agent, type AgentAdapter } from "@elie-laloum/outpost";
 
 const adapter: AgentAdapter = {
   name: "example",
@@ -25,7 +25,8 @@ const adapter: AgentAdapter = {
     return [{ kind: "text", text: line }];
   },
 };
-console.log(adapter.name);
+const worker = agent({ harness: { kind: "cli", bind: () => adapter } });
+console.log(worker.name);
 ```
 
 Cet exemple illustre le port, pas un outil installé : fournissez votre exécutable et son protocole. `request(input)` reçoit texte, mode interactif et continuation éventuels, puis retourne un `Command`. `events(line)` produit zéro ou plusieurs événements normalisés. Gardez les messages inconnus dans `raw` lorsqu’ils aident au diagnostic ; n’inventez ni tokens ni identifiants.

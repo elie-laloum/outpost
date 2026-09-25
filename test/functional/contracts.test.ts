@@ -1,3 +1,4 @@
+import { agent as composeAgent } from "../../src/domain/agent.ts";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
@@ -12,7 +13,7 @@ import {
   response,
 } from "../../src/index.ts";
 import type { AgentObservation, ConversationStore } from "../../src/index.ts";
-import { local } from "../../src/providers/local.ts";
+import { localSandboxProvider } from "../../src/providers/local.ts";
 import {
   parseEnvironment,
   resolveVariables,
@@ -33,7 +34,9 @@ test("final Claude results are authoritative without duplicating streamed text",
         : []),
       { type: "result", result: "answer", is_error: false },
     ];
-    const native = claude({ saveConversations: false });
+    const native = composeAgent({
+      harness: claude.harness({ saveConversations: false }),
+    });
     const agent = {
       ...native,
       request: () => ({
@@ -46,7 +49,7 @@ test("final Claude results are authoritative without duplicating streamed text",
     };
     const result = await dispatch({
       repository: root,
-      provider: local(),
+      sandboxProvider: localSandboxProvider(),
       agent,
       brief: { text: "test" },
       logging: false,
@@ -60,6 +63,13 @@ test("raw lines and normalized events retain pass and timestamp without losing f
     events: AgentObservation[] = [];
   const lines = ["first line", "second line"];
   const agent = {
+    kind: "cli" as const,
+    harness: {
+      kind: "cli" as const,
+      bind() {
+        throw new Error("Already bound fixture");
+      },
+    },
     name: "plain",
     request: () => ({
       executable: process.execPath,
@@ -69,7 +79,7 @@ test("raw lines and normalized events retain pass and timestamp without losing f
   };
   const result = await dispatch({
     repository: root,
-    provider: local(),
+    sandboxProvider: localSandboxProvider(),
     agent,
     brief: { text: "test" },
     logging: false,
@@ -165,15 +175,21 @@ test("Claude transcript usage retains four independent counters from the last as
     ]
       .map((item) => JSON.stringify(item))
       .join("\n") + "\ninvalid";
-  assert.deepEqual(claude().transcriptUsage?.(content), {
-    input: 2,
-    cacheCreated: 3,
-    cached: 4,
-    output: 5,
-  });
-  assert.equal(claude().transcriptUsage?.("invalid"), undefined);
+  assert.deepEqual(
+    composeAgent({ harness: claude.harness({}) }).transcriptUsage?.(content),
+    {
+      input: 2,
+      cacheCreated: 3,
+      cached: 4,
+      output: 5,
+    },
+  );
   assert.equal(
-    codex().events(
+    composeAgent({ harness: claude.harness({}) }).transcriptUsage?.("invalid"),
+    undefined,
+  );
+  assert.equal(
+    composeAgent({ harness: codex.harness({}) }).events(
       JSON.stringify({ type: "error", error: "native failure" }),
     )[0]?.kind,
     "failure",
@@ -182,8 +198,8 @@ test("Claude transcript usage retains four independent counters from the last as
 
 test("already cancelled operations preserve the exact reason without touching a repository", async () => {
   let acquired = 0;
-  const provider = {
-    ...local(),
+  const sandboxProvider = {
+    ...localSandboxProvider(),
     acquire: async () => {
       acquired++;
       throw new Error("unreachable");
@@ -196,14 +212,18 @@ test("already cancelled operations preserve the exact reason without touching a 
       operation({
         repository: "nonexistent-audit-path",
         agent: scripted(emit("ok")),
-        provider,
+        sandboxProvider,
         brief: { text: "go" },
         signal,
       }),
       (error) => error === reason,
     );
   await assert.rejects(
-    createSandbox({ repository: "nonexistent-audit-path", provider, signal }),
+    createSandbox({
+      repository: "nonexistent-audit-path",
+      sandboxProvider,
+      signal,
+    }),
     (error) => error === reason,
   );
   assert.equal(acquired, 0);
@@ -212,8 +232,8 @@ test("already cancelled operations preserve the exact reason without touching a 
 test("structured output preflight rejects missing tags and unsupported repairs before provisioning", async (t) => {
   const root = await repository(t);
   let acquired = 0;
-  const provider = {
-    ...local(),
+  const sandboxProvider = {
+    ...localSandboxProvider(),
     acquire: async () => {
       acquired++;
       throw new Error("unreachable");
@@ -223,7 +243,7 @@ test("structured output preflight rejects missing tags and unsupported repairs b
   await assert.rejects(
     dispatch({
       repository: root,
-      provider,
+      sandboxProvider,
       agent,
       brief: { text: "no tag" },
       response: response.text({ tag: "answer" }),
@@ -233,7 +253,7 @@ test("structured output preflight rejects missing tags and unsupported repairs b
   await assert.rejects(
     dispatch({
       repository: root,
-      provider,
+      sandboxProvider,
       agent,
       brief: { text: "<answer>" },
       response: response.text({ tag: "answer", repairs: 1 }),
@@ -249,7 +269,7 @@ test("journals append complete runs and include raw recognized agent output when
   for (let run = 0; run < 2; run++)
     await dispatch({
       repository: root,
-      provider: local(),
+      sandboxProvider: localSandboxProvider(),
       agent: scripted(emit("ok")),
       brief: { text: "go" },
       logging: { file, verbose: true },
@@ -270,7 +290,7 @@ test("the default completion marker stops later passes without an explicit until
   const root = await repository(t);
   const result = await dispatch({
     repository: root,
-    provider: local(),
+    sandboxProvider: localSandboxProvider(),
     agent: scripted(emit("<outpost>done</outpost>")),
     brief: { text: "go" },
     passes: 3,
@@ -307,7 +327,7 @@ test("custom conversation storage supports cold continuation and per-turn transc
   };
   const result = await dispatch({
     repository: root,
-    provider: local(),
+    sandboxProvider: localSandboxProvider(),
     agent,
     brief: { text: "go" },
     logging: false,

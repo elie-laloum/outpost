@@ -58,7 +58,7 @@ test("bounded owned probes distinguish advertised capabilities, observations and
     {
       agent: "codex",
       deadlineMs: 300,
-      provider: { name: "custom-cloud", placement: "remote" },
+      sandboxProvider: { name: "custom-cloud", placement: "remote" },
     },
   );
   assert.equal(report.hasFailures, false);

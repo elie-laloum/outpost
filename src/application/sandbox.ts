@@ -54,7 +54,7 @@ export async function createSandbox(
       return exclusive("diagnose", () =>
         diagnoseSandbox(runtime, {
           ...settings,
-          provider: context.provider,
+          sandboxProvider: context.sandboxProvider,
           signal: settings.signal
             ? AbortSignal.any([settings.signal, stop.signal])
             : stop.signal,

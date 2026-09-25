@@ -8,13 +8,13 @@ sidebar:
 Utilisez un dispatch ponctuel pour laisser la bibliothèque gérer l’allocation et la fermeture.
 
 ```ts
-import { dispatch, codex } from "@elie-laloum/outpost";
-import { docker } from "@elie-laloum/outpost/providers/docker";
+import { agent as composeAgent, dispatch, codex } from "@elie-laloum/outpost";
+import { dockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
 const result = await dispatch({
   repository: "/work/backend",
-  agent: codex(),
-  provider: docker(),
+  agent: composeAgent({ harness: codex.harness({}) }),
+  sandboxProvider: dockerSandboxProvider(),
   branch: { mode: "integrate" },
   brief: { text: "Corrige les tests, vérifie le résultat et crée un commit." },
 });

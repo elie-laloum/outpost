@@ -1,4 +1,4 @@
-import type { AgentAdapter, Usage } from "../domain/agent.types.ts";
+import type { Agent, Usage } from "../domain/agent.types.ts";
 import { invariant } from "../domain/errors.ts";
 import { ResponseError } from "../domain/response.ts";
 import type { SandboxLease } from "../domain/sandbox.types.ts";
@@ -19,7 +19,7 @@ export { notify } from "./observation.ts";
 export async function execute<T>(
   workspace: WorkspaceRecord,
   lease: SandboxLease,
-  agent: AgentAdapter,
+  agent: Agent,
   host: boolean,
   options: DispatchOptions<T>,
   afterTurn?: (turn: Turn) => Promise<Turn>,

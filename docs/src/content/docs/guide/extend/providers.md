@@ -91,12 +91,12 @@ Save **example.mts** in `workflow/`.
 
 ```ts file=example.mts
 import assert from "node:assert/strict";
-import { createSandbox, mountedProvider } from "@elie-laloum/outpost";
-import { docker } from "@elie-laloum/outpost/providers/docker";
+import { createSandbox, mountedSandboxProvider } from "@elie-laloum/outpost";
+import { dockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 import { resolve } from "node:path";
 
-const backend = docker({ image: "outpost:docs-demo" });
-const instrumented = mountedProvider({
+const backend = dockerSandboxProvider({ image: "outpost:docs-demo" });
+const instrumented = mountedSandboxProvider({
   name: "instrumented-docker",
   async acquire(context) {
     console.log("Allocating", context.directory);
@@ -105,7 +105,7 @@ const instrumented = mountedProvider({
 });
 await using sandbox = await createSandbox({
   repository: resolve(import.meta.dirname, "../repository"),
-  provider: instrumented,
+  sandboxProvider: instrumented,
 });
 const result = await sandbox.command({
   executable: "git",

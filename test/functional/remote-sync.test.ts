@@ -4,7 +4,7 @@ import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { openWorkspace } from "../../src/index.ts";
 import { seedRemote } from "../../src/application/remote-workspace.ts";
-import { local } from "../../src/providers/local.ts";
+import { localSandboxProvider } from "../../src/providers/local.ts";
 import { git } from "../../src/infrastructure/git.ts";
 import { repository } from "../helpers.ts";
 
@@ -17,7 +17,7 @@ test("remote synchronization preserves commit identity and handles repeated dirt
   t.after(() => workspace.close({ preserve: true }));
   const remote = join(root, ".outpost", "recovery", "remote");
   await mkdir(remote, { recursive: true });
-  const lease = await local().acquire({
+  const lease = await localSandboxProvider().acquire({
     repository: remote,
     directory: remote,
     gitDirectories: [],
@@ -83,7 +83,7 @@ test("remote seeds only commits, preserves unrelated staged and untracked files,
   t.after(() => workspace.close({ preserve: true }));
   const remote = join(root, ".outpost", "recovery", "committed-remote");
   await mkdir(remote, { recursive: true });
-  const lease = await local().acquire({
+  const lease = await localSandboxProvider().acquire({
     repository: remote,
     directory: remote,
     gitDirectories: [],

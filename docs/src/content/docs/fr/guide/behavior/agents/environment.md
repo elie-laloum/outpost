@@ -21,7 +21,7 @@ PROJECT_MODE=test
 2. Une déclaration vide reprend la variable correspondante du processus hôte, si elle existe.
 3. Les `variables` explicites du provider ou de l’adapter surchargent ces valeurs.
 
-Le provider et l’adapter ne peuvent pas déclarer le même nom. Placez l’environnement partagé dans le provider et les identifiants spécifiques dans l’adapter. Une sandbox active résout les variables de l’adapter à chaque tâche. Les environnements isolés n’importent que les variables déclarées ; `local()` utilise votre processus hôte et n’isole pas l’environnement.
+Le provider et l’adapter ne peuvent pas déclarer le même nom. Placez l’environnement partagé dans le provider et les identifiants spécifiques dans l’adapter. Une sandbox active résout les variables de l’adapter à chaque tâche. Les environnements isolés n’importent que les variables déclarées ; `localSandboxProvider()` utilise votre processus hôte et n’isole pas l’environnement.
 
 ## Choisir l’authentification
 

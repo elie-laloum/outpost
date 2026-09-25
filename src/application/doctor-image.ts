@@ -31,7 +31,7 @@ export async function diagnoseImage(
 }
 
 async function inspectImage(
-  { provider, agent, image }: DoctorImageOptions,
+  { sandboxProvider, agent, image }: DoctorImageOptions,
   execute: Executor,
   signal: AbortSignal,
 ): Promise<readonly DiagnosticCheck[]> {
@@ -49,7 +49,7 @@ async function inspectImage(
   };
   try {
     lease = await diagnosticContainer(
-      provider,
+      sandboxProvider,
       image,
       doctorDefaults.deadlineMs,
       tracked,
@@ -142,7 +142,7 @@ async function inspectImage(
       checks.push({
         id: "image.cleanup",
         status: "fail",
-        message: `Cleanup could not be confirmed. Inspect container ${container ?? "creation state"} with ${provider}; temporary workspace retained at ${directory}.`,
+        message: `Cleanup could not be confirmed. Inspect container ${container ?? "creation state"} with ${sandboxProvider}; temporary workspace retained at ${directory}.`,
       });
     if (!retained) {
       try {

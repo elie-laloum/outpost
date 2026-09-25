@@ -8,17 +8,22 @@ sidebar:
 Keep a sandbox warm when sequential jobs need the same environment. Provisioning, installation and setup hooks run once for that sandbox.
 
 ```ts
-import { createSandbox, codex, claude } from "@elie-laloum/outpost";
+import {
+  agent as composeAgent,
+  createSandbox,
+  codex,
+  claude,
+} from "@elie-laloum/outpost";
 
 await using sandbox = await createSandbox({
-  agent: codex(),
+  agent: composeAgent({ harness: codex.harness({}) }),
   branch: { mode: "named", name: "feature/validation" },
 });
 const implementation = await sandbox.dispatch({
   brief: { text: "Implement validation and commit it." },
 });
 await sandbox.dispatch({
-  agent: claude(),
+  agent: composeAgent({ harness: claude.harness({}) }),
   brief: { text: "Review the implementation, run tests and commit any fixes." },
 });
 console.log(implementation.commits, sandbox.workspace.branch);

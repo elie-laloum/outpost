@@ -39,13 +39,18 @@ For example, `--directory /work/workflow1 --repository ../backend` targets `/wor
 
 ```ts
 import { resolve } from "node:path";
-import { claude, dispatch, reporter } from "@elie-laloum/outpost";
-import { docker } from "@elie-laloum/outpost/providers/docker";
+import {
+  agent as composeAgent,
+  claude,
+  dispatch,
+  reporter,
+} from "@elie-laloum/outpost";
+import { dockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
 const result = await dispatch({
   repository: resolve(import.meta.dirname, "../backend"),
-  agent: claude(),
-  provider: docker({ image: "outpost:workflow1" }),
+  agent: composeAgent({ harness: claude.harness({}) }),
+  sandboxProvider: dockerSandboxProvider({ image: "outpost:workflow1" }),
   branch: { mode: "named", name: "outpost/api-change" },
   brief: { text: "Implement the API change, test and commit." },
   observe: reporter(),

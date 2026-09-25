@@ -8,15 +8,19 @@ import {
   diagnoseSandbox,
 } from "../../src/index.ts";
 import { git } from "../../src/infrastructure/git/command.ts";
-import { docker } from "../../src/providers/docker.ts";
-import { local } from "../../src/providers/local.ts";
-import { podman } from "../../src/providers/podman.ts";
+import { dockerSandboxProvider } from "../../src/providers/docker.ts";
+import { localSandboxProvider } from "../../src/providers/local.ts";
+import { podmanSandboxProvider } from "../../src/providers/podman.ts";
 
 const engine = process.env.OUTPOST_CONTAINER_ENGINE;
 if (engine !== undefined && engine !== "docker" && engine !== "podman")
   throw new Error("OUTPOST_CONTAINER_ENGINE must be docker or podman when set");
 const image = process.env.OUTPOST_CONTAINER_IMAGE ?? "outpost-ci:latest";
-const provider = engine ? { docker, podman }[engine]({ image }) : local();
+const sandboxProvider = engine
+  ? { docker: dockerSandboxProvider, podman: podmanSandboxProvider }[engine]({
+      image,
+    })
+  : localSandboxProvider();
 const directory = await realpath(
   await mkdtemp(join(tmpdir(), "outpost-owned-diagnostics-")),
 );
@@ -29,7 +33,10 @@ try {
   await git(directory, ["add", "example.txt"]);
   await git(directory, ["commit", "-m", "Initial"]);
   cleanupSafe = false;
-  const sandbox = await createSandbox({ repository: directory, provider });
+  const sandbox = await createSandbox({
+    repository: directory,
+    sandboxProvider,
+  });
   try {
     const report = await diagnoseSandbox(sandbox, { transfers: true });
     process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);

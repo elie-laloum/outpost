@@ -119,9 +119,15 @@ import { readFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { resolve } from "node:path";
 import { parseEnv } from "node:util";
-import { codex, claude, gemini } from "@elie-laloum/outpost";
-import { docker } from "@elie-laloum/outpost/providers/docker";
-import type { LifecycleHooks } from "@elie-laloum/outpost";
+import {
+  agent as composeAgent,
+  codex,
+  claude,
+  gemini,
+  type AgentAuthentication,
+  type LifecycleHooks,
+} from "@elie-laloum/outpost";
+import { dockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
 const settings = parseEnv(
   await readFile(new URL(".env", import.meta.url), "utf8"),
@@ -157,28 +163,17 @@ export async function configuration(
     throw new Error(
       "Remove OPENAI_API_KEY when using Codex account authentication",
     );
-  let hooks: LifecycleHooks = {};
-  if (name === "codex" && authentication === "login") {
-    const seed = await readFile(
+  let selected: AgentAuthentication;
+  if (authentication === "login") {
+    const credentials = await readFile(
       resolve(
         process.env.CODEX_HOME || resolve(homedir(), ".codex"),
         "auth.json",
       ),
       "utf8",
     );
-    JSON.parse(seed);
-    hooks = {
-      sandboxReady: [
-        {
-          executable: "node",
-          arguments: [
-            "-e",
-            'const fs=require("node:fs"),p=require("node:path"),h=require("node:os").homedir();const d=p.join(h,".codex");fs.mkdirSync(d,{recursive:true,mode:0o700});fs.writeFileSync(p.join(d,"auth.json"),fs.readFileSync(0),{mode:0o600});',
-          ],
-          stdin: seed,
-        },
-      ],
-    };
+    JSON.parse(credentials);
+    selected = { mode: "login", credentials };
   } else {
     const keys = {
       codex: "OPENAI_API_KEY",
@@ -186,9 +181,7 @@ export async function configuration(
       gemini: "GEMINI_API_KEY",
     };
     const key =
-      name === "claude" && authentication === "oauth-token"
-        ? "CLAUDE_CODE_OAUTH_TOKEN"
-        : keys[name];
+      authentication === "oauth-token" ? "CLAUDE_CODE_OAUTH_TOKEN" : keys[name];
     if (!variables[key]) throw new Error(`Declare ${key} in workflow/.env`);
     if (
       name === "claude" &&
@@ -196,22 +189,21 @@ export async function configuration(
       variables.CLAUDE_CODE_OAUTH_TOKEN
     )
       throw new Error("Choose one Claude authentication method");
-    if (name === "codex")
-      hooks = {
-        sandboxReady: [
-          {
-            executable: "sh",
-            arguments: ["-c", "codex login --with-api-key"],
-            stdin: variables.OPENAI_API_KEY,
-          },
-        ],
-      };
+    selected =
+      authentication === "oauth-token"
+        ? { mode: "oauth-token" }
+        : { mode: "api-key", environment: key };
   }
   return {
     repository,
-    agent: factories[name](),
-    provider: docker({ image: "outpost:docs-demo", variables }),
-    hooks,
+    agent: composeAgent({
+      harness: factories[name].harness({ authentication: selected }),
+    }),
+    sandboxProvider: dockerSandboxProvider({
+      image: "outpost:docs-demo",
+      variables,
+    }),
+    hooks: {} as LifecycleHooks,
   };
 }
 ```
@@ -232,25 +224,25 @@ Enregistrez le fichier **example.mts** dans `workflow/`.
 
 ```ts file=example.mts
 import { dispatch, response } from "@elie-laloum/outpost";
-import { vercel } from "@elie-laloum/outpost/providers/vercel";
-import { daytona } from "@elie-laloum/outpost/providers/daytona";
+import { vercelSandboxProvider } from "@elie-laloum/outpost/providers/vercel";
+import { daytonaSandboxProvider } from "@elie-laloum/outpost/providers/daytona";
 import { configuration, variables } from "./runtime.mts";
 
 const runtime = await configuration();
 const name = process.argv[2] ?? "vercel";
 if (name !== "vercel" && name !== "daytona")
   throw new Error("Choose vercel or daytona");
-const provider =
+const sandboxProvider =
   name === "vercel"
-    ? vercel({ variables, create: { timeout: 300_000 } })
-    : daytona({
+    ? vercelSandboxProvider({ variables, create: { timeout: 300_000 } })
+    : daytonaSandboxProvider({
         variables,
         connection: { apiKey: process.env.DAYTONA_API_KEY ?? "" },
         create: { language: "typescript" },
       });
 const result = await dispatch({
   ...runtime,
-  provider,
+  sandboxProvider,
   branch: { mode: "named", name: `workshop/${name}` },
   brief: {
     text: "Inspect text.ts without editing it. Return findings inside <findings> tags.",

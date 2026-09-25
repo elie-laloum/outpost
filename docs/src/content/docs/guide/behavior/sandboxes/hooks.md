@@ -8,10 +8,14 @@ sidebar:
 Hooks prepare resources at explicit lifecycle stages. Supply arrays of `Command` objects; no command is interpreted as a shell script automatically.
 
 ```ts
-import { createSandbox, codex } from "@elie-laloum/outpost";
+import {
+  agent as composeAgent,
+  createSandbox,
+  codex,
+} from "@elie-laloum/outpost";
 
 await using sandbox = await createSandbox({
-  agent: codex(),
+  agent: composeAgent({ harness: codex.harness({}) }),
   copies: [".env.test"],
   hooks: {
     workspaceReady: [{ executable: "git", arguments: ["status", "--short"] }],

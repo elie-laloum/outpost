@@ -3,10 +3,10 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { TestContext } from "node:test";
 import type {
-  AgentAdapter,
+  CliAgent,
   AgentEvent,
   AgentInput,
-} from "../src/domain/ports.ts";
+} from "../src/domain/agent.types.ts";
 import { git } from "../src/infrastructure/git.ts";
 
 export async function repository(t: TestContext): Promise<string> {
@@ -24,8 +24,15 @@ export async function repository(t: TestContext): Promise<string> {
 
 export function scripted(
   script: string | ((input: AgentInput) => string),
-): AgentAdapter {
+): CliAgent {
   return {
+    kind: "cli",
+    harness: {
+      kind: "cli",
+      bind() {
+        throw new Error("Fixture is already bound");
+      },
+    },
     name: "fixture",
     resumable: true,
     request(input) {

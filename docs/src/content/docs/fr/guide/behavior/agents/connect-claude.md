@@ -9,7 +9,7 @@ Outpost lance la CLI native Claude Code et ne crée pas de compte supplémentair
 
 ## Connexion locale
 
-Lancez `claude` et suivez la connexion ; `/login` change de compte. Avec `local()`, les identifiants de l'hôte sont disponibles. Les conteneurs n'héritent pas du trousseau. Voir [l'authentification Claude](https://code.claude.com/docs/en/authentication).
+Lancez `claude` et suivez la connexion ; `/login` change de compte. Avec `localSandboxProvider()`, les identifiants de l'hôte sont disponibles. Les conteneurs n'héritent pas du trousseau. Voir [l'authentification Claude](https://code.claude.com/docs/en/authentication).
 
 ## Jeton d'abonnement pour les sandboxes
 
@@ -28,9 +28,15 @@ Déclarez plutôt `ANTHROPIC_API_KEY=` et fournissez cette variable. Choisissez 
 ## Vérifier et exécuter
 
 ```ts
-import { createSandbox, claude } from "@elie-laloum/outpost";
+import {
+  agent as composeAgent,
+  createSandbox,
+  claude,
+} from "@elie-laloum/outpost";
 
-await using sandbox = await createSandbox({ agent: claude() });
+await using sandbox = await createSandbox({
+  agent: composeAgent({ harness: claude.harness({}) }),
+});
 const check = await sandbox.command({
   executable: "sh",
   arguments: [

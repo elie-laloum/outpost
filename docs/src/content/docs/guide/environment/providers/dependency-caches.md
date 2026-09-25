@@ -94,7 +94,7 @@ import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { createSandbox } from "@elie-laloum/outpost";
-import { docker } from "@elie-laloum/outpost/providers/docker";
+import { dockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
 const repository = resolve(import.meta.dirname, "../repository");
 const key = createHash("sha256")
@@ -102,7 +102,7 @@ const key = createHash("sha256")
   .digest("hex");
 await using sandbox = await createSandbox({
   repository,
-  provider: docker({
+  sandboxProvider: dockerSandboxProvider({
     image: "outpost:docs-demo",
     caches: [{ name: "npm", key: `node24-${key}` }],
     variables: { NPM_CONFIG_CACHE: "/outpost/cache/npm" },

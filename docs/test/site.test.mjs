@@ -208,7 +208,7 @@ test("reference symbol icons retain accessible names in both languages", async (
       ["TaskOptions", "type", "taskoptions"],
       ["WorkflowFailure", "class", "workflowfailure"],
       ["agentVersions", "constant", "agentversions"],
-      ["docker", "function", "docker"],
+      ["dockerSandboxProvider", "function", "docker"],
       ["QueueHandler", "type", "queuehandler"],
     ]) {
       await page.goto(`${locale}reference/${route}/`);
@@ -244,7 +244,10 @@ for (const [locale, label, overview] of [
   }) => {
     await page.goto(`${locale}reference/firecracker/`);
     const firecracker = page
-      .getByRole("link", { name: `firecracker — ${label}`, exact: true })
+      .getByRole("link", {
+        name: `firecrackerSandboxProvider — ${label}`,
+        exact: true,
+      })
       .filter({ visible: true });
     const family = firecracker.locator("xpath=ancestor::details[1]");
     await expect(family.locator("summary").first()).toContainText("Providers");
@@ -258,7 +261,7 @@ for (const [locale, label, overview] of [
     expect(overviewIcon.mask).toMatch(/^url\(/);
     expect(overviewIcon.width).toBeGreaterThan(0);
     await expect(page.locator("a[data-reference-overview]")).toHaveCount(23);
-    for (const name of ["firecracker", "FirecrackerOptions"]) {
+    for (const name of ["firecrackerSandboxProvider", "FirecrackerOptions"]) {
       const link = family.getByRole("link", {
         name: `${name} — ${label}`,
         exact: true,
@@ -269,12 +272,14 @@ for (const [locale, label, overview] of [
         return {
           mask: style.maskImage,
           width: parseFloat(style.width),
-          margin: parseFloat(style.marginInlineStart),
+          spacing:
+            parseFloat(style.marginInlineStart) +
+            parseFloat(getComputedStyle(element).columnGap),
         };
       });
       expect(icon.mask).not.toBe("none");
       expect(icon.width).toBeGreaterThan(0);
-      expect(icon.margin).toBeGreaterThan(0);
+      expect(icon.spacing).toBeGreaterThan(0);
     }
     await family.getByRole("link", { name: overview, exact: true }).click();
     await expect(page).toHaveURL(
@@ -327,13 +332,16 @@ for (const [locale, label, familyName] of [
   }) => {
     await page.goto(`${locale}reference/openaicompatible/`);
     const factory = page
-      .getByRole("link", { name: `openaiCompatible — ${label}`, exact: true })
+      .getByRole("link", {
+        name: `openaiModelProvider — ${label}`,
+        exact: true,
+      })
       .filter({ visible: true });
     const family = factory.locator("xpath=ancestor::details[1]");
     await expect(family.locator("summary").first()).toContainText(familyName);
     for (const name of [
-      "openaiCompatible",
-      "OpenAICompatibleOptions",
+      "openaiModelProvider",
+      "OpenAIModelProviderOptions",
       "ModelProvider",
       "ModelRequest",
       "ModelResult",

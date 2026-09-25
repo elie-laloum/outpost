@@ -11,7 +11,7 @@ import {
 } from "node:fs/promises";
 import { join } from "node:path";
 import { createHash } from "node:crypto";
-import { local } from "../../src/providers/local.ts";
+import { localSandboxProvider } from "../../src/providers/local.ts";
 import { fileBatches } from "../../src/providers/file-batches.ts";
 import { fileBatchLimits } from "../../src/providers/file-batches.constants.ts";
 import { fileManifest } from "../../src/infrastructure/file-manifest.ts";
@@ -27,7 +27,7 @@ test("uploads verify reuse and destination changes through a sandbox process, pr
     remote = join(root, "remote");
   await mkdir(source);
   await mkdir(remote);
-  const base = await local().acquire({
+  const base = await localSandboxProvider().acquire({
     repository: root,
     directory: remote,
     gitDirectories: [],
@@ -106,7 +106,7 @@ test("uploads split batches and verify oversized staged files", async (t) => {
     remote = join(root, "remote");
   await mkdir(source);
   await mkdir(remote);
-  const base = await local().acquire({
+  const base = await localSandboxProvider().acquire({
     repository: root,
     directory: remote,
     gitDirectories: [],
@@ -156,7 +156,7 @@ test("upload failures reject source mutations, corrupted payloads and symlink tr
     remote = join(root, "remote");
   await mkdir(source);
   await mkdir(remote);
-  const base = await local().acquire({
+  const base = await localSandboxProvider().acquire({
     repository: root,
     directory: remote,
     gitDirectories: [],
@@ -238,7 +238,7 @@ test("cancelled upload cleans remote staging and leaves the lease reusable", asy
     remote = join(root, "remote");
   await mkdir(source);
   await mkdir(remote);
-  const base = await local().acquire({
+  const base = await localSandboxProvider().acquire({
     repository: root,
     directory: remote,
     gitDirectories: [],
@@ -320,7 +320,7 @@ test("initial untracked inputs reuse verified preseeded payloads while legacy le
   const remote = join(root, ".outpost", "upload-remote");
   await mkdir(remote, { recursive: true });
   await writeFile(join(remote, "extra"), "preseeded");
-  const base = await local().acquire({
+  const base = await localSandboxProvider().acquire({
     repository: root,
     directory: remote,
     gitDirectories: [],
@@ -353,7 +353,7 @@ test("provisioning batches explicit files and preserves directory-copy semantics
   await writeFile(join(root, "input"), "copied input");
   await mkdir(join(root, "inputs", "empty"), { recursive: true });
   await writeFile(join(root, "inputs", "nested"), "nested input");
-  const base = await local().acquire({
+  const base = await localSandboxProvider().acquire({
     repository: root,
     directory: remote,
     gitDirectories: [],
@@ -371,7 +371,7 @@ test("provisioning batches explicit files and preserves directory-copy semantics
     repository: root,
     branch: { mode: "named", name: "copied-inputs" },
     copies: ["input", "input", "inputs", "absent"],
-    provider: {
+    sandboxProvider: {
       name: "fixture",
       placement: "remote",
       acquire: async () => ({ ...lease, fileTransfers: fileBatches(lease) }),
@@ -396,7 +396,7 @@ test("upload rejects changes after manifest inspection and invalid remote respon
     remote = join(root, "remote");
   await mkdir(source);
   await mkdir(remote);
-  const base = await local().acquire({
+  const base = await localSandboxProvider().acquire({
     repository: root,
     directory: remote,
     gitDirectories: [],

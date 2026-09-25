@@ -10,7 +10,7 @@ import {
   openWorkspace,
   response,
 } from "../../src/index.ts";
-import { local } from "../../src/providers/local.ts";
+import { localSandboxProvider } from "../../src/providers/local.ts";
 import { git } from "../../src/infrastructure/git.ts";
 import { repository, scripted, emit } from "../helpers.ts";
 
@@ -23,7 +23,7 @@ test("terminal attachment integrates successful commits and preserves failed wor
   });
   const result = await attach({
     repository: root,
-    provider: local(),
+    sandboxProvider: localSandboxProvider(),
     agent: success,
     branch: { mode: "integrate" },
     brief: { text: "terminal objective" },
@@ -33,7 +33,7 @@ test("terminal attachment integrates successful commits and preserves failed wor
   assert.equal(await readFile(join(root, "terminal.txt"), "utf8"), "saved");
   const failed = await attach({
     repository: root,
-    provider: local(),
+    sandboxProvider: localSandboxProvider(),
     agent: scripted(
       "import fs from 'node:fs';fs.writeFileSync('unfinished.txt','kept');process.exit(7)",
     ),
@@ -47,7 +47,7 @@ test("terminal attachment integrates successful commits and preserves failed wor
   );
   await using box = await createSandbox({
     repository: root,
-    provider: local(),
+    sandboxProvider: localSandboxProvider(),
   });
   assert.equal(
     (await box.attach({ agent: scripted("process.exit(0)") })).status,
@@ -59,7 +59,7 @@ test("a warm sandbox switches agents and does not leak adapter variables between
   const root = await repository(t);
   await using box = await createSandbox({
     repository: root,
-    provider: local(),
+    sandboxProvider: localSandboxProvider(),
     logging: false,
   });
   const first = {
@@ -92,7 +92,7 @@ test("one-shot dispatch writes a journal, returns usage and integrates committed
   );
   const output = await dispatch({
     repository: root,
-    provider: local(),
+    sandboxProvider: localSandboxProvider(),
     agent,
     branch: { mode: "integrate" },
     brief: { text: "work" },
@@ -114,7 +114,7 @@ test("independent workspaces survive sandbox closure and retain dirty files", as
   });
   const box = await createSandbox({
     workspace,
-    provider: local(),
+    sandboxProvider: localSandboxProvider(),
     agent: scripted(emit("ready")),
     logging: false,
   });
@@ -143,7 +143,7 @@ test("warm sandbox rejects overlap and remains usable after cancellation", async
   const root = await repository(t);
   const box = await createSandbox({
     repository: root,
-    provider: local(),
+    sandboxProvider: localSandboxProvider(),
     agent: scripted("setInterval(()=>{},1000)"),
     logging: false,
   });
@@ -179,7 +179,7 @@ test("file briefs reload between passes and literal briefs never expand", async 
   );
   const box = await createSandbox({
     repository: root,
-    provider: local(),
+    sandboxProvider: localSandboxProvider(),
     agent,
     logging: false,
   });
@@ -210,7 +210,7 @@ test("schema repairs resume the same conversation and observer failures are harm
   });
   const box = await createSandbox({
     repository: root,
-    provider: local(),
+    sandboxProvider: localSandboxProvider(),
     agent,
     logging: false,
   });

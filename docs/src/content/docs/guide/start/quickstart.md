@@ -77,7 +77,7 @@ Choose **one** command below. Each creates `workflow/` separately from `reposito
 **Codex with an API key**
 
 ```sh
-npx @elie-laloum/outpost init --yes --agent codex --authentication api-key --provider docker --directory workflow --repository ../repository --image outpost:docs-demo --install
+npx @elie-laloum/outpost init --yes --agent codex --authentication api-key --sandbox-provider docker --directory workflow --repository ../repository --image outpost:docs-demo --install
 ```
 
 **Codex with your account**
@@ -85,13 +85,13 @@ npx @elie-laloum/outpost init --yes --agent codex --authentication api-key --pro
 First install the Codex CLI on the host and run `codex -c cli_auth_credentials_store='"file"' login`. The generated script copies that explicit file credential seed into the sandbox’s private home.
 
 ```sh
-npx @elie-laloum/outpost init --yes --agent codex --authentication login --provider docker --directory workflow --repository ../repository --image outpost:docs-demo --install
+npx @elie-laloum/outpost init --yes --agent codex --authentication login --sandbox-provider docker --directory workflow --repository ../repository --image outpost:docs-demo --install
 ```
 
 **Claude with an API key**
 
 ```sh
-npx @elie-laloum/outpost init --yes --agent claude --authentication api-key --provider docker --directory workflow --repository ../repository --image outpost:docs-demo --install
+npx @elie-laloum/outpost init --yes --agent claude --authentication api-key --sandbox-provider docker --directory workflow --repository ../repository --image outpost:docs-demo --install
 ```
 
 **Claude with your subscription**
@@ -99,7 +99,7 @@ npx @elie-laloum/outpost init --yes --agent claude --authentication api-key --pr
 Obtain a subscription token on the host with `claude setup-token`.
 
 ```sh
-npx @elie-laloum/outpost init --yes --agent claude --authentication oauth-token --provider docker --directory workflow --repository ../repository --image outpost:docs-demo --install
+npx @elie-laloum/outpost init --yes --agent claude --authentication oauth-token --sandbox-provider docker --directory workflow --repository ../repository --image outpost:docs-demo --install
 ```
 
 ## 2. Declare the selected credential

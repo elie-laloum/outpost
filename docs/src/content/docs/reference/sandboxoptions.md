@@ -16,8 +16,8 @@ import type { SandboxOptions } from "@elie-laloum/outpost";
 | Name                 | Type                                                     | Presence | Meaning                                                                                                                                                  |
 | -------------------- | -------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `includeUncommitted` | `boolean \| undefined`                                   | Optional | Include uncommitted host changes when preparing a remote repository snapshot.                                                                            |
-| `agent`              | `AgentAdapter \| undefined`                              | Optional | Native coding-agent adapter.                                                                                                                             |
-| `provider`           | `SandboxProvider \| undefined`                           | Optional | Execution environment backend.                                                                                                                           |
+| `agent`              | `Agent \| undefined`                                     | Optional | Native coding-agent adapter.                                                                                                                             |
+| `sandboxProvider`    | `SandboxProvider \| undefined`                           | Optional | Execution environment backend.                                                                                                                           |
 | `workspace`          | `Workspace \| undefined`                                 | Optional | Caller-owned Git workspace; excludes new repository/branch choices.                                                                                      |
 | `hooks`              | `LifecycleHooks \| undefined`                            | Optional | Lifecycle commands in declared execution order.                                                                                                          |
 | `signal`             | `AbortSignal \| undefined`                               | Optional | Cooperative cancellation for this operation.                                                                                                             |
@@ -38,8 +38,8 @@ import type { SandboxOptions } from "@elie-laloum/outpost";
 ```ts
 export interface SandboxOptions extends WorkspaceOptions {
   readonly includeUncommitted?: boolean;
-  readonly agent?: AgentAdapter;
-  readonly provider?: SandboxProvider;
+  readonly agent?: Agent;
+  readonly sandboxProvider?: SandboxProvider;
   readonly workspace?: Workspace;
   readonly hooks?: LifecycleHooks;
   readonly signal?: AbortSignal;
@@ -53,7 +53,7 @@ export interface SandboxOptions extends WorkspaceOptions {
 
 ## Related contracts
 
-- [AgentAdapter](../agentadapter/)
+- [Agent](../type-agent/)
 - [LifecycleHooks](../lifecyclehooks/)
 - [Logging](../logging/)
 - [SandboxProvider](../sandboxprovider/)

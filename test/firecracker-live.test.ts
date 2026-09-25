@@ -3,7 +3,7 @@ import { test } from "node:test";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { firecracker } from "../src/providers/firecracker.ts";
+import { firecrackerSandboxProvider } from "../src/providers/firecracker.ts";
 import type { FirecrackerOptions } from "../src/providers/firecracker.types.ts";
 
 test(
@@ -14,7 +14,7 @@ test(
       await readFile(process.env.OUTPOST_FIRECRACKER_CONFIG!, "utf8"),
     );
     const root = await mkdtemp(join(tmpdir(), "outpost-firecracker-live-"));
-    const lease = await firecracker(options).acquire({
+    const lease = await firecrackerSandboxProvider(options).acquire({
       repository: root,
       directory: root,
       gitDirectories: [],

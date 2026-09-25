@@ -9,11 +9,11 @@ sidebar:
 
 ```ts
 import { createSandbox } from "@elie-laloum/outpost";
-import { docker } from "@elie-laloum/outpost/providers/docker";
+import { dockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
 await using sandbox = await createSandbox({
   repository: "/path/to/repository",
-  provider: docker({
+  sandboxProvider: dockerSandboxProvider({
     image: "outpost:project",
     repositoryMode: "isolated",
     networks: "none",

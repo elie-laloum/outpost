@@ -1,5 +1,5 @@
 import type { InitOptions } from "./scaffold.types.ts";
-import { authenticationRecipes } from "./init-authentication.constants.ts";
+import { authenticationRecipes } from "../adapters/agents/authentication.constants.ts";
 
 export function authenticationEnvironment(options: InitOptions): string {
   if (options.baseUrl)
@@ -25,10 +25,11 @@ export function authenticationInstructions(options: InitOptions): string {
 export function authenticationSource(options: InitOptions): string {
   const agent = options.agent ?? "codex";
   if (options.authentication === "login") {
-    if (options.provider === "local") return "const authentication = {};";
+    if (options.sandboxProvider === "local")
+      return 'const authentication = { mode: "login" as const };';
     return `const seed = await readFile(resolve(process.env.CODEX_HOME || resolve(homedir(), ".codex"), "auth.json"), "utf8");
 try { JSON.parse(seed); } catch { throw new Error("Invalid Codex authentication file. Run codex login again with file credential storage."); }
-const authentication = { sandboxReady: [{ executable: "node", arguments: ["-e", ${JSON.stringify(authenticationRecipes.codex.seed)}], stdin: seed }] };`;
+const authentication = { mode: "login" as const, credentials: seed };`;
   }
   const key = authenticationEnvironment(options).trim().replace("=", "");
   const conflict =
@@ -41,7 +42,7 @@ const authentication = { sandboxReady: [{ executable: "node", arguments: ["-e", 
   const guard = conflict
     ? `\nif (variables[${JSON.stringify(conflict)}]) throw new Error("Conflicting Claude authentication methods. Keep only the selected credential in the workflow environment.");`
     : "";
-  if (agent !== "codex" || options.baseUrl)
-    return `${check}${guard}\nconst authentication = {};`;
-  return `${check}\nconst authentication = { sandboxReady: [{ executable: "node", arguments: ["-e", ${JSON.stringify(authenticationRecipes.codex.login)}], stdin: variables.OPENAI_API_KEY }] };`;
+  const mode =
+    options.authentication === "oauth-token" ? "oauth-token" : "api-key";
+  return `${check}${guard}\nconst authentication = { mode: ${JSON.stringify(mode)} as const${mode === "api-key" ? `, environment: ${JSON.stringify(key)}` : ""} };`;
 }

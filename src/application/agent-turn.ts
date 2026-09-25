@@ -1,4 +1,5 @@
-import type { AgentAdapter } from "../domain/agent.types.ts";
+import { customTurn } from "./custom-turn.ts";
+import type { Agent } from "../domain/agent.types.ts";
 import { OutpostError } from "../domain/errors.ts";
 import type { SandboxLease } from "../domain/sandbox.types.ts";
 import { activityWatchdog } from "./activity-watchdog.ts";
@@ -9,13 +10,15 @@ import { notify } from "./observation.ts";
 
 export async function turn(
   lease: SandboxLease,
-  agent: AgentAdapter,
+  agent: Agent,
   prompt: string,
   options: DispatchOptions<unknown>,
   continuation: DispatchOptions["continuation"],
   markers: readonly string[],
   pass: number,
 ): Promise<Turn> {
+  if (agent.kind === "custom")
+    return customTurn(lease, agent, prompt, options, pass);
   const start = Date.now();
   const controller = new AbortController();
   const signal = options.signal

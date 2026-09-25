@@ -6,21 +6,22 @@ import type { InitOptions } from "./scaffold.types.ts";
 
 export function starter(options: InitOptions): string {
   const agent = options.agent ?? "codex",
-    provider = options.provider ?? "docker";
+    sandboxProvider = options.sandboxProvider ?? "docker";
   const model = options.model ? `model: ${JSON.stringify(options.model)}` : "";
   const modelProvider = options.baseUrl
-    ? `, modelProvider: ${JSON.stringify({ baseUrl: options.baseUrl, ...(options.apiKeyEnvironment ? { apiKeyEnvironment: options.apiKeyEnvironment } : {}) })}`
+    ? `modelProvider: ${JSON.stringify({ baseUrl: options.baseUrl, ...(options.apiKeyEnvironment ? { apiKeyEnvironment: options.apiKeyEnvironment } : {}) })}`
     : "";
   const image =
-    options.image && (provider === "docker" || provider === "podman")
+    options.image &&
+    (sandboxProvider === "docker" || sandboxProvider === "podman")
       ? `image: ${JSON.stringify(options.image)}, `
       : "";
   return `import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { homedir } from "node:os";
 import { parseEnv } from "node:util";
-import { dispatch, ${agent}, OutpostError, reporter } from "@elie-laloum/outpost";
-import { ${provider} } from "@elie-laloum/outpost/providers/${provider}";
+import { dispatch, agent, ${agent}, OutpostError, reporter } from "@elie-laloum/outpost";
+import { ${sandboxProvider}SandboxProvider } from "@elie-laloum/outpost/providers/${sandboxProvider}";
 
 // Paths are relative to this workflow, regardless of where Node is launched.
 const repository = resolve(import.meta.dirname, ${JSON.stringify(options.repository ?? ".")});
@@ -33,8 +34,8 @@ const variables = Object.fromEntries(
 );
 ${authenticationSource(options)}
 const runtime = {
-  agent: ${agent}({ ${model}${modelProvider} }),
-  provider: ${provider}({ ${image}variables }),
+  agent: agent({ harness: ${agent}.harness({ authentication${modelProvider ? ", " + modelProvider : ""} }), ${model} }),
+  sandboxProvider: ${sandboxProvider}SandboxProvider({ ${image}variables }),
 };
 const objective = process.argv.slice(2).join(" ") || "Inspect this repository and implement one useful improvement.";
 
@@ -42,7 +43,6 @@ console.error("[outpost] Preparing sandbox...");
 try {
   const result = await dispatch({
     ...runtime,
-    hooks: authentication,
     repository,
     branch: { mode: "integrate" },
     brief: { file: resolve(import.meta.dirname, "brief.md"), values: { OBJECTIVE: objective } },

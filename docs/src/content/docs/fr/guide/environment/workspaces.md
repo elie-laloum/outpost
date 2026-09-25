@@ -92,7 +92,7 @@ Enregistrez le fichier **example.mts** dans `workflow/`.
 ```ts file=example.mts
 import assert from "node:assert/strict";
 import { openWorkspace } from "@elie-laloum/outpost";
-import { docker } from "@elie-laloum/outpost/providers/docker";
+import { dockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 import { resolve } from "node:path";
 
 await using workspace = await openWorkspace({
@@ -101,7 +101,7 @@ await using workspace = await openWorkspace({
 });
 for (const turn of [1, 2]) {
   await using sandbox = await workspace.sandbox({
-    provider: docker({ image: "outpost:docs-demo" }),
+    sandboxProvider: dockerSandboxProvider({ image: "outpost:docs-demo" }),
   });
   const result = await sandbox.command({
     executable: "git",

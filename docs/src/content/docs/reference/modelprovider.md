@@ -6,7 +6,7 @@ sidebar:
 ---
 
 :::caution[Experimental]
-This first phase makes text-only HTTP calls without Codex. The agent harness is planned for phase two: tool execution, repository editing and conversation persistence are not implemented. This API cannot be used as a dispatch agent or sandbox provider; its contract may change. See the [implemented scope and planned harness](../../guide/advanced/model-providers/).
+Experimental: bounded text requests and caller-supplied harness execution. No built-in tool loop, streaming or native custom-harness conversation persistence.
 :::
 
 ## Import
@@ -17,17 +17,17 @@ import type { ModelProvider } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name       | Type                                              | Presence | Meaning                                                                                                                                                                                                                                              |
-| ---------- | ------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`     | `string`                                          | Required | Provider identity; the built-in direct client reports openai-compatible.                                                                                                                                                                             |
-| `generate` | `(request: ModelRequest) => Promise<ModelResult>` | Required | Send one independent text request and resolve with complete text and optional observed usage. Reject on invalid input, HTTP failure, cancellation, deadline, malformed output, refusal, truncation or tool calls; no retry or tool execution occurs. |
+| Name      | Type                                              | Presence | Meaning                                                                                                                                      |
+| --------- | ------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`    | `string`                                          | Required | Provider identity; the built-in direct client reports openai-compatible.                                                                     |
+| `request` | `(request: ModelRequest) => Promise<ModelResult>` | Required | Perform one bounded text request for the supplied model. The harness-scoped wrapper propagates cancellation and records reported usage once. |
 
 ## Signature
 
 ```ts
 export interface ModelProvider {
   readonly name: string;
-  generate(request: ModelRequest): Promise<ModelResult>;
+  request(request: ModelRequest): Promise<ModelResult>;
 }
 ```
 

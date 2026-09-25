@@ -13,7 +13,9 @@ import type { FirecrackerOptions } from "./firecracker.types.ts";
 
 export type { FirecrackerOptions } from "./firecracker.types.ts";
 
-export function firecracker(options: FirecrackerOptions): SandboxProvider {
+export function firecrackerSandboxProvider(
+  options: FirecrackerOptions,
+): SandboxProvider {
   validateFirecracker(options);
   let allocated = false;
   return {
