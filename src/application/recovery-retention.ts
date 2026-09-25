@@ -1,3 +1,8 @@
+import type { TransportStoreOptions } from "../domain/transport.types.ts";
+import {
+  planTransportRetention,
+  pruneTransportRetention,
+} from "./transport-retention.ts";
 import { lstat, rm } from "node:fs/promises";
 import { OutpostError, invariant } from "../domain/errors.ts";
 import { git } from "../infrastructure/git/command.ts";
@@ -66,6 +71,7 @@ async function workspaceReason(
 export async function planRecoveryRetention(
   options: RecoveryRetentionOptions,
 ): Promise<RecoveryRetentionPlan> {
+  if (options.transporter) return planTransportRetention(options);
   retentionPolicy(options.policy);
   const policy = structuredClone(options.policy);
   const inspection = await inspectRecovery({
@@ -159,7 +165,13 @@ export async function planRecoveryRetention(
 
 export async function pruneRecoveryRetention(
   plan: RecoveryRetentionPlan,
+  options?: TransportStoreOptions,
 ): Promise<RecoveryPruneResult> {
+  if (plan.source === "transport") {
+    invariant(options, "Transport retention requires its transporter");
+    return pruneTransportRetention(plan, options);
+  }
+  invariant(!options, "Local retention does not accept a transporter");
   retentionPolicy(plan.policy);
   invariant(plan.complete, "Cannot prune an incomplete retention plan");
   const removed: string[] = [];

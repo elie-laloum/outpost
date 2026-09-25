@@ -1,3 +1,7 @@
+import type {
+  Transport,
+  TransportReference,
+} from "../domain/transport.types.ts";
 import type { AgentAdapter } from "../domain/agent.types.ts";
 import type { Command, CommandResult } from "../domain/command.types.ts";
 import type { Brief } from "../domain/prompts.types.ts";
@@ -66,6 +70,8 @@ export interface SandboxOptions extends WorkspaceOptions {
   readonly logging?: Logging;
   readonly bootstrap?: boolean;
   readonly conversationHome?: string;
+  readonly recoveryTransport?: Transport;
+  readonly activityTransport?: Transport;
 }
 
 export interface AttachOptions {
@@ -88,6 +94,8 @@ export interface DispatchResult<T> extends Execution<T> {
   readonly directory: string;
   readonly commits: readonly Commit[];
   readonly transcript?: string;
+  readonly transcriptReference?: TransportReference;
+  readonly logReference?: TransportReference;
   readonly log?: string;
   readonly retainedDirectory?: string;
   resume<U = undefined>(

@@ -7,6 +7,10 @@ sidebar:
 
 The release notes below are synchronized from the root `CHANGELOG.md`, the single source of release history.
 
+## Unreleased
+
+- Add local/S3 object transports for artifacts, exclusively owned checkpoints, segmented journals, native conversation snapshots, verified recovery archives, shared storage reservations, resource activity and remote inventory/retention/quota operations. Preserve existing directory stores and local execution paths; AWS SDK loading remains optional. Remote ownership recovery is explicit and authenticated live storage campaigns remain outstanding.
+
 ## 4.1.0
 
 - Replace global CLI parsing and manual help with Commander subcommands and command-specific options; use Clack selection prompts for interactive initialization. Previously ignored options belonging to other commands are now rejected. Headless and JSON output remain plain.

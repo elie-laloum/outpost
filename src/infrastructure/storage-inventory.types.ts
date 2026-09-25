@@ -1,4 +1,13 @@
-export type StorageCategoryName = "recovery" | "logs" | "locks" | "workspaces";
+export type StorageCategoryName =
+  | "recovery"
+  | "logs"
+  | "locks"
+  | "workspaces"
+  | "artifacts"
+  | "checkpoints"
+  | "conversations"
+  | "reservations"
+  | "resources";
 export type StorageEntryKind =
   "file" | "directory" | "symlink" | "other" | "unknown";
 
@@ -14,6 +23,7 @@ export interface StorageUsage {
   other: number;
 }
 export interface StorageEntry extends StorageUsage {
+  readonly revision?: string;
   readonly name: string;
   readonly path: string;
   kind: StorageEntryKind;

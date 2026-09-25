@@ -19,12 +19,13 @@ Inspecte le stockage local de récupération et détermine quels workspaces prop
 
 ## Paramètres et propriétés
 
-| Nom                  | Type                       | Présence  | Rôle                                                                                                                      |
-| -------------------- | -------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `options`            | `RecoveryRetentionOptions` | Requis    | Dépôt à inspecter, politique de rétention explicite et limite de parcours.                                                |
-| `options.repository` | `string \| undefined`      | Optionnel | Checkout Git hôte ciblé.                                                                                                  |
-| `options.policy`     | `RecoveryRetentionPolicy`  | Requis    | Périmètres de stockage, âge minimal et cibles de capacité explicites utilisés pour déterminer l’éligibilité au nettoyage. |
-| `options.maxEntries` | `number \| undefined`      | Optionnel | Nombre maximal d’entrées de fichiers inspectées avant de déclarer l’inventaire incomplet.                                 |
+| Nom                   | Type                       | Présence  | Rôle                                                                                                                                                  |
+| --------------------- | -------------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `options`             | `RecoveryRetentionOptions` | Requis    | Dépôt à inspecter, politique de rétention explicite et limite de parcours.                                                                            |
+| `options.transporter` | `Transport \| undefined`   | Optionnel | Inspecte les objets distants et prépare la rétention des journaux fermés. Le nettoyage des workspaces locaux est incompatible avec le mode transport. |
+| `options.repository`  | `string \| undefined`      | Optionnel | Checkout Git hôte ciblé.                                                                                                                              |
+| `options.policy`      | `RecoveryRetentionPolicy`  | Requis    | Périmètres de stockage, âge minimal et cibles de capacité explicites utilisés pour déterminer l’éligibilité au nettoyage.                             |
+| `options.maxEntries`  | `number \| undefined`      | Optionnel | Nombre maximal d’entrées de fichiers inspectées avant de déclarer l’inventaire incomplet.                                                             |
 
 ## Retour
 

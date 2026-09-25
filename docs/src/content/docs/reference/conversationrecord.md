@@ -13,11 +13,12 @@ import type { ConversationRecord } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name     | Type     | Presence | Meaning                                                                |
-| -------- | -------- | -------- | ---------------------------------------------------------------------- |
-| `id`     | `string` | Required | Native conversation identifier used to locate or continue the session. |
-| `file`   | `string` | Required | Host path of the native transcript file.                               |
-| `format` | `string` | Required | Transcript format understood by the owning conversation store.         |
+| Name        | Type                              | Presence | Meaning                                                                                                |
+| ----------- | --------------------------------- | -------- | ------------------------------------------------------------------------------------------------------ |
+| `id`        | `string`                          | Required | Native conversation identifier used to locate or continue the session.                                 |
+| `file`      | `string`                          | Required | Host path of the native transcript file.                                                               |
+| `reference` | `TransportReference \| undefined` | Optional | Optional pinned remote conversation index. file remains a readable local transcript for compatibility. |
+| `format`    | `string`                          | Required | Transcript format understood by the owning conversation store.                                         |
 
 ## Signature
 
@@ -25,6 +26,11 @@ import type { ConversationRecord } from "@elie-laloum/outpost";
 export interface ConversationRecord {
   readonly id: string;
   readonly file: string;
+  readonly reference?: TransportReference;
   readonly format: string;
 }
 ```
+
+## Related contracts
+
+- [TransportReference](../transportreference/)

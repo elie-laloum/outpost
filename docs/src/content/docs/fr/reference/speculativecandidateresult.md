@@ -17,7 +17,7 @@ import type { SpeculativeCandidateResult } from "@elie-laloum/outpost";
 | ------------------- | ---------------------------------------------------------------- | --------- | --------------------------------------------------------------------------------------------------------- |
 | `key`               | `string`                                                         | Requis    | Clé unique du candidat reliant sa branche, sa validation et son résultat final.                           |
 | `branch`            | `string`                                                         | Requis    | Nom de la branche de travail utilisée ou observée pendant l’exécution.                                    |
-| `status`            | `"skipped" \| "failed" \| "cancelled" \| "rejected" \| "winner"` | Requis    | Résultat du candidat : winner, rejected, failed, cancelled ou skipped.                                    |
+| `status`            | `"failed" \| "skipped" \| "cancelled" \| "rejected" \| "winner"` | Requis    | Résultat du candidat : winner, rejected, failed, cancelled ou skipped.                                    |
 | `directory`         | `string \| undefined`                                            | Optionnel | Dossier hôte du workspace utilisé pour cette exécution.                                                   |
 | `retainedDirectory` | `string \| undefined`                                            | Optionnel | Workspace conservé pour inspection ou récupération.                                                       |
 | `result`            | `SpeculativeOutput<T> \| undefined`                              | Optionnel | Sortie de dispatch du candidat avec texte, commits, usage et valeur typée, sans méthodes de continuation. |

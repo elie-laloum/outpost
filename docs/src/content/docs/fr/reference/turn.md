@@ -13,14 +13,15 @@ import type { Turn } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom            | Type                  | Présence  | Rôle                                                       |
-| -------------- | --------------------- | --------- | ---------------------------------------------------------- |
-| `text`         | `string`              | Requis    | Texte rapporté pour cette passe d’agent.                   |
-| `status`       | `number`              | Requis    | Code de sortie du processus ; zéro indique le succès.      |
-| `conversation` | `string \| undefined` | Optionnel | Identité de conversation native disponible.                |
-| `transcript`   | `string \| undefined` | Optionnel | Chemin hôte disponible du transcript capturé.              |
-| `usage`        | `Usage`               | Requis    | Compteurs d’usage rapportés ; aucune estimation monétaire. |
-| `durationMs`   | `number`              | Requis    | Durée d’exécution écoulée en millisecondes.                |
+| Nom                   | Type                              | Présence  | Rôle                                                                                                                  |
+| --------------------- | --------------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------- |
+| `text`                | `string`                          | Requis    | Texte rapporté pour cette passe d’agent.                                                                              |
+| `status`              | `number`                          | Requis    | Code de sortie du processus ; zéro indique le succès.                                                                 |
+| `conversation`        | `string \| undefined`             | Optionnel | Identité de conversation native disponible.                                                                           |
+| `transcript`          | `string \| undefined`             | Optionnel | Chemin hôte disponible du transcript capturé.                                                                         |
+| `transcriptReference` | `TransportReference \| undefined` | Optionnel | Index distant versionné de la conversation capturée après ce tour ; son transcript local reste disponible séparément. |
+| `usage`               | `Usage`                           | Requis    | Compteurs d’usage rapportés ; aucune estimation monétaire.                                                            |
+| `durationMs`          | `number`                          | Requis    | Durée d’exécution écoulée en millisecondes.                                                                           |
 
 ## Signature
 
@@ -30,6 +31,7 @@ export interface Turn {
   readonly status: number;
   readonly conversation?: string;
   readonly transcript?: string;
+  readonly transcriptReference?: TransportReference;
   readonly usage: Usage;
   readonly durationMs: number;
 }
@@ -37,4 +39,5 @@ export interface Turn {
 
 ## Contrats associés
 
+- [TransportReference](../transportreference/)
 - [Usage](../usage/)

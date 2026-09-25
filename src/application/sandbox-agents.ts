@@ -56,6 +56,7 @@ export function sandboxAgents(context: ProvisionedSandbox): SandboxAgents {
       options.conversationHome,
     );
     if (
+      found.reference !== undefined ||
       provider.placement !== "host" ||
       workspace.directory !== workspace.repository
     )

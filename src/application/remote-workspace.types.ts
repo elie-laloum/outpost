@@ -1,3 +1,4 @@
+import type { Transport } from "../domain/transport.types.ts";
 import type {
   FileManifestEntry,
   SandboxLease,
@@ -13,6 +14,7 @@ export interface RemoteSync {
 }
 
 export interface RemoteSyncOptions {
+  readonly recoveryTransport?: Transport;
   readonly includeUncommitted?: boolean;
   readonly signal?: AbortSignal;
   readonly limits?: StageLimits;

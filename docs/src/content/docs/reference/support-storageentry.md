@@ -9,6 +9,7 @@ sidebar:
 
 | Name          | Type                  | Presence | Meaning                                                                                              |
 | ------------- | --------------------- | -------- | ---------------------------------------------------------------------------------------------------- |
+| `revision`    | `string \| undefined` | Optional | Object revision for a transport inventory entry; absent for local filesystem inventory.              |
 | `name`        | `string`              | Required | Filesystem basename of the inspected storage entry.                                                  |
 | `path`        | `string`              | Required | Host path of the inspected storage entry.                                                            |
 | `kind`        | `StorageEntryKind`    | Required | Filesystem entry type observed without following symbolic links.                                     |
@@ -24,6 +25,7 @@ sidebar:
 
 ```ts
 export interface StorageEntry extends StorageUsage {
+  readonly revision?: string;
   readonly name: string;
   readonly path: string;
   kind: StorageEntryKind;

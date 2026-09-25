@@ -1,3 +1,35 @@
+export { TransportConflict } from "./domain/transport.ts";
+export type {
+  Transport,
+  TransportEntry,
+  TransportObject,
+  TransportReadOptions,
+  TransportWriteOptions,
+  TransportReference,
+  TransportStoreOptions,
+} from "./domain/transport.types.ts";
+export { localTransport } from "./infrastructure/local-transport.ts";
+export type { LocalTransportOptions } from "./infrastructure/local-transport.types.ts";
+export { artifactStore } from "./infrastructure/transport-artifact-store.ts";
+export type { ArtifactStoreOptions } from "./infrastructure/transport-artifact-store.types.ts";
+export {
+  workflowCheckpointStore,
+  recoverWorkflowCheckpoint,
+} from "./infrastructure/transport-checkpoint.ts";
+export type { CheckpointRecoveryOptions } from "./infrastructure/transport-checkpoint.types.ts";
+export { readJournal } from "./infrastructure/transport-journal.ts";
+export type { ReadJournalOptions } from "./infrastructure/transport-journal.types.ts";
+export { transportConversations } from "./infrastructure/transport-conversations.ts";
+export type { TransportConversationOptions } from "./infrastructure/transport-conversations.types.ts";
+export {
+  archiveRecovery,
+  materializeRecoveryArchive,
+} from "./application/recovery-archive.ts";
+export type {
+  RecoveryArchiveOptions,
+  RecoveryArchiveRestoreOptions,
+} from "./application/recovery-archive.types.ts";
+
 export {
   attach,
   createSandbox,

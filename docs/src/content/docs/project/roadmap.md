@@ -7,6 +7,8 @@ sidebar:
 
 Outpost's next priority is reliable everyday execution: a successful first run, explainable failures and recovery that has been exercised under real conditions. The horizons below express ordering, not promised dates or release numbers. The [changelog](../changelog/) records deliveries; this page describes the work ahead.
 
+Implemented for the next release: [local/S3 storage transports](../../guide/operations/storage-transports/) cover artifacts, checkpoints, journals, conversations, recovery archives, reservations, activity and inventory/retention/quotas. Local and simulated S3 protocol tests exercise conflicts and restoration. Authenticated AWS/S3-compatible crash and pagination campaigns, operational reconciliation of abandoned owners and any NFS adapter remain validation or future work.
+
 ## Starting point
 
 The foundation includes reusable sandboxes, Git workspaces, agent adapters, typed workflows and recovery tools. The CLI, authentication setup and custom Responses providers are documented in the [setup guide](../../guide/manual/cli/). Use the [API reference](../../reference/diagnosesandbox/) for implemented contracts and the changelog for released versions. An implementation or simulated test is not evidence of a successful live provider campaign.

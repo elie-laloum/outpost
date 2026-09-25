@@ -69,6 +69,9 @@ export async function provisionSandbox(
   try {
     activity = await registerResourceActivity({
       repository: workspace.repository,
+      ...(options.activityTransport
+        ? { transporter: options.activityTransport }
+        : {}),
       workspace: workspace.directory,
       provider: provider.name,
       placement: provider.placement,
@@ -115,6 +118,9 @@ export async function provisionSandbox(
     );
     if (provider.placement === "remote") {
       sync = await seedRemote(workspace, lease, {
+        ...(options.recoveryTransport
+          ? { recoveryTransport: options.recoveryTransport }
+          : {}),
         ...(options.includeUncommitted ? { includeUncommitted: true } : {}),
         ...(options.limits ? { limits: options.limits } : {}),
         signal: setupSignal,

@@ -19,13 +19,14 @@ Inspect recovery storage and reject if observed bytes plus the requested reserva
 
 ## Parameters and properties
 
-| Name                   | Type                   | Presence | Meaning                                                                              |
-| ---------------------- | ---------------------- | -------- | ------------------------------------------------------------------------------------ |
-| `options`              | `RecoveryQuotaOptions` | Required | Repository, maximum admitted bytes, additional requested bytes and inspection bound. |
-| `options.repository`   | `string \| undefined`  | Optional | Target host Git checkout.                                                            |
-| `options.maxBytes`     | `number`               | Required | Maximum admitted total of observed storage and active reservations, in bytes.        |
-| `options.reserveBytes` | `number \| undefined`  | Optional | Additional bytes requested for admission alongside existing storage usage.           |
-| `options.maxEntries`   | `number \| undefined`  | Optional | Maximum filesystem entries inspected before marking the inventory incomplete.        |
+| Name                   | Type                     | Presence | Meaning                                                                                                                                            |
+| ---------------------- | ------------------------ | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `options`              | `RecoveryQuotaOptions`   | Required | Repository, maximum admitted bytes, additional requested bytes and inspection bound.                                                               |
+| `options.transporter`  | `Transport \| undefined` | Optional | Measure logical payload bytes in this object transport instead of the repository’s local runtime files. This is an observation, not a reservation. |
+| `options.repository`   | `string \| undefined`    | Optional | Target host Git checkout.                                                                                                                          |
+| `options.maxBytes`     | `number`                 | Required | Maximum admitted total of observed storage and active reservations, in bytes.                                                                      |
+| `options.reserveBytes` | `number \| undefined`    | Optional | Additional bytes requested for admission alongside existing storage usage.                                                                         |
+| `options.maxEntries`   | `number \| undefined`    | Optional | Maximum filesystem entries inspected before marking the inventory incomplete.                                                                      |
 
 ## Returns
 

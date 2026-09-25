@@ -1,3 +1,4 @@
+import { reserveTransportStorage } from "../infrastructure/transport-reservations.ts";
 import { directory } from "../infrastructure/files.ts";
 import { git } from "../infrastructure/git/command.ts";
 import { reserveStorage } from "../infrastructure/storage-reservations.ts";
@@ -12,5 +13,7 @@ export async function reserveRecoveryStorage(
   const root = await directory(
     (await git(requested, ["rev-parse", "--show-toplevel"])).trim(),
   );
+  if (options.transporter)
+    return reserveTransportStorage(options.transporter, root, options);
   return reserveStorage(root, options);
 }

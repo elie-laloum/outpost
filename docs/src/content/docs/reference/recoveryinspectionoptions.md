@@ -13,18 +13,20 @@ import type { RecoveryInspectionOptions } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name         | Type                   | Presence | Meaning                                                                       |
-| ------------ | ---------------------- | -------- | ----------------------------------------------------------------------------- |
-| `repository` | `string \| undefined`  | Optional | Target host Git checkout.                                                     |
-| `maxEntries` | `number \| undefined`  | Optional | Maximum filesystem entries inspected before marking the inventory incomplete. |
-| `git`        | `boolean \| undefined` | Optional | Include Git worktree state and dirty/locked checks in the inventory.          |
-| `locks`      | `boolean \| undefined` | Optional | Include local lock-file and process-ownership inspection.                     |
-| `resources`  | `boolean \| undefined` | Optional | Include locally recorded sandbox leases and active operations.                |
+| Name          | Type                     | Presence | Meaning                                                                                                                |
+| ------------- | ------------------------ | -------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `transporter` | `Transport \| undefined` | Optional | Inventory object keys and optionally resource records in this transport; host Git and lock inspection are unsupported. |
+| `repository`  | `string \| undefined`    | Optional | Target host Git checkout.                                                                                              |
+| `maxEntries`  | `number \| undefined`    | Optional | Maximum filesystem entries inspected before marking the inventory incomplete.                                          |
+| `git`         | `boolean \| undefined`   | Optional | Include Git worktree state and dirty/locked checks in the inventory.                                                   |
+| `locks`       | `boolean \| undefined`   | Optional | Include local lock-file and process-ownership inspection.                                                              |
+| `resources`   | `boolean \| undefined`   | Optional | Include locally recorded sandbox leases and active operations.                                                         |
 
 ## Signature
 
 ```ts
 export interface RecoveryInspectionOptions {
+  readonly transporter?: Transport;
   readonly repository?: string;
   readonly maxEntries?: number;
   readonly git?: boolean;
@@ -32,3 +34,7 @@ export interface RecoveryInspectionOptions {
   readonly resources?: boolean;
 }
 ```
+
+## Related contracts
+
+- [Transport](../transport/)

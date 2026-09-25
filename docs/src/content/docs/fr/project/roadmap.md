@@ -7,6 +7,8 @@ sidebar:
 
 La prochaine priorité d’Outpost est une exécution quotidienne fiable : un premier lancement réussi, des erreurs compréhensibles et une récupération éprouvée en conditions réelles. Les horizons ci-dessous indiquent un ordre, pas des dates ni des versions promises. Le [changelog](../changelog/) consigne les livraisons ; cette page décrit le travail à venir.
 
+Implémenté pour la prochaine version : les [transports de stockage local/S3](../../guide/operations/storage-transports/) couvrent artefacts, checkpoints, journaux, conversations, archives de récupération, réservations, activités et inventaire/rétention/quotas. Les tests locaux et du protocole S3 simulé exercent conflits et restauration. Les campagnes authentifiées AWS/S3 compatible sur les interruptions et la pagination, la réconciliation opérationnelle des propriétaires abandonnés et tout adaptateur NFS restent des validations ou travaux futurs.
+
 ## Point de départ
 
 Le socle comprend les sandboxes réutilisables, les workspaces Git, les adapters d’agents, les workflows typés et les outils de récupération. Le CLI, la configuration d’authentification et les fournisseurs Responses personnalisés sont documentés dans le [guide de démarrage](../../guide/manual/cli/). La [référence API](../../reference/diagnosesandbox/) décrit les contrats implémentés et le changelog les versions publiées. Une implémentation ou un test simulé ne prouve pas la réussite d’une campagne réelle sur un provider.

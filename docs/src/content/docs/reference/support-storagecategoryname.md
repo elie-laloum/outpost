@@ -8,5 +8,14 @@ sidebar:
 ## Signature
 
 ```ts
-export type StorageCategoryName = "recovery" | "logs" | "locks" | "workspaces";
+export type StorageCategoryName =
+  | "recovery"
+  | "logs"
+  | "locks"
+  | "workspaces"
+  | "artifacts"
+  | "checkpoints"
+  | "conversations"
+  | "reservations"
+  | "resources";
 ```

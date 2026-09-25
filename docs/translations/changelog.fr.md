@@ -1,5 +1,9 @@
 # Historique des versions
 
+## Non publié
+
+- Ajout des transports objet local/S3 pour les artefacts, checkpoints à propriété exclusive, journaux segmentés, snapshots de conversations natives, archives de récupération vérifiées, réservations partagées, activités des ressources et opérations distantes d’inventaire/rétention/quotas. Conservation des stores par dossier et chemins d’exécution locaux ; le SDK AWS reste optionnel. La récupération de propriété distante est explicite et les campagnes de stockage réelles authentifiées restent à effectuer.
+
 ## 4.1.0
 
 - Préserver le shell de session Daytona et le statut réel des commandes non interactives ; accepter une PTY déjà supprimée pendant le nettoyage après annulation. Ajouter les régressions des deux défauts trouvés en tests réels. Valider les workflows Claude OAuth sur Docker, Vercel et Daytona, ainsi que la saisie, le redimensionnement, la sortie, l’annulation et la réutilisation du terminal Daytona.

@@ -9,7 +9,7 @@ sidebar:
 
 | Name     | Type                                  | Presence | Meaning                                                                               |
 | -------- | ------------------------------------- | -------- | ------------------------------------------------------------------------------------- |
-| `status` | `"unknown" \| "active" \| "inactive"` | Required | Whether the recorded process is active, inactive or cannot be identified confidently. |
+| `status` | `"active" \| "unknown" \| "inactive"` | Required | Whether the recorded process is active, inactive or cannot be identified confidently. |
 | `reason` | `string`                              | Required | Reason the local lock was classified with this ownership state.                       |
 
 ## Signature

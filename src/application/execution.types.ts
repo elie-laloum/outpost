@@ -1,3 +1,4 @@
+import type { TransportReference } from "../domain/transport.types.ts";
 import type {
   AgentAdapter,
   AgentObservation,
@@ -32,6 +33,7 @@ export interface Turn {
   readonly status: number;
   readonly conversation?: string;
   readonly transcript?: string;
+  readonly transcriptReference?: TransportReference;
   readonly usage: Usage;
   readonly durationMs: number;
 }

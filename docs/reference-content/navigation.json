@@ -1,5 +1,111 @@
 [
   {
+    "title": ["Storage transports", "Transports de stockage"],
+    "items": [
+      { "slug": "reference/overview/storage-transports" },
+      {
+        "slug": "reference/localtransport",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/s3transport",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/function-artifactstore",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/function-workflowcheckpointstore",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/recoverworkflowcheckpoint",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/readjournal",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/transportconversations",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/archiverecovery",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/materializerecoveryarchive",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/transportconflict",
+        "attrs": { "data-api-kind": "class" }
+      },
+      {
+        "slug": "reference/transport",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/transportentry",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/transportobject",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/transportreadoptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/transportwriteoptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/transportreference",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/transportstoreoptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/localtransportoptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/s3transportoptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/artifactstoreoptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/checkpointrecoveryoptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/readjournaloptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/transportconversationoptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/recoveryarchiveoptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/recoveryarchiverestoreoptions",
+        "attrs": { "data-api-kind": "interface" }
+      }
+    ]
+  },
+  {
     "title": ["Diagnostics", "Diagnostics"],
     "items": [
       { "slug": "reference/overview/diagnostics" },

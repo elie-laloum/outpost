@@ -1,5 +1,12 @@
 export const groups = [
   {
+    id: "storage-transports",
+    title: ["Storage transports", "Transports de stockage"],
+    guide: "guide/operations/storage-transports",
+    names:
+      "localTransport s3Transport artifactStore workflowCheckpointStore recoverWorkflowCheckpoint readJournal transportConversations archiveRecovery materializeRecoveryArchive TransportConflict Transport TransportEntry TransportObject TransportReadOptions TransportWriteOptions TransportReference TransportStoreOptions LocalTransportOptions S3TransportOptions ArtifactStoreOptions CheckpointRecoveryOptions ReadJournalOptions TransportConversationOptions RecoveryArchiveOptions RecoveryArchiveRestoreOptions",
+  },
+  {
     id: "diagnostics",
     title: ["Diagnostics", "Diagnostics"],
     guide: "guide/operations/doctor",

@@ -13,16 +13,17 @@ import { fileWorkflowCheckpointStore } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Create a filesystem checkpoint store under directory. Acquiring a run ID owns its checkpoint exclusively; writes replace the saved JSON atomically, and releasing the lease leaves persisted results available for a later run.
+Create a checkpoint store with exactly one directory or transporter. The directory mode keeps existing JSON files, atomic replacement and local process locks. Transport mode delegates to workflowCheckpointStore and uses conditional envelopes with explicit ownership recovery. Changing modes does not migrate saved runs.
 
 [Complete example and detailed rules](../../guide/advanced/checkpoints/).
 
 ## Parameters and properties
 
-| Name                | Type                            | Presence | Meaning                                                              |
-| ------------------- | ------------------------------- | -------- | -------------------------------------------------------------------- |
-| `options`           | `FileWorkflowCheckpointOptions` | Required | Directory in which to own and persist workflow checkpoint files.     |
-| `options.directory` | `string`                        | Required | Host directory used to persist checkpoint files and ownership locks. |
+| Name                  | Type                            | Presence | Meaning                                                                                                                              |
+| --------------------- | ------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `options`             | `FileWorkflowCheckpointOptions` | Required | Exactly one legacy directory or object transporter. Each mode preserves its own layout and ownership mechanism.                      |
+| `options.directory`   | `string \| undefined`           | Optional | Legacy checkpoint directory and local process locks, mutually exclusive with transporter; existing JSON layout is preserved.         |
+| `options.transporter` | `Transport \| undefined`        | Optional | Alternative to directory; uses the transport checkpoint envelope and explicit ownership recovery. Supply exactly one storage choice. |
 
 ## Returns
 

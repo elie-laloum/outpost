@@ -79,7 +79,7 @@ function identity(value: unknown): LocalProcessIdentity | undefined {
     started: value.started,
   };
 }
-function record(value: unknown): ResourceActivityRecord {
+export function resourceRecord(value: unknown): ResourceActivityRecord {
   object(value);
   invariant(value.version === 1, "Unknown activity version");
   text(value.id);
@@ -155,7 +155,7 @@ export async function inspectResourceActivity(
         break;
       }
       try {
-        const value = record(
+        const value = resourceRecord(
           JSON.parse(
             (await readInspectionFile(file, defaults.maxRecordBytes)).toString(
               "utf8",

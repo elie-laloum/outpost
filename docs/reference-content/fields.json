@@ -604,8 +604,8 @@
     "Callback recevant les messages de diagnostic d’exécution."
   ],
   "Logging.file": [
-    "Destination path of the dispatch journal.",
-    "Chemin de destination du journal du dispatch."
+    "Local JSONL append destination, mutually exclusive with transporter; absent by default to create a managed journal.",
+    "Destination locale d’ajout JSONL, exclusive avec transporter ; absente par défaut pour créer un journal géré."
   ],
   "Logging.verbose": [
     "Include raw protocol observations in the dispatch journal.",
@@ -1745,8 +1745,8 @@
     "Indique si l’usage projeté respecte la limite, la dépasse ou reste inconnu faute d’inspection complète."
   ],
   "RecoveryInspection.repository": [
-    "Target host Git checkout.",
-    "Checkout Git hôte ciblé."
+    "Canonical local repository when inspecting the filesystem; optional caller label or an empty string in transport mode.",
+    "Dépôt local canonique pour l’inspection du système de fichiers ; libellé optionnel de l’appelant ou chaîne vide en mode transport."
   ],
   "RecoveryInspection.activity": [
     "Always unverified: filesystem inventory alone cannot prove that retained resources are inactive.",
@@ -1761,16 +1761,16 @@
     "Rapport de possession locale des verrous, présent lorsque leur inspection a été demandée."
   ],
   "RecoveryInspection.resources": [
-    "Local sandbox activity report, present when resource inspection was requested.",
-    "Rapport d’activité locale des sandboxes, présent lorsque l’inspection des ressources a été demandée."
+    "Sandbox activity report when requested; remote record ownership is always unverified.",
+    "Rapport d’activité des sandboxes sur demande ; la propriété des enregistrements distants reste toujours non vérifiée."
   ],
   "StorageInventory.root": [
-    "Repository-local .outpost directory whose storage was inspected.",
-    "Dossier .outpost local au dépôt dont le stockage a été inspecté."
+    "Inspected local runtime root, or the logical marker transport for an object inventory.",
+    "Racine locale inspectée, ou marqueur logique transport pour un inventaire objet."
   ],
   "StorageInventory.categories": [
-    "Storage grouped into recovery, logs, locks and workspaces.",
-    "Stockage regroupé en récupération, journaux, verrous et workspaces."
+    "Local recovery, logs, locks and workspaces, or transport artifacts, checkpoints, conversations, recovery, logs, reservations and resources.",
+    "Récupération, journaux, verrous et workspaces locaux, ou artefacts, checkpoints, conversations, récupération, journaux, réservations et ressources du transport."
   ],
   "StorageInventory.usage": [
     "Observed storage bytes and counts of files, directories, symbolic links and other entries.",
@@ -2333,12 +2333,12 @@
     "Toujours true : la restauration conserve les artefacts de récupération d’origine."
   ],
   "fileWorkflowCheckpointStore.options": [
-    "Directory in which to own and persist workflow checkpoint files.",
-    "Dossier dans lequel posséder et persister les fichiers de checkpoints."
+    "Exactly one legacy directory or object transporter. Each mode preserves its own layout and ownership mechanism.",
+    "Exactement un choix de dossier historique ou transport objet. Chaque mode conserve son format et son mécanisme de propriété."
   ],
   "FileWorkflowCheckpointOptions.directory": [
-    "Host directory used to persist checkpoint files and ownership locks.",
-    "Dossier hôte utilisé pour persister les checkpoints et leurs verrous de possession."
+    "Legacy checkpoint directory and local process locks, mutually exclusive with transporter; existing JSON layout is preserved.",
+    "Dossier des anciens checkpoints et verrous de processus locaux, exclusif avec transporter ; le format JSON existant est conservé."
   ],
   "approvalTask.options": [
     "Gate key, dependencies, approval prompt and trusted actors allowed to approve or reject.",
@@ -2365,8 +2365,8 @@
     "Clé de gate, dépendances, demande de pause et acteurs de confiance autorisés à reprendre ou rejeter."
   ],
   "inspectRecovery.options": [
-    "Repository, scan bound and optional Git, lock and resource inspections.",
-    "Dépôt, limite de parcours et inspections optionnelles de Git, verrous et ressources."
+    "Local repository or transport inventory selection, entry limit and optional resource inspection. Git and process-lock checks require local mode.",
+    "Choix d’inventaire du dépôt local ou d’un transport, limite d’entrées et inspection optionnelle des ressources. Git et les verrous de processus exigent le mode local."
   ],
   "RecoveryInspectionOptions.repository": [
     "Target host Git checkout.",
@@ -2561,12 +2561,12 @@
     "Store d’octets d’artefacts utilisé pour la publication immuable ou la lecture bornée des données."
   ],
   "fileArtifactStore.options": [
-    "Artifact storage directory and maximum bytes per payload.",
-    "Dossier de stockage des artefacts et octets maximaux par données publiées."
+    "Exactly one legacy directory or object transporter, plus the per-artifact byte bound.",
+    "Exactement un choix de dossier historique ou transport objet, avec la limite d’octets par artefact."
   ],
   "FileArtifactStoreOptions.directory": [
-    "Host directory storing immutable artifact payloads by ID.",
-    "Dossier hôte stockant les données d’artefacts immuables par identifiant."
+    "Legacy filesystem store directory, mutually exclusive with transporter; existing blob layout is preserved.",
+    "Dossier de l’ancien store de fichiers, exclusif avec transporter ; le format des blobs existants est conservé."
   ],
   "FileArtifactStoreOptions.maxBytes": [
     "Maximum bytes per stored artifact; defaults to 16 MiB.",
@@ -3167,5 +3167,257 @@
   "FirecrackerOptions.variables": [
     "Explicit environment declarations; values are strings.",
     "Déclarations d’environnement explicites ; les valeurs sont des chaînes."
+  ],
+  "TransportConflict.key": [
+    "Logical key whose expected revision did not match the stored object.",
+    "Clé logique dont la révision attendue ne correspondait pas à l’objet stocké."
+  ],
+  "Transport.name": [
+    "Diagnostic adapter name; callers must use the transport contract rather than branch on this name.",
+    "Nom de diagnostic de l’adaptateur ; les appelants utilisent le contrat du transport sans sélectionner un comportement par ce nom."
+  ],
+  "Transport.read": [
+    "Read one complete object with a byte limit; return undefined only when it is absent. Revisions identify the exact bytes read.",
+    "Lit un objet complet avec une limite d’octets ; renvoie undefined uniquement s’il est absent. La révision identifie précisément les octets lus."
+  ],
+  "Transport.write": [
+    "Atomically publish up to 64 MiB only when the expected revision matches, or create when ifRevision is null. Every successful write returns a fresh revision, including identical bytes.",
+    "Publie atomiquement jusqu’à 64 Mio si la révision attendue correspond, ou crée l’objet si ifRevision vaut null. Chaque écriture réussie renvoie une nouvelle révision, même pour des octets identiques."
+  ],
+  "Transport.remove": [
+    "Delete only the supplied existing revision; null is invalid. A conflict must never remove a replacement written by another owner.",
+    "Supprime uniquement la révision existante fournie ; null est invalide. Un conflit ne doit jamais supprimer un remplacement écrit par un autre propriétaire."
+  ],
+  "Transport.list": [
+    "Iterate metadata for keys beginning with the prefix, handling backend pagination. A listing is an observation, not a transaction across objects.",
+    "Parcourt les métadonnées des clés commençant par le préfixe, avec pagination du backend. Le listing est une observation, pas une transaction entre objets."
+  ],
+  "TransportReadOptions.signal": [
+    "Abort the read or listing without treating cancellation as an absent object.",
+    "Annule la lecture ou le listing sans assimiler l’annulation à un objet absent."
+  ],
+  "TransportReadOptions.maxBytes": [
+    "Maximum payload bytes for one read, default 64 MiB. Listing returns metadata and does not use this limit.",
+    "Nombre maximal d’octets utiles pour une lecture, 64 Mio par défaut. Le listing renvoie des métadonnées et n’utilise pas cette limite."
+  ],
+  "TransportObject.bytes": [
+    "Complete binary payload, without the adapter’s storage envelope.",
+    "Contenu binaire complet, sans l’enveloppe de stockage de l’adaptateur."
+  ],
+  "TransportEntry.key": [
+    "Relative logical object key; slash-separated safe segments, up to 512 characters. It is not a filesystem path or URL.",
+    "Clé logique relative ; segments sûrs séparés par des slashs, jusqu’à 512 caractères. Ce n’est ni un chemin de fichier ni une URL."
+  ],
+  "TransportEntry.revision": [
+    "Opaque version token used for conditional writes and deletes; do not interpret it as a content digest.",
+    "Jeton de version opaque utilisé pour les écritures et suppressions conditionnelles ; ce n’est pas un digest du contenu."
+  ],
+  "TransportEntry.size": [
+    "Payload size in bytes, excluding the transport envelope and backend storage overhead.",
+    "Taille utile en octets, hors enveloppe du transport et surcoûts du backend."
+  ],
+  "TransportEntry.modifiedAt": [
+    "ISO timestamp of the stored version, used as a retention observation.",
+    "Horodatage ISO de la version stockée, utilisé comme observation pour la rétention."
+  ],
+  "TransportWriteOptions.signal": [
+    "Abort a mutation. A network interruption can leave its outcome uncertain; reread before deciding to retry.",
+    "Annule une mutation. Une interruption réseau peut rendre son résultat incertain ; relire avant de décider de réessayer."
+  ],
+  "TransportWriteOptions.ifRevision": [
+    "Expected current revision; null creates an absent object and is forbidden for deletion. Mismatches raise TransportConflict.",
+    "Révision courante attendue ; null crée un objet absent et est interdit pour la suppression. Une différence provoque TransportConflict."
+  ],
+  "TransportReference.key": [
+    "Logical key in the configured transport; the reference contains no credentials or backend client.",
+    "Clé logique dans le transport configuré ; la référence ne contient ni identifiants ni client du backend."
+  ],
+  "TransportReference.revision": [
+    "Exact revision to read; a replacement is rejected instead of silently changing the referenced result.",
+    "Révision exacte à lire ; un remplacement est refusé au lieu de modifier silencieusement le résultat référencé."
+  ],
+  "TransportStoreOptions.transporter": [
+    "Caller-owned object transport used by the store or operation. Closing a workflow or sandbox does not close this transport.",
+    "Transport objet appartenant à l’appelant, utilisé par le store ou l’opération. Fermer un workflow ou une sandbox ne ferme pas ce transport."
+  ],
+  "localTransport.options": [
+    "Private root directory for the versioned local object layout.",
+    "Dossier racine privé pour le format local d’objets versionnés."
+  ],
+  "LocalTransportOptions.directory": [
+    "Root of the objects and local mutation locks; resolved when the factory is called. Symlink directories are rejected. This layout differs from legacy file stores.",
+    "Racine des objets et verrous de mutation locaux ; résolue à l’appel de la fabrique. Les dossiers symboliques sont refusés. Ce format diffère des anciens stores de fichiers."
+  ],
+  "artifactStore.options": [
+    "Transport and per-artifact payload bound for immutable publication and verified reads.",
+    "Transport et limite de contenu par artefact pour la publication immuable et les lectures vérifiées."
+  ],
+  "ArtifactStoreOptions.maxBytes": [
+    "Positive maximum artifact size in bytes, default 16 MiB; enforced before publication and while reading.",
+    "Taille maximale positive d’un artefact en octets, 16 Mio par défaut ; vérifiée avant publication et pendant la lecture."
+  ],
+  "workflowCheckpointStore.options": [
+    "Transport that owns checkpoint envelopes and their exclusive run ownership records.",
+    "Transport conservant les enveloppes de checkpoint et leur propriété exclusive par exécution."
+  ],
+  "recoverWorkflowCheckpoint.options": [
+    "Run and observed revision to unlock after the caller has independently stopped the previous runner.",
+    "Exécution et révision observée à déverrouiller après que l’appelant a arrêté indépendamment l’ancien exécuteur."
+  ],
+  "CheckpointRecoveryOptions.runId": [
+    "Run identity whose ownership is explicitly released; saved checkpoint values remain intact.",
+    "Identité de l’exécution dont la propriété est explicitement libérée ; les valeurs du checkpoint restent intactes."
+  ],
+  "CheckpointRecoveryOptions.revision": [
+    "Revision observed after stopping the old runner; a changed revision refuses recovery.",
+    "Révision observée après arrêt de l’ancien exécuteur ; une révision modifiée fait refuser la récupération."
+  ],
+  "readJournal.options": [
+    "Transport, pinned journal index revision and traversal bound.",
+    "Transport, révision exacte de l’index du journal et limite de parcours."
+  ],
+  "ReadJournalOptions.reference": [
+    "Journal index reference from DispatchResult.logReference or inspection; determines the committed event chain to read.",
+    "Référence de l’index issue de DispatchResult.logReference ou de l’inspection ; détermine la chaîne d’événements validés à lire."
+  ],
+  "ReadJournalOptions.maxEntries": [
+    "Positive maximum number of retained events to traverse, default 100,000; cycles and excess entries fail.",
+    "Nombre maximal positif d’événements à parcourir, 100 000 par défaut ; cycles et dépassements provoquent un échec."
+  ],
+  "transportConversations.format": [
+    "Native transcript format, claude or codex; Gemini has no native conversation storage.",
+    "Format natif du transcript, claude ou codex ; Gemini ne dispose pas de stockage de conversations natives."
+  ],
+  "transportConversations.options": [
+    "Transport and stable project namespace shared by all runners restoring these conversations.",
+    "Transport et espace de noms stable du projet, partagé par les exécuteurs restaurant ces conversations."
+  ],
+  "TransportConversationOptions.namespace": [
+    "Stable logical project namespace, independent of checkout paths. Use distinct namespaces for unrelated projects.",
+    "Espace de noms logique stable du projet, indépendant des chemins des checkouts. Utiliser des espaces distincts pour des projets différents."
+  ],
+  "ConversationRecord.reference": [
+    "Optional pinned remote conversation index. file remains a readable local transcript for compatibility.",
+    "Index distant optionnel de la conversation avec sa révision exacte. file reste un transcript local lisible pour compatibilité."
+  ],
+  "archiveRecovery.options": [
+    "Verified local recovery transfer, destination transport and total payload bound.",
+    "Transfert de récupération local vérifié, transport de destination et limite totale des contenus."
+  ],
+  "RecoveryArchiveOptions.directory": [
+    "Existing recovery transfer containing state.json, checksums.json and all required patches, bundles and extra files.",
+    "Transfert existant contenant state.json, checksums.json et les patches, bundles et fichiers supplémentaires requis."
+  ],
+  "RecoveryArchiveOptions.maxBytes": [
+    "Positive total payload bound, default 1 GiB. Files are uploaded in bounded chunks after local snapshot verification.",
+    "Limite positive totale des contenus, 1 Gio par défaut. Les fichiers sont envoyés par blocs bornés après vérification du snapshot local."
+  ],
+  "materializeRecoveryArchive.options": [
+    "Pinned archive reference, transport, new local destination and verification bound.",
+    "Référence exacte d’archive, transport, nouvelle destination locale et limite de vérification."
+  ],
+  "RecoveryArchiveRestoreOptions.reference": [
+    "Pinned manifest returned by archiveRecovery; every chunk revision and SHA-256 is checked.",
+    "Manifeste versionné renvoyé par archiveRecovery ; chaque révision de bloc et SHA-256 est vérifié."
+  ],
+  "RecoveryArchiveRestoreOptions.destination": [
+    "New local directory whose parent already exists. Existing destinations are refused; partial data is retained on failure.",
+    "Nouveau dossier local dont le parent existe. Les destinations existantes sont refusées ; les données partielles sont conservées en cas d’échec."
+  ],
+  "RecoveryArchiveRestoreOptions.maxBytes": [
+    "Positive total restored payload limit, default 1 GiB; also bounds recovery integrity verification.",
+    "Limite positive totale des contenus restaurés, 1 Gio par défaut ; borne aussi la vérification d’intégrité de récupération."
+  ],
+  "SandboxOptions.recoveryTransport": [
+    "Publish verified recovery archives before applying downloaded remote changes. Local synchronization staging remains; archives outlive sandbox closure.",
+    "Publie les archives de récupération vérifiées avant application des modifications distantes. La préparation locale de synchronisation demeure ; les archives survivent à la fermeture de la sandbox."
+  ],
+  "SandboxOptions.activityTransport": [
+    "Store sandbox activity records in this transport. Remote ownership remains unverified; PID observations are not used to reclaim another machine’s state.",
+    "Conserve les activités de la sandbox dans ce transport. La propriété distante reste non vérifiée ; les observations de PID ne récupèrent pas l’état d’une autre machine."
+  ],
+  "StorageReservationOptions.transporter": [
+    "Optional transport whose payload usage and shared reservation ledger replace local admission accounting. Reservations persist until explicit release and do not impose physical quotas.",
+    "Transport optionnel dont les contenus et le registre partagé remplacent le calcul local d’admission. Les réservations persistent jusqu’à libération explicite et n’imposent pas de quotas physiques."
+  ],
+  "Logging.transporter": [
+    "Persist the dispatch journal as immutable event segments and a versioned index. Mutually exclusive with file; results expose logReference.",
+    "Conserve le journal sous forme de segments immuables et d’un index versionné. Exclusif avec file ; les résultats exposent logReference."
+  ],
+  "DispatchResult.transcriptReference": [
+    "Pinned remote index for the final captured conversation, when using transported conversation storage.",
+    "Index distant versionné de la dernière conversation capturée, lorsque son stockage utilise un transport."
+  ],
+  "DispatchResult.logReference": [
+    "Pinned committed journal index for readJournal; log remains reserved for actual local file paths.",
+    "Index versionné validé du journal pour readJournal ; log reste réservé aux vrais chemins locaux."
+  ],
+  "Turn.transcriptReference": [
+    "Pinned remote index of the conversation captured after this turn; its local transcript remains available separately.",
+    "Index distant versionné de la conversation capturée après ce tour ; son transcript local reste disponible séparément."
+  ],
+  "conversations.transported": [
+    "Build a native conversation store over a caller-owned transport with a stable project namespace, including child transcripts and local materialization.",
+    "Construit un store natif sur un transport de l’appelant avec un espace de noms stable du projet, incluant les transcripts enfants et la matérialisation locale."
+  ],
+  "RecoveryRetentionOptions.transporter": [
+    "Inspect remote objects and plan retention of closed journals. Local workspace cleanup is unsupported in transport mode.",
+    "Inspecte les objets distants et prépare la rétention des journaux fermés. Le nettoyage des workspaces locaux est incompatible avec le mode transport."
+  ],
+  "RecoveryRetentionPlan.source": [
+    "Present as transport for an object-storage plan; pruning then requires the same configured transporter separately.",
+    "Vaut transport pour un plan de stockage objet ; son application exige alors le même transport configuré, fourni séparément."
+  ],
+  "StorageEntry.revision": [
+    "Object revision for a transport inventory entry; absent for local filesystem inventory.",
+    "Révision d’objet pour une entrée d’inventaire de transport ; absente dans l’inventaire du système de fichiers local."
+  ],
+  "RecoveryRetentionEntry.revision": [
+    "Expected journal index revision checked again before deletion in transport mode.",
+    "Révision attendue de l’index du journal, vérifiée de nouveau avant suppression en mode transport."
+  ],
+  "RecoveryRetentionEntry.objects": [
+    "Versioned index and segments belonging to one remote journal; deletion revalidates the group and each object revision.",
+    "Index et segments versionnés d’un journal distant ; la suppression revalide le groupe et la révision de chaque objet."
+  ],
+  "pruneRecoveryRetention.options": [
+    "Required transport binding for a plan with source transport; omitted for a local retention plan.",
+    "Transport requis pour un plan dont source vaut transport ; omis pour un plan de rétention locale."
+  ],
+  "RecoveryQuotaOptions.transporter": [
+    "Measure logical payload bytes in this object transport instead of the repository’s local runtime files. This is an observation, not a reservation.",
+    "Mesure les octets utiles de ce transport objet au lieu des fichiers locaux du dépôt. C’est une observation, pas une réservation."
+  ],
+  "FileWorkflowCheckpointOptions.transporter": [
+    "Alternative to directory; uses the transport checkpoint envelope and explicit ownership recovery. Supply exactly one storage choice.",
+    "Alternative à directory ; utilise l’enveloppe de checkpoint du transport et une récupération explicite de propriété. Fournir un seul choix de stockage."
+  ],
+  "RecoveryInspectionOptions.transporter": [
+    "Inventory object keys and optionally resource records in this transport; host Git and lock inspection are unsupported.",
+    "Inventorie les clés d’objets et éventuellement les activités dans ce transport ; l’inspection de Git et des verrous hôtes est incompatible."
+  ],
+  "FileArtifactStoreOptions.transporter": [
+    "Alternative to directory; delegates to artifactStore with the same size limit. Supply exactly one storage choice.",
+    "Alternative à directory ; délègue à artifactStore avec la même limite de taille. Fournir un seul choix de stockage."
+  ],
+  "s3Transport.options": [
+    "Caller-owned S3 client, bucket and isolated object prefix.",
+    "Client S3 appartenant à l’appelant, bucket et préfixe objet isolé."
+  ],
+  "S3TransportOptions.client": [
+    "S3Client configured by the caller with region, credentials and any compatible endpoint. Outpost does not destroy it or forward its credentials to sandboxes.",
+    "S3Client configuré par l’appelant avec région, identifiants et éventuel endpoint compatible. Outpost ne le détruit pas et ne transmet pas ses identifiants aux sandboxes."
+  ],
+  "S3TransportOptions.bucket": [
+    "Existing bucket supporting conditional PUT and DELETE operations; the adapter does not create buckets.",
+    "Bucket existant prenant en charge PUT et DELETE conditionnels ; l’adaptateur ne crée pas de bucket."
+  ],
+  "S3TransportOptions.prefix": [
+    "Optional private prefix for Outpost objects. Keep unrelated objects outside this prefix; defaults to the bucket root.",
+    "Préfixe privé optionnel des objets Outpost. Garder les objets sans rapport hors de ce préfixe ; racine du bucket par défaut."
+  ],
+  "ReadJournalOptions.maxBytes": [
+    "Total byte limit for journal segment payloads read into memory, default 64 MiB.",
+    "Limite totale des contenus de segments lus en mémoire, 64 Mio par défaut."
   ]
 }

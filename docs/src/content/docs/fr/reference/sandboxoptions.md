@@ -13,23 +13,25 @@ import type { SandboxOptions } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom                  | Type                                                     | Présence  | Rôle                                                                                                           |
-| -------------------- | -------------------------------------------------------- | --------- | -------------------------------------------------------------------------------------------------------------- |
-| `includeUncommitted` | `boolean \| undefined`                                   | Optionnel | Inclut les modifications hôtes non commitées dans le snapshot du dépôt distant.                                |
-| `agent`              | `AgentAdapter \| undefined`                              | Optionnel | Adapter natif de l’agent de code.                                                                              |
-| `provider`           | `SandboxProvider \| undefined`                           | Optionnel | Backend de l’environnement d’exécution.                                                                        |
-| `workspace`          | `Workspace \| undefined`                                 | Optionnel | Workspace Git appartenant à l’appelant ; exclut un nouveau choix de dépôt/branche.                             |
-| `hooks`              | `LifecycleHooks \| undefined`                            | Optionnel | Commandes de cycle de vie dans l’ordre déclaré.                                                                |
-| `signal`             | `AbortSignal \| undefined`                               | Optionnel | Annulation coopérative de cette opération.                                                                     |
-| `logging`            | `Logging \| undefined`                                   | Optionnel | Configure le fichier journal du dispatch et la conservation des événements détaillés.                          |
-| `bootstrap`          | `boolean \| undefined`                                   | Optionnel | Indique si un agent sélectionné absent peut être installé automatiquement.                                     |
-| `conversationHome`   | `string \| undefined`                                    | Optionnel | Home hôte utilisé pour le stockage des transcripts natifs.                                                     |
-| `storageQuota`       | `Omit<StorageReservationOptions, "signal"> \| undefined` | Optionnel | Limites d’admission et réservation demandée pour le stockage dans .outpost du dépôt.                           |
-| `repository`         | `string \| undefined`                                    | Optionnel | Checkout Git hôte ciblé.                                                                                       |
-| `branch`             | `BranchPolicy \| undefined`                              | Optionnel | Choisit le checkout courant, une branche de travail nommée conservée ou une branche préparée pour intégration. |
-| `copies`             | `readonly string[] \| undefined`                         | Optionnel | Entrées relatives au dépôt copiées dans le workspace.                                                          |
-| `limits`             | `StageLimits \| undefined`                               | Optionnel | Délais de copie, préparation Git, collecte des commits et intégration, en millisecondes.                       |
-| `label`              | `string \| undefined`                                    | Optionnel | Libellé lisible utilisé dans les rapports d’exécution.                                                         |
+| Nom                  | Type                                                     | Présence  | Rôle                                                                                                                                                                                                 |
+| -------------------- | -------------------------------------------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `includeUncommitted` | `boolean \| undefined`                                   | Optionnel | Inclut les modifications hôtes non commitées dans le snapshot du dépôt distant.                                                                                                                      |
+| `agent`              | `AgentAdapter \| undefined`                              | Optionnel | Adapter natif de l’agent de code.                                                                                                                                                                    |
+| `provider`           | `SandboxProvider \| undefined`                           | Optionnel | Backend de l’environnement d’exécution.                                                                                                                                                              |
+| `workspace`          | `Workspace \| undefined`                                 | Optionnel | Workspace Git appartenant à l’appelant ; exclut un nouveau choix de dépôt/branche.                                                                                                                   |
+| `hooks`              | `LifecycleHooks \| undefined`                            | Optionnel | Commandes de cycle de vie dans l’ordre déclaré.                                                                                                                                                      |
+| `signal`             | `AbortSignal \| undefined`                               | Optionnel | Annulation coopérative de cette opération.                                                                                                                                                           |
+| `logging`            | `Logging \| undefined`                                   | Optionnel | Configure le fichier journal du dispatch et la conservation des événements détaillés.                                                                                                                |
+| `bootstrap`          | `boolean \| undefined`                                   | Optionnel | Indique si un agent sélectionné absent peut être installé automatiquement.                                                                                                                           |
+| `conversationHome`   | `string \| undefined`                                    | Optionnel | Home hôte utilisé pour le stockage des transcripts natifs.                                                                                                                                           |
+| `recoveryTransport`  | `Transport \| undefined`                                 | Optionnel | Publie les archives de récupération vérifiées avant application des modifications distantes. La préparation locale de synchronisation demeure ; les archives survivent à la fermeture de la sandbox. |
+| `activityTransport`  | `Transport \| undefined`                                 | Optionnel | Conserve les activités de la sandbox dans ce transport. La propriété distante reste non vérifiée ; les observations de PID ne récupèrent pas l’état d’une autre machine.                             |
+| `storageQuota`       | `Omit<StorageReservationOptions, "signal"> \| undefined` | Optionnel | Limites d’admission et réservation demandée pour le stockage dans .outpost du dépôt.                                                                                                                 |
+| `repository`         | `string \| undefined`                                    | Optionnel | Checkout Git hôte ciblé.                                                                                                                                                                             |
+| `branch`             | `BranchPolicy \| undefined`                              | Optionnel | Choisit le checkout courant, une branche de travail nommée conservée ou une branche préparée pour intégration.                                                                                       |
+| `copies`             | `readonly string[] \| undefined`                         | Optionnel | Entrées relatives au dépôt copiées dans le workspace.                                                                                                                                                |
+| `limits`             | `StageLimits \| undefined`                               | Optionnel | Délais de copie, préparation Git, collecte des commits et intégration, en millisecondes.                                                                                                             |
+| `label`              | `string \| undefined`                                    | Optionnel | Libellé lisible utilisé dans les rapports d’exécution.                                                                                                                                               |
 
 ## Signature
 
@@ -44,6 +46,8 @@ export interface SandboxOptions extends WorkspaceOptions {
   readonly logging?: Logging;
   readonly bootstrap?: boolean;
   readonly conversationHome?: string;
+  readonly recoveryTransport?: Transport;
+  readonly activityTransport?: Transport;
 }
 ```
 
@@ -53,5 +57,6 @@ export interface SandboxOptions extends WorkspaceOptions {
 - [LifecycleHooks](../lifecyclehooks/)
 - [Logging](../logging/)
 - [SandboxProvider](../sandboxprovider/)
+- [Transport](../transport/)
 - [Workspace](../workspace/)
 - [WorkspaceOptions](../workspaceoptions/)

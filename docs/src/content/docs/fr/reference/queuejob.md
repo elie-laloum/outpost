@@ -15,7 +15,7 @@ import type { QueueJob } from "@elie-laloum/outpost";
 
 | Nom        | Type                                                         | Présence  | Rôle                                                                                    |
 | ---------- | ------------------------------------------------------------ | --------- | --------------------------------------------------------------------------------------- |
-| `status`   | `"done" \| "failed" \| "cancelled" \| "active" \| "pending"` | Requis    | État durable du travail : pending, active, done, failed ou cancelled.                   |
+| `status`   | `"active" \| "done" \| "failed" \| "cancelled" \| "pending"` | Requis    | État durable du travail : pending, active, done, failed ou cancelled.                   |
 | `fence`    | `number`                                                     | Requis    | Génération du bail utilisée pour rejeter les écritures périmées.                        |
 | `worker`   | `string \| undefined`                                        | Optionnel | Identité du worker prenant en charge ou possédant le bail du travail.                   |
 | `expires`  | `number \| undefined`                                        | Optionnel | Expiration absolue du bail sous forme d’horodatage Unix en millisecondes.               |

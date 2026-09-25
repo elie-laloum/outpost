@@ -107,6 +107,7 @@ export const chapters = [
       "guide/operations/recovery-verification",
       "guide/operations/recovery-restoration",
       "guide/operations/storage-retention",
+      "guide/operations/storage-transports",
       "guide/operations/remote-transfers",
       "guide/operations/security",
     ],

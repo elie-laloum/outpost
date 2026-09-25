@@ -1,3 +1,4 @@
+import { transportJournal } from "./transport-journal.ts";
 import { lock } from "./git/lock.ts";
 import { markJournalClosed } from "./journal-retention.ts";
 import { randomUUID } from "node:crypto";
@@ -14,6 +15,15 @@ export async function journal(
   logging: Logging = {},
   label?: string,
 ): Promise<Journal> {
+  if (logging && logging !== "stdout" && logging.transporter) {
+    if (logging.file !== undefined)
+      throw new Error("Provide a journal file or transporter, not both");
+    return transportJournal(
+      logging.transporter,
+      logging.verbose ?? false,
+      label,
+    );
+  }
   const file =
     logging && logging !== "stdout"
       ? resolve(

@@ -108,8 +108,8 @@
     "Inspecte le stockage local de récupération et détermine quels workspaces propres ou journaux fermés satisfont la politique d’âge et de capacité. Le plan expose éligibilité et usage projeté sans supprimer de fichier."
   ],
   "pruneRecoveryRetention": [
-    "Apply a previously reviewed retention plan. Reacquire ownership and revalidate each candidate before removal; report removed paths, retained entries and a fresh plan after pruning.",
-    "Applique un plan de rétention préalablement examiné. Reprend possession et revalide chaque candidat avant suppression ; renvoie les chemins supprimés, les entrées conservées et un nouveau plan après nettoyage."
+    "Apply a retention plan after fresh validation. Local plans reacquire filesystem ownership; transport plans require the same transporter in the second argument, revalidate closed journal groups and condition every deletion on its revision. Changed or partially removed candidates are reported as retained; recovery data remains protected.",
+    "Applique un plan de rétention après revalidation. Les plans locaux reprennent la propriété des fichiers ; les plans distants exigent le même transport en second argument, revalident les groupes de journaux fermés et conditionnent chaque suppression à sa révision. Les candidats modifiés ou partiellement supprimés sont signalés comme conservés ; les données de récupération restent protégées."
   ],
   "assertRecoveryQuota": [
     "Inspect recovery storage and reject if observed bytes plus the requested reservation exceed maxBytes, or if inspection cannot establish admission. This check does not reserve space or impose a filesystem quota; reserveRecoveryStorage coordinates cooperating writers.",
@@ -140,8 +140,8 @@
     "Revalide un plan de restauration et matérialise l’état conservé choisi dans sa nouvelle destination. Les artefacts sources restent disponibles et le résultat indique si l’index Git a pu être préservé. Examinez la destination avant intégration."
   ],
   "fileWorkflowCheckpointStore": [
-    "Create a filesystem checkpoint store under directory. Acquiring a run ID owns its checkpoint exclusively; writes replace the saved JSON atomically, and releasing the lease leaves persisted results available for a later run.",
-    "Crée un store de checkpoints dans directory. Acquérir un identifiant d’exécution donne la possession exclusive de son checkpoint ; les écritures remplacent atomiquement le JSON sauvegardé et la libération du bail conserve les résultats pour une exécution ultérieure."
+    "Create a checkpoint store with exactly one directory or transporter. The directory mode keeps existing JSON files, atomic replacement and local process locks. Transport mode delegates to workflowCheckpointStore and uses conditional envelopes with explicit ownership recovery. Changing modes does not migrate saved runs.",
+    "Crée un store de checkpoints avec exactement un dossier ou un transport. Le mode dossier conserve les fichiers JSON existants, le remplacement atomique et les verrous locaux. Le mode transport délègue à workflowCheckpointStore et utilise des enveloppes conditionnelles à récupération explicite. Changer de mode ne migre pas les exécutions."
   ],
   "approvalTask": [
     "Define a checkpoint-backed approval gate that pauses once its dependencies finish. A trusted listed actor must submit approve or reject with a reason. Approval yields the persisted decision to dependent tasks; rejection is final for that run.",
@@ -152,8 +152,8 @@
     "Définit une pause persistée par checkpoint qui attend une décision explicite resume ou reject d’un acteur de confiance autorisé. Elle n’utilise aucun timer d’attente et survit au redémarrage du processus ; contrairement à approvalTask, son action de succès est resume."
   ],
   "inspectRecovery": [
-    "Inventory the target repository’s .outpost storage, with optional Git, lock and locally recorded sandbox activity checks. Inspection is read-only, bounded by maxEntries, and does not enumerate cloud provider accounts.",
-    "Inventorie le stockage .outpost du dépôt cible, avec contrôles optionnels de Git, des verrous et de l’activité locale des sandboxes. L’inspection est en lecture seule, bornée par maxEntries, et n’énumère pas les comptes cloud."
+    "Inspect local runtime files or objects in an explicit transport without deleting them. Local mode can inspect Git, process locks and resources; transport mode lists payload sizes, revisions and optionally resource records whose remote ownership remains unverified. Incomplete inventories are reported and cannot authorize pruning.",
+    "Inspecte les fichiers locaux ou objets d’un transport explicite sans les supprimer. Le mode local peut inspecter Git, verrous de processus et ressources ; le mode transport liste tailles, révisions et éventuellement activités dont la propriété distante reste non vérifiée. Les inventaires incomplets sont signalés et n’autorisent pas le nettoyage."
   ],
   "artifact": [
     "Create named, versioned payload contracts with json or binary. JSON contracts validate both encoding and decoding and require lossless JSON; binary contracts copy Uint8Array bytes. Constructing a contract does not publish an artifact.",
@@ -176,8 +176,8 @@
     "Lit une référence d’artefact depuis une dépendance déclarée via context.value, puis charge et valide ses données stockées. Applique le signal d’annulation de la tâche et vérifie le producteur par rapport à l’exécution courante et à la clé de dépendance."
   ],
   "fileArtifactStore": [
-    "Create a filesystem store for immutable artifact bytes with atomic publication and bounded reads. maxBytes defaults to 16 MiB per payload. Existing IDs cannot be overwritten with different bytes; the caller manages retention.",
-    "Crée un store fichier pour des octets d’artefact immuables, avec publication atomique et lectures bornées. maxBytes vaut 16 Mio par données publiées par défaut. Un identifiant existant ne peut recevoir des octets différents ; l’appelant gère la rétention."
+    "Create an artifact store with exactly one directory or transporter. Directory mode preserves the existing immutable blob layout and private filesystem checks; transport mode delegates to artifactStore. Both enforce the configured payload bound and reject conflicting bytes for an existing ID.",
+    "Crée un store d’artefacts avec exactement un dossier ou un transport. Le mode dossier préserve le format immuable existant et les vérifications du système de fichiers privé ; le mode transport délègue à artifactStore. Les deux bornent les contenus et refusent des octets différents pour un identifiant existant."
   ],
   "sqliteTaskQueue": [
     "Open a durable SQLite task queue at path. Enqueue deduplicates job identities, claims create fenced leases and stale workers cannot complete queue state. Close the returned database when finished; external effects remain at least once.",
@@ -254,5 +254,45 @@
   "resourceOperationKinds": [
     "List operation names accepted by local resource activity recording; ResourceOperationKind derives its allowed values from this constant.",
     "Liste les noms d’opérations acceptés par l’enregistrement local d’activité ; ResourceOperationKind déduit ses valeurs autorisées de cette constante."
+  ],
+  "TransportConflict": [
+    "A conditional object mutation or pinned read found a different revision. Re-read state before deciding whether a retry is valid; never replace the condition with an unconditional write.",
+    "Une mutation conditionnelle ou une lecture versionnée a trouvé une révision différente. Relire l’état avant de décider si une nouvelle tentative est valable ; ne jamais remplacer la condition par une écriture inconditionnelle."
+  ],
+  "localTransport": [
+    "Create a versioned object transport in a private directory. Binary objects use an envelope distinct from legacy file stores. Local process locks serialize conditional mutations; this adapter does not establish distributed NFS ownership.",
+    "Crée un transport d’objets versionnés dans un dossier privé. Les objets binaires utilisent une enveloppe distincte des anciens stores de fichiers. Les verrous de processus locaux sérialisent les mutations conditionnelles ; cet adaptateur n’établit pas de propriété NFS distribuée."
+  ],
+  "s3Transport": [
+    "Create an object transport using the caller’s S3Client. GET reads are bounded, PUT and DELETE are conditional, and listing follows pagination. Each written envelope includes a fresh identity, preventing identical-payload writes from reusing a previous revision. Requires the optional AWS SDK and an endpoint implementing these semantics.",
+    "Crée un transport objet avec le S3Client de l’appelant. Les lectures GET sont bornées, PUT et DELETE sont conditionnels et le listing suit la pagination. Chaque enveloppe écrite comprend une nouvelle identité, empêchant la réutilisation d’une révision avec des contenus identiques. Exige le SDK AWS optionnel et un endpoint respectant ces garanties."
+  ],
+  "artifactStore": [
+    "Build an ArtifactStore over a transport. Publication creates immutable blobs or accepts identical existing bytes; conflicts with different bytes fail. Existing artifact contracts and portable references remain unchanged.",
+    "Construit un ArtifactStore sur un transport. La publication crée des blobs immuables ou accepte des octets existants identiques ; un contenu différent provoque un échec. Les contrats et références portables d’artefacts restent inchangés."
+  ],
+  "workflowCheckpointStore": [
+    "Build a checkpoint store whose ownership token and checkpoint share one conditional object. Acquisition rejects an existing owner. Release preserves values and usage. Ownership does not expire automatically; after a crash, stop the old runner and explicitly recover its observed revision before resuming.",
+    "Construit un store dont le jeton de propriété et le checkpoint partagent un objet conditionnel. L’acquisition refuse un propriétaire existant. La libération préserve valeurs et usage. La propriété n’expire pas automatiquement ; après un crash, arrêter l’ancien exécuteur et récupérer explicitement sa révision observée avant reprise."
+  ],
+  "recoverWorkflowCheckpoint": [
+    "Explicitly clear checkpoint ownership without deleting its saved progress. The caller must first ensure the old runner has stopped. The expected revision fences concurrent changes; incomplete-task replay still requires resume: retry-incomplete.",
+    "Libère explicitement la propriété d’un checkpoint sans supprimer sa progression. L’appelant doit d’abord s’assurer de l’arrêt de l’ancien exécuteur. La révision attendue protège contre les changements concurrents ; rejouer les tâches incomplètes exige toujours resume: retry-incomplete."
+  ],
+  "readJournal": [
+    "Read committed journal events in chronological order from a pinned index revision. Every linked segment revision is checked; cycles, missing segments and entry-limit overruns fail. An open journal exposes only its committed prefix.",
+    "Lit les événements validés d’un journal dans l’ordre chronologique depuis une révision exacte de l’index. Chaque révision de segment est vérifiée ; cycles, segments absents et dépassements de limite provoquent un échec. Un journal ouvert expose uniquement son préfixe validé."
+  ],
+  "transportConversations": [
+    "Build a Claude or Codex ConversationStore using transport snapshots and a stable project namespace. Capture preserves native relocation and child transcripts; locate materializes an immutable snapshot below the target repository’s recovery directory. Returned file paths remain readable and reference identifies the remote index. Native files and credentials are separate.",
+    "Construit un ConversationStore Claude ou Codex avec snapshots de transport et espace de noms stable du projet. La capture préserve la relocalisation native et les transcripts enfants ; locate matérialise un snapshot immuable sous le dossier de récupération du dépôt cible. Les chemins file restent lisibles et reference identifie l’index distant. Fichiers natifs et identifiants restent distincts."
+  ],
+  "archiveRecovery": [
+    "Snapshot and verify an existing recovery transfer, upload binary chunks with hashes, and publish its manifest last. The source is retained. An interrupted upload may retain unreferenced chunks; no incomplete manifest is published. The archive contains recovery payloads, not an independent replacement for the source Git repository.",
+    "Crée et vérifie un snapshot du transfert, envoie des blocs binaires avec empreintes puis publie le manifeste en dernier. La source est conservée. Un envoi interrompu peut laisser des blocs non référencés ; aucun manifeste incomplet n’est publié. L’archive contient les données de récupération, pas un remplacement autonome du dépôt Git source."
+  ],
+  "materializeRecoveryArchive": [
+    "Download a pinned recovery archive into a new local directory, preserving supported modes and symlinks. Check chunk revisions, SHA-256 and recovery checksums. Keep the source and any partial destination on failure. Use the existing recovery planning and restoration APIs with the source repository to produce a checkout.",
+    "Télécharge une archive versionnée dans un nouveau dossier local en conservant les modes et liens symboliques pris en charge. Vérifie révisions, SHA-256 et sommes de contrôle de récupération. Conserve la source et toute destination partielle en cas d’échec. Utiliser ensuite les API de planification et restauration avec le dépôt source pour produire un checkout."
   ]
 }

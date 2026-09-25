@@ -59,7 +59,7 @@ Use `AgentAdapter` for agent behavior, `SandboxProvider`/`SandboxLease` for exec
 
 The CLI uses Commander for command-specific parsing/help and Clack for interactive setup. Preserve headless execution, JSON output and cancellation. `init` builds Docker/Podman images by default; `--no-build` opts out. Authentication is selected explicitly: API keys, Claude subscription tokens or Codex account credential seeds. Never infer authorization to export a host keychain or forward undeclared secrets. Custom Codex model providers require Responses API compatibility; do not imply Chat Completions support.
 
-Each sandbox owns one repository. Compose multiple repositories with `isolatedTask` and dependency edges; no shared Git transaction or automatic push spans them. Runtime worktrees, locks and logs belong under the target repository's `.outpost`. Keep bilingual repository guidance and standalone/multi-repository regression tests aligned with these contracts.
+Each sandbox owns one repository. Compose multiple repositories with `isolatedTask` and dependency edges; no shared Git transaction or automatic push spans them. Runtime worktrees, local ownership locks and default logs belong under the target repository's `.outpost`. Explicit storage transports can persist artifacts, checkpoints, journals, conversations, recovery archives, reservations and resource activity remotely; Git and execution staging still require filesystems. Keep bilingual repository guidance and standalone/multi-repository regression tests aligned with these contracts.
 
 ## Code conventions
 
@@ -88,7 +88,7 @@ Treat these as review and regression-test obligations when changing the affected
 - Preserve conversation capture, restore, continuation, fork and transcript relocation. Agent authentication and conversation storage are separate concerns.
 - Preserve hook ordering, structured-response validation, retries, usage aggregation and observer isolation. Observer failures must not change execution outcomes.
 - Durable workflows persist lossless JSON outputs, explicit replay authorization and cumulative usage. Gates use trusted actor metadata; queues fence stale leases but do not guarantee exactly-once effects. Artifact digests and lineage provide integrity, not authentication.
-- Resource activity is a local observation, and storage reservations coordinate cooperating writers rather than imposing physical quotas. Opt-in research providers and policies must reject unsupported capabilities explicitly.
+- Resource activity is an observation, and storage reservations coordinate cooperating writers rather than imposing physical quotas. Transport-backed activity must not infer remote liveness from a PID. Transport checkpoint ownership and abandoned reservations require explicit recovery; conditional mutations must fence stale writers. Opt-in research providers and policies must reject unsupported capabilities explicitly.
 - Protect concurrent host edits during remote synchronization. Validate and back up before applying incoming changes. Preserve recovery artifacts whenever cleanup would discard recoverable work.
 - Keep branch integration explicit and correctly ordered. Never discard dirty or detached worktrees as routine cleanup.
 - Do not silently fall back from an isolated provider to host execution. `local()` is explicitly unisolated; mounted Git metadata is not an adversarial security boundary.

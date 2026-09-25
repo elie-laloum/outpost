@@ -1,8 +1,10 @@
+import type { TransportReference } from "./transport.types.ts";
 import type { SandboxLease } from "./sandbox.types.ts";
 
 export interface ConversationRecord {
   readonly id: string;
   readonly file: string;
+  readonly reference?: TransportReference;
   readonly format: string;
 }
 

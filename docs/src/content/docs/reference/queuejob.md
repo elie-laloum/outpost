@@ -15,7 +15,7 @@ import type { QueueJob } from "@elie-laloum/outpost";
 
 | Name       | Type                                                         | Presence | Meaning                                                                            |
 | ---------- | ------------------------------------------------------------ | -------- | ---------------------------------------------------------------------------------- |
-| `status`   | `"done" \| "failed" \| "cancelled" \| "active" \| "pending"` | Required | Durable job state: pending, active, done, failed or cancelled.                     |
+| `status`   | `"active" \| "done" \| "failed" \| "cancelled" \| "pending"` | Required | Durable job state: pending, active, done, failed or cancelled.                     |
 | `fence`    | `number`                                                     | Required | Lease generation used to reject stale queue writers.                               |
 | `worker`   | `string \| undefined`                                        | Optional | Identity of the worker claiming or owning the job lease.                           |
 | `expires`  | `number \| undefined`                                        | Optional | Absolute lease expiry as a Unix timestamp in milliseconds.                         |

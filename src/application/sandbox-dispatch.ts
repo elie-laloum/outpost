@@ -96,6 +96,9 @@ export async function dispatchInSandbox<T>(
         return {
           ...turn,
           transcript: location.file,
+          ...(location.reference
+            ? { transcriptReference: location.reference }
+            : {}),
           ...(usage ? { usage } : {}),
         };
       },
@@ -137,6 +140,8 @@ export async function dispatchInSandbox<T>(
       commits: changes,
       transcript: transcript?.file,
       log: log.file,
+      logReference: log.reference,
+      transcriptReference: transcript?.reference,
     });
     throw failure;
   }
@@ -148,6 +153,10 @@ export async function dispatchInSandbox<T>(
     commits: changes,
     ...(transcript ? { transcript: transcript.file } : {}),
     ...(log.file ? { log: log.file } : {}),
+    ...(log.reference ? { logReference: log.reference } : {}),
+    ...(transcript?.reference
+      ? { transcriptReference: transcript.reference }
+      : {}),
     resume<U>(next: DispatchOptions<U>) {
       warmContinuation(next);
       invariant(conversation, "No conversation was emitted");

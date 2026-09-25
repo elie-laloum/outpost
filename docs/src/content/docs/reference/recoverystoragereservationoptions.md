@@ -13,13 +13,14 @@ import type { RecoveryStorageReservationOptions } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name           | Type                       | Presence | Meaning                                                                       |
-| -------------- | -------------------------- | -------- | ----------------------------------------------------------------------------- |
-| `repository`   | `string \| undefined`      | Optional | Target host Git checkout.                                                     |
-| `maxBytes`     | `number`                   | Required | Maximum admitted total of observed storage and active reservations, in bytes. |
-| `reserveBytes` | `number`                   | Required | Additional bytes requested for admission alongside existing storage usage.    |
-| `maxEntries`   | `number \| undefined`      | Optional | Maximum filesystem entries inspected before marking the inventory incomplete. |
-| `signal`       | `AbortSignal \| undefined` | Optional | Cooperative cancellation for this operation.                                  |
+| Name           | Type                       | Presence | Meaning                                                                                                                                                                                 |
+| -------------- | -------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `repository`   | `string \| undefined`      | Optional | Target host Git checkout.                                                                                                                                                               |
+| `transporter`  | `Transport \| undefined`   | Optional | Optional transport whose payload usage and shared reservation ledger replace local admission accounting. Reservations persist until explicit release and do not impose physical quotas. |
+| `maxBytes`     | `number`                   | Required | Maximum admitted total of observed storage and active reservations, in bytes.                                                                                                           |
+| `reserveBytes` | `number`                   | Required | Additional bytes requested for admission alongside existing storage usage.                                                                                                              |
+| `maxEntries`   | `number \| undefined`      | Optional | Maximum filesystem entries inspected before marking the inventory incomplete.                                                                                                           |
+| `signal`       | `AbortSignal \| undefined` | Optional | Cooperative cancellation for this operation.                                                                                                                                            |
 
 ## Signature
 

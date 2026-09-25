@@ -13,17 +13,18 @@ import { fileArtifactStore } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Create a filesystem store for immutable artifact bytes with atomic publication and bounded reads. maxBytes defaults to 16 MiB per payload. Existing IDs cannot be overwritten with different bytes; the caller manages retention.
+Create an artifact store with exactly one directory or transporter. Directory mode preserves the existing immutable blob layout and private filesystem checks; transport mode delegates to artifactStore. Both enforce the configured payload bound and reject conflicting bytes for an existing ID.
 
 [Complete example and detailed rules](../../guide/advanced/artifacts/).
 
 ## Parameters and properties
 
-| Name                | Type                       | Presence | Meaning                                                   |
-| ------------------- | -------------------------- | -------- | --------------------------------------------------------- |
-| `options`           | `FileArtifactStoreOptions` | Required | Artifact storage directory and maximum bytes per payload. |
-| `options.directory` | `string`                   | Required | Host directory storing immutable artifact payloads by ID. |
-| `options.maxBytes`  | `number \| undefined`      | Optional | Maximum bytes per stored artifact; defaults to 16 MiB.    |
+| Name                  | Type                       | Presence | Meaning                                                                                                           |
+| --------------------- | -------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------- |
+| `options`             | `FileArtifactStoreOptions` | Required | Exactly one legacy directory or object transporter, plus the per-artifact byte bound.                             |
+| `options.directory`   | `string \| undefined`      | Optional | Legacy filesystem store directory, mutually exclusive with transporter; existing blob layout is preserved.        |
+| `options.transporter` | `Transport \| undefined`   | Optional | Alternative to directory; delegates to artifactStore with the same size limit. Supply exactly one storage choice. |
+| `options.maxBytes`    | `number \| undefined`      | Optional | Maximum bytes per stored artifact; defaults to 16 MiB.                                                            |
 
 ## Returns
 

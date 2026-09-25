@@ -65,3 +65,9 @@ CI rejects reversed layer dependencies, inline contract declarations, runtime in
 Checkpoint and gate contracts belong to the domain; the filesystem checkpoint adapter owns atomic persistence and local ownership. Artifact contracts validate values and lineage, while the filesystem store owns immutable bytes. The SQLite queue and HTTP transport provide durable claims; application workers execute registered handlers under fenced leases. Replay remains explicit and side effects are at least once. Gate actor names and artifact lineage are trusted metadata, not authentication.
 
 The opt-in isolated container checkout, Firecracker provider, egress policies and speculative execution helper have separate [research limits](../../../project/roadmap/). Gemini has no native conversation store. Daytona terminal execution uses its native PTY API; Vercel rejects interactive attachment.
+
+## Storage transports
+
+`Transport` is a domain port for bounded binary reads, metadata listing and atomic conditional mutations. Local and optional S3 implementations belong to infrastructure; object stores keep artifact integrity, checkpoint ownership, journal ordering and conversation layouts separate from the transport. Native conversation copies and recovery verification still use local staging. The S3 SDK loads only through `transports/s3`.
+
+Transport checkpoint ownership and cooperative reservation ledgers do not expire automatically. Explicit recovery must follow independent confirmation that the former owner stopped. Resource records stored remotely are observations with unverified ownership; they never authorize reclaiming local Git workspaces. Transport retention revalidates closed journal groups and each deletion revision. See [storage transports](../../operations/storage-transports/).

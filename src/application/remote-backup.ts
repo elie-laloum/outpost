@@ -1,3 +1,4 @@
+import { archiveRecovery } from "./recovery-archive.ts";
 import { captureRecoveryChecksums } from "./recovery-checksum-capture.ts";
 import { cp, mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
@@ -51,6 +52,17 @@ export async function backupHost(
   };
   await writeFile(join(transfer, "state.json"), JSON.stringify(state));
   await captureRecoveryChecksums(transfer, state);
+  if (context.options.recoveryTransport) {
+    const reference = await archiveRecovery({
+      directory: transfer,
+      transporter: context.options.recoveryTransport,
+    });
+    await writeFile(
+      join(transfer, "archive-reference.json"),
+      JSON.stringify(reference),
+      { mode: 0o600 },
+    );
+  }
 
   return { previousPatch, previousExtras };
 }

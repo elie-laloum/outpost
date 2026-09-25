@@ -94,6 +94,13 @@ const exportedByName = new Map(
   exportedSymbols.map((symbol) => [symbol.name, symbol]),
 );
 function slug(symbol) {
+  const preserved = {
+    artifactStore: "function-artifactstore",
+    ArtifactStore: "artifactstore",
+    workflowCheckpointStore: "function-workflowcheckpointstore",
+    WorkflowCheckpointStore: "workflowcheckpointstore",
+  };
+  if (Object.hasOwn(preserved, symbol.name)) return preserved[symbol.name];
   const name = symbol.name.toLowerCase();
   const collision = exportedSymbols.some(
     (other) => other !== symbol && other.name.toLowerCase() === name,
@@ -254,7 +261,9 @@ for (const [language, locale] of [
       ).replace(/^# Historique des versions\s*/, "")
     : canonicalChangelog;
   const versions = (text) =>
-    [...text.matchAll(/^## (.+)$/gm)].map((match) => match[1]);
+    [...text.matchAll(/^## (.+)$/gm)].map((match) =>
+      match[1] === "Non publié" ? "Unreleased" : match[1],
+    );
   if (
     JSON.stringify(versions(changelog)) !==
     JSON.stringify(versions(canonicalChangelog))

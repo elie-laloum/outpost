@@ -57,6 +57,20 @@ try {
     ],
     { cwd: temporary, stdio: "inherit" },
   );
+  assert.equal(
+    existsSync(join(temporary, "node_modules", "@aws-sdk", "client-s3")),
+    false,
+    "Base consumers must not require the optional S3 SDK",
+  );
+  execFileSync(
+    process.execPath,
+    [
+      "--input-type=module",
+      "-e",
+      "import {localTransport,artifactStore,workflowCheckpointStore,recoverWorkflowCheckpoint,readJournal,transportConversations,archiveRecovery,materializeRecoveryArchive} from '@elie-laloum/outpost'; const transporter=localTransport({directory:'state'}); const first=await transporter.write('artifacts/smoke',new Uint8Array([0,255]),{ifRevision:null}); if((await transporter.read(first.key)).bytes[1]!==255)throw Error('Transport bytes changed'); for(const item of [artifactStore,workflowCheckpointStore,recoverWorkflowCheckpoint,readJournal,transportConversations,archiveRecovery,materializeRecoveryArchive])if(typeof item!=='function')throw Error('Missing transport export');",
+    ],
+    { cwd: temporary, stdio: "inherit" },
+  );
   const cli = join(
     temporary,
     "node_modules",

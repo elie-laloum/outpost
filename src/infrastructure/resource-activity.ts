@@ -1,3 +1,5 @@
+import { TransportConflict } from "../domain/transport.ts";
+import { jsonBytes } from "./transport-json.ts";
 import { randomUUID } from "node:crypto";
 import { mkdir, open, realpath, rename, rm, opendir } from "node:fs/promises";
 import { join } from "node:path";
@@ -34,9 +36,11 @@ export async function registerResourceActivity(
       text.length > 0 && text.length <= defaults.maxText,
       "Resource activity metadata exceeds its size limit",
     );
-  const directory = await activityDirectory(options.repository);
+  const remote = options.transporter;
+  const directory = remote ? "" : await activityDirectory(options.repository);
+  let revision: string | undefined;
   const id = randomUUID();
-  const path = join(directory, `${id}.json`);
+  const path = remote ? `resources/${id}.json` : join(directory, `${id}.json`);
   const createdAt = new Date().toISOString();
   const identity = await localProcessIdentity();
   let record: ResourceActivityRecord = {
@@ -52,20 +56,29 @@ export async function registerResourceActivity(
     phase: "allocating",
     operations: [],
   };
-  const unlock = await lockStorageMutation(options.repository);
+  const unlock = remote
+    ? async () => {}
+    : await lockStorageMutation(options.repository);
   try {
-    let count = 0;
-    for await (const _entry of await opendir(directory))
-      invariant(
-        ++count < defaults.maxRecords,
-        "Too many resource activity records; inspect retained ownership before continuing",
-      );
-    const file = await open(path, "wx", 0o600);
-    try {
-      await file.writeFile(JSON.stringify(record));
-      await file.sync();
-    } finally {
-      await file.close();
+    if (remote) {
+      revision = (
+        await remote.write(path, jsonBytes(record), { ifRevision: null })
+      ).revision;
+    }
+    if (!remote) {
+      let count = 0;
+      for await (const _entry of await opendir(directory))
+        invariant(
+          ++count < defaults.maxRecords,
+          "Too many resource activity records; inspect retained ownership before continuing",
+        );
+      const file = await open(path, "wx", 0o600);
+      try {
+        await file.writeFile(JSON.stringify(record));
+        await file.sync();
+      } finally {
+        await file.close();
+      }
     }
   } finally {
     await unlock();
@@ -78,8 +91,14 @@ export async function registerResourceActivity(
     return next;
   }
   async function verify(): Promise<void> {
+    invariant(!removed, "Resource activity is closed");
+    if (remote) {
+      if ((await remote.read(path))?.revision !== revision)
+        throw new TransportConflict(path);
+      return;
+    }
     invariant(
-      (await realpath(directory)) === directory,
+      remote || (await realpath(directory)) === directory,
       "Resource activity directory changed",
     );
     invariant(!removed, "Resource activity is closed");
@@ -100,6 +119,14 @@ export async function registerResourceActivity(
         Buffer.byteLength(data) <= defaults.maxRecordBytes,
         "Resource activity record exceeds its size limit",
       );
+      if (remote) {
+        invariant(revision, "Resource revision unavailable");
+        revision = (
+          await remote.write(path, jsonBytes(value), { ifRevision: revision })
+        ).revision;
+        record = value;
+        return;
+      }
       const temporary = `${path}.${randomUUID()}.tmp`;
       const file = await open(temporary, "wx", 0o600);
       try {
@@ -176,7 +203,10 @@ export async function registerResourceActivity(
         );
         try {
           await verify();
-          await rm(path);
+          if (remote) {
+            invariant(revision, "Resource revision unavailable");
+            await remote.remove(path, { ifRevision: revision });
+          } else await rm(path);
         } catch (cause) {
           if (!(
             cause &&

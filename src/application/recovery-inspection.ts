@@ -1,3 +1,4 @@
+import { inspectTransportRecovery } from "./transport-inspection.ts";
 import { inspectResourceActivity } from "../infrastructure/resource-activity-inspection.ts";
 import { inspectLocks } from "../infrastructure/git/lock-inspection.ts";
 import { join } from "node:path";
@@ -13,6 +14,7 @@ import type {
 export async function inspectRecovery(
   options: RecoveryInspectionOptions = {},
 ): Promise<RecoveryInspection> {
+  if (options.transporter) return inspectTransportRecovery(options);
   const requested = await directory(options.repository);
   const repository = await directory(
     (await git(requested, ["rev-parse", "--show-toplevel"])).trim(),

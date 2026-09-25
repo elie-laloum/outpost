@@ -13,23 +13,25 @@ import type { SandboxOptions } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name                 | Type                                                     | Presence | Meaning                                                                                           |
-| -------------------- | -------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------- |
-| `includeUncommitted` | `boolean \| undefined`                                   | Optional | Include uncommitted host changes when preparing a remote repository snapshot.                     |
-| `agent`              | `AgentAdapter \| undefined`                              | Optional | Native coding-agent adapter.                                                                      |
-| `provider`           | `SandboxProvider \| undefined`                           | Optional | Execution environment backend.                                                                    |
-| `workspace`          | `Workspace \| undefined`                                 | Optional | Caller-owned Git workspace; excludes new repository/branch choices.                               |
-| `hooks`              | `LifecycleHooks \| undefined`                            | Optional | Lifecycle commands in declared execution order.                                                   |
-| `signal`             | `AbortSignal \| undefined`                               | Optional | Cooperative cancellation for this operation.                                                      |
-| `logging`            | `Logging \| undefined`                                   | Optional | Configure the dispatch journal file and verbose event retention.                                  |
-| `bootstrap`          | `boolean \| undefined`                                   | Optional | Whether to install a missing selected agent automatically.                                        |
-| `conversationHome`   | `string \| undefined`                                    | Optional | Host home used for native transcript storage.                                                     |
-| `storageQuota`       | `Omit<StorageReservationOptions, "signal"> \| undefined` | Optional | Admission limits and requested reservation for storage under the repository’s .outpost directory. |
-| `repository`         | `string \| undefined`                                    | Optional | Target host Git checkout.                                                                         |
-| `branch`             | `BranchPolicy \| undefined`                              | Optional | Select the current checkout, a retained named work branch or a branch prepared for integration.   |
-| `copies`             | `readonly string[] \| undefined`                         | Optional | Repository-relative inputs copied into the workspace.                                             |
-| `limits`             | `StageLimits \| undefined`                               | Optional | Timeouts for copying, Git preparation, commit collection and integration, in milliseconds.        |
-| `label`              | `string \| undefined`                                    | Optional | Human-readable label used in execution reporting.                                                 |
+| Name                 | Type                                                     | Presence | Meaning                                                                                                                                                  |
+| -------------------- | -------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `includeUncommitted` | `boolean \| undefined`                                   | Optional | Include uncommitted host changes when preparing a remote repository snapshot.                                                                            |
+| `agent`              | `AgentAdapter \| undefined`                              | Optional | Native coding-agent adapter.                                                                                                                             |
+| `provider`           | `SandboxProvider \| undefined`                           | Optional | Execution environment backend.                                                                                                                           |
+| `workspace`          | `Workspace \| undefined`                                 | Optional | Caller-owned Git workspace; excludes new repository/branch choices.                                                                                      |
+| `hooks`              | `LifecycleHooks \| undefined`                            | Optional | Lifecycle commands in declared execution order.                                                                                                          |
+| `signal`             | `AbortSignal \| undefined`                               | Optional | Cooperative cancellation for this operation.                                                                                                             |
+| `logging`            | `Logging \| undefined`                                   | Optional | Configure the dispatch journal file and verbose event retention.                                                                                         |
+| `bootstrap`          | `boolean \| undefined`                                   | Optional | Whether to install a missing selected agent automatically.                                                                                               |
+| `conversationHome`   | `string \| undefined`                                    | Optional | Host home used for native transcript storage.                                                                                                            |
+| `recoveryTransport`  | `Transport \| undefined`                                 | Optional | Publish verified recovery archives before applying downloaded remote changes. Local synchronization staging remains; archives outlive sandbox closure.   |
+| `activityTransport`  | `Transport \| undefined`                                 | Optional | Store sandbox activity records in this transport. Remote ownership remains unverified; PID observations are not used to reclaim another machine’s state. |
+| `storageQuota`       | `Omit<StorageReservationOptions, "signal"> \| undefined` | Optional | Admission limits and requested reservation for storage under the repository’s .outpost directory.                                                        |
+| `repository`         | `string \| undefined`                                    | Optional | Target host Git checkout.                                                                                                                                |
+| `branch`             | `BranchPolicy \| undefined`                              | Optional | Select the current checkout, a retained named work branch or a branch prepared for integration.                                                          |
+| `copies`             | `readonly string[] \| undefined`                         | Optional | Repository-relative inputs copied into the workspace.                                                                                                    |
+| `limits`             | `StageLimits \| undefined`                               | Optional | Timeouts for copying, Git preparation, commit collection and integration, in milliseconds.                                                               |
+| `label`              | `string \| undefined`                                    | Optional | Human-readable label used in execution reporting.                                                                                                        |
 
 ## Signature
 
@@ -44,6 +46,8 @@ export interface SandboxOptions extends WorkspaceOptions {
   readonly logging?: Logging;
   readonly bootstrap?: boolean;
   readonly conversationHome?: string;
+  readonly recoveryTransport?: Transport;
+  readonly activityTransport?: Transport;
 }
 ```
 
@@ -53,5 +57,6 @@ export interface SandboxOptions extends WorkspaceOptions {
 - [LifecycleHooks](../lifecyclehooks/)
 - [Logging](../logging/)
 - [SandboxProvider](../sandboxprovider/)
+- [Transport](../transport/)
 - [Workspace](../workspace/)
 - [WorkspaceOptions](../workspaceoptions/)

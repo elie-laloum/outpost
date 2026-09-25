@@ -1,4 +1,7 @@
+import type { Transport } from "../domain/transport.types.ts";
+
 export interface StorageReservationOptions {
+  readonly transporter?: Transport;
   readonly maxBytes: number;
   readonly reserveBytes: number;
   readonly maxEntries?: number;

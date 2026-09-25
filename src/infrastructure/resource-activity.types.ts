@@ -1,3 +1,4 @@
+import type { Transport } from "../domain/transport.types.ts";
 import type {
   LocalProcessIdentity,
   LockOwnership,
@@ -42,6 +43,7 @@ export interface ResourceActivity {
   remove(): Promise<void>;
 }
 export interface ResourceActivityOptions {
+  readonly transporter?: Transport;
   readonly repository: string;
   readonly workspace: string;
   readonly provider: string;

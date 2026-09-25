@@ -15,3 +15,5 @@ Prompt command expansion only recognizes commands present in the original prompt
 Conversation transcripts, logs, bundles and patches may contain secrets. Runtime files are ignored by Git and sensitive files are created with restrictive permissions where supported. Keep API keys in environment variables or ignored `.env` files. Never embed tokens in tracked configuration, remote URLs or examples.
 
 Report vulnerabilities privately using the repository's security reporting channel when enabled, or contact the maintainer through the hosting profile. Do not include live credentials in reports. V1 receives fixes for reproducible security defects.
+
+Explicit storage transports can send artifacts, journals, transcripts, recovery payloads and operational metadata to the configured object store. The caller owns the S3 client and credentials; they are not forwarded to agents. Use a dedicated private bucket prefix and access policy. Object revisions fence cooperating writers but do not authenticate artifact producers or operators. Stop an abandoned runner independently before releasing its checkpoint ownership; a remote PID is not proof of inactivity.

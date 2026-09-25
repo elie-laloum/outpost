@@ -1,3 +1,4 @@
+import { artifactStore } from "./transport-artifact-store.ts";
 import { artifactDigestPattern } from "../domain/artifact.constants.ts";
 import { randomUUID } from "node:crypto";
 import { link, lstat, mkdir, open, rm } from "node:fs/promises";
@@ -50,6 +51,15 @@ async function readArtifactFile(
 export function fileArtifactStore(
   options: FileArtifactStoreOptions,
 ): ArtifactStore {
+  if ((options.directory === undefined) === (options.transporter === undefined))
+    throw new Error("Provide exactly one artifact directory or transporter");
+  if (options.transporter)
+    return artifactStore({
+      transporter: options.transporter,
+      ...(options.maxBytes === undefined ? {} : { maxBytes: options.maxBytes }),
+    });
+  if (options.directory === undefined)
+    throw new Error("Artifact directory is required");
   const root = resolve(options.directory),
     maxBytes = options.maxBytes ?? artifactMaxBytes;
   if (!Number.isSafeInteger(maxBytes) || maxBytes < 1)

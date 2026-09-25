@@ -1,3 +1,4 @@
+import { workflowCheckpointStore } from "./transport-checkpoint.ts";
 import { readInspectionFile } from "./inspection-file.ts";
 import { workflowCheckpointMaxBytes } from "./workflow-checkpoint.constants.ts";
 import { createHash, randomUUID } from "node:crypto";
@@ -10,6 +11,12 @@ import { lock } from "./git/lock.ts";
 export function fileWorkflowCheckpointStore(
   options: FileWorkflowCheckpointOptions,
 ): WorkflowCheckpointStore {
+  if ((options.directory === undefined) === (options.transporter === undefined))
+    throw new Error("Provide exactly one checkpoint directory or transporter");
+  if (options.transporter)
+    return workflowCheckpointStore({ transporter: options.transporter });
+  if (options.directory === undefined)
+    throw new Error("Checkpoint directory is required");
   const configuredDirectory = resolve(options.directory);
   return {
     async acquire(runId) {

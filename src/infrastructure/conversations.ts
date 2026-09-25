@@ -1,3 +1,4 @@
+import { transportConversations } from "./transport-conversations.ts";
 import { homedir } from "node:os";
 import { join, resolve } from "node:path";
 import type { ConversationFormat } from "./conversations.types.ts";
@@ -21,6 +22,7 @@ export { relocateTranscript } from "./conversations/relocate.ts";
 export { restoreConversation } from "./conversations/restore.ts";
 
 export const conversations = {
+  transported: transportConversations,
   native: nativeConversations,
   locate: locateConversation,
   capture: captureConversation,

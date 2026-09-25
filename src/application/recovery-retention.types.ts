@@ -1,3 +1,4 @@
+import type { Transport, TransportEntry } from "../domain/transport.types.ts";
 import type { RecoveryInspection } from "./recovery-inspection.types.ts";
 export interface RecoveryRetentionPolicy {
   readonly version: 1;
@@ -7,11 +8,14 @@ export interface RecoveryRetentionPolicy {
   readonly maxWorkspaces?: number;
 }
 export interface RecoveryRetentionOptions {
+  readonly transporter?: Transport;
   readonly repository?: string;
   readonly policy: RecoveryRetentionPolicy;
   readonly maxEntries?: number;
 }
 export interface RecoveryRetentionEntry {
+  readonly revision?: string;
+  readonly objects?: readonly TransportEntry[];
   readonly path: string;
   readonly category: string;
   readonly bytes: number;
@@ -22,6 +26,7 @@ export interface RecoveryRetentionEntry {
   readonly modifiedAt?: string;
 }
 export interface RecoveryRetentionPlan {
+  readonly source?: "transport";
   readonly repository: string;
   readonly policy: RecoveryRetentionPolicy;
   readonly inspectedAt: string;
@@ -45,6 +50,7 @@ export interface RecoveryPruneResult {
   readonly after: RecoveryRetentionPlan;
 }
 export interface RecoveryQuotaOptions {
+  readonly transporter?: Transport;
   readonly repository?: string;
   readonly maxBytes: number;
   readonly reserveBytes?: number;
