@@ -9,6 +9,10 @@ sidebar:
 
 ## OpenTelemetry
 
+Passez l’adaptateur renvoyé par `openTelemetry()` dans `workflow.start({ telemetry })`, comme pour dispatch. `observe` reste disponible pour vos logs et gestionnaires d’événements de workflow. Les deux reçoivent les mêmes événements de manière synchrone, la télémétrie en premier ; une exception dans un callback est collectée dans `WorkflowResult.observerErrors` sans empêcher l’autre callback de s’exécuter. Un adaptateur personnalisé implémente le contrat exporté `WorkflowTelemetry` avec une méthode `observe(event)`. Le workflow préserve son receveur et ne ferme jamais l’adaptateur ; son propriétaire le ferme après toutes les exécutions.
+
+La forme existante `start({ observe: telemetry.observe })` reste prise en charge. Utilisez un seul branchement pour un adaptateur donné ; le passer dans les deux options livrerait les événements deux fois. L’option dédiée est disponible dans ce checkout et ne fait pas partie de la version 4.2.0 publiée.
+
 Installez l’API facultative avec le SDK et l’exportateur de votre choix. L’import principal d’Outpost ne charge pas OpenTelemetry. L’adaptateur `@elie-laloum/outpost/opentelemetry` reçoit un `Tracer` et un `Meter` injectés ; il ne configure ni providers globaux ni destination réseau.
 
 ```sh
@@ -57,7 +61,10 @@ try {
     },
   });
   const result = await workflow("inspection", [inspect]).start({
-    observe: telemetry.observe,
+    telemetry,
+    observe(event) {
+      console.log(event.type, event.status);
+    },
     budget: { usage: { output: 100 } },
   });
   result.unwrap();

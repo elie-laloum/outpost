@@ -40,7 +40,7 @@ try {
     },
   });
   const result = await workflow("local-observability-fixture", [inspect]).start(
-    { observe: observer.observe, budget: { attempts: 3, usage: { input: 8 } } },
+    { telemetry: observer, budget: { attempts: 3, usage: { input: 8 } } },
   );
   assert.equal(result.status, "failed");
   assert.ok(result.errors[0] instanceof WorkflowBudgetExceeded);

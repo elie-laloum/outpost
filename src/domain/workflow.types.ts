@@ -76,6 +76,10 @@ export interface WorkflowEvent {
   readonly durationMs?: number;
 }
 
+export interface WorkflowTelemetry {
+  observe(event: WorkflowEvent): void;
+}
+
 export interface WorkflowOptions {
   readonly decisions?: readonly WorkflowDecision[];
   readonly checkpoint?: WorkflowCheckpointOptions;
@@ -83,6 +87,7 @@ export interface WorkflowOptions {
   readonly concurrency?: number;
   readonly budget?: WorkflowBudget;
   readonly stopOnError?: boolean;
+  readonly telemetry?: WorkflowTelemetry;
   readonly observe?: (event: WorkflowEvent) => void;
 }
 

@@ -94,13 +94,19 @@ export function workflowState(
   function emit(
     event: Omit<WorkflowEvent, "executionId" | "workflow" | "timestamp">,
   ): void {
+    const notification: WorkflowEvent = {
+      ...event,
+      executionId,
+      workflow: name,
+      timestamp: new Date().toISOString(),
+    };
     try {
-      options.observe?.({
-        ...event,
-        executionId,
-        workflow: name,
-        timestamp: new Date().toISOString(),
-      });
+      options.telemetry?.observe(notification);
+    } catch (error) {
+      observerErrors.push(error);
+    }
+    try {
+      options.observe?.(notification);
     } catch (error) {
       observerErrors.push(error);
     }

@@ -59,7 +59,7 @@ test("official SDK exports parented spans, exact usage, retries and duration met
     },
   });
   const result = await workflow("secret-workflow", [run]).start({
-    observe: sdk.observer.observe,
+    telemetry: sdk.observer,
   });
   result.unwrap();
   await sdk.tracer.forceFlush();
@@ -146,9 +146,9 @@ test("cancellation, skipped tasks and concurrent executions close every span", a
   const [cancelled, done] = await Promise.all([
     workflow("cancel", [slow]).start({
       signal: abort.signal,
-      observe: sdk.observer.observe,
+      telemetry: sdk.observer,
     }),
-    workflow("done", [skipped]).start({ observe: sdk.observer.observe }),
+    workflow("done", [skipped]).start({ telemetry: sdk.observer }),
   ]);
   assert.equal(cancelled.status, "cancelled");
   done.unwrap();
@@ -227,7 +227,7 @@ test("throwing telemetry APIs and diagnostics never affect workflow outcomes or 
   });
   const result = await workflow("safe", [
     task({ key: "run", perform: () => 1 }),
-  ]).start({ observe: observer.observe });
+  ]).start({ telemetry: observer });
   result.unwrap();
   observer.close();
   assert.equal(errors, 3);
@@ -403,4 +403,25 @@ test("dispatch telemetry isolates broken instruments and span methods", async (t
   observer.close();
   assert.equal(errors, 1);
   assert.equal(sdk.spans.getFinishedSpans().length, 1);
+});
+
+test("legacy workflow observe wiring still exports the complete span tree", async (t) => {
+  const sdk = telemetry();
+  t.after(async () => {
+    sdk.observer.close();
+    await sdk.tracer.shutdown();
+    await sdk.meter.shutdown();
+  });
+  const result = await workflow("legacy", [
+    task({ key: "step", perform: () => 1 }),
+  ]).start({ observe: sdk.observer.observe });
+  result.unwrap();
+  assert.deepEqual(result.observerErrors, []);
+  assert.deepEqual(
+    sdk.spans
+      .getFinishedSpans()
+      .map((span) => span.name)
+      .sort(),
+    ["outpost.task", "outpost.task.attempt", "outpost.workflow"],
+  );
 });

@@ -73,7 +73,7 @@ export const groups = [
     title: ["Workflows", "Workflows"],
     guide: "guide/workflows/graph",
     names:
-      "task workflow WorkflowFailure Retry Task TaskContext TaskOptions TaskRecord TaskStatus Workflow WorkflowEvent WorkflowOptions WorkflowBudget WorkflowUsage WorkflowBudgetExceeded WorkflowResult agentTask commandTask isolatedTask",
+      "task workflow WorkflowFailure Retry Task TaskContext TaskOptions TaskRecord TaskStatus Workflow WorkflowEvent WorkflowTelemetry WorkflowOptions WorkflowBudget WorkflowUsage WorkflowBudgetExceeded WorkflowResult agentTask commandTask isolatedTask",
   },
   {
     id: "providers",

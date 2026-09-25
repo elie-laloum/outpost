@@ -90,6 +90,7 @@ export type {
   WorkflowBudget,
   WorkflowUsage,
   WorkflowResult,
+  WorkflowTelemetry,
 } from "./domain/workflow.ts";
 
 export { agentTask, commandTask, isolatedTask } from "./application/tasks.ts";

@@ -32,6 +32,8 @@ Enregistrez l’exemple sous **example.mts** dans ce dossier. Aucun compte, clé
 
 ## Prérequis et effets
 
+L’option `telemetry` dédiée au workflow n’est pas encore publiée : exécutez cet exemple avec un package construit depuis ce checkout. Les workflows de la version 4.2.0 publiée utilisent `observe: telemetry.observe`.
+
 Installez d’abord `npm install @opentelemetry/api @opentelemetry/sdk-trace-base @opentelemetry/sdk-metrics`. Examinez les spans et métriques exportés ; prompts, motifs d’acteurs et identifiants ne doivent pas devenir des labels de métriques. Le point d’entrée télémétrie reste optionnel et ne change pas les résultats du workflow.
 
 ## Essayer
@@ -78,7 +80,10 @@ try {
     },
   });
   const result = await workflow("inspection", [inspect]).start({
-    observe: telemetry.observe,
+    telemetry,
+    observe(event) {
+      console.log(event.type, event.status);
+    },
     budget: { usage: { output: 100 } },
   });
   result.unwrap();
@@ -212,4 +217,4 @@ node dispatch.mts
 
 Le résultat attendu est `true`, un span `outpost.dispatch` et des métriques de dispatch. Le span couvre validation, allocation, exécution, synchronisation et nettoyage. `observe` contrôle indépendamment l’affichage terminal.
 
-Le même adaptateur peut être passé au workflow avec `observe: telemetry.observe` et à ses requêtes agent avec `telemetry`. Les tokens du workflow utilisent `outpost.agent.tokens` ; ceux du dispatch utilisent `outpost.dispatch.tokens`. Ne les additionnez pas pour le même travail. Les spans de dispatch héritent du contexte OpenTelemetry actif ; les spans de tâche ne sont pas automatiquement activés dans les fonctions de tâche.
+Passez le même adaptateur dans `telemetry` à `workflow.start({ telemetry })` et à `dispatch({ telemetry, ...options })`. L’instrumentation du workflow n’instrumente pas automatiquement les dispatchs des tâches ; passez-le explicitement à ces appels si vous souhaitez aussi leurs spans. Les tokens du workflow utilisent `outpost.agent.tokens` ; ceux du dispatch utilisent `outpost.dispatch.tokens`. Ne les additionnez pas pour le même travail. Les spans de dispatch héritent du contexte OpenTelemetry actif ; les spans de tâche ne sont pas automatiquement activés dans les fonctions de tâche.

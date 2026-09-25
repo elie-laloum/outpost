@@ -196,8 +196,8 @@
     "Exécute des candidats agents bornés sur des branches distinctes issues d’une même base et retient le premier accepté par validate après nettoyage. Annule les perdants et rapporte changements hôtes et usage cumulé. Ce prototype opt-in n’intègre ni ne pousse automatiquement le gagnant."
   ],
   "openTelemetry": [
-    "Create workflow observation and complete dispatch instrumentation from an injected tracer and meter. Pass the result as dispatch telemetry, or its observe method to a workflow. Errors are isolated through onError; close finishes outstanding spans without flushing or shutting down the SDK. Only this optional entry point loads OpenTelemetry.",
-    "Crée une observation de workflow et une instrumentation du dispatch complet à partir d’un tracer et d’un meter injectés. Passez le résultat dans telemetry du dispatch, ou sa méthode observe à un workflow. Les erreurs sont isolées via onError ; close termine les spans ouverts sans vider ni fermer le SDK. Seul ce point d’entrée optionnel charge OpenTelemetry."
+    "Create workflow and complete dispatch instrumentation from an injected tracer and meter. Pass the result as telemetry to workflow.start or dispatch, keeping observe for custom handlers. The previous workflow observe wiring remains supported. Errors are isolated through onError; close finishes outstanding spans without flushing or shutting down the SDK. Only this optional entry point loads OpenTelemetry.",
+    "Crée une instrumentation de workflow et de dispatch complet à partir d’un tracer et d’un meter injectés. Passez le résultat dans telemetry à workflow.start ou dispatch, en gardant observe pour les handlers personnalisés. Le branchement observe existant du workflow reste pris en charge. Les erreurs sont isolées via onError ; close termine les spans ouverts sans vider ni fermer le SDK. Seul ce point d’entrée optionnel charge OpenTelemetry."
   ],
   "WorkflowFailure": [
     "Error thrown by WorkflowResult.unwrap when the run did not finish successfully. Its result preserves task records, errors and usage for inspection rather than discarding the workflow outcome.",

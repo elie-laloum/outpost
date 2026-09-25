@@ -937,8 +937,8 @@
     "Échecs de tâches et d’ordonnancement collectés pendant l’exécution du workflow."
   ],
   "WorkflowResult.observerErrors": [
-    "Observer callback failures isolated from task outcomes.",
-    "Erreurs des callbacks d’observation isolées des résultats des tâches."
+    "Exceptions thrown by telemetry and observe callbacks, collected independently without changing workflow status or task errors.",
+    "Exceptions levées par les callbacks telemetry et observe, collectées indépendamment sans modifier le statut du workflow ni les erreurs de tâches."
   ],
   "WorkflowResult.usage": [
     "Cumulative admitted attempts and observed token usage, including restored accounting.",
@@ -1181,8 +1181,8 @@
     "Arrête l’admission de nouvelles tâches après un échec lorsque cette option est activée."
   ],
   "WorkflowOptions.observe": [
-    "Receive workflow state and usage events; thrown errors are collected separately in observerErrors.",
-    "Reçoit les événements d’état et d’usage du workflow ; les erreurs levées sont collectées séparément dans observerErrors."
+    "Custom workflow lifecycle and usage callback, invoked after telemetry independently; thrown errors are collected in observerErrors. Existing OpenTelemetry observe callbacks remain supported.",
+    "Callback personnalisé de cycle de vie et d’usage du workflow, appelé après telemetry de manière indépendante ; les erreurs levées sont collectées dans observerErrors. Les callbacks observe OpenTelemetry existants restent pris en charge."
   ],
   "WorkflowCheckpointOptions.store": [
     "Persistence adapter that acquires, reads and writes workflow checkpoints.",
@@ -3033,8 +3033,8 @@
     "Taille maximale de la fin conservée par flux, en octets."
   ],
   "openTelemetry.options": [
-    "Tracer, meter and isolated error callback for workflow telemetry.",
-    "Tracer, meter et callback d’erreur isolée pour la télémétrie de workflow."
+    "Injected tracer, meter and isolated error callback for workflow and dispatch telemetry.",
+    "Tracer, meter et callback d’erreur isolée injectés pour la télémétrie des workflows et dispatchs."
   ],
   "OpenTelemetryOptions.tracer": [
     "OpenTelemetry tracer used to create execution spans.",
@@ -3867,5 +3867,13 @@
   "CustomAgent.capture": [
     "Always false: the custom runner does not capture native transcripts.",
     "Toujours faux : le runner personnalisé ne capture pas de transcripts natifs."
+  ],
+  "WorkflowOptions.telemetry": [
+    "Workflow telemetry adapter, such as openTelemetry({ tracer, meter }); receives events before observe, with isolated exceptions collected in observerErrors. Caller owns its lifecycle; dispatch instrumentation is configured separately.",
+    "Adaptateur de télémétrie du workflow, par exemple openTelemetry({ tracer, meter }) ; reçoit les événements avant observe, avec exceptions isolées collectées dans observerErrors. Son cycle de vie appartient à l’appelant ; l’instrumentation des dispatchs se configure séparément."
+  ],
+  "WorkflowTelemetry.observe": [
+    "Synchronously receive each workflow lifecycle and usage event with the adapter as receiver. Thrown errors are collected in WorkflowResult.observerErrors without affecting tasks or the separate observe callback.",
+    "Reçoit de manière synchrone chaque événement de cycle de vie et d’usage du workflow, avec l’adaptateur comme receveur. Les erreurs levées sont collectées dans WorkflowResult.observerErrors sans affecter les tâches ni le callback observe séparé."
   ]
 }

@@ -9,6 +9,7 @@ The release notes below are synchronized from the root `CHANGELOG.md`, the singl
 
 ## Unreleased
 
+- Add `workflow.start({ telemetry })` with an SDK-independent `WorkflowTelemetry` contract, independent custom observers and isolated callback errors. Preserve `observe: telemetry.observe` compatibility.
 - Instrument complete dispatch operations with optional OpenTelemetry telemetry and add createReporter() with typed asynchronous handlers and explicit flush().
 - Replace agent factories with `agent({ harness, model })` and `codex.harness()`, `claude.harness()` and `gemini.harness()`. Model identifiers remain free-form strings; the selected CLI or service validates availability.
 - Add `harness({ modelProvider, run })` callbacks with scoped model requests, sandbox operations, cancellation and usage accounting. Interactive attachment and native custom conversations are unsupported; the built-in model/tool loop remains planned.

@@ -32,6 +32,8 @@ Save the example as **example.mts** in this directory. No account, API key or co
 
 ## Prerequisites and effects
 
+The dedicated workflow `telemetry` option is unreleased: run this example with a package built from this checkout. Published 4.2.0 workflows use `observe: telemetry.observe` instead.
+
 First install `npm install @opentelemetry/api @opentelemetry/sdk-trace-base @opentelemetry/sdk-metrics`. Inspect the exported spans and metrics; prompts, actor reasons and credentials must not become metric labels. The telemetry entry point is optional and does not change workflow outcomes.
 
 ## Try it
@@ -78,7 +80,10 @@ try {
     },
   });
   const result = await workflow("inspection", [inspect]).start({
-    observe: telemetry.observe,
+    telemetry,
+    observe(event) {
+      console.log(event.type, event.status);
+    },
     budget: { usage: { output: 100 } },
   });
   result.unwrap();
@@ -212,4 +217,4 @@ node dispatch.mts
 
 Expect `true`, one `outpost.dispatch` span and dispatch metrics. The span includes validation, allocation, execution, synchronization and cleanup. `observe` independently controls terminal output.
 
-The same adapter can be passed to a workflow as `observe: telemetry.observe` and to its agent requests as `telemetry`. Workflow tokens use `outpost.agent.tokens`; dispatch tokens use `outpost.dispatch.tokens`. Do not sum both for the same work. Dispatch spans inherit the active OpenTelemetry context; workflow task spans are not automatically activated inside task functions.
+Pass the same adapter as `telemetry` to both `workflow.start({ telemetry })` and `dispatch({ telemetry, ...options })`. Workflow instrumentation does not automatically instrument dispatch calls inside tasks; pass it explicitly to those calls when you also need dispatch spans. Workflow tokens use `outpost.agent.tokens`; dispatch tokens use `outpost.dispatch.tokens`. Do not sum both for the same work. Dispatch spans inherit the active OpenTelemetry context; workflow task spans are not automatically activated inside task functions.

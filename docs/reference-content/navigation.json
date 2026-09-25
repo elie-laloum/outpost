@@ -545,6 +545,10 @@
         "attrs": { "data-api-kind": "interface" }
       },
       {
+        "slug": "reference/workflowtelemetry",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
         "slug": "reference/workflowoptions",
         "attrs": { "data-api-kind": "interface" }
       },

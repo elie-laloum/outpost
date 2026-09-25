@@ -2,6 +2,7 @@
 
 ## Non publié
 
+- Ajoute `workflow.start({ telemetry })` avec un contrat `WorkflowTelemetry` indépendant du SDK, des observateurs personnalisés séparés et des erreurs de callback isolées. Préserve la compatibilité avec `observe: telemetry.observe`.
 - Instrumenter les dispatchs complets avec la télémétrie OpenTelemetry optionnelle et ajouter createReporter() avec handlers asynchrones typés et flush() explicite.
 - Remplace les factories d’agents par `agent({ harness, model })` et `codex.harness()`, `claude.harness()` et `gemini.harness()`. Les identifiants restent des chaînes libres ; la CLI ou le service valide leur disponibilité.
 - Ajoute des callbacks `harness({ modelProvider, run })` avec requêtes modèle, opérations sandbox, annulation et comptabilisation de l’usage propres à l’exécution. Le terminal interactif et les conversations natives personnalisées sont absents ; la boucle modèle/outils intégrée reste prévue.

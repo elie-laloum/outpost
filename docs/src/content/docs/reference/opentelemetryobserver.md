@@ -15,15 +15,15 @@ import type { OpenTelemetryObserver } from "@elie-laloum/outpost/opentelemetry";
 
 | Name            | Type                             | Presence | Meaning                                                                                    |
 | --------------- | -------------------------------- | -------- | ------------------------------------------------------------------------------------------ |
-| `observe`       | `(event: WorkflowEvent) => void` | Required | Convert a workflow event into telemetry spans and metrics.                                 |
 | `close`         | `() => void`                     | Required | Finish any outstanding execution spans owned by this observer.                             |
 | `startDispatch` | `() => DispatchTelemetrySession` | Required | Start an independent session for one public dispatch invocation; called before validation. |
+| `observe`       | `(event: WorkflowEvent) => void` | Required | Convert a workflow event into telemetry spans and metrics.                                 |
 
 ## Signature
 
 ```ts
-export interface OpenTelemetryObserver extends DispatchTelemetry {
-  observe(event: WorkflowEvent): void;
+export interface OpenTelemetryObserver
+  extends DispatchTelemetry, WorkflowTelemetry {
   close(): void;
 }
 ```
@@ -31,4 +31,4 @@ export interface OpenTelemetryObserver extends DispatchTelemetry {
 ## Related contracts
 
 - [DispatchTelemetry](../dispatchtelemetry/)
-- [WorkflowEvent](../workflowevent/)
+- [WorkflowTelemetry](../workflowtelemetry/)
