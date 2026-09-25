@@ -276,7 +276,7 @@ test("agent CLI probes only request installation, versions and adapter help", as
           "claude",
           missingGeminiOption
             ? "gemini"
-            : "gemini --approval-mode --output-format",
+            : "gemini --approval-mode --skip-trust --output-format",
           ...args,
         ].join(" "),
         stderr: "",

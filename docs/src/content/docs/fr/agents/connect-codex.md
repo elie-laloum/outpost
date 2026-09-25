@@ -13,6 +13,18 @@ Lancez `codex login`, terminez la connexion dans le navigateur, puis lancez `cod
 
 Avec `local()`, Codex utilise les identifiants de l'hôte. Docker/Podman démarrent avec un home privé : la connexion locale ne suffit pas.
 
+## Générer un workflow avec son abonnement
+
+Sélectionnez la connexion au compte lors de l’initialisation :
+
+```sh
+outpost init --agent codex --provider docker --authentication login --repository /path/to/repository
+```
+
+Connectez-vous sur l’hôte avec le stockage des identifiants dans un fichier, comme indiqué ci-dessous. Le workflow généré lit `auth.json` dans `CODEX_HOME` (ou `~/.codex`) et transmet une copie par stdin dans le home privé de la sandbox avec le mode `0600`. Ce parcours fonctionne avec Docker, Podman, Vercel et Daytona ; adaptez `--provider`. Il utilise votre accès par compte ChatGPT et ne nécessite pas de clé API OpenAI. Les identifiants d’allocation cloud restent nécessaires pour Vercel et Daytona.
+
+Avec `--provider local`, le workflow utilise directement la connexion existante sur l’hôte. Les limites du compte et l’accès aux modèles restent applicables. Le workflow généré n’exporte ni le trousseau système ni les autres réglages Codex de l’hôte.
+
 ## Utiliser son compte ChatGPT dans un conteneur
 
 Cette recette nécessite `~/.codex/auth.json`. Si les identifiants sont dans le trousseau, sélectionnez `cli_auth_credentials_store = "file"` dans `~/.codex/config.toml` et reconnectez-vous, si la politique l'autorise. Voir le [stockage des identifiants](https://developers.openai.com/codex/auth#credential-storage).
@@ -93,7 +105,7 @@ Le hook s'exécute une fois par sandbox. Gardez les étapes dépendantes dans la
 
 ## Dépannage
 
-Lancez `codex login status` dans la sandbox. Vérifiez les fichiers absents ou expirés, le stockage uniquement dans le trousseau et les variables non déclarées. Ces exemples vérifient la connexion ; un dispatch appelle le modèle. Pour les providers cloud, utilisez le hook de clé API avec des variables explicites ; les montages locaux concernent Docker/Podman. Les identifiants du provider ne connectent pas Codex.
+Lancez `codex login status` dans la sandbox. Vérifiez les fichiers absents ou expirés, le stockage uniquement dans le trousseau et les variables non déclarées. Ces exemples vérifient la connexion ; un dispatch appelle le modèle. Pour les providers cloud, générez un workflow avec `--authentication login` afin de copier la source d’identifiants du compte, ou utilisez le hook de clé API avec des variables explicites. Les montages locaux concernent Docker/Podman. Les identifiants du provider ne connectent pas Codex.
 
 Suite : [priorité des variables](../environment/) ou [cookbooks](../../cookbooks/).
 

@@ -16,6 +16,7 @@ export function geminiRequest(
   const approvalMode =
     settings.approvalMode ?? (input.interactive ? "default" : "yolo");
   args.push("--approval-mode", approvalMode);
+  if (!input.interactive && approvalMode === "yolo") args.push("--skip-trust");
   if (!input.interactive) args.push("--output-format", "stream-json");
   if (input.interactive && input.text !== undefined)
     args.push("--prompt-interactive", input.text);

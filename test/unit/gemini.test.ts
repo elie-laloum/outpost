@@ -24,6 +24,7 @@ test("Gemini requests preserve stdin and terminal boundaries, model, variables a
       "flash",
       "--approval-mode",
       "yolo",
+      "--skip-trust",
       "--output-format",
       "stream-json",
     ],
@@ -55,6 +56,25 @@ test("Gemini requests preserve stdin and terminal boundaries, model, variables a
       () => agent.request({ continuation: { id: "session", fork } }),
       /does not support continuation or fork/,
     );
+});
+
+test("Gemini only grants workspace trust for unattended yolo execution", () => {
+  assert.ok(
+    gemini({ approvalMode: "yolo" })
+      .request({})
+      .arguments?.includes("--skip-trust"),
+  );
+  for (const approvalMode of ["default", "auto_edit", "plan"] as const)
+    assert.equal(
+      gemini({ approvalMode }).request({}).arguments?.includes("--skip-trust"),
+      false,
+    );
+  assert.equal(
+    gemini({ approvalMode: "yolo" })
+      .request({ interactive: true })
+      .arguments?.includes("--skip-trust"),
+    false,
+  );
 });
 
 test("Gemini decodes assistant deltas and final totals while retaining tool results and unknown payloads", () => {
@@ -137,7 +157,7 @@ test("Gemini CLI help diagnostics inspect only the supported fresh-session invoc
     return {
       status: 0,
       stdout:
-        "Usage: gemini [options] [command]\n  --approval-mode  Approval\n  -o, --output-format Output\n",
+        "Usage: gemini [options] [command]\n  --approval-mode  Approval\n  --skip-trust Trust\n  -o, --output-format Output\n",
       stderr: "",
     };
   });
