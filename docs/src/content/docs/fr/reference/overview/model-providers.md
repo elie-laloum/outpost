@@ -14,7 +14,7 @@ Un fournisseur de modèles porte le transport de requêtes utilisé par un harne
 
 ## Fonctionnement
 
-Configurez endpoint, credentials explicites et limites, puis transmettez le fournisseur à `customHarness({ modelProvider, run })`. Le callback utilise `context.modelProvider.request()` avec le modèle de l’agent. Les requêtes tournent dans le processus Outpost et héritent de l’annulation ; l’usage rapporté est cumulé une fois par appel.
+Configurez endpoint, credentials explicites et limites, puis transmettez le fournisseur à `harness({ modelProvider, run })`. Le callback utilise `context.modelProvider.request()` avec le modèle de l’agent. Les requêtes tournent dans le processus Outpost et héritent de l’annulation ; l’usage rapporté est cumulé une fois par appel.
 
 ## Frontières et responsabilités
 

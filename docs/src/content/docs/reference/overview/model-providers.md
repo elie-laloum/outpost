@@ -14,7 +14,7 @@ A model provider supplies the request transport used by a custom harness. `opena
 
 ## How it works
 
-Configure the endpoint, explicit credentials and request bounds, then pass the provider to `customHarness({ modelProvider, run })`. The callback uses `context.modelProvider.request()` with the agent's model. Requests run in the Outpost process and inherit cancellation; reported usage is accumulated once per call.
+Configure the endpoint, explicit credentials and request bounds, then pass the provider to `harness({ modelProvider, run })`. The callback uses `context.modelProvider.request()` with the agent's model. Requests run in the Outpost process and inherit cancellation; reported usage is accumulated once per call.
 
 ## Boundaries and responsibilities
 

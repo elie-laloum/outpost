@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   agent,
-  customHarness,
+  harness,
   codex,
   claude,
   gemini,
@@ -45,12 +45,15 @@ test("agents compose without effects and require a model only for custom harness
       /Model name/,
     );
   }
-  const harness = customHarness({
+  const configuredHarness = harness({
     modelProvider,
     run: async () => ({ text: "ok" }),
   });
-  // @ts-expect-error A custom harness requires an explicit model.
-  assert.throws(() => agent({ harness }), /requires a model/);
+  assert.throws(
+    // @ts-expect-error A custom harness requires an explicit model.
+    () => agent({ harness: configuredHarness }),
+    /requires a model/,
+  );
   // @ts-expect-error A provider is not an executable harness.
   assert.throws(() => agent({ harness: modelProvider, model: "m" }), /harness/);
   // @ts-expect-error The former factory call is no longer public.
@@ -62,7 +65,7 @@ test("custom dispatch uses its sandbox and counts each provider request once", a
   const events: AgentObservation[] = [];
   const developer = agent({
     model: "unknown-until-called",
-    harness: customHarness({
+    harness: harness({
       modelProvider,
       async run(input, context) {
         assert.equal(context.model, "unknown-until-called");
@@ -103,7 +106,7 @@ test("custom dispatch uses its sandbox and counts each provider request once", a
 test("custom harness rejects absent capabilities before sandbox allocation", async () => {
   const developer = agent({
     model: "m",
-    harness: customHarness({
+    harness: harness({
       modelProvider,
       run: async () => ({ text: "ok" }),
     }),
@@ -147,7 +150,7 @@ test("custom harness cancellation reaches commands and keeps a warm sandbox reus
   });
   const developer = agent({
     model: "m",
-    harness: customHarness({
+    harness: harness({
       modelProvider,
       async run(_input, context) {
         started();
@@ -184,7 +187,7 @@ test("custom harness cancellation reaches commands and keeps a warm sandbox reus
   );
   const simple = agent({
     model: "m",
-    harness: customHarness({
+    harness: harness({
       modelProvider,
       run: async () => ({ text: "<outpost>done</outpost>" }),
     }),
@@ -216,7 +219,7 @@ test("custom harness deadlines abort provider calls and return no late result", 
   };
   const developer = agent({
     model: "m",
-    harness: customHarness({
+    harness: harness({
       modelProvider: hanging,
       run: (input, context) =>
         context.modelProvider.request({
@@ -247,7 +250,7 @@ test("borrowed custom sandbox transfers preserve binary data and cannot release 
   await writeFile(source, bytes);
   const developer = agent({
     model: "m",
-    harness: customHarness({
+    harness: harness({
       modelProvider,
       async run(_input, context) {
         await context.sandbox.upload(

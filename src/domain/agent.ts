@@ -58,7 +58,7 @@ export function agent(options: AgentOptions): Agent {
   });
 }
 
-export function customHarness(options: CustomHarnessOptions): CustomHarness {
+export function harness(options: CustomHarnessOptions): CustomHarness {
   invariant(
     options && typeof options.run === "function",
     "Custom harness requires a run function",

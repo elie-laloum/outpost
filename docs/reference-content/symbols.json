@@ -311,7 +311,7 @@
     "Compose a harness and a model identifier without starting a process or making a network request. CLI harnesses may keep their native default model; a custom harness requires a nonempty model.",
     "Compose un harness et un identifiant de modèle sans lancer de processus ni requête réseau. Un harness CLI peut conserver son modèle par défaut ; un harness personnalisé exige un modèle non vide."
   ],
-  "customHarness": [
+  "harness": [
     "Define a caller-supplied execution callback backed by a model provider. The callback runs in the Outpost process and uses the supplied sandbox for repository operations. No tool loop, native conversation storage or interactive terminal is provided.",
     "Définit un callback fourni par l’appelant et relié à un fournisseur de modèles. Le callback tourne dans le processus Outpost et utilise le sandbox fourni pour le dépôt. Aucune boucle d’outils, conversation native ou session terminal n’est fournie."
   ],

@@ -36,7 +36,7 @@ Enregistrez **example.mts** :
 ```ts
 import {
   agent,
-  customHarness,
+  harness,
   dispatch,
   openaiModelProvider,
 } from "@elie-laloum/outpost";
@@ -51,7 +51,7 @@ if (!baseUrl || !model || !apiKey) {
 
 const worker = agent({
   model,
-  harness: customHarness({
+  harness: harness({
     modelProvider: openaiModelProvider({ baseUrl, apiKey }),
     async run(input, context) {
       return context.modelProvider.request({

@@ -309,3 +309,19 @@ test("callable contracts document their properties alongside their arguments", (
     ["event", "flush"],
   );
 });
+
+test("harness factory and contracts preserve distinct reference routes", async () => {
+  for (const locale of ["", "fr/"]) {
+    const factory = await page(`${locale}reference/function-harness.md`);
+    assert.match(factory, /export declare function harness/);
+    assert.ok(factory.includes("../type-customharness/"));
+    assert.match(
+      await page(`${locale}reference/harness.md`),
+      /export type Harness/,
+    );
+    assert.match(
+      await page(`${locale}reference/type-customharness.md`),
+      /export interface CustomHarness/,
+    );
+  }
+});

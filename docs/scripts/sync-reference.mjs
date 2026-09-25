@@ -98,6 +98,9 @@ const exportedByName = new Map(
 );
 function slug(symbol) {
   const preserved = {
+    harness: "function-harness",
+    Harness: "harness",
+    CustomHarness: "type-customharness",
     artifactStore: "function-artifactstore",
     ArtifactStore: "artifactstore",
     workflowCheckpointStore: "function-workflowcheckpointstore",

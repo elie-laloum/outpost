@@ -1,6 +1,6 @@
 ---
-title: "customHarness"
-description: "customHarness — Outpost API"
+title: "harness"
+description: "harness — Outpost API"
 sidebar:
   order: 0
 ---
@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { customHarness } from "@elie-laloum/outpost";
+import { harness } from "@elie-laloum/outpost";
 ```
 
 ## Purpose and behavior
@@ -32,9 +32,7 @@ Define a caller-supplied execution callback backed by a model provider. The call
 ## Signature
 
 ```ts
-export declare function customHarness(
-  options: CustomHarnessOptions,
-): CustomHarness;
+export declare function harness(options: CustomHarnessOptions): CustomHarness;
 ```
 
 ## Related contracts

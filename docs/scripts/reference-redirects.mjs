@@ -1,4 +1,6 @@
 export const referenceRedirects = {
+  "/reference/customharness/": "/reference/function-harness/",
+  "/fr/reference/customharness/": "/fr/reference/function-harness/",
   "/reference/docker/": "/reference/dockersandboxprovider/",
   "/fr/reference/docker/": "/fr/reference/dockersandboxprovider/",
   "/reference/podman/": "/reference/podmansandboxprovider/",

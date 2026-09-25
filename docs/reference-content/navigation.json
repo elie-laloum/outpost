@@ -287,7 +287,7 @@
       },
       { "slug": "reference/agent", "attrs": { "data-api-kind": "function" } },
       {
-        "slug": "reference/customharness",
+        "slug": "reference/function-harness",
         "attrs": { "data-api-kind": "function" }
       },
       { "slug": "reference/type-agent", "attrs": { "data-api-kind": "type" } },

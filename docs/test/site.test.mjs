@@ -151,6 +151,13 @@ test("legacy URLs and anchors still find their content", async ({ page }) => {
     /\/guide\/behavior\/agents\/conversations\/#continuation-choices$/,
   );
   await expect(page.locator("#continuation-choices")).toBeVisible();
+  for (const locale of ["", "fr/"]) {
+    await page.goto(`${locale}reference/customharness/`);
+    await expect(page).toHaveURL(
+      new RegExp(`/${locale}reference/function-harness/$`),
+    );
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("harness");
+  }
 });
 
 test("French search opens the matching translated guide", async ({ page }) => {

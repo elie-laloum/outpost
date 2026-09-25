@@ -4,7 +4,7 @@
 
 - Instrument complete dispatch operations with optional OpenTelemetry telemetry and add createReporter() with typed asynchronous handlers and explicit flush().
 - Replace agent factories with `agent({ harness, model })` and `codex.harness()`, `claude.harness()` and `gemini.harness()`. Model identifiers remain free-form strings; the selected CLI or service validates availability.
-- Add custom harness callbacks with scoped model requests, sandbox operations, cancellation and usage accounting. Interactive attachment and native custom conversations are unsupported; the built-in model/tool loop remains planned.
+- Add `harness({ modelProvider, run })` callbacks with scoped model requests, sandbox operations, cancellation and usage accounting. Interactive attachment and native custom conversations are unsupported; the built-in model/tool loop remains planned.
 - Replace the direct text client with `openaiModelProvider` and add `anthropicModelProvider`, including explicit system-prefix caching and normalized cache usage. No authenticated service campaign is implied by local HTTP tests.
 - Rename sandbox factories to `*SandboxProvider`, configuration to `sandboxProvider` and the CLI option to `--sandbox-provider`. These are breaking API changes without compatibility aliases. Legacy resource records are reported as incompatible and are not deleted.
 - Share explicit CLI authentication preparation between library harnesses and generated workflows. Update package checks, examples and the English/French reference, including nested harness methods.

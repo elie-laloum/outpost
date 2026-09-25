@@ -3620,7 +3620,7 @@
     "Harness and model selection to bind into one executable agent.",
     "Harness et sélection de modèle à composer en un agent exécutable."
   ],
-  "customHarness.options": [
+  "harness.options": [
     "Model provider and callback owned by this custom harness configuration.",
     "Fournisseur de modèles et callback portés par cette configuration de harness personnalisé."
   ],

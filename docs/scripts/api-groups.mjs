@@ -45,7 +45,7 @@ export const groups = [
     title: ["Agents", "Agents"],
     guide: "guide/agents/adapters",
     names:
-      "agent customHarness Agent AgentOptions Harness CliHarness CustomHarness CliAgent CustomAgent CustomHarnessOptions HarnessInput HarnessContext HarnessRun AgentAuthentication claude codex gemini ClaudeSettings CodexSettings CodexModelProvider GeminiSettings agentVersions AgentAdapter AgentInput",
+      "agent harness Agent AgentOptions Harness CliHarness CustomHarness CliAgent CustomAgent CustomHarnessOptions HarnessInput HarnessContext HarnessRun AgentAuthentication claude codex gemini ClaudeSettings CodexSettings CodexModelProvider GeminiSettings agentVersions AgentAdapter AgentInput",
   },
   {
     id: "prompts-responses",

@@ -1,4 +1,4 @@
-export { agent, customHarness } from "./domain/agent.ts";
+export { agent, harness } from "./domain/agent.ts";
 export type {
   AgentAuthentication,
   Agent,

@@ -10,7 +10,7 @@ An agent composes an execution harness with a model identifier. A harness define
 
 ## How it works
 
-Use `agent({ harness: codex.harness(), model: "..." })`, or the corresponding `claude.harness()` and `gemini.harness()` presets. `customHarness({ modelProvider, run })` connects a caller-supplied callback to a model service. `sandboxProvider` independently selects where repository commands execute.
+Use `agent({ harness: codex.harness(), model: "..." })`, or the corresponding `claude.harness()` and `gemini.harness()` presets. `harness({ modelProvider, run })` connects a caller-supplied callback to a model service. `sandboxProvider` independently selects where repository commands execute.
 
 ## Boundaries and responsibilities
 
@@ -21,7 +21,7 @@ These composition APIs are implemented but unreleased. [Model providers](../mode
 ## Entry points
 
 - [agent](../../agent/)
-- [customHarness](../../customharness/)
+- [harness](../../function-harness/)
 - [claude](../../claude/)
 - [codex](../../codex/)
 - [gemini](../../gemini/)

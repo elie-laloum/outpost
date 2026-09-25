@@ -42,7 +42,7 @@ These directions build on [durable workflows](../../guide/advanced/distributed/)
 
 ## Unreleased harness composition and remaining tool engine
 
-The working tree implements `agent({ harness, model })`, CLI harness presets, caller-supplied `customHarness({ modelProvider, run })` callbacks, `openaiModelProvider` and `anthropicModelProvider`. These are unreleased breaking changes; the published 4.2.0 API remains unchanged. Model identifiers are strings, without a local availability catalog.
+The working tree implements `agent({ harness, model })`, CLI harness presets, caller-supplied `harness({ modelProvider, run })` callbacks, `openaiModelProvider` and `anthropicModelProvider`. These are unreleased breaking changes; the published 4.2.0 API remains unchanged. Model identifiers are strings, without a local availability catalog.
 
 The custom callback runs in the Outpost process and borrows sandbox operations. Scoped requests propagate cancellation and accumulate reported usage. Anthropic supports an explicit system-prefix cache; tests use local simulated HTTP services. Native custom conversations, interactive attachment and streaming are unavailable.
 
