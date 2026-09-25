@@ -67,6 +67,21 @@ async function collect<T>(values: AsyncIterable<T>): Promise<T[]> {
 }
 const bytes = (value: string) => Buffer.from(value);
 
+test("local transport creates nested storage beneath an existing filesystem root", async (t) => {
+  const directory = join(await temporary(t), "missing", "nested", "store");
+  const transporter = localTransport({ directory });
+  const input = Uint8Array.of(0, 255, 128, 10);
+  const entry = await transporter.write("nested/payload", input, {
+    ifRevision: null,
+  });
+  const restored = await localTransport({ directory }).read("nested/payload");
+  assert.ok(restored);
+  assert.equal(restored.revision, entry.revision);
+  assert.deepEqual([...restored.bytes], [...input]);
+  await transporter.remove("nested/payload", { ifRevision: entry.revision });
+  assert.equal(await transporter.read("nested/payload"), undefined);
+});
+
 for (const [name, factory] of Object.entries(adapters)) {
   test(`${name}: binary writes, versions, concurrent creates, stale deletes and bounded reads`, async (t) => {
     const transporter = await factory(t);

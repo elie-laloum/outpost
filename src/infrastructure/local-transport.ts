@@ -20,8 +20,10 @@ import { transportDefaults } from "./transport.constants.ts";
 
 async function privateDirectory(path: string): Promise<void> {
   const parent = dirname(path);
-  if (parent !== path) await privateDirectory(parent);
-  await mkdir(path, { recursive: true, mode: 0o700 });
+  if (parent !== path) {
+    await privateDirectory(parent);
+    await mkdir(path, { recursive: true, mode: 0o700 });
+  }
   if (!(await lstat(path)).isDirectory())
     throw new Error("Transport directories must not be symlinks");
 }
