@@ -142,7 +142,9 @@ exit "$status"
             await sandbox.process.killPtySession(id);
           } catch (cause) {
             if (!(
-              cause instanceof Error && cause.name === "DaytonaNotFoundError"
+              cause instanceof Error &&
+              (cause.name === "DaytonaNotFoundError" ||
+                cause.name === "DaytonaProcessNotFoundError")
             ))
               throw cause;
           }
