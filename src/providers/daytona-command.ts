@@ -36,13 +36,13 @@ export function daytonaCommand(
     ]
       .map(quote)
       .join(" ");
-    const script = `cd ${quote(command.directory ?? root)} && exec env ${Object.entries(
+    const script = `cd ${quote(command.directory ?? root)} && env ${Object.entries(
       variables,
     )
       .map(([key, value]) => quote(`${key}=${value}`))
       .join(
         " ",
-      )} setsid sh -c ${quote(`echo $$ > ${quote(pid)}; test ! -f ${quote(pid + ".cancel")} || exit 130; exec ${program}${command.stdin === undefined ? "" : ` < ${quote(input)}`}`)}`;
+      )} setsid --wait sh -c ${quote(`echo $$ > ${quote(pid)}; test ! -f ${quote(pid + ".cancel")} || exit 130; exec ${program}${command.stdin === undefined ? "" : ` < ${quote(input)}`}`)}`;
     const output = { stdout: "", stderr: "" };
     let cancellation: Promise<unknown> | undefined;
     const cancel = () => {

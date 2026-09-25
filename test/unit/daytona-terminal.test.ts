@@ -238,6 +238,31 @@ test("Daytona PTY cancellation kills only the command group and permits warm reu
   await lease.release();
 });
 
+test("Daytona PTY cancellation accepts an already removed process", async () => {
+  const f = fixture();
+  f.failKill(
+    Object.assign(new Error("PTY session not found"), {
+      name: "DaytonaProcessNotFoundError",
+    }),
+  );
+  const lease = await f.acquire();
+  const stop = new AbortController();
+  const pending = lease.invoke({
+    executable: "sleep",
+    interactive: true,
+    terminal: f,
+    signal: stop.signal,
+  });
+  await tick();
+  const cause = new Error("cancel terminal");
+  stop.abort(cause);
+  await assert.rejects(pending, (error: unknown) => error === cause);
+  assert.equal(f.killed, 1);
+  assert.equal(f.disconnected, 1);
+  assert.equal(f.deleted, 0);
+  await lease.release();
+});
+
 test("Daytona PTY deadline cleans a handle acquired after cancellation", async () => {
   const f = fixture();
   let ready = () => {};
