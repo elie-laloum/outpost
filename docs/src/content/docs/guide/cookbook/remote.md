@@ -1,0 +1,272 @@
+---
+title: "Run the same analysis in a cloud sandbox"
+description: "Change the execution provider while retaining the chosen agent and its explicit authentication."
+---
+
+Change the execution provider while retaining the chosen agent and its explicit authentication.
+
+<!-- scenario:agent -->
+
+<!-- preparation:agent -->
+
+<details>
+<summary>Prepare this example from scratch</summary>
+
+Use Node.js **24+** and npm. Start in a new directory for each example.
+
+```sh
+mkdir outpost-example
+cd outpost-example
+```
+
+Git is required. Save this file as **prepare.mjs**, then run it. It creates a disposable repository with a deliberately failing whitespace test. It refuses to overwrite an existing directory.
+
+```js file=prepare.mjs
+import { mkdir, writeFile } from "node:fs/promises";
+import { resolve } from "node:path";
+import { execFileSync } from "node:child_process";
+
+const directory = resolve(process.argv[2] ?? "repository");
+await mkdir(directory);
+const files = {
+  "package.json": JSON.stringify(
+    {
+      name: "text-workshop",
+      version: "1.0.0",
+      private: true,
+      type: "module",
+      scripts: { test: "node --test text.test.ts" },
+    },
+    null,
+    2,
+  ),
+  "package-lock.json": JSON.stringify(
+    {
+      name: "text-workshop",
+      version: "1.0.0",
+      lockfileVersion: 3,
+      packages: { "": { name: "text-workshop", version: "1.0.0" } },
+    },
+    null,
+    2,
+  ),
+  "text.ts":
+    'export function slug(text: string): string {\n  return text.toLowerCase().replaceAll(" ", "-");\n}\n',
+  "text.test.ts":
+    'import test from "node:test";\nimport assert from "node:assert/strict";\nimport { slug } from "./text.ts";\ntest("simple words", () => assert.equal(slug("Hello World"), "hello-world"));\ntest("extra whitespace", () => assert.equal(slug("  Hello   World  "), "hello-world"));\n',
+  ".gitignore": ".outpost/\nnode_modules/\n.env\n",
+};
+for (const [name, content] of Object.entries(files))
+  await writeFile(resolve(directory, name), content + "\n", { flag: "wx" });
+const git = (...args) =>
+  execFileSync("git", args, { cwd: directory, stdio: "pipe" });
+git("init", "-b", "main");
+git("config", "user.name", "Outpost workshop");
+git("config", "user.email", "workshop@example.invalid");
+git("add", ".");
+git("commit", "-m", "Add text workshop with a whitespace regression");
+console.log(`Created ${directory}. The whitespace test intentionally fails.`);
+```
+
+```sh
+node prepare.mjs
+```
+
+Generate the workflow files without building a local image. This example allocates its environment in the cloud; Docker is not required. Install the optional provider SDK and declare allocation credentials as described below.
+
+```sh
+npx @elie-laloum/outpost init --yes --directory workflow --repository ../repository --image outpost:docs-demo --install --no-build
+cd workflow
+```
+
+Choose **one** of these configurations for **workflow/.env**. Empty key declarations inherit the matching environment variable; alternatively set its value in this ignored file. Account access and API billing are separate. The CLI-generated `run.ts` already configures Codex login; do not add a second login hook.
+
+**Codex — API key**
+
+```dotenv
+OUTPOST_AGENT=codex
+OUTPOST_AUTH=api-key
+OPENAI_API_KEY=
+```
+
+**Codex — account**: run `codex -c cli_auth_credentials_store='"file"' login` on the host first. This explicitly selects a file credential seed instead of exporting a keychain.
+
+```dotenv
+OUTPOST_AGENT=codex
+OUTPOST_AUTH=login
+```
+
+**Claude — API key**
+
+```dotenv
+OUTPOST_AGENT=claude
+OUTPOST_AUTH=api-key
+ANTHROPIC_API_KEY=
+```
+
+**Claude — subscription**: obtain a token with `claude setup-token` on the host and declare it below.
+
+```dotenv
+OUTPOST_AGENT=claude
+OUTPOST_AUTH=oauth-token
+CLAUDE_CODE_OAUTH_TOKEN=
+```
+
+Save **runtime.mts** next to the example. This complete configuration reads only declared variables, selects the agent and initializes its private sandbox home. The example calls `configuration()` to use your choice. These two `OUTPOST_` settings belong to this teaching script, not the Outpost API.
+
+```ts file=runtime.mts
+import { readFile } from "node:fs/promises";
+import { homedir } from "node:os";
+import { resolve } from "node:path";
+import { parseEnv } from "node:util";
+import { codex, claude, gemini } from "@elie-laloum/outpost";
+import { docker } from "@elie-laloum/outpost/providers/docker";
+import type { LifecycleHooks } from "@elie-laloum/outpost";
+
+const settings = parseEnv(
+  await readFile(new URL(".env", import.meta.url), "utf8"),
+);
+export const repository = resolve(import.meta.dirname, "../repository");
+export const variables = Object.fromEntries(
+  Object.entries(settings)
+    .filter(([name]) => !name.startsWith("OUTPOST_"))
+    .map(([name, value]) => [name, value || process.env[name] || ""]),
+);
+
+export async function configuration(
+  name = settings.OUTPOST_AGENT ?? "codex",
+  authentication = settings.OUTPOST_AUTH ?? "api-key",
+) {
+  const factories = { codex, claude, gemini };
+  if (!(name === "codex" || name === "claude" || name === "gemini"))
+    throw new Error("Choose codex, claude or gemini");
+  const supported = {
+    codex: ["api-key", "login"],
+    claude: ["api-key", "oauth-token"],
+    gemini: ["api-key"],
+  };
+  if (!supported[name].includes(authentication))
+    throw new Error(
+      `Unsupported authentication for ${name}: ${authentication}`,
+    );
+  if (
+    name === "codex" &&
+    authentication === "login" &&
+    variables.OPENAI_API_KEY
+  )
+    throw new Error(
+      "Remove OPENAI_API_KEY when using Codex account authentication",
+    );
+  let hooks: LifecycleHooks = {};
+  if (name === "codex" && authentication === "login") {
+    const seed = await readFile(
+      resolve(
+        process.env.CODEX_HOME || resolve(homedir(), ".codex"),
+        "auth.json",
+      ),
+      "utf8",
+    );
+    JSON.parse(seed);
+    hooks = {
+      sandboxReady: [
+        {
+          executable: "node",
+          arguments: [
+            "-e",
+            'const fs=require("node:fs"),p=require("node:path"),h=require("node:os").homedir();const d=p.join(h,".codex");fs.mkdirSync(d,{recursive:true,mode:0o700});fs.writeFileSync(p.join(d,"auth.json"),fs.readFileSync(0),{mode:0o600});',
+          ],
+          stdin: seed,
+        },
+      ],
+    };
+  } else {
+    const keys = {
+      codex: "OPENAI_API_KEY",
+      claude: "ANTHROPIC_API_KEY",
+      gemini: "GEMINI_API_KEY",
+    };
+    const key =
+      name === "claude" && authentication === "oauth-token"
+        ? "CLAUDE_CODE_OAUTH_TOKEN"
+        : keys[name];
+    if (!variables[key]) throw new Error(`Declare ${key} in workflow/.env`);
+    if (
+      name === "claude" &&
+      variables.ANTHROPIC_API_KEY &&
+      variables.CLAUDE_CODE_OAUTH_TOKEN
+    )
+      throw new Error("Choose one Claude authentication method");
+    if (name === "codex")
+      hooks = {
+        sandboxReady: [
+          {
+            executable: "sh",
+            arguments: ["-c", "codex login --with-api-key"],
+            stdin: variables.OPENAI_API_KEY,
+          },
+        ],
+      };
+  }
+  return {
+    repository,
+    agent: factories[name](),
+    provider: docker({ image: "outpost:docs-demo", variables }),
+    hooks,
+  };
+}
+```
+
+Agent runs make real model calls. Account/model access and response time depend on your provider. See the official [Codex authentication](https://developers.openai.com/codex/auth/) and [Claude authentication](https://code.claude.com/docs/en/authentication) documentation.
+
+</details>
+
+<!-- /preparation -->
+
+## Prerequisites and effects
+
+In `workflow/`, install `npm install @vercel/sandbox @daytona/sdk`. For Vercel, export `VERCEL_TOKEN`, `VERCEL_TEAM_ID` and `VERCEL_PROJECT_ID`; for Daytona export `DAYTONA_API_KEY`. These authenticate allocation, independently from the agent variables in `.env`. Run `node example.mts vercel` or `node example.mts daytona`. This allocates a billable sandbox and closes it after dispatch. The initial preparation may use `--no-build`: this recipe does not use Docker. Remote synchronization preserves conflicts instead of overwriting concurrent host edits.
+
+## Try it
+
+Save **example.mts** in `workflow/`.
+
+```ts file=example.mts
+import { dispatch, response } from "@elie-laloum/outpost";
+import { vercel } from "@elie-laloum/outpost/providers/vercel";
+import { daytona } from "@elie-laloum/outpost/providers/daytona";
+import { configuration, variables } from "./runtime.mts";
+
+const runtime = await configuration();
+const name = process.argv[2] ?? "vercel";
+if (name !== "vercel" && name !== "daytona")
+  throw new Error("Choose vercel or daytona");
+const provider =
+  name === "vercel"
+    ? vercel({ variables, create: { timeout: 300_000 } })
+    : daytona({
+        variables,
+        connection: { apiKey: process.env.DAYTONA_API_KEY ?? "" },
+        create: { language: "typescript" },
+      });
+const result = await dispatch({
+  ...runtime,
+  provider,
+  branch: { mode: "named", name: `workshop/${name}` },
+  brief: {
+    text: "Inspect text.ts without editing it. Return findings inside <findings> tags.",
+  },
+  response: response.text({ tag: "findings", repairs: 1 }),
+  deadlineMs: 300_000,
+});
+console.log(result.value);
+```
+
+```sh
+node example.mts
+```
+
+## Understand the result
+
+Check the output and effects described before the code.
+
+To start again, use a new demonstration directory. Named branches retain commits; dirty worktrees remain available for recovery. Scripts do not push commits.

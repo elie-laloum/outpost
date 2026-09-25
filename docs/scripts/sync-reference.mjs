@@ -3,6 +3,7 @@ import { readFile, writeFile, mkdir, readdir } from "node:fs/promises";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { groups } from "./api-groups.mjs";
+import { explain } from "./reference-explanations.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const check = process.argv.includes("--check");
@@ -97,6 +98,18 @@ for (const group of groups)
     if (![...publicNames.keys()].some((symbol) => symbol.name === name))
       throw new Error(`Stale API entry: ${name}`);
 
+const owners = new Map();
+for (const [symbol, entry] of symbols) {
+  const group = groupFor(symbol.name);
+  if (!group) continue;
+  const visit = (current) => {
+    if (owners.has(current)) return;
+    owners.set(current, group);
+    for (const related of symbols.get(current)?.related ?? []) visit(related);
+  };
+  visit(symbol);
+}
+
 for (const [symbol, { declaration, related }] of symbols) {
   const exported = publicNames.has(symbol);
   const group = groupFor(symbol.name);
@@ -157,6 +170,7 @@ for (const [symbol, { declaration, related }] of symbols) {
       front(symbol.name, exported ? 10 : 20) +
         lead +
         imports +
+        explain(symbol, declaration, group, language, checker, owners) +
         `\n\n## ${language ? "Signature" : "Signature"}\n\n\`\`\`ts\n${code}\n\`\`\`` +
         relatedText +
         "\n",
@@ -184,6 +198,9 @@ for (const [language, locale] of [
     `${locale}reference/index.md`,
     front(language ? "Index de l’API" : "API index", 0) +
       intro +
+      (language
+        ? "\n\n[CLI](manual/cli/) · [Configuration](manual/configuration/) · [Authentification](manual/authentication/) · [Compatibilités](manual/compatibility/) · [Guide progressif](../guide/)"
+        : "\n\n[CLI](manual/cli/) · [Configuration](manual/configuration/) · [Authentication](manual/authentication/) · [Compatibility](manual/compatibility/) · [Learning guide](../guide/)") +
       "\n\n" +
       sections +
       "\n",
@@ -231,11 +248,14 @@ for (const [name, raw] of expected) {
 }
 for (const locale of ["", "fr/"]) {
   const directory = resolve(root, "src/content/docs", `${locale}reference`);
-  for (const name of await readdir(directory))
+  for (const entry of await readdir(directory, { withFileTypes: true })) {
+    if (!entry.isFile()) continue;
+    const name = entry.name;
     if (!expected.has(`${locale}reference/${name}`))
       throw new Error(
         `Remove stale reference page: ${locale}reference/${name}`,
       );
+  }
 }
 console.log(
   `${publicNames.size} public symbols and ${symbols.size - publicNames.size} supporting contracts synchronized in English and French.`,

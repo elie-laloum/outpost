@@ -1,0 +1,242 @@
+{
+  "Diagnostics": {
+    "purpose": [
+      "Inspect host prerequisites, an owned sandbox or recorded agent protocol fixtures. Diagnostics report observations; they do not prove account or model access.",
+      "Inspecter les prérequis hôtes, une sandbox possédée ou les fixtures de protocole. Les diagnostics sont des observations ; ils ne prouvent pas l’accès au compte ou au modèle."
+    ],
+    "behavior": [
+      "Checks distinguish unavailable, failed and unsupported capabilities. Sandbox diagnosis uses its existing operation gate and never takes ownership of disposal.",
+      "Les contrôles distinguent capacités absentes, en échec et non prises en charge. Le diagnostic de sandbox utilise son verrou d’opération et ne devient pas propriétaire de sa fermeture."
+    ]
+  },
+  "Workspaces": {
+    "purpose": [
+      "Own a repository checkout, branch and lock independently of sandbox lifetime.",
+      "Posséder un checkout, une branche et un verrou indépendamment de la durée de vie de la sandbox."
+    ],
+    "behavior": [
+      "Repository defaults to the current working directory. Named branches retain commits; dirty or detached worktrees remain recoverable. Close the sandbox before its caller-owned workspace.",
+      "Le dépôt vaut par défaut le dossier courant. Les branches nommées conservent les commits ; les worktrees sales ou détachés restent récupérables. Fermez la sandbox avant le workspace appartenant à l’appelant."
+    ]
+  },
+  "Sandboxes": {
+    "purpose": [
+      "Acquire an execution environment and reuse it for sequential commands or agent jobs.",
+      "Acquérir un environnement d’exécution et le réutiliser pour des commandes ou tâches d’agent séquentielles."
+    ],
+    "behavior": [
+      "Docker is the default provider. Only one operation may own a sandbox at a time. Closing is idempotent; cancellation of one command does not itself destroy a warm sandbox.",
+      "Docker est le provider par défaut. Une seule opération peut posséder une sandbox à la fois. La fermeture est idempotente ; annuler une commande ne détruit pas à elle seule une sandbox chaude."
+    ]
+  },
+  "Dispatch": {
+    "purpose": [
+      "Run an agent task and collect text, typed output, commits, usage and native conversation information.",
+      "Exécuter une tâche d’agent et collecter texte, sortie typée, commits, usage et conversation native."
+    ],
+    "behavior": [
+      "One pass is the default. Process or response failures reject. An exhausted pass budget can instead return completed: false. Cold dispatch closes owned resources; warm dispatch retains its sandbox.",
+      "Une passe est la valeur par défaut. Les échecs de processus ou réponse rejettent la promesse. Épuiser les passes peut plutôt renvoyer completed: false. Le dispatch froid ferme ses ressources ; le dispatch chaud conserve sa sandbox."
+    ]
+  },
+  "Commands and terminal": {
+    "purpose": [
+      "Run a process or attach a native interactive agent session with explicit stream ownership.",
+      "Exécuter un processus ou attacher une session interactive native avec possession explicite des flux."
+    ],
+    "behavior": [
+      "Command returns nonzero exit statuses; callers must check them. Attach requires a supported interactive provider. Vercel rejects attachment.",
+      "Command renvoie les statuts non nuls ; l’appelant doit les vérifier. Attach exige un provider interactif compatible. Vercel rejette l’attachement."
+    ]
+  },
+  "Agents": {
+    "purpose": [
+      "Configure native Claude Code, Codex or Gemini behavior independently of the sandbox backend.",
+      "Configurer Claude Code, Codex ou Gemini indépendamment du backend de sandbox."
+    ],
+    "behavior": [
+      "The installed CLI chooses its model when omitted. Native conversation capture defaults on for Claude/Codex. Gemini supports fresh sessions only. Account and provider credentials are separate.",
+      "La CLI choisit son modèle si omis. La capture native est activée par défaut pour Claude/Codex. Gemini ne prend en charge que les nouvelles sessions. Identifiants d’agent et de provider sont distincts."
+    ]
+  },
+  "Prompts and responses": {
+    "purpose": [
+      "Supply a literal or file brief and validate a tagged model answer before exposing its typed value.",
+      "Fournir un brief littéral ou fichier et valider une réponse balisée avant d’exposer sa valeur typée."
+    ],
+    "behavior": [
+      "Supply exactly one brief form. Expansion defaults to 30 seconds per original command. Response repairs default to zero. Structured responses require one pass.",
+      "Fournissez exactement une forme de brief. L’expansion vaut par défaut 30 secondes par commande originale. Les réparations de réponse valent zéro par défaut. Une réponse structurée exige une passe."
+    ]
+  },
+  "Conversations": {
+    "purpose": [
+      "Locate, capture, restore and relocate native transcripts separately from authentication.",
+      "Localiser, capturer, restaurer et déplacer les transcripts natifs séparément de l’authentification."
+    ],
+    "behavior": [
+      "The host conversation home defaults to the OS home. A cold continuation requires a restorable transcript before allocation. A fork does not copy a workspace.",
+      "Le home de conversation vaut par défaut le home système. Une continuation froide exige un transcript restaurable avant allocation. Un fork ne copie pas un workspace."
+    ]
+  },
+  "Observability": {
+    "purpose": [
+      "Observe progress, log execution and account for reported usage without changing task outcomes.",
+      "Observer la progression, journaliser l’exécution et comptabiliser l’usage rapporté sans changer les résultats."
+    ],
+    "behavior": [
+      "Observer failures are isolated. Token counts are not prices. The optional OpenTelemetry entry point loads its vendor API separately from core imports.",
+      "Les échecs d’observateurs sont isolés. Les tokens ne sont pas des prix. Le point d’entrée OpenTelemetry optionnel charge son API séparément des imports du cœur."
+    ]
+  },
+  "Workflows": {
+    "purpose": [
+      "Compose tasks with explicit dependency edges and typed result access.",
+      "Composer des tâches avec dépendances explicites et accès typé aux résultats."
+    ],
+    "behavior": [
+      "Duplicate keys, missing dependencies and cycles fail validation. Failed or skipped dependencies skip descendants. Retries can repeat external effects. Unwrap throws on a non-successful result.",
+      "Les clés dupliquées, dépendances absentes et cycles échouent à la validation. Une dépendance en échec ou ignorée empêche ses descendants. Les reprises peuvent répéter les effets externes. Unwrap lève une erreur en cas de non-succès."
+    ]
+  },
+  "Providers": {
+    "purpose": [
+      "Allocate local containers, explicit host execution or remote sandboxes through dedicated package entry points.",
+      "Allouer conteneurs locaux, exécution hôte explicite ou sandboxes distantes via les sous-chemins du package."
+    ],
+    "behavior": [
+      "Mounted and host providers default to current branches; remote providers default to integration and reject current. Optional SDKs remain optional. Local execution provides no isolation.",
+      "Les providers montés et hôtes utilisent current par défaut ; les distants utilisent integrate et rejettent current. Les SDK optionnels restent optionnels. L’exécution locale ne fournit aucune isolation."
+    ]
+  },
+  "Remote transfers": {
+    "purpose": [
+      "Move binary files and validated manifests while preserving concurrent host edits.",
+      "Transférer fichiers binaires et manifestes validés en préservant les modifications hôtes concurrentes."
+    ],
+    "behavior": [
+      "Synchronization validates and backs up before applying incoming work. Transfers preserve supported permissions and symlinks and reject unsafe destination traversal. Recovery data survives unsafe cleanup.",
+      "La synchronisation valide et sauvegarde avant application. Les transferts préservent permissions et liens pris en charge et rejettent les traversées dangereuses. Les données de récupération survivent à un nettoyage risqué."
+    ]
+  },
+  "Recovery and retention": {
+    "purpose": [
+      "Inspect retained work and plan explicit storage retention without discarding recoverable edits.",
+      "Inspecter le travail conservé et planifier explicitement sa rétention sans abandonner les modifications récupérables."
+    ],
+    "behavior": [
+      "Planning does not prune. Application reacquires ownership and revalidates candidates. Quota checks observe usage rather than imposing physical filesystem limits.",
+      "Planifier ne supprime rien. L’application reprend possession et revalide les candidats. Les quotas observent l’usage plutôt que d’imposer une limite physique au système de fichiers."
+    ]
+  },
+  "Errors": {
+    "purpose": [
+      "Identify failure codes and available recovery paths before retrying or cleaning up.",
+      "Identifier les codes d’échec et chemins de récupération avant reprise ou nettoyage."
+    ],
+    "behavior": [
+      "A failed agent throws; a raw command can return a nonzero status. Preserve original errors and recovery artifacts when reporting or retrying.",
+      "Un agent en échec lève une erreur ; une commande brute peut renvoyer un statut non nul. Préservez erreurs originales et artefacts de récupération lors du diagnostic ou de la reprise."
+    ]
+  },
+  "Storage reservations": {
+    "purpose": [
+      "Coordinate cooperating writers with explicit storage reservations.",
+      "Coordonner les écrivains coopératifs avec des réservations de stockage explicites."
+    ],
+    "behavior": [
+      "Reservations are admission coordination, not physical quotas. Their owner must release them; workspace ownership can bind their lifecycle.",
+      "Les réservations coordonnent l’admission, sans quota physique. Leur propriétaire doit les libérer ; un workspace peut posséder leur durée de vie."
+    ]
+  },
+  "Recovery restoration": {
+    "purpose": [
+      "Plan then apply a retained transfer into a new destination for review.",
+      "Planifier puis appliquer un transfert conservé vers une nouvelle destination à relire."
+    ],
+    "behavior": [
+      "Restore into a new directory and inspect before integration. Verification checks recorded structure and integrity; it does not authenticate the author.",
+      "Restaurez dans un nouveau dossier et examinez avant intégration. La vérification contrôle structure et intégrité enregistrées ; elle n’authentifie pas l’auteur."
+    ]
+  },
+  "Resource activity": {
+    "purpose": [
+      "Read locally recorded lease and operation activity.",
+      "Lire l’activité enregistrée localement des baux et opérations."
+    ],
+    "behavior": [
+      "Local observations do not enumerate remote accounts and are not an authoritative cloud inventory.",
+      "Les observations locales n’énumèrent pas les comptes distants et ne constituent pas un inventaire cloud faisant autorité."
+    ]
+  },
+  "Workflow checkpoints": {
+    "purpose": [
+      "Persist lossless task results and explicitly reopen the same graph across process restarts.",
+      "Persister les résultats sans perte et rouvrir explicitement le même graphe après redémarrage."
+    ],
+    "behavior": [
+      "Completed outputs are not replayed. Interrupted ordinary tasks require retry-incomplete authorization. Outputs must be lossless JSON; full dispatch results contain functions and cannot be checkpointed directly.",
+      "Les sorties terminées ne sont pas rejouées. Une tâche ordinaire interrompue exige retry-incomplete. Les sorties doivent être du JSON sans perte ; les résultats de dispatch complets contiennent des fonctions et ne peuvent pas être persistés directement."
+    ]
+  },
+  "Approval and pause gates": {
+    "purpose": [
+      "Persist a pending decision and block dependent work until a trusted caller submits it.",
+      "Persister une décision attendue et bloquer les dépendants jusqu’à sa soumission par un appelant de confiance."
+    ],
+    "behavior": [
+      "Actor names are trusted metadata, not authentication. Paused runs need no timer. Rejection is final for that run. Invalid decision batches fail before applying any decision.",
+      "Les noms d’acteurs sont des métadonnées de confiance, pas une authentification. Une pause ne nécessite aucun timer. Le rejet est définitif pour cette exécution. Un lot invalide échoue avant toute application."
+    ]
+  },
+  "Typed artifacts": {
+    "purpose": [
+      "Publish immutable payloads and exchange small references with contract, digest and lineage validation.",
+      "Publier des données immuables et échanger des références avec validation du contrat, de l’empreinte et de la filiation."
+    ],
+    "behavior": [
+      "Filesystem payloads default to 16 MiB maximum. Callers own retention. Digests provide integrity against a trusted reference, not producer authentication or a shared transaction.",
+      "Les données du store fichier sont limitées à 16 Mio par défaut. L’appelant possède la rétention. L’empreinte fournit l’intégrité par rapport à une référence fiable, pas l’authentification du producteur ni une transaction commune."
+    ]
+  },
+  "Distributed execution": {
+    "purpose": [
+      "Coordinate durable JSON jobs through a SQLite queue, authenticated HTTP transport and registered workers.",
+      "Coordonner des tâches JSON durables via SQLite, un transport HTTP authentifié et des workers enregistrés."
+    ],
+    "behavior": [
+      "Effects are at least once. Stale fences cannot complete queue state, but external effects may repeat. HTTP binds loopback by default and supplies no TLS. One worker handles one job at a time.",
+      "Les effets sont au moins une fois. Un jeton périmé ne peut valider l’état de file, mais les effets externes peuvent se répéter. HTTP écoute loopback par défaut sans TLS. Un worker traite une tâche à la fois."
+    ]
+  },
+  "Outbound networking": {
+    "purpose": [
+      "Select an opt-in provider-enforced egress policy.",
+      "Choisir une politique réseau sortante opt-in imposée par le provider."
+    ],
+    "behavior": [
+      "Research prototype. Docker/Podman support deny-all, not domain allowlists. Vercel maps native firewall options. Unsupported capabilities are rejected instead of weakened.",
+      "Prototype de recherche. Docker/Podman prennent en charge deny-all, pas les listes de domaines. Vercel utilise son firewall natif. Les capacités non prises en charge sont rejetées plutôt qu’affaiblies."
+    ]
+  },
+  "Speculative execution": {
+    "purpose": [
+      "Race bounded candidate branches and select the first one that passes explicit validation and cleanup.",
+      "Mettre en concurrence des branches candidates bornées et retenir la première validée après nettoyage."
+    ],
+    "behavior": [
+      "Research prototype: at most eight candidates, default concurrency two. No automatic integration, push or durable race resumption. Observed usage is not a billing cap.",
+      "Prototype de recherche : au plus huit candidats, concurrence de deux par défaut. Aucune intégration, aucun push ni reprise durable de la course automatiques. L’usage observé ne plafonne pas la facturation."
+    ]
+  },
+  "Firecracker prototype": {
+    "purpose": [
+      "Allocate an opt-in microVM through an explicitly prepared host and guest.",
+      "Allouer une microVM opt-in via un hôte et un invité préparés explicitement."
+    ],
+    "behavior": [
+      "Research prototype with host/KVM, image and networking prerequisites. It does not silently fall back to host execution. Real boots require separate live validation.",
+      "Prototype de recherche avec prérequis hôte/KVM, image et réseau. Aucun repli silencieux vers l’exécution hôte. Un vrai démarrage exige une validation dédiée."
+    ]
+  }
+}

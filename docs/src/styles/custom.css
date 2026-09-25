@@ -1,17 +1,22 @@
-:root {
-  --sl-color-accent-low: #102e3c;
-  --sl-color-accent: #087ca0;
-  --sl-color-accent-high: #b5e8f6;
-  --sl-content-width: 52rem;
-}
-:root[data-theme="light"] {
-  --sl-color-accent-low: #dceff5;
-  --sl-color-accent: #086b8b;
-  --sl-color-accent-high: #123747;
-}
 .sl-markdown-content td {
   vertical-align: top;
 }
 .sl-markdown-content pre {
   tab-size: 2;
+  max-width: 100%;
+  overflow-x: auto;
+}
+.sl-markdown-content details {
+  margin-block: 1.5rem;
+  padding: 1rem;
+  border: 1px solid var(--sl-color-gray-5);
+  border-radius: 0.5rem;
+}
+.sl-markdown-content summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+.sl-markdown-content summary:focus-visible {
+  outline: 2px solid var(--sl-color-accent-high);
+  outline-offset: 4px;
 }

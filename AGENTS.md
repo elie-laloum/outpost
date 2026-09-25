@@ -16,7 +16,7 @@ Outpost is a TypeScript library and CLI for running coding agents in sandboxes, 
 
 ## Start here
 
-Read `README.md`, `package.json`, `SECURITY.md` and `docs/src/content/docs/project/architecture.md`. Inspect the relevant source, tests and workflows before editing. Check Git status and preserve unrelated work.
+Read `README.md`, `package.json`, `SECURITY.md` and `docs/src/content/docs/guide/extend/architecture.md`. Inspect the relevant source, tests and workflows before editing. Check Git status and preserve unrelated work.
 
 Use the repository as the source of truth for versions, supported options and commands. Do not rely on test counts, coverage percentages or publication status remembered from a previous chat.
 
@@ -113,14 +113,14 @@ Keep routine tests deterministic and independent of real account credentials or 
 
 Install root dependencies with `npm ci`; install documentation dependencies with `npm ci --prefix docs` when needed.
 
-| Change                                                                | Checks                                                                                               |
-| --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| Source behavior or architecture                                       | `npm run check` (architecture, typecheck, unit/functional tests, build), then `npm run coverage`.    |
-| Public API, exports, packaging or dependencies                        | Also `npm run test:package`.                                                                         |
-| Container commands, transfers, mounts, lifecycle or image scaffolding | Also real Docker and Podman tests and the PTY fixture using the setup in `.github/workflows/ci.yml`. |
-| API documentation or changelog sources                                | `npm run docs:sync`, then inspect generated changes.                                                 |
-| Documentation content or site configuration                           | `npm run build`, `npm run docs:check`, `npm run docs:build`, `npm run docs:test`.                    |
-| Any changed tracked content                                           | Prettier check on changed files; full `npm run format:check` before release.                         |
+| Change                                                                | Checks                                                                                                         |
+| --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Source behavior or architecture                                       | `npm run check` (architecture, typecheck, unit/functional tests, build), then `npm run coverage`.              |
+| Public API, exports, packaging or dependencies                        | Also `npm run test:package`.                                                                                   |
+| Container commands, transfers, mounts, lifecycle or image scaffolding | Also real Docker and Podman tests and the PTY fixture using the setup in `.github/workflows/ci.yml`.           |
+| API documentation or changelog sources                                | `npm run docs:sync`, then inspect generated changes.                                                           |
+| Documentation content or site configuration                           | `npm run build`, `npm run docs:check`, `npm run docs:build`, `npm run docs:test`, `npm run docs:test:browser`. |
+| Any changed tracked content                                           | Prettier check on changed files; full `npm run format:check` before release.                                   |
 
 CI checks Windows, macOS and Linux, real Docker/Podman execution, package consumption, coverage, formatting, documentation and dependency audits. Match relevant CI checks locally where possible. For a guidance-only Markdown edit, formatting and factual/link review are sufficient; do not rerun runtime suites without a reason.
 
@@ -128,6 +128,9 @@ CI checks Windows, macOS and Linux, real Docker/Podman execution, package consum
 
 - Use Astro Starlight in `docs/`, with `.md` content and English as the default language.
 - English content lives in `docs/src/content/docs/`; French equivalents live under `fr/` with matching relative paths. Update both languages for user-facing changes.
+- The site has two navigation spaces: Guide and Reference. Guide pages follow a progressive learning path under `guide/`; public symbol reference URLs remain stable.
+- Practical Guide pages include complete, collapsible preparation, named executable files, a launch command and observable results. Shared preparation sources live in `docs/snippets/`; regenerate their embedded Markdown with `npm run docs:sync`. The cookbook owns consumer examples; do not restore a root `examples/` directory.
+- Reference signatures and property tables are generated; bilingual explanations live in `docs/reference-content/`. The migration inventory in `docs/audit/` preserves traceability and legacy routes.
 - Organize by user task. Prefer focused, navigable pages to large catch-all documents. Maintain sidebar order, cross-links and useful prerequisites.
 - Examples must match the public API and be usable in their stated environment. Explain expected results, resource ownership, authentication and failure behavior where relevant.
 - Cookbooks progress from small tasks to advanced orchestration. Keep complete examples and distinguish instructions to an agent from enforced workflow gates.

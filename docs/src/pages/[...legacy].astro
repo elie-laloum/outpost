@@ -1,0 +1,40 @@
+---
+import migration from "../../audit/migration.json";
+
+export function getStaticPaths() {
+  const route = (name: string) => name.replace(/\.md$/, "").replace(/\/index$/, "");
+  return migration.pages
+    .filter((page) => page.source !== page.destination)
+    .map((page) => ({
+      params: { legacy: route(page.source) },
+      props: { target: route(page.destination), details: route(page.details ?? page.destination) },
+    }));
+}
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const target = `${base}/${Astro.props.target}/`;
+const details = `${base}/${Astro.props.details}/`;
+const french = Astro.props.target.startsWith("fr/");
+---
+<!doctype html>
+<html lang={french ? "fr" : "en"}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="robots" content="noindex" />
+    <meta http-equiv="refresh" content={`0;url=${target}`} />
+    <link rel="canonical" href={new URL(target, Astro.site)} />
+    <title>{french ? "Page déplacée — Outpost" : "Page moved — Outpost"}</title>
+  </head>
+  <body data-pagefind-ignore>
+    <main>
+      <h1>{french ? "Cette page a été déplacée" : "This page has moved"}</h1>
+      <p><a href={target}>{french ? "Ouvrir le guide" : "Open the guide"}</a></p>
+      <p><a href={details}>{french ? "Consulter les sections détaillées" : "Read the detailed sections"}</a></p>
+    </main>
+    <script is:inline define:vars={{ target, details }}>
+      const destination = new URL(window.location.hash ? details : target, window.location.origin);
+      destination.search = window.location.search;
+      destination.hash = window.location.hash;
+      window.location.replace(destination.href);
+    </script>
+  </body>
+</html>

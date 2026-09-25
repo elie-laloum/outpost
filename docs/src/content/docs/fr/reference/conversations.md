@@ -5,13 +5,21 @@ sidebar:
   order: 10
 ---
 
-Contrat public de **conversations**. Consultez le [guide conversations](../../agents/conversations/) pour le comportement, les valeurs par défaut et des exemples.
+Contrat public de **conversations**. Consultez le [guide conversations](../../guide/agents/conversations/) pour le comportement, les valeurs par défaut et des exemples.
 
 ## Import
 
 ```ts
 import { conversations } from "@elie-laloum/outpost";
 ```
+
+## Rôle et comportement
+
+Localiser, capturer, restaurer et déplacer les transcripts natifs séparément de l’authentification.
+
+Le home de conversation vaut par défaut le home système. Une continuation froide exige un transcript restaurable avant allocation. Un fork ne copie pas un workspace.
+
+[Exemple complet et règles détaillées](../../guide/agents/conversations/).
 
 ## Signature
 

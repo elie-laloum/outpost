@@ -1,0 +1,1947 @@
+{
+  "baseline": "c9f1365006aa45265873f4265652679c3b63304f",
+  "pages": [
+    {
+      "source": "index.md",
+      "destination": "index.md",
+      "details": "reference/behavior/start/overview.md",
+      "sections": ["Choose your next step", "How to use these docs"],
+      "sourceSha256": "aa794084f7429cdd5958beba08e7847db379cf6eeb3b9c522f5c5f86559d856f",
+      "sourceBodySha256": "8f536e9cccb9b96b6b4f00a89cc54905cdf12e3bc680a53e85a21db0f2bc7bd0",
+      "preservedBodySha256": "8f536e9cccb9b96b6b4f00a89cc54905cdf12e3bc680a53e85a21db0f2bc7bd0",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "extend/agents.md",
+      "destination": "guide/extend/agents.md",
+      "details": "reference/behavior/extend/agents.md",
+      "sections": ["Optional capabilities"],
+      "sourceSha256": "9461ff73d43ab2d68a54a3f1545262e8446e096f6c3c8480fff6281261014112",
+      "sourceBodySha256": "4116cc676b5f2143eb12f94a16dc324f2dd654cb95dad8c837850c385ae4266b",
+      "preservedBodySha256": "4116cc676b5f2143eb12f94a16dc324f2dd654cb95dad8c837850c385ae4266b",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "extend/providers.md",
+      "destination": "guide/extend/providers.md",
+      "details": "reference/behavior/extend/providers.md",
+      "sections": [],
+      "sourceSha256": "c40f4d7efbb3001f23790a500a0c94a9811795a51fae11485eec8e1c09414d84",
+      "sourceBodySha256": "d1e2e37572d2a04d1cbdc4a66282b2fa0429e7689c7d5d3a6983a18b7ddc5e5f",
+      "preservedBodySha256": "d1e2e37572d2a04d1cbdc4a66282b2fa0429e7689c7d5d3a6983a18b7ddc5e5f",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "extend/conversations.md",
+      "destination": "guide/extend/conversations.md",
+      "details": "reference/behavior/extend/conversations.md",
+      "sections": [],
+      "sourceSha256": "ac9ddb39fc7d818e69e94c5fd9cccf6c316c2087b7d8181905eba42ac6926202",
+      "sourceBodySha256": "58e23634110909f364763653dd4ae9a634e6f021ae082f9b428d7405bfd7d2c7",
+      "preservedBodySha256": "58e23634110909f364763653dd4ae9a634e6f021ae082f9b428d7405bfd7d2c7",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "agents/dispatch.md",
+      "destination": "guide/agents/dispatch.md",
+      "details": "reference/behavior/agents/dispatch.md",
+      "sections": ["Read the result"],
+      "sourceSha256": "9e745005fefa8d8b2322e044ec5361ddcc72d2da0e6f4035abcb59af2be21f3a",
+      "sourceBodySha256": "b1a1b8827596004c2a574303e911d1a3601ed4c9d7a77ebb92c87db0684b275a",
+      "preservedBodySha256": "b1a1b8827596004c2a574303e911d1a3601ed4c9d7a77ebb92c87db0684b275a",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "agents/iteration.md",
+      "destination": "guide/agents/iteration.md",
+      "details": "reference/behavior/agents/iteration.md",
+      "sections": ["Cold versus warm"],
+      "sourceSha256": "6f912f2299d50a7558aa37a94a1d9b9a2a10adcb00e3e1356d9bb144c659dd53",
+      "sourceBodySha256": "99ff92635d42b1a930406100f05c888b69841f0874344a3984d9f200690c22b0",
+      "preservedBodySha256": "99ff92635d42b1a930406100f05c888b69841f0874344a3984d9f200690c22b0",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "agents/gemini.md",
+      "destination": "guide/agents/gemini.md",
+      "details": "reference/behavior/agents/gemini.md",
+      "sections": [
+        "Create a workflow",
+        "Configure execution",
+        "Output and session boundaries"
+      ],
+      "sourceSha256": "20fefa00bb07ec6e6912b513adec8da3ef5c23ab0fd2e75cea8abecd7fff057c",
+      "sourceBodySha256": "b38eee825550f2eca5e9a85d878c2c6ebbddc794772eee80e58f9455a4477d79",
+      "preservedBodySha256": "b38eee825550f2eca5e9a85d878c2c6ebbddc794772eee80e58f9455a4477d79",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "agents/prompts.md",
+      "destination": "guide/agents/prompts.md",
+      "details": "reference/behavior/agents/prompts.md",
+      "sections": ["Resolution rules"],
+      "sourceSha256": "7da6624b8268034d19d92e4633005c9ca0601f2b23ebeaf40489a8b1cad93cf0",
+      "sourceBodySha256": "ab42c9cd6c99fc92e47c04f83b7d0f60edfdcc6b9553a8194049616adfca73ec",
+      "preservedBodySha256": "ab42c9cd6c99fc92e47c04f83b7d0f60edfdcc6b9553a8194049616adfca73ec",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "agents/environment.md",
+      "destination": "guide/agents/environment.md",
+      "details": "reference/behavior/agents/environment.md",
+      "sections": ["Precedence", "Credential choices", "Connect an account"],
+      "sourceSha256": "d6eaf997b99c508d39669d1320b4f366b21e4ba88b46e99c305c40e397603394",
+      "sourceBodySha256": "ec13fe5af4ecae69146c6a0e5807564668b342eae2a91719996864b1fd06e320",
+      "preservedBodySha256": "ec13fe5af4ecae69146c6a0e5807564668b342eae2a91719996864b1fd06e320",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "agents/connect-claude.md",
+      "destination": "guide/agents/connect-claude.md",
+      "details": "reference/behavior/agents/connect-claude.md",
+      "sections": [
+        "Local login",
+        "Subscription token for sandboxes",
+        "API-key alternative",
+        "Check and run",
+        "Keep the home coherent",
+        "Troubleshooting"
+      ],
+      "sourceSha256": "b3112f66c0717f7ef43dbe5a8c35749ed9a8930555701e21e31876d76a783f17",
+      "sourceBodySha256": "171b9003c1a210ce2abe5b1ecf457cc724cba128ccdd2f963dcfc6eddffcbfb5",
+      "preservedBodySha256": "171b9003c1a210ce2abe5b1ecf457cc724cba128ccdd2f963dcfc6eddffcbfb5",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "agents/observability.md",
+      "destination": "guide/agents/observability.md",
+      "details": "reference/behavior/agents/observability.md",
+      "sections": ["Events", "Logging", "Token accounting"],
+      "sourceSha256": "9c842df34af96392683aebbc49283f2a02698138f7d16a10dcbde1d2b712ccd1",
+      "sourceBodySha256": "35673e03808af158e6e43e39a454b944bf0fffc5dbb1d9509599b5a3702993ff",
+      "preservedBodySha256": "35673e03808af158e6e43e39a454b944bf0fffc5dbb1d9509599b5a3702993ff",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "agents/adapters.md",
+      "destination": "guide/agents/adapters.md",
+      "details": "reference/behavior/agents/adapters.md",
+      "sections": [],
+      "sourceSha256": "7d108ccace3ab55d4144ddab72819f3ebf2c531cefcdf612185c76017a5263c1",
+      "sourceBodySha256": "10c1574c8a706cded9c72eb1217a343e92034573a754b945a3fce50718ccbf2e",
+      "preservedBodySha256": "10c1574c8a706cded9c72eb1217a343e92034573a754b945a3fce50718ccbf2e",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "agents/connect-codex.md",
+      "destination": "guide/agents/connect-codex.md",
+      "details": "reference/behavior/agents/connect-codex.md",
+      "sections": [
+        "Sign in on your computer",
+        "Generate a workflow using your subscription",
+        "Use your ChatGPT account in a container",
+        "API-key alternative",
+        "Troubleshooting",
+        "OpenAI-compatible model providers"
+      ],
+      "sourceSha256": "90f392d51b07a0affe9737b7531bcd405bbb497824c92ddc7a4533c200130024",
+      "sourceBodySha256": "e8386f9317c162ee278ac5a9fd4c952c357392a29e47e9eee90a397f1e13488e",
+      "preservedBodySha256": "e8386f9317c162ee278ac5a9fd4c952c357392a29e47e9eee90a397f1e13488e",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "agents/conversations.md",
+      "destination": "guide/agents/conversations.md",
+      "details": "reference/behavior/agents/conversations.md",
+      "sections": ["Continuation choices", "Storage and capture failures"],
+      "sourceSha256": "98aa797c7e3cc81543cdd73a07bb3fb51c854065eb9755eafb2ffcb2e5a5cf69",
+      "sourceBodySha256": "88a7a026aeca2784623f4f6e431b79c9b6a0e46cc6dac9854a448db88f8873f4",
+      "preservedBodySha256": "88a7a026aeca2784623f4f6e431b79c9b6a0e46cc6dac9854a448db88f8873f4",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "agents/responses.md",
+      "destination": "guide/agents/responses.md",
+      "details": "reference/behavior/agents/responses.md",
+      "sections": ["Parsing rules", "Repair and recovery"],
+      "sourceSha256": "f1e6584a9e3a9eebdbc307235391c5c7139003cbee16bd56e808718f94b9ad5c",
+      "sourceBodySha256": "6145d944c421ab88c7b2c8e1a5d2cba283c293575ac77df281b5f1025fd11e02",
+      "preservedBodySha256": "6145d944c421ab88c7b2c8e1a5d2cba283c293575ac77df281b5f1025fd11e02",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "agents/cancellation.md",
+      "destination": "guide/agents/cancellation.md",
+      "details": "reference/behavior/agents/cancellation.md",
+      "sections": [],
+      "sourceSha256": "dc4788728c49770b7fa90b68c4130d29f17211f47c6ffc136ab44cf33a40d587",
+      "sourceBodySha256": "b9909a9fcea48af172bab4ce5cdedd682a6642e8c1312dcfb2744839f6107b5c",
+      "preservedBodySha256": "b9909a9fcea48af172bab4ce5cdedd682a6642e8c1312dcfb2744839f6107b5c",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "workflows/speculation.md",
+      "destination": "guide/advanced/speculation.md",
+      "details": "reference/behavior/workflows/speculation.md",
+      "sections": ["Budgets and recovery"],
+      "sourceSha256": "52d0eb7ce852cdb324281b7e3fb045c5c6ce817c9c3658bab44c84435f4dec27",
+      "sourceBodySha256": "d997bdf740ff70bc63ea2b94337bcece4f5e46480487107e8caeecb87a4ef5c9",
+      "preservedBodySha256": "d997bdf740ff70bc63ea2b94337bcece4f5e46480487107e8caeecb87a4ef5c9",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "workflows/checkpoints.md",
+      "destination": "guide/advanced/checkpoints.md",
+      "details": "reference/behavior/workflows/checkpoints.md",
+      "sections": [
+        "Restart and replay policy",
+        "Identity and output contract",
+        "Storage and ownership"
+      ],
+      "sourceSha256": "2f7dab3549ff4adf03d2fd8a537183158d34bc96a23192e597b2e429d9ceb3a9",
+      "sourceBodySha256": "e59761a631fe724187c2c846896e5a9830f7f40b505e37837184918f9974b7ef",
+      "preservedBodySha256": "e59761a631fe724187c2c846896e5a9830f7f40b505e37837184918f9974b7ef",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "workflows/sandbox-tasks.md",
+      "destination": "guide/workflows/sandbox-tasks.md",
+      "details": "reference/behavior/workflows/sandbox-tasks.md",
+      "sections": ["Multiple repositories"],
+      "sourceSha256": "0ceff74e19657551b120c81ba040708ede8eb01984826eb7a0ff302528488352",
+      "sourceBodySha256": "e7924574fbff0ba4b72e7acdc464031c44a41fff871cd935978dc69757a51de8",
+      "preservedBodySha256": "e7924574fbff0ba4b72e7acdc464031c44a41fff871cd935978dc69757a51de8",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "workflows/approvals.md",
+      "destination": "guide/advanced/approvals.md",
+      "details": "reference/behavior/workflows/approvals.md",
+      "sections": [
+        "Create the gate",
+        "Decide and resume",
+        "Restart and observation"
+      ],
+      "sourceSha256": "4a3a52569305e36a51fc5e7bd20d49157ec91805d4b5bf0608ff6abe18917049",
+      "sourceBodySha256": "125477cc5e5e872738b438947c08174167ca1ec7d1dbb1f33000fa40d0f76016",
+      "preservedBodySha256": "125477cc5e5e872738b438947c08174167ca1ec7d1dbb1f33000fa40d0f76016",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "workflows/budgets.md",
+      "destination": "guide/workflows/budgets.md",
+      "details": "reference/behavior/workflows/budgets.md",
+      "sections": ["Admission and cancellation", "What gets counted"],
+      "sourceSha256": "69cf0ba88a752ec04ecf24a7b17465618b6e36c4605b9eb80b82d05b75e06625",
+      "sourceBodySha256": "8f43b1b6ecf1cae75f3d1bf0dbaf668517e6479b7b5913b00e767fd385ba8e12",
+      "preservedBodySha256": "8f43b1b6ecf1cae75f3d1bf0dbaf668517e6479b7b5913b00e767fd385ba8e12",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "workflows/artifacts.md",
+      "destination": "guide/advanced/artifacts.md",
+      "details": "reference/behavior/workflows/artifacts.md",
+      "sections": [
+        "Publish and consume a contract",
+        "Derived data and another process",
+        "Binary files, ownership and limits"
+      ],
+      "sourceSha256": "2381b10a4d48c627c80a879904a5a857569f60b37bb9db4b68520352d1a892ef",
+      "sourceBodySha256": "27d657904da6702372fc996725478a0a788f99e1a2a3a4472c02c6256d217555",
+      "preservedBodySha256": "27d657904da6702372fc996725478a0a788f99e1a2a3a4472c02c6256d217555",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "workflows/distributed.md",
+      "destination": "guide/advanced/distributed.md",
+      "details": "reference/behavior/workflows/distributed.md",
+      "sections": [
+        "Start a coordinator",
+        "Start workers",
+        "Submit from a workflow",
+        "Delivery and accounting guarantees"
+      ],
+      "sourceSha256": "16edfcec291b7909cd6e74ba1a6710962caf515f3559e4999445bf350d2fc34c",
+      "sourceBodySha256": "0792401f978e0543460eb8556e989ba09fdfa0664ecec3eda232061217b00d26",
+      "preservedBodySha256": "0792401f978e0543460eb8556e989ba09fdfa0664ecec3eda232061217b00d26",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "workflows/graph.md",
+      "destination": "guide/workflows/graph.md",
+      "details": "reference/behavior/workflows/graph.md",
+      "sections": ["Dependency rules", "Result and visualization"],
+      "sourceSha256": "11b6783103f537bd3532b744c80f984fcf3674fa507ef253d73a48ce6881c987",
+      "sourceBodySha256": "ab71b782e9dbee5b83354a03fb0749577456b585090ce6dd5b24aab4e04bb08d",
+      "preservedBodySha256": "ab71b782e9dbee5b83354a03fb0749577456b585090ce6dd5b24aab4e04bb08d",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "workflows/execution.md",
+      "destination": "guide/workflows/execution.md",
+      "details": "reference/behavior/workflows/execution.md",
+      "sections": [],
+      "sourceSha256": "614414a990cfd94910722f2a0bd68d1aeb62313e9c9cef0cd4ebeb01888fcc6b",
+      "sourceBodySha256": "200117c4ffe56af3e989bee90e012340f793ac029cfd2d23d69f6cefa775787c",
+      "preservedBodySha256": "200117c4ffe56af3e989bee90e012340f793ac029cfd2d23d69f6cefa775787c",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "start/quickstart.md",
+      "destination": "guide/start/quickstart.md",
+      "details": "reference/behavior/start/quickstart.md",
+      "sections": [
+        "1. Generate the project files",
+        "2. Declare agent credentials",
+        "3. Run the starter",
+        "4. Inspect the result"
+      ],
+      "sourceSha256": "ac9d588d66dd491b7971bd49ed61e79b402535319bbd0557cb6ea003beb07d2e",
+      "sourceBodySha256": "03e1572697f5241ebc440a765fcaae3af8ab8c4867a1b29f14e69eb2ef9e5ce2",
+      "preservedBodySha256": "af125aa71cc49a583855cf56fe8b5ff4a22fb1838227b868f17377d175eba84c",
+      "disposition": "corrected with implementation evidence"
+    },
+    {
+      "source": "start/cli-images.md",
+      "destination": "reference/manual/cli-images.md",
+      "details": "reference/behavior/start/cli-images.md",
+      "sections": [],
+      "sourceSha256": "0e84b3dd09c1ed8021d72aa11dff2a7845a597114ac0e25aceca656092e60e1e",
+      "sourceBodySha256": "e93b7ed2806e18e513ee5c2bb4288544469b50cf6209e66da592abe25b53c507",
+      "preservedBodySha256": "e93b7ed2806e18e513ee5c2bb4288544469b50cf6209e66da592abe25b53c507",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "start/concepts.md",
+      "destination": "guide/start/concepts.md",
+      "details": "reference/behavior/start/concepts.md",
+      "sections": [
+        "Four building blocks",
+        "Pick the right entry point",
+        "Cleanup preserves work"
+      ],
+      "sourceSha256": "8121fbe49b930fa6655e6235cb8062664852d3de7228b0322dab4e4435b7f114",
+      "sourceBodySha256": "a3064835aaa52addee8dee05e2139f459172c346430a01fc0af4873fa06f248d",
+      "preservedBodySha256": "a3064835aaa52addee8dee05e2139f459172c346430a01fc0af4873fa06f248d",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "start/cli.md",
+      "destination": "reference/manual/cli.md",
+      "details": "reference/behavior/start/cli.md",
+      "sections": [
+        "Generated script",
+        "Authentication and prerequisites",
+        "Custom model endpoint"
+      ],
+      "sourceSha256": "e19643ec058666507d1ae22842c02e409798a048a8661e316cb2dc397fce30a8",
+      "sourceBodySha256": "39dd6354ffaf2ff38dc67b6d4dc6d8fa91bf61a48b83dfac057197bf03bf9d8e",
+      "preservedBodySha256": "39dd6354ffaf2ff38dc67b6d4dc6d8fa91bf61a48b83dfac057197bf03bf9d8e",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "start/installation.md",
+      "destination": "guide/start/installation.md",
+      "details": "reference/behavior/start/installation.md",
+      "sections": [
+        "Requirements",
+        "Install from npm",
+        "Cloud dependencies",
+        "Alternative registries and source builds"
+      ],
+      "sourceSha256": "294a29b3e4ddcfc672fdfc85d7a17d6f9d8da5f71a0e10c0cdd3d12ca2657094",
+      "sourceBodySha256": "b5d9aef456f4c52a3e6dfe6471d9ae957b485a85327dd6b656439c5c47f6c747",
+      "preservedBodySha256": "b5d9aef456f4c52a3e6dfe6471d9ae957b485a85327dd6b656439c5c47f6c747",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/index.md",
+      "destination": "fr/index.md",
+      "details": "fr/reference/behavior/start/overview.md",
+      "sections": ["Choisir un parcours", "Utiliser cette documentation"],
+      "sourceSha256": "5e8fed8e607ef70fa737357af9962db791f3a9d5df0b25c99e44a100ac39b837",
+      "sourceBodySha256": "19fd33f080e451686600294772540ece08c35602a7ee9e977495243772f9b865",
+      "preservedBodySha256": "19fd33f080e451686600294772540ece08c35602a7ee9e977495243772f9b865",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "sandboxes/hooks.md",
+      "destination": "guide/environment/hooks.md",
+      "details": "reference/behavior/sandboxes/hooks.md",
+      "sections": ["Execution order"],
+      "sourceSha256": "3e7a5bdf1259ed506fc0b16e2fceb35b22fc458918ba02e17a740a778f886ec5",
+      "sourceBodySha256": "18093b52b1807346334b3b005ac9b0da0ad158301fb00fed99eb483bd9fec71e",
+      "preservedBodySha256": "18093b52b1807346334b3b005ac9b0da0ad158301fb00fed99eb483bd9fec71e",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "sandboxes/lifecycle.md",
+      "destination": "guide/environment/lifecycle.md",
+      "details": "reference/behavior/sandboxes/lifecycle.md",
+      "sections": ["Closing and cancellation"],
+      "sourceSha256": "0ba691745aa0ca93d2b0660c15f89959904c9e4d1aca6a80646f0165cad15174",
+      "sourceBodySha256": "c0d23e169bf69eb43439303fd746a8ea3a88dc2dbb8efe6549a1976cfa34d4d8",
+      "preservedBodySha256": "c0d23e169bf69eb43439303fd746a8ea3a88dc2dbb8efe6549a1976cfa34d4d8",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "sandboxes/repositories.md",
+      "destination": "guide/environment/repositories.md",
+      "details": "reference/behavior/sandboxes/repositories.md",
+      "sections": [
+        "Initialize outside the target repository",
+        "Resolve paths explicitly",
+        "Locate changes and recovery files"
+      ],
+      "sourceSha256": "e4a7d4fd26ca6c500dc0f7ce93ea5dd0914038b4e2cb74e3f51dca60b981c2ab",
+      "sourceBodySha256": "74aaef2c41ab2a3f20e732170b6d07ea78b3e65013633f0730ccc998547c6822",
+      "preservedBodySha256": "74aaef2c41ab2a3f20e732170b6d07ea78b3e65013633f0730ccc998547c6822",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "sandboxes/workspaces.md",
+      "destination": "guide/environment/workspaces.md",
+      "details": "reference/behavior/sandboxes/workspaces.md",
+      "sections": ["Configuration"],
+      "sourceSha256": "d2f7864f49400c441dc37c76b740d1fbf96fa185e92928617333cadb78bb5311",
+      "sourceBodySha256": "2def9fbc6a1fabe3b8e04c98afe9d0319f4c6e9f02232dc96238b05cf9bbddbe",
+      "preservedBodySha256": "2def9fbc6a1fabe3b8e04c98afe9d0319f4c6e9f02232dc96238b05cf9bbddbe",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "sandboxes/commands.md",
+      "destination": "guide/environment/commands.md",
+      "details": "reference/behavior/sandboxes/commands.md",
+      "sections": ["Attach an agent"],
+      "sourceSha256": "44338f9f585753bb577765ce178020f83c576f1077ae68bac9bf499988794541",
+      "sourceBodySha256": "a5afbf6a8e2335a2f7141a6c054924e85e0332abf4e102f6d85b4c84a0d5ffbc",
+      "preservedBodySha256": "a5afbf6a8e2335a2f7141a6c054924e85e0332abf4e102f6d85b4c84a0d5ffbc",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "sandboxes/egress.md",
+      "destination": "guide/advanced/egress.md",
+      "details": "reference/behavior/sandboxes/egress.md",
+      "sections": ["Run an offline command", "Select Vercel destinations"],
+      "sourceSha256": "c863ad8595f48fbcef5712bbf3a9784b5e29899b4ec603a16379812b7fe73586",
+      "sourceBodySha256": "b8c6442d37ec8e4bd23307de090332785a613a4f42877329c05feb2779000c56",
+      "preservedBodySha256": "b8c6442d37ec8e4bd23307de090332785a613a4f42877329c05feb2779000c56",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "sandboxes/branches.md",
+      "destination": "guide/environment/branches.md",
+      "details": "reference/behavior/sandboxes/branches.md",
+      "sections": ["Integration rules", "Parallel work"],
+      "sourceSha256": "2b63da3b7eba364153c5affde9812dd3d750101fe88c2d03e9357edc453d12f0",
+      "sourceBodySha256": "7f734b33de66a7387546494d530864a76aeba95fe7e5aade83600391b701c993",
+      "preservedBodySha256": "7f734b33de66a7387546494d530864a76aeba95fe7e5aade83600391b701c993",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "sandboxes/remote-sync.md",
+      "destination": "guide/environment/remote-sync.md",
+      "details": "reference/behavior/sandboxes/remote-sync.md",
+      "sections": ["Initial state", "Returning changes", "Transfer limits"],
+      "sourceSha256": "a95708f054ce6b82f4d380ed2cbbdd533763df30be03335a1814326246318c9c",
+      "sourceBodySha256": "30271bcc4f988c38b766f8cf6d439a10a7b0f838cbeba00dc8f0455a659c1aa7",
+      "preservedBodySha256": "30271bcc4f988c38b766f8cf6d439a10a7b0f838cbeba00dc8f0455a659c1aa7",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "operations/security.md",
+      "destination": "guide/operations/security.md",
+      "details": "reference/behavior/operations/security.md",
+      "sections": ["Handle sensitive artifacts"],
+      "sourceSha256": "861a33d0f8c131c4b34ca456d4fbee095312c6e9f5170b2ba975370dcbf89c6c",
+      "sourceBodySha256": "10fb146f7e0f38f7208d8a600e43fec48b39231ae1705bcfb6ec5b575f0d371d",
+      "preservedBodySha256": "10fb146f7e0f38f7208d8a600e43fec48b39231ae1705bcfb6ec5b575f0d371d",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "operations/recovery-verification.md",
+      "destination": "guide/operations/recovery-verification.md",
+      "details": "reference/behavior/operations/recovery-verification.md",
+      "sections": [
+        "Verify a retained transfer structure",
+        "Check recorded transfer checksums",
+        "Verify Git restorability in isolation"
+      ],
+      "sourceSha256": "85a3d550a2780c781a1a84835e80b567063ad833b8433694cc1aab79b8c086a9",
+      "sourceBodySha256": "1f32a58dd272b9f2b1610a3d0cc6743f1713481a6f75689db550687411c35dc3",
+      "preservedBodySha256": "1f32a58dd272b9f2b1610a3d0cc6743f1713481a6f75689db550687411c35dc3",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "operations/storage-retention.md",
+      "destination": "guide/operations/storage-retention.md",
+      "details": "reference/behavior/operations/storage-retention.md",
+      "sections": [
+        "Plan retention and prune explicitly",
+        "Check storage admission in a workflow",
+        "Reserve capacity across concurrent operations"
+      ],
+      "sourceSha256": "d81cfec32ea89a7ecd3db374dc51081ceb4f8c6088ae0872e5e4800c2afbdea9",
+      "sourceBodySha256": "8432bbc7dd0853812345f5541bd71747131683c40fe3683b59e978bd958ae468",
+      "preservedBodySha256": "8432bbc7dd0853812345f5541bd71747131683c40fe3683b59e978bd958ae468",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "operations/development.md",
+      "destination": "guide/extend/development.md",
+      "details": "reference/behavior/operations/development.md",
+      "sections": ["Documentation development"],
+      "sourceSha256": "0eec2963ea69ef49a958a7adf7471d3687e3ef57cecd304ebd6d9bd4d7274497",
+      "sourceBodySha256": "43dbfa2e6cd09e53bebcdd36cc39e95fb1e129692febaa22d3f07d0ce6252263",
+      "preservedBodySha256": "43dbfa2e6cd09e53bebcdd36cc39e95fb1e129692febaa22d3f07d0ce6252263",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "operations/releases.md",
+      "destination": "guide/extend/releases.md",
+      "details": "reference/behavior/operations/releases.md",
+      "sections": ["Release procedure", "One documentation site"],
+      "sourceSha256": "507502c31eece0f4101192002c5609a1a0570b25dc5e0029c181b6bf65550c6d",
+      "sourceBodySha256": "2c1e36de93efa01e23c5e7434dadbe8b901fc59c3a553271660a832a9a37e4f0",
+      "preservedBodySha256": "2c1e36de93efa01e23c5e7434dadbe8b901fc59c3a553271660a832a9a37e4f0",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "operations/doctor.md",
+      "destination": "guide/operations/doctor.md",
+      "details": "reference/behavior/operations/doctor.md",
+      "sections": [
+        "Select the environment",
+        "Check an image",
+        "Check the agent CLI commands",
+        "Interpret the report",
+        "Inspect a sandbox you already own",
+        "Explicit cloud and transfer probes",
+        "Inspect bundled protocol fixtures"
+      ],
+      "sourceSha256": "23be68e3d531a7dc9e6bdab149e7003c4cfe1a72e315bd57cefca5fc133103d9",
+      "sourceBodySha256": "b8d7da2e4c2a514a33cf3b285abed493bcb53ec187a09486ecb75166f3a9164b",
+      "preservedBodySha256": "fa9948072173cd4fdfb78d384f88b78b1d85c220db55fbeaee5c1268a636025f",
+      "disposition": "corrected with implementation evidence"
+    },
+    {
+      "source": "operations/troubleshooting.md",
+      "destination": "guide/operations/troubleshooting.md",
+      "details": "reference/behavior/operations/troubleshooting.md",
+      "sections": [],
+      "sourceSha256": "221cdcc29678fe6ea4cc1bee658893e5a661522635ed769b3008ff960a63f2bf",
+      "sourceBodySha256": "58edc309795a4637d6f04697c99c0ddf39ba22ec04dc4df420dbcdec0f953361",
+      "preservedBodySha256": "58edc309795a4637d6f04697c99c0ddf39ba22ec04dc4df420dbcdec0f953361",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "operations/remote-transfers.md",
+      "destination": "guide/operations/remote-transfers.md",
+      "details": "reference/behavior/operations/remote-transfers.md",
+      "sections": [
+        "What is transferred",
+        "Initial uploads and copied inputs",
+        "Compression and limits",
+        "Failure and recovery",
+        "Custom provider contract"
+      ],
+      "sourceSha256": "4f621796184d7258342ca8ddb664ae64cde117601b3511c2cfed116765c904f8",
+      "sourceBodySha256": "d949dc518a1421261dbf390afc1e6fb0743d37ba45718f316bf8afe5731cf9a0",
+      "preservedBodySha256": "d949dc518a1421261dbf390afc1e6fb0743d37ba45718f316bf8afe5731cf9a0",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "operations/recovery-restoration.md",
+      "destination": "guide/operations/recovery-restoration.md",
+      "details": "reference/behavior/operations/recovery-restoration.md",
+      "sections": ["Plan and apply through the API", "Scope and limits"],
+      "sourceSha256": "3ba1c799df6d5097d878b76ac984fb4e1bc5b022701c4c29ab5a4f310d151b41",
+      "sourceBodySha256": "c0f4ad032b6b6827dd4dd8d3741e26b1ce44bdb67456d404aa589aab203ce298",
+      "preservedBodySha256": "c0f4ad032b6b6827dd4dd8d3741e26b1ce44bdb67456d404aa589aab203ce298",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "operations/cloud-compatibility.md",
+      "destination": "guide/extend/cloud-compatibility.md",
+      "details": "reference/behavior/operations/cloud-compatibility.md",
+      "sections": [
+        "Run manually",
+        "Scheduled checks",
+        "Cleanup and troubleshooting",
+        "Authenticated model checks"
+      ],
+      "sourceSha256": "36c1728688337fd7155bce7f5bb53bb9080f980958bcaa92bf6a08edd41a0c0d",
+      "sourceBodySha256": "1c0c133ace436d6a55c68e8ffd7a1c75d867f1ee2fbab910e68edf68163dd1dc",
+      "preservedBodySha256": "1c0c133ace436d6a55c68e8ffd7a1c75d867f1ee2fbab910e68edf68163dd1dc",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "operations/recovery.md",
+      "destination": "guide/operations/recovery.md",
+      "details": "reference/behavior/operations/recovery.md",
+      "sections": [
+        "What is preserved",
+        "Inspect retained storage",
+        "Inspect workspace Git state",
+        "Inspect lock PIDs",
+        "Verify a retained transfer structure",
+        "Check recorded transfer checksums",
+        "Recover deliberately",
+        "Observe local ownership",
+        "Inspect sandbox activity"
+      ],
+      "sourceSha256": "abee68a7193d4682b5012110b34798860551b0ecd71e16331c7b087791088962",
+      "sourceBodySha256": "bf922a50dcc097f1a2a50e2f41683893042b953fa1930a9a0b302db506c53ceb",
+      "preservedBodySha256": "bf922a50dcc097f1a2a50e2f41683893042b953fa1930a9a0b302db506c53ceb",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "operations/telemetry.md",
+      "destination": "guide/advanced/telemetry.md",
+      "details": "reference/behavior/operations/telemetry.md",
+      "sections": ["OpenTelemetry", "Metrics and privacy"],
+      "sourceSha256": "ce27d8936f0523df9a1753c4f6be4f56a8c1dcf19d5e5d797796f5325fb856f4",
+      "sourceBodySha256": "0349ff4c794b0fc1ab3d637cb1394d9ec81e3e22a78c7a5284c7d9137d5aa45f",
+      "preservedBodySha256": "0349ff4c794b0fc1ab3d637cb1394d9ec81e3e22a78c7a5284c7d9137d5aa45f",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "project/architecture.md",
+      "destination": "guide/extend/architecture.md",
+      "details": null,
+      "sections": [
+        "Contracts and configuration",
+        "Agents and conversations",
+        "Resource lifecycle",
+        "Providers and Git",
+        "Workflows",
+        "Extending and validating",
+        "Durable orchestration and research boundaries"
+      ],
+      "sourceSha256": "6b3d0f5b387148870b8a9778d96ebc5cced4aaafc31b99ce1997c2799d1a9c9f",
+      "sourceBodySha256": "1f43d1467a96201ae1295cc06d9cad6bbfc11059db83e7d6f2cd113d3aa35867",
+      "preservedBodySha256": "1f43d1467a96201ae1295cc06d9cad6bbfc11059db83e7d6f2cd113d3aa35867",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "project/roadmap.md",
+      "destination": "project/roadmap.md",
+      "details": null,
+      "sections": [
+        "Starting point",
+        "Near term: make execution dependable",
+        "Medium term: extend proven contracts",
+        "How priorities change"
+      ],
+      "sourceSha256": "c2692d6e80fd4a041f2da76dbeca895dfed3d52dd0bde1760aeec690cc97d5c3",
+      "sourceBodySha256": "58e5cc3cb85f2d53108c7635dc8618354cf7a18f420d0e6ff3ef9c0d95dc160b",
+      "preservedBodySha256": "58e5cc3cb85f2d53108c7635dc8618354cf7a18f420d0e6ff3ef9c0d95dc160b",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "project/changelog.md",
+      "destination": "project/changelog.md",
+      "details": null,
+      "sections": [
+        "4.1.0",
+        "4.0.0",
+        "3.0.0",
+        "2.0.0",
+        "1.1.4",
+        "1.1.3",
+        "1.1.2",
+        "1.1.1",
+        "1.1.0",
+        "1.0.0"
+      ],
+      "sourceSha256": "59061cc9c4389d810c3e47c8cc255cef72120ce760c8311a405d927e56bccbc1",
+      "sourceBodySha256": "2c5509cda0a1f973ab64364e69e5c7bd85f9c1fe1550fe519e13d915d6a069a2",
+      "preservedBodySha256": "2c5509cda0a1f973ab64364e69e5c7bd85f9c1fe1550fe519e13d915d6a069a2",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "cookbooks/typed-report.md",
+      "destination": "guide/cookbook/typed-report.md",
+      "details": "reference/behavior/cookbooks/typed-report.md",
+      "sections": ["Validation boundary", "Invalid responses"],
+      "sourceSha256": "c2401d2ec76d8bbd24010f6e7e0184372c03021fb78fd75cacbe6c9ed95bdcbb",
+      "sourceBodySha256": "e23df11d94edff8e6b94a9cbbeb4216a35a183c6f9975c5a960f2466bb4965ed",
+      "preservedBodySha256": "e23df11d94edff8e6b94a9cbbeb4216a35a183c6f9975c5a960f2466bb4965ed",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "cookbooks/index.md",
+      "destination": "guide/cookbook/index.md",
+      "details": "reference/behavior/cookbooks/index.md",
+      "sections": ["Shared setup", "Ownership"],
+      "sourceSha256": "ea71b8a1de4985dbeafe0d84410206830d8e7a309c4e6b0e40423f96ac41ea80",
+      "sourceBodySha256": "06da4a054cd1bdad70d6a826db9afff03368b0cc04aca0f4d91bab32d94c89d8",
+      "preservedBodySha256": "06da4a054cd1bdad70d6a826db9afff03368b0cc04aca0f4d91bab32d94c89d8",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "cookbooks/delivery-gate.md",
+      "destination": "guide/cookbook/delivery-gate.md",
+      "details": "reference/behavior/cookbooks/delivery-gate.md",
+      "sections": ["Gate behavior", "Extend carefully"],
+      "sourceSha256": "519313302fcdd868b2e14bc56141ece79a441b0622ae44566b51a8ebda8f5487",
+      "sourceBodySha256": "5a71cd5bad2ec6f8e2b80bf6d5b04441946797788c0781b54bd221db5fb37b34",
+      "preservedBodySha256": "5a71cd5bad2ec6f8e2b80bf6d5b04441946797788c0781b54bd221db5fb37b34",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "cookbooks/focused-fix.md",
+      "destination": "guide/cookbook/focused-fix.md",
+      "details": "reference/behavior/cookbooks/focused-fix.md",
+      "sections": ["Expected outcome", "Failure and repetition"],
+      "sourceSha256": "cd1e75532fe12740b5f3d487d5ba692beb02939eb607fb651f7c918e9405a2f4",
+      "sourceBodySha256": "db3ea89930a3c30bf2ac4bab41bf972ffb0bbec14377e5fb857789738d235f7d",
+      "preservedBodySha256": "db3ea89930a3c30bf2ac4bab41bf972ffb0bbec14377e5fb857789738d235f7d",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "cookbooks/parallel.md",
+      "destination": "guide/cookbook/parallel.md",
+      "details": "reference/behavior/cookbooks/parallel.md",
+      "sections": ["Isolation", "Partial failures"],
+      "sourceSha256": "e752db6c7bf66de4ec01fd3e4fa8d6359641e2a80f1025da9f845f2d74a7150d",
+      "sourceBodySha256": "7945af3663bc9c3d9454d2ed808d11879e9ba49666e0c0798ce07030a205085d",
+      "preservedBodySha256": "7945af3663bc9c3d9454d2ed808d11879e9ba49666e0c0798ce07030a205085d",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "cookbooks/pair-review.md",
+      "destination": "guide/cookbook/pair-review.md",
+      "details": "reference/behavior/cookbooks/pair-review.md",
+      "sections": ["Agent handoff", "Review before delivery"],
+      "sourceSha256": "eaaa753d176763ee219653b6857c09d770851d4460d34c484e463cd0079b8d3c",
+      "sourceBodySha256": "bf56bdcbfa23acd5e201dbea7d80f8bc91da67ab4d8002fd58e0793540a4e8f8",
+      "preservedBodySha256": "bf56bdcbfa23acd5e201dbea7d80f8bc91da67ab4d8002fd58e0793540a4e8f8",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "cookbooks/recovery.md",
+      "destination": "guide/cookbook/recovery.md",
+      "details": "reference/behavior/cookbooks/recovery.md",
+      "sections": ["Inspect before retrying", "Resume deliberately"],
+      "sourceSha256": "aaa7731486fc8a6548cbe2a27e459d6b959d762b88fe82bf8e8ad712516374a5",
+      "sourceBodySha256": "5f1815a78fd782d8b7440c482f03dd6b503270a5b1422a5197314bfc9f5b8feb",
+      "preservedBodySha256": "5f1815a78fd782d8b7440c482f03dd6b503270a5b1422a5197314bfc9f5b8feb",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "providers/firecracker.md",
+      "destination": "guide/advanced/firecracker.md",
+      "details": "reference/behavior/providers/firecracker.md",
+      "sections": [
+        "Prepare the host and guest",
+        "Create a provider",
+        "Ownership and validation"
+      ],
+      "sourceSha256": "1c9467f6cc037419db0d1f3f5ca1e16e34f05caca333f2fdb8fc9914b2a914ed",
+      "sourceBodySha256": "4ccece5b9be99b9af41b6835ee8f7551cc2efdd4751d44898814677f294c4f54",
+      "preservedBodySha256": "4ccece5b9be99b9af41b6835ee8f7551cc2efdd4751d44898814677f294c4f54",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "providers/vercel.md",
+      "destination": "guide/environment/providers/vercel.md",
+      "details": "reference/behavior/providers/vercel.md",
+      "sections": ["Agent authentication"],
+      "sourceSha256": "70e0187988107f257a418a532b2486b04c5fc4f1ddf52209a2f49e72c36049fd",
+      "sourceBodySha256": "fcdc0769b2c914c0a676083756d13bd0079d7f5ba5f56a274443e3e2ef9afa4e",
+      "preservedBodySha256": "fcdc0769b2c914c0a676083756d13bd0079d7f5ba5f56a274443e3e2ef9afa4e",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "providers/local.md",
+      "destination": "guide/environment/providers/local.md",
+      "details": "reference/behavior/providers/local.md",
+      "sections": [],
+      "sourceSha256": "4d4aa16605fb953ea77a775d337b5f5d7108c9b76e1b3da2433f1992660ce38a",
+      "sourceBodySha256": "aaa9c364e348378d5ae0c61e343a56dda20f85528e55aa15bf3870ca9b50e578",
+      "preservedBodySha256": "aaa9c364e348378d5ae0c61e343a56dda20f85528e55aa15bf3870ca9b50e578",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "providers/dependency-caches.md",
+      "destination": "guide/environment/providers/dependency-caches.md",
+      "details": "reference/behavior/providers/dependency-caches.md",
+      "sections": [
+        "Cache package downloads",
+        "Ownership, isolation and invalidation"
+      ],
+      "sourceSha256": "229eb57644624f0fee5a5be271a7296c7924b90e39384ce27f78c4c8f6889c7f",
+      "sourceBodySha256": "985edcc969dc6e8600dba91adbf5717e22966eb1e6f7d432a779734643045068",
+      "preservedBodySha256": "985edcc969dc6e8600dba91adbf5717e22966eb1e6f7d432a779734643045068",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "providers/agent-images.md",
+      "destination": "guide/environment/providers/agent-images.md",
+      "details": "reference/behavior/providers/agent-images.md",
+      "sections": [
+        "Build locally",
+        "Publish with signed provenance",
+        "Verify before pulling and running"
+      ],
+      "sourceSha256": "1612ad7bc73dc68f2dca534552218bd8b1988db38d9ba7fe5be5fb6ff1fb6701",
+      "sourceBodySha256": "fd23a106900129882b7b9ed2011d1f3c89155a8e62eb86fc953aae5cde8b7053",
+      "preservedBodySha256": "fd23a106900129882b7b9ed2011d1f3c89155a8e62eb86fc953aae5cde8b7053",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "providers/daytona.md",
+      "destination": "guide/environment/providers/daytona.md",
+      "details": "reference/behavior/providers/daytona.md",
+      "sections": [],
+      "sourceSha256": "6cfdbe2946173721171a21a6fe229b6bf3af2c5274e2940cb57d1cdb3f7801e0",
+      "sourceBodySha256": "475c3cb8f0dc376fcdbbf9c022b633bc99f0f4d75aa1fcc750fae2b72583f8c1",
+      "preservedBodySha256": "475c3cb8f0dc376fcdbbf9c022b633bc99f0f4d75aa1fcc750fae2b72583f8c1",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "providers/containers.md",
+      "destination": "guide/environment/providers/containers.md",
+      "details": "reference/behavior/providers/containers.md",
+      "sections": ["Options", "Platform differences", "File transfers"],
+      "sourceSha256": "dad685c0458ab232d8cd8ec43b02497a768c7ef397cc45c6e539eb33877b62ee",
+      "sourceBodySha256": "92b956e21cbb8979a6995c2475d049fefd190d15816ffb400321489d5a34448d",
+      "preservedBodySha256": "92b956e21cbb8979a6995c2475d049fefd190d15816ffb400321489d5a34448d",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "providers/overview.md",
+      "destination": "guide/environment/providers/overview.md",
+      "details": "reference/behavior/providers/overview.md",
+      "sections": [],
+      "sourceSha256": "492b316efb13b3263475343223a69e62b9e34e35d1c478f9f85678deca475647",
+      "sourceBodySha256": "85a4b26b110c310536866d3de3c1a3bfc96ac4c99b6249c43ffc7e2106fb51b2",
+      "preservedBodySha256": "85a4b26b110c310536866d3de3c1a3bfc96ac4c99b6249c43ffc7e2106fb51b2",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "providers/repository-isolation.md",
+      "destination": "guide/advanced/repository-isolation.md",
+      "details": "reference/behavior/providers/repository-isolation.md",
+      "sections": ["Synchronization and ownership", "Mounts and limits"],
+      "sourceSha256": "47ec4be3b8bd8d7a6c1664b58d20d1670482332df6e4f2fe82315e8804000836",
+      "sourceBodySha256": "fc7311a0b2f29e0816cad1b0e63ed401e814d23064fa3017dc163c51eb8b18fe",
+      "preservedBodySha256": "fc7311a0b2f29e0816cad1b0e63ed401e814d23064fa3017dc163c51eb8b18fe",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/extend/agents.md",
+      "destination": "fr/guide/extend/agents.md",
+      "details": "fr/reference/behavior/extend/agents.md",
+      "sections": ["Capacités facultatives"],
+      "sourceSha256": "909f3a7257f9d6702ab10840e6d1362cf8c9a1293f337b8d5d94d00e01a694e4",
+      "sourceBodySha256": "05a2ea12598ac9cca4992c0ccd391920960aeba8eadff9802b03cd2667051297",
+      "preservedBodySha256": "05a2ea12598ac9cca4992c0ccd391920960aeba8eadff9802b03cd2667051297",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/extend/providers.md",
+      "destination": "fr/guide/extend/providers.md",
+      "details": "fr/reference/behavior/extend/providers.md",
+      "sections": [],
+      "sourceSha256": "fe3d2bd653c9e629ce52aa412f1fa58e65b6d182076a148fa71079a61c8c1a3b",
+      "sourceBodySha256": "ce6cd35469f9c717dfedea1ab0d359586fd5b78a4a48486e08456a2db98d2e88",
+      "preservedBodySha256": "ce6cd35469f9c717dfedea1ab0d359586fd5b78a4a48486e08456a2db98d2e88",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/extend/conversations.md",
+      "destination": "fr/guide/extend/conversations.md",
+      "details": "fr/reference/behavior/extend/conversations.md",
+      "sections": [],
+      "sourceSha256": "3861265444f4739c73e2d442542cec4490643e3014b45e3df37cf1d2de1ccee4",
+      "sourceBodySha256": "00541c3d3a06d5ea7c743339f6efac9c3503764d7be0ec219dbac6939ec2c90c",
+      "preservedBodySha256": "00541c3d3a06d5ea7c743339f6efac9c3503764d7be0ec219dbac6939ec2c90c",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/agents/dispatch.md",
+      "destination": "fr/guide/agents/dispatch.md",
+      "details": "fr/reference/behavior/agents/dispatch.md",
+      "sections": ["Lire le résultat"],
+      "sourceSha256": "12334c4db40fba9d826007ff951a2914fdbdc5800eb5d36021e32c404d304de5",
+      "sourceBodySha256": "75c20da265035ddc38502e2f0f8b86355ad68b53c34bda7b22510dbf6af8b227",
+      "preservedBodySha256": "75c20da265035ddc38502e2f0f8b86355ad68b53c34bda7b22510dbf6af8b227",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/agents/iteration.md",
+      "destination": "fr/guide/agents/iteration.md",
+      "details": "fr/reference/behavior/agents/iteration.md",
+      "sections": ["Environnement recréé ou réutilisé"],
+      "sourceSha256": "47092b2db25d23a9927ec4a6ed41b8aeea0904df9be563c1095410660a8bd3ff",
+      "sourceBodySha256": "c3265063caacebbc4cb8ff62964298c2dfa2eb282100a9c897a46bfce36c5bad",
+      "preservedBodySha256": "c3265063caacebbc4cb8ff62964298c2dfa2eb282100a9c897a46bfce36c5bad",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/agents/gemini.md",
+      "destination": "fr/guide/agents/gemini.md",
+      "details": "fr/reference/behavior/agents/gemini.md",
+      "sections": [
+        "Créer un workflow",
+        "Configurer l'exécution",
+        "Sortie et limites des sessions"
+      ],
+      "sourceSha256": "c3db829edc691bca522b65ab5648ea5f126fa700edaadf74984eb7add65060d2",
+      "sourceBodySha256": "3b0beb7713762f9d2bf93f0a778b8b1720ccfba2dc4451e43dbf56f16dcf5876",
+      "preservedBodySha256": "3b0beb7713762f9d2bf93f0a778b8b1720ccfba2dc4451e43dbf56f16dcf5876",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/agents/prompts.md",
+      "destination": "fr/guide/agents/prompts.md",
+      "details": "fr/reference/behavior/agents/prompts.md",
+      "sections": ["Règles de résolution"],
+      "sourceSha256": "5ca533bae47ccbbd225a501c67b4ae6a322b7b505cce27fbba9e106e2bb233a1",
+      "sourceBodySha256": "333746b0e2d58f109d61df49f532659ea7a5a78a4e7f79c2748fe95633cfc301",
+      "preservedBodySha256": "333746b0e2d58f109d61df49f532659ea7a5a78a4e7f79c2748fe95633cfc301",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/agents/environment.md",
+      "destination": "fr/guide/agents/environment.md",
+      "details": "fr/reference/behavior/agents/environment.md",
+      "sections": [
+        "Priorité des valeurs",
+        "Choisir l’authentification",
+        "Connecter un compte"
+      ],
+      "sourceSha256": "32edb11e2559ca06d45e2027d392989d9cf053e3c1af60d6c729488a2ecb774f",
+      "sourceBodySha256": "d2668b2e02455ac9de35ebb9dc69a68307344307131b6c406fb93ffb4a061793",
+      "preservedBodySha256": "d2668b2e02455ac9de35ebb9dc69a68307344307131b6c406fb93ffb4a061793",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/agents/connect-claude.md",
+      "destination": "fr/guide/agents/connect-claude.md",
+      "details": "fr/reference/behavior/agents/connect-claude.md",
+      "sections": [
+        "Connexion locale",
+        "Jeton d'abonnement pour les sandboxes",
+        "Alternative avec une clé API",
+        "Vérifier et exécuter",
+        "Garder un home cohérent",
+        "Dépannage"
+      ],
+      "sourceSha256": "c97b2f0d7af5799b9f8696bb7d18f72d12d08e097f3213b076092db287a38e9b",
+      "sourceBodySha256": "c4291648239901f6ba96b9ec7c90dd81840f20f8eb6636671c25fc28f19f6da9",
+      "preservedBodySha256": "c4291648239901f6ba96b9ec7c90dd81840f20f8eb6636671c25fc28f19f6da9",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/agents/observability.md",
+      "destination": "fr/guide/agents/observability.md",
+      "details": "fr/reference/behavior/agents/observability.md",
+      "sections": ["Événements", "Journalisation", "Comptage des tokens"],
+      "sourceSha256": "dcb304daefc3adf961a9c69dfdb470bfc48f1e7efb81cc9f18e577c066d1db05",
+      "sourceBodySha256": "6c7e1692ba73ac0737c8a7350332de075be815197d88b1ec6ac7ddf23ab868e8",
+      "preservedBodySha256": "6c7e1692ba73ac0737c8a7350332de075be815197d88b1ec6ac7ddf23ab868e8",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/agents/adapters.md",
+      "destination": "fr/guide/agents/adapters.md",
+      "details": "fr/reference/behavior/agents/adapters.md",
+      "sections": [],
+      "sourceSha256": "f160c02a2615533d5d5966ec7052e4a138aa82d5f2315330ece701c5aa562b98",
+      "sourceBodySha256": "099959b7d5b86d565b59bdb683abfc52feb9f3e8ce15dde689fcb5747c5d6e28",
+      "preservedBodySha256": "099959b7d5b86d565b59bdb683abfc52feb9f3e8ce15dde689fcb5747c5d6e28",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/agents/connect-codex.md",
+      "destination": "fr/guide/agents/connect-codex.md",
+      "details": "fr/reference/behavior/agents/connect-codex.md",
+      "sections": [
+        "Se connecter sur son ordinateur",
+        "Générer un workflow avec son abonnement",
+        "Utiliser son compte ChatGPT dans un conteneur",
+        "Alternative avec une clé API",
+        "Dépannage",
+        "Fournisseurs de modèles compatibles OpenAI"
+      ],
+      "sourceSha256": "25532ca480fc079faf75157ab3b6bb2a8a2cb66db9a453a420eccf4bd1e49ff6",
+      "sourceBodySha256": "d9059bc4fd487fe609cb4ac6f45deeba861d30e0838bcbefb0652b0b7eb2b772",
+      "preservedBodySha256": "d9059bc4fd487fe609cb4ac6f45deeba861d30e0838bcbefb0652b0b7eb2b772",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/agents/conversations.md",
+      "destination": "fr/guide/agents/conversations.md",
+      "details": "fr/reference/behavior/agents/conversations.md",
+      "sections": ["Choisir la continuation", "Stockage et échecs de capture"],
+      "sourceSha256": "e87f5c758fe3fd0a4c8723ce1a7fdf483d80be947bdf95f72f1c605729fef9d4",
+      "sourceBodySha256": "02f7d91a7b3c9f2d7b0de28e0b952c6051f5ad1d2e3ae4c8c63fea92d0449d46",
+      "preservedBodySha256": "02f7d91a7b3c9f2d7b0de28e0b952c6051f5ad1d2e3ae4c8c63fea92d0449d46",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/agents/responses.md",
+      "destination": "fr/guide/agents/responses.md",
+      "details": "fr/reference/behavior/agents/responses.md",
+      "sections": ["Règles de lecture", "Réparation et récupération"],
+      "sourceSha256": "508b82c5589b2d63735e584c3a1ecf9012f4729d8d8224c65ae368a47d27119f",
+      "sourceBodySha256": "13b428b093769de267be5286a24112d5e003283344c061e1dcad41577dd0f91e",
+      "preservedBodySha256": "13b428b093769de267be5286a24112d5e003283344c061e1dcad41577dd0f91e",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/agents/cancellation.md",
+      "destination": "fr/guide/agents/cancellation.md",
+      "details": "fr/reference/behavior/agents/cancellation.md",
+      "sections": [],
+      "sourceSha256": "4809b51d1cd062a7298eb282f83b9eaee4a196cdad828eb3e7f5b955c3fec5ec",
+      "sourceBodySha256": "eeeaf50fb5b064c95af56d54ef4610a452dc4803a53dd7e4f45753c489d0c526",
+      "preservedBodySha256": "eeeaf50fb5b064c95af56d54ef4610a452dc4803a53dd7e4f45753c489d0c526",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/workflows/speculation.md",
+      "destination": "fr/guide/advanced/speculation.md",
+      "details": "fr/reference/behavior/workflows/speculation.md",
+      "sections": ["Budgets et récupération"],
+      "sourceSha256": "f7e075733c4efa90d7e0a22b3b5c78a5a01bb97a5d251d802405e9313887b9b6",
+      "sourceBodySha256": "bd2117543d63222774bbb3f3063a93f91d64fc400db5543d04d970d57fb1b47f",
+      "preservedBodySha256": "bd2117543d63222774bbb3f3063a93f91d64fc400db5543d04d970d57fb1b47f",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/workflows/checkpoints.md",
+      "destination": "fr/guide/advanced/checkpoints.md",
+      "details": "fr/reference/behavior/workflows/checkpoints.md",
+      "sections": [
+        "Redémarrage et politique de rejeu",
+        "Identité et contrat des résultats",
+        "Stockage et exclusivité"
+      ],
+      "sourceSha256": "f97647663c2e83e46899d7f9ddb73716bf3bfd876065587e3f130bab9425d7b2",
+      "sourceBodySha256": "e513e3fd08cd3b20d0e9414a9b1aa4e592406e6025f95f13e48e9f3c4249f9ae",
+      "preservedBodySha256": "e513e3fd08cd3b20d0e9414a9b1aa4e592406e6025f95f13e48e9f3c4249f9ae",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/workflows/sandbox-tasks.md",
+      "destination": "fr/guide/workflows/sandbox-tasks.md",
+      "details": "fr/reference/behavior/workflows/sandbox-tasks.md",
+      "sections": ["Plusieurs dépôts"],
+      "sourceSha256": "7b56e0c72d30403e51acb3bb52da4b7147797b0504271e70a0da261d3b624b23",
+      "sourceBodySha256": "449e0a543d73930ba4b690f4c7b6a95a9813e82ae88b7ef292adb2628c08b7f0",
+      "preservedBodySha256": "449e0a543d73930ba4b690f4c7b6a95a9813e82ae88b7ef292adb2628c08b7f0",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/workflows/approvals.md",
+      "destination": "fr/guide/advanced/approvals.md",
+      "details": "fr/reference/behavior/workflows/approvals.md",
+      "sections": [
+        "Créer l'étape",
+        "Décider et reprendre",
+        "Redémarrage et observation"
+      ],
+      "sourceSha256": "d8d7c4e72ea82c67cbda56813e23028912d8b670759b19792f13330cc1e761a2",
+      "sourceBodySha256": "3acac4ed3402a2118e3b4a31a479ee59678eee9adbd4c345f6bf51b6934af320",
+      "preservedBodySha256": "3acac4ed3402a2118e3b4a31a479ee59678eee9adbd4c345f6bf51b6934af320",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/workflows/budgets.md",
+      "destination": "fr/guide/workflows/budgets.md",
+      "details": "fr/reference/behavior/workflows/budgets.md",
+      "sections": ["Admission et annulation", "Éléments comptabilisés"],
+      "sourceSha256": "803ad30ad0e632373dd5864669707d6a3a45849043ca22e1f02495ffb56764ff",
+      "sourceBodySha256": "443d005a779f4799bf2bfd15d483af14186d2b1aab66b0b8696dfda40da6a06d",
+      "preservedBodySha256": "443d005a779f4799bf2bfd15d483af14186d2b1aab66b0b8696dfda40da6a06d",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/workflows/artifacts.md",
+      "destination": "fr/guide/advanced/artifacts.md",
+      "details": "fr/reference/behavior/workflows/artifacts.md",
+      "sections": [
+        "Publier et consommer un contrat",
+        "Données dérivées et autre processus",
+        "Fichiers binaires, propriété et limites"
+      ],
+      "sourceSha256": "3776545975668f85d25527ef3288fbff500fa90aab6f6baac14dc1b4636d6832",
+      "sourceBodySha256": "0a6a563eda44e61ee05ea58b035edec2349afe0d9325c52446c1d2f0e3e1f72b",
+      "preservedBodySha256": "0a6a563eda44e61ee05ea58b035edec2349afe0d9325c52446c1d2f0e3e1f72b",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/workflows/distributed.md",
+      "destination": "fr/guide/advanced/distributed.md",
+      "details": "fr/reference/behavior/workflows/distributed.md",
+      "sections": [
+        "Démarrer un coordinateur",
+        "Démarrer les workers",
+        "Soumettre depuis un workflow",
+        "Garanties et consommation"
+      ],
+      "sourceSha256": "c05592a80c32d250fd7cb5931cc44c14a1c316d1c28ce5826694e25140778530",
+      "sourceBodySha256": "23d2cdf64ad2dcbf7168a34694b9249827a4ad18c4f6bcbdccb77ef651ce0331",
+      "preservedBodySha256": "23d2cdf64ad2dcbf7168a34694b9249827a4ad18c4f6bcbdccb77ef651ce0331",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/workflows/graph.md",
+      "destination": "fr/guide/workflows/graph.md",
+      "details": "fr/reference/behavior/workflows/graph.md",
+      "sections": ["Règles de dépendance", "Résultat et visualisation"],
+      "sourceSha256": "84ef20db3998ca1aefb03e6adc6d45acde2ac9782aec47de0a2b3bd7a781db55",
+      "sourceBodySha256": "2fa36c84d640c13ce5f536f1a497d6686090559d2da3ec8e30d44af900d85e6c",
+      "preservedBodySha256": "2fa36c84d640c13ce5f536f1a497d6686090559d2da3ec8e30d44af900d85e6c",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/workflows/execution.md",
+      "destination": "fr/guide/workflows/execution.md",
+      "details": "fr/reference/behavior/workflows/execution.md",
+      "sections": [],
+      "sourceSha256": "57b80879f0c0aa5466387fcebbbd801028396e987ac384792e58b0412243957c",
+      "sourceBodySha256": "d341ca56593783120ffd1893fc66b3f561a2a0d10d95c8c4c5064465b659a0e8",
+      "preservedBodySha256": "d341ca56593783120ffd1893fc66b3f561a2a0d10d95c8c4c5064465b659a0e8",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/start/quickstart.md",
+      "destination": "fr/guide/start/quickstart.md",
+      "details": "fr/reference/behavior/start/quickstart.md",
+      "sections": [
+        "1. Générer les fichiers du projet",
+        "2. Déclarer les identifiants de l’agent",
+        "3. Exécuter le script",
+        "4. Examiner le résultat"
+      ],
+      "sourceSha256": "8265c2354afd2319db5a99cbcbb8bc58a523e63221f2a26dbf928e974e2f5ae4",
+      "sourceBodySha256": "19585dbdd365c3656adb9d2d25c7b2308ea0f7b9688fdf8764325f5641ec0253",
+      "preservedBodySha256": "832d4f32cd9e4a6f3bbe7c011b90017786c1f93e513f0f72c96d5f0ddd3f29b1",
+      "disposition": "corrected with implementation evidence"
+    },
+    {
+      "source": "fr/start/cli-images.md",
+      "destination": "fr/reference/manual/cli-images.md",
+      "details": "fr/reference/behavior/start/cli-images.md",
+      "sections": [],
+      "sourceSha256": "1389fe32c4b0fadae2dc2f499f385de584283f87bf22de4c4a57346520e74aed",
+      "sourceBodySha256": "6c461c6e44641d6cdff94874f8733510813bedd3c10ffb5f60c0ea44c5ea8117",
+      "preservedBodySha256": "6c461c6e44641d6cdff94874f8733510813bedd3c10ffb5f60c0ea44c5ea8117",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/start/concepts.md",
+      "destination": "fr/guide/start/concepts.md",
+      "details": "fr/reference/behavior/start/concepts.md",
+      "sections": [
+        "Quatre éléments essentiels",
+        "Choisir le point d’entrée",
+        "Le nettoyage conserve le travail"
+      ],
+      "sourceSha256": "b0c7202a08e19a1a50ed6412f7308a933abcaa4cb5024a5c85b63a1cb369ef87",
+      "sourceBodySha256": "c6d843d18cb51925a3f7010fd3f41c7190ab4d0e0f1ae7ca6225060b09ccb5f4",
+      "preservedBodySha256": "c6d843d18cb51925a3f7010fd3f41c7190ab4d0e0f1ae7ca6225060b09ccb5f4",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/start/cli.md",
+      "destination": "fr/reference/manual/cli.md",
+      "details": "fr/reference/behavior/start/cli.md",
+      "sections": [
+        "Script généré",
+        "Authentification et prérequis",
+        "Endpoint modèle personnalisé"
+      ],
+      "sourceSha256": "4a837dbd42217e7a62290c3b1d36db829a3798059c11cca8e53e422e111350ab",
+      "sourceBodySha256": "1af32c5524a6faa0ac74fe59be83036eb15627b7a60fec1de610837c83563f28",
+      "preservedBodySha256": "1af32c5524a6faa0ac74fe59be83036eb15627b7a60fec1de610837c83563f28",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/start/installation.md",
+      "destination": "fr/guide/start/installation.md",
+      "details": "fr/reference/behavior/start/installation.md",
+      "sections": [
+        "Prérequis",
+        "Installer depuis npm",
+        "Dépendances cloud",
+        "Autres registres et compilation locale"
+      ],
+      "sourceSha256": "d486e6b97ae55a777c02ddf56ec670196e330847b4b14e9825d5ac3c5a980f28",
+      "sourceBodySha256": "fc130d7ae062c6f995030bc44d6aca51a0b94a96632b0a05178edea654ea6270",
+      "preservedBodySha256": "fc130d7ae062c6f995030bc44d6aca51a0b94a96632b0a05178edea654ea6270",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/sandboxes/hooks.md",
+      "destination": "fr/guide/environment/hooks.md",
+      "details": "fr/reference/behavior/sandboxes/hooks.md",
+      "sections": ["Ordre d’exécution"],
+      "sourceSha256": "308b875c9ee934ff8031efae804b41bab1cf1fec8981d3bf9c3aecdbb7bfe2f2",
+      "sourceBodySha256": "75203119b5bb78b77a240ae16d8aa8d4a2ba3cca1316de3a41d5e0984d838bac",
+      "preservedBodySha256": "75203119b5bb78b77a240ae16d8aa8d4a2ba3cca1316de3a41d5e0984d838bac",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/sandboxes/lifecycle.md",
+      "destination": "fr/guide/environment/lifecycle.md",
+      "details": "fr/reference/behavior/sandboxes/lifecycle.md",
+      "sections": ["Fermeture et annulation"],
+      "sourceSha256": "49d3e35ca5e1b7eaea450b5b17cd93331129c724780c920b775d5b2e45071dae",
+      "sourceBodySha256": "d05e995f997f61c7c2768fe9df8f1dc704ae83552c8558a10e8b1a6ce241f758",
+      "preservedBodySha256": "d05e995f997f61c7c2768fe9df8f1dc704ae83552c8558a10e8b1a6ce241f758",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/sandboxes/repositories.md",
+      "destination": "fr/guide/environment/repositories.md",
+      "details": "fr/reference/behavior/sandboxes/repositories.md",
+      "sections": [
+        "Initialiser hors du dépôt ciblé",
+        "Résoudre les chemins explicitement",
+        "Retrouver les changements et les fichiers de récupération"
+      ],
+      "sourceSha256": "35d2d2abc1f0eb9bf45c52014a1dd40fd3aae6a77523f73900d00fcdfc7b4601",
+      "sourceBodySha256": "2439ec2273eb84cb87c9325bf87fffb32a4302f0e41093a0e65f1ac6baed74aa",
+      "preservedBodySha256": "2439ec2273eb84cb87c9325bf87fffb32a4302f0e41093a0e65f1ac6baed74aa",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/sandboxes/workspaces.md",
+      "destination": "fr/guide/environment/workspaces.md",
+      "details": "fr/reference/behavior/sandboxes/workspaces.md",
+      "sections": ["Configuration"],
+      "sourceSha256": "25e0a1ddd4e5a406a34c392e2aef84ef5269a479bb89828c8a9669c819bcac22",
+      "sourceBodySha256": "da8e369905bd4dd62b3b9fe40a6d07fdd66a7a610a41868b669ab92292fd184d",
+      "preservedBodySha256": "da8e369905bd4dd62b3b9fe40a6d07fdd66a7a610a41868b669ab92292fd184d",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/sandboxes/commands.md",
+      "destination": "fr/guide/environment/commands.md",
+      "details": "fr/reference/behavior/sandboxes/commands.md",
+      "sections": ["Ouvrir une session interactive"],
+      "sourceSha256": "0984ef111929f57447d61f30457fe11d43111879b0fb368a15a33ef906c82cf2",
+      "sourceBodySha256": "293d71c0a21e79d1499efebaa3e81d158ac7a565ae90aa378d819b69791c2113",
+      "preservedBodySha256": "293d71c0a21e79d1499efebaa3e81d158ac7a565ae90aa378d819b69791c2113",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/sandboxes/egress.md",
+      "destination": "fr/guide/advanced/egress.md",
+      "details": "fr/reference/behavior/sandboxes/egress.md",
+      "sections": [
+        "Exécuter une commande hors ligne",
+        "Choisir les destinations Vercel"
+      ],
+      "sourceSha256": "ef149a39aa59950f441fb5df779b65679b46129927d91a275facc5df681fd9ca",
+      "sourceBodySha256": "04addb3184667fdbec7584d89abbf049fcbfe96166ab4830c72ad3da1db0cae2",
+      "preservedBodySha256": "04addb3184667fdbec7584d89abbf049fcbfe96166ab4830c72ad3da1db0cae2",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/sandboxes/branches.md",
+      "destination": "fr/guide/environment/branches.md",
+      "details": "fr/reference/behavior/sandboxes/branches.md",
+      "sections": ["Règles d’intégration", "Travail parallèle"],
+      "sourceSha256": "a983b4040a7030e5752155f93066ef3d37822acee8692be014c3cb3e0f031fd6",
+      "sourceBodySha256": "a8973d5a6c1671d6c4d8353da7b5766e1b0dd930752e9a35b62f533a4f2915da",
+      "preservedBodySha256": "a8973d5a6c1671d6c4d8353da7b5766e1b0dd930752e9a35b62f533a4f2915da",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/sandboxes/remote-sync.md",
+      "destination": "fr/guide/environment/remote-sync.md",
+      "details": "fr/reference/behavior/sandboxes/remote-sync.md",
+      "sections": [
+        "État initial",
+        "Retour des changements",
+        "Limites de transfert"
+      ],
+      "sourceSha256": "61121edd608406be6eb01dcd6ca214f8463bd0aef926aaa67e502106081fdc4c",
+      "sourceBodySha256": "6f8777effc8e804aac4476f2189e396a9bc5c22300347db67470c0862df1d5f8",
+      "preservedBodySha256": "6f8777effc8e804aac4476f2189e396a9bc5c22300347db67470c0862df1d5f8",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/operations/security.md",
+      "destination": "fr/guide/operations/security.md",
+      "details": "fr/reference/behavior/operations/security.md",
+      "sections": ["Protéger les artefacts sensibles"],
+      "sourceSha256": "75299796a292d904acb05d46f3c5337b888306ef32c5b98b97c06456bb10ff75",
+      "sourceBodySha256": "dabae224c4c697aba39d641e541e96e4508149b7299673aa896ea56b39b2c4ff",
+      "preservedBodySha256": "dabae224c4c697aba39d641e541e96e4508149b7299673aa896ea56b39b2c4ff",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/operations/recovery-verification.md",
+      "destination": "fr/guide/operations/recovery-verification.md",
+      "details": "fr/reference/behavior/operations/recovery-verification.md",
+      "sections": [
+        "Vérifier la structure d’un transfert conservé",
+        "Vérifier les empreintes enregistrées du transfert",
+        "Vérifier la restauration Git en isolation"
+      ],
+      "sourceSha256": "507aae1b37488ec82a63455c3854aade51332b375e6fdf58a5da8e17179164c5",
+      "sourceBodySha256": "68b9f4a6cb85dd137c2df3cb0116d268ad53f2a3106071731fb58cf86c881a14",
+      "preservedBodySha256": "68b9f4a6cb85dd137c2df3cb0116d268ad53f2a3106071731fb58cf86c881a14",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/operations/storage-retention.md",
+      "destination": "fr/guide/operations/storage-retention.md",
+      "details": "fr/reference/behavior/operations/storage-retention.md",
+      "sections": [
+        "Planifier la rétention et nettoyer explicitement",
+        "Vérifier l’admission du stockage dans un workflow",
+        "Réserver de la capacité entre opérations concurrentes"
+      ],
+      "sourceSha256": "1ebdfcb28a6972d8d05070bcf9ad98dba80e488810f1076c83e84d5987df6595",
+      "sourceBodySha256": "639bf86e8895e19b19096e453f281c8526d984d74ecf2d150f5b453b7625bd69",
+      "preservedBodySha256": "639bf86e8895e19b19096e453f281c8526d984d74ecf2d150f5b453b7625bd69",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/operations/development.md",
+      "destination": "fr/guide/extend/development.md",
+      "details": "fr/reference/behavior/operations/development.md",
+      "sections": ["Développer la documentation"],
+      "sourceSha256": "c87e98030f0c1f6e19924cc88e1ac18a071b3fef3b614772617e1531032ece59",
+      "sourceBodySha256": "c895a465edb56869eff8a4f63d2efe0bef8ebc66a2380b18f0fd7caabff90bf7",
+      "preservedBodySha256": "c895a465edb56869eff8a4f63d2efe0bef8ebc66a2380b18f0fd7caabff90bf7",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/operations/releases.md",
+      "destination": "fr/guide/extend/releases.md",
+      "details": "fr/reference/behavior/operations/releases.md",
+      "sections": ["Procédure de release", "Un seul site documentaire"],
+      "sourceSha256": "9d0570571ad59515f13d408eaf01f22fc880e7022cc8e28bdf2deef18c7a3aa1",
+      "sourceBodySha256": "eb5347b7bbc665595ee8e8d541ab12d8e6cf4bc679e0517dfec125255f0fb958",
+      "preservedBodySha256": "eb5347b7bbc665595ee8e8d541ab12d8e6cf4bc679e0517dfec125255f0fb958",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/operations/doctor.md",
+      "destination": "fr/guide/operations/doctor.md",
+      "details": "fr/reference/behavior/operations/doctor.md",
+      "sections": [
+        "Choisir l’environnement",
+        "Vérifier une image",
+        "Vérifier les commandes du CLI agent",
+        "Interpréter le rapport",
+        "Inspecter une sandbox déjà détenue",
+        "Sondes cloud et transferts explicites",
+        "Inspecter les fixtures de protocole intégrées"
+      ],
+      "sourceSha256": "d945f2d89e444168f4dbd05bf6727d00f4df3a697c41e122952bca7157138dcd",
+      "sourceBodySha256": "8f40f3dfb076992999bd35ddedfe478e732a72444874d84fe66badd88dad21d1",
+      "preservedBodySha256": "43dbbb577270f98c52eda22941679efc0c75650db5967c400b779ac20d840c19",
+      "disposition": "corrected with implementation evidence"
+    },
+    {
+      "source": "fr/operations/troubleshooting.md",
+      "destination": "fr/guide/operations/troubleshooting.md",
+      "details": "fr/reference/behavior/operations/troubleshooting.md",
+      "sections": [],
+      "sourceSha256": "0019e2d2c1d0c256353a32928c5d0da91b04463036bb5a4ae6a0829a82edafd5",
+      "sourceBodySha256": "af220cd78d86e7eebdaf2bd991d23a130a7629dcfc12573b262976f1dc18b0ea",
+      "preservedBodySha256": "af220cd78d86e7eebdaf2bd991d23a130a7629dcfc12573b262976f1dc18b0ea",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/operations/remote-transfers.md",
+      "destination": "fr/guide/operations/remote-transfers.md",
+      "details": "fr/reference/behavior/operations/remote-transfers.md",
+      "sections": [
+        "Contenu transféré",
+        "Téléversements initiaux et copies",
+        "Compression et limites",
+        "Échec et récupération",
+        "Contrat des fournisseurs personnalisés"
+      ],
+      "sourceSha256": "2dd7b078ff4a05cf862e3fb29d560cb7f4f80b706a5e1be1704328decbb04ad0",
+      "sourceBodySha256": "0f1b759e22725c0294fd66af5a8dc3f6a788516aac6291ba0d3e5fb09a46ade8",
+      "preservedBodySha256": "0f1b759e22725c0294fd66af5a8dc3f6a788516aac6291ba0d3e5fb09a46ade8",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/operations/recovery-restoration.md",
+      "destination": "fr/guide/operations/recovery-restoration.md",
+      "details": "fr/reference/behavior/operations/recovery-restoration.md",
+      "sections": ["Planifier et appliquer via l’API", "Périmètre et limites"],
+      "sourceSha256": "3f33c00d5094994a0baa04b5204e143ab045cabef0720f1b6f1f23c25eb693d4",
+      "sourceBodySha256": "3bbb9b7caa33f73c1b9bf7e4f9fcbd2f296b6896a2020f738b66c4e2b5fa77ef",
+      "preservedBodySha256": "3bbb9b7caa33f73c1b9bf7e4f9fcbd2f296b6896a2020f738b66c4e2b5fa77ef",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/operations/cloud-compatibility.md",
+      "destination": "fr/guide/extend/cloud-compatibility.md",
+      "details": "fr/reference/behavior/operations/cloud-compatibility.md",
+      "sections": [
+        "Exécution manuelle",
+        "Vérifications planifiées",
+        "Nettoyage et dépannage",
+        "Vérifications authentifiées des modèles"
+      ],
+      "sourceSha256": "ea571319b325d90555ef398813af37ca5e1c8c563871f78ca77893e0c7ae0f63",
+      "sourceBodySha256": "7b2f44732711ace7659ecccf1ba7509c423001c0ca8a4d2e6dc557c0bb7a3f02",
+      "preservedBodySha256": "7b2f44732711ace7659ecccf1ba7509c423001c0ca8a4d2e6dc557c0bb7a3f02",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/operations/recovery.md",
+      "destination": "fr/guide/operations/recovery.md",
+      "details": "fr/reference/behavior/operations/recovery.md",
+      "sections": [
+        "Éléments conservés",
+        "Inspecter le stockage conservé",
+        "Inspecter l’état Git des workspaces",
+        "Inspecter les PID des verrous",
+        "Vérifier la structure d’un transfert conservé",
+        "Vérifier les empreintes enregistrées du transfert",
+        "Procédure de récupération",
+        "Observer la propriété locale",
+        "Inspecter l’activité des sandboxes"
+      ],
+      "sourceSha256": "301d8be602af3a3ab4d0cb47887d0ab3fd1ece92daa1aaf55a47ee691978c8d1",
+      "sourceBodySha256": "bb858b5f78ee51dc43568aa0d880e0d6851cda460ad2b36ad6f8dd8dbfa77d5a",
+      "preservedBodySha256": "bb858b5f78ee51dc43568aa0d880e0d6851cda460ad2b36ad6f8dd8dbfa77d5a",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/operations/telemetry.md",
+      "destination": "fr/guide/advanced/telemetry.md",
+      "details": "fr/reference/behavior/operations/telemetry.md",
+      "sections": ["OpenTelemetry", "Métriques et confidentialité"],
+      "sourceSha256": "55a367b01a0e3ef4042a2c33e215e67c8539817dfd7c383424bc20e90c21f5dc",
+      "sourceBodySha256": "15dcb6b28691e8d19d486905753baeb51c09e2afda68215020a9be88862650df",
+      "preservedBodySha256": "15dcb6b28691e8d19d486905753baeb51c09e2afda68215020a9be88862650df",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/project/architecture.md",
+      "destination": "fr/guide/extend/architecture.md",
+      "details": null,
+      "sections": [
+        "Responsabilités",
+        "Extension et vérification",
+        "Orchestration durable et limites de recherche"
+      ],
+      "sourceSha256": "b69c06872ddfc3ae0eaade2eb7703a8a8634ea381041dd638530340f194ac336",
+      "sourceBodySha256": "7a6f65177e37238e66ebdd1107ad54359ec8fee82f5c37c691ce0f1b99ad5c17",
+      "preservedBodySha256": "7a6f65177e37238e66ebdd1107ad54359ec8fee82f5c37c691ce0f1b99ad5c17",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/project/roadmap.md",
+      "destination": "fr/project/roadmap.md",
+      "details": null,
+      "sections": [
+        "Point de départ",
+        "Court terme : fiabiliser l’exécution",
+        "Moyen terme : étendre les contrats éprouvés",
+        "Évolution des priorités"
+      ],
+      "sourceSha256": "1e16d730b439c79343ed8365893466c64aa26f81f5b8609374d9599e4a97ad1d",
+      "sourceBodySha256": "8e54f63ac2dcfa7bd7f464731a877542d381565e58e3ccc77bc9391675e165f1",
+      "preservedBodySha256": "8e54f63ac2dcfa7bd7f464731a877542d381565e58e3ccc77bc9391675e165f1",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/project/changelog.md",
+      "destination": "fr/project/changelog.md",
+      "details": null,
+      "sections": [
+        "4.1.0",
+        "4.0.0",
+        "3.0.0",
+        "2.0.0",
+        "1.1.4",
+        "1.1.3",
+        "1.1.2",
+        "1.1.1",
+        "1.1.0",
+        "1.0.0"
+      ],
+      "sourceSha256": "acd33408ed6bc96a636c7cfd4a1b798b3f69f34faf4e9010a010b4fa68e3de8c",
+      "sourceBodySha256": "532230becf9997d151500ce9d737ebe0105d50ca6826a9db6aed9002d0f0268d",
+      "preservedBodySha256": "532230becf9997d151500ce9d737ebe0105d50ca6826a9db6aed9002d0f0268d",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/cookbooks/typed-report.md",
+      "destination": "fr/guide/cookbook/typed-report.md",
+      "details": "fr/reference/behavior/cookbooks/typed-report.md",
+      "sections": ["Limite de la validation", "Réponses invalides"],
+      "sourceSha256": "fb5e802dc1806a33e6787de5e88353b76229bffc1c82ece61fc835a024768768",
+      "sourceBodySha256": "7d0fdc7d1e89c614dddf0b8cfffd23c6693195396c603d29a077941810b318b6",
+      "preservedBodySha256": "7d0fdc7d1e89c614dddf0b8cfffd23c6693195396c603d29a077941810b318b6",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/cookbooks/index.md",
+      "destination": "fr/guide/cookbook/index.md",
+      "details": "fr/reference/behavior/cookbooks/index.md",
+      "sections": ["Installation commune", "Gestion des ressources"],
+      "sourceSha256": "c9fc14128e51e4fcfc0a4a3026c02ba14d89b1e50c4a4f225ef0388c2716996d",
+      "sourceBodySha256": "6f32a91939b88a4861fcb32a367d023143c04d19bc3752d7b7a011d7299643ed",
+      "preservedBodySha256": "6f32a91939b88a4861fcb32a367d023143c04d19bc3752d7b7a011d7299643ed",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/cookbooks/delivery-gate.md",
+      "destination": "fr/guide/cookbook/delivery-gate.md",
+      "details": "fr/reference/behavior/cookbooks/delivery-gate.md",
+      "sections": ["Fonctionnement des contrôles", "Étendre avec précaution"],
+      "sourceSha256": "e41dce27c95c3ff487cffe23a46755a17db20becc34b7a912c37599d42b95547",
+      "sourceBodySha256": "d4be5ab48a5d6b50a4aaa73e7e59f531f43fb70682e8ddb65ee01ba03f1d9789",
+      "preservedBodySha256": "d4be5ab48a5d6b50a4aaa73e7e59f531f43fb70682e8ddb65ee01ba03f1d9789",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/cookbooks/focused-fix.md",
+      "destination": "fr/guide/cookbook/focused-fix.md",
+      "details": "fr/reference/behavior/cookbooks/focused-fix.md",
+      "sections": ["Résultat attendu", "Échec et répétition"],
+      "sourceSha256": "4c81b1cda0728f950e7526d30c91eab0a0b6b38d249e2ee930f3a70082362002",
+      "sourceBodySha256": "69f28e78653b8ab809cb445e3787801745244c57a38c4872e73952b8455b6968",
+      "preservedBodySha256": "69f28e78653b8ab809cb445e3787801745244c57a38c4872e73952b8455b6968",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/cookbooks/parallel.md",
+      "destination": "fr/guide/cookbook/parallel.md",
+      "details": "fr/reference/behavior/cookbooks/parallel.md",
+      "sections": ["Isolation", "Échecs partiels"],
+      "sourceSha256": "220aa6aa60d4e5c0f9f502b07119f23e07c938012ea92d1d3c566fa9f93ceb87",
+      "sourceBodySha256": "bb7f8342a2ab780cb1ca20db0b56972b3cb5215bdfcd3f7bdda16fc979730411",
+      "preservedBodySha256": "bb7f8342a2ab780cb1ca20db0b56972b3cb5215bdfcd3f7bdda16fc979730411",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/cookbooks/pair-review.md",
+      "destination": "fr/guide/cookbook/pair-review.md",
+      "details": "fr/reference/behavior/cookbooks/pair-review.md",
+      "sections": ["Passage entre agents", "Relire avant livraison"],
+      "sourceSha256": "34a8d670193964a1d8e7e4564ced35b54c24d1e8a5ec9f92192e6fd0ebc0df32",
+      "sourceBodySha256": "423821c3c164f21b42c0edf5fe3ceb6c5050ea0af587b6d2bcc7527d4b49bd33",
+      "preservedBodySha256": "423821c3c164f21b42c0edf5fe3ceb6c5050ea0af587b6d2bcc7527d4b49bd33",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/cookbooks/recovery.md",
+      "destination": "fr/guide/cookbook/recovery.md",
+      "details": "fr/reference/behavior/cookbooks/recovery.md",
+      "sections": ["Inspecter avant de relancer", "Reprendre volontairement"],
+      "sourceSha256": "6c24828ed1fd9acc9671ffdc599c72dc33ed73dd96e0bcc5765793feebbb9fb6",
+      "sourceBodySha256": "4e6b550a978ca4e9f2605ceebd7a0b107e9ed8f51f983cae8f0a382e4195d753",
+      "preservedBodySha256": "4e6b550a978ca4e9f2605ceebd7a0b107e9ed8f51f983cae8f0a382e4195d753",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/providers/firecracker.md",
+      "destination": "fr/guide/advanced/firecracker.md",
+      "details": "fr/reference/behavior/providers/firecracker.md",
+      "sections": [
+        "Préparer l'hôte et l'invité",
+        "Créer un fournisseur",
+        "Propriété des ressources et validation"
+      ],
+      "sourceSha256": "7f96c79e09f945014c7d23eca3c5af5b03eb75c22cf6c6a76e5c6813c06c7fc7",
+      "sourceBodySha256": "32d1130309a944d598f94ee90096c51c7b619b7f6500a3fe3b889fd230fb58b8",
+      "preservedBodySha256": "32d1130309a944d598f94ee90096c51c7b619b7f6500a3fe3b889fd230fb58b8",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/providers/vercel.md",
+      "destination": "fr/guide/environment/providers/vercel.md",
+      "details": "fr/reference/behavior/providers/vercel.md",
+      "sections": ["Authentification de l’agent"],
+      "sourceSha256": "9cb6d20956392190ec1b85cee5d8dcc2234d78fcececb4ff27d81f75e10f510c",
+      "sourceBodySha256": "cf95fee26a52245a7db777837d4363d404a4c28359029932a2989c1c597d25be",
+      "preservedBodySha256": "cf95fee26a52245a7db777837d4363d404a4c28359029932a2989c1c597d25be",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/providers/local.md",
+      "destination": "fr/guide/environment/providers/local.md",
+      "details": "fr/reference/behavior/providers/local.md",
+      "sections": [],
+      "sourceSha256": "5e58898063d26ede9f1d43574f799199500b870669e4381d3de074081321dbb3",
+      "sourceBodySha256": "73826c155152a632e176a09a7ccb1fd5d79ccfe09d92229286069b86a02ed9aa",
+      "preservedBodySha256": "73826c155152a632e176a09a7ccb1fd5d79ccfe09d92229286069b86a02ed9aa",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/providers/dependency-caches.md",
+      "destination": "fr/guide/environment/providers/dependency-caches.md",
+      "details": "fr/reference/behavior/providers/dependency-caches.md",
+      "sections": [
+        "Mettre en cache les téléchargements",
+        "Propriétaire, isolation et invalidation"
+      ],
+      "sourceSha256": "ca17c323b43a6f8e2302fa2a6ba87f48cf10044bb383d106b8c33b5f70e0c26e",
+      "sourceBodySha256": "c320c21c88b86414a446593a82ae3457deaf16e3a179f40d843d35d991bbabd6",
+      "preservedBodySha256": "c320c21c88b86414a446593a82ae3457deaf16e3a179f40d843d35d991bbabd6",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/providers/agent-images.md",
+      "destination": "fr/guide/environment/providers/agent-images.md",
+      "details": "fr/reference/behavior/providers/agent-images.md",
+      "sections": [
+        "Construire localement",
+        "Publier avec une provenance signée",
+        "Vérifier avant de télécharger et d'exécuter"
+      ],
+      "sourceSha256": "d0e8bdfcf2113fd0b23f84ff7642d90fc36eaa1101a9397206d9a4a1ebd7d815",
+      "sourceBodySha256": "4b45a96bf30542c4d4f40e14e15bea37ab0de9dd98c4955bf0a94eac6f1537ab",
+      "preservedBodySha256": "4b45a96bf30542c4d4f40e14e15bea37ab0de9dd98c4955bf0a94eac6f1537ab",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/providers/daytona.md",
+      "destination": "fr/guide/environment/providers/daytona.md",
+      "details": "fr/reference/behavior/providers/daytona.md",
+      "sections": [],
+      "sourceSha256": "99094d9169b46f5cabea78692d40c40771e4e11bbdd510b122a2d660502bacf2",
+      "sourceBodySha256": "c287edc88a81bd508f683fbeeb6540f45ad83cdd72623906a4361f31e03374c2",
+      "preservedBodySha256": "c287edc88a81bd508f683fbeeb6540f45ad83cdd72623906a4361f31e03374c2",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/providers/containers.md",
+      "destination": "fr/guide/environment/providers/containers.md",
+      "details": "fr/reference/behavior/providers/containers.md",
+      "sections": [
+        "Options",
+        "Différences entre plateformes",
+        "Transfert de fichiers"
+      ],
+      "sourceSha256": "f2a395657052720fa0b7d14e3405f72516d8f98adbd9fb3ebf2fc5d8a05ff13a",
+      "sourceBodySha256": "ffcedf8c8d1ced0e8a216c4ed297a53f1c5dd887c370a5c109967abc6f27a49c",
+      "preservedBodySha256": "ffcedf8c8d1ced0e8a216c4ed297a53f1c5dd887c370a5c109967abc6f27a49c",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/providers/overview.md",
+      "destination": "fr/guide/environment/providers/overview.md",
+      "details": "fr/reference/behavior/providers/overview.md",
+      "sections": [],
+      "sourceSha256": "1a7399595beaf885f08f2fb281c65f893bd910766be4f16e7ad6e91f1d4de5ad",
+      "sourceBodySha256": "6a7c2bbb919ce5104985810c39cd8a96f4dd17700ae403d2b5486cda3f66ec75",
+      "preservedBodySha256": "6a7c2bbb919ce5104985810c39cd8a96f4dd17700ae403d2b5486cda3f66ec75",
+      "disposition": "complete body preserved; internal links migrated"
+    },
+    {
+      "source": "fr/providers/repository-isolation.md",
+      "destination": "fr/guide/advanced/repository-isolation.md",
+      "details": "fr/reference/behavior/providers/repository-isolation.md",
+      "sections": ["Synchronisation et propriété", "Montages et limites"],
+      "sourceSha256": "cb3f1e7067cea91e69b972d35fca7a3f14bb72681503df60ce736fb7a6ec02f2",
+      "sourceBodySha256": "b149cb5ab0c18affa15ff14a236b25878f9146e7f4d43c5f2fae061d048f60ad",
+      "preservedBodySha256": "b149cb5ab0c18affa15ff14a236b25878f9146e7f4d43c5f2fae061d048f60ad",
+      "disposition": "complete body preserved; internal links migrated"
+    }
+  ],
+  "examples": [
+    {
+      "source": "examples/offline.ts",
+      "destination": "guide/cookbook/offline",
+      "sourceSha256": "2b1fd181b4fc24a73b7317da0df92d563dfe5b970ca62b68af92844229fddca0",
+      "disposition": "Rewritten as a standalone consumer recipe with public imports, preparation and observable results."
+    },
+    {
+      "source": "examples/review.ts",
+      "destination": "guide/cookbook/pair-review",
+      "sourceSha256": "aa5b103d30942b680de8c7354fd719efd9cb0f917f819d73e5b052735be3c3a8",
+      "disposition": "Rewritten as a standalone consumer recipe with public imports, preparation and observable results."
+    },
+    {
+      "source": "examples/remote.ts",
+      "destination": "guide/cookbook/remote",
+      "sourceSha256": "273bd93afe9c8b1dc979dd5fb005d78eae341129f6f1da1ac7e675a5be99a252",
+      "disposition": "Rewritten as a standalone consumer recipe with public imports, preparation and observable results."
+    }
+  ],
+  "corrections": [
+    {
+      "sources": ["start/quickstart.md", "fr/start/quickstart.md"],
+      "reason": "The init scaffold already includes Codex API-key login. Only handwritten API compositions need the explicit hook.",
+      "evidence": "src/cli/init-authentication.ts"
+    },
+    {
+      "sources": ["operations/doctor.md", "fr/operations/doctor.md"],
+      "reason": "doctor supports Gemini as well as Codex and Claude.",
+      "evidence": "src/cli/doctor-command.ts"
+    }
+  ],
+  "entryDocuments": [
+    {
+      "source": "README.md",
+      "destination": "README.md; guide/start/quickstart.md; guide/index.md",
+      "disposition": "Package introduction retained; links now point to the guided journey and cookbook."
+    },
+    {
+      "source": "AGENTS.md",
+      "destination": "AGENTS.md",
+      "disposition": "Durable contributor rules aligned with the two navigation spaces, generated sources and validation commands."
+    },
+    {
+      "source": "SECURITY.md",
+      "destination": "SECURITY.md; guide/operations/security.md",
+      "disposition": "Security boundary remains unchanged; documentation retains its detailed explanations."
+    },
+    {
+      "source": "examples/README.md",
+      "destination": "guide/cookbook/index.md; guide/cookbook/offline.md; guide/cookbook/pair-review.md; guide/cookbook/remote.md",
+      "disposition": "Development-only launch paths replaced by standalone consumer setup and public package imports."
+    }
+  ],
+  "publicRoutes": [
+    "reference/agentadapter.md",
+    "reference/agentevent.md",
+    "reference/agentinput.md",
+    "reference/agentobservation.md",
+    "reference/agentprotocolreport.md",
+    "reference/agenttask.md",
+    "reference/agentversions.md",
+    "reference/approvaltask.md",
+    "reference/artifact.md",
+    "reference/artifactcontract.md",
+    "reference/artifactcontractoptions.md",
+    "reference/artifactidentity.md",
+    "reference/artifactproducer.md",
+    "reference/artifactreference.md",
+    "reference/artifactstore.md",
+    "reference/artifacttask.md",
+    "reference/artifacttaskoptions.md",
+    "reference/assertrecoveryquota.md",
+    "reference/attach.md",
+    "reference/attachoptions.md",
+    "reference/attachresult.md",
+    "reference/branchpolicy.md",
+    "reference/brief.md",
+    "reference/channel.md",
+    "reference/claude.md",
+    "reference/claudesettings.md",
+    "reference/codex.md",
+    "reference/codexmodelprovider.md",
+    "reference/codexsettings.md",
+    "reference/command.md",
+    "reference/commandresult.md",
+    "reference/commandtask.md",
+    "reference/commit.md",
+    "reference/containeroptions.md",
+    "reference/continuationoptions.md",
+    "reference/conversationcontext.md",
+    "reference/conversationformat.md",
+    "reference/conversationlocation.md",
+    "reference/conversationrecord.md",
+    "reference/conversations.md",
+    "reference/conversationstore.md",
+    "reference/createsandbox.md",
+    "reference/daytona.md",
+    "reference/daytonaoptions.md",
+    "reference/dependencycache.md",
+    "reference/diagnoseagentprotocol.md",
+    "reference/diagnosesandbox.md",
+    "reference/diagnosticcapability.md",
+    "reference/diagnosticcheck.md",
+    "reference/diagnosticstatus.md",
+    "reference/dispatch.md",
+    "reference/dispatchoptions.md",
+    "reference/dispatchresult.md",
+    "reference/disposal.md",
+    "reference/docker.md",
+    "reference/doctoragent.md",
+    "reference/durabletaskqueue.md",
+    "reference/egresspolicy.md",
+    "reference/execution.md",
+    "reference/faultcode.md",
+    "reference/fileartifactstore.md",
+    "reference/fileartifactstoreoptions.md",
+    "reference/filemanifestentry.md",
+    "reference/filetransfers.md",
+    "reference/fileworkflowcheckpointoptions.md",
+    "reference/fileworkflowcheckpointstore.md",
+    "reference/firecracker.md",
+    "reference/firecrackeroptions.md",
+    "reference/gemini.md",
+    "reference/geminisettings.md",
+    "reference/httptaskqueue.md",
+    "reference/inspectrecovery.md",
+    "reference/isolatedtask.md",
+    "reference/jsonartifactoptions.md",
+    "reference/lifecyclehooks.md",
+    "reference/local.md",
+    "reference/logging.md",
+    "reference/mountedprovider.md",
+    "reference/opentelemetry.md",
+    "reference/opentelemetryobserver.md",
+    "reference/opentelemetryoptions.md",
+    "reference/openworkspace.md",
+    "reference/outposterror.md",
+    "reference/pausetask.md",
+    "reference/planrecoveryrestore.md",
+    "reference/planrecoveryretention.md",
+    "reference/podman.md",
+    "reference/promptvariables.md",
+    "reference/prunerecoveryretention.md",
+    "reference/publishartifact.md",
+    "reference/publishartifactoptions.md",
+    "reference/queueclaim.md",
+    "reference/queueclientoptions.md",
+    "reference/queuedtask.md",
+    "reference/queuedtaskoptions.md",
+    "reference/queuehandler.md",
+    "reference/queuehandlercontext.md",
+    "reference/queuejob.md",
+    "reference/queuelease.md",
+    "reference/queuerequest.md",
+    "reference/queueresult.md",
+    "reference/queueserver.md",
+    "reference/queueserveroptions.md",
+    "reference/queueworkeroptions.md",
+    "reference/readartifact.md",
+    "reference/readartifactoptions.md",
+    "reference/readstoredartifact.md",
+    "reference/recoverydetails.md",
+    "reference/recoveryinspection.md",
+    "reference/recoveryinspectionoptions.md",
+    "reference/recoverypruneresult.md",
+    "reference/recoveryquotaoptions.md",
+    "reference/recoveryrestoreoptions.md",
+    "reference/recoveryrestoreplan.md",
+    "reference/recoveryrestoreresult.md",
+    "reference/recoveryretentionentry.md",
+    "reference/recoveryretentionoptions.md",
+    "reference/recoveryretentionplan.md",
+    "reference/recoveryretentionpolicy.md",
+    "reference/recoverystoragereservationoptions.md",
+    "reference/recoveryverification.md",
+    "reference/recoveryverificationoptions.md",
+    "reference/remoteprovider.md",
+    "reference/reporter.md",
+    "reference/reporteroptions.md",
+    "reference/reserverecoverystorage.md",
+    "reference/resourceactivityrecord.md",
+    "reference/resourceinspection.md",
+    "reference/resourceinspectionentry.md",
+    "reference/resourceoperation.md",
+    "reference/resourceoperationkind.md",
+    "reference/resourceoperationresult.md",
+    "reference/resourcephase.md",
+    "reference/response.md",
+    "reference/responseerror.md",
+    "reference/responsespec.md",
+    "reference/restorerecoverytransfer.md",
+    "reference/retry.md",
+    "reference/runqueueworker.md",
+    "reference/sandbox.md",
+    "reference/sandboxcontext.md",
+    "reference/sandboxdiagnosticoptions.md",
+    "reference/sandboxdiagnosticreport.md",
+    "reference/sandboxlease.md",
+    "reference/sandboxoptions.md",
+    "reference/sandboxprovider.md",
+    "reference/servetaskqueue.md",
+    "reference/speculate.md",
+    "reference/speculationoptions.md",
+    "reference/speculationresult.md",
+    "reference/speculativecandidate.md",
+    "reference/speculativecandidateresult.md",
+    "reference/speculativehostsnapshot.md",
+    "reference/speculativeoutput.md",
+    "reference/speculativevalidation.md",
+    "reference/sqlitetaskqueue.md",
+    "reference/stagelimits.md",
+    "reference/standardvalidator.md",
+    "reference/storagereservation.md",
+    "reference/storagereservationoptions.md",
+    "reference/support-agenttaskoptions.md",
+    "reference/support-captureconversation.md",
+    "reference/support-captureoptions.md",
+    "reference/support-commandtaskoptions.md",
+    "reference/support-commonagentsettings.md",
+    "reference/support-isolatedtaskoptions.md",
+    "reference/support-isolatedtaskrequest.md",
+    "reference/support-jsonresponseoptions.md",
+    "reference/support-localoptions.md",
+    "reference/support-localprocessidentity.md",
+    "reference/support-locateconversation.md",
+    "reference/support-lockinspection.md",
+    "reference/support-lockinspectionentry.md",
+    "reference/support-lockinspectionstate.md",
+    "reference/support-lockownership.md",
+    "reference/support-nativeconversations.md",
+    "reference/support-projectkey.md",
+    "reference/support-providerdefinition.md",
+    "reference/support-recoverychecksumresult.md",
+    "reference/support-recoveryintegrity.md",
+    "reference/support-recoverystructurecheck.md",
+    "reference/support-relocatetranscript.md",
+    "reference/support-remotepath.md",
+    "reference/support-reportpass.md",
+    "reference/support-requiredagent.md",
+    "reference/support-resourceoperationkinds.md",
+    "reference/support-resourcephases.md",
+    "reference/support-restoreconversation.md",
+    "reference/support-storagecategory.md",
+    "reference/support-storagecategoryname.md",
+    "reference/support-storageentry.md",
+    "reference/support-storageentrykind.md",
+    "reference/support-storageinventory.md",
+    "reference/support-storageissue.md",
+    "reference/support-storageusage.md",
+    "reference/support-textresponseoptions.md",
+    "reference/support-workspacegitentry.md",
+    "reference/support-workspacegitinspection.md",
+    "reference/support-workspacegitstate.md",
+    "reference/task.md",
+    "reference/taskcontext.md",
+    "reference/taskoptions.md",
+    "reference/taskqueue.md",
+    "reference/taskrecord.md",
+    "reference/taskstatus.md",
+    "reference/transferoptions.md",
+    "reference/turn.md",
+    "reference/usage.md",
+    "reference/variablequestion.md",
+    "reference/variables.md",
+    "reference/vercel.md",
+    "reference/verceloptions.md",
+    "reference/verifyrecoverytransfer.md",
+    "reference/volume.md",
+    "reference/warmdispatchresult.md",
+    "reference/workflow.md",
+    "reference/workflowbudget.md",
+    "reference/workflowbudgetexceeded.md",
+    "reference/workflowcheckpoint.md",
+    "reference/workflowcheckpointlease.md",
+    "reference/workflowcheckpointoptions.md",
+    "reference/workflowcheckpointstore.md",
+    "reference/workflowcheckpointvalue.md",
+    "reference/workflowdecision.md",
+    "reference/workflowdecisionrecord.md",
+    "reference/workflowevent.md",
+    "reference/workflowfailure.md",
+    "reference/workflowgate.md",
+    "reference/workflowgateoptions.md",
+    "reference/workflowjson.md",
+    "reference/workflowoptions.md",
+    "reference/workflowpauserequest.md",
+    "reference/workflowresult.md",
+    "reference/workflowusage.md",
+    "reference/workspace.md",
+    "reference/workspaceoptions.md",
+    "reference/workspacerecord.md"
+  ]
+}

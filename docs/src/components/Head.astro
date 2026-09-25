@@ -1,0 +1,21 @@
+---
+import StarlightHead from "@astrojs/starlight/components/Head.astro";
+---
+<StarlightHead />
+<script>
+  const prepareCopyButtons = () => {
+    for (const button of document.querySelectorAll<HTMLElement>("celestia-code-copy-button")) {
+      button.setAttribute("role", "button");
+      button.tabIndex = 0;
+      button.setAttribute("aria-label", document.documentElement.lang === "fr" ? "Copier le code" : "Copy code");
+    }
+  };
+  prepareCopyButtons();
+  document.addEventListener("astro:page-load", prepareCopyButtons);
+  document.addEventListener("keydown", (event) => {
+    if (!(event.target instanceof HTMLElement) || !event.target.matches("celestia-code-copy-button")) return;
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.target.click();
+  });
+</script>

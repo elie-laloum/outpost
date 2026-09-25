@@ -1,31 +1,30 @@
 ---
-title: "Documentation Outpost"
-description: "Documentation Outpost — Outpost"
-sidebar:
-  order: 0
+title: "Outpost"
+description: "Lancez un agent de code, comprenez son workspace, puis construisez un workflow."
 ---
 
-Exécutez des agents de code dans des environnements contrôlés, séparez leur travail Git et reliez leurs opérations avec des workflows typés.
+Outpost est une bibliothèque TypeScript et une CLI pour exécuter des agents de code dans des sandboxes, organiser leur travail Git et relier leurs résultats dans des workflows typés.
 
-Outpost est une bibliothèque TypeScript accompagnée d’un petit CLI de configuration. Elle prend en charge **Claude Code, Codex et Gemini CLI**, avec **Docker, Podman, Vercel, Daytona ou une exécution explicite sur l’hôte**. Les adapters d’agents déterminent ce qui s’exécute ; les providers de sandbox déterminent où.
+**Commencez par un résultat concret :** corrigez un test en échec dans un petit projet de traitement de texte jetable. Choisissez Codex ou Claude, lancez le script généré, puis examinez le commit.
 
-## Choisir un parcours
+[Lancer votre premier agent →](guide/start/quickstart/)
 
-| Vous voulez…                                             | Commencez ici                                   |
-| -------------------------------------------------------- | ----------------------------------------------- |
-| Exécuter votre première tâche avec un agent              | [Démarrage rapide](start/quickstart/)           |
-| Comprendre la propriété des ressources et leur fermeture | [Concepts essentiels](start/concepts/)          |
-| Conserver un environnement entre plusieurs tâches        | [Sandboxes réutilisables](sandboxes/lifecycle/) |
-| Coordonner des tâches et des agents                      | [Premier workflow](workflows/graph/)            |
-| Retrouver une option ou un type de retour                | [Index de l’API](reference/)                    |
-| Diagnostiquer un échec                                   | [Dépannage](operations/troubleshooting/)        |
+<span id="choisir-un-parcours"></span>
+<span id="utiliser-cette-documentation"></span>
 
-## Utiliser cette documentation
+## Deux façons de lire
 
-Les guides présentent une opération à la fois. La référence API recense chaque export public et son contrat TypeScript. Les exemples utilisent ESM et Node.js 24 ou ultérieur. Sauf indication contraire, les chemins comme `run.ts` sont relatifs à votre projet.
+| Apprendre par la pratique                                                                                | Retrouver un comportement précis                                                                                                  |
+| -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| Le [Guide](guide/) progresse d’une tâche d’agent vers les environnements réutilisables et les workflows. | La [Référence](reference/) explique API, commandes CLI, configuration et limites.                                                 |
+| Chaque exemple pratique contient sa préparation, son code complet et le résultat attendu.                | Les signatures suivent les déclarations du package ; les contrats détaillés restent accessibles sans interrompre l’apprentissage. |
 
-Recherchez un nom d’API, une option du CLI ou une erreur dans la barre de recherche. Le sélecteur de langue relie les pages françaises et anglaises correspondantes. Le site publié suit la dernière release ; la CI vérifie les changements non publiés avant la release suivante.
+Vous connaissez déjà les bases ? Choisissez une [recette du cookbook](guide/cookbook/) ou [diagnostiquez un échec](guide/operations/troubleshooting/).
 
-[Historique des versions](project/changelog/) · [Roadmap](project/roadmap/) · [Sources sur GitLab](https://gitlab.elielaloum.com/elielaloum/outpost)
+## Les prérequis
 
-Explorez les [cookbooks](./cookbooks/) pour des recettes complètes, du correctif ciblé au workflow de livraison validé.
+Node.js 24+, Git et Docker pour le premier agent. Choisissez explicitement compte ou clé API ; la facturation API est séparée de l’abonnement. Le téléchargement/build initial de l’image peut prendre plusieurs minutes. Les exemples suivants réutilisent cette préparation tout en restant reproductibles indépendamment.
+
+Les exemples de workflow, validation et persistance fonctionnent aussi [sans modèle ni conteneur](guide/cookbook/offline/).
+
+L’anglais et le français couvrent les mêmes fonctionnalités. Le site public suit la dernière release stable ; le [changelog](project/changelog/) répertorie les versions et la [roadmap](project/roadmap/) distingue le travail prévu.

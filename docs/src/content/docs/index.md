@@ -1,31 +1,30 @@
 ---
-title: "Outpost documentation"
-description: "Outpost documentation — Outpost"
-sidebar:
-  order: 0
+title: "Outpost"
+description: "Run a coding agent, understand its workspace, then build a workflow."
 ---
 
-Run coding agents in controlled environments, keep their Git work separate, and connect their work with typed workflows.
+Outpost is a TypeScript library and CLI that runs coding agents in sandboxes, keeps their Git work organized and connects their results in typed workflows.
 
-Outpost is a TypeScript library and a small setup CLI. It supports **Claude Code, Codex and Gemini CLI**, with **Docker, Podman, Vercel, Daytona or explicit host execution**. Agent adapters choose what runs; sandbox providers choose where it runs.
+**Start with a small result:** fix a failing test in a disposable text-processing project. Choose Codex or Claude, run the generated script, then inspect the commit.
 
-## Choose your next step
+[Run your first agent →](guide/start/quickstart/)
 
-| You want to…                             | Start here                                     |
-| ---------------------------------------- | ---------------------------------------------- |
-| Run your first agent job                 | [Quick start](start/quickstart/)               |
-| Understand ownership and cleanup         | [Core concepts](start/concepts/)               |
-| Keep an environment running between jobs | [Reusable sandboxes](sandboxes/lifecycle/)     |
-| Coordinate tasks and agents              | [Your first workflow](workflows/graph/)        |
-| Find a specific option or return type    | [API index](reference/)                        |
-| Diagnose a failed run                    | [Troubleshooting](operations/troubleshooting/) |
+<span id="choose-your-next-step"></span>
+<span id="how-to-use-these-docs"></span>
 
-## How to use these docs
+## Two ways to read
 
-Guides explain one operation at a time. The API reference lists every public export and its TypeScript contract. Examples use ESM and Node.js 24 or later. Paths such as `run.ts` are relative to your project unless a page says otherwise.
+| Learn by doing                                                                           | Look up an exact behavior                                                                                               |
+| ---------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| The [Guide](guide/) walks from one agent task to reusable environments and workflows.    | The [Reference](reference/) explains APIs, CLI commands, configuration and limits.                                      |
+| Every practical example includes its own preparation, complete code and expected result. | Signatures follow the package declarations; detailed contracts remain available without interrupting the learning path. |
 
-Use the search box for an API name, CLI flag or error. The language selector switches between matching English and French pages. The published site follows the latest release; unreleased source changes are validated by CI before the next release.
+Already know the basics? Pick a [cookbook recipe](guide/cookbook/) or [diagnose a failure](guide/operations/troubleshooting/).
 
-[Release history](project/changelog/) · [Roadmap](project/roadmap/) · [Source on GitLab](https://gitlab.elielaloum.com/elielaloum/outpost)
+## What you need
 
-Explore the [cookbooks](./cookbooks/) for complete recipes, from a focused fix to a validated delivery pipeline.
+Node.js 24+, Git and Docker for the first agent run. Choose account access or an API key explicitly; API billing is separate from a subscription. The initial image download/build can take several minutes. Subsequent examples reuse that preparation while remaining independently reproducible.
+
+Workflow, validation and persistence examples also run [without a model or container](guide/cookbook/offline/).
+
+English and French cover the same features. The public site follows the latest stable release; the [changelog](project/changelog/) records releases and the [roadmap](project/roadmap/) distinguishes planned work.

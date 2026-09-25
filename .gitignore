@@ -15,3 +15,6 @@ docs/.astro/
 docs/.examples/
 
 sandbox
+
+docs/test-results/
+docs/playwright-report/

@@ -61,3 +61,9 @@ jobs:
       - run: node test/fixtures/codex-compatible.ts
         env:
           OUTPOST_CONTAINER_ENGINE: ${{ matrix.engine }}
+      - name: Validate documentation container examples
+        run: |
+          ${{ matrix.engine }} tag outpost-ci:latest outpost:docs-demo
+          npm run docs:test:container
+        env:
+          OUTPOST_DOCS_ENGINE: ${{ matrix.engine }}

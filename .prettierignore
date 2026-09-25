@@ -5,3 +5,6 @@ coverage/
 
 docs/.astro/
 docs/.examples/
+
+docs/test-results/
+docs/playwright-report/

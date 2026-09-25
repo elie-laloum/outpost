@@ -8,6 +8,8 @@ Version 4.1.0 improves CLI setup, explicit agent authentication and custom OpenA
 
 ## Get started
 
+New to Outpost? Follow the [complete first-run workshop](https://elie-laloum.github.io/outpost/guide/start/quickstart/): choose Codex or Claude and account or API-key access, create a disposable TypeScript repository, then fix and verify a real test. The [Guide](https://elie-laloum.github.io/outpost/guide/) teaches the concepts; the [Reference](https://elie-laloum.github.io/outpost/reference/) explains exact contracts. Every [cookbook recipe](https://elie-laloum.github.io/outpost/guide/cookbook/) includes its own preparation and runnable code.
+
 Requires Node.js **24+**, Git, a target repository with a commit, and the credentials of your chosen agent. The workflow can live in its own directory. This example uses Docker.
 
 ```sh
@@ -22,11 +24,13 @@ Copy `.env.example` to `.env` and declare `OPENAI_API_KEY`. An empty declaration
 node run.ts "Add validation, run tests and commit the change"
 ```
 
-`init` creates `package.json`, `run.ts`, `brief.md`, `.env.example`, `.gitignore` and a container recipe directly in the workflow directory. Existing package manifests are preserved; explicit CommonJS projects get `run.mts` for compatibility. The script resolves its brief, environment and relative repository paths from its own directory. See [multi-repository workflows](https://elie-laloum.github.io/outpost/workflows/sandbox-tasks/) to orchestrate several repositories.
+`init` creates `package.json`, `run.ts`, `brief.md`, `.env.example`, `.gitignore` and a container recipe directly in the workflow directory. Existing package manifests are preserved; explicit CommonJS projects get `run.mts` for compatibility. The script resolves its brief, environment and relative repository paths from its own directory. See [multi-repository workflows](https://elie-laloum.github.io/outpost/guide/workflows/sandbox-tasks/) to orchestrate several repositories.
 
-Generated Codex API-key workflows prepare login inside the sandbox. For account login and credential storage, see [Connect Codex](https://elie-laloum.github.io/outpost/agents/connect-codex/) before dispatching.
+Generated Codex API-key workflows prepare login inside the sandbox. For account login and credential storage, see [Connect Codex](https://elie-laloum.github.io/outpost/guide/agents/connect-codex/) before dispatching.
 
 ## Use the library
+
+After preparing the selected agent credentials and provider, library calls follow this shape. For a fully runnable version with explicit authentication, use the [dispatch workshop](https://elie-laloum.github.io/outpost/guide/agents/dispatch/).
 
 ```ts
 import { dispatch, codex } from "@elie-laloum/outpost";
@@ -40,9 +44,9 @@ const result = await dispatch({
 console.log(result.branch, result.commits);
 ```
 
-`repository` selects a local Git checkout; without it, library calls use the current working directory. See [repository paths](https://elie-laloum.github.io/outpost/sandboxes/repositories/) for external checkouts and paths relative to the workflow script.
+`repository` selects a local Git checkout; without it, library calls use the current working directory. See [repository paths](https://elie-laloum.github.io/outpost/guide/environment/repositories/) for external checkouts and paths relative to the workflow script.
 
-Learn about [sandboxes](https://elie-laloum.github.io/outpost/sandboxes/lifecycle/), [workflows](https://elie-laloum.github.io/outpost/workflows/graph/), [providers](https://elie-laloum.github.io/outpost/providers/overview/) and [recovery](https://elie-laloum.github.io/outpost/operations/recovery/) in the English/French documentation. The [roadmap](https://elie-laloum.github.io/outpost/project/roadmap/) describes future work.
+Learn about [sandboxes](https://elie-laloum.github.io/outpost/guide/environment/lifecycle/), [workflows](https://elie-laloum.github.io/outpost/guide/workflows/graph/), [providers](https://elie-laloum.github.io/outpost/guide/environment/providers/overview/) and [recovery](https://elie-laloum.github.io/outpost/guide/operations/recovery/) in the English/French documentation. The [roadmap](https://elie-laloum.github.io/outpost/project/roadmap/) describes future work.
 
 ## Development
 

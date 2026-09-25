@@ -7,6 +7,8 @@ sidebar:
 
 Chaque export public du package et de ses sous-chemins possède une page de référence. Les signatures sont extraites des déclarations TypeScript compilées et vérifiées en CI. Les guides expliquent les usages ; les contrats détaillent les champs exacts. Les contrats auxiliaires restent accessibles depuis les types qui les utilisent.
 
+[CLI](manual/cli/) · [Configuration](manual/configuration/) · [Authentification](manual/authentication/) · [Compatibilités](manual/compatibility/) · [Guide progressif](../guide/)
+
 ## Diagnostics
 
 - [diagnoseSandbox](./diagnosesandbox/)

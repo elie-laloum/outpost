@@ -7,6 +7,8 @@ sidebar:
 
 Every public export from the package and its subpaths has a reference page. Signatures are extracted from compiled TypeScript declarations and checked in CI. Guides explain usage; contracts list exact fields. Supporting contracts are linked from the types that use them.
 
+[CLI](manual/cli/) · [Configuration](manual/configuration/) · [Authentication](manual/authentication/) · [Compatibility](manual/compatibility/) · [Learning guide](../guide/)
+
 ## Diagnostics
 
 - [diagnoseSandbox](./diagnosesandbox/)

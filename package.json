@@ -66,11 +66,13 @@
     "test:package": "node scripts/package-smoke.mjs",
     "test:container": "node --test test/container.test.ts",
     "architecture": "node scripts/check-architecture.mjs",
-    "docs:sync": "npm run build && node docs/scripts/sync-reference.mjs",
-    "docs:check": "node docs/scripts/sync-reference.mjs --check && npm run check --prefix docs",
+    "docs:sync": "npm run build && node docs/scripts/sync-preparations.mjs && node docs/scripts/sync-reference.mjs",
+    "docs:check": "node docs/scripts/sync-preparations.mjs --check && node docs/scripts/sync-reference.mjs --check && npm run check --prefix docs",
     "docs:dev": "npm run dev --prefix docs",
     "docs:build": "npm run build --prefix docs",
-    "docs:test": "npm run test:build --prefix docs && node docs/scripts/check-examples.mjs && node --test docs/scripts/release-channel.test.mjs"
+    "docs:test": "npm run test:build --prefix docs && node docs/scripts/check-examples.mjs && node --test docs/scripts/release-channel.test.mjs",
+    "docs:test:browser": "npm run test:browser --prefix docs",
+    "docs:test:container": "node docs/scripts/check-container-examples.mjs"
   },
   "repository": {
     "type": "git",

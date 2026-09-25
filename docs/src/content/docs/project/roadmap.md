@@ -9,7 +9,7 @@ Outpost's next priority is reliable everyday execution: a successful first run, 
 
 ## Starting point
 
-The foundation includes reusable sandboxes, Git workspaces, agent adapters, typed workflows and recovery tools. The CLI, authentication setup and custom Responses providers are documented in the [setup guide](../../start/cli/). Use the [API reference](../../reference/) for implemented contracts and the changelog for released versions. An implementation or simulated test is not evidence of a successful live provider campaign.
+The foundation includes reusable sandboxes, Git workspaces, agent adapters, typed workflows and recovery tools. The CLI, authentication setup and custom Responses providers are documented in the [setup guide](../../reference/manual/cli/). Use the [API reference](../../reference/) for implemented contracts and the changelog for released versions. An implementation or simulated test is not evidence of a successful live provider campaign.
 
 ## Near term: make execution dependable
 
@@ -20,7 +20,7 @@ The foundation includes reusable sandboxes, Git workspaces, agent adapters, type
 | 3. Verify reproducible agent images         | Users can select an image whose bundled agents and provenance have been checked.                                                                                                                                 | A successful signed publication, independent signature verification and native CLI/container checks for the published digest.                                                                                                       |
 | 4. Measure remote execution costs           | Transfer and startup optimizations have demonstrated benefits without weakening recovery.                                                                                                                        | Vercel/Daytona measurements on representative repositories, including large files, many small files, interrupted transfers and concurrent host edits.                                                                               |
 
-Start with [cloud compatibility campaigns](../../operations/cloud-compatibility/), [diagnostics](../../operations/doctor/) and [agent images](../../providers/agent-images/). Fix contract failures before expanding the provider matrix. CI syntax probes and local simulated endpoints remain useful checks, but do not replace authenticated provider runs.
+Start with [cloud compatibility campaigns](../../guide/extend/cloud-compatibility/), [diagnostics](../../guide/operations/doctor/) and [agent images](../../guide/environment/providers/agent-images/). Fix contract failures before expanding the provider matrix. CI syntax probes and local simulated endpoints remain useful checks, but do not replace authenticated provider runs.
 
 ## Medium term: extend proven contracts
 
@@ -32,7 +32,7 @@ Start with [cloud compatibility campaigns](../../operations/cloud-compatibility/
 | Stronger execution isolation  | Move selected isolation prototypes toward an operationally supported deployment.             | Real Firecracker boots, resource limits, jailer integration, lifecycle cleanup and adversarial review; measured container isolation and egress behavior.                                                      |
 | Recoverable speculative work  | Resume interrupted candidate races and compare their actual cost and integration outcomes.   | Durable candidate ownership, recovery after coordinator failure, bounded cleanup and explicit conflict handling before integration.                                                                           |
 
-These directions build on [durable workflows](../../workflows/distributed/), [Gemini](../../agents/gemini/), [repository isolation](../../providers/repository-isolation/), [Firecracker](../../providers/firecracker/), [egress policies](../../sandboxes/egress/) and [speculation](../../workflows/speculation/). Their documented limits remain in force until the corresponding evidence exists. Container allowlists, dynamic network policies, microVM snapshots and stronger artifact trust are candidates for this horizon, not current guarantees.
+These directions build on [durable workflows](../../guide/advanced/distributed/), [Gemini](../../guide/agents/gemini/), [repository isolation](../../guide/advanced/repository-isolation/), [Firecracker](../../guide/advanced/firecracker/), [egress policies](../../guide/advanced/egress/) and [speculation](../../guide/advanced/speculation/). Their documented limits remain in force until the corresponding evidence exists. Container allowlists, dynamic network policies, microVM snapshots and stronger artifact trust are candidates for this horizon, not current guarantees.
 
 ## How priorities change
 

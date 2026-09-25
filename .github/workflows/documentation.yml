@@ -25,6 +25,8 @@ jobs:
       - run: npm run docs:check
       - run: npm run docs:build
       - run: npm run docs:test
+      - run: npx --prefix docs playwright install --with-deps chromium
+      - run: npm run docs:test:browser
       - run: npm audit --prefix docs --audit-level=high
       - uses: actions/upload-pages-artifact@v4
         if: startsWith(github.ref, 'refs/tags/v')

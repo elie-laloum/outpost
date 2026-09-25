@@ -1,0 +1,238 @@
+{
+  "repository": ["Target host Git checkout.", "Checkout Git hôte ciblé."],
+  "workspace": [
+    "Caller-owned Git workspace; excludes new repository/branch choices.",
+    "Workspace Git appartenant à l’appelant ; exclut un nouveau choix de dépôt/branche."
+  ],
+  "provider": [
+    "Execution environment backend.",
+    "Backend de l’environnement d’exécution."
+  ],
+  "agent": [
+    "Native coding-agent adapter.",
+    "Adapter natif de l’agent de code."
+  ],
+  "branch": [
+    "Git workspace policy or resulting branch identity, according to this contract.",
+    "Politique de workspace Git ou identité de branche résultante selon ce contrat."
+  ],
+  "brief": [
+    "Literal text or file-based task input.",
+    "Entrée de tâche textuelle littérale ou provenant d’un fichier."
+  ],
+  "signal": [
+    "Cooperative cancellation for this operation.",
+    "Annulation coopérative de cette opération."
+  ],
+  "hooks": [
+    "Lifecycle commands in declared execution order.",
+    "Commandes de cycle de vie dans l’ordre déclaré."
+  ],
+  "variables": [
+    "Explicit environment declarations; values are strings.",
+    "Déclarations d’environnement explicites ; les valeurs sont des chaînes."
+  ],
+  "copies": [
+    "Repository-relative inputs copied into the workspace.",
+    "Entrées relatives au dépôt copiées dans le workspace."
+  ],
+  "passes": [
+    "Maximum agent passes; one by default.",
+    "Nombre maximal de passes d’agent ; une par défaut."
+  ],
+  "until": [
+    "Completion marker or markers; an empty list disables matching.",
+    "Marqueur(s) de fin ; une liste vide désactive la détection."
+  ],
+  "deadlineMs": [
+    "Hard operation deadline in milliseconds.",
+    "Échéance absolue de l’opération en millisecondes."
+  ],
+  "idleMs": [
+    "Maximum silent interval in milliseconds.",
+    "Intervalle silencieux maximal en millisecondes."
+  ],
+  "timeoutMs": [
+    "Time limit in milliseconds for the owning operation.",
+    "Délai en millisecondes pour l’opération concernée."
+  ],
+  "response": [
+    "Parser and validator for the tagged agent answer.",
+    "Analyseur et validateur de la réponse balisée."
+  ],
+  "observe": [
+    "Notification callback; observer failures are isolated.",
+    "Callback d’observation ; ses erreurs sont isolées."
+  ],
+  "usage": [
+    "Reported usage counters; not a currency estimate.",
+    "Compteurs d’usage rapportés ; aucune estimation monétaire."
+  ],
+  "commits": [
+    "Collected Git commit identities and subjects.",
+    "Identités et sujets des commits Git collectés."
+  ],
+  "text": [
+    "Text content; see the owning operation for its source.",
+    "Contenu textuel ; sa provenance dépend de l’opération."
+  ],
+  "value": [
+    "Typed value produced or consumed by this contract.",
+    "Valeur typée produite ou consommée par ce contrat."
+  ],
+  "completed": [
+    "Whether the configured completion marker matched.",
+    "Indique si le marqueur de fin configuré a été détecté."
+  ],
+  "conversation": [
+    "Available native conversation identity.",
+    "Identité de conversation native disponible."
+  ],
+  "transcript": [
+    "Available host path to the captured transcript.",
+    "Chemin hôte disponible du transcript capturé."
+  ],
+  "retainedDirectory": [
+    "Workspace retained for inspection or recovery.",
+    "Workspace conservé pour inspection ou récupération."
+  ],
+  "directory": [
+    "Filesystem directory used by the owning operation; see path rules.",
+    "Dossier utilisé par l’opération ; voir les règles de résolution."
+  ],
+  "key": [
+    "Stable task or cache key within its owning contract.",
+    "Clé stable de tâche ou cache dans le contrat concerné."
+  ],
+  "after": [
+    "Declared task dependencies whose values may be read.",
+    "Dépendances déclarées dont les valeurs peuvent être lues."
+  ],
+  "perform": [
+    "Task implementation; honor its cancellation signal.",
+    "Implémentation de tâche ; respecter son signal d’annulation."
+  ],
+  "condition": [
+    "Predicate evaluated before the first task attempt.",
+    "Prédicat évalué avant la première tentative."
+  ],
+  "retry": [
+    "Explicit retry policy; repeated effects require care.",
+    "Politique explicite de reprise ; les effets peuvent se répéter."
+  ],
+  "attempts": [
+    "Attempt count or admission limit, according to the owning contract.",
+    "Nombre de tentatives ou limite d’admission selon le contrat."
+  ],
+  "concurrency": [
+    "Maximum admitted concurrent tasks or candidates.",
+    "Nombre maximal de tâches ou candidats concurrents admis."
+  ],
+  "checkpoint": [
+    "Durable execution storage and replay configuration.",
+    "Stockage durable de l’exécution et configuration de rejeu."
+  ],
+  "decisions": [
+    "Explicit decisions for persisted pending gates.",
+    "Décisions explicites pour les gates persistés en attente."
+  ],
+  "runId": [
+    "Stable identity of a saved workflow execution.",
+    "Identité stable d’une exécution sauvegardée."
+  ],
+  "version": [
+    "Caller-controlled contract or graph version.",
+    "Version de contrat ou graphe contrôlée par l’appelant."
+  ],
+  "actors": [
+    "Trusted actor identifiers, not an authentication mechanism.",
+    "Identifiants d’acteurs de confiance, sans mécanisme d’authentification."
+  ],
+  "schema": [
+    "Boundary validator that narrows unknown input.",
+    "Validateur de frontière qui précise une entrée inconnue."
+  ],
+  "repairs": [
+    "Additional attempts to repair invalid structured output; zero by default.",
+    "Tentatives supplémentaires de réparation de sortie invalide ; zéro par défaut."
+  ],
+  "tag": [
+    "XML-style delimiter identifier.",
+    "Identifiant de balise de type XML."
+  ],
+  "retain": [
+    "Maximum retained tail per output stream, in bytes.",
+    "Taille maximale de la fin conservée par flux, en octets."
+  ],
+  "executable": [
+    "Program to execute without implicit shell parsing.",
+    "Programme à exécuter sans analyse shell implicite."
+  ],
+  "arguments": [
+    "Arguments passed directly to the executable.",
+    "Arguments transmis directement au programme."
+  ],
+  "stdin": ["Input supplied to the process.", "Entrée fournie au processus."],
+  "status": [
+    "Recorded process or lifecycle outcome; inspect its declared type.",
+    "Résultat enregistré du processus ou cycle de vie ; voir son type."
+  ],
+  "stdout": ["Captured standard output.", "Sortie standard capturée."],
+  "stderr": ["Captured standard error.", "Sortie d’erreur capturée."],
+  "image": [
+    "Container or guest image reference.",
+    "Référence d’image de conteneur ou d’invité."
+  ],
+  "bootstrap": [
+    "Whether to install a missing selected agent automatically.",
+    "Indique si un agent sélectionné absent peut être installé automatiquement."
+  ],
+  "conversationHome": [
+    "Host home used for native transcript storage.",
+    "Home hôte utilisé pour le stockage des transcripts natifs."
+  ],
+  "saveConversations": [
+    "Enable native transcript capture when the adapter supports it.",
+    "Activer la capture native si l’adapter la prend en charge."
+  ],
+  "model": [
+    "Native CLI model identifier; availability depends on the account.",
+    "Identifiant de modèle natif ; disponibilité selon le compte."
+  ],
+  "producer": [
+    "Recorded artifact producer identity, not authentication.",
+    "Identité enregistrée du producteur, sans authentification."
+  ],
+  "parents": [
+    "Ordered artifact parent references or identifiers.",
+    "Références ou identifiants parents ordonnés."
+  ],
+  "token": [
+    "Explicit transport credential; never place it in a URL.",
+    "Identifiant de transport explicite ; jamais dans une URL."
+  ],
+  "fence": [
+    "Lease generation used to reject stale queue writers.",
+    "Génération du bail utilisée pour rejeter les écritures périmées."
+  ],
+  "leaseMs": [
+    "Worker lease duration in milliseconds.",
+    "Durée du bail worker en millisecondes."
+  ],
+  "store": [
+    "Caller-supplied persistence implementation.",
+    "Implémentation de persistance fournie par l’appelant."
+  ],
+  "budget": [
+    "Shared attempt and observed usage admission limits.",
+    "Limites partagées de tentatives et d’usage observé."
+  ],
+  "options": [
+    "Configuration object. Its fields are described in the associated options contract below.",
+    "Objet de configuration. Ses champs sont décrits dans le contrat d’options associé ci-dessous."
+  ],
+  "prompt": [
+    "Human-readable instruction presented at this boundary.",
+    "Instruction lisible présentée à cette étape."
+  ]
+}
