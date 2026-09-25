@@ -20,7 +20,7 @@ Traduction du journal `CHANGELOG.md` conservé à la racine du dépôt. Chaque v
 
 - Préserver les sorties exactes des commandes Daytona grâce à un encodage en flux, pour corriger la synchronisation des chemins Git séparés par des octets nuls. Vérifier les sorties sans fin de ligne, l’Unicode, les statuts de sortie, l’annulation et la réutilisation.
 - Accorder confiance au workspace sélectionné pour les requêtes Gemini autonomes en mode `yolo` avec `--skip-trust` ; préserver les autres modes et documenter cette frontière. Clarifier la génération des workflows Codex par abonnement sur les providers locaux et cloud.
-- Valider les workflows authentifiés avec modification de fichier pour Codex par abonnement et Gemini par clé API sur Docker, Vercel et Daytona, ainsi qu’un endpoint Responses personnalisé sur Docker et Vercel. L’endpoint testé réinitialise les connexions HTTPS provenant de Daytona avant authentification ; cette combinaison reste non validée. Le parcours Codex par clé API n’a pas été exercé dans cette campagne.
+- Valider les workflows authentifiés avec modification de fichier pour Codex par abonnement et Gemini par clé API sur Docker, Vercel et Daytona, un endpoint Responses personnalisé sur Docker et Vercel, et OpenRouter Responses sur Daytona. Le même adapter sans modification termine le parcours modèle/outils/synchronisation avec OpenRouter ; l’autre endpoint personnalisé réinitialise toujours les connexions HTTPS depuis Daytona avant authentification. Le parcours Codex par clé API n’a pas été exercé dans cette campagne.
 
 ## 4.0.0
 
