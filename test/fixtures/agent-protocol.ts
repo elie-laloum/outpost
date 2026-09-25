@@ -28,6 +28,7 @@ if (agent === "gemini") {
   assert.deepEqual(args, [
     "--approval-mode",
     "yolo",
+    "--skip-trust",
     "--output-format",
     "stream-json",
   ]);
