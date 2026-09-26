@@ -9,13 +9,13 @@ sidebar:
 
 ## Installer agy
 
-Dans cette version, Outpost n’installe **pas** `agy` : les images générées par `outpost init` ne le contiennent pas et les fournisseurs distants ne l’installent pas automatiquement. L’installateur officiel est un script shell distant, dont l’intégration attend une décision des mainteneurs. Fournissez la CLI vous-même :
+Outpost installe `agy` avec le script d’installation officiel de Google, `https://antigravity.google/cli/install.sh`, là où il installe les autres CLI :
 
-- **Images de conteneur.** Ajoutez `agy` à votre propre image en suivant les [instructions d’installation officielles](https://antigravity.google/docs/cli/install/). L’installateur place un binaire unique `agy` dans `~/.local/bin`. À l’exécution, Outpost monte un home privé vide sur `/home/agent` : un binaire laissé dans le home de l’utilisateur de construction est donc masqué. Copiez-le dans un répertoire du `PATH` situé hors du home, comme `/usr/local/bin`. Relisez le script avant de l’exécuter dans une construction.
-- **Fournisseurs distants.** L’installation automatique distante installe les versions fixées de Claude Code, Codex, Copilot et Kimi, pas `agy` : l’environnement distant doit déjà fournir `agy` dans le `PATH`.
-- **Exécution locale.** Avec `localSandboxProvider()`, installez `agy` sur l’hôte. Ce fournisseur s’exécute directement sur l’hôte, sans isolation.
+- **Images de conteneur générées.** La recette écrite par `outpost init` exécute l’installateur pendant la construction avec un `HOME` temporaire, puis installe le binaire sous `/usr/local/bin/agy`. L’installateur place `agy` dans `~/.local/bin`, mais Outpost monte à l’exécution un home privé vide sur `/home/agent`, qui masquerait un binaire laissé dans le home de l’utilisateur de l’image. La recette de l’[image d’agents préconstruite](../../../environment/providers/agent-images/) conserve la même étape. Une image personnalisée doit de même fournir `agy` dans le `PATH`, hors du home ; consultez les [instructions d’installation officielles](https://antigravity.google/docs/cli/install/).
+- **Fournisseurs distants.** Avec l’installation automatique activée, par défaut, une sandbox distante sans `agy` dans le `PATH` exécute `curl -fsSL https://antigravity.google/cli/install.sh | bash` lors de la préparation de l’agent, ce qui installe `~/.local/bin/agy` dans le home de la sandbox. Cela nécessite `curl`, `bash` et un accès réseau à `antigravity.google` dans la sandbox. `bootstrap: false` désactive cette installation ; l’environnement doit alors déjà fournir `agy`. Les versions fixées de Claude Code, Codex, Copilot et Kimi sont, elles, installées avec npm dans `~/.outpost-tools`.
+- **Exécution locale.** Avec `localSandboxProvider()`, installez `agy` sur l’hôte en suivant les [instructions d’installation officielles](https://antigravity.google/docs/cli/install/). Ce fournisseur s’exécute directement sur l’hôte, sans isolation.
 
-Outpost définit `AGY_CLI_DISABLE_AUTO_UPDATE=true` pour chaque commande `agy`, afin que la CLI ne se remplace pas pendant une exécution. Une valeur fournie dans les `variables` du harness la remplace. Antigravity n’a pas de version fixée : `agentVersions` ne contient pas d’entrée `antigravity`.
+Antigravity n’a pas de version fixée : `agentVersions` ne contient pas d’entrée `antigravity`, et l’installateur récupère la version courante (1.2.11 lors des tests de cette intégration). Reconstruire une image ou préparer une nouvelle sandbox distante peut donc installer un `agy` plus récent. L’installateur est un script shell distant téléchargé pendant la construction ou l’installation automatique ; si votre politique exige un binaire relu, installez `agy` dans votre propre image et désactivez l’installation automatique distante. Outpost définit `AGY_CLI_DISABLE_AUTO_UPDATE=true` pour chaque commande `agy`, afin que la CLI ne se remplace pas pendant une exécution. Une valeur fournie dans les `variables` du harness la remplace.
 
 ## S’authentifier
 
@@ -105,7 +105,7 @@ const result = await dispatch({
 console.log(result.text, result.usage);
 ```
 
-Cet exemple exécute `agy` installé sur l’hôte. Pour l’isoler, utilisez `dockerSandboxProvider({ image })` depuis `@elie-laloum/outpost/providers/docker` avec une image qui fournit `agy`. `model` sur `agent()` accepte un nom de modèle pris en charge par `agy` et le transmet avec `--model` ; `reasoning` et `maxOutputTokens` sont refusés lors de la composition de l’agent.
+Cet exemple exécute `agy` installé sur l’hôte. Pour l’isoler, utilisez `dockerSandboxProvider({ image })` depuis `@elie-laloum/outpost/providers/docker` avec une image générée par `outpost init`, qui contient `agy`, ou une autre image qui le fournit. `model` sur `agent()` accepte un nom de modèle pris en charge par `agy` et le transmet avec `--model` ; `reasoning` et `maxOutputTokens` sont refusés lors de la composition de l’agent.
 
 Une exécution sans interface lance :
 
@@ -132,10 +132,10 @@ Les sessions Antigravity sont uniquement des sessions neuves. L’identifiant de
 
 ## Diagnostiquer l’installation
 
-Inspectez la CLI installée sans appel au modèle ni identifiants. Indiquez l’image qui fournit `agy`, ou utilisez `--sandbox-provider local` pour une installation sur l’hôte :
+Inspectez la CLI installée sans appel au modèle ni identifiants. Indiquez l’image construite par `outpost init`, ou utilisez `--sandbox-provider local` pour une installation sur l’hôte :
 
 ```sh
-npx @elie-laloum/outpost doctor --sandbox-provider docker --agent antigravity --image outpost:agy
+npx @elie-laloum/outpost doctor --sandbox-provider docker --agent antigravity --image outpost:mon-workflow
 ```
 
-La vérification lance `agy --version` et `agy --help`, qui doit afficher `Usage of agy:` et déclarer les options utilisées par Outpost. Elle n’authentifie aucun compte et ne prouve pas le comportement d’un modèle réel.
+La vérification lance `agy --version` et `agy --help`, qui doit afficher `Usage of agy:` et déclarer les options utilisées par Outpost. La version est signalée sans comparaison, faute de version fixée. Elle n’authentifie aucun compte et ne prouve pas le comportement d’un modèle réel.

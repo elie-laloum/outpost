@@ -9,7 +9,7 @@ sidebar:
 
 ## Installer la CLI
 
-Les images générées par `outpost init` installent le paquet `@github/copilot` à la version fixée, avec Claude Code, Codex et Kimi Code. Les fournisseurs distants installent au besoin la même version dans `~/.outpost-tools`, sauf avec `bootstrap: false`. Pour `localSandboxProvider()`, installez vous-même `@github/copilot` sur l’hôte. `agentVersions.copilot` indique la version de référence fixée.
+Les images générées par `outpost init` installent le paquet `@github/copilot` à la version fixée, avec Claude Code, Codex, Kimi Code et Antigravity. Les fournisseurs distants installent au besoin la même version dans `~/.outpost-tools`, sauf avec `bootstrap: false`. Pour `localSandboxProvider()`, installez vous-même `@github/copilot` sur l’hôte. `agentVersions.copilot` indique la version de référence fixée.
 
 Outpost définit `COPILOT_AUTO_UPDATE=false` pour chaque commande `copilot`, afin que la CLI ne se remplace pas pendant une exécution. Une valeur fournie dans les `variables` du harness la remplace.
 

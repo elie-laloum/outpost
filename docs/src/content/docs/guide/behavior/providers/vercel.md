@@ -31,7 +31,7 @@ await dispatch({
 
 `create` is typed from the installed SDK’s sandbox-creation options. Use it for provider credentials, runtime, resources and network configuration supported by that SDK. Credential discovery follows the SDK, so authenticate sandbox allocation separately from the selected model.
 
-Outpost-specific options are `root` (remote workspace path), `retain` (captured output tail) and `variables` (provider environment). Outpost discovers the actual remote home and can install the selected missing agent in a user-writable prefix. Set `bootstrap: false` on dispatch/sandbox options to manage installation yourself.
+Outpost-specific options are `root` (remote workspace path), `retain` (captured output tail) and `variables` (provider environment). Outpost discovers the actual remote home and can install the selected missing agent in that home: npm-based CLIs under `~/.outpost-tools`, and Antigravity's `agy` under `~/.local/bin` through its official install script. Set `bootstrap: false` on dispatch/sandbox options to manage installation yourself.
 
 The default workspace is `/vercel/sandbox/outpost`. Outpost creates missing parent directories recursively, including on images whose initial working directory is `/vercel`. A custom `root` must be writable by the sandbox user.
 

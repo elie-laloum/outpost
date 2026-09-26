@@ -30,6 +30,10 @@ test("prebuilt image context pins inputs, locks supported agents and preserves U
   assert.match(recipe, /RUN npm ci .*--omit=dev/);
   assert.match(
     recipe,
+    /antigravity\.google\/cli\/install\.sh .*\/usr\/local\/bin\/agy/,
+  );
+  assert.match(
+    recipe,
     /ENV PATH=\/opt\/outpost\/agents\/node_modules\/.bin:\$PATH/,
   );
   assert.match(

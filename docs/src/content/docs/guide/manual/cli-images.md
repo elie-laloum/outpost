@@ -21,7 +21,7 @@ npx outpost image remove --engine podman --image outpost:custom
 | `--uid`, `--gid` | Numeric build identity matching runtime access requirements.  |
 | `--directory`    | Target project directory; current directory by default.       |
 
-The generated image uses Node 24 and includes Git, Python and the Claude Code, Codex, Copilot and Kimi CLIs, installed with npm at the versions pinned in `agentVersions`. It does not include the Antigravity CLI (`agy`): add it to the generated recipe by following the [official installation guide](https://antigravity.google/docs/cli/install/), or use the local provider with `agy` installed on the host. Install additional project tools in the generated recipe, then rebuild.
+The generated image uses Node 24 and includes Git, Python and the Claude Code, Codex, Copilot and Kimi CLIs, installed with npm at the versions pinned in `agentVersions`. It also includes the Antigravity CLI (`agy`), installed in `/usr/local/bin` by its [official install script](https://antigravity.google/docs/cli/install/) at build time; that script is not version-pinned, so a rebuild can pick up a newer `agy`. The recipe sets `XDG_CACHE_HOME=/tmp/.cache` so that Copilot can load its native addon, since the private home is mounted `noexec`. Install additional project tools in the generated recipe, then rebuild.
 
 Image removal targets the selected image; it is not a global prune. Outpost does not automatically rebuild an outdated image when starting a job. Rebuild after changing recipes, agent version pins or the desired UID/GID.
 

@@ -333,7 +333,7 @@ test("help diagnostics inspect each new CLI through its registered executable", 
   assert.equal(doctorAgents.antigravity.referenceVersion, undefined);
 });
 
-test("remote bootstrap installs npm CLIs, allows scripts only for Claude and leaves Antigravity to the image", async () => {
+test("remote bootstrap installs npm CLIs, allows scripts only for Claude and runs the official Antigravity installer", async () => {
   const scripts: string[] = [];
   const lease: SandboxLease = {
     root: "/workspace",
@@ -369,8 +369,19 @@ test("remote bootstrap installs npm CLIs, allows scripts only for Claude and lea
   assert.match(scripts[1]!, /@moonshot-ai\/kimi-code@2\.1\.1/);
   assert.ok(scripts.every((script) => !script.includes("--allow-scripts")));
   const antigravity = composeAgent({ harness: antigravityHarness() });
-  assert.equal(await prepareAdapter(antigravity, lease, signal), antigravity);
-  assert.equal(scripts.length, 2);
+  const prepared = await prepareAdapter(antigravity, lease, signal);
+  if (prepared.kind !== "cli") throw new Error("Expected CLI harness");
+  assert.equal(
+    prepared.request({ text: "hello" }).executable,
+    "/home/agent/.outpost-tools/bin/agy",
+  );
+  assert.equal(scripts.length, 3);
+  assert.ok(
+    scripts[2]!.includes(
+      "curl -fsSL 'https://antigravity.google/cli/install.sh' | bash >&2 && test -x '/home/agent/.local/bin/agy'",
+    ),
+    scripts[2],
+  );
   await assert.rejects(
     prepareAdapter(
       { ...antigravity, bootstrap: "unrecognized" },

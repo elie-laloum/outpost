@@ -13,7 +13,7 @@ import { agentVersions } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Expose les versions des CLI Claude, Codex et Gemini servant de références aux fixtures de protocole et aux images générées. Ces valeurs n’interrogent pas les binaires installés et ne prouvent pas l’accès à un compte.
+Expose les versions des CLI Claude Code, Codex, Copilot et Kimi épinglées pour les images générées et le bootstrap distant, qui servent de références aux fixtures de protocole intégrées. Antigravity n’y figure pas : son script d’installation officiel installe la version courante. Ces valeurs n’interrogent pas les binaires installés et ne prouvent pas l’accès à un compte.
 
 [Exemple complet et règles détaillées](../../guide/agents/harness/).
 

@@ -62,7 +62,7 @@ Sign in on the host before running an `account` workflow, with file storage wher
 
 The removed `--authentication api-key`, `oauth-token` and `login` values correspond to `usage`, `account-token` and `account`.
 
-Docker/Podman images build automatically and contain the Claude Code, Codex, GitHub Copilot and Kimi Code CLIs; add the Antigravity CLI (`agy`) to the recipe yourself. Use `--no-build` to generate files only, then run `outpost image build --engine docker --directory <workflow>` (or `podman`) when ready. The engine and daemon must be available. If installation or image building fails after generation, keep the generated files and rerun the failed install/build command; do not rerun initialization over those files. Cloud allocation credentials remain in the host environment and are separate from model credentials.
+Docker/Podman images build automatically and contain the Claude Code, Codex, GitHub Copilot, Kimi Code and Antigravity (`agy`) CLIs. Use `--no-build` to generate files only, then run `outpost image build --engine docker --directory <workflow>` (or `podman`) when ready. The engine and daemon must be available. If installation or image building fails after generation, keep the generated files and rerun the failed install/build command; do not rerun initialization over those files. Cloud allocation credentials remain in the host environment and are separate from model credentials.
 
 ## Custom model endpoint
 

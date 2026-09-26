@@ -4,6 +4,37 @@ import { invariant } from "../domain/errors.ts";
 import type { SandboxLease } from "../domain/sandbox.types.ts";
 import { quote, requireSuccess } from "../infrastructure/process.ts";
 import { agentInstallers } from "./agent-bootstrap.constants.ts";
+import type {
+  AgentInstallation,
+  AgentInstallations,
+  AgentInstaller,
+} from "./agent-bootstrap.types.ts";
+
+const installations: AgentInstallations = {
+  npm: (installer, home) => {
+    const prefix = posix.join(home, ".outpost-tools");
+    const scripts = installer.allowScripts
+      ? ` --allow-scripts=${installer.package.replace(/@[^@/]+$/, "")}`
+      : "";
+    return {
+      target: posix.join(prefix, "bin", installer.binary),
+      install: `npm install --global${scripts} --prefix ${quote(prefix)} ${installer.package}`,
+    };
+  },
+  script: (installer, home) => ({
+    target: posix.join(home, installer.installed),
+    install: `curl -fsSL ${quote(installer.url)} | bash`,
+  }),
+};
+
+function installation(
+  installer: AgentInstaller,
+  home: string,
+): AgentInstallation {
+  return installer.kind === "npm"
+    ? installations.npm(installer, home)
+    : installations.script(installer, home);
+}
 
 export async function prepareAdapter(
   agent: Agent,
@@ -18,17 +49,13 @@ export async function prepareAdapter(
     : undefined;
   invariant(installer, `Unknown agent bootstrap: ${name}`);
   const { binary } = installer;
-  const prefix = posix.join(runtime.home, ".outpost-tools"),
-    target = posix.join(prefix, "bin", binary);
-  const scripts = installer.allowScripts
-    ? ` --allow-scripts=${installer.package.replace(/@[^@/]+$/, "")}`
-    : "";
+  const { target, install } = installation(installer, runtime.home);
   const installed = await requireSuccess(
     {
       executable: "sh",
       arguments: [
         "-c",
-        `if command -v ${binary} >/dev/null 2>&1; then command -v ${binary}; elif test -x ${quote(target)}; then printf '%s\\n' ${quote(target)}; else npm install --global${scripts} --prefix ${quote(prefix)} ${installer.package} >&2 && printf '%s\\n' ${quote(target)}; fi`,
+        `if command -v ${binary} >/dev/null 2>&1; then command -v ${binary}; elif test -x ${quote(target)}; then printf '%s\\n' ${quote(target)}; else ${install} >&2 && test -x ${quote(target)} && printf '%s\\n' ${quote(target)}; fi`,
       ],
       signal,
     },

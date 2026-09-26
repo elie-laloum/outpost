@@ -67,7 +67,7 @@ node example.mts
 
 ## Comprendre le résultat
 
-Les presets de harness choisissent le comportement de la CLI native. Composez un agent avec son modèle et transmettez cet agent au dispatch ; choisissez indépendamment l’environnement avec sandboxProvider. La construction ne déclenche ni authentification ni requête modèle. Sans modèle explicite, la CLI utilise son défaut. Claude et Codex permettent la capture, la reprise et le fork des conversations natives ; Antigravity, Copilot et Kimi n’exécutent que de nouvelles sessions. `agentVersions` indique les versions de CLI épinglées pour les images générées et le bootstrap distant ; Antigravity n’a pas de version épinglée.
+Les presets de harness choisissent le comportement de la CLI native. Composez un agent avec son modèle et transmettez cet agent au dispatch ; choisissez indépendamment l’environnement avec sandboxProvider. La construction ne déclenche ni authentification ni requête modèle. Sans modèle explicite, la CLI utilise son défaut. Claude et Codex permettent la capture, la reprise et le fork des conversations natives ; Antigravity, Copilot et Kimi n’exécutent que de nouvelles sessions. `agentVersions` indique les versions de CLI épinglées pour les images générées et le bootstrap distant ; Antigravity n’a pas de version épinglée, et tous deux installent sa version courante avec le script d’installation officiel.
 
 [Contrats, options et cas particuliers](../../behavior/agents/adapters/).
 

@@ -13,7 +13,7 @@ import { agentVersions } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Expose the Claude, Codex and Gemini CLI versions used as compatibility references by bundled protocol fixtures and generated images. These values do not query the installed binaries or prove live account access.
+Expose the Claude Code, Codex, Copilot and Kimi CLI versions pinned for generated images and remote bootstrap and used as compatibility references by bundled protocol fixtures. Antigravity has no entry: its official install script installs the current release. These values do not query the installed binaries or prove live account access.
 
 [Complete example and detailed rules](../../guide/agents/harness/).
 

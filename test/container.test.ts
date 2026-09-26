@@ -443,7 +443,13 @@ test(
   async () => {
     const engine =
       process.env.OUTPOST_CONTAINER_ENGINE === "podman" ? "podman" : "docker";
-    for (const agent of ["codex", "claude", "copilot", "kimi"] as const) {
+    for (const agent of [
+      "codex",
+      "claude",
+      "antigravity",
+      "copilot",
+      "kimi",
+    ] as const) {
       let name = "";
       const checks = await diagnoseImage(
         { sandboxProvider: engine, agent, image: containerImage },
@@ -478,10 +484,12 @@ test(
           ? ["agent.cli.start", "agent.cli.resume", "agent.cli.fork"]
           : ["agent.cli.start"],
       );
-      assert.equal(
-        checks.find((check) => check.id === "agent.sandbox")?.version,
-        agentVersions[agent],
-      );
+      const version = checks.find(
+        (check) => check.id === "agent.sandbox",
+      )?.version;
+      if (agent === "antigravity")
+        assert.match(version ?? "", /^\d+\.\d+\.\d+/);
+      else assert.equal(version, agentVersions[agent]);
       await assertContainerRemoved(engine, name);
     }
     let name = "";

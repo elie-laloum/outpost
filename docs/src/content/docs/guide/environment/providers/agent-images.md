@@ -5,14 +5,14 @@ sidebar:
   order: 4
 ---
 
-Outpost includes a build workflow for a combined Claude Code/Codex/Copilot/Kimi container image. The Antigravity CLI (`agy`) is not included; add it in your own derived image by following the [official installation guide](https://antigravity.google/docs/cli/install/). Its agent versions come from the same pins as generated workflow projects. The workflow and verification procedure are available; this page does not assert that a public image or signed attestation has been published. Use only a digest from a successful, verified publication run.
+Outpost includes a build workflow for a combined Claude Code/Codex/Copilot/Kimi/Antigravity container image. The Claude Code, Codex, Copilot and Kimi versions come from the same pins as generated workflow projects. As in generated projects, the Antigravity CLI (`agy`) comes from its [official install script](https://antigravity.google/docs/cli/install/), which is not version-pinned: the image contains the release current at build time. The workflow and verification procedure are available; this page does not assert that a public image or signed attestation has been published. Use only a digest from a successful, verified publication run.
 
 Use a source checkout, Docker, a reviewed base-image digest and a Debian snapshot. Building and signing an image take longer than a one-minute example; the commands below distinguish local builds from verified publication.
 
 <details>
 <summary>Prerequisites and complete procedure</summary>
 
-Outpost includes a build workflow for a combined Claude Code/Codex/Copilot/Kimi container image. The Antigravity CLI (`agy`) is not included; add it in your own derived image by following the [official installation guide](https://antigravity.google/docs/cli/install/). Its agent versions come from the same pins as generated workflow projects. The workflow and verification procedure are available; this page does not assert that a public image or signed attestation has been published. Use only a digest from a successful, verified publication run.
+Outpost includes a build workflow for a combined Claude Code/Codex/Copilot/Kimi/Antigravity container image. The Claude Code, Codex, Copilot and Kimi versions come from the same pins as generated workflow projects. As in generated projects, the Antigravity CLI (`agy`) comes from its [official install script](https://antigravity.google/docs/cli/install/), which is not version-pinned: the image contains the release current at build time. The workflow and verification procedure are available; this page does not assert that a public image or signed attestation has been published. Use only a digest from a successful, verified publication run.
 
 ## Build locally
 
@@ -29,13 +29,13 @@ docker build --build-arg AGENT_UID="$(id -u)" \
 
 Replace `REVIEWED_BASE_DIGEST` with 64 hexadecimal characters. Podman accepts the same generated Dockerfile and build arguments. The context contains only the recipe and package manifests; repository files, credentials and transcripts are excluded.
 
-The context reuses the existing packages, non-root user and private home recipe, adding a digest-pinned base, dated Debian package repositories and `npm ci` against `images/agents/package-lock.json`. Agent dependencies are installed under `/opt/outpost/agents`, outside the ephemeral home. All four CLI binaries (`claude`, `codex`, `copilot`, `kimi`) are on `PATH`. The generator fails when the image manifest no longer matches the supported-agent versions. Update both the manifest and its lockfile when updating those pins:
+The context reuses the existing packages, non-root user and private home recipe, adding a digest-pinned base, dated Debian package repositories and `npm ci` against `images/agents/package-lock.json`. Agent dependencies are installed under `/opt/outpost/agents`, outside the ephemeral home. The four npm CLI binaries (`claude`, `codex`, `copilot`, `kimi`) are on `PATH`, and the official install script's `agy` binary is installed in `/usr/local/bin`. `XDG_CACHE_HOME=/tmp/.cache` lets Copilot extract its native addon outside the private home, which is mounted `noexec`. The generator fails when the image manifest no longer matches the supported-agent versions. Update both the manifest and its lockfile when updating those pins:
 
 ```sh
 npm install --package-lock-only --ignore-scripts --prefix images/agents
 ```
 
-Record the source commit, base digest, snapshot, architecture, UID/GID and resulting image digest. These inputs make dependency resolution repeatable; build timestamps and tool behavior can still prevent byte-for-byte identical images. A pinned snapshot intentionally stops receiving new security packages until you review and update it. The local build is unsigned.
+Record the source commit, base digest, snapshot, architecture, UID/GID and resulting image digest. These inputs make npm and Debian dependency resolution repeatable, but not the `agy` release, so also record the output of `agy --version` in the image; build timestamps and tool behavior can still prevent byte-for-byte identical images. A pinned snapshot intentionally stops receiving new security packages until you review and update it. The local build is unsigned.
 
 ## Publish with signed provenance
 

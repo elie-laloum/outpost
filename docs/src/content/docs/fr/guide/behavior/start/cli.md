@@ -62,7 +62,7 @@ Connectez-vous sur l’hôte avant de lancer un workflow `account`, avec un stoc
 
 Les valeurs supprimées `--authentication api-key`, `oauth-token` et `login` correspondent à `usage`, `account-token` et `account`.
 
-Les images Docker/Podman sont construites automatiquement et contiennent les CLI Claude Code, Codex, GitHub Copilot et Kimi Code ; ajoutez vous-même la CLI Antigravity (`agy`) à la recette. Utilisez `--no-build` pour générer uniquement les fichiers, puis `outpost image build --engine docker --directory <workflow>` (ou `podman`) lorsque vous êtes prêt. Le moteur et son daemon doivent être disponibles. Si l’installation ou le build échoue après la génération, conservez les fichiers et relancez la commande d’installation/build concernée ; ne relancez pas init sur ces fichiers. Les credentials d’allocation cloud restent sur l’hôte et sont distincts des credentials des modèles.
+Les images Docker/Podman sont construites automatiquement et contiennent les CLI Claude Code, Codex, GitHub Copilot, Kimi Code et Antigravity (`agy`). Utilisez `--no-build` pour générer uniquement les fichiers, puis `outpost image build --engine docker --directory <workflow>` (ou `podman`) lorsque vous êtes prêt. Le moteur et son daemon doivent être disponibles. Si l’installation ou le build échoue après la génération, conservez les fichiers et relancez la commande d’installation/build concernée ; ne relancez pas init sur ces fichiers. Les credentials d’allocation cloud restent sur l’hôte et sont distincts des credentials des modèles.
 
 ## Endpoint modèle personnalisé
 

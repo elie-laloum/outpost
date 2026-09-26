@@ -7,7 +7,7 @@ description: "Les capacités des agents et providers sont indépendantes."
 | --------------------------------------- | ------------------ | ------------------------------- | --------------------- | ----------------------------------- | -------------------- |
 | Claude Code                             | Oui                | Oui                             | Oui                   | `account` (fichier, jeton), `usage` | Oui                  |
 | Codex                                   | Oui                | Oui                             | Oui                   | `account` (fichier), `usage`        | Oui                  |
-| Antigravity CLI (`agy`)                 | Oui                | Non                             | Non                   | `account` (fichier), `usage`        | Non                  |
+| Antigravity CLI (`agy`)                 | Oui                | Non                             | Non                   | `account` (fichier), `usage`        | Oui, non épinglé     |
 | GitHub Copilot CLI                      | Oui                | Non                             | Non                   | `account` (fichier, jeton)          | Oui                  |
 | Kimi Code                               | Oui                | Non                             | Non                   | `account` (profil), `usage`         | Oui                  |
 | `harness()` personnalisé (expérimental) | Oui                | Oui, transcript Outpost         | Oui                   | Clé API du model provider           | Sans objet           |

@@ -110,7 +110,7 @@ npx @elie-laloum/outpost init --yes --agent claude --authentication account-toke
 npx @elie-laloum/outpost init --yes --agent claude --authentication usage --sandbox-provider docker --directory workflow --repository ../repository --image outpost:docs-demo --install
 ```
 
-GitHub Copilot et Kimi Code utilisent la même commande avec `--agent copilot` ou `--agent kimi` ; voir [Copilot](../../agents/connect-copilot/) et [Kimi Code](../../agents/connect-kimi/). Antigravity n’est pas installé dans les images générées ; voir [Antigravity](../../agents/connect-antigravity/).
+Antigravity, GitHub Copilot et Kimi Code utilisent la même commande avec `--agent antigravity`, `--agent copilot` ou `--agent kimi` ; voir [Antigravity](../../agents/connect-antigravity/), [Copilot](../../agents/connect-copilot/) et [Kimi Code](../../agents/connect-kimi/).
 
 ## 2. Déclarer l’identifiant choisi
 

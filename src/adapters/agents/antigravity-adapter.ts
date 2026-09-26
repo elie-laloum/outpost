@@ -20,6 +20,7 @@ function bindAntigravity(settings: Bound<AntigravitySettings>): AgentAdapter {
   return Object.freeze({
     name: "antigravity",
     ...(credentials ? { credentials } : {}),
+    bootstrap: "antigravity",
     resumable: false,
     capture: false,
     requiresFinishedEvent: true,

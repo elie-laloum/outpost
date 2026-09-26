@@ -35,7 +35,7 @@ Une déclaration vide reprend la variable du processus. Une valeur non vide dans
 node run.ts "Ajoute la validation des entrées, lance les tests et crée un commit"
 ```
 
-Le script utilise TypeScript, exécuté directement par Node.js 24+. Pour un projet existant déclarant `"type": "commonjs"`, le fichier généré est `run.mts` ; utilisez la commande affichée par `init`. L’image contient les CLI Claude Code, Codex, GitHub Copilot et Kimi Code, Git, Node et Python ; elle ne contient pas la CLI Antigravity (`agy`). Ajoutez les autres outils du projet dans la recette si nécessaire.
+Le script utilise TypeScript, exécuté directement par Node.js 24+. Pour un projet existant déclarant `"type": "commonjs"`, le fichier généré est `run.mts` ; utilisez la commande affichée par `init`. L’image contient les CLI Claude Code, Codex, GitHub Copilot, Kimi Code et Antigravity (`agy`), Git, Node et Python. Ajoutez les autres outils du projet dans la recette si nécessaire.
 
 ## 4. Examiner le résultat
 

@@ -5,7 +5,7 @@ sidebar:
   order: 4
 ---
 
-Outpost fournit un workflow de construction d'une image combinant Claude Code, Codex, Copilot et Kimi. Le CLI Antigravity (`agy`) n'y figure pas ; ajoutez-le dans votre propre image dérivée en suivant le [guide d'installation officiel](https://antigravity.google/docs/cli/install/). Les versions des agents proviennent des mêmes références épinglées que les projets générés. Le workflow et sa procédure de vérification sont disponibles ; cette page n'affirme pas qu'une image publique ou une attestation signée a été publiée. Utilisez uniquement le digest d'une publication réussie et vérifiée.
+Outpost fournit un workflow de construction d'une image combinant Claude Code, Codex, Copilot, Kimi et Antigravity. Les versions de Claude Code, Codex, Copilot et Kimi proviennent des mêmes références épinglées que les projets générés. Comme dans les projets générés, le CLI Antigravity (`agy`) provient de son [script d'installation officiel](https://antigravity.google/docs/cli/install/), qui n'est pas épinglé : l'image contient la version courante au moment de la construction. Le workflow et sa procédure de vérification sont disponibles ; cette page n'affirme pas qu'une image publique ou une attestation signée a été publiée. Utilisez uniquement le digest d'une publication réussie et vérifiée.
 
 ## Construire localement
 
@@ -22,13 +22,13 @@ docker build --build-arg AGENT_UID="$(id -u)" \
 
 Remplacez `REVIEWED_BASE_DIGEST` par 64 caractères hexadécimaux. Podman accepte le même Dockerfile et les mêmes arguments. Le contexte contient uniquement la recette et les manifestes de paquets ; les fichiers du dépôt, identifiants et transcriptions sont exclus.
 
-Le contexte réutilise les paquets existants, l'utilisateur non root et le home privé, en ajoutant une base épinglée par digest, des dépôts Debian datés et `npm ci` avec `images/agents/package-lock.json`. Les dépendances des agents sont installées dans `/opt/outpost/agents`, hors du home éphémère. Les quatre CLI (`claude`, `codex`, `copilot`, `kimi`) sont dans `PATH`. Le générateur échoue si le manifeste ne correspond plus aux versions d'agents supportées. Mettez à jour le manifeste et son lockfile lorsque ces versions changent :
+Le contexte réutilise les paquets existants, l'utilisateur non root et le home privé, en ajoutant une base épinglée par digest, des dépôts Debian datés et `npm ci` avec `images/agents/package-lock.json`. Les dépendances des agents sont installées dans `/opt/outpost/agents`, hors du home éphémère. Les quatre CLI installés avec npm (`claude`, `codex`, `copilot`, `kimi`) sont dans `PATH`, et le binaire `agy` du script d'installation officiel est installé dans `/usr/local/bin`. `XDG_CACHE_HOME=/tmp/.cache` permet à Copilot d'extraire son module natif hors du home privé, monté en `noexec`. Le générateur échoue si le manifeste ne correspond plus aux versions d'agents supportées. Mettez à jour le manifeste et son lockfile lorsque ces versions changent :
 
 ```sh
 npm install --package-lock-only --ignore-scripts --prefix images/agents
 ```
 
-Consignez le commit source, le digest de base, l'instantané, l'architecture, l'UID/GID et le digest obtenu. Ces entrées rendent la résolution des dépendances reproductible ; les horodatages et outils peuvent empêcher une identité octet par octet. Un instantané épinglé ne reçoit plus de nouveaux paquets de sécurité avant révision et mise à jour explicites. La construction locale n'est pas signée.
+Consignez le commit source, le digest de base, l'instantané, l'architecture, l'UID/GID et le digest obtenu. Ces entrées rendent reproductible la résolution des dépendances npm et Debian, mais pas la version d'`agy` : consignez aussi la sortie d'`agy --version` dans l'image ; les horodatages et outils peuvent empêcher une identité octet par octet. Un instantané épinglé ne reçoit plus de nouveaux paquets de sécurité avant révision et mise à jour explicites. La construction locale n'est pas signée.
 
 ## Publier avec une provenance signée
 

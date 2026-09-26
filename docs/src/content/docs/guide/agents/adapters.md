@@ -67,7 +67,7 @@ node example.mts
 
 ## Understand the result
 
-Harness presets choose native CLI behavior. Compose an agent with its model and pass that agent to dispatch; select the environment independently with sandboxProvider. Construction performs no authentication or model request. Omitted model settings use the CLI default. Claude and Codex can capture, resume and fork native conversations; Antigravity, Copilot and Kimi run fresh sessions only. `agentVersions` lists the CLI versions pinned for generated images and remote bootstrap; Antigravity has no pinned version.
+Harness presets choose native CLI behavior. Compose an agent with its model and pass that agent to dispatch; select the environment independently with sandboxProvider. Construction performs no authentication or model request. Omitted model settings use the CLI default. Claude and Codex can capture, resume and fork native conversations; Antigravity, Copilot and Kimi run fresh sessions only. `agentVersions` lists the CLI versions pinned for generated images and remote bootstrap; Antigravity has no pinned version, and both install its current release with the official install script.
 
 [Contracts, options and edge cases](../../behavior/agents/adapters/).
 

@@ -192,8 +192,8 @@
     "Identifiant d’agent natif utilisé dans les événements et diagnostics."
   ],
   "AgentAdapter.bootstrap": [
-    "Name of the pinned npm installer used to install the CLI on remote providers when bootstrapping is enabled.",
-    "Nom de l’installeur npm épinglé utilisé pour installer la CLI sur les providers distants lorsque le bootstrap est activé."
+    "Name of the built-in installer used to install a missing CLI on remote providers when bootstrapping is enabled: a pinned npm package for claude, codex, copilot and kimi, or the official, unpinned install script for antigravity.",
+    "Nom de l’installeur intégré utilisé pour installer une CLI absente sur les providers distants lorsque le bootstrap est activé : un paquet npm épinglé pour claude, codex, copilot et kimi, ou le script d’installation officiel, non épinglé, pour antigravity."
   ],
   "AgentAdapter.requiresFinishedEvent": [
     "Require the native finished protocol event before treating an agent turn as complete.",
@@ -3613,8 +3613,8 @@
     "Identifiant d’agent natif utilisé dans les événements et diagnostics."
   ],
   "AgentFeatures.bootstrap": [
-    "Name of the pinned npm installer used to install the CLI on remote providers when bootstrapping is enabled.",
-    "Nom de l’installeur npm épinglé utilisé pour installer la CLI sur les providers distants lorsque le bootstrap est activé."
+    "Name of the built-in installer used to install a missing CLI on remote providers when bootstrapping is enabled: a pinned npm package for claude, codex, copilot and kimi, or the official, unpinned install script for antigravity.",
+    "Nom de l’installeur intégré utilisé pour installer une CLI absente sur les providers distants lorsque le bootstrap est activé : un paquet npm épinglé pour claude, codex, copilot et kimi, ou le script d’installation officiel, non épinglé, pour antigravity."
   ],
   "AgentFeatures.requiresFinishedEvent": [
     "Require the native finished protocol event before treating an agent turn as complete.",
@@ -3729,8 +3729,8 @@
     "Effort de raisonnement optionnel. Chaque harness ou fournisseur n’accepte que les niveaux qu’il sait exprimer et refuse les autres à la composition de l’agent ; son absence conserve le défaut du modèle."
   ],
   "AgentModel.maxOutputTokens": [
-    "Optional positive output-token limit for each model response. Claude Code receives it as CLAUDE_CODE_MAX_OUTPUT_TOKENS; Codex and Gemini CLI reject it; the Anthropic provider requires it.",
-    "Limite positive optionnelle de tokens de sortie pour chaque réponse du modèle. Claude Code la reçoit via CLAUDE_CODE_MAX_OUTPUT_TOKENS ; Codex et Gemini CLI la refusent ; le fournisseur Anthropic l’exige."
+    "Optional positive output-token limit for each model response. Claude Code receives it as CLAUDE_CODE_MAX_OUTPUT_TOKENS; Codex, Antigravity, Copilot and Kimi reject it; the Anthropic provider requires it.",
+    "Limite positive optionnelle de tokens de sortie pour chaque réponse du modèle. Claude Code la reçoit via CLAUDE_CODE_MAX_OUTPUT_TOKENS ; Codex, Antigravity, Copilot et Kimi la refusent ; le fournisseur Anthropic l’exige."
   ],
   "ModelProvider.validate": [
     "Optional check called by agent() with the normalized AgentModel; throw to reject unsupported reasoning levels or missing output limits before any request.",

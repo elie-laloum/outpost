@@ -9,7 +9,7 @@ sidebar:
 
 ## Installer la CLI
 
-Les images générées par `outpost init` installent le paquet `@moonshot-ai/kimi-code` à la version fixée, avec Claude Code, Codex et Copilot. Les fournisseurs distants installent au besoin la même version dans `~/.outpost-tools`, sauf avec `bootstrap: false`. Pour `localSandboxProvider()`, installez vous-même `@moonshot-ai/kimi-code` sur l’hôte. `agentVersions.kimi` indique la version de référence fixée.
+Les images générées par `outpost init` installent le paquet `@moonshot-ai/kimi-code` à la version fixée, avec Claude Code, Codex, Copilot et Antigravity. Les fournisseurs distants installent au besoin la même version dans `~/.outpost-tools`, sauf avec `bootstrap: false`. Pour `localSandboxProvider()`, installez vous-même `@moonshot-ai/kimi-code` sur l’hôte. `agentVersions.kimi` indique la version de référence fixée.
 
 Outpost définit `KIMI_CODE_NO_AUTO_UPDATE=1` pour chaque commande `kimi`, afin que la CLI ne se remplace pas pendant une exécution. Une valeur fournie dans les `variables` du harness la remplace.
 

@@ -31,7 +31,7 @@ await dispatch({
 
 `create` reprend le type des options de création du SDK installé. Utilisez-le pour les identifiants, runtime, ressources et paramètres réseau pris en charge. La découverte des identifiants suit le SDK : l’authentification de la sandbox reste distincte de celle du modèle.
 
-Les options propres à Outpost sont `root` (répertoire distant), `retain` (fin de sortie conservée) et `variables` (environnement du provider). Outpost découvre le home réel et peut installer l’agent manquant dans un préfixe accessible à l’utilisateur. Passez `bootstrap: false` aux options de dispatch/sandbox pour gérer l’installation vous-même.
+Les options propres à Outpost sont `root` (répertoire distant), `retain` (fin de sortie conservée) et `variables` (environnement du provider). Outpost découvre le home réel et peut installer l’agent manquant dans ce home : les CLI distribués par npm sous `~/.outpost-tools`, et `agy` d’Antigravity sous `~/.local/bin` avec son script d’installation officiel. Passez `bootstrap: false` aux options de dispatch/sandbox pour gérer l’installation vous-même.
 
 Le workspace par défaut est `/vercel/sandbox/outpost`. Outpost crée récursivement les répertoires parents manquants, y compris sur les images dont le répertoire de travail initial est `/vercel`. Un `root` personnalisé doit être accessible en écriture à l’utilisateur de la sandbox.
 

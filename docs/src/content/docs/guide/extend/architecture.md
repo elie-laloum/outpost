@@ -36,7 +36,7 @@ Each agent has its own factory, request builder, authentication strategy and eve
 
 ## Resource lifecycle
 
-`application/workspace.ts` owns the host workspace. `sandbox-provision.ts` acquires and prepares a provider lease. `sandbox.ts` composes dispatch, attachment and command operations; `operation-gate.ts` enforces exclusive ownership and waits for active work during closure.
+`application/workspace.ts` owns the host workspace. `sandbox-provision.ts` acquires and prepares a provider lease. On remote placements, `agent-bootstrap.ts` installs a missing agent CLI through the installer named by `AgentAdapter.bootstrap`, with one strategy per installer kind: a pinned npm package, or the official install script for Antigravity. `sandbox.ts` composes dispatch, attachment and command operations; `operation-gate.ts` enforces exclusive ownership and waits for active work during closure.
 
 `sandbox-dispatch.ts` owns the dispatch transaction: execution, transcript capture, synchronization, journal closure and recovery metadata. `agent-turn.ts` supervises one process; `agent-output.ts` accumulates protocol output; `activity-watchdog.ts` owns timers. Usage aggregation is a domain operation shared by warm and cold execution.
 

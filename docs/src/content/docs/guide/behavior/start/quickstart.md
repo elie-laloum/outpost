@@ -35,7 +35,7 @@ An empty declaration imports the matching process variable. A nonempty file valu
 node run.ts "Add input validation, run tests and commit the change"
 ```
 
-The script uses TypeScript, executed directly by Node.js 24+. For existing projects declaring `"type": "commonjs"`, the generated file is `run.mts`; use the command printed by `init`. The image contains the Claude Code, Codex, GitHub Copilot and Kimi Code CLIs, Git, Node and Python; it does not contain the Antigravity CLI (`agy`). Add other project tools to the recipe as needed.
+The script uses TypeScript, executed directly by Node.js 24+. For existing projects declaring `"type": "commonjs"`, the generated file is `run.mts`; use the command printed by `init`. The image contains the Claude Code, Codex, GitHub Copilot, Kimi Code and Antigravity (`agy`) CLIs, Git, Node and Python. Add other project tools to the recipe as needed.
 
 ## 4. Inspect the result
 
