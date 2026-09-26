@@ -7,6 +7,7 @@ import type {
   ModelToolCallBlock,
 } from "../domain/model.types.ts";
 import type { SandboxLease } from "../domain/sandbox.types.ts";
+import type { HarnessTool } from "../domain/tool.types.ts";
 
 export interface HarnessRuntime {
   readonly agent: CustomAgent;
@@ -19,8 +20,11 @@ export interface HarnessRuntime {
 
 export interface ToolCallBatch {
   readonly concurrent: boolean;
-  readonly calls: readonly ModelToolCallBlock[];
+  readonly calls: readonly PreparedCall[];
 }
+
+export type ValidatedInput =
+  { readonly value: unknown } | { readonly outcome: ToolOutcome };
 
 export interface ToolOutcome {
   readonly content: string;
@@ -39,3 +43,14 @@ export type StopHandler = (
   result: ModelResult,
   content: readonly ModelContentBlock[],
 ) => Promise<string | undefined>;
+
+export interface PreparedCall {
+  readonly call: ModelToolCallBlock;
+  readonly tool?: HarnessTool;
+  readonly input?: unknown;
+  readonly outcome?: ToolOutcome;
+}
+
+export interface ToolDenial {
+  readonly deny: string;
+}

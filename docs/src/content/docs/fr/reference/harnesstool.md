@@ -6,7 +6,7 @@ sidebar:
 ---
 
 :::caution[Expérimental]
-Expérimental : élément du moteur de harness intégré non publié. Hooks, permissions, conversations persistées et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication.
+Expérimental : élément du moteur de harness intégré non publié. Conversations persistées, jeux d’outils fournis et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication.
 :::
 
 ## Import
@@ -25,6 +25,7 @@ import type { HarnessTool } from "@elie-laloum/outpost";
 | `readOnly`    | `boolean`                                                                          | Requis   | Indique si l’outil peut s’exécuter en parallèle d’autres appels en lecture seule.                    |
 | `inputSchema` | `Readonly<Record<string, unknown>>`                                                | Requis   | JSON Schema figé envoyé au modèle, converti depuis un Standard Schema si besoin.                     |
 | `validate`    | `(value: unknown) => Promise<ToolValidation<Input>>`                               | Requis   | Contrôle les arguments bruts du modèle et renvoie la valeur typée ou une liste de problèmes lisible. |
+| `resources`   | `(input: Input) => ToolResources`                                                  | Requis   | Chemins et commande d’une entrée validée ; vide si l’outil n’en déclare pas.                         |
 | `execute`     | `(input: Input, context: HarnessToolContext) => ToolOutput \| Promise<ToolOutput>` | Requis   | Exécute l’appel avec l’entrée validée et son contexte.                                               |
 
 ## Signature
@@ -37,6 +38,7 @@ export interface HarnessTool<Input = unknown> {
   readonly readOnly: boolean;
   readonly inputSchema: JsonSchema;
   validate(value: unknown): Promise<ToolValidation<Input>>;
+  resources(input: Input): ToolResources;
   execute(
     input: Input,
     context: HarnessToolContext,
@@ -49,4 +51,5 @@ export interface HarnessTool<Input = unknown> {
 - [HarnessToolContext](../harnesstoolcontext/)
 - [JsonSchema](../jsonschema/)
 - [ToolOutput](../tooloutput/)
+- [ToolResources](../toolresources/)
 - [ToolValidation](../toolvalidation/)

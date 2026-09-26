@@ -36,6 +36,12 @@ export function reporter(
           `${prefix} tool ${event.isError ? "failed" : "done"}: ${event.name}${options.verbose ? ` ${event.preview}` : ""}\n`,
         );
         break;
+      case "tool-denied":
+        write(`${prefix} tool denied: ${event.name} · ${event.reason}\n`);
+        break;
+      case "stop-prevented":
+        write(`${prefix} stop prevented: ${event.message}\n`);
+        break;
       case "step":
         if (options.verbose) write(`${prefix} step ${event.index}\n`);
         break;

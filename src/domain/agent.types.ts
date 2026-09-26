@@ -43,6 +43,13 @@ export type AgentEvent =
       readonly characters: number;
     }
   | { readonly kind: "step"; readonly index: number }
+  | {
+      readonly kind: "tool-denied";
+      readonly callId: string;
+      readonly name: string;
+      readonly reason: string;
+    }
+  | { readonly kind: "stop-prevented"; readonly message: string }
   | { readonly kind: "conversation"; readonly id: string }
   | { readonly kind: "usage"; readonly tokens: Usage }
   | { readonly kind: "failure"; readonly message: string }

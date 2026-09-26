@@ -6,7 +6,7 @@ sidebar:
 ---
 
 :::caution[Experimental]
-Experimental: part of the unreleased built-in harness engine. Hooks, permissions, persisted conversations and streaming are not available yet; the contract may change before release.
+Experimental: part of the unreleased built-in harness engine. Persisted conversations, built-in toolsets and streaming are not available yet; the contract may change before release.
 :::
 
 ## Import
@@ -23,6 +23,7 @@ import type { HarnessToolOptions } from "@elie-laloum/outpost";
 | `description` | `string`                                                                           | Required | Nonempty explanation the model reads to decide when and how to call the tool.                                                                                        |
 | `input`       | `Readonly<Record<string, unknown>> \| StandardJsonSchema<Input>`                   | Required | Input schema: a JSON Schema object validated by the built-in subset, or a Standard Schema that exposes JSON Schema, such as Zod 4, whose validator checks the input. |
 | `readOnly`    | `boolean \| undefined`                                                             | Optional | Mark tools without side effects so they can run concurrently; defaults to false.                                                                                     |
+| `resources`   | `((input: Input) => ToolResources) \| undefined`                                   | Optional | Describe the paths and command of a validated input so permission rules can match them. Custom tools without it only match by name.                                  |
 | `execute`     | `(input: Input, context: HarnessToolContext) => ToolOutput \| Promise<ToolOutput>` | Required | Run the call with validated input and its context. Return text, or { content, isError } to report a failure the model can react to.                                  |
 
 ## Signature
@@ -33,6 +34,7 @@ export interface HarnessToolOptions<Input> {
   readonly description: string;
   readonly input: StandardJsonSchema<Input> | JsonSchema;
   readonly readOnly?: boolean;
+  resources?(input: Input): ToolResources;
   execute(
     input: Input,
     context: HarnessToolContext,
@@ -46,3 +48,4 @@ export interface HarnessToolOptions<Input> {
 - [JsonSchema](../jsonschema/)
 - [StandardJsonSchema](../standardjsonschema/)
 - [ToolOutput](../tooloutput/)
+- [ToolResources](../toolresources/)

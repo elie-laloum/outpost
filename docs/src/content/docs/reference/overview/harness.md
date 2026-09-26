@@ -12,7 +12,7 @@ A harness defines how an agent executes a task and accesses its model. CLI prese
 
 Choose `claudeHarness()`, `codexHarness()` or `geminiHarness()` to delegate execution to the corresponding CLI. Their options configure execution, explicit authentication and supported conversation behavior.
 
-Use `harness()` to let Outpost drive the model itself. It combines a [model provider](../model-providers/), tools from `defineHarnessTool()` and `defineHarnessToolset()`, instructions from text or `defineHarnessInstructions()`, loop limits and tool execution settings. Select the model on the [agent](../agents/); a custom harness requires an explicit model, while a CLI preset can keep its native default.
+Use `harness()` to let Outpost drive the model itself. It combines a [model provider](../model-providers/), tools from `defineHarnessTool()` and `defineHarnessToolset()`, instructions from text or `defineHarnessInstructions()`, hooks, permissions, loop limits and tool execution settings. Select the model on the [agent](../agents/); a custom harness requires an explicit model, while a CLI preset can keep its native default.
 
 ## Boundaries and responsibilities
 
@@ -26,6 +26,7 @@ These harness APIs are implemented but unreleased; the engine and its definition
 
 - [harness](../../function-harness/) composes the Outpost engine.
 - [defineHarnessTool](../../defineharnesstool/), [defineHarnessToolset](../../defineharnesstoolset/) and [defineHarnessInstructions](../../defineharnessinstructions/) declare what the engine can use.
+- [defineHarnessHook](../../defineharnesshook/) and [defineHarnessPermissions](../../defineharnesspermissions/) control tool calls and the end of the loop.
 - [claudeHarness](../../claudeharness/), [codexHarness](../../codexharness/) and [geminiHarness](../../geminiharness/) configure the CLI presets.
 - [Harness](../../harness/) is the shared composition contract.
 - [HarnessToolContext](../../harnesstoolcontext/) describes the sandbox, cancellation signal, model and observer available to a tool.

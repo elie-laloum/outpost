@@ -33,5 +33,6 @@ export const HARNESS_TOOL_FIELDS: ReadonlySet<string> = new Set([
   "description",
   "input",
   "readOnly",
+  "resources",
   "execute",
 ]);

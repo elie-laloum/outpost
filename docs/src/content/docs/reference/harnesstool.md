@@ -6,7 +6,7 @@ sidebar:
 ---
 
 :::caution[Experimental]
-Experimental: part of the unreleased built-in harness engine. Hooks, permissions, persisted conversations and streaming are not available yet; the contract may change before release.
+Experimental: part of the unreleased built-in harness engine. Persisted conversations, built-in toolsets and streaming are not available yet; the contract may change before release.
 :::
 
 ## Import
@@ -25,6 +25,7 @@ import type { HarnessTool } from "@elie-laloum/outpost";
 | `readOnly`    | `boolean`                                                                          | Required | Whether the tool may run concurrently with other read-only calls.                   |
 | `inputSchema` | `Readonly<Record<string, unknown>>`                                                | Required | Frozen JSON Schema sent to the model, converted from a Standard Schema when needed. |
 | `validate`    | `(value: unknown) => Promise<ToolValidation<Input>>`                               | Required | Check raw model arguments and return the typed value or a readable issue list.      |
+| `resources`   | `(input: Input) => ToolResources`                                                  | Required | Paths and command of a validated input; empty when the tool declares none.          |
 | `execute`     | `(input: Input, context: HarnessToolContext) => ToolOutput \| Promise<ToolOutput>` | Required | Run the call with validated input and its context.                                  |
 
 ## Signature
@@ -37,6 +38,7 @@ export interface HarnessTool<Input = unknown> {
   readonly readOnly: boolean;
   readonly inputSchema: JsonSchema;
   validate(value: unknown): Promise<ToolValidation<Input>>;
+  resources(input: Input): ToolResources;
   execute(
     input: Input,
     context: HarnessToolContext,
@@ -49,4 +51,5 @@ export interface HarnessTool<Input = unknown> {
 - [HarnessToolContext](../harnesstoolcontext/)
 - [JsonSchema](../jsonschema/)
 - [ToolOutput](../tooloutput/)
+- [ToolResources](../toolresources/)
 - [ToolValidation](../toolvalidation/)

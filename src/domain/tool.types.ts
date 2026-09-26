@@ -1,5 +1,6 @@
 import type { AgentEvent } from "./agent.types.ts";
 import type { AgentModel } from "./model.types.ts";
+import type { ToolResources } from "./permissions.types.ts";
 import type { StandardValidator } from "./response.types.ts";
 import type { SandboxLease } from "./sandbox.types.ts";
 
@@ -34,6 +35,7 @@ export interface HarnessToolOptions<Input> {
   readonly description: string;
   readonly input: StandardJsonSchema<Input> | JsonSchema;
   readonly readOnly?: boolean;
+  resources?(input: Input): ToolResources;
   execute(
     input: Input,
     context: HarnessToolContext,
@@ -50,6 +52,7 @@ export interface HarnessTool<Input = unknown> {
   readonly readOnly: boolean;
   readonly inputSchema: JsonSchema;
   validate(value: unknown): Promise<ToolValidation<Input>>;
+  resources(input: Input): ToolResources;
   execute(
     input: Input,
     context: HarnessToolContext,

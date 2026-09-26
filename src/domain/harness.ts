@@ -11,6 +11,7 @@ import type {
   HarnessToolExecution,
   ResolvedHarnessLimits,
 } from "./harness.types.ts";
+import { harnessHooks } from "./hook.ts";
 import { harnessInstructions } from "./instructions.ts";
 import { harnessTools } from "./tool.ts";
 
@@ -43,6 +44,11 @@ export function harness(options: CustomHarnessOptions): CustomHarness {
     options.cache === undefined || typeof options.cache === "boolean",
     "Harness cache must be boolean",
   );
+  invariant(
+    options.permissions === undefined ||
+      options.permissions?.kind === "permissions",
+    "Declare permissions with defineHarnessPermissions",
+  );
   return Object.freeze({
     kind: "custom",
     modelProvider: options.modelProvider,
@@ -50,6 +56,8 @@ export function harness(options: CustomHarnessOptions): CustomHarness {
     tools: harnessTools(options.tools ?? []),
     limits: limits(options.limits ?? {}),
     toolExecution: toolExecution(options.toolExecution ?? {}),
+    hooks: harnessHooks(options.hooks),
+    ...(options.permissions ? { permissions: options.permissions } : {}),
     cache: options.cache ?? HARNESS_DEFAULTS.cache,
   });
 }

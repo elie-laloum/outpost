@@ -12,10 +12,26 @@ import type {
   LoopState,
   StopHandler,
 } from "./harness.types.ts";
+import {
+  afterModel,
+  beforeModel,
+  sessionInstructions,
+  stopRequest,
+} from "./harness-hooks.ts";
 import { executeToolCalls } from "./tool-execution.ts";
 
 const stopHandlers: Readonly<Record<ModelStopReason, StopHandler>> = {
-  end: async (_runtime, _state, result) => result.text,
+  end: async (runtime, state, result, content) => {
+    const message = await stopRequest(runtime, result.text, state.step);
+    if (message === undefined) return result.text;
+    runtime.emit({ kind: "stop-prevented", message });
+    state.messages.push({ role: "assistant", content });
+    state.messages.push({
+      role: "user",
+      content: [{ type: "text", text: message }],
+    });
+    return undefined;
+  },
   "max-tokens": async (_runtime, state) => {
     throw new OutpostError(
       "limit",
@@ -42,7 +58,7 @@ const stopHandlers: Readonly<Record<ModelStopReason, StopHandler>> = {
     state.messages.push({ role: "assistant", content });
     state.messages.push({
       role: "user",
-      content: await executeToolCalls(runtime, calls),
+      content: await executeToolCalls(runtime, calls, state.step),
     });
     return undefined;
   },
@@ -53,7 +69,12 @@ export async function harnessLoop(
   prompt: string,
 ): Promise<string> {
   const { harness, model } = runtime.agent;
-  const system = await instructions(runtime);
+  const system = [
+    await instructions(runtime),
+    ...(await sessionInstructions(runtime, prompt)),
+  ]
+    .filter((text) => text.trim())
+    .join("\n\n");
   const tools: ModelToolSpec[] = harness.tools.map((tool) => ({
     name: tool.name,
     description: tool.description,
@@ -75,6 +96,7 @@ export async function harnessLoop(
     if (exceeded)
       throw limit("usage", `Harness exceeded its ${exceeded} token budget`);
     runtime.emit({ kind: "step", index: step });
+    await beforeModel(runtime, messages, step);
     const result = await runtime.modelProvider.request({
       model: model.name,
       messages: [...messages],
@@ -88,6 +110,7 @@ export async function harnessLoop(
         "Harness usage limits require a model provider that reports usage",
       );
     if (result.usage) usage = addUsage(usage, result.usage);
+    await afterModel(runtime, result, step);
     const content: readonly ModelContentBlock[] = result.content ?? [
       { type: "text", text: result.text },
     ];

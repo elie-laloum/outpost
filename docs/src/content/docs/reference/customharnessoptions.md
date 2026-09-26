@@ -6,7 +6,7 @@ sidebar:
 ---
 
 :::caution[Experimental]
-Experimental: part of the unreleased built-in harness engine. Hooks, permissions, persisted conversations and streaming are not available yet; the contract may change before release.
+Experimental: part of the unreleased built-in harness engine. Persisted conversations, built-in toolsets and streaming are not available yet; the contract may change before release.
 :::
 
 ## Import
@@ -17,14 +17,16 @@ import type { CustomHarnessOptions } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name            | Type                                                               | Presence | Meaning                                                                                                                                                            |
-| --------------- | ------------------------------------------------------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `modelProvider` | `ModelProvider`                                                    | Required | Request transport the engine calls for each step; it validates the agent model when the agent is composed.                                                         |
-| `instructions`  | `HarnessInstructionsOption \| undefined`                           | Optional | System instructions as text, a defineHarnessInstructions() result or a list of both. Resolved at each turn and joined with blank lines; empty results are skipped. |
-| `tools`         | `readonly (HarnessTool<unknown> \| HarnessToolset)[] \| undefined` | Optional | Tools and toolsets the model may call. Nested toolsets are flattened; names must be unique across the harness.                                                     |
-| `limits`        | `HarnessLimits \| undefined`                                       | Optional | Bounds on steps, tool calls and token usage. Reaching one fails the turn with code limit.                                                                          |
-| `toolExecution` | `HarnessToolExecution \| undefined`                                | Optional | Tool concurrency, per-call deadline and error policy.                                                                                                              |
-| `cache`         | `boolean \| undefined`                                             | Optional | Ask the provider to cache the conversation prefix; defaults to true. OpenAI caches stable prefixes automatically.                                                  |
+| Name            | Type                                                                              | Presence | Meaning                                                                                                                                                            |
+| --------------- | --------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `modelProvider` | `ModelProvider`                                                                   | Required | Request transport the engine calls for each step; it validates the agent model when the agent is composed.                                                         |
+| `instructions`  | `HarnessInstructionsOption \| undefined`                                          | Optional | System instructions as text, a defineHarnessInstructions() result or a list of both. Resolved at each turn and joined with blank lines; empty results are skipped. |
+| `tools`         | `readonly (HarnessTool<unknown> \| HarnessToolset)[] \| undefined`                | Optional | Tools and toolsets the model may call. Nested toolsets are flattened; names must be unique across the harness.                                                     |
+| `limits`        | `HarnessLimits \| undefined`                                                      | Optional | Bounds on steps, tool calls and token usage. Reaching one fails the turn with code limit.                                                                          |
+| `toolExecution` | `HarnessToolExecution \| undefined`                                               | Optional | Tool concurrency, per-call deadline and error policy.                                                                                                              |
+| `hooks`         | `readonly HarnessHook<import("./hook.types.ts").HarnessHookPhase>[] \| undefined` | Optional | Hooks from defineHarnessHook, run in declaration order within each phase.                                                                                          |
+| `permissions`   | `HarnessPermissions \| undefined`                                                 | Optional | Rules from defineHarnessPermissions, evaluated before before-tool hooks.                                                                                           |
+| `cache`         | `boolean \| undefined`                                                            | Optional | Ask the provider to cache the conversation prefix; defaults to true. OpenAI caches stable prefixes automatically.                                                  |
 
 ## Signature
 
@@ -35,14 +37,18 @@ export interface CustomHarnessOptions {
   readonly tools?: readonly (HarnessTool | HarnessToolset)[];
   readonly limits?: HarnessLimits;
   readonly toolExecution?: HarnessToolExecution;
+  readonly hooks?: readonly HarnessHook[];
+  readonly permissions?: HarnessPermissions;
   readonly cache?: boolean;
 }
 ```
 
 ## Related contracts
 
+- [HarnessHook](../harnesshook/)
 - [HarnessInstructionsOption](../harnessinstructionsoption/)
 - [HarnessLimits](../harnesslimits/)
+- [HarnessPermissions](../harnesspermissions/)
 - [HarnessTool](../harnesstool/)
 - [HarnessToolExecution](../harnesstoolexecution/)
 - [HarnessToolset](../harnesstoolset/)

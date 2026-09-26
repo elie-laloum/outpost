@@ -6,7 +6,7 @@ sidebar:
 ---
 
 :::caution[Experimental]
-Experimental: part of the unreleased built-in harness engine. Hooks, permissions, persisted conversations and streaming are not available yet; the contract may change before release.
+Experimental: part of the unreleased built-in harness engine. Persisted conversations, built-in toolsets and streaming are not available yet; the contract may change before release.
 :::
 
 ## Import
@@ -30,6 +30,7 @@ Define a tool the engine can offer to the model. Validates the name, description
 | `options.description` | `string`                                                                           | Required | Nonempty explanation the model reads to decide when and how to call the tool.                                                                                        |
 | `options.input`       | `Readonly<Record<string, unknown>> \| StandardJsonSchema<Input>`                   | Required | Input schema: a JSON Schema object validated by the built-in subset, or a Standard Schema that exposes JSON Schema, such as Zod 4, whose validator checks the input. |
 | `options.readOnly`    | `boolean \| undefined`                                                             | Optional | Mark tools without side effects so they can run concurrently; defaults to false.                                                                                     |
+| `options.resources`   | `((input: Input) => ToolResources) \| undefined`                                   | Optional | Describe the paths and command of a validated input so permission rules can match them. Custom tools without it only match by name.                                  |
 | `options.execute`     | `(input: Input, context: HarnessToolContext) => ToolOutput \| Promise<ToolOutput>` | Required | Run the call with validated input and its context. Return text, or { content, isError } to report a failure the model can react to.                                  |
 
 ## Returns

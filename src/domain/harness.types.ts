@@ -1,5 +1,7 @@
 import type { Usage } from "./agent.types.ts";
+import type { HarnessHook } from "./hook.types.ts";
 import type { AgentModel, ModelProvider } from "./model.types.ts";
+import type { HarnessPermissions } from "./permissions.types.ts";
 import type { SandboxLease } from "./sandbox.types.ts";
 import type { HarnessTool, HarnessToolset } from "./tool.types.ts";
 
@@ -42,6 +44,8 @@ export interface CustomHarnessOptions {
   readonly tools?: readonly (HarnessTool | HarnessToolset)[];
   readonly limits?: HarnessLimits;
   readonly toolExecution?: HarnessToolExecution;
+  readonly hooks?: readonly HarnessHook[];
+  readonly permissions?: HarnessPermissions;
   readonly cache?: boolean;
 }
 
@@ -52,5 +56,7 @@ export interface CustomHarness {
   readonly tools: readonly HarnessTool[];
   readonly limits: ResolvedHarnessLimits;
   readonly toolExecution: Required<HarnessToolExecution>;
+  readonly hooks: readonly HarnessHook[];
+  readonly permissions?: HarnessPermissions;
   readonly cache: boolean;
 }

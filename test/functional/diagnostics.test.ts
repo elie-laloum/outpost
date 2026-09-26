@@ -41,6 +41,8 @@ test("human reporter exposes phases, duration and raw token counts while quiet m
     sink({ kind: "result", text: "answer" });
     sink({ kind: "tool", name: "read", input: { path: "x" } });
     sink({ kind: "step", index: 3 });
+    sink({ kind: "tool-denied", callId: "d", name: "rm", reason: "unsafe" });
+    sink({ kind: "stop-prevented", message: "run tests first" });
     sink({
       kind: "tool-result",
       callId: "c",
@@ -68,6 +70,8 @@ test("human reporter exposes phases, duration and raw token counts while quiet m
   assert.equal(normal.match(/answer/g)?.length, 1);
   assert.doesNotMatch(normal, /raw-line|brief|\/work/);
   assert.match(normal, /tool failed: read\n/);
+  assert.match(normal, /tool denied: rm · unsafe/);
+  assert.match(normal, /stop prevented: run tests first/);
   assert.doesNotMatch(normal, /missing-file|step 3/);
   assert.match(verbose, /tool failed: read missing-file/);
   assert.match(verbose, /step 3/);

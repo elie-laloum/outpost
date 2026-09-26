@@ -4,7 +4,7 @@ description: Compose a model provider, tools, instructions and limits into an ag
 ---
 
 :::caution[Unreleased API]
-This working-tree API is experimental. Use a package built from this checkout. Hooks, permissions, built-in toolsets, custom conversations and streaming are not available yet.
+This working-tree API is experimental. Use a package built from this checkout. Built-in toolsets, custom conversations and streaming are not available yet.
 :::
 
 `claudeHarness()`, `codexHarness()` and `geminiHarness()` delegate the whole task to a CLI that runs its own model and tool loop. `harness()` builds that loop in Outpost instead. You declare what the agent can use, and Outpost drives the model:
@@ -12,7 +12,8 @@ This working-tree API is experimental. Use a package built from this checkout. H
 - a **model provider**, such as `anthropicModelProvider()` or `openaiModelProvider()`;
 - **tools** created with `defineHarnessTool()` and grouped with `defineHarnessToolset()`;
 - **instructions**, fixed text or resolved when the task starts with `defineHarnessInstructions()`;
-- **limits** on steps, tool calls and tokens, and how tools execute.
+- **limits** on steps, tool calls and tokens, and how tools execute;
+- **hooks** and **permissions** that control the loop with `defineHarnessHook()` and `defineHarnessPermissions()`.
 
 The result is used like any other agent: `agent({ harness, model })`, then `dispatch()`, a warm sandbox or a workflow task.
 
@@ -202,12 +203,63 @@ By default the harness asks the provider to cache the conversation prefix (`cach
 
 While a tool runs, the dispatch idle watchdog is suspended and the tool deadline applies. Cancelling the dispatch cancels running tools. Tool code runs in the Outpost process: JavaScript that ignores `signal` keeps running detached after its deadline, although its later sandbox calls are rejected.
 
+## Control the loop with hooks and permissions
+
+Hooks are control code that runs at a precise point of the loop. Unlike dispatch observers, they can change what happens, and an exception thrown by a hook fails the turn.
+
+| Phase           | Receives                        | Can return                                                  |
+| --------------- | ------------------------------- | ----------------------------------------------------------- |
+| `session-start` | the rendered `prompt`           | `{ instructions }` appended to the system instructions      |
+| `before-model`  | the `messages` about to be sent | nothing; throw to stop the turn                             |
+| `after-model`   | the model `result`              | nothing; throw to stop the turn                             |
+| `before-tool`   | the validated `call`            | `{ deny: reason }`, or `{ input }` to rewrite the arguments |
+| `after-tool`    | the `call` and its `result`     | `{ result }` to replace what the model receives             |
+| `stop`          | the final answer `text`         | `{ continue: message }` to refuse stopping                  |
+
+Every hook also receives the borrowed `sandbox`, the turn `signal`, the agent `model` and the current `step`. Hooks of the same phase run in declaration order. `before-tool` hooks run one call at a time in call order, before any tool of that step executes. A rewritten input is validated and checked against permissions again. A `stop` hook that keeps refusing is still bounded by `maxSteps`.
+
+```ts
+import {
+  defineHarnessHook,
+  defineHarnessPermissions,
+} from "@elie-laloum/outpost";
+
+export const permissions = defineHarnessPermissions({
+  default: "deny",
+  rules: [
+    { effect: "deny", commands: ["git push*"], reason: "Do not publish." },
+    { effect: "allow", tools: ["read_*", "list_*"] },
+    { effect: "allow", tools: ["write_file"], paths: ["src/**", "test/**"] },
+    { effect: "allow", tools: ["shell"], commands: ["npm test", "npm run *"] },
+  ],
+});
+
+let tested = false;
+export const requireTests = [
+  defineHarnessHook({
+    on: "after-tool",
+    run({ call, result }) {
+      if (call.name === "shell" && !result.isError) tested = true;
+    },
+  }),
+  defineHarnessHook({
+    on: "stop",
+    run: () =>
+      tested ? undefined : { continue: "Run npm test before you finish." },
+  }),
+];
+```
+
+Pass them with `harness({ permissions, hooks: requireTests, ... })`. Permission rules are evaluated first; the first rule that applies decides, and `default` applies otherwise. Rules match tool names, and the paths and command that a tool declares through its `resources(input)` function. An `allow` rule with `paths` requires every declared path to match; a `deny` rule needs one. Paths outside the repository never match. A tool without `resources` is matched by name only.
+
+Instructions tell the model what to do; hooks and permissions enforce it. Permissions are not a security boundary: shell metacharacters can bypass command patterns, and symbolic links can bypass path rules. Run untrusted work in an isolated sandbox provider.
+
 ## Observe the loop
 
-Dispatch observers receive `step` before each model request, `tool` with a `callId` before each call, `tool-result` with a preview after it, `text` for model text, and `usage` for each request. See [Observability](../observability/) for the other events.
+Dispatch observers receive `step` before each model request, `tool` with a `callId` before each call, `tool-result` with a preview after it, `tool-denied` when permissions or a hook refuse a call, `stop-prevented` when a `stop` hook refuses the answer, `text` for model text, and `usage` for each request. See [Observability](../observability/) for the other events.
 
 ## Not available yet
 
-Custom harness conversations are not persisted: continuation, fork and automatic response repairs are rejected. Interactive attachment is unsupported. Hooks, permissions, built-in toolsets, context management, skills and streaming are planned; see the [roadmap](../../../project/roadmap/#direct-model-harness).
+Custom harness conversations are not persisted: continuation, fork and automatic response repairs are rejected. Interactive attachment is unsupported. Built-in toolsets, context management, skills and streaming are planned; see the [roadmap](../../../project/roadmap/#direct-model-harness).
 
 [Harness reference](../../../reference/overview/harness/) · [Model providers](../../advanced/model-providers/)

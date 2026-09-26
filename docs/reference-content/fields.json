@@ -392,8 +392,8 @@
     "Identifiant de conversation native à poursuivre ; fork demande une conversation distincte dérivée de celle-ci."
   ],
   "AgentEvent.kind": [
-    "Discriminator selecting the event payload: phase, summary, warning, text, result, prompt, tool, tool-result, step, conversation, usage, failure, finished or raw.",
-    "Discriminant sélectionnant les données de l’événement : phase, summary, warning, text, result, prompt, tool, tool-result, step, conversation, usage, failure, finished ou raw."
+    "Discriminator selecting the event payload: phase, summary, warning, text, result, prompt, tool, tool-result, tool-denied, step, stop-prevented, conversation, usage, failure, finished or raw.",
+    "Discriminant sélectionnant les données de l’événement : phase, summary, warning, text, result, prompt, tool, tool-result, tool-denied, step, stop-prevented, conversation, usage, failure, finished ou raw."
   ],
   "AgentEvent.name": [
     "Phase name for phase events, or tool name for tool and tool-result events.",
@@ -424,8 +424,8 @@
     "Compteurs d’usage de tokens portés par un événement usage ou summary."
   ],
   "AgentEvent.message": [
-    "Warning or failure message decoded from the agent event.",
-    "Message d’avertissement ou d’échec décodé depuis l’événement d’agent."
+    "Warning or failure message, or the message a stop hook sent back to the model.",
+    "Message d’avertissement ou d’échec, ou message qu’un hook stop a renvoyé au modèle."
   ],
   "AgentEvent.text": [
     "Text carried by the event: streamed text, final answer or submitted prompt according to kind.",
@@ -4155,5 +4155,249 @@
   "ReporterHandlers.step": [
     "Handle the start of a custom harness step before its model request; receives pass and at metadata and may return a promise.",
     "Traite : début d’une étape de harness personnalisé avant sa requête au modèle ; reçoit pass et at et peut retourner une promesse."
+  ],
+  "HarnessHookContext.sandbox": [
+    "Borrowed sandbox of the turn; hooks may inspect the repository through it.",
+    "Sandbox emprunté de la passe ; les hooks peuvent inspecter le dépôt par son intermédiaire."
+  ],
+  "HarnessHookInput.sandbox": [
+    "Borrowed sandbox of the turn; hooks may inspect the repository through it.",
+    "Sandbox emprunté de la passe ; les hooks peuvent inspecter le dépôt par son intermédiaire."
+  ],
+  "HarnessHookContext.signal": [
+    "Turn cancellation signal; asynchronous hooks should honor it.",
+    "Signal d’annulation de la passe ; les hooks asynchrones doivent le respecter."
+  ],
+  "HarnessHookInput.signal": [
+    "Turn cancellation signal; asynchronous hooks should honor it.",
+    "Signal d’annulation de la passe ; les hooks asynchrones doivent le respecter."
+  ],
+  "HarnessHookContext.model": [
+    "Normalized model of the agent running the turn.",
+    "Modèle normalisé de l’agent qui exécute la passe."
+  ],
+  "HarnessHookInput.model": [
+    "Normalized model of the agent running the turn.",
+    "Modèle normalisé de l’agent qui exécute la passe."
+  ],
+  "HarnessHookContext.step": [
+    "Current step number; 0 during session-start.",
+    "Numéro de l’étape en cours ; 0 pendant session-start."
+  ],
+  "HarnessHookInput.step": [
+    "Current step number; 0 during session-start.",
+    "Numéro de l’étape en cours ; 0 pendant session-start."
+  ],
+  "HarnessHookInput.prompt": [
+    "Rendered prompt of the turn, available to session-start hooks.",
+    "Prompt rendu de la passe, disponible pour les hooks session-start."
+  ],
+  "HarnessHookInput.messages": [
+    "Conversation about to be sent in this step, available to before-model hooks.",
+    "Conversation sur le point d’être envoyée à cette étape, disponible pour les hooks before-model."
+  ],
+  "HarnessHookInput.result": [
+    "Model result for after-model hooks, or the tool outcome for after-tool hooks.",
+    "Résultat du modèle pour les hooks after-model, ou issue de l’outil pour les hooks after-tool."
+  ],
+  "HarnessHookInput.call": [
+    "Tool call with its validated input for before-tool and after-tool hooks.",
+    "Appel d’outil avec son entrée validée pour les hooks before-tool et after-tool."
+  ],
+  "HarnessHookInput.text": [
+    "Final answer the model wants to stop with, available to stop hooks.",
+    "Réponse finale avec laquelle le modèle veut s’arrêter, disponible pour les hooks stop."
+  ],
+  "HarnessHookEvents.session-start": [
+    "Event for session-start hooks: the rendered prompt.",
+    "Événement des hooks session-start : le prompt rendu."
+  ],
+  "HarnessHookEvents.before-model": [
+    "Event for before-model hooks: the messages about to be sent.",
+    "Événement des hooks before-model : les messages sur le point d’être envoyés."
+  ],
+  "HarnessHookEvents.after-model": [
+    "Event for after-model hooks: the model result.",
+    "Événement des hooks after-model : le résultat du modèle."
+  ],
+  "HarnessHookEvents.before-tool": [
+    "Event for before-tool hooks: the validated call.",
+    "Événement des hooks before-tool : l’appel validé."
+  ],
+  "HarnessHookEvents.after-tool": [
+    "Event for after-tool hooks: the call and its outcome.",
+    "Événement des hooks after-tool : l’appel et son issue."
+  ],
+  "HarnessHookEvents.stop": [
+    "Event for stop hooks: the final answer text.",
+    "Événement des hooks stop : le texte de la réponse finale."
+  ],
+  "HarnessHookDecisions.session-start": [
+    "Return { instructions } to append text to the system instructions of the turn.",
+    "Renvoyez { instructions } pour ajouter du texte aux instructions système de la passe."
+  ],
+  "HarnessHookDecisions.before-model": [
+    "No decision: return nothing to continue, or throw to fail the turn.",
+    "Aucune décision : ne renvoyez rien pour continuer, ou levez une erreur pour faire échouer la passe."
+  ],
+  "HarnessHookDecisions.after-model": [
+    "No decision: return nothing to continue, or throw to fail the turn.",
+    "Aucune décision : ne renvoyez rien pour continuer, ou levez une erreur pour faire échouer la passe."
+  ],
+  "HarnessHookDecisions.before-tool": [
+    "Return { deny } to refuse the call with a reason sent to the model, or { input } to replace the input, which is validated and checked against permissions again.",
+    "Renvoyez { deny } pour refuser l’appel avec une raison transmise au modèle, ou { input } pour remplacer l’entrée, qui est de nouveau validée et contrôlée par les permissions."
+  ],
+  "HarnessHookDecisions.after-tool": [
+    "Return { result } to replace the text or error flag sent to the model.",
+    "Renvoyez { result } pour remplacer le texte ou l’indicateur d’erreur envoyés au modèle."
+  ],
+  "HarnessHookDecisions.stop": [
+    "Return { continue } with a message to refuse the final answer; the message is sent as the next user message. Bounded by maxSteps.",
+    "Renvoyez { continue } avec un message pour refuser la réponse finale ; le message est envoyé comme message utilisateur suivant. Borné par maxSteps."
+  ],
+  "HarnessHookOptions.on": [
+    "Loop point where the hook runs.",
+    "Point de la boucle où le hook s’exécute."
+  ],
+  "HarnessHook.on": [
+    "Loop point where the hook runs.",
+    "Point de la boucle où le hook s’exécute."
+  ],
+  "HarnessHookOptions.name": [
+    "Optional name for diagnostics; defaults to the phase.",
+    "Nom optionnel pour le diagnostic ; vaut la phase par défaut."
+  ],
+  "HarnessHook.name": [
+    "Name used for diagnostics.",
+    "Nom utilisé pour le diagnostic."
+  ],
+  "HarnessHookOptions.run": [
+    "Control function for this phase. Hooks of a phase run in declaration order; an exception fails the turn.",
+    "Fonction de contrôle de cette phase. Les hooks d’une phase s’exécutent dans l’ordre de déclaration ; une exception fait échouer la passe."
+  ],
+  "HarnessHook.run": [
+    "Control function for this phase.",
+    "Fonction de contrôle de cette phase."
+  ],
+  "HarnessHook.kind": [
+    "Definition discriminator: hook.",
+    "Discriminant de la définition : hook."
+  ],
+  "HarnessToolResultView.content": [
+    "Text that will be sent to the model for the call.",
+    "Texte qui sera envoyé au modèle pour l’appel."
+  ],
+  "HarnessToolResultView.isError": [
+    "Whether the call is reported as failed.",
+    "Indique si l’appel est signalé en échec."
+  ],
+  "HarnessHookInput.deny": [
+    "Reason sent to the model when a before-tool hook refuses the call.",
+    "Raison envoyée au modèle quand un hook before-tool refuse l’appel."
+  ],
+  "HarnessPermissionRule.effect": [
+    "allow or deny when the rule applies.",
+    "allow ou deny quand la règle s’applique."
+  ],
+  "HarnessPermissionRule.tools": [
+    "Tool name patterns; * matches any characters. Omit to apply to every tool.",
+    "Motifs de noms d’outils ; * correspond à n’importe quels caractères. Omettez-les pour viser tous les outils."
+  ],
+  "HarnessPermissionRule.paths": [
+    "Repository path globs (**, * and ?) matched against paths declared by tool resources. An allow rule needs every path to match; a deny rule needs one. Paths outside the repository never match.",
+    "Globs de chemins du dépôt (**, * et ?) comparés aux chemins déclarés par les ressources de l’outil. Une règle allow exige que tous les chemins correspondent ; une règle deny, un seul. Les chemins hors du dépôt ne correspondent jamais."
+  ],
+  "HarnessPermissionRule.commands": [
+    "Command patterns where * matches any characters, compared with the command declared by tool resources. Shell metacharacters can bypass such patterns.",
+    "Motifs de commandes où * correspond à n’importe quels caractères, comparés à la commande déclarée par les ressources de l’outil. Les métacaractères du shell peuvent contourner ces motifs."
+  ],
+  "HarnessPermissionRule.reason": [
+    "Explanation returned to the model when a deny rule applies.",
+    "Explication renvoyée au modèle quand une règle deny s’applique."
+  ],
+  "HarnessPermissionsOptions.rules": [
+    "Ordered rules; the first one that applies decides.",
+    "Règles ordonnées ; la première qui s’applique décide."
+  ],
+  "HarnessPermissions.rules": [
+    "Frozen ordered rules.",
+    "Règles ordonnées et figées."
+  ],
+  "HarnessPermissionsOptions.default": [
+    "Effect when no rule applies; defaults to allow.",
+    "Effet quand aucune règle ne s’applique ; allow par défaut."
+  ],
+  "HarnessPermissions.default": [
+    "Effect when no rule applies.",
+    "Effet quand aucune règle ne s’applique."
+  ],
+  "HarnessPermissions.kind": [
+    "Definition discriminator: permissions.",
+    "Discriminant de la définition : permissions."
+  ],
+  "HarnessPermissions.evaluate": [
+    "Decide whether a tool may run with the given resources.",
+    "Décide si un outil peut s’exécuter avec les ressources données."
+  ],
+  "PermissionDecision.allowed": [
+    "Whether the call may run.",
+    "Indique si l’appel peut s’exécuter."
+  ],
+  "PermissionDecision.reason": [
+    "Why the call was denied.",
+    "Pourquoi l’appel a été refusé."
+  ],
+  "ToolResources.paths": [
+    "Repository-relative paths the call reads or writes.",
+    "Chemins relatifs au dépôt que l’appel lit ou écrit."
+  ],
+  "ToolResources.command": [
+    "Command line the call runs, for command permission rules.",
+    "Ligne de commande exécutée par l’appel, pour les règles de permission sur les commandes."
+  ],
+  "HarnessToolOptions.resources": [
+    "Describe the paths and command of a validated input so permission rules can match them. Custom tools without it only match by name.",
+    "Décrit les chemins et la commande d’une entrée validée pour que les règles de permission puissent les comparer. Un outil sans cette fonction n’est comparé que par son nom."
+  ],
+  "HarnessTool.resources": [
+    "Paths and command of a validated input; empty when the tool declares none.",
+    "Chemins et commande d’une entrée validée ; vide si l’outil n’en déclare pas."
+  ],
+  "CustomHarnessOptions.hooks": [
+    "Hooks from defineHarnessHook, run in declaration order within each phase.",
+    "Hooks issus de defineHarnessHook, exécutés dans l’ordre de déclaration au sein de chaque phase."
+  ],
+  "CustomHarness.hooks": [
+    "Frozen hooks of the harness.",
+    "Hooks figés du harness."
+  ],
+  "CustomHarnessOptions.permissions": [
+    "Rules from defineHarnessPermissions, evaluated before before-tool hooks.",
+    "Règles issues de defineHarnessPermissions, évaluées avant les hooks before-tool."
+  ],
+  "CustomHarness.permissions": [
+    "Permission rules evaluated before before-tool hooks, when set.",
+    "Règles de permission évaluées avant les hooks before-tool, si elles sont définies."
+  ],
+  "AgentEvent.reason": [
+    "Why a custom harness denied a tool call.",
+    "Pourquoi un harness personnalisé a refusé un appel d’outil."
+  ],
+  "ReporterHandlers.tool-denied": [
+    "Handle a tool call denied by permissions or a hook, with its reason; receives pass and at metadata and may return a promise.",
+    "Traite : appel d’outil refusé par les permissions ou un hook, avec sa raison ; reçoit pass et at et peut retourner une promesse."
+  ],
+  "ReporterHandlers.stop-prevented": [
+    "Handle a final answer refused by a stop hook, with the message sent back; receives pass and at metadata and may return a promise.",
+    "Traite : réponse finale refusée par un hook stop, avec le message renvoyé ; reçoit pass et at et peut retourner une promesse."
+  ],
+  "defineHarnessHook.options": [
+    "Loop phase, optional name and control function of the hook.",
+    "Phase de la boucle, nom optionnel et fonction de contrôle du hook."
+  ],
+  "defineHarnessPermissions.options": [
+    "Ordered rules and the default effect when none applies.",
+    "Règles ordonnées et effet par défaut quand aucune ne s’applique."
   ]
 }

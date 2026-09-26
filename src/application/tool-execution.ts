@@ -13,10 +13,13 @@ import type {
   HarnessToolEvent,
   ToolOutput,
 } from "../domain/tool.types.ts";
+import { afterTool, beforeTool } from "./harness-hooks.ts";
 import type {
   HarnessRuntime,
+  PreparedCall,
   ToolCallBatch,
   ToolOutcome,
+  ValidatedInput,
 } from "./harness.types.ts";
 
 const toolEvents: ReadonlySet<string> = new Set(["text", "warning", "raw"]);
@@ -24,51 +27,41 @@ const toolEvents: ReadonlySet<string> = new Set(["text", "warning", "raw"]);
 export async function executeToolCalls(
   runtime: HarnessRuntime,
   calls: readonly ModelToolCallBlock[],
+  step: number,
 ): Promise<readonly ModelToolResultBlock[]> {
   const tools = new Map(
     runtime.agent.harness.tools.map((tool) => [tool.name, tool]),
   );
-  const results = new Map<string, ModelToolResultBlock>();
-  for (const batch of batches(calls, tools)) {
+  const prepared: PreparedCall[] = [];
+  for (const call of calls)
+    prepared.push(await prepareCall(runtime, tools, call, step));
+  const outcomes = new Map<string, ToolOutcome>();
+  for (const batch of batches(prepared)) {
     const pending = [...batch.calls];
     const limit = batch.concurrent
       ? runtime.agent.harness.toolExecution.concurrency
       : 1;
     await Promise.all(
       Array.from({ length: Math.min(limit, pending.length) }, async () => {
-        for (let call = pending.shift(); call; call = pending.shift())
-          results.set(call.id, await executeToolCall(runtime, tools, call));
+        for (let next = pending.shift(); next; next = pending.shift())
+          outcomes.set(next.call.id, await executeCall(runtime, next));
       }),
     );
   }
-  return calls.map((call) => results.get(call.id)!);
+  const results: ModelToolResultBlock[] = [];
+  for (const { call, outcome } of prepared)
+    results.push(
+      await finish(runtime, call, outcome ?? outcomes.get(call.id)!, step),
+    );
+  return results;
 }
 
-function batches(
-  calls: readonly ModelToolCallBlock[],
-  tools: ReadonlyMap<string, HarnessTool>,
-): readonly ToolCallBatch[] {
-  const grouped: ToolCallBatch[] = [];
-  for (const call of calls) {
-    const concurrent = tools.get(call.name)?.readOnly ?? true;
-    const last = grouped.at(-1);
-    if (last?.concurrent && concurrent) {
-      grouped[grouped.length - 1] = {
-        concurrent,
-        calls: [...last.calls, call],
-      };
-      continue;
-    }
-    grouped.push({ concurrent, calls: [call] });
-  }
-  return grouped;
-}
-
-async function executeToolCall(
+async function prepareCall(
   runtime: HarnessRuntime,
   tools: ReadonlyMap<string, HarnessTool>,
   call: ModelToolCallBlock,
-): Promise<ModelToolResultBlock> {
+  step: number,
+): Promise<PreparedCall> {
   runtime.signal.throwIfAborted();
   runtime.emit({
     kind: "tool",
@@ -76,38 +69,120 @@ async function executeToolCall(
     input: call.input,
     callId: call.id,
   });
-  const output = await toolOutput(runtime, tools.get(call.name), call);
+  const tool = tools.get(call.name);
+  if (!tool) return { call, outcome: failed(`Unknown tool: ${call.name}`) };
+  const validated = await validate(tool, call.input, "Invalid input");
+  if ("outcome" in validated) return { call, outcome: validated.outcome };
+  const permitted = permission(runtime, tool, validated.value);
+  if (permitted) return denied(runtime, call, permitted);
+  const decision = await beforeTool(
+    runtime,
+    { ...call, input: validated.value },
+    step,
+  );
+  if ("deny" in decision) return denied(runtime, call, decision.deny);
+  if (decision.input === validated.value)
+    return { call, tool, input: validated.value };
+  const revised = await validate(
+    tool,
+    decision.input,
+    "Hook produced invalid input",
+  );
+  if ("outcome" in revised) return { call, outcome: revised.outcome };
+  const revisedPermission = permission(runtime, tool, revised.value);
+  if (revisedPermission) return denied(runtime, call, revisedPermission);
+  return { call, tool, input: revised.value };
+}
+
+async function validate(
+  tool: HarnessTool,
+  input: unknown,
+  label: string,
+): Promise<ValidatedInput> {
+  const validation = await tool.validate(input);
+  if ("issues" in validation)
+    return {
+      outcome: failed(`${label} for ${tool.name}: ${validation.issues}`),
+    };
+  return { value: validation.value };
+}
+
+function permission(
+  runtime: HarnessRuntime,
+  tool: HarnessTool,
+  input: unknown,
+): string | undefined {
+  const permissions = runtime.agent.harness.permissions;
+  if (!permissions) return undefined;
+  const decision = permissions.evaluate(tool.name, tool.resources(input));
+  return decision.allowed ? undefined : decision.reason;
+}
+
+function denied(
+  runtime: HarnessRuntime,
+  call: ModelToolCallBlock,
+  reason: string,
+): PreparedCall {
+  runtime.emit({
+    kind: "tool-denied",
+    callId: call.id,
+    name: call.name,
+    reason,
+  });
+  return { call, outcome: failed(`Denied: ${reason}`) };
+}
+
+async function finish(
+  runtime: HarnessRuntime,
+  call: ModelToolCallBlock,
+  outcome: ToolOutcome,
+  step: number,
+): Promise<ModelToolResultBlock> {
+  const final = await afterTool(runtime, call, outcome, step, normalized);
   const content =
-    output.content.length > TOOL_RESULT_CHARACTERS
-      ? `${output.content.slice(0, TOOL_RESULT_CHARACTERS)}\n[truncated ${output.content.length - TOOL_RESULT_CHARACTERS} characters]`
-      : output.content;
+    final.content.length > TOOL_RESULT_CHARACTERS
+      ? `${final.content.slice(0, TOOL_RESULT_CHARACTERS)}\n[truncated ${final.content.length - TOOL_RESULT_CHARACTERS} characters]`
+      : final.content;
   runtime.emit({
     kind: "tool-result",
     callId: call.id,
     name: call.name,
-    isError: output.isError,
+    isError: final.isError,
     preview: content.slice(0, TOOL_PREVIEW_CHARACTERS),
-    characters: output.content.length,
+    characters: final.content.length,
   });
   return {
     type: "tool-result",
     callId: call.id,
     content,
-    ...(output.isError ? { isError: true } : {}),
+    ...(final.isError ? { isError: true } : {}),
   };
 }
 
-async function toolOutput(
+function batches(calls: readonly PreparedCall[]): readonly ToolCallBatch[] {
+  const grouped: ToolCallBatch[] = [];
+  for (const prepared of calls) {
+    if (prepared.outcome) continue;
+    const concurrent = prepared.tool!.readOnly;
+    const last = grouped.at(-1);
+    if (last?.concurrent && concurrent) {
+      grouped[grouped.length - 1] = {
+        concurrent,
+        calls: [...last.calls, prepared],
+      };
+      continue;
+    }
+    grouped.push({ concurrent, calls: [prepared] });
+  }
+  return grouped;
+}
+
+async function executeCall(
   runtime: HarnessRuntime,
-  tool: HarnessTool | undefined,
-  call: ModelToolCallBlock,
+  prepared: PreparedCall,
 ): Promise<ToolOutcome> {
-  if (!tool) return failed(`Unknown tool: ${call.name}`);
-  const validation = await tool.validate(call.input);
-  if ("issues" in validation)
-    return failed(`Invalid input for ${call.name}: ${validation.issues}`);
   try {
-    return normalized(await runTool(runtime, tool, call, validation.value));
+    return normalized(await runTool(runtime, prepared));
   } catch (error) {
     runtime.signal.throwIfAborted();
     if (runtime.agent.harness.toolExecution.onError === "fail") throw error;
@@ -117,9 +192,7 @@ async function toolOutput(
 
 async function runTool(
   runtime: HarnessRuntime,
-  tool: HarnessTool,
-  call: ModelToolCallBlock,
-  input: unknown,
+  { call, tool, input }: PreparedCall,
 ): Promise<ToolOutput> {
   const { deadlineMs } = runtime.agent.harness.toolExecution;
   const controller = new AbortController();
@@ -141,7 +214,7 @@ async function runTool(
     signal.addEventListener("abort", fail, { once: true });
   });
   const execution = Promise.resolve().then(() =>
-    tool.execute(input, {
+    tool!.execute(input, {
       sandbox: scopedLease(runtime.sandbox, signal),
       signal,
       callId: call.id,

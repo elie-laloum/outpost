@@ -44,9 +44,9 @@ These directions build on [durable workflows](../../guide/advanced/distributed/)
 
 The working tree implements `agent({ harness, model })`, CLI harness presets, `openaiModelProvider` and `anthropicModelProvider`, and a built-in engine behind `harness()`. These are unreleased breaking changes; the published 4.2.0 API remains unchanged. Models are names or `{ name, reasoning, maxOutputTokens }` objects validated by the executing harness or provider, without a local availability catalog.
 
-The engine runs in the Outpost process. Providers exchange messages, tool calls and replayable reasoning with Chat Completions, Responses and Anthropic Messages, including history caching. Tools declared with `defineHarnessTool()` run through the borrowed sandbox with validation, bounded concurrency, per-call deadlines and step, tool-call and token limits. Tests use scripted providers and local simulated HTTP services.
+The engine runs in the Outpost process. Providers exchange messages, tool calls and replayable reasoning with Chat Completions, Responses and Anthropic Messages, including history caching. Tools declared with `defineHarnessTool()` run through the borrowed sandbox with validation, bounded concurrency, per-call deadlines and step, tool-call and token limits. Hooks and declarative permissions control tool calls and the end of the loop. Tests use scripted providers and local simulated HTTP services.
 
-Still planned: hooks and declarative permissions, built-in repository toolsets, durable custom conversations with resume, fork and response repairs, context management, skills and streaming. Authenticated service campaigns and complete repository-editing scenarios remain prerequisites for broader compatibility claims. No release date is promised.
+Still planned: built-in repository toolsets, durable custom conversations with resume, fork and response repairs, context management, skills and streaming. Authenticated service campaigns and complete repository-editing scenarios remain prerequisites for broader compatibility claims. No release date is promised.
 
 ## How priorities change
 

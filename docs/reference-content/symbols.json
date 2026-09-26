@@ -330,5 +330,13 @@
   "defineHarnessInstructions": [
     "Define system instructions from text or from a resolver called at the start of each turn with the sandbox, signal and model. The resolved text is not stored in the conversation.",
     "Définit des instructions système à partir d’un texte ou d’un résolveur appelé au début de chaque passe avec le sandbox, le signal et le modèle. Le texte résolu n’est pas stocké dans la conversation."
+  ],
+  "defineHarnessHook": [
+    "Define control code that runs at one point of the engine loop: session-start, before-model, after-model, before-tool, after-tool or stop. Unlike observers, a hook can add instructions, deny or rewrite a tool call, replace its result or refuse to stop; an exception from a hook fails the turn.",
+    "Définit du code de contrôle exécuté à un point de la boucle du moteur : session-start, before-model, after-model, before-tool, after-tool ou stop. Contrairement aux observateurs, un hook peut ajouter des instructions, refuser ou réécrire un appel d’outil, remplacer son résultat ou refuser l’arrêt ; une exception d’un hook fait échouer la passe."
+  ],
+  "defineHarnessPermissions": [
+    "Define ordered allow and deny rules over tool names, command patterns and repository paths. The engine evaluates them before before-tool hooks, and again after a hook rewrites the input; the first matching rule wins. Permissions are not a security boundary: the sandbox isolates.",
+    "Définit des règles ordonnées d’autorisation et de refus sur les noms d’outils, les motifs de commande et les chemins du dépôt. Le moteur les évalue avant les hooks before-tool, et de nouveau après la réécriture de l’entrée par un hook ; la première règle applicable l’emporte. Les permissions ne sont pas une frontière de sécurité : c’est le sandbox qui isole."
   ]
 }

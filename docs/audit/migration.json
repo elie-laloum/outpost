@@ -119,7 +119,7 @@
       "sections": ["Events", "Logging", "Token accounting"],
       "sourceSha256": "9c842df34af96392683aebbc49283f2a02698138f7d16a10dcbde1d2b712ccd1",
       "sourceBodySha256": "35673e03808af158e6e43e39a454b944bf0fffc5dbb1d9509599b5a3702993ff",
-      "preservedBodySha256": "026b597e55b37a295db277faa371781e1132d534ccea91c7bb120c895b30f1cf",
+      "preservedBodySha256": "2861bae5035565726f9f74451dfa518fd2288b20a9c7d62c2330cfa7903710c6",
       "disposition": "complete body preserved; internal links migrated; added typed asynchronous reporters and complete dispatch telemetry contracts"
     },
     {
@@ -942,7 +942,7 @@
       "sections": ["Événements", "Journalisation", "Comptage des tokens"],
       "sourceSha256": "dcb304daefc3adf961a9c69dfdb470bfc48f1e7efb81cc9f18e577c066d1db05",
       "sourceBodySha256": "6c7e1692ba73ac0737c8a7350332de075be815197d88b1ec6ac7ddf23ab868e8",
-      "preservedBodySha256": "3e94fd0496877be8db672332a51d64c5b260d4c6e1644a091cb8e58274f6f1d5",
+      "preservedBodySha256": "9c1b8c81b88d7368c24891292e8240026cc103f07e236f080a0c87d35001119a",
       "disposition": "complete body preserved; internal links migrated; added typed asynchronous reporters and complete dispatch telemetry contracts"
     },
     {

@@ -46,6 +46,10 @@ export function defineHarnessTool<Input>(
     options.readOnly === undefined || typeof options.readOnly === "boolean",
     "Tool readOnly must be boolean",
   );
+  invariant(
+    options.resources === undefined || typeof options.resources === "function",
+    "Tool resources must be a function",
+  );
   const standard = isStandardJsonSchema(options.input)
     ? (options.input as StandardJsonSchema<Input>)
     : undefined;
@@ -71,6 +75,7 @@ export function defineHarnessTool<Input>(
         ? { issues: issues.join("; ") }
         : { value: value as Input };
     },
+    resources: (value: Input) => options.resources?.(value) ?? {},
     execute: (value: Input, context: HarnessToolContext) =>
       options.execute(value, context),
   });

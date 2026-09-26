@@ -4,7 +4,7 @@ description: Composez un fournisseur de modèles, des outils, des instructions e
 ---
 
 :::caution[API non publiée]
-Cette API de l’arbre de travail est expérimentale. Utilisez un package construit depuis ce checkout. Hooks, permissions, jeux d’outils fournis, conversations personnalisées et streaming ne sont pas encore disponibles.
+Cette API de l’arbre de travail est expérimentale. Utilisez un package construit depuis ce checkout. Jeux d’outils fournis, conversations personnalisées et streaming ne sont pas encore disponibles.
 :::
 
 `claudeHarness()`, `codexHarness()` et `geminiHarness()` confient toute la tâche à une CLI qui exécute sa propre boucle de modèle et d’outils. `harness()` construit cette boucle dans Outpost. Vous déclarez ce que l’agent peut utiliser, et Outpost pilote le modèle :
@@ -12,7 +12,8 @@ Cette API de l’arbre de travail est expérimentale. Utilisez un package constr
 - un **fournisseur de modèles**, comme `anthropicModelProvider()` ou `openaiModelProvider()` ;
 - des **outils** créés avec `defineHarnessTool()` et regroupés avec `defineHarnessToolset()` ;
 - des **instructions**, texte fixe ou résolu au démarrage de la tâche avec `defineHarnessInstructions()` ;
-- des **limites** sur les étapes, les appels d’outils et les tokens, et la façon d’exécuter les outils.
+- des **limites** sur les étapes, les appels d’outils et les tokens, et la façon d’exécuter les outils ;
+- des **hooks** et des **permissions** qui contrôlent la boucle avec `defineHarnessHook()` et `defineHarnessPermissions()`.
 
 Le résultat s’utilise comme tout autre agent : `agent({ harness, model })`, puis `dispatch()`, un sandbox chaud ou une tâche de workflow.
 
@@ -202,12 +203,63 @@ Par défaut, le harness demande au fournisseur de mettre en cache le préfixe de
 
 Pendant l’exécution d’un outil, le délai d’inactivité du dispatch est suspendu et le délai de l’outil s’applique. Annuler le dispatch annule les outils en cours. Le code des outils tourne dans le processus Outpost : un JavaScript qui ignore `signal` continue détaché après son délai, mais ses appels sandbox suivants sont refusés.
 
+## Contrôler la boucle avec des hooks et des permissions
+
+Les hooks sont du code de contrôle exécuté à un point précis de la boucle. Contrairement aux observateurs du dispatch, ils peuvent modifier ce qui se passe, et une exception levée par un hook fait échouer la passe.
+
+| Phase           | Reçoit                                     | Peut renvoyer                                                  |
+| --------------- | ------------------------------------------ | -------------------------------------------------------------- |
+| `session-start` | le `prompt` rendu                          | `{ instructions }` ajoutées aux instructions système           |
+| `before-model`  | les `messages` sur le point d’être envoyés | rien ; levez une erreur pour arrêter la passe                  |
+| `after-model`   | le `result` du modèle                      | rien ; levez une erreur pour arrêter la passe                  |
+| `before-tool`   | l’appel validé `call`                      | `{ deny: raison }`, ou `{ input }` pour réécrire les arguments |
+| `after-tool`    | l’appel `call` et son `result`             | `{ result }` pour remplacer ce que reçoit le modèle            |
+| `stop`          | le texte `text` de la réponse finale       | `{ continue: message }` pour refuser l’arrêt                   |
+
+Chaque hook reçoit aussi le `sandbox` emprunté, le `signal` de la passe, le `model` de l’agent et l’étape `step` en cours. Les hooks d’une même phase s’exécutent dans l’ordre de déclaration. Les hooks `before-tool` traitent les appels un par un, dans l’ordre, avant l’exécution de tout outil de l’étape. Une entrée réécrite est de nouveau validée et contrôlée par les permissions. Un hook `stop` qui refuse sans cesse reste borné par `maxSteps`.
+
+```ts
+import {
+  defineHarnessHook,
+  defineHarnessPermissions,
+} from "@elie-laloum/outpost";
+
+export const permissions = defineHarnessPermissions({
+  default: "deny",
+  rules: [
+    { effect: "deny", commands: ["git push*"], reason: "Do not publish." },
+    { effect: "allow", tools: ["read_*", "list_*"] },
+    { effect: "allow", tools: ["write_file"], paths: ["src/**", "test/**"] },
+    { effect: "allow", tools: ["shell"], commands: ["npm test", "npm run *"] },
+  ],
+});
+
+let tested = false;
+export const requireTests = [
+  defineHarnessHook({
+    on: "after-tool",
+    run({ call, result }) {
+      if (call.name === "shell" && !result.isError) tested = true;
+    },
+  }),
+  defineHarnessHook({
+    on: "stop",
+    run: () =>
+      tested ? undefined : { continue: "Run npm test before you finish." },
+  }),
+];
+```
+
+Passez-les avec `harness({ permissions, hooks: requireTests, ... })`. Les règles de permission sont évaluées en premier ; la première règle qui s’applique décide, sinon `default` s’applique. Les règles comparent les noms d’outils, ainsi que les chemins et la commande qu’un outil déclare via sa fonction `resources(input)`. Une règle `allow` avec `paths` exige que tous les chemins déclarés correspondent ; une règle `deny` n’en exige qu’un. Les chemins hors du dépôt ne correspondent jamais. Un outil sans `resources` n’est comparé que par son nom.
+
+Les instructions disent au modèle quoi faire ; les hooks et les permissions l’imposent. Les permissions ne sont pas une frontière de sécurité : les métacaractères du shell peuvent contourner les motifs de commande, et les liens symboliques les règles de chemins. Exécutez le travail non fiable dans un provider de sandbox isolé.
+
 ## Observer la boucle
 
-Les observateurs du dispatch reçoivent `step` avant chaque requête au modèle, `tool` avec un `callId` avant chaque appel, `tool-result` avec un aperçu après, `text` pour le texte du modèle et `usage` pour chaque requête. Voir [Observabilité](../observability/) pour les autres événements.
+Les observateurs du dispatch reçoivent `step` avant chaque requête au modèle, `tool` avec un `callId` avant chaque appel, `tool-result` avec un aperçu après, `tool-denied` quand les permissions ou un hook refusent un appel, `stop-prevented` quand un hook `stop` refuse la réponse, `text` pour le texte du modèle et `usage` pour chaque requête. Voir [Observabilité](../observability/) pour les autres événements.
 
 ## Pas encore disponible
 
-Les conversations des harness personnalisés ne sont pas persistées : continuation, fork et réparations automatiques des réponses sont refusés. Le terminal interactif n’est pas pris en charge. Hooks, permissions, jeux d’outils fournis, gestion du contexte, skills et streaming sont prévus ; voir la [feuille de route](../../../project/roadmap/#direct-model-harness).
+Les conversations des harness personnalisés ne sont pas persistées : continuation, fork et réparations automatiques des réponses sont refusés. Le terminal interactif n’est pas pris en charge. Jeux d’outils fournis, gestion du contexte, skills et streaming sont prévus ; voir la [feuille de route](../../../project/roadmap/#direct-model-harness).
 
 [Référence Harness](../../../reference/overview/harness/) · [Fournisseurs de modèles](../../advanced/model-providers/)

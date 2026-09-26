@@ -1,6 +1,27 @@
 export { agent } from "./domain/agent.ts";
 export { harness } from "./domain/harness.ts";
+export { defineHarnessHook } from "./domain/hook.ts";
 export { defineHarnessInstructions } from "./domain/instructions.ts";
+export { defineHarnessPermissions } from "./domain/permissions.ts";
+export type {
+  HarnessHook,
+  HarnessHookContext,
+  HarnessHookDecisions,
+  HarnessHookEvents,
+  HarnessHookInput,
+  HarnessHookOptions,
+  HarnessHookPhase,
+  HarnessHookResult,
+  HarnessToolResultView,
+} from "./domain/hook.types.ts";
+export type {
+  HarnessPermissionRule,
+  HarnessPermissions,
+  HarnessPermissionsOptions,
+  PermissionDecision,
+  PermissionEffect,
+  ToolResources,
+} from "./domain/permissions.types.ts";
 export { defineHarnessTool, defineHarnessToolset } from "./domain/tool.ts";
 export type {
   AgentAuthentication,

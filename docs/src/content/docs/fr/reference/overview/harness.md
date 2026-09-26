@@ -12,7 +12,7 @@ Un harness définit comment un agent exécute une tâche et accède à son modè
 
 Choisissez `claudeHarness()`, `codexHarness()` ou `geminiHarness()` pour déléguer l’exécution à la CLI correspondante. Leurs options configurent l’exécution, l’authentification explicite et les conversations prises en charge.
 
-Utilisez `harness()` pour qu’Outpost pilote lui-même le modèle. Il combine un [fournisseur de modèles](../model-providers/), des outils issus de `defineHarnessTool()` et `defineHarnessToolset()`, des instructions en texte ou via `defineHarnessInstructions()`, des limites de boucle et des réglages d’exécution des outils. Sélectionnez le modèle sur l’[agent](../agents/) ; un harness personnalisé exige un modèle explicite, tandis qu’un preset CLI peut conserver son modèle natif par défaut.
+Utilisez `harness()` pour qu’Outpost pilote lui-même le modèle. Il combine un [fournisseur de modèles](../model-providers/), des outils issus de `defineHarnessTool()` et `defineHarnessToolset()`, des instructions en texte ou via `defineHarnessInstructions()`, des hooks, des permissions, des limites de boucle et des réglages d’exécution des outils. Sélectionnez le modèle sur l’[agent](../agents/) ; un harness personnalisé exige un modèle explicite, tandis qu’un preset CLI peut conserver son modèle natif par défaut.
 
 ## Frontières et responsabilités
 
@@ -26,6 +26,7 @@ Ces API de harness sont implémentées mais non publiées ; le moteur et ses dé
 
 - [harness](../../function-harness/) compose le moteur d’Outpost.
 - [defineHarnessTool](../../defineharnesstool/), [defineHarnessToolset](../../defineharnesstoolset/) et [defineHarnessInstructions](../../defineharnessinstructions/) déclarent ce que le moteur peut utiliser.
+- [defineHarnessHook](../../defineharnesshook/) et [defineHarnessPermissions](../../defineharnesspermissions/) contrôlent les appels d’outils et la fin de la boucle.
 - [claudeHarness](../../claudeharness/), [codexHarness](../../codexharness/) et [geminiHarness](../../geminiharness/) configurent les presets CLI.
 - [Harness](../../harness/) est le contrat commun de composition.
 - [HarnessToolContext](../../harnesstoolcontext/) décrit le sandbox, le signal d’annulation, le modèle et l’observateur accessibles à un outil.
