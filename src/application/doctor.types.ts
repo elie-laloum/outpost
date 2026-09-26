@@ -1,7 +1,16 @@
+import type { AgentCliDiagnostic } from "../adapters/agents/cli-diagnostics.types.ts";
+import type { CliHarness } from "../domain/agent.types.ts";
 import type { Command } from "../domain/command.types.ts";
 export type DoctorProvider =
   "docker" | "podman" | "local" | "vercel" | "daytona";
-export type DoctorAgent = "codex" | "claude" | "gemini";
+export type DoctorAgent =
+  "codex" | "claude" | "antigravity" | "copilot" | "kimi";
+export interface DoctorAgentProfile {
+  readonly executable: string;
+  readonly referenceVersion?: string;
+  diagnostics(): readonly AgentCliDiagnostic[];
+  harness(): CliHarness;
+}
 export type DiagnosticStatus = "pass" | "warn" | "fail" | "skipped";
 export interface DiagnosticCheck {
   readonly id: string;

@@ -1,0 +1,1 @@
+export const HOST_CREDENTIAL_LIMIT = 1_048_576;

@@ -13,5 +13,6 @@ export const requiredCredentials = {
 export const agentPackages = [
   { executable: "codex", package: "@openai/codex" },
   { executable: "claude", package: "@anthropic-ai/claude-code" },
-  { executable: "gemini", package: "@google/gemini-cli" },
+  { executable: "copilot", package: "@github/copilot" },
+  { executable: "kimi", package: "@moonshot-ai/kimi-code" },
 ] as const;

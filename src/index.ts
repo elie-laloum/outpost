@@ -48,6 +48,7 @@ export { harnessSearchTools } from "./adapters/tools/search-tools.ts";
 export { harnessShellTools } from "./adapters/tools/shell-tools.ts";
 export type { ShellToolsOptions } from "./adapters/tools/tools.types.ts";
 export type {
+  AccountCredential,
   AgentAuthentication,
   Agent,
   AgentOptions,
@@ -55,6 +56,7 @@ export type {
   CliHarness,
   CliAgent,
   CustomAgent,
+  UsageCredential,
 } from "./domain/agent.types.ts";
 export type {
   Harness,
@@ -161,9 +163,11 @@ export type {
 export { agentTask, commandTask, isolatedTask } from "./application/tasks.ts";
 
 export {
+  antigravityHarness,
   claudeHarness,
   codexHarness,
-  geminiHarness,
+  copilotHarness,
+  kimiHarness,
 } from "./providers/agents.ts";
 
 export { agentVersions } from "./providers/versions.ts";
@@ -180,10 +184,12 @@ export type {
 } from "./infrastructure/conversations.ts";
 
 export type {
+  AntigravitySettings,
   ClaudeSettings,
   CodexSettings,
   CodexModelProvider,
-  GeminiSettings,
+  CopilotSettings,
+  KimiSettings,
 } from "./providers/agents.ts";
 
 export {

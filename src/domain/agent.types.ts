@@ -92,9 +92,7 @@ export interface AgentFeatures {
 }
 
 export interface AgentAdapter extends AgentFeatures {
-  authenticate?(
-    variables: Readonly<Record<string, string>>,
-  ): Command | undefined;
+  credentials?(variables: Variables): CredentialPlan;
   request(input: AgentInput): Command;
   events(line: string): readonly AgentEvent[];
 }
@@ -136,7 +134,42 @@ export interface CustomAgentOptions {
 }
 export type AgentOptions = CliAgentOptions | CustomAgentOptions;
 
+export type AccountCredential =
+  | { readonly file: string }
+  | { readonly key: string }
+  | { readonly variable: string };
+
+export type UsageCredential =
+  { readonly key: string } | { readonly variable: string };
+
 export type AgentAuthentication =
-  | { readonly mode: "api-key"; readonly environment?: string }
-  | { readonly mode: "oauth-token" }
-  | { readonly mode: "login"; readonly credentials?: string };
+  | "account"
+  | "usage"
+  | { readonly account: AccountCredential }
+  | { readonly usage: UsageCredential };
+
+export interface HostCredentialPath {
+  readonly path: string;
+  readonly home?: { readonly variable: string; readonly path: string };
+}
+
+export interface HostCredential {
+  readonly source: HostCredentialPath;
+  readonly destination:
+    { readonly file: string } | { readonly variable: string };
+  readonly login: string;
+  readonly alternative?: string;
+  select?(content: string): string;
+}
+
+export interface GeneratedCredential {
+  readonly path: string;
+  readonly content: string;
+}
+
+export interface CredentialPlan {
+  readonly variables: Variables;
+  readonly host: readonly HostCredential[];
+  readonly files: readonly GeneratedCredential[];
+  readonly commands: readonly Command[];
+}

@@ -3,9 +3,11 @@ import { test } from "node:test";
 import {
   agent,
   harness,
+  antigravityHarness,
   codexHarness,
   claudeHarness,
-  geminiHarness,
+  copilotHarness,
+  kimiHarness,
   defineHarnessInstructions,
   defineHarnessTool,
   dispatch,
@@ -94,7 +96,13 @@ function resultContents(request: ModelRequest | undefined) {
 }
 
 test("agents compose without effects and custom harnesses are declarative", () => {
-  for (const preset of [codexHarness, claudeHarness, geminiHarness]) {
+  for (const preset of [
+    codexHarness,
+    claudeHarness,
+    antigravityHarness,
+    copilotHarness,
+    kimiHarness,
+  ]) {
     const selected = agent({
       harness: preset(),
       model: "arbitrary-future-model",
@@ -720,16 +728,16 @@ test("switching CLI configurations reactivates authentication without repeating 
   const selected: string[] = [];
   const first = {
     ...scripted(emit(done)),
-    authenticate() {
+    credentials() {
       selected.push("first");
-      return undefined;
+      return { variables: {}, host: [], files: [], commands: [] };
     },
   };
   const second = {
     ...scripted(emit(done)),
-    authenticate() {
+    credentials() {
       selected.push("second");
-      return undefined;
+      return { variables: {}, host: [], files: [], commands: [] };
     },
   };
   await using sandbox = await createSandbox({

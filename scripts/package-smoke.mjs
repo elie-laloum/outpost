@@ -58,7 +58,7 @@ try {
     [
       "--input-type=module",
       "-e",
-      "import {openaiModelProvider, geminiHarness, response, workflow, conversations, reporter, recoveryDetails, diagnoseAgentProtocol, diagnoseSandbox, planRecoveryRetention, pruneRecoveryRetention, assertRecoveryQuota, verifyRecoveryTransfer} from '@elie-laloum/outpost'; import {dockerSandboxProvider} from '@elie-laloum/outpost/providers/docker'; import {firecrackerSandboxProvider} from '@elie-laloum/outpost/providers/firecracker'; if(typeof firecrackerSandboxProvider!=='function')throw Error('Missing Firecracker provider'); if((await response.text({tag:'ok'}).read('<ok>yes</ok>'))!=='yes'||dockerSandboxProvider().name!=='docker')throw Error('Package import failed'); for(const item of [openaiModelProvider,conversations.capture,reporter,recoveryDetails,diagnoseSandbox,planRecoveryRetention,pruneRecoveryRetention,assertRecoveryQuota,verifyRecoveryTransfer])if(typeof item!=='function')throw Error('Missing public extension'); if(diagnoseAgentProtocol('codex').hasFailures||diagnoseAgentProtocol('gemini').hasFailures)throw Error('Protocol fixtures failed'); (await workflow('empty',[]).start()).unwrap()",
+      "import {openaiModelProvider, antigravityHarness, copilotHarness, kimiHarness, response, workflow, conversations, reporter, recoveryDetails, diagnoseAgentProtocol, diagnoseSandbox, planRecoveryRetention, pruneRecoveryRetention, assertRecoveryQuota, verifyRecoveryTransfer} from '@elie-laloum/outpost'; import {dockerSandboxProvider} from '@elie-laloum/outpost/providers/docker'; import {firecrackerSandboxProvider} from '@elie-laloum/outpost/providers/firecracker'; if(typeof firecrackerSandboxProvider!=='function')throw Error('Missing Firecracker provider'); if((await response.text({tag:'ok'}).read('<ok>yes</ok>'))!=='yes'||dockerSandboxProvider().name!=='docker')throw Error('Package import failed'); for(const item of [openaiModelProvider,antigravityHarness,copilotHarness,kimiHarness,conversations.capture,reporter,recoveryDetails,diagnoseSandbox,planRecoveryRetention,pruneRecoveryRetention,assertRecoveryQuota,verifyRecoveryTransfer])if(typeof item!=='function')throw Error('Missing public extension'); for(const name of ['codex','claude','antigravity','copilot','kimi'])if(diagnoseAgentProtocol(name).hasFailures)throw Error('Protocol fixtures failed'); (await workflow('empty',[]).start()).unwrap()",
     ],
     { cwd: temporary, stdio: "inherit" },
   );
@@ -84,8 +84,8 @@ try {
       `
     import assert from 'node:assert/strict';
     import * as api from '@elie-laloum/outpost';
-    for (const name of ['fileArtifactStore','fileWorkflowCheckpointStore','claude','codex','gemini','customHarness','openaiCompatible','local','docker','podman','vercel','daytona','firecracker','mountedProvider','remoteProvider']) assert.equal(name in api, false, name);
-    for (const name of ['claude','codex','gemini']) {
+    for (const name of ['fileArtifactStore','fileWorkflowCheckpointStore','claude','codex','gemini','geminiHarness','customHarness','openaiCompatible','local','docker','podman','vercel','daytona','firecracker','mountedProvider','remoteProvider']) assert.equal(name in api, false, name);
+    for (const name of ['claude','codex','antigravity','copilot','kimi']) {
       assert.equal(typeof api[name+'Harness'], 'function');
       assert.equal(api.agent({harness:api[name+'Harness'](),model:'arbitrary-model'}).model.name,'arbitrary-model');
     }
@@ -192,7 +192,11 @@ try {
   const consumer = join(temporary, "consumer.ts");
   writeFileSync(
     consumer,
-    `import { agent as composeAgent,  dispatch, codexHarness, geminiHarness, response, createSandbox, type GeminiSettings, type EgressPolicy } from '@elie-laloum/outpost';
+    `import { agent as composeAgent,  dispatch, codexHarness, claudeHarness, antigravityHarness, copilotHarness, kimiHarness, response, createSandbox, type AntigravitySettings, type CopilotSettings, type KimiSettings, type AgentAuthentication, type AccountCredential, type UsageCredential, type EgressPolicy } from '@elie-laloum/outpost';
+// @ts-expect-error Gemini CLI was removed without a compatibility export.
+import { geminiHarness } from '@elie-laloum/outpost';
+// @ts-expect-error Gemini CLI settings were removed.
+import type { GeminiSettings } from '@elie-laloum/outpost';
 import { openaiModelProvider, type OpenAIModelProviderOptions, type ModelProvider, type ModelRequest, type ModelResult, type AgentAdapter, type SandboxProvider } from '@elie-laloum/outpost';
 import { harness, anthropicModelProvider, defineHarnessTool, type Agent, type AgentModel, type ModelReasoning, type HarnessTool, type Harness, type HarnessOptions, type AgentHarness } from '@elie-laloum/outpost';
 // @ts-expect-error The renamed harness contract has no compatibility export.
@@ -264,8 +268,20 @@ await using sandbox = await createSandbox({ sandboxProvider: localSandboxProvide
 await sandbox.diagnose({transfers:true});
 const result = await sandbox.dispatch({ agent: composeAgent({ harness: codexHarness({}) }), brief: { text: 'Return <n>1</n>' }, response: response.json({tag:'n', schema: value => Number(value)}) });
 const n: number = result.value;
-const geminiSettings: GeminiSettings = { approvalMode: 'plan' };
-composeAgent({ harness: geminiHarness(geminiSettings), model: "flash" });
+const accountFile: AccountCredential = { file: '~/.outpost/accounts/kimi' };
+const usageKey: UsageCredential = { variable: 'TEAM_API_KEY' };
+const forms: readonly AgentAuthentication[] = ['account', 'usage', { account: accountFile }, { usage: usageKey }, { account: { key: 'token' } }];
+console.log(forms);
+// @ts-expect-error Legacy authentication modes were removed.
+codexHarness({ authentication: { mode: 'login' } });
+// @ts-expect-error Usage credentials cannot name a file.
+claudeHarness({ authentication: { usage: { file: '~/.claude' } } });
+const antigravitySettings: AntigravitySettings = { mode: 'plan', authentication: 'account' };
+const copilotSettings: CopilotSettings = { authentication: { account: { variable: 'COPILOT_GITHUB_TOKEN' } } };
+const kimiSettings: KimiSettings = { authentication: 'usage' };
+composeAgent({ harness: antigravityHarness(antigravitySettings), model: 'fixture' });
+composeAgent({ harness: copilotHarness(copilotSettings) });
+composeAgent({ harness: kimiHarness(kimiSettings), model: 'fixture' });
 const once = await dispatch({agent:composeAgent({ harness: codexHarness({}) }),sandboxProvider:localSandboxProvider(),brief:{text:'hello'}});
 await once.fork({brief:{text:'alternative'},branch:{mode:'named',name:'outpost/alternative'},hooks:{workspaceReady:[]}});
 // @ts-expect-error Warm results cannot replace their sandbox configuration.

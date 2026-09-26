@@ -7,8 +7,8 @@ import { executeProcess } from "../infrastructure/process.ts";
 import type { Executor } from "../infrastructure/process.types.ts";
 import { registerCleanup } from "../infrastructure/shutdown.ts";
 import { diagnosticContainer } from "../providers/diagnostic-container.ts";
-import { agentVersions } from "../providers/versions.constants.ts";
-import { diagnoseAgentCli } from "./doctor-agent.ts";
+import { doctorAgents } from "./doctor-agent.constants.ts";
+import { agentVersionProbe, diagnoseAgentCli } from "./doctor-agent.ts";
 import { diagnosticProbe } from "./diagnostic-probe.ts";
 import { doctorDefaults } from "./doctor.constants.ts";
 import type { DiagnosticCheck, DoctorImageOptions } from "./doctor.types.ts";
@@ -101,11 +101,9 @@ async function inspectImage(
     const agentVersion = await diagnosticProbe(
       {
         id: "agent.sandbox",
-        command: { executable: agent, arguments: ["--version"] },
+        ...agentVersionProbe(agent),
         failureStatus: "fail",
-        readVersion: true,
-        referenceVersion: agentVersions[agent],
-        remedy: `Install ${agent} in the image and rebuild it. This check does not bootstrap agents.`,
+        remedy: `Install ${doctorAgents[agent].executable} in the image and rebuild it. This check does not bootstrap agents.`,
       },
       invoke,
     );

@@ -14,8 +14,20 @@ export const codexModelSupport: CliModelSupport = {
   maxOutputTokens: false,
 };
 
-export const geminiModelSupport: CliModelSupport = {
-  agent: "Gemini CLI",
+export const antigravityModelSupport: CliModelSupport = {
+  agent: "Antigravity CLI",
+  reasoning: new Set(),
+  maxOutputTokens: false,
+};
+
+export const copilotModelSupport: CliModelSupport = {
+  agent: "GitHub Copilot CLI",
+  reasoning: new Set(),
+  maxOutputTokens: false,
+};
+
+export const kimiModelSupport: CliModelSupport = {
+  agent: "Kimi Code",
   reasoning: new Set(),
   maxOutputTokens: false,
 };

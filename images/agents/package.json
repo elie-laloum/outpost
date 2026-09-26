@@ -3,9 +3,10 @@
   "private": true,
   "version": "1.0.0",
   "dependencies": {
-    "@google/gemini-cli": "0.61.0",
-    "@openai/codex": "0.156.1",
-    "@anthropic-ai/claude-code": "2.1.280"
+    "@anthropic-ai/claude-code": "2.1.280",
+    "@github/copilot": "1.0.88",
+    "@moonshot-ai/kimi-code": "2.1.1",
+    "@openai/codex": "0.156.1"
   },
   "allowScripts": {
     "@anthropic-ai/claude-code": true

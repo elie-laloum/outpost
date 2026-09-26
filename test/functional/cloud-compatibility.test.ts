@@ -252,7 +252,7 @@ test("standalone cloud runner reports skipped with exit 2 when disabled", async 
 test("agent CLI probes only request installation, versions and adapter help", async () => {
   const calls: string[] = [];
   const checks: string[] = [];
-  let missingGeminiOption = false;
+  let missingKimiOption = false;
   const lease: SandboxLease = {
     root: "/fixture",
     home: "/fixture",
@@ -264,7 +264,8 @@ test("agent CLI probes only request installation, versions and adapter help", as
       const args = command.arguments ?? [];
       if (command.executable === "npm") {
         assert.equal(args[0], "install");
-        assert.ok(args.includes("@google/gemini-cli"));
+        assert.ok(args.includes("@github/copilot"));
+        assert.ok(args.includes("@moonshot-ai/kimi-code"));
         return { status: 0, stdout: "", stderr: "" };
       }
       assert.ok(args.includes("--help") || args.includes("--version"));
@@ -272,12 +273,14 @@ test("agent CLI probes only request installation, versions and adapter help", as
         status: 0,
         stdout: [
           "1.2.3",
-          "codex exec resume",
-          "codex exec fork",
-          "claude",
-          missingGeminiOption
-            ? "gemini"
-            : "gemini --approval-mode --skip-trust --output-format",
+          "Usage: codex exec [",
+          "Usage: codex exec resume [",
+          "Usage: codex exec fork [",
+          "Usage: claude [",
+          "Usage: copilot [ --output-format --allow-all --no-ask-user",
+          missingKimiOption
+            ? "Usage: kimi ["
+            : "Usage: kimi [ --prompt --output-format",
           ...args,
         ].join(" "),
         stderr: "",
@@ -287,7 +290,7 @@ test("agent CLI probes only request installation, versions and adapter help", as
   await verifyCloudAgents(lease, new AbortController().signal, (check) =>
     checks.push(check.name),
   );
-  assert.equal(calls.length, 11);
+  assert.equal(calls.length, 13);
   assert.deepEqual(checks, [
     "codex-cli-version",
     "codex-cli-start",
@@ -297,10 +300,12 @@ test("agent CLI probes only request installation, versions and adapter help", as
     "claude-cli-start",
     "claude-cli-resume",
     "claude-cli-fork",
-    "gemini-cli-version",
-    "gemini-cli-start",
+    "copilot-cli-version",
+    "copilot-cli-start",
+    "kimi-cli-version",
+    "kimi-cli-start",
   ]);
-  missingGeminiOption = true;
+  missingKimiOption = true;
   await assert.rejects(
     verifyCloudAgents(lease, new AbortController().signal, () => {}),
     { code: "ERR_ASSERTION" },

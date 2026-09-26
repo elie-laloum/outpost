@@ -1,15 +1,22 @@
+import { doctorAgents } from "../application/doctor-agent.constants.ts";
 import {
   doctorDefaults,
   providerDiagnostics,
 } from "../application/doctor.constants.ts";
 import { diagnose } from "../application/doctor.ts";
-import type { DoctorProvider } from "../application/doctor.types.ts";
+import type {
+  DoctorAgent,
+  DoctorProvider,
+} from "../application/doctor.types.ts";
 import { invariant } from "../domain/errors.ts";
 import type { Executor } from "../infrastructure/process.types.ts";
 import type { CliInvocation } from "./main.types.ts";
 
 function isProvider(value: string): value is DoctorProvider {
   return Object.hasOwn(providerDiagnostics, value);
+}
+function isAgent(value: string): value is DoctorAgent {
+  return Object.hasOwn(doctorAgents, value);
 }
 export async function doctorCommand(
   { values, positionals }: CliInvocation,
@@ -35,8 +42,8 @@ export async function doctorCommand(
     "Unknown provider. Choose docker, podman, local, vercel or daytona.",
   );
   invariant(
-    agent === "codex" || agent === "claude" || agent === "gemini",
-    "Unknown agent. Choose codex, claude or gemini.",
+    isAgent(agent),
+    `Unknown agent. Choose ${Object.keys(doctorAgents).join(", ")}.`,
   );
   const report = await diagnose(
     {

@@ -2,9 +2,11 @@ import { agent as composeAgent } from "../../src/domain/agent.ts";
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
+  antigravityHarness,
   claudeHarness,
   codexHarness,
-  geminiHarness,
+  copilotHarness,
+  kimiHarness,
 } from "../../src/providers/agents.ts";
 import { agentOutput } from "../../src/application/agent-output.ts";
 import { operationGate } from "../../src/application/operation-gate.ts";
@@ -13,7 +15,9 @@ import { addUsage } from "../../src/domain/usage.ts";
 for (const adapter of [
   composeAgent({ harness: claudeHarness({}) }),
   composeAgent({ harness: codexHarness({}) }),
-  composeAgent({ harness: geminiHarness({}) }),
+  composeAgent({ harness: antigravityHarness({}) }),
+  composeAgent({ harness: copilotHarness({}) }),
+  composeAgent({ harness: kimiHarness({}) }),
 ]) {
   test(`${adapter.name} preserves unknown protocol events without invoking inherited handlers`, () => {
     for (const type of [
@@ -22,10 +26,12 @@ for (const adapter of [
       "toString",
       "__proto__",
     ]) {
-      const event = { type, payload: "unrecognized" };
-      assert.deepEqual(adapter.events(JSON.stringify(event)), [
-        { kind: "raw", value: event },
-      ]);
+      for (const discriminant of ["type", "event", "role"]) {
+        const event = { [discriminant]: type, payload: "unrecognized" };
+        assert.deepEqual(adapter.events(JSON.stringify(event)), [
+          { kind: "raw", value: event },
+        ]);
+      }
     }
     for (const line of ["not json", "", "{"])
       assert.deepEqual(adapter.events(line), [{ kind: "raw", value: line }]);

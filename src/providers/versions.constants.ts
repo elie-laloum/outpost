@@ -1,5 +1,6 @@
 export const agentVersions = Object.freeze({
-  gemini: "0.61.0",
   codex: "0.156.1",
   claude: "2.1.280",
+  copilot: "1.0.88",
+  kimi: "2.1.1",
 });

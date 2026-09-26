@@ -1,6 +1,7 @@
 import { invariant } from "../../domain/errors.ts";
 import type { AgentModel } from "../../domain/model.types.ts";
-import { authenticationCommand } from "./authentication.ts";
+import { credentialPlanner } from "./authentication.ts";
+import { claudeCredentials } from "./claude-authentication.ts";
 import type { AgentAdapter, CliHarness } from "../../domain/agent.types.ts";
 import { claudeEvents, claudeTranscriptUsage } from "./claude-events.ts";
 import { claudeRequest } from "./claude-request.ts";
@@ -19,9 +20,15 @@ function bindClaude(settings: Bound<ClaudeSettings>): AgentAdapter {
       !Object.hasOwn(settings.variables ?? {}, CLAUDE_MAX_OUTPUT_VARIABLE),
     `Set maxOutputTokens on the agent model or ${CLAUDE_MAX_OUTPUT_VARIABLE}, not both`,
   );
+  const credentials = credentialPlanner(
+    "Claude Code",
+    claudeCredentials,
+    settings.authentication,
+    settings.model,
+  );
   return Object.freeze({
     name: "claude",
-    authenticate: authenticationCommand("claude", settings.authentication),
+    ...(credentials ? { credentials } : {}),
     conversations: "claude",
     resumable: true,
     capture: settings.saveConversations ?? true,

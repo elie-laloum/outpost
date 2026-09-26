@@ -1,5 +1,6 @@
 import type { ResourceActivity } from "../infrastructure/resource-activity.types.ts";
 import type { Agent } from "../domain/agent.types.ts";
+import type { Variables } from "../domain/command.types.ts";
 import type { SandboxLease, SandboxProvider } from "../domain/sandbox.types.ts";
 import type { LifecycleHooks } from "../domain/workspace.types.ts";
 import type { WorkspaceLease } from "../infrastructure/git/workspace.types.ts";
@@ -45,4 +46,9 @@ export interface SandboxAgents {
 export interface OperationGate {
   run<T>(action: () => Promise<T>): Promise<T>;
   close(): Promise<void>;
+}
+
+export interface AuthenticatedAgent {
+  readonly adapter: Agent;
+  readonly variables: Variables;
 }

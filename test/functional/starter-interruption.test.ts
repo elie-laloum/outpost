@@ -17,7 +17,7 @@ for (const signal of ["SIGINT", "SIGTERM", undefined] as const) {
       directory: folder,
       repository: root,
       sandboxProvider: "local",
-      authentication: "login",
+      authentication: "account",
     });
     const bridge = join(folder, "bridge.mts");
     const script = signal

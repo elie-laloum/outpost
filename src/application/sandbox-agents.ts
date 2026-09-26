@@ -1,11 +1,12 @@
-import { requireSuccess } from "../infrastructure/process.ts";
 import type { Agent } from "../domain/agent.types.ts";
 import type { Command } from "../domain/command.types.ts";
 import { invariant } from "../domain/errors.ts";
 import { resolveVariables } from "../infrastructure/settings.ts";
+import { authenticateAgent } from "./agent-authentication.ts";
 import { prepareAdapter } from "./agent-bootstrap.ts";
 import { storageFor } from "./agent-storage.ts";
 import type {
+  AuthenticatedAgent,
   ProvisionedSandbox,
   SandboxAgents,
 } from "./sandbox-session.types.ts";
@@ -14,7 +15,7 @@ export function sandboxAgents(context: ProvisionedSandbox): SandboxAgents {
   const { options, sandboxProvider, workspace, runtime, prepared, staging } =
     context;
   const known = new Set<string>();
-  const authenticated = new Map<string, Agent>();
+  const authenticated = new Map<string, AuthenticatedAgent>();
   const selectAgent = async (
     selected: Agent | undefined,
     signal: AbortSignal,
@@ -33,15 +34,22 @@ export function sandboxAgents(context: ProvisionedSandbox): SandboxAgents {
       sandboxProvider.variables,
     );
     const adapter = prepared.get(selected)!;
-    if (adapter.kind === "cli" && authenticated.get(adapter.name) !== adapter) {
-      const command = adapter.authenticate?.(variables);
-      if (command)
-        await requireSuccess(
-          { ...command, variables, signal },
-          runtime.invoke.bind(runtime),
-        );
-      authenticated.set(adapter.name, adapter);
-    }
+    if (
+      adapter.kind === "cli" &&
+      authenticated.get(adapter.name)?.adapter !== adapter
+    )
+      authenticated.set(adapter.name, {
+        adapter,
+        variables: await authenticateAgent(
+          adapter,
+          variables,
+          runtime,
+          sandboxProvider.placement,
+          signal,
+        ),
+      });
+    const credentials =
+      adapter.kind === "cli" ? authenticated.get(adapter.name)?.variables : {};
     return {
       selected,
       adapter,
@@ -50,7 +58,7 @@ export function sandboxAgents(context: ProvisionedSandbox): SandboxAgents {
         invoke(command: Command) {
           return runtime.invoke({
             ...command,
-            variables: { ...variables, ...command.variables },
+            variables: { ...variables, ...credentials, ...command.variables },
           });
         },
       },
