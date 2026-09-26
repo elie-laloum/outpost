@@ -1,34 +1,14 @@
 ---
-import { referenceRedirects } from "../../scripts/reference-redirects.mjs";
-import migration from "../../audit/migration.json";
-
+import { routeRedirects } from "../../scripts/route-redirects.mjs";
 export function getStaticPaths() {
-  const route = (name: string) =>
-    name.replace(/\.md$/, "").replace(/\/index$/, "");
-  const pages = migration.pages
-    .filter((page) => page.source !== page.destination)
-    .map((page) => ({
-      params: { legacy: route(page.source) },
-      props: {
-        target: route(page.destination),
-        details: route(page.details ?? page.destination),
-      },
-    }));
-  return [
-    ...pages,
-    ...Object.entries(referenceRedirects).map(([source, destination]) => ({
-      params: { legacy: source.replace(/^\/|\/$/g, "") },
-      props: {
-        target: destination.replace(/^\/|\/$/g, ""),
-        details: destination.replace(/^\/|\/$/g, ""),
-      },
-    })),
-  ];
+  return Object.entries(routeRedirects).map(([source, destination]) => ({
+    params: { legacy: source.replace(/^\/|\/$/g, "") },
+    props: { target: destination },
+  }));
 }
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
-const target = `${base}/${Astro.props.target}/`;
-const details = `${base}/${Astro.props.details}/`;
-const french = Astro.props.target.startsWith("fr/");
+const target = `${base}${Astro.props.target}`;
+const french = Astro.props.target.startsWith("/fr/");
 ---
 <!doctype html>
 <html lang={french ? "fr" : "en"}>
@@ -43,12 +23,14 @@ const french = Astro.props.target.startsWith("fr/");
     <main>
       <h1>{french ? "Cette page a été déplacée" : "This page has moved"}</h1>
       <p><a href={target}>{french ? "Ouvrir la page" : "Open the page"}</a></p>
-      <p><a href={details}>{french ? "Consulter les sections détaillées" : "Read the detailed sections"}</a></p>
     </main>
-    <script is:inline define:vars={{ target, details }}>
-      const destination = new URL(window.location.hash ? details : target, window.location.origin);
+    <script is:inline define:vars={{ target, french }}>
+      const destination = new URL(target, window.location.origin);
       destination.search = window.location.search;
       destination.hash = window.location.hash;
+      if (french && target.endsWith("/chat-history/") && destination.hash === "#continuation-choices") {
+        destination.hash = "#choix-de-continuation";
+      }
       window.location.replace(destination.href);
     </script>
   </body>

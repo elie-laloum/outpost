@@ -40,29 +40,12 @@ export default defineConfig({
         {
           label: "Guide",
           items: [
-            ...chapters.map(([label, fr, items], index) => ({
+            ...chapters.map(([label, fr, items]) => ({
               label,
               translations: { fr },
-              collapsed: index !== 0,
+              collapsed: false,
               items,
             })),
-            {
-              label: "CLI and configuration",
-              translations: { fr: "CLI et configuration" },
-              items: [
-                "guide/manual/cli",
-                "guide/manual/cli-images",
-                "guide/manual/configuration",
-                "guide/manual/authentication",
-                "guide/manual/compatibility",
-              ],
-            },
-            {
-              label: "Behavior in depth",
-              translations: { fr: "Comportements détaillés" },
-              collapsed: true,
-              items: [{ autogenerate: { directory: "guide/behavior" } }],
-            },
           ],
         },
         {
@@ -72,6 +55,9 @@ export default defineConfig({
         },
       ],
       components: {
+        PageFrame: "./src/components/GuideFrame.astro",
+        Header: "./src/components/GuideHeader.astro",
+        PageTitle: "./src/components/GuideTitle.astro",
         Head: "./src/components/Head.astro",
         Sidebar: "./src/components/Sidebar.astro",
       },

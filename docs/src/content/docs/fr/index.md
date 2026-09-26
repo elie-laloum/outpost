@@ -1,30 +1,17 @@
 ---
-title: "Outpost"
-description: "Lancez un agent de code, comprenez son workspace, puis construisez un workflow."
+title: Outpost
+description: "Agents de code, votre infrastructure, votre workflow."
 ---
 
-Outpost est une bibliothèque TypeScript et une CLI pour exécuter des agents de code dans des sandboxes, organiser leur travail Git et relier leurs résultats dans des workflows typés.
+Exécutez des agents de code depuis TypeScript. Choisissez un agent, donnez-lui un workspace Git et reliez ses résultats au reste de votre application.
 
-**Commencez par un résultat concret :** corrigez un test en échec dans un petit projet de traitement de texte jetable. Choisissez Codex ou Claude, lancez le script généré, puis examinez le commit.
+[Ouvrir le guide →](guide/introduction/)
 
-[Lancer votre premier agent →](guide/start/quickstart/)
+## Construire avec Outpost
 
-<span id="choisir-un-parcours"></span>
-<span id="utiliser-cette-documentation"></span>
+- [Configurez un agent](guide/setup/) et [envoyez une requête](guide/first-request/).
+- [Choisissez un environnement](guide/execution-backends/) local ou cloud.
+- [Reliez les tâches](guide/task-dependencies/) avec résultats typés et dépendances explicites.
+- [Consultez une API](reference/) pour les signatures et options exactes.
 
-## Deux façons de lire
-
-| Apprendre par la pratique                                                                                | Retrouver un comportement précis                                                                                                  |
-| -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| Le [Guide](guide/) progresse d’une tâche d’agent vers les environnements réutilisables et les workflows. | La [Référence](reference/diagnosesandbox/) explique API, commandes CLI, configuration et limites.                                 |
-| Chaque exemple pratique contient sa préparation, son code complet et le résultat attendu.                | Les signatures suivent les déclarations du package ; les contrats détaillés restent accessibles sans interrompre l’apprentissage. |
-
-Vous connaissez déjà les bases ? Choisissez une [recette du cookbook](guide/cookbook/) ou [diagnostiquez un échec](guide/operations/troubleshooting/).
-
-## Les prérequis
-
-Node.js 24+, Git et Docker pour le premier agent. Choisissez explicitement compte ou clé API ; la facturation API est séparée de l’abonnement. Le téléchargement/build initial de l’image peut prendre plusieurs minutes. Les exemples suivants réutilisent cette préparation tout en restant reproductibles indépendamment.
-
-Les exemples de workflow, validation et persistance fonctionnent aussi [sans modèle ni conteneur](guide/cookbook/offline/).
-
-L’anglais et le français couvrent les mêmes fonctionnalités. Le site public suit la dernière release stable ; le [changelog](project/changelog/) répertorie les versions et la [roadmap](project/roadmap/) distingue le travail prévu.
+Le guide propose des explications ciblées et des snippets courts en anglais et en français. Le [changelog](project/changelog/) répertorie les versions ; la [roadmap](project/roadmap/) distingue les capacités disponibles du travail prévu.

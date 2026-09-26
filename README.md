@@ -8,7 +8,7 @@ Version 6.0.0 unifies CLI authentication: every harness selects `account` (your 
 
 ## Get started
 
-New to Outpost? Follow the [complete first-run workshop](https://elie-laloum.github.io/outpost/guide/start/quickstart/): choose an agent and account or API-key access, create a disposable TypeScript repository, then fix and verify a real test. The [Guide](https://elie-laloum.github.io/outpost/guide/) teaches the concepts; the [Reference](https://elie-laloum.github.io/outpost/reference/) explains exact contracts. Every [cookbook recipe](https://elie-laloum.github.io/outpost/guide/cookbook/) includes its own preparation and runnable code.
+Start with [Setup](https://elie-laloum.github.io/outpost/guide/setup/), then [send your first request](https://elie-laloum.github.io/outpost/guide/first-request/). The [Guide](https://elie-laloum.github.io/outpost/guide/introduction/) explains each capability with focused snippets; the [Reference](https://elie-laloum.github.io/outpost/reference/) documents exact API contracts.
 
 Requires Node.js **24+**, Git, a target repository with a commit, and the credentials of your chosen agent. The workflow can live in its own directory. This example uses Docker.
 
@@ -24,13 +24,13 @@ The generated script uses `authentication: "account"`: log in to Codex on the ho
 node run.ts "Add validation, run tests and commit the change"
 ```
 
-`init` creates `package.json`, `run.ts`, `brief.md`, `.env.example`, `.gitignore` and a container recipe directly in the workflow directory. Existing package manifests are preserved; explicit CommonJS projects get `run.mts` for compatibility. The script resolves its brief, environment and relative repository paths from its own directory. See [multi-repository workflows](https://elie-laloum.github.io/outpost/guide/workflows/sandbox-tasks/) to orchestrate several repositories.
+`init` creates `package.json`, `run.ts`, `brief.md`, `.env.example`, `.gitignore` and a container recipe directly in the workflow directory. Existing package manifests are preserved; explicit CommonJS projects get `run.mts` for compatibility. The script resolves its brief, environment and relative repository paths from its own directory. See [multi-repository workflows](https://elie-laloum.github.io/outpost/guide/parallel-repositories/) to orchestrate several repositories.
 
-Outpost never reads a system keychain. See [authentication](https://elie-laloum.github.io/outpost/guide/manual/authentication/) for every agent's account and API-key forms before dispatching.
+Outpost never reads a system keychain. See [authentication](https://elie-laloum.github.io/outpost/guide/access-credentials/) for every agent's account and API-key forms before dispatching.
 
 ## Use the library
 
-After preparing the selected agent credentials and provider, library calls follow this shape. For a fully runnable version with explicit authentication, use the [dispatch workshop](https://elie-laloum.github.io/outpost/guide/agents/dispatch/).
+After preparing the selected agent credentials and provider, library calls follow this shape. For configuration and a first call, see [First request](https://elie-laloum.github.io/outpost/guide/first-request/).
 
 ```ts
 import { agent, dispatch, codexHarness } from "@elie-laloum/outpost";
@@ -44,11 +44,11 @@ const result = await dispatch({
 console.log(result.branch, result.commits);
 ```
 
-`repository` selects a local Git checkout; without it, library calls use the current working directory. See [repository paths](https://elie-laloum.github.io/outpost/guide/environment/repositories/) for external checkouts and paths relative to the workflow script.
+`repository` selects a local Git checkout; without it, library calls use the current working directory. See [repository paths](https://elie-laloum.github.io/outpost/guide/repository-context/) for external checkouts and paths relative to the workflow script.
 
-Let Outpost drive a model itself with `harness({ modelProvider, tools, instructions, limits })` and tools from `defineHarnessTool()`, then compose it with `agent({ harness, model })`. See [build a custom harness](https://elie-laloum.github.io/outpost/guide/agents/harness/) for a complete example.
+Let Outpost drive a model itself with `harness({ modelProvider, tools, instructions, limits })` and tools from `defineHarnessTool()`, then compose it with `agent({ harness, model })`. See [build a custom harness](https://elie-laloum.github.io/outpost/guide/model-loop/) for configuration.
 
-Learn about [sandboxes](https://elie-laloum.github.io/outpost/guide/environment/lifecycle/), [workflows](https://elie-laloum.github.io/outpost/guide/workflows/graph/), [providers](https://elie-laloum.github.io/outpost/guide/environment/providers/overview/) and [recovery](https://elie-laloum.github.io/outpost/guide/operations/recovery/) in the English/French documentation. The [roadmap](https://elie-laloum.github.io/outpost/project/roadmap/) describes future work.
+Learn about [sandboxes](https://elie-laloum.github.io/outpost/guide/sandbox-sessions/), [workflows](https://elie-laloum.github.io/outpost/guide/task-dependencies/), [providers](https://elie-laloum.github.io/outpost/guide/execution-backends/) and [recovery](https://elie-laloum.github.io/outpost/guide/failure-recovery/) in the English/French documentation. The [roadmap](https://elie-laloum.github.io/outpost/project/roadmap/) describes future work.
 
 ## Development
 

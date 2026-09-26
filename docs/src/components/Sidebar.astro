@@ -1,4 +1,5 @@
 ---
+import GuideSidebar from "./GuideSidebar.astro";
 import SidebarPersister from "@astrojs/starlight/components/SidebarPersister.astro";
 import SidebarSublist from "@astrojs/starlight/components/SidebarSublist.astro";
 import MobileMenuFooter from "starlight-theme-celestia/components/MobileMenuFooter.astro";
@@ -24,6 +25,7 @@ if (groups[0] && !groups.some((group) => group.isCurrent)) groups[0].isCurrent =
 const [guide, reference] = groups;
 ---
 
+{ /^(fr\/)?guide\//.test(Astro.locals.starlightRoute.entry.id) ? <GuideSidebar /> : (
 <outpost-sidebar>
   <MultiSidebarTabs groups={groups} />
   <SidebarPersister>
@@ -54,6 +56,7 @@ const [guide, reference] = groups;
   </SidebarPersister>
   <div class="md:sl-hidden"><MobileMenuFooter /></div>
 </outpost-sidebar>
+)}
 
 <style>
   outpost-sidebar {

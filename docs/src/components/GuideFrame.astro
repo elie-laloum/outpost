@@ -1,0 +1,39 @@
+---
+import ExistingFrame from "starlight-theme-celestia/components/PageFrame.astro";
+const guide = /^(fr\/)?guide\//.test(Astro.locals.starlightRoute.entry.id);
+---
+{guide ? (
+  <div class="guide-frame">
+    <header class="guide-top"><slot name="header" /></header>
+    <nav class="guide-sidebar" aria-label={Astro.locals.t('sidebarNav.accessibleLabel')}>
+      <div id="starlight__sidebar"><slot name="sidebar" /></div>
+    </nav>
+    <div class="guide-main main-frame"><slot /></div>
+  </div>
+) : (
+  <ExistingFrame><slot name="header" slot="header" /><slot name="sidebar" slot="sidebar" /><slot /></ExistingFrame>
+)}
+<style>
+  .guide-frame { --sl-sidebar-width: 17rem; --sl-content-width: 49rem; --sl-nav-height: 4rem; min-height: 100vh; }
+  .guide-top { position: fixed; inset: 0 0 auto; height: 4rem; z-index: var(--sl-z-index-navbar); background: var(--sl-color-bg); border-bottom: 1px solid var(--sl-color-hairline-light); }
+  .guide-sidebar { position: fixed; inset: 4rem auto 0 0; width: 17rem; overflow-y: auto; scrollbar-width: thin; border-right: 1px solid var(--sl-color-hairline-light); background: var(--sl-color-bg); z-index: var(--sl-z-index-menu); }
+  .guide-main { padding: 6rem 0 0 17rem; }
+  .guide-frame :global(.content-panel) { border: 0; padding: 1rem 2.5rem; }
+  .guide-frame :global(.sl-markdown-content) { font-size: .95rem; line-height: 1.8; }
+  .guide-frame :global(.sl-markdown-content h2) { margin-top: 2.5rem; font-size: 1.3rem; font-weight: 600; letter-spacing: -.025em; }
+  .guide-frame :global(.sl-markdown-content h3) { font-size: 1.05rem; font-weight: 550; }
+  .guide-frame :global(.sl-markdown-content a) { color: var(--sl-color-white); text-decoration-color: var(--sl-color-gray-4); text-underline-offset: .2em; }
+  .guide-frame :global(.sl-markdown-content table) { font-size: .86rem; }
+  .guide-frame :global(.sl-markdown-content pre) { font-size: .81rem; line-height: 1.65; }
+  .guide-frame :global(.right-sidebar) { padding-top: 6rem; }
+  .guide-frame :global(.right-sidebar a) { font-size: .8rem; }
+  .guide-frame :global(.pagination-links) { border-top: 1px solid var(--sl-color-hairline-light); padding-top: 1.5rem; }
+  @media (min-width: 100rem) { .guide-sidebar { left: calc((100vw - 100rem) / 2); } .guide-frame { max-width: 100rem; margin: auto; } }
+  @media (max-width: 49.99rem) {
+    .guide-sidebar { display: none; width: 100%; }
+    :global(body[data-mobile-menu-expanded]) .guide-sidebar { display: block; }
+    .guide-main { padding: 5rem 0 0; }
+    .guide-frame :global(.content-panel) { padding: .8rem 1.25rem; }
+  }
+  @media print { .guide-top, .guide-sidebar { display: none; } .guide-main { padding: 0; } }
+</style>

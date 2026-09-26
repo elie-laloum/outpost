@@ -36,29 +36,12 @@ for (const name of files) {
     `Unfinished or stale content: ${name}`,
   );
   assert.ok(content.length > 150, `Empty page: ${name}`);
-  if (content.includes("<!-- scenario:")) {
-    assert.match(
+  if (/^(fr\/)?guide\//.test(name.replaceAll("\\", "/"))) {
+    assert.doesNotMatch(
       content,
-      /<!-- preparation:(agent|sandbox|offline) -->/,
-      `Missing complete preparation: ${name}`,
+      /<!-- (scenario|preparation):|<details>/,
+      `Superseded workshop format: ${name}`,
     );
-    assert.match(
-      content,
-      /```ts file=example\.mts/,
-      `Missing executable entry point: ${name}`,
-    );
-    assert.match(
-      content,
-      /node example\.mts/,
-      `Missing launch command: ${name}`,
-    );
-    assert.match(
-      content,
-      /## (Understand the result|Comprendre le résultat)/,
-      `Missing expected result: ${name}`,
-    );
-    const visible = content.replace(/<details>[\s\S]*?<\/details>/g, "");
-    assert.ok(visible.length > 300, `Guide hides all useful content: ${name}`);
   }
 }
 const other = (await readdir(root, { recursive: true })).filter((name) =>

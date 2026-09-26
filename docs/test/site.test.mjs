@@ -1,33 +1,53 @@
 import { readFile } from "node:fs/promises";
 import { test, expect } from "@playwright/test";
 
-test("Guide and Reference have separate navigation", async ({ page }) => {
-  await page.goto("guide/agents/dispatch/");
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-    "Give an agent one task",
-  );
-  const reference = page
-    .getByRole("tab", { name: "Reference", exact: true })
-    .filter({ visible: true });
-  await reference.click();
-  await page
-    .getByText("Diagnostics", { exact: true })
-    .filter({ visible: true })
-    .click();
-  await page
-    .getByRole("link", { name: "diagnoseSandbox", exact: true })
-    .filter({ visible: true })
-    .click();
-  await expect(page).toHaveURL(/\/reference\/diagnosesandbox\/$/);
-  await expect(
-    page
-      .getByRole("tab", { name: "Reference", exact: true })
-      .filter({ visible: true }),
-  ).toHaveAttribute("aria-selected", "true");
-});
+for (const [locale, title, reference] of [
+  ["", "First request", "Reference"],
+  ["fr/", "Première requête", "Référence"],
+]) {
+  test(`guide navigation opens Reference (${locale || "en"})`, async ({
+    page,
+  }) => {
+    await page.goto(`${locale}guide/first-request/`);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(title);
+    await expect(page.locator(".guide-navigation section > h2")).toHaveCount(
+      10,
+    );
+    await expect(page.locator(".guide-navigation details")).toHaveCount(0);
+    await expect(page.locator(".sl-markdown-content details")).toHaveCount(0);
+    await page
+      .locator(".guide-header")
+      .getByRole("link", { name: reference, exact: true })
+      .click();
+    await expect(page).toHaveURL(/\/reference\/diagnosesandbox\/$/);
+    await expect(page.locator(".guide-frame")).toHaveCount(0);
+    await expect(
+      page
+        .getByRole("tab", { name: reference, exact: true })
+        .filter({ visible: true }),
+    ).toHaveAttribute("aria-selected", "true");
+  });
 
-test("language switch retains the corresponding page", async ({ page }) => {
-  await page.goto("guide/agents/dispatch/");
+  test(`search finds the new guide (${locale || "en"})`, async ({ page }) => {
+    await page.goto(`${locale}guide/introduction/`);
+    await page
+      .getByRole("button", { name: /Search|Rechercher/ })
+      .filter({ visible: true })
+      .first()
+      .click();
+    await page.getByRole("textbox").fill(title);
+    const result = page
+      .locator(".pagefind-ui__result-link")
+      .filter({ hasText: title })
+      .first();
+    await expect(result).toBeVisible();
+    await result.click();
+    await expect(page).toHaveURL(new RegExp(`/${locale}guide/first-request/`));
+  });
+}
+
+test("language switch retains the new guide page", async ({ page }) => {
+  await page.goto("guide/first-request/");
   const select = page
     .locator("starlight-lang-select select")
     .filter({ visible: true });
@@ -36,88 +56,75 @@ test("language switch retains the corresponding page", async ({ page }) => {
     .filter({ hasText: "Français" })
     .getAttribute("value");
   await select.selectOption(value);
-  await expect(page).toHaveURL(/\/fr\/guide\/agents\/dispatch\/$/);
-  await expect(page.locator("html")).toHaveAttribute("lang", "fr");
+  await expect(page).toHaveURL(/\/fr\/guide\/first-request\/$/);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+    "Première requête",
+  );
 });
 
-test("preparation opens with the keyboard and main code copies exactly", async ({
+test("short request snippet copies exactly with the keyboard", async ({
   page,
   context,
 }) => {
   await context.grantPermissions(["clipboard-read", "clipboard-write"]);
-  await page.goto("guide/agents/dispatch/");
-  const summary = page.locator(".sl-markdown-content summary").first();
-  await summary.focus();
-  await page.keyboard.press("Enter");
-  await expect(
-    page.locator(".sl-markdown-content details").first(),
-  ).toHaveAttribute("open", "");
-  const code = page
-    .locator("pre")
-    .filter({ hasText: "import { dispatch }" })
-    .last();
+  await page.goto("guide/first-request/");
   const markdown = await readFile(
-    new URL("../src/content/docs/guide/agents/dispatch.md", import.meta.url),
+    new URL("../src/content/docs/guide/first-request.md", import.meta.url),
     "utf8",
   );
   const expected = markdown
-    .match(/```ts file=example\.mts\n([\s\S]*?)```/)[1]
+    .match(/```ts title="review\.mts"\n([\s\S]*?)```/)[1]
     .trimEnd();
+  const code = page.locator("pre").filter({ hasText: "import { dispatch }" });
   const copy = code.locator("..").getByRole("button", { name: "Copy code" });
   await copy.focus();
   await page.keyboard.press("Enter");
-  const copied = await page.evaluate(() => navigator.clipboard.readText());
-  expect(copied).toBe(expected);
-});
-
-test("search finds a runnable guide", async ({ page }) => {
-  await page.goto("guide/agents/dispatch/");
-  await page
-    .getByRole("link", { name: "Learn Outpost", exact: true })
-    .filter({ visible: true })
-    .click();
-  await page
-    .getByRole("button", { name: /Search/ })
-    .filter({ visible: true })
-    .first()
-    .click();
-  const input = page.getByRole("textbox", { name: "Search", exact: true });
-  await input.fill("Give an agent one task");
-  await expect(page.locator(".pagefind-ui__result-link").first()).toBeVisible();
-  await expect(page.locator(".pagefind-ui__results")).toContainText(
-    "Give an agent one task",
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
+    expected,
   );
 });
 
-test("mobile navigation works without horizontal page overflow", async ({
-  page,
-}) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("guide/agents/dispatch/");
-  await page.getByRole("button", { name: "Menu", exact: true }).click();
-  await expect(
-    page
-      .getByRole("tab", { name: "Reference", exact: true })
-      .filter({ visible: true }),
-  ).toBeVisible();
-  await page
-    .getByRole("tab", { name: "Reference", exact: true })
-    .filter({ visible: true })
-    .click();
-  await page
-    .getByText("Diagnostics", { exact: true })
-    .filter({ visible: true })
-    .click();
-  await page
-    .getByRole("link", { name: "diagnoseSandbox", exact: true })
-    .filter({ visible: true })
-    .click();
-  await expect(page).toHaveURL(/\/reference\/diagnosesandbox\/$/);
-  expect(
-    await page.evaluate(
-      () => document.documentElement.scrollWidth <= window.innerWidth,
-    ),
-  ).toBe(true);
+for (const locale of ["", "fr/"]) {
+  test(`mobile guide navigation and code fit the screen (${locale || "en"})`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(`${locale}guide/first-request/`);
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= window.innerWidth,
+      ),
+    ).toBe(true);
+    await page.getByRole("button", { name: "Menu", exact: true }).click();
+    const setup = page
+      .locator(".guide-navigation a")
+      .filter({ hasText: locale ? /^Mise en place$/ : /^Setup$/ });
+    await expect(setup).toBeVisible();
+    await setup.click();
+    await expect(page).toHaveURL(/\/guide\/setup\/$/);
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= window.innerWidth,
+      ),
+    ).toBe(true);
+  });
+}
+
+test("retired guide URLs resolve directly to new topics", async ({ page }) => {
+  await page.goto("agents/dispatch/");
+  await expect(page).toHaveURL(/\/guide\/first-request\/$/);
+  await page.goto("agents/conversations/#continuation-choices");
+  await expect(page).toHaveURL(/\/guide\/chat-history\/#continuation-choices$/);
+  await expect(page.locator("#continuation-choices")).toBeVisible();
+  for (const locale of ["", "fr/"]) {
+    await page.goto(`${locale}guide/`);
+    await expect(page).toHaveURL(new RegExp(`/${locale}guide/introduction/$`));
+    await page.goto(`${locale}reference/customharness/`);
+    await expect(page).toHaveURL(
+      new RegExp(`/${locale}reference/function-harness/$`),
+    );
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("harness");
+  }
 });
 
 test("theme changes and long API signatures remain within the page", async ({
@@ -143,51 +150,21 @@ test("theme changes and long API signatures remain within the page", async ({
   ).toBeVisible();
 });
 
-test("legacy URLs and anchors still find their content", async ({ page }) => {
-  await page.goto("agents/dispatch/");
-  await expect(page).toHaveURL(/\/guide\/agents\/dispatch\/$/);
-  await page.goto("agents/conversations/#continuation-choices");
-  await expect(page).toHaveURL(
-    /\/guide\/behavior\/agents\/conversations\/#continuation-choices$/,
-  );
-  await expect(page.locator("#continuation-choices")).toBeVisible();
-  for (const locale of ["", "fr/"]) {
-    await page.goto(`${locale}reference/customharness/`);
-    await expect(page).toHaveURL(
-      new RegExp(`/${locale}reference/function-harness/$`),
-    );
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("harness");
-  }
-});
-
-test("French search opens the matching translated guide", async ({ page }) => {
-  await page.goto("fr/guide/");
-  await page
-    .locator("site-search button[data-open-modal]")
-    .filter({ visible: true })
-    .click();
-  await page.getByRole("textbox").fill("Confier une tâche à un agent");
-  const result = page
-    .locator(".pagefind-ui__result-link")
-    .filter({ hasText: "Confier une tâche à un agent" })
-    .first();
-  await expect(result).toBeVisible();
-  await result.click();
-  await expect(page).toHaveURL(/\/fr\/guide\/agents\/dispatch\//);
-});
-
 for (const locale of ["", "fr/"]) {
-  test(`moved manuals and detailed behavior belong to Guide (${locale || "en"})`, async ({
+  test(`retired manuals resolve to the rebuilt Guide (${locale || "en"})`, async ({
     page,
   }) => {
-    for (const route of ["manual/cli", "behavior/agents/conversations"]) {
+    for (const [route, target] of [
+      ["manual/cli", "command-line"],
+      ["behavior/agents/conversations", "chat-history"],
+    ]) {
       await page.goto(`${locale}reference/${route}/`);
-      await expect(page).toHaveURL(new RegExp(`/${locale}guide/${route}/$`));
+      await expect(page).toHaveURL(new RegExp(`/${locale}guide/${target}/$`));
       await expect(
         page
-          .getByRole("tab", { name: "Guide", exact: true })
-          .filter({ visible: true }),
-      ).toHaveAttribute("aria-selected", "true");
+          .locator(".guide-header")
+          .getByRole("link", { name: "Guide", exact: true }),
+      ).toHaveAttribute("aria-current", "true");
     }
     await page.goto(`${locale}reference/`);
     await expect(page).toHaveURL(/\/reference\/diagnosesandbox\/$/);

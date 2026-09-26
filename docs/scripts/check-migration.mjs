@@ -1,79 +1,88 @@
-import { referenceRedirects } from "./reference-redirects.mjs";
 import assert from "node:assert/strict";
-import { createHash } from "node:crypto";
-import { readFile, access } from "node:fs/promises";
-import { resolve, dirname } from "node:path";
-import { fileURLToPath } from "node:url";
+import { readFile, readdir } from "node:fs/promises";
 import { chapters } from "./navigation.mjs";
+import { routeRedirects, resolveRoute } from "./route-redirects.mjs";
 
-const docs = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const content = resolve(docs, "src/content/docs");
-const migration = JSON.parse(
-  await readFile(resolve(docs, "audit/migration.json"), "utf8"),
-);
-const normalizedBody = (source) =>
-  source
-    .replace(/^---\n[\s\S]*?\n---\n/, "")
-    .replace(/(?<=\]\()[^)]+(?=\))/g, "URL")
-    .replace(/\s+/g, "")
-    .replace(/-{3,}/g, "---");
-for (const page of migration.pages) {
-  await access(resolve(content, page.destination));
-  if (!page.details) continue;
-  const preserved = await readFile(resolve(content, page.details), "utf8");
-  const digest = createHash("sha256")
-    .update(normalizedBody(preserved))
-    .digest("hex");
+const root = new URL("../src/content/docs/", import.meta.url);
+const files = (await readdir(root, { recursive: true }))
+  .map((name) => name.replaceAll("\\", "/"))
+  .filter((name) => name.endsWith(".md"));
+const route = (name) =>
+  `/${name
+    .replaceAll("\\", "/")
+    .replace(/\.md$/, "")
+    .replace(/\/index$/, "")}/`;
+const routes = new Set(files.map(route));
+for (const [source, target] of Object.entries(routeRedirects)) {
+  assert.ok(!routes.has(source), `Redirect shadows content: ${source}`);
+  assert.ok(
+    routes.has(target),
+    `Missing redirect destination: ${source} -> ${target}`,
+  );
   assert.equal(
-    digest,
-    page.preservedBodySha256,
-    `Changed preserved contract: ${page.details}. Review the migration inventory before accepting information changes.`,
+    source.startsWith("/fr/"),
+    target.startsWith("/fr/"),
+    `Redirect changes language: ${source}`,
   );
-  const headings = [...preserved.matchAll(/^#{1,6} (.+)$/gm)].map(
-    (match) => match[1],
-  );
-  for (const section of page.sections)
+}
+const migration = JSON.parse(
+  await readFile(new URL("../audit/migration.json", import.meta.url), "utf8"),
+);
+for (const page of migration.pages) {
+  for (const name of [page.source, page.destination, page.details].filter(
+    Boolean,
+  )) {
     assert.ok(
-      headings.includes(section),
-      `Missing preserved section: ${page.source}: ${section}`,
+      routes.has(resolveRoute(route(name))),
+      `Lost historical route: ${name}`,
+    );
+  }
+}
+for (const name of migration.publicRoutes) {
+  for (const locale of ["", "fr/"])
+    assert.ok(
+      routes.has(resolveRoute(route(locale + name))),
+      `Lost public route: ${locale}${name}`,
     );
 }
-for (const route of migration.publicRoutes)
+for (const example of migration.examples) {
   for (const locale of ["", "fr/"])
-    await access(resolve(content, locale + route)).catch(async () => {
-      const target =
-        referenceRedirects["/" + locale + route.replace(/\.md$/, "/")];
-      assert.ok(
-        target,
-        `Missing preserved route or explicit redirect: ${locale}${route}`,
-      );
-      await access(resolve(content, target.slice(1).replace(/\/$/, ".md")));
-    });
-for (const example of migration.examples)
-  for (const locale of ["", "fr/"])
-    await access(resolve(content, `${locale}${example.destination}.md`));
+    assert.ok(
+      routes.has(resolveRoute(route(`${locale}${example.destination}.md`))),
+      `Lost example destination: ${example.destination}`,
+    );
+}
 const names = chapters.flatMap(([, , items]) => items);
-assert.equal(
-  new Set(names).size,
-  names.length,
-  "Guide navigation contains duplicate pages",
-);
+assert.equal(new Set(names).size, names.length, "Duplicate guide navigation");
 for (const name of names) {
-  const alternatives = [`${name}.md`, `${name}/index.md`];
+  assert.ok(routes.has(`/${name}/`), `Missing guide page: ${name}`);
   assert.ok(
-    (
-      await Promise.all(
-        alternatives.map((path) =>
-          access(resolve(content, path)).then(
-            () => true,
-            () => false,
-          ),
-        ),
-      )
-    ).some(Boolean),
-    `Unknown navigation entry: ${name}`,
+    routes.has(`/fr/${name}/`),
+    `Missing translated guide page: ${name}`,
   );
 }
-console.log(
-  `${migration.pages.length} source pages and ${migration.examples.length} former examples have verified destinations.`,
+const guidePages = files
+  .filter((name) => name.startsWith("guide/"))
+  .map((name) => name.replace(/\.md$/, ""));
+assert.deepEqual(
+  new Set(names),
+  new Set(guidePages),
+  "Every guide page must appear once in navigation",
 );
+console.log(
+  `${guidePages.length} guide pages and ${Object.keys(routeRedirects).length} legacy routes verified.`,
+);
+
+const readme = await readFile(
+  new URL("../../README.md", import.meta.url),
+  "utf8",
+);
+for (const match of readme.matchAll(
+  /https:\/\/elie-laloum\.github\.io\/outpost(\/[^)#\s]*)/g,
+)) {
+  const path = match[1] === "/" ? "/index/" : match[1];
+  assert.ok(
+    routes.has(resolveRoute(path)),
+    `Broken README documentation link: ${match[0]}`,
+  );
+}

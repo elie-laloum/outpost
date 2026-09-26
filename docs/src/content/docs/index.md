@@ -1,30 +1,17 @@
 ---
-title: "Outpost"
-description: "Run a coding agent, understand its workspace, then build a workflow."
+title: Outpost
+description: "Coding agents, your infrastructure, your workflow."
 ---
 
-Outpost is a TypeScript library and CLI that runs coding agents in sandboxes, keeps their Git work organized and connects their results in typed workflows.
+Run coding agents from TypeScript. Choose an agent, give it a Git workspace and connect its results to the rest of your application.
 
-**Start with a small result:** fix a failing test in a disposable text-processing project. Choose Codex or Claude, run the generated script, then inspect the commit.
+[Open the guide →](guide/introduction/)
 
-[Run your first agent →](guide/start/quickstart/)
+## Build with Outpost
 
-<span id="choose-your-next-step"></span>
-<span id="how-to-use-these-docs"></span>
+- [Set up an agent](guide/setup/) and [send a request](guide/first-request/).
+- [Choose an environment](guide/execution-backends/) for local or cloud execution.
+- [Connect tasks](guide/task-dependencies/) with typed results and explicit dependencies.
+- [Look up an API](reference/) for exact signatures and options.
 
-## Two ways to read
-
-| Learn by doing                                                                           | Look up an exact behavior                                                                                               |
-| ---------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| The [Guide](guide/) walks from one agent task to reusable environments and workflows.    | The [Reference](reference/) explains APIs, CLI commands, configuration and limits.                                      |
-| Every practical example includes its own preparation, complete code and expected result. | Signatures follow the package declarations; detailed contracts remain available without interrupting the learning path. |
-
-Already know the basics? Pick a [cookbook recipe](guide/cookbook/) or [diagnose a failure](guide/operations/troubleshooting/).
-
-## What you need
-
-Node.js 24+, Git and Docker for the first agent run. Choose account access or an API key explicitly; API billing is separate from a subscription. The initial image download/build can take several minutes. Subsequent examples reuse that preparation while remaining independently reproducible.
-
-Workflow, validation and persistence examples also run [without a model or container](guide/cookbook/offline/).
-
-English and French cover the same features. The public site follows the latest stable release; the [changelog](project/changelog/) records releases and the [roadmap](project/roadmap/) distinguishes planned work.
+The guide provides focused explanations and short snippets in English and French. The [changelog](project/changelog/) records releases; the [roadmap](project/roadmap/) separates available capabilities from planned work.

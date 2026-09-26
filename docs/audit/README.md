@@ -1,42 +1,15 @@
-# Documentation migration audit
+# Documentation design and validation
 
-The migration inventory is [migration.json](migration.json). It records the baseline commit, every original English/French page and section, its learning destination, its complete detailed contract, source checksums, the three former executable examples, entry documents, and all 237 existing API routes per language. Generated reference pages describe 200 public symbols and 39 supporting contracts; some symbols share a route.
+The Guide is authored from the public Reference contracts. Its editorial and visual model is [Better Auth](https://better-auth.com/docs): a direct introduction, compact setup, short snippets beside their explanation, then focused concept and integration pages. The former workshop content and organization have been replaced, not retained as a second reading path.
 
-## Conservation and corrections
+English and French have matching routes. `docs/scripts/navigation.mjs` defines the Guide groups. GuideFrame, GuideHeader, GuideTitle and GuideSidebar implement its scoped presentation; Reference retains its existing components, navigation, icons, generated pages and explanatory sources.
 
-All 138 original editorial page bodies were compared with their destination. The comparison ignores frontmatter, whitespace, table separator width and link destinations; the rendered-site check validates the migrated links separately. The detailed contracts preserve the original information while the Guide teaches it with independent scenarios. Architecture, roadmaps and changelogs retain their own destinations.
+## Compatibility
 
-Two factual corrections apply in both languages:
+`migration.json` remains the historical inventory of the earlier migration. Its preserved-body hashes describe that historical snapshot, not a requirement to retain the retired Guide text. `guide-redirects.json` maps every subsequently retired Guide route to its new destination. `route-redirects.mjs` resolves both migrations and reference aliases directly to live pages, checks for cycles and preserves locale. No retired guide content is kept in the search index.
 
-- The CLI already generates Codex API-key login hooks. Adding a second hook is unnecessary; handwritten API configurations still supply one. Evidence: `src/cli/init-authentication.ts`.
-- `doctor --agent` also accepts Gemini. Evidence: `src/cli/doctor-command.ts`.
+## Validation
 
-`sourceBodySha256` and `preservedBodySha256` match except for those four corrected pages. `docs:check` verifies the complete normalized bodies of preserved contracts, their sections, navigation destinations and the existing symbol routes. A future intentional change to a preserved contract must update the inventory after reviewing what information changed. The historical source digest remains unchanged. Roadmaps and changelogs continue to evolve from their normal sources.
+`docs:check` validates bilingual page parity, navigation coverage, legacy destinations and generated reference consistency. `docs:test` checks rendered links, assets and anchors, compiles all Guide TypeScript snippets against the built package and executes selected offline snippets in temporary directories. Snippets importing `outpost.config.mts` use the actual configuration published on Setup, not a test-only substitute.
 
-The former root examples now use public package imports and complete preparation in the cookbook. Their old development-only launch paths are intentionally replaced. The README keeps the package introduction and links to the new learning path; SECURITY.md is unchanged; AGENTS.md records the new durable documentation conventions.
-
-## Reviewed changes after the migration
-
-The unified `account`/`usage` authentication and the replacement of Gemini CLI by the Antigravity, GitHub Copilot CLI and Kimi Code harnesses changed several preserved contracts. Their inventory entries record the reviewed digests and current sections with the disposition "reviewed change: unified authentication and Antigravity, Copilot and Kimi harnesses". The former Gemini routes redirect to the Antigravity pages, and the reference routes `gemini`, `geminiharness` and `geminisettings` redirect to `antigravityharness` and `antigravitysettings`. The two corrections above describe the migration baseline: generated scripts now select `authentication` instead of preparing login hooks, and `doctor --agent` accepts `codex`, `claude`, `antigravity`, `copilot` and `kimi`.
-
-## Structure and reproducibility
-
-- `guide/`: learn, run and observe. Every marked scenario embeds preparation from `docs/snippets/`; Markdown remains the source of the executable code.
-- `reference/`: stable generated symbol routes, CLI/configuration/compatibility manuals and complete detailed contracts. Editorial reference sources live in `docs/reference-content/`.
-- Legacy guide routes are static GitHub Pages-compatible redirects. A URL with an anchor opens the preserved detailed contract; a URL without an anchor opens the new Guide destination. Homepage anchor aliases remain on the homepage.
-- Each demonstration repository contains its own initial Git commit and a deliberately failing whitespace test. Preparation refuses to overwrite an existing repository. Multi-repository recipes explicitly create both repositories.
-- Firecracker, signed image publication and restoration of an actual retained remote transfer need the resources described on their pages. They are operational procedures, not claims that arbitrary cloud/hardware state can be prepared in one minute.
-
-## Validation boundaries
-
-`docs:test` assembles and typechecks both languages, executes offline scenarios with assertions, checks rejected approval decisions and fixture authentication configurations, and verifies the demonstration preparation. `docs:test:container` runs the documented sandbox scenarios on the selected real engine. The CI engine matrix covers Docker and Podman.
-
-Local validation uses Node.js 24 and real Docker. Podman is unavailable on this workstation. No paid model calls, authenticated Vercel/Daytona allocations, Firecracker host provisioning or publication were performed. Compilation is not evidence of live agent/provider compatibility; those campaigns retain their own documented prerequisites.
-
-Browser tests use a dedicated production preview and cover Guide/Reference, corresponding languages, search after navigation, keyboard preparation/copy, mobile layout, themes, long signatures and legacy anchors. The Head override keeps Starlight page loading because Celestia 0.3.2's ClientRouter leaves search uninitialized after navigation; it also makes the theme's copy controls keyboard accessible. Theme styling remains native.
-
-No public Outpost API, runtime behavior, package version, release tag or deployment is changed by this migration.
-
-## Unreleased harness API update
-
-The harness refactor intentionally updates preserved examples to compose agents, separates model transports from sandbox allocation, renames sandbox factories and the CLI selector, and shares explicit authentication preparation. The preserved-body digests were reviewed and refreshed; original source digests remain unchanged. Renamed reference symbols retain explicit redirects validated against their generated destinations. This update changes the public API without compatibility aliases and has not been published.
+`docs:test:container` runs the documented command snippet against the requested Docker or Podman image without model calls. Browser tests cover both languages, navigation, search, code copying, responsive layout, legacy redirects and existing Reference behavior. Live agent, cloud and model calls require their own credentials and are not implied by documentation checks.
