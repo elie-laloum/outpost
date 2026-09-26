@@ -99,6 +99,8 @@ try {
     assert.equal('model' in modelProvider,false);
     const echo=api.defineHarnessTool({name:'echo',description:'Echo.',readOnly:true,input:{type:'object',properties:{text:{type:'string'}}},execute:input=>input.text});
     const toolset=api.defineHarnessToolset({name:'basic',tools:[echo]});
+    for (const name of ['File','Edit','Search','Git','Shell']) assert.equal(api['harness'+name+'Tools']().kind,'toolset',name);
+    assert.deepEqual(api.harnessFileTools().tools.map(tool=>tool.name),['read_file','list_files']);
     const permissions=api.defineHarnessPermissions({default:'deny',rules:[{effect:'allow',tools:['echo']}]});
     assert.deepEqual(permissions.evaluate('echo',{}),{allowed:true});
     const stop=api.defineHarnessHook({on:'stop',run:()=>undefined});

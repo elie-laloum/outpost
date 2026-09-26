@@ -4399,5 +4399,13 @@
   "defineHarnessPermissions.options": [
     "Ordered rules and the default effect when none applies.",
     "Règles ordonnées et effet par défaut quand aucune ne s’applique."
+  ],
+  "harnessShellTools.options": [
+    "Optional shell settings such as the command deadline.",
+    "Réglages optionnels du shell, comme le délai des commandes."
+  ],
+  "ShellToolsOptions.deadlineMs": [
+    "Deadline of each shell command in milliseconds; defaults to 120,000. The harness tool deadline also applies.",
+    "Délai de chaque commande shell en millisecondes ; 120 000 par défaut. Le délai des outils du harness s’applique aussi."
   ]
 }

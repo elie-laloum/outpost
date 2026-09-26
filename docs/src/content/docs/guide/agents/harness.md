@@ -4,7 +4,7 @@ description: Compose a model provider, tools, instructions and limits into an ag
 ---
 
 :::caution[Unreleased API]
-This working-tree API is experimental. Use a package built from this checkout. Built-in toolsets, custom conversations and streaming are not available yet.
+This working-tree API is experimental. Use a package built from this checkout. Custom conversations and streaming are not available yet.
 :::
 
 `claudeHarness()`, `codexHarness()` and `geminiHarness()` delegate the whole task to a CLI that runs its own model and tool loop. `harness()` builds that loop in Outpost instead. You declare what the agent can use, and Outpost drives the model:
@@ -176,7 +176,7 @@ export const readFile = defineHarnessTool({
 
 `execute` receives the validated input and a context with the borrowed `sandbox`, a `signal`, the `callId`, the agent `model` and `observe()`. Return text, or `{ content, isError }` to report a failure the model can react to. `observe()` accepts `text`, `warning` and `raw` events only; Outpost emits the loop events itself.
 
-`defineHarnessToolset({ name, tools })` groups tools, including other toolsets, so a set can be shared between harnesses. Tool names must stay unique across the whole harness.
+`defineHarnessToolset({ name, tools })` groups tools, including other toolsets, so a set can be shared between harnesses. Tool names must stay unique across the whole harness. Outpost also provides [toolsets to read, search, edit, run commands and inspect Git](../harness-toolsets/).
 
 ## Loop, stop reasons and limits
 
@@ -260,6 +260,6 @@ Dispatch observers receive `step` before each model request, `tool` with a `call
 
 ## Not available yet
 
-Custom harness conversations are not persisted: continuation, fork and automatic response repairs are rejected. Interactive attachment is unsupported. Built-in toolsets, context management, skills and streaming are planned; see the [roadmap](../../../project/roadmap/#direct-model-harness).
+Custom harness conversations are not persisted: continuation, fork and automatic response repairs are rejected. Interactive attachment is unsupported. Context management, skills and streaming are planned; see the [roadmap](../../../project/roadmap/#direct-model-harness).
 
 [Harness reference](../../../reference/overview/harness/) · [Model providers](../../advanced/model-providers/)

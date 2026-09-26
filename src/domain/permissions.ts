@@ -1,4 +1,5 @@
 import { invariant } from "./errors.ts";
+import { glob } from "./glob.ts";
 import type {
   CompiledRule,
   HarnessPermissionRule,
@@ -81,9 +82,9 @@ function compileRule(rule: HarnessPermissionRule): CompiledRule {
   );
   return Object.freeze({
     rule: Object.freeze({ ...rule }),
-    ...patterns("tools", rule.tools, (value) => glob(value, "[^]*")),
-    ...patterns("paths", rule.paths, (value) => glob(value, "[^/]*")),
-    ...patterns("commands", rule.commands, (value) => glob(value, "[^]*")),
+    ...patterns("tools", rule.tools, (value) => glob(value, "text")),
+    ...patterns("paths", rule.paths, (value) => glob(value, "path")),
+    ...patterns("commands", rule.commands, (value) => glob(value, "text")),
   });
 }
 
@@ -100,30 +101,6 @@ function patterns(
     `Permission ${key} must be a nonempty list of patterns`,
   );
   return { [key]: Object.freeze(values.map(compile)) };
-}
-
-function glob(pattern: string, star: string): RegExp {
-  let source = "";
-  for (let index = 0; index < pattern.length; index++) {
-    const character = pattern[index]!;
-    if (character === "*" && pattern[index + 1] === "*") {
-      const directory = pattern[index + 2] === "/";
-      source += directory ? "(?:[^]*/)?" : "[^]*";
-      index += directory ? 2 : 1;
-      continue;
-    }
-    source += globTokens[character]?.(star) ?? escape(character);
-  }
-  return new RegExp(`^${source}$`);
-}
-
-const globTokens: Readonly<Record<string, (star: string) => string>> = {
-  "*": (star) => star,
-  "?": () => "[^/]",
-};
-
-function escape(character: string): string {
-  return character.replace(/[.+^${}()|[\]\\]/g, "\\$&");
 }
 
 function applies(

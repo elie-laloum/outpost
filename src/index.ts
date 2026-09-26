@@ -23,6 +23,12 @@ export type {
   ToolResources,
 } from "./domain/permissions.types.ts";
 export { defineHarnessTool, defineHarnessToolset } from "./domain/tool.ts";
+export { harnessEditTools } from "./adapters/tools/edit-tools.ts";
+export { harnessFileTools } from "./adapters/tools/file-tools.ts";
+export { harnessGitTools } from "./adapters/tools/git-tools.ts";
+export { harnessSearchTools } from "./adapters/tools/search-tools.ts";
+export { harnessShellTools } from "./adapters/tools/shell-tools.ts";
+export type { ShellToolsOptions } from "./adapters/tools/tools.types.ts";
 export type {
   AgentAuthentication,
   Agent,

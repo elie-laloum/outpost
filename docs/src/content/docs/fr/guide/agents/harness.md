@@ -4,7 +4,7 @@ description: Composez un fournisseur de modèles, des outils, des instructions e
 ---
 
 :::caution[API non publiée]
-Cette API de l’arbre de travail est expérimentale. Utilisez un package construit depuis ce checkout. Jeux d’outils fournis, conversations personnalisées et streaming ne sont pas encore disponibles.
+Cette API de l’arbre de travail est expérimentale. Utilisez un package construit depuis ce checkout. Conversations personnalisées et streaming ne sont pas encore disponibles.
 :::
 
 `claudeHarness()`, `codexHarness()` et `geminiHarness()` confient toute la tâche à une CLI qui exécute sa propre boucle de modèle et d’outils. `harness()` construit cette boucle dans Outpost. Vous déclarez ce que l’agent peut utiliser, et Outpost pilote le modèle :
@@ -176,7 +176,7 @@ export const readFile = defineHarnessTool({
 
 `execute` reçoit l’entrée validée et un contexte avec le `sandbox` emprunté, un `signal`, le `callId`, le `model` de l’agent et `observe()`. Renvoyez du texte, ou `{ content, isError }` pour signaler un échec auquel le modèle peut réagir. `observe()` n’accepte que les événements `text`, `warning` et `raw` ; Outpost émet lui-même les événements de la boucle.
 
-`defineHarnessToolset({ name, tools })` regroupe des outils, y compris d’autres jeux d’outils, pour les partager entre harness. Les noms d’outils doivent rester uniques dans tout le harness.
+`defineHarnessToolset({ name, tools })` regroupe des outils, y compris d’autres jeux d’outils, pour les partager entre harness. Les noms d’outils doivent rester uniques dans tout le harness. Outpost fournit aussi des [jeux d’outils pour lire, chercher, modifier, lancer des commandes et inspecter Git](../harness-toolsets/).
 
 ## Boucle, raisons d’arrêt et limites
 
@@ -260,6 +260,6 @@ Les observateurs du dispatch reçoivent `step` avant chaque requête au modèle,
 
 ## Pas encore disponible
 
-Les conversations des harness personnalisés ne sont pas persistées : continuation, fork et réparations automatiques des réponses sont refusés. Le terminal interactif n’est pas pris en charge. Jeux d’outils fournis, gestion du contexte, skills et streaming sont prévus ; voir la [feuille de route](../../../project/roadmap/#direct-model-harness).
+Les conversations des harness personnalisés ne sont pas persistées : continuation, fork et réparations automatiques des réponses sont refusés. Le terminal interactif n’est pas pris en charge. Gestion du contexte, skills et streaming sont prévus ; voir la [feuille de route](../../../project/roadmap/#direct-model-harness).
 
 [Référence Harness](../../../reference/overview/harness/) · [Fournisseurs de modèles](../../advanced/model-providers/)

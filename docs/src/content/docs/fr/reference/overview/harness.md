@@ -26,6 +26,7 @@ Ces API de harness sont implémentées mais non publiées ; le moteur et ses dé
 
 - [harness](../../function-harness/) compose le moteur d’Outpost.
 - [defineHarnessTool](../../defineharnesstool/), [defineHarnessToolset](../../defineharnesstoolset/) et [defineHarnessInstructions](../../defineharnessinstructions/) déclarent ce que le moteur peut utiliser.
+- [harnessFileTools](../../harnessfiletools/), [harnessEditTools](../../harnessedittools/), [harnessSearchTools](../../harnesssearchtools/), [harnessGitTools](../../harnessgittools/) et [harnessShellTools](../../harnessshelltools/) fournissent des outils de dépôt.
 - [defineHarnessHook](../../defineharnesshook/) et [defineHarnessPermissions](../../defineharnesspermissions/) contrôlent les appels d’outils et la fin de la boucle.
 - [claudeHarness](../../claudeharness/), [codexHarness](../../codexharness/) et [geminiHarness](../../geminiharness/) configurent les presets CLI.
 - [Harness](../../harness/) est le contrat commun de composition.

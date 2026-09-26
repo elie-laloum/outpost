@@ -338,5 +338,25 @@
   "defineHarnessPermissions": [
     "Define ordered allow and deny rules over tool names, command patterns and repository paths. The engine evaluates them before before-tool hooks, and again after a hook rewrites the input; the first matching rule wins. Permissions are not a security boundary: the sandbox isolates.",
     "Définit des règles ordonnées d’autorisation et de refus sur les noms d’outils, les motifs de commande et les chemins du dépôt. Le moteur les évalue avant les hooks before-tool, et de nouveau après la réécriture de l’entrée par un hook ; la première règle applicable l’emporte. Les permissions ne sont pas une frontière de sécurité : c’est le sandbox qui isole."
+  ],
+  "harnessFileTools": [
+    "Create the files toolset: read_file returns numbered lines of a UTF-8 file downloaded from the sandbox, and list_files lists files Git tracks or does not ignore. Both are read-only and declare their paths for permission rules.",
+    "Crée le jeu d’outils files : read_file renvoie les lignes numérotées d’un fichier UTF-8 téléchargé depuis le sandbox, et list_files liste les fichiers que Git suit ou n’ignore pas. Les deux sont en lecture seule et déclarent leurs chemins pour les règles de permission."
+  ],
+  "harnessEditTools": [
+    "Create the edit toolset: write_file creates or replaces a file, and edit_file replaces exact text, keeps line endings and permissions and refuses to overwrite a file that changed during the edit.",
+    "Crée le jeu d’outils edit : write_file crée ou remplace un fichier, et edit_file remplace un texte exact, conserve fins de ligne et permissions et refuse d’écraser un fichier modifié pendant l’opération."
+  ],
+  "harnessSearchTools": [
+    "Create the search toolset: search runs git grep with an extended regular expression over tracked and non-ignored files and returns bounded path:line:text matches.",
+    "Crée le jeu d’outils search : search exécute git grep avec une expression régulière étendue sur les fichiers suivis et non ignorés, et renvoie des correspondances chemin:ligne:texte bornées."
+  ],
+  "harnessGitTools": [
+    "Create the git toolset: git runs read-only status, diff, log or show commands and refuses options that write files or run external programs.",
+    "Crée le jeu d’outils git : git exécute les commandes en lecture seule status, diff, log ou show et refuse les options qui écrivent des fichiers ou lancent des programmes externes."
+  ],
+  "harnessShellTools": [
+    "Create the shell toolset: shell runs sh -c in the repository root with a deadline and no input, and reports the exit status, stdout and stderr. Requires a POSIX shell in the sandbox.",
+    "Crée le jeu d’outils shell : shell exécute sh -c à la racine du dépôt avec un délai et sans entrée, et renvoie statut de sortie, stdout et stderr. Exige un shell POSIX dans le sandbox."
   ]
 }
