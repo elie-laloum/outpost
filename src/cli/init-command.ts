@@ -60,7 +60,7 @@ export async function initializeCommand({
     const choices = Object.entries(authenticationChoices).find(
       ([name]) => name === options.agent,
     )?.[1];
-    invariant(choices, "Choose codex, claude or gemini");
+    invariant(choices, "Choose codex, claude, antigravity, copilot or kimi");
     const questions = [
       {
         key: "manager",
@@ -71,8 +71,8 @@ export async function initializeCommand({
       {
         key: "authentication",
         message: "Agent authentication",
-        options: [...choices],
-        initialValue: "api-key",
+        options: choices.map(({ value, label }) => ({ value, label })),
+        initialValue: options.baseUrl === undefined ? "account" : "usage",
       },
     ];
     for (const question of questions) {

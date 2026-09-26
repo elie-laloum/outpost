@@ -8,8 +8,8 @@
       "sections": ["Choose your next step", "How to use these docs"],
       "sourceSha256": "aa794084f7429cdd5958beba08e7847db379cf6eeb3b9c522f5c5f86559d856f",
       "sourceBodySha256": "8f536e9cccb9b96b6b4f00a89cc54905cdf12e3bc680a53e85a21db0f2bc7bd0",
-      "preservedBodySha256": "f715fc6e355f53bf91241a364bdfec9b9116fe9967f6ac245f166a39d99b231a",
-      "disposition": "body preserved; links migrated and obsolete API index label replaced"
+      "preservedBodySha256": "936d83b6191b6db6f1c35acd7174d432374ddedc73dab8f0db3e181ecf48443e",
+      "disposition": "body preserved; links migrated and obsolete API index label replaced; reviewed change: unified authentication and Antigravity, Copilot and Kimi harnesses"
     },
     {
       "source": "extend/agents.md",
@@ -18,8 +18,8 @@
       "sections": ["Optional capabilities"],
       "sourceSha256": "9461ff73d43ab2d68a54a3f1545262e8446e096f6c3c8480fff6281261014112",
       "sourceBodySha256": "4116cc676b5f2143eb12f94a16dc324f2dd654cb95dad8c837850c385ae4266b",
-      "preservedBodySha256": "a48b2d7e87cd1c2923c0e766b7be643ff66fdb6ab994f5d25a8f4f28b887e688",
-      "disposition": "complete body preserved; internal links migrated"
+      "preservedBodySha256": "d0ff4292d72af73d098f44f1bf3fa512ee35dda3999401e6485520e58faf1485",
+      "disposition": "complete body preserved; internal links migrated; reviewed change: unified authentication and Antigravity, Copilot and Kimi harnesses"
     },
     {
       "source": "extend/providers.md",
@@ -63,17 +63,20 @@
     },
     {
       "source": "agents/gemini.md",
-      "destination": "guide/agents/gemini.md",
-      "details": "guide/behavior/agents/gemini.md",
+      "destination": "guide/agents/connect-antigravity.md",
+      "details": "guide/behavior/agents/connect-antigravity.md",
       "sections": [
-        "Create a workflow",
+        "Install agy",
+        "Authenticate",
         "Configure execution",
-        "Output and session boundaries"
+        "Output and failures",
+        "Usage and session limits",
+        "Diagnose the installation"
       ],
       "sourceSha256": "20fefa00bb07ec6e6912b513adec8da3ef5c23ab0fd2e75cea8abecd7fff057c",
       "sourceBodySha256": "b38eee825550f2eca5e9a85d878c2c6ebbddc794772eee80e58f9455a4477d79",
-      "preservedBodySha256": "a4e7616b95b79f1eb08a84bff928fb61222e84d5eef789d42d2f017067d6da51",
-      "disposition": "complete body preserved; internal links migrated"
+      "preservedBodySha256": "2f0c8acb7a8db343850a98213c5b3447445efb3b49e707f74486bfe1e6cc9028",
+      "disposition": "complete body preserved; internal links migrated; reviewed change: unified authentication and Antigravity, Copilot and Kimi harnesses"
     },
     {
       "source": "agents/prompts.md",
@@ -92,8 +95,8 @@
       "sections": ["Precedence", "Credential choices", "Connect an account"],
       "sourceSha256": "d6eaf997b99c508d39669d1320b4f366b21e4ba88b46e99c305c40e397603394",
       "sourceBodySha256": "ec13fe5af4ecae69146c6a0e5807564668b342eae2a91719996864b1fd06e320",
-      "preservedBodySha256": "a8685a3e515dded1eb192a4cf41150495ef25fbc338d869273cc43e2e1313054",
-      "disposition": "complete body preserved; internal links migrated"
+      "preservedBodySha256": "a941b0bc2f25292a15251b28cde7d58122477f621afecd714f477ddb2e3c250c",
+      "disposition": "complete body preserved; internal links migrated; reviewed change: unified authentication and Antigravity, Copilot and Kimi harnesses"
     },
     {
       "source": "agents/connect-claude.md",
@@ -109,8 +112,8 @@
       ],
       "sourceSha256": "b3112f66c0717f7ef43dbe5a8c35749ed9a8930555701e21e31876d76a783f17",
       "sourceBodySha256": "171b9003c1a210ce2abe5b1ecf457cc724cba128ccdd2f963dcfc6eddffcbfb5",
-      "preservedBodySha256": "940c94b48d1861cccec51105238512f64a3d50a0db0befeccdd44fc51b0d9bbb",
-      "disposition": "complete body preserved; internal links migrated"
+      "preservedBodySha256": "ea7b45f5fd420197decf73f3a59d7ff6f8258d36cf00d49ba452d702e14b4b77",
+      "disposition": "complete body preserved; internal links migrated; reviewed change: unified authentication and Antigravity, Copilot and Kimi harnesses"
     },
     {
       "source": "agents/observability.md",
@@ -129,8 +132,8 @@
       "sections": [],
       "sourceSha256": "7d108ccace3ab55d4144ddab72819f3ebf2c531cefcdf612185c76017a5263c1",
       "sourceBodySha256": "10c1574c8a706cded9c72eb1217a343e92034573a754b945a3fce50718ccbf2e",
-      "preservedBodySha256": "60c45c769c14c56e237e6f3bba8b779fad50bbc67c6aa105dd43d06d7f24e62f",
-      "disposition": "complete body preserved; internal links migrated"
+      "preservedBodySha256": "05b8a73cbc6c6ce4a7d5cff04881d414c7407d24c99ce7636c9548302e56e14f",
+      "disposition": "complete body preserved; internal links migrated; reviewed change: unified authentication and Antigravity, Copilot and Kimi harnesses"
     },
     {
       "source": "agents/connect-codex.md",
@@ -146,8 +149,8 @@
       ],
       "sourceSha256": "90f392d51b07a0affe9737b7531bcd405bbb497824c92ddc7a4533c200130024",
       "sourceBodySha256": "e8386f9317c162ee278ac5a9fd4c952c357392a29e47e9eee90a397f1e13488e",
-      "preservedBodySha256": "b3082187d6f208abb55430bdf239d22e89a5acd74a264895bee24e2a5561c1e9",
-      "disposition": "complete body preserved; internal links migrated"
+      "preservedBodySha256": "3d45413cb8cbc3259a5b08da2341b4bc6f9a51b8272a8a0b67c97a280a5a0992",
+      "disposition": "complete body preserved; internal links migrated; reviewed change: unified authentication and Antigravity, Copilot and Kimi harnesses"
     },
     {
       "source": "agents/conversations.md",
@@ -156,8 +159,8 @@
       "sections": ["Continuation choices", "Storage and capture failures"],
       "sourceSha256": "98aa797c7e3cc81543cdd73a07bb3fb51c854065eb9755eafb2ffcb2e5a5cf69",
       "sourceBodySha256": "88a7a026aeca2784623f4f6e431b79c9b6a0e46cc6dac9854a448db88f8873f4",
-      "preservedBodySha256": "f91796c0a6951d83640754f83998492c343a3ae1630e82f1a6413598bef25c40",
-      "disposition": "complete body preserved; internal links migrated"
+      "preservedBodySha256": "10e6f97e5021d98d7f1a01fbcf6a717b538d675f24bfd6b36ea1f2bcb7993bc7",
+      "disposition": "complete body preserved; internal links migrated; reviewed change: unified authentication and Antigravity, Copilot and Kimi harnesses"
     },
     {
       "source": "agents/responses.md",
@@ -166,8 +169,8 @@
       "sections": ["Parsing rules", "Repair and recovery"],
       "sourceSha256": "f1e6584a9e3a9eebdbc307235391c5c7139003cbee16bd56e808718f94b9ad5c",
       "sourceBodySha256": "6145d944c421ab88c7b2c8e1a5d2cba283c293575ac77df281b5f1025fd11e02",
-      "preservedBodySha256": "aca62de780ee15787bf137ac0d241d5dd6ef6cf2fd6c7d867562c4fee9ebc61e",
-      "disposition": "complete body preserved; internal links migrated"
+      "preservedBodySha256": "9aab709050520cae8e8dbd3d8e4a333a6c1794a3010c4f36f47e08b030c48946",
+      "disposition": "complete body preserved; internal links migrated; reviewed change: unified authentication and Antigravity, Copilot and Kimi harnesses"
     },
     {
       "source": "agents/cancellation.md",
@@ -298,8 +301,8 @@
       ],
       "sourceSha256": "ac9d588d66dd491b7971bd49ed61e79b402535319bbd0557cb6ea003beb07d2e",
       "sourceBodySha256": "03e1572697f5241ebc440a765fcaae3af8ab8c4867a1b29f14e69eb2ef9e5ce2",
-      "preservedBodySha256": "a9718de7d7c2822adddc7453843cece2ca46760bf147e51f05b02ecf91a1bb32",
-      "disposition": "corrected with implementation evidence"
+      "preservedBodySha256": "8c8d3ba3f96ec7c4ff55482981632aa1ac4db789a9fcf8236cfa2e7a2e0ae798",
+      "disposition": "corrected with implementation evidence; reviewed change: unified authentication and Antigravity, Copilot and Kimi harnesses"
     },
     {
       "source": "start/cli-images.md",
@@ -308,8 +311,8 @@
       "sections": [],
       "sourceSha256": "0e84b3dd09c1ed8021d72aa11dff2a7845a597114ac0e25aceca656092e60e1e",
       "sourceBodySha256": "e93b7ed2806e18e513ee5c2bb4288544469b50cf6209e66da592abe25b53c507",
-      "preservedBodySha256": "e93b7ed2806e18e513ee5c2bb4288544469b50cf6209e66da592abe25b53c507",
-      "disposition": "complete body preserved; internal links migrated"
+      "preservedBodySha256": "1b5c6dad887ecde40d6c27fc3bd56e7cbd62ab7b01e7af8c1b8f8fe028dad726",
+      "disposition": "complete body preserved; internal links migrated; reviewed change: unified authentication and Antigravity, Copilot and Kimi harnesses"
     },
     {
       "source": "start/concepts.md",
@@ -336,8 +339,8 @@
       ],
       "sourceSha256": "e19643ec058666507d1ae22842c02e409798a048a8661e316cb2dc397fce30a8",
       "sourceBodySha256": "39dd6354ffaf2ff38dc67b6d4dc6d8fa91bf61a48b83dfac057197bf03bf9d8e",
-      "preservedBodySha256": "feec095fbf8d4b5161beffcb41d082d141d800fccb4d9854cda11fc238cb72b9",
-      "disposition": "complete body preserved; internal links migrated"
+      "preservedBodySha256": "82143515297c3e5e8aab3b9fc34c50d9affde9682b2a692f5c751b5a51352465",
+      "disposition": "complete body preserved; internal links migrated; reviewed change: unified authentication and Antigravity, Copilot and Kimi harnesses"
     },
     {
       "source": "start/installation.md",
@@ -361,8 +364,8 @@
       "sections": ["Choisir un parcours", "Utiliser cette documentation"],
       "sourceSha256": "5e8fed8e607ef70fa737357af9962db791f3a9d5df0b25c99e44a100ac39b837",
       "sourceBodySha256": "19fd33f080e451686600294772540ece08c35602a7ee9e977495243772f9b865",
-      "preservedBodySha256": "653b57084418ab42f9c2c57a74ecbae8d86122f419d5569f7cffae46137f9bef",
-      "disposition": "body preserved; links migrated and obsolete API index label replaced"
+      "preservedBodySha256": "0feaee7608f3845c74d94eca8065cb4e0a8d900775da392a802dc1b660212307",
+      "disposition": "body preserved; links migrated and obsolete API index label replaced; reviewed change: unified authentication and Antigravity, Copilot and Kimi harnesses"
     },
     {
       "source": "sandboxes/hooks.md",
@@ -455,8 +458,8 @@
       "sections": ["Handle sensitive artifacts"],
       "sourceSha256": "861a33d0f8c131c4b34ca456d4fbee095312c6e9f5170b2ba975370dcbf89c6c",
       "sourceBodySha256": "10fb146f7e0f38f7208d8a600e43fec48b39231ae1705bcfb6ec5b575f0d371d",
-      "preservedBodySha256": "f57185955274abe8e5b8f990ed2c48072681d3c6756dcfdab9a7221fa82592df",
-      "disposition": "complete body preserved; internal links migrated"
+      "preservedBodySha256": "ff4034d43b8e2667356042d678c2fbd78f95af8771e1046d900d84085ef4809a",
+      "disposition": "complete body preserved; internal links migrated; reviewed change: unified authentication and Antigravity, Copilot and Kimi harnesses"
     },
     {
       "source": "operations/recovery-verification.md",
@@ -516,13 +519,12 @@
         "Check the agent CLI commands",
         "Interpret the report",
         "Inspect a sandbox you already own",
-        "Explicit cloud and transfer probes",
         "Inspect bundled protocol fixtures"
       ],
       "sourceSha256": "23be68e3d531a7dc9e6bdab149e7003c4cfe1a72e315bd57cefca5fc133103d9",
       "sourceBodySha256": "b8d7da2e4c2a514a33cf3b285abed493bcb53ec187a09486ecb75166f3a9164b",
-      "preservedBodySha256": "955c895ae705061bdbddb36d6e30738d7e1dd37f7c845e472a44936168a338a2",
-      "disposition": "corrected with implementation evidence"
+      "preservedBodySha256": "8b0bdc7b9b36612473f3e6d2d346f70bb67a2e26a458b312074339e68c0e063c",
+      "disposition": "corrected with implementation evidence; reviewed change: unified authentication and Antigravity, Copilot and Kimi harnesses"
     },
     {
       "source": "operations/troubleshooting.md",
@@ -531,8 +533,8 @@
       "sections": [],
       "sourceSha256": "221cdcc29678fe6ea4cc1bee658893e5a661522635ed769b3008ff960a63f2bf",
       "sourceBodySha256": "58edc309795a4637d6f04697c99c0ddf39ba22ec04dc4df420dbcdec0f953361",
-      "preservedBodySha256": "58edc309795a4637d6f04697c99c0ddf39ba22ec04dc4df420dbcdec0f953361",
-      "disposition": "complete body preserved; internal links migrated"
+      "preservedBodySha256": "d52081e0984c7b120a1b46cd351c26bc5d19f0600b7d787ee43142542d91d2c1",
+      "disposition": "complete body preserved; internal links migrated; reviewed change: unified authentication and Antigravity, Copilot and Kimi harnesses"
     },
     {
       "source": "operations/remote-transfers.md",
@@ -572,8 +574,8 @@
       ],
       "sourceSha256": "36c1728688337fd7155bce7f5bb53bb9080f980958bcaa92bf6a08edd41a0c0d",
       "sourceBodySha256": "1c0c133ace436d6a55c68e8ffd7a1c75d867f1ee2fbab910e68edf68163dd1dc",
-      "preservedBodySha256": "1c0c133ace436d6a55c68e8ffd7a1c75d867f1ee2fbab910e68edf68163dd1dc",
-      "disposition": "complete body preserved; internal links migrated"
+      "preservedBodySha256": "8a0442737365178c90063f1ece80193cb2ac3e5b7d503f825081753a60144b5d",
+      "disposition": "complete body preserved; internal links migrated; reviewed change: unified authentication and Antigravity, Copilot and Kimi harnesses"
     },
     {
       "source": "operations/recovery.md",
@@ -716,8 +718,8 @@
       "sections": ["Agent handoff", "Review before delivery"],
       "sourceSha256": "eaaa753d176763ee219653b6857c09d770851d4460d34c484e463cd0079b8d3c",
       "sourceBodySha256": "bf56bdcbfa23acd5e201dbea7d80f8bc91da67ab4d8002fd58e0793540a4e8f8",
-      "preservedBodySha256": "87e6ad800ca17abac19837c089f75e013ecf3f25ae78ead2cba2fb6b347d4d81",
-      "disposition": "complete body preserved; internal links migrated"
+      "preservedBodySha256": "cb75fb6b4a270b616fb50746c2efd13953c48751c12c531516bdec3b545c70c9",
+      "disposition": "complete body preserved; internal links migrated; reviewed change: unified authentication and Antigravity, Copilot and Kimi harnesses"
     },
     {
       "source": "cookbooks/recovery.md",
@@ -750,8 +752,8 @@
       "sections": ["Agent authentication"],
       "sourceSha256": "70e0187988107f257a418a532b2486b04c5fc4f1ddf52209a2f49e72c36049fd",
       "sourceBodySha256": "fcdc0769b2c914c0a676083756d13bd0079d7f5ba5f56a274443e3e2ef9afa4e",
-      "preservedBodySha256": "56ff2fd22e8e9fe4412fca5b689e5fc537b2a40b85dda0d5c5cbdf818fe1fbe4",
-      "disposition": "complete body preserved; internal links migrated"
+      "preservedBodySha256": "7052bfcdfe2235de98539496c88e7adbdf5828c1c89fbc765f63fec408a312fd",
+      "disposition": "complete body preserved; internal links migrated; reviewed change: unified authentication and Antigravity, Copilot and Kimi harnesses"
     },
     {
       "source": "providers/local.md",
@@ -787,8 +789,8 @@
       ],
       "sourceSha256": "1612ad7bc73dc68f2dca534552218bd8b1988db38d9ba7fe5be5fb6ff1fb6701",
       "sourceBodySha256": "fd23a106900129882b7b9ed2011d1f3c89155a8e62eb86fc953aae5cde8b7053",
-      "preservedBodySha256": "fd23a106900129882b7b9ed2011d1f3c89155a8e62eb86fc953aae5cde8b7053",
-      "disposition": "complete body preserved; internal links migrated"
+      "preservedBodySha256": "745ba53f79ed6070665308f19445d9e24a1f6d1029b1091fc64d2e9dcab105f5",
+      "disposition": "complete body preserved; internal links migrated; reviewed change: unified authentication and Antigravity, Copilot and Kimi harnesses"
     },
     {
       "source": "providers/daytona.md",
@@ -837,8 +839,8 @@
       "sections": ["Capacités facultatives"],
       "sourceSha256": "909f3a7257f9d6702ab10840e6d1362cf8c9a1293f337b8d5d94d00e01a694e4",
       "sourceBodySha256": "05a2ea12598ac9cca4992c0ccd391920960aeba8eadff9802b03cd2667051297",
-      "preservedBodySha256": "9aa3d7b26664659549e81a73ddcbfeaf1fdaa1b9b98c3d27a6f623b19af120d0",
-      "disposition": "complete body preserved; internal links migrated"
+      "preservedBodySha256": "837d247f0c80176c11ac2e13fc2af562c03fd046a80811b1da74aa7955ac209f",
+      "disposition": "complete body preserved; internal links migrated; reviewed change: unified authentication and Antigravity, Copilot and Kimi harnesses"
     },
     {
       "source": "fr/extend/providers.md",
@@ -882,17 +884,20 @@
     },
     {
       "source": "fr/agents/gemini.md",
-      "destination": "fr/guide/agents/gemini.md",
-      "details": "fr/guide/behavior/agents/gemini.md",
+      "destination": "fr/guide/agents/connect-antigravity.md",
+      "details": "fr/guide/behavior/agents/connect-antigravity.md",
       "sections": [
-        "Créer un workflow",
-        "Configurer l'exécution",
-        "Sortie et limites des sessions"
+        "Installer agy",
+        "S’authentifier",
+        "Configurer l’exécution",
+        "Sortie et échecs",
+        "Consommation et limites des sessions",
+        "Diagnostiquer l’installation"
       ],
       "sourceSha256": "c3db829edc691bca522b65ab5648ea5f126fa700edaadf74984eb7add65060d2",
       "sourceBodySha256": "3b0beb7713762f9d2bf93f0a778b8b1720ccfba2dc4451e43dbf56f16dcf5876",
-      "preservedBodySha256": "ee0121b747141ff9c4139c3ac872a545c5ca2433c20f686d7e477faf78bd189e",
-      "disposition": "complete body preserved; internal links migrated"
+      "preservedBodySha256": "78b16732295f7916b64da2d9a73c69a80cb256e1b19eced0802468086900490e",
+      "disposition": "complete body preserved; internal links migrated; reviewed change: unified authentication and Antigravity, Copilot and Kimi harnesses"
     },
     {
       "source": "fr/agents/prompts.md",
@@ -915,8 +920,8 @@
       ],
       "sourceSha256": "32edb11e2559ca06d45e2027d392989d9cf053e3c1af60d6c729488a2ecb774f",
       "sourceBodySha256": "d2668b2e02455ac9de35ebb9dc69a68307344307131b6c406fb93ffb4a061793",
-      "preservedBodySha256": "43c70faa7859a4edfbe967e8c713a8392b63a7790ec461a61e17fd1523a08468",
-      "disposition": "complete body preserved; internal links migrated"
+      "preservedBodySha256": "78a4148d6a4cafa97b7886e188d7a7fe6aba43047de5d7d7db1b86a7f91882c9",
+      "disposition": "complete body preserved; internal links migrated; reviewed change: unified authentication and Antigravity, Copilot and Kimi harnesses"
     },
     {
       "source": "fr/agents/connect-claude.md",
@@ -932,8 +937,8 @@
       ],
       "sourceSha256": "c97b2f0d7af5799b9f8696bb7d18f72d12d08e097f3213b076092db287a38e9b",
       "sourceBodySha256": "c4291648239901f6ba96b9ec7c90dd81840f20f8eb6636671c25fc28f19f6da9",
-      "preservedBodySha256": "f84757039a3af7aedcae595acf4a1a3ef0950c46dfe69bca14f80f1c941af13f",
-      "disposition": "complete body preserved; internal links migrated"
+      "preservedBodySha256": "14c7b73aa7b9cbdea5ad8d80a29881d2d2c5d7802f2ee64f733182c059bf7283",
+      "disposition": "complete body preserved; internal links migrated; reviewed change: unified authentication and Antigravity, Copilot and Kimi harnesses"
     },
     {
       "source": "fr/agents/observability.md",
@@ -952,8 +957,8 @@
       "sections": [],
       "sourceSha256": "f160c02a2615533d5d5966ec7052e4a138aa82d5f2315330ece701c5aa562b98",
       "sourceBodySha256": "099959b7d5b86d565b59bdb683abfc52feb9f3e8ce15dde689fcb5747c5d6e28",
-      "preservedBodySha256": "c9166b883ecfbaae53bb47566d8a5e18275e720c6a56518e95c6258b5ddc26a8",
-      "disposition": "complete body preserved; internal links migrated"
+      "preservedBodySha256": "eb2648e694fa8b7f78688e06aa1d8a9a3e20b1942ad0b9294258395150528cc9",
+      "disposition": "complete body preserved; internal links migrated; reviewed change: unified authentication and Antigravity, Copilot and Kimi harnesses"
     },
     {
       "source": "fr/agents/connect-codex.md",
@@ -969,8 +974,8 @@
       ],
       "sourceSha256": "25532ca480fc079faf75157ab3b6bb2a8a2cb66db9a453a420eccf4bd1e49ff6",
       "sourceBodySha256": "d9059bc4fd487fe609cb4ac6f45deeba861d30e0838bcbefb0652b0b7eb2b772",
-      "preservedBodySha256": "449f710eaa24f6625f1fa6714f8a7ce1421a986da8addb2811db9348d7eb4ba0",
-      "disposition": "complete body preserved; internal links migrated"
+      "preservedBodySha256": "21e53b300a5cea84c0e4a135a9d036e1bb75c949cd2d49905990efa202695b85",
+      "disposition": "complete body preserved; internal links migrated; reviewed change: unified authentication and Antigravity, Copilot and Kimi harnesses"
     },
     {
       "source": "fr/agents/conversations.md",
@@ -979,8 +984,8 @@
       "sections": ["Choisir la continuation", "Stockage et échecs de capture"],
       "sourceSha256": "e87f5c758fe3fd0a4c8723ce1a7fdf483d80be947bdf95f72f1c605729fef9d4",
       "sourceBodySha256": "02f7d91a7b3c9f2d7b0de28e0b952c6051f5ad1d2e3ae4c8c63fea92d0449d46",
-      "preservedBodySha256": "419253acdf0c4e98c880f0fd35f50579baf958c6f16b0069101552511b666026",
-      "disposition": "complete body preserved; internal links migrated"
+      "preservedBodySha256": "cec28061d25da5b9720c67e770e26e20d5ad6c8992f6e9b59a272940c8cb237a",
+      "disposition": "complete body preserved; internal links migrated; reviewed change: unified authentication and Antigravity, Copilot and Kimi harnesses"
     },
     {
       "source": "fr/agents/responses.md",
@@ -989,8 +994,8 @@
       "sections": ["Règles de lecture", "Réparation et récupération"],
       "sourceSha256": "508b82c5589b2d63735e584c3a1ecf9012f4729d8d8224c65ae368a47d27119f",
       "sourceBodySha256": "13b428b093769de267be5286a24112d5e003283344c061e1dcad41577dd0f91e",
-      "preservedBodySha256": "21184b772820494358b4bbd228612d9a303a1886ff7702593be45ba39157969a",
-      "disposition": "complete body preserved; internal links migrated"
+      "preservedBodySha256": "167ab345d7f9ed6350ba496eaf72fc4a0f7ec38e9bac900fff94d913a4fa8c29",
+      "disposition": "complete body preserved; internal links migrated; reviewed change: unified authentication and Antigravity, Copilot and Kimi harnesses"
     },
     {
       "source": "fr/agents/cancellation.md",
@@ -1121,8 +1126,8 @@
       ],
       "sourceSha256": "8265c2354afd2319db5a99cbcbb8bc58a523e63221f2a26dbf928e974e2f5ae4",
       "sourceBodySha256": "19585dbdd365c3656adb9d2d25c7b2308ea0f7b9688fdf8764325f5641ec0253",
-      "preservedBodySha256": "832d4f32cd9e4a6f3bbe7c011b90017786c1f93e513f0f72c96d5f0ddd3f29b1",
-      "disposition": "corrected with implementation evidence"
+      "preservedBodySha256": "e43e0df86487227e7e8bac550e1c3fb86466ae6bc16ce215e5eb5301386a7c9d",
+      "disposition": "corrected with implementation evidence; reviewed change: unified authentication and Antigravity, Copilot and Kimi harnesses"
     },
     {
       "source": "fr/start/cli-images.md",
@@ -1131,8 +1136,8 @@
       "sections": [],
       "sourceSha256": "1389fe32c4b0fadae2dc2f499f385de584283f87bf22de4c4a57346520e74aed",
       "sourceBodySha256": "6c461c6e44641d6cdff94874f8733510813bedd3c10ffb5f60c0ea44c5ea8117",
-      "preservedBodySha256": "6c461c6e44641d6cdff94874f8733510813bedd3c10ffb5f60c0ea44c5ea8117",
-      "disposition": "complete body preserved; internal links migrated"
+      "preservedBodySha256": "a6c52a62ea18bee2a11720258b839aac982fd3215c24f94473f4dfa62a310975",
+      "disposition": "complete body preserved; internal links migrated; reviewed change: unified authentication and Antigravity, Copilot and Kimi harnesses"
     },
     {
       "source": "fr/start/concepts.md",
@@ -1159,8 +1164,8 @@
       ],
       "sourceSha256": "4a837dbd42217e7a62290c3b1d36db829a3798059c11cca8e53e422e111350ab",
       "sourceBodySha256": "1af32c5524a6faa0ac74fe59be83036eb15627b7a60fec1de610837c83563f28",
-      "preservedBodySha256": "ec2ee28d10721e5c0842da5fd346aa59b2923c030f52b714aa8317c1cdb8584f",
-      "disposition": "complete body preserved; internal links migrated"
+      "preservedBodySha256": "3d16aad4185fafe4f4165e1042646b2db0a6e674a390465228e102dd76e26aec",
+      "disposition": "complete body preserved; internal links migrated; reviewed change: unified authentication and Antigravity, Copilot and Kimi harnesses"
     },
     {
       "source": "fr/start/installation.md",
@@ -1275,8 +1280,8 @@
       "sections": ["Protéger les artefacts sensibles"],
       "sourceSha256": "75299796a292d904acb05d46f3c5337b888306ef32c5b98b97c06456bb10ff75",
       "sourceBodySha256": "dabae224c4c697aba39d641e541e96e4508149b7299673aa896ea56b39b2c4ff",
-      "preservedBodySha256": "d92f83f58e5d8b19d777deeb4e881fed8c77d0331b231454d8bcf93c3be0aa11",
-      "disposition": "complete body preserved; internal links migrated"
+      "preservedBodySha256": "c8804a8f2163977edc1c548fffdbfd7b1731a35fcbfc73b7eb179992b30dade0",
+      "disposition": "complete body preserved; internal links migrated; reviewed change: unified authentication and Antigravity, Copilot and Kimi harnesses"
     },
     {
       "source": "fr/operations/recovery-verification.md",
@@ -1336,13 +1341,12 @@
         "Vérifier les commandes du CLI agent",
         "Interpréter le rapport",
         "Inspecter une sandbox déjà détenue",
-        "Sondes cloud et transferts explicites",
         "Inspecter les fixtures de protocole intégrées"
       ],
       "sourceSha256": "d945f2d89e444168f4dbd05bf6727d00f4df3a697c41e122952bca7157138dcd",
       "sourceBodySha256": "8f40f3dfb076992999bd35ddedfe478e732a72444874d84fe66badd88dad21d1",
-      "preservedBodySha256": "46eb5113a5247b2649a5db2238773ebacc9e154b604f26a899dd537249ec4258",
-      "disposition": "corrected with implementation evidence"
+      "preservedBodySha256": "692daed6c8f6359b362fd90e409e8acf0d6e0790e18c0070f807451fe0a755c5",
+      "disposition": "corrected with implementation evidence; reviewed change: unified authentication and Antigravity, Copilot and Kimi harnesses"
     },
     {
       "source": "fr/operations/troubleshooting.md",
@@ -1351,8 +1355,8 @@
       "sections": [],
       "sourceSha256": "0019e2d2c1d0c256353a32928c5d0da91b04463036bb5a4ae6a0829a82edafd5",
       "sourceBodySha256": "af220cd78d86e7eebdaf2bd991d23a130a7629dcfc12573b262976f1dc18b0ea",
-      "preservedBodySha256": "af220cd78d86e7eebdaf2bd991d23a130a7629dcfc12573b262976f1dc18b0ea",
-      "disposition": "complete body preserved; internal links migrated"
+      "preservedBodySha256": "9533d2dc6ebb4b58d1909c70c8c2a2e4ecd0b7c73dc70b7d6248146bf28c3a47",
+      "disposition": "complete body preserved; internal links migrated; reviewed change: unified authentication and Antigravity, Copilot and Kimi harnesses"
     },
     {
       "source": "fr/operations/remote-transfers.md",
@@ -1392,8 +1396,8 @@
       ],
       "sourceSha256": "ea571319b325d90555ef398813af37ca5e1c8c563871f78ca77893e0c7ae0f63",
       "sourceBodySha256": "7b2f44732711ace7659ecccf1ba7509c423001c0ca8a4d2e6dc557c0bb7a3f02",
-      "preservedBodySha256": "7b2f44732711ace7659ecccf1ba7509c423001c0ca8a4d2e6dc557c0bb7a3f02",
-      "disposition": "complete body preserved; internal links migrated"
+      "preservedBodySha256": "6603700922a7e6904b04dfa3124a7fc34442734c87421dd33a9e4a83de0de029",
+      "disposition": "complete body preserved; internal links migrated; reviewed change: unified authentication and Antigravity, Copilot and Kimi harnesses"
     },
     {
       "source": "fr/operations/recovery.md",
@@ -1532,8 +1536,8 @@
       "sections": ["Passage entre agents", "Relire avant livraison"],
       "sourceSha256": "34a8d670193964a1d8e7e4564ced35b54c24d1e8a5ec9f92192e6fd0ebc0df32",
       "sourceBodySha256": "423821c3c164f21b42c0edf5fe3ceb6c5050ea0af587b6d2bcc7527d4b49bd33",
-      "preservedBodySha256": "09e194bb1d4903dd4bf80240d4bd63485e9587e7a9328dc136ff4e28cf5aadbd",
-      "disposition": "complete body preserved; internal links migrated"
+      "preservedBodySha256": "8613d8e62d0bb65fb80676402f6da2e4e21e8026d7a5a1cd8aa9779df709b351",
+      "disposition": "complete body preserved; internal links migrated; reviewed change: unified authentication and Antigravity, Copilot and Kimi harnesses"
     },
     {
       "source": "fr/cookbooks/recovery.md",
@@ -1566,8 +1570,8 @@
       "sections": ["Authentification de l’agent"],
       "sourceSha256": "9cb6d20956392190ec1b85cee5d8dcc2234d78fcececb4ff27d81f75e10f510c",
       "sourceBodySha256": "cf95fee26a52245a7db777837d4363d404a4c28359029932a2989c1c597d25be",
-      "preservedBodySha256": "c61d9ae0da184eda46a28df7a84011d14c4aed11c2e129b8c73929820bca115f",
-      "disposition": "complete body preserved; internal links migrated"
+      "preservedBodySha256": "d0426e216af3a209576c6127d6cb0a849e83406e93a3558ac4f9c7fc0b9a1541",
+      "disposition": "complete body preserved; internal links migrated; reviewed change: unified authentication and Antigravity, Copilot and Kimi harnesses"
     },
     {
       "source": "fr/providers/local.md",
@@ -1603,8 +1607,8 @@
       ],
       "sourceSha256": "d0e8bdfcf2113fd0b23f84ff7642d90fc36eaa1101a9397206d9a4a1ebd7d815",
       "sourceBodySha256": "4b45a96bf30542c4d4f40e14e15bea37ab0de9dd98c4955bf0a94eac6f1537ab",
-      "preservedBodySha256": "4b45a96bf30542c4d4f40e14e15bea37ab0de9dd98c4955bf0a94eac6f1537ab",
-      "disposition": "complete body preserved; internal links migrated"
+      "preservedBodySha256": "b86d6d5299ab7163094c52edc3d5f85638d3671fdf1037209fb5cff3e4e22268",
+      "disposition": "complete body preserved; internal links migrated; reviewed change: unified authentication and Antigravity, Copilot and Kimi harnesses"
     },
     {
       "source": "fr/providers/daytona.md",
@@ -1672,7 +1676,7 @@
     },
     {
       "source": "reference/behavior/agents/gemini.md",
-      "destination": "guide/behavior/agents/gemini.md"
+      "destination": "guide/behavior/agents/connect-antigravity.md"
     },
     {
       "source": "reference/behavior/agents/prompts.md",
@@ -1956,7 +1960,7 @@
     },
     {
       "source": "fr/reference/behavior/agents/gemini.md",
-      "destination": "fr/guide/behavior/agents/gemini.md"
+      "destination": "fr/guide/behavior/agents/connect-antigravity.md"
     },
     {
       "source": "fr/reference/behavior/agents/prompts.md",
@@ -2233,6 +2237,22 @@
     {
       "source": "fr/reference/overview/remote-transfers.md",
       "destination": "fr/reference/overview/providers.md"
+    },
+    {
+      "source": "guide/agents/gemini.md",
+      "destination": "guide/agents/connect-antigravity.md"
+    },
+    {
+      "source": "guide/behavior/agents/gemini.md",
+      "destination": "guide/behavior/agents/connect-antigravity.md"
+    },
+    {
+      "source": "fr/guide/agents/gemini.md",
+      "destination": "fr/guide/agents/connect-antigravity.md"
+    },
+    {
+      "source": "fr/guide/behavior/agents/gemini.md",
+      "destination": "fr/guide/behavior/agents/connect-antigravity.md"
     }
   ],
   "examples": [

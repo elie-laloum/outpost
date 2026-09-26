@@ -14,5 +14,6 @@ import type { DoctorAgent } from "@elie-laloum/outpost";
 ## Signature
 
 ```ts
-export type DoctorAgent = "codex" | "claude" | "gemini";
+export type DoctorAgent =
+  "codex" | "claude" | "antigravity" | "copilot" | "kimi";
 ```

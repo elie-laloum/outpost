@@ -5,17 +5,17 @@ description: "Read the CLI output as a small program you own."
 
 The CLI creates an ordinary TypeScript program. You can read and change it; no workflow service runs in the background.
 
-| Part                   | Why it exists                                                                                        |
-| ---------------------- | ---------------------------------------------------------------------------------------------------- |
-| `repository`           | Resolves the target Git checkout relative to the script, independent of the current shell directory. |
-| `.env` and `variables` | Read explicitly declared credentials and pass them to the execution environment.                     |
-| `authentication`       | Initialize the selected login in the private sandbox home.                                           |
-| `agent`                | Select Codex, Claude or Gemini behavior.                                                             |
-| `provider`             | Choose where that agent runs, independently of its protocol.                                         |
-| `brief`                | Read the task file and substitute the objective.                                                     |
-| `dispatch`             | Own one execution and collect its answer, changes, usage and conversation.                           |
+| Part                   | Why it exists                                                                                                                               |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `repository`           | Resolves the target Git checkout relative to the script, independent of the current shell directory.                                        |
+| `.env` and `variables` | Read explicitly declared variables, including the selected credential's default one, and pass them to the provider.                         |
+| `authentication`       | Select `account`, an account token or `usage`; Outpost prepares it in the private sandbox home. The script reads no credential file itself. |
+| `agent`                | Select Codex, Claude Code, Antigravity, GitHub Copilot or Kimi Code behavior.                                                               |
+| `provider`             | Choose where that agent runs, independently of its protocol.                                                                                |
+| `brief`                | Read the task file and substitute the objective.                                                                                            |
+| `dispatch`             | Own one execution and collect its answer, changes, usage and conversation.                                                                  |
 
-The generated starter integrates commits into the target branch. The next [complete dispatch example](../../agents/dispatch/) shows a named branch so you can review before integrating; that page includes its own preparation and runnable code.
+The [authentication manual](../../manual/authentication/) explains each `authentication` form and what Outpost prepares. The generated starter integrates commits into the target branch. The next [complete dispatch example](../../agents/dispatch/) shows a named branch so you can review before integrating; that page includes its own preparation and runnable code.
 
 ## Three different lifetimes
 

@@ -10,13 +10,13 @@ Un agent compose un harness d’exécution et un modèle. Le harness définit l�
 
 ## Fonctionnement
 
-Utilisez `agent({ harness: codexHarness(), model: "..." })`, ou les presets `claudeHarness()` et `geminiHarness()`. `harness({ modelProvider, run })` relie un callback de l’appelant à un service de modèles. `sandboxProvider` choisit indépendamment où exécuter les commandes du dépôt.
+Utilisez `agent({ harness: codexHarness(), model: "..." })`, ou les presets `claudeHarness()`, `antigravityHarness()`, `copilotHarness()` et `kimiHarness()`. `harness({ modelProvider, tools, instructions })` laisse Outpost piloter lui-même un service de modèles. `sandboxProvider` choisit indépendamment où exécuter les commandes du dépôt.
 
-`agent()` normalise le modèle en `AgentModel` figé et demande au harness ou à son fournisseur de le valider. Un niveau de raisonnement ou une limite de sortie que la CLI ou le service choisi ne sait pas exprimer est refusé immédiatement, avant toute création de sandbox.
+`agent()` normalise le modèle en `AgentModel` figé et demande au harness ou à son fournisseur de le valider. Un niveau de raisonnement ou une limite de sortie que la CLI ou le service choisi ne sait pas exprimer est refusé immédiatement, avant toute création de sandbox. Antigravity, Copilot et Kimi n’acceptent qu’un nom de modèle ; Kimi en exige un avec l’authentification `usage`.
 
 ## Frontières et responsabilités
 
-Un agent associe une configuration d’exécution et une sélection de modèle. La famille [Harness](../harness/) regroupe les presets CLI, les callbacks personnalisés, les réglages d’authentification et les capacités d’exécution. Les [fournisseurs de modèles](../model-providers/) fournissent les transports HTTP aux harness personnalisés, tandis que `sandboxProvider` choisit indépendamment l’environnement d’exécution.
+Un agent associe une configuration d’exécution et une sélection de modèle. La famille [Harness](../harness/) regroupe les presets CLI, le moteur intégré, les réglages d’authentification (`AgentAuthentication`, `AccountCredential`, `UsageCredential`) et les capacités d’exécution. Les [fournisseurs de modèles](../model-providers/) fournissent les transports HTTP aux harness personnalisés, tandis que `sandboxProvider` choisit indépendamment l’environnement d’exécution.
 
 Ces API de composition sont disponibles depuis la version 5.0.0. Utilisez l’agent avec dispatch, un sandbox ou une tâche de workflow ; sa construction ne déclenche aucune exécution.
 

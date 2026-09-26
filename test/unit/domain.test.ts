@@ -4,9 +4,11 @@ import assert from "node:assert/strict";
 import { prepareBrief, validateBrief } from "../../src/domain/prompts.ts";
 import { response, ResponseError } from "../../src/domain/response.ts";
 import {
+  antigravityHarness,
   claudeHarness,
   codexHarness,
-  geminiHarness,
+  copilotHarness,
+  kimiHarness,
 } from "../../src/providers/agents.ts";
 import { parseEnvironment } from "../../src/infrastructure/settings.ts";
 import { OutpostError } from "../../src/domain/errors.ts";
@@ -264,8 +266,20 @@ test("agent models normalize names and reject unsupported CLI settings", () => {
       { name: "m", maxOutputTokens: 1 },
       /Codex.*maxOutputTokens/,
     ],
-    [geminiHarness(), { name: "m", reasoning: "low" }, /Gemini CLI.*"low"/],
-    [geminiHarness(), { name: "m", maxOutputTokens: 1 }, /Gemini CLI/],
+    [
+      antigravityHarness(),
+      { name: "m", reasoning: "low" },
+      /Antigravity CLI.*"low"/,
+    ],
+    [antigravityHarness(), { name: "m", maxOutputTokens: 1 }, /Antigravity/],
+    [
+      copilotHarness(),
+      { name: "m", reasoning: "high" },
+      /GitHub Copilot CLI.*"high"/,
+    ],
+    [copilotHarness(), { name: "m", maxOutputTokens: 1 }, /Copilot/],
+    [kimiHarness(), { name: "m", reasoning: "max" }, /Kimi Code.*"max"/],
+    [kimiHarness(), { name: "m", maxOutputTokens: 1 }, /Kimi Code/],
   ] as const)
     assert.throws(() => composeAgent({ harness, model }), message);
   assert.throws(

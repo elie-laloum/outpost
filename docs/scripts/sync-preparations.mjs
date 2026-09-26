@@ -1,5 +1,5 @@
 import { readFile, readdir, writeFile } from "node:fs/promises";
-import { resolve, dirname } from "node:path";
+import { resolve, dirname, posix } from "node:path";
 import { fileURLToPath } from "node:url";
 import { format } from "../../node_modules/prettier/index.mjs";
 
@@ -15,6 +15,8 @@ const snippets = Object.fromEntries(
 );
 export function preparation(kind, french, page) {
   const tr = (en, fr) => (french ? fr : en);
+  const link = (target) =>
+    `${posix.relative(page.replace(/\.md$/, ""), `${french ? "fr/" : ""}${target}`)}/`;
   const offline = kind === "offline";
   const agent = kind === "agent";
   const demo = kind !== "offline";
@@ -56,27 +58,37 @@ export function preparation(kind, french, page) {
         `\n\n\`\`\`sh\nnpx @elie-laloum/outpost init --yes --directory workflow --repository ../repository --image outpost:docs-demo --install${remote ? " --no-build" : ""}\ncd workflow\n\`\`\`\n\n` +
         (agent
           ? tr(
-              "Choose **one** of these configurations for **workflow/.env**. Empty key declarations inherit the matching environment variable; alternatively set its value in this ignored file. Account access and API billing are separate. The CLI-generated `run.ts` already configures Codex login; do not add a second login hook.",
-              "Choisissez **une** des configurations ci-dessous pour **workflow/.env**. Les déclarations de clés vides héritent de la variable d’environnement correspondante ; vous pouvez aussi renseigner sa valeur dans ce fichier ignoré par Git. Accès par compte et facturation API sont distincts. Le `run.ts` généré par la CLI configure déjà la connexion Codex ; n’ajoutez pas un second hook.",
+              "Choose **one** of these configurations for **workflow/.env**. `account` copies the login you already made on the host into the private sandbox home; `usage` bills an API key. Empty key declarations inherit the matching environment variable; alternatively set its value in this ignored file. Outpost never reads a system keychain.",
+              "Choisissez **une** des configurations ci-dessous pour **workflow/.env**. `account` copie dans le home privé de la sandbox la connexion déjà faite sur l’hôte ; `usage` facture une clé API. Les déclarations de clés vides héritent de la variable d’environnement correspondante ; vous pouvez aussi renseigner sa valeur dans ce fichier ignoré par Git. Outpost ne lit jamais un trousseau système.",
             ) +
             "\n\n" +
+            tr(
+              "**Codex — account**: run `codex -c cli_auth_credentials_store='\"file\"' login` on the host first so the login is stored in `auth.json`.",
+              "**Codex — compte** : lancez d’abord `codex -c cli_auth_credentials_store='\"file\"' login` sur l’hôte pour que la connexion soit enregistrée dans `auth.json`.",
+            ) +
+            "\n\n```dotenv\nOUTPOST_AGENT=codex\nOUTPOST_AUTH=account\n```\n\n" +
             tr("**Codex — API key**", "**Codex — clé API**") +
-            "\n\n```dotenv\nOUTPOST_AGENT=codex\nOUTPOST_AUTH=api-key\nOPENAI_API_KEY=\n```\n\n" +
+            "\n\n```dotenv\nOUTPOST_AGENT=codex\nOUTPOST_AUTH=usage\nOPENAI_API_KEY=\n```\n\n" +
             tr(
-              "**Codex — account**: run `codex -c cli_auth_credentials_store='\"file\"' login` on the host first. This explicitly selects a file credential seed instead of exporting a keychain.",
-              "**Codex — compte** : lancez d’abord `codex -c cli_auth_credentials_store='\"file\"' login` sur l’hôte. Vous sélectionnez explicitement un fichier de connexion sans exporter un trousseau.",
+              "**Claude — account**: run `claude`, then `/login`, on the host. On macOS this login stays in the keychain: use the subscription token instead.",
+              "**Claude — compte** : lancez `claude`, puis `/login`, sur l’hôte. Sur macOS, cette connexion reste dans le trousseau : utilisez plutôt le jeton d’abonnement.",
             ) +
-            "\n\n```dotenv\nOUTPOST_AGENT=codex\nOUTPOST_AUTH=login\n```\n\n" +
+            "\n\n```dotenv\nOUTPOST_AGENT=claude\nOUTPOST_AUTH=account\n```\n\n" +
+            tr(
+              "**Claude — subscription token**: obtain a token with `claude setup-token` on the host and declare it below.",
+              "**Claude — jeton d’abonnement** : obtenez un jeton avec `claude setup-token` sur l’hôte et déclarez-le ci-dessous.",
+            ) +
+            "\n\n```dotenv\nOUTPOST_AGENT=claude\nOUTPOST_AUTH=account-token\nCLAUDE_CODE_OAUTH_TOKEN=\n```\n\n" +
             tr("**Claude — API key**", "**Claude — clé API**") +
-            "\n\n```dotenv\nOUTPOST_AGENT=claude\nOUTPOST_AUTH=api-key\nANTHROPIC_API_KEY=\n```\n\n" +
+            "\n\n```dotenv\nOUTPOST_AGENT=claude\nOUTPOST_AUTH=usage\nANTHROPIC_API_KEY=\n```\n\n" +
             tr(
-              "**Claude — subscription**: obtain a token with `claude setup-token` on the host and declare it below.",
-              "**Claude — abonnement** : obtenez un jeton avec `claude setup-token` sur l’hôte et déclarez-le ci-dessous.",
+              `**Antigravity, GitHub Copilot and Kimi Code** accept the same values when they support them: see [Antigravity](${link("guide/agents/connect-antigravity")}), [Copilot](${link("guide/agents/connect-copilot")}) and [Kimi Code](${link("guide/agents/connect-kimi")}). Kimi API keys also need \`OUTPOST_MODEL\`.`,
+              `**Antigravity, GitHub Copilot et Kimi Code** acceptent les mêmes valeurs lorsqu’ils les prennent en charge : voir [Antigravity](${link("guide/agents/connect-antigravity")}), [Copilot](${link("guide/agents/connect-copilot")}) et [Kimi Code](${link("guide/agents/connect-kimi")}). Les clés API Kimi exigent aussi \`OUTPOST_MODEL\`.`,
             ) +
-            "\n\n```dotenv\nOUTPOST_AGENT=claude\nOUTPOST_AUTH=oauth-token\nCLAUDE_CODE_OAUTH_TOKEN=\n```\n\n" +
+            "\n\n" +
             tr(
-              "Save **runtime.mts** next to the example. This complete configuration reads only declared variables, selects the agent and initializes its private sandbox home. The example calls `configuration()` to use your choice. These two `OUTPOST_` settings belong to this teaching script, not the Outpost API.",
-              "Enregistrez **runtime.mts** à côté de l’exemple. Cette configuration complète lit uniquement les variables déclarées, sélectionne l’agent et initialise son home privé dans la sandbox. L’exemple appelle `configuration()` pour utiliser votre choix. Les deux réglages `OUTPOST_` appartiennent à ce script pédagogique, pas à l’API Outpost.",
+              "Save **runtime.mts** next to the example. This complete configuration reads only declared variables, selects the agent and its authentication, and lets Outpost prepare the private sandbox home. The example calls `configuration()` to use your choice. The `OUTPOST_` settings belong to this teaching script, not the Outpost API.",
+              "Enregistrez **runtime.mts** à côté de l’exemple. Cette configuration complète lit uniquement les variables déclarées, sélectionne l’agent et son authentification, puis laisse Outpost préparer le home privé de la sandbox. L’exemple appelle `configuration()` pour utiliser votre choix. Les réglages `OUTPOST_` appartiennent à ce script pédagogique, pas à l’API Outpost.",
             ) +
             "\n\n```ts file=runtime.mts\n" +
             snippets["runtime.mts"] +

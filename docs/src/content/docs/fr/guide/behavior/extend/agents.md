@@ -33,8 +33,8 @@ Cet exemple illustre le port, pas un outil installé : fournissez votre exécuta
 
 ## Capacités facultatives
 
-`variables` déclare l’environnement de l’adapter. `resumable` indique si une réparation de réponse peut reprendre une conversation. `storage` fournit un `ConversationStore` personnalisé ; `conversations` sélectionne un format natif intégré. `capture` contrôle la capture, et `transcriptUsage(text)` peut fournir des compteurs faisant autorité.
+`variables` déclare l’environnement de l’adapter. `resumable` indique si une réparation de réponse peut reprendre une conversation. `storage` fournit un `ConversationStore` personnalisé ; `conversations` sélectionne un format natif intégré. `capture` contrôle la capture, et `transcriptUsage(text)` peut fournir des compteurs faisant autorité. `requiresFinishedEvent` fait échouer une sortie à zéro lorsque le CLI n’a émis aucun événement `finished`. `credentials(variables)` renvoie un plan d’identifiants (variables, fichiers de l’hôte à lire, fichiers générés et commandes de connexion) qu’Outpost installe une fois par sandbox avant la première commande de l’agent ; en placement hôte, seules ses variables sont transmises. Les adapters intégrés l’utilisent pour l’option [`authentication`](../../../manual/authentication/).
 
 Émettez `conversation` lorsque le CLI fournit l’identifiant, `usage` pour les compteurs, `result` pour la réponse finale et `failure` pour les erreurs du protocole. `finished` seul ne remplace pas le marqueur textuel configuré.
 
-Testez les arguments en mode normal, interactif, reprise et fork. Couvrez les entrées partielles/bruitées, événements inconnus, annulation via le provider et transcripts invalides. L’adapter ne gère pas le nettoyage du workspace.
+Testez les arguments en mode normal, interactif, reprise et fork ; un adapter à nouvelles sessions doit refuser explicitement les continuations. Couvrez les entrées partielles/bruitées, événements inconnus, annulation via le provider et transcripts invalides. L’adapter ne gère pas le nettoyage du workspace.

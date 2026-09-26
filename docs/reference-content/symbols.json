@@ -307,10 +307,6 @@
     "Create a Codex harness from execution, authentication and conversation settings without starting the CLI. Compose it with agent({ harness, model }) to select a model independently. The CLI owns its internal model/tool loop.",
     "Crée un harness Codex à partir des réglages d’exécution, d’authentification et de conversation, sans lancer la CLI. Composez-le avec agent({ harness, model }) pour sélectionner séparément le modèle. La CLI possède sa boucle interne modèle/outils."
   ],
-  "geminiHarness": [
-    "Create a Gemini CLI harness from execution, authentication and conversation settings without starting the CLI. Compose it with agent({ harness, model }) to select a model independently. The CLI owns its internal model/tool loop.",
-    "Crée un harness Gemini CLI à partir des réglages d’exécution, d’authentification et de conversation, sans lancer la CLI. Composez-le avec agent({ harness, model }) pour sélectionner séparément le modèle. La CLI possède sa boucle interne modèle/outils."
-  ],
   "defineHarnessTool": [
     "Define a tool the engine can offer to the model. Validates the name, description and input schema immediately and returns a frozen definition whose validate() checks model arguments before execute() runs.",
     "Définit un outil que le moteur peut proposer au modèle. Valide immédiatement le nom, la description et le schéma d’entrée, et renvoie une définition figée dont validate() contrôle les arguments du modèle avant l’exécution de execute()."
@@ -370,5 +366,17 @@
   "defineHarnessSkill": [
     "Define a skill: instructions, and optionally tools, that a custom harness lists in its system instructions and the model loads with load_skill when needed. Skill tools are refused until their skill is loaded.",
     "Définit une skill : des instructions, et éventuellement des outils, qu’un harness personnalisé liste dans ses instructions système et que le modèle charge avec load_skill au besoin. Les outils d’une skill sont refusés tant qu’elle n’est pas chargée."
+  ],
+  "antigravityHarness": [
+    "Create an Antigravity CLI (agy) harness from execution, authentication and permission settings without starting the CLI. Compose it with agent({ harness, model }) to select a model name independently; reasoning and maxOutputTokens are rejected. Each run starts a fresh session: native capture, resume, fork and automatic response repairs are unsupported. The CLI owns its internal model/tool loop.",
+    "Crée un harness Antigravity CLI (agy) à partir des réglages d’exécution, d’authentification et de permissions, sans lancer la CLI. Composez-le avec agent({ harness, model }) pour sélectionner séparément un nom de modèle ; reasoning et maxOutputTokens sont refusés. Chaque exécution démarre une session neuve : capture native, reprise, fork et réparations automatiques des réponses ne sont pas pris en charge. La CLI possède sa boucle interne modèle/outils."
+  ],
+  "copilotHarness": [
+    "Create a GitHub Copilot CLI harness from execution, authentication and permission settings without starting the CLI. Compose it with agent({ harness, model }) to select a model name independently; reasoning and maxOutputTokens are rejected. Each run starts a fresh session: native capture, resume, fork and automatic response repairs are unsupported. The CLI owns its internal model/tool loop.",
+    "Crée un harness GitHub Copilot CLI à partir des réglages d’exécution, d’authentification et de permissions, sans lancer la CLI. Composez-le avec agent({ harness, model }) pour sélectionner séparément un nom de modèle ; reasoning et maxOutputTokens sont refusés. Chaque exécution démarre une session neuve : capture native, reprise, fork et réparations automatiques des réponses ne sont pas pris en charge. La CLI possède sa boucle interne modèle/outils."
+  ],
+  "kimiHarness": [
+    "Create a Kimi Code harness from execution, authentication and permission settings without starting the CLI. Compose it with agent({ harness, model }) to select a model name independently; reasoning and maxOutputTokens are rejected. Each run starts a fresh session: native capture, resume, fork and automatic response repairs are unsupported. The CLI owns its internal model/tool loop.",
+    "Crée un harness Kimi Code à partir des réglages d’exécution, d’authentification et de permissions, sans lancer la CLI. Composez-le avec agent({ harness, model }) pour sélectionner séparément un nom de modèle ; reasoning et maxOutputTokens sont refusés. Chaque exécution démarre une session neuve : capture native, reprise, fork et réparations automatiques des réponses ne sont pas pris en charge. La CLI possède sa boucle interne modèle/outils."
   ]
 }

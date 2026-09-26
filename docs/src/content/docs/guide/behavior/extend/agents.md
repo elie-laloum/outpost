@@ -33,8 +33,8 @@ This illustrates the port, not an installed CLI: supply your real executable and
 
 ## Optional capabilities
 
-`variables` declares adapter environment. `resumable` signals whether response repair can resume a conversation. `storage` supplies a custom `ConversationStore`; `conversations` selects a built-in native format. `capture` controls transcript capture, and `transcriptUsage(text)` can provide authoritative token counts.
+`variables` declares adapter environment. `resumable` signals whether response repair can resume a conversation. `storage` supplies a custom `ConversationStore`; `conversations` selects a built-in native format. `capture` controls transcript capture, and `transcriptUsage(text)` can provide authoritative token counts. `requiresFinishedEvent` makes a zero exit fail when the CLI emitted no `finished` event. `credentials(variables)` returns a credential plan (variables, host files to read, generated files and login commands) that Outpost installs once per sandbox before the agent's first command; on the host placement only its variables are forwarded. Built-in adapters use it for the [`authentication`](../../../manual/authentication/) setting.
 
 Emit `conversation` when the CLI provides an ID, `usage` for counters, `result` for an authoritative final answer, and `failure` for protocol failures. `finished` alone is not the configured textual completion marker.
 
-Test request arguments for ordinary, interactive, resume and fork modes. Test partial/noisy input, unknown events, cancellation through the provider, and malformed transcripts. An adapter is not responsible for managing workspace cleanup.
+Test request arguments for ordinary, interactive, resume and fork modes; a fresh-session adapter should reject continuations explicitly. Test partial/noisy input, unknown events, cancellation through the provider, and malformed transcripts. An adapter is not responsible for managing workspace cleanup.

@@ -15,6 +15,10 @@ Two factual corrections apply in both languages:
 
 The former root examples now use public package imports and complete preparation in the cookbook. Their old development-only launch paths are intentionally replaced. The README keeps the package introduction and links to the new learning path; SECURITY.md is unchanged; AGENTS.md records the new durable documentation conventions.
 
+## Reviewed changes after the migration
+
+The unified `account`/`usage` authentication and the replacement of Gemini CLI by the Antigravity, GitHub Copilot CLI and Kimi Code harnesses changed several preserved contracts. Their inventory entries record the reviewed digests and current sections with the disposition "reviewed change: unified authentication and Antigravity, Copilot and Kimi harnesses". The former Gemini routes redirect to the Antigravity pages, and the reference routes `gemini`, `geminiharness` and `geminisettings` redirect to `antigravityharness` and `antigravitysettings`. The two corrections above describe the migration baseline: generated scripts now select `authentication` instead of preparing login hooks, and `doctor --agent` accepts `codex`, `claude`, `antigravity`, `copilot` and `kimi`.
+
 ## Structure and reproducibility
 
 - `guide/`: learn, run and observe. Every marked scenario embeds preparation from `docs/snippets/`; Markdown remains the source of the executable code.

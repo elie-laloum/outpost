@@ -1,12 +1,13 @@
 import { readFile } from "node:fs/promises";
-import { homedir } from "node:os";
 import { resolve } from "node:path";
 import { parseEnv } from "node:util";
 import {
   agent as composeAgent,
-  codexHarness,
+  antigravityHarness,
   claudeHarness,
-  geminiHarness,
+  codexHarness,
+  copilotHarness,
+  kimiHarness,
   type AgentAuthentication,
   type LifecycleHooks,
 } from "@elie-laloum/outpost";
@@ -22,69 +23,38 @@ export const variables = Object.fromEntries(
     .map(([name, value]) => [name, value || process.env[name] || ""]),
 );
 
+const factories = {
+  codex: codexHarness,
+  claude: claudeHarness,
+  antigravity: antigravityHarness,
+  copilot: copilotHarness,
+  kimi: kimiHarness,
+};
+const tokens: Record<string, string> = {
+  claude: "CLAUDE_CODE_OAUTH_TOKEN",
+  copilot: "COPILOT_GITHUB_TOKEN",
+};
+
+function authenticationFor(name: string, choice: string): AgentAuthentication {
+  if (choice === "account-token" && tokens[name])
+    return { account: { variable: tokens[name] } };
+  if (choice === "account" || choice === "usage") return choice;
+  throw new Error(`Unsupported OUTPOST_AUTH for ${name}: ${choice}`);
+}
+
 export async function configuration(
   name = settings.OUTPOST_AGENT ?? "codex",
-  authentication = settings.OUTPOST_AUTH ?? "api-key",
+  authentication = settings.OUTPOST_AUTH ?? "account",
 ) {
-  const factories = {
-    codex: codexHarness,
-    claude: claudeHarness,
-    gemini: geminiHarness,
-  };
-  if (!(name === "codex" || name === "claude" || name === "gemini"))
-    throw new Error("Choose codex, claude or gemini");
-  const supported = {
-    codex: ["api-key", "login"],
-    claude: ["api-key", "oauth-token"],
-    gemini: ["api-key"],
-  };
-  if (!supported[name].includes(authentication))
-    throw new Error(
-      `Unsupported authentication for ${name}: ${authentication}`,
-    );
-  if (
-    name === "codex" &&
-    authentication === "login" &&
-    variables.OPENAI_API_KEY
-  )
-    throw new Error(
-      "Remove OPENAI_API_KEY when using Codex account authentication",
-    );
-  let selected: AgentAuthentication;
-  if (authentication === "login") {
-    const credentials = await readFile(
-      resolve(
-        process.env.CODEX_HOME || resolve(homedir(), ".codex"),
-        "auth.json",
-      ),
-      "utf8",
-    );
-    JSON.parse(credentials);
-    selected = { mode: "login", credentials };
-  } else {
-    const keys = {
-      codex: "OPENAI_API_KEY",
-      claude: "ANTHROPIC_API_KEY",
-      gemini: "GEMINI_API_KEY",
-    };
-    const key =
-      authentication === "oauth-token" ? "CLAUDE_CODE_OAUTH_TOKEN" : keys[name];
-    if (!variables[key]) throw new Error(`Declare ${key} in workflow/.env`);
-    if (
-      name === "claude" &&
-      variables.ANTHROPIC_API_KEY &&
-      variables.CLAUDE_CODE_OAUTH_TOKEN
-    )
-      throw new Error("Choose one Claude authentication method");
-    selected =
-      authentication === "oauth-token"
-        ? { mode: "oauth-token" }
-        : { mode: "api-key", environment: key };
-  }
+  if (!Object.hasOwn(factories, name))
+    throw new Error(`Choose ${Object.keys(factories).join(", ")}`);
   return {
     repository,
     agent: composeAgent({
-      harness: factories[name]({ authentication: selected }),
+      harness: factories[name as keyof typeof factories]({
+        authentication: authenticationFor(name, authentication),
+      }),
+      ...(settings.OUTPOST_MODEL ? { model: settings.OUTPOST_MODEL } : {}),
     }),
     sandboxProvider: dockerSandboxProvider({
       image: "outpost:docs-demo",

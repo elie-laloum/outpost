@@ -124,7 +124,7 @@ test("CLI allows opting out of the default image build and declares subscription
     "--agent",
     "claude",
     "--authentication",
-    "oauth-token",
+    "account-token",
     "--no-build",
     "--directory",
     directory,
@@ -136,5 +136,8 @@ test("CLI allows opting out of the default image build and declares subscription
   );
   assert.match(result.stdout, /claude setup-token/);
   const source = await readFile(join(directory, "run.ts"), "utf8");
-  assert.match(source, /Missing CLAUDE_CODE_OAUTH_TOKEN/);
+  assert.match(
+    source,
+    /authentication: \{ account: \{ variable: "CLAUDE_CODE_OAUTH_TOKEN" \} \}/,
+  );
 });

@@ -5,7 +5,7 @@ sidebar:
   order: 3
 ---
 
-`outpost doctor` inspects the host by default. Add `--image` to also inspect a local Docker/Podman image in a temporary sandbox. Neither mode installs tools or makes a model call. Host and image diagnostics are available since 3.0.0; Gemini checks are available since 4.0.0.
+`outpost doctor` inspects the host by default. Add `--image` to also inspect a local Docker/Podman image in a temporary sandbox. Neither mode installs tools or makes a model call. Host and image diagnostics are available since 3.0.0; Antigravity, Copilot and Kimi checks are unreleased additions.
 
 ```sh
 outpost doctor --sandbox-provider docker --agent codex
@@ -21,7 +21,7 @@ node src/cli/main.ts doctor --sandbox-provider docker --agent codex
 
 ## Select the environment
 
-`--sandbox-provider` accepts `docker` (default), `podman`, `local`, `vercel` or `daytona`. `--agent` accepts `codex` (default), `claude` or `gemini`. Options are explicit: the command does not read the workflow script or its environment files. It does not require a Git checkout.
+`--sandbox-provider` accepts `docker` (default), `podman`, `local`, `vercel` or `daytona`. `--agent` accepts `codex` (default), `claude`, `antigravity`, `copilot` or `kimi`. Antigravity is checked through its `agy` executable. Options are explicit: the command does not read the workflow script or its environment files. It does not require a Git checkout.
 
 Every report checks the running Node.js version, Git on PATH and the selected agent's host CLI. Docker/Podman also check the engine CLI, access through `info` and host tar availability. Each external command has a five-second deadline and bounded output.
 
@@ -37,13 +37,13 @@ node src/cli/main.ts doctor --sandbox-provider docker --agent codex --image outp
 
 The command starts a separate container with networking disabled, an empty temporary workspace and a private ephemeral home. It does not mount your repository or pass host credentials. It uses Outpost's normal container user and execution adapter, so image UID mismatches and missing runtime tools fail startup. Workflow-specific mounts, environment variables and user overrides are not reproduced.
 
-Checks identify Node.js and Git inside the container, verify home accessibility, and compare the selected agent CLI against the pinned version. The image's agent is reported as `agent.sandbox`, separately from `agent.host`. No agent bootstrap, authentication or model call runs. A missing or failing image agent is a failed check; a version mismatch is a warning.
+Checks identify Node.js and Git inside the container, verify home accessibility, and compare the selected agent CLI against the pinned version. Antigravity has no pinned version: its version is only identified. The image's agent is reported as `agent.sandbox`, separately from `agent.host`. No agent bootstrap, authentication or model call runs. A missing or failing image agent is a failed check; a version mismatch is a warning.
 
 Each engine operation and probe has a five-second deadline. Cancellation and timeout trigger cleanup. The report includes `image.cleanup`; a cleanup failure reports the owned container name and retains the temporary workspace for inspection. The command returns a failure if cleanup cannot be confirmed.
 
 ## Check the agent CLI commands
 
-After a successful image agent-version probe, doctor also runs the default headless adapter requests for a new turn, resume and fork with `--help`. The checks are `agent.cli.start`, `agent.cli.resume` and `agent.cli.fork`. They run inside the same temporary image sandbox with empty input and a placeholder conversation identifier. They never resume or fork a real conversation.
+After a successful image agent-version probe, doctor also runs the default headless adapter requests for a new turn, resume and fork with `--help`. The checks are `agent.cli.start`, `agent.cli.resume` and `agent.cli.fork`. They run inside the same temporary image sandbox with empty input and a placeholder conversation identifier. They never resume or fork a real conversation. Antigravity, Copilot and Kimi run fresh sessions only, so they have a single `agent.cli.start` check: `<executable> --help` must print the expected usage line and declare the long options of the default headless request.
 
 A successful exit alone is insufficient: some CLIs display help even for unknown options. Doctor also checks the expected command's usage line and the declarations of the long options used by Outpost. Missing declarations or failed commands produce `FAIL`. Unrecognized help produces `WARN`, leaving support unverified. If the version probe fails, the help checks are `SKIPPED`.
 
@@ -58,7 +58,7 @@ These checks confirm only the commands and option names advertised in help for t
 | `FAIL`    | A prerequisite, image, CLI help or cleanup check failed; follow its suggested action.                                  |
 | `SKIPPED` | The capability was not checked.                                                                                        |
 
-An exact agent-version match only confirms the version pinned in Outpost's image recipe and bootstrap configuration. It does not prove protocol compatibility or authentication. A different version is unverified, not necessarily incompatible. A missing host agent is a warning: dispatch can bootstrap a missing CLI, and isolated providers have their own agent installation.
+An exact agent-version match only confirms the version pinned in Outpost's image recipe and bootstrap configuration. It does not prove protocol compatibility or authentication. A different version is unverified, not necessarily incompatible. A missing host agent is a warning: remote providers can bootstrap a missing Claude Code, Codex, Copilot or Kimi CLI, and isolated providers have their own agent installation. Nothing installs `agy`: it must already be in the image or on the host.
 
 The host agent version does not describe an existing container or cloud sandbox. `--image` checks a fresh sandbox only. Workflow mounts, repository state, credentials and model access require separate checks in the actual execution environment. A successful doctor run is not a guarantee that dispatch will succeed.
 
@@ -89,7 +89,7 @@ try {
 }
 ```
 
-`agent` is optional. When present, it adds version and default start/resume/fork help checks against the installed sandbox CLI. It never runs a conversation. Without `agent`, no agent executable is invoked. Existing environment variables remain those of the owned sandbox; this does not reproduce the network-disabled, credential-free `--image` environment.
+`agent` is optional. When present, it adds version and default start/resume/fork help checks against the installed sandbox CLI (start only for Antigravity, Copilot and Kimi). It never runs a conversation. Without `agent`, no agent executable is invoked. Existing environment variables remain those of the owned sandbox; this does not reproduce the network-disabled, credential-free `--image` environment.
 
 Commands retain bounded output and have a deadline of five seconds each by default, configurable from 1 to 60,000 milliseconds with `deadlineMs`. An optional `signal` cancels further probes. Providers must honor command and transfer cancellation/deadlines; diagnostics cannot force a custom provider that ignores its contract to settle. Reports contain sanitized observations, not raw output or provider errors. `scope` is `owned-sandbox`, `ownership` is `caller`, and `modelCompatibility` remains `unverified`.
 
@@ -108,10 +108,11 @@ import { diagnoseAgentProtocol } from "@elie-laloum/outpost";
 
 console.log(diagnoseAgentProtocol("codex"));
 console.log(diagnoseAgentProtocol("claude"));
+console.log(diagnoseAgentProtocol("kimi"));
 ```
 
-This synchronous, offline report decodes bundled synthetic events for conversation identifiers, text, tools, usage, completion, failures, unknown events and malformed input. `scope` is `bundled-protocol-fixtures`. `referenceVersion` identifies the configured agent version; both `installedCli` and `modelCompatibility` remain `unverified`. A passing result verifies the package's parser against those structural fixtures, not any installed executable, authenticated account or model. No real model probe is provided or called implicitly.
+This synchronous, offline report decodes bundled synthetic events for conversation identifiers, text, tools, usage, completion, failures, unknown events and malformed input. `scope` is `bundled-protocol-fixtures`. It accepts the same agents as `--agent`. `referenceVersion` identifies the pinned agent version and is absent for Antigravity; both `installedCli` and `modelCompatibility` remain `unverified`. A passing result verifies the package's parser against those structural fixtures, not any installed executable, authenticated account or model. No real model probe is provided or called implicitly.
 
-The deterministic executable fixtures in `test/fixtures/agent-protocol.ts` additionally exercise the default start/resume/fork request arguments and stdin with chunked JSON-line output. Run them from a source checkout with `node --test test/functional/doctor-protocol.test.ts`. They do not use installed agent CLIs or credentials.
+The deterministic executable fixtures in `test/fixtures/agent-protocol.ts` additionally exercise the default start/resume/fork request arguments (start only for fresh-session agents) and stdin with chunked JSON-line output. Run them from a source checkout with `node --test test/functional/doctor-protocol.test.ts`. They do not use installed agent CLIs or credentials.
 
-Run `node test/fixtures/sandbox-diagnostics.ts` from a source checkout for a complete local demonstration. It creates a temporary Git repository, diagnoses an explicit `localSandboxProvider()` sandbox with binary transfer probes, verifies subsequent command reuse, checks both bundled protocols and removes its temporary resources. It never invokes a real agent. To exercise an existing local container image instead, set `OUTPOST_CONTAINER_ENGINE=docker` or `podman`; `OUTPOST_CONTAINER_IMAGE` defaults to `outpost-ci:latest`. The fixture retains its temporary repository if sandbox cleanup cannot be confirmed.
+Run `node test/fixtures/sandbox-diagnostics.ts` from a source checkout for a complete local demonstration. It creates a temporary Git repository, diagnoses an explicit `localSandboxProvider()` sandbox with binary transfer probes, verifies subsequent command reuse, checks the bundled Claude Code and Codex protocols and removes its temporary resources. It never invokes a real agent. To exercise an existing local container image instead, set `OUTPOST_CONTAINER_ENGINE=docker` or `podman`; `OUTPOST_CONTAINER_IMAGE` defaults to `outpost-ci:latest`. The fixture retains its temporary repository if sandbox cleanup cannot be confirmed.

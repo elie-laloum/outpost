@@ -1,48 +1,52 @@
-import type { InitOptions } from "./scaffold.types.ts";
-import { authenticationRecipes } from "../adapters/agents/authentication.constants.ts";
+import type { AgentAuthentication } from "../domain/agent.types.ts";
+import { invariant } from "../domain/errors.ts";
+import { authenticationChoices } from "./main.constants.ts";
+import type { AuthenticationChoice, InitOptions } from "./scaffold.types.ts";
+
+export function authenticationChoice(
+  options: InitOptions,
+): AuthenticationChoice {
+  const agent = options.agent ?? "codex";
+  const value =
+    options.authentication ?? (options.baseUrl ? "usage" : "account");
+  const choices: readonly AuthenticationChoice[] = Object.hasOwn(
+    authenticationChoices,
+    agent,
+  )
+    ? authenticationChoices[agent]
+    : [];
+  const choice = choices.find((candidate) => candidate.value === value);
+  invariant(
+    choice,
+    `Authentication for ${agent} must be ${choices.map((candidate) => candidate.value).join(", ") || "one of its supported forms"}`,
+  );
+  return choice;
+}
 
 export function authenticationEnvironment(options: InitOptions): string {
   if (options.baseUrl)
     return `${options.apiKeyEnvironment ?? "OPENAI_API_KEY"}=\n`;
-  if (options.authentication === "login") return "";
-  if (options.authentication === "oauth-token")
-    return "CLAUDE_CODE_OAUTH_TOKEN=\n";
-  return authenticationRecipes[options.agent ?? "codex"].environment;
+  const { variable } = authenticationChoice(options);
+  return variable ? `${variable}=\n` : "";
 }
 
 export function authenticationInstructions(options: InitOptions): string {
-  if (options.authentication === "login")
-    return "Run codex login on the host. For isolated providers, use file credential storage; the generated script copies auth.json into the private sandbox home.";
-  if (options.authentication === "oauth-token")
-    return "Run claude setup-token on the host, then set CLAUDE_CODE_OAUTH_TOKEN in the workflow .env or parent environment. This uses your Claude subscription.";
-  return (
-    "Set " +
-    authenticationEnvironment(options).trim().replace("=", "") +
-    " in the workflow .env or parent environment. API usage is billed separately from subscriptions."
-  );
+  if (options.baseUrl)
+    return `Set ${options.apiKeyEnvironment ?? "OPENAI_API_KEY"} in the workflow .env or parent environment for the custom Responses provider.`;
+  return authenticationChoice(options).instructions;
+}
+
+export function authenticationSetting(
+  options: InitOptions,
+): AgentAuthentication {
+  const { value, variable } = authenticationChoice(options);
+  if (value !== "account-token") return value;
+  invariant(variable, "Account tokens require a declared variable");
+  return { account: { variable } };
 }
 
 export function authenticationSource(options: InitOptions): string {
-  const agent = options.agent ?? "codex";
-  if (options.authentication === "login") {
-    if (options.sandboxProvider === "local")
-      return 'const authentication = { mode: "login" as const };';
-    return `const seed = await readFile(resolve(process.env.CODEX_HOME || resolve(homedir(), ".codex"), "auth.json"), "utf8");
-try { JSON.parse(seed); } catch { throw new Error("Invalid Codex authentication file. Run codex login again with file credential storage."); }
-const authentication = { mode: "login" as const, credentials: seed };`;
-  }
-  const key = authenticationEnvironment(options).trim().replace("=", "");
-  const conflict =
-    agent === "claude"
-      ? key === "ANTHROPIC_API_KEY"
-        ? "CLAUDE_CODE_OAUTH_TOKEN"
-        : "ANTHROPIC_API_KEY"
-      : undefined;
-  const check = `if (!variables[${JSON.stringify(key)}]) throw new Error(${JSON.stringify(`Missing ${key}. Configure the workflow .env or parent environment before starting a sandbox.`)});`;
-  const guard = conflict
-    ? `\nif (variables[${JSON.stringify(conflict)}]) throw new Error("Conflicting Claude authentication methods. Keep only the selected credential in the workflow environment.");`
-    : "";
-  const mode =
-    options.authentication === "oauth-token" ? "oauth-token" : "api-key";
-  return `${check}${guard}\nconst authentication = { mode: ${JSON.stringify(mode)} as const${mode === "api-key" ? `, environment: ${JSON.stringify(key)}` : ""} };`;
+  const setting = authenticationSetting(options);
+  if (typeof setting === "string") return JSON.stringify(setting);
+  return `{ account: { variable: ${JSON.stringify(authenticationChoice(options).variable)} } }`;
 }

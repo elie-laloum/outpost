@@ -1,0 +1,46 @@
+import type { AgentAdapter, CliHarness } from "../../domain/agent.types.ts";
+import type { AgentModel } from "../../domain/model.types.ts";
+import { credentialPlanner } from "./authentication.ts";
+import { kimiCredentials } from "./kimi-authentication.ts";
+import { kimiEvents } from "./kimi-events.ts";
+import { kimiRequest } from "./kimi-request.ts";
+import type { KimiSettings } from "./kimi.types.ts";
+import { kimiModelSupport } from "./model-support.constants.ts";
+import { harnessSettings, supportModel } from "./model-support.ts";
+import type { Bound } from "./settings.types.ts";
+
+function bindKimi(settings: Bound<KimiSettings>): AgentAdapter {
+  supportModel(kimiModelSupport, settings.model);
+  const credentials = credentialPlanner(
+    "Kimi Code",
+    kimiCredentials,
+    settings.authentication,
+    settings.model,
+  );
+  return Object.freeze({
+    name: "kimi",
+    ...(credentials ? { credentials } : {}),
+    bootstrap: "kimi",
+    resumable: false,
+    capture: false,
+    variables: Object.freeze({
+      KIMI_CODE_NO_AUTO_UPDATE: "1",
+      ...settings.variables,
+    }),
+    request: (input) => kimiRequest(settings, input),
+    events: kimiEvents,
+  } satisfies AgentAdapter);
+}
+
+export function kimiHarness(settings: KimiSettings = {}): CliHarness {
+  harnessSettings(settings);
+  const configured = Object.freeze({
+    ...settings,
+    variables: Object.freeze({ ...settings.variables }),
+  });
+  return Object.freeze({
+    kind: "cli",
+    bind: (model?: AgentModel) =>
+      bindKimi({ ...configured, ...(model === undefined ? {} : { model }) }),
+  });
+}

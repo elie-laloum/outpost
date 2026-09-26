@@ -1,8 +1,9 @@
 import assert from "node:assert/strict";
 import { posix } from "node:path";
 import { codexDiagnostics } from "../../src/adapters/agents/codex-diagnostics.ts";
-import { geminiDiagnostics } from "../../src/adapters/agents/gemini-diagnostics.ts";
 import { claudeDiagnostics } from "../../src/adapters/agents/claude-diagnostics.ts";
+import { copilotDiagnostics } from "../../src/adapters/agents/copilot-diagnostics.ts";
+import { kimiDiagnostics } from "../../src/adapters/agents/kimi-diagnostics.ts";
 import type { SandboxLease } from "../../src/domain/sandbox.types.ts";
 import type { CompatibilityCheck } from "./cloud-compatibility.types.ts";
 import {
@@ -34,7 +35,8 @@ export async function verifyCloudAgents(
   const diagnostics = {
     codex: codexDiagnostics,
     claude: claudeDiagnostics,
-    gemini: geminiDiagnostics,
+    copilot: copilotDiagnostics,
+    kimi: kimiDiagnostics,
   };
   for (const agent of agentPackages) {
     const scenarios = diagnostics[agent.executable]();

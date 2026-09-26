@@ -2,22 +2,27 @@ import assert from "node:assert/strict";
 import { fileURLToPath } from "node:url";
 import { test } from "node:test";
 import {
+  antigravityHarness,
   claudeHarness,
   codexHarness,
-  geminiHarness,
+  copilotHarness,
+  kimiHarness,
   diagnoseAgentProtocol,
 } from "../../src/index.ts";
 import { protocolFixtures } from "../../src/adapters/agents/protocol-fixtures.constants.ts";
 import { executeProcess } from "../../src/infrastructure/process.ts";
 
-for (const name of ["claude", "codex", "gemini"] as const) {
-  const agent = {
-    claude: claudeHarness,
-    codex: codexHarness,
-    gemini: geminiHarness,
-  }
-    [name]()
-    .bind();
+const harnesses = {
+  claude: claudeHarness,
+  codex: codexHarness,
+  antigravity: antigravityHarness,
+  copilot: copilotHarness,
+  kimi: kimiHarness,
+} as const;
+const resumable = new Set(["claude", "codex"]);
+
+for (const name of Object.keys(harnesses) as (keyof typeof harnesses)[]) {
+  const agent = harnesses[name]().bind();
   test(`${name} reports only synthetic structural compatibility`, () => {
     const report = diagnoseAgentProtocol(name);
     assert.equal(report.hasFailures, false);
@@ -25,15 +30,14 @@ for (const name of ["claude", "codex", "gemini"] as const) {
     assert.equal(report.modelCompatibility, "unverified");
     assert.deepEqual(
       report.checks.map((check) => check.id),
-      [
-        "protocol.fixture.turn",
-        "protocol.fixture.failure",
-        "protocol.fixture.unknown",
-      ],
+      protocolFixtures[name].map(
+        (fixture) => `protocol.fixture.${fixture.name}`,
+      ),
     );
+    assert.ok(report.checks.length >= 3);
   });
   for (const mode of ["start", "resume", "fork"] as const) {
-    if (name === "gemini" && mode !== "start") continue;
+    if (!resumable.has(name) && mode !== "start") continue;
     test(`${name} ${mode} default request executes deterministic streaming fixture`, async () => {
       const request = agent.request({
         text: "fixture-prompt",

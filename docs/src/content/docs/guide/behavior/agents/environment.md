@@ -25,7 +25,7 @@ The same name cannot be declared by both provider and adapter. Put shared enviro
 
 ## Credential choices
 
-Use `OPENAI_API_KEY` for Codex, and `ANTHROPIC_API_KEY` or `CLAUDE_CODE_OAUTH_TOKEN` for Claude Code. For native CLI authentication, explicitly mount the required authentication file or directory at the correct agent-home path. Prefer read-only mounts when the CLI supports them. Do not mount your entire home just to expose one credential.
+Select credentials with the harness `authentication` setting. `"usage"` reads the CLI's default API-key variable: `ANTHROPIC_API_KEY` for Claude Code, `OPENAI_API_KEY` for Codex, `GEMINI_API_KEY` for Antigravity and `KIMI_API_KEY` for Kimi. `{ account: { variable } }` reads a token such as `CLAUDE_CODE_OAUTH_TOKEN` or `COPILOT_GITHUB_TOKEN`. Every `variable` form reads the resolved variables described above (adapter `variables`, provider `variables` and `.outpost/.env` declarations); a missing variable fails sandbox preparation. `"account"` and `{ account: { file } }` copy the host login into the private sandbox home of isolated providers; with `localSandboxProvider()` nothing is copied and the CLI uses its own host login. Outpost never reads a system keychain. See [authentication](../../../manual/authentication/) for the forms each CLI accepts. Do not mount your entire home just to expose one credential.
 
 Vercel/Daytona credentials authenticate sandbox allocation separately from model calls. A successful provider connection does not prove the agent is authenticated.
 
@@ -35,4 +35,4 @@ See [mounts](../../../environment/providers/containers/) and [security boundarie
 
 ## Connect an account
 
-Follow [Claude Code account setup](../../../agents/connect-claude/) or [Codex account setup](../../../agents/connect-codex/) for subscription login, API keys and container authentication. Merely declaring OPENAI_API_KEY does not initialize a Codex login; use the documented setup hook.
+Follow the setup page for [Claude Code](../../../agents/connect-claude/), [Codex](../../../agents/connect-codex/), [Antigravity](../../../agents/connect-antigravity/), [Copilot](../../../agents/connect-copilot/) or [Kimi](../../../agents/connect-kimi/) for account login, API keys and container authentication. Merely declaring `OPENAI_API_KEY` does not initialize a Codex login: select `authentication: "usage"` so that Outpost runs `codex login --with-api-key` in the sandbox.

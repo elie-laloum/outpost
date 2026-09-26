@@ -1,13 +1,35 @@
 import { agent as composeAgent } from "../domain/agent.ts";
-import { codexHarness } from "../adapters/agents/codex-adapter.ts";
 import { invariant } from "../domain/errors.ts";
-import { supportedAgents, supportedProviders } from "./scaffold.constants.ts";
+import {
+  antigravityHarness,
+  claudeHarness,
+  codexHarness,
+  copilotHarness,
+  kimiHarness,
+} from "../providers/agents.ts";
+import {
+  authenticationChoice,
+  authenticationSetting,
+} from "./init-authentication.ts";
+import { authenticationChoices } from "./main.constants.ts";
+import { supportedProviders } from "./scaffold.constants.ts";
 import type { InitOptions } from "./scaffold.types.ts";
+
+const harnesses = {
+  codex: codexHarness,
+  claude: claudeHarness,
+  antigravity: antigravityHarness,
+  copilot: copilotHarness,
+  kimi: kimiHarness,
+} as const;
 
 export function validateInitialization(options: InitOptions): void {
   const agent = options.agent ?? "codex",
     sandboxProvider = options.sandboxProvider ?? "docker";
-  invariant(supportedAgents.includes(agent), "Choose codex, claude or gemini");
+  invariant(
+    Object.hasOwn(authenticationChoices, agent),
+    "Choose codex, claude, antigravity, copilot or kimi",
+  );
   invariant(
     supportedProviders.includes(sandboxProvider),
     "Unknown sandbox provider",
@@ -16,29 +38,24 @@ export function validateInitialization(options: InitOptions): void {
     !options.apiKeyEnvironment || options.baseUrl,
     "--api-key-env requires --base-url",
   );
-  if (options.baseUrl) {
-    invariant(
-      agent === "codex" &&
-        (!options.authentication || options.authentication === "api-key"),
-      "Custom Responses providers require Codex and api-key authentication",
-    );
-    composeAgent({
-      harness: codexHarness({
+  invariant(
+    !options.baseUrl ||
+      (agent === "codex" && authenticationChoice(options).value === "usage"),
+    "Custom Responses providers require Codex and usage authentication",
+  );
+  const authentication = authenticationSetting(options);
+  const modelProvider = options.baseUrl
+    ? {
         modelProvider: {
           baseUrl: options.baseUrl,
           ...(options.apiKeyEnvironment
             ? { apiKeyEnvironment: options.apiKeyEnvironment }
             : {}),
         },
-      }),
-      ...(options.model ? { model: options.model } : {}),
-    });
-  }
-  const authentication = options.authentication ?? "api-key";
-  invariant(
-    authentication === "api-key" ||
-      (authentication === "oauth-token" && agent === "claude") ||
-      (authentication === "login" && agent === "codex"),
-    "Authentication must be api-key, oauth-token for Claude, or login for Codex",
-  );
+      }
+    : {};
+  composeAgent({
+    harness: harnesses[agent]({ authentication, ...modelProvider }),
+    ...(options.model ? { model: options.model } : {}),
+  });
 }

@@ -14,7 +14,7 @@ Un store de conversations localise, capture et restaure les transcripts natifs. 
 
 ## Limites et responsabilités
 
-Bifurquer une conversation ne bifurque pas ses fichiers. Choisissez un workspace séparé lorsque les alternatives doivent rester isolées. L’authentification est indépendante du stockage des transcripts, qui peuvent contenir des données sensibles. Gemini ne propose actuellement ni capture native, ni reprise, ni fork.
+Bifurquer une conversation ne bifurque pas ses fichiers. Choisissez un workspace séparé lorsque les alternatives doivent rester isolées. L’authentification est indépendante du stockage des transcripts, qui peuvent contenir des données sensibles. Antigravity, Copilot et Kimi n’exécutent que de nouvelles sessions : ils ne proposent ni capture native, ni reprise, ni fork.
 
 ## Points d’entrée
 

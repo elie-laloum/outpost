@@ -47,9 +47,10 @@ test("prebuilt image context pins inputs, locks supported agents and preserves U
     await readFile(join(directory, "package-lock.json"), "utf8"),
   );
   for (const [name, version] of Object.entries({
-    "@google/gemini-cli": agentVersions.gemini,
     "@openai/codex": agentVersions.codex,
     "@anthropic-ai/claude-code": agentVersions.claude,
+    "@github/copilot": agentVersions.copilot,
+    "@moonshot-ai/kimi-code": agentVersions.kimi,
   })) {
     assert.equal(lock.packages[""].dependencies[name], version);
     assert.equal(lock.packages[`node_modules/${name}`].version, version);

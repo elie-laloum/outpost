@@ -3,16 +3,31 @@ import type { Executor } from "../infrastructure/process.types.ts";
 import { diagnosticProbe } from "./diagnostic-probe.ts";
 import {
   agentDiagnosticDefaults,
-  agentDiagnosticPlans,
+  doctorAgents,
 } from "./doctor-agent.constants.ts";
-import type { DiagnosticCheck, DoctorAgent } from "./doctor.types.ts";
+import type {
+  DiagnosticCheck,
+  DiagnosticProbe,
+  DoctorAgent,
+} from "./doctor.types.ts";
+
+export function agentVersionProbe(
+  agent: DoctorAgent,
+): Pick<DiagnosticProbe, "command" | "readVersion" | "referenceVersion"> {
+  const { executable, referenceVersion } = doctorAgents[agent];
+  return {
+    command: { executable, arguments: ["--version"] },
+    readVersion: true,
+    ...(referenceVersion === undefined ? {} : { referenceVersion }),
+  };
+}
 
 export async function diagnoseAgentCli(
   agent: DoctorAgent,
   execute: Executor,
 ): Promise<readonly DiagnosticCheck[]> {
   const checks: DiagnosticCheck[] = [];
-  for (const plan of agentDiagnosticPlans[agent]()) {
+  for (const plan of doctorAgents[agent].diagnostics()) {
     let help = "";
     const check = await diagnosticProbe(
       {
@@ -34,7 +49,7 @@ export async function diagnoseAgentCli(
     }
     const usage = help
       .split(/\r?\n/)
-      .some((line) => line.trim().startsWith(`Usage: ${plan.usage} [`));
+      .some((line) => line.trim().startsWith(plan.usage));
     if (!usage) {
       checks.push({
         id: check.id,

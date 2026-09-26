@@ -18,7 +18,6 @@ export function starter(options: InitOptions): string {
       : "";
   return `import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import { homedir } from "node:os";
 import { parseEnv } from "node:util";
 import { dispatch, agent, ${agent}Harness, OutpostError, reporter } from "@elie-laloum/outpost";
 import { ${sandboxProvider}SandboxProvider } from "@elie-laloum/outpost/providers/${sandboxProvider}";
@@ -32,9 +31,8 @@ const environment = await readFile(new URL(".env", import.meta.url), "utf8").cat
 const variables = Object.fromEntries(
   Object.entries({ ...parseEnv(${JSON.stringify(authenticationEnvironment(options))}), ...parseEnv(environment) }).map(([key, value]) => [key, value || process.env[key] || ""]),
 );
-${authenticationSource(options)}
 const runtime = {
-  agent: agent({ harness: ${agent}Harness({ authentication${modelProvider ? ", " + modelProvider : ""} }), ${model} }),
+  agent: agent({ harness: ${agent}Harness({ authentication: ${authenticationSource(options)}${modelProvider ? ", " + modelProvider : ""} }), ${model} }),
   sandboxProvider: ${sandboxProvider}SandboxProvider({ ${image}variables }),
 };
 const objective = process.argv.slice(2).join(" ") || "Inspect this repository and implement one useful improvement.";

@@ -1,20 +1,12 @@
 import { isDeepStrictEqual } from "node:util";
-import { claudeHarness } from "../adapters/agents/claude-adapter.ts";
-import { codexHarness } from "../adapters/agents/codex-adapter.ts";
-import { geminiHarness } from "../adapters/agents/gemini-adapter.ts";
 import { protocolFixtures } from "../adapters/agents/protocol-fixtures.constants.ts";
-import { agentVersions } from "../providers/versions.constants.ts";
+import { doctorAgents } from "./doctor-agent.constants.ts";
 import type { AgentProtocolReport } from "./doctor-protocol.types.ts";
 import type { DiagnosticCheck, DoctorAgent } from "./doctor.types.ts";
 
 export function diagnoseAgentProtocol(agent: DoctorAgent): AgentProtocolReport {
-  const adapter = {
-    claude: claudeHarness,
-    codex: codexHarness,
-    gemini: geminiHarness,
-  }
-    [agent]()
-    .bind();
+  const profile = doctorAgents[agent];
+  const adapter = profile.harness().bind();
   const checks: DiagnosticCheck[] = protocolFixtures[agent].map((fixture) => {
     const events = fixture.lines.flatMap((line) => adapter.events(line));
     const passed = isDeepStrictEqual(events, fixture.expected);
@@ -29,7 +21,9 @@ export function diagnoseAgentProtocol(agent: DoctorAgent): AgentProtocolReport {
   return {
     scope: "bundled-protocol-fixtures",
     agent,
-    referenceVersion: agentVersions[agent],
+    ...(profile.referenceVersion === undefined
+      ? {}
+      : { referenceVersion: profile.referenceVersion }),
     installedCli: "unverified",
     modelCompatibility: "unverified",
     checks,

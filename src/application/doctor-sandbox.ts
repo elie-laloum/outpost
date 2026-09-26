@@ -1,8 +1,7 @@
 import { invariant } from "../domain/errors.ts";
 import type { SandboxLease } from "../domain/sandbox.types.ts";
 import type { Executor } from "../infrastructure/process.types.ts";
-import { agentVersions } from "../providers/versions.constants.ts";
-import { diagnoseAgentCli } from "./doctor-agent.ts";
+import { agentVersionProbe, diagnoseAgentCli } from "./doctor-agent.ts";
 import { diagnosticProbe } from "./diagnostic-probe.ts";
 import { doctorDefaults } from "./doctor.constants.ts";
 import type { DiagnosticCheck } from "./doctor.types.ts";
@@ -94,9 +93,7 @@ export async function diagnoseSandbox(
     const version = await diagnosticProbe(
       {
         id: "agent.sandbox",
-        command: { executable: options.agent, arguments: ["--version"] },
-        readVersion: true,
-        referenceVersion: agentVersions[options.agent],
+        ...agentVersionProbe(options.agent),
         failureStatus: "fail",
         remedy: "Install the agent explicitly; diagnostics never bootstrap it.",
       },

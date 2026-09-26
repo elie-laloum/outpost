@@ -4,15 +4,16 @@ export const imageRecipe = `FROM node:24-bookworm-slim
 ARG AGENT_UID=1000
 ARG AGENT_GID=1000
 RUN apt-get update && apt-get install -y --no-install-recommends git openssh-client ca-certificates curl procps util-linux python3 && rm -rf /var/lib/apt/lists/*
-RUN npm install -g --allow-scripts=@anthropic-ai/claude-code @openai/codex@${agentVersions.codex} @anthropic-ai/claude-code@${agentVersions.claude} @google/gemini-cli@${agentVersions.gemini}
+RUN npm install -g --allow-scripts=@anthropic-ai/claude-code @openai/codex@${agentVersions.codex} @anthropic-ai/claude-code@${agentVersions.claude} @github/copilot@${agentVersions.copilot} @moonshot-ai/kimi-code@${agentVersions.kimi}
 RUN groupmod -o -g "$AGENT_GID" node && usermod -o -u "$AGENT_UID" -g "$AGENT_GID" node
 RUN mkdir -p /home/agent && chown "$AGENT_UID:$AGENT_GID" /home/agent && chmod 700 /home/agent
 ENV HOME=/home/agent
+# The private home is a noexec tmpfs; Copilot extracts native addons into its cache.
+ENV XDG_CACHE_HOME=/tmp/.cache
 USER $AGENT_UID:$AGENT_GID
 WORKDIR /workspace
 `;
 
-export const supportedAgents: readonly string[] = ["codex", "claude", "gemini"];
 export const supportedProviders: readonly string[] = [
   "docker",
   "podman",

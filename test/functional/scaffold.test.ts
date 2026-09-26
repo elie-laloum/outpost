@@ -60,6 +60,7 @@ test("initialization supports cloud peers and requested package manager", async 
       directory: root,
       agent: "claude",
       sandboxProvider: "vercel",
+      authentication: "usage",
       manager: "pnpm",
       install: true,
     },
@@ -127,7 +128,7 @@ test("generated starter uses an external repository, workflow credentials and br
     repository: relative(folder, root),
     sandboxProvider: "local",
     agent: "codex",
-    authentication: "login",
+    authentication: "account",
   });
   await writeFile(
     join(folder, ".env"),

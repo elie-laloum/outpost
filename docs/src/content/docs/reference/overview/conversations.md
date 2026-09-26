@@ -14,7 +14,7 @@ A conversation store locates, captures and restores native transcripts. Continua
 
 ## Boundaries and responsibilities
 
-Forking a conversation does not fork its files. Choose a separate workspace when alternatives must remain isolated. Authentication is independent of transcript storage, and transcripts may contain sensitive content. Gemini currently has no native capture, resume or fork support.
+Forking a conversation does not fork its files. Choose a separate workspace when alternatives must remain isolated. Authentication is independent of transcript storage, and transcripts may contain sensitive content. Antigravity, Copilot and Kimi run fresh sessions only: they have no native capture, resume or fork support.
 
 ## Entry points
 

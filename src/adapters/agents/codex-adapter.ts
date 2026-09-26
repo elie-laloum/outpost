@@ -1,5 +1,6 @@
 import type { AgentModel } from "../../domain/model.types.ts";
-import { authenticationCommand } from "./authentication.ts";
+import { credentialPlanner } from "./authentication.ts";
+import { codexCredentials } from "./codex-authentication.ts";
 import type { AgentAdapter, CliHarness } from "../../domain/agent.types.ts";
 import { codexProvider } from "./codex-provider.ts";
 import { codexEvents } from "./codex-events.ts";
@@ -11,13 +12,15 @@ import type { Bound, CodexSettings } from "./settings.types.ts";
 function bindCodex(settings: Bound<CodexSettings>): AgentAdapter {
   supportModel(codexModelSupport, settings.model);
   codexProvider(settings);
+  const credentials = credentialPlanner(
+    "Codex",
+    codexCredentials(settings.modelProvider),
+    settings.authentication,
+    settings.model,
+  );
   return Object.freeze({
     name: "codex",
-    authenticate: authenticationCommand(
-      "codex",
-      settings.authentication,
-      settings.modelProvider !== undefined,
-    ),
+    ...(credentials ? { credentials } : {}),
     conversations: "codex",
     resumable: true,
     capture: settings.saveConversations ?? true,

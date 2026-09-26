@@ -6,6 +6,17 @@
 
 Breaking type renames, without compatibility aliases: `CustomHarness` becomes `Harness`, `CustomHarnessOptions` becomes `HarnessOptions`, and the former `Harness` union becomes `AgentHarness` (`CliHarness | Harness`). Update type imports and annotations accordingly. Runtime behavior and discriminants remain unchanged.
 
+Breaking: unified CLI authentication, without compatibility aliases:
+
+- Replace `{ mode: "api-key" | "oauth-token" | "login", environment?, credentials? }` with `authentication: "account" | "usage" | { account: { file | key | variable } } | { usage: { key | variable } }` on every CLI harness, with the new `AccountCredential` and `UsageCredential` types. There is no automatic mode; unsupported forms fail when the agent is composed and list the accepted forms.
+- `account` copies the CLI's own host session into the private sandbox home: Claude `.credentials.json` (only `claudeAiOauth`), Codex `auth.json`, the Antigravity OAuth token file, the Copilot token stored in `config.json` (forwarded as `COPILOT_GITHUB_TOKEN`) and the Kimi Code credentials and device identifier, followed by `kimi login` in the sandbox. `CLAUDE_CONFIG_DIR`, `CODEX_HOME`, `COPILOT_HOME` and `KIMI_CODE_HOME` relocate the host sources. Outpost reads only regular files up to 1 MiB, never reads a system keychain, and installs files through one stdin-fed installer with 0700 directories and 0600 files. The local provider receives variables only: no file is written and no login command runs on the host.
+- `usage` forwards the CLI's standard API-key variable (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY` followed by `codex login --with-api-key` in the sandbox, `GEMINI_API_KEY` with a generated Antigravity `settings.json`, or `KIMI_API_KEY` translated to Kimi's model variables and requiring a model). Codex with a custom `modelProvider` accepts only usage forms, applied to `apiKeyEnvironment`. Classic `ghp_` tokens are rejected for Copilot.
+- `AgentAdapter.authenticate()` becomes `credentials(variables)`, returning a `CredentialPlan`. `outpost init --authentication` accepts `account`, `account-token` (Claude and Copilot) or `usage`, defaults to `account`, and generated scripts no longer read credential files.
+
+Breaking: remove Gemini CLI, which no longer serves free, Google AI Pro and Ultra accounts. `geminiHarness()`, `GeminiSettings`, `agentVersions.gemini` and `doctor --agent gemini` are removed, and generated images no longer install `@google/gemini-cli`.
+
+Add `antigravityHarness()`, `copilotHarness()` and `kimiHarness()` with `AntigravitySettings`, `CopilotSettings` and `KimiSettings`. They run fresh sessions without native capture, resume, fork or automatic response repairs, accept model names only and disable CLI auto-updates by default. Antigravity (`agy`) streams `stream-json` from a stdin prompt; GitHub Copilot CLI 1.0.88 and Kimi Code 2.1.1 are pinned in generated images, the published agent image lock and remote bootstrap. `agy` is neither installed by generated images nor bootstrapped. Copilot and Kimi report no token usage. `doctor` accepts `antigravity`, `copilot` and `kimi`. Protocols are covered by synthetic fixtures; live runs of the three CLIs remain unvalidated.
+
 ## 5.0.0
 
 Breaking changes, without compatibility aliases:

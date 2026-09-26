@@ -56,7 +56,11 @@ import { vercelSandboxProvider } from "@elie-laloum/outpost/providers/vercel";
 const token = process.env.CLAUDE_CODE_OAUTH_TOKEN;
 if (!token) throw new Error("Set CLAUDE_CODE_OAUTH_TOKEN before allocation");
 await using sandbox = await createSandbox({
-  agent: composeAgent({ harness: claudeHarness({}) }),
+  agent: composeAgent({
+    harness: claudeHarness({
+      authentication: { account: { variable: "CLAUDE_CODE_OAUTH_TOKEN" } },
+    }),
+  }),
   sandboxProvider: vercelSandboxProvider({
     create: { timeout: 300_000 },
     variables: { CLAUDE_CODE_OAUTH_TOKEN: token },
@@ -64,4 +68,4 @@ await using sandbox = await createSandbox({
 });
 ```
 
-Obtenez ce jeton avec `claude setup-token` sur l’hôte. Pour utiliser la facturation API, transmettez plutôt `ANTHROPIC_API_KEY` sans jeton d’abonnement. La bibliothèque ne charge pas automatiquement le `.env` du dossier de workflow : lisez-le explicitement, utilisez le script généré ou déclarez la variable dans `.outpost/.env` du dépôt ciblé. Voir [l’authentification Claude](../../../agents/connect-claude/) et [la priorité des variables](../../../agents/environment/).
+Obtenez ce jeton avec `claude setup-token` sur l’hôte. Pour utiliser la facturation API, transmettez plutôt `ANTHROPIC_API_KEY` et choisissez `authentication: "usage"`. `authentication: "account"` copie à la place le fichier de connexion Claude de l’hôte dans le home privé de la sandbox. La bibliothèque ne charge pas automatiquement le `.env` du dossier de workflow : lisez-le explicitement, utilisez le script généré ou déclarez la variable dans `.outpost/.env` du dépôt ciblé. Voir [l’authentification Claude](../../../agents/connect-claude/) et [la priorité des variables](../../../agents/environment/).

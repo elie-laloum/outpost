@@ -12,6 +12,8 @@ Remote providers upload repository history and inputs to the selected cloud acco
 
 Prompt command expansion only recognizes commands present in the original prompt file. Substitution cannot introduce new expansion fragments. Values substituted inside an original shell command still have shell semantics and must be trusted or quoted by the prompt author.
 
+Agent authentication is explicit. `account` reads only the selected CLI's own session file (or the file or profile named by `account.file`) on the host, refuses links, directories and files above 1 MiB, and never reads a system keychain. Isolated providers receive a copy in the private sandbox home through stdin, with 0700 directories and 0600 files; `localSandboxProvider()` receives credential variables only and no host file is written. A sandbox copy can refresh and rotate a subscription refresh token, invalidating the host login; use a dedicated profile through `account.file` when that matters. Agents can read every credential they receive, so give them only the access their task requires.
+
 Conversation transcripts, logs, bundles and patches may contain secrets. Runtime files are ignored by Git and sensitive files are created with restrictive permissions where supported. Keep API keys in environment variables or ignored `.env` files. Never embed tokens in tracked configuration, remote URLs or examples.
 
 Report vulnerabilities privately using the repository's security reporting channel when enabled, or contact the maintainer through the hosting profile. Do not include live credentials in reports. V1 receives fixes for reproducible security defects.

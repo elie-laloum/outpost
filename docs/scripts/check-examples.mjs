@@ -124,28 +124,37 @@ import { configuration, variables } from "./runtime.mts";
 const config = await configuration();
 assert.equal(config.agent.name, process.argv[2]);
 assert.equal(variables.UNDECLARED_SECRET, undefined);
+config.agent.credentials?.(config.sandboxProvider.variables ?? {});
 console.log(config.agent.name);
 `,
   );
-  const seed = resolve(authentication.workspace, "seed");
-  await mkdir(seed);
-  await writeFile(resolve(seed, "auth.json"), JSON.stringify({ demo: true }));
   const authCases = [
-    ["codex", "api-key", "OPENAI_API_KEY=fixture", true],
-    ["codex", "login", "", true],
-    ["claude", "api-key", "ANTHROPIC_API_KEY=fixture", true],
-    ["claude", "oauth-token", "CLAUDE_CODE_OAUTH_TOKEN=fixture", true],
-    ["gemini", "api-key", "GEMINI_API_KEY=fixture", true],
-    ["codex", "api-key", "", false],
-    ["codex", "login", "OPENAI_API_KEY=fixture", false],
+    ["codex", "account", "", true],
+    ["codex", "usage", "OPENAI_API_KEY=fixture", true],
+    ["claude", "account", "", true],
+    ["claude", "account-token", "CLAUDE_CODE_OAUTH_TOKEN=fixture", true],
+    ["claude", "usage", "ANTHROPIC_API_KEY=fixture", true],
+    ["antigravity", "usage", "GEMINI_API_KEY=fixture", true],
+    [
+      "copilot",
+      "account-token",
+      "COPILOT_GITHUB_TOKEN=github_pat_fixture",
+      true,
+    ],
+    ["kimi", "usage", "KIMI_API_KEY=fixture\nOUTPOST_MODEL=fixture", true],
+    ["codex", "usage", "", false],
+    ["codex", "account-token", "", false],
     [
       "claude",
-      "api-key",
+      "usage",
       "ANTHROPIC_API_KEY=fixture\nCLAUDE_CODE_OAUTH_TOKEN=fixture",
       false,
     ],
-    ["claude", "login", "ANTHROPIC_API_KEY=fixture", false],
-    ["gemini", "login", "GEMINI_API_KEY=fixture", false],
+    ["claude", "account", "ANTHROPIC_API_KEY=fixture", false],
+    ["copilot", "usage", "", false],
+    ["copilot", "account-token", "COPILOT_GITHUB_TOKEN=ghp_classic", false],
+    ["kimi", "usage", "KIMI_API_KEY=fixture", false],
+    ["gemini", "account", "", false],
   ];
   for (const [agent, method, declarations, succeeds] of authCases) {
     await writeFile(
@@ -156,7 +165,6 @@ console.log(config.agent.name);
       cwd: authentication.workspace,
       env: {
         PATH: process.env.PATH,
-        CODEX_HOME: seed,
         UNDECLARED_SECRET: "not-forwarded",
       },
       encoding: "utf8",

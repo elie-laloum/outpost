@@ -443,7 +443,7 @@ test(
   async () => {
     const engine =
       process.env.OUTPOST_CONTAINER_ENGINE === "podman" ? "podman" : "docker";
-    for (const agent of ["codex", "claude", "gemini"] as const) {
+    for (const agent of ["codex", "claude", "copilot", "kimi"] as const) {
       let name = "";
       const checks = await diagnoseImage(
         { sandboxProvider: engine, agent, image: containerImage },
@@ -474,9 +474,9 @@ test(
         checks
           .filter((check) => check.id.startsWith("agent.cli."))
           .map((check) => check.id),
-        agent === "gemini"
-          ? ["agent.cli.start"]
-          : ["agent.cli.start", "agent.cli.resume", "agent.cli.fork"],
+        agent === "codex" || agent === "claude"
+          ? ["agent.cli.start", "agent.cli.resume", "agent.cli.fork"]
+          : ["agent.cli.start"],
       );
       assert.equal(
         checks.find((check) => check.id === "agent.sandbox")?.version,

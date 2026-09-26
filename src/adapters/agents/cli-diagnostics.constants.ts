@@ -14,12 +14,12 @@ export const cliDiagnosticScenarios: readonly AgentCliScenario[] = [
   },
 ];
 export const codexDiagnosticUsage = {
-  start: "codex exec",
-  resume: "codex exec resume",
-  fork: "codex exec fork",
+  start: "Usage: codex exec [",
+  resume: "Usage: codex exec resume [",
+  fork: "Usage: codex exec fork [",
 } as const;
 export const claudeDiagnosticUsage = {
-  start: "claude",
-  resume: "claude",
-  fork: "claude",
+  start: "Usage: claude [",
+  resume: "Usage: claude [",
+  fork: "Usage: claude [",
 } as const;

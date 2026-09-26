@@ -1,0 +1,382 @@
+import assert from "node:assert/strict";
+import { test } from "node:test";
+import { agent as composeAgent } from "../../src/domain/agent.ts";
+import {
+  antigravityHarness,
+  copilotHarness,
+  kimiHarness,
+} from "../../src/index.ts";
+import { prepareAdapter } from "../../src/application/agent-bootstrap.ts";
+import { diagnoseAgentCli } from "../../src/application/doctor-agent.ts";
+import { doctorAgents } from "../../src/application/doctor-agent.constants.ts";
+import { decodeLine } from "../../src/adapters/agents/event-decoder.ts";
+import type { Command } from "../../src/domain/command.types.ts";
+import type { SandboxLease } from "../../src/domain/sandbox.types.ts";
+
+const decoder = (
+  harness: typeof antigravityHarness | typeof copilotHarness,
+) => {
+  const agent = composeAgent({ harness: harness({}) });
+  return (value: unknown) => agent.events(JSON.stringify(value));
+};
+
+test("event decoding selects handlers by the protocol discriminant", () => {
+  const handlers = {
+    assistant: () => [{ kind: "text", text: "role" } as const],
+  };
+  assert.deepEqual(decodeLine('{"role":"assistant"}', handlers, "role"), [
+    { kind: "text", text: "role" },
+  ]);
+  assert.deepEqual(decodeLine('{"type":"assistant"}', handlers, "role"), [
+    { kind: "raw", value: { type: "assistant" } },
+  ]);
+  assert.deepEqual(decodeLine('{"type":"assistant"}', handlers), [
+    { kind: "text", text: "role" },
+  ]);
+});
+
+test("new CLI adapters are fresh-session agents with pinned update and continuation behavior", () => {
+  const expectations = [
+    [antigravityHarness, "antigravity", "AGY_CLI_DISABLE_AUTO_UPDATE", "true"],
+    [copilotHarness, "copilot", "COPILOT_AUTO_UPDATE", "false"],
+    [kimiHarness, "kimi", "KIMI_CODE_NO_AUTO_UPDATE", "1"],
+  ] as const;
+  for (const [harness, name, variable, value] of expectations) {
+    const variables = { CUSTOM: "fixture" };
+    const agent = composeAgent({ harness: harness({ variables }) });
+    variables.CUSTOM = "changed";
+    assert.equal(agent.name, name);
+    assert.equal(agent.variables?.[variable], value);
+    assert.equal(agent.variables?.CUSTOM, "fixture");
+    assert.equal(agent.resumable, false);
+    assert.equal(agent.capture, false);
+    assert.equal(agent.conversations, undefined);
+    assert.ok(Object.isFrozen(agent));
+    assert.equal(
+      composeAgent({
+        harness: harness({ variables: { [variable]: "override" } }),
+      }).variables?.[variable],
+      "override",
+    );
+    for (const fork of [true, false])
+      assert.throws(
+        () => agent.request({ continuation: { id: "session", fork } }),
+        /does not support continuation or fork/,
+      );
+  }
+  assert.equal(
+    composeAgent({ harness: antigravityHarness() }).requiresFinishedEvent,
+    true,
+  );
+  assert.equal(
+    composeAgent({ harness: copilotHarness() }).requiresFinishedEvent,
+    true,
+  );
+  assert.equal(
+    composeAgent({ harness: kimiHarness() }).requiresFinishedEvent,
+    undefined,
+  );
+});
+
+test("Antigravity sends prompts as stream-json input and preserves interactive modes", () => {
+  const agent = composeAgent({
+    harness: antigravityHarness(),
+    model: "fixture-model",
+  });
+  assert.deepEqual(agent.request({ text: "-literal\nsecond line" }), {
+    executable: "agy",
+    arguments: [
+      "--model",
+      "fixture-model",
+      "--dangerously-skip-permissions",
+      "--input-format",
+      "stream-json",
+      "--output-format",
+      "stream-json",
+    ],
+    stdin: `${JSON.stringify({ event: "user", message: { content: "-literal\nsecond line" } })}\n`,
+  });
+  assert.deepEqual(
+    composeAgent({ harness: antigravityHarness({ mode: "plan" }) }).request({})
+      .arguments,
+    [
+      "--mode",
+      "plan",
+      "--input-format",
+      "stream-json",
+      "--output-format",
+      "stream-json",
+    ],
+  );
+  assert.deepEqual(
+    composeAgent({ harness: antigravityHarness() }).request({
+      interactive: true,
+      text: "Inspect",
+    }),
+    {
+      executable: "agy",
+      arguments: ["--prompt-interactive", "Inspect"],
+      interactive: true,
+    },
+  );
+  assert.deepEqual(
+    composeAgent({ harness: antigravityHarness() }).request({
+      interactive: true,
+    }).arguments,
+    [],
+  );
+});
+
+test("Antigravity decodes streamed steps and treats canceled or empty turns as failures", () => {
+  const decode = decoder(antigravityHarness);
+  assert.deepEqual(
+    decode({
+      event: "step_update",
+      step_update: { step_type: "agent_response", text_delta: "hello" },
+    }),
+    [{ kind: "text", text: "hello" }],
+  );
+  assert.deepEqual(
+    decode({
+      event: "result",
+      result: { status: "SUCCESS", response: "   " },
+    }),
+    [{ kind: "failure", message: "Antigravity returned an empty response" }],
+  );
+  assert.deepEqual(decode({ event: "result", result: {} }), [
+    {
+      kind: "failure",
+      message: "Antigravity ended the turn with status unknown",
+    },
+  ]);
+  assert.deepEqual(
+    decode({
+      event: "result",
+      result: { status: "SUCCESS", response: "done", usage: { bad: "x" } },
+    }),
+    [
+      { kind: "usage", tokens: { input: 0, cached: 0, output: 0 } },
+      { kind: "result", text: "done" },
+      { kind: "finished" },
+    ],
+  );
+  for (const value of [
+    { event: "init" },
+    { event: "step_update" },
+    { event: "step_update", step_update: { step_type: "checkpoint" } },
+    { event: "step_update", step_update: { step_type: "constructor" } },
+    {
+      event: "step_update",
+      step_update: { step_type: "agent_response", text_delta: "" },
+    },
+    {
+      event: "step_update",
+      step_update: { step_type: "tool", state: "ACTIVE", tool_name: "x" },
+    },
+    { event: "step_update", step_update: { step_type: "tool", state: "DONE" } },
+  ])
+    assert.deepEqual(decode(value), [{ kind: "raw", value }]);
+});
+
+test("Copilot reads prompts from stdin and decodes messages, tools and final exit codes", () => {
+  const agent = composeAgent({
+    harness: copilotHarness(),
+    model: "fixture-model",
+  });
+  assert.deepEqual(agent.request({ text: "-literal" }), {
+    executable: "copilot",
+    arguments: [
+      "--model",
+      "fixture-model",
+      "--output-format",
+      "json",
+      "--allow-all",
+      "--no-ask-user",
+    ],
+    stdin: "-literal",
+  });
+  assert.equal(agent.request({}).stdin, "");
+  assert.deepEqual(
+    composeAgent({ harness: copilotHarness() }).request({
+      interactive: true,
+      text: "Inspect",
+    }),
+    {
+      executable: "copilot",
+      arguments: ["--interactive", "Inspect"],
+      interactive: true,
+    },
+  );
+  assert.deepEqual(
+    composeAgent({ harness: copilotHarness() }).request({ interactive: true })
+      .arguments,
+    [],
+  );
+  const decode = decoder(copilotHarness);
+  assert.deepEqual(
+    decode({
+      type: "assistant.message",
+      data: {
+        content: "text",
+        toolRequests: [{ name: "view", arguments: { path: "a" } }, {}],
+      },
+    }),
+    [
+      { kind: "text", text: "text" },
+      { kind: "tool", name: "view", input: { path: "a" } },
+    ],
+  );
+  assert.deepEqual(
+    decode({ type: "result", exitCode: 0, outcome: "blocked" }),
+    [
+      {
+        kind: "failure",
+        message: "GitHub Copilot CLI was blocked before completing the prompt",
+      },
+    ],
+  );
+  assert.deepEqual(decode({ type: "result" }), [
+    {
+      kind: "failure",
+      message: "GitHub Copilot CLI ended with exit code unknown",
+    },
+  ]);
+  for (const value of [
+    { type: "assistant.message" },
+    { type: "assistant.message", data: { content: "" } },
+    { type: "session.error", data: {} },
+  ])
+    assert.deepEqual(decode(value), [{ kind: "raw", value }]);
+});
+
+test("Kimi passes the prompt as an option value and decodes role-based lines", () => {
+  const agent = composeAgent({
+    harness: kimiHarness(),
+    model: "kimi-code/fixture",
+  });
+  assert.deepEqual(agent.request({ text: "-literal" }), {
+    executable: "kimi",
+    arguments: [
+      "--model",
+      "kimi-code/fixture",
+      "--prompt",
+      "-literal",
+      "--output-format",
+      "stream-json",
+    ],
+  });
+  assert.deepEqual(
+    composeAgent({ harness: kimiHarness() }).request({ interactive: true }),
+    { executable: "kimi", arguments: [], interactive: true },
+  );
+  assert.throws(
+    () =>
+      composeAgent({ harness: kimiHarness() }).request({
+        interactive: true,
+        text: "Inspect",
+      }),
+    /without an initial prompt/,
+  );
+  const decode = (value: unknown) =>
+    composeAgent({ harness: kimiHarness() }).events(JSON.stringify(value));
+  assert.deepEqual(
+    decode({
+      role: "assistant",
+      tool_calls: [
+        { function: { name: "Shell", arguments: "not json" } },
+        { function: { name: "Read", arguments: { path: "a" } } },
+        { function: {} },
+      ],
+    }),
+    [
+      { kind: "tool", name: "Shell", input: "not json" },
+      { kind: "tool", name: "Read", input: { path: "a" } },
+    ],
+  );
+  for (const value of [
+    { role: "assistant", content: "" },
+    { role: "meta" },
+    { role: "meta", type: "session.resume_hint" },
+    { role: "meta", type: "turn.step.retrying" },
+    { role: "meta", type: "toString" },
+  ])
+    assert.deepEqual(decode(value), [{ kind: "raw", value }]);
+});
+
+test("help diagnostics inspect each new CLI through its registered executable", async () => {
+  const help = {
+    antigravity:
+      "Usage of agy:\n  --dangerously-skip-permissions  Skip\n  --input-format  Input\n  --output-format  Output\n",
+    copilot:
+      "GitHub Copilot CLI\nUsage: copilot [OPTIONS] [COMMAND]\n  --output-format <format>\n  --allow-all\n  --no-ask-user\n",
+    kimi: "Usage: kimi [options] [command]\n  -p, --prompt <prompt>  Prompt\n  --output-format <format>  Output\n",
+  } as const;
+  for (const agent of ["antigravity", "copilot", "kimi"] as const) {
+    const commands: Command[] = [];
+    const checks = await diagnoseAgentCli(agent, async (command) => {
+      commands.push(command);
+      return { status: 0, stdout: help[agent], stderr: "" };
+    });
+    assert.deepEqual(
+      commands.map((command) => [command.executable, command.arguments]),
+      [[doctorAgents[agent].executable, ["--help"]]],
+    );
+    assert.equal(checks[0]?.status, "pass", JSON.stringify(checks));
+    const missing = await diagnoseAgentCli(agent, async () => ({
+      status: 0,
+      stdout: help[agent].split("\n")[agent === "copilot" ? 1 : 0]!,
+      stderr: "",
+    }));
+    assert.equal(missing[0]?.status, "fail");
+  }
+  assert.equal(doctorAgents.antigravity.executable, "agy");
+  assert.equal(doctorAgents.antigravity.referenceVersion, undefined);
+});
+
+test("remote bootstrap installs npm CLIs, allows scripts only for Claude and leaves Antigravity to the image", async () => {
+  const scripts: string[] = [];
+  const lease: SandboxLease = {
+    root: "/workspace",
+    home: "/home/agent",
+    async invoke(command) {
+      scripts.push(command.arguments?.[1] ?? "");
+      const binary = /command -v (\w+)/.exec(command.arguments?.[1] ?? "")?.[1];
+      return {
+        status: 0,
+        stdout: `/home/agent/.outpost-tools/bin/${binary}\n`,
+        stderr: "",
+      };
+    },
+    async upload() {},
+    async download() {},
+    async release() {},
+  };
+  const signal = new AbortController().signal;
+  for (const harness of [copilotHarness, kimiHarness]) {
+    const agent = composeAgent({ harness: harness() });
+    const prepared = await prepareAdapter(agent, lease, signal);
+    assert.equal(prepared.kind, "cli");
+    if (prepared.kind !== "cli") throw new Error("Expected CLI harness");
+    assert.equal(
+      prepared.request({ text: "hello" }).executable,
+      `/home/agent/.outpost-tools/bin/${agent.name}`,
+    );
+  }
+  assert.match(
+    scripts[0]!,
+    /npm install --global --prefix .* @github\/copilot@1\.0\.88/,
+  );
+  assert.match(scripts[1]!, /@moonshot-ai\/kimi-code@2\.1\.1/);
+  assert.ok(scripts.every((script) => !script.includes("--allow-scripts")));
+  const antigravity = composeAgent({ harness: antigravityHarness() });
+  assert.equal(await prepareAdapter(antigravity, lease, signal), antigravity);
+  assert.equal(scripts.length, 2);
+  await assert.rejects(
+    prepareAdapter(
+      { ...antigravity, bootstrap: "unrecognized" },
+      lease,
+      signal,
+    ),
+    /Unknown agent bootstrap/,
+  );
+});

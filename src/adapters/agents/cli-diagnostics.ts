@@ -21,3 +21,20 @@ export function cliDiagnostics(
     };
   });
 }
+
+export function helpDiagnostics(
+  request: (input: AgentInput) => Command,
+  usage: string,
+): readonly AgentCliDiagnostic[] {
+  const command = request({});
+  return [
+    {
+      mode: "start",
+      usage,
+      options: (command.arguments ?? []).filter((argument) =>
+        argument.startsWith("--"),
+      ),
+      command: { executable: command.executable, arguments: ["--help"] },
+    },
+  ];
+}

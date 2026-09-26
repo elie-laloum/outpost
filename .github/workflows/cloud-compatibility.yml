@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       agents:
-        description: Install current Claude Code/Codex/Gemini CLIs and check help contracts (no model calls)
+        description: Install current Claude Code/Codex/Copilot/Kimi CLIs and check help contracts (no model calls)
         type: boolean
         default: true
       models:

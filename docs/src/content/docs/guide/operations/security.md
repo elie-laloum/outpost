@@ -13,10 +13,12 @@ Shared Git metadata remains writable. A mounted sandbox is not a hostile-agent b
 
 Remote providers upload history and selected files to your cloud account. Review that provider’s storage/network policies. Credentials explicitly sent to the environment are available to code running there.
 
+Agent credentials are prepared only when a harness selects `authentication`. Outpost reads account files on the host (regular files of at most 1 MiB; links and directories are refused) and never reads a system keychain. In an isolated sandbox, one installer receives the files on stdin and writes them into the private home with `0700` directories and `0600` files, refusing path traversal; secrets never appear in command arguments. Credential variables reach every command of that agent in the sandbox, so code the agent runs can read them. A copied account login carries your subscription session: prefer a dedicated profile or a long-lived token when refresh-token rotation matters. The local provider writes no credential file and runs no login command. See [authentication](../../manual/authentication/).
+
 ## Handle sensitive artifacts
 
 - Keep secrets in ignored environment files or secure process configuration, not source or remote URLs.
-- Mount only needed authentication files, preferably read-only when supported.
+- Prefer the harness `authentication` option to mounting authentication files; mount only needed files, preferably read-only when supported.
 - Treat logs, native transcripts, bundles and patches as potentially sensitive.
 - Apply retention and backup rules to `.outpost/logs`, `.outpost/recovery` and native agent storage independently.
 

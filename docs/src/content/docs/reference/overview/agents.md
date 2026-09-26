@@ -10,13 +10,13 @@ An agent composes an execution harness with a model. A harness defines how the t
 
 ## How it works
 
-Use `agent({ harness: codexHarness(), model: "..." })`, or the corresponding `claudeHarness()` and `geminiHarness()` presets. `harness({ modelProvider, run })` connects a caller-supplied callback to a model service. `sandboxProvider` independently selects where repository commands execute.
+Use `agent({ harness: codexHarness(), model: "..." })`, or the corresponding `claudeHarness()`, `antigravityHarness()`, `copilotHarness()` and `kimiHarness()` presets. `harness({ modelProvider, tools, instructions })` lets Outpost drive a model service itself. `sandboxProvider` independently selects where repository commands execute.
 
-`agent()` normalizes the model into a frozen `AgentModel` and asks the harness or its model provider to validate it. A reasoning level or output limit that the selected CLI or service cannot express is rejected immediately, before any sandbox exists.
+`agent()` normalizes the model into a frozen `AgentModel` and asks the harness or its model provider to validate it. A reasoning level or output limit that the selected CLI or service cannot express is rejected immediately, before any sandbox exists. Antigravity, Copilot and Kimi accept only a model name; Kimi with `usage` authentication requires one.
 
 ## Boundaries and responsibilities
 
-An agent binds execution configuration and model selection. The [Harness](../harness/) family owns CLI presets, custom callbacks, authentication settings and execution capabilities. [Model providers](../model-providers/) supply HTTP transports to custom harnesses, while `sandboxProvider` independently selects the execution environment.
+An agent binds execution configuration and model selection. The [Harness](../harness/) family owns CLI presets, the built-in engine, authentication settings (`AgentAuthentication`, `AccountCredential`, `UsageCredential`) and execution capabilities. [Model providers](../model-providers/) supply HTTP transports to custom harnesses, while `sandboxProvider` independently selects the execution environment.
 
 These composition APIs are available since 5.0.0. Use the agent with dispatch, a sandbox or a workflow task; constructing it performs no execution.
 

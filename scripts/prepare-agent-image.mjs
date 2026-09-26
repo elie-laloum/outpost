@@ -19,9 +19,10 @@ const manifest = JSON.parse(
   await readFile(resolve(source, "package.json"), "utf8"),
 );
 for (const [name, version] of Object.entries({
-  "@google/gemini-cli": agentVersions.gemini,
   "@openai/codex": agentVersions.codex,
   "@anthropic-ai/claude-code": agentVersions.claude,
+  "@github/copilot": agentVersions.copilot,
+  "@moonshot-ai/kimi-code": agentVersions.kimi,
 })) {
   if (manifest.dependencies[name] !== version)
     throw new Error(

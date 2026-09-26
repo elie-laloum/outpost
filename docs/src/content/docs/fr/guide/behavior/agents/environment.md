@@ -25,7 +25,7 @@ Le provider et l’adapter ne peuvent pas déclarer le même nom. Placez l’env
 
 ## Choisir l’authentification
 
-Utilisez `OPENAI_API_KEY` pour Codex, et `ANTHROPIC_API_KEY` ou `CLAUDE_CODE_OAUTH_TOKEN` pour Claude Code. Pour l’authentification native, montez explicitement le fichier ou répertoire requis dans le home de l’agent. Préférez la lecture seule lorsque le CLI la supporte. Ne montez pas tout votre home pour fournir un seul identifiant.
+Choisissez les identifiants avec l’option `authentication` du harness. `"usage"` lit la variable de clé API par défaut du CLI : `ANTHROPIC_API_KEY` pour Claude Code, `OPENAI_API_KEY` pour Codex, `GEMINI_API_KEY` pour Antigravity et `KIMI_API_KEY` pour Kimi. `{ account: { variable } }` lit un jeton comme `CLAUDE_CODE_OAUTH_TOKEN` ou `COPILOT_GITHUB_TOKEN`. Toute forme `variable` lit les variables résolues décrites ci-dessus (`variables` de l’adapter, `variables` du provider et déclarations de `.outpost/.env`) ; une variable absente fait échouer la préparation de la sandbox. `"account"` et `{ account: { file } }` copient la connexion de l’hôte dans le home privé de la sandbox des providers isolés ; avec `localSandboxProvider()`, rien n’est copié et le CLI utilise sa propre connexion sur l’hôte. Outpost ne lit jamais un trousseau système. Voir [l’authentification](../../../manual/authentication/) pour les formes acceptées par chaque CLI. Ne montez pas tout votre home pour fournir un seul identifiant.
 
 Les identifiants Vercel/Daytona servent à allouer la sandbox, indépendamment des appels au modèle. Une connexion au provider réussie ne prouve pas que l’agent est authentifié.
 
@@ -35,4 +35,4 @@ Voir [les montages](../../../environment/providers/containers/) et [les limites 
 
 ## Connecter un compte
 
-Suivez la [connexion Claude Code](../../../agents/connect-claude/) ou la [connexion Codex](../../../agents/connect-codex/) pour les abonnements, clés API et conteneurs. Déclarer OPENAI_API_KEY ne crée pas à lui seul une connexion Codex ; utilisez le hook documenté.
+Suivez la page de connexion de [Claude Code](../../../agents/connect-claude/), [Codex](../../../agents/connect-codex/), [Antigravity](../../../agents/connect-antigravity/), [Copilot](../../../agents/connect-copilot/) ou [Kimi](../../../agents/connect-kimi/) pour les comptes, clés API et conteneurs. Déclarer `OPENAI_API_KEY` ne crée pas à lui seul une connexion Codex : choisissez `authentication: "usage"` pour qu’Outpost exécute `codex login --with-api-key` dans la sandbox.

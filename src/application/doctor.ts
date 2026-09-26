@@ -1,7 +1,7 @@
 import { invariant } from "../domain/errors.ts";
 import { executeProcess } from "../infrastructure/process.ts";
 import type { Executor } from "../infrastructure/process.types.ts";
-import { agentVersions } from "../providers/versions.constants.ts";
+import { agentVersionProbe } from "./doctor-agent.ts";
 import { diagnoseImage } from "./doctor-image.ts";
 import { diagnosticProbe } from "./diagnostic-probe.ts";
 import { doctorDefaults, providerDiagnostics } from "./doctor.constants.ts";
@@ -103,12 +103,10 @@ export async function diagnose(
     await diagnosticProbe(
       {
         id: "agent.host",
-        command: { executable: agent, arguments: ["--version"] },
+        ...agentVersionProbe(agent),
         failureStatus: "warn",
         remedy:
           "Host CLI is unavailable or unverified. A sandbox may have its own CLI; dispatch can bootstrap a missing agent.",
-        readVersion: true,
-        referenceVersion: agentVersions[agent],
       },
       execute,
     ),
