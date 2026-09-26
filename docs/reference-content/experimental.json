@@ -20,12 +20,12 @@
     "Expérimental : requêtes texte bornées et exécution de harness fournie par l’appelant. Sans boucle d’outils intégrée, streaming ni persistance native des conversations personnalisées."
   ],
   "ModelRequest": [
-    "Experimental: bounded text requests and caller-supplied harness execution. No built-in tool loop, streaming or native custom-harness conversation persistence.",
-    "Expérimental : requêtes texte bornées et exécution de harness fournie par l’appelant. Sans boucle d’outils intégrée, streaming ni persistance native des conversations personnalisées."
+    "Experimental: bounded requests with messages, tools, reasoning and history caching for custom harnesses. No streaming yet; the contract may change before release.",
+    "Expérimental : requêtes bornées avec messages, outils, raisonnement et cache d’historique pour les harness personnalisés. Pas encore de streaming ; le contrat peut changer avant publication."
   ],
   "ModelResult": [
-    "Experimental: bounded text requests and caller-supplied harness execution. No built-in tool loop, streaming or native custom-harness conversation persistence.",
-    "Expérimental : requêtes texte bornées et exécution de harness fournie par l’appelant. Sans boucle d’outils intégrée, streaming ni persistance native des conversations personnalisées."
+    "Experimental: normalized content blocks, stop reason and usage returned to custom harnesses. No streaming yet; the contract may change before release.",
+    "Expérimental : blocs de contenu normalisés, raison d’arrêt et usage renvoyés aux harness personnalisés. Pas encore de streaming ; le contrat peut changer avant publication."
   ],
   "anthropicModelProvider": [
     "Experimental: bounded text requests and caller-supplied harness execution. No built-in tool loop, streaming or native custom-harness conversation persistence.",
@@ -38,5 +38,37 @@
   "harness": [
     "Experimental: bounded text requests and caller-supplied harness execution. No built-in tool loop, streaming or native custom-harness conversation persistence.",
     "Expérimental : requêtes texte bornées et exécution de harness fournie par l’appelant. Sans boucle d’outils intégrée, streaming ni persistance native des conversations personnalisées."
+  ],
+  "ModelMessage": [
+    "Experimental: provider-neutral messages, tool calls and replayable reasoning for model transports. No streaming yet; the contract may change before release.",
+    "Expérimental : messages, appels d’outils et raisonnement rejouable neutres vis-à-vis du fournisseur. Pas encore de streaming ; le contrat peut changer avant publication."
+  ],
+  "ModelContentBlock": [
+    "Experimental: provider-neutral messages, tool calls and replayable reasoning for model transports. No streaming yet; the contract may change before release.",
+    "Expérimental : messages, appels d’outils et raisonnement rejouable neutres vis-à-vis du fournisseur. Pas encore de streaming ; le contrat peut changer avant publication."
+  ],
+  "ModelTextBlock": [
+    "Experimental: provider-neutral messages, tool calls and replayable reasoning for model transports. No streaming yet; the contract may change before release.",
+    "Expérimental : messages, appels d’outils et raisonnement rejouable neutres vis-à-vis du fournisseur. Pas encore de streaming ; le contrat peut changer avant publication."
+  ],
+  "ModelToolCallBlock": [
+    "Experimental: provider-neutral messages, tool calls and replayable reasoning for model transports. No streaming yet; the contract may change before release.",
+    "Expérimental : messages, appels d’outils et raisonnement rejouable neutres vis-à-vis du fournisseur. Pas encore de streaming ; le contrat peut changer avant publication."
+  ],
+  "ModelToolResultBlock": [
+    "Experimental: provider-neutral messages, tool calls and replayable reasoning for model transports. No streaming yet; the contract may change before release.",
+    "Expérimental : messages, appels d’outils et raisonnement rejouable neutres vis-à-vis du fournisseur. Pas encore de streaming ; le contrat peut changer avant publication."
+  ],
+  "ModelReasoningBlock": [
+    "Experimental: provider-neutral messages, tool calls and replayable reasoning for model transports. No streaming yet; the contract may change before release.",
+    "Expérimental : messages, appels d’outils et raisonnement rejouable neutres vis-à-vis du fournisseur. Pas encore de streaming ; le contrat peut changer avant publication."
+  ],
+  "ModelToolSpec": [
+    "Experimental: provider-neutral messages, tool calls and replayable reasoning for model transports. No streaming yet; the contract may change before release.",
+    "Expérimental : messages, appels d’outils et raisonnement rejouable neutres vis-à-vis du fournisseur. Pas encore de streaming ; le contrat peut changer avant publication."
+  ],
+  "ModelStopReason": [
+    "Experimental: provider-neutral messages, tool calls and replayable reasoning for model transports. No streaming yet; the contract may change before release.",
+    "Expérimental : messages, appels d’outils et raisonnement rejouable neutres vis-à-vis du fournisseur. Pas encore de streaming ; le contrat peut changer avant publication."
   ]
 }

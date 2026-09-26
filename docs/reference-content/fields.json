@@ -3365,12 +3365,12 @@
     "Identité du fournisseur ; le client direct intégré indique openai-compatible."
   ],
   "ModelRequest.prompt": [
-    "Nonempty text sent as this request’s user input; no repository content is collected automatically.",
-    "Texte non vide envoyé comme entrée utilisateur de cette requête ; aucun contenu du dépôt n’est collecté automatiquement."
+    "Nonempty text sent as a single user message. Use it or messages, never both; no repository content is collected automatically.",
+    "Texte non vide envoyé comme unique message utilisateur. Utilisez-le ou messages, jamais les deux ; aucun contenu du dépôt n’est collecté automatiquement."
   ],
   "ModelRequest.system": [
-    "Optional text sent as a Chat Completions system message or Responses instructions.",
-    "Texte optionnel envoyé comme message system de Chat Completions ou instructions de Responses."
+    "Optional instructions sent as a Chat Completions system message, Responses instructions or Anthropic system text.",
+    "Instructions optionnelles envoyées comme message system de Chat Completions, instructions de Responses ou texte system d’Anthropic."
   ],
   "ModelRequest.maxOutputTokens": [
     "Positive output token limit sent as max_completion_tokens, max_output_tokens or max_tokens. Optional for OpenAI, required by Anthropic. Inside a custom harness it defaults to the agent model limit.",
@@ -3381,8 +3381,8 @@
     "Signal d’annulation de l’appelant pour cette requête, combiné au délai du fournisseur. L’annulation ne détruit pas le client réutilisable."
   ],
   "ModelResult.text": [
-    "Complete assistant text, preserving whitespace; Responses output_text parts are concatenated in order. Incomplete or unsupported outputs reject instead of returning partial success.",
-    "Texte complet de l’assistant, espaces préservés ; les parties output_text de Responses sont concaténées dans l’ordre. Les sorties incomplètes ou non prises en charge échouent sans succès partiel."
+    "Concatenated text blocks of the response; empty when the model only called tools.",
+    "Blocs de texte concaténés de la réponse ; vide quand le modèle a seulement appelé des outils."
   ],
   "ModelResult.usage": [
     "Token counts reported by the service, when present. Missing usage stays absent; missing cached-token details become zero. This is not a billing estimate or automatic workflow usage report.",
@@ -3705,8 +3705,8 @@
     "Analyse un transcript natif pour récupérer l’usage de tokens disponible."
   ],
   "ModelProvider.request": [
-    "Perform one bounded text request for the supplied model. The harness-scoped wrapper propagates cancellation and records reported usage once.",
-    "Exécute une requête texte bornée pour le modèle fourni. Le wrapper du harness propage l’annulation et comptabilise une fois l’usage rapporté."
+    "Perform one bounded, non-streaming request for the supplied model. The harness-scoped wrapper propagates cancellation and records reported usage once.",
+    "Exécute une requête bornée sans streaming pour le modèle fourni. Le wrapper du harness propage l’annulation et comptabilise une fois l’usage rapporté."
   ],
   "ModelRequest.model": [
     "Nonempty service-specific model identifier; no local catalog or availability probe is used.",
@@ -3851,5 +3851,105 @@
   "ModelRequest.reasoning": [
     "Optional reasoning effort for this request. OpenAI sends it as reasoning_effort or reasoning.effort; Anthropic maps none to disabled thinking and low to max to adaptive thinking with that effort, and rejects minimal.",
     "Effort de raisonnement optionnel pour cette requête. OpenAI l’envoie dans reasoning_effort ou reasoning.effort ; Anthropic traduit none en réflexion désactivée et low à max en réflexion adaptative avec cet effort, et refuse minimal."
+  ],
+  "ModelRequest.messages": [
+    "Conversation history starting and ending with a user message. Each tool call needs exactly one result in the next user message; reasoning blocks from another provider or model are dropped before sending.",
+    "Historique de conversation qui commence et se termine par un message utilisateur. Chaque appel d’outil exige exactement un résultat dans le message utilisateur suivant ; les blocs de raisonnement d’un autre fournisseur ou modèle sont retirés avant l’envoi."
+  ],
+  "ModelRequest.tools": [
+    "Tools the model may call, with unique names and JSON Schema inputs. The provider translates them to its function or tool format; it never executes them.",
+    "Outils que le modèle peut appeler, avec des noms uniques et des entrées en JSON Schema. Le fournisseur les traduit dans son format ; il ne les exécute jamais."
+  ],
+  "ModelRequest.cache": [
+    "Ask Anthropic to cache the conversation prefix with an automatic breakpoint. OpenAI caches stable prefixes automatically and ignores the flag.",
+    "Demande à Anthropic de mettre en cache le préfixe de la conversation avec un point de cache automatique. OpenAI met en cache les préfixes stables automatiquement et ignore l’option."
+  ],
+  "ModelResult.content": [
+    "Normalized response blocks in model order: text, tool calls and opaque reasoning to replay unchanged in later requests. Built-in providers always return it.",
+    "Blocs de réponse normalisés dans l’ordre du modèle : texte, appels d’outils et raisonnement opaque à rejouer tel quel dans les requêtes suivantes. Les fournisseurs intégrés le renvoient toujours."
+  ],
+  "ModelResult.stopReason": [
+    "Why the model stopped: end, tool-calls, max-tokens or refusal. A max-tokens result may contain truncated text or incomplete tool calls.",
+    "Raison de l’arrêt du modèle : end, tool-calls, max-tokens ou refusal. Un résultat max-tokens peut contenir un texte tronqué ou des appels d’outils incomplets."
+  ],
+  "ModelProvider.identity": [
+    "Stable key combining the protocol and endpoint. Reasoning blocks carry it so they are replayed only to the service that produced them.",
+    "Clé stable qui combine le protocole et l’endpoint. Les blocs de raisonnement la portent pour n’être rejoués qu’au service qui les a produits."
+  ],
+  "ModelMessage.role": [
+    "Author of the message: user for prompts and tool results, assistant for model output.",
+    "Auteur du message : user pour les prompts et les résultats d’outils, assistant pour la sortie du modèle."
+  ],
+  "ModelMessage.content": [
+    "Nonempty ordered content blocks. Tool calls and reasoning belong to assistant messages; tool results belong to user messages.",
+    "Blocs de contenu ordonnés, non vides. Les appels d’outils et le raisonnement appartiennent aux messages assistant ; les résultats d’outils aux messages utilisateur."
+  ],
+  "ModelTextBlock.type": [
+    "Block discriminator: text.",
+    "Discriminant du bloc : text."
+  ],
+  "ModelTextBlock.text": [
+    "Plain text of the block; empty text blocks are not sent to Anthropic.",
+    "Texte brut du bloc ; les blocs de texte vides ne sont pas envoyés à Anthropic."
+  ],
+  "ModelToolCallBlock.type": [
+    "Block discriminator: tool-call.",
+    "Discriminant du bloc : tool-call."
+  ],
+  "ModelToolCallBlock.id": [
+    "Service-issued call identifier that the matching tool result must reference.",
+    "Identifiant d’appel émis par le service, que le résultat correspondant doit référencer."
+  ],
+  "ModelToolCallBlock.name": [
+    "Name of the requested tool, as declared in the request tools.",
+    "Nom de l’outil demandé, tel que déclaré dans les outils de la requête."
+  ],
+  "ModelToolCallBlock.input": [
+    "Parsed tool arguments. When the service returns invalid JSON, the raw string is kept so the caller can report the error to the model.",
+    "Arguments de l’outil analysés. Quand le service renvoie un JSON invalide, la chaîne brute est conservée pour que l’appelant signale l’erreur au modèle."
+  ],
+  "ModelToolResultBlock.type": [
+    "Block discriminator: tool-result.",
+    "Discriminant du bloc : tool-result."
+  ],
+  "ModelToolResultBlock.callId": [
+    "Identifier of the tool call this result answers.",
+    "Identifiant de l’appel d’outil auquel ce résultat répond."
+  ],
+  "ModelToolResultBlock.content": [
+    "Text returned to the model for this call.",
+    "Texte renvoyé au modèle pour cet appel."
+  ],
+  "ModelToolResultBlock.isError": [
+    "Mark the result as a failed tool execution so the model can recover.",
+    "Signale un échec d’exécution de l’outil pour que le modèle puisse se corriger."
+  ],
+  "ModelReasoningBlock.type": [
+    "Block discriminator: reasoning.",
+    "Discriminant du bloc : reasoning."
+  ],
+  "ModelReasoningBlock.provider": [
+    "Identity of the provider that produced the block; other providers never receive it.",
+    "Identité du fournisseur qui a produit le bloc ; les autres fournisseurs ne le reçoivent jamais."
+  ],
+  "ModelReasoningBlock.model": [
+    "Model that produced the block; it is replayed only to the same model.",
+    "Modèle qui a produit le bloc ; il n’est rejoué qu’à ce même modèle."
+  ],
+  "ModelReasoningBlock.data": [
+    "Opaque service payload, such as an Anthropic thinking block with its signature or an OpenAI encrypted reasoning item. Do not modify it.",
+    "Charge opaque du service, comme un bloc thinking Anthropic avec sa signature ou un élément de raisonnement chiffré OpenAI. Ne la modifiez pas."
+  ],
+  "ModelToolSpec.name": [
+    "Unique tool name of 1 to 64 letters, digits, underscores or hyphens.",
+    "Nom d’outil unique de 1 à 64 lettres, chiffres, tirets bas ou tirets."
+  ],
+  "ModelToolSpec.description": [
+    "Explanation the model reads to decide when and how to call the tool.",
+    "Explication que le modèle lit pour décider quand et comment appeler l’outil."
+  ],
+  "ModelToolSpec.inputSchema": [
+    "JSON Schema object describing the tool arguments.",
+    "Objet JSON Schema qui décrit les arguments de l’outil."
   ]
 }

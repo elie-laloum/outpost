@@ -60,8 +60,14 @@ test("Anthropic sends model per request with explicit system cache and normalize
   });
   assert.deepEqual(result, {
     text: "answer",
+    content: [{ type: "text", text: "answer" }],
+    stopReason: "end",
     usage: { input: 21, cached: 11, cacheCreated: 7, output: 2 },
   });
+  assert.equal(
+    provider.identity,
+    `anthropic:messages:http://127.0.0.1:${address.port}/v1`,
+  );
   assert.deepEqual(requests[0], {
     url: "/v1/messages",
     key: "secret",
@@ -220,16 +226,48 @@ test("Anthropic rejects invalid configuration and unsupported or incomplete resp
   for (const value of [
     null,
     {},
-    { ...message, stop_reason: "max_tokens" },
-    { ...message, stop_reason: "refusal" },
+    { ...message, stop_reason: "pause_turn" },
+    { ...message, stop_reason: "toString" },
+    { ...message, stop_reason: "tool_use" },
     { ...message, content: [{ type: "tool_use" }] },
+    { ...message, content: [{ type: "server_tool_use" }] },
     { ...message, content: [] },
     { ...message, usage: { input_tokens: -1, output_tokens: 1 } },
   ])
     assert.throws(() => readAnthropicResponse(value), { code: "response" });
   assert.deepEqual(readAnthropicResponse({ ...message, usage: undefined }), {
     text: "answer",
+    content: [{ type: "text", text: "answer" }],
+    stopReason: "end",
   });
+  assert.equal(
+    readAnthropicResponse({ ...message, stop_reason: "max_tokens" }).stopReason,
+    "max-tokens",
+  );
+  assert.equal(
+    readAnthropicResponse({ ...message, stop_reason: "refusal" }).stopReason,
+    "refusal",
+  );
+  const called = readAnthropicResponse(
+    {
+      ...message,
+      stop_reason: "tool_use",
+      content: [
+        { type: "thinking", thinking: "", signature: "sig" },
+        { type: "tool_use", id: "t1", name: "read", input: { path: "a" } },
+      ],
+    },
+    { identity: "anthropic:test", model: "claude" },
+  );
+  assert.deepEqual(called.content, [
+    {
+      type: "reasoning",
+      provider: "anthropic:test",
+      model: "claude",
+      data: { type: "thinking", thinking: "", signature: "sig" },
+    },
+    { type: "tool-call", id: "t1", name: "read", input: { path: "a" } },
+  ]);
   assert.deepEqual(
     readAnthropicResponse({
       ...message,

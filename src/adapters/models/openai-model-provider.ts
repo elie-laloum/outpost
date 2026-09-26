@@ -1,8 +1,8 @@
 import { invariant } from "../../domain/errors.ts";
 import type { ModelProvider } from "../../domain/model.types.ts";
 import type { OpenAIModelProviderOptions } from "./openai-model-provider.types.ts";
-import { modelProtocols } from "./openai-request.ts";
-import { textProvider } from "./text-provider.ts";
+import { modelProtocols } from "./openai-protocols.ts";
+import { httpModelProvider } from "./http-provider.ts";
 
 export function openaiModelProvider(
   options: OpenAIModelProviderOptions,
@@ -24,7 +24,7 @@ export function openaiModelProvider(
     Object.hasOwn(modelProtocols, api),
     "Unsupported model API protocol",
   );
-  return textProvider(
+  return httpModelProvider(
     options,
     modelProtocols[api]!,
     "openai",

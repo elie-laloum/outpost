@@ -20,14 +20,16 @@ import type { ModelProvider } from "@elie-laloum/outpost";
 | Nom        | Type                                              | Présence  | Rôle                                                                                                                                                                                                |
 | ---------- | ------------------------------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `name`     | `string`                                          | Requis    | Identité du fournisseur ; le client direct intégré indique openai-compatible.                                                                                                                       |
+| `identity` | `string \| undefined`                             | Optionnel | Clé stable qui combine le protocole et l’endpoint. Les blocs de raisonnement la portent pour n’être rejoués qu’au service qui les a produits.                                                       |
 | `validate` | `((model: AgentModel) => void) \| undefined`      | Optionnel | Contrôle optionnel appelé par agent() avec l’AgentModel normalisé ; lever une erreur pour refuser un niveau de raisonnement non pris en charge ou une limite de sortie absente avant toute requête. |
-| `request`  | `(request: ModelRequest) => Promise<ModelResult>` | Requis    | Exécute une requête texte bornée pour le modèle fourni. Le wrapper du harness propage l’annulation et comptabilise une fois l’usage rapporté.                                                       |
+| `request`  | `(request: ModelRequest) => Promise<ModelResult>` | Requis    | Exécute une requête bornée sans streaming pour le modèle fourni. Le wrapper du harness propage l’annulation et comptabilise une fois l’usage rapporté.                                              |
 
 ## Signature
 
 ```ts
 export interface ModelProvider {
   readonly name: string;
+  readonly identity?: string;
   validate?(model: AgentModel): void;
   request(request: ModelRequest): Promise<ModelResult>;
 }

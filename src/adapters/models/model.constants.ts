@@ -4,7 +4,10 @@ export const MODEL_MAX_TIMEOUT_MS = 2_147_483_647;
 export const MODEL_REQUEST_FIELDS = new Set([
   "model",
   "prompt",
+  "messages",
   "system",
+  "tools",
+  "cache",
   "maxOutputTokens",
   "reasoning",
   "signal",

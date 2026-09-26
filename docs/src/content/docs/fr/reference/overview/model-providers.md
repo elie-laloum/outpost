@@ -7,7 +7,7 @@ sidebar:
 ---
 
 :::caution[Expérimental — refonte non publiée]
-Les requêtes texte bornées et les callbacks personnalisés sont implémentés. La boucle d’outils intégrée, le streaming et les conversations natives personnalisées restent prévus.
+Les requêtes bornées avec messages, appels d’outils, rejeu du raisonnement et cache d’historique sont implémentées, avec les callbacks personnalisés. La boucle d’outils intégrée, le streaming et les conversations natives personnalisées restent prévus.
 :::
 
 Un fournisseur de modèles porte le transport de requêtes utilisé par un harness personnalisé. `openaiModelProvider()` prend en charge les services Chat Completions et Responses ; `anthropicModelProvider()` utilise Anthropic Messages avec cache optionnel du préfixe système. L’allocation du sandbox est indépendante.
@@ -18,7 +18,7 @@ Configurez endpoint, credentials explicites et limites, puis transmettez le four
 
 ## Frontières et responsabilités
 
-Le modèle de l’agent est un nom non vide, éventuellement accompagné de `reasoning` et `maxOutputTokens` que le fournisseur valide à la composition. Le service vérifie la disponibilité lors de l’appel ; aucun catalogue local, retry ni repli de protocole. Ces transports refusent les réponses d’outils et sorties incomplètes. Les fixtures HTTP locales valident les contrats sans prouver la compatibilité authentifiée de tous les services.
+Le modèle de l’agent est un nom non vide, éventuellement accompagné de `reasoning` et `maxOutputTokens` que le fournisseur valide à la composition. Le service vérifie la disponibilité lors de l’appel ; aucun catalogue local, retry ni repli de protocole. Ces transports traduisent les appels d’outils sans jamais les exécuter ; les résultats indiquent une raison d’arrêt normalisée au lieu de masquer une troncature ou un refus. Les fixtures HTTP locales valident les contrats sans prouver la compatibilité authentifiée de tous les services.
 
 ## Points d’entrée
 

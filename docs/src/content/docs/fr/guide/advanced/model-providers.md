@@ -6,7 +6,7 @@ sidebar:
 ---
 
 :::caution[API non publiée]
-Cette API de l’arbre de travail remplace le client direct expérimental de 4.2.0. Utilisez un package construit depuis ce checkout. Elle fournit des requêtes texte bornées et un callback personnalisé, sans boucle d’outils intégrée, streaming ni conversations natives personnalisées.
+Cette API de l’arbre de travail remplace le client direct expérimental de 4.2.0. Utilisez un package construit depuis ce checkout. Elle fournit des requêtes bornées avec messages et appels d’outils, ainsi qu’un callback personnalisé, sans boucle d’outils intégrée, streaming ni conversations natives personnalisées.
 :::
 
 `openaiModelProvider()` configure un service HTTP utilisant Chat Completions ou Responses. `anthropicModelProvider()` utilise Anthropic Messages. Le harness porte le fournisseur ; l’agent sélectionne son modèle avec un nom ou un objet `{ name, reasoning, maxOutputTokens }`. Un modèle inconnu ou inaccessible échoue lors de l’appel au service, sans catalogue ni substitution.
@@ -89,6 +89,23 @@ Lancez `node --env-file=.env example.mts`. La commande affiche la réponse et l�
 
 Les sept niveaux sont `none`, `minimal`, `low`, `medium`, `high`, `xhigh` et `max`. OpenAI les transmet tels quels : le service décide des niveaux acceptés par chaque modèle. Certains modèles Anthropic ne peuvent pas désactiver la réflexion et refusent `none`.
 
+## Messages, appels d’outils et rejeu du raisonnement
+
+Une requête porte soit `prompt`, soit `messages`. Les messages commencent et se terminent par un message utilisateur. Chaque bloc `tool-call` d’un message assistant exige exactement un bloc `tool-result` dans le message utilisateur suivant ; sinon la requête est refusée. Déclarez les outils appelables dans `tools` avec un nom, une description et un JSON Schema. Le fournisseur les traduit en fonctions Chat Completions, éléments de fonction Responses ou outils Anthropic, et ne les exécute jamais.
+
+Le résultat conserve les blocs de la réponse dans `content` et explique la fin du tour dans `stopReason` :
+
+| `stopReason` | Signification                                                                                |
+| ------------ | -------------------------------------------------------------------------------------------- |
+| `end`        | Réponse finale dans `text`.                                                                  |
+| `tool-calls` | Le modèle demande des outils ; répondez à chaque appel avant la requête suivante.            |
+| `max-tokens` | La limite de sortie est atteinte ; le texte ou les arguments d’outils peuvent être tronqués. |
+| `refusal`    | Le service a refusé ou filtré la réponse.                                                    |
+
+Ajoutez le `content` renvoyé tel quel comme message assistant suivant. Il peut contenir des blocs `reasoning` : la réflexion Anthropic avec sa signature, ou les éléments de raisonnement chiffrés d’OpenAI. Chaque bloc enregistre l’`identity` du fournisseur et le modèle qui l’ont produit, et n’est renvoyé qu’à ce même couple. Chat Completions ne sait pas rejouer le raisonnement : ses blocs sont retirés. Des arguments d’outil en JSON invalide sont conservés sous forme de chaîne brute, pour que l’appelant réponde par un résultat en erreur.
+
+Avec `cache: true`, Anthropic met en cache le préfixe de la conversation grâce à un point de cache automatique. OpenAI met en cache les préfixes stables de lui-même et ignore l’option. Gardez le texte système et la liste d’outils identiques entre les requêtes pour profiter de l’un ou l’autre cache.
+
 ## Propriété et limites des requêtes
 
 Le callback tourne dans le processus Outpost. Utilisez `context.sandbox` pour les commandes et transferts du dépôt, et attendez toutes les opérations. Le lease est emprunté et ne peut pas être libéré par le harness. Commandes et requêtes héritent de l’annulation de la passe ; le JavaScript arbitraire doit respecter `context.signal`. Outpost attend la fin des opérations suivies avant de terminer la passe.
@@ -101,6 +118,6 @@ Le protocole OpenAI utilise `chat-completions` par défaut ; sélectionnez expli
 
 Configurez `anthropicModelProvider({ apiKey, cacheSystem: true })` comme fournisseur du harness, et fixez `maxOutputTokens` sur le modèle de l’agent. Chaque requête doit alors fournir des instructions système. Le fournisseur place un point de cache éphémère sur ce texte. Éligibilité et lectures effectives dépendent du service, selon le [contrat de cache Anthropic](https://platform.claude.com/docs/en/build-with-claude/prompt-caching).
 
-`usage.input` inclut l’entrée non cachée, la création et la lecture de cache ; `cached` et `cacheCreated` en sont des sous-ensembles, pas des totaux supplémentaires. Le fournisseur utilise [Messages](https://platform.claude.com/docs/en/api/messages/create), avec la limite de sortie prise dans la requête ou dans le modèle de l’agent. Les réponses d’outils, refus et sorties incomplètes sont rejetés.
+`usage.input` inclut l’entrée non cachée, la création et la lecture de cache ; `cached` et `cacheCreated` en sont des sous-ensembles, pas des totaux supplémentaires. Le fournisseur utilise [Messages](https://platform.claude.com/docs/en/api/messages/create), avec la limite de sortie prise dans la requête ou dans le modèle de l’agent. `pause_turn` est refusé, car les outils serveur ne sont pas pris en charge.
 
 [Référence des fournisseurs de modèles](../../../reference/overview/model-providers/) · [Moteur d’outils restant](../../../project/roadmap/#direct-model-harness)

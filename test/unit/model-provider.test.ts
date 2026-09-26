@@ -1,10 +1,12 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { openaiModelProvider, OutpostError } from "../../src/index.ts";
 import {
-  readChatCompletion,
-  readModelResponse,
-} from "../../src/adapters/models/openai-response.ts";
+  openaiModelProvider,
+  OutpostError,
+  type ModelToolSpec,
+} from "../../src/index.ts";
+import { readChatCompletion } from "../../src/adapters/models/openai-chat.ts";
+import { readModelResponse } from "../../src/adapters/models/openai-responses.ts";
 import { modelJson } from "../../src/adapters/models/model-http.ts";
 
 const options = {
@@ -72,9 +74,30 @@ test("text-only requests reject unsupported capabilities and invalid input", asy
     /maxOutputTokens/,
   );
   await assert.rejects(
-    // @ts-expect-error Runtime JavaScript callers cannot silently request tools.
-    provider.request({ model: "model", prompt: "hi", tools: [] }),
+    // @ts-expect-error Runtime JavaScript callers cannot silently request streaming.
+    provider.request({ model: "model", prompt: "hi", stream: true }),
     /Unsupported/,
+  );
+  for (const tools of [
+    [{ name: "bad name", description: "", inputSchema: {} }],
+    [{ name: "run", description: "", inputSchema: [] }],
+    [
+      { name: "run", description: "", inputSchema: {} },
+      { name: "run", description: "", inputSchema: {} },
+    ],
+  ])
+    await assert.rejects(
+      provider.request({
+        model: "model",
+        prompt: "hi",
+        tools: tools as unknown as ModelToolSpec[],
+      }),
+      /Model tools/,
+    );
+  await assert.rejects(
+    // @ts-expect-error Runtime validation rejects non-boolean cache flags.
+    provider.request({ model: "model", prompt: "hi", cache: "yes" }),
+    /cache/,
   );
   await assert.rejects(
     // @ts-expect-error Runtime input validation must reject non-text instructions.
@@ -85,8 +108,14 @@ test("text-only requests reject unsupported capabilities and invalid input", asy
   await assert.rejects(provider.request(null), /object/);
 });
 
+const ended = (text: string) => ({
+  text,
+  content: [{ type: "text", text }],
+  stopReason: "end",
+});
+
 test("Chat Completions preserves text and optional reported usage", () => {
-  assert.deepEqual(readChatCompletion(chat(" héllo\n")), { text: " héllo\n" });
+  assert.deepEqual(readChatCompletion(chat(" héllo\n")), ended(" héllo\n"));
   assert.deepEqual(
     readChatCompletion({
       ...chat(),
@@ -96,7 +125,7 @@ test("Chat Completions preserves text and optional reported usage", () => {
         prompt_tokens_details: { cached_tokens: 3 },
       },
     }),
-    { text: "hello", usage: { input: 10, output: 4, cached: 3 } },
+    { ...ended("hello"), usage: { input: 10, output: 4, cached: 3 } },
   );
   assert.deepEqual(
     readChatCompletion({
@@ -111,8 +140,22 @@ test("Responses collects output text after reasoning with actual usage", () => {
   assert.deepEqual(
     readModelResponse(
       responses([{ type: "reasoning" }, message("one"), message("two")]),
+      { identity: "openai:responses:test", model: "m" },
     ),
-    { text: "onetwo" },
+    {
+      text: "onetwo",
+      content: [
+        {
+          type: "reasoning",
+          provider: "openai:responses:test",
+          model: "m",
+          data: { type: "reasoning" },
+        },
+        { type: "text", text: "one" },
+        { type: "text", text: "two" },
+      ],
+      stopReason: "end",
+    },
   );
   assert.deepEqual(
     readModelResponse({
@@ -127,6 +170,110 @@ test("Responses collects output text after reasoning with actual usage", () => {
   );
 });
 
+test("decoders normalize tool calls, limits and refusals", () => {
+  const called = readChatCompletion({
+    choices: [
+      {
+        finish_reason: "tool_calls",
+        message: {
+          role: "assistant",
+          content: null,
+          tool_calls: [
+            {
+              id: "call-1",
+              type: "function",
+              function: { name: "read", arguments: '{"path":"a"}' },
+            },
+            {
+              id: "call-2",
+              type: "function",
+              function: { name: "read", arguments: "{broken" },
+            },
+          ],
+        },
+      },
+    ],
+  });
+  assert.equal(called.stopReason, "tool-calls");
+  assert.deepEqual(called.content, [
+    { type: "tool-call", id: "call-1", name: "read", input: { path: "a" } },
+    { type: "tool-call", id: "call-2", name: "read", input: "{broken" },
+  ]);
+  assert.equal(
+    readChatCompletion({
+      choices: [
+        {
+          finish_reason: "stop",
+          message: {
+            role: "assistant",
+            content: "",
+            tool_calls: [
+              {
+                id: "c",
+                type: "function",
+                function: { name: "t", arguments: "{}" },
+              },
+            ],
+          },
+        },
+      ],
+    }).stopReason,
+    "tool-calls",
+  );
+  assert.equal(
+    readChatCompletion({
+      choices: [{ ...chat().choices[0], finish_reason: "length" }],
+    }).stopReason,
+    "max-tokens",
+  );
+  assert.equal(
+    readChatCompletion({
+      choices: [{ ...chat().choices[0], finish_reason: "content_filter" }],
+    }).stopReason,
+    "refusal",
+  );
+  assert.equal(
+    readChatCompletion({
+      choices: [
+        {
+          finish_reason: "stop",
+          message: { role: "assistant", content: null, refusal: "no" },
+        },
+      ],
+    }).stopReason,
+    "refusal",
+  );
+  const responseCall = readModelResponse(
+    responses([
+      { type: "reasoning", id: "rs", encrypted_content: "x" },
+      { type: "function_call", call_id: "c1", name: "run", arguments: "{}" },
+    ]),
+  );
+  assert.equal(responseCall.stopReason, "tool-calls");
+  assert.deepEqual(responseCall.content?.[1], {
+    type: "tool-call",
+    id: "c1",
+    name: "run",
+    input: {},
+  });
+  assert.equal(
+    readModelResponse({
+      status: "incomplete",
+      incomplete_details: { reason: "max_output_tokens" },
+      output: [{ ...message("partial"), status: "incomplete" }],
+    }).stopReason,
+    "max-tokens",
+  );
+  assert.equal(
+    readModelResponse(
+      responses([
+        { ...message(), content: [{ type: "refusal", refusal: "no" }] },
+      ]),
+    ).stopReason,
+    "refusal",
+  );
+});
+
 test("decoders reject incomplete, refused, malformed and tool responses", () => {
   for (const value of [
     null,
@@ -137,7 +284,7 @@ test("decoders reject incomplete, refused, malformed and tool responses", () => 
     { choices: [chat().choices[0], chat().choices[0]] },
   ])
     assert.throws(() => readChatCompletion(value), { code: "response" });
-  for (const finish_reason of ["length", "tool_calls", "content_filter", null])
+  for (const finish_reason of ["tool_calls", "function_call", null])
     assert.throws(
       () =>
         readChatCompletion({
@@ -146,7 +293,7 @@ test("decoders reject incomplete, refused, malformed and tool responses", () => 
       OutpostError,
     );
   for (const extra of [
-    { refusal: "no" },
+    { refusal: 1 },
     { tool_calls: [{}] },
     { function_call: {} },
     { role: "user" },

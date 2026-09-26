@@ -17,7 +17,7 @@ import { anthropicModelProvider } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Configure un transport texte Anthropic Messages avec cache optionnel du préfixe système. Le harness fournit le modèle par requête ; le modèle de l’agent doit fixer maxOutputTokens, et le raisonnement se traduit en réflexion adaptative ou désactivée. Les lectures et écritures de cache sont normalisées dans l’usage ; outils, streaming et réponses incomplètes sont refusés.
+Configure un transport Anthropic Messages avec messages, appels d’outils, rejeu de la réflexion et cache optionnel du préfixe système et de l’historique. Le harness fournit le modèle par requête ; le modèle de l’agent doit fixer maxOutputTokens, et le raisonnement se traduit en réflexion adaptative ou désactivée. Les lectures et écritures de cache sont normalisées dans l’usage ; streaming et outils serveur sont refusés.
 
 [Exemple complet et règles détaillées](../../guide/advanced/model-providers/).
 

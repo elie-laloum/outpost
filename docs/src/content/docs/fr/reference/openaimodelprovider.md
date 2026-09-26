@@ -17,7 +17,7 @@ import { openaiModelProvider } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Configure un transport texte réutilisable utilisant Chat Completions ou Responses. Le harness fournit le modèle à chaque requête. La construction valide localement ; les requêtes appliquent annulation, taille et délais sans retry ni changement de protocole.
+Configure un transport de requêtes réutilisable utilisant Chat Completions ou Responses, avec messages, appels d’outils et effort de raisonnement. Le harness fournit le modèle à chaque requête. La construction valide localement ; les requêtes appliquent annulation, taille et délais sans retry ni changement de protocole.
 
 [Exemple complet et règles détaillées](../../guide/advanced/model-providers/).
 

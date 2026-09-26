@@ -3,7 +3,7 @@ import type { ModelProvider, ModelRequest } from "../../domain/model.types.ts";
 import type {
   HttpModelOptions,
   ModelProtocol,
-} from "./openai-model-provider.types.ts";
+} from "./model-protocol.types.ts";
 import {
   MODEL_MAX_TIMEOUT_MS,
   MODEL_RESPONSE_BYTES,
@@ -12,7 +12,7 @@ import {
 import { validateModelRequest } from "./model-request.ts";
 import { modelJson } from "./model-http.ts";
 
-export function textProvider(
+export function httpModelProvider(
   options: HttpModelOptions,
   protocol: ModelProtocol,
   name: string,
@@ -55,11 +55,14 @@ export function textProvider(
     options.maxResponseBytes ?? MODEL_RESPONSE_BYTES,
     "Model maxResponseBytes",
   );
+  const identity = `${name}:${protocol.path}:${base.origin}${base.pathname.replace(/\/+$/, "")}`;
   return Object.freeze({
     name,
+    identity,
     ...(protocol.validate ? { validate: protocol.validate } : {}),
     async request(request: ModelRequest) {
       validateModelRequest(request);
+      const context = { identity, model: request.model };
       const deadline = new AbortController();
       const signal = request.signal
         ? AbortSignal.any([request.signal, deadline.signal])
@@ -71,7 +74,7 @@ export function textProvider(
           method: "POST",
           redirect: "error",
           headers: { "Content-Type": "application/json", ...headers },
-          body: JSON.stringify(protocol.build(request.model, request)),
+          body: JSON.stringify(protocol.build(request, context)),
           signal,
         });
         if (!response.ok) {
@@ -84,7 +87,7 @@ export function textProvider(
         }
         const value = await modelJson(response, maxBytes);
         signal.throwIfAborted();
-        return protocol.read(value);
+        return protocol.read(value, context);
       } catch (error) {
         if (signal.aborted) {
           const timedOut = deadline.signal.aborted && !request.signal?.aborted;

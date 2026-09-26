@@ -1,16 +1,13 @@
 import { invariant } from "../../domain/errors.ts";
-import type {
-  ModelProvider,
-  ModelReasoning,
-} from "../../domain/model.types.ts";
+import type { ModelProvider } from "../../domain/model.types.ts";
 import type { AnthropicModelProviderOptions } from "./anthropic-model-provider.types.ts";
 import {
   ANTHROPIC_BASE_URL,
-  ANTHROPIC_REASONING,
   ANTHROPIC_VERSION,
 } from "./anthropic-model-provider.constants.ts";
+import { anthropicBody, supportedReasoning } from "./anthropic-request.ts";
 import { readAnthropicResponse } from "./anthropic-response.ts";
-import { textProvider } from "./text-provider.ts";
+import { httpModelProvider } from "./http-provider.ts";
 
 export function anthropicModelProvider(
   options: AnthropicModelProviderOptions,
@@ -41,7 +38,7 @@ export function anthropicModelProvider(
     "cacheSystem must be boolean",
   );
   const cacheSystem = options.cacheSystem ?? false;
-  return textProvider(
+  return httpModelProvider(
     { ...options, baseUrl: options.baseUrl ?? ANTHROPIC_BASE_URL },
     {
       path: "messages",
@@ -52,49 +49,10 @@ export function anthropicModelProvider(
         );
         supportedReasoning(model.reasoning);
       },
-      build(model, request) {
-        invariant(
-          !cacheSystem || !!request.system?.trim(),
-          "System cache requires system instructions",
-        );
-        invariant(
-          request.maxOutputTokens !== undefined,
-          "Anthropic requests require maxOutputTokens",
-        );
-        supportedReasoning(request.reasoning);
-        return {
-          model,
-          max_tokens: request.maxOutputTokens,
-          ...(request.reasoning === undefined
-            ? {}
-            : ANTHROPIC_REASONING[request.reasoning]),
-          stream: false,
-          messages: [{ role: "user", content: request.prompt }],
-          ...(request.system === undefined
-            ? {}
-            : {
-                system: cacheSystem
-                  ? [
-                      {
-                        type: "text",
-                        text: request.system,
-                        cache_control: { type: "ephemeral" },
-                      },
-                    ]
-                  : request.system,
-              }),
-        };
-      },
+      build: (request, context) => anthropicBody(request, context, cacheSystem),
       read: readAnthropicResponse,
     },
     "anthropic",
     { "x-api-key": options.apiKey, "anthropic-version": ANTHROPIC_VERSION },
-  );
-}
-
-function supportedReasoning(reasoning: ModelReasoning | undefined): void {
-  invariant(
-    reasoning === undefined || Object.hasOwn(ANTHROPIC_REASONING, reasoning),
-    `Anthropic does not support reasoning "${reasoning}"`,
   );
 }

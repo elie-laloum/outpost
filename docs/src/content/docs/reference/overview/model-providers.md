@@ -7,7 +7,7 @@ sidebar:
 ---
 
 :::caution[Experimental — unreleased refactor]
-Bounded text requests and custom callbacks are implemented. The built-in tool loop, streaming and native custom conversations remain planned.
+Bounded requests with messages, tool calls, reasoning replay and history caching are implemented, with custom callbacks. The built-in tool loop, streaming and native custom conversations remain planned.
 :::
 
 A model provider supplies the request transport used by a custom harness. `openaiModelProvider()` supports Chat Completions and Responses services; `anthropicModelProvider()` supports Anthropic Messages and optional system-prefix caching. Sandbox allocation is independent.
@@ -18,7 +18,7 @@ Configure the endpoint, explicit credentials and request bounds, then pass the p
 
 ## Boundaries and responsibilities
 
-The agent model is a nonempty name, optionally with `reasoning` and `maxOutputTokens` that the provider validates when the agent is composed. The service validates model availability when called; there is no local catalog, retry or protocol fallback. These transports reject tool responses and incomplete output. Local HTTP fixtures validate the contracts without proving authenticated compatibility with every service.
+The agent model is a nonempty name, optionally with `reasoning` and `maxOutputTokens` that the provider validates when the agent is composed. The service validates model availability when called; there is no local catalog, retry or protocol fallback. These transports translate tool calls but never execute them; results report a normalized stop reason instead of hiding truncation or refusals. Local HTTP fixtures validate the contracts without proving authenticated compatibility with every service.
 
 ## Entry points
 

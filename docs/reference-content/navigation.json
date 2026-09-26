@@ -716,6 +716,22 @@
         }
       },
       {
+        "slug": "reference/modelcontentblock",
+        "attrs": {
+          "data-api-kind": "type",
+          "data-api-status": "experimental",
+          "title": "Experimental / Expérimental"
+        }
+      },
+      {
+        "slug": "reference/modelstopreason",
+        "attrs": {
+          "data-api-kind": "type",
+          "data-api-status": "experimental",
+          "title": "Experimental / Expérimental"
+        }
+      },
+      {
         "slug": "reference/anthropicmodelprovideroptions",
         "attrs": {
           "data-api-kind": "interface",
@@ -749,6 +765,54 @@
       },
       {
         "slug": "reference/modelresult",
+        "attrs": {
+          "data-api-kind": "interface",
+          "data-api-status": "experimental",
+          "title": "Experimental / Expérimental"
+        }
+      },
+      {
+        "slug": "reference/modelmessage",
+        "attrs": {
+          "data-api-kind": "interface",
+          "data-api-status": "experimental",
+          "title": "Experimental / Expérimental"
+        }
+      },
+      {
+        "slug": "reference/modeltextblock",
+        "attrs": {
+          "data-api-kind": "interface",
+          "data-api-status": "experimental",
+          "title": "Experimental / Expérimental"
+        }
+      },
+      {
+        "slug": "reference/modeltoolcallblock",
+        "attrs": {
+          "data-api-kind": "interface",
+          "data-api-status": "experimental",
+          "title": "Experimental / Expérimental"
+        }
+      },
+      {
+        "slug": "reference/modeltoolresultblock",
+        "attrs": {
+          "data-api-kind": "interface",
+          "data-api-status": "experimental",
+          "title": "Experimental / Expérimental"
+        }
+      },
+      {
+        "slug": "reference/modelreasoningblock",
+        "attrs": {
+          "data-api-kind": "interface",
+          "data-api-status": "experimental",
+          "title": "Experimental / Expérimental"
+        }
+      },
+      {
+        "slug": "reference/modeltoolspec",
         "attrs": {
           "data-api-kind": "interface",
           "data-api-status": "experimental",

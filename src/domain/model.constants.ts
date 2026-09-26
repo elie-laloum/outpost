@@ -15,3 +15,5 @@ export const AGENT_MODEL_FIELDS: ReadonlySet<string> = new Set([
   "reasoning",
   "maxOutputTokens",
 ]);
+
+export const TOOL_NAME_PATTERN = /^[A-Za-z0-9_-]{1,64}$/;

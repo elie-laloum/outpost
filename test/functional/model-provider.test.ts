@@ -95,7 +95,12 @@ test("direct model HTTP contracts, cancellation, deadlines and reuse", async (t)
       maxOutputTokens: 12,
       reasoning: "low",
     }),
-    { text: " Héllo\n", usage: { input: 5, output: 3, cached: 0 } },
+    {
+      text: " Héllo\n",
+      content: [{ type: "text", text: " Héllo\n" }],
+      stopReason: "end",
+      usage: { input: 5, output: 3, cached: 0 },
+    },
   );
   assert.deepEqual(requests[0], {
     url: "/prefix/v1/chat/completions",
