@@ -13,7 +13,8 @@ import {
   runQueueWorker,
   queuedTask,
   workflow,
-  fileWorkflowCheckpointStore,
+  workflowCheckpointStore,
+  localTransport,
 } from "../../src/index.ts";
 import type { TaskQueue, QueueHandler, QueueJob } from "../../src/index.ts";
 
@@ -292,8 +293,10 @@ test("queued workflow resumes same logical job after connection loss and reports
   });
   const graph = workflow("remote", [remote]);
   const checkpoint = {
-    store: fileWorkflowCheckpointStore({
-      directory: join(directory, "checkpoints"),
+    store: workflowCheckpointStore({
+      transporter: localTransport({
+        directory: join(directory, "checkpoints"),
+      }),
     }),
     runId: "run",
     version: "1",
@@ -399,8 +402,10 @@ test("failed terminal queue usage is counted once across workflow retries and ch
   });
   const graph = workflow("failed-usage", [remote]);
   const checkpoint = {
-    store: fileWorkflowCheckpointStore({
-      directory: join(directory, "checkpoints"),
+    store: workflowCheckpointStore({
+      transporter: localTransport({
+        directory: join(directory, "checkpoints"),
+      }),
     }),
     runId: "failure",
     version: "1",

@@ -16,15 +16,16 @@ import { resolve } from "node:path";
 import {
   artifact,
   artifactTask,
-  fileArtifactStore,
-  fileWorkflowCheckpointStore,
+  artifactStore,
+  workflowCheckpointStore,
   readArtifact,
   task,
   workflow,
+  localTransport,
 } from "@elie-laloum/outpost";
 
-const store = fileArtifactStore({
-  directory: resolve(".outpost/artifacts"),
+const store = artifactStore({
+  transporter: localTransport({ directory: resolve(".outpost/artifacts") }),
   maxBytes: 1024 * 1024,
 });
 const api = artifact.json({
@@ -57,7 +58,9 @@ const consume = task({
 });
 const result = await workflow("api-contract", [publish, consume]).start({
   checkpoint: {
-    store: fileWorkflowCheckpointStore({ directory: resolve(".outpost/runs") }),
+    store: workflowCheckpointStore({
+      transporter: localTransport({ directory: resolve(".outpost/runs") }),
+    }),
     runId: "api-contract-1",
     version: "1",
   },
@@ -76,7 +79,7 @@ Le résultat complet d'un `isolatedTask` contient des méthodes de continuation 
 
 Une tâche d'artefact peut déclarer `parents: context => [context.value(publish)]` avec `after: [publish]`. La référence enregistre ces identifiants ordonnés ; modifier la filiation modifie l'identifiant même si les octets restent identiques. Déclarez vous-même chaque artefact d'entrée comme parent : la filiation est explicite, pas déduite des lectures. Les parents dupliqués sont rejetés. Leurs identifiants désignent des références, pas des chemins ; conservez les références parentes séparément si les lecteurs doivent parcourir la filiation.
 
-Sérialisez la référence avec `JSON.stringify` ou retournez-la comme résultat d'une tâche pour la [persistance par checkpoint](../../../advanced/checkpoints/). Un autre processus ouvre `fileArtifactStore` avec le même répertoire, ou sa copie, puis appelle `readStoredArtifact(store, api, parsedReference, { producer, parents })`. Cela valide la structure d'une référence non fiable, le contrat, le contenu, le schéma, le producteur attendu et les parents ordonnés exacts. Les attentes optionnelles `producer` et `parents` doivent provenir de votre état d'orchestration de confiance ; sans elles, seule la cohérence interne de ces champs est vérifiée. La référence ne contient aucun chemin propre à l'hôte. Un `ArtifactStore` personnalisé peut transporter les octets par identifiant vers une autre machine ; le lecteur vérifie toujours leur intégrité.
+Sérialisez la référence avec `JSON.stringify` ou retournez-la comme résultat d'une tâche pour la [persistance par checkpoint](../../../advanced/checkpoints/). Un autre processus ouvre `artifactStore` avec le même répertoire, ou sa copie, puis appelle `readStoredArtifact(store, api, parsedReference, { producer, parents })`. Cela valide la structure d'une référence non fiable, le contrat, le contenu, le schéma, le producteur attendu et les parents ordonnés exacts. Les attentes optionnelles `producer` et `parents` doivent provenir de votre état d'orchestration de confiance ; sans elles, seule la cohérence interne de ces champs est vérifiée. La référence ne contient aucun chemin propre à l'hôte. Un `ArtifactStore` personnalisé peut transporter les octets par identifiant vers une autre machine ; le lecteur vérifie toujours leur intégrité.
 
 Pour publier hors d'un workflow, utilisez `publishArtifact(store, api, value, { producer: { executionId, taskKey, attempt }, parents })`. `attempt` commence à 1. Dans un workflow, `artifactTask` fournit automatiquement l'identité du producteur et l'annulation.
 
@@ -84,8 +87,8 @@ Pour publier hors d'un workflow, utilisez `publishArtifact(store, api, value, { 
 
 Utilisez `artifact.binary({ name: "bundle", version: "1" })` pour des données `Uint8Array`, y compris des `Buffer` Node. Lisez un fichier que vous possédez avec `node:fs/promises.readFile`, puis publiez ses octets. Les lectures renvoient un nouveau tableau d'octets. Aucun nom de fichier, permission, répertoire, extraction d'archive ou lien symbolique n'est transporté. Téléchargez les fichiers de la sandbox via sa capacité de transfert avant publication ; sa destruction ne supprime pas les artefacts stockés. Les contrats JSON exigent des valeurs JSON sans perte ; dates, champs undefined, nombres non finis et instances de classes sont rejetés.
 
-`fileArtifactStore` limite par défaut chaque contenu à 16 Mio ; `maxBytes` configure cette limite en lecture et en écriture. Les opérations chargent un contenu borné en mémoire ; les appelants doivent limiter la taille des fichiers sources avant de les charger. Ce n'est ni un quota disque total ni un service de diffusion de gros fichiers.
+`artifactStore` limite par défaut chaque contenu à 16 Mio ; `maxBytes` configure cette limite en lecture et en écriture. Les opérations chargent un contenu borné en mémoire ; les appelants doivent limiter la taille des fichiers sources avant de les charger. Ce n'est ni un quota disque total ni un service de diffusion de gros fichiers.
 
-L'appelant possède le répertoire et gère sa conservation. Gardez-le hors des worktrees jetables, privé aux auteurs de confiance et hors du contrôle de version. Les composants du répertoire et les fichiers objets ne doivent pas être des liens symboliques ; fournissez un chemin canonique sur les plateformes dont les répertoires temporaires ont des alias. Des objets identiques peuvent être republiés simultanément ; un contenu conflictuel est rejeté. La publication prépare, synchronise et lie atomiquement un objet immuable, puis synchronise le répertoire sur les plateformes compatibles. L'annulation et les échecs ordinaires nettoient les fichiers temporaires. Un crash peut laisser des fichiers cachés `.tmp` ou des objets complets sans référence ; inspectez-les et supprimez-les uniquement lorsque les auteurs sont arrêtés. Aucun nettoyage automatique n'est exécuté : conservez chaque objet nécessaire aux checkpoints retenus et à la filiation avant toute suppression.
+L'appelant possède le répertoire et gère sa conservation. Gardez-le hors des worktrees jetables, privé aux auteurs de confiance et hors du contrôle de version. Les composants du répertoire et les fichiers objets ne doivent pas être des liens symboliques ; fournissez un chemin canonique sur les plateformes dont les répertoires temporaires ont des alias. Des objets identiques peuvent être republiés simultanément ; un contenu conflictuel est rejeté. La publication prépare, synchronise et publie conditionnellement un objet immuable, puis synchronise le répertoire sur les plateformes compatibles. L'annulation et les échecs ordinaires nettoient les fichiers temporaires. Un crash peut laisser des fichiers cachés `.tmp` ou des objets complets sans référence ; inspectez-les et supprimez-les uniquement lorsque les auteurs sont arrêtés. Aucun nettoyage automatique n'est exécuté : conservez chaque objet nécessaire aux checkpoints retenus et à la filiation avant toute suppression.
 
 Une annulation, un échec d'écriture de checkpoint ou la perte du processus peut survenir après la publication d'un objet mais avant le retour ou la sauvegarde de sa référence. Publication et checkpoints sont des transactions distinctes. Il n'existe aucune transaction ou annulation globale entre dépôts. Les empreintes détectent une incohérence par rapport à une référence fiable ; elles n'authentifient pas un producteur et n'empêchent pas un auteur de remplacer à la fois la référence et les octets. Le stockage local suppose un propriétaire de confiance, sans remplacement hostile concurrent des répertoires parents.

@@ -31,7 +31,7 @@ test("inspection resolves a checkout from a subdirectory without creating runtim
   assert.equal(report.scannedEntries, 0);
   assert.deepEqual(
     report.categories.map((category) => category.name),
-    ["recovery", "logs", "locks", "workspaces"],
+    ["recovery", "logs", "locks", "workspaces", "storage"],
   );
   assert.ok(
     report.categories.every((category) => category.entries.length === 0),

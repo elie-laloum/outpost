@@ -1,3 +1,4 @@
+import { localTransport, readJournal } from "../../src/index.ts";
 import assert from "node:assert/strict";
 import { test, type TestContext } from "node:test";
 import { createServer, type ServerResponse } from "node:http";
@@ -253,7 +254,7 @@ test("the harness streams text deltas to observers but not to non-verbose journa
     execute: (input: { text?: string }) => input.text ?? "",
   });
   const events: AgentObservation[] = [];
-  const log = join(root, "journal.jsonl");
+  const transporter = localTransport({ directory: join(root, "journals") });
   const provider: ModelProvider = anthropicModelProvider({
     baseUrl,
     apiKey: "key",
@@ -266,7 +267,7 @@ test("the harness streams text deltas to observers but not to non-verbose journa
       harness: harness({ modelProvider: provider, tools: [echo] }),
     }),
     brief: { text: "stream" },
-    logging: { file: log },
+    logging: { transporter },
     observe: (event) => events.push(event),
   });
   assert.equal(result.completed, true);
@@ -283,7 +284,9 @@ test("the harness streams text deltas to observers but not to non-verbose journa
     cacheCreated: 0,
     output: 3,
   });
-  const journal = await readFile(log, "utf8");
+  const journal = JSON.stringify(
+    await readJournal({ transporter, reference: result.logReference! }),
+  );
   assert.doesNotMatch(journal, /"kind":"text-delta"/);
   assert.match(journal, /"kind":"tool-result"/);
 });

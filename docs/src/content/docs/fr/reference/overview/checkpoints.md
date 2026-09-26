@@ -10,7 +10,7 @@ Un checkpoint stocke l’état durable d’une exécution de workflow : résulta
 
 ## Fonctionnement et philosophie
 
-L’identité d’exécution et la version du graphe relient l’état persisté à la définition du workflow. `fileWorkflowCheckpointStore` fournit la persistance sur fichiers ; les contrats de store et de bail définissent la propriété lors de l’accès à cet état. Les valeurs terminées peuvent être réutilisées selon les règles de checkpoint et de rejeu.
+L’identité d’exécution et la version du graphe relient l’état persisté à la définition du workflow. `workflowCheckpointStore` fournit la persistance sur fichiers ; les contrats de store et de bail définissent la propriété lors de l’accès à cet état. Les valeurs terminées peuvent être réutilisées selon les règles de checkpoint et de rejeu.
 
 ## Limites et responsabilités
 
@@ -18,7 +18,7 @@ Les sorties stockées doivent être du JSON sans perte. Rejouer un travail ayant
 
 ## Points d’entrée
 
-- [fileWorkflowCheckpointStore](../../fileworkflowcheckpointstore/)
+- [workflowCheckpointStore](../../fileworkflowcheckpointstore/)
 - [WorkflowCheckpointOptions](../../workflowcheckpointoptions/)
 - [WorkflowCheckpointStore](../../workflowcheckpointstore/)
 - [WorkflowCheckpoint](../../workflowcheckpoint/)

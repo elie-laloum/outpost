@@ -599,10 +599,6 @@
     "Callback receiving execution diagnostic messages.",
     "Callback recevant les messages de diagnostic d’exécution."
   ],
-  "Logging.file": [
-    "Local JSONL append destination, mutually exclusive with transporter; absent by default to create a managed journal.",
-    "Destination locale d’ajout JSONL, exclusive avec transporter ; absente par défaut pour créer un journal géré."
-  ],
   "Logging.verbose": [
     "Include raw protocol observations in the dispatch journal.",
     "Inclut les observations brutes du protocole dans le journal du dispatch."
@@ -654,10 +650,6 @@
   "DispatchResult.transcript": [
     "Available host path to the captured transcript.",
     "Chemin hôte disponible du transcript capturé."
-  ],
-  "DispatchResult.log": [
-    "Host path of the dispatch journal, when logging produced one.",
-    "Chemin hôte du journal du dispatch lorsqu’un journal a été produit."
   ],
   "DispatchResult.retainedDirectory": [
     "Workspace retained for inspection or recovery.",
@@ -2280,14 +2272,6 @@
     "Always true: restoration preserves the original recovery artifacts.",
     "Toujours true : la restauration conserve les artefacts de récupération d’origine."
   ],
-  "fileWorkflowCheckpointStore.options": [
-    "Exactly one legacy directory or object transporter. Each mode preserves its own layout and ownership mechanism.",
-    "Exactement un choix de dossier historique ou transport objet. Chaque mode conserve son format et son mécanisme de propriété."
-  ],
-  "FileWorkflowCheckpointOptions.directory": [
-    "Legacy checkpoint directory and local process locks, mutually exclusive with transporter; existing JSON layout is preserved.",
-    "Dossier des anciens checkpoints et verrous de processus locaux, exclusif avec transporter ; le format JSON existant est conservé."
-  ],
   "approvalTask.options": [
     "Gate key, dependencies, approval prompt and trusted actors allowed to approve or reject.",
     "Clé de gate, dépendances, demande d’approbation et acteurs de confiance autorisés à approuver ou rejeter."
@@ -2507,18 +2491,6 @@
   "readArtifact.store": [
     "Artifact byte store used for immutable publication or bounded payload retrieval.",
     "Store d’octets d’artefacts utilisé pour la publication immuable ou la lecture bornée des données."
-  ],
-  "fileArtifactStore.options": [
-    "Exactly one legacy directory or object transporter, plus the per-artifact byte bound.",
-    "Exactement un choix de dossier historique ou transport objet, avec la limite d’octets par artefact."
-  ],
-  "FileArtifactStoreOptions.directory": [
-    "Legacy filesystem store directory, mutually exclusive with transporter; existing blob layout is preserved.",
-    "Dossier de l’ancien store de fichiers, exclusif avec transporter ; le format des blobs existants est conservé."
-  ],
-  "FileArtifactStoreOptions.maxBytes": [
-    "Maximum bytes per stored artifact; defaults to 16 MiB.",
-    "Nombre maximal d’octets par artefact stocké ; 16 Mio par défaut."
   ],
   "sqliteTaskQueue.path": [
     "Host path to the SQLite queue database.",
@@ -3249,20 +3221,20 @@
     "Conserve les activités de la sandbox dans ce transport. La propriété distante reste non vérifiée ; les observations de PID ne récupèrent pas l’état d’une autre machine."
   ],
   "StorageReservationOptions.transporter": [
-    "Optional transport whose payload usage and shared reservation ledger replace local admission accounting. Reservations persist until explicit release and do not impose physical quotas.",
-    "Transport optionnel dont les contenus et le registre partagé remplacent le calcul local d’admission. Les réservations persistent jusqu’à libération explicite et n’imposent pas de quotas physiques."
+    "Transport for the conditional reservation ledger. Defaults to localTransport under the repository’s .outpost/storage with filesystem usage accounting. An explicit transport measures object payloads. Abandoned claims require explicit recovery in both cases.",
+    "Transport du registre conditionnel de réservations. Par défaut : localTransport sous .outpost/storage avec mesure des fichiers du dépôt. Un transport explicite mesure les contenus objets. Les réservations abandonnées exigent une récupération explicite dans les deux cas."
   ],
   "Logging.transporter": [
-    "Persist the dispatch journal as immutable event segments and a versioned index. Mutually exclusive with file; results expose logReference.",
-    "Conserve le journal sous forme de segments immuables et d’un index versionné. Exclusif avec file ; les résultats exposent logReference."
+    "Persist immutable event segments and a versioned index through this transport. Defaults to localTransport rooted at <repository>/.outpost/storage; read the returned logReference with readJournal.",
+    "Conserve des segments immuables et un index versionné via ce transport. Par défaut : localTransport dans <repository>/.outpost/storage ; lire logReference avec readJournal."
   ],
   "DispatchResult.transcriptReference": [
     "Pinned remote index for the final captured conversation, when using transported conversation storage.",
     "Index distant versionné de la dernière conversation capturée, lorsque son stockage utilise un transport."
   ],
   "DispatchResult.logReference": [
-    "Pinned committed journal index for readJournal; log remains reserved for actual local file paths.",
-    "Index versionné validé du journal pour readJournal ; log reste réservé aux vrais chemins locaux."
+    "Versioned journal index for readJournal, for both local and remote persistence. Absent when logging is disabled or directed to stdout.",
+    "Index versionné du journal pour readJournal, en stockage local comme distant. Absent lorsque la journalisation est désactivée ou envoyée vers stdout."
   ],
   "Turn.transcriptReference": [
     "Pinned remote index of the conversation captured after this turn; its local transcript remains available separately.",
@@ -3300,17 +3272,9 @@
     "Measure logical payload bytes in this object transport instead of the repository’s local runtime files. This is an observation, not a reservation.",
     "Mesure les octets utiles de ce transport objet au lieu des fichiers locaux du dépôt. C’est une observation, pas une réservation."
   ],
-  "FileWorkflowCheckpointOptions.transporter": [
-    "Alternative to directory; uses the transport checkpoint envelope and explicit ownership recovery. Supply exactly one storage choice.",
-    "Alternative à directory ; utilise l’enveloppe de checkpoint du transport et une récupération explicite de propriété. Fournir un seul choix de stockage."
-  ],
   "RecoveryInspectionOptions.transporter": [
     "Inventory object keys and optionally resource records in this transport; host Git and lock inspection are unsupported.",
     "Inventorie les clés d’objets et éventuellement les activités dans ce transport ; l’inspection de Git et des verrous hôtes est incompatible."
-  ],
-  "FileArtifactStoreOptions.transporter": [
-    "Alternative to directory; delegates to artifactStore with the same size limit. Supply exactly one storage choice.",
-    "Alternative à directory ; délègue à artifactStore avec la même limite de taille. Fournir un seul choix de stockage."
   ],
   "s3Transport.options": [
     "Caller-owned S3 client, bucket and isolated object prefix.",

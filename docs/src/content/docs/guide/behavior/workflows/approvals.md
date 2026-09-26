@@ -12,9 +12,10 @@ Use `approvalTask()` for an approve/reject gate and `pauseTask()` for a resume/r
 ```ts
 import {
   approvalTask,
-  fileWorkflowCheckpointStore,
+  workflowCheckpointStore,
   task,
   workflow,
+  localTransport,
 } from "@elie-laloum/outpost";
 
 const build = task({
@@ -40,7 +41,9 @@ const publish = task({
 });
 const release = workflow("release", [build, approval, publish]);
 const checkpoint = {
-  store: fileWorkflowCheckpointStore({ directory: ".outpost/workflows" }),
+  store: workflowCheckpointStore({
+    transporter: localTransport({ directory: ".outpost/workflows" }),
+  }),
   runId: "release-build-42",
   version: "release-definition-v1",
 };

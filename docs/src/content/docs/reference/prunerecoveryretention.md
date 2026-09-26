@@ -13,7 +13,7 @@ import { pruneRecoveryRetention } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Apply a retention plan after fresh validation. Local plans reacquire filesystem ownership; transport plans require the same transporter in the second argument, revalidate closed journal groups and condition every deletion on its revision. Changed or partially removed candidates are reported as retained; recovery data remains protected.
+Apply a retention plan after fresh validation. Worktree removal reacquires the Git branch lock. Local and remote journal groups use conditional object deletion; explicit transport plans require the same transporter in the second argument. Changed or partially removed candidates are retained; recovery data remains protected.
 
 [Complete example and detailed rules](../../guide/operations/recovery/).
 

@@ -14,7 +14,7 @@ Utilisez `localTransport` pour un dossier privé ou `s3Transport`, depuis le poi
 
 ## Limites et responsabilités
 
-Les checkpoints gardent une propriété explicite jusqu’à libération ou récupération autorisée. Archives et conversations natives matérialisent les fichiers nécessaires à Git ou à l’agent. Workspaces, SQLite et montages exigent toujours un système de fichiers. L’activité distante reste une observation dont la propriété n’est pas vérifiée ; elle ne prouve pas l’arrêt d’une autre machine. Les stores par dossier gardent leur format et ne sont pas migrés automatiquement.
+Les checkpoints gardent une propriété explicite jusqu’à libération ou récupération autorisée. Archives et conversations natives matérialisent les fichiers nécessaires à Git ou à l’agent. Workspaces, SQLite et montages exigent toujours un système de fichiers. L’activité distante reste une observation dont la propriété n’est pas vérifiée ; elle ne prouve pas l’arrêt d’une autre machine. Composez les stores avec localTransport pour le disque ; les factories de stores par dossier sont supprimées.
 
 ## Points d’entrée
 

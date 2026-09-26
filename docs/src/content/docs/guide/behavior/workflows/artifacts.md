@@ -16,15 +16,16 @@ import { resolve } from "node:path";
 import {
   artifact,
   artifactTask,
-  fileArtifactStore,
-  fileWorkflowCheckpointStore,
+  artifactStore,
+  workflowCheckpointStore,
   readArtifact,
   task,
   workflow,
+  localTransport,
 } from "@elie-laloum/outpost";
 
-const store = fileArtifactStore({
-  directory: resolve(".outpost/artifacts"),
+const store = artifactStore({
+  transporter: localTransport({ directory: resolve(".outpost/artifacts") }),
   maxBytes: 1024 * 1024,
 });
 const api = artifact.json({
@@ -57,7 +58,9 @@ const consume = task({
 });
 const result = await workflow("api-contract", [publish, consume]).start({
   checkpoint: {
-    store: fileWorkflowCheckpointStore({ directory: resolve(".outpost/runs") }),
+    store: workflowCheckpointStore({
+      transporter: localTransport({ directory: resolve(".outpost/runs") }),
+    }),
     runId: "api-contract-1",
     version: "1",
   },
@@ -76,7 +79,7 @@ A full `isolatedTask` result contains continuation methods and cannot itself be 
 
 An artifact task can declare `parents: context => [context.value(publish)]` alongside `after: [publish]`. The reference records those ordered IDs; changing lineage changes the artifact ID even when bytes stay identical. Declare every artifact input as a parent yourself: lineage is explicit, not inferred from reads. Duplicate parents are rejected. Parent IDs identify references, not filesystem paths; retain parent references separately if later readers need to traverse the lineage.
 
-Serialize the reference with `JSON.stringify` or return it as a task result for [checkpoint persistence](../../../advanced/checkpoints/). Another process opens `fileArtifactStore` with the same directory, or a copied directory, then calls `readStoredArtifact(store, api, parsedReference, { producer, parents })`. This validates untrusted reference structure, contract, content, schema and the exact expected producer and ordered parents. The optional `producer` and `parents` expectations must come from your trusted orchestration state; without them, those fields are only checked for internal consistency. The reference has no host-specific path. A custom `ArtifactStore` can transport the bytes by ID to another machine; the read helper still verifies integrity.
+Serialize the reference with `JSON.stringify` or return it as a task result for [checkpoint persistence](../../../advanced/checkpoints/). Another process opens `artifactStore` with the same directory, or a copied directory, then calls `readStoredArtifact(store, api, parsedReference, { producer, parents })`. This validates untrusted reference structure, contract, content, schema and the exact expected producer and ordered parents. The optional `producer` and `parents` expectations must come from your trusted orchestration state; without them, those fields are only checked for internal consistency. The reference has no host-specific path. A custom `ArtifactStore` can transport the bytes by ID to another machine; the read helper still verifies integrity.
 
 For publishing outside a workflow, use `publishArtifact(store, api, value, { producer: { executionId, taskKey, attempt }, parents })`. `attempt` starts at 1. Inside a workflow, `artifactTask` supplies producer identity and cancellation automatically.
 
@@ -84,8 +87,8 @@ For publishing outside a workflow, use `publishArtifact(store, api, value, { pro
 
 Use `artifact.binary({ name: "bundle", version: "1" })` for `Uint8Array` payloads, including Node `Buffer` values. Read a file you own into bytes with `node:fs/promises.readFile`, then publish those bytes. Reads return a fresh byte array. No filenames, permissions, directories, archive extraction or symlinks are transported. Download sandbox files through its transfer capability before publication; sandbox disposal does not delete stored artifacts. JSON contracts require lossless JSON values; dates, undefined fields, nonfinite numbers and class instances are rejected.
 
-`fileArtifactStore` defaults to a 16 MiB maximum per payload; `maxBytes` configures the limit on both reads and writes. Operations buffer one bounded payload in memory; callers should bound source files before loading them. This is not a total disk quota or a streaming large-file service.
+`artifactStore` defaults to a 16 MiB maximum per payload; `maxBytes` configures the limit on both reads and writes. Operations buffer one bounded payload in memory; callers should bound source files before loading them. This is not a total disk quota or a streaming large-file service.
 
-The caller owns the directory and its retention. Keep it outside disposable worktrees, private to trusted writers and out of version control. Directory components and object files must not be symlinks; supply a canonical directory path on platforms with aliased temporary directories. Existing identical objects can be republished concurrently; conflicting content is rejected. Publication stages, flushes and atomically links an immutable object, then flushes the directory on supported platforms. Cancellation and ordinary write failures clean temporary files. A crash can leave hidden `.tmp` files or unreferenced complete objects; inspect and remove them only while writers are stopped. No automatic pruning runs: keep every object required by retained checkpoints and parent lineage before deleting anything.
+The caller owns the directory and its retention. Keep it outside disposable worktrees, private to trusted writers and out of version control. Directory components and object files must not be symlinks; supply a canonical directory path on platforms with aliased temporary directories. Existing identical objects can be republished concurrently; conflicting content is rejected. Publication stages, flushes and conditionally publishes an immutable object, then flushes the directory on supported platforms. Cancellation and ordinary write failures clean temporary files. A crash can leave hidden `.tmp` files or unreferenced complete objects; inspect and remove them only while writers are stopped. No automatic pruning runs: keep every object required by retained checkpoints and parent lineage before deleting anything.
 
 A cancellation, failed checkpoint write or process loss can occur after an object is committed but before its reference is returned or saved. Publication and workflow checkpoints are separate transactions. There is no cross-repository transaction or rollback. Hashes detect inconsistency against a trusted reference; they do not authenticate a producer or prevent a writer from replacing both the reference and bytes. The filesystem store is for trusted local ownership, not hostile concurrent replacement of parent directories.

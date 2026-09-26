@@ -13,7 +13,7 @@ import { localTransport } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Crée un transport d’objets versionnés dans un dossier privé. Les objets binaires utilisent une enveloppe distincte des anciens stores de fichiers. Les verrous de processus locaux sérialisent les mutations conditionnelles ; cet adaptateur n’établit pas de propriété NFS distribuée.
+Crée un transport d’objets versionnés dans un dossier privé. Les verrous locaux sérialisent les mutations conditionnelles. Utilisez-le avec artifactStore et workflowCheckpointStore pour persister sur disque ; cet adaptateur n’établit pas de propriété NFS distribuée.
 
 [Exemple complet et règles détaillées](../../guide/operations/storage-transports/).
 

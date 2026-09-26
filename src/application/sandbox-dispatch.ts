@@ -139,7 +139,6 @@ export async function dispatchInSandbox<T>(
       directory: workspace.directory,
       commits: changes,
       transcript: transcript?.file,
-      log: log.file,
       logReference: log.reference,
       transcriptReference: transcript?.reference,
     });
@@ -152,7 +151,6 @@ export async function dispatchInSandbox<T>(
     directory: workspace.directory,
     commits: changes,
     ...(transcript ? { transcript: transcript.file } : {}),
-    ...(log.file ? { log: log.file } : {}),
     ...(log.reference ? { logReference: log.reference } : {}),
     ...(transcript?.reference
       ? { transcriptReference: transcript.reference }

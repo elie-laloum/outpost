@@ -1,9 +1,10 @@
-import { lstat, opendir, realpath } from "node:fs/promises";
 import { join } from "node:path";
 import { invariant, positive } from "../domain/errors.ts";
 import { observeOwnership } from "./git/process-identity.ts";
 import type { LocalProcessIdentity } from "./git/process-identity.types.ts";
-import { readInspectionFile } from "./inspection-file.ts";
+import { repositoryTransport } from "./repository-transport.ts";
+import { repositoryStorageDirectory } from "./repository-transport.constants.ts";
+import { jsonObject } from "./transport-json.ts";
 import {
   resourceActivityDefaults as defaults,
   resourceOperationKinds,
@@ -140,60 +141,46 @@ export async function inspectResourceActivity(
   positive(maxEntries, "maxEntries");
   const entries: ResourceInspectionEntry[] = [];
   const issues: StorageIssue[] = [];
-  let path = repository;
+  const transporter = repositoryTransport(repository);
+  const root = join(repository, ".outpost", repositoryStorageDirectory);
   try {
-    for (const part of [".outpost", "locks", defaults.directory]) {
-      path = join(path, part);
-      const info = await lstat(path);
-      invariant(
-        info.isDirectory() &&
-          !info.isSymbolicLink() &&
-          (await realpath(path)) === path,
-        "Unsafe activity directory",
-      );
-    }
-    for await (const entry of await opendir(path)) {
-      const file = join(path, entry.name);
+    for await (const entry of transporter.list("resources/")) {
+      const path = join(root, "objects", `${entry.key}.object`);
       if (entries.length >= Math.min(maxEntries, defaults.maxRecords)) {
-        issues.push({ path, code: "RESOURCE_ENTRY_LIMIT" });
+        issues.push({ path: root, code: "RESOURCE_ENTRY_LIMIT" });
         break;
       }
       try {
-        const value = resourceRecord(
-          JSON.parse(
-            (await readInspectionFile(file, defaults.maxRecordBytes)).toString(
-              "utf8",
-            ),
-          ),
-        );
+        const current = await transporter.read(entry.key, {
+          maxBytes: defaults.maxRecordBytes,
+        });
         invariant(
-          entry.name === `${value.id}.json`,
+          current?.revision === entry.revision,
+          "Resource changed during inspection",
+        );
+        const value = resourceRecord(jsonObject(current));
+        invariant(
+          entry.key === `resources/${value.id}.json`,
           "Activity identity mismatch",
         );
         entries.push({
-          path: file,
+          path,
           record: value,
           ownership: await observeOwnership(value.pid, value.identity),
         });
       } catch {
         entries.push({
-          path: file,
+          path,
           ownership: {
             status: "unknown",
             reason: "RESOURCE_RECORD_UNREADABLE",
           },
         });
-        issues.push({ path: file, code: "RESOURCE_RECORD_UNREADABLE" });
+        issues.push({ path, code: "RESOURCE_RECORD_UNREADABLE" });
       }
     }
-  } catch (cause) {
-    if (!(
-      cause &&
-      typeof cause === "object" &&
-      "code" in cause &&
-      cause.code === "ENOENT"
-    ))
-      issues.push({ path, code: "RESOURCE_DIRECTORY_UNAVAILABLE" });
+  } catch {
+    issues.push({ path: root, code: "RESOURCE_DIRECTORY_UNAVAILABLE" });
   }
   entries.sort((left, right) => left.path.localeCompare(right.path));
   return {

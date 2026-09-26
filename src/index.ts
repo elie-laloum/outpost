@@ -298,8 +298,6 @@ export type {
   RecoveryRestoreResult,
 } from "./application/recovery-restore.types.ts";
 
-export { fileWorkflowCheckpointStore } from "./infrastructure/workflow-checkpoint.ts";
-export type { FileWorkflowCheckpointOptions } from "./infrastructure/workflow-checkpoint.types.ts";
 export type {
   WorkflowCheckpoint,
   WorkflowCheckpointOptions,
@@ -339,7 +337,6 @@ export {
   readStoredArtifact,
 } from "./domain/artifact.ts";
 export { artifactTask, readArtifact } from "./application/artifact-tasks.ts";
-export { fileArtifactStore } from "./infrastructure/artifact-store.ts";
 export type {
   ArtifactContract,
   ArtifactContractOptions,
@@ -352,7 +349,6 @@ export type {
   ReadArtifactOptions,
 } from "./domain/artifact.types.ts";
 export type { ArtifactTaskOptions } from "./application/artifact-tasks.types.ts";
-export type { FileArtifactStoreOptions } from "./infrastructure/artifact-store.types.ts";
 
 export { sqliteTaskQueue } from "./infrastructure/task-queue.ts";
 export {

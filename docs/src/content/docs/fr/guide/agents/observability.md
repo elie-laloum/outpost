@@ -237,7 +237,11 @@ const result = await dispatch({
   warn: (message) => console.error(message),
   deadlineMs: 300_000,
 });
-console.log({ usage: result.usage, log: result.log, text: result.text });
+console.log({
+  usage: result.usage,
+  logReference: result.logReference,
+  text: result.text,
+});
 ```
 
 ```sh

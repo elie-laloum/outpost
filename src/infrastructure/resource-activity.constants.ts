@@ -1,5 +1,4 @@
 export const resourceActivityDefaults = {
-  directory: "resource-activity",
   maxRecords: 10_000,
   maxRecordBytes: 65_536,
   maxText: 4_096,

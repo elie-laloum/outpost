@@ -213,7 +213,7 @@ export const groups = [
     title: ["Workflow checkpoints", "Checkpoints de workflow"],
     guide: "guide/advanced/checkpoints",
     names:
-      "fileWorkflowCheckpointStore FileWorkflowCheckpointOptions WorkflowCheckpoint WorkflowCheckpointOptions WorkflowCheckpointStore WorkflowCheckpointLease WorkflowCheckpointValue WorkflowJson",
+      "WorkflowCheckpoint WorkflowCheckpointOptions WorkflowCheckpointStore WorkflowCheckpointLease WorkflowCheckpointValue WorkflowJson",
   },
   {
     id: "approvals",
@@ -227,7 +227,7 @@ export const groups = [
     title: ["Typed artifacts", "Artefacts typés"],
     guide: "guide/advanced/artifacts",
     names:
-      "artifact publishArtifact readStoredArtifact artifactTask readArtifact fileArtifactStore ArtifactContract ArtifactContractOptions ArtifactIdentity ArtifactProducer ArtifactReference ArtifactStore JsonArtifactOptions PublishArtifactOptions ReadArtifactOptions ArtifactTaskOptions FileArtifactStoreOptions",
+      "artifact publishArtifact readStoredArtifact artifactTask readArtifact ArtifactContract ArtifactContractOptions ArtifactIdentity ArtifactProducer ArtifactReference ArtifactStore JsonArtifactOptions PublishArtifactOptions ReadArtifactOptions ArtifactTaskOptions",
   },
   {
     id: "distributed-execution",

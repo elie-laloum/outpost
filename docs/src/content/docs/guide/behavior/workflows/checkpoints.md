@@ -9,9 +9,10 @@ Checkpoints are opt-in. They retain completed task values, execution identity, t
 
 ```ts
 import {
-  fileWorkflowCheckpointStore,
+  workflowCheckpointStore,
   task,
   workflow,
+  localTransport,
 } from "@elie-laloum/outpost";
 
 const inspect = task({
@@ -21,7 +22,9 @@ const inspect = task({
 const delivery = workflow("delivery", [inspect]);
 const result = await delivery.start({
   checkpoint: {
-    store: fileWorkflowCheckpointStore({ directory: ".outpost/workflows" }),
+    store: workflowCheckpointStore({
+      transporter: localTransport({ directory: ".outpost/workflows" }),
+    }),
     runId: "delivery-ticket-42",
     version: "implementation-and-inputs-v1",
   },
@@ -52,10 +55,10 @@ Outputs must be lossless JSON values, or top-level `undefined` for tasks with no
 
 `WorkflowCheckpointStore` is a domain port. `acquire(runId)` returns an exclusive lease with `read`, `write` and `release`; custom adapters must retain exclusivity until all writes finish and atomically replace snapshots. `read` returns `undefined` for a new run; persisted snapshots are versioned and validated before any task executes.
 
-The filesystem adapter writes private files (0600) using temporary files, file synchronization and atomic replacement, plus parent-directory synchronization on POSIX. Each checkpoint is limited to 16 MiB. Local process locks reject concurrent owners, reclaim confirmed dead owners and refuse uncertain ownership. This adapter is for a local filesystem with local process ownership, not a distributed or network-filesystem lock. Checkpoints can contain sensitive results; protect the directory and keep it outside tracked content. Recovery preserves checkpoint data until you explicitly remove it.
+`workflowCheckpointStore({ transporter })` stores one conditional envelope containing ownership and checkpoint data. Use `localTransport({ directory })` for disk storage with private files and atomic replacement. Checkpoints are limited to 16 MiB. The same ownership and revision rules apply to local and remote transports; keep storage private and outside disposable worktrees.
 
 See [execution policies](../../../workflows/execution/) and [usage budgets](../../../workflows/budgets/) for cancellation, retries and admission limits.
 
 A full `DispatchResult` contains continuation functions and cannot be checkpointed directly. Call `dispatch` inside a task, forward its signal and report its usage, then return plain data such as `result.value`. An artifact task can publish that data and return a JSON reference; see [typed artifacts](../../../advanced/artifacts/).
 
-Automatic dead-owner reclamation requires Linux process identity. On platforms without it, including macOS and Windows, an interrupted owner remains uncertain and blocks restart. After independently verifying that no runner still owns the checkpoint, preserve the checkpoint JSON and remove only the lock path reported by the conflict before retrying.
+After a crash, ownership remains recorded on every platform. Confirm the previous runner has stopped, read `checkpoints/<SHA-256 of runId>.json` through the transport and pass its observed revision to `recoverWorkflowCheckpoint({ transporter, runId, revision })`. Recovery preserves values and usage; `resume: "retry-incomplete"` separately authorizes task replay.

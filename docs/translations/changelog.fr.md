@@ -1,5 +1,9 @@
 # Historique des versions
 
+## Non publié
+
+- Breaking: Unifie la persistance des artefacts, checkpoints, journaux, activités et réservations via Transport, avec localTransport sur disque. Supprime fileArtifactStore, fileWorkflowCheckpointStore, leurs types d’options, logging.file et DispatchResult.log ; les journaux exposent logReference. Les objets internes résident par défaut sous .outpost/storage. La récupération après crash des checkpoints et réservations est explicite en local comme à distance ; les anciens formats ne sont pas migrés. Worktrees Git et préparation d’exécution restent des opérations du système de fichiers.
+
 ## 5.0.0
 
 Changements cassants, sans alias de compatibilité :

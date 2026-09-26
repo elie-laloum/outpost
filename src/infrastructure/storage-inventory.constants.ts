@@ -5,6 +5,7 @@ export const storageCategories: readonly StorageCategoryName[] = [
   "logs",
   "locks",
   "workspaces",
+  "storage",
 ];
 export const storageInventoryDefaults = Object.freeze({
   maxEntries: 100_000,

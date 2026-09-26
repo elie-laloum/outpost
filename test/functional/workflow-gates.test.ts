@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import type { TestContext } from "node:test";
@@ -9,9 +10,10 @@ import { once } from "node:events";
 import {
   approvalTask,
   pauseTask,
-  fileWorkflowCheckpointStore,
+  workflowCheckpointStore,
   task,
   workflow,
+  localTransport,
 } from "../../src/index.ts";
 import type {
   WorkflowCheckpointStore,
@@ -26,7 +28,9 @@ async function setup(t: TestContext) {
   return {
     directory,
     checkpoint: {
-      store: fileWorkflowCheckpointStore({ directory }),
+      store: workflowCheckpointStore({
+        transporter: localTransport({ directory: directory }),
+      }),
       runId: "release",
       version: "1",
     },
@@ -324,10 +328,10 @@ test(
     const module = new URL("../../src/index.ts", import.meta.url).href;
     await writeFile(
       script,
-      `import { approvalTask, task, workflow, fileWorkflowCheckpointStore } from ${JSON.stringify(module)};
+      `import { approvalTask, task, workflow, workflowCheckpointStore, localTransport } from ${JSON.stringify(module)};
 const source = task({key:'source',perform:()=>42});
 const gate = approvalTask({key:'review',after:[source],prompt:'Ship this change?',actors:['maintainer']});
-const result = await workflow('release',[source,gate]).start({checkpoint:{store:fileWorkflowCheckpointStore({directory:${JSON.stringify(directory)}}),runId:'release',version:'1'}});
+const result = await workflow('release',[source,gate]).start({checkpoint:{store:workflowCheckpointStore({ transporter: localTransport({ directory: ${JSON.stringify(directory)} }) }),runId:'release',version:'1'}});
 console.log(JSON.stringify(result));`,
     );
     const child = spawn(process.execPath, [script], {
@@ -362,11 +366,21 @@ test("corrupt requests and decisions are rejected before executing anything", as
   const review = approvalTask(gateOptions);
   const graph = workflow("release", [review]);
   const first = await graph.start({ checkpoint });
-  const path = join(
-    directory,
-    (await readdir(directory)).find((entry) => entry.endsWith(".json"))!,
-  );
-  const initial = JSON.parse(await readFile(path, "utf8"));
+  const transporter = localTransport({ directory });
+  const key = `checkpoints/${createHash("sha256").update(checkpoint.runId).digest("hex")}.json`;
+  const read = async () =>
+    JSON.parse(Buffer.from((await transporter.read(key))!.bytes).toString())
+      .checkpoint;
+  const write = async (_path: string, checkpoint: string) =>
+    transporter.write(
+      key,
+      Buffer.from(
+        JSON.stringify({ owner: null, checkpoint: JSON.parse(checkpoint) }),
+      ),
+      { ifRevision: (await transporter.read(key))!.revision },
+    );
+  const path = key;
+  const initial = await read();
   for (const patch of [
     { pause: undefined },
     { status: "active", pause: undefined },
@@ -375,7 +389,7 @@ test("corrupt requests and decisions are rejected before executing anything", as
     { pause: { ...initial.records[0].pause, requestedAt: "invalid" } },
     { decision: decision(first) },
   ]) {
-    await writeFile(
+    await write(
       path,
       JSON.stringify({
         ...initial,
@@ -384,16 +398,16 @@ test("corrupt requests and decisions are rejected before executing anything", as
     );
     await assert.rejects(graph.start({ checkpoint }), /Invalid/);
   }
-  await writeFile(path, JSON.stringify(initial));
+  await write(path, JSON.stringify(initial));
   await graph.start({ checkpoint, decisions: [decision(first)] });
-  const approved = JSON.parse(await readFile(path, "utf8"));
+  const approved = await read();
   for (const patch of [
     { decision: undefined },
     { decision: { ...approved.records[0].decision, actor: "intruder" } },
     { decision: { ...approved.records[0].decision, reason: "" } },
     { decision: { ...approved.records[0].decision, decidedAt: "invalid" } },
   ]) {
-    await writeFile(
+    await write(
       path,
       JSON.stringify({
         ...approved,
@@ -402,7 +416,7 @@ test("corrupt requests and decisions are rejected before executing anything", as
     );
     await assert.rejects(graph.start({ checkpoint }), /Invalid/);
   }
-  await writeFile(
+  await write(
     path,
     JSON.stringify({
       ...approved,

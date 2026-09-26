@@ -3,11 +3,13 @@ import {
   planTransportRetention,
   pruneTransportRetention,
 } from "./transport-retention.ts";
-import { lstat, rm } from "node:fs/promises";
+import { lstat } from "node:fs/promises";
+import { join } from "node:path";
+import { repositoryTransport } from "../infrastructure/repository-transport.ts";
+import { repositoryStorageDirectory } from "../infrastructure/repository-transport.constants.ts";
 import { OutpostError, invariant } from "../domain/errors.ts";
 import { git } from "../infrastructure/git/command.ts";
 import { lock, lockPath } from "../infrastructure/git/lock.ts";
-import { closedJournal } from "../infrastructure/journal-retention.ts";
 import type { StorageEntry } from "../infrastructure/storage-inventory.types.ts";
 import type { RecoveryInspection } from "./recovery-inspection.types.ts";
 import { inspectRecovery } from "./recovery-inspection.ts";
@@ -82,7 +84,7 @@ export async function planRecoveryRetention(
   });
   const entries: RecoveryRetentionEntry[] = [];
   const inspectedAt = new Date().toISOString();
-  const complete = inspection.complete && inspection.git?.complete !== false;
+  let complete = inspection.complete && inspection.git?.complete !== false;
   for (const category of inspection.categories) {
     for (const entry of category.entries) {
       let reason = "RECOVERY_DATA_PROTECTED";
@@ -94,16 +96,6 @@ export async function planRecoveryRetention(
         policy.scopes.includes("clean-workspaces")
       )
         reason = await workspaceReason(entry, inspection);
-      if (
-        category.name === "logs" &&
-        policy.scopes.includes("closed-logs") &&
-        entry.kind === "file" &&
-        entry.name.endsWith(".jsonl") &&
-        (await closedJournal(entry.path))
-      )
-        reason = "ELIGIBLE";
-      if (category.name === "logs" && entry.name.endsWith(".closed.json"))
-        reason = "CLOSURE_RECORD_PROTECTED";
       if (
         reason === "ELIGIBLE" &&
         (!entry.modifiedAt ||
@@ -129,21 +121,75 @@ export async function planRecoveryRetention(
       });
     }
   }
+  const logs = await planTransportRetention({
+    transporter: repositoryTransport(inspection.repository),
+    policy: {
+      version: 1,
+      scopes: policy.scopes.filter((scope) => scope === "closed-logs"),
+      minAgeMs: policy.minAgeMs,
+    },
+    ...(options.maxEntries === undefined
+      ? {}
+      : { maxEntries: options.maxEntries }),
+  });
+  for (const entry of logs.entries.filter(
+    (entry) => entry.category === "logs",
+  )) {
+    let bytes = 0;
+    for (const object of entry.objects ?? []) {
+      try {
+        bytes += (
+          await lstat(
+            join(
+              inspection.repository,
+              ".outpost",
+              repositoryStorageDirectory,
+              "objects",
+              `${object.key}.object`,
+            ),
+          )
+        ).size;
+      } catch {
+        complete = false;
+      }
+    }
+    const container = entries.findIndex(
+      (value) =>
+        value.category === "storage" &&
+        value.path ===
+          join(
+            inspection.repository,
+            ".outpost",
+            repositoryStorageDirectory,
+            "objects",
+          ),
+    );
+    const stored = entries[container];
+    if (!stored || stored.bytes < bytes) complete = false;
+    if (stored)
+      entries[container] = {
+        ...stored,
+        bytes: Math.max(0, stored.bytes - bytes),
+      };
+    entries.push({ ...entry, bytes, eligible: entry.eligible && complete });
+  }
+  complete = complete && logs.complete;
+  if (!complete) {
+    for (let index = 0; index < entries.length; index++) {
+      const entry = entries[index]!;
+      if (entry.eligible)
+        entries[index] = {
+          ...entry,
+          eligible: false,
+          reason: "INCOMPLETE_INVENTORY",
+        };
+    }
+  }
   const projectedBytes =
     inspection.usage.bytes -
     entries
       .filter((entry) => entry.eligible)
-      .reduce(
-        (sum, entry) =>
-          sum +
-          entry.bytes +
-          (entry.category === "logs"
-            ? (entries.find(
-                (other) => other.path === `${entry.path}.closed.json`,
-              )?.bytes ?? 0)
-            : 0),
-        0,
-      );
+      .reduce((sum, entry) => sum + entry.bytes, 0);
   const workspaces = entries.filter(
     (entry) => entry.category === "workspaces" && !entry.eligible,
   ).length;
@@ -219,16 +265,22 @@ export async function pruneRecoveryRetention(
           await release();
         }
       } else {
-        const release = await lock(plan.repository, `journal:${entry.path}`);
-        try {
-          invariant(
-            entry.category === "logs" && (await closedJournal(entry.path)),
-            "Journal changed before pruning",
-          );
-          await rm(entry.path);
-          await rm(`${entry.path}.closed.json`);
-        } finally {
-          await release();
+        const result = await pruneTransportRetention(
+          {
+            ...plan,
+            source: "transport",
+            policy: {
+              version: 1,
+              scopes: ["closed-logs"],
+              minAgeMs: plan.policy.minAgeMs,
+            },
+            entries: [candidate],
+          },
+          { transporter: repositoryTransport(plan.repository) },
+        );
+        if (!result.removed.includes(entry.path)) {
+          retained.push(...result.retained);
+          continue;
         }
       }
       removed.push(entry.path);

@@ -7,6 +7,10 @@ sidebar:
 
 The release notes below are synchronized from the root `CHANGELOG.md`, the single source of release history.
 
+## Unreleased
+
+- Breaking: Unify artifact, checkpoint, journal, resource activity and reservation persistence through Transport, with localTransport for disk storage. Remove fileArtifactStore, fileWorkflowCheckpointStore, their option types, logging.file and DispatchResult.log; journals expose logReference. Default runtime objects live under .outpost/storage. Checkpoint and reservation crash recovery is explicit locally and remotely; old file layouts are not migrated. Git worktrees and execution staging remain filesystem operations.
+
 ## 5.0.0
 
 Breaking changes, without compatibility aliases:

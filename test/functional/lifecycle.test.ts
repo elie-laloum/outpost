@@ -1,3 +1,5 @@
+import { readJournal } from "../../src/infrastructure/transport-journal.ts";
+import { repositoryTransport } from "../../src/infrastructure/repository-transport.ts";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { access, readFile, writeFile } from "node:fs/promises";
@@ -101,8 +103,16 @@ test("one-shot dispatch writes a journal, returns usage and integrates committed
   assert.equal(output.commits[0]?.subject, "Created");
   assert.deepEqual(output.usage, { input: 2, cached: 1, output: 3 });
   assert.equal(output.completed, true);
-  assert.ok(output.log);
-  assert.match(await readFile(output.log, "utf8"), /usage/);
+  assert.ok(output.logReference);
+  assert.match(
+    JSON.stringify(
+      await readJournal({
+        transporter: repositoryTransport(root),
+        reference: output.logReference,
+      }),
+    ),
+    /usage/,
+  );
   await assert.rejects(access(output.directory));
 });
 

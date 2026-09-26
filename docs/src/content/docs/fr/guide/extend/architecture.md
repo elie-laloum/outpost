@@ -43,7 +43,7 @@ La CI refuse les dépendances entre couches dans le mauvais sens, les contrats d
 
 ## Orchestration durable et limites de recherche
 
-Les contrats de checkpoints et de portes appartiennent au domaine ; l’adapter de fichiers possède la persistance atomique et la propriété locale. Les contrats d’artefacts valident les valeurs et la filiation ; leur store de fichiers possède les octets immuables. La file SQLite et son transport HTTP fournissent les claims persistants ; les workers applicatifs exécutent les handlers enregistrés sous leases protégées par fencing. La répétition reste explicite et les effets peuvent être exécutés plusieurs fois. Les noms d’acteurs et la filiation sont des métadonnées de confiance, pas une authentification.
+Les contrats de checkpoints et de portes appartiennent au domaine ; le store de checkpoints possède la persistance conditionnelle et la propriété explicite via Transport. Les contrats d’artefacts valident les valeurs et la filiation ; leur store possède la publication immuable via Transport. La file SQLite et son transport HTTP fournissent les claims persistants ; les workers applicatifs exécutent les handlers enregistrés sous leases protégées par fencing. La répétition reste explicite et les effets peuvent être exécutés plusieurs fois. Les noms d’acteurs et la filiation sont des métadonnées de confiance, pas une authentification.
 
 Le checkout isolé des conteneurs, le provider Firecracker, les politiques réseau et l’exécution spéculative ont leurs propres [limites de recherche](../../../project/roadmap/). Gemini ne possède pas de store de conversations natives. Daytona utilise son API PTY native ; Vercel refuse l’attachement interactif.
 

@@ -28,7 +28,7 @@ export async function startupFailure(
     recordRecovery(cause, {
       branch: workspace.branch,
       directory: workspace.directory,
-      log: log.file,
+      logReference: log.reference,
     });
   } catch {}
 }

@@ -62,7 +62,7 @@ CI rejects reversed layer dependencies, inline contract declarations, runtime in
 
 ## Durable orchestration and research boundaries
 
-Checkpoint and gate contracts belong to the domain; the filesystem checkpoint adapter owns atomic persistence and local ownership. Artifact contracts validate values and lineage, while the filesystem store owns immutable bytes. The SQLite queue and HTTP transport provide durable claims; application workers execute registered handlers under fenced leases. Replay remains explicit and side effects are at least once. Gate actor names and artifact lineage are trusted metadata, not authentication.
+Checkpoint and gate contracts belong to the domain; the transport checkpoint store owns conditional persistence and explicit ownership. Artifact contracts validate values and lineage, while the artifact store owns immutable publication through Transport. The SQLite queue and HTTP transport provide durable claims; application workers execute registered handlers under fenced leases. Replay remains explicit and side effects are at least once. Gate actor names and artifact lineage are trusted metadata, not authentication.
 
 The opt-in isolated container checkout, Firecracker provider, egress policies and speculative execution helper have separate [research limits](../../../project/roadmap/). Gemini has no native conversation store. Daytona terminal execution uses its native PTY API; Vercel rejects interactive attachment.
 

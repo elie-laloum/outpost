@@ -39,10 +39,25 @@ export function reservationLedger(value: unknown): ReservationLedger {
   return { format: 1, reservations: Object.fromEntries(entries) };
 }
 
+async function payloadUsage(
+  transporter: Transport,
+  maxEntries: number,
+  signal?: AbortSignal,
+): Promise<number> {
+  let usage = 0,
+    count = 0;
+  for await (const entry of transporter.list("", signal ? { signal } : {})) {
+    invariant(++count <= maxEntries, "Reservation inventory is incomplete");
+    if (entry.key !== key) usage += entry.size;
+  }
+  return usage;
+}
+
 export async function reserveTransportStorage(
   transporter: Transport,
   repository: string,
   options: StorageReservationOptions,
+  measureUsage?: () => Promise<number>,
 ): Promise<StorageReservation> {
   invariant(
     Number.isSafeInteger(options.maxBytes) &&
@@ -69,25 +84,16 @@ export async function reserveTransportStorage(
       const reservations = { ...ledger.reservations };
       if (release) delete reservations[id];
       if (!release) {
-        let usage = 0,
-          count = 0;
-        for await (const entry of transporter.list(
-          "",
-          options.signal ? { signal: options.signal } : {},
-        )) {
-          invariant(
-            ++count <= maxEntries,
-            "Reservation inventory is incomplete",
-          );
-          if (entry.key !== key) usage += entry.size;
-        }
+        const usage = measureUsage
+          ? await measureUsage()
+          : await payloadUsage(transporter, maxEntries, options.signal);
         const reserved = Object.values(reservations).reduce(
           (sum, value) => sum + value,
           0,
         );
         invariant(
           usage + reserved + options.reserveBytes <= options.maxBytes,
-          "Outpost storage quota admission refused",
+          "Outpost storage reservation admission refused",
         );
         reservations[id] = options.reserveBytes;
       }

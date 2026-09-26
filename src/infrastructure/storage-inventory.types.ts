@@ -1,4 +1,5 @@
 export type StorageCategoryName =
+  | "storage"
   | "recovery"
   | "logs"
   | "locks"

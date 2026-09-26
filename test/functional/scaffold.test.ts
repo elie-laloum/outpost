@@ -209,7 +209,7 @@ test("initialization creates a standalone package with provider dependencies and
   );
   assert.equal(
     await readFile(join(folder, ".gitignore"), "utf8"),
-    "custom/\n.env\nnode_modules/\n.outpost/workspaces/\n.outpost/locks/\n.outpost/recovery/\n.outpost/logs/\n",
+    "custom/\n.env\nnode_modules/\n.outpost/workspaces/\n.outpost/locks/\n.outpost/recovery/\n.outpost/logs/\n.outpost/storage/\n",
   );
   assert.ok(result.files.includes(join(folder, "package.json")));
   const fresh = join(temporary, "new-workflow");

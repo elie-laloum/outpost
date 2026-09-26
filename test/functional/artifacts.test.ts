@@ -7,12 +7,13 @@ import { join } from "node:path";
 import {
   artifact,
   artifactTask,
-  fileArtifactStore,
-  fileWorkflowCheckpointStore,
+  artifactStore,
+  workflowCheckpointStore,
   isolatedTask,
   readArtifact,
   response,
   workflow,
+  localTransport,
 } from "../../src/index.ts";
 import { localSandboxProvider } from "../../src/providers/local.ts";
 import { emit, repository, scripted } from "../helpers.ts";
@@ -32,7 +33,9 @@ test("isolated repositories exchange validated artifacts and resume references i
   const backendRepository = await repository(t),
     frontendRepository = await repository(t);
   const directory = join(backendRepository, ".outpost", "artifacts");
-  const store = fileArtifactStore({ directory });
+  const store = artifactStore({
+    transporter: localTransport({ directory: directory }),
+  });
   const contract = artifact.json({ name: "api", version: "1", schema });
   const backend = isolatedTask({
     key: "backend",
@@ -59,7 +62,9 @@ test("isolated repositories exchange validated artifacts and resume references i
         context,
         published,
         contract,
-        fileArtifactStore({ directory }),
+        artifactStore({
+          transporter: localTransport({ directory: directory }),
+        }),
       );
       return {
         repository: frontendRepository,
@@ -68,8 +73,8 @@ test("isolated repositories exchange validated artifacts and resume references i
         brief: { text: api.endpoint },
         agent: scripted(
           (input) => `
-      import {writeFileSync} from 'node:fs';
-      import {execFileSync} from 'node:child_process';
+      import { writeFileSync } from 'node:fs';
+      import { execFileSync } from 'node:child_process';
       writeFileSync('endpoint.txt', ${JSON.stringify(input.text)});
       execFileSync('git', ['add','endpoint.txt']); execFileSync('git', ['commit','-m','Consume API']);
       ${emit("<outpost>done</outpost>")}
@@ -104,7 +109,9 @@ test("isolated repositories exchange validated artifacts and resume references i
     produce: () => ({ endpoint: "/saved" }),
   });
   const checkpoint = {
-    store: fileWorkflowCheckpointStore({ directory: checkpointDirectory }),
+    store: workflowCheckpointStore({
+      transporter: localTransport({ directory: checkpointDirectory }),
+    }),
     runId: "artifact",
     version: "1",
   };
@@ -112,11 +119,11 @@ test("isolated repositories exchange validated artifacts and resume references i
   const script = join(frontendRepository, "read.mjs");
   await writeFile(
     script,
-    `import {artifact,artifactTask,fileArtifactStore,fileWorkflowCheckpointStore,readStoredArtifact,workflow} from ${JSON.stringify(new URL("../../src/index.ts", import.meta.url).href)};
-    const store=fileArtifactStore({directory:${JSON.stringify(directory)}});
+    `import { artifact, artifactTask, artifactStore, workflowCheckpointStore, readStoredArtifact, workflow, localTransport } from ${JSON.stringify(new URL("../../src/index.ts", import.meta.url).href)};
+    const store=artifactStore({ transporter: localTransport({ directory: ${JSON.stringify(directory)} }) });
     const contract=artifact.json({name:'api',version:'1',schema:${schema.toString()}});
     const item=artifactTask({key:'persisted',store,contract,produce(){throw new Error('must not replay')}});
-    const result=await workflow('persisted',[item]).start({checkpoint:{store:fileWorkflowCheckpointStore({directory:${JSON.stringify(checkpointDirectory)}}),runId:'artifact',version:'1'}});
+    const result=await workflow('persisted',[item]).start({checkpoint:{store:workflowCheckpointStore({ transporter: localTransport({ directory: ${JSON.stringify(checkpointDirectory)} }) }),runId:'artifact',version:'1'}});
     result.unwrap(); console.log(JSON.stringify(await readStoredArtifact(store,contract,result.value(item))));
   `,
   );

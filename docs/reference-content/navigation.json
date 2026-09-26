@@ -1458,20 +1458,12 @@
         "attrs": { "data-reference-overview": "" }
       },
       {
-        "slug": "reference/fileworkflowcheckpointstore",
-        "attrs": { "data-api-kind": "function" }
-      },
-      {
         "slug": "reference/workflowcheckpointvalue",
         "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/workflowjson",
         "attrs": { "data-api-kind": "type" }
-      },
-      {
-        "slug": "reference/fileworkflowcheckpointoptions",
-        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/workflowcheckpoint",
@@ -1552,10 +1544,6 @@
         "attrs": { "data-api-kind": "function" }
       },
       {
-        "slug": "reference/fileartifactstore",
-        "attrs": { "data-api-kind": "function" }
-      },
-      {
         "slug": "reference/artifact",
         "attrs": { "data-api-kind": "constant" }
       },
@@ -1597,10 +1585,6 @@
       },
       {
         "slug": "reference/readartifactoptions",
-        "attrs": { "data-api-kind": "interface" }
-      },
-      {
-        "slug": "reference/fileartifactstoreoptions",
         "attrs": { "data-api-kind": "interface" }
       }
     ]

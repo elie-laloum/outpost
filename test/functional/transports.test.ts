@@ -18,8 +18,7 @@ import type { TestContext } from "node:test";
 import {
   localTransport,
   TransportConflict,
-  fileArtifactStore,
-  fileWorkflowCheckpointStore,
+  artifactStore,
   workflowCheckpointStore,
   recoverWorkflowCheckpoint,
   artifact,
@@ -137,7 +136,7 @@ for (const [name, factory] of Object.entries(adapters)) {
 
   test(`${name}: artifact publication and workflow restart preserve values and ownership`, async (t) => {
     const transporter = await factory(t);
-    const store = fileArtifactStore({ transporter });
+    const store = artifactStore({ transporter });
     const contract = artifact.binary({ name: "result", version: "1" });
     const options = {
       producer: { executionId: "run", taskKey: "build", attempt: 1 },
@@ -152,7 +151,7 @@ for (const [name, factory] of Object.entries(adapters)) {
       [0, 255],
     );
     await assert.rejects(
-      fileArtifactStore({ transporter, maxBytes: 1 }).put(
+      artifactStore({ transporter, maxBytes: 1 }).put(
         "a".repeat(64),
         Uint8Array.of(1, 2),
       ),
@@ -169,7 +168,7 @@ for (const [name, factory] of Object.entries(adapters)) {
       }),
     ]);
     const checkpoint = {
-      store: fileWorkflowCheckpointStore({ transporter }),
+      store: workflowCheckpointStore({ transporter }),
       runId: "run",
       version: "1",
     };
@@ -496,7 +495,7 @@ test("dispatch integrates transport journals, activity and workspace reservation
     logging: { transporter },
   });
   const result = await sandbox.dispatch({ brief: { text: "run" } });
-  assert.equal(result.log, undefined);
+  assert.equal("log" in result, false);
   assert.ok(result.logReference);
   assert.ok(
     (await readJournal({ transporter, reference: result.logReference }))
@@ -643,15 +642,6 @@ test("local object roots reject symlinks and archive restoration rejects travers
 
 test("transport modes reject incompatible configuration and malformed state", async (t) => {
   const transporter = await adapters.local(t);
-  assert.throws(
-    () => fileArtifactStore({ transporter, directory: "." }),
-    /exactly one/,
-  );
-  assert.throws(
-    () => fileWorkflowCheckpointStore({ transporter, directory: "." }),
-    /exactly one/,
-  );
-  await assert.rejects(journal("", { transporter, file: "log" }), /not both/);
   await assert.rejects(
     inspectRecovery({ transporter, git: true }),
     /cannot verify/,

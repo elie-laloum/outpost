@@ -1,3 +1,4 @@
+import { repositoryTransport } from "../../src/infrastructure/repository-transport.ts";
 import assert from "node:assert/strict";
 import {
   lstat,
@@ -151,6 +152,7 @@ test("owned diagnostics expose in-flight transfers and complete without losing t
     ).status,
     0,
   );
+  await sandbox.close();
 });
 
 test("allocation and closure are observable while independent workspaces outlive successful sandbox disposal", async (t) => {
@@ -237,9 +239,8 @@ test("failed provider cleanup keeps bounded records and protects the associated 
     "RESOURCE_ACTIVITY_RECORDED",
   );
   assert.equal(
-    plan.entries.find((entry) => entry.path.endsWith("resource-activity"))
-      ?.reason,
-    "OWNERSHIP_RECORD_PROTECTED",
+    plan.entries.find((entry) => entry.category === "storage")?.reason,
+    "RECOVERY_DATA_PROTECTED",
   );
   await pruneRecoveryRetention(plan);
   assert.equal((await inspect(root)).entries.length, 1);
@@ -347,8 +348,13 @@ test("parallel sandboxes and storage reservations keep distinct private ownershi
   assert.equal(records.length, 2);
   assert.notEqual(records[0]!.record?.id, records[1]!.record?.id);
   assert.equal(
-    (await readdir(join(root, ".outpost", "locks", "storage-reservations")))
-      .length,
+    Object.keys(
+      JSON.parse(
+        Buffer.from(
+          (await repositoryTransport(root).read("reservations/ledger"))!.bytes,
+        ).toString(),
+      ).reservations,
+    ).length,
     1,
   );
   await Promise.all(sandboxes.map((sandbox) => sandbox.close()));
@@ -367,34 +373,43 @@ test("resource inspection is read-only, bounded and conservative for stale, fore
     placement: "remote",
   });
   const entry = (await inspect(root)).entries[0]!;
-  const original = JSON.parse(await readFile(entry.path, "utf8"));
+  const transporter = repositoryTransport(root);
+  const key = `resources/${entry.record!.id}.json`;
+  const original = JSON.parse(
+    Buffer.from((await transporter.read(key))!.bytes).toString(),
+  );
+  const replace = async (value: unknown) =>
+    transporter.write(key, Buffer.from(JSON.stringify(value)), {
+      ifRevision: (await transporter.read(key))!.revision,
+    });
   const identity = await localProcessIdentity();
   for (const changed of [
     { ...original, identity: undefined },
     { ...original, identity: { ...identity, host: "another-host" } },
     { ...original, identity: { ...identity, started: "0" } },
   ]) {
-    await writeFile(entry.path, JSON.stringify(changed));
+    await replace(changed);
     assert.equal((await inspect(root)).entries[0]!.ownership.status, "unknown");
   }
   if (identity) {
-    await writeFile(
-      entry.path,
-      JSON.stringify({ ...original, pid: 2_147_483_647 }),
-    );
+    await replace({ ...original, pid: 2_147_483_647 });
     assert.equal(
       (await inspect(root)).entries[0]!.ownership.status,
       "inactive",
     );
     assert.ok(await readFile(entry.path));
   }
-  const directory = join(root, ".outpost", "locks", "resource-activity");
-  await writeFile(join(directory, "bad.json"), "private-malformed-content");
+  const directory = join(root, ".outpost", "storage", "objects", "resources");
+  await transporter.write(
+    "resources/bad.json",
+    Buffer.from("private-malformed-content"),
+    { ifRevision: null },
+  );
   const report = await inspect(root);
   assert.equal(report.complete, false);
   assert.equal(
-    report.entries.find((entry) => entry.path.endsWith("bad.json"))?.ownership
-      .status,
+    report.entries.find((entry) => entry.path.endsWith("bad.json.object"))
+      ?.ownership.status,
     "unknown",
   );
   assert.doesNotMatch(JSON.stringify(report), /private-malformed-content/);
@@ -410,15 +425,15 @@ test("resource inspection is read-only, bounded and conservative for stale, fore
   );
   const outside = join(root, "outside.json");
   await writeFile(outside, JSON.stringify(original));
-  await symlink(outside, join(directory, "symlink.json"));
+  await symlink(outside, join(directory, "symlink.json.object"));
   assert.equal(
     (await inspect(root)).entries.find((entry) =>
-      entry.path.endsWith("symlink.json"),
+      entry.path.endsWith("symlink.json.object"),
     )?.record,
     undefined,
   );
-  await writeFile(entry.path, JSON.stringify(original));
-  await handle.remove();
+  await replace(original);
+  await assert.rejects(handle.remove(), /conflict/i);
 });
 
 test("resource CLI reports live records in JSON and text and fails honestly on malformed records", async (t) => {
@@ -452,12 +467,20 @@ test("resource CLI reports live records in JSON and text and fails honestly on m
   assert.match(text.stdout, /Recorded sandbox activity/);
   assert.match(text.stdout, /ready \| idle/);
   await writeFile(
-    join(root, ".outpost", "locks", "resource-activity", "invalid.json"),
+    join(
+      root,
+      ".outpost",
+      "storage",
+      "objects",
+      "resources",
+      "invalid.json.object",
+    ),
     "invalid",
   );
   const invalid = await run();
   assert.equal(invalid.status, 1);
-  assert.match(invalid.stdout, /RESOURCE_RECORD_UNREADABLE/);
+  assert.match(invalid.stdout, /RESOURCE_DIRECTORY_UNAVAILABLE/);
+  await sandbox.close();
 });
 
 test("tracking bounds concurrent operations, rejects replacement ownership and keeps unsettled resources", async (t) => {
@@ -491,7 +514,7 @@ test("tracking bounds concurrent operations, rejects replacement ownership and k
   const entry = (await inspect(root)).entries[0]!;
   const bytes = await readFile(entry.path);
   await writeFile(entry.path, JSON.stringify({ id: "replacement" }));
-  await assert.rejects(handle.remove(), /identity changed/);
+  await assert.rejects(handle.remove(), /envelope|conflict|header|object/i);
   await writeFile(entry.path, bytes);
   await handle.remove();
   await handle.remove();
@@ -501,10 +524,12 @@ test("symlinked activity storage and excessive metadata refuse allocation before
   const root = await repository(t);
   const outside = join(root, "outside");
   await mkdir(outside);
-  await mkdir(join(root, ".outpost", "locks"), { recursive: true });
+  await mkdir(join(root, ".outpost", "storage", "objects"), {
+    recursive: true,
+  });
   await symlink(
     outside,
-    join(root, ".outpost", "locks", "resource-activity"),
+    join(root, ".outpost", "storage", "objects", "resources"),
     "junction",
   );
   await assert.rejects(

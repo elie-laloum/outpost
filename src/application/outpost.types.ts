@@ -96,7 +96,6 @@ export interface DispatchResult<T> extends Execution<T> {
   readonly transcript?: string;
   readonly transcriptReference?: TransportReference;
   readonly logReference?: TransportReference;
-  readonly log?: string;
   readonly retainedDirectory?: string;
   resume<U = undefined>(
     options: ContinuationOptions<U>,

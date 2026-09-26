@@ -13,7 +13,7 @@ import { localTransport } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Create a versioned object transport in a private directory. Binary objects use an envelope distinct from legacy file stores. Local process locks serialize conditional mutations; this adapter does not establish distributed NFS ownership.
+Create a versioned object transport in a private directory. Local process locks serialize conditional mutations. Use it with artifactStore and workflowCheckpointStore for disk persistence; this adapter does not establish distributed NFS ownership.
 
 [Complete example and detailed rules](../../guide/operations/storage-transports/).
 

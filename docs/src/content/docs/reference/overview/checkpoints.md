@@ -10,7 +10,7 @@ A checkpoint stores the durable state of a workflow execution: task outcomes, JS
 
 ## How it works
 
-A run identity and graph version connect persisted state to the workflow definition. `fileWorkflowCheckpointStore` provides filesystem persistence; the store and lease contracts define ownership while accessing that state. Completed values can be reused according to the checkpoint and replay rules.
+A run identity and graph version connect persisted state to the workflow definition. `workflowCheckpointStore` provides filesystem persistence; the store and lease contracts define ownership while accessing that state. Completed values can be reused according to the checkpoint and replay rules.
 
 ## Boundaries and responsibilities
 
@@ -18,7 +18,7 @@ Stored outputs must be lossless JSON. Replaying work with external effects requi
 
 ## Entry points
 
-- [fileWorkflowCheckpointStore](../../fileworkflowcheckpointstore/)
+- [workflowCheckpointStore](../../fileworkflowcheckpointstore/)
 - [WorkflowCheckpointOptions](../../workflowcheckpointoptions/)
 - [WorkflowCheckpointStore](../../workflowcheckpointstore/)
 - [WorkflowCheckpoint](../../workflowcheckpoint/)

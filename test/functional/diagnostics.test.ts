@@ -1,3 +1,6 @@
+import { readJournal } from "../../src/infrastructure/transport-journal.ts";
+import { transportReference } from "../../src/infrastructure/transport-json.ts";
+import { repositoryTransport } from "../../src/infrastructure/repository-transport.ts";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFile, mkdir, writeFile } from "node:fs/promises";
@@ -104,7 +107,7 @@ test("idle diagnostics repeat before timeout and error recovery preserves the jo
     (error) => {
       const recovery = recoveryDetails(error);
       assert.equal(recovery?.branch, "idle-test");
-      assert.equal(typeof recovery?.log, "string");
+      assert.ok(transportReference(recovery?.logReference));
       return true;
     },
   );
@@ -141,7 +144,12 @@ test("preparation errors are journaled and sibling hooks are cancelled", async (
   const recovery = recoveryDetails(error);
   assert.equal(recovery?.branch, "hook-errors");
   assert.match(
-    await readFile(recovery!.log as string, "utf8"),
+    JSON.stringify(
+      await readJournal({
+        transporter: repositoryTransport(root),
+        reference: transportReference(recovery!.logReference),
+      }),
+    ),
     /preparation failed/,
   );
 });

@@ -14,7 +14,7 @@ Use `localTransport` for a private directory or `s3Transport` from the optional 
 
 ## Boundaries and responsibilities
 
-Checkpoints retain explicit ownership until release or authorized recovery. Archives and native conversations materialize files when Git or an agent needs them. Workspaces, SQLite and sandbox mounts still require filesystems. Remote activity is an observation with unverified ownership, not proof that another machine has stopped. Existing directory stores retain their original format and are not migrated automatically.
+Checkpoints retain explicit ownership until release or authorized recovery. Archives and native conversations materialize files when Git or an agent needs them. Workspaces, SQLite and sandbox mounts still require filesystems. Remote activity is an observation with unverified ownership, not proof that another machine has stopped. Compose stores with localTransport for disk persistence; the file-store factories have been removed.
 
 ## Entry points
 

@@ -21,9 +21,9 @@ const result = await dispatch({
   label: "inspection",
   observe: reporter({ label: "inspection", verbose: false }),
   warn: console.warn,
-  logging: { file: ".outpost/logs/inspection.jsonl", verbose: true },
+  logging: { verbose: true },
 });
-console.log(result.usage, result.log);
+console.log(result.usage, result.logReference);
 ```
 
 ## Événements
@@ -34,9 +34,9 @@ Les erreurs des callbacks d’observation et d’avertissement ne font pas écho
 
 ## Journalisation
 
-Le défaut est un fichier JSONL généré dans `.outpost/logs`. Utilisez `logging: false` pour la désactiver, `"stdout"` pour la sortie standard, ou `{ file, verbose }` pour la configurer. Un dispatch peut surcharger la politique de sa sandbox. Le mode verbeux inclut le protocole brut et les fragments `text-delta` diffusés en streaming.
+Les journaux utilisent des segments immuables et un index versionné via `Transport`. Par défaut : `localTransport({ directory: resolve(repository, ".outpost/storage") })`. Utilisez `logging: false` pour désactiver la persistance, `"stdout"` pour le terminal ou `{ transporter, verbose }` pour choisir le stockage. Le mode verbose inclut les événements bruts et les fragments `text-delta`.
 
-Des dispatchs successifs peuvent compléter le même `logging.file`. Les écritures simultanées au même chemin sont refusées pendant sa possession dans ce dépôt. Les logs par défaut reçoivent un fichier annexe privé indiquant leur fermeture pour la conservation ; fermer un journal est idempotent.
+Chaque dispatch possède son propre journal, même avec un transport partagé. Lisez `result.logReference` avec `readJournal({ transporter, reference: result.logReference })`. La fermeture est idempotente et marque conditionnellement l’index comme fermé pour la rétention ; il n’y a ni fichier annexe JSONL ni option d’ajout à un fichier.
 
 ## Comptage des tokens
 

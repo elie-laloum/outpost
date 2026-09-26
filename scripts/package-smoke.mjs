@@ -84,7 +84,7 @@ try {
       `
     import assert from 'node:assert/strict';
     import * as api from '@elie-laloum/outpost';
-    for (const name of ['claude','codex','gemini','customHarness','openaiCompatible','local','docker','podman','vercel','daytona','firecracker','mountedProvider','remoteProvider']) assert.equal(name in api, false, name);
+    for (const name of ['fileArtifactStore','fileWorkflowCheckpointStore','claude','codex','gemini','customHarness','openaiCompatible','local','docker','podman','vercel','daytona','firecracker','mountedProvider','remoteProvider']) assert.equal(name in api, false, name);
     for (const name of ['claude','codex','gemini']) {
       assert.equal(typeof api[name+'Harness'], 'function');
       assert.equal(api.agent({harness:api[name+'Harness'](),model:'arbitrary-model'}).model.name,'arbitrary-model');
@@ -94,6 +94,18 @@ try {
       assert.equal(name in exports,false,name);
       assert.equal(typeof exports[name+'SandboxProvider'],'function');
     }
+    const transporter=api.localTransport({directory:'consumer-store'});
+    const artifact=api.artifactStore({transporter});
+    const id='a'.repeat(64);
+    await artifact.put(id,new Uint8Array([0,255]));
+    assert.deepEqual([...await artifact.get(id)],[0,255]);
+    const checkpoints=api.workflowCheckpointStore({transporter});
+    const lease=await checkpoints.acquire('consumer');
+    await lease.write({answer:42});
+    await lease.release();
+    const resumed=await checkpoints.acquire('consumer');
+    assert.deepEqual(await resumed.read(),{answer:42});
+    await resumed.release();
     const modelProvider=api.anthropicModelProvider({apiKey:'unused'});
     assert.equal('generate' in modelProvider,false);
     assert.equal(typeof modelProvider.stream,'function');

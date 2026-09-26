@@ -16,7 +16,7 @@ export async function scaffoldFiles(
       "Objective: {{OBJECTIVE}}\n\nWork on {{WORK_BRANCH}} from {{BASE_BRANCH}}. Inspect the repository, implement the objective, run relevant tests and commit your changes. When finished, write <outpost>done</outpost>.\n",
     ".env.example": authenticationEnvironment(options),
     ".gitignore":
-      "node_modules/\n.env\n.outpost/workspaces/\n.outpost/locks/\n.outpost/recovery/\n.outpost/logs/\n",
+      "node_modules/\n.env\n.outpost/workspaces/\n.outpost/locks/\n.outpost/recovery/\n.outpost/logs/\n.outpost/storage/\n",
   };
   if (sandboxProvider === "docker" || sandboxProvider === "podman")
     files[sandboxProvider === "docker" ? "Dockerfile" : "Containerfile"] =

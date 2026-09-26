@@ -39,9 +39,10 @@ import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import {
   approvalTask,
-  fileWorkflowCheckpointStore,
+  workflowCheckpointStore,
   task,
   workflow,
+  localTransport,
 } from "@elie-laloum/outpost";
 
 const action = process.argv[2] ?? "approve";
@@ -59,7 +60,9 @@ const deliver = task({
 });
 const plan = workflow("reviewed-report", [approval, deliver]);
 const checkpoint = {
-  store: fileWorkflowCheckpointStore({ directory: "./state/approvals" }),
+  store: workflowCheckpointStore({
+    transporter: localTransport({ directory: "./state/approvals" }),
+  }),
   runId: randomUUID(),
   version: "1",
 };

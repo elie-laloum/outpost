@@ -1,3 +1,4 @@
+import { repositoryTransport } from "../../src/infrastructure/repository-transport.ts";
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { mkdir, readFile, writeFile, rename } from "node:fs/promises";
@@ -55,8 +56,12 @@ test("retention dry run accounts for all categories; apply removes only closed l
   });
   assert.equal(plan.entries.filter((entry) => entry.eligible).length, 2);
   assert.equal(plan.quota, "exceeded");
+  assert.equal(
+    plan.entries.reduce((sum, entry) => sum + entry.bytes, 0),
+    plan.usageBytes,
+  );
   assert.equal(plan.projectedBytes, Buffer.byteLength("recovery data"));
-  assert.ok(await readFile(log.file!));
+  assert.ok(await repositoryTransport(root).read(log.reference!.key));
   const result = await pruneRecoveryRetention(plan);
   assert.equal(result.removed.length, 2);
   assert.equal(result.retained.length, 0);
@@ -67,7 +72,10 @@ test("retention dry run accounts for all categories; apply removes only closed l
     head,
   );
   assert.equal(await readFile(recovery, "utf8"), "recovery data");
-  await assert.rejects(readFile(log.file!), { code: "ENOENT" });
+  assert.equal(
+    await repositoryTransport(root).read(log.reference!.key),
+    undefined,
+  );
 });
 
 test("dirty, ignored, detached, unregistered, Git-locked and operation-owned workspaces are retained", async (t) => {
@@ -111,9 +119,11 @@ test("pruning revalidates dirty changes, newly acquired locks, age and immutable
   await writeFile(join(dirty, "new.txt"), "new work");
   const release = await lock(root, "acquired");
   t.after(release);
-  const bytes = await readFile(log.file!);
-  await rename(log.file!, `${log.file!}.old`);
-  await writeFile(log.file!, bytes);
+  const transporter = repositoryTransport(root);
+  const object = (await transporter.read(log.reference!.key))!;
+  await transporter.write(object.key, object.bytes, {
+    ifRevision: object.revision,
+  });
   const result = await pruneRecoveryRetention(plan);
   assert.equal(result.removed.length, 0);
   assert.equal(result.retained.length, 3);
@@ -129,27 +139,20 @@ test("pruning revalidates dirty changes, newly acquired locks, age and immutable
   );
 });
 
-test("legacy/custom/unclosed/modified logs remain protected and reopening invalidates closure", async (t) => {
+test("unclosed and malformed journals remain protected", async (t) => {
   const root = await repository(t);
   const active = await journal(root);
   t.after(() => active.close());
-  const closed = await journal(root);
-  await closed.close();
-  const reopened = await journal(root, { file: closed.file! });
-  t.after(() => reopened.close());
   const modified = await journal(root);
   await modified.close();
-  await writeFile(modified.file!, "changed");
-  const legacy = join(root, ".outpost", "logs", "legacy.jsonl");
-  await writeFile(legacy, "old data");
+  const transporter = repositoryTransport(root);
+  await transporter.write(modified.reference!.key, Buffer.from("changed"), {
+    ifRevision: modified.reference!.revision,
+  });
   const plan = await planRecoveryRetention({ repository: root, policy });
   assert.equal(plan.entries.filter((entry) => entry.eligible).length, 0);
-  await assert.rejects(readFile(`${closed.file!}.closed.json`), {
-    code: "ENOENT",
-  });
   assert.equal((await pruneRecoveryRetention(plan)).removed.length, 0);
   await active.close();
-  await reopened.close();
 });
 
 test("quota admission fails closed on partial inventory and includes protected recovery and planned bytes", async (t) => {
@@ -206,7 +209,7 @@ test("retention CLI defaults to dry run and requires a validated explicit policy
   const dry = await run(["--policy", file, "--json"]);
   assert.equal(dry.status, 0, dry.stderr);
   assert.equal(JSON.parse(dry.stdout).dryRun, true);
-  assert.ok(await readFile(log.file!));
+  assert.ok(await repositoryTransport(root).read(log.reference!.key));
   const applied = await run(["--policy", file, "--apply"]);
   assert.equal(applied.status, 0, applied.stderr);
   assert.match(applied.stdout, /REMOVED/);

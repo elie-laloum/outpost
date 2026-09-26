@@ -16,12 +16,13 @@ import { join, parse } from "node:path";
 import {
   artifact,
   artifactTask,
-  fileArtifactStore,
+  artifactStore,
   publishArtifact,
   readArtifact,
   readStoredArtifact,
   task,
   workflow,
+  localTransport,
 } from "../../src/index.ts";
 import type { ArtifactStore } from "../../src/index.ts";
 
@@ -45,7 +46,7 @@ async function directory(t: TestContext) {
 
 test("binary and JSON artifacts have immutable identities, lineage and portable references", async (t) => {
   const path = await directory(t),
-    store = fileArtifactStore({ directory: path });
+    store = artifactStore({ transporter: localTransport({ directory: path }) });
   const parent = await publishArtifact(store, json, 4, { producer });
   const bytes = Uint8Array.of(0, 255, 128, 13, 10);
   const reference = await publishArtifact(store, binary, bytes, {
@@ -109,7 +110,9 @@ test("binary and JSON artifacts have immutable identities, lineage and portable 
 });
 
 test("schema validation runs on publish and read, including Standard Schema and lossless JSON", async (t) => {
-  const store = fileArtifactStore({ directory: await directory(t) });
+  const store = artifactStore({
+    transporter: localTransport({ directory: await directory(t) }),
+  });
   const reference = await publishArtifact(store, json, 5, { producer });
   const rejected = artifact.json({
     name: "number",
@@ -164,7 +167,7 @@ test("schema validation runs on publish and read, including Standard Schema and 
 
 test("missing, corrupt and forged artifacts fail before decoding", async (t) => {
   const path = await directory(t),
-    store = fileArtifactStore({ directory: path });
+    store = artifactStore({ transporter: localTransport({ directory: path }) });
   const reference = await publishArtifact(store, binary, Uint8Array.of(1), {
     producer,
   });
@@ -183,7 +186,11 @@ test("missing, corrupt and forged artifacts fail before decoding", async (t) => 
       /Invalid artifact reference/,
     );
   }
-  await writeFile(join(path, `${reference.id}.blob`), Uint8Array.of(2));
+  const transporter = localTransport({ directory: path });
+  const object = (await transporter.read(`artifacts/${reference.id}.blob`))!;
+  await transporter.write(object.key, Uint8Array.of(2), {
+    ifRevision: object.revision,
+  });
   await assert.rejects(
     readStoredArtifact(store, binary, reference),
     /integrity mismatch/,
@@ -192,18 +199,30 @@ test("missing, corrupt and forged artifacts fail before decoding", async (t) => 
     publishArtifact(store, binary, Uint8Array.of(1), { producer }),
     /integrity mismatch/,
   );
-  assert.ok(!(await readdir(path)).some((name) => name.endsWith(".tmp")));
-  await rm(join(path, `${reference.id}.blob`));
-  await assert.rejects(readStoredArtifact(store, binary, reference), {
-    code: "ENOENT",
-  });
+  assert.ok(
+    !(await readdir(path, { recursive: true })).some((name) =>
+      name.endsWith(".tmp"),
+    ),
+  );
+  await rm(join(path, "objects", "artifacts", `${reference.id}.blob.object`));
+  await assert.rejects(
+    readStoredArtifact(store, binary, reference),
+    /does not exist/,
+  );
 });
 
 test("storage bounds, unsafe IDs, symlinks and cancellation do not publish partial files", async (t) => {
   const path = await directory(t),
-    store = fileArtifactStore({ directory: path, maxBytes: 2 });
+    store = artifactStore({
+      transporter: localTransport({ directory: path }),
+      maxBytes: 2,
+    });
   assert.throws(
-    () => fileArtifactStore({ directory: path, maxBytes: 0 }),
+    () =>
+      artifactStore({
+        transporter: localTransport({ directory: path }),
+        maxBytes: 0,
+      }),
     /positive/,
   );
   await assert.rejects(store.get("../outside"), /storage ID/);
@@ -248,15 +267,22 @@ test("storage bounds, unsafe IDs, symlinks and cancellation do not publish parti
     publishArtifact(store, delayed, 1, { producer, signal: controller.signal }),
     { name: "AbortError" },
   );
-  await writeFile(join(path, `${reference.id}.blob`), "large");
+  const transporter = localTransport({ directory: path });
+  const object = (await transporter.read(`artifacts/${reference.id}.blob`))!;
+  await transporter.write(object.key, Buffer.from("large"), {
+    ifRevision: object.revision,
+  });
   await assert.rejects(
     readStoredArtifact(store, binary, reference),
-    /too large/,
+    /too large|limit/,
   );
   if (process.platform === "win32") return;
-  await rm(join(path, `${reference.id}.blob`));
+  await rm(join(path, "objects", "artifacts", `${reference.id}.blob.object`));
   await writeFile(join(path, "outside"), "x");
-  await symlink(join(path, "outside"), join(path, `${reference.id}.blob`));
+  await symlink(
+    join(path, "outside"),
+    join(path, "objects", "artifacts", `${reference.id}.blob.object`),
+  );
   await assert.rejects(
     readStoredArtifact(store, binary, reference),
     /Inspection path/,
@@ -266,7 +292,9 @@ test("storage bounds, unsafe IDs, symlinks and cancellation do not publish parti
     /Inspection path/,
   );
   await symlink(path, join(path, "alias"));
-  const alias = fileArtifactStore({ directory: join(path, "alias", "nested") });
+  const alias = artifactStore({
+    transporter: localTransport({ directory: join(path, "alias", "nested") }),
+  });
   await assert.rejects(
     publishArtifact(alias, binary, Uint8Array.of(1), { producer }),
     /symlinks/,
@@ -275,7 +303,10 @@ test("storage bounds, unsafe IDs, symlinks and cancellation do not publish parti
 
 test("cancellation during a file write removes temporary files", async (t) => {
   const path = await directory(t),
-    store = fileArtifactStore({ directory: path, maxBytes: 32 * 1024 * 1024 });
+    store = artifactStore({
+      transporter: localTransport({ directory: path }),
+      maxBytes: 32 * 1024 * 1024,
+    });
   const controller = new AbortController();
   const pending = store.put(
     "a".repeat(64),
@@ -285,13 +316,25 @@ test("cancellation during a file write removes temporary files", async (t) => {
   // Abort once staging exists, before the asynchronous write completes.
   let staged = false;
   for (let attempt = 0; attempt < 1000 && !staged; attempt++) {
-    staged = (await readdir(path)).some((name) => name.endsWith(".tmp"));
+    staged = (await readdir(path, { recursive: true })).some((name) =>
+      name.endsWith(".tmp"),
+    );
     if (!staged) await new Promise((resolve) => setImmediate(resolve));
   }
   assert.ok(staged, "Expected to observe staging before publication");
   controller.abort();
   await assert.rejects(pending, { name: "AbortError" });
-  assert.deepEqual(await readdir(path), []);
+  assert.equal(
+    await localTransport({ directory: path }).read(
+      "artifacts/" + "a".repeat(64) + ".blob",
+    ),
+    undefined,
+  );
+  assert.ok(
+    !(await readdir(path, { recursive: true })).some((name) =>
+      name.endsWith(".tmp"),
+    ),
+  );
 });
 
 test("artifact tasks enforce dependency declarations and producer execution identity", async () => {
@@ -344,19 +387,23 @@ test("artifact tasks enforce dependency declarations and producer execution iden
 
 test("concurrent publishers never replace committed data and binary payloads are copied", async (t) => {
   const path = await directory(t);
-  const store = fileArtifactStore({ directory: path });
+  const store = artifactStore({
+    transporter: localTransport({ directory: path }),
+  });
   const options = { producer };
   const [first, second] = await Promise.all([
     publishArtifact(store, binary, Uint8Array.of(255, 0), options),
     publishArtifact(
-      fileArtifactStore({ directory: path }),
+      artifactStore({ transporter: localTransport({ directory: path }) }),
       binary,
       Uint8Array.of(255, 0),
       options,
     ),
   ]);
   assert.deepEqual(first, second);
-  assert.deepEqual(await readdir(path), [`${first.id}.blob`]);
+  assert.deepEqual(await readdir(join(path, "objects", "artifacts")), [
+    `${first.id}.blob.object`,
+  ]);
   const bytes = await readStoredArtifact(store, binary, first);
   bytes[0] = 0;
   assert.deepEqual(
@@ -379,8 +426,10 @@ test("artifact publication validates filesystem roots without recreating them", 
   });
   syncBuiltinESMExports();
   try {
-    const store = fileArtifactStore({
-      directory: join(path, "nested", "artifacts"),
+    const store = artifactStore({
+      transporter: localTransport({
+        directory: join(path, "nested", "artifacts"),
+      }),
     });
     const reference = await publishArtifact(store, binary, Uint8Array.of(9), {
       producer,

@@ -39,15 +39,16 @@ import { resolve } from "node:path";
 import {
   artifact,
   artifactTask,
-  fileArtifactStore,
-  fileWorkflowCheckpointStore,
+  artifactStore,
+  workflowCheckpointStore,
   readArtifact,
   task,
   workflow,
+  localTransport,
 } from "@elie-laloum/outpost";
 
-const store = fileArtifactStore({
-  directory: resolve(".outpost/artifacts"),
+const store = artifactStore({
+  transporter: localTransport({ directory: resolve(".outpost/artifacts") }),
   maxBytes: 1024 * 1024,
 });
 const api = artifact.json({
@@ -80,7 +81,9 @@ const consume = task({
 });
 const result = await workflow("api-contract", [publish, consume]).start({
   checkpoint: {
-    store: fileWorkflowCheckpointStore({ directory: resolve(".outpost/runs") }),
+    store: workflowCheckpointStore({
+      transporter: localTransport({ directory: resolve(".outpost/runs") }),
+    }),
     runId: "api-contract-1",
     version: "1",
   },

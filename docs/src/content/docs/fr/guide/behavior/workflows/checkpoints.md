@@ -9,9 +9,10 @@ Les checkpoints sont optionnels. Ils conservent les valeurs des tâches terminé
 
 ```ts
 import {
-  fileWorkflowCheckpointStore,
+  workflowCheckpointStore,
   task,
   workflow,
+  localTransport,
 } from "@elie-laloum/outpost";
 
 const inspect = task({
@@ -21,7 +22,9 @@ const inspect = task({
 const delivery = workflow("delivery", [inspect]);
 const result = await delivery.start({
   checkpoint: {
-    store: fileWorkflowCheckpointStore({ directory: ".outpost/workflows" }),
+    store: workflowCheckpointStore({
+      transporter: localTransport({ directory: ".outpost/workflows" }),
+    }),
     runId: "delivery-ticket-42",
     version: "implementation-and-inputs-v1",
   },
@@ -52,10 +55,10 @@ Les résultats doivent être des valeurs JSON sans perte, ou `undefined` au prem
 
 `WorkflowCheckpointStore` est un port du domaine. `acquire(runId)` retourne un lease exclusif avec `read`, `write` et `release` ; les adaptateurs doivent conserver l'exclusivité jusqu'à la fin des écritures et remplacer les snapshots atomiquement. `read` retourne `undefined` pour un nouveau run ; les snapshots persistés sont versionnés et validés avant toute tâche.
 
-L'adaptateur fichier écrit des fichiers privés (0600) via des fichiers temporaires, synchronisation et remplacement atomique, avec synchronisation du répertoire parent sur POSIX. Chaque checkpoint est limité à 16 Mio. Les verrous de processus locaux refusent les propriétaires concurrents, récupèrent les propriétaires confirmés morts et refusent les propriétaires incertains. Cet adaptateur cible un système de fichiers local et des processus locaux ; ce n'est pas un verrou distribué ou pour système de fichiers réseau. Les checkpoints peuvent contenir des résultats sensibles ; protégez leur répertoire et excluez-le des fichiers suivis. Les données sont conservées jusqu'à leur suppression explicite.
+`workflowCheckpointStore({ transporter })` conserve une enveloppe conditionnelle contenant propriété et checkpoint. Utilisez `localTransport({ directory })` pour le disque, avec fichiers privés et remplacement atomique. Les checkpoints sont limités à 16 Mio. Les mêmes règles de propriété et de révision s’appliquent aux transports locaux et distants ; gardez le stockage privé et hors des worktrees jetables.
 
 Consultez les [politiques d'exécution](../../../workflows/execution/) et les [budgets d'usage](../../../workflows/budgets/) pour l'annulation, les retries et les limites d'admission.
 
 Un `DispatchResult` complet contient des fonctions de continuation et ne peut pas être sauvegardé directement. Appelez `dispatch` dans une tâche, transmettez son signal et déclarez sa consommation, puis retournez des données simples comme `result.value`. Une tâche d’artefact peut publier ces données et retourner une référence JSON ; voir les [artefacts typés](../../../advanced/artifacts/).
 
-La reprise automatique d’un verrou inactif exige l’identité de processus Linux. Sur les plateformes qui ne la fournissent pas, notamment macOS et Windows, un propriétaire interrompu reste incertain et bloque le redémarrage. Après avoir vérifié indépendamment qu’aucun runner ne détient encore le checkpoint, conservez son JSON et retirez uniquement le verrou indiqué par le conflit avant de réessayer.
+Après un crash, la propriété reste enregistrée sur toutes les plateformes. Confirmez l’arrêt de l’ancien exécuteur, lisez `checkpoints/<SHA-256 de runId>.json` via le transport puis transmettez sa révision à `recoverWorkflowCheckpoint({ transporter, runId, revision })`. La récupération conserve valeurs et usage ; `resume: "retry-incomplete"` autorise séparément le rejeu des tâches.

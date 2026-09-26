@@ -1,3 +1,4 @@
+import { localTransport, readJournal } from "../../src/index.ts";
 import { agent as composeAgent } from "../../src/domain/agent.ts";
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -263,27 +264,34 @@ test("structured output preflight rejects missing tags and unsupported repairs b
   assert.equal(acquired, 0);
 });
 
-test("journals append complete runs and include raw recognized agent output when verbose", async (t) => {
-  const root = await repository(t),
-    file = join(root, "combined.jsonl");
-  for (let run = 0; run < 2; run++)
-    await dispatch({
+test("journals retain independent complete runs and recognized raw output when verbose", async (t) => {
+  const root = await repository(t);
+  const transporter = localTransport({ directory: join(root, "journals") });
+  const records: unknown[] = [];
+  for (let run = 0; run < 2; run++) {
+    const result = await dispatch({
       repository: root,
       sandboxProvider: localSandboxProvider(),
       agent: scripted(emit("ok")),
       brief: { text: "go" },
-      logging: { file, verbose: true },
+      logging: { transporter, verbose: true },
     });
-  const records = (await readFile(file, "utf8"))
-    .trim()
-    .split("\n")
-    .map((line) => JSON.parse(line));
-  assert.equal(
-    records.filter((record) => record.kind === "dispatch-start").length,
-    2,
-  );
-  assert.equal(records.filter((record) => record.kind === "raw").length, 2);
-  assert.equal(records.filter((record) => record.kind === "text").length, 2);
+    assert.ok(result.logReference);
+    records.push(
+      ...(await readJournal({ transporter, reference: result.logReference })),
+    );
+  }
+  for (const kind of ["dispatch-start", "raw", "text"])
+    assert.equal(
+      records.filter(
+        (record) =>
+          record &&
+          typeof record === "object" &&
+          "kind" in record &&
+          record.kind === kind,
+      ).length,
+      2,
+    );
 });
 
 test("the default completion marker stops later passes without an explicit until option", async (t) => {

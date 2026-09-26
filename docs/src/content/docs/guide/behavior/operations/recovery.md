@@ -38,18 +38,18 @@ Remote recovery folders may contain `initial.bundle`/`commits.bundle`, binary-ca
 
 ## Inspect retained storage
 
-The `outpost recovery inspect` command, available since 3.0.0, inventories the selected checkout's `.outpost/recovery`, `.outpost/logs`, `.outpost/locks` and `.outpost/workspaces`. By default it reads filesystem metadata, without reading transcript, patch or lock contents, modifying Git metadata, creating runtime directories or removing files.
+The `outpost recovery inspect` command, available since 3.0.0, inventories the selected checkout's `.outpost/recovery`, `.outpost/logs`, `.outpost/locks` and `.outpost/workspaces` and `.outpost/storage`. By default it reads filesystem metadata, without reading transcript, patch or lock contents, modifying Git metadata, creating runtime directories or removing files.
 
 ```sh
 node src/cli/main.ts recovery inspect --repository /path/to/repository
 node src/cli/main.ts recovery inspect --repository /path/to/repository --json
 ```
 
-Use Node.js 24+ from a source checkout. With the built CLI, use `outpost recovery inspect`. `--repository` defaults to the current directory; subdirectories resolve to their Git checkout root. A linked worktree is inspected as its own checkout. Custom log locations and native conversation stores outside these four directories are not included.
+Use Node.js 24+ from a source checkout. With the built CLI, use `outpost recovery inspect`. `--repository` defaults to the current directory; subdirectories resolve to their Git checkout root. A linked worktree is inspected as its own checkout. Custom log locations and native conversation stores outside these managed directories are not included.
 
 Each direct child of a storage directory has an entry with its path, kind, recursive logical byte size, file/directory/symlink counts, most recent observed modification time and completeness. Hard-linked files are counted per path; sparse files use their logical length. Sizes are not allocated disk blocks or unique physical storage. Symlink targets are excluded, and symlinked storage roots are refused.
 
-The inventory is observational, not an atomic snapshot. Files may change during traversal. Missing storage directories are normal; inaccessible paths, unsupported file types and exhausted limits produce explicit issues and partial totals. The default budget is 100,000 entries across all four directories, in recovery/logs/locks/workspaces order, with a maximum traversal depth of 64. `--max-entries NUMBER` adjusts the entry budget. Empty category directories do not consume this budget.
+The inventory is observational, not an atomic snapshot. Files may change during traversal. Missing storage directories are normal; inaccessible paths, unsupported file types and exhausted limits produce explicit issues and partial totals. The default budget is 100,000 entries across all managed directories, in recovery/logs/locks/workspaces/storage order, with a maximum traversal depth of 64. `--max-entries NUMBER` adjusts the entry budget. Empty category directories do not consume this budget.
 
 ```sh
 node src/cli/main.ts recovery inspect --repository /path/to/repository --max-entries 1000 --json
@@ -126,7 +126,7 @@ See [retention and quotas](../../../operations/storage-retention/) to plan expli
 
 ## Inspect sandbox activity
 
-Sandboxes created through `createSandbox`, workspace methods, dispatch or attach register their lifecycle under `.outpost/locks/resource-activity`. Inspect these records without contacting providers:
+Sandboxes created through `createSandbox`, workspace methods, dispatch or attach register their lifecycle under `.outpost/storage/objects/resources`. Inspect these records without contacting providers:
 
 ```sh
 outpost recovery inspect --repository /path/to/repository --resources --json

@@ -78,7 +78,7 @@ for (const signal of ["SIGINT", "SIGTERM", undefined] as const) {
       assert.match(output.stderr, /Cancelled\. Recovery details:/);
       assert.match(output.stderr, /branch:/);
       assert.match(output.stderr, /directory:/);
-      assert.match(output.stderr, /log:/);
+      assert.match(output.stderr, /logReference:/);
       assert.doesNotMatch(output.stderr, /OutpostError:|at file:/);
       const workspaces = join(root, ".outpost", "workspaces");
       const entries = await readdir(workspaces);
@@ -92,11 +92,9 @@ for (const signal of ["SIGINT", "SIGTERM", undefined] as const) {
       assert.match(output.stderr, /OutpostError:/);
       assert.doesNotMatch(output.stderr, /Cancelled/);
     }
-    assert.deepEqual(await readdir(join(root, ".outpost", "locks")), [
-      "resource-activity",
-    ]);
+    assert.deepEqual(await readdir(join(root, ".outpost", "locks")), []);
     assert.deepEqual(
-      await readdir(join(root, ".outpost", "locks", "resource-activity")),
+      await readdir(join(root, ".outpost", "storage", "objects", "resources")),
       [],
     );
   });

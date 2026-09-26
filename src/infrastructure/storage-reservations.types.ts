@@ -15,12 +15,3 @@ export interface StorageReservation {
   release(): Promise<void>;
   [Symbol.asyncDispose](): Promise<void>;
 }
-
-export interface StorageReservationRecord {
-  readonly version: 1;
-  readonly id: string;
-  readonly pid: number;
-  readonly identity?: unknown;
-  readonly reserveBytes: number;
-  readonly createdAt: string;
-}

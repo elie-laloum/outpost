@@ -21,9 +21,9 @@ const result = await dispatch({
   label: "inspection",
   observe: reporter({ label: "inspection", verbose: false }),
   warn: console.warn,
-  logging: { file: ".outpost/logs/inspection.jsonl", verbose: true },
+  logging: { verbose: true },
 });
-console.log(result.usage, result.log);
+console.log(result.usage, result.logReference);
 ```
 
 ## Events
@@ -34,9 +34,9 @@ Observer and warning callback exceptions do not fail the job. Do not use an obse
 
 ## Logging
 
-The default is a generated JSONL file under `.outpost/logs`. Set `logging: false` to disable it, `"stdout"` for standard output, or `{ file, verbose }` for control. A dispatch can override the warm sandbox’s logging policy. Verbose logging includes raw protocol events and streamed `text-delta` fragments.
+Journals use immutable event segments and a versioned index through `Transport`. The default is `localTransport({ directory: resolve(repository, ".outpost/storage") })`. Set `logging: false` to disable persistence, `"stdout"` for terminal output, or `{ transporter, verbose }` to choose storage. Verbose journals include raw protocol events and streamed `text-delta` fragments.
 
-A configured `logging.file` can be appended by sequential dispatches. Concurrent writers to the same path are rejected while it is owned in that repository. Default logs receive a private closed-log sidecar for retention; closing a journal is idempotent.
+Each dispatch owns a separate journal, even with a shared transport. Read `result.logReference` with `readJournal({ transporter, reference: result.logReference })`. Closing is idempotent and conditionally marks the index closed for retention; there is no JSONL sidecar or append-to-file option.
 
 ## Token accounting
 

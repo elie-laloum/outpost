@@ -88,8 +88,8 @@
     "Inspecte le stockage local de récupération et détermine quels workspaces propres ou journaux fermés satisfont la politique d’âge et de capacité. Le plan expose éligibilité et usage projeté sans supprimer de fichier."
   ],
   "pruneRecoveryRetention": [
-    "Apply a retention plan after fresh validation. Local plans reacquire filesystem ownership; transport plans require the same transporter in the second argument, revalidate closed journal groups and condition every deletion on its revision. Changed or partially removed candidates are reported as retained; recovery data remains protected.",
-    "Applique un plan de rétention après revalidation. Les plans locaux reprennent la propriété des fichiers ; les plans distants exigent le même transport en second argument, revalident les groupes de journaux fermés et conditionnent chaque suppression à sa révision. Les candidats modifiés ou partiellement supprimés sont signalés comme conservés ; les données de récupération restent protégées."
+    "Apply a retention plan after fresh validation. Worktree removal reacquires the Git branch lock. Local and remote journal groups use conditional object deletion; explicit transport plans require the same transporter in the second argument. Changed or partially removed candidates are retained; recovery data remains protected.",
+    "Applique un plan après revalidation. La suppression d’un worktree reprend le verrou de branche Git. Les journaux locaux et distants utilisent des suppressions conditionnelles d’objets ; un plan de transport explicite exige le même transport en second argument. Les candidats modifiés ou partiellement supprimés sont conservés ; les données de récupération restent protégées."
   ],
   "assertRecoveryQuota": [
     "Inspect recovery storage and reject if observed bytes plus the requested reservation exceed maxBytes, or if inspection cannot establish admission. This check does not reserve space or impose a filesystem quota; reserveRecoveryStorage coordinates cooperating writers.",
@@ -108,8 +108,8 @@
     "Rejoue les fixtures d’événements intégrées dans l’adapter choisi et rapporte la compatibilité de décodage avec la version CLI enregistrée. Ne lance pas le CLI installé, ne valide pas les identifiants et ne teste pas de modèle réel."
   ],
   "reserveRecoveryStorage": [
-    "Acquire a coordinated recovery-storage reservation after checking observed usage and other active reservations. The caller must release the returned reservation; it coordinates cooperating processes without reserving physical disk blocks.",
-    "Acquiert une réservation coordonnée de stockage après contrôle de l’usage observé et des autres réservations actives. L’appelant doit libérer la réservation renvoyée ; elle coordonne les processus coopératifs sans réserver physiquement des blocs disque."
+    "Reserve cooperative headroom in a conditional transport ledger. By default localTransport stores the ledger under .outpost/storage and admission measures local runtime files; an explicit transport measures its payloads. Release is idempotent. Abandoned reservations require explicit conditional recovery after confirming the owner stopped.",
+    "Réserve une capacité coopérative dans un registre conditionnel via Transport. Par défaut, localTransport conserve le registre sous .outpost/storage et l’admission mesure les fichiers locaux ; un transport explicite mesure ses contenus. La libération est idempotente. Une réservation abandonnée exige une récupération conditionnelle explicite après confirmation de l’arrêt du propriétaire."
   ],
   "planRecoveryRestore": [
     "Validate a retained transfer and prepare restoration of its previous or incoming side into a new destination. The plan records payloads, commit and fingerprints for later revalidation; it does not populate the destination.",
@@ -118,10 +118,6 @@
   "restoreRecoveryTransfer": [
     "Revalidate a restoration plan and materialize the selected retained state into its new destination. Source recovery artifacts remain available, and the result reports whether staging could be preserved. Review the destination before integrating it.",
     "Revalide un plan de restauration et matérialise l’état conservé choisi dans sa nouvelle destination. Les artefacts sources restent disponibles et le résultat indique si l’index Git a pu être préservé. Examinez la destination avant intégration."
-  ],
-  "fileWorkflowCheckpointStore": [
-    "Create a checkpoint store with exactly one directory or transporter. The directory mode keeps existing JSON files, atomic replacement and local process locks. Transport mode delegates to workflowCheckpointStore and uses conditional envelopes with explicit ownership recovery. Changing modes does not migrate saved runs.",
-    "Crée un store de checkpoints avec exactement un dossier ou un transport. Le mode dossier conserve les fichiers JSON existants, le remplacement atomique et les verrous locaux. Le mode transport délègue à workflowCheckpointStore et utilise des enveloppes conditionnelles à récupération explicite. Changer de mode ne migre pas les exécutions."
   ],
   "approvalTask": [
     "Define a checkpoint-backed approval gate that pauses once its dependencies finish. A trusted listed actor must submit approve or reject with a reason. Approval yields the persisted decision to dependent tasks; rejection is final for that run.",
@@ -154,10 +150,6 @@
   "readArtifact": [
     "Read an artifact reference from a declared task dependency through context.value, then load and validate its stored payload. It applies the task cancellation signal and checks the producer against the current execution and dependency key.",
     "Lit une référence d’artefact depuis une dépendance déclarée via context.value, puis charge et valide ses données stockées. Applique le signal d’annulation de la tâche et vérifie le producteur par rapport à l’exécution courante et à la clé de dépendance."
-  ],
-  "fileArtifactStore": [
-    "Create an artifact store with exactly one directory or transporter. Directory mode preserves the existing immutable blob layout and private filesystem checks; transport mode delegates to artifactStore. Both enforce the configured payload bound and reject conflicting bytes for an existing ID.",
-    "Crée un store d’artefacts avec exactement un dossier ou un transport. Le mode dossier préserve le format immuable existant et les vérifications du système de fichiers privé ; le mode transport délègue à artifactStore. Les deux bornent les contenus et refusent des octets différents pour un identifiant existant."
   ],
   "sqliteTaskQueue": [
     "Open a durable SQLite task queue at path. Enqueue deduplicates job identities, claims create fenced leases and stale workers cannot complete queue state. Close the returned database when finished; external effects remain at least once.",
@@ -216,8 +208,8 @@
     "Une mutation conditionnelle ou une lecture versionnée a trouvé une révision différente. Relire l’état avant de décider si une nouvelle tentative est valable ; ne jamais remplacer la condition par une écriture inconditionnelle."
   ],
   "localTransport": [
-    "Create a versioned object transport in a private directory. Binary objects use an envelope distinct from legacy file stores. Local process locks serialize conditional mutations; this adapter does not establish distributed NFS ownership.",
-    "Crée un transport d’objets versionnés dans un dossier privé. Les objets binaires utilisent une enveloppe distincte des anciens stores de fichiers. Les verrous de processus locaux sérialisent les mutations conditionnelles ; cet adaptateur n’établit pas de propriété NFS distribuée."
+    "Create a versioned object transport in a private directory. Local process locks serialize conditional mutations. Use it with artifactStore and workflowCheckpointStore for disk persistence; this adapter does not establish distributed NFS ownership.",
+    "Crée un transport d’objets versionnés dans un dossier privé. Les verrous locaux sérialisent les mutations conditionnelles. Utilisez-le avec artifactStore et workflowCheckpointStore pour persister sur disque ; cet adaptateur n’établit pas de propriété NFS distribuée."
   ],
   "s3Transport": [
     "Create an object transport using the caller’s S3Client. GET reads are bounded, PUT and DELETE are conditional, and listing follows pagination. Each written envelope includes a fresh identity, preventing identical-payload writes from reusing a previous revision. Requires the optional AWS SDK and an endpoint implementing these semantics.",

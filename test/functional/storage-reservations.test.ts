@@ -8,15 +8,18 @@ import { reserveRecoveryStorage } from "../../src/application/storage-reservatio
 import { openWorkspace } from "../../src/application/workspace.ts";
 import { createSandbox } from "../../src/application/sandbox.ts";
 import { lock } from "../../src/infrastructure/git/lock.ts";
-import { localProcessIdentity } from "../../src/infrastructure/git/process-identity.ts";
-import { storageMutationLockDefaults } from "../../src/infrastructure/storage-mutation-lock.constants.ts";
-import { storageReservationDefaults } from "../../src/infrastructure/storage-reservations.constants.ts";
+import { repositoryTransport } from "../../src/infrastructure/repository-transport.ts";
 import { repository } from "../helpers.ts";
 import { localSandboxProvider } from "../../src/providers/local.ts";
 
 const options = { maxBytes: 1_100_000, reserveBytes: 1_000_000 };
-const records = (root: string) =>
-  join(root, ".outpost", "locks", "storage-reservations");
+const records = (root: string) => join(root, ".outpost", "storage");
+async function reservations(root: string) {
+  const object = await repositoryTransport(root).read("reservations/ledger");
+  return object
+    ? Object.keys(JSON.parse(Buffer.from(object.bytes).toString()).reservations)
+    : [];
+}
 
 test("reservations charge concurrent headroom and release idempotently without deleting recovery data", async (t) => {
   const root = await repository(t);
@@ -28,21 +31,13 @@ test("reservations charge concurrent headroom and release idempotently without d
     reserveRecoveryStorage({ repository: root, ...options }),
     /reservation admission refused/,
   );
-  const data: unknown = JSON.parse(
-    await readFile(join(records(root), `${first.id}.json`), "utf8"),
-  );
-  assert.ok(
-    data &&
-      typeof data === "object" &&
-      "pid" in data &&
-      data.pid === process.pid,
-  );
+  assert.deepEqual(await reservations(root), [first.id]);
   await Promise.all([first.release(), first.release()]);
   await first[Symbol.asyncDispose]();
   const second = await reserveRecoveryStorage({ repository: root, ...options });
   await second.release();
   assert.equal(await readFile(join(recovery, "backup"), "utf8"), "valuable");
-  assert.deepEqual(await readdir(records(root)), []);
+  assert.deepEqual(await reservations(root), []);
 });
 
 test(
@@ -93,11 +88,9 @@ test(
 );
 
 test(
-  "a crashed local owner is reclaimed only when process identity establishes inactivity",
+  "a crashed local owner stays charged until explicit conditional recovery",
   { timeout: 20_000 },
   async (t) => {
-    if (!(await localProcessIdentity()))
-      return t.skip("Local identity unavailable");
     const root = await repository(t);
     const child = fork(
       resolve("test/fixtures/storage-reservations.ts"),
@@ -113,55 +106,63 @@ test(
       child.kill("SIGKILL");
       await exited;
     }
-    assert.equal((await readdir(records(root))).length, 1);
+    assert.equal((await reservations(root)).length, 1);
+    await assert.rejects(
+      reserveRecoveryStorage({ repository: root, ...options }),
+      /admission refused/,
+    );
+    const transporter = repositoryTransport(root);
+    const ledger = (await transporter.read("reservations/ledger"))!;
+    await transporter.write(
+      ledger.key,
+      Buffer.from(JSON.stringify({ format: 1, reservations: {} })),
+      { ifRevision: ledger.revision },
+    );
     const replacement = await reserveRecoveryStorage({
       repository: root,
       ...options,
     });
-    assert.deepEqual(await readdir(records(root)), [`${replacement.id}.json`]);
+    assert.deepEqual(await reservations(root), [replacement.id]);
     await replacement.release();
   },
 );
 
-test("uncertain owners remain charged and malformed records fail closed", async (t) => {
+test("malformed reservation ledgers refuse admission and release", async (t) => {
   const root = await repository(t);
   const first = await reserveRecoveryStorage({ repository: root, ...options });
-  const path = join(records(root), `${first.id}.json`);
-  const record = JSON.parse(await readFile(path, "utf8"));
-  await writeFile(path, JSON.stringify({ ...record, identity: undefined }));
+  const transporter = repositoryTransport(root);
+  const original = (await transporter.read("reservations/ledger"))!;
+  const changed = await transporter.write(original.key, Buffer.from("{}"), {
+    ifRevision: original.revision,
+  });
   await assert.rejects(
     reserveRecoveryStorage({ repository: root, ...options }),
-    /admission refused/,
+    /Invalid reservation/,
   );
-  await writeFile(path, "{}");
-  await assert.rejects(
-    reserveRecoveryStorage({ repository: root, ...options }),
-    /invalid; admission refused/,
-  );
-  await assert.rejects(first.release(), /invalid/);
-  await writeFile(path, "{");
-  await assert.rejects(
-    reserveRecoveryStorage({ repository: root, ...options }),
-    /unreadable; admission refused/,
-  );
-  await writeFile(path, JSON.stringify(record));
+  await assert.rejects(first.release(), /Invalid reservation/);
+  await transporter.write(original.key, original.bytes, {
+    ifRevision: changed.revision,
+  });
   await first.release();
 });
 
 test("partial inventory and invalid bounds refuse admission without creating claims", async (t) => {
   const root = await repository(t);
+  await mkdir(join(root, ".outpost", "recovery"), { recursive: true });
+  await writeFile(join(root, ".outpost", "recovery", "a"), "a");
+  await writeFile(join(root, ".outpost", "recovery", "b"), "b");
   await assert.rejects(
     reserveRecoveryStorage({ repository: root, ...options, maxEntries: 1 }),
     /admission refused/,
   );
-  assert.deepEqual(await readdir(records(root)), []);
+  assert.deepEqual(await reservations(root), []);
   await assert.rejects(
     reserveRecoveryStorage({ repository: root, ...options, maxBytes: -1 }),
-    /nonnegative/,
+    /Invalid reservation/,
   );
   await assert.rejects(
     reserveRecoveryStorage({ repository: root, ...options, reserveBytes: NaN }),
-    /nonnegative/,
+    /Invalid reservation/,
   );
   await assert.rejects(
     reserveRecoveryStorage({
@@ -175,7 +176,7 @@ test("partial inventory and invalid bounds refuse admission without creating cla
 
 test("cancellation interrupts lock waiting without creating a reservation", async (t) => {
   const root = await repository(t);
-  const release = await lock(root, storageMutationLockDefaults.lockKey);
+  const release = await lock(records(root), "reservations/ledger");
   try {
     await assert.rejects(
       reserveRecoveryStorage({
@@ -210,7 +211,7 @@ test("workspace reservations span warm ownership and release on close while pres
     branch: { mode: "named", name: "reserved" },
     storageQuota: options,
   });
-  assert.equal((await readdir(records(root))).length, 1);
+  assert.equal((await reservations(root)).length, 1);
   await assert.rejects(
     reserveRecoveryStorage({ repository: root, ...options }),
     /admission refused/,
@@ -223,9 +224,9 @@ test("workspace reservations span warm ownership and release on close while pres
     sandboxProvider: localSandboxProvider(),
   });
   await assert.rejects(workspace.close(), /Close the sandbox/);
-  assert.equal((await readdir(records(root))).length, 1);
+  assert.equal((await reservations(root)).length, 1);
   await sandbox.close();
-  assert.equal((await readdir(records(root))).length, 1);
+  assert.equal((await reservations(root)).length, 1);
   const content = join(workspace.directory, "important");
   await writeFile(content, "preserve");
   assert.equal(
@@ -233,7 +234,7 @@ test("workspace reservations span warm ownership and release on close while pres
     workspace.directory,
   );
   await workspace.close();
-  assert.deepEqual(await readdir(records(root)), []);
+  assert.deepEqual(await reservations(root), []);
   assert.equal(await readFile(content, "utf8"), "preserve");
 });
 
@@ -246,7 +247,7 @@ test("workspace allocation and startup hook failures release reservations", asyn
       storageQuota: options,
     }),
   );
-  assert.deepEqual(await readdir(records(root)), []);
+  assert.deepEqual(await reservations(root), []);
   await assert.rejects(
     openWorkspace({
       repository: root,
@@ -261,7 +262,7 @@ test("workspace allocation and startup hook failures release reservations", asyn
       },
     }),
   );
-  assert.deepEqual(await readdir(records(root)), []);
+  assert.deepEqual(await reservations(root), []);
   await assert.rejects(
     createSandbox({
       repository: root,
@@ -276,14 +277,14 @@ test("workspace allocation and startup hook failures release reservations", asyn
     }),
     /provider failed/,
   );
-  assert.deepEqual(await readdir(records(root)), []);
+  assert.deepEqual(await reservations(root), []);
 });
 
 test("reservation directories and records cannot redirect writes through symlinks", async (t) => {
   const root = await repository(t);
   const external = join(root, "external");
   await mkdir(external);
-  await mkdir(join(root, ".outpost", "locks"), { recursive: true });
+  await mkdir(join(root, ".outpost"), { recursive: true });
   try {
     await symlink(external, records(root), "junction");
   } catch (error) {
@@ -298,7 +299,7 @@ test("reservation directories and records cannot redirect writes through symlink
   }
   await assert.rejects(
     reserveRecoveryStorage({ repository: root, ...options }),
-    /must not use symlinks/,
+    /incomplete inventory|symlinks/,
   );
   assert.deepEqual(await readdir(external), []);
 });

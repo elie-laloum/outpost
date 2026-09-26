@@ -1,4 +1,17 @@
 export const referenceRedirects = {
+  "/fr/reference/fileworkflowcheckpointoptions/":
+    "/fr/reference/transportstoreoptions/",
+  "/reference/fileworkflowcheckpointoptions/":
+    "/reference/transportstoreoptions/",
+  "/fr/reference/fileworkflowcheckpointstore/":
+    "/fr/reference/function-workflowcheckpointstore/",
+  "/reference/fileworkflowcheckpointstore/":
+    "/reference/function-workflowcheckpointstore/",
+  "/fr/reference/fileartifactstoreoptions/":
+    "/fr/reference/artifactstoreoptions/",
+  "/reference/fileartifactstoreoptions/": "/reference/artifactstoreoptions/",
+  "/fr/reference/fileartifactstore/": "/fr/reference/function-artifactstore/",
+  "/reference/fileartifactstore/": "/reference/function-artifactstore/",
   "/reference/claude/": "/reference/claudeharness/",
   "/reference/codex/": "/reference/codexharness/",
   "/reference/gemini/": "/reference/geminiharness/",

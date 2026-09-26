@@ -38,7 +38,7 @@ Les dossiers distants peuvent contenir `initial.bundle`/`commits.bundle`, patche
 
 ## Inspecter le stockage conservé
 
-La commande `outpost recovery inspect`, disponible depuis 3.0.0, inventorie `.outpost/recovery`, `.outpost/logs`, `.outpost/locks` et `.outpost/workspaces` dans le checkout choisi. Par défaut, elle lit les métadonnées du système de fichiers, sans lire le contenu des transcripts, patches ou verrous, modifier les métadonnées Git, créer de dossiers d’exécution ni supprimer de fichiers.
+La commande `outpost recovery inspect`, disponible depuis 3.0.0, inventorie `.outpost/recovery`, `.outpost/logs`, `.outpost/locks` et `.outpost/workspaces` et `.outpost/storage` dans le checkout choisi. Par défaut, elle lit les métadonnées du système de fichiers, sans lire le contenu des transcripts, patches ou verrous, modifier les métadonnées Git, créer de dossiers d’exécution ni supprimer de fichiers.
 
 ```sh
 node src/cli/main.ts recovery inspect --repository /chemin/du/depot
@@ -126,7 +126,7 @@ Consultez aussi la [rétention et les quotas](../../../operations/storage-retent
 
 ## Inspecter l’activité des sandboxes
 
-Les sandboxes créées par `createSandbox`, les méthodes d’un workspace, dispatch ou attach enregistrent leur cycle de vie dans `.outpost/locks/resource-activity`. Inspectez ces enregistrements sans contacter les fournisseurs :
+Les sandboxes créées par `createSandbox`, les méthodes d’un workspace, dispatch ou attach enregistrent leur cycle de vie dans `.outpost/storage/objects/resources`. Inspectez ces enregistrements sans contacter les fournisseurs :
 
 ```sh
 outpost recovery inspect --repository /path/to/repository --resources --json

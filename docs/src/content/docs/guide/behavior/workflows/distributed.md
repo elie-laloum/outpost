@@ -66,10 +66,11 @@ Heartbeats renew leases every third of the lease interval. Choose a lease longer
 
 ```ts
 import {
-  fileWorkflowCheckpointStore,
+  workflowCheckpointStore,
   httpTaskQueue,
   queuedTask,
   workflow,
+  localTransport,
 } from "@elie-laloum/outpost";
 
 const url = process.env.OUTPOST_QUEUE_URL;
@@ -88,7 +89,9 @@ const double = queuedTask({
 });
 const result = await workflow("remote-calculation", [double]).start({
   checkpoint: {
-    store: fileWorkflowCheckpointStore({ directory: "./private/checkpoints" }),
+    store: workflowCheckpointStore({
+      transporter: localTransport({ directory: "./private/checkpoints" }),
+    }),
     runId: "calculation-1",
     version: "double-v1",
   },

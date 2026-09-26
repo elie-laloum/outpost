@@ -37,9 +37,10 @@ Save **example.mts** in `outpost-example/`.
 ```ts file=example.mts
 import assert from "node:assert/strict";
 import {
-  fileWorkflowCheckpointStore,
+  workflowCheckpointStore,
   task,
   workflow,
+  localTransport,
 } from "@elie-laloum/outpost";
 
 let calls = 0;
@@ -52,7 +53,9 @@ const convert = task({
 });
 const plan = workflow("durable-text", [convert]);
 const checkpoint = {
-  store: fileWorkflowCheckpointStore({ directory: "./state/checkpoints" }),
+  store: workflowCheckpointStore({
+    transporter: localTransport({ directory: "./state/checkpoints" }),
+  }),
   runId: "text-1",
   version: "1",
 };
