@@ -1,3 +1,4 @@
+import type { ServerSentEvent } from "../../infrastructure/sse.types.ts";
 import type {
   AgentModel,
   ModelContentBlock,
@@ -17,8 +18,19 @@ export interface ProtocolContext {
   readonly model: string;
 }
 
+export interface StreamDecoder {
+  push(event: ServerSentEvent): string | undefined;
+  final(): unknown;
+}
+
+export interface StreamProtocol {
+  readonly body: Readonly<Record<string, unknown>>;
+  decoder(): StreamDecoder;
+}
+
 export interface ModelProtocol {
   readonly path: string;
+  readonly stream?: StreamProtocol;
   validate?(model: AgentModel): void;
   build(
     request: ModelRequest,
@@ -33,3 +45,14 @@ export type BlockEncoders<Extra extends unknown[] = []> = {
     ...extra: Extra
   ) => unknown;
 };
+
+export interface ChatToolCallDraft {
+  id?: string;
+  readonly type: "function";
+  readonly function: ChatFunctionDraft;
+}
+
+export interface ChatFunctionDraft {
+  name?: string;
+  arguments: string;
+}

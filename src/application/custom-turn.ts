@@ -1,5 +1,10 @@
 import type { AgentEvent, CustomAgent, Usage } from "../domain/agent.types.ts";
-import type { ModelProvider } from "../domain/model.types.ts";
+import type {
+  ModelProvider,
+  ModelRequest,
+  ModelResult,
+  ModelStreamEvent,
+} from "../domain/model.types.ts";
 import type { SandboxLease } from "../domain/sandbox.types.ts";
 import { invariant, OutpostError } from "../domain/errors.ts";
 import { addUsage } from "../domain/usage.ts";
@@ -49,35 +54,60 @@ export async function customTurn(
     watchdog.refresh(false);
     notify(options.observe, { ...event, pass, at: new Date().toISOString() });
   };
+  const provider = agent.harness.modelProvider;
+  const scoped = (request: ModelRequest): ModelRequest => {
+    const { reasoning, maxOutputTokens } = agent.model;
+    return {
+      ...(reasoning === undefined ? {} : { reasoning }),
+      ...(maxOutputTokens === undefined ? {} : { maxOutputTokens }),
+      ...request,
+      signal,
+    };
+  };
+  const account = (result: ModelResult): ModelResult => {
+    signal.throwIfAborted();
+    invariant(
+      result && typeof result.text === "string",
+      "Model provider must return text",
+    );
+    if (result.usage) {
+      usage = addUsage(usage, result.usage);
+      notify(options.observe, {
+        kind: "usage",
+        tokens: result.usage,
+        pass,
+        at: new Date().toISOString(),
+      });
+    }
+    watchdog.refresh(false);
+    return result;
+  };
+  async function* stream(
+    request: ModelRequest,
+  ): AsyncGenerator<ModelStreamEvent> {
+    signal.throwIfAborted();
+    let finish!: () => void;
+    track(new Promise<void>((resolve) => (finish = resolve)));
+    try {
+      for await (const event of provider.stream!(scoped(request))) {
+        signal.throwIfAborted();
+        watchdog.refresh(false);
+        yield event.type === "result"
+          ? { type: "result", result: account(event.result) }
+          : event;
+      }
+    } finally {
+      finish();
+    }
+  }
   const modelProvider: ModelProvider = {
-    name: agent.harness.modelProvider.name,
+    name: provider.name,
+    ...(provider.stream ? { stream } : {}),
     request(request) {
       return track(
         (async () => {
           signal.throwIfAborted();
-          const { reasoning, maxOutputTokens } = agent.model;
-          const result = await agent.harness.modelProvider.request({
-            ...(reasoning === undefined ? {} : { reasoning }),
-            ...(maxOutputTokens === undefined ? {} : { maxOutputTokens }),
-            ...request,
-            signal,
-          });
-          signal.throwIfAborted();
-          invariant(
-            result && typeof result.text === "string",
-            "Model provider must return text",
-          );
-          if (result.usage) {
-            usage = addUsage(usage, result.usage);
-            notify(options.observe, {
-              kind: "usage",
-              tokens: result.usage,
-              pass,
-              at: new Date().toISOString(),
-            });
-          }
-          watchdog.refresh(false);
-          return result;
+          return account(await provider.request(scoped(request)));
         })(),
       );
     },

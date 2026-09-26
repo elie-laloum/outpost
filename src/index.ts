@@ -408,6 +408,7 @@ export type {
   ModelResult,
   ModelSpec,
   ModelStopReason,
+  ModelStreamEvent,
   ModelTextBlock,
   ModelToolCallBlock,
   ModelToolResultBlock,

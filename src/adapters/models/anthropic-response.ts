@@ -9,6 +9,7 @@ import {
   requireResponse,
   stopReason,
   tokens,
+  toolInput,
 } from "./model-response.ts";
 import { ANTHROPIC_STOP_REASONS } from "./stop-reasons.constants.ts";
 
@@ -33,7 +34,7 @@ const decoders: Readonly<
       type: "tool-call",
       id: block.id,
       name: block.name,
-      input: object(block.input),
+      input: toolInput(block.input),
     };
   },
   thinking: reasoning,

@@ -10,7 +10,7 @@ Outpost is a TypeScript library and CLI for running coding agents in sandboxes, 
 - Make code understandable through names, small responsibilities and explicit contracts.
 - Use domain-driven design and ports and adapters pragmatically. Introduce abstractions for real responsibilities and variations, not speculative flexibility.
 - Keep agent protocols independent of sandbox backends. Claude Code, Codex and Gemini CLI have adapters; Gemini currently supports fresh sessions without native conversation capture, resume, fork or automatic response repairs. Additional agents belong behind the existing ports.
-- Harness model requests use the experimental `ModelProvider` contract and `openaiModelProvider()` / `anthropicModelProvider()` in `src/adapters/models/`, independently of sandbox providers and CLI agent adapters. Providers exchange bounded, non-streaming messages with tool calls and replayable reasoning; streaming remains planned.
+- Harness model requests use the experimental `ModelProvider` contract and `openaiModelProvider()` / `anthropicModelProvider()` in `src/adapters/models/`, independently of sandbox providers and CLI agent adapters. Providers exchange bounded messages with tool calls and replayable reasoning, with optional streaming.
 - Preserve existing features and public contracts during refactoring. Architecture changes must not silently change execution behavior.
 - Prefer explicit ownership, predictable failure modes and recoverable state over hidden automation.
 - Distinguish released behavior, implemented but unreleased additions, and opt-in research prototypes. Keep remaining work and live-validation prerequisites in the roadmap; do not imply publication from a local implementation.

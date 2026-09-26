@@ -6,7 +6,7 @@ sidebar:
 ---
 
 :::caution[Unreleased API]
-This working-tree API replaces the experimental direct client from 4.2.0. Use a package built from this checkout. Providers send bounded, non-streaming requests with messages and tool calls.
+This working-tree API replaces the experimental direct client from 4.2.0. Use a package built from this checkout. Providers send bounded requests with messages and tool calls, with or without streaming.
 :::
 
 `openaiModelProvider()` configures an HTTP service using Chat Completions or Responses. `anthropicModelProvider()` uses Anthropic Messages. A [custom harness](../../agents/harness/) owns its provider and drives it; the agent selects the model with a name or a `{ name, reasoning, maxOutputTokens }` object. An unknown or inaccessible model fails when the service is called, without catalog lookup or model substitution.
@@ -85,6 +85,29 @@ The result keeps the response blocks in `content` and explains the end of the tu
 Append the returned `content` unchanged as the next assistant message. It can include `reasoning` blocks: Anthropic thinking with its signature, or OpenAI encrypted reasoning items. Each block records the provider `identity` and model that produced it, and is sent back only to that same pair. Chat Completions cannot replay reasoning, so its blocks are dropped. Invalid JSON tool arguments are kept as the raw string, so the caller can answer with an error result.
 
 With `cache: true`, Anthropic caches the conversation prefix through an automatic breakpoint. OpenAI caches stable prefixes on its own and ignores the flag. Keep the system text and tool list identical between requests to benefit from either cache.
+
+## Streaming
+
+Built-in providers also implement `stream(request)`. It sends the same request with streaming enabled and yields `{ type: "text-delta", text }` events while the answer arrives, then one `{ type: "result", result }` with the same `ModelResult` a non-streaming request returns:
+
+```ts
+import { openaiModelProvider } from "@elie-laloum/outpost";
+
+const provider = openaiModelProvider({
+  baseUrl: "https://api.openai.com/v1",
+  apiKey: process.env.OPENAI_API_KEY ?? "",
+  api: "responses",
+});
+for await (const event of provider.stream!({
+  model: "gpt-5.5",
+  prompt: "Hi",
+})) {
+  if (event.type === "text-delta") process.stdout.write(event.text);
+  if (event.type === "result") console.log("\n", event.result.usage);
+}
+```
+
+For streams, `timeoutMs` bounds the silence between two received chunks instead of the whole request, so long answers are not cut while data keeps arriving. `maxResponseBytes` still bounds the total size. Chat Completions requests usage with `stream_options.include_usage`. A custom harness uses `stream()` automatically when its provider implements it, and forwards the deltas as `text-delta` events.
 
 ## Request ownership and bounds
 

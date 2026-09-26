@@ -6,7 +6,7 @@ sidebar:
 ---
 
 :::caution[Expérimental]
-Expérimental : blocs de contenu normalisés, raison d’arrêt et usage renvoyés aux harness personnalisés. Pas encore de streaming ; le contrat peut changer avant publication.
+Expérimental : contrat de fournisseur pour les harness personnalisés, avec messages, appels d’outils, raisonnement rejouable, cache d’historique et streaming. Il peut changer avant publication.
 :::
 
 ## Import

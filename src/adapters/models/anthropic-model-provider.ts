@@ -7,6 +7,7 @@ import {
 } from "./anthropic-model-provider.constants.ts";
 import { anthropicBody, supportedReasoning } from "./anthropic-request.ts";
 import { readAnthropicResponse } from "./anthropic-response.ts";
+import { anthropicStream } from "./anthropic-stream.ts";
 import { httpModelProvider } from "./http-provider.ts";
 
 export function anthropicModelProvider(
@@ -51,6 +52,7 @@ export function anthropicModelProvider(
       },
       build: (request, context) => anthropicBody(request, context, cacheSystem),
       read: readAnthropicResponse,
+      stream: { body: { stream: true }, decoder: anthropicStream },
     },
     "anthropic",
     { "x-api-key": options.apiKey, "anthropic-version": ANTHROPIC_VERSION },

@@ -4,7 +4,7 @@ description: Composez un fournisseur de modèles, des outils, des instructions e
 ---
 
 :::caution[API non publiée]
-Cette API de l’arbre de travail est expérimentale. Utilisez un package construit depuis ce checkout. Le streaming n’est pas encore disponible.
+Cette API de l’arbre de travail est expérimentale. Utilisez un package construit depuis ce checkout.
 :::
 
 `claudeHarness()`, `codexHarness()` et `geminiHarness()` confient toute la tâche à une CLI qui exécute sa propre boucle de modèle et d’outils. `harness()` construit cette boucle dans Outpost. Vous déclarez ce que l’agent peut utiliser, et Outpost pilote le modèle :
@@ -319,10 +319,10 @@ Le moteur valide le nouvel historique, en retire les blocs de raisonnement, vala
 
 ## Observer la boucle
 
-Les observateurs du dispatch reçoivent `step` avant chaque requête au modèle, `tool` avec un `callId` avant chaque appel, `tool-result` avec un aperçu après, `tool-denied` quand les permissions ou un hook refusent un appel, `stop-prevented` quand un hook `stop` refuse la réponse, `compaction` quand une stratégie de contexte réécrit l’historique, `conversation` avec l’identifiant de conversation, `text` pour le texte du modèle et `usage` pour chaque requête. Voir [Observabilité](../observability/) pour les autres événements.
+Les observateurs du dispatch reçoivent `step` avant chaque requête au modèle, des fragments `text-delta` pendant la réponse d’un fournisseur en streaming, `tool` avec un `callId` avant chaque appel, `tool-result` avec un aperçu après, `tool-denied` quand les permissions ou un hook refusent un appel, `stop-prevented` quand un hook `stop` refuse la réponse, `compaction` quand une stratégie de contexte réécrit l’historique, `conversation` avec l’identifiant de conversation, `text` pour le texte du modèle et `usage` pour chaque requête. Voir [Observabilité](../observability/) pour les autres événements.
 
 ## Pas encore disponible
 
-Le terminal interactif n’est pas pris en charge. Le streaming est prévu ; voir la [feuille de route](../../../project/roadmap/#direct-model-harness).
+Le terminal interactif n’est pas pris en charge. Voir la [feuille de route](../../../project/roadmap/#direct-model-harness) pour la validation qui reste à mener avant publication.
 
 [Référence Harness](../../../reference/overview/harness/) · [Fournisseurs de modèles](../../advanced/model-providers/)

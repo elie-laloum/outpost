@@ -26,6 +26,7 @@ export type AgentEvent =
     }
   | { readonly kind: "warning"; readonly message: string }
   | { readonly kind: "text"; readonly text: string }
+  | { readonly kind: "text-delta"; readonly text: string }
   | { readonly kind: "result"; readonly text: string }
   | { readonly kind: "prompt"; readonly text: string }
   | {

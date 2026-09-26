@@ -7,12 +7,12 @@ sidebar:
 
 ## Parameters and properties
 
-| Name               | Type                  | Presence | Meaning                                                                                                                                    |
-| ------------------ | --------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `baseUrl`          | `string`              | Required | Absolute HTTP(S) API base URL, including any /v1 prefix; excludes credentials, query and fragment. The selected protocol path is appended. |
-| `apiKey`           | `string \| false`     | Required | Explicit bearer API key, or false for an unauthenticated endpoint. No environment variable or account login is read automatically.         |
-| `timeoutMs`        | `number \| undefined` | Optional | Positive request deadline in milliseconds, covering headers and the complete body; defaults to 120000 and cannot exceed 2147483647.        |
-| `maxResponseBytes` | `number \| undefined` | Optional | Positive maximum response body size in bytes after HTTP decompression; defaults to 8388608 (8 MiB). Oversized responses fail.              |
+| Name               | Type                  | Presence | Meaning                                                                                                                                                            |
+| ------------------ | --------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `baseUrl`          | `string`              | Required | Absolute HTTP(S) API base URL, including any /v1 prefix; excludes credentials, query and fragment. The selected protocol path is appended.                         |
+| `apiKey`           | `string \| false`     | Required | Explicit bearer API key, or false for an unauthenticated endpoint. No environment variable or account login is read automatically.                                 |
+| `timeoutMs`        | `number \| undefined` | Optional | Positive deadline in milliseconds; defaults to 120000 and cannot exceed 2147483647. It covers the whole request, or the silence between two chunks when streaming. |
+| `maxResponseBytes` | `number \| undefined` | Optional | Positive maximum response body size in bytes after HTTP decompression; defaults to 8388608 (8 MiB). Oversized responses fail.                                      |
 
 ## Signature
 

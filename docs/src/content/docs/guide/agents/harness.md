@@ -4,7 +4,7 @@ description: Compose a model provider, tools, instructions and limits into an ag
 ---
 
 :::caution[Unreleased API]
-This working-tree API is experimental. Use a package built from this checkout. Streaming is not available yet.
+This working-tree API is experimental. Use a package built from this checkout.
 :::
 
 `claudeHarness()`, `codexHarness()` and `geminiHarness()` delegate the whole task to a CLI that runs its own model and tool loop. `harness()` builds that loop in Outpost instead. You declare what the agent can use, and Outpost drives the model:
@@ -319,10 +319,10 @@ The engine validates the new history, removes reasoning blocks from it, since th
 
 ## Observe the loop
 
-Dispatch observers receive `step` before each model request, `tool` with a `callId` before each call, `tool-result` with a preview after it, `tool-denied` when permissions or a hook refuse a call, `stop-prevented` when a `stop` hook refuses the answer, `compaction` when a context strategy rewrites the history, `conversation` with the conversation id, `text` for model text, and `usage` for each request. See [Observability](../observability/) for the other events.
+Dispatch observers receive `step` before each model request, `text-delta` fragments while a streaming provider answers, `tool` with a `callId` before each call, `tool-result` with a preview after it, `tool-denied` when permissions or a hook refuse a call, `stop-prevented` when a `stop` hook refuses the answer, `compaction` when a context strategy rewrites the history, `conversation` with the conversation id, `text` for model text, and `usage` for each request. See [Observability](../observability/) for the other events.
 
 ## Not available yet
 
-Interactive attachment is unsupported. Streaming is planned; see the [roadmap](../../../project/roadmap/#direct-model-harness).
+Interactive attachment is unsupported. See the [roadmap](../../../project/roadmap/#direct-model-harness) for the validation that remains before release.
 
 [Harness reference](../../../reference/overview/harness/) · [Model providers](../../advanced/model-providers/)

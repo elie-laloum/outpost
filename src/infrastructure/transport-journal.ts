@@ -1,3 +1,4 @@
+import { verboseOnly } from "./journal.constants.ts";
 import { transportDefaults } from "./transport.constants.ts";
 import { readLimit } from "./transport-envelope.ts";
 import { randomUUID } from "node:crypto";
@@ -67,7 +68,7 @@ export async function transportJournal(
       return { key: current.key, revision: current.revision };
     },
     record(event) {
-      if (closing || (event.kind === "raw" && !verbose)) return;
+      if (closing || (verboseOnly.has(event.kind) && !verbose)) return;
       try {
         const value = structuredClone({
           at: new Date().toISOString(),

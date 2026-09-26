@@ -7,7 +7,7 @@ sidebar:
 ---
 
 :::caution[Experimental — unreleased refactor]
-Bounded requests with messages, tool calls, reasoning replay and history caching are implemented, with custom callbacks. The built-in tool loop, streaming and native custom conversations remain planned.
+Bounded requests with messages, tool calls, reasoning replay, history caching and streaming are implemented. The built-in engine of `harness()` drives them.
 :::
 
 A model provider supplies the request transport used by a custom harness. `openaiModelProvider()` supports Chat Completions and Responses services; `anthropicModelProvider()` supports Anthropic Messages and optional system-prefix caching. Sandbox allocation is independent.

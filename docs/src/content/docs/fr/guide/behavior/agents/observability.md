@@ -28,13 +28,13 @@ console.log(result.usage, result.log);
 
 ## Événements
 
-`AgentObservation` ajoute un numéro de `pass` à partir de 1 et une date ISO `at` aux événements normalisés. Les variantes sont `phase`, `prompt`, `text`, `result`, `tool`, `tool-result`, `tool-denied`, `step`, `stop-prevented`, `compaction`, `conversation`, `usage`, `summary`, `warning`, `failure`, `finished` et `raw`. Les harness personnalisés émettent `step` avant chaque requête au modèle, `tool-result` avec un aperçu borné après chaque appel d’outil, `tool-denied` quand les permissions ou un hook refusent un appel `stop-prevented` quand un hook stop refuse la réponse et `compaction` quand une stratégie de contexte réécrit l’historique ; leurs événements `tool` portent un `callId`. Vérifiez le discriminant avant de lire les champs propres à une variante. Le protocole inconnu reste disponible dans `raw`.
+`AgentObservation` ajoute un numéro de `pass` à partir de 1 et une date ISO `at` aux événements normalisés. Les variantes sont `phase`, `prompt`, `text`, `text-delta`, `result`, `tool`, `tool-result`, `tool-denied`, `step`, `stop-prevented`, `compaction`, `conversation`, `usage`, `summary`, `warning`, `failure`, `finished` et `raw`. Les harness personnalisés émettent `step` avant chaque requête au modèle, `tool-result` avec un aperçu borné après chaque appel d’outil, `tool-denied` quand les permissions ou un hook refusent un appel `stop-prevented` quand un hook stop refuse la réponse et `compaction` quand une stratégie de contexte réécrit l’historique ; leurs événements `tool` portent un `callId`. Vérifiez le discriminant avant de lire les champs propres à une variante. Le protocole inconnu reste disponible dans `raw`.
 
 Les erreurs des callbacks d’observation et d’avertissement ne font pas échouer la tâche. N’utilisez pas un observateur pour imposer une règle métier essentielle : validez le résultat retourné. `reporter` accepte `label`, `verbose`, `quiet` et une fonction `write(text)` personnalisée.
 
 ## Journalisation
 
-Le défaut est un fichier JSONL généré dans `.outpost/logs`. Utilisez `logging: false` pour la désactiver, `"stdout"` pour la sortie standard, ou `{ file, verbose }` pour la configurer. Un dispatch peut surcharger la politique de sa sandbox. Le mode verbeux inclut le protocole brut.
+Le défaut est un fichier JSONL généré dans `.outpost/logs`. Utilisez `logging: false` pour la désactiver, `"stdout"` pour la sortie standard, ou `{ file, verbose }` pour la configurer. Un dispatch peut surcharger la politique de sa sandbox. Le mode verbeux inclut le protocole brut et les fragments `text-delta` diffusés en streaming.
 
 Des dispatchs successifs peuvent compléter le même `logging.file`. Les écritures simultanées au même chemin sont refusées pendant sa possession dans ce dépôt. Les logs par défaut reçoivent un fichier annexe privé indiquant leur fermeture pour la conservation ; fermer un journal est idempotent.
 

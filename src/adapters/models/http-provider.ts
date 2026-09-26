@@ -1,5 +1,10 @@
 import { invariant, OutpostError, positive } from "../../domain/errors.ts";
-import type { ModelProvider, ModelRequest } from "../../domain/model.types.ts";
+import type {
+  ModelProvider,
+  ModelRequest,
+  ModelStreamEvent,
+} from "../../domain/model.types.ts";
+import { serverSentEvents } from "../../infrastructure/sse.ts";
 import type {
   HttpModelOptions,
   ModelProtocol,
@@ -56,10 +61,87 @@ export function httpModelProvider(
     "Model maxResponseBytes",
   );
   const identity = `${name}:${protocol.path}:${base.origin}${base.pathname.replace(/\/+$/, "")}`;
+  const post = async (body: unknown, signal: AbortSignal) => {
+    signal.throwIfAborted();
+    const response = await fetch(endpoint, {
+      method: "POST",
+      redirect: "error",
+      headers: { "Content-Type": "application/json", ...headers },
+      body: JSON.stringify(body),
+      signal,
+    });
+    if (response.ok) return response;
+    await response.body?.cancel();
+    throw new OutpostError(
+      "provider",
+      `Model request failed with HTTP ${response.status}`,
+      { status: response.status },
+    );
+  };
+  const failure = (
+    error: unknown,
+    signal: AbortSignal,
+    deadline: AbortSignal,
+    request: ModelRequest,
+  ): OutpostError => {
+    if (signal.aborted) {
+      const timedOut = deadline.aborted && !request.signal?.aborted;
+      return new OutpostError(
+        timedOut ? "timeout" : "aborted",
+        timedOut ? "Model request timed out" : "Model request was cancelled",
+      );
+    }
+    if (error instanceof OutpostError) return error;
+    return new OutpostError(
+      "provider",
+      "Model request failed during HTTP transport",
+    );
+  };
+  async function* stream(
+    request: ModelRequest,
+  ): AsyncGenerator<ModelStreamEvent> {
+    validateModelRequest(request);
+    const streaming = protocol.stream!;
+    const context = { identity, model: request.model };
+    const deadline = new AbortController();
+    const signal = request.signal
+      ? AbortSignal.any([request.signal, deadline.signal])
+      : deadline.signal;
+    let timer = setTimeout(() => deadline.abort(), timeoutMs);
+    const refresh = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => deadline.abort(), timeoutMs);
+    };
+    try {
+      const response = await post(
+        { ...protocol.build(request, context), ...streaming.body },
+        signal,
+      );
+      if (!response.body)
+        throw new OutpostError("response", "Model response has no body");
+      const decoder = streaming.decoder();
+      for await (const event of serverSentEvents(
+        response.body,
+        maxBytes,
+        refresh,
+      )) {
+        signal.throwIfAborted();
+        const text = decoder.push(event);
+        if (text) yield { type: "text-delta", text };
+      }
+      signal.throwIfAborted();
+      yield { type: "result", result: protocol.read(decoder.final(), context) };
+    } catch (error) {
+      throw failure(error, signal, deadline.signal, request);
+    } finally {
+      clearTimeout(timer);
+    }
+  }
   return Object.freeze({
     name,
     identity,
     ...(protocol.validate ? { validate: protocol.validate } : {}),
+    ...(protocol.stream ? { stream } : {}),
     async request(request: ModelRequest) {
       validateModelRequest(request);
       const context = { identity, model: request.model };
@@ -69,40 +151,12 @@ export function httpModelProvider(
         : deadline.signal;
       const timer = setTimeout(() => deadline.abort(), timeoutMs);
       try {
-        signal.throwIfAborted();
-        const response = await fetch(endpoint, {
-          method: "POST",
-          redirect: "error",
-          headers: { "Content-Type": "application/json", ...headers },
-          body: JSON.stringify(protocol.build(request, context)),
-          signal,
-        });
-        if (!response.ok) {
-          await response.body?.cancel();
-          throw new OutpostError(
-            "provider",
-            `Model request failed with HTTP ${response.status}`,
-            { status: response.status },
-          );
-        }
+        const response = await post(protocol.build(request, context), signal);
         const value = await modelJson(response, maxBytes);
         signal.throwIfAborted();
         return protocol.read(value, context);
       } catch (error) {
-        if (signal.aborted) {
-          const timedOut = deadline.signal.aborted && !request.signal?.aborted;
-          throw new OutpostError(
-            timedOut ? "timeout" : "aborted",
-            timedOut
-              ? "Model request timed out"
-              : "Model request was cancelled",
-          );
-        }
-        if (error instanceof OutpostError) throw error;
-        throw new OutpostError(
-          "provider",
-          "Model request failed during HTTP transport",
-        );
+        throw failure(error, signal, deadline.signal, request);
       } finally {
         clearTimeout(timer);
       }

@@ -168,10 +168,11 @@ export const groups = [
       "ModelReasoningBlock",
       "ModelToolSpec",
       "ModelStopReason",
+      "ModelStreamEvent",
     ],
     guide: "guide/advanced/model-providers",
     names:
-      "openaiModelProvider anthropicModelProvider AnthropicModelProviderOptions OpenAIModelProviderOptions ModelProvider ModelRequest ModelResult ModelMessage ModelContentBlock ModelTextBlock ModelToolCallBlock ModelToolResultBlock ModelReasoningBlock ModelToolSpec ModelStopReason",
+      "openaiModelProvider anthropicModelProvider AnthropicModelProviderOptions OpenAIModelProviderOptions ModelProvider ModelRequest ModelResult ModelMessage ModelContentBlock ModelTextBlock ModelToolCallBlock ModelToolResultBlock ModelReasoningBlock ModelToolSpec ModelStopReason ModelStreamEvent",
   },
   {
     id: "recovery-retention",

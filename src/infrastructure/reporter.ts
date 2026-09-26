@@ -8,19 +8,25 @@ export function reporter(
 ): (event: AgentEvent & ReportPass) => void {
   const write = options.write ?? ((text) => process.stdout.write(text));
   let streamed = false;
+  let deltas = false;
   return (event) => {
     if (options.quiet) return;
     const prefix = `[${options.label ?? "outpost"}${event.pass ? ` · pass ${event.pass}` : ""}]`;
     switch (event.kind) {
       case "phase":
-        if (event.name === "running") streamed = false;
+        if (event.name === "running") streamed = deltas = false;
         write(
           `${prefix} ${event.name}${event.agent ? ` · ${event.agent}` : ""}${event.branch ? ` · ${event.branch}` : ""}${options.verbose && event.directory ? ` · ${event.directory}` : ""}\n`,
         );
         break;
+      case "text-delta":
+        streamed = true;
+        deltas = true;
+        write(event.text);
+        break;
       case "text":
         streamed = true;
-        write(event.text);
+        if (!deltas) write(event.text);
         break;
       case "result":
         if (!streamed || options.verbose)
@@ -49,6 +55,7 @@ export function reporter(
           );
         break;
       case "step":
+        deltas = false;
         if (options.verbose) write(`${prefix} step ${event.index}\n`);
         break;
       case "summary":

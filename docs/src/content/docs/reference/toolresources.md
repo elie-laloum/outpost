@@ -6,7 +6,7 @@ sidebar:
 ---
 
 :::caution[Experimental]
-Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.
+Experimental: part of the unreleased built-in harness engine. The contract may change before release.
 :::
 
 ## Import

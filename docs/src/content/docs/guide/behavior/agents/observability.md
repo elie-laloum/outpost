@@ -28,13 +28,13 @@ console.log(result.usage, result.log);
 
 ## Events
 
-`AgentObservation` adds a one-based `pass` and ISO timestamp `at` to normalized events. Kinds are `phase`, `prompt`, `text`, `result`, `tool`, `tool-result`, `tool-denied`, `step`, `stop-prevented`, `compaction`, `conversation`, `usage`, `summary`, `warning`, `failure`, `finished` and `raw`. Custom harnesses emit `step` before each model request, `tool-result` with a bounded preview after each tool call, `tool-denied` when permissions or a hook refuse a call `stop-prevented` when a stop hook refuses the answer and `compaction` when a context strategy rewrites the history; their `tool` events carry a `callId`. Use the discriminant before reading kind-specific fields. Unknown protocol data remains available as `raw`.
+`AgentObservation` adds a one-based `pass` and ISO timestamp `at` to normalized events. Kinds are `phase`, `prompt`, `text`, `text-delta`, `result`, `tool`, `tool-result`, `tool-denied`, `step`, `stop-prevented`, `compaction`, `conversation`, `usage`, `summary`, `warning`, `failure`, `finished` and `raw`. Custom harnesses emit `step` before each model request, `tool-result` with a bounded preview after each tool call, `tool-denied` when permissions or a hook refuse a call `stop-prevented` when a stop hook refuses the answer and `compaction` when a context strategy rewrites the history; their `tool` events carry a `callId`. Use the discriminant before reading kind-specific fields. Unknown protocol data remains available as `raw`.
 
 Observer and warning callback exceptions do not fail the job. Do not use an observer to enforce critical business rules: validate the returned result instead. `reporter` accepts `label`, `verbose`, `quiet` and a custom `write(text)` function.
 
 ## Logging
 
-The default is a generated JSONL file under `.outpost/logs`. Set `logging: false` to disable it, `"stdout"` for standard output, or `{ file, verbose }` for control. A dispatch can override the warm sandbox’s logging policy. Verbose logging includes raw protocol events.
+The default is a generated JSONL file under `.outpost/logs`. Set `logging: false` to disable it, `"stdout"` for standard output, or `{ file, verbose }` for control. A dispatch can override the warm sandbox’s logging policy. Verbose logging includes raw protocol events and streamed `text-delta` fragments.
 
 A configured `logging.file` can be appended by sequential dispatches. Concurrent writers to the same path are rejected while it is owned in that repository. Default logs receive a private closed-log sidecar for retention; closing a journal is idempotent.
 

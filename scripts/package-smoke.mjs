@@ -96,6 +96,7 @@ try {
     }
     const modelProvider=api.anthropicModelProvider({apiKey:'unused'});
     assert.equal('generate' in modelProvider,false);
+    assert.equal(typeof modelProvider.stream,'function');
     assert.equal('model' in modelProvider,false);
     const echo=api.defineHarnessTool({name:'echo',description:'Echo.',readOnly:true,input:{type:'object',properties:{text:{type:'string'}}},execute:input=>input.text});
     const toolset=api.defineHarnessToolset({name:'basic',tools:[echo]});

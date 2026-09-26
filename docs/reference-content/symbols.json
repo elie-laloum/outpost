@@ -292,8 +292,8 @@
     "Crée un provider microVM Firecracker opt-in à partir de réglages explicites de noyau, rootfs, TAP et SSH. L’hôte doit fournir KVM et un invité préparé ; l’allocation ne se replie pas sur l’exécution hôte. Le bail acquis possède l’arrêt de la VM."
   ],
   "openaiModelProvider": [
-    "Configure a reusable request transport using Chat Completions or Responses, with messages, tool calls and reasoning effort. The harness supplies the model on each request. Construction performs local validation only; requests enforce cancellation, response size and deadlines without retries or protocol fallback.",
-    "Configure un transport de requêtes réutilisable utilisant Chat Completions ou Responses, avec messages, appels d’outils et effort de raisonnement. Le harness fournit le modèle à chaque requête. La construction valide localement ; les requêtes appliquent annulation, taille et délais sans retry ni changement de protocole."
+    "Configure a reusable request transport using Chat Completions or Responses, with messages, tool calls, reasoning effort and optional streaming. The harness supplies the model on each request. Construction performs local validation only; requests enforce cancellation, response size and deadlines without retries or protocol fallback.",
+    "Configure un transport de requêtes réutilisable utilisant Chat Completions ou Responses, avec messages, appels d’outils, effort de raisonnement et streaming optionnel. Le harness fournit le modèle à chaque requête. La construction valide localement ; les requêtes appliquent annulation, taille et délais sans retry ni changement de protocole."
   ],
   "agent": [
     "Compose a harness and a model without starting a process or making a network request. The model is a name or an AgentModel object; the harness or its model provider rejects unsupported reasoning levels and output limits immediately. CLI harnesses may keep their native default model; a custom harness requires one.",
@@ -304,8 +304,8 @@
     "Compose le moteur intégré d’Outpost à partir d’un fournisseur de modèles, d’outils, d’instructions, de limites et de réglages d’exécution des outils. La validation est immédiate ; rien ne s’exécute avant le dispatch de l’agent. Le moteur appelle le modèle, valide et exécute les outils dans le sandbox emprunté et échoue avec le code limit quand une borne est atteinte. Les callbacks run sont refusés."
   ],
   "anthropicModelProvider": [
-    "Configure an Anthropic Messages transport with messages, tool calls, thinking replay and optional system-prefix and history caching. The harness supplies the model per request; the agent model must set maxOutputTokens, and reasoning maps to adaptive or disabled thinking. Cache reads and writes are normalized into usage; streaming and server tools are rejected.",
-    "Configure un transport Anthropic Messages avec messages, appels d’outils, rejeu de la réflexion et cache optionnel du préfixe système et de l’historique. Le harness fournit le modèle par requête ; le modèle de l’agent doit fixer maxOutputTokens, et le raisonnement se traduit en réflexion adaptative ou désactivée. Les lectures et écritures de cache sont normalisées dans l’usage ; streaming et outils serveur sont refusés."
+    "Configure an Anthropic Messages transport with messages, tool calls, thinking replay, optional streaming and optional system-prefix and history caching. The harness supplies the model per request; the agent model must set maxOutputTokens, and reasoning maps to adaptive or disabled thinking. Cache reads and writes are normalized into usage; server tools are rejected.",
+    "Configure un transport Anthropic Messages avec messages, appels d’outils, rejeu de la réflexion, streaming optionnel et cache optionnel du préfixe système et de l’historique. Le harness fournit le modèle par requête ; le modèle de l’agent doit fixer maxOutputTokens, et le raisonnement se traduit en réflexion adaptative ou désactivée. Les lectures et écritures de cache sont normalisées dans l’usage ; les outils serveur sont refusés."
   ],
   "claudeHarness": [
     "Create a Claude Code harness from execution, authentication and conversation settings without starting the CLI. Compose it with agent({ harness, model }) to select a model independently. The CLI owns its internal model/tool loop.",

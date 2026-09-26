@@ -6,7 +6,7 @@ sidebar:
 ---
 
 :::caution[Experimental]
-Experimental: provider-neutral messages, tool calls and replayable reasoning for model transports. No streaming yet; the contract may change before release.
+Experimental: provider contract for custom harnesses with messages, tool calls, replayable reasoning, history caching and streaming. It may change before release.
 :::
 
 ## Import

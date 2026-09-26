@@ -1,3 +1,4 @@
+import { verboseOnly } from "./journal.constants.ts";
 import { transportJournal } from "./transport-journal.ts";
 import { lock } from "./git/lock.ts";
 import { markJournalClosed } from "./journal-retention.ts";
@@ -67,7 +68,11 @@ export async function journal(
     ...(file ? { file } : {}),
     record(event) {
       if (!logging || closing) return;
-      if (event.kind === "raw" && logging !== "stdout" && !logging.verbose)
+      if (
+        verboseOnly.has(event.kind) &&
+        logging !== "stdout" &&
+        !logging.verbose
+      )
         return;
       const line =
         JSON.stringify({

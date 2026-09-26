@@ -7,7 +7,7 @@ sidebar:
 ---
 
 :::caution[Expérimental — refonte non publiée]
-Les requêtes bornées avec messages, appels d’outils, rejeu du raisonnement et cache d’historique sont implémentées, avec les callbacks personnalisés. La boucle d’outils intégrée, le streaming et les conversations natives personnalisées restent prévus.
+Les requêtes bornées avec messages, appels d’outils, rejeu du raisonnement, cache d’historique et streaming sont implémentées. Le moteur intégré de `harness()` les pilote.
 :::
 
 Un fournisseur de modèles porte le transport de requêtes utilisé par un harness personnalisé. `openaiModelProvider()` prend en charge les services Chat Completions et Responses ; `anthropicModelProvider()` utilise Anthropic Messages avec cache optionnel du préfixe système. L’allocation du sandbox est indépendante.

@@ -75,9 +75,14 @@ export interface ModelResult {
   readonly usage?: Usage;
 }
 
+export type ModelStreamEvent =
+  | { readonly type: "text-delta"; readonly text: string }
+  | { readonly type: "result"; readonly result: ModelResult };
+
 export interface ModelProvider {
   readonly name: string;
   readonly identity?: string;
   validate?(model: AgentModel): void;
   request(request: ModelRequest): Promise<ModelResult>;
+  stream?(request: ModelRequest): AsyncIterable<ModelStreamEvent>;
 }

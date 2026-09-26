@@ -2,6 +2,8 @@ import type { Usage } from "../domain/agent.types.ts";
 import { OutpostError } from "../domain/errors.ts";
 import type {
   ModelContentBlock,
+  ModelRequest,
+  ModelResult,
   ModelStopReason,
   ModelToolCallBlock,
   ModelToolSpec,
@@ -108,7 +110,7 @@ export async function harnessLoop(
     runtime.emit({ kind: "step", index: step });
     await compact(runtime, history, step);
     await beforeModel(runtime, history.messages, step);
-    const result = await runtime.modelProvider.request({
+    const result = await requestModel(runtime, {
       model: model.name,
       messages: history.messages,
       ...(system ? { system } : {}),
@@ -167,4 +169,21 @@ function exceededUsage(
 
 function limit(name: string, message: string): OutpostError {
   return new OutpostError("limit", message, { limit: name });
+}
+
+async function requestModel(
+  runtime: HarnessRuntime,
+  request: ModelRequest,
+): Promise<ModelResult> {
+  const provider = runtime.modelProvider;
+  if (!provider.stream) return provider.request(request);
+  let result: ModelResult | undefined;
+  for await (const event of provider.stream(request)) {
+    if (event.type === "text-delta")
+      runtime.emit({ kind: "text-delta", text: event.text });
+    if (event.type === "result") result = event.result;
+  }
+  if (!result)
+    throw new OutpostError("response", "Model stream ended without a result");
+  return result;
 }

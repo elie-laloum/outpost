@@ -392,8 +392,8 @@
     "Identifiant de conversation native à poursuivre ; fork demande une conversation distincte dérivée de celle-ci."
   ],
   "AgentEvent.kind": [
-    "Discriminator selecting the event payload: phase, summary, warning, text, result, prompt, tool, tool-result, tool-denied, step, stop-prevented, compaction, conversation, usage, failure, finished or raw.",
-    "Discriminant sélectionnant les données de l’événement : phase, summary, warning, text, result, prompt, tool, tool-result, tool-denied, step, stop-prevented, compaction, conversation, usage, failure, finished ou raw."
+    "Discriminator selecting the event payload: phase, summary, warning, text, text-delta, result, prompt, tool, tool-result, tool-denied, step, stop-prevented, compaction, conversation, usage, failure, finished or raw.",
+    "Discriminant sélectionnant les données de l’événement : phase, summary, warning, text, text-delta, result, prompt, tool, tool-result, tool-denied, step, stop-prevented, compaction, conversation, usage, failure, finished ou raw."
   ],
   "AgentEvent.name": [
     "Phase name for phase events, or tool name for tool and tool-result events.",
@@ -428,8 +428,8 @@
     "Message d’avertissement ou d’échec, ou message qu’un hook stop a renvoyé au modèle."
   ],
   "AgentEvent.text": [
-    "Text carried by the event: streamed text, final answer or submitted prompt according to kind.",
-    "Texte porté par l’événement : texte diffusé, réponse finale ou prompt soumis selon kind."
+    "Text carried by the event: a streamed fragment, streamed text, final answer or submitted prompt according to kind.",
+    "Texte porté par l’événement : fragment diffusé, texte diffusé, réponse finale ou prompt soumis selon la variante."
   ],
   "AgentEvent.input": [
     "Raw arguments supplied to the tool named by this tool event.",
@@ -3557,8 +3557,8 @@
     "Protocole HTTP : chat-completions par défaut, ou responses. Aucun repli automatique entre protocoles."
   ],
   "OpenAIModelProviderOptions.timeoutMs": [
-    "Positive request deadline in milliseconds, covering headers and the complete body; defaults to 120000 and cannot exceed 2147483647.",
-    "Délai positif en millisecondes couvrant les en-têtes et le corps complet ; 120000 par défaut, maximum 2147483647."
+    "Positive deadline in milliseconds; defaults to 120000 and cannot exceed 2147483647. It covers the whole request, or the silence between two chunks when streaming.",
+    "Délai positif en millisecondes ; 120000 par défaut, sans dépasser 2147483647. Il couvre toute la requête, ou le silence entre deux fragments en streaming."
   ],
   "OpenAIModelProviderOptions.maxResponseBytes": [
     "Positive maximum response body size in bytes after HTTP decompression; defaults to 8388608 (8 MiB). Oversized responses fail.",
@@ -3733,8 +3733,8 @@
     "Clé API bearer explicite, ou false pour un endpoint sans authentification. Aucune variable d’environnement ni connexion de compte n’est lue automatiquement."
   ],
   "HttpModelOptions.timeoutMs": [
-    "Positive request deadline in milliseconds, covering headers and the complete body; defaults to 120000 and cannot exceed 2147483647.",
-    "Délai positif en millisecondes couvrant les en-têtes et le corps complet ; 120000 par défaut, maximum 2147483647."
+    "Positive deadline in milliseconds; defaults to 120000 and cannot exceed 2147483647. It covers the whole request, or the silence between two chunks when streaming.",
+    "Délai positif en millisecondes ; 120000 par défaut, sans dépasser 2147483647. Il couvre toute la requête, ou le silence entre deux fragments en streaming."
   ],
   "HttpModelOptions.maxResponseBytes": [
     "Positive maximum response body size in bytes after HTTP decompression; defaults to 8388608 (8 MiB). Oversized responses fail.",
@@ -3757,8 +3757,8 @@
     "Active un point de cache éphémère sur le texte système. Les requêtes doivent contenir des instructions système ; une lecture de cache n’est pas garantie."
   ],
   "AnthropicModelProviderOptions.timeoutMs": [
-    "Positive request deadline in milliseconds, covering headers and the complete body; defaults to 120000 and cannot exceed 2147483647.",
-    "Délai positif en millisecondes couvrant les en-têtes et le corps complet ; 120000 par défaut, maximum 2147483647."
+    "Positive deadline in milliseconds; defaults to 120000 and cannot exceed 2147483647. It covers the whole request, or the silence between two chunks when streaming.",
+    "Délai positif en millisecondes ; 120000 par défaut, sans dépasser 2147483647. Il couvre toute la requête, ou le silence entre deux fragments en streaming."
   ],
   "AnthropicModelProviderOptions.maxResponseBytes": [
     "Positive maximum response body size in bytes after HTTP decompression; defaults to 8388608 (8 MiB). Oversized responses fail.",
@@ -4552,5 +4552,25 @@
   "CustomHarness.skills": [
     "Skills of the harness; their tools and load_skill are part of the tool list.",
     "Skills du harness ; leurs outils et load_skill font partie de la liste d’outils."
+  ],
+  "ModelProvider.stream": [
+    "Optional streaming variant of request: yields text-delta events while the answer arrives, then one result event with the same ModelResult. Custom harnesses use it automatically when present.",
+    "Variante optionnelle de request en streaming : produit des événements text-delta au fil de la réponse, puis un événement result avec le même ModelResult. Les harness personnalisés l’utilisent automatiquement s’il est présent."
+  ],
+  "ModelStreamEvent.type": [
+    "text-delta for a fragment of answer text, or result for the final result.",
+    "text-delta pour un fragment du texte de réponse, ou result pour le résultat final."
+  ],
+  "ModelStreamEvent.text": [
+    "Fragment of answer text, in arrival order.",
+    "Fragment du texte de réponse, dans l’ordre d’arrivée."
+  ],
+  "ModelStreamEvent.result": [
+    "Final normalized result, identical to a non-streaming request.",
+    "Résultat final normalisé, identique à celui d’une requête sans streaming."
+  ],
+  "ReporterHandlers.text-delta": [
+    "Handle a streamed fragment of model text from a custom harness; receives pass and at metadata and may return a promise.",
+    "Traite : fragment de texte du modèle diffusé en streaming par un harness personnalisé ; reçoit pass et at et peut retourner une promesse."
   ]
 }

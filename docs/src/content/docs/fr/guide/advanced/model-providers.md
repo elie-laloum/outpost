@@ -6,7 +6,7 @@ sidebar:
 ---
 
 :::caution[API non publiée]
-Cette API de l’arbre de travail remplace le client direct expérimental de 4.2.0. Utilisez un package construit depuis ce checkout. Les fournisseurs envoient des requêtes bornées sans streaming, avec messages et appels d’outils.
+Cette API de l’arbre de travail remplace le client direct expérimental de 4.2.0. Utilisez un package construit depuis ce checkout. Les fournisseurs envoient des requêtes bornées avec messages et appels d’outils, avec ou sans streaming.
 :::
 
 `openaiModelProvider()` configure un service HTTP utilisant Chat Completions ou Responses. `anthropicModelProvider()` utilise Anthropic Messages. Un [harness personnalisé](../../agents/harness/) porte son fournisseur et le pilote ; l’agent sélectionne son modèle avec un nom ou un objet `{ name, reasoning, maxOutputTokens }`. Un modèle inconnu ou inaccessible échoue lors de l’appel au service, sans catalogue ni substitution.
@@ -85,6 +85,29 @@ Le résultat conserve les blocs de la réponse dans `content` et explique la fin
 Ajoutez le `content` renvoyé tel quel comme message assistant suivant. Il peut contenir des blocs `reasoning` : la réflexion Anthropic avec sa signature, ou les éléments de raisonnement chiffrés d’OpenAI. Chaque bloc enregistre l’`identity` du fournisseur et le modèle qui l’ont produit, et n’est renvoyé qu’à ce même couple. Chat Completions ne sait pas rejouer le raisonnement : ses blocs sont retirés. Des arguments d’outil en JSON invalide sont conservés sous forme de chaîne brute, pour que l’appelant réponde par un résultat en erreur.
 
 Avec `cache: true`, Anthropic met en cache le préfixe de la conversation grâce à un point de cache automatique. OpenAI met en cache les préfixes stables de lui-même et ignore l’option. Gardez le texte système et la liste d’outils identiques entre les requêtes pour profiter de l’un ou l’autre cache.
+
+## Streaming
+
+Les fournisseurs intégrés implémentent aussi `stream(request)`. Cette méthode envoie la même requête avec le streaming activé et produit des événements `{ type: "text-delta", text }` au fil de la réponse, puis un unique `{ type: "result", result }` contenant le même `ModelResult` qu’une requête sans streaming :
+
+```ts
+import { openaiModelProvider } from "@elie-laloum/outpost";
+
+const provider = openaiModelProvider({
+  baseUrl: "https://api.openai.com/v1",
+  apiKey: process.env.OPENAI_API_KEY ?? "",
+  api: "responses",
+});
+for await (const event of provider.stream!({
+  model: "gpt-5.5",
+  prompt: "Hi",
+})) {
+  if (event.type === "text-delta") process.stdout.write(event.text);
+  if (event.type === "result") console.log("\n", event.result.usage);
+}
+```
+
+Pour un stream, `timeoutMs` borne le silence entre deux fragments reçus plutôt que la requête entière : une longue réponse n’est pas coupée tant que des données arrivent. `maxResponseBytes` borne toujours la taille totale. Chat Completions demande l’usage avec `stream_options.include_usage`. Un harness personnalisé utilise `stream()` automatiquement quand son fournisseur l’implémente, et relaie les fragments sous forme d’événements `text-delta`.
 
 ## Propriété et limites des requêtes
 

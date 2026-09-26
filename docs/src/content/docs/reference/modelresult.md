@@ -6,7 +6,7 @@ sidebar:
 ---
 
 :::caution[Experimental]
-Experimental: normalized content blocks, stop reason and usage returned to custom harnesses. No streaming yet; the contract may change before release.
+Experimental: provider contract for custom harnesses with messages, tool calls, replayable reasoning, history caching and streaming. It may change before release.
 :::
 
 ## Import
