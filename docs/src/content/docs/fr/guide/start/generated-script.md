@@ -5,17 +5,17 @@ description: "Lire le résultat de la CLI comme un petit programme que vous maî
 
 La CLI crée un programme TypeScript ordinaire. Vous pouvez le lire et le modifier ; aucun service de workflow ne tourne en arrière-plan.
 
-| Élément               | Son rôle                                                                                       |
-| --------------------- | ---------------------------------------------------------------------------------------------- |
-| `repository`          | Résoudre le checkout Git ciblé par rapport au script, indépendamment du dossier du shell.      |
-| `.env` et `variables` | Lire les identifiants explicitement déclarés et les transmettre à l’environnement d’exécution. |
-| `authentication`      | Initialiser la connexion choisie dans le home privé de la sandbox.                             |
-| `agent`               | Choisir le comportement Codex, Claude ou Gemini.                                               |
-| `provider`            | Choisir où l’agent s’exécute, indépendamment de son protocole.                                 |
-| `brief`               | Lire le fichier de tâche et substituer l’objectif.                                             |
-| `dispatch`            | Posséder une exécution et collecter réponse, changements, usage et conversation.               |
+| Élément               | Son rôle                                                                                                                                                        |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `repository`          | Résoudre le checkout Git ciblé par rapport au script, indépendamment du dossier du shell.                                                                       |
+| `.env` et `variables` | Lire les variables explicitement déclarées, dont celle par défaut de l’identifiant choisi, et les transmettre au provider.                                      |
+| `authentication`      | Choisir `account`, un jeton de compte ou `usage` ; Outpost le prépare dans le home privé de la sandbox. Le script ne lit lui-même aucun fichier d’identifiants. |
+| `agent`               | Choisir le comportement Codex, Claude Code, Antigravity, GitHub Copilot ou Kimi Code.                                                                           |
+| `provider`            | Choisir où l’agent s’exécute, indépendamment de son protocole.                                                                                                  |
+| `brief`               | Lire le fichier de tâche et substituer l’objectif.                                                                                                              |
+| `dispatch`            | Posséder une exécution et collecter réponse, changements, usage et conversation.                                                                                |
 
-Le starter intègre les commits dans la branche ciblée. L’[exemple complet de dispatch](../../agents/dispatch/) utilise ensuite une branche nommée pour relire avant intégration ; cette page contient sa préparation et son code exécutable.
+Le [manuel d’authentification](../../manual/authentication/) explique chaque forme d’`authentication` et ce qu’Outpost prépare. Le starter intègre les commits dans la branche ciblée. L’[exemple complet de dispatch](../../agents/dispatch/) utilise ensuite une branche nommée pour relire avant intégration ; cette page contient sa préparation et son code exécutable.
 
 ## Trois durées de vie différentes
 

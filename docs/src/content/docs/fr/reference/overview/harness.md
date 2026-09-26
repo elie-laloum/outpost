@@ -10,7 +10,7 @@ Un harness définit comment un agent exécute une tâche et accède à son modè
 
 ## Fonctionnement
 
-Choisissez `claudeHarness()`, `codexHarness()` ou `geminiHarness()` pour déléguer l’exécution à la CLI correspondante. Leurs options configurent l’exécution, l’authentification explicite et les conversations prises en charge.
+Choisissez `claudeHarness()`, `codexHarness()`, `antigravityHarness()`, `copilotHarness()` ou `kimiHarness()` pour déléguer l’exécution à la CLI correspondante. Leurs réglages configurent l’exécution, l’authentification explicite et les conversations prises en charge. `authentication` reçoit une [`AgentAuthentication`](../../agentauthentication/) : `"account"` réutilise la connexion propre à la CLI, éventuellement via un [`AccountCredential`](../../accountcredential/) (`file`, `key` ou `variable`), tandis que `"usage"` facture une clé API, éventuellement via un [`UsageCredential`](../../usagecredential/) (`key` ou `variable`). Chaque preset n’accepte que les formes prises en charge par sa CLI et refuse les autres à la composition de l’agent. Sans `authentication`, Outpost ne prépare aucun identifiant.
 
 Utilisez `harness()` pour qu’Outpost pilote lui-même le modèle. Il combine un [fournisseur de modèles](../model-providers/), des outils issus de `defineHarnessTool()` et `defineHarnessToolset()`, des instructions en texte ou via `defineHarnessInstructions()`, des hooks, des permissions, des limites de boucle et des réglages d’exécution des outils. Sélectionnez le modèle sur l’[agent](../agents/) ; un harness personnalisé exige un modèle explicite, tandis qu’un preset CLI peut conserver son modèle natif par défaut.
 
@@ -18,7 +18,7 @@ Le moteur intégré renvoie un [`Harness`](../../type-customharness/) configuré
 
 ## Frontières et responsabilités
 
-Construire un harness ne lance ni processus, ni connexion, ni requête réseau. Une CLI possède sa boucle interne modèle/outils. Claude et Codex prennent en charge capture, reprise et fork natifs ; Gemini prend en charge les sessions neuves.
+Construire un harness ne lance ni processus, ni connexion, ni requête réseau ; les fichiers d’identifiants de l’hôte ne sont lus qu’à la préparation d’une sandbox, et Outpost ne lit jamais un trousseau système. Une CLI possède sa boucle interne modèle/outils. Claude Code et Codex prennent en charge capture, reprise et fork natifs ; Antigravity, Copilot et Kimi ne prennent en charge que les nouvelles sessions, acceptent un nom de modèle sans `reasoning` ni `maxOutputTokens` et exigent `repairs: 0`.
 
 Le moteur d’Outpost tourne dans le processus Outpost. Chaque étape est une requête au modèle ; les outils passent par le sandbox emprunté, et les limites font échouer la passe avec le code `limit` au lieu de réussir. Les passes sont enregistrées dans des transcriptions qui permettent continuation, fork et réparations de réponse, et des stratégies de contexte peuvent compacter les longs historiques. Le terminal interactif n’est pas pris en charge. `AgentAdapter` et `AgentInput` décrivent la construction des commandes CLI et le décodage des événements. L’allocation du sandbox relève de [Providers](../providers/).
 
@@ -32,9 +32,11 @@ Les presets CLI sont stables depuis la version 5.0.0 ; le moteur et ses définit
 - [defineHarnessContextStrategy](../../defineharnesscontextstrategy/), [truncateToolResults](../../truncatetoolresults/) et [summarizeHistory](../../summarizehistory/) maintiennent les longs historiques dans le contexte du modèle.
 - [defineHarnessSkill](../../defineharnessskill/) regroupe des instructions et des outils que le modèle charge à la demande.
 - [defineHarnessHook](../../defineharnesshook/) et [defineHarnessPermissions](../../defineharnesspermissions/) contrôlent les appels d’outils et la fin de la boucle.
-- [claudeHarness](../../claudeharness/), [codexHarness](../../codexharness/) et [geminiHarness](../../geminiharness/) configurent les presets CLI.
+- [claudeHarness](../../claudeharness/), [codexHarness](../../codexharness/), [antigravityHarness](../../antigravityharness/), [copilotHarness](../../copilotharness/) et [kimiHarness](../../kimiharness/) configurent les presets CLI avec [ClaudeSettings](../../claudesettings/), [CodexSettings](../../codexsettings/), [AntigravitySettings](../../antigravitysettings/), [CopilotSettings](../../copilotsettings/) et [KimiSettings](../../kimisettings/).
+- [AgentAuthentication](../../agentauthentication/), [AccountCredential](../../accountcredential/) et [UsageCredential](../../usagecredential/) choisissent comment un preset CLI s’authentifie.
+- [agentVersions](../../agentversions/) liste les versions de CLI épinglées pour les images générées et le bootstrap distant.
 - [Harness](../../harness/) est le contrat commun de composition.
 - [HarnessToolContext](../../harnesstoolcontext/) décrit le sandbox, le signal d’annulation, le modèle et l’observateur accessibles à un outil.
 - [AgentAdapter](../../agentadapter/) décrit l’adaptateur de protocole CLI.
 
-[Apprendre avec le guide pratique](../../../guide/agents/harness/). Pour les presets CLI, consultez [le guide des adapters](../../../guide/agents/adapters/).
+[Apprendre avec le guide pratique](../../../guide/agents/harness/). Pour les presets CLI, consultez [le guide des adapters](../../../guide/agents/adapters/) et [l’authentification](../../../guide/manual/authentication/).

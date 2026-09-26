@@ -19,18 +19,20 @@ Expose the Claude, Codex and Gemini CLI versions used as compatibility reference
 
 ## Parameters and properties
 
-| Name     | Type        | Presence | Meaning                                                         |
-| -------- | ----------- | -------- | --------------------------------------------------------------- |
-| `gemini` | `"0.61.0"`  | Required | Gemini CLI version used by the bundled compatibility fixtures.  |
-| `codex`  | `"0.156.1"` | Required | Codex CLI version used by the bundled compatibility fixtures.   |
-| `claude` | `"2.1.280"` | Required | Claude Code version used by the bundled compatibility fixtures. |
+| Name      | Type        | Presence | Meaning                                                                        |
+| --------- | ----------- | -------- | ------------------------------------------------------------------------------ |
+| `codex`   | `"0.156.1"` | Required | Codex CLI version used by the bundled compatibility fixtures.                  |
+| `claude`  | `"2.1.280"` | Required | Claude Code version used by the bundled compatibility fixtures.                |
+| `copilot` | `"1.0.88"`  | Required | GitHub Copilot CLI version installed by generated images and remote bootstrap. |
+| `kimi`    | `"2.1.1"`   | Required | Kimi Code CLI version installed by generated images and remote bootstrap.      |
 
 ## Signature
 
 ```ts
 export declare const agentVersions: Readonly<{
-  gemini: "0.61.0";
   codex: "0.156.1";
   claude: "2.1.280";
+  copilot: "1.0.88";
+  kimi: "2.1.1";
 }>;
 ```

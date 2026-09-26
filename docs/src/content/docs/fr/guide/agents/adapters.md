@@ -38,20 +38,24 @@ Enregistrez le fichier **example.mts** dans `outpost-example/`.
 import assert from "node:assert/strict";
 import {
   agent as composeAgent,
+  antigravityHarness,
   claudeHarness,
   codexHarness,
-  geminiHarness,
+  copilotHarness,
+  kimiHarness,
   agentVersions,
 } from "@elie-laloum/outpost";
 
 const agents = [
   composeAgent({ harness: codexHarness({}) }),
   composeAgent({ harness: claudeHarness({}) }),
-  composeAgent({ harness: geminiHarness({}) }),
+  composeAgent({ harness: antigravityHarness({}) }),
+  composeAgent({ harness: copilotHarness({}) }),
+  composeAgent({ harness: kimiHarness({}) }),
 ];
 assert.deepEqual(
   agents.map((agent) => agent.name),
-  ["codex", "claude", "gemini"],
+  ["codex", "claude", "antigravity", "copilot", "kimi"],
 );
 console.log(agents.map((agent) => agent.name));
 console.log(agentVersions);
@@ -63,7 +67,7 @@ node example.mts
 
 ## Comprendre le résultat
 
-Les presets de harness choisissent le comportement de la CLI native. Composez un agent avec son modèle et transmettez cet agent au dispatch ; choisissez indépendamment l’environnement avec sandboxProvider. La construction ne déclenche ni authentification ni requête modèle. Sans modèle explicite, la CLI utilise son défaut. Gemini prend en charge les nouvelles sessions ; Claude et Codex permettent capture et reprise natives.
+Les presets de harness choisissent le comportement de la CLI native. Composez un agent avec son modèle et transmettez cet agent au dispatch ; choisissez indépendamment l’environnement avec sandboxProvider. La construction ne déclenche ni authentification ni requête modèle. Sans modèle explicite, la CLI utilise son défaut. Claude et Codex permettent la capture, la reprise et le fork des conversations natives ; Antigravity, Copilot et Kimi n’exécutent que de nouvelles sessions. `agentVersions` indique les versions de CLI épinglées pour les images générées et le bootstrap distant ; Antigravity n’a pas de version épinglée.
 
 [Contrats, options et cas particuliers](../../behavior/agents/adapters/).
 

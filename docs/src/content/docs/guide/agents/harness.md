@@ -7,7 +7,7 @@ description: Compose a model provider, tools, instructions and limits into an ag
 The built-in harness engine is experimental since 5.0.0: its contracts may still change, and it has not yet been validated against every model service.
 :::
 
-`claudeHarness()`, `codexHarness()` and `geminiHarness()` delegate the whole task to a CLI that runs its own model and tool loop. `harness()` builds that loop in Outpost instead. You declare what the agent can use, and Outpost drives the model:
+`claudeHarness()`, `codexHarness()`, `antigravityHarness()`, `copilotHarness()` and `kimiHarness()` delegate the whole task to a CLI that runs its own model and tool loop. `harness()` builds that loop in Outpost instead. You declare what the agent can use, and Outpost drives the model:
 
 - a **model provider**, such as `anthropicModelProvider()` or `openaiModelProvider()`;
 - **tools** created with `defineHarnessTool()` and grouped with `defineHarnessToolset()`;

@@ -56,7 +56,11 @@ import { vercelSandboxProvider } from "@elie-laloum/outpost/providers/vercel";
 const token = process.env.CLAUDE_CODE_OAUTH_TOKEN;
 if (!token) throw new Error("Set CLAUDE_CODE_OAUTH_TOKEN before allocation");
 await using sandbox = await createSandbox({
-  agent: composeAgent({ harness: claudeHarness({}) }),
+  agent: composeAgent({
+    harness: claudeHarness({
+      authentication: { account: { variable: "CLAUDE_CODE_OAUTH_TOKEN" } },
+    }),
+  }),
   sandboxProvider: vercelSandboxProvider({
     create: { timeout: 300_000 },
     variables: { CLAUDE_CODE_OAUTH_TOKEN: token },
@@ -64,4 +68,4 @@ await using sandbox = await createSandbox({
 });
 ```
 
-Obtain this token with `claude setup-token` on the host. For API billing instead, pass `ANTHROPIC_API_KEY` without the subscription token. A workflow-local `.env` is not automatically loaded by the library: read it explicitly, use the generated starter, or declare the variable in the target repository's `.outpost/.env`. See [Claude authentication](../../../agents/connect-claude/) and [environment precedence](../../../agents/environment/).
+Obtain this token with `claude setup-token` on the host. For API billing instead, pass `ANTHROPIC_API_KEY` and select `authentication: "usage"`. `authentication: "account"` instead copies the Claude login file from the host into the private sandbox home. A workflow-local `.env` is not automatically loaded by the library: read it explicitly, use the generated starter, or declare the variable in the target repository's `.outpost/.env`. See [Claude authentication](../../../agents/connect-claude/) and [environment precedence](../../../agents/environment/).

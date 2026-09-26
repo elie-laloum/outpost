@@ -1,9 +1,9 @@
 ---
-title: "Run a fresh Gemini session"
-description: "Use the Gemini adapter for a bounded analysis of the text workshop."
+title: "Connect GitHub Copilot explicitly"
+description: "Choose one GitHub Copilot CLI authentication method, then verify it with a small real request."
 ---
 
-Use the Gemini adapter for a bounded analysis of the text workshop.
+Choose one GitHub Copilot CLI authentication method, then verify it with a small real request.
 
 <!-- scenario:agent -->
 
@@ -79,51 +79,61 @@ npx @elie-laloum/outpost init --yes --directory workflow --repository ../reposit
 cd workflow
 ```
 
-Choose **one** of these configurations for **workflow/.env**. Empty key declarations inherit the matching environment variable; alternatively set its value in this ignored file. Account access and API billing are separate. The CLI-generated `run.ts` already configures Codex login; do not add a second login hook.
+Choose **one** of these configurations for **workflow/.env**. `account` copies the login you already made on the host into the private sandbox home; `usage` bills an API key. Empty key declarations inherit the matching environment variable; alternatively set its value in this ignored file. Outpost never reads a system keychain.
+
+**Codex — account**: run `codex -c cli_auth_credentials_store='"file"' login` on the host first so the login is stored in `auth.json`.
+
+```dotenv
+OUTPOST_AGENT=codex
+OUTPOST_AUTH=account
+```
 
 **Codex — API key**
 
 ```dotenv
 OUTPOST_AGENT=codex
-OUTPOST_AUTH=api-key
+OUTPOST_AUTH=usage
 OPENAI_API_KEY=
 ```
 
-**Codex — account**: run `codex -c cli_auth_credentials_store='"file"' login` on the host first. This explicitly selects a file credential seed instead of exporting a keychain.
+**Claude — account**: run `claude`, then `/login`, on the host. On macOS this login stays in the keychain: use the subscription token instead.
 
 ```dotenv
-OUTPOST_AGENT=codex
-OUTPOST_AUTH=login
+OUTPOST_AGENT=claude
+OUTPOST_AUTH=account
+```
+
+**Claude — subscription token**: obtain a token with `claude setup-token` on the host and declare it below.
+
+```dotenv
+OUTPOST_AGENT=claude
+OUTPOST_AUTH=account-token
+CLAUDE_CODE_OAUTH_TOKEN=
 ```
 
 **Claude — API key**
 
 ```dotenv
 OUTPOST_AGENT=claude
-OUTPOST_AUTH=api-key
+OUTPOST_AUTH=usage
 ANTHROPIC_API_KEY=
 ```
 
-**Claude — subscription**: obtain a token with `claude setup-token` on the host and declare it below.
+**Antigravity, GitHub Copilot and Kimi Code** accept the same values when they support them: see [Antigravity](../connect-antigravity/), [Copilot](/) and [Kimi Code](../connect-kimi/). Kimi API keys also need `OUTPOST_MODEL`.
 
-```dotenv
-OUTPOST_AGENT=claude
-OUTPOST_AUTH=oauth-token
-CLAUDE_CODE_OAUTH_TOKEN=
-```
-
-Save **runtime.mts** next to the example. This complete configuration reads only declared variables, selects the agent and initializes its private sandbox home. The example calls `configuration()` to use your choice. These two `OUTPOST_` settings belong to this teaching script, not the Outpost API.
+Save **runtime.mts** next to the example. This complete configuration reads only declared variables, selects the agent and its authentication, and lets Outpost prepare the private sandbox home. The example calls `configuration()` to use your choice. The `OUTPOST_` settings belong to this teaching script, not the Outpost API.
 
 ```ts file=runtime.mts
 import { readFile } from "node:fs/promises";
-import { homedir } from "node:os";
 import { resolve } from "node:path";
 import { parseEnv } from "node:util";
 import {
   agent as composeAgent,
-  codexHarness,
+  antigravityHarness,
   claudeHarness,
-  geminiHarness,
+  codexHarness,
+  copilotHarness,
+  kimiHarness,
   type AgentAuthentication,
   type LifecycleHooks,
 } from "@elie-laloum/outpost";
@@ -139,69 +149,38 @@ export const variables = Object.fromEntries(
     .map(([name, value]) => [name, value || process.env[name] || ""]),
 );
 
+const factories = {
+  codex: codexHarness,
+  claude: claudeHarness,
+  antigravity: antigravityHarness,
+  copilot: copilotHarness,
+  kimi: kimiHarness,
+};
+const tokens: Record<string, string> = {
+  claude: "CLAUDE_CODE_OAUTH_TOKEN",
+  copilot: "COPILOT_GITHUB_TOKEN",
+};
+
+function authenticationFor(name: string, choice: string): AgentAuthentication {
+  if (choice === "account-token" && tokens[name])
+    return { account: { variable: tokens[name] } };
+  if (choice === "account" || choice === "usage") return choice;
+  throw new Error(`Unsupported OUTPOST_AUTH for ${name}: ${choice}`);
+}
+
 export async function configuration(
   name = settings.OUTPOST_AGENT ?? "codex",
-  authentication = settings.OUTPOST_AUTH ?? "api-key",
+  authentication = settings.OUTPOST_AUTH ?? "account",
 ) {
-  const factories = {
-    codex: codexHarness,
-    claude: claudeHarness,
-    gemini: geminiHarness,
-  };
-  if (!(name === "codex" || name === "claude" || name === "gemini"))
-    throw new Error("Choose codex, claude or gemini");
-  const supported = {
-    codex: ["api-key", "login"],
-    claude: ["api-key", "oauth-token"],
-    gemini: ["api-key"],
-  };
-  if (!supported[name].includes(authentication))
-    throw new Error(
-      `Unsupported authentication for ${name}: ${authentication}`,
-    );
-  if (
-    name === "codex" &&
-    authentication === "login" &&
-    variables.OPENAI_API_KEY
-  )
-    throw new Error(
-      "Remove OPENAI_API_KEY when using Codex account authentication",
-    );
-  let selected: AgentAuthentication;
-  if (authentication === "login") {
-    const credentials = await readFile(
-      resolve(
-        process.env.CODEX_HOME || resolve(homedir(), ".codex"),
-        "auth.json",
-      ),
-      "utf8",
-    );
-    JSON.parse(credentials);
-    selected = { mode: "login", credentials };
-  } else {
-    const keys = {
-      codex: "OPENAI_API_KEY",
-      claude: "ANTHROPIC_API_KEY",
-      gemini: "GEMINI_API_KEY",
-    };
-    const key =
-      authentication === "oauth-token" ? "CLAUDE_CODE_OAUTH_TOKEN" : keys[name];
-    if (!variables[key]) throw new Error(`Declare ${key} in workflow/.env`);
-    if (
-      name === "claude" &&
-      variables.ANTHROPIC_API_KEY &&
-      variables.CLAUDE_CODE_OAUTH_TOKEN
-    )
-      throw new Error("Choose one Claude authentication method");
-    selected =
-      authentication === "oauth-token"
-        ? { mode: "oauth-token" }
-        : { mode: "api-key", environment: key };
-  }
+  if (!Object.hasOwn(factories, name))
+    throw new Error(`Choose ${Object.keys(factories).join(", ")}`);
   return {
     repository,
     agent: composeAgent({
-      harness: factories[name]({ authentication: selected }),
+      harness: factories[name as keyof typeof factories]({
+        authentication: authenticationFor(name, authentication),
+      }),
+      ...(settings.OUTPOST_MODEL ? { model: settings.OUTPOST_MODEL } : {}),
     }),
     sandboxProvider: dockerSandboxProvider({
       image: "outpost:docs-demo",
@@ -225,10 +204,10 @@ Save **example.mts** in `workflow/`.
 ```ts file=example.mts
 import { dispatch } from "@elie-laloum/outpost";
 import { configuration } from "./runtime.mts";
-const runtime = await configuration("gemini", "api-key");
+const runtime = await configuration("copilot");
 const result = await dispatch({
   ...runtime,
-  branch: { mode: "named", name: "workshop/gemini" },
+  branch: { mode: "named", name: "workshop/copilot" },
   brief: {
     text: "Read text.ts and explain its whitespace bug without editing it.",
   },
@@ -243,8 +222,13 @@ node example.mts
 
 ## Understand the result
 
-Before running, declare `GEMINI_API_KEY=` in `workflow/.env` and supply its value. Gemini starts a fresh session; native capture, resume, fork and automatic response repairs are unsupported. The generated image includes the CLI; changing the agent does not require changing the provider. Optional model settings must match access in your Gemini account.
+The example selects Copilot and reads `OUTPOST_AUTH` from `workflow/.env`. Declare `OUTPOST_AGENT=copilot` too, so the other examples use the same agent, then choose one form:
 
-[Contracts, options and edge cases](../../behavior/agents/gemini/).
+- `OUTPOST_AUTH=account` reuses `copilot login` from the host. Outpost reads the token stored for the last signed-in user in `~/.copilot/config.json` and passes it to the sandbox as `COPILOT_GITHUB_TOKEN`. Copilot keeps its token in the system keychain by default, and Outpost never reads a keychain: in that case, use the token form.
+- `OUTPOST_AUTH=account-token` with `COPILOT_GITHUB_TOKEN=` uses a fine-grained personal access token with the **Copilot Requests** permission, or an OAuth token (`gho_` or `ghu_`). Classic `ghp_` tokens are rejected.
+
+There is no API-key form: every request counts against the premium requests of your GitHub Copilot plan, and Outpost reports zero token usage. The generated image already contains the pinned CLI. Copilot starts a fresh session every time: Outpost does not capture, resume or fork its conversations, and structured responses require `repairs: 0`. A successful answer explains that `slug` neither trims nor collapses repeated spaces; this makes a real model call.
+
+[Contracts, options and edge cases](../../behavior/agents/connect-copilot/).
 
 To start again, use a new demonstration directory. Named branches retain commits; dirty worktrees remain available for recovery. Scripts do not push commits.

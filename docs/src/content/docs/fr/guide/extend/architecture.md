@@ -7,14 +7,14 @@ sidebar:
 
 Outpost utilise des ports et des adapters. Le domaine décrit les capacités ; les services applicatifs coordonnent leur utilisation. Les agents et les providers de sandbox implémentent des contrats indépendants.
 
-| Couche            | Responsabilité                                                          |
-| ----------------- | ----------------------------------------------------------------------- |
-| `domain`          | Contrats, règles, prompts, réponses, graphes et exécution des workflows |
-| `adapters/agents` | Commandes et protocoles propres à Claude, Codex et Gemini               |
-| `providers`       | Allocation, commandes, transferts et libération des sandboxes           |
-| `infrastructure`  | Git, processus, fichiers, conversations et journaux                     |
-| `application`     | Cycle de vie, dispatch et synchronisation distante                      |
-| `cli`             | Commandes, initialisation et images                                     |
+| Couche            | Responsabilité                                                                                           |
+| ----------------- | -------------------------------------------------------------------------------------------------------- |
+| `domain`          | Contrats, règles, prompts, réponses, graphes et exécution des workflows                                  |
+| `adapters/agents` | Commandes, plans d’identifiants et protocoles propres à Claude Code, Codex, Antigravity, Copilot et Kimi |
+| `providers`       | Allocation, commandes, transferts et libération des sandboxes                                            |
+| `infrastructure`  | Git, processus, fichiers, identifiants de l’hôte, conversations et journaux                              |
+| `application`     | Cycle de vie, dispatch et synchronisation distante                                                       |
+| `cli`             | Commandes, initialisation et images                                                                      |
 
 Les contrats nommés et les types objets sont placés dans des fichiers `*.types.ts`, sans initialisation à l’exécution. Les paramètres par défaut, options reconnues, recettes et limites partagées sont placés dans des fichiers `*.constants.ts`. Les variables locales et valeurs calculées restent dans leur opération.
 
@@ -22,8 +22,8 @@ Les points d’entrée publics comprennent `src/index.ts`, les sous-chemins `pro
 
 ## Responsabilités
 
-- Chaque agent possède un adapter, un constructeur de commande et un décodeur d’événements. Des registres de handlers remplacent le dispatch conditionnel des protocoles. Un événement inconnu reste une observation brute.
-- Les conversations constituent un port distinct. Les stratégies Claude et Codex portent leurs conventions de stockage ; capture, restauration, recherche et réécriture sont séparées.
+- Chaque agent possède un adapter, un constructeur de commande, une stratégie d’authentification et un décodeur d’événements. Des registres de handlers, indexés par un discriminant de protocole, remplacent le dispatch conditionnel : `decodeLine` lit `type` par défaut, `event` pour Antigravity et `role` pour Kimi. Un événement inconnu reste une observation brute.
+- Les conversations constituent un port distinct. Les stratégies Claude et Codex portent leurs conventions de stockage ; capture, restauration, recherche et réécriture sont séparées. Les adapters Antigravity, Copilot et Kimi ne permettent pas la reprise et n’ont pas de store natif.
 - Le workspace possède son état Git. La préparation du sandbox, les opérations exclusives, le dispatch, le terminal et la fermeture ont chacun un service dédié.
 - L’exécution d’un tour, l’accumulation des événements et la surveillance des délais sont séparées. L’agrégation de consommation est une règle commune du domaine.
 - Les providers composent leurs services de préparation, commandes et transferts. Docker et Podman partagent la mécanique du moteur de conteneurs.
@@ -31,11 +31,17 @@ Les points d’entrée publics comprennent `src/index.ts`, les sous-chemins `pro
 - Inventaire, intégrité, vérification Git isolée et rétention sont des opérations distinctes. Le nettoyage explicite acquiert les verrous et revalide les candidats ; `assertRecoveryQuota` observe le stockage, tandis que les réservations explicites sérialisent l’admission coopérative et peuvent appartenir au workspace. Les enregistrements d’activité décrivent les leases et opérations observées localement, sans énumérer les comptes distants. Les volumes de cache des conteneurs ont une durée de vie distincte, gérée par le moteur.
 - La propriété locale des verrous est vérifiée lorsque la plateforme le permet ; les propriétaires incertains bloquent la reprise automatique. Les workspaces modifiés, détachés ou contenant des fichiers ignorés restent récupérables.
 - Les workflows séparent validation du graphe, état d’exécution, tentatives, budgets et ordonnancement. Les wrappers applicatifs transmettent la consommation normalisée des agents au comptage partagé. L’adapter OpenTelemetry d’infrastructure consomme les événements avec tracer et meter injectés, noms fixes et attributs bornés. Les erreurs d’observateurs ne changent pas l’issue de l’exécution.
-- Les diagnostics d’une sandbox détenue utilisent la même exclusion d’opération que commandes et dispatch. Le nettoyage des probes temporaires est indépendant ; le diagnostic ne devient jamais propriétaire de la libération de la lease.
+- Les diagnostics d’une sandbox détenue utilisent la même exclusion d’opération que commandes et dispatch. Le nettoyage des probes temporaires est indépendant ; le diagnostic ne devient jamais propriétaire de la libération de la lease. Le registre `doctorAgents` associe chaque agent de doctor à son exécutable (`agy` pour Antigravity), sa version épinglée éventuelle, ses diagnostics d’aide et son harness.
+
+## Authentification
+
+`AgentAuthentication` choisit `account` ou `usage`, éventuellement avec `file`, `key` ou `variable` ; le domaine valide sa forme. Un adapter qui prend en charge l’authentification implémente `AgentAdapter.credentials(variables)`, qui renvoie un `CredentialPlan` : variables d’identifiants, fichiers d’identifiants de l’hôte à lire, fichiers générés et commandes de connexion. Les stratégies propres à chaque agent vivent dans `adapters/agents/<agent>-authentication.ts` ; le harness refuse une forme non prise en charge dès la composition de l’agent.
+
+`infrastructure/host-credentials.ts` lit les fichiers d’identifiants de l’hôte : fichiers réguliers uniquement, de taille bornée, et jamais un trousseau système. `application/agent-authentication.ts` installe un plan une fois par adapter et par sandbox, depuis `sandbox-agents.ts`. Pour un placement isolé, il écrit les fichiers dans le home privé de la sandbox par un unique installateur qui reçoit du JSON sur l’entrée standard, puis exécute les commandes de connexion du plan. Pour le placement hôte, il transmet uniquement les variables d’identifiants. Ces variables sont fusionnées dans chaque commande de cet agent.
 
 ## Extension et vérification
 
-Un nouvel agent implémente `AgentAdapter` dans son propre module. Un nouveau backend implémente `SandboxProvider` et `SandboxLease`, avec annulation, délais de transfert et libération idempotente. Les contrats existants restent compatibles.
+Un nouvel agent implémente `AgentAdapter` dans son propre module, avec des contrats de requête, de plan d’identifiants et d’événements testés séparément. Il ajoute un format de conversation ou un store personnalisé lorsque la continuation native est prise en charge, et se déclare sinon non reprenable. Enregistrez son exécutable, ses diagnostics et son harness dans `doctorAgents` pour que `outpost doctor --agent` puisse le vérifier. Un nouveau backend implémente `SandboxProvider` et `SandboxLease`, avec annulation, délais de transfert et libération idempotente. Les contrats existants restent compatibles.
 
 `npm run check` vérifie l’architecture, les types, les tests unitaires et fonctionnels et la compilation. `npm run coverage` impose 80 % sur les lignes, branches et fonctions. Les modules de types, effacés à l’exécution, sont contrôlés par TypeScript et le test consommateur du package. Les handlers CLI entrent dans la couverture ; seul le point d’entrée du processus est exclu.
 
@@ -45,7 +51,7 @@ La CI refuse les dépendances entre couches dans le mauvais sens, les contrats d
 
 Les contrats de checkpoints et de portes appartiennent au domaine ; le store de checkpoints possède la persistance conditionnelle et la propriété explicite via Transport. Les contrats d’artefacts valident les valeurs et la filiation ; leur store possède la publication immuable via Transport. La file SQLite et son transport HTTP fournissent les claims persistants ; les workers applicatifs exécutent les handlers enregistrés sous leases protégées par fencing. La répétition reste explicite et les effets peuvent être exécutés plusieurs fois. Les noms d’acteurs et la filiation sont des métadonnées de confiance, pas une authentification.
 
-Le checkout isolé des conteneurs, le provider Firecracker, les politiques réseau et l’exécution spéculative ont leurs propres [limites de recherche](../../../project/roadmap/). Gemini ne possède pas de store de conversations natives. Daytona utilise son API PTY native ; Vercel refuse l’attachement interactif.
+Le checkout isolé des conteneurs, le provider Firecracker, les politiques réseau et l’exécution spéculative ont leurs propres [limites de recherche](../../../project/roadmap/). Daytona utilise son API PTY native ; Vercel refuse l’attachement interactif.
 
 ## Transports de stockage
 

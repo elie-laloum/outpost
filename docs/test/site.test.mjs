@@ -218,7 +218,8 @@ test("reference symbol icons retain accessible names in both languages", async (
       ["dockerSandboxProvider", "function", "docker"],
       ["claudeHarness", "function", "claude"],
       ["codexHarness", "function", "codex"],
-      ["geminiHarness", "function", "gemini"],
+      ["antigravityHarness", "function", "gemini"],
+      ["copilotHarness", "function", "copilotharness"],
       ["QueueHandler", "type", "queuehandler"],
     ]) {
       await page.goto(`${locale}reference/${route}/`);
@@ -485,8 +486,12 @@ for (const [locale, overview, label] of [
     for (const name of [
       "claudeHarness",
       "codexHarness",
-      "geminiHarness",
+      "antigravityHarness",
+      "copilotHarness",
+      "kimiHarness",
       "AgentAuthentication",
+      "AccountCredential",
+      "UsageCredential",
     ]) {
       await expect(family.getByRole("link", { name, exact: true })).toHaveCount(
         1,

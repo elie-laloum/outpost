@@ -7,7 +7,7 @@ description: Composez un fournisseur de modèles, des outils, des instructions e
 Le moteur de harness intégré est expérimental depuis la version 5.0.0 : ses contrats peuvent encore changer, et il n’a pas encore été validé contre tous les services de modèles.
 :::
 
-`claudeHarness()`, `codexHarness()` et `geminiHarness()` confient toute la tâche à une CLI qui exécute sa propre boucle de modèle et d’outils. `harness()` construit cette boucle dans Outpost. Vous déclarez ce que l’agent peut utiliser, et Outpost pilote le modèle :
+`claudeHarness()`, `codexHarness()`, `antigravityHarness()`, `copilotHarness()` et `kimiHarness()` confient toute la tâche à une CLI qui exécute sa propre boucle de modèle et d’outils. `harness()` construit cette boucle dans Outpost. Vous déclarez ce que l’agent peut utiliser, et Outpost pilote le modèle :
 
 - un **fournisseur de modèles**, comme `anthropicModelProvider()` ou `openaiModelProvider()` ;
 - des **outils** créés avec `defineHarnessTool()` et regroupés avec `defineHarnessToolset()` ;

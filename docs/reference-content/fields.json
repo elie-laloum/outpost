@@ -192,8 +192,8 @@
     "Identifiant d’agent natif utilisé dans les événements et diagnostics."
   ],
   "AgentAdapter.bootstrap": [
-    "Shell recipe that installs the native CLI when bootstrapping is enabled.",
-    "Recette shell installant le CLI natif lorsque le bootstrap est activé."
+    "Name of the pinned npm installer used to install the CLI on remote providers when bootstrapping is enabled.",
+    "Nom de l’installeur npm épinglé utilisé pour installer la CLI sur les providers distants lorsque le bootstrap est activé."
   ],
   "AgentAdapter.requiresFinishedEvent": [
     "Require the native finished protocol event before treating an agent turn as complete.",
@@ -400,8 +400,8 @@
     "Nom de la phase pour les événements phase, ou nom de l’outil pour les événements tool et tool-result."
   ],
   "AgentEvent.agent": [
-    "Agent CLI identifier to report or diagnose: claude, codex or gemini.",
-    "Identifiant du CLI d’agent à rapporter ou diagnostiquer : claude, codex ou gemini."
+    "Agent CLI identifier to report or diagnose: claude, codex, antigravity (executable agy), copilot or kimi.",
+    "Identifiant du CLI d’agent à rapporter ou diagnostiquer : claude, codex, antigravity (exécutable agy), copilot ou kimi."
   ],
   "AgentEvent.branch": [
     "Name of the work branch used or observed during execution.",
@@ -761,8 +761,8 @@
     "Ferme cette ressource via le mécanisme de libération asynchrone JavaScript."
   ],
   "SandboxDiagnosticOptions.agent": [
-    "Agent CLI identifier to report or diagnose: claude, codex or gemini.",
-    "Identifiant du CLI d’agent à rapporter ou diagnostiquer : claude, codex ou gemini."
+    "Agent CLI identifier to report or diagnose: claude, codex, antigravity (executable agy), copilot or kimi.",
+    "Identifiant du CLI d’agent à rapporter ou diagnostiquer : claude, codex, antigravity (exécutable agy), copilot ou kimi."
   ],
   "SandboxDiagnosticOptions.deadlineMs": [
     "Maximum duration of each diagnostic probe in milliseconds.",
@@ -829,8 +829,8 @@
     "Version détectée par la sonde de diagnostic lorsqu’elle est disponible."
   ],
   "DiagnosticCheck.referenceVersion": [
-    "CLI version against which the bundled protocol fixtures were recorded.",
-    "Version du CLI ayant servi à enregistrer les fixtures de protocole intégrées."
+    "Pinned CLI version the bundled protocol fixtures target; absent for Antigravity, which has no pinned version.",
+    "Version épinglée du CLI visée par les fixtures de protocole intégrées ; absente pour Antigravity, qui n’a pas de version épinglée."
   ],
   "WarmDispatchResult.resume": [
     "Continue this result’s conversation on the still-open original sandbox.",
@@ -1343,18 +1343,6 @@
   "CodexModelProvider.apiKeyEnvironment": [
     "Environment variable containing the endpoint API key; false disables the API-key environment declaration.",
     "Variable d’environnement contenant la clé API de l’endpoint ; false désactive la déclaration de cette variable."
-  ],
-  "GeminiSettings.variables": [
-    "Explicit environment declarations; values are strings.",
-    "Déclarations d’environnement explicites ; les valeurs sont des chaînes."
-  ],
-  "GeminiSettings.approvalMode": [
-    "Gemini CLI tool-approval mode.",
-    "Mode d’approbation des outils du CLI Gemini."
-  ],
-  "agentVersions.gemini": [
-    "Gemini CLI version used by the bundled compatibility fixtures.",
-    "Version du CLI Gemini utilisée par les fixtures de compatibilité intégrées."
   ],
   "agentVersions.codex": [
     "Codex CLI version used by the bundled compatibility fixtures.",
@@ -2145,20 +2133,20 @@
     "Métadonnées d’agent et provider, sondes de transfert, annulation et délai par sonde."
   ],
   "diagnoseAgentProtocol.agent": [
-    "Agent CLI identifier to report or diagnose: claude, codex or gemini.",
-    "Identifiant du CLI d’agent à rapporter ou diagnostiquer : claude, codex ou gemini."
+    "Agent CLI identifier to report or diagnose: claude, codex, antigravity (executable agy), copilot or kimi.",
+    "Identifiant du CLI d’agent à rapporter ou diagnostiquer : claude, codex, antigravity (exécutable agy), copilot ou kimi."
   ],
   "AgentProtocolReport.scope": [
     "Always bundled-protocol-fixtures: checks replay recorded adapter fixtures.",
     "Toujours bundled-protocol-fixtures : les contrôles rejouent les fixtures enregistrées d’adapter."
   ],
   "AgentProtocolReport.agent": [
-    "Agent CLI identifier to report or diagnose: claude, codex or gemini.",
-    "Identifiant du CLI d’agent à rapporter ou diagnostiquer : claude, codex ou gemini."
+    "Agent CLI identifier to report or diagnose: claude, codex, antigravity (executable agy), copilot or kimi.",
+    "Identifiant du CLI d’agent à rapporter ou diagnostiquer : claude, codex, antigravity (exécutable agy), copilot ou kimi."
   ],
   "AgentProtocolReport.referenceVersion": [
-    "CLI version against which the bundled protocol fixtures were recorded.",
-    "Version du CLI ayant servi à enregistrer les fixtures de protocole intégrées."
+    "Pinned CLI version the bundled protocol fixtures target; absent for Antigravity, which has no pinned version.",
+    "Version épinglée du CLI visée par les fixtures de protocole intégrées ; absente pour Antigravity, qui n’a pas de version épinglée."
   ],
   "AgentProtocolReport.installedCli": [
     "Always unverified: bundled fixture checks do not invoke the installed CLI.",
@@ -3169,8 +3157,8 @@
     "Nombre maximal positif d’événements à parcourir, 100 000 par défaut ; cycles et dépassements provoquent un échec."
   ],
   "transportConversations.format": [
-    "Transcript format: claude or codex for native CLI transcripts, or harness for custom harness transcripts. Gemini has no native conversation storage.",
-    "Format de transcription : claude ou codex pour les transcriptions natives des CLI, ou harness pour celles des harness personnalisés. Gemini n’a pas de stockage natif des conversations."
+    "Transcript format: claude or codex for native CLI transcripts, or harness for custom harness transcripts. Antigravity, Copilot and Kimi have no native conversation storage.",
+    "Format de transcription : claude ou codex pour les transcriptions natives des CLI, ou harness pour celles des harness personnalisés. Antigravity, Copilot et Kimi n’ont pas de stockage natif des conversations."
   ],
   "transportConversations.options": [
     "Transport and stable project namespace shared by all runners restoring these conversations.",
@@ -3620,17 +3608,13 @@
     "Request transport the engine calls for each step; it validates the agent model when the agent is composed.",
     "Transport de requêtes que le moteur appelle à chaque étape ; il valide le modèle de l’agent à la composition."
   ],
-  "AgentAdapter.authenticate": [
-    "Build an optional authentication command from explicitly resolved variables; reactivated when the selected configuration for this CLI changes.",
-    "Construit une commande d’authentification optionnelle depuis les variables résolues explicitement ; réactivée lorsque la configuration sélectionnée pour cette CLI change."
-  ],
   "AgentFeatures.name": [
     "Native agent identifier used in execution events and diagnostics.",
     "Identifiant d’agent natif utilisé dans les événements et diagnostics."
   ],
   "AgentFeatures.bootstrap": [
-    "Shell recipe that installs the native CLI when bootstrapping is enabled.",
-    "Recette shell installant le CLI natif lorsque le bootstrap est activé."
+    "Name of the pinned npm installer used to install the CLI on remote providers when bootstrapping is enabled.",
+    "Nom de l’installeur npm épinglé utilisé pour installer la CLI sur les providers distants lorsque le bootstrap est activé."
   ],
   "AgentFeatures.requiresFinishedEvent": [
     "Require the native finished protocol event before treating an agent turn as complete.",
@@ -3668,25 +3652,9 @@
     "Nonempty service-specific model identifier; no local catalog or availability probe is used.",
     "Identifiant de modèle non vide propre au service ; aucun catalogue local ni sonde de disponibilité."
   ],
-  "AgentAuthentication.mode": [
-    "Explicit credential mode: API key, Claude subscription token, or existing Codex login. Unsupported agent/mode combinations fail locally.",
-    "Mode explicite : clé API, token d’abonnement Claude ou session Codex existante. Les associations non prises en charge sont refusées localement."
-  ],
-  "AgentAuthentication.environment": [
-    "Environment variable holding the API key. Codex can read a custom variable; Claude and Gemini require their standard ANTHROPIC_API_KEY and GEMINI_API_KEY names.",
-    "Variable d’environnement contenant la clé API. Codex peut lire une variable personnalisée ; Claude et Gemini exigent leurs noms standards ANTHROPIC_API_KEY et GEMINI_API_KEY."
-  ],
-  "AgentAuthentication.credentials": [
-    "Explicit Codex auth.json contents to seed in the sandbox home. Omit only when a usable session already exists in that execution environment. No host file is discovered.",
-    "Contenu explicite du auth.json Codex à copier dans le home du sandbox. Omettez-le uniquement si cet environnement possède déjà une session utilisable. Aucun fichier hôte n’est découvert."
-  ],
   "CommonAgentSettings.authentication": [
-    "Explicit authentication preparation for this CLI harness. Omission preserves already-configured access without discovering host credentials.",
-    "Préparation explicite de l’authentification de ce harness CLI. Son absence conserve l’accès déjà configuré sans rechercher des credentials hôte."
-  ],
-  "GeminiSettings.authentication": [
-    "Explicit authentication preparation for this CLI harness. Omission preserves already-configured access without discovering host credentials.",
-    "Préparation explicite de l’authentification de ce harness CLI. Son absence conserve l’accès déjà configuré sans rechercher des credentials hôte."
+    "Explicit authentication for this CLI harness: \"account\", \"usage\", { account: { file | key | variable } } or { usage: { key | variable } }. Unsupported forms fail when the agent is composed. Omission prepares nothing and keeps the access already configured in the execution environment.",
+    "Authentification explicite de ce harness CLI : \"account\", \"usage\", { account: { file | key | variable } } ou { usage: { key | variable } }. Les formes non prises en charge échouent à la composition de l’agent. Son absence ne prépare rien et conserve l’accès déjà configuré dans l’environnement d’exécution."
   ],
   "HttpModelOptions.baseUrl": [
     "Absolute HTTP(S) API base URL, including any /v1 prefix; excludes credentials, query and fragment. The selected protocol path is appended.",
@@ -3751,10 +3719,6 @@
   "codexHarness.settings": [
     "Configuration for the Codex harness; pass the selected model to agent() instead.",
     "Configuration du harness Codex ; transmettez le modèle choisi à agent()."
-  ],
-  "geminiHarness.settings": [
-    "Configuration for the Gemini CLI harness; pass the selected model to agent() instead.",
-    "Configuration du harness Gemini CLI ; transmettez le modèle choisi à agent()."
   ],
   "AgentModel.name": [
     "Nonempty model identifier passed unchanged to the CLI or model service; no local catalog is consulted.",
@@ -4533,5 +4497,137 @@
   "ReporterHandlers.text-delta": [
     "Handle a streamed fragment of model text from a custom harness; receives pass and at metadata and may return a promise.",
     "Traite : fragment de texte du modèle diffusé en streaming par un harness personnalisé ; reçoit pass et at et peut retourner une promesse."
+  ],
+  "AgentAdapter.credentials": [
+    "Plan the credentials of this CLI from the resolved workflow variables, without disk access: variables to forward, host files to copy into the private sandbox home, generated files and login commands. Called once per adapter and sandbox; the local provider receives only the variables.",
+    "Planifie les credentials de cette CLI à partir des variables résolues du workflow, sans accès disque : variables à transmettre, fichiers hôte à copier dans le home privé de la sandbox, fichiers générés et commandes de connexion. Appelé une fois par adapter et par sandbox ; le provider local ne reçoit que les variables."
+  ],
+  "AgentAuthentication.account": [
+    "Subscription or plan credentials: a file or profile directory on the host (file), a literal token (key) or a variable holding the token (variable).",
+    "Credentials d’abonnement ou de forfait : fichier ou dossier de profil sur l’hôte (file), jeton littéral (key) ou variable contenant le jeton (variable)."
+  ],
+  "AgentAuthentication.usage": [
+    "API-billed credentials: a literal key (key) or the variable holding it (variable), mapped to the CLI's standard API-key variable.",
+    "Credentials facturés à l’usage de l’API : clé littérale (key) ou variable qui la contient (variable), transmise dans la variable de clé API standard de la CLI."
+  ],
+  "AccountCredential.file": [
+    "Host path of a session file, or of a Kimi Code profile directory, read instead of the CLI's default location. ~ expands to the host home; relative paths resolve from the current directory. Only regular files up to 1 MiB are read.",
+    "Chemin hôte d’un fichier de session, ou d’un dossier de profil Kimi Code, lu à la place de l’emplacement par défaut de la CLI. ~ désigne le home de l’hôte ; les chemins relatifs partent du dossier courant. Seuls des fichiers ordinaires d’au plus 1 Mio sont lus."
+  ],
+  "AccountCredential.key": [
+    "Literal subscription token forwarded in the CLI's token variable (Claude CLAUDE_CODE_OAUTH_TOKEN, Copilot COPILOT_GITHUB_TOKEN). Prefer variable to keep secrets out of source files.",
+    "Jeton d’abonnement littéral transmis dans la variable de jeton de la CLI (Claude CLAUDE_CODE_OAUTH_TOKEN, Copilot COPILOT_GITHUB_TOKEN). Préférez variable pour garder les secrets hors du code."
+  ],
+  "AccountCredential.variable": [
+    "Name of a resolved workflow variable holding the subscription token; its value is forwarded in the CLI's token variable.",
+    "Nom d’une variable résolue du workflow contenant le jeton d’abonnement ; sa valeur est transmise dans la variable de jeton de la CLI."
+  ],
+  "UsageCredential.key": [
+    "Literal API key forwarded in the CLI's standard API-key variable. Prefer variable to keep secrets out of source files.",
+    "Clé API littérale transmise dans la variable de clé API standard de la CLI. Préférez variable pour garder les secrets hors du code."
+  ],
+  "UsageCredential.variable": [
+    "Name of a resolved workflow variable holding the API key; its value is forwarded in the CLI's standard API-key variable.",
+    "Nom d’une variable résolue du workflow contenant la clé API ; sa valeur est transmise dans la variable de clé API standard de la CLI."
+  ],
+  "AntigravitySettings.authentication": [
+    "Explicit authentication for this CLI harness: \"account\", \"usage\", { account: { file | key | variable } } or { usage: { key | variable } }. Unsupported forms fail when the agent is composed. Omission prepares nothing and keeps the access already configured in the execution environment.",
+    "Authentification explicite de ce harness CLI : \"account\", \"usage\", { account: { file | key | variable } } ou { usage: { key | variable } }. Les formes non prises en charge échouent à la composition de l’agent. Son absence ne prépare rien et conserve l’accès déjà configuré dans l’environnement d’exécution."
+  ],
+  "AntigravitySettings.variables": [
+    "Explicit environment declarations; values are strings.",
+    "Déclarations d’environnement explicites ; les valeurs sont des chaînes."
+  ],
+  "AntigravitySettings.mode": [
+    "Antigravity execution mode passed with --mode. Without it, headless runs pass --dangerously-skip-permissions; interactive sessions keep the CLI's approval prompts.",
+    "Mode d’exécution Antigravity transmis avec --mode. Sans lui, les exécutions non interactives passent --dangerously-skip-permissions ; les sessions interactives conservent les demandes d’approbation de la CLI."
+  ],
+  "CopilotSettings.authentication": [
+    "Explicit authentication for this CLI harness: \"account\", \"usage\", { account: { file | key | variable } } or { usage: { key | variable } }. Unsupported forms fail when the agent is composed. Omission prepares nothing and keeps the access already configured in the execution environment.",
+    "Authentification explicite de ce harness CLI : \"account\", \"usage\", { account: { file | key | variable } } ou { usage: { key | variable } }. Les formes non prises en charge échouent à la composition de l’agent. Son absence ne prépare rien et conserve l’accès déjà configuré dans l’environnement d’exécution."
+  ],
+  "CopilotSettings.variables": [
+    "Explicit environment declarations; values are strings.",
+    "Déclarations d’environnement explicites ; les valeurs sont des chaînes."
+  ],
+  "KimiSettings.authentication": [
+    "Explicit authentication for this CLI harness: \"account\", \"usage\", { account: { file | key | variable } } or { usage: { key | variable } }. Unsupported forms fail when the agent is composed. Omission prepares nothing and keeps the access already configured in the execution environment.",
+    "Authentification explicite de ce harness CLI : \"account\", \"usage\", { account: { file | key | variable } } ou { usage: { key | variable } }. Les formes non prises en charge échouent à la composition de l’agent. Son absence ne prépare rien et conserve l’accès déjà configuré dans l’environnement d’exécution."
+  ],
+  "KimiSettings.variables": [
+    "Explicit environment declarations; values are strings.",
+    "Déclarations d’environnement explicites ; les valeurs sont des chaînes."
+  ],
+  "antigravityHarness.settings": [
+    "Configuration for the Antigravity CLI harness; pass the selected model to agent() instead.",
+    "Configuration du harness Antigravity CLI ; transmettez le modèle choisi à agent()."
+  ],
+  "copilotHarness.settings": [
+    "Configuration for the GitHub Copilot CLI harness; pass the selected model to agent() instead.",
+    "Configuration du harness GitHub Copilot CLI ; transmettez le modèle choisi à agent()."
+  ],
+  "kimiHarness.settings": [
+    "Configuration for the Kimi Code harness; pass the selected model to agent() instead.",
+    "Configuration du harness Kimi Code ; transmettez le modèle choisi à agent()."
+  ],
+  "agentVersions.copilot": [
+    "GitHub Copilot CLI version installed by generated images and remote bootstrap.",
+    "Version de GitHub Copilot CLI installée par les images générées et le bootstrap distant."
+  ],
+  "agentVersions.kimi": [
+    "Kimi Code CLI version installed by generated images and remote bootstrap.",
+    "Version de la CLI Kimi Code installée par les images générées et le bootstrap distant."
+  ],
+  "CredentialPlan.variables": [
+    "Environment variables forwarded to every command of the agent, including on the local provider.",
+    "Variables d’environnement transmises à chaque commande de l’agent, y compris avec le provider local."
+  ],
+  "CredentialPlan.host": [
+    "Host credential files to read and install in the private sandbox home or expose as variables; skipped on the local provider.",
+    "Fichiers de credentials de l’hôte à lire puis installer dans le home privé de la sandbox ou exposer en variables ; ignorés avec le provider local."
+  ],
+  "CredentialPlan.files": [
+    "Fixed files generated by Outpost in the private sandbox home, such as the Antigravity settings selecting the Gemini API.",
+    "Fichiers fixes générés par Outpost dans le home privé de la sandbox, comme les réglages Antigravity qui sélectionnent l’API Gemini."
+  ],
+  "CredentialPlan.commands": [
+    "Login commands run in the sandbox after file installation, with secrets passed on stdin; skipped on the local provider.",
+    "Commandes de connexion lancées dans la sandbox après l’installation des fichiers, avec les secrets sur stdin ; ignorées avec le provider local."
+  ],
+  "HostCredential.source": [
+    "Host location of the credential file and the optional environment variable that relocates the CLI's home.",
+    "Emplacement hôte du fichier de credentials et variable d’environnement optionnelle qui déplace le home de la CLI."
+  ],
+  "HostCredential.destination": [
+    "Where the selected content goes: a file path relative to the sandbox home, or an environment variable.",
+    "Destination du contenu retenu : chemin de fichier relatif au home de la sandbox, ou variable d’environnement."
+  ],
+  "HostCredential.login": [
+    "Host command that creates the file, shown when it is missing.",
+    "Commande hôte qui crée le fichier, indiquée lorsqu’il manque."
+  ],
+  "HostCredential.alternative": [
+    "Alternative authentication form suggested when the file is missing.",
+    "Autre forme d’authentification proposée lorsque le fichier manque."
+  ],
+  "HostCredential.select": [
+    "Validate the file and return only the content to install or forward, without echoing secrets in errors.",
+    "Valide le fichier et ne renvoie que le contenu à installer ou transmettre, sans reproduire de secret dans les erreurs."
+  ],
+  "HostCredentialPath.path": [
+    "Default host path; ~ expands to the host home directory.",
+    "Chemin hôte par défaut ; ~ désigne le home de l’hôte."
+  ],
+  "HostCredentialPath.home": [
+    "Environment variable that relocates the CLI's home on the host (for example CODEX_HOME) and the file path inside it.",
+    "Variable d’environnement qui déplace le home de la CLI sur l’hôte (par exemple CODEX_HOME) et chemin du fichier à l’intérieur."
+  ],
+  "GeneratedCredential.path": [
+    "File path relative to the private sandbox home.",
+    "Chemin de fichier relatif au home privé de la sandbox."
+  ],
+  "GeneratedCredential.content": [
+    "Fixed file content written with mode 0600.",
+    "Contenu fixe du fichier, écrit avec le mode 0600."
   ]
 }

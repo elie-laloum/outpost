@@ -5,7 +5,7 @@ sidebar:
   order: 9
 ---
 
-La capture native des conversations est active par défaut pour Claude Code et Codex. [Gemini](../../../agents/gemini/) ne prend en charge ni capture native, ni reprise, ni fork dans Outpost. Le transcript est copié dans le stockage de l’agent sur l’hôte ; ses chemins de travail sont réécrits pour permettre une reprise native dans le bon dépôt.
+La capture native des conversations est active par défaut pour Claude Code et Codex. Le transcript est copié dans le stockage de l’agent sur l’hôte ; ses chemins de travail sont réécrits pour permettre une reprise native dans le bon dépôt. Antigravity, Copilot et Kimi n’exécutent que de nouvelles sessions : Outpost ne prend en charge pour eux ni capture native, ni reprise, ni fork, et `resume()`, `fork()` ou une continuation explicite échoue.
 
 ```ts
 import {

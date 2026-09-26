@@ -15,25 +15,26 @@ import type { AgentAuthentication } from "@elie-laloum/outpost";
 
 The fields below cover all variants; the signature specifies their allowed combinations.
 
-| Name          | Type                                    | Presence          | Meaning                                                                                                                                                                  |
-| ------------- | --------------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `mode`        | `"api-key" \| "oauth-token" \| "login"` | Required          | Explicit credential mode: API key, Claude subscription token, or existing Codex login. Unsupported agent/mode combinations fail locally.                                 |
-| `environment` | `string \| undefined`                   | Variant-dependent | Environment variable holding the API key. Codex can read a custom variable; Claude and Gemini require their standard ANTHROPIC_API_KEY and GEMINI_API_KEY names.         |
-| `credentials` | `string \| undefined`                   | Variant-dependent | Explicit Codex auth.json contents to seed in the sandbox home. Omit only when a usable session already exists in that execution environment. No host file is discovered. |
+| Name      | Type                | Presence          | Meaning                                                                                                                                             |
+| --------- | ------------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `account` | `AccountCredential` | Variant-dependent | Subscription or plan credentials: a file or profile directory on the host (file), a literal token (key) or a variable holding the token (variable). |
+| `usage`   | `UsageCredential`   | Variant-dependent | API-billed credentials: a literal key (key) or the variable holding it (variable), mapped to the CLI's standard API-key variable.                   |
 
 ## Signature
 
 ```ts
 export type AgentAuthentication =
+  | "account"
+  | "usage"
   | {
-      readonly mode: "api-key";
-      readonly environment?: string;
+      readonly account: AccountCredential;
     }
   | {
-      readonly mode: "oauth-token";
-    }
-  | {
-      readonly mode: "login";
-      readonly credentials?: string;
+      readonly usage: UsageCredential;
     };
 ```
+
+## Related contracts
+
+- [AccountCredential](../accountcredential/)
+- [UsageCredential](../usagecredential/)

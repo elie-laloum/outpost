@@ -3,11 +3,14 @@ title: "Choose compatible capabilities"
 description: "Agent and provider capabilities are independent."
 ---
 
-| Agent       | Fresh run | Native capture, resume and fork | Response repair |
-| ----------- | --------- | ------------------------------- | --------------- |
-| Claude Code | Yes       | Yes                             | Yes             |
-| Codex       | Yes       | Yes                             | Yes             |
-| Gemini CLI  | Yes       | No                              | No              |
+| Agent                             | Fresh run | Native capture, resume and fork | Response repair | Authentication forms             | In generated image |
+| --------------------------------- | --------- | ------------------------------- | --------------- | -------------------------------- | ------------------ |
+| Claude Code                       | Yes       | Yes                             | Yes             | `account` (file, token), `usage` | Yes                |
+| Codex                             | Yes       | Yes                             | Yes             | `account` (file), `usage`        | Yes                |
+| Antigravity CLI (`agy`)           | Yes       | No                              | No              | `account` (file), `usage`        | No                 |
+| GitHub Copilot CLI                | Yes       | No                              | No              | `account` (file, token)          | Yes                |
+| Kimi Code                         | Yes       | No                              | No              | `account` (profile), `usage`     | Yes                |
+| Custom `harness()` (experimental) | Yes       | Yes, Outpost transcript         | Yes             | Model provider API key           | Not applicable     |
 
 | Provider        | Environment                | Interactive terminal | Git mode                  |
 | --------------- | -------------------------- | -------------------- | ------------------------- |
@@ -17,4 +20,4 @@ description: "Agent and provider capabilities are independent."
 | Daytona         | Remote sandbox             | Yes, native PTY      | Named, integrate          |
 | Firecracker     | Research microVM           | See prototype limits | See prototype limits      |
 
-[Choose a provider](../../environment/providers/overview/) or consult [exact provider limits](../../behavior/providers/overview/). Custom Codex endpoints require Responses API compatibility. Gemini does not inherit Claude/Codex conversation support. Opt-in isolation, egress and speculative execution have explicitly documented research limits.
+[Choose a provider](../../environment/providers/overview/) or consult [exact provider limits](../../behavior/providers/overview/). Custom Codex endpoints require Responses API compatibility. Antigravity, Copilot and Kimi run fresh sessions only; they do not inherit Claude/Codex conversation support. See [authentication](../authentication/) for each form and [CLI agent harnesses](../../behavior/agents/adapters/) for per-CLI settings. Opt-in isolation, egress and speculative execution have explicitly documented research limits.

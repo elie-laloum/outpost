@@ -28,7 +28,9 @@ export const chapters = [
       "guide/agents/environment",
       "guide/agents/connect-codex",
       "guide/agents/connect-claude",
-      "guide/agents/gemini",
+      "guide/agents/connect-antigravity",
+      "guide/agents/connect-copilot",
+      "guide/agents/connect-kimi",
     ],
   ],
   [

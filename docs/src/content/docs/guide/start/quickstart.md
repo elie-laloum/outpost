@@ -72,45 +72,55 @@ node prepare.mjs
 
 ## 1. Choose your agent and access
 
-Choose **one** command below. Each creates `workflow/` separately from `repository/`, installs Outpost and builds `outpost:docs-demo`. Initial installation and image construction can take several minutes. API usage is billed separately from account subscriptions.
+Choose **one** command below. Each creates `workflow/` separately from `repository/`, installs Outpost and builds `outpost:docs-demo`. Initial installation and image construction can take several minutes. `account` uses your subscription; `usage` bills an API key separately from any subscription.
+
+**Codex with your ChatGPT account**
+
+First install the Codex CLI on the host and run `codex -c cli_auth_credentials_store='"file"' login`. Before the first run, Outpost copies that login file into the sandbox's private home.
+
+```sh
+npx @elie-laloum/outpost init --yes --agent codex --authentication account --sandbox-provider docker --directory workflow --repository ../repository --image outpost:docs-demo --install
+```
 
 **Codex with an API key**
 
 ```sh
-npx @elie-laloum/outpost init --yes --agent codex --authentication api-key --sandbox-provider docker --directory workflow --repository ../repository --image outpost:docs-demo --install
+npx @elie-laloum/outpost init --yes --agent codex --authentication usage --sandbox-provider docker --directory workflow --repository ../repository --image outpost:docs-demo --install
 ```
 
-**Codex with your account**
+**Claude with your subscription login**
 
-First install the Codex CLI on the host and run `codex -c cli_auth_credentials_store='"file"' login`. The generated script copies that explicit file credential seed into the sandbox’s private home.
+First run `claude`, then `/login`, on the host. Outpost copies only the subscription entry of `~/.claude/.credentials.json`. On macOS the login stays in the Keychain, which Outpost never reads: use the token below instead.
 
 ```sh
-npx @elie-laloum/outpost init --yes --agent codex --authentication login --sandbox-provider docker --directory workflow --repository ../repository --image outpost:docs-demo --install
+npx @elie-laloum/outpost init --yes --agent claude --authentication account --sandbox-provider docker --directory workflow --repository ../repository --image outpost:docs-demo --install
+```
+
+**Claude with a subscription token**
+
+Obtain a subscription token on the host with `claude setup-token`.
+
+```sh
+npx @elie-laloum/outpost init --yes --agent claude --authentication account-token --sandbox-provider docker --directory workflow --repository ../repository --image outpost:docs-demo --install
 ```
 
 **Claude with an API key**
 
 ```sh
-npx @elie-laloum/outpost init --yes --agent claude --authentication api-key --sandbox-provider docker --directory workflow --repository ../repository --image outpost:docs-demo --install
+npx @elie-laloum/outpost init --yes --agent claude --authentication usage --sandbox-provider docker --directory workflow --repository ../repository --image outpost:docs-demo --install
 ```
 
-**Claude with your subscription**
-
-Obtain a subscription token on the host with `claude setup-token`.
-
-```sh
-npx @elie-laloum/outpost init --yes --agent claude --authentication oauth-token --sandbox-provider docker --directory workflow --repository ../repository --image outpost:docs-demo --install
-```
+GitHub Copilot and Kimi Code use the same command with `--agent copilot` or `--agent kimi`; see [Copilot](../../agents/connect-copilot/) and [Kimi Code](../../agents/connect-kimi/). Antigravity is not installed in generated images; see [Antigravity](../../agents/connect-antigravity/).
 
 ## 2. Declare the selected credential
 
-For API keys or a Claude subscription, copy `workflow/.env.example` to `workflow/.env` and fill in the variable it names. An empty declaration inherits the same host environment variable. Codex account login instead reads the credential file prepared above; it needs no API key. Keep `.env` untracked.
+For an API key or a Claude subscription token, copy `workflow/.env.example` to `workflow/.env` and fill in the variable it names. An empty declaration inherits the same host environment variable. Account logins read the host file prepared above and need no variable. Keep `.env` untracked.
 
 ```sh
 cd workflow
 ```
 
-The generated `run.ts` already initializes Codex API-key authentication inside the sandbox. No additional login hook is needed. See official [Codex authentication](https://developers.openai.com/codex/auth/) and [Claude authentication](https://code.claude.com/docs/en/authentication) for account prerequisites.
+The generated `run.ts` only selects the form, for example `authentication: "account"`; Outpost prepares it inside the sandbox before the agent starts. No login hook is needed. The [authentication manual](../../manual/authentication/) explains every form. See official [Codex authentication](https://developers.openai.com/codex/auth/) and [Claude authentication](https://code.claude.com/docs/en/authentication) for account prerequisites.
 
 ## 3. Run the task
 

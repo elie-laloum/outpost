@@ -7,14 +7,14 @@ sidebar:
 
 Outpost uses ports and adapters. Domain contracts describe capabilities; application services coordinate their use. Concrete agents and sandbox providers implement independent ports. A new agent does not require changes to sandbox allocation, and a new provider does not require changes to agent protocols.
 
-| Layer             | Owns                                                                                | Dependencies                                   |
-| ----------------- | ----------------------------------------------------------------------------------- | ---------------------------------------------- |
-| `domain`          | Contracts, validation, prompts, responses, task graphs and workflow execution rules | Domain and Node primitives                     |
-| `adapters/agents` | Claude/Codex/Gemini command construction and event translation                      | Domain and infrastructure                      |
-| `providers`       | Sandbox allocation, commands, transfers and disposal                                | Domain, infrastructure and provider services   |
-| `infrastructure`  | Git, processes, files, native transcript storage and logging                        | Domain and infrastructure                      |
-| `application`     | Resource ownership, use cases and remote synchronization                            | Domain, adapters, providers and infrastructure |
-| `cli`             | Argument handling, onboarding and image commands                                    | Application and adapters                       |
+| Layer             | Owns                                                                                                           | Dependencies                                   |
+| ----------------- | -------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| `domain`          | Contracts, validation, prompts, responses, task graphs and workflow execution rules                            | Domain and Node primitives                     |
+| `adapters/agents` | Claude Code, Codex, Antigravity, Copilot and Kimi command construction, credential plans and event translation | Domain and infrastructure                      |
+| `providers`       | Sandbox allocation, commands, transfers and disposal                                                           | Domain, infrastructure and provider services   |
+| `infrastructure`  | Git, processes, files, host credential files, native transcript storage and logging                            | Domain and infrastructure                      |
+| `application`     | Resource ownership, use cases and remote synchronization                                                       | Domain, adapters, providers and infrastructure |
+| `cli`             | Argument handling, onboarding and image commands                                                               | Application and adapters                       |
 
 ## Contracts and configuration
 
@@ -24,9 +24,15 @@ The public facade remains `src/index.ts`, with the `providers/*` package subpath
 
 ## Agents and conversations
 
-Each agent has its own factory, request builder and event decoder in `adapters/agents`. The factory composes these capabilities into `AgentAdapter`. Protocol decoding uses event-handler registries; unknown events remain raw observations.
+Each agent has its own factory, request builder, authentication strategy and event decoder in `adapters/agents`. The factory composes these capabilities into `AgentAdapter`. Protocol decoding uses event-handler registries keyed by a protocol discriminant: `decodeLine` reads `type` by default, `event` for Antigravity and `role` for Kimi. Unknown events remain raw observations.
 
-`ConversationStore` is a separate port. Native stores delegate filesystem conventions to Claude and Codex layout strategies. Capture, restore, discovery and structural transcript rewriting have separate services. A custom store can be supplied without changing the execution pipeline.
+`ConversationStore` is a separate port. Native stores delegate filesystem conventions to Claude and Codex layout strategies; Antigravity, Copilot and Kimi adapters are not resumable and have no native store. Capture, restore, discovery and structural transcript rewriting have separate services. A custom store can be supplied without changing the execution pipeline.
+
+## Authentication
+
+`AgentAuthentication` selects `account` or `usage`, optionally with a `file`, `key` or `variable`; the domain validates its shape. An adapter that supports authentication implements `AgentAdapter.credentials(variables)`, which returns a `CredentialPlan`: credential variables, host credential files to read, generated files and login commands. Per-agent strategies live in `adapters/agents/<agent>-authentication.ts`; the composed harness rejects an unsupported form when the agent is composed.
+
+`infrastructure/host-credentials.ts` reads host credential files: regular files only, bounded in size, and never a system keychain. `application/agent-authentication.ts` installs a plan once per adapter and sandbox, called from `sandbox-agents.ts`. For an isolated placement, it writes files into the private sandbox home through one installer that receives JSON on standard input, then runs the plan's login commands. For the host placement it forwards only the credential variables. Those variables are merged into every command of that agent.
 
 ## Resource lifecycle
 
@@ -34,7 +40,7 @@ Each agent has its own factory, request builder and event decoder in `adapters/a
 
 `sandbox-dispatch.ts` owns the dispatch transaction: execution, transcript capture, synchronization, journal closure and recovery metadata. `agent-turn.ts` supervises one process; `agent-output.ts` accumulates protocol output; `activity-watchdog.ts` owns timers. Usage aggregation is a domain operation shared by warm and cold execution.
 
-Owned-sandbox diagnostics use the same exclusive operation gate as commands and dispatch. Their temporary transfer probes clean up independently; diagnosis never takes ownership of lease disposal.
+Owned-sandbox diagnostics use the same exclusive operation gate as commands and dispatch. Their temporary transfer probes clean up independently; diagnosis never takes ownership of lease disposal. The `doctorAgents` registry maps each doctor agent to its executable (`agy` for Antigravity), optional pinned version, help diagnostics and harness.
 
 Workspaces and sandboxes retain separate lifetimes. Cold passes allocate separate environments; warm operations reuse a lease. Cancellation, continuation, hook ordering and recovery remain part of the contract.
 
@@ -54,7 +60,7 @@ Workflow graph validation, execution state, task retries and dependency scheduli
 
 ## Extending and validating
 
-To add an agent, implement `AgentAdapter` in its own module, with request and event contracts tested independently. Add a conversation layout or custom store when native continuation is supported. To add a sandbox backend, implement `SandboxProvider` and `SandboxLease`, including cancellation, transfer deadlines and idempotent disposal.
+To add an agent, implement `AgentAdapter` in its own module, with request, credential-plan and event contracts tested independently. Add a conversation layout or custom store when native continuation is supported; otherwise declare the adapter non-resumable. Register its executable, diagnostics and harness in the `doctorAgents` registry so `outpost doctor --agent` can check it. To add a sandbox backend, implement `SandboxProvider` and `SandboxLease`, including cancellation, transfer deadlines and idempotent disposal.
 
 Run `npm run check` for architecture checks, type checking, unit/functional tests and the build. `npm run coverage` enforces 80% lines, branches and functions. Type-only modules are excluded from runtime coverage because TypeScript erases them; type checking and the packed consumer test validate their contracts. CLI command handlers are covered; only the process entry wrapper is excluded.
 
@@ -64,7 +70,7 @@ CI rejects reversed layer dependencies, inline contract declarations, runtime in
 
 Checkpoint and gate contracts belong to the domain; the transport checkpoint store owns conditional persistence and explicit ownership. Artifact contracts validate values and lineage, while the artifact store owns immutable publication through Transport. The SQLite queue and HTTP transport provide durable claims; application workers execute registered handlers under fenced leases. Replay remains explicit and side effects are at least once. Gate actor names and artifact lineage are trusted metadata, not authentication.
 
-The opt-in isolated container checkout, Firecracker provider, egress policies and speculative execution helper have separate [research limits](../../../project/roadmap/). Gemini has no native conversation store. Daytona terminal execution uses its native PTY API; Vercel rejects interactive attachment.
+The opt-in isolated container checkout, Firecracker provider, egress policies and speculative execution helper have separate [research limits](../../../project/roadmap/). Daytona terminal execution uses its native PTY API; Vercel rejects interactive attachment.
 
 ## Storage transports
 

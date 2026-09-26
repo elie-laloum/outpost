@@ -2,13 +2,13 @@
 
 [Documentation](https://elie-laloum.github.io/outpost/) · [Français](https://elie-laloum.github.io/outpost/fr/) · [API](https://elie-laloum.github.io/outpost/reference/) · [Changelog](CHANGELOG.md)
 
-Outpost is a TypeScript library for running coding agents in reusable sandboxes, managing their Git workspaces and composing typed workflows. Claude Code, Codex and Gemini CLI adapters work with Docker, Podman, Vercel, Daytona or explicit host execution. Gemini supports fresh sessions only; native conversation capture, resume and fork are available for Claude Code and Codex.
+Outpost is a TypeScript library for running coding agents in reusable sandboxes, managing their Git workspaces and composing typed workflows. Claude Code, Codex, Antigravity, GitHub Copilot CLI and Kimi Code adapters work with Docker, Podman, Vercel, Daytona or explicit host execution. Each harness authenticates explicitly with your account login or an API key. Antigravity, Copilot and Kimi run fresh sessions only; native conversation capture, resume and fork are available for Claude Code and Codex.
 
 Version 5.0.0 composes every agent with `agent({ harness, model })`, moves reasoning and output limits onto the agent model, and adds an experimental built-in harness engine: Outpost drives a model provider with tools, hooks, permissions, persisted conversations, context strategies, skills and streaming. It contains breaking API changes. See the [changelog](CHANGELOG.md#500) for details and migration notes, and the [roadmap](https://elie-laloum.github.io/outpost/project/roadmap/) for remaining validation and upcoming priorities.
 
 ## Get started
 
-New to Outpost? Follow the [complete first-run workshop](https://elie-laloum.github.io/outpost/guide/start/quickstart/): choose Codex or Claude and account or API-key access, create a disposable TypeScript repository, then fix and verify a real test. The [Guide](https://elie-laloum.github.io/outpost/guide/) teaches the concepts; the [Reference](https://elie-laloum.github.io/outpost/reference/) explains exact contracts. Every [cookbook recipe](https://elie-laloum.github.io/outpost/guide/cookbook/) includes its own preparation and runnable code.
+New to Outpost? Follow the [complete first-run workshop](https://elie-laloum.github.io/outpost/guide/start/quickstart/): choose an agent and account or API-key access, create a disposable TypeScript repository, then fix and verify a real test. The [Guide](https://elie-laloum.github.io/outpost/guide/) teaches the concepts; the [Reference](https://elie-laloum.github.io/outpost/reference/) explains exact contracts. Every [cookbook recipe](https://elie-laloum.github.io/outpost/guide/cookbook/) includes its own preparation and runnable code.
 
 Requires Node.js **24+**, Git, a target repository with a commit, and the credentials of your chosen agent. The workflow can live in its own directory. This example uses Docker.
 
@@ -18,7 +18,7 @@ cd workflow1
 npx @elie-laloum/outpost init --yes --repository /path1/repository --install
 ```
 
-Copy `.env.example` to `.env` and declare `OPENAI_API_KEY`. An empty declaration inherits the matching process variable. Then run the generated script:
+The generated script uses `authentication: "account"`: log in to Codex on the host with file credential storage (`codex -c cli_auth_credentials_store='"file"' login`), and Outpost copies that login into the private sandbox home. For API billing instead, add `--authentication usage`, copy `.env.example` to `.env` and declare `OPENAI_API_KEY`; an empty declaration inherits the matching process variable. Then run the generated script:
 
 ```sh
 node run.ts "Add validation, run tests and commit the change"
@@ -26,7 +26,7 @@ node run.ts "Add validation, run tests and commit the change"
 
 `init` creates `package.json`, `run.ts`, `brief.md`, `.env.example`, `.gitignore` and a container recipe directly in the workflow directory. Existing package manifests are preserved; explicit CommonJS projects get `run.mts` for compatibility. The script resolves its brief, environment and relative repository paths from its own directory. See [multi-repository workflows](https://elie-laloum.github.io/outpost/guide/workflows/sandbox-tasks/) to orchestrate several repositories.
 
-Generated Codex API-key workflows prepare login inside the sandbox. For account login and credential storage, see [Connect Codex](https://elie-laloum.github.io/outpost/guide/agents/connect-codex/) before dispatching.
+Outpost never reads a system keychain. See [authentication](https://elie-laloum.github.io/outpost/guide/manual/authentication/) for every agent's account and API-key forms before dispatching.
 
 ## Use the library
 
@@ -37,7 +37,7 @@ import { agent, dispatch, codexHarness } from "@elie-laloum/outpost";
 
 const result = await dispatch({
   repository: "/path1/repository",
-  agent: agent({ harness: codexHarness({}) }),
+  agent: agent({ harness: codexHarness({ authentication: "account" }) }),
   branch: { mode: "integrate" },
   brief: { text: "Fix the failing tests, verify and commit." },
 });

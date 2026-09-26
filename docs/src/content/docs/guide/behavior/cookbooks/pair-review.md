@@ -5,7 +5,7 @@ sidebar:
   order: 3
 ---
 
-Reuse one sandbox across implementation and review. Declare **OPENAI_API_KEY=** and one Claude credential in **.outpost/.env**, and supply both values through your environment. This uses API-key login for Codex; the [account-cache hook](../../../agents/connect-codex/) is an alternative.
+Reuse one sandbox across implementation and review. Declare **OPENAI_API_KEY=** and **ANTHROPIC_API_KEY=** in **.outpost/.env**, and supply both values through your environment. With `usage` authentication, Outpost runs `codex login --with-api-key` once in the sandbox, with the key on standard input, and gives Claude Code its API key; `"account"` copies host logins instead (see [Codex](../../../agents/connect-codex/) and [Claude Code](../../../agents/connect-claude/)).
 
 ```ts
 import {
@@ -16,18 +16,11 @@ import {
 } from "@elie-laloum/outpost";
 
 await using sandbox = await createSandbox({
-  agent: composeAgent({ harness: codexHarness({}) }),
+  agent: composeAgent({ harness: codexHarness({ authentication: "usage" }) }),
   branch: { mode: "named", name: "feature/parser-review" },
   hooks: {
     sandboxReady: [
-      {
-        executable: "sh",
-        arguments: [
-          "-c",
-          'test -n "$OPENAI_API_KEY" && printenv OPENAI_API_KEY | codex login --with-api-key && npm ci',
-        ],
-        deadlineMs: 180_000,
-      },
+      { executable: "npm", arguments: ["ci"], deadlineMs: 180_000 },
     ],
   },
 });
@@ -36,7 +29,7 @@ const implementation = await sandbox.dispatch({
   deadlineMs: 600_000,
 });
 const review = await sandbox.dispatch({
-  agent: composeAgent({ harness: claudeHarness({}) }),
+  agent: composeAgent({ harness: claudeHarness({ authentication: "usage" }) }),
   brief: {
     text:
       "Review the diff against " +

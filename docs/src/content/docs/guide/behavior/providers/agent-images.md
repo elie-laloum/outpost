@@ -5,7 +5,7 @@ sidebar:
   order: 4
 ---
 
-Outpost includes a build workflow for a combined Claude Code/Codex/Gemini container image. Its agent versions come from the same pins as generated workflow projects. The workflow and verification procedure are available; this page does not assert that a public image or signed attestation has been published. Use only a digest from a successful, verified publication run.
+Outpost includes a build workflow for a combined Claude Code/Codex/Copilot/Kimi container image. The Antigravity CLI (`agy`) is not included; add it in your own derived image by following the [official installation guide](https://antigravity.google/docs/cli/install/). Its agent versions come from the same pins as generated workflow projects. The workflow and verification procedure are available; this page does not assert that a public image or signed attestation has been published. Use only a digest from a successful, verified publication run.
 
 ## Build locally
 
@@ -22,7 +22,7 @@ docker build --build-arg AGENT_UID="$(id -u)" \
 
 Replace `REVIEWED_BASE_DIGEST` with 64 hexadecimal characters. Podman accepts the same generated Dockerfile and build arguments. The context contains only the recipe and package manifests; repository files, credentials and transcripts are excluded.
 
-The context reuses the existing packages, non-root user and private home recipe, adding a digest-pinned base, dated Debian package repositories and `npm ci` against `images/agents/package-lock.json`. Agent dependencies are installed under `/opt/outpost/agents`, outside the ephemeral home. All three CLI binaries are on `PATH`. The generator fails when the image manifest no longer matches the supported-agent versions. Update both the manifest and its lockfile when updating those pins:
+The context reuses the existing packages, non-root user and private home recipe, adding a digest-pinned base, dated Debian package repositories and `npm ci` against `images/agents/package-lock.json`. Agent dependencies are installed under `/opt/outpost/agents`, outside the ephemeral home. All four CLI binaries (`claude`, `codex`, `copilot`, `kimi`) are on `PATH`. The generator fails when the image manifest no longer matches the supported-agent versions. Update both the manifest and its lockfile when updating those pins:
 
 ```sh
 npm install --package-lock-only --ignore-scripts --prefix images/agents

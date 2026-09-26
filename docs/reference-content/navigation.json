@@ -350,6 +350,10 @@
         }
       },
       {
+        "slug": "reference/antigravityharness",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
         "slug": "reference/claudeharness",
         "attrs": { "data-api-kind": "function" }
       },
@@ -358,7 +362,11 @@
         "attrs": { "data-api-kind": "function" }
       },
       {
-        "slug": "reference/geminiharness",
+        "slug": "reference/copilotharness",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/kimiharness",
         "attrs": { "data-api-kind": "function" }
       },
       {
@@ -548,6 +556,14 @@
       },
       {
         "slug": "reference/agentauthentication",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/accountcredential",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/usagecredential",
         "attrs": { "data-api-kind": "type" }
       },
       {
@@ -799,6 +815,10 @@
         }
       },
       {
+        "slug": "reference/antigravitysettings",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
         "slug": "reference/claudesettings",
         "attrs": { "data-api-kind": "interface" }
       },
@@ -811,7 +831,11 @@
         "attrs": { "data-api-kind": "interface" }
       },
       {
-        "slug": "reference/geminisettings",
+        "slug": "reference/copilotsettings",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/kimisettings",
         "attrs": { "data-api-kind": "interface" }
       },
       {

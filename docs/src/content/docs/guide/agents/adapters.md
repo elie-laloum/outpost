@@ -38,20 +38,24 @@ Save **example.mts** in `outpost-example/`.
 import assert from "node:assert/strict";
 import {
   agent as composeAgent,
+  antigravityHarness,
   claudeHarness,
   codexHarness,
-  geminiHarness,
+  copilotHarness,
+  kimiHarness,
   agentVersions,
 } from "@elie-laloum/outpost";
 
 const agents = [
   composeAgent({ harness: codexHarness({}) }),
   composeAgent({ harness: claudeHarness({}) }),
-  composeAgent({ harness: geminiHarness({}) }),
+  composeAgent({ harness: antigravityHarness({}) }),
+  composeAgent({ harness: copilotHarness({}) }),
+  composeAgent({ harness: kimiHarness({}) }),
 ];
 assert.deepEqual(
   agents.map((agent) => agent.name),
-  ["codex", "claude", "gemini"],
+  ["codex", "claude", "antigravity", "copilot", "kimi"],
 );
 console.log(agents.map((agent) => agent.name));
 console.log(agentVersions);
@@ -63,7 +67,7 @@ node example.mts
 
 ## Understand the result
 
-Harness presets choose native CLI behavior. Compose an agent with its model and pass that agent to dispatch; select the environment independently with sandboxProvider. Construction performs no authentication or model request. Omitted model settings use the CLI default. Gemini supports fresh sessions only, while Claude and Codex can capture and resume native conversations.
+Harness presets choose native CLI behavior. Compose an agent with its model and pass that agent to dispatch; select the environment independently with sandboxProvider. Construction performs no authentication or model request. Omitted model settings use the CLI default. Claude and Codex can capture, resume and fork native conversations; Antigravity, Copilot and Kimi run fresh sessions only. `agentVersions` lists the CLI versions pinned for generated images and remote bootstrap; Antigravity has no pinned version.
 
 [Contracts, options and edge cases](../../behavior/agents/adapters/).
 

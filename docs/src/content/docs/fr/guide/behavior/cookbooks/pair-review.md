@@ -5,7 +5,7 @@ sidebar:
   order: 3
 ---
 
-Réutilisez une sandbox entre implémentation et revue. Déclarez **OPENAI_API_KEY=** et un identifiant Claude dans **.outpost/.env**, puis fournissez les valeurs par l’environnement. Codex utilise ici une clé API ; le [hook de copie du compte](../../../agents/connect-codex/) est une alternative.
+Réutilisez une sandbox entre implémentation et revue. Déclarez **OPENAI_API_KEY=** et **ANTHROPIC_API_KEY=** dans **.outpost/.env**, puis fournissez les valeurs par l’environnement. Avec l’authentification `usage`, Outpost exécute une fois `codex login --with-api-key` dans la sandbox, avec la clé sur l’entrée standard, et fournit sa clé API à Claude Code ; `"account"` copie plutôt les connexions de l’hôte (voir [Codex](../../../agents/connect-codex/) et [Claude Code](../../../agents/connect-claude/)).
 
 ```ts
 import {
@@ -16,18 +16,11 @@ import {
 } from "@elie-laloum/outpost";
 
 await using sandbox = await createSandbox({
-  agent: composeAgent({ harness: codexHarness({}) }),
+  agent: composeAgent({ harness: codexHarness({ authentication: "usage" }) }),
   branch: { mode: "named", name: "feature/parser-review" },
   hooks: {
     sandboxReady: [
-      {
-        executable: "sh",
-        arguments: [
-          "-c",
-          'test -n "$OPENAI_API_KEY" && printenv OPENAI_API_KEY | codex login --with-api-key && npm ci',
-        ],
-        deadlineMs: 180_000,
-      },
+      { executable: "npm", arguments: ["ci"], deadlineMs: 180_000 },
     ],
   },
 });
@@ -36,7 +29,7 @@ const implementation = await sandbox.dispatch({
   deadlineMs: 600_000,
 });
 const review = await sandbox.dispatch({
-  agent: composeAgent({ harness: claudeHarness({}) }),
+  agent: composeAgent({ harness: claudeHarness({ authentication: "usage" }) }),
   brief: {
     text:
       "Review the diff against " +
