@@ -314,13 +314,18 @@ test("harness factory and contracts preserve distinct reference routes", async (
     const factory = await page(`${locale}reference/function-harness.md`);
     assert.match(factory, /export declare function harness/);
     assert.ok(factory.includes("../type-customharness/"));
+    assert.match(factory, /harness\(options: HarnessOptions\): Harness/);
+    assert.match(
+      await page(`${locale}reference/customharnessoptions.md`),
+      /export interface HarnessOptions/,
+    );
     assert.match(
       await page(`${locale}reference/harness.md`),
-      /export type Harness/,
+      /export type AgentHarness/,
     );
     assert.match(
       await page(`${locale}reference/type-customharness.md`),
-      /export interface CustomHarness/,
+      /export interface Harness/,
     );
   }
 });

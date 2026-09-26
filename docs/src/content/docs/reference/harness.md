@@ -1,6 +1,6 @@
 ---
-title: "Harness"
-description: "Harness — Outpost API"
+title: "AgentHarness"
+description: "AgentHarness — Outpost API"
 sidebar:
   order: 10
 ---
@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import type { Harness } from "@elie-laloum/outpost";
+import type { AgentHarness } from "@elie-laloum/outpost";
 ```
 
 ## Parameters and properties
@@ -34,10 +34,10 @@ The fields below cover all variants; the signature specifies their allowed combi
 ## Signature
 
 ```ts
-export type Harness = CliHarness | CustomHarness;
+export type AgentHarness = CliHarness | Harness;
 ```
 
 ## Related contracts
 
 - [CliHarness](../cliharness/)
-- [CustomHarness](../type-customharness/)
+- [Harness](../type-customharness/)

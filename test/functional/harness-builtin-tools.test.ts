@@ -12,7 +12,7 @@ import {
   harnessGitTools,
   harnessSearchTools,
   harnessShellTools,
-  type CustomHarnessOptions,
+  type HarnessOptions,
   type ModelProvider,
   type ModelRequest,
 } from "../../src/index.ts";
@@ -27,7 +27,7 @@ async function exercise(
   t: TestContext,
   steps: readonly Step[],
   prepare: (root: string) => Promise<void> = async () => undefined,
-  extra: Omit<CustomHarnessOptions, "modelProvider"> = {},
+  extra: Omit<HarnessOptions, "modelProvider"> = {},
 ): Promise<string[][]> {
   const root = await repository(t);
   await prepare(root);

@@ -41,7 +41,7 @@ export interface HarnessToolExecution {
   readonly onError?: "return-to-model" | "fail";
 }
 
-export interface CustomHarnessOptions {
+export interface HarnessOptions {
   readonly modelProvider: ModelProvider;
   readonly instructions?: HarnessInstructionsOption;
   readonly tools?: readonly (HarnessTool | HarnessToolset)[];
@@ -55,7 +55,7 @@ export interface CustomHarnessOptions {
   readonly cache?: boolean;
 }
 
-export interface CustomHarness {
+export interface Harness {
   readonly kind: "custom";
   readonly modelProvider: ModelProvider;
   readonly instructions: readonly HarnessInstructions[];

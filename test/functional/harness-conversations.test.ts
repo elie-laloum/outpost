@@ -13,7 +13,7 @@ import {
   transportConversations,
   truncateToolResults,
   type AgentObservation,
-  type CustomHarnessOptions,
+  type HarnessOptions,
   type ModelProvider,
   type ModelRequest,
   type ModelResult,
@@ -88,7 +88,7 @@ const touch = defineHarnessTool({
 function worker(
   replies: Reply[],
   requests: ModelRequest[],
-  extra: Omit<CustomHarnessOptions, "modelProvider"> = {},
+  extra: Omit<HarnessOptions, "modelProvider"> = {},
 ) {
   return agent({
     model: "m",

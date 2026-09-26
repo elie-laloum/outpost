@@ -13,7 +13,7 @@ import {
   attach,
   response,
   type AgentObservation,
-  type CustomHarnessOptions,
+  type HarnessOptions,
   type HarnessTool,
   type ModelProvider,
   type ModelRequest,
@@ -80,7 +80,7 @@ const echo = defineHarnessTool({
 const developer = (
   modelProvider: ModelProvider,
   tools: HarnessTool[] = [echo],
-  extra: Omit<CustomHarnessOptions, "modelProvider" | "tools"> = {},
+  extra: Omit<HarnessOptions, "modelProvider" | "tools"> = {},
 ) =>
   agent({
     model: "m",

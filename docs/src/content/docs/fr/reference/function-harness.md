@@ -25,7 +25,7 @@ Compose le moteur intégré d’Outpost à partir d’un fournisseur de modèles
 
 | Nom                     | Type                                                                              | Présence  | Rôle                                                                                                                                                                                                  |
 | ----------------------- | --------------------------------------------------------------------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `options`               | `CustomHarnessOptions`                                                            | Requis    | Fournisseur de modèles, instructions, outils, limites de boucle, exécution des outils et cache d’historique du moteur intégré d’Outpost.                                                              |
+| `options`               | `HarnessOptions`                                                                  | Requis    | Fournisseur de modèles, instructions, outils, limites de boucle, exécution des outils et cache d’historique du moteur intégré d’Outpost.                                                              |
 | `options.modelProvider` | `ModelProvider`                                                                   | Requis    | Transport de requêtes que le moteur appelle à chaque étape ; il valide le modèle de l’agent à la composition.                                                                                         |
 | `options.instructions`  | `HarnessInstructionsOption \| undefined`                                          | Optionnel | Instructions système en texte, résultat de defineHarnessInstructions() ou liste des deux. Résolues à chaque passe et jointes par des lignes vides ; les résultats vides sont ignorés.                 |
 | `options.tools`         | `readonly (HarnessTool<unknown> \| HarnessToolset)[] \| undefined`                | Optionnel | Outils et jeux d’outils que le modèle peut appeler. Les jeux imbriqués sont aplatis ; les noms doivent être uniques dans tout le harness.                                                             |
@@ -40,15 +40,15 @@ Compose le moteur intégré d’Outpost à partir d’un fournisseur de modèles
 
 ## Retour
 
-`CustomHarness`
+`Harness`
 
 ## Signature
 
 ```ts
-export declare function harness(options: CustomHarnessOptions): CustomHarness;
+export declare function harness(options: HarnessOptions): Harness;
 ```
 
 ## Contrats associés
 
-- [CustomHarness](../type-customharness/)
-- [CustomHarnessOptions](../customharnessoptions/)
+- [Harness](../type-customharness/)
+- [HarnessOptions](../customharnessoptions/)

@@ -51,14 +51,14 @@ export type {
   AgentAuthentication,
   Agent,
   AgentOptions,
-  Harness,
+  AgentHarness,
   CliHarness,
   CliAgent,
   CustomAgent,
 } from "./domain/agent.types.ts";
 export type {
-  CustomHarness,
-  CustomHarnessOptions,
+  Harness,
+  HarnessOptions,
   HarnessInstructionContext,
   HarnessInstructions,
   HarnessInstructionSource,

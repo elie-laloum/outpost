@@ -11,6 +11,8 @@ The release notes below are synchronized from the root `CHANGELOG.md`, the singl
 
 - Breaking: Unify artifact, checkpoint, journal, resource activity and reservation persistence through Transport, with localTransport for disk storage. Remove fileArtifactStore, fileWorkflowCheckpointStore, their option types, logging.file and DispatchResult.log; journals expose logReference. Default runtime objects live under .outpost/storage. Checkpoint and reservation crash recovery is explicit locally and remotely; old file layouts are not migrated. Git worktrees and execution staging remain filesystem operations.
 
+Breaking type renames, without compatibility aliases: `CustomHarness` becomes `Harness`, `CustomHarnessOptions` becomes `HarnessOptions`, and the former `Harness` union becomes `AgentHarness` (`CliHarness | Harness`). Update type imports and annotations accordingly. Runtime behavior and discriminants remain unchanged.
+
 ## 5.0.0
 
 Breaking changes, without compatibility aliases:

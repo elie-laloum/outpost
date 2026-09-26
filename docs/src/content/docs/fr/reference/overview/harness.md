@@ -14,6 +14,8 @@ Choisissez `claudeHarness()`, `codexHarness()` ou `geminiHarness()` pour délég
 
 Utilisez `harness()` pour qu’Outpost pilote lui-même le modèle. Il combine un [fournisseur de modèles](../model-providers/), des outils issus de `defineHarnessTool()` et `defineHarnessToolset()`, des instructions en texte ou via `defineHarnessInstructions()`, des hooks, des permissions, des limites de boucle et des réglages d’exécution des outils. Sélectionnez le modèle sur l’[agent](../agents/) ; un harness personnalisé exige un modèle explicite, tandis qu’un preset CLI peut conserver son modèle natif par défaut.
 
+Le moteur intégré renvoie un [`Harness`](../../type-customharness/) configuré avec [`HarnessOptions`](../../customharnessoptions/). [`AgentHarness`](../../harness/) est l’union `CliHarness | Harness` pour le code qui accepte les deux variantes d’exécution.
+
 ## Frontières et responsabilités
 
 Construire un harness ne lance ni processus, ni connexion, ni requête réseau. Une CLI possède sa boucle interne modèle/outils. Claude et Codex prennent en charge capture, reprise et fork natifs ; Gemini prend en charge les sessions neuves.

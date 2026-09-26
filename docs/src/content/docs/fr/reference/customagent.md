@@ -18,7 +18,7 @@ import type { CustomAgent } from "@elie-laloum/outpost";
 | `resumable`             | `boolean`                                             | Requis    | Toujours faux : les callbacks personnalisés n’ont ni reprise native ni réparation automatique.                                   |
 | `capture`               | `boolean`                                             | Requis    | Toujours faux : le runner personnalisé ne capture pas de transcripts natifs.                                                     |
 | `kind`                  | `"custom"`                                            | Requis    | Discriminant d’exécution : custom.                                                                                               |
-| `harness`               | `CustomHarness`                                       | Requis    | Harness personnalisé avec son fournisseur de modèles.                                                                            |
+| `harness`               | `Harness`                                             | Requis    | Harness intégré d’Outpost avec son fournisseur de modèles.                                                                       |
 | `model`                 | `AgentModel`                                          | Requis    | AgentModel normalisé et figé dont le nom, le raisonnement et la limite de sortie s’appliquent par défaut aux requêtes du modèle. |
 | `name`                  | `string`                                              | Requis    | Identifiant d’agent natif utilisé dans les événements et diagnostics.                                                            |
 | `bootstrap`             | `string \| undefined`                                 | Optionnel | Recette shell installant le CLI natif lorsque le bootstrap est activé.                                                           |
@@ -35,7 +35,7 @@ export interface CustomAgent extends AgentFeatures {
   readonly resumable: boolean;
   readonly capture: boolean;
   readonly kind: "custom";
-  readonly harness: CustomHarness;
+  readonly harness: Harness;
   readonly model: AgentModel;
 }
 ```
@@ -44,4 +44,4 @@ export interface CustomAgent extends AgentFeatures {
 
 - [AgentFeatures](../support-agentfeatures/)
 - [AgentModel](../agentmodel/)
-- [CustomHarness](../type-customharness/)
+- [Harness](../type-customharness/)

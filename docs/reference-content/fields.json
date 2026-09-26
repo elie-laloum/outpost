@@ -3537,8 +3537,8 @@
     "Fournisseur de modèles, instructions, outils, limites de boucle, exécution des outils et cache d’historique du moteur intégré d’Outpost."
   ],
   "AgentOptions.harness": [
-    "Execution harness; its kind selects CLI supervision or a custom callback.",
-    "Harness d’exécution ; sa variante sélectionne une CLI ou un callback personnalisé."
+    "Execution harness; its kind selects CLI supervision or the built-in Outpost engine.",
+    "Harness d’exécution ; sa variante sélectionne une CLI ou le moteur intégré d’Outpost."
   ],
   "AgentOptions.model": [
     "Model name, or an AgentModel object with optional reasoning and output limit. The executing harness or provider validates supported values when the agent is composed. Required for custom harnesses; optional for CLI defaults.",
@@ -3553,16 +3553,16 @@
     "Nom du modèle, ou objet AgentModel avec raisonnement et limite de sortie optionnels. Le harness ou le fournisseur qui exécute valide les valeurs prises en charge à la composition de l’agent. Son absence conserve le modèle par défaut de la CLI."
   ],
   "CustomAgentOptions.harness": [
-    "Custom callback harness with its configured model provider.",
-    "Harness personnalisé avec son fournisseur de modèles."
+    "Built-in Outpost harness with its configured model provider.",
+    "Harness intégré d’Outpost avec son fournisseur de modèles."
   ],
   "CustomAgentOptions.model": [
     "Required model name or AgentModel object. The model provider validates reasoning and output limits when the agent is composed; model availability is checked by the service.",
     "Nom de modèle ou objet AgentModel requis. Le fournisseur de modèles valide le raisonnement et la limite de sortie à la composition de l’agent ; le service vérifie la disponibilité du modèle."
   ],
   "Agent.harness": [
-    "Execution harness; its kind selects CLI supervision or a custom callback.",
-    "Harness d’exécution ; sa variante sélectionne une CLI ou un callback personnalisé."
+    "Execution harness; its kind selects CLI supervision or the built-in Outpost engine.",
+    "Harness d’exécution ; sa variante sélectionne une CLI ou le moteur intégré d’Outpost."
   ],
   "Agent.model": [
     "Normalized frozen AgentModel of the composed agent; absent when a CLI harness keeps its native default.",
@@ -3577,8 +3577,8 @@
     "AgentModel normalisé et figé lié à la commande CLI ; absent quand le défaut natif de la CLI est conservé."
   ],
   "CustomAgent.harness": [
-    "Custom callback harness with its configured model provider.",
-    "Harness personnalisé avec son fournisseur de modèles."
+    "Built-in Outpost harness with its configured model provider.",
+    "Harness intégré d’Outpost avec son fournisseur de modèles."
   ],
   "CustomAgent.model": [
     "Normalized frozen AgentModel whose name, reasoning and output limit are applied to model requests by default.",
@@ -3588,7 +3588,7 @@
     "Execution discriminator: cli.",
     "Discriminant d’exécution : cli."
   ],
-  "CustomHarness.kind": [
+  "Harness.kind": [
     "Execution discriminator: custom.",
     "Discriminant d’exécution : custom."
   ],
@@ -3604,7 +3604,7 @@
     "Execution discriminator: cli or custom.",
     "Discriminant d’exécution : cli or custom."
   ],
-  "Harness.kind": [
+  "AgentHarness.kind": [
     "Execution discriminator: cli or custom.",
     "Discriminant d’exécution : cli or custom."
   ],
@@ -3612,11 +3612,11 @@
     "Build the CLI adapter for an optional normalized AgentModel without launching the program; unsupported reasoning or output limits are rejected here.",
     "Construit l’adaptateur CLI pour un AgentModel normalisé optionnel sans lancer le programme ; un raisonnement ou une limite de sortie non pris en charge est refusé ici."
   ],
-  "CustomHarnessOptions.modelProvider": [
+  "HarnessOptions.modelProvider": [
     "Request transport the engine calls for each step; it validates the agent model when the agent is composed.",
     "Transport de requêtes que le moteur appelle à chaque étape ; il valide le modèle de l’agent à la composition."
   ],
-  "CustomHarness.modelProvider": [
+  "Harness.modelProvider": [
     "Request transport the engine calls for each step; it validates the agent model when the agent is composed.",
     "Transport de requêtes que le moteur appelle à chaque étape ; il valide le modèle de l’agent à la composition."
   ],
@@ -3888,43 +3888,43 @@
     "Nonempty instruction text, or a function that receives the sandbox, signal and model and returns the text when a turn starts.",
     "Texte d’instructions non vide, ou fonction qui reçoit le sandbox, le signal et le modèle et renvoie le texte au début d’une passe."
   ],
-  "CustomHarnessOptions.instructions": [
+  "HarnessOptions.instructions": [
     "System instructions as text, a defineHarnessInstructions() result or a list of both. Resolved at each turn and joined with blank lines; empty results are skipped.",
     "Instructions système en texte, résultat de defineHarnessInstructions() ou liste des deux. Résolues à chaque passe et jointes par des lignes vides ; les résultats vides sont ignorés."
   ],
-  "CustomHarness.instructions": [
+  "Harness.instructions": [
     "Normalized instruction sources resolved at the start of each turn.",
     "Sources d’instructions normalisées, résolues au début de chaque passe."
   ],
-  "CustomHarnessOptions.tools": [
+  "HarnessOptions.tools": [
     "Tools and toolsets the model may call. Nested toolsets are flattened; names must be unique across the harness.",
     "Outils et jeux d’outils que le modèle peut appeler. Les jeux imbriqués sont aplatis ; les noms doivent être uniques dans tout le harness."
   ],
-  "CustomHarness.tools": [
+  "Harness.tools": [
     "Flattened, frozen tool list sent to the model in declaration order.",
     "Liste d’outils aplatie et figée, envoyée au modèle dans l’ordre de déclaration."
   ],
-  "CustomHarnessOptions.limits": [
+  "HarnessOptions.limits": [
     "Bounds on steps, tool calls and token usage. Reaching one fails the turn with code limit.",
     "Bornes sur les étapes, les appels d’outils et l’usage de tokens. En atteindre une fait échouer la passe avec le code limit."
   ],
-  "CustomHarness.limits": [
+  "Harness.limits": [
     "Normalized limits; maxSteps defaults to 100.",
     "Limites normalisées ; maxSteps vaut 100 par défaut."
   ],
-  "CustomHarnessOptions.toolExecution": [
+  "HarnessOptions.toolExecution": [
     "Tool concurrency, per-call deadline and error policy.",
     "Concurrence des outils, délai par appel et politique d’erreur."
   ],
-  "CustomHarness.toolExecution": [
+  "Harness.toolExecution": [
     "Normalized tool execution settings with defaults applied.",
     "Réglages d’exécution des outils normalisés, valeurs par défaut appliquées."
   ],
-  "CustomHarnessOptions.cache": [
+  "HarnessOptions.cache": [
     "Ask the provider to cache the conversation prefix; defaults to true. OpenAI caches stable prefixes automatically.",
     "Demande au fournisseur de mettre en cache le préfixe de la conversation ; true par défaut. OpenAI met en cache les préfixes stables automatiquement."
   ],
-  "CustomHarness.cache": [
+  "Harness.cache": [
     "Whether each request asks the provider to cache the conversation prefix.",
     "Indique si chaque requête demande au fournisseur de mettre en cache le préfixe de la conversation."
   ],
@@ -4328,19 +4328,16 @@
     "Paths and command of a validated input; empty when the tool declares none.",
     "Chemins et commande d’une entrée validée ; vide si l’outil n’en déclare pas."
   ],
-  "CustomHarnessOptions.hooks": [
+  "HarnessOptions.hooks": [
     "Hooks from defineHarnessHook, run in declaration order within each phase.",
     "Hooks issus de defineHarnessHook, exécutés dans l’ordre de déclaration au sein de chaque phase."
   ],
-  "CustomHarness.hooks": [
-    "Frozen hooks of the harness.",
-    "Hooks figés du harness."
-  ],
-  "CustomHarnessOptions.permissions": [
+  "Harness.hooks": ["Frozen hooks of the harness.", "Hooks figés du harness."],
+  "HarnessOptions.permissions": [
     "Rules from defineHarnessPermissions, evaluated before before-tool hooks.",
     "Règles issues de defineHarnessPermissions, évaluées avant les hooks before-tool."
   ],
-  "CustomHarness.permissions": [
+  "Harness.permissions": [
     "Permission rules evaluated before before-tool hooks, when set.",
     "Règles de permission évaluées avant les hooks before-tool, si elles sont définies."
   ],
@@ -4440,19 +4437,19 @@
     "Number of recent messages kept after the summary; defaults to 6.",
     "Nombre de messages récents conservés après le résumé ; 6 par défaut."
   ],
-  "CustomHarnessOptions.context": [
+  "HarnessOptions.context": [
     "Strategy that can rewrite the history before each model request, such as truncateToolResults() or summarizeHistory().",
     "Stratégie qui peut réécrire l’historique avant chaque requête au modèle, comme truncateToolResults() ou summarizeHistory()."
   ],
-  "CustomHarness.context": [
+  "Harness.context": [
     "Context strategy of the harness, when set.",
     "Stratégie de contexte du harness, si elle est définie."
   ],
-  "CustomHarnessOptions.conversations": [
+  "HarnessOptions.conversations": [
     "Store for turn transcripts; defaults to harnessConversations(). Use transportConversations(\"harness\", …) for remote storage or false to disable continuation and repairs.",
     "Store des transcriptions de passes ; harnessConversations() par défaut. Utilisez transportConversations(\"harness\", …) pour un stockage distant, ou false pour désactiver continuation et réparations."
   ],
-  "CustomHarness.conversations": [
+  "Harness.conversations": [
     "Configured conversation store, or false when recording is disabled; absent means the default store.",
     "Store de conversations configuré, ou false si l’enregistrement est désactivé ; absent signifie le store par défaut."
   ],
@@ -4509,11 +4506,11 @@
     "Definition discriminator: skill.",
     "Discriminant de la définition : skill."
   ],
-  "CustomHarnessOptions.skills": [
+  "HarnessOptions.skills": [
     "Skills listed in the system instructions and loaded on demand through the load_skill tool.",
     "Skills listées dans les instructions système et chargées à la demande via l’outil load_skill."
   ],
-  "CustomHarness.skills": [
+  "Harness.skills": [
     "Skills of the harness; their tools and load_skill are part of the tool list.",
     "Skills du harness ; leurs outils et load_skill font partie de la liste d’outils."
   ],

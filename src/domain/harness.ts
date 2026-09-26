@@ -6,8 +6,8 @@ import {
   USAGE_FIELDS,
 } from "./harness.constants.ts";
 import type {
-  CustomHarness,
-  CustomHarnessOptions,
+  Harness,
+  HarnessOptions,
   HarnessLimits,
   HarnessToolExecution,
   ResolvedHarnessLimits,
@@ -20,7 +20,7 @@ import {
 import { harnessSkills, skillCatalog, skillLoader } from "./skill.ts";
 import { harnessTools } from "./tool.ts";
 
-export function harness(options: CustomHarnessOptions): CustomHarness {
+export function harness(options: HarnessOptions): Harness {
   invariant(
     options !== null && typeof options === "object",
     "Harness options must be an object",

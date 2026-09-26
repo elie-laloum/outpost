@@ -18,7 +18,7 @@ import type { CustomAgent } from "@elie-laloum/outpost";
 | `resumable`             | `boolean`                                             | Required | Always false: custom callbacks have no native conversation continuation or automatic response repair.         |
 | `capture`               | `boolean`                                             | Required | Always false: the custom runner does not capture native transcripts.                                          |
 | `kind`                  | `"custom"`                                            | Required | Execution discriminator: custom.                                                                              |
-| `harness`               | `CustomHarness`                                       | Required | Custom callback harness with its configured model provider.                                                   |
+| `harness`               | `Harness`                                             | Required | Built-in Outpost harness with its configured model provider.                                                  |
 | `model`                 | `AgentModel`                                          | Required | Normalized frozen AgentModel whose name, reasoning and output limit are applied to model requests by default. |
 | `name`                  | `string`                                              | Required | Native agent identifier used in execution events and diagnostics.                                             |
 | `bootstrap`             | `string \| undefined`                                 | Optional | Shell recipe that installs the native CLI when bootstrapping is enabled.                                      |
@@ -35,7 +35,7 @@ export interface CustomAgent extends AgentFeatures {
   readonly resumable: boolean;
   readonly capture: boolean;
   readonly kind: "custom";
-  readonly harness: CustomHarness;
+  readonly harness: Harness;
   readonly model: AgentModel;
 }
 ```
@@ -44,4 +44,4 @@ export interface CustomAgent extends AgentFeatures {
 
 - [AgentFeatures](../support-agentfeatures/)
 - [AgentModel](../agentmodel/)
-- [CustomHarness](../type-customharness/)
+- [Harness](../type-customharness/)

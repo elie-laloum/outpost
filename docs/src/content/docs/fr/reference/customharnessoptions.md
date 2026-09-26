@@ -1,6 +1,6 @@
 ---
-title: "CustomHarnessOptions"
-description: "CustomHarnessOptions — Outpost API"
+title: "HarnessOptions"
+description: "HarnessOptions — Outpost API"
 sidebar:
   order: 20
 ---
@@ -12,7 +12,7 @@ Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le 
 ## Import
 
 ```ts
-import type { CustomHarnessOptions } from "@elie-laloum/outpost";
+import type { HarnessOptions } from "@elie-laloum/outpost";
 ```
 
 ## Paramètres et propriétés
@@ -34,7 +34,7 @@ import type { CustomHarnessOptions } from "@elie-laloum/outpost";
 ## Signature
 
 ```ts
-export interface CustomHarnessOptions {
+export interface HarnessOptions {
   readonly modelProvider: ModelProvider;
   readonly instructions?: HarnessInstructionsOption;
   readonly tools?: readonly (HarnessTool | HarnessToolset)[];

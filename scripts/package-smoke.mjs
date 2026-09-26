@@ -194,7 +194,11 @@ try {
     consumer,
     `import { agent as composeAgent,  dispatch, codexHarness, geminiHarness, response, createSandbox, type GeminiSettings, type EgressPolicy } from '@elie-laloum/outpost';
 import { openaiModelProvider, type OpenAIModelProviderOptions, type ModelProvider, type ModelRequest, type ModelResult, type AgentAdapter, type SandboxProvider } from '@elie-laloum/outpost';
-import { harness, anthropicModelProvider, defineHarnessTool, type Agent, type AgentModel, type ModelReasoning, type HarnessTool } from '@elie-laloum/outpost';
+import { harness, anthropicModelProvider, defineHarnessTool, type Agent, type AgentModel, type ModelReasoning, type HarnessTool, type Harness, type HarnessOptions, type AgentHarness } from '@elie-laloum/outpost';
+// @ts-expect-error The renamed harness contract has no compatibility export.
+import type { CustomHarness } from '@elie-laloum/outpost';
+// @ts-expect-error The renamed options contract has no compatibility export.
+import type { CustomHarnessOptions } from '@elie-laloum/outpost';
 // @ts-expect-error The renamed factory has no compatibility export.
 import { customHarness } from '@elie-laloum/outpost';
 // @ts-expect-error Removed API has no compatibility export.
@@ -202,7 +206,15 @@ import { openaiCompatible } from '@elie-laloum/outpost';
 // @ts-expect-error Removed sandbox factory has no alias.
 import { local } from '@elie-laloum/outpost/providers/local';
 const read: HarnessTool<{ path: string }> = defineHarnessTool({name:'read',description:'Read a file.',readOnly:true,input:{type:'object',properties:{path:{type:'string'}},required:['path']},execute:async(input: { path: string },context)=>(await context.sandbox.invoke({executable:'cat',arguments:[input.path],signal:context.signal})).stdout});
-const custom = harness({modelProvider:anthropicModelProvider({apiKey:'unused'}),tools:[read],limits:{maxSteps:5,usage:{output:1000}},toolExecution:{concurrency:2,onError:'return-to-model'}});
+const harnessOptions: HarnessOptions = {modelProvider:anthropicModelProvider({apiKey:'unused'}),tools:[read],limits:{maxSteps:5,usage:{output:1000}},toolExecution:{concurrency:2,onError:'return-to-model'}};
+const custom: Harness = harness(harnessOptions);
+const variants: readonly AgentHarness[] = [custom, codexHarness()];
+for (const configured of variants) {
+  if (configured.kind === 'cli') configured.bind();
+  if (configured.kind === 'custom') configured.modelProvider.validate?.({name:'arbitrary'});
+}
+// @ts-expect-error Harness describes the built-in engine, not a CLI preset.
+const cliAsHarness: Harness = codexHarness();
 // @ts-expect-error Custom callbacks were replaced by declarative tools.
 harness({modelProvider:anthropicModelProvider({apiKey:'unused'}),run:async()=>({text:'done'})});
 const reasoning: ModelReasoning = 'high';

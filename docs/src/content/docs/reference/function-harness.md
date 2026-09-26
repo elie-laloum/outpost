@@ -25,7 +25,7 @@ Compose the built-in Outpost engine from a model provider, tools, instructions, 
 
 | Name                    | Type                                                                              | Presence | Meaning                                                                                                                                                                   |
 | ----------------------- | --------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `options`               | `CustomHarnessOptions`                                                            | Required | Model provider, instructions, tools, loop limits, tool execution settings and history caching for the built-in Outpost engine.                                            |
+| `options`               | `HarnessOptions`                                                                  | Required | Model provider, instructions, tools, loop limits, tool execution settings and history caching for the built-in Outpost engine.                                            |
 | `options.modelProvider` | `ModelProvider`                                                                   | Required | Request transport the engine calls for each step; it validates the agent model when the agent is composed.                                                                |
 | `options.instructions`  | `HarnessInstructionsOption \| undefined`                                          | Optional | System instructions as text, a defineHarnessInstructions() result or a list of both. Resolved at each turn and joined with blank lines; empty results are skipped.        |
 | `options.tools`         | `readonly (HarnessTool<unknown> \| HarnessToolset)[] \| undefined`                | Optional | Tools and toolsets the model may call. Nested toolsets are flattened; names must be unique across the harness.                                                            |
@@ -40,15 +40,15 @@ Compose the built-in Outpost engine from a model provider, tools, instructions, 
 
 ## Returns
 
-`CustomHarness`
+`Harness`
 
 ## Signature
 
 ```ts
-export declare function harness(options: CustomHarnessOptions): CustomHarness;
+export declare function harness(options: HarnessOptions): Harness;
 ```
 
 ## Related contracts
 
-- [CustomHarness](../type-customharness/)
-- [CustomHarnessOptions](../customharnessoptions/)
+- [Harness](../type-customharness/)
+- [HarnessOptions](../customharnessoptions/)

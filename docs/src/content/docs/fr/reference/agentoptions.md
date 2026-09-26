@@ -17,7 +17,7 @@ Les champs ci-dessous couvrent toutes les variantes ; la signature précise leur
 
 | Nom       | Type                                  | Présence          | Rôle                                                                                                                                                                                                                                                               |
 | --------- | ------------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `harness` | `CliHarness \| CustomHarness`         | Requis            | Harness d’exécution ; sa variante sélectionne une CLI ou un callback personnalisé.                                                                                                                                                                                 |
+| `harness` | `CliHarness \| Harness`               | Requis            | Harness d’exécution ; sa variante sélectionne une CLI ou le moteur intégré d’Outpost.                                                                                                                                                                              |
 | `model`   | `ModelSpec \| undefined \| ModelSpec` | Selon la variante | Nom du modèle, ou objet AgentModel avec raisonnement et limite de sortie optionnels. Le harness ou le fournisseur qui exécute valide les valeurs prises en charge à la composition de l’agent. Requis pour un harness personnalisé ; optionnel pour le défaut CLI. |
 
 ## Signature

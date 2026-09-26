@@ -83,11 +83,11 @@
     "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
     "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
-  "CustomHarness": [
+  "Harness": [
     "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
     "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
-  "CustomHarnessOptions": [
+  "HarnessOptions": [
     "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
     "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],

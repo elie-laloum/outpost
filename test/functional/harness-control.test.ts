@@ -8,7 +8,7 @@ import {
   dispatch,
   harness,
   type AgentObservation,
-  type CustomHarnessOptions,
+  type HarnessOptions,
   type ModelProvider,
   type ModelRequest,
   type ModelResult,
@@ -70,7 +70,7 @@ const write = defineHarnessTool({
 async function run(
   t: import("node:test").TestContext,
   replies: Reply[],
-  options: Omit<CustomHarnessOptions, "modelProvider" | "tools">,
+  options: Omit<HarnessOptions, "modelProvider" | "tools">,
   extra: Partial<Parameters<typeof dispatch>[0]> = {},
 ) {
   const requests: ModelRequest[] = [];

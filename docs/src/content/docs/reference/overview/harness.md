@@ -14,6 +14,8 @@ Choose `claudeHarness()`, `codexHarness()` or `geminiHarness()` to delegate exec
 
 Use `harness()` to let Outpost drive the model itself. It combines a [model provider](../model-providers/), tools from `defineHarnessTool()` and `defineHarnessToolset()`, instructions from text or `defineHarnessInstructions()`, hooks, permissions, loop limits and tool execution settings. Select the model on the [agent](../agents/); a custom harness requires an explicit model, while a CLI preset can keep its native default.
 
+The built-in engine returns a [`Harness`](../../type-customharness/) configured with [`HarnessOptions`](../../customharnessoptions/). [`AgentHarness`](../../harness/) is the union `CliHarness | Harness` for code that accepts either execution variant.
+
 ## Boundaries and responsibilities
 
 Constructing a harness starts no process, login or network request. A CLI owns its internal model/tool loop. Claude and Codex support native capture, resume and fork; Gemini supports fresh sessions.

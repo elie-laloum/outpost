@@ -1,4 +1,4 @@
-import type { CustomHarness } from "./harness.types.ts";
+import type { Harness } from "./harness.types.ts";
 import type { AgentModel, ModelSpec } from "./model.types.ts";
 import type { Command, Variables } from "./command.types.ts";
 import type { ConversationStore } from "./conversation.types.ts";
@@ -108,7 +108,7 @@ export interface CliHarness {
   bind(model?: AgentModel): AgentAdapter;
 }
 
-export type Harness = CliHarness | CustomHarness;
+export type AgentHarness = CliHarness | Harness;
 
 export interface CliAgent extends AgentAdapter {
   readonly kind: "cli";
@@ -120,7 +120,7 @@ export interface CustomAgent extends AgentFeatures {
   readonly resumable: boolean;
   readonly capture: boolean;
   readonly kind: "custom";
-  readonly harness: CustomHarness;
+  readonly harness: Harness;
   readonly model: AgentModel;
 }
 
@@ -131,7 +131,7 @@ export interface CliAgentOptions {
   readonly model?: ModelSpec;
 }
 export interface CustomAgentOptions {
-  readonly harness: CustomHarness;
+  readonly harness: Harness;
   readonly model: ModelSpec;
 }
 export type AgentOptions = CliAgentOptions | CustomAgentOptions;
