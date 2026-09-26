@@ -20,7 +20,7 @@ Construire un harness ne lance ni processus, ni connexion, ni requête réseau. 
 
 Le moteur d’Outpost tourne dans le processus Outpost. Chaque étape est une requête au modèle ; les outils passent par le sandbox emprunté, et les limites font échouer la passe avec le code `limit` au lieu de réussir. Les passes sont enregistrées dans des transcriptions qui permettent continuation, fork et réparations de réponse, et des stratégies de contexte peuvent compacter les longs historiques. Le terminal interactif n’est pas pris en charge. `AgentAdapter` et `AgentInput` décrivent la construction des commandes CLI et le décodage des événements. L’allocation du sandbox relève de [Providers](../providers/).
 
-Ces API de harness sont implémentées mais non publiées ; le moteur et ses définitions sont expérimentaux.
+Les presets CLI sont stables depuis la version 5.0.0 ; le moteur et ses définitions sont expérimentaux.
 
 ## Points d’entrée
 

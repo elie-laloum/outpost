@@ -3,8 +3,8 @@ title: Construire un harness personnalisé (expérimental)
 description: Composez un fournisseur de modèles, des outils, des instructions et des limites en un agent piloté par Outpost.
 ---
 
-:::caution[API non publiée]
-Cette API de l’arbre de travail est expérimentale. Utilisez un package construit depuis ce checkout.
+:::caution[API expérimentale]
+Le moteur de harness intégré est expérimental depuis la version 5.0.0 : ses contrats peuvent encore changer, et il n’a pas encore été validé contre tous les services de modèles.
 :::
 
 `claudeHarness()`, `codexHarness()` et `geminiHarness()` confient toute la tâche à une CLI qui exécute sa propre boucle de modèle et d’outils. `harness()` construit cette boucle dans Outpost. Vous déclarez ce que l’agent peut utiliser, et Outpost pilote le modèle :
@@ -22,13 +22,13 @@ Le résultat s’utilise comme tout autre agent : `agent({ harness, model })`, p
 <details>
 <summary>Préparation complète et exemple exécutable</summary>
 
-Utilisez Node.js 24+, npm et Git. Construisez ce checkout avec `npm ci` et `npm run build`. Dans un nouveau dossier, installez ce package local et créez un dépôt contenant un fichier :
+Utilisez Node.js 24+, npm et Git. Dans un nouveau dossier, installez Outpost et créez un dépôt contenant un fichier :
 
 ```sh
 mkdir harness-example
 cd harness-example
 npm init -y
-npm install /absolute/path/to/outpost
+npm install @elie-laloum/outpost
 git init
 echo "# Demo" > README.md
 git add README.md
@@ -323,6 +323,6 @@ Les observateurs du dispatch reçoivent `step` avant chaque requête au modèle,
 
 ## Pas encore disponible
 
-Le terminal interactif n’est pas pris en charge. Voir la [feuille de route](../../../project/roadmap/#direct-model-harness) pour la validation qui reste à mener avant publication.
+Le terminal interactif n’est pas pris en charge. Voir la [feuille de route](../../../project/roadmap/#direct-model-harness) pour la validation qui reste à mener.
 
 [Référence Harness](../../../reference/overview/harness/) · [Fournisseurs de modèles](../../advanced/model-providers/)

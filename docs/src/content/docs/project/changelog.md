@@ -7,22 +7,32 @@ sidebar:
 
 The release notes below are synchronized from the root `CHANGELOG.md`, the single source of release history.
 
-## Unreleased
+## 5.0.0
+
+Breaking changes, without compatibility aliases:
+
+- Replace agent factories with `agent({ harness, model })` and the `codexHarness()`, `claudeHarness()` and `geminiHarness()` presets.
+- Accept the model as a name or an `AgentModel` object with `reasoning` and `maxOutputTokens`; `agent.model` is now a normalized object. `reasoning` leaves `claudeHarness()` and `codexHarness()`, and `maxOutputTokens` leaves `anthropicModelProvider()`. The CLI harness or model provider rejects unsupported settings when the agent is composed: Claude Code maps them to `--effort` and `CLAUDE_CODE_MAX_OUTPUT_TOKENS`, Codex accepts reasoning only, Gemini CLI accepts neither, Anthropic requires an output limit and OpenAI forwards reasoning effort.
+- Rename sandbox factories to `*SandboxProvider`, configuration to `sandboxProvider` and the CLI option to `--sandbox-provider`. Legacy resource records are reported as incompatible and are not deleted.
+- Replace the experimental direct text client with `openaiModelProvider` and add `anthropicModelProvider`.
+
+Experimental built-in harness engine:
+
+- `harness({ modelProvider, instructions, tools, hooks, permissions, context, conversations, skills, limits, toolExecution, cache })` lets Outpost drive a model itself. The engine runs tools through the borrowed sandbox with input validation, read-only concurrency, per-call deadlines and ordered results, returns tool errors to the model and fails with the new `limit` error code on step, tool-call, token or output limits.
+- Model providers exchange messages, tool calls, opaque reasoning replayed only to their provider identity and model, a normalized `stopReason`, system-prefix and history caching, and optional streaming through `stream()`, with `timeoutMs` measuring inactivity between chunks. Truncated or refused answers are reported instead of rejected.
+- Add `defineHarnessTool()` (JSON Schema subset or Standard Schema inputs), `defineHarnessToolset()` and `defineHarnessInstructions()`.
+- Add `defineHarnessHook()` for `session-start`, `before-model`, `after-model`, `before-tool`, `after-tool` and `stop`, and `defineHarnessPermissions()` for ordered allow/deny rules over tool names, commands and repository paths declared by a tool's `resources()`. Hook exceptions fail the turn.
+- Add built-in toolsets: `harnessFileTools()`, `harnessEditTools()` with conflict-checked exact replacement, `harnessSearchTools()`, `harnessGitTools()` and `harnessShellTools()`.
+- Record custom harness turns as append-only transcripts in `.outpost/conversations/harness/`, excluded from Git, with `harnessConversations()` by default or `transportConversations("harness", …)`. Custom harnesses support continuation, fork and response repairs. Add `defineHarnessContextStrategy()`, `truncateToolResults()` and `summarizeHistory()`.
+- Add `defineHarnessSkill()` for instructions and tools loaded on demand through a reserved `load_skill` tool.
+- Dispatch observers receive `step`, `tool-result`, `tool-denied`, `stop-prevented`, `compaction` and `text-delta` events; journals keep `text-delta` only in verbose mode.
+- These APIs are tested with scripted providers, local simulated HTTP services and the local sandbox provider; no authenticated service campaign is implied.
+
+Other changes:
 
 - Add `workflow.start({ telemetry })` with an SDK-independent `WorkflowTelemetry` contract, independent custom observers and isolated callback errors. Preserve `observe: telemetry.observe` compatibility.
-- Instrument complete dispatch operations with optional OpenTelemetry telemetry and add createReporter() with typed asynchronous handlers and explicit flush().
-- Replace agent factories with `agent({ harness, model })` and `codexHarness()`, `claudeHarness()` and `geminiHarness()`. Model identifiers remain free-form strings; the selected CLI or service validates availability.
-- Replace the direct text client with `openaiModelProvider` and add `anthropicModelProvider`, including explicit system-prefix caching and normalized cache usage. No authenticated service campaign is implied by local HTTP tests.
-- Rename sandbox factories to `*SandboxProvider`, configuration to `sandboxProvider` and the CLI option to `--sandbox-provider`. These are breaking API changes without compatibility aliases. Legacy resource records are reported as incompatible and are not deleted.
-- Accept `agent({ model })` as a name or an `AgentModel` object with `reasoning` and `maxOutputTokens`. `reasoning` leaves `claudeHarness()` and `codexHarness()`, and `maxOutputTokens` leaves `anthropicModelProvider()`. The CLI harness or model provider rejects unsupported settings when the agent is composed: Claude Code maps them to `--effort` and `CLAUDE_CODE_MAX_OUTPUT_TOKENS`, Codex accepts reasoning only, Gemini CLI accepts neither, Anthropic requires an output limit and OpenAI forwards reasoning effort. `agent.model` is now a normalized object. These are breaking changes.
-- Extend the experimental model contract with `messages`, tool declarations, `tool-call`/`tool-result` blocks, opaque reasoning blocks replayed only to their provider identity and model, a normalized `stopReason` and an Anthropic history-cache flag. The three protocols translate tool calls without executing them, and truncated or refused answers are reported instead of rejected.
-- Replace `harness({ modelProvider, run })` callbacks with a declarative built-in engine: `harness({ modelProvider, instructions, tools, limits, toolExecution, cache })`. Add `defineHarnessTool()` (JSON Schema subset or Standard Schema inputs), `defineHarnessToolset()` and `defineHarnessInstructions()`. The engine runs tools through the borrowed sandbox with input validation, read-only concurrency, per-call deadlines and ordered results, returns tool errors to the model, and fails with the new `limit` error code on step, tool-call, token or output limits. Dispatch observers receive `step` and `tool-result` events. `run`, `HarnessInput`, `HarnessContext` and `HarnessRun` are removed. Hooks, permissions, built-in toolsets, persisted custom conversations and streaming remain planned.
-- Add `defineHarnessHook()` for `session-start`, `before-model`, `after-model`, `before-tool`, `after-tool` and `stop` control points, and `defineHarnessPermissions()` for ordered allow/deny rules over tool names, commands and repository paths declared by a tool's `resources()`. Permissions run before hooks and again after a hook rewrites a call; denials and refused stops are reported to the model and emitted as `tool-denied` and `stop-prevented` events. Hook exceptions fail the turn.
-- Add built-in harness toolsets: `harnessFileTools()` (`read_file`, `list_files`), `harnessEditTools()` (`write_file`, exact-replacement `edit_file` with conflict detection), `harnessSearchTools()` (`git grep`), `harnessGitTools()` (read-only `status`, `diff`, `log`, `show`) and `harnessShellTools()` (`sh -c` with a deadline). File contents move through binary-safe transfers, paths stay inside the repository, and every tool declares resources for permission rules.
-- Record custom harness turns as append-only transcripts under `.outpost/conversations/harness/`, excluded from Git, with `harnessConversations()` as the default store and `transportConversations("harness", …)` for remote storage. Custom harnesses now support continuation, fork and response repairs (read-only tools during repairs), hold a per-conversation lock and close interrupted tool calls with error results on resume. Add `defineHarnessContextStrategy()`, `truncateToolResults()` and `summarizeHistory()`; compactions are recorded in the transcript, drop replayed reasoning and emit `compaction` events. `conversations: false` disables recording.
-- Add `defineHarnessSkill()` for instructions and tools that a custom harness loads on demand. Skills are listed in the system instructions, loaded through a reserved `load_skill` tool, and their tools are declared from the start but refused until the skill is loaded, which keeps the tool list and provider cache stable. Loaded skills are read back from the conversation.
-- Add optional `ModelProvider.stream()` to the three built-in providers: server-sent events are decoded into `text-delta` fragments and the same final `ModelResult`, with `timeoutMs` measuring inactivity between chunks. Custom harnesses stream automatically and emit `text-delta` events, which journals keep only in verbose mode and the terminal reporter prints once.
-- Share explicit CLI authentication preparation between library harnesses and generated workflows. Update package checks, examples and the English/French reference, including the direct harness factories.
+- Instrument complete dispatch operations with optional OpenTelemetry telemetry and add `createReporter()` with typed asynchronous handlers and explicit `flush()`.
+- Share explicit CLI authentication preparation between library harnesses and generated workflows. Update package checks, examples and the English/French reference.
 
 ## 4.2.0
 

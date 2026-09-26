@@ -18,7 +18,7 @@ Utilisez `agent({ harness: codexHarness(), model: "..." })`, ou les presets `cla
 
 Un agent associe une configuration d’exécution et une sélection de modèle. La famille [Harness](../harness/) regroupe les presets CLI, les callbacks personnalisés, les réglages d’authentification et les capacités d’exécution. Les [fournisseurs de modèles](../model-providers/) fournissent les transports HTTP aux harness personnalisés, tandis que `sandboxProvider` choisit indépendamment l’environnement d’exécution.
 
-Ces API de composition sont implémentées mais non publiées. Utilisez l’agent avec dispatch, un sandbox ou une tâche de workflow ; sa construction ne déclenche aucune exécution.
+Ces API de composition sont disponibles depuis la version 5.0.0. Utilisez l’agent avec dispatch, un sandbox ou une tâche de workflow ; sa construction ne déclenche aucune exécution.
 
 ## Points d’entrée
 

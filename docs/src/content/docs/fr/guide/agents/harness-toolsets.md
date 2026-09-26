@@ -3,8 +3,8 @@ title: Jeux d’outils fournis pour le harness (expérimental)
 description: Donnez à un harness personnalisé des outils de dépôt pour lire, chercher, modifier, lancer des commandes et inspecter Git.
 ---
 
-:::caution[API non publiée]
-Ces jeux d’outils sont expérimentaux et appartiennent au moteur de [harness personnalisé](../harness/) non publié. Utilisez un package construit depuis ce checkout.
+:::caution[API expérimentale]
+Ces jeux d’outils sont expérimentaux depuis la version 5.0.0 et appartiennent au moteur de [harness personnalisé](../harness/). Ils n’ont été testés qu’avec le provider de sandbox local.
 :::
 
 Outpost fournit cinq jeux d’outils pour un [harness personnalisé](../harness/). Chacun renvoie un résultat de `defineHarnessToolset()` : vous pouvez les combiner avec vos propres outils et les restreindre avec des [permissions](../harness/#contrôler-la-boucle-avec-des-hooks-et-des-permissions).

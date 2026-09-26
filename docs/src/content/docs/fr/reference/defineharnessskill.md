@@ -6,7 +6,7 @@ sidebar:
 ---
 
 :::caution[Expérimental]
-Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication.
+Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure.
 :::
 
 ## Import

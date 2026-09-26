@@ -6,7 +6,7 @@ sidebar:
   order: 0
 ---
 
-:::caution[Experimental — unreleased refactor]
+:::caution[Experimental]
 Bounded requests with messages, tool calls, reasoning replay, history caching and streaming are implemented. The built-in engine of `harness()` drives them.
 :::
 

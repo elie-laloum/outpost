@@ -6,7 +6,7 @@ sidebar:
   order: 0
 ---
 
-:::caution[Expérimental — refonte non publiée]
+:::caution[Expérimental]
 Les requêtes bornées avec messages, appels d’outils, rejeu du raisonnement, cache d’historique et streaming sont implémentées. Le moteur intégré de `harness()` les pilote.
 :::
 

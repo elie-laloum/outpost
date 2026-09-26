@@ -32,7 +32,7 @@ Enregistrez l’exemple sous **example.mts** dans ce dossier. Aucun compte, clé
 
 ## Prérequis et effets
 
-L’option `telemetry` dédiée au workflow n’est pas encore publiée : exécutez cet exemple avec un package construit depuis ce checkout. Les workflows de la version 4.2.0 publiée utilisent `observe: telemetry.observe`.
+L’option `telemetry` dédiée au workflow est disponible depuis la version 5.0.0. Les workflows en version 4.2.0 utilisent `observe: telemetry.observe`.
 
 Installez d’abord `npm install @opentelemetry/api @opentelemetry/sdk-trace-base @opentelemetry/sdk-metrics`. Examinez les spans et métriques exportés ; prompts, motifs d’acteurs et identifiants ne doivent pas devenir des labels de métriques. Le point d’entrée télémétrie reste optionnel et ne change pas les résultats du workflow.
 

@@ -8,295 +8,295 @@
     "Ces options configurent le provider Firecracker expérimental et exigent un noyau, un système de fichiers racine, un réseau et un accès SSH préparés manuellement. Elles n’activent ni le jailer ni l’isolation par cgroups ; la validation pour la production reste incomplète. Consultez les [prérequis et limites](../../guide/advanced/firecracker/)."
   ],
   "openaiModelProvider": [
-    "Experimental: provider contract for custom harnesses with messages, tool calls, replayable reasoning, history caching and streaming. It may change before release.",
-    "Expérimental : contrat de fournisseur pour les harness personnalisés, avec messages, appels d’outils, raisonnement rejouable, cache d’historique et streaming. Il peut changer avant publication."
+    "Experimental: provider contract for custom harnesses with messages, tool calls, replayable reasoning, history caching and streaming. It may change in a later release.",
+    "Expérimental : contrat de fournisseur pour les harness personnalisés, avec messages, appels d’outils, raisonnement rejouable, cache d’historique et streaming. Il peut changer dans une version ultérieure."
   ],
   "OpenAIModelProviderOptions": [
-    "Experimental: provider contract for custom harnesses with messages, tool calls, replayable reasoning, history caching and streaming. It may change before release.",
-    "Expérimental : contrat de fournisseur pour les harness personnalisés, avec messages, appels d’outils, raisonnement rejouable, cache d’historique et streaming. Il peut changer avant publication."
+    "Experimental: provider contract for custom harnesses with messages, tool calls, replayable reasoning, history caching and streaming. It may change in a later release.",
+    "Expérimental : contrat de fournisseur pour les harness personnalisés, avec messages, appels d’outils, raisonnement rejouable, cache d’historique et streaming. Il peut changer dans une version ultérieure."
   ],
   "ModelProvider": [
-    "Experimental: provider contract for custom harnesses with messages, tool calls, replayable reasoning, history caching and streaming. It may change before release.",
-    "Expérimental : contrat de fournisseur pour les harness personnalisés, avec messages, appels d’outils, raisonnement rejouable, cache d’historique et streaming. Il peut changer avant publication."
+    "Experimental: provider contract for custom harnesses with messages, tool calls, replayable reasoning, history caching and streaming. It may change in a later release.",
+    "Expérimental : contrat de fournisseur pour les harness personnalisés, avec messages, appels d’outils, raisonnement rejouable, cache d’historique et streaming. Il peut changer dans une version ultérieure."
   ],
   "ModelRequest": [
-    "Experimental: provider contract for custom harnesses with messages, tool calls, replayable reasoning, history caching and streaming. It may change before release.",
-    "Expérimental : contrat de fournisseur pour les harness personnalisés, avec messages, appels d’outils, raisonnement rejouable, cache d’historique et streaming. Il peut changer avant publication."
+    "Experimental: provider contract for custom harnesses with messages, tool calls, replayable reasoning, history caching and streaming. It may change in a later release.",
+    "Expérimental : contrat de fournisseur pour les harness personnalisés, avec messages, appels d’outils, raisonnement rejouable, cache d’historique et streaming. Il peut changer dans une version ultérieure."
   ],
   "ModelResult": [
-    "Experimental: provider contract for custom harnesses with messages, tool calls, replayable reasoning, history caching and streaming. It may change before release.",
-    "Expérimental : contrat de fournisseur pour les harness personnalisés, avec messages, appels d’outils, raisonnement rejouable, cache d’historique et streaming. Il peut changer avant publication."
+    "Experimental: provider contract for custom harnesses with messages, tool calls, replayable reasoning, history caching and streaming. It may change in a later release.",
+    "Expérimental : contrat de fournisseur pour les harness personnalisés, avec messages, appels d’outils, raisonnement rejouable, cache d’historique et streaming. Il peut changer dans une version ultérieure."
   ],
   "anthropicModelProvider": [
-    "Experimental: provider contract for custom harnesses with messages, tool calls, replayable reasoning, history caching and streaming. It may change before release.",
-    "Expérimental : contrat de fournisseur pour les harness personnalisés, avec messages, appels d’outils, raisonnement rejouable, cache d’historique et streaming. Il peut changer avant publication."
+    "Experimental: provider contract for custom harnesses with messages, tool calls, replayable reasoning, history caching and streaming. It may change in a later release.",
+    "Expérimental : contrat de fournisseur pour les harness personnalisés, avec messages, appels d’outils, raisonnement rejouable, cache d’historique et streaming. Il peut changer dans une version ultérieure."
   ],
   "AnthropicModelProviderOptions": [
-    "Experimental: provider contract for custom harnesses with messages, tool calls, replayable reasoning, history caching and streaming. It may change before release.",
-    "Expérimental : contrat de fournisseur pour les harness personnalisés, avec messages, appels d’outils, raisonnement rejouable, cache d’historique et streaming. Il peut changer avant publication."
+    "Experimental: provider contract for custom harnesses with messages, tool calls, replayable reasoning, history caching and streaming. It may change in a later release.",
+    "Expérimental : contrat de fournisseur pour les harness personnalisés, avec messages, appels d’outils, raisonnement rejouable, cache d’historique et streaming. Il peut changer dans une version ultérieure."
   ],
   "harness": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "ModelMessage": [
-    "Experimental: provider contract for custom harnesses with messages, tool calls, replayable reasoning, history caching and streaming. It may change before release.",
-    "Expérimental : contrat de fournisseur pour les harness personnalisés, avec messages, appels d’outils, raisonnement rejouable, cache d’historique et streaming. Il peut changer avant publication."
+    "Experimental: provider contract for custom harnesses with messages, tool calls, replayable reasoning, history caching and streaming. It may change in a later release.",
+    "Expérimental : contrat de fournisseur pour les harness personnalisés, avec messages, appels d’outils, raisonnement rejouable, cache d’historique et streaming. Il peut changer dans une version ultérieure."
   ],
   "ModelContentBlock": [
-    "Experimental: provider contract for custom harnesses with messages, tool calls, replayable reasoning, history caching and streaming. It may change before release.",
-    "Expérimental : contrat de fournisseur pour les harness personnalisés, avec messages, appels d’outils, raisonnement rejouable, cache d’historique et streaming. Il peut changer avant publication."
+    "Experimental: provider contract for custom harnesses with messages, tool calls, replayable reasoning, history caching and streaming. It may change in a later release.",
+    "Expérimental : contrat de fournisseur pour les harness personnalisés, avec messages, appels d’outils, raisonnement rejouable, cache d’historique et streaming. Il peut changer dans une version ultérieure."
   ],
   "ModelTextBlock": [
-    "Experimental: provider contract for custom harnesses with messages, tool calls, replayable reasoning, history caching and streaming. It may change before release.",
-    "Expérimental : contrat de fournisseur pour les harness personnalisés, avec messages, appels d’outils, raisonnement rejouable, cache d’historique et streaming. Il peut changer avant publication."
+    "Experimental: provider contract for custom harnesses with messages, tool calls, replayable reasoning, history caching and streaming. It may change in a later release.",
+    "Expérimental : contrat de fournisseur pour les harness personnalisés, avec messages, appels d’outils, raisonnement rejouable, cache d’historique et streaming. Il peut changer dans une version ultérieure."
   ],
   "ModelToolCallBlock": [
-    "Experimental: provider contract for custom harnesses with messages, tool calls, replayable reasoning, history caching and streaming. It may change before release.",
-    "Expérimental : contrat de fournisseur pour les harness personnalisés, avec messages, appels d’outils, raisonnement rejouable, cache d’historique et streaming. Il peut changer avant publication."
+    "Experimental: provider contract for custom harnesses with messages, tool calls, replayable reasoning, history caching and streaming. It may change in a later release.",
+    "Expérimental : contrat de fournisseur pour les harness personnalisés, avec messages, appels d’outils, raisonnement rejouable, cache d’historique et streaming. Il peut changer dans une version ultérieure."
   ],
   "ModelToolResultBlock": [
-    "Experimental: provider contract for custom harnesses with messages, tool calls, replayable reasoning, history caching and streaming. It may change before release.",
-    "Expérimental : contrat de fournisseur pour les harness personnalisés, avec messages, appels d’outils, raisonnement rejouable, cache d’historique et streaming. Il peut changer avant publication."
+    "Experimental: provider contract for custom harnesses with messages, tool calls, replayable reasoning, history caching and streaming. It may change in a later release.",
+    "Expérimental : contrat de fournisseur pour les harness personnalisés, avec messages, appels d’outils, raisonnement rejouable, cache d’historique et streaming. Il peut changer dans une version ultérieure."
   ],
   "ModelReasoningBlock": [
-    "Experimental: provider contract for custom harnesses with messages, tool calls, replayable reasoning, history caching and streaming. It may change before release.",
-    "Expérimental : contrat de fournisseur pour les harness personnalisés, avec messages, appels d’outils, raisonnement rejouable, cache d’historique et streaming. Il peut changer avant publication."
+    "Experimental: provider contract for custom harnesses with messages, tool calls, replayable reasoning, history caching and streaming. It may change in a later release.",
+    "Expérimental : contrat de fournisseur pour les harness personnalisés, avec messages, appels d’outils, raisonnement rejouable, cache d’historique et streaming. Il peut changer dans une version ultérieure."
   ],
   "ModelToolSpec": [
-    "Experimental: provider contract for custom harnesses with messages, tool calls, replayable reasoning, history caching and streaming. It may change before release.",
-    "Expérimental : contrat de fournisseur pour les harness personnalisés, avec messages, appels d’outils, raisonnement rejouable, cache d’historique et streaming. Il peut changer avant publication."
+    "Experimental: provider contract for custom harnesses with messages, tool calls, replayable reasoning, history caching and streaming. It may change in a later release.",
+    "Expérimental : contrat de fournisseur pour les harness personnalisés, avec messages, appels d’outils, raisonnement rejouable, cache d’historique et streaming. Il peut changer dans une version ultérieure."
   ],
   "ModelStopReason": [
-    "Experimental: provider contract for custom harnesses with messages, tool calls, replayable reasoning, history caching and streaming. It may change before release.",
-    "Expérimental : contrat de fournisseur pour les harness personnalisés, avec messages, appels d’outils, raisonnement rejouable, cache d’historique et streaming. Il peut changer avant publication."
+    "Experimental: provider contract for custom harnesses with messages, tool calls, replayable reasoning, history caching and streaming. It may change in a later release.",
+    "Expérimental : contrat de fournisseur pour les harness personnalisés, avec messages, appels d’outils, raisonnement rejouable, cache d’historique et streaming. Il peut changer dans une version ultérieure."
   ],
   "defineHarnessTool": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "defineHarnessToolset": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "defineHarnessInstructions": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "CustomHarness": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "CustomHarnessOptions": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "HarnessLimits": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "HarnessToolExecution": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "HarnessInstructions": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "HarnessInstructionContext": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "HarnessInstructionSource": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "HarnessInstructionsOption": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "HarnessTool": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "HarnessToolOptions": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "HarnessToolContext": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "HarnessToolEvent": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "HarnessToolset": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "HarnessToolsetOptions": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "JsonSchema": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "StandardJsonSchema": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "ToolOutput": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "ToolValidation": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "defineHarnessHook": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "defineHarnessPermissions": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "HarnessHook": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "HarnessHookContext": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "HarnessHookDecisions": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "HarnessHookEvents": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "HarnessHookInput": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "HarnessHookOptions": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "HarnessHookPhase": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "HarnessHookResult": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "HarnessToolResultView": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "HarnessPermissionRule": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "HarnessPermissions": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "HarnessPermissionsOptions": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "PermissionDecision": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "PermissionEffect": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "ToolResources": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "harnessFileTools": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "harnessEditTools": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "harnessSearchTools": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "harnessGitTools": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "harnessShellTools": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "ShellToolsOptions": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "defineHarnessContextStrategy": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "truncateToolResults": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "summarizeHistory": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "HarnessContextInput": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "HarnessContextResult": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "HarnessContextStrategy": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "HarnessContextStrategyOptions": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "SummarizeHistoryOptions": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "TruncateToolResultsOptions": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "defineHarnessSkill": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "HarnessSkill": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "HarnessSkillOptions": [
-    "Experimental: part of the unreleased built-in harness engine. The contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Le contrat peut changer avant publication."
+    "Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.",
+    "Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure."
   ],
   "ModelStreamEvent": [
-    "Experimental: provider contract for custom harnesses with messages, tool calls, replayable reasoning, history caching and streaming. It may change before release.",
-    "Expérimental : contrat de fournisseur pour les harness personnalisés, avec messages, appels d’outils, raisonnement rejouable, cache d’historique et streaming. Il peut changer avant publication."
+    "Experimental: provider contract for custom harnesses with messages, tool calls, replayable reasoning, history caching and streaming. It may change in a later release.",
+    "Expérimental : contrat de fournisseur pour les harness personnalisés, avec messages, appels d’outils, raisonnement rejouable, cache d’historique et streaming. Il peut changer dans une version ultérieure."
   ]
 }

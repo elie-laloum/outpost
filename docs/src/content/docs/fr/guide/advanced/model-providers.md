@@ -5,8 +5,8 @@ sidebar:
   order: 8
 ---
 
-:::caution[API non publiée]
-Cette API de l’arbre de travail remplace le client direct expérimental de 4.2.0. Utilisez un package construit depuis ce checkout. Les fournisseurs envoient des requêtes bornées avec messages et appels d’outils, avec ou sans streaming.
+:::caution[API expérimentale]
+Depuis la version 5.0.0, les fournisseurs de modèles remplacent le client direct expérimental de 4.2.0. Ils envoient des requêtes bornées avec messages et appels d’outils, avec ou sans streaming. Les tests utilisent des services locaux simulés ; leurs contrats peuvent encore changer.
 :::
 
 `openaiModelProvider()` configure un service HTTP utilisant Chat Completions ou Responses. `anthropicModelProvider()` utilise Anthropic Messages. Un [harness personnalisé](../../agents/harness/) porte son fournisseur et le pilote ; l’agent sélectionne son modèle avec un nom ou un objet `{ name, reasoning, maxOutputTokens }`. Un modèle inconnu ou inaccessible échoue lors de l’appel au service, sans catalogue ni substitution.
@@ -18,13 +18,13 @@ Un `sandboxProvider` alloue l’environnement d’exécution. Ses constructeurs 
 <details>
 <summary>Préparation complète et exemple exécutable</summary>
 
-Utilisez Node.js 24+ et npm. Construisez ce checkout avec `npm ci` et `npm run build`. Dans un nouveau dossier, installez ce package local :
+Utilisez Node.js 24+ et npm. Dans un nouveau dossier, installez Outpost :
 
 ```sh
 mkdir model-example
 cd model-example
 npm init -y
-npm install /absolute/path/to/outpost
+npm install @elie-laloum/outpost
 ```
 
 Créez un fichier `.env` ignoré avec `MODEL_BASE_URL`, `MODEL_NAME` et `MODEL_API_KEY`. Le service reçoit le prompt et peut facturer l’usage de l’API ; les identifiants d’abonnement CLI ne sont pas utilisés.

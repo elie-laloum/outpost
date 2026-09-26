@@ -3,8 +3,8 @@ title: Build a custom harness (experimental)
 description: Compose a model provider, tools, instructions and limits into an agent that Outpost drives itself.
 ---
 
-:::caution[Unreleased API]
-This working-tree API is experimental. Use a package built from this checkout.
+:::caution[Experimental API]
+The built-in harness engine is experimental since 5.0.0: its contracts may still change, and it has not yet been validated against every model service.
 :::
 
 `claudeHarness()`, `codexHarness()` and `geminiHarness()` delegate the whole task to a CLI that runs its own model and tool loop. `harness()` builds that loop in Outpost instead. You declare what the agent can use, and Outpost drives the model:
@@ -22,13 +22,13 @@ The result is used like any other agent: `agent({ harness, model })`, then `disp
 <details>
 <summary>Complete preparation and executable example</summary>
 
-Use Node.js 24+, npm and Git. Build this checkout with `npm ci` and `npm run build`. In a new directory, install that local package and create a repository with one file:
+Use Node.js 24+, npm and Git. In a new directory, install Outpost and create a repository with one file:
 
 ```sh
 mkdir harness-example
 cd harness-example
 npm init -y
-npm install /absolute/path/to/outpost
+npm install @elie-laloum/outpost
 git init
 echo "# Demo" > README.md
 git add README.md
@@ -323,6 +323,6 @@ Dispatch observers receive `step` before each model request, `text-delta` fragme
 
 ## Not available yet
 
-Interactive attachment is unsupported. See the [roadmap](../../../project/roadmap/#direct-model-harness) for the validation that remains before release.
+Interactive attachment is unsupported. See the [roadmap](../../../project/roadmap/#direct-model-harness) for the validation that remains.
 
 [Harness reference](../../../reference/overview/harness/) · [Model providers](../../advanced/model-providers/)

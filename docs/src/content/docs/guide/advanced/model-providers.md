@@ -5,8 +5,8 @@ sidebar:
   order: 8
 ---
 
-:::caution[Unreleased API]
-This working-tree API replaces the experimental direct client from 4.2.0. Use a package built from this checkout. Providers send bounded requests with messages and tool calls, with or without streaming.
+:::caution[Experimental API]
+Since 5.0.0, model providers replace the experimental direct client from 4.2.0. They send bounded requests with messages and tool calls, with or without streaming. Tests use local simulated services; their contracts may still change.
 :::
 
 `openaiModelProvider()` configures an HTTP service using Chat Completions or Responses. `anthropicModelProvider()` uses Anthropic Messages. A [custom harness](../../agents/harness/) owns its provider and drives it; the agent selects the model with a name or a `{ name, reasoning, maxOutputTokens }` object. An unknown or inaccessible model fails when the service is called, without catalog lookup or model substitution.
@@ -18,13 +18,13 @@ A `sandboxProvider` allocates the execution environment. Its constructors have e
 <details>
 <summary>Complete preparation and executable example</summary>
 
-Use Node.js 24+ and npm. Build this checkout with `npm ci` and `npm run build`. In a new directory, install that local package:
+Use Node.js 24+ and npm. In a new directory, install Outpost:
 
 ```sh
 mkdir model-example
 cd model-example
 npm init -y
-npm install /absolute/path/to/outpost
+npm install @elie-laloum/outpost
 ```
 
 Create an ignored `.env` file with `MODEL_BASE_URL`, `MODEL_NAME` and `MODEL_API_KEY`. The service receives the prompt and can charge for API usage; CLI subscription credentials are not used.

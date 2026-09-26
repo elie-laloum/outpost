@@ -6,7 +6,7 @@ sidebar:
 ---
 
 :::caution[Experimental]
-Experimental: part of the unreleased built-in harness engine. The contract may change before release.
+Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.
 :::
 
 ## Import

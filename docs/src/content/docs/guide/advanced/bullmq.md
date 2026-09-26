@@ -8,13 +8,13 @@ The optional `bullmqTaskQueue` adapter connects `queuedTask` and `runQueueWorker
 <details>
 <summary>Prepare this example from scratch</summary>
 
-Use Node.js **24+**, npm and Docker. No model account or agent credentials are needed. Create a separate demonstration directory and install Outpost 4.2.0 or later with the optional BullMQ dependency:
+Use Node.js **24+**, npm and Docker. No model account or agent credentials are needed. Create a separate demonstration directory and install Outpost 5.0.0 or later with the optional BullMQ dependency:
 
 ```sh
 mkdir outpost-redis-example
 cd outpost-redis-example
 npm init -y
-npm install '@elie-laloum/outpost@^4.2.0' 'bullmq@^5.81.5'
+npm install '@elie-laloum/outpost@^5.0.0' 'bullmq@^5.81.5'
 docker run -d --name outpost-redis-demo \
   -p 127.0.0.1:6379:6379 -v outpost-redis-demo:/data \
   redis:7-alpine redis-server --appendonly yes --maxmemory-policy noeviction

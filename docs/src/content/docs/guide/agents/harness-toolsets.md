@@ -3,8 +3,8 @@ title: Built-in harness toolsets (experimental)
 description: Give a custom harness repository tools to read, search, edit, run commands and inspect Git.
 ---
 
-:::caution[Unreleased API]
-These toolsets are experimental and belong to the unreleased [custom harness](../harness/) engine. Use a package built from this checkout.
+:::caution[Experimental API]
+These toolsets are experimental since 5.0.0 and belong to the [custom harness](../harness/) engine. They have been tested with the local sandbox provider only.
 :::
 
 Outpost provides five toolsets for a [custom harness](../harness/). Each returns a `defineHarnessToolset()` result, so you can combine them with your own tools and restrict them with [permissions](../harness/#control-the-loop-with-hooks-and-permissions).
