@@ -4,7 +4,7 @@ description: Compose a model provider, tools, instructions and limits into an ag
 ---
 
 :::caution[Unreleased API]
-This working-tree API is experimental. Use a package built from this checkout. Custom conversations and streaming are not available yet.
+This working-tree API is experimental. Use a package built from this checkout. Skills and streaming are not available yet.
 :::
 
 `claudeHarness()`, `codexHarness()` and `geminiHarness()` delegate the whole task to a CLI that runs its own model and tool loop. `harness()` builds that loop in Outpost instead. You declare what the agent can use, and Outpost drives the model:
@@ -254,12 +254,41 @@ Pass them with `harness({ permissions, hooks: requireTests, ... })`. Permission 
 
 Instructions tell the model what to do; hooks and permissions enforce it. Permissions are not a security boundary: shell metacharacters can bypass command patterns, and symbolic links can bypass path rules. Run untrusted work in an isolated sandbox provider.
 
+## Conversations, repairs and context
+
+Each turn of a custom harness is recorded as an append-only JSONL transcript in `.outpost/conversations/harness/<id>.jsonl` of the target repository, with private file permissions. Outpost adds this directory to the repository's Git exclusions. The dispatch result returns the `conversation` id and the `transcript` path, so custom harnesses support the same continuation features as Claude Code and Codex:
+
+- `continuation: { id }` resumes the conversation: the next prompt is appended after the full history, including tool calls and results.
+- `continuation: { id, fork: true }` starts a new conversation from a copy of the history; the original is unchanged.
+- `response` repairs reuse the conversation. During a repair turn only `readOnly` tools are offered.
+
+Only one turn can write a conversation at a time; a concurrent resume fails with code `conflict`. If a turn stopped after the model requested tools, resuming adds an error result for each unanswered call. Set `conversations: false` to disable recording, and therefore continuation and repairs. To keep transcripts outside the host, pass `conversations: transportConversations("harness", { transporter, namespace })`; see [storage transports](../../operations/storage-transports/).
+
+Long turns can outgrow the model context. Set `context` to a strategy that rewrites the history before a request:
+
+```ts
+import { summarizeHistory, truncateToolResults } from "@elie-laloum/outpost";
+
+export const shorten = truncateToolResults({
+  keepRecent: 4,
+  maxCharacters: 2_000,
+});
+export const summarize = summarizeHistory({
+  triggerCharacters: 400_000,
+  keepRecentMessages: 6,
+});
+```
+
+`truncateToolResults()` shortens the results of older tool calls and keeps the most recent ones intact. `summarizeHistory()` asks the model to summarize the older part once the history exceeds a size, keeps the first prompt and the recent messages, and costs one extra request. `defineHarnessContextStrategy({ name, compact })` lets you write your own; `compact` receives the messages and a `summarize()` helper and returns a new list, or nothing to keep the history.
+
+The engine validates the new history, removes reasoning blocks from it, since they are only valid in the original conversation, records it as a `compaction` entry in the transcript and emits a `compaction` event. Rewriting the history changes the conversation prefix, so the provider cache restarts from that point.
+
 ## Observe the loop
 
-Dispatch observers receive `step` before each model request, `tool` with a `callId` before each call, `tool-result` with a preview after it, `tool-denied` when permissions or a hook refuse a call, `stop-prevented` when a `stop` hook refuses the answer, `text` for model text, and `usage` for each request. See [Observability](../observability/) for the other events.
+Dispatch observers receive `step` before each model request, `tool` with a `callId` before each call, `tool-result` with a preview after it, `tool-denied` when permissions or a hook refuse a call, `stop-prevented` when a `stop` hook refuses the answer, `compaction` when a context strategy rewrites the history, `conversation` with the conversation id, `text` for model text, and `usage` for each request. See [Observability](../observability/) for the other events.
 
 ## Not available yet
 
-Custom harness conversations are not persisted: continuation, fork and automatic response repairs are rejected. Interactive attachment is unsupported. Context management, skills and streaming are planned; see the [roadmap](../../../project/roadmap/#direct-model-harness).
+Interactive attachment is unsupported. Skills and streaming are planned; see the [roadmap](../../../project/roadmap/#direct-model-harness).
 
 [Harness reference](../../../reference/overview/harness/) · [Model providers](../../advanced/model-providers/)

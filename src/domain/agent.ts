@@ -43,12 +43,14 @@ export function agent(options: AgentOptions): Agent {
     "Create custom harnesses with harness()",
   );
   harness.modelProvider.validate?.(model);
+  const persisted = harness.conversations !== false;
   return Object.freeze({
     kind: "custom",
     name: "custom",
     harness,
     model,
-    capture: false,
-    resumable: false,
+    capture: persisted,
+    resumable: persisted,
+    ...(harness.conversations ? { storage: harness.conversations } : {}),
   });
 }

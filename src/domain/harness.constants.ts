@@ -14,6 +14,8 @@ export const HARNESS_FIELDS: ReadonlySet<string> = new Set([
   "toolExecution",
   "hooks",
   "permissions",
+  "context",
+  "conversations",
   "cache",
 ]);
 

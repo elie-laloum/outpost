@@ -21,8 +21,9 @@ Regroupe les opérations sur les transcripts natifs : localisation sur l’hôte
 
 | Nom           | Type                                                                                                                                                                                                                                                                | Présence | Rôle                                                                                                                                                            |
 | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `transported` | `(format: ConversationFormat, options: import("./transport-conversations.types.js").TransportConversationOptions) => import("../index.js").ConversationStore`                                                                                                       | Requis   | Construit un store natif sur un transport de l’appelant avec un espace de noms stable du projet, incluant les transcripts enfants et la matérialisation locale. |
+| `transported` | `(format: import("./conversations.types.ts").StoredConversationFormat, options: import("./transport-conversations.types.js").TransportConversationOptions) => import("../index.js").ConversationStore`                                                              | Requis   | Construit un store natif sur un transport de l’appelant avec un espace de noms stable du projet, incluant les transcripts enfants et la matérialisation locale. |
 | `native`      | `(format: ConversationFormat) => import("../index.js").ConversationStore`                                                                                                                                                                                           | Requis   | Crée un ConversationStore natif Claude ou Codex pour persister les transcripts.                                                                                 |
+| `harness`     | `() => import("../index.js").ConversationStore`                                                                                                                                                                                                                     | Requis   | Crée le store de conversations par défaut des harness personnalisés, dont les transcriptions se trouvent dans .outpost/conversations/harness du dépôt cible.    |
 | `locate`      | `(format: ConversationFormat, id: string, repository: string, home?: string) => Promise<import("./conversations.types.ts").ConversationLocation>`                                                                                                                   | Requis   | Localise un transcript natif sur l’hôte par format, identifiant, dépôt et home optionnel.                                                                       |
 | `capture`     | `(format: ConversationFormat, id: string, repository: string, lease: import("../index.js").SandboxLease, staging: string, options?: import("./conversations/capture.types.js").CaptureOptions) => Promise<import("./conversations.types.ts").ConversationLocation>` | Requis   | Capture la conversation choisie depuis un bail de sandbox vers le dossier de capture hôte.                                                                      |
 | `restore`     | `(location: import("./conversations.types.ts").ConversationLocation, lease: import("../index.js").SandboxLease, staging: string) => Promise<void>`                                                                                                                  | Requis   | Restaure un transcript localisé dans une sandbox et adapte ses chemins de dépôt.                                                                                |
@@ -38,6 +39,7 @@ Regroupe les opérations sur les transcripts natifs : localisation sur l’hôte
 export declare const conversations: {
   transported: typeof transportConversations;
   native: typeof nativeConversations;
+  harness: typeof harnessConversations;
   locate: typeof locateConversation;
   capture: typeof captureConversation;
   restore: typeof restoreConversation;
@@ -57,6 +59,7 @@ export declare const conversations: {
 
 - [captureConversation](../support-captureconversation/)
 - [ConversationFormat](../conversationformat/)
+- [harnessConversations](../harnessconversations/)
 - [locateConversation](../support-locateconversation/)
 - [nativeConversations](../support-nativeconversations/)
 - [projectKey](../support-projectkey/)

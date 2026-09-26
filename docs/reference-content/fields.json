@@ -392,8 +392,8 @@
     "Identifiant de conversation native à poursuivre ; fork demande une conversation distincte dérivée de celle-ci."
   ],
   "AgentEvent.kind": [
-    "Discriminator selecting the event payload: phase, summary, warning, text, result, prompt, tool, tool-result, tool-denied, step, stop-prevented, conversation, usage, failure, finished or raw.",
-    "Discriminant sélectionnant les données de l’événement : phase, summary, warning, text, result, prompt, tool, tool-result, tool-denied, step, stop-prevented, conversation, usage, failure, finished ou raw."
+    "Discriminator selecting the event payload: phase, summary, warning, text, result, prompt, tool, tool-result, tool-denied, step, stop-prevented, compaction, conversation, usage, failure, finished or raw.",
+    "Discriminant sélectionnant les données de l’événement : phase, summary, warning, text, result, prompt, tool, tool-result, tool-denied, step, stop-prevented, compaction, conversation, usage, failure, finished ou raw."
   ],
   "AgentEvent.name": [
     "Phase name for phase events, or tool name for tool and tool-result events.",
@@ -3197,8 +3197,8 @@
     "Nombre maximal positif d’événements à parcourir, 100 000 par défaut ; cycles et dépassements provoquent un échec."
   ],
   "transportConversations.format": [
-    "Native transcript format, claude or codex; Gemini has no native conversation storage.",
-    "Format natif du transcript, claude ou codex ; Gemini ne dispose pas de stockage de conversations natives."
+    "Transcript format: claude or codex for native CLI transcripts, or harness for custom harness transcripts. Gemini has no native conversation storage.",
+    "Format de transcription : claude ou codex pour les transcriptions natives des CLI, ou harness pour celles des harness personnalisés. Gemini n’a pas de stockage natif des conversations."
   ],
   "transportConversations.options": [
     "Transport and stable project namespace shared by all runners restoring these conversations.",
@@ -4407,5 +4407,105 @@
   "ShellToolsOptions.deadlineMs": [
     "Deadline of each shell command in milliseconds; defaults to 120,000. The harness tool deadline also applies.",
     "Délai de chaque commande shell en millisecondes ; 120 000 par défaut. Le délai des outils du harness s’applique aussi."
+  ],
+  "defineHarnessContextStrategy.options": [
+    "Strategy name and compact function.",
+    "Nom de la stratégie et fonction compact."
+  ],
+  "truncateToolResults.options": [
+    "Number of recent tool results kept intact and the length older results are cut to.",
+    "Nombre de résultats d’outils récents conservés intacts et longueur à laquelle les plus anciens sont coupés."
+  ],
+  "summarizeHistory.options": [
+    "History size that triggers a summary and number of recent messages kept.",
+    "Taille d’historique qui déclenche un résumé et nombre de messages récents conservés."
+  ],
+  "HarnessContextStrategyOptions.name": [
+    "Nonempty name reported in compaction events.",
+    "Nom non vide indiqué dans les événements compaction."
+  ],
+  "HarnessContextStrategy.name": [
+    "Name reported in compaction events.",
+    "Nom indiqué dans les événements compaction."
+  ],
+  "HarnessContextStrategyOptions.compact": [
+    "Return a rewritten message list, or nothing to keep the history. The list must start and end with a user message and keep each tool call paired with its result.",
+    "Renvoie une liste de messages réécrite, ou rien pour garder l’historique. La liste doit commencer et finir par un message utilisateur et garder chaque appel d’outil associé à son résultat."
+  ],
+  "HarnessContextStrategy.compact": [
+    "Run the strategy before a model request.",
+    "Exécute la stratégie avant une requête au modèle."
+  ],
+  "HarnessContextStrategy.kind": [
+    "Definition discriminator: context.",
+    "Discriminant de la définition : context."
+  ],
+  "HarnessContextInput.messages": [
+    "Current effective history about to be sent.",
+    "Historique effectif sur le point d’être envoyé."
+  ],
+  "HarnessContextInput.step": [
+    "Current step number.",
+    "Numéro de l’étape en cours."
+  ],
+  "HarnessContextInput.model": [
+    "Normalized model of the agent.",
+    "Modèle normalisé de l’agent."
+  ],
+  "HarnessContextInput.signal": [
+    "Turn cancellation signal.",
+    "Signal d’annulation de la passe."
+  ],
+  "HarnessContextInput.summarize": [
+    "Ask the agent model for a factual summary of the given messages; the request counts toward usage.",
+    "Demande au modèle de l’agent un résumé factuel des messages donnés ; la requête compte dans l’usage."
+  ],
+  "TruncateToolResultsOptions.keepRecent": [
+    "Number of most recent tool-result messages kept intact; defaults to 4.",
+    "Nombre de messages de résultats d’outils les plus récents conservés intacts ; 4 par défaut."
+  ],
+  "TruncateToolResultsOptions.maxCharacters": [
+    "Length older tool results are cut to; defaults to 2,000 characters.",
+    "Longueur à laquelle les anciens résultats d’outils sont coupés ; 2 000 caractères par défaut."
+  ],
+  "SummarizeHistoryOptions.triggerCharacters": [
+    "Serialized history size that triggers a summary; defaults to 400,000 characters.",
+    "Taille de l’historique sérialisé qui déclenche un résumé ; 400 000 caractères par défaut."
+  ],
+  "SummarizeHistoryOptions.keepRecentMessages": [
+    "Number of recent messages kept after the summary; defaults to 6.",
+    "Nombre de messages récents conservés après le résumé ; 6 par défaut."
+  ],
+  "CustomHarnessOptions.context": [
+    "Strategy that can rewrite the history before each model request, such as truncateToolResults() or summarizeHistory().",
+    "Stratégie qui peut réécrire l’historique avant chaque requête au modèle, comme truncateToolResults() ou summarizeHistory()."
+  ],
+  "CustomHarness.context": [
+    "Context strategy of the harness, when set.",
+    "Stratégie de contexte du harness, si elle est définie."
+  ],
+  "CustomHarnessOptions.conversations": [
+    "Store for turn transcripts; defaults to harnessConversations(). Use transportConversations(\"harness\", …) for remote storage or false to disable continuation and repairs.",
+    "Store des transcriptions de passes ; harnessConversations() par défaut. Utilisez transportConversations(\"harness\", …) pour un stockage distant, ou false pour désactiver continuation et réparations."
+  ],
+  "CustomHarness.conversations": [
+    "Configured conversation store, or false when recording is disabled; absent means the default store.",
+    "Store de conversations configuré, ou false si l’enregistrement est désactivé ; absent signifie le store par défaut."
+  ],
+  "AgentEvent.strategy": [
+    "Name of the context strategy that rewrote the history.",
+    "Nom de la stratégie de contexte qui a réécrit l’historique."
+  ],
+  "AgentEvent.messages": [
+    "Number of messages in the history after compaction.",
+    "Nombre de messages de l’historique après compaction."
+  ],
+  "ReporterHandlers.compaction": [
+    "Handle a custom harness history compaction, with the strategy name and message count; receives pass and at metadata and may return a promise.",
+    "Traite : compaction de l’historique d’un harness personnalisé, avec le nom de la stratégie et le nombre de messages ; reçoit pass et at et peut retourner une promesse."
+  ],
+  "conversations.harness": [
+    "Create the default custom harness conversation store, whose transcripts live in .outpost/conversations/harness of the target repository.",
+    "Crée le store de conversations par défaut des harness personnalisés, dont les transcriptions se trouvent dans .outpost/conversations/harness du dépôt cible."
   ]
 }

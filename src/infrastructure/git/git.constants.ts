@@ -9,4 +9,5 @@ export const runtimeExclusions = [
   "/.outpost/locks/",
   "/.outpost/recovery/",
   "/.outpost/logs/",
+  "/.outpost/conversations/",
 ] as const;

@@ -50,6 +50,11 @@ export type AgentEvent =
       readonly reason: string;
     }
   | { readonly kind: "stop-prevented"; readonly message: string }
+  | {
+      readonly kind: "compaction";
+      readonly strategy: string;
+      readonly messages: number;
+    }
   | { readonly kind: "conversation"; readonly id: string }
   | { readonly kind: "usage"; readonly tokens: Usage }
   | { readonly kind: "failure"; readonly message: string }
@@ -111,8 +116,8 @@ export interface CliAgent extends AgentAdapter {
 }
 
 export interface CustomAgent extends AgentFeatures {
-  readonly resumable: false;
-  readonly capture: false;
+  readonly resumable: boolean;
+  readonly capture: boolean;
   readonly kind: "custom";
   readonly harness: CustomHarness;
   readonly model: AgentModel;

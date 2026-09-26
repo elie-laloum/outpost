@@ -21,8 +21,9 @@ Group native transcript operations: locate on the host, capture from a sandbox, 
 
 | Name          | Type                                                                                                                                                                                                                                                                | Presence | Meaning                                                                                                                                                 |
 | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `transported` | `(format: ConversationFormat, options: import("./transport-conversations.types.js").TransportConversationOptions) => import("../index.js").ConversationStore`                                                                                                       | Required | Build a native conversation store over a caller-owned transport with a stable project namespace, including child transcripts and local materialization. |
+| `transported` | `(format: import("./conversations.types.ts").StoredConversationFormat, options: import("./transport-conversations.types.js").TransportConversationOptions) => import("../index.js").ConversationStore`                                                              | Required | Build a native conversation store over a caller-owned transport with a stable project namespace, including child transcripts and local materialization. |
 | `native`      | `(format: ConversationFormat) => import("../index.js").ConversationStore`                                                                                                                                                                                           | Required | Create a native Claude or Codex ConversationStore for transcript persistence.                                                                           |
+| `harness`     | `() => import("../index.js").ConversationStore`                                                                                                                                                                                                                     | Required | Create the default custom harness conversation store, whose transcripts live in .outpost/conversations/harness of the target repository.                |
 | `locate`      | `(format: ConversationFormat, id: string, repository: string, home?: string) => Promise<import("./conversations.types.ts").ConversationLocation>`                                                                                                                   | Required | Locate a native transcript on the host by format, ID, repository and optional home.                                                                     |
 | `capture`     | `(format: ConversationFormat, id: string, repository: string, lease: import("../index.js").SandboxLease, staging: string, options?: import("./conversations/capture.types.js").CaptureOptions) => Promise<import("./conversations.types.ts").ConversationLocation>` | Required | Capture the selected conversation from a sandbox lease into host staging.                                                                               |
 | `restore`     | `(location: import("./conversations.types.ts").ConversationLocation, lease: import("../index.js").SandboxLease, staging: string) => Promise<void>`                                                                                                                  | Required | Restore a located transcript into a sandbox and relocate its repository paths.                                                                          |
@@ -38,6 +39,7 @@ Group native transcript operations: locate on the host, capture from a sandbox, 
 export declare const conversations: {
   transported: typeof transportConversations;
   native: typeof nativeConversations;
+  harness: typeof harnessConversations;
   locate: typeof locateConversation;
   capture: typeof captureConversation;
   restore: typeof restoreConversation;
@@ -57,6 +59,7 @@ export declare const conversations: {
 
 - [captureConversation](../support-captureconversation/)
 - [ConversationFormat](../conversationformat/)
+- [harnessConversations](../harnessconversations/)
 - [locateConversation](../support-locateconversation/)
 - [nativeConversations](../support-nativeconversations/)
 - [projectKey](../support-projectkey/)

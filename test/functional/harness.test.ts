@@ -273,7 +273,7 @@ test("the built-in loop runs tools in the sandbox and returns the final answer",
     toolEvent?.kind === "tool" ? toolEvent.callId : undefined,
     "call-1-0",
   );
-  assert.equal(result.conversation, undefined);
+  assert.match(result.conversation ?? "", /^[0-9a-f-]{36}$/);
 });
 
 test("tool failures return to the model unless configured to fail the turn", async (t) => {
@@ -529,7 +529,11 @@ test("tool deadlines release tools that ignore cancellation and hold the idle wa
 });
 
 test("custom harness rejects absent capabilities before sandbox allocation", async () => {
-  const configured = developer(scriptedProvider([]));
+  const configured = developer(scriptedProvider([]), [echo], {
+    conversations: false,
+  });
+  assert.equal(configured.resumable, false);
+  assert.equal(configured.capture, false);
   const sandboxProvider = {
     ...localSandboxProvider(),
     async acquire() {

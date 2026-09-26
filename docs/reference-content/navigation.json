@@ -417,6 +417,30 @@
           "title": "Experimental / Expérimental"
         }
       },
+      {
+        "slug": "reference/defineharnesscontextstrategy",
+        "attrs": {
+          "data-api-kind": "function",
+          "data-api-status": "experimental",
+          "title": "Experimental / Expérimental"
+        }
+      },
+      {
+        "slug": "reference/truncatetoolresults",
+        "attrs": {
+          "data-api-kind": "function",
+          "data-api-status": "experimental",
+          "title": "Experimental / Expérimental"
+        }
+      },
+      {
+        "slug": "reference/summarizehistory",
+        "attrs": {
+          "data-api-kind": "function",
+          "data-api-status": "experimental",
+          "title": "Experimental / Expérimental"
+        }
+      },
       { "slug": "reference/harness", "attrs": { "data-api-kind": "type" } },
       {
         "slug": "reference/harnessinstructionsource",
@@ -500,6 +524,14 @@
       },
       {
         "slug": "reference/permissioneffect",
+        "attrs": {
+          "data-api-kind": "type",
+          "data-api-status": "experimental",
+          "title": "Experimental / Expérimental"
+        }
+      },
+      {
+        "slug": "reference/harnesscontextresult",
         "attrs": {
           "data-api-kind": "type",
           "data-api-status": "experimental",
@@ -703,6 +735,46 @@
         }
       },
       {
+        "slug": "reference/harnesscontextinput",
+        "attrs": {
+          "data-api-kind": "interface",
+          "data-api-status": "experimental",
+          "title": "Experimental / Expérimental"
+        }
+      },
+      {
+        "slug": "reference/harnesscontextstrategy",
+        "attrs": {
+          "data-api-kind": "interface",
+          "data-api-status": "experimental",
+          "title": "Experimental / Expérimental"
+        }
+      },
+      {
+        "slug": "reference/harnesscontextstrategyoptions",
+        "attrs": {
+          "data-api-kind": "interface",
+          "data-api-status": "experimental",
+          "title": "Experimental / Expérimental"
+        }
+      },
+      {
+        "slug": "reference/summarizehistoryoptions",
+        "attrs": {
+          "data-api-kind": "interface",
+          "data-api-status": "experimental",
+          "title": "Experimental / Expérimental"
+        }
+      },
+      {
+        "slug": "reference/truncatetoolresultsoptions",
+        "attrs": {
+          "data-api-kind": "interface",
+          "data-api-status": "experimental",
+          "title": "Experimental / Expérimental"
+        }
+      },
+      {
         "slug": "reference/claudesettings",
         "attrs": { "data-api-kind": "interface" }
       },
@@ -766,11 +838,19 @@
         "attrs": { "data-reference-overview": "" }
       },
       {
+        "slug": "reference/harnessconversations",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
         "slug": "reference/conversations",
         "attrs": { "data-api-kind": "constant" }
       },
       {
         "slug": "reference/conversationformat",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/storedconversationformat",
         "attrs": { "data-api-kind": "type" }
       },
       {

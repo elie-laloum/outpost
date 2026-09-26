@@ -29,9 +29,7 @@ export async function executeToolCalls(
   calls: readonly ModelToolCallBlock[],
   step: number,
 ): Promise<readonly ModelToolResultBlock[]> {
-  const tools = new Map(
-    runtime.agent.harness.tools.map((tool) => [tool.name, tool]),
-  );
+  const tools = new Map(runtime.tools.map((tool) => [tool.name, tool]));
   const prepared: PreparedCall[] = [];
   for (const call of calls)
     prepared.push(await prepareCall(runtime, tools, call, step));

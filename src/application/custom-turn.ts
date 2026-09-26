@@ -6,7 +6,12 @@ import { addUsage } from "../domain/usage.ts";
 import { activityWatchdog } from "./activity-watchdog.ts";
 import { executionDefaults } from "./execution.constants.ts";
 import type { DispatchOptions, Turn } from "./execution.types.ts";
+import { openTranscript } from "../infrastructure/conversations/harness-transcript.ts";
+import type { TranscriptHandle } from "../infrastructure/conversations/harness-transcript.types.ts";
+import { storageFor } from "./agent-storage.ts";
+import { harnessHistory } from "./harness-history.ts";
 import { harnessLoop } from "./harness-loop.ts";
+import type { CustomTurnContext } from "./harness.types.ts";
 import { notify } from "./observation.ts";
 
 export async function customTurn(
@@ -15,6 +20,7 @@ export async function customTurn(
   prompt: string,
   options: DispatchOptions<unknown>,
   pass: number,
+  context: CustomTurnContext,
 ): Promise<Turn> {
   const start = Date.now();
   const controller = new AbortController();
@@ -123,12 +129,28 @@ export async function customTurn(
       );
     },
   };
+  let transcript: TranscriptHandle | undefined;
   try {
     signal.throwIfAborted();
     watchdog.refresh(false);
+    const storage = storageFor(agent);
+    transcript = storage
+      ? await openTranscript({
+          repository: context.repository,
+          store: storage,
+          model: agent.model.name,
+          ...(context.continuation
+            ? { continuation: context.continuation }
+            : {}),
+        })
+      : undefined;
+    if (transcript) emit({ kind: "conversation", id: transcript.id });
     const text = await harnessLoop(
       {
         agent,
+        tools: context.repair
+          ? agent.harness.tools.filter((tool) => tool.readOnly)
+          : agent.harness.tools,
         modelProvider,
         sandbox,
         signal,
@@ -136,6 +158,7 @@ export async function customTurn(
         hold: () => watchdog.hold(),
       },
       prompt,
+      harnessHistory(transcript),
     );
     signal.throwIfAborted();
     for (const value of [
@@ -163,11 +186,18 @@ export async function customTurn(
       pass,
       at: new Date().toISOString(),
     });
-    return { text, usage, status: 0, durationMs: Date.now() - start };
+    return {
+      text,
+      usage,
+      status: 0,
+      durationMs: Date.now() - start,
+      ...(transcript ? { conversation: transcript.id } : {}),
+    };
   } catch (error) {
     signal.throwIfAborted();
     throw error;
   } finally {
+    await transcript?.close();
     controller.abort(new OutpostError("aborted", "Harness turn ended"));
     clearTimeout(timer);
     watchdog.close();

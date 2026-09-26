@@ -18,7 +18,7 @@ Utilisez `harness()` pour qu’Outpost pilote lui-même le modèle. Il combine u
 
 Construire un harness ne lance ni processus, ni connexion, ni requête réseau. Une CLI possède sa boucle interne modèle/outils. Claude et Codex prennent en charge capture, reprise et fork natifs ; Gemini prend en charge les sessions neuves.
 
-Le moteur d’Outpost tourne dans le processus Outpost. Chaque étape est une requête au modèle ; les outils passent par le sandbox emprunté, et les limites font échouer la passe avec le code `limit` au lieu de réussir. Il n’a pas encore de conversations persistées, de réparations automatiques de réponse ni de terminal interactif. `AgentAdapter` et `AgentInput` décrivent la construction des commandes CLI et le décodage des événements. L’allocation du sandbox relève de [Providers](../providers/).
+Le moteur d’Outpost tourne dans le processus Outpost. Chaque étape est une requête au modèle ; les outils passent par le sandbox emprunté, et les limites font échouer la passe avec le code `limit` au lieu de réussir. Les passes sont enregistrées dans des transcriptions qui permettent continuation, fork et réparations de réponse, et des stratégies de contexte peuvent compacter les longs historiques. Le terminal interactif n’est pas pris en charge. `AgentAdapter` et `AgentInput` décrivent la construction des commandes CLI et le décodage des événements. L’allocation du sandbox relève de [Providers](../providers/).
 
 Ces API de harness sont implémentées mais non publiées ; le moteur et ses définitions sont expérimentaux.
 
@@ -27,6 +27,7 @@ Ces API de harness sont implémentées mais non publiées ; le moteur et ses dé
 - [harness](../../function-harness/) compose le moteur d’Outpost.
 - [defineHarnessTool](../../defineharnesstool/), [defineHarnessToolset](../../defineharnesstoolset/) et [defineHarnessInstructions](../../defineharnessinstructions/) déclarent ce que le moteur peut utiliser.
 - [harnessFileTools](../../harnessfiletools/), [harnessEditTools](../../harnessedittools/), [harnessSearchTools](../../harnesssearchtools/), [harnessGitTools](../../harnessgittools/) et [harnessShellTools](../../harnessshelltools/) fournissent des outils de dépôt.
+- [defineHarnessContextStrategy](../../defineharnesscontextstrategy/), [truncateToolResults](../../truncatetoolresults/) et [summarizeHistory](../../summarizehistory/) maintiennent les longs historiques dans le contexte du modèle.
 - [defineHarnessHook](../../defineharnesshook/) et [defineHarnessPermissions](../../defineharnesspermissions/) contrôlent les appels d’outils et la fin de la boucle.
 - [claudeHarness](../../claudeharness/), [codexHarness](../../codexharness/) et [geminiHarness](../../geminiharness/) configurent les presets CLI.
 - [Harness](../../harness/) est le contrat commun de composition.

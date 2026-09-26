@@ -31,7 +31,11 @@ export async function downloadChanges(
     .split("\0")
     .filter(Boolean);
   for (const file of incoming) {
-    if (/^\.outpost\/(locks|recovery|workspaces|logs)(\/|$)/i.test(file))
+    if (
+      /^\.outpost\/(locks|recovery|workspaces|logs|conversations)(\/|$)/i.test(
+        file,
+      )
+    )
       throw new OutpostError(
         "workspace",
         "Remote file overlaps Outpost runtime state",

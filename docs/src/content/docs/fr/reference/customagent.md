@@ -15,8 +15,8 @@ import type { CustomAgent } from "@elie-laloum/outpost";
 
 | Nom                     | Type                                                  | Présence  | Rôle                                                                                                                             |
 | ----------------------- | ----------------------------------------------------- | --------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `resumable`             | `false`                                               | Requis    | Toujours faux : les callbacks personnalisés n’ont ni reprise native ni réparation automatique.                                   |
-| `capture`               | `false`                                               | Requis    | Toujours faux : le runner personnalisé ne capture pas de transcripts natifs.                                                     |
+| `resumable`             | `boolean`                                             | Requis    | Toujours faux : les callbacks personnalisés n’ont ni reprise native ni réparation automatique.                                   |
+| `capture`               | `boolean`                                             | Requis    | Toujours faux : le runner personnalisé ne capture pas de transcripts natifs.                                                     |
 | `kind`                  | `"custom"`                                            | Requis    | Discriminant d’exécution : custom.                                                                                               |
 | `harness`               | `CustomHarness`                                       | Requis    | Harness personnalisé avec son fournisseur de modèles.                                                                            |
 | `model`                 | `AgentModel`                                          | Requis    | AgentModel normalisé et figé dont le nom, le raisonnement et la limite de sortie s’appliquent par défaut aux requêtes du modèle. |
@@ -32,8 +32,8 @@ import type { CustomAgent } from "@elie-laloum/outpost";
 
 ```ts
 export interface CustomAgent extends AgentFeatures {
-  readonly resumable: false;
-  readonly capture: false;
+  readonly resumable: boolean;
+  readonly capture: boolean;
   readonly kind: "custom";
   readonly harness: CustomHarness;
   readonly model: AgentModel;

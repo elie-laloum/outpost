@@ -8,10 +8,12 @@ import type {
 } from "../domain/model.types.ts";
 import { addUsage } from "../domain/usage.ts";
 import type {
+  HarnessHistory,
   HarnessRuntime,
   LoopState,
   StopHandler,
 } from "./harness.types.ts";
+import { compact } from "./harness-context.ts";
 import {
   afterModel,
   beforeModel,
@@ -23,10 +25,10 @@ import { executeToolCalls } from "./tool-execution.ts";
 const stopHandlers: Readonly<Record<ModelStopReason, StopHandler>> = {
   end: async (runtime, state, result, content) => {
     const message = await stopRequest(runtime, result.text, state.step);
+    await state.history.append({ role: "assistant", content });
     if (message === undefined) return result.text;
     runtime.emit({ kind: "stop-prevented", message });
-    state.messages.push({ role: "assistant", content });
-    state.messages.push({
+    await state.history.append({
       role: "user",
       content: [{ type: "text", text: message }],
     });
@@ -55,8 +57,8 @@ const stopHandlers: Readonly<Record<ModelStopReason, StopHandler>> = {
         "maxToolCalls",
         `Harness exceeded ${maxToolCalls} tool calls`,
       );
-    state.messages.push({ role: "assistant", content });
-    state.messages.push({
+    await state.history.append({ role: "assistant", content });
+    await state.history.append({
       role: "user",
       content: await executeToolCalls(runtime, calls, state.step),
     });
@@ -67,6 +69,7 @@ const stopHandlers: Readonly<Record<ModelStopReason, StopHandler>> = {
 export async function harnessLoop(
   runtime: HarnessRuntime,
   prompt: string,
+  history: HarnessHistory,
 ): Promise<string> {
   const { harness, model } = runtime.agent;
   const system = [
@@ -75,14 +78,15 @@ export async function harnessLoop(
   ]
     .filter((text) => text.trim())
     .join("\n\n");
-  const tools: ModelToolSpec[] = harness.tools.map((tool) => ({
+  const tools: ModelToolSpec[] = runtime.tools.map((tool) => ({
     name: tool.name,
     description: tool.description,
     inputSchema: tool.inputSchema,
   }));
-  const messages: LoopState["messages"] = [
-    { role: "user", content: [{ type: "text", text: prompt }] },
-  ];
+  await history.append({
+    role: "user",
+    content: [{ type: "text", text: prompt }],
+  });
   let usage: Usage = { input: 0, cached: 0, output: 0 };
   let toolCalls = 0;
   for (let step = 1; ; step++) {
@@ -96,10 +100,11 @@ export async function harnessLoop(
     if (exceeded)
       throw limit("usage", `Harness exceeded its ${exceeded} token budget`);
     runtime.emit({ kind: "step", index: step });
-    await beforeModel(runtime, messages, step);
+    await compact(runtime, history, step);
+    await beforeModel(runtime, history.messages, step);
     const result = await runtime.modelProvider.request({
       model: model.name,
-      messages: [...messages],
+      messages: history.messages,
       ...(system ? { system } : {}),
       ...(tools.length ? { tools } : {}),
       ...(harness.cache ? { cache: true } : {}),
@@ -117,7 +122,7 @@ export async function harnessLoop(
     for (const block of content)
       if (block.type === "text" && block.text)
         runtime.emit({ kind: "text", text: block.text });
-    const state: LoopState = { messages, step, toolCalls };
+    const state: LoopState = { history, step, toolCalls };
     const reason = result.stopReason ?? inferredStop(content);
     const answer = await stopHandlers[reason](runtime, state, result, content);
     toolCalls = state.toolCalls;

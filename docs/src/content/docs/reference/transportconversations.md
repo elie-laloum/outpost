@@ -19,12 +19,12 @@ Build a Claude or Codex ConversationStore using transport snapshots and a stable
 
 ## Parameters and properties
 
-| Name                  | Type                           | Presence | Meaning                                                                                                                    |
-| --------------------- | ------------------------------ | -------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `format`              | `ConversationFormat`           | Required | Native transcript format, claude or codex; Gemini has no native conversation storage.                                      |
-| `options`             | `TransportConversationOptions` | Required | Transport and stable project namespace shared by all runners restoring these conversations.                                |
-| `options.namespace`   | `string`                       | Required | Stable logical project namespace, independent of checkout paths. Use distinct namespaces for unrelated projects.           |
-| `options.transporter` | `Transport`                    | Required | Caller-owned object transport used by the store or operation. Closing a workflow or sandbox does not close this transport. |
+| Name                  | Type                           | Presence | Meaning                                                                                                                                              |
+| --------------------- | ------------------------------ | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `format`              | `StoredConversationFormat`     | Required | Transcript format: claude or codex for native CLI transcripts, or harness for custom harness transcripts. Gemini has no native conversation storage. |
+| `options`             | `TransportConversationOptions` | Required | Transport and stable project namespace shared by all runners restoring these conversations.                                                          |
+| `options.namespace`   | `string`                       | Required | Stable logical project namespace, independent of checkout paths. Use distinct namespaces for unrelated projects.                                     |
+| `options.transporter` | `Transport`                    | Required | Caller-owned object transport used by the store or operation. Closing a workflow or sandbox does not close this transport.                           |
 
 ## Returns
 
@@ -34,13 +34,13 @@ Build a Claude or Codex ConversationStore using transport snapshots and a stable
 
 ```ts
 export declare function transportConversations(
-  format: ConversationFormat,
+  format: StoredConversationFormat,
   options: TransportConversationOptions,
 ): ConversationStore;
 ```
 
 ## Related contracts
 
-- [ConversationFormat](../conversationformat/)
 - [ConversationStore](../conversationstore/)
+- [StoredConversationFormat](../storedconversationformat/)
 - [TransportConversationOptions](../transportconversationoptions/)

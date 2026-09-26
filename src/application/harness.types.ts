@@ -8,9 +8,11 @@ import type {
 } from "../domain/model.types.ts";
 import type { SandboxLease } from "../domain/sandbox.types.ts";
 import type { HarnessTool } from "../domain/tool.types.ts";
+import type { DispatchOptions, TurnContext } from "./execution.types.ts";
 
 export interface HarnessRuntime {
   readonly agent: CustomAgent;
+  readonly tools: readonly HarnessTool[];
   readonly modelProvider: ModelProvider;
   readonly sandbox: SandboxLease;
   readonly signal: AbortSignal;
@@ -31,8 +33,18 @@ export interface ToolOutcome {
   readonly isError: boolean;
 }
 
+export interface HarnessHistory {
+  readonly messages: readonly ModelMessage[];
+  append(message: ModelMessage): Promise<void>;
+  replace(messages: readonly ModelMessage[]): Promise<void>;
+}
+
+export interface CustomTurnContext extends TurnContext {
+  readonly continuation?: DispatchOptions["continuation"];
+}
+
 export interface LoopState {
-  readonly messages: ModelMessage[];
+  readonly history: HarnessHistory;
   readonly step: number;
   toolCalls: number;
 }
@@ -54,3 +66,9 @@ export interface PreparedCall {
 export interface ToolDenial {
   readonly deny: string;
 }
+
+export type BlockRenderers = {
+  readonly [Type in ModelContentBlock["type"]]: (
+    block: Extract<ModelContentBlock, { type: Type }>,
+  ) => string;
+};

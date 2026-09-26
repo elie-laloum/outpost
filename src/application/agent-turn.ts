@@ -5,7 +5,7 @@ import type { SandboxLease } from "../domain/sandbox.types.ts";
 import { activityWatchdog } from "./activity-watchdog.ts";
 import { agentOutput } from "./agent-output.ts";
 import { executionDefaults } from "./execution.constants.ts";
-import type { DispatchOptions, Turn } from "./execution.types.ts";
+import type { DispatchOptions, Turn, TurnContext } from "./execution.types.ts";
 import { notify } from "./observation.ts";
 
 export async function turn(
@@ -16,9 +16,13 @@ export async function turn(
   continuation: DispatchOptions["continuation"],
   markers: readonly string[],
   pass: number,
+  context: TurnContext,
 ): Promise<Turn> {
   if (agent.kind === "custom")
-    return customTurn(lease, agent, prompt, options, pass);
+    return customTurn(lease, agent, prompt, options, pass, {
+      ...context,
+      continuation,
+    });
   const start = Date.now();
   const controller = new AbortController();
   const signal = options.signal

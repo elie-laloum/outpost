@@ -41,6 +41,7 @@ test("human reporter exposes phases, duration and raw token counts while quiet m
     sink({ kind: "result", text: "answer" });
     sink({ kind: "tool", name: "read", input: { path: "x" } });
     sink({ kind: "step", index: 3 });
+    sink({ kind: "compaction", strategy: "summarize-history", messages: 4 });
     sink({ kind: "tool-denied", callId: "d", name: "rm", reason: "unsafe" });
     sink({ kind: "stop-prevented", message: "run tests first" });
     sink({
@@ -75,6 +76,8 @@ test("human reporter exposes phases, duration and raw token counts while quiet m
   assert.doesNotMatch(normal, /missing-file|step 3/);
   assert.match(verbose, /tool failed: read missing-file/);
   assert.match(verbose, /step 3/);
+  assert.match(verbose, /context compacted by summarize-history · 4 messages/);
+  assert.doesNotMatch(normal, /context compacted/);
   assert.match(verbose, /raw-line/);
   assert.match(verbose, /\/work/);
   assert.equal(quiet, "");

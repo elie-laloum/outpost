@@ -358,5 +358,21 @@
   "harnessShellTools": [
     "Create the shell toolset: shell runs sh -c in the repository root with a deadline and no input, and reports the exit status, stdout and stderr. Requires a POSIX shell in the sandbox.",
     "Crée le jeu d’outils shell : shell exécute sh -c à la racine du dépôt avec un délai et sans entrée, et renvoie statut de sortie, stdout et stderr. Exige un shell POSIX dans le sandbox."
+  ],
+  "defineHarnessContextStrategy": [
+    "Define how a custom harness rewrites its history before a model request. compact receives the messages and a summarize() helper and returns a new list or nothing; the engine validates it, removes replayed reasoning and records a compaction in the transcript.",
+    "Définit comment un harness personnalisé réécrit son historique avant une requête au modèle. compact reçoit les messages et une aide summarize(), et renvoie une nouvelle liste ou rien ; le moteur la valide, retire le raisonnement rejoué et enregistre une compaction dans la transcription."
+  ],
+  "truncateToolResults": [
+    "Create a context strategy that shortens the results of older tool calls and keeps the most recent ones intact. It changes nothing until an older result exceeds the limit.",
+    "Crée une stratégie de contexte qui raccourcit les résultats des anciens appels d’outils et laisse intacts les plus récents. Elle ne change rien tant qu’aucun ancien résultat ne dépasse la limite."
+  ],
+  "summarizeHistory": [
+    "Create a context strategy that, once the history exceeds a size, asks the model to summarize the older part and keeps the first prompt and the recent messages. Each summary costs one extra request.",
+    "Crée une stratégie de contexte qui, quand l’historique dépasse une taille, demande au modèle de résumer la partie ancienne et conserve le premier prompt et les messages récents. Chaque résumé coûte une requête de plus."
+  ],
+  "harnessConversations": [
+    "Create the default conversation store of custom harnesses. Transcripts live in .outpost/conversations/harness under the target repository; locating a missing conversation fails with code session, and restore is a no-op because the loop runs on the host.",
+    "Crée le store de conversations par défaut des harness personnalisés. Les transcriptions se trouvent dans .outpost/conversations/harness du dépôt cible ; localiser une conversation absente échoue avec le code session, et restore ne fait rien car la boucle tourne sur l’hôte."
   ]
 }

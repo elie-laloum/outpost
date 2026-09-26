@@ -4,7 +4,8 @@ import { dirname, join, relative } from "node:path";
 import type { ConversationStore } from "../domain/conversation.types.ts";
 import { invariant } from "../domain/errors.ts";
 import { transportKey } from "../domain/transport.ts";
-import type { ConversationFormat } from "./conversations.types.ts";
+import type { StoredConversationFormat } from "./conversations.types.ts";
+import { harnessConversations } from "./conversations/harness-store.ts";
 import type { TransportConversationOptions } from "./transport-conversations.types.ts";
 import { nativeConversations } from "./conversations/native-store.ts";
 import { files } from "./conversations/files.ts";
@@ -13,11 +14,23 @@ import { jsonBytes, jsonObject, transportReference } from "./transport-json.ts";
 import { archiveFiles, restoreArchiveFiles } from "./transport-archive.ts";
 import { safeDestination } from "./files.ts";
 
+const baseStores: Readonly<
+  Record<StoredConversationFormat, () => ConversationStore>
+> = {
+  claude: () => nativeConversations("claude"),
+  codex: () => nativeConversations("codex"),
+  harness: harnessConversations,
+};
+
 export function transportConversations(
-  format: ConversationFormat,
+  format: StoredConversationFormat,
   options: TransportConversationOptions,
 ): ConversationStore {
-  const native = nativeConversations(format);
+  invariant(
+    Object.hasOwn(baseStores, format),
+    "Unsupported conversation format",
+  );
+  const native = baseStores[format]();
   const prefix = `conversations/${transportKey(options.namespace)}/${format}`;
   const key = (id: string) => {
     validId(id);

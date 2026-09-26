@@ -6,7 +6,7 @@ sidebar:
 ---
 
 :::caution[Experimental]
-Experimental: part of the unreleased built-in harness engine. Persisted conversations, built-in toolsets and streaming are not available yet; the contract may change before release.
+Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.
 :::
 
 ## Import
@@ -23,17 +23,19 @@ Compose the built-in Outpost engine from a model provider, tools, instructions, 
 
 ## Parameters and properties
 
-| Name                    | Type                                                                              | Presence | Meaning                                                                                                                                                            |
-| ----------------------- | --------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `options`               | `CustomHarnessOptions`                                                            | Required | Model provider, instructions, tools, loop limits, tool execution settings and history caching for the built-in Outpost engine.                                     |
-| `options.modelProvider` | `ModelProvider`                                                                   | Required | Request transport the engine calls for each step; it validates the agent model when the agent is composed.                                                         |
-| `options.instructions`  | `HarnessInstructionsOption \| undefined`                                          | Optional | System instructions as text, a defineHarnessInstructions() result or a list of both. Resolved at each turn and joined with blank lines; empty results are skipped. |
-| `options.tools`         | `readonly (HarnessTool<unknown> \| HarnessToolset)[] \| undefined`                | Optional | Tools and toolsets the model may call. Nested toolsets are flattened; names must be unique across the harness.                                                     |
-| `options.limits`        | `HarnessLimits \| undefined`                                                      | Optional | Bounds on steps, tool calls and token usage. Reaching one fails the turn with code limit.                                                                          |
-| `options.toolExecution` | `HarnessToolExecution \| undefined`                                               | Optional | Tool concurrency, per-call deadline and error policy.                                                                                                              |
-| `options.hooks`         | `readonly HarnessHook<import("./hook.types.ts").HarnessHookPhase>[] \| undefined` | Optional | Hooks from defineHarnessHook, run in declaration order within each phase.                                                                                          |
-| `options.permissions`   | `HarnessPermissions \| undefined`                                                 | Optional | Rules from defineHarnessPermissions, evaluated before before-tool hooks.                                                                                           |
-| `options.cache`         | `boolean \| undefined`                                                            | Optional | Ask the provider to cache the conversation prefix; defaults to true. OpenAI caches stable prefixes automatically.                                                  |
+| Name                    | Type                                                                              | Presence | Meaning                                                                                                                                                                   |
+| ----------------------- | --------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `options`               | `CustomHarnessOptions`                                                            | Required | Model provider, instructions, tools, loop limits, tool execution settings and history caching for the built-in Outpost engine.                                            |
+| `options.modelProvider` | `ModelProvider`                                                                   | Required | Request transport the engine calls for each step; it validates the agent model when the agent is composed.                                                                |
+| `options.instructions`  | `HarnessInstructionsOption \| undefined`                                          | Optional | System instructions as text, a defineHarnessInstructions() result or a list of both. Resolved at each turn and joined with blank lines; empty results are skipped.        |
+| `options.tools`         | `readonly (HarnessTool<unknown> \| HarnessToolset)[] \| undefined`                | Optional | Tools and toolsets the model may call. Nested toolsets are flattened; names must be unique across the harness.                                                            |
+| `options.limits`        | `HarnessLimits \| undefined`                                                      | Optional | Bounds on steps, tool calls and token usage. Reaching one fails the turn with code limit.                                                                                 |
+| `options.toolExecution` | `HarnessToolExecution \| undefined`                                               | Optional | Tool concurrency, per-call deadline and error policy.                                                                                                                     |
+| `options.hooks`         | `readonly HarnessHook<import("./hook.types.ts").HarnessHookPhase>[] \| undefined` | Optional | Hooks from defineHarnessHook, run in declaration order within each phase.                                                                                                 |
+| `options.permissions`   | `HarnessPermissions \| undefined`                                                 | Optional | Rules from defineHarnessPermissions, evaluated before before-tool hooks.                                                                                                  |
+| `options.context`       | `HarnessContextStrategy \| undefined`                                             | Optional | Strategy that can rewrite the history before each model request, such as truncateToolResults() or summarizeHistory().                                                     |
+| `options.conversations` | `false \| ConversationStore \| undefined`                                         | Optional | Store for turn transcripts; defaults to harnessConversations(). Use transportConversations("harness", …) for remote storage or false to disable continuation and repairs. |
+| `options.cache`         | `boolean \| undefined`                                                            | Optional | Ask the provider to cache the conversation prefix; defaults to true. OpenAI caches stable prefixes automatically.                                                         |
 
 ## Returns
 

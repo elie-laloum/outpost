@@ -132,7 +132,7 @@ Le bucket ou endpoint compatible doit prendre en charge PUT et DELETE conditionn
 | Inspection et quotas     | `inspectRecovery({ transporter, resources: true })`, `assertRecoveryQuota({ transporter, maxBytes })`                                          | Observe les contenus et les activités. La propriété d’un PID distant reste non vérifiée.                                                                     |
 | Rétention                | `planRecoveryRetention({ transporter, policy })`, puis `pruneRecoveryRetention(plan, { transporter })`                                         | Seuls les journaux fermés explicitement sélectionnés sont éligibles. Composition du groupe et révisions sont revalidées.                                     |
 
-Un adaptateur peut être composé ainsi : `{ ...agent({ harness: claudeHarness() }), storage: transportConversations("claude", { transporter, namespace: "project-a" }) }`. L’authentification native reste indépendante du stockage des transcripts.
+Un adaptateur peut être composé ainsi : `{ ...agent({ harness: claudeHarness() }), storage: transportConversations("claude", { transporter, namespace: "project-a" }) }`. L’authentification native reste indépendante du stockage des transcripts. Un harness personnalisé stocke ses transcriptions de la même façon avec `harness({ conversations: transportConversations("harness", { transporter, namespace: "project-a" }), ... })`.
 
 ## Propriété et écritures interrompues
 

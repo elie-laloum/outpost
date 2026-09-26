@@ -4,7 +4,7 @@ description: Composez un fournisseur de modèles, des outils, des instructions e
 ---
 
 :::caution[API non publiée]
-Cette API de l’arbre de travail est expérimentale. Utilisez un package construit depuis ce checkout. Conversations personnalisées et streaming ne sont pas encore disponibles.
+Cette API de l’arbre de travail est expérimentale. Utilisez un package construit depuis ce checkout. Skills et streaming ne sont pas encore disponibles.
 :::
 
 `claudeHarness()`, `codexHarness()` et `geminiHarness()` confient toute la tâche à une CLI qui exécute sa propre boucle de modèle et d’outils. `harness()` construit cette boucle dans Outpost. Vous déclarez ce que l’agent peut utiliser, et Outpost pilote le modèle :
@@ -254,12 +254,41 @@ Passez-les avec `harness({ permissions, hooks: requireTests, ... })`. Les règle
 
 Les instructions disent au modèle quoi faire ; les hooks et les permissions l’imposent. Les permissions ne sont pas une frontière de sécurité : les métacaractères du shell peuvent contourner les motifs de commande, et les liens symboliques les règles de chemins. Exécutez le travail non fiable dans un provider de sandbox isolé.
 
+## Conversations, réparations et contexte
+
+Chaque passe d’un harness personnalisé est enregistrée comme transcription JSONL en ajout seul dans `.outpost/conversations/harness/<id>.jsonl` du dépôt cible, avec des permissions privées. Outpost ajoute ce dossier aux exclusions Git du dépôt. Le résultat du dispatch renvoie l’identifiant `conversation` et le chemin `transcript` : les harness personnalisés prennent en charge les mêmes fonctions de continuation que Claude Code et Codex.
+
+- `continuation: { id }` reprend la conversation : le prompt suivant s’ajoute après tout l’historique, appels et résultats d’outils compris.
+- `continuation: { id, fork: true }` démarre une nouvelle conversation à partir d’une copie de l’historique ; l’original reste inchangé.
+- Les réparations de `response` réutilisent la conversation. Pendant une passe de réparation, seuls les outils `readOnly` sont proposés.
+
+Une seule passe peut écrire une conversation à la fois ; une reprise concurrente échoue avec le code `conflict`. Si une passe s’est arrêtée après une demande d’outils, la reprise ajoute un résultat en erreur pour chaque appel sans réponse. Passez `conversations: false` pour désactiver l’enregistrement, et donc la continuation et les réparations. Pour conserver les transcriptions hors de l’hôte, passez `conversations: transportConversations("harness", { transporter, namespace })` ; voir [les transports de stockage](../../operations/storage-transports/).
+
+Les longues passes peuvent dépasser le contexte du modèle. Fixez `context` à une stratégie qui réécrit l’historique avant une requête :
+
+```ts
+import { summarizeHistory, truncateToolResults } from "@elie-laloum/outpost";
+
+export const shorten = truncateToolResults({
+  keepRecent: 4,
+  maxCharacters: 2_000,
+});
+export const summarize = summarizeHistory({
+  triggerCharacters: 400_000,
+  keepRecentMessages: 6,
+});
+```
+
+`truncateToolResults()` raccourcit les résultats des anciens appels d’outils et laisse intacts les plus récents. `summarizeHistory()` demande au modèle de résumer la partie ancienne quand l’historique dépasse une taille, conserve le premier prompt et les messages récents, et coûte une requête de plus. `defineHarnessContextStrategy({ name, compact })` permet d’écrire la vôtre ; `compact` reçoit les messages et une aide `summarize()`, et renvoie une nouvelle liste, ou rien pour garder l’historique.
+
+Le moteur valide le nouvel historique, en retire les blocs de raisonnement, valables seulement dans la conversation d’origine, l’enregistre comme entrée `compaction` dans la transcription et émet un événement `compaction`. Réécrire l’historique change le préfixe de la conversation : le cache du fournisseur repart de ce point.
+
 ## Observer la boucle
 
-Les observateurs du dispatch reçoivent `step` avant chaque requête au modèle, `tool` avec un `callId` avant chaque appel, `tool-result` avec un aperçu après, `tool-denied` quand les permissions ou un hook refusent un appel, `stop-prevented` quand un hook `stop` refuse la réponse, `text` pour le texte du modèle et `usage` pour chaque requête. Voir [Observabilité](../observability/) pour les autres événements.
+Les observateurs du dispatch reçoivent `step` avant chaque requête au modèle, `tool` avec un `callId` avant chaque appel, `tool-result` avec un aperçu après, `tool-denied` quand les permissions ou un hook refusent un appel, `stop-prevented` quand un hook `stop` refuse la réponse, `compaction` quand une stratégie de contexte réécrit l’historique, `conversation` avec l’identifiant de conversation, `text` pour le texte du modèle et `usage` pour chaque requête. Voir [Observabilité](../observability/) pour les autres événements.
 
 ## Pas encore disponible
 
-Les conversations des harness personnalisés ne sont pas persistées : continuation, fork et réparations automatiques des réponses sont refusés. Le terminal interactif n’est pas pris en charge. Gestion du contexte, skills et streaming sont prévus ; voir la [feuille de route](../../../project/roadmap/#direct-model-harness).
+Le terminal interactif n’est pas pris en charge. Skills et streaming sont prévus ; voir la [feuille de route](../../../project/roadmap/#direct-model-harness).
 
 [Référence Harness](../../../reference/overview/harness/) · [Fournisseurs de modèles](../../advanced/model-providers/)

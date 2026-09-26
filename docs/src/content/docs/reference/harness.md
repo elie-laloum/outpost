@@ -26,6 +26,8 @@ The fields below cover all variants; the signature specifies their allowed combi
 | `toolExecution` | `Required<HarnessToolExecution>`                                     | Variant-dependent | Normalized tool execution settings with defaults applied.                                                                                            |
 | `hooks`         | `readonly HarnessHook<import("./hook.types.ts").HarnessHookPhase>[]` | Variant-dependent | Frozen hooks of the harness.                                                                                                                         |
 | `permissions`   | `HarnessPermissions \| undefined`                                    | Variant-dependent | Permission rules evaluated before before-tool hooks, when set.                                                                                       |
+| `context`       | `HarnessContextStrategy \| undefined`                                | Variant-dependent | Context strategy of the harness, when set.                                                                                                           |
+| `conversations` | `false \| ConversationStore \| undefined`                            | Variant-dependent | Configured conversation store, or false when recording is disabled; absent means the default store.                                                  |
 | `cache`         | `boolean`                                                            | Variant-dependent | Whether each request asks the provider to cache the conversation prefix.                                                                             |
 
 ## Signature

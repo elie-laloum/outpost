@@ -80,6 +80,7 @@ export async function execute<T>(
       continuation,
       markers,
       index + 1,
+      { repository: workspace.repository, repair: repair !== undefined },
     );
     const current = afterTurn ? await afterTurn(finished) : finished;
     turns.push(current);

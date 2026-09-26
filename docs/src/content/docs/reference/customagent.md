@@ -15,8 +15,8 @@ import type { CustomAgent } from "@elie-laloum/outpost";
 
 | Name                    | Type                                                  | Presence | Meaning                                                                                                       |
 | ----------------------- | ----------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------- |
-| `resumable`             | `false`                                               | Required | Always false: custom callbacks have no native conversation continuation or automatic response repair.         |
-| `capture`               | `false`                                               | Required | Always false: the custom runner does not capture native transcripts.                                          |
+| `resumable`             | `boolean`                                             | Required | Always false: custom callbacks have no native conversation continuation or automatic response repair.         |
+| `capture`               | `boolean`                                             | Required | Always false: the custom runner does not capture native transcripts.                                          |
 | `kind`                  | `"custom"`                                            | Required | Execution discriminator: custom.                                                                              |
 | `harness`               | `CustomHarness`                                       | Required | Custom callback harness with its configured model provider.                                                   |
 | `model`                 | `AgentModel`                                          | Required | Normalized frozen AgentModel whose name, reasoning and output limit are applied to model requests by default. |
@@ -32,8 +32,8 @@ import type { CustomAgent } from "@elie-laloum/outpost";
 
 ```ts
 export interface CustomAgent extends AgentFeatures {
-  readonly resumable: false;
-  readonly capture: false;
+  readonly resumable: boolean;
+  readonly capture: boolean;
   readonly kind: "custom";
   readonly harness: CustomHarness;
   readonly model: AgentModel;

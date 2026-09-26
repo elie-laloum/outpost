@@ -1,3 +1,4 @@
+import type { ConversationStore } from "./conversation.types.ts";
 import { invariant, positive } from "./errors.ts";
 import {
   HARNESS_DEFAULTS,
@@ -49,6 +50,16 @@ export function harness(options: CustomHarnessOptions): CustomHarness {
       options.permissions?.kind === "permissions",
     "Declare permissions with defineHarnessPermissions",
   );
+  invariant(
+    options.context === undefined || options.context?.kind === "context",
+    "Declare context strategies with defineHarnessContextStrategy",
+  );
+  invariant(
+    options.conversations === undefined ||
+      options.conversations === false ||
+      conversationStore(options.conversations),
+    "Harness conversations must be a conversation store or false",
+  );
   return Object.freeze({
     kind: "custom",
     modelProvider: options.modelProvider,
@@ -58,6 +69,10 @@ export function harness(options: CustomHarnessOptions): CustomHarness {
     toolExecution: toolExecution(options.toolExecution ?? {}),
     hooks: harnessHooks(options.hooks),
     ...(options.permissions ? { permissions: options.permissions } : {}),
+    ...(options.context ? { context: options.context } : {}),
+    ...(options.conversations === undefined
+      ? {}
+      : { conversations: options.conversations }),
     cache: options.cache ?? HARNESS_DEFAULTS.cache,
   });
 }
@@ -121,4 +136,14 @@ function toolExecution(
     ),
     onError: value.onError ?? HARNESS_DEFAULTS.onError,
   });
+}
+
+function conversationStore(value: ConversationStore): boolean {
+  return (
+    value !== null &&
+    typeof value === "object" &&
+    typeof value.locate === "function" &&
+    typeof value.capture === "function" &&
+    typeof value.restore === "function"
+  );
 }

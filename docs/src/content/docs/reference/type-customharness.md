@@ -6,7 +6,7 @@ sidebar:
 ---
 
 :::caution[Experimental]
-Experimental: part of the unreleased built-in harness engine. Persisted conversations, built-in toolsets and streaming are not available yet; the contract may change before release.
+Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.
 :::
 
 ## Import
@@ -27,6 +27,8 @@ import type { CustomHarness } from "@elie-laloum/outpost";
 | `toolExecution` | `Required<HarnessToolExecution>`                                     | Required | Normalized tool execution settings with defaults applied.                                                  |
 | `hooks`         | `readonly HarnessHook<import("./hook.types.ts").HarnessHookPhase>[]` | Required | Frozen hooks of the harness.                                                                               |
 | `permissions`   | `HarnessPermissions \| undefined`                                    | Optional | Permission rules evaluated before before-tool hooks, when set.                                             |
+| `context`       | `HarnessContextStrategy \| undefined`                                | Optional | Context strategy of the harness, when set.                                                                 |
+| `conversations` | `false \| ConversationStore \| undefined`                            | Optional | Configured conversation store, or false when recording is disabled; absent means the default store.        |
 | `cache`         | `boolean`                                                            | Required | Whether each request asks the provider to cache the conversation prefix.                                   |
 
 ## Signature
@@ -41,12 +43,16 @@ export interface CustomHarness {
   readonly toolExecution: Required<HarnessToolExecution>;
   readonly hooks: readonly HarnessHook[];
   readonly permissions?: HarnessPermissions;
+  readonly context?: HarnessContextStrategy;
+  readonly conversations?: ConversationStore | false;
   readonly cache: boolean;
 }
 ```
 
 ## Related contracts
 
+- [ConversationStore](../conversationstore/)
+- [HarnessContextStrategy](../harnesscontextstrategy/)
 - [HarnessHook](../harnesshook/)
 - [HarnessInstructions](../harnessinstructions/)
 - [HarnessPermissions](../harnesspermissions/)

@@ -18,7 +18,7 @@ Use `harness()` to let Outpost drive the model itself. It combines a [model prov
 
 Constructing a harness starts no process, login or network request. A CLI owns its internal model/tool loop. Claude and Codex support native capture, resume and fork; Gemini supports fresh sessions.
 
-The Outpost engine runs in the Outpost process. Each step is one model request; tools run through the borrowed sandbox, and limits fail the turn with the `limit` code instead of succeeding. It has no persisted conversations, automatic response repairs or interactive attachment yet. `AgentAdapter` and `AgentInput` describe CLI command construction and event decoding. Sandbox allocation belongs to [Providers](../providers/).
+The Outpost engine runs in the Outpost process. Each step is one model request; tools run through the borrowed sandbox, and limits fail the turn with the `limit` code instead of succeeding. Turns are recorded as transcripts that support continuation, fork and response repairs, and context strategies can compact long histories. Interactive attachment is unsupported. `AgentAdapter` and `AgentInput` describe CLI command construction and event decoding. Sandbox allocation belongs to [Providers](../providers/).
 
 These harness APIs are implemented but unreleased; the engine and its definitions are experimental.
 
@@ -27,6 +27,7 @@ These harness APIs are implemented but unreleased; the engine and its definition
 - [harness](../../function-harness/) composes the Outpost engine.
 - [defineHarnessTool](../../defineharnesstool/), [defineHarnessToolset](../../defineharnesstoolset/) and [defineHarnessInstructions](../../defineharnessinstructions/) declare what the engine can use.
 - [harnessFileTools](../../harnessfiletools/), [harnessEditTools](../../harnessedittools/), [harnessSearchTools](../../harnesssearchtools/), [harnessGitTools](../../harnessgittools/) and [harnessShellTools](../../harnessshelltools/) provide repository tools.
+- [defineHarnessContextStrategy](../../defineharnesscontextstrategy/), [truncateToolResults](../../truncatetoolresults/) and [summarizeHistory](../../summarizehistory/) keep long histories within the model context.
 - [defineHarnessHook](../../defineharnesshook/) and [defineHarnessPermissions](../../defineharnesspermissions/) control tool calls and the end of the loop.
 - [claudeHarness](../../claudeharness/), [codexHarness](../../codexharness/) and [geminiHarness](../../geminiharness/) configure the CLI presets.
 - [Harness](../../harness/) is the shared composition contract.

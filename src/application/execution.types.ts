@@ -26,6 +26,11 @@ export interface DispatchOptions<T = undefined> {
   readonly diagnostic?: (message: string) => void;
 }
 
+export interface TurnContext {
+  readonly repository: string;
+  readonly repair: boolean;
+}
+
 export interface Turn {
   readonly text: string;
   readonly status: number;

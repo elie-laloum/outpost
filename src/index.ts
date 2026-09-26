@@ -1,5 +1,18 @@
 export { agent } from "./domain/agent.ts";
 export { harness } from "./domain/harness.ts";
+export {
+  defineHarnessContextStrategy,
+  summarizeHistory,
+  truncateToolResults,
+} from "./domain/context.ts";
+export type {
+  HarnessContextInput,
+  HarnessContextResult,
+  HarnessContextStrategy,
+  HarnessContextStrategyOptions,
+  SummarizeHistoryOptions,
+  TruncateToolResultsOptions,
+} from "./domain/context.types.ts";
 export { defineHarnessHook } from "./domain/hook.ts";
 export { defineHarnessInstructions } from "./domain/instructions.ts";
 export { defineHarnessPermissions } from "./domain/permissions.ts";
@@ -150,11 +163,15 @@ export {
 
 export { agentVersions } from "./providers/versions.ts";
 
-export { conversations } from "./infrastructure/conversations.ts";
+export {
+  conversations,
+  harnessConversations,
+} from "./infrastructure/conversations.ts";
 
 export type {
   ConversationFormat,
   ConversationLocation,
+  StoredConversationFormat,
 } from "./infrastructure/conversations.ts";
 
 export type {

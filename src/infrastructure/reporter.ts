@@ -42,6 +42,12 @@ export function reporter(
       case "stop-prevented":
         write(`${prefix} stop prevented: ${event.message}\n`);
         break;
+      case "compaction":
+        if (options.verbose)
+          write(
+            `${prefix} context compacted by ${event.strategy} · ${event.messages} messages\n`,
+          );
+        break;
       case "step":
         if (options.verbose) write(`${prefix} step ${event.index}\n`);
         break;

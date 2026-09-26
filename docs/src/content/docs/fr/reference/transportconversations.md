@@ -19,12 +19,12 @@ Construit un ConversationStore Claude ou Codex avec snapshots de transport et es
 
 ## Paramètres et propriétés
 
-| Nom                   | Type                           | Présence | Rôle                                                                                                                                        |
-| --------------------- | ------------------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `format`              | `ConversationFormat`           | Requis   | Format natif du transcript, claude ou codex ; Gemini ne dispose pas de stockage de conversations natives.                                   |
-| `options`             | `TransportConversationOptions` | Requis   | Transport et espace de noms stable du projet, partagé par les exécuteurs restaurant ces conversations.                                      |
-| `options.namespace`   | `string`                       | Requis   | Espace de noms logique stable du projet, indépendant des chemins des checkouts. Utiliser des espaces distincts pour des projets différents. |
-| `options.transporter` | `Transport`                    | Requis   | Transport objet appartenant à l’appelant, utilisé par le store ou l’opération. Fermer un workflow ou une sandbox ne ferme pas ce transport. |
+| Nom                   | Type                           | Présence | Rôle                                                                                                                                                                                     |
+| --------------------- | ------------------------------ | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `format`              | `StoredConversationFormat`     | Requis   | Format de transcription : claude ou codex pour les transcriptions natives des CLI, ou harness pour celles des harness personnalisés. Gemini n’a pas de stockage natif des conversations. |
+| `options`             | `TransportConversationOptions` | Requis   | Transport et espace de noms stable du projet, partagé par les exécuteurs restaurant ces conversations.                                                                                   |
+| `options.namespace`   | `string`                       | Requis   | Espace de noms logique stable du projet, indépendant des chemins des checkouts. Utiliser des espaces distincts pour des projets différents.                                              |
+| `options.transporter` | `Transport`                    | Requis   | Transport objet appartenant à l’appelant, utilisé par le store ou l’opération. Fermer un workflow ou une sandbox ne ferme pas ce transport.                                              |
 
 ## Retour
 
@@ -34,13 +34,13 @@ Construit un ConversationStore Claude ou Codex avec snapshots de transport et es
 
 ```ts
 export declare function transportConversations(
-  format: ConversationFormat,
+  format: StoredConversationFormat,
   options: TransportConversationOptions,
 ): ConversationStore;
 ```
 
 ## Contrats associés
 
-- [ConversationFormat](../conversationformat/)
 - [ConversationStore](../conversationstore/)
+- [StoredConversationFormat](../storedconversationformat/)
 - [TransportConversationOptions](../transportconversationoptions/)
