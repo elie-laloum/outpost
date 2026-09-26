@@ -28,6 +28,7 @@ Les champs ci-dessous couvrent toutes les variantes ; la signature précise leur
 | `permissions`   | `HarnessPermissions \| undefined`                                    | Selon la variante | Règles de permission évaluées avant les hooks before-tool, si elles sont définies.                                                                                      |
 | `context`       | `HarnessContextStrategy \| undefined`                                | Selon la variante | Stratégie de contexte du harness, si elle est définie.                                                                                                                  |
 | `conversations` | `false \| ConversationStore \| undefined`                            | Selon la variante | Store de conversations configuré, ou false si l’enregistrement est désactivé ; absent signifie le store par défaut.                                                     |
+| `skills`        | `readonly HarnessSkill[]`                                            | Selon la variante | Skills du harness ; leurs outils et load_skill font partie de la liste d’outils.                                                                                        |
 | `cache`         | `boolean`                                                            | Selon la variante | Indique si chaque requête demande au fournisseur de mettre en cache le préfixe de la conversation.                                                                      |
 
 ## Signature

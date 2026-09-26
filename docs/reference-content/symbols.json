@@ -374,5 +374,9 @@
   "harnessConversations": [
     "Create the default conversation store of custom harnesses. Transcripts live in .outpost/conversations/harness under the target repository; locating a missing conversation fails with code session, and restore is a no-op because the loop runs on the host.",
     "Crée le store de conversations par défaut des harness personnalisés. Les transcriptions se trouvent dans .outpost/conversations/harness du dépôt cible ; localiser une conversation absente échoue avec le code session, et restore ne fait rien car la boucle tourne sur l’hôte."
+  ],
+  "defineHarnessSkill": [
+    "Define a skill: instructions, and optionally tools, that a custom harness lists in its system instructions and the model loads with load_skill when needed. Skill tools are refused until their skill is loaded.",
+    "Définit une skill : des instructions, et éventuellement des outils, qu’un harness personnalisé liste dans ses instructions système et que le modèle charge avec load_skill au besoin. Les outils d’une skill sont refusés tant qu’elle n’est pas chargée."
   ]
 }

@@ -28,11 +28,21 @@ export async function executeToolCalls(
   runtime: HarnessRuntime,
   calls: readonly ModelToolCallBlock[],
   step: number,
+  loaded: ReadonlySet<string>,
 ): Promise<readonly ModelToolResultBlock[]> {
   const tools = new Map(runtime.tools.map((tool) => [tool.name, tool]));
+  const owners = new Map(
+    runtime.agent.harness.skills.flatMap((skill) =>
+      skill.tools.map((tool) => [tool.name, skill.name] as const),
+    ),
+  );
+  const locked = (name: string) => {
+    const skill = owners.get(name);
+    return skill === undefined || loaded.has(skill) ? undefined : skill;
+  };
   const prepared: PreparedCall[] = [];
   for (const call of calls)
-    prepared.push(await prepareCall(runtime, tools, call, step));
+    prepared.push(await prepareCall(runtime, tools, call, step, locked));
   const outcomes = new Map<string, ToolOutcome>();
   for (const batch of batches(prepared)) {
     const pending = [...batch.calls];
@@ -59,6 +69,7 @@ async function prepareCall(
   tools: ReadonlyMap<string, HarnessTool>,
   call: ModelToolCallBlock,
   step: number,
+  locked: (name: string) => string | undefined,
 ): Promise<PreparedCall> {
   runtime.signal.throwIfAborted();
   runtime.emit({
@@ -71,6 +82,13 @@ async function prepareCall(
   if (!tool) return { call, outcome: failed(`Unknown tool: ${call.name}`) };
   const validated = await validate(tool, call.input, "Invalid input");
   if ("outcome" in validated) return { call, outcome: validated.outcome };
+  const skill = locked(tool.name);
+  if (skill)
+    return denied(
+      runtime,
+      call,
+      `Load the ${skill} skill with load_skill before using ${tool.name}`,
+    );
   const permitted = permission(runtime, tool, validated.value);
   if (permitted) return denied(runtime, call, permitted);
   const decision = await beforeTool(

@@ -102,6 +102,8 @@ try {
     for (const name of ['File','Edit','Search','Git','Shell']) assert.equal(api['harness'+name+'Tools']().kind,'toolset',name);
     assert.deepEqual(api.harnessFileTools().tools.map(tool=>tool.name),['read_file','list_files']);
     assert.equal(api.harnessConversations().name,'harness');
+    const skill=api.defineHarnessSkill({name:'style',description:'House style.',instructions:'Be brief.'});
+    assert.deepEqual(api.harness({modelProvider,skills:[skill]}).tools.map(tool=>tool.name),['load_skill']);
     assert.equal(api.summarizeHistory().kind,'context');
     assert.equal(api.truncateToolResults().name,'truncate-tool-results');
     assert.equal(api.harness({modelProvider,conversations:false,context:api.truncateToolResults()}).conversations,false);

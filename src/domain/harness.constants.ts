@@ -16,6 +16,7 @@ export const HARNESS_FIELDS: ReadonlySet<string> = new Set([
   "permissions",
   "context",
   "conversations",
+  "skills",
   "cache",
 ]);
 

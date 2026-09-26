@@ -6,7 +6,7 @@ sidebar:
 ---
 
 :::caution[Experimental]
-Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.
+Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.
 :::
 
 ## Import
@@ -29,6 +29,7 @@ import type { CustomHarness } from "@elie-laloum/outpost";
 | `permissions`   | `HarnessPermissions \| undefined`                                    | Optional | Permission rules evaluated before before-tool hooks, when set.                                             |
 | `context`       | `HarnessContextStrategy \| undefined`                                | Optional | Context strategy of the harness, when set.                                                                 |
 | `conversations` | `false \| ConversationStore \| undefined`                            | Optional | Configured conversation store, or false when recording is disabled; absent means the default store.        |
+| `skills`        | `readonly HarnessSkill[]`                                            | Required | Skills of the harness; their tools and load_skill are part of the tool list.                               |
 | `cache`         | `boolean`                                                            | Required | Whether each request asks the provider to cache the conversation prefix.                                   |
 
 ## Signature
@@ -45,6 +46,7 @@ export interface CustomHarness {
   readonly permissions?: HarnessPermissions;
   readonly context?: HarnessContextStrategy;
   readonly conversations?: ConversationStore | false;
+  readonly skills: readonly HarnessSkill[];
   readonly cache: boolean;
 }
 ```
@@ -56,6 +58,7 @@ export interface CustomHarness {
 - [HarnessHook](../harnesshook/)
 - [HarnessInstructions](../harnessinstructions/)
 - [HarnessPermissions](../harnesspermissions/)
+- [HarnessSkill](../harnessskill/)
 - [HarnessTool](../harnesstool/)
 - [HarnessToolExecution](../harnesstoolexecution/)
 - [ModelProvider](../modelprovider/)

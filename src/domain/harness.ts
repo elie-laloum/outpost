@@ -13,7 +13,11 @@ import type {
   ResolvedHarnessLimits,
 } from "./harness.types.ts";
 import { harnessHooks } from "./hook.ts";
-import { harnessInstructions } from "./instructions.ts";
+import {
+  defineHarnessInstructions,
+  harnessInstructions,
+} from "./instructions.ts";
+import { harnessSkills, skillCatalog, skillLoader } from "./skill.ts";
 import { harnessTools } from "./tool.ts";
 
 export function harness(options: CustomHarnessOptions): CustomHarness {
@@ -60,11 +64,22 @@ export function harness(options: CustomHarnessOptions): CustomHarness {
       conversationStore(options.conversations),
     "Harness conversations must be a conversation store or false",
   );
+  const skills = harnessSkills(options.skills);
   return Object.freeze({
     kind: "custom",
     modelProvider: options.modelProvider,
-    instructions: harnessInstructions(options.instructions),
-    tools: harnessTools(options.tools ?? []),
+    instructions: Object.freeze([
+      ...harnessInstructions(options.instructions),
+      ...(skills.length
+        ? [defineHarnessInstructions(skillCatalog(skills))]
+        : []),
+    ]),
+    tools: harnessTools([
+      ...(options.tools ?? []),
+      ...skills.flatMap((skill) => skill.tools),
+      ...(skills.length ? [skillLoader(skills)] : []),
+    ]),
+    skills,
     limits: limits(options.limits ?? {}),
     toolExecution: toolExecution(options.toolExecution ?? {}),
     hooks: harnessHooks(options.hooks),

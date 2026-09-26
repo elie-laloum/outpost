@@ -4,7 +4,7 @@ description: Compose a model provider, tools, instructions and limits into an ag
 ---
 
 :::caution[Unreleased API]
-This working-tree API is experimental. Use a package built from this checkout. Skills and streaming are not available yet.
+This working-tree API is experimental. Use a package built from this checkout. Streaming is not available yet.
 :::
 
 `claudeHarness()`, `codexHarness()` and `geminiHarness()` delegate the whole task to a CLI that runs its own model and tool loop. `harness()` builds that loop in Outpost instead. You declare what the agent can use, and Outpost drives the model:
@@ -254,6 +254,40 @@ Pass them with `harness({ permissions, hooks: requireTests, ... })`. Permission 
 
 Instructions tell the model what to do; hooks and permissions enforce it. Permissions are not a security boundary: shell metacharacters can bypass command patterns, and symbolic links can bypass path rules. Run untrusted work in an isolated sandbox provider.
 
+## Skills
+
+A skill packages instructions, and optionally tools, that the model loads only when a task needs them. This keeps the system instructions short.
+
+```ts
+import { defineHarnessSkill, defineHarnessTool } from "@elie-laloum/outpost";
+
+const applyMigration = defineHarnessTool({
+  name: "apply_migration",
+  description: "Apply the pending database migration.",
+  input: { type: "object", additionalProperties: false },
+  execute: async (_input, { sandbox, signal }) =>
+    (
+      await sandbox.invoke({
+        executable: "npm",
+        arguments: ["run", "migrate"],
+        signal,
+      })
+    ).stdout,
+});
+
+export const migrations = defineHarnessSkill({
+  name: "migrations",
+  description: "Plan and apply database migrations.",
+  instructions:
+    "Back up the database, write a reversible migration, then apply it.",
+  tools: [applyMigration],
+});
+```
+
+Pass skills with `harness({ skills: [migrations], ... })`. The system instructions then list each skill's name and description, and the engine adds a `load_skill` tool. Loading a skill returns its instructions, resolved at that moment like `defineHarnessInstructions()`, and enables its tools from the next step.
+
+Skill tools are declared to the model from the start so that the tool list, and therefore the provider cache, stays stable; calling one before its skill is loaded is refused with an explanation. Loaded skills are read from the conversation, so they stay loaded after a continuation. Names of skill tools share the harness namespace, and `load_skill` is reserved when skills are present.
+
 ## Conversations, repairs and context
 
 Each turn of a custom harness is recorded as an append-only JSONL transcript in `.outpost/conversations/harness/<id>.jsonl` of the target repository, with private file permissions. Outpost adds this directory to the repository's Git exclusions. The dispatch result returns the `conversation` id and the `transcript` path, so custom harnesses support the same continuation features as Claude Code and Codex:
@@ -289,6 +323,6 @@ Dispatch observers receive `step` before each model request, `tool` with a `call
 
 ## Not available yet
 
-Interactive attachment is unsupported. Skills and streaming are planned; see the [roadmap](../../../project/roadmap/#direct-model-harness).
+Interactive attachment is unsupported. Streaming is planned; see the [roadmap](../../../project/roadmap/#direct-model-harness).
 
 [Harness reference](../../../reference/overview/harness/) · [Model providers](../../advanced/model-providers/)

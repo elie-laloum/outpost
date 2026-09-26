@@ -6,7 +6,7 @@ sidebar:
 ---
 
 :::caution[Expérimental]
-Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication.
+Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication.
 :::
 
 ## Import
@@ -29,6 +29,7 @@ import type { CustomHarness } from "@elie-laloum/outpost";
 | `permissions`   | `HarnessPermissions \| undefined`                                    | Optionnel | Règles de permission évaluées avant les hooks before-tool, si elles sont définies.                                  |
 | `context`       | `HarnessContextStrategy \| undefined`                                | Optionnel | Stratégie de contexte du harness, si elle est définie.                                                              |
 | `conversations` | `false \| ConversationStore \| undefined`                            | Optionnel | Store de conversations configuré, ou false si l’enregistrement est désactivé ; absent signifie le store par défaut. |
+| `skills`        | `readonly HarnessSkill[]`                                            | Requis    | Skills du harness ; leurs outils et load_skill font partie de la liste d’outils.                                    |
 | `cache`         | `boolean`                                                            | Requis    | Indique si chaque requête demande au fournisseur de mettre en cache le préfixe de la conversation.                  |
 
 ## Signature
@@ -45,6 +46,7 @@ export interface CustomHarness {
   readonly permissions?: HarnessPermissions;
   readonly context?: HarnessContextStrategy;
   readonly conversations?: ConversationStore | false;
+  readonly skills: readonly HarnessSkill[];
   readonly cache: boolean;
 }
 ```
@@ -56,6 +58,7 @@ export interface CustomHarness {
 - [HarnessHook](../harnesshook/)
 - [HarnessInstructions](../harnessinstructions/)
 - [HarnessPermissions](../harnesspermissions/)
+- [HarnessSkill](../harnessskill/)
 - [HarnessTool](../harnesstool/)
 - [HarnessToolExecution](../harnesstoolexecution/)
 - [ModelProvider](../modelprovider/)

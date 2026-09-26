@@ -4,6 +4,7 @@ import type { ConversationStore } from "./conversation.types.ts";
 import type { HarnessHook } from "./hook.types.ts";
 import type { AgentModel, ModelProvider } from "./model.types.ts";
 import type { HarnessPermissions } from "./permissions.types.ts";
+import type { HarnessSkill } from "./skill.types.ts";
 import type { SandboxLease } from "./sandbox.types.ts";
 import type { HarnessTool, HarnessToolset } from "./tool.types.ts";
 
@@ -50,6 +51,7 @@ export interface CustomHarnessOptions {
   readonly permissions?: HarnessPermissions;
   readonly context?: HarnessContextStrategy;
   readonly conversations?: ConversationStore | false;
+  readonly skills?: readonly HarnessSkill[];
   readonly cache?: boolean;
 }
 
@@ -64,5 +66,6 @@ export interface CustomHarness {
   readonly permissions?: HarnessPermissions;
   readonly context?: HarnessContextStrategy;
   readonly conversations?: ConversationStore | false;
+  readonly skills: readonly HarnessSkill[];
   readonly cache: boolean;
 }

@@ -28,6 +28,7 @@ The fields below cover all variants; the signature specifies their allowed combi
 | `permissions`   | `HarnessPermissions \| undefined`                                    | Variant-dependent | Permission rules evaluated before before-tool hooks, when set.                                                                                       |
 | `context`       | `HarnessContextStrategy \| undefined`                                | Variant-dependent | Context strategy of the harness, when set.                                                                                                           |
 | `conversations` | `false \| ConversationStore \| undefined`                            | Variant-dependent | Configured conversation store, or false when recording is disabled; absent means the default store.                                                  |
+| `skills`        | `readonly HarnessSkill[]`                                            | Variant-dependent | Skills of the harness; their tools and load_skill are part of the tool list.                                                                         |
 | `cache`         | `boolean`                                                            | Variant-dependent | Whether each request asks the provider to cache the conversation prefix.                                                                             |
 
 ## Signature

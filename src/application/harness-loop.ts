@@ -6,6 +6,7 @@ import type {
   ModelToolCallBlock,
   ModelToolSpec,
 } from "../domain/model.types.ts";
+import { loadedSkills } from "../domain/skill.ts";
 import { addUsage } from "../domain/usage.ts";
 import type {
   HarnessHistory,
@@ -60,7 +61,12 @@ const stopHandlers: Readonly<Record<ModelStopReason, StopHandler>> = {
     await state.history.append({ role: "assistant", content });
     await state.history.append({
       role: "user",
-      content: await executeToolCalls(runtime, calls, state.step),
+      content: await executeToolCalls(
+        runtime,
+        calls,
+        state.step,
+        loadedSkills(state.history.messages),
+      ),
     });
     return undefined;
   },

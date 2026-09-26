@@ -105,10 +105,13 @@ export const groups = [
       "HarnessContextStrategyOptions",
       "SummarizeHistoryOptions",
       "TruncateToolResultsOptions",
+      "defineHarnessSkill",
+      "HarnessSkill",
+      "HarnessSkillOptions",
     ],
     guide: "guide/agents/harness",
     names:
-      "harness defineHarnessTool defineHarnessToolset defineHarnessInstructions claudeHarness codexHarness geminiHarness Harness CliHarness CustomHarness CustomHarnessOptions HarnessLimits HarnessToolExecution HarnessInstructions HarnessInstructionContext HarnessInstructionSource HarnessInstructionsOption HarnessTool HarnessToolOptions HarnessToolContext HarnessToolEvent HarnessToolset HarnessToolsetOptions JsonSchema StandardJsonSchema ToolOutput ToolValidation defineHarnessHook defineHarnessPermissions HarnessHook HarnessHookContext HarnessHookDecisions HarnessHookEvents HarnessHookInput HarnessHookOptions HarnessHookPhase HarnessHookResult HarnessToolResultView HarnessPermissionRule HarnessPermissions HarnessPermissionsOptions PermissionDecision PermissionEffect ToolResources harnessFileTools harnessEditTools harnessSearchTools harnessGitTools harnessShellTools ShellToolsOptions defineHarnessContextStrategy truncateToolResults summarizeHistory HarnessContextInput HarnessContextResult HarnessContextStrategy HarnessContextStrategyOptions SummarizeHistoryOptions TruncateToolResultsOptions AgentAuthentication ClaudeSettings CodexSettings CodexModelProvider GeminiSettings agentVersions AgentAdapter AgentInput",
+      "harness defineHarnessTool defineHarnessToolset defineHarnessInstructions claudeHarness codexHarness geminiHarness Harness CliHarness CustomHarness CustomHarnessOptions HarnessLimits HarnessToolExecution HarnessInstructions HarnessInstructionContext HarnessInstructionSource HarnessInstructionsOption HarnessTool HarnessToolOptions HarnessToolContext HarnessToolEvent HarnessToolset HarnessToolsetOptions JsonSchema StandardJsonSchema ToolOutput ToolValidation defineHarnessHook defineHarnessPermissions HarnessHook HarnessHookContext HarnessHookDecisions HarnessHookEvents HarnessHookInput HarnessHookOptions HarnessHookPhase HarnessHookResult HarnessToolResultView HarnessPermissionRule HarnessPermissions HarnessPermissionsOptions PermissionDecision PermissionEffect ToolResources harnessFileTools harnessEditTools harnessSearchTools harnessGitTools harnessShellTools ShellToolsOptions defineHarnessContextStrategy truncateToolResults summarizeHistory HarnessContextInput HarnessContextResult HarnessContextStrategy HarnessContextStrategyOptions SummarizeHistoryOptions TruncateToolResultsOptions defineHarnessSkill HarnessSkill HarnessSkillOptions AgentAuthentication ClaudeSettings CodexSettings CodexModelProvider GeminiSettings agentVersions AgentAdapter AgentInput",
   },
   {
     id: "prompts-responses",

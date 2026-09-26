@@ -441,6 +441,14 @@
           "title": "Experimental / Expérimental"
         }
       },
+      {
+        "slug": "reference/defineharnessskill",
+        "attrs": {
+          "data-api-kind": "function",
+          "data-api-status": "experimental",
+          "title": "Experimental / Expérimental"
+        }
+      },
       { "slug": "reference/harness", "attrs": { "data-api-kind": "type" } },
       {
         "slug": "reference/harnessinstructionsource",
@@ -768,6 +776,22 @@
       },
       {
         "slug": "reference/truncatetoolresultsoptions",
+        "attrs": {
+          "data-api-kind": "interface",
+          "data-api-status": "experimental",
+          "title": "Experimental / Expérimental"
+        }
+      },
+      {
+        "slug": "reference/harnessskill",
+        "attrs": {
+          "data-api-kind": "interface",
+          "data-api-status": "experimental",
+          "title": "Experimental / Expérimental"
+        }
+      },
+      {
+        "slug": "reference/harnessskilloptions",
         "attrs": {
           "data-api-kind": "interface",
           "data-api-status": "experimental",

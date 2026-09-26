@@ -4507,5 +4507,50 @@
   "conversations.harness": [
     "Create the default custom harness conversation store, whose transcripts live in .outpost/conversations/harness of the target repository.",
     "Crée le store de conversations par défaut des harness personnalisés, dont les transcriptions se trouvent dans .outpost/conversations/harness du dépôt cible."
+  ],
+  "defineHarnessSkill.options": [
+    "Skill name, description, instructions and optional tools.",
+    "Nom, description, instructions et outils optionnels de la skill."
+  ],
+  "HarnessSkillOptions.name": [
+    "Unique skill name the model passes to load_skill.",
+    "Nom unique de la skill, transmis par le modèle à load_skill."
+  ],
+  "HarnessSkill.name": ["Unique skill name.", "Nom unique de la skill."],
+  "HarnessSkillOptions.description": [
+    "Short description listed in the system instructions so the model knows when to load the skill.",
+    "Courte description listée dans les instructions système pour que le modèle sache quand charger la skill."
+  ],
+  "HarnessSkill.description": [
+    "Description listed in the system instructions.",
+    "Description listée dans les instructions système."
+  ],
+  "HarnessSkillOptions.instructions": [
+    "Instructions returned when the skill is loaded: text or a resolver receiving the sandbox, signal and model.",
+    "Instructions renvoyées au chargement de la skill : texte ou résolveur recevant le sandbox, le signal et le modèle."
+  ],
+  "HarnessSkill.instructions": [
+    "Instructions resolved when the skill is loaded.",
+    "Instructions résolues au chargement de la skill."
+  ],
+  "HarnessSkillOptions.tools": [
+    "Tools or toolsets enabled once the skill is loaded; their names must be unique across the harness.",
+    "Outils ou jeux d’outils activés une fois la skill chargée ; leurs noms doivent être uniques dans tout le harness."
+  ],
+  "HarnessSkill.tools": [
+    "Flattened tools enabled by the skill.",
+    "Outils aplatis activés par la skill."
+  ],
+  "HarnessSkill.kind": [
+    "Definition discriminator: skill.",
+    "Discriminant de la définition : skill."
+  ],
+  "CustomHarnessOptions.skills": [
+    "Skills listed in the system instructions and loaded on demand through the load_skill tool.",
+    "Skills listées dans les instructions système et chargées à la demande via l’outil load_skill."
+  ],
+  "CustomHarness.skills": [
+    "Skills of the harness; their tools and load_skill are part of the tool list.",
+    "Skills du harness ; leurs outils et load_skill font partie de la liste d’outils."
   ]
 }

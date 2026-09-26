@@ -6,7 +6,7 @@ sidebar:
 ---
 
 :::caution[Experimental]
-Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.
+Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.
 :::
 
 ## Import
@@ -35,6 +35,7 @@ Compose the built-in Outpost engine from a model provider, tools, instructions, 
 | `options.permissions`   | `HarnessPermissions \| undefined`                                                 | Optional | Rules from defineHarnessPermissions, evaluated before before-tool hooks.                                                                                                  |
 | `options.context`       | `HarnessContextStrategy \| undefined`                                             | Optional | Strategy that can rewrite the history before each model request, such as truncateToolResults() or summarizeHistory().                                                     |
 | `options.conversations` | `false \| ConversationStore \| undefined`                                         | Optional | Store for turn transcripts; defaults to harnessConversations(). Use transportConversations("harness", …) for remote storage or false to disable continuation and repairs. |
+| `options.skills`        | `readonly HarnessSkill[] \| undefined`                                            | Optional | Skills listed in the system instructions and loaded on demand through the load_skill tool.                                                                                |
 | `options.cache`         | `boolean \| undefined`                                                            | Optional | Ask the provider to cache the conversation prefix; defaults to true. OpenAI caches stable prefixes automatically.                                                         |
 
 ## Returns

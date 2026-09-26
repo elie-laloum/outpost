@@ -6,7 +6,7 @@ sidebar:
 ---
 
 :::caution[Expérimental]
-Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication.
+Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication.
 :::
 
 ## Import
@@ -28,6 +28,7 @@ import type { CustomHarnessOptions } from "@elie-laloum/outpost";
 | `permissions`   | `HarnessPermissions \| undefined`                                                 | Optionnel | Règles issues de defineHarnessPermissions, évaluées avant les hooks before-tool.                                                                                                                      |
 | `context`       | `HarnessContextStrategy \| undefined`                                             | Optionnel | Stratégie qui peut réécrire l’historique avant chaque requête au modèle, comme truncateToolResults() ou summarizeHistory().                                                                           |
 | `conversations` | `false \| ConversationStore \| undefined`                                         | Optionnel | Store des transcriptions de passes ; harnessConversations() par défaut. Utilisez transportConversations("harness", …) pour un stockage distant, ou false pour désactiver continuation et réparations. |
+| `skills`        | `readonly HarnessSkill[] \| undefined`                                            | Optionnel | Skills listées dans les instructions système et chargées à la demande via l’outil load_skill.                                                                                                         |
 | `cache`         | `boolean \| undefined`                                                            | Optionnel | Demande au fournisseur de mettre en cache le préfixe de la conversation ; true par défaut. OpenAI met en cache les préfixes stables automatiquement.                                                  |
 
 ## Signature
@@ -43,6 +44,7 @@ export interface CustomHarnessOptions {
   readonly permissions?: HarnessPermissions;
   readonly context?: HarnessContextStrategy;
   readonly conversations?: ConversationStore | false;
+  readonly skills?: readonly HarnessSkill[];
   readonly cache?: boolean;
 }
 ```
@@ -55,6 +57,7 @@ export interface CustomHarnessOptions {
 - [HarnessInstructionsOption](../harnessinstructionsoption/)
 - [HarnessLimits](../harnesslimits/)
 - [HarnessPermissions](../harnesspermissions/)
+- [HarnessSkill](../harnessskill/)
 - [HarnessTool](../harnesstool/)
 - [HarnessToolExecution](../harnesstoolexecution/)
 - [HarnessToolset](../harnesstoolset/)

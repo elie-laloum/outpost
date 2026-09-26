@@ -14,6 +14,11 @@ export type {
   TruncateToolResultsOptions,
 } from "./domain/context.types.ts";
 export { defineHarnessHook } from "./domain/hook.ts";
+export { defineHarnessSkill } from "./domain/skill.ts";
+export type {
+  HarnessSkill,
+  HarnessSkillOptions,
+} from "./domain/skill.types.ts";
 export { defineHarnessInstructions } from "./domain/instructions.ts";
 export { defineHarnessPermissions } from "./domain/permissions.ts";
 export type {

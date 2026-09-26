@@ -36,8 +36,8 @@
     "Expérimental : requêtes texte bornées et exécution de harness fournie par l’appelant. Sans boucle d’outils intégrée, streaming ni persistance native des conversations personnalisées."
   ],
   "harness": [
-    "Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication."
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
   ],
   "ModelMessage": [
     "Experimental: provider-neutral messages, tool calls and replayable reasoning for model transports. No streaming yet; the contract may change before release.",
@@ -72,215 +72,227 @@
     "Expérimental : messages, appels d’outils et raisonnement rejouable neutres vis-à-vis du fournisseur. Pas encore de streaming ; le contrat peut changer avant publication."
   ],
   "defineHarnessTool": [
-    "Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication."
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
   ],
   "defineHarnessToolset": [
-    "Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication."
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
   ],
   "defineHarnessInstructions": [
-    "Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication."
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
   ],
   "CustomHarness": [
-    "Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication."
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
   ],
   "CustomHarnessOptions": [
-    "Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication."
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
   ],
   "HarnessLimits": [
-    "Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication."
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
   ],
   "HarnessToolExecution": [
-    "Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication."
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
   ],
   "HarnessInstructions": [
-    "Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication."
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
   ],
   "HarnessInstructionContext": [
-    "Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication."
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
   ],
   "HarnessInstructionSource": [
-    "Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication."
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
   ],
   "HarnessInstructionsOption": [
-    "Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication."
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
   ],
   "HarnessTool": [
-    "Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication."
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
   ],
   "HarnessToolOptions": [
-    "Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication."
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
   ],
   "HarnessToolContext": [
-    "Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication."
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
   ],
   "HarnessToolEvent": [
-    "Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication."
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
   ],
   "HarnessToolset": [
-    "Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication."
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
   ],
   "HarnessToolsetOptions": [
-    "Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication."
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
   ],
   "JsonSchema": [
-    "Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication."
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
   ],
   "StandardJsonSchema": [
-    "Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication."
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
   ],
   "ToolOutput": [
-    "Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication."
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
   ],
   "ToolValidation": [
-    "Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication."
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
   ],
   "defineHarnessHook": [
-    "Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication."
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
   ],
   "defineHarnessPermissions": [
-    "Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication."
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
   ],
   "HarnessHook": [
-    "Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication."
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
   ],
   "HarnessHookContext": [
-    "Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication."
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
   ],
   "HarnessHookDecisions": [
-    "Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication."
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
   ],
   "HarnessHookEvents": [
-    "Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication."
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
   ],
   "HarnessHookInput": [
-    "Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication."
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
   ],
   "HarnessHookOptions": [
-    "Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication."
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
   ],
   "HarnessHookPhase": [
-    "Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication."
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
   ],
   "HarnessHookResult": [
-    "Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication."
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
   ],
   "HarnessToolResultView": [
-    "Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication."
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
   ],
   "HarnessPermissionRule": [
-    "Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication."
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
   ],
   "HarnessPermissions": [
-    "Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication."
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
   ],
   "HarnessPermissionsOptions": [
-    "Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication."
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
   ],
   "PermissionDecision": [
-    "Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication."
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
   ],
   "PermissionEffect": [
-    "Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication."
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
   ],
   "ToolResources": [
-    "Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication."
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
   ],
   "harnessFileTools": [
-    "Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication."
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
   ],
   "harnessEditTools": [
-    "Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication."
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
   ],
   "harnessSearchTools": [
-    "Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication."
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
   ],
   "harnessGitTools": [
-    "Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication."
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
   ],
   "harnessShellTools": [
-    "Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication."
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
   ],
   "ShellToolsOptions": [
-    "Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication."
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
   ],
   "defineHarnessContextStrategy": [
-    "Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication."
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
   ],
   "truncateToolResults": [
-    "Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication."
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
   ],
   "summarizeHistory": [
-    "Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication."
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
   ],
   "HarnessContextInput": [
-    "Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication."
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
   ],
   "HarnessContextResult": [
-    "Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication."
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
   ],
   "HarnessContextStrategy": [
-    "Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication."
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
   ],
   "HarnessContextStrategyOptions": [
-    "Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication."
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
   ],
   "SummarizeHistoryOptions": [
-    "Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication."
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
   ],
   "TruncateToolResultsOptions": [
-    "Experimental: part of the unreleased built-in harness engine. Skills and streaming are not available yet; the contract may change before release.",
-    "Expérimental : élément du moteur de harness intégré non publié. Skills et streaming ne sont pas encore disponibles ; le contrat peut changer avant publication."
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
+  ],
+  "defineHarnessSkill": [
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
+  ],
+  "HarnessSkill": [
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
+  ],
+  "HarnessSkillOptions": [
+    "Experimental: part of the unreleased built-in harness engine. Streaming is not available yet; the contract may change before release.",
+    "Expérimental : élément du moteur de harness intégré non publié. Le streaming n’est pas encore disponible ; le contrat peut changer avant publication."
   ]
 }

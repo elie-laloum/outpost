@@ -28,6 +28,7 @@ These harness APIs are implemented but unreleased; the engine and its definition
 - [defineHarnessTool](../../defineharnesstool/), [defineHarnessToolset](../../defineharnesstoolset/) and [defineHarnessInstructions](../../defineharnessinstructions/) declare what the engine can use.
 - [harnessFileTools](../../harnessfiletools/), [harnessEditTools](../../harnessedittools/), [harnessSearchTools](../../harnesssearchtools/), [harnessGitTools](../../harnessgittools/) and [harnessShellTools](../../harnessshelltools/) provide repository tools.
 - [defineHarnessContextStrategy](../../defineharnesscontextstrategy/), [truncateToolResults](../../truncatetoolresults/) and [summarizeHistory](../../summarizehistory/) keep long histories within the model context.
+- [defineHarnessSkill](../../defineharnessskill/) packages instructions and tools that the model loads on demand.
 - [defineHarnessHook](../../defineharnesshook/) and [defineHarnessPermissions](../../defineharnesspermissions/) control tool calls and the end of the loop.
 - [claudeHarness](../../claudeharness/), [codexHarness](../../codexharness/) and [geminiHarness](../../geminiharness/) configure the CLI presets.
 - [Harness](../../harness/) is the shared composition contract.
