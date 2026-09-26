@@ -17,7 +17,7 @@ import type { DiagnosticCapability } from "@elie-laloum/outpost";
 | ------------ | ----------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------- |
 | `id`         | `"command" \| "transfers" \| "batchTransfers" \| "interactiveTerminal"` | Required | Capability being assessed: command, transfers, batch transfers or interactive terminal.       |
 | `advertised` | `boolean \| "unknown"`                                                  | Required | Whether the inspected adapter advertises this capability; unknown if it cannot be determined. |
-| `observed`   | `"unverified" \| "pass" \| "fail"`                                      | Required | Probe outcome, or unverified when no probe established support.                               |
+| `observed`   | `"fail" \| "unverified" \| "pass"`                                      | Required | Probe outcome, or unverified when no probe established support.                               |
 
 ## Signature
 

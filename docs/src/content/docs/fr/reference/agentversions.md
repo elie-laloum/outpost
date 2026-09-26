@@ -15,7 +15,7 @@ import { agentVersions } from "@elie-laloum/outpost";
 
 Expose les versions des CLI Claude, Codex et Gemini servant de références aux fixtures de protocole et aux images générées. Ces valeurs n’interrogent pas les binaires installés et ne prouvent pas l’accès à un compte.
 
-[Exemple complet et règles détaillées](../../guide/agents/adapters/).
+[Exemple complet et règles détaillées](../../guide/agents/harness/).
 
 ## Paramètres et propriétés
 

@@ -10,7 +10,7 @@ sidebar:
 | Name     | Type               | Presence | Meaning                                                                         |
 | -------- | ------------------ | -------- | ------------------------------------------------------------------------------- |
 | `path`   | `string`           | Required | Retained transfer entry examined by this verification check.                    |
-| `status` | `"pass" \| "fail"` | Required | pass when the checked invariant holds, fail when it does not.                   |
+| `status` | `"fail" \| "pass"` | Required | pass when the checked invariant holds, fail when it does not.                   |
 | `code`   | `string`           | Required | Diagnostic code identifying the verified invariant or detected transfer defect. |
 
 ## Signature

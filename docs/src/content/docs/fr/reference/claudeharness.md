@@ -15,7 +15,7 @@ import { claudeHarness } from "@elie-laloum/outpost";
 
 Crée un harness Claude Code à partir des réglages d’exécution, d’authentification et de conversation, sans lancer la CLI. Composez-le avec agent({ harness, model }) pour sélectionner séparément le modèle. La CLI possède sa boucle interne modèle/outils.
 
-[Exemple complet et règles détaillées](../../guide/agents/adapters/).
+[Exemple complet et règles détaillées](../../guide/agents/harness/).
 
 ## Paramètres et propriétés
 

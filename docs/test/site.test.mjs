@@ -464,9 +464,9 @@ for (const locale of ["", "fr/"]) {
   }
 }
 
-for (const [locale, overview] of [
-  ["", "Overview"],
-  ["fr/", "Vue d’ensemble"],
+for (const [locale, overview, label] of [
+  ["", "Overview", "Experimental"],
+  ["fr/", "Vue d’ensemble", "Expérimental"],
 ]) {
   test(`Harness is a first-level family in Agents & models (${locale || "en"})`, async ({
     page,
@@ -483,16 +483,21 @@ for (const [locale, overview] of [
     );
     await expect(section.locator("h2")).toHaveText("Agents & models");
     for (const name of [
-      "harness",
       "claudeHarness",
       "codexHarness",
       "geminiHarness",
-      "HarnessContext",
       "AgentAuthentication",
     ]) {
       await expect(family.getByRole("link", { name, exact: true })).toHaveCount(
         1,
       );
+    }
+    for (const name of ["harness", "defineHarnessTool", "HarnessToolContext"]) {
+      const link = family.getByRole("link", {
+        name: `${name} — ${label}`,
+        exact: true,
+      });
+      await expect(link).toHaveAttribute("data-api-status", "experimental");
     }
     await family.getByRole("link", { name: overview, exact: true }).click();
     await expect(page).toHaveURL(

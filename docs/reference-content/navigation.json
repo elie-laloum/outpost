@@ -319,7 +319,35 @@
       },
       {
         "slug": "reference/function-harness",
-        "attrs": { "data-api-kind": "function" }
+        "attrs": {
+          "data-api-kind": "function",
+          "data-api-status": "experimental",
+          "title": "Experimental / Expérimental"
+        }
+      },
+      {
+        "slug": "reference/defineharnesstool",
+        "attrs": {
+          "data-api-kind": "function",
+          "data-api-status": "experimental",
+          "title": "Experimental / Expérimental"
+        }
+      },
+      {
+        "slug": "reference/defineharnesstoolset",
+        "attrs": {
+          "data-api-kind": "function",
+          "data-api-status": "experimental",
+          "title": "Experimental / Expérimental"
+        }
+      },
+      {
+        "slug": "reference/defineharnessinstructions",
+        "attrs": {
+          "data-api-kind": "function",
+          "data-api-status": "experimental",
+          "title": "Experimental / Expérimental"
+        }
       },
       {
         "slug": "reference/claudeharness",
@@ -334,7 +362,54 @@
         "attrs": { "data-api-kind": "function" }
       },
       { "slug": "reference/harness", "attrs": { "data-api-kind": "type" } },
-      { "slug": "reference/harnessrun", "attrs": { "data-api-kind": "type" } },
+      {
+        "slug": "reference/harnessinstructionsource",
+        "attrs": {
+          "data-api-kind": "type",
+          "data-api-status": "experimental",
+          "title": "Experimental / Expérimental"
+        }
+      },
+      {
+        "slug": "reference/harnessinstructionsoption",
+        "attrs": {
+          "data-api-kind": "type",
+          "data-api-status": "experimental",
+          "title": "Experimental / Expérimental"
+        }
+      },
+      {
+        "slug": "reference/harnesstoolevent",
+        "attrs": {
+          "data-api-kind": "type",
+          "data-api-status": "experimental",
+          "title": "Experimental / Expérimental"
+        }
+      },
+      {
+        "slug": "reference/jsonschema",
+        "attrs": {
+          "data-api-kind": "type",
+          "data-api-status": "experimental",
+          "title": "Experimental / Expérimental"
+        }
+      },
+      {
+        "slug": "reference/tooloutput",
+        "attrs": {
+          "data-api-kind": "type",
+          "data-api-status": "experimental",
+          "title": "Experimental / Expérimental"
+        }
+      },
+      {
+        "slug": "reference/toolvalidation",
+        "attrs": {
+          "data-api-kind": "type",
+          "data-api-status": "experimental",
+          "title": "Experimental / Expérimental"
+        }
+      },
       {
         "slug": "reference/agentauthentication",
         "attrs": { "data-api-kind": "type" }
@@ -349,19 +424,99 @@
       },
       {
         "slug": "reference/type-customharness",
-        "attrs": { "data-api-kind": "interface" }
+        "attrs": {
+          "data-api-kind": "interface",
+          "data-api-status": "experimental",
+          "title": "Experimental / Expérimental"
+        }
       },
       {
         "slug": "reference/customharnessoptions",
-        "attrs": { "data-api-kind": "interface" }
+        "attrs": {
+          "data-api-kind": "interface",
+          "data-api-status": "experimental",
+          "title": "Experimental / Expérimental"
+        }
       },
       {
-        "slug": "reference/harnessinput",
-        "attrs": { "data-api-kind": "interface" }
+        "slug": "reference/harnesslimits",
+        "attrs": {
+          "data-api-kind": "interface",
+          "data-api-status": "experimental",
+          "title": "Experimental / Expérimental"
+        }
       },
       {
-        "slug": "reference/harnesscontext",
-        "attrs": { "data-api-kind": "interface" }
+        "slug": "reference/harnesstoolexecution",
+        "attrs": {
+          "data-api-kind": "interface",
+          "data-api-status": "experimental",
+          "title": "Experimental / Expérimental"
+        }
+      },
+      {
+        "slug": "reference/harnessinstructions",
+        "attrs": {
+          "data-api-kind": "interface",
+          "data-api-status": "experimental",
+          "title": "Experimental / Expérimental"
+        }
+      },
+      {
+        "slug": "reference/harnessinstructioncontext",
+        "attrs": {
+          "data-api-kind": "interface",
+          "data-api-status": "experimental",
+          "title": "Experimental / Expérimental"
+        }
+      },
+      {
+        "slug": "reference/harnesstool",
+        "attrs": {
+          "data-api-kind": "interface",
+          "data-api-status": "experimental",
+          "title": "Experimental / Expérimental"
+        }
+      },
+      {
+        "slug": "reference/harnesstooloptions",
+        "attrs": {
+          "data-api-kind": "interface",
+          "data-api-status": "experimental",
+          "title": "Experimental / Expérimental"
+        }
+      },
+      {
+        "slug": "reference/harnesstoolcontext",
+        "attrs": {
+          "data-api-kind": "interface",
+          "data-api-status": "experimental",
+          "title": "Experimental / Expérimental"
+        }
+      },
+      {
+        "slug": "reference/harnesstoolset",
+        "attrs": {
+          "data-api-kind": "interface",
+          "data-api-status": "experimental",
+          "title": "Experimental / Expérimental"
+        }
+      },
+      {
+        "slug": "reference/harnesstoolsetoptions",
+        "attrs": {
+          "data-api-kind": "interface",
+          "data-api-status": "experimental",
+          "title": "Experimental / Expérimental"
+        }
+      },
+      {
+        "slug": "reference/standardjsonschema",
+        "attrs": {
+          "data-api-kind": "interface",
+          "data-api-status": "experimental",
+          "title": "Experimental / Expérimental"
+        }
       },
       {
         "slug": "reference/claudesettings",

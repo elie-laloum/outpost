@@ -17,7 +17,7 @@ import type { DiagnosticCapability } from "@elie-laloum/outpost";
 | ------------ | ----------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------- |
 | `id`         | `"command" \| "transfers" \| "batchTransfers" \| "interactiveTerminal"` | Requis   | Capacité évaluée : commande, transferts, transferts par lot ou terminal interactif.            |
 | `advertised` | `boolean \| "unknown"`                                                  | Requis   | Indique si l’adapter inspecté annonce cette capacité ; unknown si cela ne peut être déterminé. |
-| `observed`   | `"unverified" \| "pass" \| "fail"`                                      | Requis   | Résultat de la sonde, ou unverified si aucune sonde n’a établi la prise en charge.             |
+| `observed`   | `"fail" \| "unverified" \| "pass"`                                      | Requis   | Résultat de la sonde, ou unverified si aucune sonde n’a établi la prise en charge.             |
 
 ## Signature
 

@@ -8,4 +8,5 @@ export type FaultCode =
   | "prompt"
   | "response"
   | "session"
-  | "provider";
+  | "provider"
+  | "limit";

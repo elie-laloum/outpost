@@ -97,8 +97,13 @@ try {
     const modelProvider=api.anthropicModelProvider({apiKey:'unused'});
     assert.equal('generate' in modelProvider,false);
     assert.equal('model' in modelProvider,false);
-    assert.equal(api.agent({harness:api.harness({modelProvider,run:async()=>({text:'done'})}),model:{name:'arbitrary',maxOutputTokens:100}}).kind,'custom');
-    assert.throws(()=>api.agent({harness:api.harness({modelProvider,run:async()=>({text:'done'})}),model:'arbitrary'}),/maxOutputTokens/);
+    const echo=api.defineHarnessTool({name:'echo',description:'Echo.',readOnly:true,input:{type:'object',properties:{text:{type:'string'}}},execute:input=>input.text});
+    const toolset=api.defineHarnessToolset({name:'basic',tools:[echo]});
+    const configured=api.harness({modelProvider,tools:[toolset],instructions:api.defineHarnessInstructions('Be brief.')});
+    assert.equal(configured.tools[0].name,'echo');
+    assert.equal(api.agent({harness:configured,model:{name:'arbitrary',maxOutputTokens:100}}).kind,'custom');
+    assert.throws(()=>api.agent({harness:configured,model:'arbitrary'}),/maxOutputTokens/);
+    assert.throws(()=>api.harness({modelProvider,run:async()=>({text:'done'})}),/no longer accepts run/);
   `,
     ],
     { cwd: temporary, stdio: "inherit" },
@@ -165,14 +170,17 @@ try {
     consumer,
     `import { agent as composeAgent,  dispatch, codexHarness, geminiHarness, response, createSandbox, type GeminiSettings, type EgressPolicy } from '@elie-laloum/outpost';
 import { openaiModelProvider, type OpenAIModelProviderOptions, type ModelProvider, type ModelRequest, type ModelResult, type AgentAdapter, type SandboxProvider } from '@elie-laloum/outpost';
-import { harness, anthropicModelProvider, type Agent, type AgentModel, type ModelReasoning } from '@elie-laloum/outpost';
+import { harness, anthropicModelProvider, defineHarnessTool, type Agent, type AgentModel, type ModelReasoning, type HarnessTool } from '@elie-laloum/outpost';
 // @ts-expect-error The renamed factory has no compatibility export.
 import { customHarness } from '@elie-laloum/outpost';
 // @ts-expect-error Removed API has no compatibility export.
 import { openaiCompatible } from '@elie-laloum/outpost';
 // @ts-expect-error Removed sandbox factory has no alias.
 import { local } from '@elie-laloum/outpost/providers/local';
-const custom = harness({modelProvider:anthropicModelProvider({apiKey:'unused'}),run:async(input,context)=>context.modelProvider.request({model:context.model,prompt:input.prompt,signal:context.signal})});
+const read: HarnessTool<{ path: string }> = defineHarnessTool({name:'read',description:'Read a file.',readOnly:true,input:{type:'object',properties:{path:{type:'string'}},required:['path']},execute:async(input: { path: string },context)=>(await context.sandbox.invoke({executable:'cat',arguments:[input.path],signal:context.signal})).stdout});
+const custom = harness({modelProvider:anthropicModelProvider({apiKey:'unused'}),tools:[read],limits:{maxSteps:5,usage:{output:1000}},toolExecution:{concurrency:2,onError:'return-to-model'}});
+// @ts-expect-error Custom callbacks were replaced by declarative tools.
+harness({modelProvider:anthropicModelProvider({apiKey:'unused'}),run:async()=>({text:'done'})});
 const reasoning: ModelReasoning = 'high';
 const selectedModel: AgentModel = {name:'arbitrary',reasoning,maxOutputTokens:10};
 const composed: Agent = composeAgent({harness:custom,model:selectedModel});

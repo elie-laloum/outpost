@@ -15,7 +15,7 @@ import { agentVersions } from "@elie-laloum/outpost";
 
 Expose the Claude, Codex and Gemini CLI versions used as compatibility references by bundled protocol fixtures and generated images. These values do not query the installed binaries or prove live account access.
 
-[Complete example and detailed rules](../../guide/agents/adapters/).
+[Complete example and detailed rules](../../guide/agents/harness/).
 
 ## Parameters and properties
 

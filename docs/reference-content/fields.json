@@ -392,12 +392,12 @@
     "Identifiant de conversation native à poursuivre ; fork demande une conversation distincte dérivée de celle-ci."
   ],
   "AgentEvent.kind": [
-    "Discriminator selecting the event payload: phase, summary, warning, text, result, prompt, tool, conversation, usage, failure, finished or raw.",
-    "Discriminant sélectionnant les données de l’événement : phase, summary, warning, text, result, prompt, tool, conversation, usage, failure, finished ou raw."
+    "Discriminator selecting the event payload: phase, summary, warning, text, result, prompt, tool, tool-result, step, conversation, usage, failure, finished or raw.",
+    "Discriminant sélectionnant les données de l’événement : phase, summary, warning, text, result, prompt, tool, tool-result, step, conversation, usage, failure, finished ou raw."
   ],
   "AgentEvent.name": [
-    "Phase name for phase events or tool name for tool events.",
-    "Nom de phase pour les événements phase ou nom d’outil pour les événements tool."
+    "Phase name for phase events, or tool name for tool and tool-result events.",
+    "Nom de la phase pour les événements phase, ou nom de l’outil pour les événements tool et tool-result."
   ],
   "AgentEvent.agent": [
     "Agent CLI identifier to report or diagnose: claude, codex or gemini.",
@@ -3569,8 +3569,8 @@
     "Harness et sélection de modèle à composer en un agent exécutable."
   ],
   "harness.options": [
-    "Model provider and callback owned by this custom harness configuration.",
-    "Fournisseur de modèles et callback portés par cette configuration de harness personnalisé."
+    "Model provider, instructions, tools, loop limits, tool execution settings and history caching for the built-in Outpost engine.",
+    "Fournisseur de modèles, instructions, outils, limites de boucle, exécution des outils et cache d’historique du moteur intégré d’Outpost."
   ],
   "AgentOptions.harness": [
     "Execution harness; its kind selects CLI supervision or a custom callback.",
@@ -3649,20 +3649,12 @@
     "Construit l’adaptateur CLI pour un AgentModel normalisé optionnel sans lancer le programme ; un raisonnement ou une limite de sortie non pris en charge est refusé ici."
   ],
   "CustomHarnessOptions.modelProvider": [
-    "Reusable request transport used by the execution callback; no model catalog is imposed.",
-    "Transport de requêtes utilisé par le callback ; aucun catalogue de modèles n’est imposé."
+    "Request transport the engine calls for each step; it validates the agent model when the agent is composed.",
+    "Transport de requêtes que le moteur appelle à chaque étape ; il valide le modèle de l’agent à la composition."
   ],
   "CustomHarness.modelProvider": [
-    "Reusable request transport used by the execution callback; no model catalog is imposed.",
-    "Transport de requêtes utilisé par le callback ; aucun catalogue de modèles n’est imposé."
-  ],
-  "CustomHarnessOptions.run": [
-    "Caller implementation returning text and optional usage. It must cooperate with cancellation and await its sandbox and model operations.",
-    "Implémentation de l’appelant renvoyant texte et usage optionnel. Elle doit respecter l’annulation et attendre ses opérations sandbox et modèle."
-  ],
-  "CustomHarness.run": [
-    "Caller implementation returning text and optional usage. It must cooperate with cancellation and await its sandbox and model operations.",
-    "Implémentation de l’appelant renvoyant texte et usage optionnel. Elle doit respecter l’annulation et attendre ses opérations sandbox et modèle."
+    "Request transport the engine calls for each step; it validates the agent model when the agent is composed.",
+    "Transport de requêtes que le moteur appelle à chaque étape ; il valide le modèle de l’agent à la composition."
   ],
   "AgentAdapter.authenticate": [
     "Build an optional authentication command from explicitly resolved variables; reactivated when the selected configuration for this CLI changes.",
@@ -3711,38 +3703,6 @@
   "ModelRequest.model": [
     "Nonempty service-specific model identifier; no local catalog or availability probe is used.",
     "Identifiant de modèle non vide propre au service ; aucun catalogue local ni sonde de disponibilité."
-  ],
-  "HarnessInput.prompt": [
-    "Prepared prompt for this execution pass, including rendered brief values and configured response instructions.",
-    "Prompt préparé pour cette passe, avec les valeurs du brief et les instructions de réponse configurées."
-  ],
-  "HarnessRun.input": [
-    "Prepared prompt supplied to one custom execution pass.",
-    "Prompt préparé transmis à une passe d’exécution personnalisée."
-  ],
-  "HarnessRun.context": [
-    "Operation-scoped model access, sandbox, cancellation signal and isolated observation callback.",
-    "Accès au modèle, sandbox, signal d’annulation et callback d’observation isolé propres à l’opération."
-  ],
-  "HarnessContext.model": [
-    "Model name selected on the composed agent; requests inherit its reasoning and output limit unless they set their own.",
-    "Nom du modèle sélectionné sur l’agent composé ; les requêtes héritent de son raisonnement et de sa limite de sortie sauf si elles fixent les leurs."
-  ],
-  "HarnessContext.modelProvider": [
-    "Request wrapper bound to this agent’s model and cancellation; reported usage is accumulated across calls.",
-    "Wrapper de requêtes lié au modèle de cet agent et à son annulation ; l’usage rapporté est cumulé entre les appels."
-  ],
-  "HarnessContext.sandbox": [
-    "Borrowed sandbox capabilities for commands and transfers. The harness cannot release the lease; operations inherit turn cancellation.",
-    "Capacités empruntées du sandbox pour commandes et transferts. Le harness ne peut pas libérer le lease ; les opérations héritent de l’annulation."
-  ],
-  "HarnessContext.signal": [
-    "Combined external cancellation and execution deadline; callbacks must cooperate with this signal.",
-    "Annulation externe et délai d’exécution combinés ; les callbacks doivent respecter ce signal."
-  ],
-  "HarnessContext.observe": [
-    "Emit an observation without allowing observer exceptions to alter execution. Result, usage and completion are managed by the runner; conversation events are unsupported.",
-    "Émet une observation sans laisser les erreurs d’observateur altérer l’exécution. Résultat, usage et fin sont gérés par le runner ; les événements de conversation sont refusés."
   ],
   "AgentAuthentication.mode": [
     "Explicit credential mode: API key, Claude subscription token, or existing Codex login. Unsupported agent/mode combinations fail locally.",
@@ -3951,5 +3911,249 @@
   "ModelToolSpec.inputSchema": [
     "JSON Schema object describing the tool arguments.",
     "Objet JSON Schema qui décrit les arguments de l’outil."
+  ],
+  "defineHarnessTool.options": [
+    "Tool name, description, input schema, read-only flag and execute function.",
+    "Nom, description, schéma d’entrée, indicateur de lecture seule et fonction execute de l’outil."
+  ],
+  "defineHarnessToolset.options": [
+    "Toolset name and the tools or nested toolsets it groups.",
+    "Nom du jeu d’outils et outils ou jeux imbriqués qu’il regroupe."
+  ],
+  "defineHarnessInstructions.source": [
+    "Nonempty instruction text, or a function that receives the sandbox, signal and model and returns the text when a turn starts.",
+    "Texte d’instructions non vide, ou fonction qui reçoit le sandbox, le signal et le modèle et renvoie le texte au début d’une passe."
+  ],
+  "CustomHarnessOptions.instructions": [
+    "System instructions as text, a defineHarnessInstructions() result or a list of both. Resolved at each turn and joined with blank lines; empty results are skipped.",
+    "Instructions système en texte, résultat de defineHarnessInstructions() ou liste des deux. Résolues à chaque passe et jointes par des lignes vides ; les résultats vides sont ignorés."
+  ],
+  "CustomHarness.instructions": [
+    "Normalized instruction sources resolved at the start of each turn.",
+    "Sources d’instructions normalisées, résolues au début de chaque passe."
+  ],
+  "CustomHarnessOptions.tools": [
+    "Tools and toolsets the model may call. Nested toolsets are flattened; names must be unique across the harness.",
+    "Outils et jeux d’outils que le modèle peut appeler. Les jeux imbriqués sont aplatis ; les noms doivent être uniques dans tout le harness."
+  ],
+  "CustomHarness.tools": [
+    "Flattened, frozen tool list sent to the model in declaration order.",
+    "Liste d’outils aplatie et figée, envoyée au modèle dans l’ordre de déclaration."
+  ],
+  "CustomHarnessOptions.limits": [
+    "Bounds on steps, tool calls and token usage. Reaching one fails the turn with code limit.",
+    "Bornes sur les étapes, les appels d’outils et l’usage de tokens. En atteindre une fait échouer la passe avec le code limit."
+  ],
+  "CustomHarness.limits": [
+    "Normalized limits; maxSteps defaults to 100.",
+    "Limites normalisées ; maxSteps vaut 100 par défaut."
+  ],
+  "CustomHarnessOptions.toolExecution": [
+    "Tool concurrency, per-call deadline and error policy.",
+    "Concurrence des outils, délai par appel et politique d’erreur."
+  ],
+  "CustomHarness.toolExecution": [
+    "Normalized tool execution settings with defaults applied.",
+    "Réglages d’exécution des outils normalisés, valeurs par défaut appliquées."
+  ],
+  "CustomHarnessOptions.cache": [
+    "Ask the provider to cache the conversation prefix; defaults to true. OpenAI caches stable prefixes automatically.",
+    "Demande au fournisseur de mettre en cache le préfixe de la conversation ; true par défaut. OpenAI met en cache les préfixes stables automatiquement."
+  ],
+  "CustomHarness.cache": [
+    "Whether each request asks the provider to cache the conversation prefix.",
+    "Indique si chaque requête demande au fournisseur de mettre en cache le préfixe de la conversation."
+  ],
+  "HarnessLimits.maxSteps": [
+    "Maximum number of model requests in one turn; defaults to 100.",
+    "Nombre maximal de requêtes au modèle dans une passe ; 100 par défaut."
+  ],
+  "HarnessLimits.maxToolCalls": [
+    "Maximum number of tool calls in one turn; unbounded apart from maxSteps when omitted.",
+    "Nombre maximal d’appels d’outils dans une passe ; seulement borné par maxSteps s’il est omis."
+  ],
+  "HarnessLimits.usage": [
+    "Token budget per counter (input, cached, cacheCreated, output), checked before each new request. Requires a provider that reports usage; the last step may exceed it.",
+    "Budget de tokens par compteur (input, cached, cacheCreated, output), vérifié avant chaque nouvelle requête. Exige un fournisseur qui rapporte l’usage ; la dernière étape peut le dépasser."
+  ],
+  "HarnessToolExecution.concurrency": [
+    "Maximum number of read-only tools running at once; other tools run one at a time. Defaults to 4.",
+    "Nombre maximal d’outils en lecture seule exécutés en même temps ; les autres s’exécutent un par un. 4 par défaut."
+  ],
+  "HarnessToolExecution.deadlineMs": [
+    "Per-call deadline in milliseconds; defaults to 300,000. An expired call is reported to the model as an error.",
+    "Délai par appel en millisecondes ; 300 000 par défaut. Un appel expiré est signalé au modèle comme une erreur."
+  ],
+  "HarnessToolExecution.onError": [
+    "return-to-model (default) sends a thrown error back as an error result; fail rejects the turn with that error.",
+    "return-to-model (par défaut) renvoie une exception comme résultat en erreur ; fail fait échouer la passe avec cette erreur."
+  ],
+  "HarnessInstructions.kind": [
+    "Definition discriminator: instructions.",
+    "Discriminant de la définition : instructions."
+  ],
+  "HarnessInstructions.resolve": [
+    "Produce the instruction text for one turn from its context.",
+    "Produit le texte d’instructions d’une passe à partir de son contexte."
+  ],
+  "HarnessInstructionContext.sandbox": [
+    "Borrowed sandbox of the turn, for example to read project guidance before the first request.",
+    "Sandbox emprunté de la passe, par exemple pour lire les consignes du projet avant la première requête."
+  ],
+  "HarnessInstructionContext.signal": [
+    "Turn cancellation signal; honor it in asynchronous resolvers.",
+    "Signal d’annulation de la passe ; respectez-le dans les résolveurs asynchrones."
+  ],
+  "HarnessInstructionContext.model": [
+    "Normalized model of the agent running the turn.",
+    "Modèle normalisé de l’agent qui exécute la passe."
+  ],
+  "HarnessToolOptions.name": [
+    "Unique tool name of 1 to 64 letters, digits, underscores or hyphens, shown to the model.",
+    "Nom d’outil unique de 1 à 64 lettres, chiffres, tirets bas ou tirets, présenté au modèle."
+  ],
+  "HarnessTool.name": [
+    "Unique tool name shown to the model.",
+    "Nom d’outil unique présenté au modèle."
+  ],
+  "HarnessToolOptions.description": [
+    "Nonempty explanation the model reads to decide when and how to call the tool.",
+    "Explication non vide que le modèle lit pour décider quand et comment appeler l’outil."
+  ],
+  "HarnessTool.description": [
+    "Explanation sent to the model with the tool.",
+    "Explication envoyée au modèle avec l’outil."
+  ],
+  "HarnessToolOptions.input": [
+    "Input schema: a JSON Schema object validated by the built-in subset, or a Standard Schema that exposes JSON Schema, such as Zod 4, whose validator checks the input.",
+    "Schéma d’entrée : objet JSON Schema validé par le sous-ensemble intégré, ou Standard Schema qui expose un JSON Schema, comme Zod 4, dont le validateur contrôle l’entrée."
+  ],
+  "HarnessToolOptions.readOnly": [
+    "Mark tools without side effects so they can run concurrently; defaults to false.",
+    "Marque les outils sans effet de bord pour qu’ils puissent s’exécuter en parallèle ; false par défaut."
+  ],
+  "HarnessTool.readOnly": [
+    "Whether the tool may run concurrently with other read-only calls.",
+    "Indique si l’outil peut s’exécuter en parallèle d’autres appels en lecture seule."
+  ],
+  "HarnessToolOptions.execute": [
+    "Run the call with validated input and its context. Return text, or { content, isError } to report a failure the model can react to.",
+    "Exécute l’appel avec l’entrée validée et son contexte. Renvoie du texte, ou { content, isError } pour signaler un échec auquel le modèle peut réagir."
+  ],
+  "HarnessTool.execute": [
+    "Run the call with validated input and its context.",
+    "Exécute l’appel avec l’entrée validée et son contexte."
+  ],
+  "HarnessTool.kind": [
+    "Definition discriminator: tool.",
+    "Discriminant de la définition : tool."
+  ],
+  "HarnessTool.inputSchema": [
+    "Frozen JSON Schema sent to the model, converted from a Standard Schema when needed.",
+    "JSON Schema figé envoyé au modèle, converti depuis un Standard Schema si besoin."
+  ],
+  "HarnessTool.validate": [
+    "Check raw model arguments and return the typed value or a readable issue list.",
+    "Contrôle les arguments bruts du modèle et renvoie la valeur typée ou une liste de problèmes lisible."
+  ],
+  "HarnessToolContext.sandbox": [
+    "Borrowed sandbox for commands and transfers. Operations follow the call deadline and turn cancellation; the tool cannot release the sandbox.",
+    "Sandbox emprunté pour les commandes et transferts. Les opérations suivent le délai de l’appel et l’annulation de la passe ; l’outil ne peut pas libérer le sandbox."
+  ],
+  "HarnessToolContext.signal": [
+    "Aborted when the call deadline expires or the turn is cancelled. JavaScript that ignores it keeps running detached.",
+    "Annulé à l’expiration du délai de l’appel ou à l’annulation de la passe. Un JavaScript qui l’ignore continue détaché."
+  ],
+  "HarnessToolContext.callId": [
+    "Identifier of the model tool call being executed.",
+    "Identifiant de l’appel d’outil du modèle en cours d’exécution."
+  ],
+  "HarnessToolContext.model": [
+    "Normalized model of the agent running the tool.",
+    "Modèle normalisé de l’agent qui exécute l’outil."
+  ],
+  "HarnessToolContext.observe": [
+    "Report text, warning or raw events to dispatch observers; other kinds are rejected.",
+    "Signale des événements text, warning ou raw aux observateurs du dispatch ; les autres variantes sont refusées."
+  ],
+  "HarnessToolsetOptions.name": [
+    "Nonempty name identifying the toolset.",
+    "Nom non vide qui identifie le jeu d’outils."
+  ],
+  "HarnessToolset.name": [
+    "Name identifying the toolset.",
+    "Nom qui identifie le jeu d’outils."
+  ],
+  "HarnessToolsetOptions.tools": [
+    "Tools and nested toolsets to group; names must be unique.",
+    "Outils et jeux imbriqués à regrouper ; les noms doivent être uniques."
+  ],
+  "HarnessToolset.tools": [
+    "Flattened, frozen tool list.",
+    "Liste d’outils aplatie et figée."
+  ],
+  "HarnessToolset.kind": [
+    "Definition discriminator: toolset.",
+    "Discriminant de la définition : toolset."
+  ],
+  "StandardJsonSchema.~standard": [
+    "Standard Schema properties: validate() checks a value and jsonSchema.input() converts the input type to JSON Schema.",
+    "Propriétés Standard Schema : validate() contrôle une valeur et jsonSchema.input() convertit le type d’entrée en JSON Schema."
+  ],
+  "ToolOutput.content": [
+    "Text returned to the model for the call.",
+    "Texte renvoyé au modèle pour l’appel."
+  ],
+  "ToolOutput.isError": [
+    "Report the call as failed so the model can recover.",
+    "Signale l’échec de l’appel pour que le modèle puisse se corriger."
+  ],
+  "ToolValidation.value": [
+    "Validated input passed to execute.",
+    "Entrée validée transmise à execute."
+  ],
+  "ToolValidation.issues": [
+    "Readable validation problems returned to the model as an error result.",
+    "Problèmes de validation lisibles renvoyés au modèle comme résultat en erreur."
+  ],
+  "AgentEvent.callId": [
+    "Identifier linking a tool event to its tool-result event; set by custom harnesses.",
+    "Identifiant qui relie un événement tool à son événement tool-result ; fourni par les harness personnalisés."
+  ],
+  "AgentEvent.isError": [
+    "Whether the tool call failed or reported an error.",
+    "Indique si l’appel d’outil a échoué ou signalé une erreur."
+  ],
+  "AgentEvent.preview": [
+    "Beginning of the tool result, bounded for logs and reporters.",
+    "Début du résultat de l’outil, borné pour les journaux et les rapporteurs."
+  ],
+  "AgentEvent.characters": [
+    "Full length of the tool result before any truncation.",
+    "Longueur complète du résultat de l’outil avant toute troncature."
+  ],
+  "AgentEvent.index": [
+    "One-based step number of a custom harness turn.",
+    "Numéro d’étape, à partir de 1, d’une passe de harness personnalisé."
+  ],
+  "ResolvedHarnessLimits.maxSteps": [
+    "Effective maximum number of model requests per turn after defaults.",
+    "Nombre maximal effectif de requêtes au modèle par passe, défauts appliqués."
+  ],
+  "ResolvedHarnessLimits.maxToolCalls": [
+    "Configured maximum number of tool calls per turn, when set.",
+    "Nombre maximal d’appels d’outils par passe, s’il est défini."
+  ],
+  "ResolvedHarnessLimits.usage": [
+    "Configured token budget per usage counter, when set.",
+    "Budget de tokens configuré par compteur d’usage, s’il est défini."
+  ],
+  "ReporterHandlers.tool-result": [
+    "Handle the custom harness tool result, with its call identifier, error flag and bounded preview; receives pass and at metadata and may return a promise.",
+    "Traite : résultat d’outil d’un harness personnalisé, avec identifiant d’appel, indicateur d’erreur et aperçu borné ; reçoit pass et at et peut retourner une promesse."
+  ],
+  "ReporterHandlers.step": [
+    "Handle the start of a custom harness step before its model request; receives pass and at metadata and may return a promise.",
+    "Traite : début d’une étape de harness personnalisé avant sa requête au modèle ; reçoit pass et at et peut retourner une promesse."
   ]
 }

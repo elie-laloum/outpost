@@ -28,7 +28,7 @@ console.log(result.usage, result.log);
 
 ## Événements
 
-`AgentObservation` ajoute un numéro de `pass` à partir de 1 et une date ISO `at` aux événements normalisés. Les variantes sont `phase`, `prompt`, `text`, `result`, `tool`, `conversation`, `usage`, `summary`, `warning`, `failure`, `finished` et `raw`. Vérifiez le discriminant avant de lire les champs propres à une variante. Le protocole inconnu reste disponible dans `raw`.
+`AgentObservation` ajoute un numéro de `pass` à partir de 1 et une date ISO `at` aux événements normalisés. Les variantes sont `phase`, `prompt`, `text`, `result`, `tool`, `tool-result`, `step`, `conversation`, `usage`, `summary`, `warning`, `failure`, `finished` et `raw`. Les harness personnalisés émettent `step` avant chaque requête au modèle, et `tool-result` avec un aperçu borné après chaque appel d’outil ; leurs événements `tool` portent un `callId`. Vérifiez le discriminant avant de lire les champs propres à une variante. Le protocole inconnu reste disponible dans `raw`.
 
 Les erreurs des callbacks d’observation et d’avertissement ne font pas échouer la tâche. N’utilisez pas un observateur pour imposer une règle métier essentielle : validez le résultat retourné. `reporter` accepte `label`, `verbose`, `quiet` et une fonction `write(text)` personnalisée.
 

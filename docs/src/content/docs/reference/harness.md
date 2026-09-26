@@ -19,8 +19,12 @@ The fields below cover all variants; the signature specifies their allowed combi
 | --------------- | -------------------------------------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `kind`          | `"cli" \| "custom"`                    | Required          | Execution discriminator: cli or custom.                                                                                                              |
 | `bind`          | `(model?: AgentModel) => AgentAdapter` | Variant-dependent | Build the CLI adapter for an optional normalized AgentModel without launching the program; unsupported reasoning or output limits are rejected here. |
-| `modelProvider` | `ModelProvider`                        | Variant-dependent | Reusable request transport used by the execution callback; no model catalog is imposed.                                                              |
-| `run`           | `HarnessRun`                           | Variant-dependent | Caller implementation returning text and optional usage. It must cooperate with cancellation and await its sandbox and model operations.             |
+| `modelProvider` | `ModelProvider`                        | Variant-dependent | Request transport the engine calls for each step; it validates the agent model when the agent is composed.                                           |
+| `instructions`  | `readonly HarnessInstructions[]`       | Variant-dependent | Normalized instruction sources resolved at the start of each turn.                                                                                   |
+| `tools`         | `readonly HarnessTool<unknown>[]`      | Variant-dependent | Flattened, frozen tool list sent to the model in declaration order.                                                                                  |
+| `limits`        | `ResolvedHarnessLimits`                | Variant-dependent | Normalized limits; maxSteps defaults to 100.                                                                                                         |
+| `toolExecution` | `Required<HarnessToolExecution>`       | Variant-dependent | Normalized tool execution settings with defaults applied.                                                                                            |
+| `cache`         | `boolean`                              | Variant-dependent | Whether each request asks the provider to cache the conversation prefix.                                                                             |
 
 ## Signature
 

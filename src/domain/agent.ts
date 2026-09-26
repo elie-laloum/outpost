@@ -7,8 +7,6 @@ import type {
   CustomAgentOptions,
   CliAgent,
   CustomAgent,
-  CustomHarness,
-  CustomHarnessOptions,
 } from "./agent.types.ts";
 
 export function agent(options: CliAgentOptions): CliAgent;
@@ -40,9 +38,9 @@ export function agent(options: AgentOptions): Agent {
   }
   invariant(model, "Custom harness requires a model name");
   invariant(
-    typeof harness.run === "function" &&
-      typeof harness.modelProvider?.request === "function",
-    "Custom harness requires a model provider and run function",
+    typeof harness.modelProvider?.request === "function" &&
+      Array.isArray(harness.tools),
+    "Create custom harnesses with harness()",
   );
   harness.modelProvider.validate?.(model);
   return Object.freeze({
@@ -52,26 +50,5 @@ export function agent(options: AgentOptions): Agent {
     model,
     capture: false,
     resumable: false,
-  });
-}
-
-export function harness(options: CustomHarnessOptions): CustomHarness {
-  invariant(
-    options && typeof options.run === "function",
-    "Custom harness requires a run function",
-  );
-  invariant(
-    typeof options.modelProvider?.request === "function",
-    "Custom harness requires a model provider",
-  );
-  invariant(
-    options.modelProvider.validate === undefined ||
-      typeof options.modelProvider.validate === "function",
-    "Model provider validate must be a function",
-  );
-  return Object.freeze({
-    kind: "custom",
-    modelProvider: options.modelProvider,
-    run: options.run,
   });
 }

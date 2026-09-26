@@ -300,8 +300,8 @@
     "Compose un harness et un modèle sans lancer de processus ni requête réseau. Le modèle est un nom ou un objet AgentModel ; le harness ou son fournisseur refuse immédiatement un niveau de raisonnement ou une limite de sortie non pris en charge. Un harness CLI peut conserver son modèle par défaut ; un harness personnalisé en exige un."
   ],
   "harness": [
-    "Define a caller-supplied execution callback backed by a model provider. The callback runs in the Outpost process and uses the supplied sandbox for repository operations. No tool loop, native conversation storage or interactive terminal is provided.",
-    "Définit un callback fourni par l’appelant et relié à un fournisseur de modèles. Le callback tourne dans le processus Outpost et utilise le sandbox fourni pour le dépôt. Aucune boucle d’outils, conversation native ou session terminal n’est fournie."
+    "Compose the built-in Outpost engine from a model provider, tools, instructions, limits and tool execution settings. Validation happens immediately; nothing runs until the agent is dispatched. The engine calls the model, validates and runs tools in the borrowed sandbox and fails with code limit when a bound is reached. run callbacks are rejected.",
+    "Compose le moteur intégré d’Outpost à partir d’un fournisseur de modèles, d’outils, d’instructions, de limites et de réglages d’exécution des outils. La validation est immédiate ; rien ne s’exécute avant le dispatch de l’agent. Le moteur appelle le modèle, valide et exécute les outils dans le sandbox emprunté et échoue avec le code limit quand une borne est atteinte. Les callbacks run sont refusés."
   ],
   "anthropicModelProvider": [
     "Configure an Anthropic Messages transport with messages, tool calls, thinking replay and optional system-prefix and history caching. The harness supplies the model per request; the agent model must set maxOutputTokens, and reasoning maps to adaptive or disabled thinking. Cache reads and writes are normalized into usage; streaming and server tools are rejected.",
@@ -318,5 +318,17 @@
   "geminiHarness": [
     "Create a Gemini CLI harness from execution, authentication and conversation settings without starting the CLI. Compose it with agent({ harness, model }) to select a model independently. The CLI owns its internal model/tool loop.",
     "Crée un harness Gemini CLI à partir des réglages d’exécution, d’authentification et de conversation, sans lancer la CLI. Composez-le avec agent({ harness, model }) pour sélectionner séparément le modèle. La CLI possède sa boucle interne modèle/outils."
+  ],
+  "defineHarnessTool": [
+    "Define a tool the engine can offer to the model. Validates the name, description and input schema immediately and returns a frozen definition whose validate() checks model arguments before execute() runs.",
+    "Définit un outil que le moteur peut proposer au modèle. Valide immédiatement le nom, la description et le schéma d’entrée, et renvoie une définition figée dont validate() contrôle les arguments du modèle avant l’exécution de execute()."
+  ],
+  "defineHarnessToolset": [
+    "Group tools and nested toolsets under a name so they can be reused across harnesses. Flattens nested sets and rejects duplicate tool names.",
+    "Regroupe des outils et des jeux imbriqués sous un nom pour les réutiliser entre harness. Aplatit les jeux imbriqués et refuse les noms d’outils en double."
+  ],
+  "defineHarnessInstructions": [
+    "Define system instructions from text or from a resolver called at the start of each turn with the sandbox, signal and model. The resolved text is not stored in the conversation.",
+    "Définit des instructions système à partir d’un texte ou d’un résolveur appelé au début de chaque passe avec le sandbox, le signal et le modèle. Le texte résolu n’est pas stocké dans la conversation."
   ]
 }

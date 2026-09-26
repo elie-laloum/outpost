@@ -1,18 +1,38 @@
-export { agent, harness } from "./domain/agent.ts";
+export { agent } from "./domain/agent.ts";
+export { harness } from "./domain/harness.ts";
+export { defineHarnessInstructions } from "./domain/instructions.ts";
+export { defineHarnessTool, defineHarnessToolset } from "./domain/tool.ts";
 export type {
   AgentAuthentication,
   Agent,
   AgentOptions,
   Harness,
   CliHarness,
-  CustomHarness,
   CliAgent,
   CustomAgent,
-  CustomHarnessOptions,
-  HarnessInput,
-  HarnessContext,
-  HarnessRun,
 } from "./domain/agent.types.ts";
+export type {
+  CustomHarness,
+  CustomHarnessOptions,
+  HarnessInstructionContext,
+  HarnessInstructions,
+  HarnessInstructionSource,
+  HarnessInstructionsOption,
+  HarnessLimits,
+  HarnessToolExecution,
+} from "./domain/harness.types.ts";
+export type {
+  HarnessTool,
+  HarnessToolContext,
+  HarnessToolEvent,
+  HarnessToolOptions,
+  HarnessToolset,
+  HarnessToolsetOptions,
+  JsonSchema,
+  StandardJsonSchema,
+  ToolOutput,
+  ToolValidation,
+} from "./domain/tool.types.ts";
 export { TransportConflict } from "./domain/transport.ts";
 export type {
   Transport,

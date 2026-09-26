@@ -10,11 +10,12 @@ export function activityWatchdog(
 ): ActivityWatchdog {
   let idle: NodeJS.Timeout | undefined, settle: NodeJS.Timeout | undefined;
   let lastActivity = Date.now();
+  let holds = 0;
   const refresh = (completed: boolean) => {
     lastActivity = Date.now();
     clearTimeout(idle);
     clearTimeout(settle);
-    if (!completed)
+    if (!completed && holds === 0)
       idle = setTimeout(
         () =>
           controller.abort(
@@ -35,7 +36,7 @@ export function activityWatchdog(
   const warningInterval =
     options.idleWarningMs ?? executionDefaults.idleWarningMs;
   const warnings = setInterval(() => {
-    if (Date.now() - lastActivity >= warningInterval) {
+    if (holds === 0 && Date.now() - lastActivity >= warningInterval) {
       const message = `Agent has been idle for ${Math.floor((Date.now() - lastActivity) / 1000)} seconds`;
       notify(options.warn, message);
       notify(options.observe, {
@@ -49,6 +50,17 @@ export function activityWatchdog(
 
   return {
     refresh,
+    hold() {
+      holds++;
+      refresh(false);
+      let released = false;
+      return () => {
+        if (released) return;
+        released = true;
+        holds--;
+        refresh(false);
+      };
+    },
     close() {
       clearTimeout(idle);
       clearTimeout(settle);

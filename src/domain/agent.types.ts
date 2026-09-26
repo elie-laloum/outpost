@@ -1,10 +1,5 @@
-import type {
-  AgentModel,
-  ModelProvider,
-  ModelResult,
-  ModelSpec,
-} from "./model.types.ts";
-import type { SandboxLease } from "./sandbox.types.ts";
+import type { CustomHarness } from "./harness.types.ts";
+import type { AgentModel, ModelSpec } from "./model.types.ts";
 import type { Command, Variables } from "./command.types.ts";
 import type { ConversationStore } from "./conversation.types.ts";
 
@@ -33,7 +28,21 @@ export type AgentEvent =
   | { readonly kind: "text"; readonly text: string }
   | { readonly kind: "result"; readonly text: string }
   | { readonly kind: "prompt"; readonly text: string }
-  | { readonly kind: "tool"; readonly name: string; readonly input: unknown }
+  | {
+      readonly kind: "tool";
+      readonly name: string;
+      readonly input: unknown;
+      readonly callId?: string;
+    }
+  | {
+      readonly kind: "tool-result";
+      readonly callId: string;
+      readonly name: string;
+      readonly isError: boolean;
+      readonly preview: string;
+      readonly characters: number;
+    }
+  | { readonly kind: "step"; readonly index: number }
   | { readonly kind: "conversation"; readonly id: string }
   | { readonly kind: "usage"; readonly tokens: Usage }
   | { readonly kind: "failure"; readonly message: string }
@@ -86,35 +95,7 @@ export interface CliHarness {
   bind(model?: AgentModel): AgentAdapter;
 }
 
-export interface CustomHarness {
-  readonly kind: "custom";
-  readonly modelProvider: ModelProvider;
-  readonly run: HarnessRun;
-}
-
 export type Harness = CliHarness | CustomHarness;
-
-export interface HarnessInput {
-  readonly prompt: string;
-}
-
-export interface HarnessContext {
-  readonly model: string;
-  readonly modelProvider: ModelProvider;
-  readonly sandbox: SandboxLease;
-  readonly signal: AbortSignal;
-  observe(event: AgentEvent): void;
-}
-
-export type HarnessRun = (
-  input: HarnessInput,
-  context: HarnessContext,
-) => Promise<ModelResult>;
-
-export interface CustomHarnessOptions {
-  readonly modelProvider: ModelProvider;
-  readonly run: HarnessRun;
-}
 
 export interface CliAgent extends AgentAdapter {
   readonly kind: "cli";

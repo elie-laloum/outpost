@@ -46,6 +46,7 @@ export interface AgentOutput {
 
 export interface ActivityWatchdog {
   refresh(completed: boolean): void;
+  hold(): () => void;
   close(): void;
 }
 

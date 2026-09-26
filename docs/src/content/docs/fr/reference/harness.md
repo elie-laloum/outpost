@@ -19,8 +19,12 @@ Les champs ci-dessous couvrent toutes les variantes ; la signature précise leur
 | --------------- | -------------------------------------- | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `kind`          | `"cli" \| "custom"`                    | Requis            | Discriminant d’exécution : cli or custom.                                                                                                                               |
 | `bind`          | `(model?: AgentModel) => AgentAdapter` | Selon la variante | Construit l’adaptateur CLI pour un AgentModel normalisé optionnel sans lancer le programme ; un raisonnement ou une limite de sortie non pris en charge est refusé ici. |
-| `modelProvider` | `ModelProvider`                        | Selon la variante | Transport de requêtes utilisé par le callback ; aucun catalogue de modèles n’est imposé.                                                                                |
-| `run`           | `HarnessRun`                           | Selon la variante | Implémentation de l’appelant renvoyant texte et usage optionnel. Elle doit respecter l’annulation et attendre ses opérations sandbox et modèle.                         |
+| `modelProvider` | `ModelProvider`                        | Selon la variante | Transport de requêtes que le moteur appelle à chaque étape ; il valide le modèle de l’agent à la composition.                                                           |
+| `instructions`  | `readonly HarnessInstructions[]`       | Selon la variante | Sources d’instructions normalisées, résolues au début de chaque passe.                                                                                                  |
+| `tools`         | `readonly HarnessTool<unknown>[]`      | Selon la variante | Liste d’outils aplatie et figée, envoyée au modèle dans l’ordre de déclaration.                                                                                         |
+| `limits`        | `ResolvedHarnessLimits`                | Selon la variante | Limites normalisées ; maxSteps vaut 100 par défaut.                                                                                                                     |
+| `toolExecution` | `Required<HarnessToolExecution>`       | Selon la variante | Réglages d’exécution des outils normalisés, valeurs par défaut appliquées.                                                                                              |
+| `cache`         | `boolean`                              | Selon la variante | Indique si chaque requête demande au fournisseur de mettre en cache le préfixe de la conversation.                                                                      |
 
 ## Signature
 

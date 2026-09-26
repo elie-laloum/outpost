@@ -28,7 +28,7 @@ console.log(result.usage, result.log);
 
 ## Events
 
-`AgentObservation` adds a one-based `pass` and ISO timestamp `at` to normalized events. Kinds are `phase`, `prompt`, `text`, `result`, `tool`, `conversation`, `usage`, `summary`, `warning`, `failure`, `finished` and `raw`. Use the discriminant before reading kind-specific fields. Unknown protocol data remains available as `raw`.
+`AgentObservation` adds a one-based `pass` and ISO timestamp `at` to normalized events. Kinds are `phase`, `prompt`, `text`, `result`, `tool`, `tool-result`, `step`, `conversation`, `usage`, `summary`, `warning`, `failure`, `finished` and `raw`. Custom harnesses emit `step` before each model request, and `tool-result` with a bounded preview after each tool call; their `tool` events carry a `callId`. Use the discriminant before reading kind-specific fields. Unknown protocol data remains available as `raw`.
 
 Observer and warning callback exceptions do not fail the job. Do not use an observer to enforce critical business rules: validate the returned result instead. `reporter` accepts `label`, `verbose`, `quiet` and a custom `write(text)` function.
 

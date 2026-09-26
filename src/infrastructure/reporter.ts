@@ -31,6 +31,14 @@ export function reporter(
           `\n${prefix} tool: ${event.name}${options.verbose ? ` ${JSON.stringify(event.input)}` : ""}\n`,
         );
         break;
+      case "tool-result":
+        write(
+          `${prefix} tool ${event.isError ? "failed" : "done"}: ${event.name}${options.verbose ? ` ${event.preview}` : ""}\n`,
+        );
+        break;
+      case "step":
+        if (options.verbose) write(`${prefix} step ${event.index}\n`);
+        break;
       case "summary":
         write(
           `\n${prefix} finished · ${(event.durationMs / 1000).toFixed(2)}s · status ${event.status} · input ${event.tokens.input} · cache read ${event.tokens.cached} · cache write ${event.tokens.cacheCreated ?? 0} · output ${event.tokens.output}\n`,

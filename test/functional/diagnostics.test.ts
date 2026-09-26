@@ -40,6 +40,15 @@ test("human reporter exposes phases, duration and raw token counts while quiet m
     sink({ kind: "text", text: "answer" });
     sink({ kind: "result", text: "answer" });
     sink({ kind: "tool", name: "read", input: { path: "x" } });
+    sink({ kind: "step", index: 3 });
+    sink({
+      kind: "tool-result",
+      callId: "c",
+      name: "read",
+      isError: true,
+      preview: "missing-file",
+      characters: 12,
+    });
     sink({ kind: "warning", message: "idle" });
     sink({ kind: "failure", message: "failed" });
     sink({
@@ -58,6 +67,10 @@ test("human reporter exposes phases, duration and raw token counts while quiet m
   assert.match(normal, /final-only/);
   assert.equal(normal.match(/answer/g)?.length, 1);
   assert.doesNotMatch(normal, /raw-line|brief|\/work/);
+  assert.match(normal, /tool failed: read\n/);
+  assert.doesNotMatch(normal, /missing-file|step 3/);
+  assert.match(verbose, /tool failed: read missing-file/);
+  assert.match(verbose, /step 3/);
   assert.match(verbose, /raw-line/);
   assert.match(verbose, /\/work/);
   assert.equal(quiet, "");

@@ -48,7 +48,7 @@ console.log(result.branch, result.commits);
 
 `repository` selects a local Git checkout; without it, library calls use the current working directory. See [repository paths](https://elie-laloum.github.io/outpost/guide/environment/repositories/) for external checkouts and paths relative to the workflow script.
 
-Define your own execution with `harness({ modelProvider, run })`, then compose it with `agent({ harness, model })`. See [model providers and harnesses](https://elie-laloum.github.io/outpost/guide/advanced/model-providers/) for a complete example.
+Let Outpost drive a model itself with `harness({ modelProvider, tools, instructions, limits })` and tools from `defineHarnessTool()`, then compose it with `agent({ harness, model })`. See [build a custom harness](https://elie-laloum.github.io/outpost/guide/agents/harness/) for a complete example.
 
 Learn about [sandboxes](https://elie-laloum.github.io/outpost/guide/environment/lifecycle/), [workflows](https://elie-laloum.github.io/outpost/guide/workflows/graph/), [providers](https://elie-laloum.github.io/outpost/guide/environment/providers/overview/) and [recovery](https://elie-laloum.github.io/outpost/guide/operations/recovery/) in the English/French documentation. The [roadmap](https://elie-laloum.github.io/outpost/project/roadmap/) describes future work.
 

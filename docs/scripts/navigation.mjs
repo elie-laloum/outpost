@@ -16,6 +16,7 @@ export const chapters = [
     [
       "guide/agents/dispatch",
       "guide/agents/adapters",
+      "guide/agents/harness",
       "guide/agents/prompts",
       "guide/agents/responses",
       "guide/agents/schemas",

@@ -10,7 +10,7 @@ sidebar:
 | Nom      | Type               | Présence | Rôle                                                                                  |
 | -------- | ------------------ | -------- | ------------------------------------------------------------------------------------- |
 | `path`   | `string`           | Requis   | Entrée du transfert conservé examinée par ce contrôle.                                |
-| `status` | `"pass" \| "fail"` | Requis   | pass lorsque l’invariant contrôlé est respecté, fail sinon.                           |
+| `status` | `"fail" \| "pass"` | Requis   | pass lorsque l’invariant contrôlé est respecté, fail sinon.                           |
 | `code`   | `string`           | Requis   | Code de diagnostic identifiant l’invariant vérifié ou le défaut de transfert détecté. |
 
 ## Signature

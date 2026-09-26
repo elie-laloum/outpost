@@ -6,26 +6,29 @@ sidebar:
   order: 0
 ---
 
-A harness defines how an agent executes a task and accesses its model. CLI presets and caller-defined harnesses are composed with a model identifier using `agent({ harness, model })`. This family groups their factories, execution contracts, settings and CLI protocol adapters.
+A harness defines how an agent executes a task and accesses its model. CLI presets and the Outpost engine are composed with a model using `agent({ harness, model })`. This family groups their factories, tool and instruction definitions, execution contracts, settings and CLI protocol adapters.
 
 ## How it works
 
-Choose `claudeHarness()`, `codexHarness()` or `geminiHarness()` to delegate execution to the corresponding CLI. Their options configure execution, explicit authentication and supported conversation behavior. Use `harness({ modelProvider, run })` to supply your own execution callback backed by a [model provider](../model-providers/). Select the model on the [agent](../agents/); a custom harness requires an explicit model, while a CLI preset can keep its native default.
+Choose `claudeHarness()`, `codexHarness()` or `geminiHarness()` to delegate execution to the corresponding CLI. Their options configure execution, explicit authentication and supported conversation behavior.
+
+Use `harness()` to let Outpost drive the model itself. It combines a [model provider](../model-providers/), tools from `defineHarnessTool()` and `defineHarnessToolset()`, instructions from text or `defineHarnessInstructions()`, loop limits and tool execution settings. Select the model on the [agent](../agents/); a custom harness requires an explicit model, while a CLI preset can keep its native default.
 
 ## Boundaries and responsibilities
 
-Constructing a harness starts no process, login or network request. The CLI owns its internal model/tool loop. Claude and Codex support native capture, resume and fork; Gemini supports fresh sessions.
+Constructing a harness starts no process, login or network request. A CLI owns its internal model/tool loop. Claude and Codex support native capture, resume and fork; Gemini supports fresh sessions.
 
-A custom callback runs in the Outpost process, borrows its sandbox for repository operations and cooperates with cancellation. It has no native conversations, automatic response repairs or interactive attachment. The generic tool engine remains planned. `AgentAdapter` and `AgentInput` describe CLI command construction and event decoding; `HarnessInput`, `HarnessContext` and `HarnessRun` describe custom execution. Sandbox allocation belongs to [Providers](../providers/).
+The Outpost engine runs in the Outpost process. Each step is one model request; tools run through the borrowed sandbox, and limits fail the turn with the `limit` code instead of succeeding. It has no persisted conversations, automatic response repairs or interactive attachment yet. `AgentAdapter` and `AgentInput` describe CLI command construction and event decoding. Sandbox allocation belongs to [Providers](../providers/).
 
-These harness APIs are implemented but unreleased.
+These harness APIs are implemented but unreleased; the engine and its definitions are experimental.
 
 ## Entry points
 
-- [harness](../../function-harness/) defines your execution callback.
+- [harness](../../function-harness/) composes the Outpost engine.
+- [defineHarnessTool](../../defineharnesstool/), [defineHarnessToolset](../../defineharnesstoolset/) and [defineHarnessInstructions](../../defineharnessinstructions/) declare what the engine can use.
 - [claudeHarness](../../claudeharness/), [codexHarness](../../codexharness/) and [geminiHarness](../../geminiharness/) configure the CLI presets.
 - [Harness](../../harness/) is the shared composition contract.
-- [HarnessContext](../../harnesscontext/) describes the model, provider, sandbox, cancellation signal and observer available to a callback.
+- [HarnessToolContext](../../harnesstoolcontext/) describes the sandbox, cancellation signal, model and observer available to a tool.
 - [AgentAdapter](../../agentadapter/) describes the CLI protocol adapter.
 
-[Learn with the practical guide](../../../guide/agents/adapters/). For a complete callback example, see [model providers and custom harnesses](../../../guide/advanced/model-providers/).
+[Learn with the practical guide](../../../guide/agents/harness/). For CLI presets, see [the adapters guide](../../../guide/agents/adapters/).

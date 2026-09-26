@@ -6,6 +6,7 @@ import { addUsage } from "../domain/usage.ts";
 import { activityWatchdog } from "./activity-watchdog.ts";
 import { executionDefaults } from "./execution.constants.ts";
 import type { DispatchOptions, Turn } from "./execution.types.ts";
+import { harnessLoop } from "./harness-loop.ts";
 import { notify } from "./observation.ts";
 
 export async function customTurn(
@@ -29,7 +30,6 @@ export async function customTurn(
     options.deadlineMs ?? executionDefaults.deadlineMs,
   );
   let usage: Usage = { input: 0, cached: 0, output: 0 };
-  let reported = false;
   const pending = new Set<Promise<unknown>>();
   const track = <T>(operation: Promise<T>): Promise<T> => {
     pending.add(operation);
@@ -38,14 +38,8 @@ export async function customTurn(
       .catch(() => undefined);
     return operation;
   };
-  const observe = (event: AgentEvent) => {
+  const emit = (event: AgentEvent) => {
     signal.throwIfAborted();
-    invariant(
-      !["conversation", "usage", "result", "finished", "summary"].includes(
-        event.kind,
-      ),
-      "Custom harness must return its result; conversations and usage events are not supported",
-    );
     watchdog.refresh(false);
     notify(options.observe, { ...event, pass, at: new Date().toISOString() });
   };
@@ -55,24 +49,20 @@ export async function customTurn(
       return track(
         (async () => {
           signal.throwIfAborted();
-          invariant(
-            request.model === agent.model.name,
-            "Harness request model must match its agent",
-          );
           const { reasoning, maxOutputTokens } = agent.model;
           const result = await agent.harness.modelProvider.request({
             ...(reasoning === undefined ? {} : { reasoning }),
             ...(maxOutputTokens === undefined ? {} : { maxOutputTokens }),
             ...request,
-            model: agent.model.name,
-            signal: request.signal
-              ? AbortSignal.any([request.signal, signal])
-              : signal,
+            signal,
           });
           signal.throwIfAborted();
+          invariant(
+            result && typeof result.text === "string",
+            "Model provider must return text",
+          );
           if (result.usage) {
             usage = addUsage(usage, result.usage);
-            reported = true;
             notify(options.observe, {
               kind: "usage",
               tokens: result.usage,
@@ -136,16 +126,18 @@ export async function customTurn(
   try {
     signal.throwIfAborted();
     watchdog.refresh(false);
-    const result = await agent.harness.run(
-      { prompt },
-      { model: agent.model.name, modelProvider, sandbox, signal, observe },
+    const text = await harnessLoop(
+      {
+        agent,
+        modelProvider,
+        sandbox,
+        signal,
+        emit,
+        hold: () => watchdog.hold(),
+      },
+      prompt,
     );
     signal.throwIfAborted();
-    invariant(
-      result && typeof result.text === "string",
-      "Harness must return text",
-    );
-    if (!reported && result.usage) usage = result.usage;
     for (const value of [
       usage.input,
       usage.cached,
@@ -162,7 +154,7 @@ export async function customTurn(
     );
     notify(options.observe, {
       kind: "result",
-      text: result.text,
+      text,
       pass,
       at: new Date().toISOString(),
     });
@@ -171,12 +163,7 @@ export async function customTurn(
       pass,
       at: new Date().toISOString(),
     });
-    return {
-      text: result.text,
-      usage,
-      status: 0,
-      durationMs: Date.now() - start,
-    };
+    return { text, usage, status: 0, durationMs: Date.now() - start };
   } catch (error) {
     signal.throwIfAborted();
     throw error;

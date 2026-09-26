@@ -1,4 +1,5 @@
 import { OutpostError, invariant } from "./errors.ts";
+import { validateStandard } from "./standard-schema.ts";
 import type {
   JsonResponseOptions,
   ResponseSpec,
@@ -67,8 +68,8 @@ export const response = {
       const fenced = text.match(/^```(?:json)?\s*\r?\n([\s\S]*?)\r?\n```$/i);
       const input: unknown = JSON.parse(fenced ? fenced[1]! : text);
       if (typeof options.schema === "function") return options.schema(input);
-      const result = await options.schema["~standard"].validate(input);
-      if (result.issues) throw new Error(JSON.stringify(result.issues));
+      const result = await validateStandard(options.schema, input);
+      if ("issues" in result) throw new Error(JSON.stringify(result.issues));
       return result.value;
     }),
 };
