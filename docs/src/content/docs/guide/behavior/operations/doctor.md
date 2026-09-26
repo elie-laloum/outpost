@@ -5,7 +5,7 @@ sidebar:
   order: 3
 ---
 
-`outpost doctor` inspects the host by default. Add `--image` to also inspect a local Docker/Podman image in a temporary sandbox. Neither mode installs tools or makes a model call. Host and image diagnostics are available since 3.0.0; Antigravity, Copilot and Kimi checks are unreleased additions.
+`outpost doctor` inspects the host by default. Add `--image` to also inspect a local Docker/Podman image in a temporary sandbox. Neither mode installs tools or makes a model call. Host and image diagnostics are available since 3.0.0; Antigravity, Copilot and Kimi checks are available since 6.0.0.
 
 ```sh
 outpost doctor --sandbox-provider docker --agent codex

@@ -4,7 +4,7 @@
 
 Outpost is a TypeScript library for running coding agents in reusable sandboxes, managing their Git workspaces and composing typed workflows. Claude Code, Codex, Antigravity, GitHub Copilot CLI and Kimi Code adapters work with Docker, Podman, Vercel, Daytona or explicit host execution. Each harness authenticates explicitly with your account login or an API key. Antigravity, Copilot and Kimi run fresh sessions only; native conversation capture, resume and fork are available for Claude Code and Codex.
 
-Version 5.0.0 composes every agent with `agent({ harness, model })`, moves reasoning and output limits onto the agent model, and adds an experimental built-in harness engine: Outpost drives a model provider with tools, hooks, permissions, persisted conversations, context strategies, skills and streaming. It contains breaking API changes. See the [changelog](CHANGELOG.md#500) for details and migration notes, and the [roadmap](https://elie-laloum.github.io/outpost/project/roadmap/) for remaining validation and upcoming priorities.
+Version 6.0.0 unifies CLI authentication: every harness selects `account` (your host login, copied into the private sandbox home) or `usage` (an API key), and Outpost never reads a system keychain. It replaces Gemini CLI with Antigravity, GitHub Copilot CLI and Kimi Code harnesses, routes all runtime persistence through storage transports, and renames the harness types. It contains breaking API changes. See the [changelog](CHANGELOG.md#600) for details and migration notes, and the [roadmap](https://elie-laloum.github.io/outpost/project/roadmap/) for remaining validation and upcoming priorities.
 
 ## Get started
 

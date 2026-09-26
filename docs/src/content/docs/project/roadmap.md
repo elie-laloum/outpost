@@ -17,7 +17,7 @@ The [BullMQ/Redis adapter](../../guide/advanced/bullmq/) is available since 4.2.
 
 Available since 5.0.0: agents compose a harness with a model through `agent({ harness, model })`, and the experimental [built-in harness engine](../../guide/agents/harness/) drives a model provider with tools, hooks, permissions, conversations, context strategies, skills and streaming. Its validation status is described [below](#direct-model-harness).
 
-Implemented, not yet released: every CLI harness authenticates explicitly with `account` (the CLI's own host session, copied into the private sandbox home) or `usage` (an API key), as described in [authentication](../../guide/manual/authentication/). Gemini CLI is removed; [Antigravity](../../guide/agents/connect-antigravity/), [GitHub Copilot CLI](../../guide/agents/connect-copilot/) and [Kimi Code](../../guide/agents/connect-kimi/) harnesses run fresh sessions. Their protocols are covered by synthetic fixtures only.
+Available since 6.0.0: all runtime persistence goes through storage transports, and every CLI harness authenticates explicitly with `account` (the CLI's own host session, copied into the private sandbox home) or `usage` (an API key), as described in [authentication](../../guide/manual/authentication/). Gemini CLI is removed; [Antigravity](../../guide/agents/connect-antigravity/), [GitHub Copilot CLI](../../guide/agents/connect-copilot/) and [Kimi Code](../../guide/agents/connect-kimi/) harnesses run fresh sessions. Their protocols are covered by synthetic fixtures and installed-CLI help checks; live model runs remain the fifth near-term priority below.
 
 ## Near term: make execution dependable
 

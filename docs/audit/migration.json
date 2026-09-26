@@ -523,8 +523,8 @@
       ],
       "sourceSha256": "23be68e3d531a7dc9e6bdab149e7003c4cfe1a72e315bd57cefca5fc133103d9",
       "sourceBodySha256": "b8d7da2e4c2a514a33cf3b285abed493bcb53ec187a09486ecb75166f3a9164b",
-      "preservedBodySha256": "aed394cf5ef9d32d4a03a8ba4ff1d81775fc88fd95caac798ddaf96f38e2ae65",
-      "disposition": "corrected with implementation evidence; reviewed change: unified authentication and Antigravity, Copilot and Kimi harnesses; reviewed change: Antigravity CLI installed in generated images and remote bootstrap"
+      "preservedBodySha256": "0176fd1b44e2841d9f845768079f87a2307957b1508e24b31956602365355699",
+      "disposition": "corrected with implementation evidence; reviewed change: unified authentication and Antigravity, Copilot and Kimi harnesses; reviewed change: Antigravity CLI installed in generated images and remote bootstrap; reviewed change: 6.0.0 release notes"
     },
     {
       "source": "operations/troubleshooting.md",
@@ -1345,8 +1345,8 @@
       ],
       "sourceSha256": "d945f2d89e444168f4dbd05bf6727d00f4df3a697c41e122952bca7157138dcd",
       "sourceBodySha256": "8f40f3dfb076992999bd35ddedfe478e732a72444874d84fe66badd88dad21d1",
-      "preservedBodySha256": "d235f13485be9d60754fc065cc97b48854cf5957467fdaeef03af632b12964a3",
-      "disposition": "corrected with implementation evidence; reviewed change: unified authentication and Antigravity, Copilot and Kimi harnesses; reviewed change: Antigravity CLI installed in generated images and remote bootstrap"
+      "preservedBodySha256": "7ca125648aee230bc5d48cf96804d56ef07417cbe9048a89012b4d4b17dc4aac",
+      "disposition": "corrected with implementation evidence; reviewed change: unified authentication and Antigravity, Copilot and Kimi harnesses; reviewed change: Antigravity CLI installed in generated images and remote bootstrap; reviewed change: 6.0.0 release notes"
     },
     {
       "source": "fr/operations/troubleshooting.md",
