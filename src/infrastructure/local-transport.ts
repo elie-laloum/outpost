@@ -18,14 +18,17 @@ import { readInspectionFile } from "./inspection-file.ts";
 import { decodeObject, encodeObject, readLimit } from "./transport-envelope.ts";
 import { transportDefaults } from "./transport.constants.ts";
 
-async function privateDirectory(path: string): Promise<void> {
+async function privateDirectory(path: string, target = true): Promise<void> {
   const parent = dirname(path);
   if (parent !== path) {
-    await privateDirectory(parent);
+    await privateDirectory(parent, false);
     await mkdir(path, { recursive: true, mode: 0o700 });
   }
-  if (!(await lstat(path)).isDirectory())
-    throw new Error("Transport directories must not be symlinks");
+  const info = await lstat(path);
+  if (info.isDirectory()) return;
+  // Root-owned ancestor links belong to the system layout, such as /var on macOS.
+  if (!target && info.isSymbolicLink() && info.uid === 0) return;
+  throw new Error("Transport directories must not be symlinks");
 }
 
 export function localTransport(options: LocalTransportOptions): Transport {

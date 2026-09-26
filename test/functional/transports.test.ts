@@ -601,7 +601,7 @@ test("journal publication failure preserves the last committed prefix", async (t
   );
 });
 
-test("local object roots reject symlinks and archive restoration rejects traversal", async (t) => {
+test("local object roots reject user symlinks, including ancestors, and archive restoration rejects traversal", async (t) => {
   const root = await temporary(t),
     transporter = localTransport({ directory: join(root, "store") });
   const { restoreArchiveFiles } =
@@ -637,6 +637,11 @@ test("local object roots reject symlinks and archive restoration rejects travers
       /symlink/,
     );
     await assert.rejects(alias.read(manifest.key), /changed/);
+    const nested = localTransport({ directory: join(root, "alias", "nested") });
+    await assert.rejects(
+      nested.write("artifacts/x", bytes("x"), { ifRevision: null }),
+      /symlink/,
+    );
   }
 });
 

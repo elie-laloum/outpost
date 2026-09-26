@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { mkdir, mkdtemp, rm, symlink, writeFile } from "node:fs/promises";
 import { homedir, tmpdir } from "node:os";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 import { test } from "node:test";
 import type { HostCredential } from "../../src/domain/agent.types.ts";
 import {
@@ -35,7 +35,7 @@ test("host credential paths expand the home directory and honor explicit home ov
   };
   assert.equal(
     resolveHostPath(source, { CODEX_HOME: "/profiles/codex" }),
-    join("/profiles/codex", "auth.json"),
+    join(resolve("/profiles/codex"), "auth.json"),
   );
   assert.equal(
     resolveHostPath(source, { CODEX_HOME: "" }),
