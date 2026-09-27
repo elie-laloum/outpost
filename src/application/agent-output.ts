@@ -53,6 +53,9 @@ export function agentOutput(
       markers.some((marker) => (finalText ?? text).includes(marker));
   }
   return {
+    get failure() {
+      return failure;
+    },
     get completed() {
       return completed;
     },

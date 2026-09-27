@@ -23,4 +23,6 @@ Interrompre `doctor` arrête sa sonde hôte active et ses descendants. SIGINT te
 
 Un contrôle local réussi n’est pas un test de modèle payant. La configuration SDK cloud, l’allocation réelle et la disponibilité d’un modèle sont des contrôles distincts. Après configuration, envoyez une petite première requête sans modification et inspectez son résultat réel.
 
+Lorsqu’un agent CLI retente une connexion jusqu’à sa limite de temps, Outpost conserve le code d’erreur `timeout`. Si le dernier événement d’échec signale un problème de connexion reconnu, le message conseille aussi de vérifier l’endpoint du modèle et l’accès réseau ; `details.agentDiagnostic` vaut `"connection"`. Cette indication résume le signalement de l’agent, ne prouve pas que l’endpoint est arrêté et ne recopie ni l’URL ni les identifiants signalés. Un timeout ordinaire ou un échec d’authentification seul ne reçoit pas cette indication de connexion.
+
 API : [diagnoseSandbox](../../reference/diagnosesandbox/) · [diagnoseAgentProtocol](../../reference/diagnoseagentprotocol/).

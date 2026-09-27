@@ -23,4 +23,6 @@ Interrupting `doctor` stops its active host probe and its descendants. SIGINT ex
 
 A passing local preflight is not a paid model test. Cloud SDK configuration, real provider allocation and live model availability are separate checks. Use a small non-mutating first request after setup, and inspect its actual outcome.
 
+When a CLI agent keeps retrying a connection until its deadline, Outpost preserves the `timeout` error code. If the latest failure event reports a recognized connection problem, the error message also suggests checking the model endpoint and network access; `details.agentDiagnostic` is `"connection"`. This hint summarizes the agent’s report, does not prove the endpoint is down, and does not copy the reported URL or credential. An ordinary timeout or an authentication-only failure does not receive this connection hint.
+
 API: [diagnoseSandbox](../../reference/diagnosesandbox/) · [diagnoseAgentProtocol](../../reference/diagnoseagentprotocol/).

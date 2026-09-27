@@ -18,3 +18,6 @@ export const dispatchDeadlines = [
   "deadlineMs",
   "expansionMs",
 ] as const;
+
+export const agentConnectionFailurePattern =
+  /\b(?:connection (?:failed|refused|reset)|error sending request|ECONNREFUSED|ENOTFOUND|EAI_AGAIN)\b/i;

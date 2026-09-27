@@ -4,7 +4,10 @@ import { OutpostError } from "../domain/errors.ts";
 import type { SandboxLease } from "../domain/sandbox.types.ts";
 import { activityWatchdog } from "./activity-watchdog.ts";
 import { agentOutput } from "./agent-output.ts";
-import { executionDefaults } from "./execution.constants.ts";
+import {
+  agentConnectionFailurePattern,
+  executionDefaults,
+} from "./execution.constants.ts";
 import type { DispatchOptions, Turn, TurnContext } from "./execution.types.ts";
 import { notify } from "./observation.ts";
 
@@ -61,10 +64,28 @@ export async function turn(
       });
   } catch (cause) {
     options.signal?.throwIfAborted();
-    if (controller.signal.reason !== "completion")
-      throw controller.signal.reason instanceof OutpostError
-        ? controller.signal.reason
-        : cause;
+    if (controller.signal.reason !== "completion") {
+      const error =
+        controller.signal.reason instanceof OutpostError
+          ? controller.signal.reason
+          : cause;
+      if (
+        error instanceof OutpostError &&
+        error.code === "timeout" &&
+        output.failure &&
+        agentConnectionFailurePattern.test(output.failure)
+      ) {
+        const diagnosed = new OutpostError(
+          error.code,
+          `${error.message}. The agent reported a connection failure. Check the model endpoint and network access.`,
+          { ...error.details, agentDiagnostic: "connection" },
+          error,
+        );
+        diagnosed.recovery = error.recovery;
+        throw diagnosed;
+      }
+      throw error;
+    }
     notify(
       options.warn,
       "Agent remained active after completion; its command was stopped and trailing output retained",

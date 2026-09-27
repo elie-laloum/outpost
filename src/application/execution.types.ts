@@ -42,6 +42,7 @@ export interface Turn {
 }
 
 export interface AgentOutput {
+  readonly failure: string | undefined;
   readonly completed: boolean;
   readonly conversation: string | undefined;
   append(chunk: string): void;

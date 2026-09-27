@@ -311,3 +311,36 @@ test("local elevated commands run as the current account without escalation", as
     await box.close();
   }
 });
+
+test("network diagnostics survive an idle timeout and the sandbox remains reusable", async (t) => {
+  const root = await repository(t);
+  const sandbox = await createSandbox({
+    repository: root,
+    sandboxProvider: localSandboxProvider(),
+    logging: false,
+  });
+  t.after(() => sandbox.close());
+  await assert.rejects(
+    sandbox.dispatch({
+      agent: scripted(
+        `console.log(JSON.stringify({ kind: "failure", message: "Connection failed: error sending request https://example.test?token=private-canary" })); setInterval(() => {}, 1000);`,
+      ),
+      brief: { text: "exercise connection failure" },
+      idleMs: 1000,
+      deadlineMs: 10000,
+    }),
+    (error: unknown) => {
+      assert.ok(error instanceof Error && "code" in error);
+      assert.equal(error.code, "timeout");
+      assert.match(error.message, /connection failure.*endpoint.*network/);
+      assert.doesNotMatch(error.message, /private-canary|example.test/);
+      return true;
+    },
+  );
+  const reused = await sandbox.command({
+    executable: process.execPath,
+    arguments: ["-e", "process.stdout.write('reused'); process.exitCode = 7"],
+  });
+  assert.equal(reused.status, 7);
+  assert.equal(reused.stdout, "reused");
+});
