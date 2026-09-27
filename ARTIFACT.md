@@ -126,6 +126,8 @@ Déjà codé, reste à prouver en conditions réelles.
 
 ### Images d'agents signées
 
+- [x] **Validation terminée le 28 septembre 2026 (Docker Linux amd64)** : le [workflow de publication 36353567785](https://github.com/elie-laloum/outpost/actions/runs/36353567785) a construit la base épinglée avec le snapshot Debian daté, passé les tests, publié l’image sur GHCR et vérifié son attestation après approbation. Le rapport transmis depuis la seconde machine `rathena` confirme le téléchargement anonyme, la vérification de l’attestation et les cinq CLI sur le digest publié `sha256:3eb28c660bb7a5a93fdef8455872534fbcefb6396736b35762e1ad69158cc064`. La visibilité publique et le tag sont confirmés. Rapport et relance : `temp/signed-agent-images/SUMMARY.md`. L’installateur Antigravity non épinglé reste un point distinct ; aucune reproductibilité bit à bit n’est revendiquée.
+
 **Ce qu'on teste** — Le workflow `agent-images` en mode publication : image de base épinglée par digest, snapshot Debian daté, publication sur ghcr.io et attestation.
 
 **Ce que ça vérifie** — `gh attestation verify` réussit depuis une autre machine, et les CLI embarquées répondent sur le digest réellement publié.
