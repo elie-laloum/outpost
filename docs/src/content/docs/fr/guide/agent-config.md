@@ -19,11 +19,11 @@ const reviewer = agent({
 | ------------------------------------- | --------------------------- | ----------------------------------------- |
 | [Codex](../codex/)                    | Oui                         | Compte ou clé API                         |
 | [Claude Code](../claude-code/)        | Oui                         | Compte, jeton d’abonnement ou clé API     |
-| [Antigravity](../antigravity/)        | Non                         | Compte ou clé API                         |
-| [GitHub Copilot CLI](../copilot-cli/) | Non                         | Compte ou jeton Copilot                   |
-| [Kimi Code](../kimi-code/)            | Non                         | Compte ou clé API ; l’API exige un modèle |
+| [Antigravity](../antigravity/)        | Reprise à chaud seule       | Compte ou clé API                         |
+| [GitHub Copilot CLI](../copilot-cli/) | Reprise seule               | Compte ou jeton Copilot                   |
+| [Kimi Code](../kimi-code/)            | Oui                         | Compte ou clé API ; l’API exige un modèle |
 
-Antigravity, Copilot et Kimi démarrent des sessions neuves. Ils ne peuvent pas utiliser les réparations automatiques de réponse qui nécessitent une continuation.
+Kimi permet continuation et fork. Copilot permet uniquement la continuation. Antigravity permet la continuation dans la même sandbox ouverte. Les trois peuvent réparer les réponses structurées avec leur mode de continuation pris en charge.
 
 ## Sélectionner un modèle
 

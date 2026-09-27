@@ -1,3 +1,4 @@
+import { agentRequest } from "./agent-request.ts";
 import { invariant } from "../domain/errors.ts";
 import type { CommandResult } from "../domain/command.types.ts";
 import { git } from "../infrastructure/git/command.ts";
@@ -22,6 +23,16 @@ export async function attachInSandbox(
     (settings.agent ?? options.agent)?.kind === "cli",
     "This harness does not support interactive attachment",
   );
+  invariant(
+    !settings.continuation ||
+      (settings.agent ?? options.agent)?.resumable !== false,
+    "This adapter does not support continuation",
+  );
+  invariant(
+    !settings.continuation?.fork ||
+      (settings.agent ?? options.agent)?.forkable !== false,
+    "This adapter does not support automated fork",
+  );
   const { selectAgent, restore } = agents;
   const signal = settings.signal
     ? AbortSignal.any([settings.signal, stop.signal])
@@ -30,7 +41,8 @@ export async function attachInSandbox(
     settings.agent ?? options.agent,
     signal,
   );
-  if (settings.continuation) await restore(settings.continuation.id, selected);
+  if (settings.continuation)
+    await restore(settings.continuation.id, selected, executionLease);
   const brief = await completeBrief(settings.brief, signal, settings.ask);
   const text = brief
     ? await renderBrief(
@@ -45,11 +57,20 @@ export async function attachInSandbox(
     adapter.kind === "cli",
     "This harness does not support interactive attachment",
   );
-  const command = adapter.request({
-    interactive: true,
-    ...(text === undefined ? {} : { text }),
-    ...(settings.continuation ? { continuation: settings.continuation } : {}),
-  });
+  const command = await agentRequest(
+    adapter,
+    {
+      interactive: true,
+      ...(text === undefined ? {} : { text }),
+      ...(settings.continuation ? { continuation: settings.continuation } : {}),
+    },
+    (command) =>
+      executionLease.invoke({
+        ...command,
+        signal,
+        deadlineMs: executionDefaults.attachMs,
+      }),
+  );
   const baseline = (
     await git(workspace.directory, ["rev-parse", "HEAD"])
   ).trim();

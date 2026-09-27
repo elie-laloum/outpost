@@ -17,7 +17,7 @@ import type { ConversationLocation } from "@elie-laloum/outpost";
 | -------- | -------------------- | -------- | ---------------------------------------------------------------------- |
 | `id`     | `string`             | Required | Native conversation identifier used to locate or continue the session. |
 | `file`   | `string`             | Required | Host path of the native transcript file.                               |
-| `format` | `ConversationFormat` | Required | Native transcript layout: claude or codex.                             |
+| `format` | `ConversationFormat` | Required | Native transcript layout: claude, codex, copilot or kimi.              |
 
 ## Signature
 

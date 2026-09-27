@@ -186,7 +186,7 @@ Existe, mais partiel ou expérimental pour un usage en production.
 
 ### Reprise et fork pour Antigravity, Copilot, Kimi
 
-**Faiblesse actuelle** — Chaque tour repart d'une session neuve. Une tâche en plusieurs tours perd son contexte, on ne peut pas brancher une conversation, et une réponse JSON invalide fait échouer la tâche au lieu d'être réparée.
+**État (implémenté, non publié)** — Copilot et Kimi disposent de la capture native, de la reprise à chaud/à froid et des réparations JSON ; Kimi dispose aussi du fork natif. Antigravity reprend une conversation et répare ses réponses dans la même sandbox ouverte. La capture portable et la reprise à froid Antigravity, ainsi que le fork automatisé Antigravity/Copilot, restent explicitement refusés. Les campagnes authentifiées multi-providers restent à réaliser.
 
 **Ce que ça complète** — Capturer la conversation native de chaque CLI quand son format est stable, puis la reprendre, la forker et réparer les réponses, avec le même contrat que Claude Code et Codex. Quand une CLI ne le permet pas, le refuser explicitement et le documenter.
 

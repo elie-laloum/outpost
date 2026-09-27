@@ -13,7 +13,7 @@ import { antigravityHarness } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Create an Antigravity CLI (agy) harness from execution, authentication and permission settings without starting the CLI. Compose it with agent({ harness, model }) to select a model name independently; reasoning and maxOutputTokens are rejected. Each run starts a fresh session: native capture, resume, fork and automatic response repairs are unsupported. The CLI owns its internal model/tool loop.
+Create an Antigravity CLI (agy) harness from execution, authentication and permission settings without starting the CLI. Compose it with agent({ harness, model }) to select a model name independently; reasoning and maxOutputTokens are rejected. Warm resume and automatic response repairs reuse a conversation in the same open sandbox. Portable capture, cold resume and automated fork are rejected. The CLI owns its internal model/tool loop.
 
 [Complete example and detailed rules](../../guide/agents/harness/).
 

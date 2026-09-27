@@ -15,7 +15,7 @@ Copie un transcript natif depuis le bail de sandbox vers le dossier de capture h
 
 | Nom             | Type                                       | Présence  | Rôle                                                                                                     |
 | --------------- | ------------------------------------------ | --------- | -------------------------------------------------------------------------------------------------------- |
-| `format`        | `ConversationFormat`                       | Requis    | Organisation native des transcripts : claude ou codex.                                                   |
+| `format`        | `ConversationFormat`                       | Requis    | Organisation native des transcripts : claude, codex, copilot ou kimi.                                    |
 | `id`            | `string`                                   | Requis    | Identifiant de conversation native utilisé pour localiser ou poursuivre la session.                      |
 | `repository`    | `string`                                   | Requis    | Checkout Git hôte ciblé.                                                                                 |
 | `lease`         | `SandboxLease`                             | Requis    | Bail d’exécution de sandbox utilisé pour accéder au home natif de l’agent et transférer les transcripts. |

@@ -36,7 +36,7 @@ test("event decoding selects handlers by the protocol discriminant", () => {
   ]);
 });
 
-test("new CLI adapters are fresh-session agents with pinned update and continuation behavior", () => {
+test("CLI adapters declare independent continuation and capture capabilities", () => {
   const expectations = [
     [antigravityHarness, "antigravity", "AGY_CLI_DISABLE_AUTO_UPDATE", "true"],
     [copilotHarness, "copilot", "COPILOT_AUTO_UPDATE", "false"],
@@ -49,9 +49,13 @@ test("new CLI adapters are fresh-session agents with pinned update and continuat
     assert.equal(agent.name, name);
     assert.equal(agent.variables?.[variable], value);
     assert.equal(agent.variables?.CUSTOM, "fixture");
-    assert.equal(agent.resumable, false);
-    assert.equal(agent.capture, false);
-    assert.equal(agent.conversations, undefined);
+    assert.equal(agent.resumable, true);
+    assert.equal(agent.forkable, name === "kimi");
+    assert.equal(agent.capture, name === "antigravity" ? false : undefined);
+    assert.equal(
+      agent.conversations,
+      name === "antigravity" ? undefined : name,
+    );
     assert.ok(Object.isFrozen(agent));
     assert.equal(
       composeAgent({
@@ -59,11 +63,19 @@ test("new CLI adapters are fresh-session agents with pinned update and continuat
       }).variables?.[variable],
       "override",
     );
-    for (const fork of [true, false])
-      assert.throws(
-        () => agent.request({ continuation: { id: "session", fork } }),
-        /does not support continuation or fork/,
-      );
+    assert.ok(
+      agent
+        .request({ continuation: { id: "session" } })
+        .arguments?.includes("session"),
+    );
+    assert.throws(
+      () => agent.request({ continuation: { id: "session", fork: true } }),
+      /automated fork|fork preparation/,
+    );
+    assert.throws(
+      () => agent.request({ continuation: { id: "../bad" } }),
+      /Invalid conversation/,
+    );
   }
   assert.equal(
     composeAgent({ harness: antigravityHarness() }).requiresFinishedEvent,
@@ -318,13 +330,28 @@ test("help diagnostics inspect each new CLI through its registered executable", 
     const commands: Command[] = [];
     const checks = await diagnoseAgentCli(agent, async (command) => {
       commands.push(command);
-      return { status: 0, stdout: help[agent], stderr: "" };
+      return {
+        status: 0,
+        stdout:
+          command.arguments?.[0] === "fork"
+            ? "Usage: kimi fork [options]\n  --yes  Confirm"
+            : help[agent] +
+              "  --resume  Resume\n  --conversation  Resume\n  --session  Resume",
+        stderr: "",
+      };
     });
     assert.deepEqual(
       commands.map((command) => [command.executable, command.arguments]),
-      [[doctorAgents[agent].executable, ["--help"]]],
+      [
+        [doctorAgents[agent].executable, ["--help"]],
+        [doctorAgents[agent].executable, ["--help"]],
+        ...(agent === "kimi" ? [["kimi", ["fork", "--help"]]] : []),
+      ],
     );
-    assert.equal(checks[0]?.status, "pass", JSON.stringify(checks));
+    assert.ok(
+      checks.every((check) => check.status === "pass"),
+      JSON.stringify(checks),
+    );
     const missing = await diagnoseAgentCli(agent, async () => ({
       status: 0,
       stdout: help[agent].split("\n")[agent === "copilot" ? 1 : 0]!,
@@ -396,5 +423,48 @@ test("remote bootstrap installs npm CLIs, allows scripts only for Claude and ver
       signal,
     ),
     /Unknown agent bootstrap/,
+  );
+});
+
+test("native Kimi fork uses the borrowed executor and rejects failed or ambiguous output", async () => {
+  const adapter = kimiHarness().bind();
+  assert.ok(adapter.fork);
+  const requests: Command[] = [];
+  assert.equal(
+    await adapter.fork("parent", async (command) => {
+      requests.push(command);
+      return {
+        status: 0,
+        stdout: 'Forked to session_child ("Fork: parent") in 1ms\n',
+        stderr: "",
+      };
+    }),
+    "session_child",
+  );
+  assert.deepEqual(requests, [
+    { executable: "kimi", arguments: ["fork", "parent", "--yes"] },
+  ]);
+  for (const stdout of [
+    "",
+    "Forked to parent in 1ms",
+    "Forked to ../bad in 1ms",
+  ])
+    await assert.rejects(
+      adapter.fork("parent", async () => ({ status: 0, stdout, stderr: "" })),
+      /distinct conversation identifier/,
+    );
+  await assert.rejects(
+    adapter.fork("parent", async () => ({
+      status: 7,
+      stdout: "",
+      stderr: "failure",
+    })),
+    /status 7/,
+  );
+  await assert.rejects(
+    adapter.fork("../parent", async () => {
+      assert.fail("unsafe ID invoked");
+    }),
+    /Invalid conversation/,
   );
 });

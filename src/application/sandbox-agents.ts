@@ -1,3 +1,4 @@
+import type { SandboxLease } from "../domain/sandbox.types.ts";
 import type { Agent } from "../domain/agent.types.ts";
 import type { Command } from "../domain/command.types.ts";
 import { invariant } from "../domain/errors.ts";
@@ -66,7 +67,11 @@ export function sandboxAgents(context: ProvisionedSandbox): SandboxAgents {
   };
   const conversationKey = (agent: Agent, id: string) =>
     `${agent.storage?.name ?? agent.conversations ?? agent.name}:${id}`;
-  const restore = async (id: string, agent: Agent) => {
+  const restore = async (
+    id: string,
+    agent: Agent,
+    executionLease: SandboxLease,
+  ) => {
     if (known.has(conversationKey(agent, id))) return;
     const storage = storageFor(agent);
     invariant(storage, "This adapter does not support native conversations");
@@ -75,16 +80,12 @@ export function sandboxAgents(context: ProvisionedSandbox): SandboxAgents {
       workspace.repository,
       options.conversationHome,
     );
-    if (
-      found.reference !== undefined ||
-      sandboxProvider.placement !== "host" ||
-      workspace.directory !== workspace.repository
-    )
-      await storage.restore(found, {
-        repository: workspace.repository,
-        sandbox: runtime,
-        staging,
-      });
+    await storage.restore(found, {
+      repository: workspace.repository,
+      sandbox: executionLease,
+      staging,
+      local: sandboxProvider.placement === "host",
+    });
     known.add(conversationKey(agent, id));
   };
 

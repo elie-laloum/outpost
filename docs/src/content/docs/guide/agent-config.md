@@ -19,11 +19,11 @@ const reviewer = agent({
 | ------------------------------------- | ---------------------------- | ---------------------------------------- |
 | [Codex](../codex/)                    | Yes                          | Account or API key                       |
 | [Claude Code](../claude-code/)        | Yes                          | Account, subscription token or API key   |
-| [Antigravity](../antigravity/)        | No                           | Account or API key                       |
-| [GitHub Copilot CLI](../copilot-cli/) | No                           | Account or Copilot token                 |
-| [Kimi Code](../kimi-code/)            | No                           | Account or API key; API requires a model |
+| [Antigravity](../antigravity/)        | Warm resume only             | Account or API key                       |
+| [GitHub Copilot CLI](../copilot-cli/) | Resume only                  | Account or Copilot token                 |
+| [Kimi Code](../kimi-code/)            | Yes                          | Account or API key; API requires a model |
 
-Antigravity, Copilot and Kimi start fresh sessions. They cannot use automatic response repairs that require continuation.
+Kimi supports continuation and fork. Copilot supports continuation only. Antigravity supports continuation only in the same open sandbox. All three can repair structured responses using their supported continuation mode.
 
 ## Select a model
 

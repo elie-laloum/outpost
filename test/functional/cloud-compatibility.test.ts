@@ -279,10 +279,10 @@ test("agent CLI probes only request installation, versions and adapter help", as
           "Usage: codex exec resume [",
           "Usage: codex exec fork [",
           "Usage: claude [",
-          "Usage: copilot [ --output-format --allow-all --no-ask-user",
+          "Usage: copilot [ --output-format --allow-all --no-ask-user --resume",
           missingKimiOption
             ? "Usage: kimi ["
-            : "Usage: kimi [ --prompt --output-format",
+            : "Usage: kimi [ --prompt --output-format --session Usage: kimi fork [ --yes",
           ...args,
         ].join(" "),
         stderr: "",
@@ -292,7 +292,7 @@ test("agent CLI probes only request installation, versions and adapter help", as
   await verifyCloudAgents(lease, new AbortController().signal, (check) =>
     checks.push(check.name),
   );
-  assert.equal(calls.length, 13);
+  assert.equal(calls.length, 16);
   assert.deepEqual(checks, [
     "codex-cli-version",
     "codex-cli-start",
@@ -304,8 +304,11 @@ test("agent CLI probes only request installation, versions and adapter help", as
     "claude-cli-fork",
     "copilot-cli-version",
     "copilot-cli-start",
+    "copilot-cli-resume",
     "kimi-cli-version",
     "kimi-cli-start",
+    "kimi-cli-resume",
+    "kimi-cli-fork",
   ]);
   missingKimiOption = true;
   await assert.rejects(

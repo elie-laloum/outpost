@@ -9,13 +9,13 @@ Contrat auxiliaire non exporté directement ; utilisez l’inférence TypeScript
 
 ## Rôle et comportement
 
-Crée le ConversationStore natif du format Claude ou Codex choisi, en liant localisation, capture et restauration à son organisation de fichiers.
+Crée le ConversationStore natif du format Claude, Codex, Copilot ou Kimi choisi, en liant localisation, capture et restauration à son organisation de fichiers. Copilot/Kimi utilisent des bundles JSON bornés plutôt qu’un transcript unique.
 
 ## Paramètres et propriétés
 
-| Nom      | Type                 | Présence | Rôle                                                   |
-| -------- | -------------------- | -------- | ------------------------------------------------------ |
-| `format` | `ConversationFormat` | Requis   | Organisation native des transcripts : claude ou codex. |
+| Nom      | Type                 | Présence | Rôle                                                                  |
+| -------- | -------------------- | -------- | --------------------------------------------------------------------- |
+| `format` | `ConversationFormat` | Requis   | Organisation native des transcripts : claude, codex, copilot ou kimi. |
 
 ## Retour
 

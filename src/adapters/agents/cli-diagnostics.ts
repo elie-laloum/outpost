@@ -25,11 +25,17 @@ export function cliDiagnostics(
 export function helpDiagnostics(
   request: (input: AgentInput) => Command,
   usage: string,
+  resume = false,
 ): readonly AgentCliDiagnostic[] {
-  const command = request({});
-  return [
-    {
-      mode: "start",
+  const modes = resume ? (["start", "resume"] as const) : (["start"] as const);
+  return modes.map((mode) => {
+    const command = request(
+      mode === "resume"
+        ? { continuation: { id: "00000000-0000-0000-0000-000000000000" } }
+        : {},
+    );
+    return {
+      mode,
       usage,
       options: (command.arguments ?? []).filter((argument) =>
         argument.startsWith("--"),
@@ -39,6 +45,6 @@ export function helpDiagnostics(
         arguments: ["--help"],
         ...(command.variables ? { variables: command.variables } : {}),
       },
-    },
-  ];
+    };
+  });
 }

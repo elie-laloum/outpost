@@ -1,3 +1,4 @@
+import { agentRequest } from "./agent-request.ts";
 import { customTurn } from "./custom-turn.ts";
 import type { Agent } from "../domain/agent.types.ts";
 import { OutpostError } from "../domain/errors.ts";
@@ -35,11 +36,30 @@ export async function turn(
   const watchdog = activityWatchdog(controller, options, pass);
   watchdog.refresh(false);
   let status = 0;
+  let preparedConversation: string | undefined;
   try {
-    const command = agent.request({
-      text: prompt,
-      ...(continuation ? { continuation } : {}),
-    });
+    const command = await agentRequest(
+      agent,
+      {
+        text: prompt,
+        ...(continuation ? { continuation } : {}),
+      },
+      (command) =>
+        lease.invoke({
+          ...command,
+          signal,
+          deadlineMs: options.deadlineMs ?? executionDefaults.deadlineMs,
+        }),
+      (id) => {
+        preparedConversation = id;
+        notify(options.observe, {
+          kind: "conversation",
+          id,
+          pass,
+          at: new Date().toISOString(),
+        });
+      },
+    );
     const result = await lease.invoke({
       ...command,
       signal,
@@ -60,7 +80,7 @@ export async function turn(
     if (status !== 0)
       throw new OutpostError("process", `Agent exited with status ${status}`, {
         ...result,
-        conversation: output.conversation,
+        conversation: output.conversation ?? preparedConversation,
       });
   } catch (cause) {
     options.signal?.throwIfAborted();
@@ -93,5 +113,10 @@ export async function turn(
   } finally {
     watchdog.close();
   }
-  return { ...output.result(), status, durationMs: Date.now() - start };
+  return {
+    ...(preparedConversation ? { conversation: preparedConversation } : {}),
+    ...output.result(),
+    status,
+    durationMs: Date.now() - start,
+  };
 }

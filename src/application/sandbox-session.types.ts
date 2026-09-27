@@ -39,7 +39,11 @@ export interface SandboxAgents {
     agent: Agent | undefined,
     signal: AbortSignal,
   ): Promise<SelectedAgent>;
-  restore(id: string, agent: Agent): Promise<void>;
+  restore(
+    id: string,
+    agent: Agent,
+    executionLease: SandboxLease,
+  ): Promise<void>;
   remember(agent: Agent, id: string): void;
 }
 

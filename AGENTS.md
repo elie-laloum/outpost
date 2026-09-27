@@ -9,7 +9,7 @@ Outpost is a TypeScript library and CLI for running coding agents in sandboxes, 
 - Prioritize reliable, directly usable behavior and an excellent developer experience.
 - Make code understandable through names, small responsibilities and explicit contracts.
 - Use domain-driven design and ports and adapters pragmatically. Introduce abstractions for real responsibilities and variations, not speculative flexibility.
-- Keep agent protocols independent of sandbox backends. Claude Code, Codex, Antigravity (`agy`), GitHub Copilot CLI and Kimi Code have adapters; Antigravity, Copilot and Kimi currently support fresh sessions without native conversation capture, resume, fork or automatic response repairs. Additional agents belong behind the existing ports.
+- Keep agent protocols independent of sandbox backends. Claude Code, Codex, Antigravity (`agy`), GitHub Copilot CLI and Kimi Code have adapters; Kimi supports native capture, resume, fork and response repairs; Copilot supports capture, resume and repairs but rejects automated fork. Antigravity supports resume and repairs only in its existing sandbox, without portable capture or automated fork. Additional agents belong behind the existing ports.
 - Harness model requests use the experimental `ModelProvider` contract and `openaiModelProvider()` / `anthropicModelProvider()` in `src/adapters/models/`, independently of sandbox providers and CLI agent adapters. Providers exchange bounded messages with tool calls and replayable reasoning, with optional streaming.
 - Preserve existing features and public contracts during refactoring. Architecture changes must not silently change execution behavior.
 - Prefer explicit ownership, predictable failure modes and recoverable state over hidden automation.

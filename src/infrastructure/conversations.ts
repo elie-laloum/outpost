@@ -49,9 +49,11 @@ export const conversations = {
   directory(
     format: ConversationFormat,
     repository: string,
-    home = homedir(),
+    home?: string,
   ): string {
-    return conversationLayout(format).directory(repository, home);
+    if (format === "copilot" || format === "kimi")
+      return join(home ?? repository, ".outpost", "conversations", format);
+    return conversationLayout(format).directory(repository, home ?? homedir());
   },
   destination: remotePath,
 };

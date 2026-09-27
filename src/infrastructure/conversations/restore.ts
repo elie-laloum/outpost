@@ -1,3 +1,4 @@
+import { sessionConversations } from "./session-bundle.ts";
 import { randomUUID } from "node:crypto";
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname, join, posix, relative } from "node:path";
@@ -13,6 +14,12 @@ export async function restoreConversation(
   lease: SandboxLease,
   staging: string,
 ): Promise<void> {
+  if (location.format === "copilot" || location.format === "kimi")
+    return sessionConversations(location.format).restore(location, {
+      repository: lease.root,
+      sandbox: lease,
+      staging,
+    });
   const target = remotePath(location.format, location.id, lease, location.file);
   const contents = relocateTranscript(
     await readFile(location.file, "utf8"),

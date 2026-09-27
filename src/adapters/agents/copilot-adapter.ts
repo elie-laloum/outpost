@@ -21,8 +21,9 @@ function bindCopilot(settings: Bound<CopilotSettings>): AgentAdapter {
     name: "copilot",
     ...(credentials ? { credentials } : {}),
     bootstrap: "copilot",
-    resumable: false,
-    capture: false,
+    resumable: true,
+    forkable: false,
+    conversations: "copilot",
     requiresFinishedEvent: true,
     variables: Object.freeze({
       COPILOT_AUTO_UPDATE: "false",

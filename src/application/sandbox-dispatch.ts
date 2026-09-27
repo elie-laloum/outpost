@@ -22,8 +22,7 @@ export async function dispatchInSandbox<T>(
   result: Sandbox,
   dispatch: DispatchOptions<T>,
 ): Promise<WarmDispatchResult<T>> {
-  const { options, sandboxProvider, workspace, runtime, sync, stop, staging } =
-    context;
+  const { options, sandboxProvider, workspace, sync, stop, staging } = context;
   const { selectAgent, restore } = agents;
   await preflightDispatch(
     dispatch,
@@ -37,7 +36,8 @@ export async function dispatchInSandbox<T>(
     dispatch.agent ?? options.agent,
     signal,
   );
-  if (dispatch.continuation) await restore(dispatch.continuation.id, selected);
+  if (dispatch.continuation)
+    await restore(dispatch.continuation.id, selected, executionLease);
   const baseline = (
     await git(workspace.directory, ["rev-parse", "HEAD"])
   ).trim();
@@ -52,12 +52,14 @@ export async function dispatchInSandbox<T>(
   const storage = storageFor(selected);
   let failure: unknown;
   let conversation = dispatch.continuation?.id;
-  const conversations = new Set<string>(conversation ? [conversation] : []);
+  const conversations = new Set<string>(
+    conversation && !dispatch.continuation?.fork ? [conversation] : [],
+  );
   const save = async (id: string) => {
     invariant(storage, "Conversation storage is unavailable");
     const location = await storage.capture(id, {
       repository: workspace.repository,
-      sandbox: runtime,
+      sandbox: executionLease,
       staging,
       ...(options.conversationHome ? { home: options.conversationHome } : {}),
       ...(dispatch.warn ? { warn: dispatch.warn } : {}),

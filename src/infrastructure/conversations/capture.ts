@@ -1,3 +1,4 @@
+import { sessionConversations } from "./session-bundle.ts";
 import { randomUUID } from "node:crypto";
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
@@ -25,6 +26,15 @@ export async function captureConversation(
   staging: string,
   options: CaptureOptions = {},
 ): Promise<ConversationLocation> {
+  if (format === "copilot" || format === "kimi") {
+    const record = await sessionConversations(format).capture(id, {
+      repository,
+      sandbox: lease,
+      staging,
+      ...options,
+    });
+    return { ...record, format };
+  }
   validId(id);
   const home = options.home ?? homedir();
   const layout = conversationLayout(format);

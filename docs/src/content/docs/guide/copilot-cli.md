@@ -26,7 +26,7 @@ Run `copilot login` on the host and select `authentication: "account"`. Outpost 
 
 ## Session support
 
-Requests start a new session. Native conversation capture, resume, fork and automatic response repairs are unavailable. A sequence of requests can share files in a sandbox, but that does not create a shared conversation.
+Native capture, warm and cold resume, and automatic response repairs are supported. Outpost resumes the exact session ID with `--resume`; it preserves history, metadata, plans, checkpoints and persistent files in a bounded session bundle. Automated fork is explicitly rejected: the interactive `/fork` command does not establish a supported headless fork contract. See [chat history](../chat-history/) and [GitHub’s session storage](https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-best-practices).
 
 See [GitHub’s CLI quickstart](https://docs.github.com/en/copilot/get-started/cli-quickstart) for Copilot access and login requirements.
 

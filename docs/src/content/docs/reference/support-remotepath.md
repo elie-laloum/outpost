@@ -15,7 +15,7 @@ Compute the native transcript path inside a sandbox lease from the format and co
 
 | Name       | Type                 | Presence | Meaning                                                                                  |
 | ---------- | -------------------- | -------- | ---------------------------------------------------------------------------------------- |
-| `format`   | `ConversationFormat` | Required | Native transcript layout: claude or codex.                                               |
+| `format`   | `ConversationFormat` | Required | Native transcript layout: claude, codex, copilot or kimi.                                |
 | `id`       | `string`             | Required | Native conversation identifier used to locate or continue the session.                   |
 | `lease`    | `SandboxLease`       | Required | Sandbox execution lease used to access the native agent home and transfer transcripts.   |
 | `original` | `string`             | Required | Original native transcript filename, when needed to preserve the Codex session filename. |

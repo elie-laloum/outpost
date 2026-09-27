@@ -30,6 +30,7 @@ function fixture(
   const adapter = composeAgent({ harness: harnesses[name]() });
   return {
     ...adapter,
+    capture: false,
     request: () => ({
       executable: process.execPath,
       arguments: [
@@ -42,7 +43,7 @@ function fixture(
 }
 
 for (const name of Object.keys(harnesses) as (keyof typeof harnesses)[]) {
-  test(`${name} dispatch aggregates a real streamed process and rejects native resume/fork`, async (t) => {
+  test(`${name} dispatch aggregates a real streamed process without synthetic native files`, async (t) => {
     const root = await repository(t);
     const observed: AgentEvent[] = [];
     const result = await dispatch({
@@ -60,10 +61,13 @@ for (const name of Object.keys(harnesses) as (keyof typeof harnesses)[]) {
     assert.equal(result.conversation, "fixture-conversation");
     assert.equal(result.transcript, undefined);
     assert.ok(observed.some((event) => event.kind === "tool"));
-    for (const continuation of [result.resume, result.fork])
+    for (const continuation of [
+      result.resume,
+      ...(name === "kimi" ? [] : [result.fork]),
+    ])
       await assert.rejects(
         continuation({ brief: { text: "continue" } }),
-        /does not support continuation or fork/,
+        /native conversations|automated fork|missing|incomplete/,
       );
   });
 }

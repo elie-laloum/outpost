@@ -43,6 +43,6 @@ const coder = agent({
 
 API authentication requires an explicit model on `agent()`. The `region` option is reserved for account authentication; configure API endpoints through the CLI model variables when needed. Set `KIMI_MODEL` in your application environment for the snippet above; this is an example variable, not an Outpost setting. Account authentication can use the CLI’s default model.
 
-This adapter starts fresh sessions only. Native conversation capture, resume, fork and automatic response repair are unavailable.
+Native capture, warm and cold resume, fork and automatic response repairs are supported for Kimi Code 2.1.1. Outpost resumes with `--session` and forks with `kimi fork <id> --yes` before continuing the new ID. The parent remains independent. Capture preserves session metadata and agent files, including native history and plans. See [chat history](../chat-history/) and [Kimi’s session documentation](https://www.kimi.com/code/docs/en/kimi-code-cli/guides/sessions.html).
 
 API: [kimiHarness](../../reference/kimiharness/).

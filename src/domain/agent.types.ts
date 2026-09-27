@@ -1,6 +1,6 @@
 import type { Harness } from "./harness.types.ts";
 import type { AgentModel, ModelSpec } from "./model.types.ts";
-import type { Command, Variables } from "./command.types.ts";
+import type { Command, CommandResult, Variables } from "./command.types.ts";
 import type { ConversationStore } from "./conversation.types.ts";
 
 export interface Usage {
@@ -84,14 +84,19 @@ export interface AgentFeatures {
   readonly bootstrap?: string;
   readonly requiresFinishedEvent?: boolean;
   readonly variables?: Variables;
-  readonly conversations?: "claude" | "codex";
+  readonly conversations?: "claude" | "codex" | "copilot" | "kimi";
   readonly storage?: ConversationStore;
   readonly capture?: boolean;
   readonly resumable?: boolean;
+  readonly forkable?: boolean;
   transcriptUsage?(text: string): Usage | undefined;
 }
 
 export interface AgentAdapter extends AgentFeatures {
+  fork?(
+    id: string,
+    invoke: (command: Command) => Promise<CommandResult>,
+  ): Promise<string>;
   credentials?(variables: Variables): CredentialPlan;
   request(input: AgentInput): Command;
   events(line: string): readonly AgentEvent[];

@@ -15,7 +15,7 @@ Copy a native transcript from the sandbox lease into host staging and return its
 
 | Name            | Type                                       | Presence | Meaning                                                                                |
 | --------------- | ------------------------------------------ | -------- | -------------------------------------------------------------------------------------- |
-| `format`        | `ConversationFormat`                       | Required | Native transcript layout: claude or codex.                                             |
+| `format`        | `ConversationFormat`                       | Required | Native transcript layout: claude, codex, copilot or kimi.                              |
 | `id`            | `string`                                   | Required | Native conversation identifier used to locate or continue the session.                 |
 | `repository`    | `string`                                   | Required | Target host Git checkout.                                                              |
 | `lease`         | `SandboxLease`                             | Required | Sandbox execution lease used to access the native agent home and transfer transcripts. |

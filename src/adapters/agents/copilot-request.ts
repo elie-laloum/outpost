@@ -1,3 +1,4 @@
+import { validId } from "../../infrastructure/conversations/identity.ts";
 import type { AgentInput } from "../../domain/agent.types.ts";
 import type { Command } from "../../domain/command.types.ts";
 import { invariant } from "../../domain/errors.ts";
@@ -9,10 +10,14 @@ export function copilotRequest(
   input: AgentInput,
 ): Command {
   invariant(
-    !input.continuation,
-    "GitHub Copilot CLI does not support continuation or fork in Outpost",
+    !input.continuation?.fork,
+    "GitHub Copilot CLI does not support automated fork in Outpost",
   );
   const args: string[] = [];
+  if (input.continuation) {
+    validId(input.continuation.id);
+    args.push("--resume", input.continuation.id);
+  }
   if (settings.model) args.push("--model", settings.model.name);
   if (input.interactive)
     return {

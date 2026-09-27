@@ -216,8 +216,8 @@
     "Indique si l’adapter active la capture des transcripts natifs."
   ],
   "AgentAdapter.resumable": [
-    "Whether the adapter supports native conversation continuation.",
-    "Indique si l’adapter prend en charge la continuation native des conversations."
+    "Whether the agent can continue a conversation, including response repair. Cold continuation additionally requires a conversation store; fork support is declared separately.",
+    "Indique si l’agent peut continuer une conversation, y compris pour réparer une réponse. La reprise à froid exige aussi un store ; le fork est déclaré séparément."
   ],
   "AgentAdapter.transcriptUsage": [
     "Parse a native transcript to recover token usage when available.",
@@ -1353,8 +1353,8 @@
     "Version de Claude Code utilisée par les fixtures de compatibilité intégrées."
   ],
   "conversations.native": [
-    "Create a native Claude or Codex ConversationStore for transcript persistence.",
-    "Crée un ConversationStore natif Claude ou Codex pour persister les transcripts."
+    "Create a native Claude, Codex, Copilot or Kimi ConversationStore for transcript persistence.",
+    "Crée un ConversationStore natif Claude, Codex, Copilot ou Kimi pour persister les transcripts."
   ],
   "conversations.locate": [
     "Locate a native transcript on the host by format, ID, repository and optional home.",
@@ -1385,16 +1385,16 @@
     "Calcule le dossier hôte des transcripts pour le format et le dépôt choisis."
   ],
   "conversations.destination": [
-    "Compute the destination transcript path within the sandbox’s agent home.",
-    "Calcule le chemin de destination du transcript dans le home de l’agent en sandbox."
+    "Compute the transcript destination within the sandbox home; Copilot/Kimi return a bundle staging path, which requires restore to materialize native files.",
+    "Calcule la destination dans le home de sandbox ; Copilot/Kimi renvoient un chemin de staging du bundle, que restore doit matérialiser en fichiers natifs."
   ],
   "nativeConversations.format": [
-    "Native transcript layout: claude or codex.",
-    "Organisation native des transcripts : claude ou codex."
+    "Native transcript layout: claude, codex, copilot or kimi.",
+    "Organisation native des transcripts : claude, codex, copilot ou kimi."
   ],
   "locateConversation.format": [
-    "Native transcript layout: claude or codex.",
-    "Organisation native des transcripts : claude ou codex."
+    "Native transcript layout: claude, codex, copilot or kimi.",
+    "Organisation native des transcripts : claude, codex, copilot ou kimi."
   ],
   "locateConversation.id": [
     "Native conversation identifier used to locate or continue the session.",
@@ -1417,12 +1417,12 @@
     "Chemin hôte du fichier de transcript natif."
   ],
   "ConversationLocation.format": [
-    "Native transcript layout: claude or codex.",
-    "Organisation native des transcripts : claude ou codex."
+    "Native transcript layout: claude, codex, copilot or kimi.",
+    "Organisation native des transcripts : claude, codex, copilot ou kimi."
   ],
   "captureConversation.format": [
-    "Native transcript layout: claude or codex.",
-    "Organisation native des transcripts : claude ou codex."
+    "Native transcript layout: claude, codex, copilot or kimi.",
+    "Organisation native des transcripts : claude, codex, copilot ou kimi."
   ],
   "captureConversation.id": [
     "Native conversation identifier used to locate or continue the session.",
@@ -1485,8 +1485,8 @@
     "Chemin de dépôt à encoder pour l’organisation des dossiers de projet natifs Claude."
   ],
   "remotePath.format": [
-    "Native transcript layout: claude or codex.",
-    "Organisation native des transcripts : claude ou codex."
+    "Native transcript layout: claude, codex, copilot or kimi.",
+    "Organisation native des transcripts : claude, codex, copilot ou kimi."
   ],
   "remotePath.id": [
     "Native conversation identifier used to locate or continue the session.",
@@ -3157,8 +3157,8 @@
     "Nombre maximal positif d’événements à parcourir, 100 000 par défaut ; cycles et dépassements provoquent un échec."
   ],
   "transportConversations.format": [
-    "Transcript format: claude or codex for native CLI transcripts, or harness for custom harness transcripts. Antigravity, Copilot and Kimi have no native conversation storage.",
-    "Format de transcription : claude ou codex pour les transcriptions natives des CLI, ou harness pour celles des harness personnalisés. Antigravity, Copilot et Kimi n’ont pas de stockage natif des conversations."
+    "Transcript format: claude or codex for native JSONL, copilot or kimi for native session bundles, or harness for custom harness transcripts. Antigravity has no portable conversation store.",
+    "Format : claude ou codex pour le JSONL natif, copilot ou kimi pour les bundles de session, ou harness pour les transcriptions des harness personnalisés. Antigravity n’a pas de store portable."
   ],
   "transportConversations.options": [
     "Transport and stable project namespace shared by all runners restoring these conversations.",
@@ -3637,8 +3637,8 @@
     "Indique si l’adapter active la capture des transcripts natifs."
   ],
   "AgentFeatures.resumable": [
-    "Whether the adapter supports native conversation continuation.",
-    "Indique si l’adapter prend en charge la continuation native des conversations."
+    "Whether the agent can continue a conversation, including response repair. Cold continuation additionally requires a conversation store; fork support is declared separately.",
+    "Indique si l’agent peut continuer une conversation, y compris pour réparer une réponse. La reprise à froid exige aussi un store ; le fork est déclaré séparément."
   ],
   "AgentFeatures.transcriptUsage": [
     "Parse a native transcript to recover token usage when available.",
@@ -3697,8 +3697,8 @@
     "Taille maximale positive du corps après décompression HTTP, en octets ; 8388608 (8 Mio) par défaut. Les réponses dépassant cette limite échouent."
   ],
   "CustomAgent.resumable": [
-    "Always false: custom callbacks have no native conversation continuation or automatic response repair.",
-    "Toujours faux : les callbacks personnalisés n’ont ni reprise native ni réparation automatique."
+    "Whether the agent can continue a conversation, including response repair. Cold continuation additionally requires a conversation store; fork support is declared separately.",
+    "Indique si l’agent peut continuer une conversation, y compris pour réparer une réponse. La reprise à froid exige aussi un store ; le fork est déclaré séparément."
   ],
   "CustomAgent.capture": [
     "Always false: the custom runner does not capture native transcripts.",
@@ -4645,5 +4645,49 @@
   "agentVersions.antigravity": [
     "Antigravity CLI version installed from SHA-512-verified archives by generated images and remote bootstrap, and used as the doctor compatibility reference.",
     "Version de la CLI Antigravity installée depuis des archives vérifiées par SHA-512 dans les images générées et le bootstrap distant, et utilisée comme référence de compatibilité par doctor."
+  ],
+  "AgentFeatures.forkable": [
+    "Whether conversation branching is supported; false rejects fork before allocation. Omitted preserves the adapter’s existing fork behavior. Resume support is declared separately.",
+    "Indique si la bifurcation est prise en charge ; false refuse le fork avant allocation. L’absence conserve le comportement existant de l’adapter. La reprise est déclarée séparément."
+  ],
+  "AgentAdapter.forkable": [
+    "Whether conversation branching is supported; false rejects fork before allocation. Omitted preserves the adapter’s existing fork behavior. Resume support is declared separately.",
+    "Indique si la bifurcation est prise en charge ; false refuse le fork avant allocation. L’absence conserve le comportement existant de l’adapter. La reprise est déclarée séparément."
+  ],
+  "CliAgent.forkable": [
+    "Whether conversation branching is supported; false rejects fork before allocation. Omitted preserves the adapter’s existing fork behavior. Resume support is declared separately.",
+    "Indique si la bifurcation est prise en charge ; false refuse le fork avant allocation. L’absence conserve le comportement existant de l’adapter. La reprise est déclarée séparément."
+  ],
+  "CliAgent.resumable": [
+    "Whether the agent can continue a conversation, including response repair. Cold continuation additionally requires a conversation store; fork support is declared separately.",
+    "Indique si l’agent peut continuer une conversation, y compris pour réparer une réponse. La reprise à froid exige aussi un store ; le fork est déclaré séparément."
+  ],
+  "CustomAgent.forkable": [
+    "Whether conversation branching is supported; false rejects fork before allocation. Omitted preserves the adapter’s existing fork behavior. Resume support is declared separately.",
+    "Indique si la bifurcation est prise en charge ; false refuse le fork avant allocation. L’absence conserve le comportement existant de l’adapter. La reprise est déclarée séparément."
+  ],
+  "AgentAdapter.fork": [
+    "Optional native fork preparation: receive the parent ID and a borrowed sandbox command executor, then return a distinct child ID. Outpost requests continuation on that child; adapters with a fork flag can omit this hook.",
+    "Préparation native optionnelle du fork : reçoit l’identifiant parent et un exécuteur de commandes dans la sandbox empruntée, puis renvoie un identifiant enfant distinct. Outpost continue cet enfant ; les adapters dotés d’un flag de fork peuvent omettre ce hook."
+  ],
+  "AgentAdapter.fork.id": [
+    "Parent conversation identifier already restored in the sandbox.",
+    "Identifiant de la conversation parente déjà restaurée dans la sandbox."
+  ],
+  "AgentAdapter.fork.invoke": [
+    "Run a CLI command in the borrowed sandbox with the operation’s credentials, cancellation and deadline.",
+    "Exécute une commande CLI dans la sandbox empruntée avec les identifiants, l’annulation et le délai de l’opération."
+  ],
+  "CliAgent.fork": [
+    "Optional native fork preparation: receive the parent ID and a borrowed sandbox command executor, then return a distinct child ID. Outpost requests continuation on that child; adapters with a fork flag can omit this hook.",
+    "Préparation native optionnelle du fork : reçoit l’identifiant parent et un exécuteur de commandes dans la sandbox empruntée, puis renvoie un identifiant enfant distinct. Outpost continue cet enfant ; les adapters dotés d’un flag de fork peuvent omettre ce hook."
+  ],
+  "CliAgent.fork.id": [
+    "Parent conversation identifier already restored in the sandbox.",
+    "Identifiant de la conversation parente déjà restaurée dans la sandbox."
+  ],
+  "CliAgent.fork.invoke": [
+    "Run a CLI command in the borrowed sandbox with the operation’s credentials, cancellation and deadline.",
+    "Exécute une commande CLI dans la sandbox empruntée avec les identifiants, l’annulation et le délai de l’opération."
   ]
 }

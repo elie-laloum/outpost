@@ -1,3 +1,4 @@
+import { forkKimi } from "./kimi-fork.ts";
 import type { AgentAdapter, CliHarness } from "../../domain/agent.types.ts";
 import { invariant } from "../../domain/errors.ts";
 import { authenticationForm } from "../../domain/authentication.ts";
@@ -24,8 +25,10 @@ function bindKimi(settings: Bound<KimiSettings>): AgentAdapter {
     name: "kimi",
     ...(credentials ? { credentials } : {}),
     bootstrap: "kimi",
-    resumable: false,
-    capture: false,
+    resumable: true,
+    forkable: true,
+    fork: forkKimi,
+    conversations: "kimi",
     variables: Object.freeze({
       KIMI_CODE_NO_AUTO_UPDATE: "1",
       ...settings.variables,

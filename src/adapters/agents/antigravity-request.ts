@@ -1,3 +1,4 @@
+import { validId } from "../../infrastructure/conversations/identity.ts";
 import type { AgentInput } from "../../domain/agent.types.ts";
 import type { Command } from "../../domain/command.types.ts";
 import { invariant } from "../../domain/errors.ts";
@@ -10,10 +11,14 @@ export function antigravityRequest(
   input: AgentInput,
 ): Command {
   invariant(
-    !input.continuation,
-    "Antigravity does not support continuation or fork in Outpost",
+    !input.continuation?.fork,
+    "Antigravity does not support automated fork in Outpost",
   );
   const args: string[] = [];
+  if (input.continuation) {
+    validId(input.continuation.id);
+    args.push("--conversation", input.continuation.id);
+  }
   if (settings.model) args.push("--model", settings.model.name);
   if (settings.mode) args.push("--mode", settings.mode);
   if (input.interactive)

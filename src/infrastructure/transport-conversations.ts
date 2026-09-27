@@ -20,6 +20,8 @@ const baseStores: Readonly<
   claude: () => nativeConversations("claude"),
   codex: () => nativeConversations("codex"),
   harness: harnessConversations,
+  copilot: () => nativeConversations("copilot"),
+  kimi: () => nativeConversations("kimi"),
 };
 
 export function transportConversations(

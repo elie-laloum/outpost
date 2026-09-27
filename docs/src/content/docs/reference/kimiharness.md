@@ -13,7 +13,7 @@ import { kimiHarness } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Create a Kimi Code harness from execution, authentication and permission settings without starting the CLI. Compose it with agent({ harness, model }) to select a model name independently; reasoning and maxOutputTokens are rejected. Each run starts a fresh session: native capture, resume, fork and automatic response repairs are unsupported. The CLI owns its internal model/tool loop. Account profiles default to region: "global" for kimi.ai; set mainland-cn explicitly for kimi.com. The region determines the credential slot and sandbox login endpoints.
+Create a Kimi Code harness from execution, authentication and permission settings without starting the CLI. Compose it with agent({ harness, model }) to select a model name independently; reasoning and maxOutputTokens are rejected. Native session bundles support capture, warm/cold resume and response repairs. Fork runs the native kimi fork command and continues a distinct child ID. The CLI owns its internal model/tool loop. Account profiles default to region: "global" for kimi.ai; set mainland-cn explicitly for kimi.com. The region determines the credential slot and sandbox login endpoints.
 
 [Complete example and detailed rules](../../guide/agents/harness/).
 

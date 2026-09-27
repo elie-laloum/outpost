@@ -20,6 +20,14 @@ export async function attach(
     options.agent.kind === "cli",
     "This harness does not support interactive attachment",
   );
+  invariant(
+    !options.continuation || options.agent.resumable !== false,
+    "This adapter does not support continuation",
+  );
+  invariant(
+    !options.continuation?.fork || options.agent.forkable !== false,
+    "This adapter does not support automated fork",
+  );
   validateBrief(options.brief, true);
   const brief = await completeBrief(options.brief, options.signal, options.ask);
   if (brief) options = { ...options, brief };
