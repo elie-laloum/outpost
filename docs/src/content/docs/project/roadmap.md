@@ -35,6 +35,8 @@ Available in 6.0.1: the [Guide](../../guide/introduction/) has been rewritten in
 
 Start with [cloud compatibility campaigns](../../guide/integration-ports/), [diagnostics](../../guide/preflight-checks/) and [agent images](../../guide/image-recipes/). Fix contract failures before expanding the provider matrix. CI syntax probes and local simulated endpoints remain useful checks, but do not replace authenticated provider runs.
 
+**Firecracker hardening (implemented, unreleased):** optional jailer launch now provisions a private jail and cgroup v2 limits under a trusted root supervisor. Direct execution and its live WSL2 campaign remain available. The local WSL2 campaign passed jailer confinement, CPU throttling under a half-CPU quota, an induced VMM OOM kill, IPv4/IPv6 denial and cleanup after that failure. These results cover Firecracker 1.17.0 with a Linux 6.1.186 guest; broader deployment and control-plane validation remain open. The VMM limits do not bound the supervisor's buffered transfers or kernel work outside the cgroup; the provider remains experimental pending control-plane resource handling and adversarial validation.
+
 ## Medium term: extend proven contracts
 
 | Direction                     | Next useful capability                                                                                             | Conditions before promotion                                                                                                                                                                                   |

@@ -3025,12 +3025,12 @@
     "Chemin du home de l’agent à l’intérieur de l’environnement d’exécution."
   ],
   "FirecrackerOptions.cpus": [
-    "CPU allocation limit for the execution environment.",
-    "Limite d’allocation CPU de l’environnement d’exécution."
+    "Number of guest vCPUs; does not impose a host CPU quota. The jailer cpuQuotaUs setting limits VMM CPU bandwidth separately.",
+    "Nombre de vCPU invités ; n’impose pas de quota CPU hôte. Le réglage cpuQuotaUs du jailer limite séparément le temps CPU du VMM."
   ],
   "FirecrackerOptions.memoryMb": [
-    "Memory allocation limit in megabytes.",
-    "Limite d’allocation mémoire en mégaoctets."
+    "Guest memory size in MiB. The optional jailer memoryMaxMb limit covers the VMM and must exceed guest memory.",
+    "Taille de la mémoire invitée en Mio. La limite optionnelle memoryMaxMb du jailer couvre le VMM et doit dépasser la mémoire invitée."
   ],
   "FirecrackerOptions.bootDeadlineMs": [
     "Maximum time in milliseconds to wait for the guest to become reachable over SSH.",
@@ -4637,5 +4637,9 @@
   "S3TransportOptions.deleteMode": [
     "\"conditional\" (default) requires atomic conditional DELETE support. \"tombstone\" removes objects through conditional PUT markers for endpoints such as R2; reads and lists hide markers and conditional creation can replace them. All writers sharing a prefix must select the same mode. Markers retain a 1 KiB envelope and listing adds a HEAD per object; physically purge markers only after stopping every writer.",
     "\"conditional\" (défaut) exige DELETE conditionnel atomique. \"tombstone\" supprime via des marqueurs PUT conditionnels pour les endpoints comme R2 ; lectures et listes masquent les marqueurs, remplaçables par création conditionnelle. Tous les écrivains d’un préfixe doivent choisir le même mode. Chaque marqueur conserve une enveloppe de 1 Kio et le listing ajoute un HEAD par objet ; purger physiquement seulement après arrêt de tous les écrivains."
+  ],
+  "FirecrackerOptions.jailer": [
+    "Optional privileged jailer launch with a root-owned binary and assets, protected jail directory, dedicated cgroup v2 parent, non-root uid/gid, cpuQuotaUs per 100000 microseconds, memoryMaxMb including VMM overhead, and a processes thread limit. Requires a trusted root supervisor; never invokes sudo. CPU, memory and pids controllers must already be enabled. Omit to retain direct experimental execution.",
+    "Lancement optionnel avec jailer : binaire et assets appartenant à root, répertoire protégé, parent cgroup v2 dédié, uid/gid non root, cpuQuotaUs par période de 100000 microsecondes, memoryMaxMb incluant le surcoût du VMM et limite de threads processes. Exige un superviseur root de confiance, sans appel à sudo. Les contrôleurs CPU, mémoire et pids doivent déjà être activés. Omettre conserve le lancement direct expérimental."
   ]
 }

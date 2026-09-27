@@ -35,6 +35,8 @@ Disponible en 6.0.1 : le [Guide](../../guide/introduction/) est entièrement ré
 
 Commencer par les [campagnes cloud](../../guide/integration-ports/), les [diagnostics](../../guide/preflight-checks/) et les [images d’agents](../../guide/image-recipes/). Corriger les défauts de contrat avant d’élargir la matrice des providers. Les contrôles de syntaxe en CI et les endpoints simulés locaux restent utiles, mais ne remplacent pas les exécutions authentifiées sur les providers.
 
+**Renforcement Firecracker (implémenté, non publié) :** le lancement optionnel par jailer prépare une prison privée et des limites cgroup v2 sous un superviseur root de confiance. Le lancement direct et sa campagne réelle WSL2 restent disponibles. La campagne locale WSL2 a réussi le confinement jailer, le bridage sous un quota d’un demi-CPU, l’arrêt OOM provoqué du VMM, le refus IPv4/IPv6 et le nettoyage après cet échec. Ces résultats concernent Firecracker 1.17.0 avec un invité Linux 6.1.186 ; les validations plus larges du déploiement et du superviseur restent ouvertes. Les limites du VMM ne bornent ni les transferts chargés en mémoire par le superviseur ni le travail du noyau hors cgroup ; le provider reste expérimental en attente de la gestion des ressources du superviseur et de la validation adversariale.
+
 ## Moyen terme : étendre les contrats éprouvés
 
 | Orientation                       | Prochaine capacité utile                                                                                                              | Conditions avant promotion                                                                                                                                                                                                                       |

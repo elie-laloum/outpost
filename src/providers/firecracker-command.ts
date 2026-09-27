@@ -19,7 +19,7 @@ export function firecrackerSsh(
 ): Command {
   const ssh = options.ssh;
   return {
-    executable: ssh.binary ?? "ssh",
+    executable: ssh.binary ?? (options.jailer ? "/usr/bin/ssh" : "ssh"),
     arguments: [
       "-F",
       "/dev/null",

@@ -15,13 +15,16 @@ import { isAbsolute, join } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import { invariant, OutpostError, positive } from "../domain/errors.ts";
 import { registerCleanup } from "../infrastructure/shutdown.ts";
+import { prepareJailer, validateJailer } from "./firecracker-jailer.ts";
 import { firecrackerDefaults } from "./firecracker.constants.ts";
 import type {
   FirecrackerMachine,
+  FirecrackerLaunch,
   FirecrackerOptions,
 } from "./firecracker.types.ts";
 
 export function validateFirecracker(options: FirecrackerOptions): void {
+  validateJailer(options);
   invariant(
     !("egress" in options) || options.egress === undefined,
     "Firecracker cannot enforce Outpost egress policies; configure host networking explicitly",
@@ -142,16 +145,25 @@ export async function firecrackerMachine(
   } catch (cause) {
     return failedAllocation([directory, lock, transportLock], cause);
   }
-  const child = spawn(
-    options.binary,
-    [
-      "--api-sock",
-      join(directory, "api.sock"),
-      "--config-file",
-      join(directory, "config.json"),
-    ],
-    { stdio: "ignore" },
-  );
+  let launch: FirecrackerLaunch;
+  try {
+    launch = options.jailer
+      ? await prepareJailer(options, directory, signal)
+      : {
+          binary: options.binary,
+          arguments: [
+            "--api-sock",
+            join(directory, "api.sock"),
+            "--config-file",
+            join(directory, "config.json"),
+          ],
+          async stop() {},
+          async cleanup() {},
+        };
+  } catch (cause) {
+    return failedAllocation([directory, lock, transportLock], cause);
+  }
+  const child = spawn(launch.binary, launch.arguments, { stdio: "ignore" });
   let exited = false;
   const exit = new Promise<void>((resolve) => {
     child.once("error", () => {
@@ -171,7 +183,11 @@ export async function firecrackerMachine(
       closed = true;
       if (!exited) child.kill("SIGTERM");
       await Promise.race([exit, delay(200, undefined, { ref: false })]);
-      if (!exited) child.kill("SIGKILL");
+      try {
+        await launch.stop();
+      } finally {
+        if (!exited) child.kill("SIGKILL");
+      }
       await Promise.race([
         exit,
         delay(firecrackerDefaults.cleanupMs, undefined, { ref: false }),
@@ -181,6 +197,7 @@ export async function firecrackerMachine(
           "provider",
           `VM termination uncertain; private disk retained at ${directory}`,
         );
+      await launch.cleanup();
       await rm(directory, { recursive: true, force: true });
       await rm(lock, { recursive: true, force: true });
       await rm(transportLock, { recursive: true, force: true });

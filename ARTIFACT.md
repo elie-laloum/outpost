@@ -164,6 +164,8 @@ Déjà codé, reste à prouver en conditions réelles.
 
 ### Firecracker en réel
 
+**Statut — validation locale renforcée réussie (non publiée), point encore ouvert** : le mode jailer est implémenté avec UID/GID dédiés, chemins privilégiés protégés et limites cgroup v2. Sur WSL2, les tests réels passent pour le fonctionnement, le confinement, le bridage CPU, l’arrêt OOM provoqué, le refus IPv4/IPv6 et le nettoyage de la VM. La revue ciblée a identifié des téléchargements chargés en mémoire dans le superviseur, hors limite du VMM, et du travail noyau hors quota. Le statut expérimental est conservé ; preuves et limites : `temp/firecracker-live/hardening/`.
+
 **Ce qu'on teste** — `test/firecracker-live.test.ts` sur un hôte Linux avec KVM : démarrage, commande, annulation, transferts, nettoyage, jailer, limites CPU et mémoire.
 
 **Ce que ça vérifie** — La VM démarre, le processus est bien tué à l'annulation, et rien ne reste après fermeture (interfaces réseau, rootfs, sockets).

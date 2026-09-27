@@ -22,6 +22,16 @@ export interface FirecrackerOptions {
   readonly memoryMb?: number;
   readonly bootDeadlineMs?: number;
   readonly variables?: Variables;
+  readonly jailer?: {
+    readonly binary: string;
+    readonly directory: string;
+    readonly cgroup: string;
+    readonly uid: number;
+    readonly gid: number;
+    readonly cpuQuotaUs: number;
+    readonly memoryMaxMb: number;
+    readonly processes: number;
+  };
 }
 
 export interface FirecrackerRuntime {
@@ -36,4 +46,11 @@ export interface FirecrackerMachine {
   readonly directory: string;
   readonly isClosed: () => boolean;
   release(): Promise<void>;
+}
+
+export interface FirecrackerLaunch {
+  readonly binary: string;
+  readonly arguments: readonly string[];
+  stop(): Promise<void>;
+  cleanup(): Promise<void>;
 }
