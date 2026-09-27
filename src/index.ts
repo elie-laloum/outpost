@@ -140,6 +140,7 @@ export type {
 export {
   WorkflowFailure,
   WorkflowBudgetExceeded,
+  WorkflowUsageUnavailable,
   task,
   workflow,
 } from "./domain/workflow.ts";

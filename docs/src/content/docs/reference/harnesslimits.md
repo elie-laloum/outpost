@@ -17,11 +17,11 @@ import type { HarnessLimits } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name           | Type                          | Presence | Meaning                                                                                                                                                               |
-| -------------- | ----------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `maxSteps`     | `number \| undefined`         | Optional | Maximum number of model requests in one turn; defaults to 100.                                                                                                        |
-| `maxToolCalls` | `number \| undefined`         | Optional | Maximum number of tool calls in one turn; unbounded apart from maxSteps when omitted.                                                                                 |
-| `usage`        | `Partial<Usage> \| undefined` | Optional | Token budget per counter (input, cached, cacheCreated, output), checked before each new request. Requires a provider that reports usage; the last step may exceed it. |
+| Name           | Type                                            | Presence | Meaning                                                                                                                                                               |
+| -------------- | ----------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `maxSteps`     | `number \| undefined`                           | Optional | Maximum number of model requests in one turn; defaults to 100.                                                                                                        |
+| `maxToolCalls` | `number \| undefined`                           | Optional | Maximum number of tool calls in one turn; unbounded apart from maxSteps when omitted.                                                                                 |
+| `usage`        | `Partial<Omit<Usage, "complete">> \| undefined` | Optional | Token budget per counter (input, cached, cacheCreated, output), checked before each new request. Requires a provider that reports usage; the last step may exceed it. |
 
 ## Signature
 
@@ -29,7 +29,7 @@ import type { HarnessLimits } from "@elie-laloum/outpost";
 export interface HarnessLimits {
   readonly maxSteps?: number;
   readonly maxToolCalls?: number;
-  readonly usage?: Partial<Usage>;
+  readonly usage?: Partial<Omit<Usage, "complete">>;
 }
 ```
 

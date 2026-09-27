@@ -60,7 +60,7 @@ export function reporter(
         break;
       case "summary":
         write(
-          `\n${prefix} finished · ${(event.durationMs / 1000).toFixed(2)}s · status ${event.status} · input ${event.tokens.input} · cache read ${event.tokens.cached} · cache write ${event.tokens.cacheCreated ?? 0} · output ${event.tokens.output}\n`,
+          `\n${prefix} finished · ${(event.durationMs / 1000).toFixed(2)}s · status ${event.status} · ${event.tokens.complete === false ? "incomplete token usage · " : ""}input ${event.tokens.input} · cache read ${event.tokens.cached} · cache write ${event.tokens.cacheCreated ?? 0} · output ${event.tokens.output}\n`,
         );
         break;
       case "failure":

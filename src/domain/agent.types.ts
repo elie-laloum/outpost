@@ -4,6 +4,7 @@ import type { Command, Variables } from "./command.types.ts";
 import type { ConversationStore } from "./conversation.types.ts";
 
 export interface Usage {
+  readonly complete?: boolean;
   readonly input: number;
   readonly cached: number;
   readonly cacheCreated?: number;
@@ -57,7 +58,11 @@ export type AgentEvent =
       readonly messages: number;
     }
   | { readonly kind: "conversation"; readonly id: string }
-  | { readonly kind: "usage"; readonly tokens: Usage }
+  | {
+      readonly kind: "usage";
+      readonly tokens: Usage;
+      readonly cumulative?: boolean;
+    }
   | { readonly kind: "failure"; readonly message: string }
   | { readonly kind: "finished" }
   | { readonly kind: "raw"; readonly value: unknown };
@@ -83,6 +88,7 @@ export interface AgentFeatures {
   readonly name: string;
   readonly bootstrap?: string;
   readonly requiresFinishedEvent?: boolean;
+  readonly usage?: "events" | "session" | "unavailable";
   readonly variables?: Variables;
   readonly conversations?: "claude" | "codex";
   readonly storage?: ConversationStore;
@@ -95,6 +101,8 @@ export interface AgentAdapter extends AgentFeatures {
   credentials?(variables: Variables): CredentialPlan;
   request(input: AgentInput): Command;
   events(line: string): readonly AgentEvent[];
+  usageCommand?(conversation: string): Command | undefined;
+  usageResult?(text: string): Usage | undefined;
 }
 
 export interface RequiredAgent {

@@ -1017,6 +1017,10 @@
         "slug": "reference/workflowbudgetexceeded",
         "attrs": { "data-api-kind": "class" }
       },
+      {
+        "slug": "reference/workflowusageunavailable",
+        "attrs": { "data-api-kind": "class" }
+      },
       { "slug": "reference/retry", "attrs": { "data-api-kind": "interface" } },
       {
         "slug": "reference/type-task",

@@ -1,5 +1,5 @@
 import { checkpointValue } from "./checkpoint-value.ts";
-import { WorkflowBudgetExceeded } from "./budget.ts";
+import { WorkflowBudgetExceeded, WorkflowUsageUnavailable } from "./budget.ts";
 import { setTimeout as delay } from "node:timers/promises";
 import type { Task, WorkflowExecutionState } from "../workflow.types.ts";
 
@@ -77,7 +77,9 @@ export async function runTask(
     state.error = error instanceof Error ? error.message : String(error);
     if (
       signal.aborted ||
-      (error instanceof WorkflowBudgetExceeded && runtime.accounting.exhausted)
+      ((error instanceof WorkflowBudgetExceeded ||
+        error instanceof WorkflowUsageUnavailable) &&
+        runtime.accounting.exhausted)
     )
       finish(item, "cancelled");
     else {

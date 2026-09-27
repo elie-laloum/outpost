@@ -45,4 +45,12 @@ L’authentification API exige un modèle explicite sur `agent()`. L’option `r
 
 Cet adaptateur démarre uniquement des sessions neuves. La capture native des conversations, la reprise, le fork et la réparation automatique des réponses ne sont pas disponibles.
 
+## Comptabilité des tokens
+
+La CLI épinglée `@moonshot-ai/kimi-code` 2.1.1 omet l’usage dans `stream-json`. Après la fin de la commande, Outpost utilise l’identifiant de session pour lire les entrées `usage.record` sous `KIMI_CODE_HOME/sessions/<workspace>/<id>/agents/*/wire.jsonl` (home par défaut : `~/.kimi-code`), dans la sandbox. Les entrées de l’agent principal et des sous-agents sont additionnées une seule fois ; tailles de contexte et résumés d’étape ne sont pas ajoutés à nouveau.
+
+`inputOther` devient `usage.input`, `output` devient `usage.output`, `inputCacheRead` devient `usage.cached` et `inputCacheCreation` devient `usage.cacheCreated`. L’entrée exclut les lectures et écritures de cache. Seul l’usage rapporté est disponible ; un zéro fourni par la CLI ne prouve pas qu’un appel modèle non rapporté était gratuit.
+
+Un identifiant absent, des entrées manquantes ou malformées, une interruption ou le dépassement des limites de lecture produisent `usage.complete === false` ; les compteurs mesurés restent une borne inférieure. Un avertissement au démarrage précise que la collecte intervient après l’exécution. Combinez `budget.attempts` avec un timeout de tâche ou un délai de dispatch ; voir [Budgets de consommation](../token-budgets/). Cette comptabilité n’active ni capture de conversation native ni reprise.
+
 API : [kimiHarness](../../reference/kimiharness/).

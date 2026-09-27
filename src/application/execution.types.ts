@@ -42,6 +42,11 @@ export interface Turn {
 }
 
 export interface AgentOutput {
+  readonly usage: Usage;
+  readonly reportedUsage: boolean;
+  readonly finalUsage: boolean;
+  recordUsage(tokens: Usage, cumulative?: boolean): void;
+  setUsageBaseline(tokens: Usage | undefined): void;
   readonly failure: string | undefined;
   readonly completed: boolean;
   readonly conversation: string | undefined;

@@ -1,7 +1,7 @@
 import { visitAgentEvent } from "../domain/agent-events.ts";
 import type { AgentAdapter, Usage } from "../domain/agent.types.ts";
 import { OutpostError } from "../domain/errors.ts";
-import { addUsage } from "../domain/usage.ts";
+import { addUsage, usageDifference } from "../domain/usage.ts";
 import { executionDefaults } from "./execution.constants.ts";
 import type { AgentOutput, DispatchOptions } from "./execution.types.ts";
 import { notify } from "./observation.ts";
@@ -19,6 +19,9 @@ export function agentOutput(
     conversation: string | undefined,
     failure: string | undefined;
   let usage: Usage = { input: 0, cached: 0, output: 0 };
+  let baseline: Usage | undefined = { input: 0, cached: 0, output: 0 };
+  let reportedUsage = false,
+    finalUsage = false;
   let completed = false,
     finished = false;
   const handlers: import("../domain/agent.types.ts").AgentEventHandlers = {
@@ -37,22 +40,53 @@ export function agentOutput(
     failure: (event) => {
       failure = event.message;
     },
-    usage: (event) => {
-      usage = addUsage(usage, event.tokens);
-    },
+    usage: (event) => recordUsage(event.tokens, event.cumulative),
   };
+  function recordUsage(tokens: Usage, cumulative = false): void {
+    reportedUsage = true;
+    if (cumulative && (!baseline || baseline.complete === false)) {
+      recordUsage({ input: 0, cached: 0, output: 0, complete: false });
+      return;
+    }
+    if (cumulative && tokens.complete !== false) finalUsage = true;
+    const current = cumulative ? usageDifference(tokens, baseline!) : tokens;
+    const delta = cumulative ? usageDifference(current, usage) : current;
+    usage = addUsage(usage, delta);
+    notify(options.observe, {
+      kind: "usage",
+      tokens: delta,
+      pass,
+      at: new Date().toISOString(),
+    });
+  }
   function consume(line: string): void {
     const at = new Date().toISOString();
     notify(options.observe, { kind: "raw", value: line, pass, at });
     for (const event of agent.events(line)) {
       visitAgentEvent(event, handlers);
-      if (event.kind !== "raw") notify(options.observe, { ...event, pass, at });
+      if (event.kind !== "raw" && event.kind !== "usage")
+        notify(options.observe, { ...event, pass, at });
     }
     completed =
       (!agent.requiresFinishedEvent || finished) &&
       markers.some((marker) => (finalText ?? text).includes(marker));
   }
   return {
+    get usage() {
+      return usage;
+    },
+    get reportedUsage() {
+      return reportedUsage;
+    },
+    get finalUsage() {
+      return finalUsage;
+    },
+    recordUsage,
+    setUsageBaseline(tokens) {
+      baseline = tokens;
+      if (!tokens || tokens.complete === false)
+        recordUsage({ input: 0, cached: 0, output: 0, complete: false });
+    },
     get failure() {
       return failure;
     },

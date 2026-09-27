@@ -4645,5 +4645,33 @@
   "agentVersions.antigravity": [
     "Antigravity CLI version installed from SHA-512-verified archives by generated images and remote bootstrap, and used as the doctor compatibility reference.",
     "Version de la CLI Antigravity installée depuis des archives vérifiées par SHA-512 dans les images générées et le bootstrap distant, et utilisée comme référence de compatibilité par doctor."
+  ],
+  "Usage.complete": [
+    "False when some token usage could not be measured; counters then represent a lower bound. Omitted or true preserves reported-usage semantics without certifying external billing. False survives aggregation and checkpoint replay.",
+    "False lorsqu’une partie de l’usage n’a pas pu être mesurée ; les compteurs représentent alors une borne inférieure. L’absence ou true conserve la sémantique de l’usage rapporté sans certifier la facturation externe. False persiste dans les agrégations et reprises de checkpoint."
+  ],
+  "AgentFeatures.usage": [
+    "CLI accounting capability: events expects usage in the decoded stream, session collects counters after exit, and unavailable declares that tokens cannot be measured. Omission preserves legacy adapter behavior.",
+    "Capacité de comptabilité CLI : events attend l’usage dans le flux décodé, session collecte les compteurs après la sortie et unavailable déclare les tokens non mesurables. L’absence conserve le comportement des adaptateurs existants."
+  ],
+  "AgentAdapter.usageCommand": [
+    "Build a bounded read-only command to collect counters for this conversation inside the borrowed sandbox; return undefined for an unsupported identifier.",
+    "Construit une commande de lecture bornée pour collecter les compteurs de cette conversation dans la sandbox empruntée ; renvoie undefined pour un identifiant non pris en charge."
+  ],
+  "AgentAdapter.usageResult": [
+    "Decode the successful usage command’s stdout into session totals. Return undefined when unreadable, or complete: false for partial totals; do not return transcript content.",
+    "Décode stdout de la commande d’usage réussie en totaux de session. Renvoie undefined si illisible, ou complete: false pour des totaux partiels ; ne renvoie pas le contenu du transcript."
+  ],
+  "AgentEvent.cumulative": [
+    "On CLI usage events, true identifies a total for the current command. The runtime converts it to nonnegative deltas before notifying observers; omission means an incremental usage event.",
+    "Sur les événements d’usage CLI, true indique un total pour la commande courante. Le runtime le convertit en deltas positifs ou nuls avant de notifier les observateurs ; l’absence indique un événement incrémental."
+  ],
+  "WorkflowUsageUnavailable.dimension": [
+    "Always usage: token accounting is incomplete and the budget has no attempt fallback.",
+    "Toujours usage : la comptabilité des tokens est incomplète et le budget n’a pas de repli en tentatives."
+  ],
+  "WorkflowUsageUnavailable.name": [
+    "Stable error name WorkflowUsageUnavailable.",
+    "Nom d’erreur stable WorkflowUsageUnavailable."
   ]
 }

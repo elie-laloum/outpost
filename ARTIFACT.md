@@ -194,9 +194,11 @@ Existe, mais partiel ou expérimental pour un usage en production.
 
 ### Consommation de tokens Copilot et Kimi
 
-**Faiblesse actuelle** — La consommation remonte vide. Les budgets de workflow et de spéculation ne voient rien, et un workflow avec ces agents peut dépenser sans limite.
+**Statut — implémenté localement (non publié)** : collecte des compteurs de session Copilot `1.0.88` et Kimi `2.1.1` dans la sandbox, avec agrégation des sous-agents Kimi et réconciliation du flux Copilot. Les mesures absentes ou partielles portent `Usage.complete: false` jusque dans les checkpoints. Les budgets exclusivement en tokens refusent un usage incomplet ; un budget de tentatives permet le repli, à combiner avec les délais de tâche ou de dispatch. Régressions hors ligne de protocole, processus, annulation, workflow et spéculation ajoutées. Les appels authentifiés et la comparaison avec la facturation restent dans la campagne « Antigravity, Copilot et Kimi en réel ».
 
-**Ce que ça complète** — Lire l'usage quand la CLI l'expose (sortie, fichier de session). Sinon, marquer l'usage comme inconnu, prévenir au démarrage et permettre un budget en tentatives ou en durée pour ces agents.
+**Faiblesse initiale** — La consommation remonte vide. Les budgets de workflow et de spéculation ne voient rien, et un workflow avec ces agents peut dépenser sans limite.
+
+**Périmètre traité** — Lire l'usage quand la CLI l'expose (sortie, fichier de session). Sinon, marquer l'usage comme inconnu, prévenir au démarrage et permettre un budget en tentatives ou en durée pour ces agents.
 
 <a id="r-agy"></a>
 

@@ -8,11 +8,11 @@ import type {
 } from "./budget.types.ts";
 
 export class WorkflowBudgetExceeded extends Error {
-  readonly dimension: "attempts" | keyof Usage;
+  readonly dimension: "attempts" | Exclude<keyof Usage, "complete">;
   readonly limit: number;
   readonly observed: number;
   constructor(
-    dimension: "attempts" | keyof Usage,
+    dimension: "attempts" | Exclude<keyof Usage, "complete">,
     limit: number,
     observed: number,
   ) {
@@ -26,9 +26,19 @@ export class WorkflowBudgetExceeded extends Error {
   }
 }
 
+export class WorkflowUsageUnavailable extends Error {
+  readonly dimension = "usage";
+  constructor() {
+    super(
+      "Token usage is incomplete; configure budget.attempts and task timeouts or dispatch deadlines before continuing",
+    );
+    this.name = "WorkflowUsageUnavailable";
+  }
+}
+
 export function workflowAccounting(
   budget: WorkflowBudget | undefined,
-  exhaust: (error: WorkflowBudgetExceeded) => void,
+  exhaust: (error: WorkflowBudgetExceeded | WorkflowUsageUnavailable) => void,
   initial?: WorkflowUsage,
 ): WorkflowAccounting {
   for (const [key, value] of Object.entries({
@@ -47,7 +57,7 @@ export function workflowAccounting(
   let exhausted = false;
   let usageExhausted = false;
   function fail(
-    dimension: "attempts" | keyof Usage,
+    dimension: "attempts" | Exclude<keyof Usage, "complete">,
     limit: number,
     observed: number,
   ): WorkflowBudgetExceeded {
@@ -59,11 +69,30 @@ export function workflowAccounting(
     }
     return error;
   }
+  function checkCompleteness(): WorkflowUsageUnavailable | undefined {
+    if (
+      tokens.complete !== false ||
+      budget?.attempts !== undefined ||
+      !usageDimensions.some(
+        (dimension) => budget?.usage?.[dimension] !== undefined,
+      )
+    )
+      return;
+    const error = new WorkflowUsageUnavailable();
+    if (!usageExhausted) {
+      exhausted = true;
+      usageExhausted = true;
+      exhaust(error);
+    }
+    return error;
+  }
   return {
     get exhausted() {
       return exhausted;
     },
     admit() {
+      const unavailable = checkCompleteness();
+      if (unavailable) throw unavailable;
       if (budget?.attempts !== undefined && attempts >= budget.attempts)
         throw fail("attempts", budget.attempts, attempts);
       for (const dimension of usageDimensions) {
@@ -74,6 +103,8 @@ export function workflowAccounting(
       attempts++;
     },
     report(usage) {
+      if (usage.complete !== undefined && typeof usage.complete !== "boolean")
+        throw new Error("Reported usage complete must be a boolean");
       for (const dimension of usageDimensions) {
         const value = usage[dimension] ?? 0;
         if (!Number.isSafeInteger(value) || value < 0)
@@ -82,6 +113,7 @@ export function workflowAccounting(
           );
       }
       tokens = addUsage(tokens, usage);
+      checkCompleteness();
       for (const dimension of usageDimensions) {
         const limit = budget?.usage?.[dimension];
         if (limit !== undefined && (tokens[dimension] ?? 0) >= limit)

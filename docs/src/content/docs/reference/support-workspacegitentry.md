@@ -13,7 +13,7 @@ The fields below cover all variants; the signature specifies their allowed combi
 | -------- | -------------------------------------------------------------- | ----------------- | ---------------------------------------------------------------------------------- |
 | `name`   | `string`                                                       | Required          | Filesystem basename of the inspected storage entry.                                |
 | `path`   | `string`                                                       | Required          | Host path of the inspected storage entry.                                          |
-| `state`  | `"registered" \| "unregistered" \| "skipped" \| "unavailable"` | Required          | Classification of the worktree’s Git state used to decide whether cleanup is safe. |
+| `state`  | `"registered" \| "unregistered" \| "unavailable" \| "skipped"` | Required          | Classification of the worktree’s Git state used to decide whether cleanup is safe. |
 | `head`   | `string`                                                       | Variant-dependent | Git HEAD commit recorded by the inspection or snapshot.                            |
 | `branch` | `string \| null`                                               | Variant-dependent | Worktree branch name, or null when HEAD is detached.                               |
 | `dirty`  | `boolean`                                                      | Variant-dependent | Whether tracked or untracked changes make the checkout dirty.                      |

@@ -7,6 +7,8 @@ sidebar:
 
 Outpost's next priority is reliable everyday execution: a successful first run, explainable failures and recovery that has been exercised under real conditions. The horizons below express ordering, not promised dates or release numbers. The [changelog](../changelog/) records deliveries; this page describes the work ahead.
 
+**Unreleased token accounting:** Copilot and Kimi session counters, incomplete-usage propagation and token-only budget rejection are implemented. Offline protocol, process, workflow and checkpoint regressions cover these contracts. Authenticated runs and comparison with vendor billing remain part of the live CLI campaigns.
+
 ## Starting point
 
 The foundation includes reusable sandboxes, Git workspaces, agent adapters, typed workflows and recovery tools. The CLI, authentication setup and custom Responses providers are documented in the [setup guide](../../guide/command-line/). Use the [API reference](../../reference/diagnosesandbox/) for implemented contracts and the changelog for released versions. An implementation or simulated test is not evidence of a successful live provider campaign.

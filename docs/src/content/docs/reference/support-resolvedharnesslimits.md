@@ -7,11 +7,11 @@ sidebar:
 
 ## Parameters and properties
 
-| Name           | Type                          | Presence | Meaning                                                             |
-| -------------- | ----------------------------- | -------- | ------------------------------------------------------------------- |
-| `maxSteps`     | `number`                      | Required | Effective maximum number of model requests per turn after defaults. |
-| `maxToolCalls` | `number \| undefined`         | Optional | Configured maximum number of tool calls per turn, when set.         |
-| `usage`        | `Partial<Usage> \| undefined` | Optional | Configured token budget per usage counter, when set.                |
+| Name           | Type                                            | Presence | Meaning                                                             |
+| -------------- | ----------------------------------------------- | -------- | ------------------------------------------------------------------- |
+| `maxSteps`     | `number`                                        | Required | Effective maximum number of model requests per turn after defaults. |
+| `maxToolCalls` | `number \| undefined`                           | Optional | Configured maximum number of tool calls per turn, when set.         |
+| `usage`        | `Partial<Omit<Usage, "complete">> \| undefined` | Optional | Configured token budget per usage counter, when set.                |
 
 ## Signature
 

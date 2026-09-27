@@ -1,3 +1,4 @@
+import { copilotShutdown, copilotUsage } from "./copilot-usage.ts";
 import type { AgentEvent } from "../../domain/agent.types.ts";
 import { decodeLine } from "./event-decoder.ts";
 import { asRecord } from "./protocol.ts";
@@ -47,6 +48,10 @@ function result(event: ProtocolRecord): AgentEvent[] {
 export function copilotEvents(line: string): AgentEvent[] {
   return decodeLine(line, {
     "assistant.message": message,
+    "assistant.usage": (event) => [
+      { kind: "usage", tokens: copilotUsage(event.data) },
+    ],
+    "session.shutdown": copilotShutdown,
     "session.error": (event) => {
       const data = asRecord(event.data);
       return typeof data.message === "string"

@@ -33,8 +33,13 @@ export function validateCheckpoint(
     throw invalid();
   for (const dimension of ["input", "cached", "output"])
     if (!integer(value.usage.tokens[dimension])) throw invalid();
-  for (const count of Object.values(value.usage.tokens))
+  for (const [dimension, count] of Object.entries(value.usage.tokens)) {
+    if (dimension === "complete") {
+      if (typeof count !== "boolean") throw invalid();
+      continue;
+    }
     if (!integer(count)) throw invalid();
+  }
   if (value.records.length !== tasks.length) throw invalid();
   const keys = new Set(tasks.map((item) => item.key));
   let attempts = 0;

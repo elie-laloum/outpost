@@ -5,6 +5,7 @@ export const executionDefaults = Object.freeze({
   settleMs: 60_000,
   deadlineMs: 3_600_000,
   expansionMs: 30_000,
+  usageMs: 5000,
   attachMs: 86_400_000,
   completion: "<outpost>done</outpost>",
   rawTailBytes: 65_536,

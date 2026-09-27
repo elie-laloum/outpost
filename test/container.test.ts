@@ -7,7 +7,13 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFile, mkdir, writeFile, readlink, lstat } from "node:fs/promises";
 import { join } from "node:path";
-import { createSandbox, codexHarness, claudeHarness } from "../src/index.ts";
+import {
+  createSandbox,
+  codexHarness,
+  claudeHarness,
+  copilotHarness,
+  kimiHarness,
+} from "../src/index.ts";
 import { dockerSandboxProvider } from "../src/providers/docker.ts";
 import { podmanSandboxProvider } from "../src/providers/podman.ts";
 import { repository } from "./helpers.ts";
@@ -839,6 +845,68 @@ test(
       assert.equal((await lease.invoke({ executable: "true" })).status, 0);
     } finally {
       await lease.release();
+    }
+  },
+);
+
+test(
+  "session token readers see the private container home for Copilot and Kimi",
+  { skip: !process.env.OUTPOST_CONTAINER_ENGINE },
+  async (t) => {
+    const root = await repository(t);
+    const provider =
+      process.env.OUTPOST_CONTAINER_ENGINE === "podman"
+        ? podmanSandboxProvider
+        : dockerSandboxProvider;
+    await using box = await createSandbox({
+      repository: root,
+      sandboxProvider: provider({ image: containerImage, networks: "none" }),
+      logging: false,
+    });
+    for (const kind of ["copilot", "kimi"] as const) {
+      const adapter = composeAgent({
+        harness: kind === "copilot" ? copilotHarness() : kimiHarness(),
+      });
+      const selected = {
+        ...adapter,
+        request: () => ({
+          executable: "node",
+          arguments: [
+            "-e",
+            `
+            const { mkdirSync, writeFileSync } = require("node:fs");
+            const { join, dirname } = require("node:path");
+            const { homedir } = require("node:os");
+            const kind = ${JSON.stringify(kind)};
+            const file = kind === "copilot"
+              ? join(homedir(), ".copilot/session-state/session_fixture/events.jsonl")
+              : join(homedir(), ".kimi-code/sessions/workspace/session_fixture/agents/main/wire.jsonl");
+            mkdirSync(dirname(file), { recursive: true });
+            const record = kind === "copilot"
+              ? { type: "session.shutdown", data: { modelMetrics: { model: { usage: {
+                inputTokens: 7, outputTokens: 2, cacheReadTokens: 3, cacheWriteTokens: 1
+              } } } } }
+              : { type: "usage.record", usage: { inputOther: 7, output: 2, inputCacheRead: 3, inputCacheCreation: 1 } };
+            writeFileSync(file, JSON.stringify(record) + "\\n");
+            const final = kind === "copilot"
+              ? { type: "result", exitCode: 0, sessionId: "session_fixture" }
+              : { role: "meta", type: "session.resume_hint", session_id: "session_fixture" };
+            console.log(JSON.stringify(final));
+          `,
+          ],
+        }),
+      };
+      const result = await box.dispatch({
+        agent: selected,
+        brief: { text: "fixture" },
+      });
+      assert.deepEqual(result.usage, {
+        input: 7,
+        output: 2,
+        cached: 3,
+        cacheCreated: 1,
+      });
+      assert.equal((await box.command({ executable: "true" })).status, 0);
     }
   },
 );

@@ -37,6 +37,7 @@ The fields below cover all variants; the signature specifies their allowed combi
 | `strategy`   | `string`                                                                                                                                                                                                                                         | Variant-dependent | Name of the context strategy that rewrote the history.                                                                                                                                                                 |
 | `messages`   | `number`                                                                                                                                                                                                                                         | Variant-dependent | Number of messages in the history after compaction.                                                                                                                                                                    |
 | `id`         | `string`                                                                                                                                                                                                                                         | Variant-dependent | Native conversation identifier used to locate or continue the session.                                                                                                                                                 |
+| `cumulative` | `boolean \| undefined`                                                                                                                                                                                                                           | Variant-dependent | On CLI usage events, true identifies a total for the current command. The runtime converts it to nonnegative deltas before notifying observers; omission means an incremental usage event.                             |
 | `value`      | `unknown`                                                                                                                                                                                                                                        | Variant-dependent | Unrecognized raw protocol value preserved for observation.                                                                                                                                                             |
 
 ## Signature
@@ -116,6 +117,7 @@ export type AgentEvent =
   | {
       readonly kind: "usage";
       readonly tokens: Usage;
+      readonly cumulative?: boolean;
     }
   | {
       readonly kind: "failure";

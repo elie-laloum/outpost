@@ -2,7 +2,7 @@ import type { Usage } from "../agent.types.ts";
 
 export interface WorkflowBudget {
   readonly attempts?: number;
-  readonly usage?: Partial<Usage>;
+  readonly usage?: Partial<Omit<Usage, "complete">>;
 }
 
 export interface WorkflowUsage {

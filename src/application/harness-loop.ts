@@ -160,10 +160,12 @@ function inferredStop(content: readonly ModelContentBlock[]): ModelStopReason {
 
 function exceededUsage(
   usage: Usage,
-  limits: Partial<Usage> | undefined,
+  limits: Partial<Omit<Usage, "complete">> | undefined,
 ): string | undefined {
   return Object.entries(limits ?? {}).find(
-    ([key, value]) => (usage[key as keyof Usage] ?? 0) > (value ?? Infinity),
+    ([key, value]) =>
+      (usage[key as Exclude<keyof Usage, "complete">] ?? 0) >
+      (value ?? Infinity),
   )?.[0];
 }
 

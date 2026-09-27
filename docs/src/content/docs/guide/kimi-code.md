@@ -45,4 +45,12 @@ API authentication requires an explicit model on `agent()`. The `region` option 
 
 This adapter starts fresh sessions only. Native conversation capture, resume, fork and automatic response repair are unavailable.
 
+## Token accounting
+
+The pinned `@moonshot-ai/kimi-code` 2.1.1 CLI omits usage from `stream-json`. After the command exits, Outpost uses its session ID to read `usage.record` entries under `KIMI_CODE_HOME/sessions/<workspace>/<id>/agents/*/wire.jsonl` (default home: `~/.kimi-code`), inside the sandbox. Main-agent and sub-agent records are added once; context-size and step summaries are not added again.
+
+`inputOther` maps to `usage.input`, `output` to `usage.output`, `inputCacheRead` to `usage.cached`, and `inputCacheCreation` to `usage.cacheCreated`. Input excludes cache reads and writes. Only reported usage is available; an upstream zero cannot establish that an unreported model call was free.
+
+A missing session ID, absent or malformed records, interrupted execution or exceeded reader limits produces `usage.complete === false`; measured counters are retained as a lower bound. Collection warns at startup because it happens after execution. Combine `budget.attempts` with a task timeout or dispatch deadline; see [Usage budgets](../token-budgets/). This accounting does not enable native conversation capture or resume.
+
 API: [kimiHarness](../../reference/kimiharness/).

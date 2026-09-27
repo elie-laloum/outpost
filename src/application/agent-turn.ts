@@ -1,3 +1,8 @@
+import {
+  collectAgentUsage,
+  prepareAgentUsage,
+  warnUsage,
+} from "./agent-usage.ts";
 import { customTurn } from "./custom-turn.ts";
 import type { Agent } from "../domain/agent.types.ts";
 import { OutpostError } from "../domain/errors.ts";
@@ -35,7 +40,24 @@ export async function turn(
   const watchdog = activityWatchdog(controller, options, pass);
   watchdog.refresh(false);
   let status = 0;
+  let commandCompleted = false;
   try {
+    if (agent.usage === "session")
+      warnUsage(
+        options,
+        pass,
+        `${agent.name}: token usage is collected after the command exits; use budget.attempts and time limits to bound execution before the final counters arrive`,
+      );
+    if (agent.usage === "unavailable") {
+      warnUsage(
+        options,
+        pass,
+        `${agent.name}: token usage is unavailable; use budget.attempts and time limits`,
+      );
+      output.recordUsage({ input: 0, cached: 0, output: 0, complete: false });
+    }
+    await prepareAgentUsage(lease, agent, output, continuation, signal);
+    signal.throwIfAborted();
     const command = agent.request({
       text: prompt,
       ...(continuation ? { continuation } : {}),
@@ -55,6 +77,7 @@ export async function turn(
         watchdog.refresh(output.completed);
       },
     });
+    commandCompleted = true;
     status = result.status;
     output.flush();
     if (status !== 0)
@@ -92,6 +115,20 @@ export async function turn(
     );
   } finally {
     watchdog.close();
+    try {
+      output.flush();
+    } catch {
+      commandCompleted = false;
+    }
+    await collectAgentUsage(
+      lease,
+      agent,
+      output,
+      options,
+      pass,
+      commandCompleted,
+    );
   }
+  options.signal?.throwIfAborted();
   return { ...output.result(), status, durationMs: Date.now() - start };
 }

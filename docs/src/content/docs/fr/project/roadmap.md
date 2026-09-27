@@ -7,6 +7,8 @@ sidebar:
 
 La prochaine priorité d’Outpost est une exécution quotidienne fiable : un premier lancement réussi, des erreurs compréhensibles et une récupération éprouvée en conditions réelles. Les horizons ci-dessous indiquent un ordre, pas des dates ni des versions promises. Le [changelog](../changelog/) consigne les livraisons ; cette page décrit le travail à venir.
 
+**Comptabilité des tokens non publiée :** les compteurs de session Copilot et Kimi, la propagation de l’usage incomplet et le refus des budgets exclusivement en tokens sont implémentés. Les régressions hors ligne de protocole, processus, workflow et checkpoint couvrent ces contrats. Les exécutions authentifiées et la comparaison avec la facturation restent dans les campagnes CLI réelles.
+
 ## Point de départ
 
 Le socle comprend les sandboxes réutilisables, les workspaces Git, les adapters d’agents, les workflows typés et les outils de récupération. Le CLI, la configuration d’authentification et les fournisseurs Responses personnalisés sont documentés dans le [guide de démarrage](../../guide/command-line/). La [référence API](../../reference/diagnosesandbox/) décrit les contrats implémentés et le changelog les versions publiées. Une implémentation ou un test simulé ne prouve pas la réussite d’une campagne réelle sur un provider.

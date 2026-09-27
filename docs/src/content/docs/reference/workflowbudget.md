@@ -13,17 +13,17 @@ import type { WorkflowBudget } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name       | Type                          | Presence | Meaning                                                                                            |
-| ---------- | ----------------------------- | -------- | -------------------------------------------------------------------------------------------------- |
-| `attempts` | `number \| undefined`         | Optional | Maximum cumulative task attempts that the workflow may admit.                                      |
-| `usage`    | `Partial<Usage> \| undefined` | Optional | Per-token-counter admission thresholds; observed usage may overshoot while admitted work finishes. |
+| Name       | Type                                            | Presence | Meaning                                                                                            |
+| ---------- | ----------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------- |
+| `attempts` | `number \| undefined`                           | Optional | Maximum cumulative task attempts that the workflow may admit.                                      |
+| `usage`    | `Partial<Omit<Usage, "complete">> \| undefined` | Optional | Per-token-counter admission thresholds; observed usage may overshoot while admitted work finishes. |
 
 ## Signature
 
 ```ts
 export interface WorkflowBudget {
   readonly attempts?: number;
-  readonly usage?: Partial<Usage>;
+  readonly usage?: Partial<Omit<Usage, "complete">>;
 }
 ```
 

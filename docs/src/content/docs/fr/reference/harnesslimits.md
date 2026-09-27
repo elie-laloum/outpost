@@ -17,11 +17,11 @@ import type { HarnessLimits } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom            | Type                          | Présence  | Rôle                                                                                                                                                                                        |
-| -------------- | ----------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `maxSteps`     | `number \| undefined`         | Optionnel | Nombre maximal de requêtes au modèle dans une passe ; 100 par défaut.                                                                                                                       |
-| `maxToolCalls` | `number \| undefined`         | Optionnel | Nombre maximal d’appels d’outils dans une passe ; seulement borné par maxSteps s’il est omis.                                                                                               |
-| `usage`        | `Partial<Usage> \| undefined` | Optionnel | Budget de tokens par compteur (input, cached, cacheCreated, output), vérifié avant chaque nouvelle requête. Exige un fournisseur qui rapporte l’usage ; la dernière étape peut le dépasser. |
+| Nom            | Type                                            | Présence  | Rôle                                                                                                                                                                                        |
+| -------------- | ----------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `maxSteps`     | `number \| undefined`                           | Optionnel | Nombre maximal de requêtes au modèle dans une passe ; 100 par défaut.                                                                                                                       |
+| `maxToolCalls` | `number \| undefined`                           | Optionnel | Nombre maximal d’appels d’outils dans une passe ; seulement borné par maxSteps s’il est omis.                                                                                               |
+| `usage`        | `Partial<Omit<Usage, "complete">> \| undefined` | Optionnel | Budget de tokens par compteur (input, cached, cacheCreated, output), vérifié avant chaque nouvelle requête. Exige un fournisseur qui rapporte l’usage ; la dernière étape peut le dépasser. |
 
 ## Signature
 
@@ -29,7 +29,7 @@ import type { HarnessLimits } from "@elie-laloum/outpost";
 export interface HarnessLimits {
   readonly maxSteps?: number;
   readonly maxToolCalls?: number;
-  readonly usage?: Partial<Usage>;
+  readonly usage?: Partial<Omit<Usage, "complete">>;
 }
 ```
 

@@ -1,3 +1,5 @@
+import { copilotUsage } from "./copilot-usage.ts";
+import { sessionUsageCommand, sessionUsageResult } from "./session-usage.ts";
 import type { AgentAdapter, CliHarness } from "../../domain/agent.types.ts";
 import type { AgentModel } from "../../domain/model.types.ts";
 import { credentialPlanner } from "./authentication.ts";
@@ -30,6 +32,10 @@ function bindCopilot(settings: Bound<CopilotSettings>): AgentAdapter {
     }),
     request: (input) => copilotRequest(settings, input),
     events: copilotEvents,
+    usage: "session",
+    usageCommand: (conversation) =>
+      sessionUsageCommand("copilot", conversation),
+    usageResult: (text) => sessionUsageResult(text, copilotUsage),
   } satisfies AgentAdapter);
 }
 

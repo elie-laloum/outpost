@@ -37,6 +37,7 @@ Les champs ci-dessous couvrent toutes les variantes ; la signature précise leur
 | `strategy`   | `string`                                                                                                                                                                                                                                         | Selon la variante | Nom de la stratégie de contexte qui a réécrit l’historique.                                                                                                                                                                         |
 | `messages`   | `number`                                                                                                                                                                                                                                         | Selon la variante | Nombre de messages de l’historique après compaction.                                                                                                                                                                                |
 | `id`         | `string`                                                                                                                                                                                                                                         | Selon la variante | Identifiant de conversation native utilisé pour localiser ou poursuivre la session.                                                                                                                                                 |
+| `cumulative` | `boolean \| undefined`                                                                                                                                                                                                                           | Selon la variante | Sur les événements d’usage CLI, true indique un total pour la commande courante. Le runtime le convertit en deltas positifs ou nuls avant de notifier les observateurs ; l’absence indique un événement incrémental.                |
 | `value`      | `unknown`                                                                                                                                                                                                                                        | Selon la variante | Valeur brute de protocole non reconnue conservée pour observation.                                                                                                                                                                  |
 
 ## Signature
@@ -116,6 +117,7 @@ export type AgentEvent =
   | {
       readonly kind: "usage";
       readonly tokens: Usage;
+      readonly cumulative?: boolean;
     }
   | {
       readonly kind: "failure";

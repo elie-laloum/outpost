@@ -30,4 +30,12 @@ Requests start a new session. Native conversation capture, resume, fork and auto
 
 See [GitHub’s CLI quickstart](https://docs.github.com/en/copilot/get-started/cli-quickstart) for Copilot access and login requirements.
 
+## Token accounting
+
+Outpost reads the session’s `session.shutdown.modelMetrics` from `COPILOT_HOME/session-state/<id>/events.jsonl` (default: `~/.copilot`) inside the sandbox after the command exits. Available `assistant.usage` events are counted during execution; the final session total reconciles them without adding them twice. Premium requests and billing credits are not token counts.
+
+The pinned Copilot CLI is 1.0.88. Input, output, cache reads and cache writes retain the CLI’s reported counters; do not add cache counters to input to estimate a bill. Missing fields, unreadable files or interrupted collection produce `usage.complete === false` and an explicit warning. No native transcript capture or resume is enabled by this reader.
+
+Collection is bounded and may only finish after the model has spent tokens. Combine an attempt budget with a task timeout or dispatch deadline; see [Usage budgets](../token-budgets/).
+
 API: [copilotHarness](../../reference/copilotharness/).
