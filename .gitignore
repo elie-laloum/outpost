@@ -14,7 +14,7 @@ coverage/
 docs/.astro/
 docs/.examples/
 
-sandbox
+temp
 
 docs/test-results/
 docs/playwright-report/
