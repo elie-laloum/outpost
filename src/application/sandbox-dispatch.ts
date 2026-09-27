@@ -1,9 +1,9 @@
+import { observedOperation } from "../domain/observed-operation.ts";
 import { readFile } from "node:fs/promises";
 import type { ConversationRecord } from "../domain/conversation.types.ts";
 import { invariant, recordRecovery } from "../domain/errors.ts";
 import { git } from "../infrastructure/git/command.ts";
 import { commits } from "../infrastructure/git/history.ts";
-import { journal } from "../infrastructure/journal.ts";
 import { storageFor } from "./agent-storage.ts";
 import { warmContinuation } from "./continuation.ts";
 import { preflightDispatch } from "./dispatch-validation.ts";
@@ -32,20 +32,27 @@ export async function dispatchInSandbox<T>(
   const signal = dispatch.signal
     ? AbortSignal.any([dispatch.signal, stop.signal])
     : stop.signal;
-  const { selected, adapter, executionLease } = await selectAgent(
-    dispatch.agent ?? options.agent,
-    signal,
+  const { selected, adapter, executionLease } = await observedOperation(
+    dispatch.observation,
+    "sandbox",
+    "agent.prepare",
+    async () =>
+      selectAgent(
+        dispatch.agent ?? options.agent,
+        signal,
+        dispatch.observation,
+      ),
   );
   if (dispatch.continuation)
-    await restore(dispatch.continuation.id, selected, executionLease);
+    await observedOperation(
+      dispatch.observation,
+      "conversation",
+      "conversation.restore",
+      async () => restore(dispatch.continuation!.id, selected, executionLease),
+    );
   const baseline = (
     await git(workspace.directory, ["rev-parse", "HEAD"])
   ).trim();
-  const log = await journal(
-    workspace.repository,
-    dispatch.logging ?? options.logging,
-    dispatch.label,
-  );
   let execution: Execution<T> | undefined,
     transcript: ConversationRecord | undefined;
   const captured = new Map<string, ConversationRecord>();
@@ -57,14 +64,22 @@ export async function dispatchInSandbox<T>(
   );
   const save = async (id: string) => {
     invariant(storage, "Conversation storage is unavailable");
-    const location = await storage.capture(id, {
-      repository: workspace.repository,
-      sandbox: executionLease,
-      staging,
-      ...(options.conversationHome ? { home: options.conversationHome } : {}),
-      ...(dispatch.warn ? { warn: dispatch.warn } : {}),
-      local: sandboxProvider.placement === "host",
-    });
+    const location = await observedOperation(
+      dispatch.observation,
+      "conversation",
+      "conversation.capture",
+      async () =>
+        storage.capture(id, {
+          repository: workspace.repository,
+          sandbox: executionLease,
+          staging,
+          ...(options.conversationHome
+            ? { home: options.conversationHome }
+            : {}),
+          ...(dispatch.warn ? { warn: dispatch.warn } : {}),
+          local: sandboxProvider.placement === "host",
+        }),
+    );
     captured.set(id, location);
     transcript = location;
     return location;
@@ -84,7 +99,6 @@ export async function dispatchInSandbox<T>(
             conversations.add(event.id);
             agents.remember(selected, event.id);
           }
-          log.record(event);
           notify(dispatch.observe, event);
         },
       },
@@ -107,13 +121,14 @@ export async function dispatchInSandbox<T>(
     );
   } catch (cause) {
     failure = cause;
-    log.record({
-      kind: "failure",
-      message: cause instanceof Error ? cause.message : String(cause),
-    });
   }
   try {
-    await sync?.pull();
+    await observedOperation(
+      dispatch.observation,
+      "transfer",
+      "repository.refresh",
+      async () => sync?.pull(),
+    );
     if (storage && selected.capture !== false)
       for (const id of conversations)
         if (failure || !captured.has(id)) await save(id);
@@ -125,15 +140,12 @@ export async function dispatchInSandbox<T>(
         )
       : cause;
   }
-  try {
-    await log.close();
-  } catch (cause) {
-    failure ??= cause;
-  }
-  const changes = await commits(
-    workspace.directory,
-    baseline,
-    options.limits?.collectMs,
+  const changes = await observedOperation(
+    dispatch.observation,
+    "git",
+    "commits.collect",
+    async () =>
+      commits(workspace.directory, baseline, options.limits?.collectMs),
   );
   if (failure) {
     recordRecovery(failure, {
@@ -141,7 +153,6 @@ export async function dispatchInSandbox<T>(
       directory: workspace.directory,
       commits: changes,
       transcript: transcript?.file,
-      logReference: log.reference,
       transcriptReference: transcript?.reference,
     });
     throw failure;
@@ -153,7 +164,6 @@ export async function dispatchInSandbox<T>(
     directory: workspace.directory,
     commits: changes,
     ...(transcript ? { transcript: transcript.file } : {}),
-    ...(log.reference ? { logReference: log.reference } : {}),
     ...(transcript?.reference
       ? { transcriptReference: transcript.reference }
       : {}),

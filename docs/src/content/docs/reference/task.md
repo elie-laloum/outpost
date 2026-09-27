@@ -22,11 +22,11 @@ Define and freeze a workflow node whose perform callback runs when its dependenc
 | Name                | Type                                                                   | Presence | Meaning                                                                                                  |
 | ------------------- | ---------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------- |
 | `options`           | `TaskOptions<T>`                                                       | Required | Task identity, dependency edges, perform callback and attempt policy.                                    |
-| `options.key`       | `string`                                                               | Required | Stable task key identifying the node within its workflow graph.                                          |
+| `options.retry`     | `Retry \| undefined`                                                   | Optional | Explicit retry policy; repeated effects require care.                                                    |
 | `options.gate`      | `WorkflowGate \| undefined`                                            | Optional | Persisted approval or pause definition; execution requires a checkpoint and a matching trusted decision. |
+| `options.key`       | `string`                                                               | Required | Stable task key identifying the node within its workflow graph.                                          |
 | `options.perform`   | `(context: TaskContext) => T \| Promise<T>`                            | Required | Callback executed for each task attempt; returns its output and must honor context.signal.               |
 | `options.condition` | `((context: TaskContext) => boolean \| Promise<boolean>) \| undefined` | Optional | Predicate evaluated before the first task attempt.                                                       |
-| `options.retry`     | `Retry \| undefined`                                                   | Optional | Explicit retry policy; repeated effects require care.                                                    |
 | `options.timeoutMs` | `number \| undefined`                                                  | Optional | Time limit in milliseconds for each task attempt; cancellation is cooperative through context.signal.    |
 | `options.after`     | `readonly Task<unknown>[] \| undefined`                                | Optional | Declared task dependencies whose values may be read.                                                     |
 

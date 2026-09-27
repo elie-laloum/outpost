@@ -4306,8 +4306,8 @@
     "Règles de permission évaluées avant les hooks before-tool, si elles sont définies."
   ],
   "AgentEvent.reason": [
-    "Why a custom harness denied a tool call.",
-    "Pourquoi un harness personnalisé a refusé un appel d’outil."
+    "Reason for tool denial or forced termination; stopped distinguishes completion, idle timeout, deadline, cancellation and oversized protocol output.",
+    "Motif de refus d’outil ou d’arrêt forcé ; stopped distingue complétion, inactivité, deadline, annulation et sortie de protocole trop volumineuse."
   ],
   "ReporterHandlers.tool-denied": [
     "Handle a tool call denied by permissions or a hook, with its reason; receives pass and at metadata and may return a promise.",
@@ -4689,5 +4689,357 @@
   "CliAgent.fork.invoke": [
     "Run a CLI command in the borrowed sandbox with the operation’s credentials, cancellation and deadline.",
     "Exécute une commande CLI dans la sandbox empruntée avec les identifiants, l’annulation et le délai de l’opération."
+  ],
+  "AgentEvent.messageId": [
+    "CLI identifier of the message whose usage is reported.",
+    "Identifiant CLI du message dont l’usage est rapporté."
+  ],
+  "AgentEvent.parentCallId": [
+    "Parent tool call supplied by a CLI for a nested agent message or tool event.",
+    "Appel d’outil parent fourni par la CLI pour un message de sous-agent ou un événement d’outil."
+  ],
+  "AgentEvent.truncated": [
+    "Whether the stderr fragment or oversized raw preview was bounded before delivery.",
+    "Indique si le fragment stderr ou l’aperçu brut trop volumineux a été borné avant livraison."
+  ],
+  "AgentEvent.changes": [
+    "Structured file changes exposed by the CLI; the adapter preserves the supplied protocol data.",
+    "Modifications de fichiers structurées exposées par la CLI ; l’adapter conserve les données fournies."
+  ],
+  "AgentEvent.request": [
+    "Model request observed only when the hub explicitly enables verbose payloads; may contain private instructions and messages.",
+    "Requête modèle observée uniquement si le hub active explicitement les contenus détaillés ; peut contenir des instructions et messages privés."
+  ],
+  "AgentEvent.response": [
+    "Model response observed only when verbose payloads are enabled, including tool calls and replayable content.",
+    "Réponse modèle observée uniquement lorsque les contenus détaillés sont activés, avec appels d’outils et contenu rejouable."
+  ],
+  "AgentEvent.attempt": [
+    "Retry attempt explicitly reported by a model provider; Outpost does not infer hidden retries.",
+    "Tentative de reprise explicitement signalée par un fournisseur modèle ; Outpost ne déduit pas les reprises cachées."
+  ],
+  "AgentEvent.phase": [
+    "Harness hook phase that completed.",
+    "Phase du hook de harness qui vient de se terminer."
+  ],
+  "AgentEvent.changed": [
+    "Whether a hook returned a decision or changed its observable input.",
+    "Indique si le hook a renvoyé une décision ou modifié son entrée observable."
+  ],
+  "AgentEvent.count": [
+    "Number of nonempty instruction sources resolved for this harness turn.",
+    "Nombre de sources d’instructions non vides résolues pour ce tour de harness."
+  ],
+  "AgentEvent.names": [
+    "Skills newly loaded into the conversation and available to subsequent model steps.",
+    "Skills nouvellement chargés dans la conversation et disponibles aux étapes modèle suivantes."
+  ],
+  "AgentEvent.channel": [
+    "Command output stream for the tool-output event: stdout or stderr.",
+    "Flux de sortie de la commande pour l’événement tool-output : stdout ou stderr."
+  ],
+  "AgentEvent.bytes": [
+    "Observed UTF-8 byte size of an oversized protocol line or buffered prefix before termination.",
+    "Taille UTF-8 constatée d’une ligne de protocole trop volumineuse ou du préfixe reçu avant l’arrêt."
+  ],
+  "ModelReasoningBlock.text": [
+    "Optional readable reasoning or summary exposed by the provider, separate from opaque replay data.",
+    "Raisonnement lisible ou résumé éventuellement exposé par le fournisseur, distinct des données opaques de rejeu."
+  ],
+  "ModelStreamEvent.attempt": [
+    "Provider-reported retry attempt; emitting it does not request a retry.",
+    "Tentative de reprise signalée par le fournisseur ; l’émettre ne déclenche pas de reprise."
+  ],
+  "ModelStreamEvent.message": [
+    "Optional diagnostic associated with the provider-reported retry.",
+    "Diagnostic facultatif associé à la reprise signalée par le fournisseur."
+  ],
+  "ObservationHub.scope": [
+    "Immutable correlation fields inherited by emissions from this hub.",
+    "Champs de corrélation immuables hérités par les émissions de ce hub."
+  ],
+  "ObservationHub.errors": [
+    "Shared bounded collection of sink, serialization, overflow and timeout errors; retains the first 100 failures independently of execution.",
+    "Collection partagée et bornée des erreurs de récepteur, sérialisation, saturation et délai ; conserve les 100 premières indépendamment de l’exécution."
+  ],
+  "ObservationHub.dropped": [
+    "Shared count of delivery losses across sinks, including overflow and disabled receivers.",
+    "Compteur partagé des livraisons perdues par les récepteurs, notamment lors de saturation ou de désactivation."
+  ],
+  "ObservationHub.verbose": [
+    "Whether producers may emit full model request and response payloads; journal retention is configured separately.",
+    "Autorise les producteurs à émettre les requêtes et réponses modèle complètes ; la conservation dans le journal se configure séparément."
+  ],
+  "ObservationHub.emit": [
+    "Stamp and deliver a typed event to inherited and local sinks; failures are collected instead of thrown.",
+    "Horodate et livre un événement typé aux récepteurs hérités et locaux ; les erreurs sont collectées sans être levées."
+  ],
+  "ObservationHub.child": [
+    "Create a scoped child sharing sequence and delivery diagnostics, optionally adding sinks only for that child and its descendants.",
+    "Crée un enfant contextualisé partageant séquence et diagnostics de livraison, avec des récepteurs supplémentaires limités à cet enfant et ses descendants."
+  ],
+  "ObservationHub.flush": [
+    "Drain the current delivery snapshot and flush registered sinks with bounded waits; later emissions belong to a later snapshot.",
+    "Vide les livraisons présentes à l’appel et les récepteurs enregistrés avec des attentes bornées ; les émissions ultérieures appartiennent à un appel suivant."
+  ],
+  "ObservationHub.close": [
+    "Stop emissions from this child and its descendants, drain its delivery snapshot and detach its own sinks without closing caller-owned parent sinks.",
+    "Arrête les émissions de cet enfant et de ses descendants, vide ses livraisons et détache ses récepteurs sans fermer ceux du parent appartenant à l’appelant."
+  ],
+  "ObservationScope.executionId": [
+    "Workflow execution identifier, preserved when resuming its checkpoint.",
+    "Identifiant d’exécution du workflow, conservé lors de la reprise de son checkpoint."
+  ],
+  "ObservationScope.taskKey": [
+    "Declared workflow task key producing this event.",
+    "Clé déclarée de la tâche de workflow qui produit cet événement."
+  ],
+  "ObservationScope.attempt": [
+    "Task attempt number; condition evaluation may use zero.",
+    "Numéro de tentative de la tâche ; l’évaluation d’une condition peut utiliser zéro."
+  ],
+  "ObservationScope.dispatchId": [
+    "Unique identifier for one cold or warm dispatch, shared across its passes.",
+    "Identifiant unique d’un dispatch froid ou chaud, partagé entre ses passes."
+  ],
+  "ObservationScope.pass": [
+    "Agent pass number within the dispatch.",
+    "Numéro de passe de l’agent dans le dispatch."
+  ],
+  "ObservationScope.candidate": [
+    "Declared speculative candidate key.",
+    "Clé déclarée du candidat spéculatif."
+  ],
+  "ObservationEvent.event": [
+    "Original workflow lifecycle event when kind is workflow.",
+    "Événement de cycle de vie original du workflow lorsque kind vaut workflow."
+  ],
+  "ObservationEvent.completed": [
+    "Whether the dispatch satisfied its completion marker or structured response contract.",
+    "Indique si le dispatch a satisfait son marqueur de complétion ou son contrat de réponse structurée."
+  ],
+  "ObservationEvent.commits": [
+    "Commits collected for a completed dispatch when available.",
+    "Commits collectés pour un dispatch terminé lorsqu’ils sont disponibles."
+  ],
+  "ObservationEvent.usage": [
+    "Accumulated dispatch usage, including usage observed before failure.",
+    "Usage cumulé du dispatch, incluant l’usage observé avant un échec."
+  ],
+  "ObservationEvent.status": [
+    "Operation lifecycle state, dispatch outcome, candidate selection result or queue transition according to kind; agent summaries retain numeric exit status.",
+    "État d’opération, résultat de dispatch, sélection du candidat ou transition de queue selon kind ; les résumés d’agent conservent le statut de sortie numérique."
+  ],
+  "ObservationEvent.id": [
+    "Correlation identifier for an operation, conversation or queued job according to kind.",
+    "Identifiant de corrélation d’une opération, conversation ou tâche en queue selon kind."
+  ],
+  "ObservationEvent.name": [
+    "Operation, phase or tool name according to the event variant.",
+    "Nom d’opération, de phase ou d’outil selon la variante de l’événement."
+  ],
+  "ObservationEvent.channel": [
+    "stdout or stderr stream for command-task and tool output events.",
+    "Flux stdout ou stderr des sorties de commandes de tâche et d’outil."
+  ],
+  "OperationEvent.kind": [
+    "Discriminant for an Outpost lifecycle operation.",
+    "Discriminant d’une opération du cycle de vie Outpost."
+  ],
+  "OperationEvent.id": [
+    "Unique identifier shared by the start and terminal event of this operation.",
+    "Identifiant unique partagé par le début et l’événement terminal de cette opération."
+  ],
+  "OperationEvent.name": [
+    "Stable operation name, without command arguments, credentials or repository contents.",
+    "Nom stable de l’opération, sans arguments de commande, identifiants d’accès ni contenu du dépôt."
+  ],
+  "OperationEvent.status": [
+    "Started, finished successfully or failed; terminal events carry elapsed duration.",
+    "Démarrée, terminée avec succès ou en échec ; les événements terminaux portent la durée écoulée."
+  ],
+  "OperationEvent.durationMs": [
+    "Elapsed monotonic duration in milliseconds on finished or failed events.",
+    "Durée monotone écoulée en millisecondes sur les événements finished ou failed."
+  ],
+  "ObservationSink.observe": [
+    "Receive one envelope; returned promises are serialized per sink and rejection is isolated from execution.",
+    "Reçoit une enveloppe ; les promesses retournées sont sérialisées par récepteur et leurs rejets sont isolés de l’exécution."
+  ],
+  "ObservationSink.flush": [
+    "Optional drain of the receiver’s own buffering, invoked by hub flush with its delivery timeout.",
+    "Vidage facultatif du tampon propre au récepteur, appelé par flush avec le délai de livraison du hub."
+  ],
+  "Observation.seq": [
+    "Strictly increasing sequence shared by a root hub and all its scoped children; gaps may indicate dropped deliveries.",
+    "Séquence strictement croissante partagée par un hub racine et ses enfants ; des trous peuvent indiquer des livraisons perdues."
+  ],
+  "Observation.at": [
+    "ISO timestamp assigned when Outpost emits the event, not an upstream server timestamp.",
+    "Horodatage ISO attribué à l’émission par Outpost, distinct d’un horodatage serveur amont."
+  ],
+  "Observation.source": [
+    "Outpost subsystem producing the event.",
+    "Sous-système Outpost qui produit l’événement."
+  ],
+  "Observation.scope": [
+    "Workflow, task, attempt, dispatch, pass and candidate fields known at emission.",
+    "Champs workflow, tâche, tentative, dispatch, passe et candidat connus à l’émission."
+  ],
+  "Observation.event": [
+    "Typed payload; narrow its kind before accessing variant-specific fields.",
+    "Contenu typé ; filtrer son kind avant de lire les champs propres à une variante."
+  ],
+  "WorkspaceOptions.observation": [
+    "Optional caller-owned hub for workspace, allocation, transfer and cleanup operations; creating a workspace does not close the hub.",
+    "Hub facultatif appartenant à l’appelant pour les opérations de workspace, allocation, transfert et nettoyage ; créer un workspace ne ferme pas le hub."
+  ],
+  "DispatchOptions.observation": [
+    "Optional parent hub; dispatch creates a child with its own dispatchId and drains it before returning or throwing.",
+    "Hub parent facultatif ; le dispatch crée un enfant avec son dispatchId et le vide avant retour ou exception."
+  ],
+  "AgentObservation.seq": [
+    "Hub sequence when delivered through a dispatch; optional for manually constructed legacy observations.",
+    "Séquence du hub lors d’une livraison par dispatch ; facultative pour les observations historiques construites manuellement."
+  ],
+  "AgentObservation.source": [
+    "Producing subsystem when the observation passed through a hub.",
+    "Sous-système producteur lorsque l’observation est passée par un hub."
+  ],
+  "AgentObservation.scope": [
+    "Additional correlation context without changing the legacy kind, pass and at fields.",
+    "Contexte de corrélation supplémentaire conservant les champs historiques kind, pass et at."
+  ],
+  "DispatchResult.observerErrors": [
+    "Collected sink and journal failures, separate from execution success; a supplied shared hub also exposes its accumulated diagnostics.",
+    "Erreurs collectées des récepteurs et du journal, distinctes du succès de l’exécution ; un hub partagé fourni expose également ses diagnostics cumulés."
+  ],
+  "TaskContext.observation": [
+    "Task-scoped hub with workflow execution, task key and attempt; pass it to custom nested work such as speculate.",
+    "Hub de la tâche avec exécution du workflow, clé et tentative ; le transmettre aux opérations imbriquées personnalisées comme speculate."
+  ],
+  "WorkflowOptions.observation": [
+    "Parent hub receiving workflow, task, agent and operation envelopes; historical observe callbacks still receive WorkflowEvent.",
+    "Hub parent recevant les enveloppes de workflow, tâche, agent et opération ; les callbacks observe historiques reçoivent toujours WorkflowEvent."
+  ],
+  "ClaudeSettings.partialMessages": [
+    "Opt into Claude noninteractive partial stream messages and normalized text-delta events; interactive requests are unchanged.",
+    "Active les messages partiels Claude non interactifs et les événements text-delta normalisés ; les requêtes interactives restent inchangées."
+  ],
+  "CustomReporterOptions.capacity": [
+    "Maximum waiting events in the reporter queue, default 1024; overflow drops newest deliveries and makes flush reject.",
+    "Maximum d’événements en attente dans le reporter, 1024 par défaut ; la saturation perd les nouvelles livraisons et fait rejeter flush."
+  ],
+  "CustomReporterOptions.deliveryTimeoutMs": [
+    "Maximum asynchronous handler wait in milliseconds, default 5000; timeout disables further deliveries and makes flush reject.",
+    "Attente maximale d’un gestionnaire asynchrone en millisecondes, 5000 par défaut ; le dépassement désactive les livraisons suivantes et fait rejeter flush."
+  ],
+  "SpeculationOptions.observation": [
+    "Parent hub used to correlate candidate allocation, agent events, validation, selection and cleanup by candidate key.",
+    "Hub parent qui corrèle allocation, événements d’agent, validation, sélection et nettoyage par clé de candidat."
+  ],
+  "createObservationHub.options": [
+    "Optional receivers, initial scope, delivery limits and opt-in model payload verbosity.",
+    "Récepteurs, contexte initial, limites de livraison et activation des contenus modèle détaillés facultatifs."
+  ],
+  "ObservationHubOptions.sinks": [
+    "Receivers attached to this root and inherited by every child.",
+    "Récepteurs rattachés à cette racine et hérités par chaque enfant."
+  ],
+  "ObservationHubOptions.scope": [
+    "Initial correlation fields; child scopes override only explicitly supplied fields.",
+    "Champs de corrélation initiaux ; les enfants ne remplacent que les champs explicitement fournis."
+  ],
+  "ObservationHubOptions.capacity": [
+    "Maximum waiting envelopes per asynchronous sink, default 1024; newest deliveries are dropped on overflow and counted.",
+    "Maximum d’enveloppes en attente par récepteur asynchrone, 1024 par défaut ; les nouvelles livraisons sont perdues et comptées en cas de saturation."
+  ],
+  "ObservationHubOptions.deliveryTimeoutMs": [
+    "Maximum asynchronous delivery or receiver-flush wait, default 5000 ms; an expired receiver is disabled.",
+    "Attente maximale d’une livraison asynchrone ou du vidage d’un récepteur, 5000 ms par défaut ; un récepteur hors délai est désactivé."
+  ],
+  "ObservationHubOptions.verbose": [
+    "Explicitly allow full model request/response events. Does not enable verbose journal retention by itself.",
+    "Autorise explicitement les événements de requête/réponse modèle complets. N’active pas à lui seul leur conservation dans le journal."
+  ],
+  "OpenTelemetryObserver.sink": [
+    "Unified hub receiver producing parented workflow, task, dispatch and operation spans and existing metrics; use instead of wiring the same instance through legacy telemetry too.",
+    "Récepteur unifié du hub produisant des spans liés de workflow, tâche, dispatch et opération ainsi que les métriques existantes ; évite de brancher simultanément cette même instance par telemetry."
+  ],
+  "archiveRecovery.observation": [
+    "Optional hub receiving start and terminal events for archive creation; never persisted in the recovery plan or archive.",
+    "Hub facultatif recevant le début et la fin de création d’archive ; jamais persisté dans le plan ni l’archive."
+  ],
+  "materializeRecoveryArchive.observation": [
+    "Optional hub receiving start and terminal events for archive materialization; never persisted in the recovery plan or archive.",
+    "Hub facultatif recevant le début et la fin de matérialisation d’archive ; jamais persisté dans le plan ni l’archive."
+  ],
+  "planRecoveryRetention.observation": [
+    "Optional hub receiving start and terminal events for retention planning; never persisted in the recovery plan or archive.",
+    "Hub facultatif recevant le début et la fin de planification de rétention ; jamais persisté dans le plan ni l’archive."
+  ],
+  "pruneRecoveryRetention.observation": [
+    "Optional hub receiving start and terminal events for retention pruning; never persisted in the recovery plan or archive.",
+    "Hub facultatif recevant le début et la fin de suppression selon la rétention ; jamais persisté dans le plan ni l’archive."
+  ],
+  "planRecoveryRestore.observation": [
+    "Optional hub receiving start and terminal events for restore planning; never persisted in the recovery plan or archive.",
+    "Hub facultatif recevant le début et la fin de planification de restauration ; jamais persisté dans le plan ni l’archive."
+  ],
+  "restoreRecoveryTransfer.observation": [
+    "Optional hub receiving start and terminal events for recovery restoration; never persisted in the recovery plan or archive.",
+    "Hub facultatif recevant le début et la fin de restauration de récupération ; jamais persisté dans le plan ni l’archive."
+  ],
+  "ReporterHandlers.stderr": [
+    "Handle bounded stderr fragments; asynchronous handlers are serialized and their failures remain observer errors.",
+    "Traite les événements de fragments stderr bornés ; les gestionnaires asynchrones sont sérialisés et leurs échecs restent des erreurs d’observation."
+  ],
+  "ReporterHandlers.message-usage": [
+    "Handle per-message CLI usage without counting final totals twice; asynchronous handlers are serialized and their failures remain observer errors.",
+    "Traite les événements de usage CLI par message sans compter deux fois les totaux finaux ; les gestionnaires asynchrones sont sérialisés et leurs échecs restent des erreurs d’observation."
+  ],
+  "ReporterHandlers.stopped": [
+    "Handle the reason for forced agent termination; asynchronous handlers are serialized and their failures remain observer errors.",
+    "Traite les événements de motif d’arrêt forcé de l’agent ; les gestionnaires asynchrones sont sérialisés et leurs échecs restent des erreurs d’observation."
+  ],
+  "ReporterHandlers.reasoning": [
+    "Handle readable reasoning exposed by the agent or model; asynchronous handlers are serialized and their failures remain observer errors.",
+    "Traite les événements de raisonnement lisible exposé par l’agent ou le modèle ; les gestionnaires asynchrones sont sérialisés et leurs échecs restent des erreurs d’observation."
+  ],
+  "ReporterHandlers.file-change": [
+    "Handle structured CLI file changes; asynchronous handlers are serialized and their failures remain observer errors.",
+    "Traite les événements de modifications structurées de fichiers de la CLI ; les gestionnaires asynchrones sont sérialisés et leurs échecs restent des erreurs d’observation."
+  ],
+  "ReporterHandlers.model-request": [
+    "Handle opt-in full model requests; asynchronous handlers are serialized and their failures remain observer errors.",
+    "Traite les événements de requêtes modèle complètes activées explicitement ; les gestionnaires asynchrones sont sérialisés et leurs échecs restent des erreurs d’observation."
+  ],
+  "ReporterHandlers.model-response": [
+    "Handle opt-in full model responses; asynchronous handlers are serialized and their failures remain observer errors.",
+    "Traite les événements de réponses modèle complètes activées explicitement ; les gestionnaires asynchrones sont sérialisés et leurs échecs restent des erreurs d’observation."
+  ],
+  "ReporterHandlers.model-retry": [
+    "Handle provider-reported retries; asynchronous handlers are serialized and their failures remain observer errors.",
+    "Traite les événements de reprises signalées par le fournisseur ; les gestionnaires asynchrones sont sérialisés et leurs échecs restent des erreurs d’observation."
+  ],
+  "ReporterHandlers.model-error": [
+    "Handle model request failures; asynchronous handlers are serialized and their failures remain observer errors.",
+    "Traite les événements de échecs de requête modèle ; les gestionnaires asynchrones sont sérialisés et leurs échecs restent des erreurs d’observation."
+  ],
+  "ReporterHandlers.hook": [
+    "Handle completed hook decisions and changes; asynchronous handlers are serialized and their failures remain observer errors.",
+    "Traite les événements de décisions et modifications des hooks terminés ; les gestionnaires asynchrones sont sérialisés et leurs échecs restent des erreurs d’observation."
+  ],
+  "ReporterHandlers.instructions-loaded": [
+    "Handle the resolved instruction count; asynchronous handlers are serialized and their failures remain observer errors.",
+    "Traite les événements de nombre d’instructions résolues ; les gestionnaires asynchrones sont sérialisés et leurs échecs restent des erreurs d’observation."
+  ],
+  "ReporterHandlers.skills-loaded": [
+    "Handle newly loaded skill names; asynchronous handlers are serialized and their failures remain observer errors.",
+    "Traite les événements de noms des skills nouvellement chargés ; les gestionnaires asynchrones sont sérialisés et leurs échecs restent des erreurs d’observation."
+  ],
+  "ReporterHandlers.tool-output": [
+    "Handle tool command output correlated by callId; asynchronous handlers are serialized and their failures remain observer errors.",
+    "Traite les événements de sorties de commandes d’outil corrélées par callId ; les gestionnaires asynchrones sont sérialisés et leurs échecs restent des erreurs d’observation."
   ]
 }

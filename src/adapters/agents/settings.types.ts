@@ -9,6 +9,7 @@ export interface CommonAgentSettings {
 }
 
 export interface ClaudeSettings extends CommonAgentSettings {
+  readonly partialMessages?: boolean;
   readonly permissions?:
     | "default"
     | "acceptEdits"

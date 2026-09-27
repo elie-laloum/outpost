@@ -1,3 +1,5 @@
+import { observedOperation } from "../domain/observed-operation.ts";
+import type { ObservationHub } from "../domain/observation.types.ts";
 import { createHash } from "node:crypto";
 import { cp, lstat, mkdir } from "node:fs/promises";
 import { basename, dirname, join, resolve } from "node:path";
@@ -79,7 +81,7 @@ async function locations(options: RecoveryRestoreOptions) {
   return { repository, directory: transfer, destination };
 }
 
-export async function planRecoveryRestore(
+async function planRecoveryRestoreOperation(
   options: RecoveryRestoreOptions,
 ): Promise<RecoveryRestorePlan> {
   const paths = await locations(options);
@@ -134,7 +136,7 @@ async function applyPatch(
   ]);
 }
 
-export async function restoreRecoveryTransfer(
+async function restoreRecoveryOperation(
   plan: RecoveryRestorePlan,
 ): Promise<RecoveryRestoreResult> {
   invariant(
@@ -246,4 +248,22 @@ export async function restoreRecoveryTransfer(
   } finally {
     await snapshot.dispose();
   }
+}
+
+export function planRecoveryRestore(
+  options: RecoveryRestoreOptions,
+  observation?: ObservationHub,
+): Promise<RecoveryRestorePlan> {
+  return observedOperation(observation, "recovery", "restore.plan", () =>
+    planRecoveryRestoreOperation(options),
+  );
+}
+
+export function restoreRecoveryTransfer(
+  plan: RecoveryRestorePlan,
+  observation?: ObservationHub,
+): Promise<RecoveryRestoreResult> {
+  return observedOperation(observation, "recovery", "restore.apply", () =>
+    restoreRecoveryOperation(plan),
+  );
 }

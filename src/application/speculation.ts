@@ -1,3 +1,4 @@
+import { taskObservation } from "./task-observation.ts";
 import { randomUUID } from "node:crypto";
 import { invariant, recoveryDetails } from "../domain/errors.ts";
 import { workflowAccounting } from "../domain/workflow/budget.ts";
@@ -68,6 +69,11 @@ export async function speculate<T = undefined>(
       } catch {
         return;
       }
+      const observation = taskObservation(
+        options.observation ?? candidate.request.observation,
+        candidate.request.observe,
+        { candidate: candidate.key },
+      );
       const initial = records[index]!;
       let sandbox: Sandbox | undefined;
       let result: SpeculativeOutput<T> | undefined;
@@ -77,11 +83,12 @@ export async function speculate<T = undefined>(
       let retainedDirectory: string | undefined;
       const usage = taskUsage(
         { reportUsage: (value) => accounting.report(value) },
-        candidate.request.observe,
+        undefined,
       );
       try {
         sandbox = await createSandbox({
           ...options.sandbox,
+          ...(observation ? { observation } : {}),
           repository: options.repository,
           sandboxProvider: options.sandboxProvider,
           branch: { mode: "named", name: initial.branch, from: baseline },
@@ -99,6 +106,7 @@ export async function speculate<T = undefined>(
           ...output
         } = await sandbox.dispatch({
           ...candidate.request,
+          ...(observation ? { observation } : {}),
           signal,
           observe: usage.observe,
         });
@@ -110,6 +118,10 @@ export async function speculate<T = undefined>(
           result,
           sandbox,
           signal,
+        });
+        observation?.emit("workflow", {
+          kind: "candidate",
+          status: "validated",
         });
         signal.throwIfAborted();
       } catch (cause) {
@@ -147,7 +159,12 @@ export async function speculate<T = undefined>(
         if (accepted && !winner) return "winner";
         return "rejected";
       }
+      observation?.emit("workflow", { kind: "candidate", status: "cleanup" });
       const status = candidateStatus();
+      observation?.emit("workflow", {
+        kind: "candidate",
+        status: status === "winner" ? "accepted" : "rejected",
+      });
       const record: SpeculativeCandidateResult<T> = {
         ...initial,
         status,
@@ -157,6 +174,7 @@ export async function speculate<T = undefined>(
         ...(error !== undefined ? { error } : {}),
       };
       records[index] = record;
+      await observation.close();
       if (status === "winner") {
         winner = record;
         stop.abort(
@@ -185,6 +203,7 @@ export async function speculate<T = undefined>(
     }),
     (error: unknown) => ({ before, changed: true, error }),
   );
+  await options.observation?.flush();
   return {
     id,
     baseline,

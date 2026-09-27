@@ -1,4 +1,6 @@
 import { agentRequest } from "./agent-request.ts";
+import { boundedLines } from "./output-lines.ts";
+import { stopReason } from "./stop-reason.ts";
 import { customTurn } from "./custom-turn.ts";
 import type { Agent } from "../domain/agent.types.ts";
 import { OutpostError } from "../domain/errors.ts";
@@ -35,6 +37,15 @@ export async function turn(
   const output = agentOutput(agent, options, markers, pass);
   const watchdog = activityWatchdog(controller, options, pass);
   watchdog.refresh(false);
+  const stderr = boundedLines((text, truncated) =>
+    notify(options.observe, {
+      kind: "stderr",
+      text,
+      truncated,
+      pass,
+      at: new Date().toISOString(),
+    }),
+  );
   let status = 0;
   let preparedConversation: string | undefined;
   try {
@@ -72,6 +83,7 @@ export async function turn(
             controller.abort(cause);
           }
         }
+        if (channel === "stderr") stderr.append(chunk);
         watchdog.refresh(output.completed);
       },
     });
@@ -83,6 +95,14 @@ export async function turn(
         conversation: output.conversation ?? preparedConversation,
       });
   } catch (cause) {
+    const reason = stopReason(options.signal, controller.signal.reason, cause);
+    if (reason)
+      notify(options.observe, {
+        kind: "stopped",
+        reason,
+        pass,
+        at: new Date().toISOString(),
+      });
     options.signal?.throwIfAborted();
     if (controller.signal.reason !== "completion") {
       const error =
@@ -111,6 +131,8 @@ export async function turn(
       "Agent remained active after completion; its command was stopped and trailing output retained",
     );
   } finally {
+    stderr.flush();
+    if (controller.signal.reason === "completion") output.flush();
     watchdog.close();
   }
   return {

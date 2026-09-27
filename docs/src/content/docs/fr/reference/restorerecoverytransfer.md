@@ -19,9 +19,10 @@ Revalide un plan de restauration et matérialise l’état conservé choisi dans
 
 ## Paramètres et propriétés
 
-| Nom    | Type                  | Présence | Rôle                                                                                   |
-| ------ | --------------------- | -------- | -------------------------------------------------------------------------------------- |
-| `plan` | `RecoveryRestorePlan` | Requis   | Plan de restauration liant source, destination, état choisi et empreintes d’intégrité. |
+| Nom           | Type                          | Présence  | Rôle                                                                                                                    |
+| ------------- | ----------------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `plan`        | `RecoveryRestorePlan`         | Requis    | Plan de restauration liant source, destination, état choisi et empreintes d’intégrité.                                  |
+| `observation` | `ObservationHub \| undefined` | Optionnel | Hub facultatif recevant le début et la fin de restauration de récupération ; jamais persisté dans le plan ni l’archive. |
 
 ## Retour
 
@@ -32,10 +33,12 @@ Revalide un plan de restauration et matérialise l’état conservé choisi dans
 ```ts
 export declare function restoreRecoveryTransfer(
   plan: RecoveryRestorePlan,
+  observation?: ObservationHub,
 ): Promise<RecoveryRestoreResult>;
 ```
 
 ## Contrats associés
 
+- [ObservationHub](../observationhub/)
 - [RecoveryRestorePlan](../recoveryrestoreplan/)
 - [RecoveryRestoreResult](../recoveryrestoreresult/)

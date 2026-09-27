@@ -13,21 +13,23 @@ import type { WorkspaceOptions } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom            | Type                                                     | Présence  | Rôle                                                                                                           |
-| -------------- | -------------------------------------------------------- | --------- | -------------------------------------------------------------------------------------------------------------- |
-| `storageQuota` | `Omit<StorageReservationOptions, "signal"> \| undefined` | Optionnel | Limites d’admission et réservation demandée pour le stockage dans .outpost du dépôt.                           |
-| `signal`       | `AbortSignal \| undefined`                               | Optionnel | Annulation coopérative de cette opération.                                                                     |
-| `repository`   | `string \| undefined`                                    | Optionnel | Checkout Git hôte ciblé.                                                                                       |
-| `branch`       | `BranchPolicy \| undefined`                              | Optionnel | Choisit le checkout courant, une branche de travail nommée conservée ou une branche préparée pour intégration. |
-| `copies`       | `readonly string[] \| undefined`                         | Optionnel | Entrées relatives au dépôt copiées dans le workspace.                                                          |
-| `limits`       | `StageLimits \| undefined`                               | Optionnel | Délais de copie, préparation Git, collecte des commits et intégration, en millisecondes.                       |
-| `label`        | `string \| undefined`                                    | Optionnel | Libellé lisible utilisé dans les rapports d’exécution.                                                         |
-| `hooks`        | `LifecycleHooks \| undefined`                            | Optionnel | Commandes de cycle de vie dans l’ordre déclaré.                                                                |
+| Nom            | Type                                                     | Présence  | Rôle                                                                                                                                                   |
+| -------------- | -------------------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `observation`  | `ObservationHub \| undefined`                            | Optionnel | Hub facultatif appartenant à l’appelant pour les opérations de workspace, allocation, transfert et nettoyage ; créer un workspace ne ferme pas le hub. |
+| `storageQuota` | `Omit<StorageReservationOptions, "signal"> \| undefined` | Optionnel | Limites d’admission et réservation demandée pour le stockage dans .outpost du dépôt.                                                                   |
+| `signal`       | `AbortSignal \| undefined`                               | Optionnel | Annulation coopérative de cette opération.                                                                                                             |
+| `repository`   | `string \| undefined`                                    | Optionnel | Checkout Git hôte ciblé.                                                                                                                               |
+| `branch`       | `BranchPolicy \| undefined`                              | Optionnel | Choisit le checkout courant, une branche de travail nommée conservée ou une branche préparée pour intégration.                                         |
+| `copies`       | `readonly string[] \| undefined`                         | Optionnel | Entrées relatives au dépôt copiées dans le workspace.                                                                                                  |
+| `limits`       | `StageLimits \| undefined`                               | Optionnel | Délais de copie, préparation Git, collecte des commits et intégration, en millisecondes.                                                               |
+| `label`        | `string \| undefined`                                    | Optionnel | Libellé lisible utilisé dans les rapports d’exécution.                                                                                                 |
+| `hooks`        | `LifecycleHooks \| undefined`                            | Optionnel | Commandes de cycle de vie dans l’ordre déclaré.                                                                                                        |
 
 ## Signature
 
 ```ts
 export interface WorkspaceOptions {
+  readonly observation?: ObservationHub;
   readonly storageQuota?: Omit<StorageReservationOptions, "signal">;
   readonly signal?: AbortSignal;
   readonly repository?: string;
@@ -43,5 +45,6 @@ export interface WorkspaceOptions {
 
 - [BranchPolicy](../branchpolicy/)
 - [LifecycleHooks](../lifecyclehooks/)
+- [ObservationHub](../observationhub/)
 - [StageLimits](../stagelimits/)
 - [StorageReservationOptions](../storagereservationoptions/)

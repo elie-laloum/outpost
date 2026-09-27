@@ -14,6 +14,7 @@ export interface RemoteSync {
 }
 
 export interface RemoteSyncOptions {
+  readonly observation?: import("../domain/observation.types.ts").ObservationHub;
   readonly recoveryTransport?: Transport;
   readonly includeUncommitted?: boolean;
   readonly signal?: AbortSignal;

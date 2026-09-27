@@ -23,6 +23,8 @@ Available in 6.0.1: the [Guide](../../guide/introduction/) has been rewritten in
 
 **Implemented, unreleased:** Antigravity installation now pins versioned archives and SHA-512 digests for images and remote bootstrap; doctor compares the installed version with `agentVersions.antigravity`. See [pinned installation](../../guide/antigravity/#pinned-installation). Authenticated model runs and platform-specific live validation remain separate requirements.
 
+Implemented, unreleased: [scoped observation hubs](../../guide/live-events/) correlate workflow, agent and operation events with bounded sink delivery and OpenTelemetry spans. Protocol fixtures and local tests do not establish compatibility with every live CLI version. Interactive TTY events, full remote-worker event relay and a durable state registry by ID remain outside this implementation.
+
 ## Near term: make execution dependable
 
 | Priority                                    | Outcome                                                                                                                                                                                                          | Evidence required                                                                                                                                                                                                                                                                                  |

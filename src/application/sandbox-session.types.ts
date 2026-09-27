@@ -38,6 +38,7 @@ export interface SandboxAgents {
   selectAgent(
     agent: Agent | undefined,
     signal: AbortSignal,
+    observation?: import("../domain/observation.types.ts").ObservationHub,
   ): Promise<SelectedAgent>;
   restore(
     id: string,

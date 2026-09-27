@@ -19,22 +19,18 @@ export const protocolFixtures: Readonly<
       expected: [
         { kind: "conversation", id: "fixture-conversation" },
         {
-          kind: "raw",
-          value: {
-            event: "step_update",
-            step_update: {
-              conversation_id: "fixture-conversation",
-              step_index: 1,
-              state: "ACTIVE",
-              step_type: "tool",
-              tool_name: "run_command",
-            },
-          },
-        },
-        {
           kind: "tool",
           name: "run_command",
-          input: { command: "fixture-command" },
+          input: undefined,
+          callId: "fixture-conversation:1",
+        },
+        {
+          kind: "tool-result",
+          name: "run_command",
+          callId: "fixture-conversation:1",
+          preview: "",
+          characters: 0,
+          isError: false,
         },
         { kind: "text", text: "fixture-result" },
         { kind: "usage", tokens: { input: 10, cached: 2, output: 4 } },
@@ -142,12 +138,12 @@ export const protocolFixtures: Readonly<
           callId: "call-1",
         },
         {
-          kind: "raw",
-          value: {
-            role: "tool",
-            tool_call_id: "call-1",
-            content: "fixture-output",
-          },
+          kind: "tool-result",
+          callId: "call-1",
+          name: "",
+          preview: "fixture-output",
+          characters: 14,
+          isError: false,
         },
         { kind: "text", text: "fixture-result" },
         { kind: "conversation", id: "fixture-conversation" },

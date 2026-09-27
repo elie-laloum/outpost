@@ -9,6 +9,7 @@ Traduction du journal `CHANGELOG.md` conservé à la racine du dépôt. Chaque v
 
 ## Non publié
 
+- Ajoute des hubs d’observation contextualisés avec récepteurs branchables bornés, événements corrélés de workflow/agent/opération, diagnostics d’arrêt, résultats d’outils CLI normalisés et contenus modèle activés explicitement. Journaux et reporters partagent la politique de livraison ; leurs erreurs sont rapportées indépendamment de l’exécution. OpenTelemetry peut consommer le flux unifié sans changer les noms de métriques.
 - Ajoute capture native, reprise à chaud/à froid et réparations pour Copilot et Kimi, ainsi que le fork natif Kimi. Antigravity permet uniquement reprise à chaud et réparations ; capture portable, reprise à froid et fork automatisé restent indisponibles. Le fork automatisé Copilot est explicitement refusé. Les bundles conservent les fichiers natifs pris en charge et peuvent être archivés par Transport.
 
 - Ajout du lancement Firecracker optionnel par jailer avec assets protégés appartenant à root, identité VMM non privilégiée, limites CPU/mémoire/processus par cgroup v2 et nettoyage conservateur. Le lancement direct reste compatible ; le provider reste expérimental en attente de validations plus larges des hôtes et de résistance aux attaques.

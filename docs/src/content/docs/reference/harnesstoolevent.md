@@ -19,12 +19,14 @@ import type { HarnessToolEvent } from "@elie-laloum/outpost";
 
 The fields below cover all variants; the signature specifies their allowed combinations.
 
-| Name      | Type                           | Presence          | Meaning                                                                                                                                                                                                                |
-| --------- | ------------------------------ | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `kind`    | `"warning" \| "text" \| "raw"` | Required          | Discriminator selecting the event payload: phase, summary, warning, text, text-delta, result, prompt, tool, tool-result, tool-denied, step, stop-prevented, compaction, conversation, usage, failure, finished or raw. |
-| `message` | `string`                       | Variant-dependent | Warning or failure message, or the message a stop hook sent back to the model.                                                                                                                                         |
-| `text`    | `string`                       | Variant-dependent | Text carried by the event: a streamed fragment, streamed text, final answer or submitted prompt according to kind.                                                                                                     |
-| `value`   | `unknown`                      | Variant-dependent | Unrecognized raw protocol value preserved for observation.                                                                                                                                                             |
+| Name        | Type                           | Presence          | Meaning                                                                                                                                                                                                                |
+| ----------- | ------------------------------ | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `kind`      | `"warning" \| "text" \| "raw"` | Required          | Discriminator selecting the event payload: phase, summary, warning, text, text-delta, result, prompt, tool, tool-result, tool-denied, step, stop-prevented, compaction, conversation, usage, failure, finished or raw. |
+| `message`   | `string`                       | Variant-dependent | Warning or failure message, or the message a stop hook sent back to the model.                                                                                                                                         |
+| `text`      | `string`                       | Variant-dependent | Text carried by the event: a streamed fragment, streamed text, final answer or submitted prompt according to kind.                                                                                                     |
+| `value`     | `unknown`                      | Variant-dependent | Unrecognized raw protocol value preserved for observation.                                                                                                                                                             |
+| `bytes`     | `number \| undefined`          | Variant-dependent | Observed UTF-8 byte size of an oversized protocol line or buffered prefix before termination.                                                                                                                          |
+| `truncated` | `boolean \| undefined`         | Variant-dependent | Whether the stderr fragment or oversized raw preview was bounded before delivery.                                                                                                                                      |
 
 ## Signature
 

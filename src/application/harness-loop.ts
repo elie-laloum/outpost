@@ -97,6 +97,7 @@ export async function harnessLoop(
   });
   let usage: Usage = { input: 0, cached: 0, output: 0 };
   let toolCalls = 0;
+  const announcedSkills = new Set<string>();
   for (let step = 1; ; step++) {
     runtime.signal.throwIfAborted();
     if (step > harness.limits.maxSteps)
@@ -107,6 +108,12 @@ export async function harnessLoop(
     const exceeded = exceededUsage(usage, harness.limits.usage);
     if (exceeded)
       throw limit("usage", `Harness exceeded its ${exceeded} token budget`);
+    const newlyLoaded = [...loadedSkills(history.messages)].filter(
+      (name) => !announcedSkills.has(name),
+    );
+    for (const name of newlyLoaded) announcedSkills.add(name);
+    if (newlyLoaded.length)
+      runtime.emit({ kind: "skills-loaded", names: newlyLoaded });
     runtime.emit({ kind: "step", index: step });
     await compact(runtime, history, step);
     await beforeModel(runtime, history.messages, step);
@@ -127,9 +134,12 @@ export async function harnessLoop(
     const content: readonly ModelContentBlock[] = result.content ?? [
       { type: "text", text: result.text },
     ];
-    for (const block of content)
+    for (const block of content) {
       if (block.type === "text" && block.text)
         runtime.emit({ kind: "text", text: block.text });
+      if (block.type === "reasoning" && block.text)
+        runtime.emit({ kind: "reasoning", text: block.text });
+    }
     const state: LoopState = { history, step, toolCalls };
     const reason = result.stopReason ?? inferredStop(content);
     const answer = await stopHandlers[reason](runtime, state, result, content);
@@ -149,6 +159,10 @@ async function instructions(runtime: HarnessRuntime): Promise<string> {
     ),
   );
   runtime.signal.throwIfAborted();
+  runtime.emit({
+    kind: "instructions-loaded",
+    count: texts.filter((text) => text.trim()).length,
+  });
   return texts.filter((text) => text.trim()).join("\n\n");
 }
 
@@ -176,14 +190,37 @@ async function requestModel(
   request: ModelRequest,
 ): Promise<ModelResult> {
   const provider = runtime.modelProvider;
-  if (!provider.stream) return provider.request(request);
-  let result: ModelResult | undefined;
-  for await (const event of provider.stream(request)) {
-    if (event.type === "text-delta")
-      runtime.emit({ kind: "text-delta", text: event.text });
-    if (event.type === "result") result = event.result;
+  if (runtime.verbose) runtime.emit({ kind: "model-request", request });
+  try {
+    const result = await receive();
+    if (runtime.verbose)
+      runtime.emit({ kind: "model-response", response: result });
+    return result;
+  } catch (error) {
+    runtime.emit({
+      kind: "model-error",
+      message: error instanceof Error ? error.message : String(error),
+    });
+    throw error;
   }
-  if (!result)
-    throw new OutpostError("response", "Model stream ended without a result");
-  return result;
+  async function receive(): Promise<ModelResult> {
+    if (!provider.stream) return provider.request(request);
+    let result: ModelResult | undefined;
+    for await (const event of provider.stream(request)) {
+      if (event.type === "text-delta")
+        runtime.emit({ kind: "text-delta", text: event.text });
+      if (event.type === "reasoning")
+        runtime.emit({ kind: "reasoning", text: event.text });
+      if (event.type === "retry")
+        runtime.emit({
+          kind: "model-retry",
+          attempt: event.attempt,
+          ...(event.message ? { message: event.message } : {}),
+        });
+      if (event.type === "result") result = event.result;
+    }
+    if (!result)
+      throw new OutpostError("response", "Model stream ended without a result");
+    return result;
+  }
 }

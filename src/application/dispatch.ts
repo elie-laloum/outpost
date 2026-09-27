@@ -19,8 +19,10 @@ export async function dispatch<T = undefined>(
   options: SandboxOptions & DispatchOptions<T> & RequiredAgent,
 ): Promise<DispatchResult<T>> {
   const { telemetry: _telemetry, ...configuration } = options;
-  return observeDispatch(options, (observed) =>
-    dispatchOperation({ ...configuration, ...observed }, options),
+  return observeDispatch(
+    options,
+    (observed) => dispatchOperation({ ...configuration, ...observed }, options),
+    options.workspace?.repository ?? options.repository ?? process.cwd(),
   );
 }
 

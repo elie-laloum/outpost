@@ -42,100 +42,112 @@ async function scheduleRun(
   const concurrency = options.concurrency ?? 1;
   positive(concurrency, "concurrency");
   const state = workflowState(name, tasks, options, checkpoint);
-  const {
-    executionId,
-    signal,
-    values,
-    records,
-    errors,
-    observerErrors,
-    record,
-    emit,
-    finish,
-  } = state;
-  const active = new Map<Task, Promise<void>>();
-  const started = Date.now();
-  const decisions = prepareDecisions(state);
-  emit({ type: "start" });
-  applyDecisions(state, decisions);
-  await state.persist();
   try {
-    while (true) {
-      let changed = false;
-      for (const item of tasks) {
-        if (record(item).status !== "waiting") continue;
-        if (signal.aborted || state.accounting.exhausted) {
-          finish(item, "cancelled");
-          changed = true;
-          continue;
-        }
-        const dependencies = item.after.map(
-          (dependency) => record(dependency).status,
-        );
-        if (
-          dependencies.some((status) =>
-            ["failed", "skipped", "cancelled", "rejected"].includes(status),
+    const {
+      executionId,
+      signal,
+      values,
+      records,
+      errors,
+      observerErrors,
+      record,
+      emit,
+      finish,
+    } = state;
+    const active = new Map<Task, Promise<void>>();
+    const started = Date.now();
+    const decisions = prepareDecisions(state);
+    emit({ type: "start" });
+    if (checkpoint?.initial) emit({ type: "resume" });
+    applyDecisions(state, decisions);
+    await state.persist();
+    try {
+      while (true) {
+        let changed = false;
+        for (const item of tasks) {
+          if (record(item).status !== "waiting") continue;
+          if (signal.aborted || state.accounting.exhausted) {
+            finish(item, "cancelled");
+            changed = true;
+            continue;
+          }
+          const dependencies = item.after.map(
+            (dependency) => record(dependency).status,
+          );
+          if (
+            dependencies.some((status) =>
+              ["failed", "skipped", "cancelled", "rejected"].includes(status),
+            )
+          ) {
+            finish(item, "skipped");
+            changed = true;
+            continue;
+          }
+          if (
+            active.size >= concurrency ||
+            item.after.some((dependency) => active.has(dependency)) ||
+            !dependencies.every((status) => status === "done")
           )
-        ) {
-          finish(item, "skipped");
+            continue;
+          const running = (
+            item.gate ? pauseGate(item, state) : runTask(item, state)
+          ).finally(() => {
+            active.delete(item);
+          });
+          active.set(item, running);
           changed = true;
+        }
+        if (active.size) {
+          await Promise.race(active.values());
           continue;
         }
-        if (
-          active.size >= concurrency ||
-          item.after.some((dependency) => active.has(dependency)) ||
-          !dependencies.every((status) => status === "done")
-        )
-          continue;
-        const running = (
-          item.gate ? pauseGate(item, state) : runTask(item, state)
-        ).finally(() => {
-          active.delete(item);
-        });
-        active.set(item, running);
-        changed = true;
+        if (!changed) break;
       }
-      if (active.size) {
-        await Promise.race(active.values());
-        continue;
-      }
-      if (!changed) break;
+    } catch (error) {
+      state.stop.abort(error);
+      await Promise.allSettled(active.values());
+      throw error;
     }
+    await state.persist();
+    if (options.signal?.aborted) errors.push(options.signal.reason);
+    const paused = [...records.values()].some(
+      (entry) => entry.status === "paused",
+    );
+    let status: WorkflowResult["status"] = "done";
+    if (paused) status = "paused";
+    if (errors.length) status = "failed";
+    if (options.signal?.aborted) status = "cancelled";
+    emit({ type: "finish", status, durationMs: Date.now() - started });
+    await state.observation.close();
+    observerErrors.push(...state.observation.errors);
+    const result: WorkflowResult = Object.freeze({
+      executionId,
+      name,
+      status,
+      usage: state.accounting.snapshot(),
+      tasks: Object.freeze(
+        [...records.values()].map((value) => Object.freeze({ ...value })),
+      ),
+      errors: Object.freeze(errors),
+      observerErrors: Object.freeze(observerErrors),
+      value<T>(item: Task<T>): T {
+        if (!values.has(item))
+          throw new Error(
+            `${item.key} has no successful value in this execution`,
+          );
+        return values.get(item) as T;
+      },
+      unwrap() {
+        if (status !== "done") throw new WorkflowFailure(result);
+      },
+    });
+    return result;
   } catch (error) {
-    state.stop.abort(error);
-    await Promise.allSettled(active.values());
+    state.emit({
+      type: "finish",
+      status: options.signal?.aborted ? "cancelled" : "failed",
+    });
+    await state.observation.close();
     throw error;
   }
-  await state.persist();
-  if (options.signal?.aborted) errors.push(options.signal.reason);
-  const paused = [...records.values()].some(
-    (entry) => entry.status === "paused",
-  );
-  let status: WorkflowResult["status"] = "done";
-  if (paused) status = "paused";
-  if (errors.length) status = "failed";
-  if (options.signal?.aborted) status = "cancelled";
-  emit({ type: "finish", status, durationMs: Date.now() - started });
-  const result: WorkflowResult = Object.freeze({
-    executionId,
-    name,
-    status,
-    usage: state.accounting.snapshot(),
-    tasks: Object.freeze(
-      [...records.values()].map((value) => Object.freeze({ ...value })),
-    ),
-    errors: Object.freeze(errors),
-    observerErrors: Object.freeze(observerErrors),
-    value<T>(item: Task<T>): T {
-      if (!values.has(item))
-        throw new Error(
-          `${item.key} has no successful value in this execution`,
-        );
-      return values.get(item) as T;
-    },
-    unwrap() {
-      if (status !== "done") throw new WorkflowFailure(result);
-    },
-  });
-  return result;
 }

@@ -1,3 +1,4 @@
+import { observedOperation } from "../domain/observed-operation.ts";
 import type { Command } from "../domain/command.types.ts";
 import type { SandboxLease } from "../domain/sandbox.types.ts";
 import { requireSuccess } from "../infrastructure/process.ts";
@@ -9,6 +10,7 @@ export async function hooks(
   invoke: SandboxLease["invoke"],
   signal?: AbortSignal,
   parallel = false,
+  observation?: import("../domain/observation.types.ts").ObservationHub,
 ): Promise<void> {
   if (parallel) {
     const controller = new AbortController();
@@ -17,10 +19,12 @@ export async function hooks(
       : controller.signal;
     const outcomes = await Promise.allSettled(
       commands.map((command) =>
-        hooks([command], directory, invoke, combined).catch((cause) => {
-          controller.abort(cause);
-          throw cause;
-        }),
+        hooks([command], directory, invoke, combined, false, observation).catch(
+          (cause) => {
+            controller.abort(cause);
+            throw cause;
+          },
+        ),
       ),
     );
     const failure = outcomes.find((outcome) => outcome.status === "rejected");
@@ -28,13 +32,19 @@ export async function hooks(
     return;
   }
   for (const command of commands)
-    await requireSuccess(
-      {
-        ...command,
-        directory: command.directory ?? directory,
-        deadlineMs: command.deadlineMs ?? hookDeadlineMs,
-        ...(signal ? { signal } : {}),
-      },
-      invoke,
+    await observedOperation(
+      observation,
+      "hooks",
+      "lifecycle.command",
+      async () =>
+        requireSuccess(
+          {
+            ...command,
+            directory: command.directory ?? directory,
+            deadlineMs: command.deadlineMs ?? hookDeadlineMs,
+            ...(signal ? { signal } : {}),
+          },
+          invoke,
+        ),
     );
 }

@@ -19,14 +19,15 @@ Valide un transfert conservé et prépare la restauration de son état previous 
 
 ## Paramètres et propriétés
 
-| Nom                   | Type                       | Présence  | Rôle                                                                                                          |
-| --------------------- | -------------------------- | --------- | ------------------------------------------------------------------------------------------------------------- |
-| `options`             | `RecoveryRestoreOptions`   | Requis    | Source du transfert conservé, dépôt, nouvelle destination, côté choisi et limite d’octets de vérification.    |
-| `options.directory`   | `string`                   | Requis    | Dossier hôte contenant les artefacts de transfert conservés à vérifier ou restaurer.                          |
-| `options.repository`  | `string`                   | Requis    | Checkout Git hôte ciblé.                                                                                      |
-| `options.destination` | `string`                   | Requis    | Nouveau dossier de destination absent, hors du dépôt source, de ses métadonnées Git et du transfert conservé. |
-| `options.side`        | `"previous" \| "incoming"` | Requis    | État conservé à restaurer : previous pour l’état hôte antérieur ou incoming pour l’état distant entrant.      |
-| `options.maxBytes`    | `number \| undefined`      | Optionnel | Nombre maximal d’octets de données conservées autorisé pour copier et vérifier les sources de restauration.   |
+| Nom                   | Type                          | Présence  | Rôle                                                                                                                     |
+| --------------------- | ----------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `options`             | `RecoveryRestoreOptions`      | Requis    | Source du transfert conservé, dépôt, nouvelle destination, côté choisi et limite d’octets de vérification.               |
+| `options.directory`   | `string`                      | Requis    | Dossier hôte contenant les artefacts de transfert conservés à vérifier ou restaurer.                                     |
+| `options.repository`  | `string`                      | Requis    | Checkout Git hôte ciblé.                                                                                                 |
+| `options.destination` | `string`                      | Requis    | Nouveau dossier de destination absent, hors du dépôt source, de ses métadonnées Git et du transfert conservé.            |
+| `options.side`        | `"previous" \| "incoming"`    | Requis    | État conservé à restaurer : previous pour l’état hôte antérieur ou incoming pour l’état distant entrant.                 |
+| `options.maxBytes`    | `number \| undefined`         | Optionnel | Nombre maximal d’octets de données conservées autorisé pour copier et vérifier les sources de restauration.              |
+| `observation`         | `ObservationHub \| undefined` | Optionnel | Hub facultatif recevant le début et la fin de planification de restauration ; jamais persisté dans le plan ni l’archive. |
 
 ## Retour
 
@@ -37,10 +38,12 @@ Valide un transfert conservé et prépare la restauration de son état previous 
 ```ts
 export declare function planRecoveryRestore(
   options: RecoveryRestoreOptions,
+  observation?: ObservationHub,
 ): Promise<RecoveryRestorePlan>;
 ```
 
 ## Contrats associés
 
+- [ObservationHub](../observationhub/)
 - [RecoveryRestoreOptions](../recoveryrestoreoptions/)
 - [RecoveryRestorePlan](../recoveryrestoreplan/)

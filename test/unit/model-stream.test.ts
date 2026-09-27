@@ -142,6 +142,7 @@ test("Anthropic streams rebuild text, thinking and partial tool input", () => {
       provider: "anthropic:test",
       model: "m",
       data: { type: "thinking", thinking: "hmm", signature: "sig" },
+      text: "hmm",
     },
     { type: "text", text: "Hello" },
     { type: "tool-call", id: "t", name: "read", input: { path: "a" } },

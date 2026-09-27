@@ -17,6 +17,7 @@ import { storageFor } from "./agent-storage.ts";
 import { harnessHistory } from "./harness-history.ts";
 import { harnessLoop } from "./harness-loop.ts";
 import type { CustomTurnContext } from "./harness.types.ts";
+import { stopReason } from "./stop-reason.ts";
 import { notify } from "./observation.ts";
 
 export async function customTurn(
@@ -178,6 +179,7 @@ export async function customTurn(
     const text = await harnessLoop(
       {
         agent,
+        verbose: options.observation?.verbose ?? false,
         tools: context.repair
           ? agent.harness.tools.filter((tool) => tool.readOnly)
           : agent.harness.tools,
@@ -224,6 +226,14 @@ export async function customTurn(
       ...(transcript ? { conversation: transcript.id } : {}),
     };
   } catch (error) {
+    const reason = stopReason(options.signal, controller.signal.reason, error);
+    if (reason)
+      notify(options.observe, {
+        kind: "stopped",
+        reason,
+        pass,
+        at: new Date().toISOString(),
+      });
     signal.throwIfAborted();
     throw error;
   } finally {

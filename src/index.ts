@@ -418,3 +418,15 @@ export type {
 } from "./domain/model.types.ts";
 export { anthropicModelProvider } from "./adapters/models/anthropic-model-provider.ts";
 export type { AnthropicModelProviderOptions } from "./adapters/models/anthropic-model-provider.types.ts";
+
+export { createObservationHub } from "./domain/observation.ts";
+export type {
+  Observation,
+  ObservationScope,
+  ObservationSource,
+  ObservationEvent,
+  OperationEvent,
+  ObservationHub,
+  ObservationHubOptions,
+  ObservationSink,
+} from "./domain/observation.types.ts";

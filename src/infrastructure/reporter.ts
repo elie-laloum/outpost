@@ -1,11 +1,11 @@
-import type { AgentEvent } from "../domain/agent.types.ts";
+import type { ObservationEvent } from "../domain/observation.types.ts";
 import type { ReporterOptions, ReportPass } from "./reporter.types.ts";
 
 export type { ReporterOptions } from "./reporter.types.ts";
 
 export function reporter(
   options: ReporterOptions = {},
-): (event: AgentEvent & ReportPass) => void {
+): (event: ObservationEvent & ReportPass) => void {
   const write = options.write ?? ((text) => process.stdout.write(text));
   let streamed = false;
   let deltas = false;
@@ -13,6 +13,12 @@ export function reporter(
     if (options.quiet) return;
     const prefix = `[${options.label ?? "outpost"}${event.pass ? ` · pass ${event.pass}` : ""}]`;
     switch (event.kind) {
+      case "operation":
+        if (options.verbose || event.status === "failed")
+          write(
+            `${prefix} ${event.name} · ${event.status}${event.durationMs === undefined ? "" : ` · ${Math.round(event.durationMs)}ms`}\n`,
+          );
+        break;
       case "phase":
         if (event.name === "running") streamed = deltas = false;
         write(

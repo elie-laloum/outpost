@@ -23,6 +23,8 @@ Disponible en 6.0.1 : le [Guide](../../guide/introduction/) est entièrement ré
 
 **Implémenté, non publié :** l’installation Antigravity épingle désormais les archives versionnées et empreintes SHA-512 pour les images et le bootstrap distant ; doctor compare la version installée à `agentVersions.antigravity`. Voir [l’installation épinglée](../../guide/antigravity/#installation-épinglée). Les exécutions authentifiées de modèles et la validation réelle par plateforme restent des exigences distinctes.
 
+Implémenté, non publié : les [hubs d’observation contextualisés](../../guide/live-events/) corrèlent événements de workflow, agent et opération avec livraison bornée et spans OpenTelemetry. Les fixtures de protocole et tests locaux ne prouvent pas la compatibilité avec toutes les versions réelles de CLI. Événements TTY interactifs, relais complet des workers distants et registre d’état durable par ID restent hors de cette implémentation.
+
 ## Court terme : fiabiliser l’exécution
 
 | Priorité                                                    | Résultat attendu                                                                                                                                                                                                           | Preuves nécessaires                                                                                                                                                                                                                                                                                                                                                               |

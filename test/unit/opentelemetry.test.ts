@@ -425,3 +425,67 @@ test("legacy workflow observe wiring still exports the complete span tree", asyn
     ["outpost.task", "outpost.task.attempt", "outpost.workflow"],
   );
 });
+
+test("hub sink parents dispatch and operation spans and retains dispatch metric names", async (t) => {
+  const { createObservationHub } = await import("../../src/index.ts");
+  const sdk = telemetry();
+  t.after(async () => {
+    sdk.observer.close();
+    await sdk.tracer.shutdown();
+    await sdk.meter.shutdown();
+  });
+  const hub = createObservationHub({ sinks: [sdk.observer.sink] });
+  const run = task({
+    key: "task",
+    perform(context) {
+      const dispatch = context.observation!.child({ dispatchId: "dispatch" });
+      dispatch.emit("sandbox", { kind: "dispatch-start" });
+      dispatch.emit("git", {
+        kind: "operation",
+        id: "operation",
+        name: "branch.integrate",
+        status: "started",
+      });
+      dispatch.emit("git", {
+        kind: "operation",
+        id: "operation",
+        name: "branch.integrate",
+        status: "failed",
+        durationMs: 1,
+      });
+      dispatch.emit("sandbox", {
+        kind: "dispatch-finished",
+        status: "failed",
+        completed: false,
+        usage: { input: 3, cached: 1, output: 2 },
+      });
+    },
+  });
+  (await workflow("run", [run]).start({ observation: hub })).unwrap();
+  await sdk.tracer.forceFlush();
+  await sdk.meter.forceFlush();
+  const spans = sdk.spans.getFinishedSpans();
+  const dispatch = spans.find((value) => value.name === "outpost.dispatch")!;
+  const attempt = spans.find((value) => value.name === "outpost.task.attempt")!;
+  const operation = spans.find(
+    (value) => value.name === "outpost.branch.integrate",
+  )!;
+  assert.equal(
+    dispatch.parentSpanContext?.spanId,
+    attempt.spanContext().spanId,
+  );
+  assert.equal(
+    operation.parentSpanContext?.spanId,
+    dispatch.spanContext().spanId,
+  );
+  assert.equal(operation.status.code, SpanStatusCode.ERROR);
+  const names = sdk.metrics
+    .getMetrics()
+    .flatMap((batch) =>
+      batch.scopeMetrics.flatMap((scope) =>
+        scope.metrics.map((metric) => metric.descriptor.name),
+      ),
+    );
+  assert.ok(names.includes("outpost.dispatch.executions"));
+  assert.equal(hub.errors.length, 0);
+});

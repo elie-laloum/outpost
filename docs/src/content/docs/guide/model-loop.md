@@ -41,3 +41,9 @@ Set `MODEL_NAME` to a model available on your service, then pass this agent to a
 The loop supports [tool policies](../tool-policies/), [context management](../history-management/) and [loadable skills](../loadable-skills/). These settings configure the built-in loop, not Codex or Claude CLI internals.
 
 API: [harness](../../reference/function-harness/) · [HarnessOptions](../../reference/customharnessoptions/).
+
+## Observe the loop
+
+The [observation hub](../live-events/) receives instruction/skill loading, hook decisions, tool output correlated by `callId`, readable reasoning and model errors. Providers may report reasoning and retry stream events; Outpost does not infer retries hidden inside an HTTP client or add retry behavior. Replay blocks can remain opaque even when no readable reasoning is available.
+
+Full `model-request` and `model-response` events require an explicitly verbose hub. Their payloads may contain private conversation content; they are excluded from the normal journal. `tool-result` keeps its bounded preview while `tool-output` exposes command output as it arrives.

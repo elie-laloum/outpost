@@ -24,6 +24,7 @@ Applique un plan après revalidation. La suppression d’un worktree reprend le 
 | `plan`                | `RecoveryRetentionPlan`              | Requis    | Plan de rétention préalablement calculé dont les entrées éligibles doivent être revalidées avant suppression.                               |
 | `options`             | `TransportStoreOptions \| undefined` | Optionnel | Transport requis pour un plan dont source vaut transport ; omis pour un plan de rétention locale.                                           |
 | `options.transporter` | `Transport`                          | Requis    | Transport objet appartenant à l’appelant, utilisé par le store ou l’opération. Fermer un workflow ou une sandbox ne ferme pas ce transport. |
+| `observation`         | `ObservationHub \| undefined`        | Optionnel | Hub facultatif recevant le début et la fin de suppression selon la rétention ; jamais persisté dans le plan ni l’archive.                   |
 
 ## Retour
 
@@ -35,11 +36,13 @@ Applique un plan après revalidation. La suppression d’un worktree reprend le 
 export declare function pruneRecoveryRetention(
   plan: RecoveryRetentionPlan,
   options?: TransportStoreOptions,
+  observation?: ObservationHub,
 ): Promise<RecoveryPruneResult>;
 ```
 
 ## Contrats associés
 
+- [ObservationHub](../observationhub/)
 - [RecoveryPruneResult](../recoverypruneresult/)
 - [RecoveryRetentionPlan](../recoveryretentionplan/)
 - [TransportStoreOptions](../transportstoreoptions/)

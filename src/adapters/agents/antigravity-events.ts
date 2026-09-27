@@ -1,3 +1,4 @@
+import { toolResult } from "./tool-result.ts";
 import type { AgentEvent } from "../../domain/agent.types.ts";
 import { decodeLine } from "./event-decoder.ts";
 import { asRecord, numberOrZero } from "./protocol.ts";
@@ -8,17 +9,28 @@ const steps: EventDecoders = {
     typeof step.text_delta === "string" && step.text_delta
       ? [{ kind: "text", text: step.text_delta }]
       : [],
-  tool: (step) =>
-    typeof step.tool_name === "string" &&
-    (step.state === "DONE" || step.state === "ERROR")
-      ? [
-          {
-            kind: "tool",
-            name: step.tool_name,
-            input: asRecord(step.tool_info).parameters,
-          },
-        ]
-      : [],
+  tool: (step) => {
+    if (typeof step.tool_name !== "string") return [];
+    const callId =
+      typeof step.step_index === "number" &&
+      Number.isSafeInteger(step.step_index)
+        ? `${String(step.conversation_id ?? "turn")}:${step.step_index}`
+        : undefined;
+    const info = asRecord(step.tool_info);
+    if (step.state === "ACTIVE" && callId)
+      return [
+        { kind: "tool", name: step.tool_name, input: info.parameters, callId },
+      ];
+    if (step.state !== "DONE" && step.state !== "ERROR") return [];
+    if (callId)
+      return toolResult(
+        callId,
+        step.tool_name,
+        info.result ?? info.output,
+        step.state === "ERROR",
+      );
+    return [{ kind: "tool", name: step.tool_name, input: info.parameters }];
+  },
 };
 
 function failure(result: ProtocolRecord, response: string): string {

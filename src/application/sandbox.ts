@@ -1,3 +1,4 @@
+import { observedOperation } from "../domain/observed-operation.ts";
 import type { ResourceOperationKind } from "../infrastructure/resource-activity.types.ts";
 import { OutpostError } from "../domain/errors.ts";
 import { validateBrief } from "../domain/prompts.ts";
@@ -29,12 +30,22 @@ export async function createSandbox(
     workspace,
     root: runtime.root,
     dispatch(settings) {
-      return observeDispatch(settings, (observed) => {
-        validateDispatch(observed);
-        return exclusive("dispatch", () =>
-          dispatchInSandbox(context, agents, result, observed),
-        );
-      });
+      validateDispatch(settings);
+      return exclusive("dispatch", () =>
+        observeDispatch(
+          {
+            ...(options.logging === undefined
+              ? {}
+              : { logging: options.logging }),
+            ...(options.observation
+              ? { observation: options.observation }
+              : {}),
+            ...settings,
+          },
+          (observed) => dispatchInSandbox(context, agents, result, observed),
+          workspace.repository,
+        ),
+      );
     },
     resume(id, settings) {
       return result.dispatch({ ...settings, continuation: { id } });
@@ -72,7 +83,12 @@ export async function createSandbox(
               : stop.signal,
           });
         } finally {
-          await sync?.pull();
+          await observedOperation(
+            options.observation,
+            "transfer",
+            "repository.refresh",
+            async () => sync?.pull(),
+          );
         }
       });
     },
@@ -85,7 +101,12 @@ export async function createSandbox(
         await context.activity.phase("closing").catch(() => undefined);
         try {
           await runtime.release();
-          await sync?.close();
+          await observedOperation(
+            options.observation,
+            "transfer",
+            "repository.release",
+            async () => sync?.close(),
+          );
           if (!(await context.activity.idle()))
             throw new OutpostError(
               "provider",

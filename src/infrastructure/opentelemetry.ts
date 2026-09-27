@@ -1,3 +1,4 @@
+import { observationTelemetry } from "./opentelemetry-observation.ts";
 import { dispatchTelemetry } from "./opentelemetry-dispatch.ts";
 import { context, trace, SpanStatusCode } from "@opentelemetry/api";
 import type { Context, Histogram } from "@opentelemetry/api";
@@ -103,7 +104,25 @@ export function openTelemetry(
     finish(execution.workflow, status, at, durations.workflow);
     safe(() => counters.workflows?.add(1, { "outpost.status": status }));
   }
-  return {
+  const sink = observationTelemetry(
+    options,
+    (event) => observer.observe(event),
+    (scope) => {
+      const execution = scope.executionId
+        ? executions.get(scope.executionId)
+        : undefined;
+      if (scope.taskKey)
+        return (
+          execution?.attempts.get(scope.taskKey)?.context ??
+          execution?.tasks.get(scope.taskKey)?.context ??
+          execution?.workflow.context
+        );
+      return execution?.workflow.context;
+    },
+    (parent) => dispatches.startDispatch(parent),
+  );
+  const observer: OpenTelemetryObserver = {
+    sink,
     startDispatch: dispatches.startDispatch,
     observe(event: WorkflowEvent) {
       if (closed) return;
@@ -189,9 +208,11 @@ export function openTelemetry(
       if (closed) return;
       closed = true;
       dispatches.close();
+      safe(() => sink.close());
       for (const execution of executions.values())
         complete(execution, "cancelled", Date.now());
       executions.clear();
     },
   };
+  return observer;
 }

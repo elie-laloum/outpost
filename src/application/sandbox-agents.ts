@@ -1,4 +1,5 @@
 import type { SandboxLease } from "../domain/sandbox.types.ts";
+import { observedOperation } from "../domain/observed-operation.ts";
 import type { Agent } from "../domain/agent.types.ts";
 import type { Command } from "../domain/command.types.ts";
 import { invariant } from "../domain/errors.ts";
@@ -20,13 +21,19 @@ export function sandboxAgents(context: ProvisionedSandbox): SandboxAgents {
   const selectAgent = async (
     selected: Agent | undefined,
     signal: AbortSignal,
+    observation = options.observation,
   ) => {
     invariant(selected, "Provide an agent on the sandbox or this operation");
     if (!prepared.has(selected))
       prepared.set(
         selected,
         sandboxProvider.placement === "remote" && options.bootstrap !== false
-          ? await prepareAdapter(selected, runtime, signal)
+          ? await observedOperation(
+              observation,
+              "sandbox",
+              "agent.bootstrap",
+              async () => prepareAdapter(selected, runtime, signal),
+            )
           : selected,
       );
     const variables = await resolveVariables(
@@ -41,12 +48,18 @@ export function sandboxAgents(context: ProvisionedSandbox): SandboxAgents {
     )
       authenticated.set(adapter.name, {
         adapter,
-        variables: await authenticateAgent(
-          adapter,
-          variables,
-          runtime,
-          sandboxProvider.placement,
-          signal,
+        variables: await observedOperation(
+          observation,
+          "sandbox",
+          "agent.authenticate",
+          async () =>
+            authenticateAgent(
+              adapter,
+              variables,
+              runtime,
+              sandboxProvider.placement,
+              signal,
+            ),
         ),
       });
     const credentials =

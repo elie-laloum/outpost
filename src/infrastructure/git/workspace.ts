@@ -1,3 +1,4 @@
+import { observedOperation } from "../../domain/observed-operation.ts";
 import { randomUUID } from "node:crypto";
 import { join } from "node:path";
 import { OutpostError, recordRecovery } from "../../domain/errors.ts";
@@ -15,7 +16,12 @@ import type {
 export async function acquireWorkspace(
   options: AcquireWorkspaceOptions,
 ): Promise<WorkspaceLease> {
-  const repository = await prepareRepository(options);
+  const repository = await observedOperation(
+    options.observation,
+    "git",
+    "repository.prepare",
+    async () => prepareRepository(options),
+  );
   const policy = options.branch ?? { mode: "current" };
   const baseBranch = (
     await git(repository, ["symbolic-ref", "--quiet", "--short", "HEAD"]).catch(
@@ -47,26 +53,41 @@ export async function acquireWorkspace(
           }${randomUUID()}`;
   if (policy.mode !== "current")
     await git(repository, ["check-ref-format", "--branch", branch]);
-  const unlock = await lock(
-    repository,
-    policy.mode === "current" ? repository : branch,
+  const unlock = await observedOperation(
+    options.observation,
+    "git",
+    "workspace.lock",
+    async () =>
+      lock(repository, policy.mode === "current" ? repository : branch),
   );
   let workdir = repository;
   let created = false;
   try {
     if (policy.mode !== "current") {
-      ({ workdir, created } = await managedWorktree({
-        repository,
-        policy,
-        branch,
-        options,
-      }));
+      ({ workdir, created } = await observedOperation(
+        options.observation,
+        "git",
+        "worktree.prepare",
+        async () =>
+          managedWorktree({
+            repository,
+            policy,
+            branch,
+            options,
+          }),
+      ));
     }
-    await copySelected(
-      repository,
-      workdir,
-      options.copies ?? [],
-      options.limits?.copyMs,
+    await observedOperation(
+      options.observation,
+      "transfer",
+      "workspace.copy",
+      async () =>
+        copySelected(
+          repository,
+          workdir,
+          options.copies ?? [],
+          options.limits?.copyMs,
+        ),
     );
     const baseline = (await git(workdir, ["rev-parse", "HEAD"])).trim();
     const gitDir = (
@@ -108,7 +129,12 @@ export async function acquireWorkspace(
         );
       else recordRecovery(error, { branch, directory: workdir });
     }
-    await unlock();
+    await observedOperation(
+      options.observation,
+      "git",
+      "workspace.unlock",
+      async () => unlock(),
+    );
     throw error;
   }
 }

@@ -1,3 +1,4 @@
+import { observationDefaults } from "../domain/observation.constants.ts";
 import { OutpostError } from "../domain/errors.ts";
 import {
   TOOL_PREVIEW_CHARACTERS,
@@ -231,7 +232,7 @@ async function runTool(
   });
   const execution = Promise.resolve().then(() =>
     tool!.execute(input, {
-      sandbox: scopedLease(runtime.sandbox, signal),
+      sandbox: scopedLease(runtime.sandbox, signal, runtime, call.id),
       signal,
       callId: call.id,
       model: runtime.agent.model,
@@ -257,7 +258,12 @@ async function runTool(
   }
 }
 
-function scopedLease(lease: SandboxLease, signal: AbortSignal): SandboxLease {
+function scopedLease(
+  lease: SandboxLease,
+  signal: AbortSignal,
+  runtime: HarnessRuntime,
+  callId: string,
+): SandboxLease {
   const combine = (own?: AbortSignal) =>
     own ? AbortSignal.any([own, signal]) : signal;
   return {
@@ -265,7 +271,27 @@ function scopedLease(lease: SandboxLease, signal: AbortSignal): SandboxLease {
     home: lease.home,
     invoke: (command) => {
       signal.throwIfAborted();
-      return lease.invoke({ ...command, signal: combine(command.signal) });
+      return lease.invoke({
+        ...command,
+        signal: combine(command.signal),
+        observe(channel, text) {
+          for (
+            let offset = 0;
+            offset < text.length;
+            offset += observationDefaults.outputCharacters
+          )
+            runtime.emit({
+              kind: "tool-output",
+              callId,
+              channel,
+              text: text.slice(
+                offset,
+                offset + observationDefaults.outputCharacters,
+              ),
+            });
+          command.observe?.(channel, text);
+        },
+      });
     },
     upload: (source, destination, settings = {}) => {
       signal.throwIfAborted();

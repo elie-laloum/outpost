@@ -38,6 +38,7 @@ export async function transportJournal(
   transporter: Transport,
   verbose: boolean,
   label?: string,
+  started = true,
 ): Promise<Journal> {
   const prefix = `logs/${randomUUID()}`;
   let head: TransportReference | null = null;
@@ -62,7 +63,12 @@ export async function transportJournal(
     );
     head = segment;
   };
-  await append({ kind: "dispatch-start", at: new Date().toISOString(), label });
+  if (started)
+    await append({
+      kind: "dispatch-start",
+      at: new Date().toISOString(),
+      label,
+    });
   return {
     get reference() {
       return { key: current.key, revision: current.revision };
@@ -82,6 +88,7 @@ export async function transportJournal(
           .catch((error) => {
             failure = error;
           });
+        return pending;
       } catch (error) {
         failure = error;
       }

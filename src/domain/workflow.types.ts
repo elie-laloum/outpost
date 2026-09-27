@@ -1,3 +1,4 @@
+import type { ObservationHub } from "./observation.types.ts";
 import type {
   WorkflowDecision,
   WorkflowDecisionRecord,
@@ -13,6 +14,7 @@ import type {
 } from "./workflow/budget.types.ts";
 
 export interface TaskContext {
+  readonly observation?: ObservationHub;
   readonly signal: AbortSignal;
   readonly attempt: number;
   readonly executionId: string;
@@ -68,7 +70,18 @@ export interface WorkflowEvent {
   readonly executionId: string;
   readonly workflow: string;
   readonly timestamp: string;
-  readonly type: "start" | "task" | "attempt" | "retry" | "usage" | "finish";
+  readonly type:
+    | "start"
+    | "task"
+    | "attempt"
+    | "retry"
+    | "usage"
+    | "finish"
+    | "gate"
+    | "decision"
+    | "checkpoint"
+    | "resume"
+    | "budget-exceeded";
   readonly key?: string;
   readonly status?: TaskStatus;
   readonly attempt?: number;
@@ -81,6 +94,7 @@ export interface WorkflowTelemetry {
 }
 
 export interface WorkflowOptions {
+  readonly observation?: ObservationHub;
   readonly decisions?: readonly WorkflowDecision[];
   readonly checkpoint?: WorkflowCheckpointOptions;
   readonly signal?: AbortSignal;
@@ -115,6 +129,7 @@ export type WorkflowNotification = Omit<
   "executionId" | "workflow" | "timestamp"
 >;
 export interface WorkflowExecutionState {
+  readonly observation: ObservationHub;
   readonly executionId: string;
   readonly stop: AbortController;
   readonly signal: AbortSignal;

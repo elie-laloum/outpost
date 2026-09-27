@@ -33,12 +33,22 @@ export function queuedTask<T>(options: QueuedTaskOptions<T>): Task<T> {
         input: input(context),
         ...(deadline === undefined ? {} : { deadline }),
       });
+      context.observation?.emit("workflow", {
+        kind: "queue",
+        id,
+        status: "enqueued",
+      });
       try {
         while (job.status === "pending" || job.status === "active") {
           await delay(pollMs, undefined, { signal: context.signal });
           const latest = await queue.get(id);
           if (!latest) throw new Error("Queued workflow job disappeared");
           job = latest;
+          context.observation?.emit("workflow", {
+            kind: "queue",
+            id,
+            status: "polled",
+          });
         }
         if (job.result?.usage) {
           if (context.reportUsageOnce)
@@ -48,8 +58,19 @@ export function queuedTask<T>(options: QueuedTaskOptions<T>): Task<T> {
         if (job.status !== "done" || !job.result)
           throw new Error(job.result?.error ?? "Queued workflow job cancelled");
         context.signal.throwIfAborted();
-        return decode(job.result.value);
+        const value = decode(job.result.value);
+        context.observation?.emit("workflow", {
+          kind: "queue",
+          id,
+          status: "completed",
+        });
+        return value;
       } catch (error) {
+        context.observation?.emit("workflow", {
+          kind: "queue",
+          id,
+          status: "failed",
+        });
         if (context.signal.aborted) {
           const latest = await queue.get(id);
           if (latest) await queue.cancel(id, latest.fence);

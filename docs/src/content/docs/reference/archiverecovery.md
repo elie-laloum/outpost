@@ -19,12 +19,13 @@ Snapshot and verify an existing recovery transfer, upload binary chunks with has
 
 ## Parameters and properties
 
-| Name                  | Type                     | Presence | Meaning                                                                                                                    |
-| --------------------- | ------------------------ | -------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `options`             | `RecoveryArchiveOptions` | Required | Verified local recovery transfer, destination transport and total payload bound.                                           |
-| `options.directory`   | `string`                 | Required | Existing recovery transfer containing state.json, checksums.json and all required patches, bundles and extra files.        |
-| `options.maxBytes`    | `number \| undefined`    | Optional | Positive total payload bound, default 1 GiB. Files are uploaded in bounded chunks after local snapshot verification.       |
-| `options.transporter` | `Transport`              | Required | Caller-owned object transport used by the store or operation. Closing a workflow or sandbox does not close this transport. |
+| Name                  | Type                          | Presence | Meaning                                                                                                                    |
+| --------------------- | ----------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `options`             | `RecoveryArchiveOptions`      | Required | Verified local recovery transfer, destination transport and total payload bound.                                           |
+| `options.directory`   | `string`                      | Required | Existing recovery transfer containing state.json, checksums.json and all required patches, bundles and extra files.        |
+| `options.maxBytes`    | `number \| undefined`         | Optional | Positive total payload bound, default 1 GiB. Files are uploaded in bounded chunks after local snapshot verification.       |
+| `options.transporter` | `Transport`                   | Required | Caller-owned object transport used by the store or operation. Closing a workflow or sandbox does not close this transport. |
+| `observation`         | `ObservationHub \| undefined` | Optional | Optional hub receiving start and terminal events for archive creation; never persisted in the recovery plan or archive.    |
 
 ## Returns
 
@@ -35,10 +36,12 @@ Snapshot and verify an existing recovery transfer, upload binary chunks with has
 ```ts
 export declare function archiveRecovery(
   options: RecoveryArchiveOptions,
+  observation?: ObservationHub,
 ): Promise<TransportReference>;
 ```
 
 ## Related contracts
 
+- [ObservationHub](../observationhub/)
 - [RecoveryArchiveOptions](../recoveryarchiveoptions/)
 - [TransportReference](../transportreference/)

@@ -220,9 +220,11 @@ Existe, mais partiel ou expérimental pour un usage en production.
 
 ### Observabilité complète
 
-**Faiblesse actuelle** — Les événements d'agent et de workflow arrivent par deux canaux séparés et non reliés. Plusieurs étapes n'émettent rien : sandbox, Git, stderr, arrêt forcé.
+**Statut — implémenté, non publié** : hub contextualisé, récepteurs bornés, corrélation workflows/agents/opérations, diagnostics de processus, adaptateurs des cinq CLI et événements du harness. La documentation bilingue décrit les garanties et limites. Les événements TTY, le relais complet des workers distants et le registre d’état durable par ID restent hors périmètre.
 
-**Ce que ça complète** — Le plan des issues #1 à #7 : un hub central, un contexte commun (workflow, tâche, tentative, run) et des récepteurs branchables. Il faut aussi remplacer les mentions de Gemini par Antigravity, Copilot et Kimi. C'est la base du registre d'état par ID.
+**Besoin traité** — Relier les événements d'agent et de workflow et rendre visibles les étapes de sandbox, Git, stderr et arrêt forcé.
+
+**Périmètre livré** — Le plan des issues #1 à #7 : un hub central, un contexte commun (workflow, tâche, tentative, dispatch) et des récepteurs branchables. Les adaptateurs couvrent Claude, Codex, Antigravity, Copilot et Kimi. Le registre d'état par ID reste un chantier distinct.
 
 <a id="r-harness"></a>
 

@@ -13,17 +13,17 @@ import type { WorkflowEvent } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name          | Type                                                               | Presence | Meaning                                                                                               |
-| ------------- | ------------------------------------------------------------------ | -------- | ----------------------------------------------------------------------------------------------------- |
-| `executionId` | `string`                                                           | Required | Identity of the workflow execution, preserved across checkpoint resumption.                           |
-| `workflow`    | `string`                                                           | Required | Name of the workflow that emitted this event.                                                         |
-| `timestamp`   | `string`                                                           | Required | ISO timestamp when the workflow event was emitted.                                                    |
-| `type`        | `"usage" \| "retry" \| "start" \| "task" \| "attempt" \| "finish"` | Required | Event category: run start/finish, task transition, attempt, retry or usage report.                    |
-| `key`         | `string \| undefined`                                              | Optional | Stable task key identifying the node within its workflow graph.                                       |
-| `status`      | `TaskStatus \| undefined`                                          | Optional | Task lifecycle state, including waiting, active, done, failure, cancellation or gate pause/rejection. |
-| `attempt`     | `number \| undefined`                                              | Optional | One-based task attempt number.                                                                        |
-| `usage`       | `Usage \| undefined`                                               | Optional | Reported usage counters; not a currency estimate.                                                     |
-| `durationMs`  | `number \| undefined`                                              | Optional | Elapsed execution time in milliseconds.                                                               |
+| Name          | Type                                                                                                                                        | Presence | Meaning                                                                                               |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------- |
+| `executionId` | `string`                                                                                                                                    | Required | Identity of the workflow execution, preserved across checkpoint resumption.                           |
+| `workflow`    | `string`                                                                                                                                    | Required | Name of the workflow that emitted this event.                                                         |
+| `timestamp`   | `string`                                                                                                                                    | Required | ISO timestamp when the workflow event was emitted.                                                    |
+| `type`        | `"usage" \| "retry" \| "resume" \| "start" \| "task" \| "attempt" \| "finish" \| "gate" \| "decision" \| "checkpoint" \| "budget-exceeded"` | Required | Event category: run start/finish, task transition, attempt, retry or usage report.                    |
+| `key`         | `string \| undefined`                                                                                                                       | Optional | Stable task key identifying the node within its workflow graph.                                       |
+| `status`      | `TaskStatus \| undefined`                                                                                                                   | Optional | Task lifecycle state, including waiting, active, done, failure, cancellation or gate pause/rejection. |
+| `attempt`     | `number \| undefined`                                                                                                                       | Optional | One-based task attempt number.                                                                        |
+| `usage`       | `Usage \| undefined`                                                                                                                        | Optional | Reported usage counters; not a currency estimate.                                                     |
+| `durationMs`  | `number \| undefined`                                                                                                                       | Optional | Elapsed execution time in milliseconds.                                                               |
 
 ## Signature
 
@@ -32,7 +32,18 @@ export interface WorkflowEvent {
   readonly executionId: string;
   readonly workflow: string;
   readonly timestamp: string;
-  readonly type: "start" | "task" | "attempt" | "retry" | "usage" | "finish";
+  readonly type:
+    | "start"
+    | "task"
+    | "attempt"
+    | "retry"
+    | "usage"
+    | "finish"
+    | "gate"
+    | "decision"
+    | "checkpoint"
+    | "resume"
+    | "budget-exceeded";
   readonly key?: string;
   readonly status?: TaskStatus;
   readonly attempt?: number;

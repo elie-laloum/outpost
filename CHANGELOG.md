@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Add scoped observation hubs with bounded pluggable sinks, correlated workflow/agent/operation events, process stop diagnostics, normalized CLI tool results and opt-in model payloads. Journals and reporters use the shared delivery policy; sink failures are reported independently of execution. OpenTelemetry can consume the unified stream without changing metric names.
 - Add native session capture, warm/cold resume and response repairs for Copilot and Kimi, plus native Kimi fork. Antigravity supports warm resume and repairs only; portable capture/cold resume and automated fork remain unsupported. Copilot automated fork is explicitly refused. Session bundles preserve supported native files and can be archived through Transport.
 
 - Add opt-in Firecracker jailer execution with protected root-owned assets, an unprivileged VMM identity, cgroup v2 CPU/memory/process limits and conservative jail/cgroup cleanup. Direct execution remains compatible; the provider remains experimental pending broader host and adversarial validation.

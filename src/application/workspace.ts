@@ -1,3 +1,4 @@
+import { observedOperation } from "../domain/observed-operation.ts";
 import { invariant } from "../domain/errors.ts";
 import { allocateWorkspace } from "./workspace-allocation.ts";
 import { executeProcess } from "../infrastructure/process.ts";
@@ -13,16 +14,32 @@ export async function openWorkspace(
   options: WorkspaceOptions = {},
 ): Promise<Workspace> {
   options.signal?.throwIfAborted();
-  const lease = await allocateWorkspace(options);
+  const lease = await observedOperation(
+    options.observation,
+    "git",
+    "workspace.allocate",
+    async () => allocateWorkspace(options),
+  );
   try {
-    await hooks(
-      options.hooks?.workspaceReady ?? [],
-      lease.directory,
-      executeProcess,
-      options.signal,
+    await observedOperation(
+      options.observation,
+      "hooks",
+      "workspace.ready",
+      async () =>
+        hooks(
+          options.hooks?.workspaceReady ?? [],
+          lease.directory,
+          executeProcess,
+          options.signal,
+        ),
     );
   } catch (cause) {
-    await startupFailure(lease, cause, options);
+    await observedOperation(
+      options.observation,
+      "recovery",
+      "workspace.startup-failure",
+      async () => startupFailure(lease, cause, options),
+    );
     await lease.dispose();
     throw cause;
   }
@@ -34,6 +51,10 @@ export async function openWorkspace(
   };
   const result: Workspace = {
     ...lease,
+    integrate: () =>
+      observedOperation(options.observation, "git", "branch.integrate", () =>
+        lease.integrate(),
+      ),
     dispatch(options) {
       return dispatch({ ...options, workspace: result });
     },
@@ -49,7 +70,12 @@ export async function openWorkspace(
         "Close the sandbox before closing its workspace",
       );
       state.closed = true;
-      return lease.dispose(settings.preserve);
+      return observedOperation(
+        options.observation,
+        "recovery",
+        "workspace.cleanup",
+        () => lease.dispose(settings.preserve),
+      );
     },
     async [Symbol.asyncDispose]() {
       await result.close();

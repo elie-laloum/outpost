@@ -32,6 +32,7 @@ export interface SpeculativeValidation<T> {
 }
 
 export interface SpeculationOptions<T = undefined> {
+  readonly observation?: import("../domain/observation.types.ts").ObservationHub;
   readonly repository: string;
   readonly sandboxProvider: NonNullable<SandboxOptions["sandboxProvider"]>;
   readonly candidates: readonly SpeculativeCandidate<T>[];
