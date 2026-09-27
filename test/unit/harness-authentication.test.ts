@@ -449,3 +449,34 @@ test("Kimi validates account regions and keeps API authentication separate", () 
     result.variables,
   );
 });
+
+test("Copilot reads object-valued stored tokens for the selected account", () => {
+  const credential = hostCredential(
+    plan(
+      agent({
+        harness: copilotHarness({ authentication: "account" }),
+      }),
+    ),
+  );
+  const configuration = (value: unknown) =>
+    JSON.stringify({
+      lastLoggedInUser: { host: "https://github.com", login: "octo" },
+      authTokens: {
+        "https://github.com:other": { token: "gho_other" },
+        "https://github.com:octo": value,
+      },
+    });
+  assert.equal(
+    credential.select?.(configuration({ token: "gho_selected" })),
+    "gho_selected",
+  );
+  for (const value of [{}, { token: "" }, { token: 42 }, null])
+    assert.throws(
+      () => credential.select?.(configuration(value)),
+      /no token for the last logged-in user/,
+    );
+  assert.throws(
+    () => credential.select?.(configuration({ token: "ghp_classic" })),
+    /classic personal access tokens/,
+  );
+});

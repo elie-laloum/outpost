@@ -2,6 +2,7 @@
 
 ## Non publié
 
+- Corrige l’authentification Copilot par compte lorsque `config.json` stocke le jeton du compte sélectionné dans un objet avec un champ `token`, tout en conservant la prise en charge des jetons stockés sous forme de chaîne.
 - Corrige l’authentification des comptes Kimi Code internationaux avec `kimiHarness({ authentication: "account", region: "global" })` : copie le fichier OAuth propre à la région et l’identifiant d’appareil, puis configure la même région dans la sandbox. L’authentification par compte utilise `region: "global"` par défaut ; les comptes chinois doivent sélectionner explicitement `region: "mainland-cn"`. Les endpoints de compte contradictoires sont refusés pour les régions explicites comme pour celle par défaut.
 
 ## 6.0.1

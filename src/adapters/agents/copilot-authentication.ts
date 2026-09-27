@@ -28,10 +28,11 @@ function parseConfiguration(content: string): Record<string, unknown> {
 function storedToken(content: string): string {
   const configuration = parseConfiguration(content);
   const user = asRecord(configuration.lastLoggedInUser);
-  const token =
+  const stored =
     typeof user.host === "string" && typeof user.login === "string"
       ? asRecord(configuration.authTokens)[`${user.host}:${user.login}`]
       : undefined;
+  const token = typeof stored === "string" ? stored : asRecord(stored).token;
   invariant(
     typeof token === "string" && token !== "",
     `Copilot config.json stores no token for the last logged-in user. Copilot keeps tokens in the system keychain by default, which Outpost never reads: pass { account: { variable: "${variable}" } } instead.`,

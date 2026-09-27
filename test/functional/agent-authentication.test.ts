@@ -92,6 +92,18 @@ test("isolated placements install host files once and run login commands with me
     { COPILOT_GITHUB_TOKEN: "gho_file" },
   );
   assert.equal(calls.length, 0);
+  await writeFile(
+    profile,
+    JSON.stringify({
+      lastLoggedInUser: { host: "https://github.com", login: "octo" },
+      authTokens: { "https://github.com:octo": { token: "gho_object" } },
+    }),
+  );
+  assert.deepEqual(
+    await authenticateAgent(copilot, {}, lease, "mounted", signal),
+    { COPILOT_GITHUB_TOKEN: "gho_object" },
+  );
+  assert.equal(calls.length, 0);
   const codexAuth = join(directory, "auth.json");
   await writeFile(codexAuth, '{"tokens":{"access_token":"fixture"}}');
   const codex = agent({
