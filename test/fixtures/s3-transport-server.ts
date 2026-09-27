@@ -2,13 +2,18 @@ import { createServer } from "node:http";
 import { createHash } from "node:crypto";
 import { S3Client } from "@aws-sdk/client-s3";
 import type { TestContext } from "node:test";
+import type {
+  S3FixtureOptions,
+  S3FixtureObject,
+} from "./s3-transport-server.types.ts";
 import { s3Transport } from "../../src/infrastructure/s3-transport.ts";
 
-export async function s3Fixture(t: TestContext) {
-  const objects = new Map<
-    string,
-    { bytes: Buffer; etag: string; date: Date }
-  >();
+export async function s3Fixture(
+  t: TestContext,
+  options: S3FixtureOptions = {},
+) {
+  const objects = new Map<string, S3FixtureObject>();
+  const requests: string[] = [];
   const server = createServer(async (request, response) => {
     try {
       const url = new URL(request.url!, "http://localhost");
@@ -39,6 +44,7 @@ export async function s3Fixture(t: TestContext) {
         );
         return;
       }
+      requests.push(request.method ?? "");
       const existing = objects.get(key);
       if (request.method === "PUT") {
         if (request.headers["if-none-match"] === "*" && existing)
@@ -52,13 +58,21 @@ export async function s3Fixture(t: TestContext) {
         for await (const chunk of request) chunks.push(Buffer.from(chunk));
         const bytes = Buffer.concat(chunks);
         const etag = '"' + createHash("md5").update(bytes).digest("hex") + '"';
-        objects.set(key, { bytes, etag, date: new Date() });
+        objects.set(key, {
+          bytes,
+          etag,
+          date: new Date(),
+          tombstone: request.headers["x-amz-meta-outpost-tombstone"] === "true",
+        });
         response.setHeader("ETag", etag);
         response.end();
         return;
       }
       if (request.method === "DELETE") {
-        if (request.headers["if-match"] !== existing?.etag)
+        if (
+          !options.ignoreDeleteCondition &&
+          request.headers["if-match"] !== existing?.etag
+        )
           return error(412, "PreconditionFailed");
         objects.delete(key);
         response.writeHead(204);
@@ -68,7 +82,10 @@ export async function s3Fixture(t: TestContext) {
       if (!existing) return error(404, "NoSuchKey");
       response.setHeader("ETag", existing.etag);
       response.setHeader("Content-Length", existing.bytes.length);
-      response.end(existing.bytes);
+      response.setHeader("Last-Modified", existing.date.toUTCString());
+      if (existing.tombstone)
+        response.setHeader("x-amz-meta-outpost-tombstone", "true");
+      response.end(request.method === "HEAD" ? undefined : existing.bytes);
     } catch {
       response.writeHead(500);
       response.end();
@@ -93,7 +110,14 @@ export async function s3Fixture(t: TestContext) {
     );
   });
   return {
-    transporter: s3Transport({ client, bucket: "bucket", prefix: "project" }),
+    transporter: s3Transport({
+      client,
+      bucket: "bucket",
+      prefix: "project",
+      ...(options.deleteMode ? { deleteMode: options.deleteMode } : {}),
+    }),
+    requests,
+    client,
     objects,
   };
 }

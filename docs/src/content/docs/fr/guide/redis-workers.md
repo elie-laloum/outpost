@@ -5,6 +5,8 @@ description: "Distribuer les travaux avec BullMQ et Redis standalone."
 
 Installez `bullmq` et démarrez un serveur Redis standalone. L’adaptateur se charge uniquement via son sous-chemin de paquet optionnel.
 
+Réglez `maxmemory-policy` sur `noeviction` avant d’ouvrir une file. Outpost vérifie Redis INFO et refuse toute autre politique ou une valeur indisponible ; il ne modifie jamais la configuration du serveur. L’éviction des clés expirables peut supprimer les verrous des workers. Sur Redis Cloud, modifiez **Data eviction policy** en **no eviction** dans la console, enregistrez puis vérifiez qu’INFO indique `maxmemory_policy:noeviction`. Lorsque la mémoire est pleine, les écritures échouent au lieu d’évincer l’état de la file ; surveillez la capacité et gérez ces erreurs.
+
 ```sh
 npm install bullmq
 ```

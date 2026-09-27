@@ -51,6 +51,11 @@ export async function openBullMQResources(options: BullMQTaskQueueOptions) {
   root.on("error", report);
   try {
     await root.waitUntilReady();
+    const memory = await (await root.client).info();
+    if (!/^maxmemory_policy:noeviction\r?$/m.test(memory))
+      throw new Error(
+        "Redis maxmemory-policy must be noeviction; change the database Data eviction policy in your Redis service settings",
+      );
   } catch (error) {
     await root.close();
     throw error;

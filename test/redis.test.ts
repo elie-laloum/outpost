@@ -385,3 +385,26 @@ test("BullMQ close waits for admitted publication and is idempotent", async (t) 
     await enqueue;
   }
 });
+
+test("BullMQ refuses eviction policies that can discard queue locks", async () => {
+  const inspector = new Queue(`policy-${randomUUID()}`, { connection });
+  const client = await inspector.client;
+  try {
+    await client.runCommand("config", [
+      "SET",
+      "maxmemory-policy",
+      "volatile-lru",
+    ]);
+    await assert.rejects(
+      bullmqTaskQueue({ name: "unsafe-policy", connection }),
+      /maxmemory-policy must be noeviction/,
+    );
+  } finally {
+    await client.runCommand("config", [
+      "SET",
+      "maxmemory-policy",
+      "noeviction",
+    ]);
+    await inspector.close();
+  }
+});

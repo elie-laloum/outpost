@@ -9,6 +9,9 @@ The release notes below are synchronized from the root `CHANGELOG.md`, the singl
 
 ## Unreleased
 
+- Add `s3Transport({ deleteMode: "tombstone" })` for services such as R2 without atomic conditional DELETE: conditional PUT markers fence stale deletions and concurrent recreation, remain physically stored, and are hidden from reads and lists. The default conditional DELETE mode is unchanged.
+- Refuse BullMQ queues unless Redis INFO confirms `maxmemory-policy=noeviction`, with a configuration error instead of allowing eviction of queue state.
+
 - Stop host `doctor` probes and their descendants on interruption, preserving SIGINT/SIGTERM exit codes.
 - Keep a safe connection diagnostic in CLI-agent timeout errors when the latest failure event reports a connection problem, without copying endpoint URLs or credentials.
 - Fix Copilot account authentication when `config.json` stores the selected account token as an object with a `token` field, while retaining support for string tokens.

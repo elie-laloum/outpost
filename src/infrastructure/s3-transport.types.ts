@@ -4,4 +4,5 @@ export interface S3TransportOptions {
   readonly client: S3Client;
   readonly bucket: string;
   readonly prefix?: string;
+  readonly deleteMode?: "conditional" | "tombstone";
 }

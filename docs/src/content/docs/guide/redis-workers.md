@@ -5,6 +5,8 @@ description: "Distribute jobs using BullMQ and standalone Redis."
 
 Install `bullmq` and run a standalone Redis server. The adapter loads only through its optional package subpath.
 
+Set `maxmemory-policy` to `noeviction` before opening a queue. Outpost checks Redis INFO and rejects other policies or an unavailable policy value; it never changes server configuration. Evicting expiring keys can discard worker locks. On Redis Cloud, edit the database **Data eviction policy** to **no eviction** in the provider console, save, and verify INFO reports `maxmemory_policy:noeviction`. When memory is full, writes fail instead of evicting queue state; monitor capacity and handle those errors.
+
 ```sh
 npm install bullmq
 ```

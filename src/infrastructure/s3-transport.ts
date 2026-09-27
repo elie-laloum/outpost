@@ -1,5 +1,6 @@
 import {
   GetObjectCommand,
+  HeadObjectCommand,
   PutObjectCommand,
   DeleteObjectCommand,
   ListObjectsV2Command,
@@ -13,6 +14,7 @@ import type { Transport } from "../domain/transport.types.ts";
 import type { S3TransportOptions } from "./s3-transport.types.ts";
 import { decodeObject, encodeObject, readLimit } from "./transport-envelope.ts";
 import { transportDefaults } from "./transport.constants.ts";
+import { s3DeleteMode, s3TombstoneMetadata } from "./s3-transport.constants.ts";
 
 export type { S3TransportOptions } from "./s3-transport.types.ts";
 
@@ -30,6 +32,9 @@ function status(error: unknown): number | undefined {
 
 export function s3Transport(options: S3TransportOptions): Transport {
   if (!options.bucket.trim()) throw new Error("S3 bucket must not be empty");
+  const deleteMode = options.deleteMode ?? s3DeleteMode;
+  if (deleteMode !== "conditional" && deleteMode !== "tombstone")
+    throw new Error("Invalid S3 delete mode");
   const prefix = options.prefix
     ? `${transportKey(options.prefix.replace(/\/$/, ""))}/`
     : "";
@@ -37,6 +42,17 @@ export function s3Transport(options: S3TransportOptions): Transport {
     Bucket: options.bucket,
     Key: `${prefix}${transportKey(key)}`,
   });
+  async function head(key: string, signal?: AbortSignal) {
+    try {
+      return await options.client.send(
+        new HeadObjectCommand(target(key)),
+        signal ? { abortSignal: signal } : {},
+      );
+    } catch (error) {
+      if (status(error) === 404) return undefined;
+      throw error;
+    }
+  }
   return {
     name: "s3",
     async read(key, settings = {}) {
@@ -50,6 +66,8 @@ export function s3Transport(options: S3TransportOptions): Transport {
         if (!value.Body) throw new Error("Missing S3 object body");
         const reader = value.Body.transformToWebStream().getReader();
         try {
+          if (value.Metadata?.[s3TombstoneMetadata] === "true")
+            return undefined;
           if (
             !value.ETag ||
             (value.ContentLength ?? Infinity) >
@@ -84,14 +102,22 @@ export function s3Transport(options: S3TransportOptions): Transport {
       transportCondition(settings.ifRevision);
       settings.signal?.throwIfAborted();
       const { entry, data } = encodeObject(key, bytes);
+      let revision = settings.ifRevision;
+      if (deleteMode === "tombstone" && revision === null) {
+        const current = await head(key, settings.signal);
+        if (current?.Metadata?.[s3TombstoneMetadata] === "true") {
+          if (!current.ETag) throw new Error("Missing S3 tombstone revision");
+          revision = current.ETag;
+        }
+      }
       try {
         const value = await options.client.send(
           new PutObjectCommand({
             ...target(key),
             Body: data,
-            ...(settings.ifRevision === null
+            ...(revision === null
               ? { IfNoneMatch: "*" }
-              : { IfMatch: settings.ifRevision }),
+              : { IfMatch: revision }),
           }),
           settings.signal ? { abortSignal: settings.signal } : {},
         );
@@ -109,6 +135,20 @@ export function s3Transport(options: S3TransportOptions): Transport {
       if (settings.ifRevision === null)
         throw new Error("S3 removal requires an existing revision");
       try {
+        if (deleteMode === "tombstone") {
+          const { data } = encodeObject(key, new Uint8Array());
+          const value = await options.client.send(
+            new PutObjectCommand({
+              ...target(key),
+              IfMatch: settings.ifRevision,
+              Body: data,
+              Metadata: { [s3TombstoneMetadata]: "true" },
+            }),
+            settings.signal ? { abortSignal: settings.signal } : {},
+          );
+          if (!value.ETag) throw new Error("Missing S3 revision after removal");
+          return;
+        }
         await options.client.send(
           new DeleteObjectCommand({
             ...target(key),
@@ -146,6 +186,25 @@ export function s3Transport(options: S3TransportOptions): Transport {
           )
             throw new Error("Invalid S3 listing entry");
           const key = transportKey(item.Key.slice(prefix.length));
+          if (deleteMode === "tombstone") {
+            const current = await head(key, settings.signal);
+            if (!current || current.Metadata?.[s3TombstoneMetadata] === "true")
+              continue;
+            if (
+              !current.ETag ||
+              !current.LastModified ||
+              current.ContentLength === undefined ||
+              current.ContentLength < transportDefaults.headerBytes
+            )
+              throw new Error("Invalid S3 listing object");
+            yield {
+              key,
+              revision: current.ETag,
+              size: current.ContentLength - transportDefaults.headerBytes,
+              modifiedAt: current.LastModified.toISOString(),
+            };
+            continue;
+          }
           yield {
             key,
             revision: item.ETag,

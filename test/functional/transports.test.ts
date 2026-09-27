@@ -58,6 +58,13 @@ const adapters = {
   local: async (t: TestContext) =>
     localTransport({ directory: join(await temporary(t), "store") }),
   s3: async (t: TestContext) => (await s3Fixture(t)).transporter,
+  "s3-tombstone": async (t: TestContext) =>
+    (
+      await s3Fixture(t, {
+        deleteMode: "tombstone",
+        ignoreDeleteCondition: true,
+      })
+    ).transporter,
 };
 async function collect<T>(values: AsyncIterable<T>): Promise<T[]> {
   const result: T[] = [];

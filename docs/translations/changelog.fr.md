@@ -2,6 +2,9 @@
 
 ## Non publié
 
+- Ajoute `s3Transport({ deleteMode: "tombstone" })` pour les services comme R2 sans DELETE conditionnel atomique : des marqueurs PUT conditionnels bloquent suppressions périmées et recréations concurrentes, restent physiquement stockés et sont masqués des lectures et listes. Le mode DELETE conditionnel par défaut est inchangé.
+- Refuse les files BullMQ si Redis INFO ne confirme pas `maxmemory-policy=noeviction`, avec une erreur de configuration au lieu de permettre l’éviction de l’état des files.
+
 - Arrête les sondes hôte de `doctor` et leurs descendants lors d’une interruption, en préservant les codes de sortie SIGINT/SIGTERM.
 - Conserve un diagnostic de connexion sûr dans les erreurs de timeout des agents CLI lorsque le dernier événement d’échec signale un problème de connexion, sans recopier d’URL d’endpoint ni d’identifiants.
 - Corrige l’authentification Copilot par compte lorsque `config.json` stocke le jeton du compte sélectionné dans un objet avec un champ `token`, tout en conservant la prise en charge des jetons stockés sous forme de chaîne.

@@ -3273,8 +3273,8 @@
     "S3Client configuré par l’appelant avec région, identifiants et éventuel endpoint compatible. Outpost ne le détruit pas et ne transmet pas ses identifiants aux sandboxes."
   ],
   "S3TransportOptions.bucket": [
-    "Existing bucket supporting conditional PUT and DELETE operations; the adapter does not create buckets.",
-    "Bucket existant prenant en charge PUT et DELETE conditionnels ; l’adaptateur ne crée pas de bucket."
+    "Existing private bucket supporting conditional PUT and paginated listing, plus conditional DELETE in the default delete mode. The adapter does not create buckets.",
+    "Bucket privé existant prenant en charge PUT conditionnel et la pagination, ainsi que DELETE conditionnel dans le mode de suppression par défaut. L’adaptateur ne crée pas de bucket."
   ],
   "S3TransportOptions.prefix": [
     "Optional private prefix for Outpost objects. Keep unrelated objects outside this prefix; defaults to the bucket root.",
@@ -4633,5 +4633,9 @@
   "KimiSettings.region": [
     "Account deployment: \"global\" for kimi.ai (default) or \"mainland-cn\" for kimi.com. Selects the matching OAuth file, account endpoints and sandbox login region without copying the host configuration. Requires account authentication when authentication is supplied; usage forms reject an explicit region. Omission selects global for accounts and does not change API authentication. Conflicting declared account endpoints are rejected, including with the default region.",
     "Service du compte : \"global\" pour kimi.ai (par défaut) ou \"mainland-cn\" pour kimi.com. Sélectionne le fichier OAuth, les endpoints de compte et la région de connexion dans la sandbox sans copier la configuration hôte. Exige le mode compte lorsqu’une authentification est fournie ; les formes usage refusent une région explicite. Son absence sélectionne global pour les comptes et ne modifie pas l’authentification API. Les endpoints de compte déclarés contradictoires sont refusés, y compris avec la région par défaut."
+  ],
+  "S3TransportOptions.deleteMode": [
+    "\"conditional\" (default) requires atomic conditional DELETE support. \"tombstone\" removes objects through conditional PUT markers for endpoints such as R2; reads and lists hide markers and conditional creation can replace them. All writers sharing a prefix must select the same mode. Markers retain a 1 KiB envelope and listing adds a HEAD per object; physically purge markers only after stopping every writer.",
+    "\"conditional\" (défaut) exige DELETE conditionnel atomique. \"tombstone\" supprime via des marqueurs PUT conditionnels pour les endpoints comme R2 ; lectures et listes masquent les marqueurs, remplaçables par création conditionnelle. Tous les écrivains d’un préfixe doivent choisir le même mode. Chaque marqueur conserve une enveloppe de 1 Kio et le listing ajoute un HEAD par objet ; purger physiquement seulement après arrêt de tous les écrivains."
   ]
 }

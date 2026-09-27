@@ -13,7 +13,7 @@ import { bullmqTaskQueue } from "@elie-laloum/outpost/queues/bullmq";
 
 ## Rôle et comportement
 
-Ouvre un adaptateur optionnel BullMQ 5 sur Redis standalone. Implémente TaskQueue pour queuedTask et runQueueWorker, avec identité des requêtes, résultats JSON sans perte et baux atomiques protégés par génération. Possède ses connexions et contrôles de jobs bloqués ; attendre close() après avoir arrêté les workers. La persistance Redis et l’absence d’éviction déterminent la durabilité. Importer depuis @elie-laloum/outpost/queues/bullmq et installer bullmq séparément.
+Ouvre un adaptateur optionnel BullMQ 5 sur Redis standalone. Implémente TaskQueue pour queuedTask et runQueueWorker, avec identité des requêtes, résultats JSON sans perte et baux atomiques protégés par génération. Possède ses connexions et contrôles de jobs bloqués ; attendre close() après avoir arrêté les workers. La persistance Redis et l’absence d’éviction déterminent la durabilité. Importer depuis @elie-laloum/outpost/queues/bullmq et installer bullmq séparément. Refuse un serveur Redis dont INFO ne confirme pas maxmemory_policy=noeviction ; configurez le serveur avant d’ouvrir la file. Ne modifie pas la configuration du serveur.
 
 [Exemple complet et règles détaillées](../../guide/advanced/distributed/).
 
