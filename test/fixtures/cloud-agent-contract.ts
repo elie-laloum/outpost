@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { cloudCommandFailure } from "./cloud-failure.ts";
 import { posix } from "node:path";
 import { codexDiagnostics } from "../../src/adapters/agents/codex-diagnostics.ts";
 import { claudeDiagnostics } from "../../src/adapters/agents/claude-diagnostics.ts";
@@ -31,7 +32,8 @@ export async function verifyCloudAgents(
     deadlineMs: 120_000,
     retain: 1024,
   });
-  assert.equal(installed.status, 0);
+  if (installed.status !== 0)
+    throw cloudCommandFailure("agent-cli-installation", "agent-cli", installed);
   const diagnostics = {
     codex: codexDiagnostics,
     claude: claudeDiagnostics,
@@ -52,7 +54,12 @@ export async function verifyCloudAgents(
       signal,
       deadlineMs: compatibilityLimits.commandMs,
     });
-    assert.equal(version.status, 0);
+    if (version.status !== 0)
+      throw cloudCommandFailure(
+        `${agent.executable}-cli-version`,
+        "agent-cli",
+        version,
+      );
     const parsedVersion = (version.stdout + version.stderr).match(
       /\b\d+\.\d+\.\d+\b/,
     )?.[0];
@@ -69,7 +76,12 @@ export async function verifyCloudAgents(
         signal,
         deadlineMs: compatibilityLimits.commandMs,
       });
-      assert.equal(result.status, 0);
+      if (result.status !== 0)
+        throw cloudCommandFailure(
+          `${agent.executable}-cli-${scenario.mode}`,
+          "agent-cli",
+          result,
+        );
       const output = result.stdout + result.stderr;
       assert.ok(output.includes(scenario.usage));
       for (const option of scenario.options) assert.ok(output.includes(option));

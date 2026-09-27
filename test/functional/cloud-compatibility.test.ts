@@ -10,6 +10,7 @@ import { daytonaFiles } from "../../src/providers/daytona-files.ts";
 import { localSandboxProvider } from "../../src/providers/local.ts";
 import { fileBatches } from "../../src/providers/file-batches.ts";
 import { executeProcess } from "../../src/infrastructure/process.ts";
+import { verifyCloudModels } from "../fixtures/cloud-model-contract.ts";
 import { verifyCloudAgents } from "../fixtures/cloud-agent-contract.ts";
 import { runCloudCompatibility } from "../fixtures/cloud-compatibility.ts";
 import type { CompatibilityOptions } from "../fixtures/cloud-compatibility.types.ts";
@@ -205,6 +206,7 @@ test("cloud runner bounds stuck verification and releases a late acquisition", a
   const reports = await runCloudCompatibility({
     environment,
     deadlineMs: 20,
+    cleanupMs: 20,
     create: () => ({
       ...sandboxProvider,
       acquire: () =>
@@ -311,3 +313,145 @@ test("agent CLI probes only request installation, versions and adapter help", as
     { code: "ERR_ASSERTION" },
   );
 });
+
+for (const failure of [
+  {
+    cause: Object.assign(new Error("private-token"), { statusCode: 401 }),
+    category: "allocation",
+    reason: "authentication-rejected",
+  },
+  {
+    cause: { response: { status: 403 }, message: "private-token" },
+    category: "allocation",
+    reason: "authentication-rejected",
+  },
+  {
+    cause: Object.assign(new Error("private-token"), { statusCode: 429 }),
+    category: "allocation",
+    reason: "quota-exceeded",
+  },
+  {
+    cause: new Error("private-token", { cause: { code: "ECONNREFUSED" } }),
+    category: "network",
+    reason: "network-unreachable",
+  },
+]) {
+  test(`cloud allocation reports ${failure.reason} without exposing credentials`, async () => {
+    const reports = await runCloudCompatibility({
+      environment,
+      create: () => ({
+        name: "daytona",
+        placement: "remote",
+        acquire: async () => {
+          throw failure.cause;
+        },
+      }),
+    });
+    const check = reports[1]?.checks.find(
+      (check) => check.name === "allocation",
+    );
+    assert.equal(check?.reason, failure.reason);
+    assert.equal(check?.category, failure.category);
+    assert.doesNotMatch(
+      JSON.stringify(reports),
+      /private-token|fake-never-sent/,
+    );
+  });
+}
+
+test("cloud runner confirms cleanup for allocations arriving during the cleanup window", async () => {
+  let released = 0;
+  const reports = await runCloudCompatibility({
+    environment,
+    deadlineMs: 10,
+    cleanupMs: 1000,
+    create: () => ({
+      name: "daytona",
+      placement: "remote",
+      acquire: async () => {
+        await new Promise((resolve) => setTimeout(resolve, 30));
+        return {
+          root: "/unused",
+          home: "/unused",
+          invoke: async () => ({ status: 0, stdout: "", stderr: "" }),
+          upload: async () => {},
+          download: async () => {},
+          release: async () => {
+            released++;
+          },
+        };
+      },
+    }),
+  });
+  assert.equal(released, 1);
+  assert.equal(
+    reports[1]?.checks.find((check) => check.name === "allocation")?.reason,
+    "deadline-exceeded",
+  );
+  assert.deepEqual(
+    reports[1]?.checks.find((check) => check.name === "cleanup"),
+    { name: "cleanup", status: "pass", reason: "late-allocation-released" },
+  );
+});
+
+for (const agent of ["claude", "codex"] as const) {
+  test(`cloud runner preserves ${agent} failure attribution and releases the lease`, async () => {
+    const sandboxProvider = localSandboxProvider();
+    const reports = await runCloudCompatibility({
+      environment,
+      create: () => ({
+        ...sandboxProvider,
+        acquire: async (context) => {
+          const lease = await sandboxProvider.acquire(context);
+          return {
+            ...lease,
+            invoke: async () => ({
+              status: 1,
+              stdout: JSON.stringify({
+                error: {
+                  code:
+                    agent === "claude"
+                      ? "insufficient_quota"
+                      : "invalid_api_key",
+                  message: "private-model-key",
+                },
+              }),
+              stderr: "",
+            }),
+          };
+        },
+      }),
+      verify: (lease, _directory, signal, record) =>
+        verifyCloudModels(
+          lease,
+          {
+            OUTPOST_CLOUD_MODEL_AGENTS: agent,
+            ANTHROPIC_API_KEY: "private-model-key",
+            OPENAI_API_KEY: "private-model-key",
+          },
+          signal,
+          record,
+        ),
+    });
+    const failed = reports[1]?.checks.find((check) => check.status === "fail");
+    assert.equal(
+      failed?.name,
+      agent === "claude"
+        ? "claude-authenticated-model-turn"
+        : "codex-agent-login",
+    );
+    assert.equal(
+      failed?.category,
+      agent === "claude" ? "model-access" : "agent-authentication",
+    );
+    assert.equal(
+      failed?.reason,
+      agent === "claude" ? "quota-exceeded" : "authentication-rejected",
+    );
+    assert.equal(
+      reports[1]?.checks.find((check) => check.name === "cleanup")?.status,
+      "pass",
+    );
+    assert.doesNotMatch(JSON.stringify(reports), /private-model-key/);
+  });
+}

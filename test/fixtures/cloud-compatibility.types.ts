@@ -4,10 +4,31 @@ import type {
 } from "../../src/domain/sandbox.types.ts";
 
 export type CloudName = "vercel" | "daytona";
+export type CompatibilityStage =
+  | "allocation"
+  | "lease-contract"
+  | "agent-cli-contract"
+  | "authenticated-model-turn";
+export type CompatibilityCategory =
+  | "allocation"
+  | "agent-cli"
+  | "agent-authentication"
+  | "model-access"
+  | "network"
+  | "contract"
+  | "cleanup";
+export type CompatibilityFailureReason =
+  | "authentication-rejected"
+  | "quota-exceeded"
+  | "model-unavailable"
+  | "network-unreachable"
+  | "deadline-exceeded"
+  | "contract-failed";
 export interface CompatibilityCheck {
   readonly name: string;
   readonly status: "pass" | "fail" | "skipped";
   readonly reason?: string;
+  readonly category?: CompatibilityCategory;
   readonly version?: string;
 }
 export interface CompatibilityReport {

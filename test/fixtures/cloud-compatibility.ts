@@ -1,3 +1,4 @@
+import { cloudFailure } from "./cloud-failure.ts";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -10,6 +11,7 @@ import {
 } from "./cloud-compatibility.constants.ts";
 import type {
   CompatibilityCheck,
+  CompatibilityStage,
   CompatibilityOptions,
   CompatibilityReport,
 } from "./cloud-compatibility.types.ts";
@@ -48,7 +50,8 @@ export async function runCloudCompatibility(
       options.deadlineMs ?? compatibilityLimits.deadlineMs,
     );
     let lease: SandboxLease | undefined;
-    let stage = "allocation";
+    let allocationCleanup: Promise<void> | undefined;
+    let stage: CompatibilityStage = "allocation";
     try {
       const acquiring = options.create(sandboxProvider).acquire({
         repository: directory,
@@ -57,11 +60,10 @@ export async function runCloudCompatibility(
         variables: {},
         signal,
       });
-      void acquiring
-        .then(async (late) => {
-          if (signal.aborted && !lease) await late.release();
-        })
-        .catch(() => undefined);
+      allocationCleanup = acquiring.then(async (late) => {
+        if (signal.aborted && !lease) await late.release();
+      });
+      void allocationCleanup.catch(() => undefined);
       lease = await interruptible(acquiring, signal);
       checks.push({ name: stage, status: "pass" });
       stage = "lease-contract";
@@ -103,12 +105,8 @@ export async function runCloudCompatibility(
           status: "skipped",
           reason: "not-opted-in",
         });
-    } catch {
-      checks.push({
-        name: stage,
-        status: "fail",
-        reason: signal.aborted ? "deadline-exceeded" : "contract-failed",
-      });
+    } catch (cause) {
+      checks.push(cloudFailure(cause, stage, signal.aborted));
     } finally {
       if (lease) {
         try {
@@ -127,9 +125,33 @@ export async function runCloudCompatibility(
             name: "cleanup",
             status: "fail",
             reason: "cleanup-unconfirmed",
+            category: "cleanup",
           });
         }
-      } else
+      }
+      if (!lease && signal.aborted && allocationCleanup) {
+        try {
+          await interruptible(
+            allocationCleanup,
+            AbortSignal.timeout(
+              options.cleanupMs ?? compatibilityLimits.cleanupMs,
+            ),
+          );
+          checks.push({
+            name: "cleanup",
+            status: "pass",
+            reason: "late-allocation-released",
+          });
+        } catch {
+          checks.push({
+            name: "cleanup",
+            status: "fail",
+            category: "cleanup",
+            reason: "cleanup-unconfirmed",
+          });
+        }
+      }
+      if (!lease && !(signal.aborted && allocationCleanup))
         checks.push({
           name: "cleanup",
           status: "skipped",

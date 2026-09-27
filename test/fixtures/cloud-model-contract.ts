@@ -1,3 +1,4 @@
+import { CloudCheckError, cloudCommandFailure } from "./cloud-failure.ts";
 import { agent as composeAgent } from "../../src/domain/agent.ts";
 import assert from "node:assert/strict";
 import { posix } from "node:path";
@@ -45,51 +46,86 @@ export async function verifyCloudModels(
       name,
     );
     if (name === "codex") {
-      const login = await lease.invoke({
-        executable,
-        arguments: ["login", "--with-api-key"],
-        stdin: value,
-        variables,
-        signal,
-        deadlineMs: 30_000,
-      });
-      assert.equal(login.status, 0, "Codex API-key login failed");
+      const login = await lease
+        .invoke({
+          executable,
+          arguments: ["login", "--with-api-key"],
+          stdin: value,
+          variables,
+          signal,
+          deadlineMs: 30_000,
+        })
+        .catch((cause) => {
+          throw new CloudCheckError(
+            "codex-agent-login",
+            "agent-authentication",
+            cause,
+          );
+        });
+      if (login.status !== 0)
+        throw cloudCommandFailure(
+          "codex-agent-login",
+          "agent-authentication",
+          login,
+        );
     }
     const model =
       environment[
         name === "claude" ? "OUTPOST_CLAUDE_MODEL" : "OUTPOST_CODEX_MODEL"
       ];
-    const settings = { saveConversations: false, ...(model ? { model } : {}) };
-    const adapter =
+    const harness =
       name === "claude"
-        ? composeAgent({ harness: claudeHarness(settings) })
-        : composeAgent({ harness: codexHarness(settings) });
+        ? claudeHarness({
+            saveConversations: false,
+            authentication:
+              credential === "CLAUDE_CODE_OAUTH_TOKEN"
+                ? { account: { variable: credential } }
+                : "usage",
+          })
+        : codexHarness({ saveConversations: false, authentication: "usage" });
+    const adapter = composeAgent({ harness, ...(model ? { model } : {}) });
     const request = adapter.request({
       text: "Reply with exactly OUTPOST_AUTH_OK. Do not use tools or modify any files.",
     });
-    const result = await lease.invoke({
-      ...request,
-      executable,
-      variables,
-      signal,
-      deadlineMs: 90_000,
-      retain: 65536,
-    });
-    assert.equal(
-      result.status,
-      0,
-      `${name} authenticated model command failed`,
-    );
-    const text = result.stdout
+    const result = await lease
+      .invoke({
+        ...request,
+        arguments: [
+          ...(request.arguments ?? []),
+          ...(name === "codex" ? ["--skip-git-repo-check"] : []),
+        ],
+        executable,
+        variables,
+        signal,
+        deadlineMs: 90_000,
+        retain: 65536,
+      })
+      .catch((cause) => {
+        throw new CloudCheckError(
+          `${name}-authenticated-model-turn`,
+          "model-access",
+          cause,
+        );
+      });
+    const events = result.stdout
       .split("\n")
-      .flatMap((line) => adapter.events(line))
+      .flatMap((line) => adapter.events(line));
+    if (result.status !== 0 || events.some((event) => event.kind === "failure"))
+      throw cloudCommandFailure(
+        `${name}-authenticated-model-turn`,
+        "model-access",
+        result,
+      );
+    const text = events
       .filter((event) => event.kind === "text")
       .map((event) => event.text)
       .join("");
-    assert.ok(
-      text.includes("OUTPOST_AUTH_OK"),
-      `${name} returned no authenticated response`,
-    );
+    if (!text.includes("OUTPOST_AUTH_OK"))
+      throw new CloudCheckError(
+        `${name}-authenticated-model-turn`,
+        "model-access",
+        new Error("Missing authenticated response"),
+      );
     record({ name: `${name}-authenticated-model-turn`, status: "pass" });
   }
 }
