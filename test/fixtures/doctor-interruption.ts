@@ -1,11 +1,19 @@
 import assert from "node:assert/strict";
-import { diagnoseImage } from "../../src/application/doctor-image.ts";
+import { doctorCommand } from "../../src/cli/doctor-command.ts";
 import { executeProcess } from "../../src/infrastructure/process.ts";
 
 const sandboxProvider = process.argv[2];
 assert.ok(sandboxProvider === "docker" || sandboxProvider === "podman");
-await diagnoseImage(
-  { sandboxProvider, agent: "codex", image: "outpost-ci:latest" },
+await doctorCommand(
+  {
+    positionals: ["doctor"],
+    values: {
+      sandboxProvider,
+      agent: "codex",
+      image: "outpost-ci:latest",
+      json: true,
+    },
+  },
   async (command) => {
     const args = command.arguments ?? [];
     if (args[0] === "create")

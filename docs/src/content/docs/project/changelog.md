@@ -9,6 +9,7 @@ The release notes below are synchronized from the root `CHANGELOG.md`, the singl
 
 ## Unreleased
 
+- Stop host `doctor` probes and their descendants on interruption, preserving SIGINT/SIGTERM exit codes.
 - Fix Copilot account authentication when `config.json` stores the selected account token as an object with a `token` field, while retaining support for string tokens.
 - Fix Kimi Code international account authentication with `kimiHarness({ authentication: "account", region: "global" })`: copy the region-scoped OAuth credential and device identifier, then provision the same region inside the sandbox. Account authentication defaults to `region: "global"` when omitted; Chinese accounts must select `region: "mainland-cn"` explicitly. Conflicting account endpoint overrides are rejected for both explicit and default regions.
 

@@ -11,6 +11,8 @@ npx outpost doctor --sandbox-provider docker --agent codex --image outpost:dev -
 
 Le rapport distingue les capacités disponibles, non prises en charge et défaillantes. Corrigez le problème d’exécutable, d’image ou de moteur signalé avant de relancer une requête.
 
+Interrompre `doctor` arrête sa sonde hôte active et ses descendants. SIGINT termine avec le code 130 ; SIGTERM avec le code 143. Les diagnostics d’image nettoient aussi leur conteneur temporaire.
+
 ## Diagnostiquer une sandbox possédée
 
 `sandbox.diagnose()` inspecte une sandbox existante sous son contrôle d’exclusivité. Le diagnostic ne possède pas et ne ferme pas la sandbox. Ne le lancez pas en parallèle d’une autre commande dans cette même sandbox.

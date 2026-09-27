@@ -72,5 +72,5 @@ export async function doctorCommand(
         : "No blocking check failed; warnings and skipped checks still need review.\n",
     );
   }
-  if (report.hasFailures) process.exitCode = 1;
+  if (report.hasFailures && !process.exitCode) process.exitCode = 1;
 }

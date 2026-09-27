@@ -11,6 +11,8 @@ npx outpost doctor --sandbox-provider docker --agent codex --image outpost:dev -
 
 The report separates available, unsupported and failing capabilities. Fix the reported executable, image or engine problem before retrying a dispatch.
 
+Interrupting `doctor` stops its active host probe and its descendants. SIGINT exits with status 130; SIGTERM exits with status 143. Image diagnostics also clean up their temporary container.
+
 ## Diagnose an owned sandbox
 
 `sandbox.diagnose()` inspects an existing sandbox under its operation gate. The diagnostic does not own or close the sandbox. Do not run it concurrently with another command on that same sandbox.

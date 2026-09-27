@@ -1,4 +1,5 @@
-import { invariant } from "../domain/errors.ts";
+import { invariant, OutpostError } from "../domain/errors.ts";
+import { registerCleanup } from "../infrastructure/shutdown.ts";
 import { executeProcess } from "../infrastructure/process.ts";
 import type { Executor } from "../infrastructure/process.types.ts";
 import { agentVersionProbe } from "./doctor-agent.ts";
@@ -15,6 +16,28 @@ export async function diagnose(
   options: DoctorOptions,
   execute: Executor = executeProcess,
 ): Promise<DoctorReport> {
+  const stop = new AbortController();
+  const pending = inspect(options, execute, stop.signal);
+  const unregister = registerCleanup(async () => {
+    stop.abort(new OutpostError("aborted", "Host diagnostics interrupted"));
+    await pending;
+  });
+  try {
+    return await pending;
+  } finally {
+    unregister();
+  }
+}
+
+async function inspect(
+  options: DoctorOptions,
+  execute: Executor,
+  signal: AbortSignal,
+): Promise<DoctorReport> {
+  const probe: Executor = (command) => {
+    signal.throwIfAborted();
+    return execute({ ...command, signal });
+  };
   const { sandboxProvider, agent, image } = options;
   if (image !== undefined) {
     invariant(
@@ -50,7 +73,7 @@ export async function diagnose(
         remedy: "Install Git and make it available on PATH.",
         readVersion: true,
       },
-      execute,
+      probe,
     ),
   );
   if (capabilities.placement === "mounted") {
@@ -62,7 +85,7 @@ export async function diagnose(
         remedy: `Install ${sandboxProvider} and make it available on PATH.`,
         readVersion: true,
       },
-      execute,
+      probe,
     );
     checks.push(engine);
     if (engine.status === "pass")
@@ -77,7 +100,7 @@ export async function diagnose(
             failureStatus: "fail",
             remedy: `Check ${sandboxProvider} is running and accessible to this user; on macOS, start its virtual machine.`,
           },
-          execute,
+          probe,
         ),
       );
     checks.push(
@@ -88,7 +111,7 @@ export async function diagnose(
           failureStatus: "fail",
           remedy: "Install GNU tar or bsdtar for container transfers.",
         },
-        execute,
+        probe,
       ),
     );
   }
@@ -108,9 +131,10 @@ export async function diagnose(
         remedy:
           "Host CLI is unavailable or unverified. A sandbox may have its own CLI; dispatch can bootstrap a missing agent.",
       },
-      execute,
+      probe,
     ),
   );
+  signal.throwIfAborted();
   if (
     image !== undefined &&
     (sandboxProvider === "docker" || sandboxProvider === "podman")

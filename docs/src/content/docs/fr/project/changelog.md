@@ -9,6 +9,7 @@ Traduction du journal `CHANGELOG.md` conservé à la racine du dépôt. Chaque v
 
 ## Non publié
 
+- Arrête les sondes hôte de `doctor` et leurs descendants lors d’une interruption, en préservant les codes de sortie SIGINT/SIGTERM.
 - Corrige l’authentification Copilot par compte lorsque `config.json` stocke le jeton du compte sélectionné dans un objet avec un champ `token`, tout en conservant la prise en charge des jetons stockés sous forme de chaîne.
 - Corrige l’authentification des comptes Kimi Code internationaux avec `kimiHarness({ authentication: "account", region: "global" })` : copie le fichier OAuth propre à la région et l’identifiant d’appareil, puis configure la même région dans la sandbox. L’authentification par compte utilise `region: "global"` par défaut ; les comptes chinois doivent sélectionner explicitement `region: "mainland-cn"`. Les endpoints de compte contradictoires sont refusés pour les régions explicites comme pour celle par défaut.
 
