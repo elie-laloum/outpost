@@ -7,6 +7,13 @@ sidebar:
 
 The release notes below are synchronized from the root `CHANGELOG.md`, the single source of release history.
 
+## 6.0.1
+
+- Rebuild the English and French Guide from scratch with focused explanations and short, directly usable snippets. Introduce a new page structure, task-based navigation and a dedicated responsive Guide layout.
+- Cover setup, agent configuration, sandboxes, workflows, persistence, monitoring, operations and the experimental model engine across 60 pages per language. Preserve the Reference content and navigation.
+- Redirect retired Guide URLs to their new destinations, including localized links and continuation anchors. Validate rendered links, search, navigation and examples in both languages.
+- Replace workshop preparation generation with compilation of Guide snippets, offline execution of selected examples and real Docker/Podman checks of the documented command example. Public library contracts are unchanged.
+
 ## 6.0.0
 
 Breaking changes, without compatibility aliases:

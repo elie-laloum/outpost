@@ -1,5 +1,12 @@
 # Historique des versions
 
+## 6.0.1
+
+- Reconstruit entièrement le Guide anglais et français avec des explications ciblées et des snippets courts, directement utilisables. Introduit une nouvelle structure de pages, une navigation par besoin et une mise en page responsive propre au Guide.
+- Couvre l’installation, la configuration des agents, les sandboxes, les workflows, la persistance, l’observation, l’exploitation et le moteur de modèles expérimental sur 60 pages par langue. Préserve le contenu et la navigation de la Référence.
+- Redirige les anciennes URL du Guide vers leurs nouvelles destinations, y compris les liens localisés et les ancres de continuation. Vérifie les liens rendus, la recherche, la navigation et les exemples dans les deux langues.
+- Remplace la génération de préparations d’ateliers par la compilation des snippets du Guide, l’exécution hors ligne d’exemples sélectionnés et les vérifications Docker/Podman réelles de l’exemple de commande documenté. Les contrats publics de la bibliothèque restent inchangés.
+
 ## 6.0.0
 
 Changements cassants, sans alias de compatibilité :
