@@ -84,13 +84,17 @@ Déjà codé, reste à prouver en conditions réelles.
 
 ### Campagnes cloud Vercel et Daytona
 
-**Ce qu'on teste** — Le workflow GitHub `cloud-compatibility` (déjà planifié chaque lundi) avec l'option d'appels modèles, plus des échecs provoqués : mauvais jeton, quota épuisé, réseau coupé, démarrage trop long.
+**Statut — validation technique locale réussie (non publiée)** : les fixtures corrigées passent sur les deux providers avec les deux modèles retenus ; les erreurs attendues sont classées et le nettoyage est confirmé, y compris après allocation tardive. Le réseau Daytona est exclu selon le périmètre convenu ; le quota reste injecté. Bilan et preuves : `temp/cloud-compatibility/SUMMARY.md`. La confirmation de facturation dans les consoles reste distincte.
 
-**Ce que ça vérifie** — Chaque échec est rangé dans la bonne catégorie (allocation, connexion de l'agent, accès au modèle, réseau), la sandbox est supprimée après l'échec, et le rapport JSON ne contient aucun secret.
+**Ce qu'on teste** — La suite de compatibilité cloud exécutée localement sur Vercel et Daytona avec `gpt-5.6-luna` et `claude-haiku-4-5`, plus des échecs provoqués : mauvais jeton, quota refusé par injection, réseau coupé sur Vercel, démarrage trop long. Cette campagne ne lance pas GitHub Actions. Le blocage réseau dynamique Daytona est exclu du périmètre retenu : le compte ne permet pas de modifier cette politique par sandbox.
 
-**Prérequis** — `VERCEL_TOKEN`, `VERCEL_TEAM_ID`, `VERCEL_PROJECT_ID`, `DAYTONA_API_KEY`, les clés des modèles dans l'environnement GitHub `cloud-compatibility`, la variable `OUTPOST_CLOUD_LIVE=1` sur le dépôt, et un budget cloud.
+**Ce que ça vérifie** — Chaque échec est rangé dans la bonne catégorie (allocation, connexion de l'agent, accès au modèle, réseau), avec une raison distincte pour le quota et le délai dépassé ; le nettoyage est confirmé après l'échec, y compris pour une allocation tardive ; le rapport JSON ne contient aucun secret. Vercel arrête ses sandboxes éphémères, Daytona les supprime.
 
-**À vérifier à la main** — Dans les consoles Vercel et Daytona, aucune sandbox orpheline ne tourne encore. La facture correspond au nombre de runs lancés.
+**Prérequis** — `VERCEL_TOKEN`, `VERCEL_TEAM_ID` (l'équipe propriétaire du projet, pas l'utilisateur), `VERCEL_PROJECT_ID`, `DAYTONA_API_KEY`, `OPENAI_API_KEY` et `ANTHROPIC_API_KEY` dans `test/.env`, Node.js 24+ et un budget total de 2 $ maximum. Les commandes et preuves de la campagne sont conservées dans `temp/cloud-compatibility/`.
+
+**Limites convenues** — Le quota épuisé est simulé sans consommer de crédit pour atteindre une limite réelle. Le blocage réseau dynamique Daytona reste hors périmètre et n'est pas compté comme réussi. Les scénarios par abonnement et les autres agents relèvent des campagnes dédiées.
+
+**À vérifier à la main** — Dans les consoles Vercel et Daytona, aucune sandbox de campagne ne tourne encore. Comparer la facture aux runs enregistrés ; une estimation locale ne vaut pas confirmation de facturation.
 
 <a id="t-harness"></a>
 
@@ -107,6 +111,8 @@ Déjà codé, reste à prouver en conditions réelles.
 <a id="t-doctor"></a>
 
 ### Diagnostics de premier lancement
+
+**Statut — validation locale partielle (non publiée)** : les 10 scénarios contrôlés de la campagne Linux passent après correction de l’annulation des sondes hôte et du diagnostic réseau conservé lors d’un timeout. La clarté des messages a été confirmée par le propriétaire. Traces et relance : `temp/first-launch-diagnostics/`. Les comptes réellement expirés/révoqués, macOS/Windows et les autres combinaisons agent/authentification restent à tester ; le point complet reste ouvert.
 
 **Ce qu'on teste** — `outpost doctor --json` puis un premier dispatch dans des situations cassées : CLI absente, jeton expiré, endpoint injoignable, modèle inconnu, Docker arrêté. Sur Linux, macOS et Windows, en CI sans terminal, et avec une annulation (Ctrl-C).
 
@@ -297,10 +303,17 @@ const fix = loopTask({
   key: "fix-tests",
   maxRounds: 4,
   attempt: (ctx, feedback) =>
-    session.dispatch({ brief: { text: `Fix the failing tests.\n${feedback ?? ""}` } }),
+    session.dispatch({
+      brief: { text: `Fix the failing tests.\n${feedback ?? ""}` },
+    }),
   async check() {
-    const run = await session.command({ executable: "npm", arguments: ["test"] });
-    return run.status === 0 ? { done: true } : { done: false, feedback: run.stdout };
+    const run = await session.command({
+      executable: "npm",
+      arguments: ["test"],
+    });
+    return run.status === 0
+      ? { done: true }
+      : { done: false, feedback: run.stdout };
   },
 });
 ```
@@ -334,8 +347,10 @@ await pipeline.start({
 
 ```ts
 const coder = fallbackAgent(
-  [agent({ harness: claudeHarness({ authentication: "account" }) }),
-   agent({ harness: codexHarness({ authentication: "usage" }) })],
+  [
+    agent({ harness: claudeHarness({ authentication: "account" }) }),
+    agent({ harness: codexHarness({ authentication: "usage" }) }),
+  ],
   { on: ["quota", "unavailable"] },
 );
 ```
@@ -354,9 +369,18 @@ const coder = fallbackAgent(
 import { scriptedAgent } from "@elie-laloum/outpost/testing";
 
 const coder = scriptedAgent({
-  turns: [{ text: "Done", commit: { message: "fix: parser", files: { "src/p.ts": "..." } } }],
+  turns: [
+    {
+      text: "Done",
+      commit: { message: "fix: parser", files: { "src/p.ts": "..." } },
+    },
+  ],
 });
-const result = await dispatch({ repository, agent: coder, brief: { text: "Fix" } });
+const result = await dispatch({
+  repository,
+  agent: coder,
+  brief: { text: "Fix" },
+});
 assert.equal(result.commits.length, 1);
 ```
 
@@ -371,8 +395,15 @@ assert.equal(result.commits.length, 1);
 **Exemple (API proposée)**
 
 ```ts
-const recorded = await readJournal({ transporter, reference: result.logReference! });
-const replayed = await dispatch({ repository, agent: replayAgent({ journal: recorded }), brief });
+const recorded = await readJournal({
+  transporter,
+  reference: result.logReference!,
+});
+const replayed = await dispatch({
+  repository,
+  agent: replayAgent({ journal: recorded }),
+  brief,
+});
 ```
 
 <a id="f-cache"></a>
@@ -388,7 +419,10 @@ const replayed = await dispatch({ repository, agent: replayAgent({ journal: reco
 ```ts
 const review = task({
   key: "review",
-  cache: { store: taskCache({ transporter }), key: (ctx) => [headCommit, briefHash, "claude"] },
+  cache: {
+    store: taskCache({ transporter }),
+    key: (ctx) => [headCommit, briefHash, "claude"],
+  },
   perform: (ctx) => reviewer(ctx),
 });
 ```
@@ -437,9 +471,14 @@ const result = await run.result;
 
 ```ts
 await dispatch({
-  repository, agent: coder, brief,
+  repository,
+  agent: coder,
+  brief,
   branch: { mode: "integrate" },
-  guard: { protectedPaths: [".github/**", "migrations/**"], maxChangedLines: 800 },
+  guard: {
+    protectedPaths: [".github/**", "migrations/**"],
+    maxChangedLines: 800,
+  },
 });
 ```
 
@@ -455,7 +494,9 @@ await dispatch({
 
 ```ts
 await session.integrate({
-  onConflict: resolveWithAgent(coder, { verify: { executable: "npm", arguments: ["test"] } }),
+  onConflict: resolveWithAgent(coder, {
+    verify: { executable: "npm", arguments: ["test"] },
+  }),
 });
 ```
 
@@ -471,7 +512,11 @@ await session.integrate({
 
 ```ts
 await speculate({
-  repository, sandboxProvider, budget, candidates, validate,
+  repository,
+  sandboxProvider,
+  budget,
+  candidates,
+  validate,
   select: "best",
   score: async ({ result }) => -result.usage.output - diffSize(result),
 });
@@ -489,9 +534,14 @@ await speculate({
 
 ```ts
 await dispatch({
-  repository, agent: coder, brief,
+  repository,
+  agent: coder,
+  brief,
   branch: { mode: "named", name: "outpost/fix-parser" },
-  deliver: gitlabMergeRequest({ token: process.env.GITLAB_TOKEN!, draft: true }),
+  deliver: gitlabMergeRequest({
+    token: process.env.GITLAB_TOKEN!,
+    draft: true,
+  }),
 });
 ```
 
@@ -507,7 +557,9 @@ await dispatch({
 
 ```ts
 onIssueLabel("outpost:fix", async (issue) => {
-  await fixWorkflow.start({ checkpoint: { store, runId: `issue-${issue.number}`, version: "1" } });
+  await fixWorkflow.start({
+    checkpoint: { store, runId: `issue-${issue.number}`, version: "1" },
+  });
 });
 ```
 
@@ -576,7 +628,10 @@ await pipeline.start({
 ```ts
 import { kubernetesSandboxProvider } from "@elie-laloum/outpost/providers/kubernetes";
 
-const sandboxProvider = kubernetesSandboxProvider({ namespace: "agents", image: "outpost:dev" });
+const sandboxProvider = kubernetesSandboxProvider({
+  namespace: "agents",
+  image: "outpost:dev",
+});
 ```
 
 ---
@@ -599,9 +654,13 @@ Second tour d'exploration. Mêmes conventions que les features.
 
 ```ts
 const run = await readRun({ transporter, id: "wf_2026_09_27_nightly" });
-console.log(run.status, run.tasks.map((t) => `${t.key}: ${t.status}`));
+console.log(
+  run.status,
+  run.tasks.map((t) => `${t.key}: ${t.status}`),
+);
 
-for await (const event of watchRun({ transporter, id: run.id, from: run.seq })) render(event);
+for await (const event of watchRun({ transporter, id: run.id, from: run.seq }))
+  render(event);
 ```
 
 <a id="i-report"></a>
@@ -634,7 +693,9 @@ const profile = agentProfile({
   instructions: "Never modify generated files.",
   allowedTools: ["read", "edit", "shell:npm test"],
 });
-const coder = agent({ harness: codexHarness({ authentication: "account", profile }) });
+const coder = agent({
+  harness: codexHarness({ authentication: "account", profile }),
+});
 ```
 
 <a id="i-templates"></a>
@@ -652,7 +713,10 @@ npx outpost image build --provider daytona --name outpost-node24
 ```
 
 ```ts
-const sandboxProvider = daytonaSandboxProvider({ connection, create: { snapshot: "outpost-node24" } });
+const sandboxProvider = daytonaSandboxProvider({
+  connection,
+  create: { snapshot: "outpost-node24" },
+});
 ```
 
 <a id="i-cloud-cache"></a>
@@ -717,8 +781,12 @@ npx outpost image build --image outpost:dev --update
 **Exemple (API proposée)**
 
 ```ts
-const variables = await fromSecrets(vaultSource({ path: "kv/outpost" }), ["OPENAI_API_KEY"]);
-const coder = agent({ harness: codexHarness({ authentication: "usage", variables }) });
+const variables = await fromSecrets(vaultSource({ path: "kv/outpost" }), [
+  "OPENAI_API_KEY",
+]);
+const coder = agent({
+  harness: codexHarness({ authentication: "usage", variables }),
+});
 ```
 
 <a id="i-multirepo"></a>
@@ -750,7 +818,9 @@ await deliverTogether([apiResult, webResult], {
 
 ```ts
 await dispatch({
-  repository, agent: coder, brief,
+  repository,
+  agent: coder,
+  brief,
   watchdog: { repetition: { window: 20, maxRepeats: 3 }, onStuck: "stop" },
 });
 ```
