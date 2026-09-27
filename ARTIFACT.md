@@ -202,9 +202,11 @@ Existe, mais partiel ou expérimental pour un usage en production.
 
 ### Version d'Antigravity non épinglée
 
-**Faiblesse actuelle** — Le script d'installation récupère la dernière version d'`agy`. Deux images construites à des dates différentes, ou une image et un bootstrap distant, peuvent embarquer des versions différentes.
+**Statut — implémenté, non publié** : la version `1.2.12` est déclarée dans `agentVersions.antigravity`. Les images et le bootstrap partagent une installation d’archives versionnées vérifiées par SHA-512 ; les mises à jour automatiques sont désactivées dans les invocations Outpost et `doctor` compare la version installée à la référence. Les binaires préinstallés restent réutilisés. Validation : 573 tests unitaires/fonctionnels, couverture au-dessus des seuils, paquet, 11 tests Docker réels, fixture PTY, bootstrap réel puis réutilisation hors réseau et 37 tests navigateur de documentation réussis. Podman est absent ; les exécutions natives ARM64, musl et macOS ne sont pas validées ici. Les campagnes authentifiées de modèles restent distinctes. Bilan : `temp/antigravity-pinned/SUMMARY.md`.
 
-**Ce que ça complète** — Une version épinglée avec vérification de l'empreinte, déclarée dans `agentVersions` comme Copilot et Kimi, et affichée par `outpost doctor`.
+**Faiblesse corrigée** — Le script d'installation récupère la dernière version d'`agy`. Deux images construites à des dates différentes, ou une image et un bootstrap distant, peuvent embarquer des versions différentes.
+
+**Résultat** — Une version épinglée avec vérification de l'empreinte, déclarée dans `agentVersions` comme Copilot et Kimi, et affichée par `outpost doctor`.
 
 <a id="r-copilot"></a>
 

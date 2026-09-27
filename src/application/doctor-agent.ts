@@ -14,9 +14,13 @@ import type {
 export function agentVersionProbe(
   agent: DoctorAgent,
 ): Pick<DiagnosticProbe, "command" | "readVersion" | "referenceVersion"> {
-  const { executable, referenceVersion } = doctorAgents[agent];
+  const { executable, referenceVersion, variables } = doctorAgents[agent];
   return {
-    command: { executable, arguments: ["--version"] },
+    command: {
+      executable,
+      arguments: ["--version"],
+      ...(variables ? { variables } : {}),
+    },
     readVersion: true,
     ...(referenceVersion === undefined ? {} : { referenceVersion }),
   };

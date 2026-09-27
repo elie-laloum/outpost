@@ -192,8 +192,8 @@
     "Identifiant d’agent natif utilisé dans les événements et diagnostics."
   ],
   "AgentAdapter.bootstrap": [
-    "Name of the built-in installer used to install a missing CLI on remote providers when bootstrapping is enabled: a pinned npm package for claude, codex, copilot and kimi, or the official, unpinned install script for antigravity.",
-    "Nom de l’installeur intégré utilisé pour installer une CLI absente sur les providers distants lorsque le bootstrap est activé : un paquet npm épinglé pour claude, codex, copilot et kimi, ou le script d’installation officiel, non épinglé, pour antigravity."
+    "Name of the built-in installer used to install a missing CLI on remote providers when bootstrapping is enabled: a pinned npm package for claude, codex, copilot and kimi, or a versioned archive with a pinned SHA-512 digest for antigravity.",
+    "Nom de l’installeur intégré utilisé pour installer une CLI absente sur les providers distants lorsque le bootstrap est activé : un paquet npm épinglé pour claude, codex, copilot et kimi, ou une archive versionnée avec une empreinte SHA-512 épinglée pour antigravity."
   ],
   "AgentAdapter.requiresFinishedEvent": [
     "Require the native finished protocol event before treating an agent turn as complete.",
@@ -3613,8 +3613,8 @@
     "Identifiant d’agent natif utilisé dans les événements et diagnostics."
   ],
   "AgentFeatures.bootstrap": [
-    "Name of the built-in installer used to install a missing CLI on remote providers when bootstrapping is enabled: a pinned npm package for claude, codex, copilot and kimi, or the official, unpinned install script for antigravity.",
-    "Nom de l’installeur intégré utilisé pour installer une CLI absente sur les providers distants lorsque le bootstrap est activé : un paquet npm épinglé pour claude, codex, copilot et kimi, ou le script d’installation officiel, non épinglé, pour antigravity."
+    "Name of the built-in installer used to install a missing CLI on remote providers when bootstrapping is enabled: a pinned npm package for claude, codex, copilot and kimi, or a versioned archive with a pinned SHA-512 digest for antigravity.",
+    "Nom de l’installeur intégré utilisé pour installer une CLI absente sur les providers distants lorsque le bootstrap est activé : un paquet npm épinglé pour claude, codex, copilot et kimi, ou une archive versionnée avec une empreinte SHA-512 épinglée pour antigravity."
   ],
   "AgentFeatures.requiresFinishedEvent": [
     "Require the native finished protocol event before treating an agent turn as complete.",
@@ -4641,5 +4641,9 @@
   "FirecrackerOptions.jailer": [
     "Optional privileged jailer launch with a root-owned binary and assets, protected jail directory, dedicated cgroup v2 parent, non-root uid/gid, cpuQuotaUs per 100000 microseconds, memoryMaxMb including VMM overhead, and a processes thread limit. Requires a trusted root supervisor; never invokes sudo. CPU, memory and pids controllers must already be enabled. Omit to retain direct experimental execution.",
     "Lancement optionnel avec jailer : binaire et assets appartenant à root, répertoire protégé, parent cgroup v2 dédié, uid/gid non root, cpuQuotaUs par période de 100000 microsecondes, memoryMaxMb incluant le surcoût du VMM et limite de threads processes. Exige un superviseur root de confiance, sans appel à sudo. Les contrôleurs CPU, mémoire et pids doivent déjà être activés. Omettre conserve le lancement direct expérimental."
+  ],
+  "agentVersions.antigravity": [
+    "Antigravity CLI version installed from SHA-512-verified archives by generated images and remote bootstrap, and used as the doctor compatibility reference.",
+    "Version de la CLI Antigravity installée depuis des archives vérifiées par SHA-512 dans les images générées et le bootstrap distant, et utilisée comme référence de compatibilité par doctor."
   ]
 }

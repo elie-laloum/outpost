@@ -1,4 +1,3 @@
-import { antigravityInstaller } from "../providers/versions.constants.ts";
 import { agentVersions } from "../providers/versions.ts";
 import type { AgentInstaller } from "./agent-bootstrap.types.ts";
 
@@ -26,9 +25,8 @@ export const agentInstallers: Readonly<Record<string, AgentInstaller>> =
       package: `@moonshot-ai/kimi-code@${agentVersions.kimi}`,
     },
     antigravity: {
-      kind: "script",
+      kind: "antigravity",
       binary: "agy",
-      url: antigravityInstaller,
       installed: ".local/bin/agy",
     },
   });

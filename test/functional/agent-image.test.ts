@@ -28,10 +28,10 @@ test("prebuilt image context pins inputs, locks supported agents and preserves U
   );
   assert.match(recipe, /COPY package.json package-lock.json/);
   assert.match(recipe, /RUN npm ci .*--omit=dev/);
-  assert.match(
-    recipe,
-    /antigravity\.google\/cli\/install\.sh .*\/usr\/local\/bin\/agy/,
-  );
+  assert.match(recipe, /antigravity-cli\/1\.2\.12-/);
+  assert.match(recipe, /sha512sum/);
+  assert.match(recipe, /ENV AGY_CLI_DISABLE_AUTO_UPDATE=true/);
+  assert.ok(!recipe.includes("install.sh"));
   assert.match(
     recipe,
     /ENV PATH=\/opt\/outpost\/agents\/node_modules\/.bin:\$PATH/,

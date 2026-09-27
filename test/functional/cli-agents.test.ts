@@ -156,10 +156,10 @@ test("new agents scaffold their harness, image installation and declared API key
     assert.match(recipe, /@github\/copilot@1\.0\.88/);
     assert.match(recipe, /@moonshot-ai\/kimi-code@2\.1\.1/);
     assert.doesNotMatch(recipe, /gemini-cli/);
-    assert.match(
-      recipe,
-      /curl -fsSL https:\/\/antigravity\.google\/cli\/install\.sh \| HOME=\/tmp\/agy bash && install -m 0755 \/tmp\/agy\/\.local\/bin\/agy \/usr\/local\/bin\/agy/,
-    );
+    assert.match(recipe, /antigravity-cli\/1\.2\.12-/);
+    assert.match(recipe, /sha512sum/);
+    assert.match(recipe, /ENV AGY_CLI_DISABLE_AUTO_UPDATE=true/);
+    assert.doesNotMatch(recipe, /install\.sh/);
     assert.match(recipe, /^ENV XDG_CACHE_HOME=\/tmp\/\.cache$/m);
   }
 });

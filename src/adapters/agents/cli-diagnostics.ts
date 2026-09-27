@@ -34,7 +34,11 @@ export function helpDiagnostics(
       options: (command.arguments ?? []).filter((argument) =>
         argument.startsWith("--"),
       ),
-      command: { executable: command.executable, arguments: ["--help"] },
+      command: {
+        executable: command.executable,
+        arguments: ["--help"],
+        ...(command.variables ? { variables: command.variables } : {}),
+      },
     },
   ];
 }

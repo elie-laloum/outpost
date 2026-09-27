@@ -1,3 +1,4 @@
+import { agentVersions } from "../../src/providers/versions.constants.ts";
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { agent as composeAgent } from "../../src/domain/agent.ts";
@@ -85,6 +86,7 @@ test("Antigravity sends prompts as stream-json input and preserves interactive m
   });
   assert.deepEqual(agent.request({ text: "-literal\nsecond line" }), {
     executable: "agy",
+    variables: { AGY_CLI_DISABLE_AUTO_UPDATE: "true" },
     arguments: [
       "--model",
       "fixture-model",
@@ -115,6 +117,7 @@ test("Antigravity sends prompts as stream-json input and preserves interactive m
     }),
     {
       executable: "agy",
+      variables: { AGY_CLI_DISABLE_AUTO_UPDATE: "true" },
       arguments: ["--prompt-interactive", "Inspect"],
       interactive: true,
     },
@@ -330,10 +333,13 @@ test("help diagnostics inspect each new CLI through its registered executable", 
     assert.equal(missing[0]?.status, "fail");
   }
   assert.equal(doctorAgents.antigravity.executable, "agy");
-  assert.equal(doctorAgents.antigravity.referenceVersion, undefined);
+  assert.equal(
+    doctorAgents.antigravity.referenceVersion,
+    agentVersions.antigravity,
+  );
 });
 
-test("remote bootstrap installs npm CLIs, allows scripts only for Claude and runs the official Antigravity installer", async () => {
+test("remote bootstrap installs npm CLIs, allows scripts only for Claude and verifies the pinned Antigravity archive", async () => {
   const scripts: string[] = [];
   const lease: SandboxLease = {
     root: "/workspace",
@@ -376,11 +382,12 @@ test("remote bootstrap installs npm CLIs, allows scripts only for Claude and run
     "/home/agent/.outpost-tools/bin/agy",
   );
   assert.equal(scripts.length, 3);
-  assert.ok(
-    scripts[2]!.includes(
-      "curl -fsSL 'https://antigravity.google/cli/install.sh' | bash >&2 && test -x '/home/agent/.local/bin/agy'",
-    ),
-    scripts[2],
+  assert.match(scripts[2]!, /antigravity-cli\/1\.2\.12-/);
+  assert.match(scripts[2]!, /sha512sum/);
+  assert.ok(!scripts[2]!.includes("install.sh"));
+  assert.equal(
+    prepared.request({ text: "hello" }).variables?.AGY_CLI_DISABLE_AUTO_UPDATE,
+    "true",
   );
   await assert.rejects(
     prepareAdapter(

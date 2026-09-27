@@ -1,6 +1,7 @@
 import type { AgentAdapter, CliHarness } from "../../domain/agent.types.ts";
 import type { AgentModel } from "../../domain/model.types.ts";
 import { antigravityCredentials } from "./antigravity-authentication.ts";
+import { antigravityVariables } from "./antigravity.constants.ts";
 import { antigravityEvents } from "./antigravity-events.ts";
 import { antigravityRequest } from "./antigravity-request.ts";
 import type { AntigravitySettings } from "./antigravity.types.ts";
@@ -25,7 +26,7 @@ function bindAntigravity(settings: Bound<AntigravitySettings>): AgentAdapter {
     capture: false,
     requiresFinishedEvent: true,
     variables: Object.freeze({
-      AGY_CLI_DISABLE_AUTO_UPDATE: "true",
+      ...antigravityVariables,
       ...settings.variables,
     }),
     request: (input) => antigravityRequest(settings, input),

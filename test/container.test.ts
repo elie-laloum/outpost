@@ -487,9 +487,7 @@ test(
       const version = checks.find(
         (check) => check.id === "agent.sandbox",
       )?.version;
-      if (agent === "antigravity")
-        assert.match(version ?? "", /^\d+\.\d+\.\d+/);
-      else assert.equal(version, agentVersions[agent]);
+      assert.equal(version, agentVersions[agent]);
       await assertContainerRemoved(engine, name);
     }
     let name = "";

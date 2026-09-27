@@ -6,9 +6,8 @@ export type AgentInstaller =
       readonly allowScripts?: boolean;
     }
   | {
-      readonly kind: "script";
+      readonly kind: "antigravity";
       readonly binary: string;
-      readonly url: string;
       readonly installed: string;
     };
 

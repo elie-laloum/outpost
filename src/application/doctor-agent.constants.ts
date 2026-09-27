@@ -1,3 +1,4 @@
+import { antigravityVariables } from "../adapters/agents/antigravity.constants.ts";
 import { antigravityHarness } from "../adapters/agents/antigravity-adapter.ts";
 import { antigravityDiagnostics } from "../adapters/agents/antigravity-diagnostics.ts";
 import { claudeHarness } from "../adapters/agents/claude-adapter.ts";
@@ -27,6 +28,8 @@ export const doctorAgents: Readonly<Record<DoctorAgent, DoctorAgentProfile>> =
     },
     antigravity: {
       executable: "agy",
+      referenceVersion: agentVersions.antigravity,
+      variables: antigravityVariables,
       diagnostics: antigravityDiagnostics,
       harness: () => antigravityHarness(),
     },

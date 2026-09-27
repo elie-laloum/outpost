@@ -28,6 +28,12 @@ const coder = agent({
 
 Seules les sessions neuves sont prises en charge. La capture native, la reprise, le fork et la réparation automatique des réponses ne sont pas disponibles. Utilisez les sorties explicites des tâches du workflow pour transmettre des résultats à une autre requête.
 
-Les images générées utilisent l’installateur officiel Antigravity, qui télécharge la CLI courante. Pour des builds reproductibles, fournissez une image contenant le binaire vérifié. Voir [Configuration CLI Google](https://antigravity.google/docs/getting-started?tab=cli).
+## Installation épinglée
+
+Les images générées et le bootstrap distant installent la version de [`agentVersions.antigravity`](../../reference/agentversions/) depuis des archives Google versionnées, dont les empreintes SHA-512 enregistrées dans Outpost sont vérifiées avant extraction. Les distributions Linux amd64/arm64 couvrent glibc et musl ; l’installateur reconnaît aussi macOS Intel/Apple Silicon. Une plateforme non prise en charge ou une empreinte incorrecte provoque un échec explicite. Les fichiers temporaires sont nettoyés après réussite, échec ou interruption interceptée.
+
+Outpost définit `AGY_CLI_DISABLE_AUTO_UPDATE=true` dans les images générées, les requêtes Antigravity et les commandes de diagnostic, conformément aux [instructions de Google](https://antigravity.google/docs/cli/troubleshooting/). Cela empêche les mises à jour en arrière-plan pendant ces invocations.
+
+Le bootstrap réutilise un exécutable existant sans le remplacer ni vérifier ses octets. Lancez `outpost doctor --agent antigravity --sandbox-provider local` pour l’hôte, ou ajoutez `--sandbox-provider docker --image votre-image` pour inspecter une image. Doctor affiche les versions installée et de référence et avertit si elles diffèrent ; il ne vérifie pas l’empreinte du binaire installé. Les images et recettes existantes doivent être régénérées ou modifiées puis reconstruites pour adopter cette installation. Ces contrôles ne prouvent pas la compatibilité des exécutions authentifiées de modèles.
 
 API : [antigravityHarness](../../reference/antigravityharness/).

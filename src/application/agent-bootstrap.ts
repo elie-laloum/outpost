@@ -3,6 +3,7 @@ import type { Agent } from "../domain/agent.types.ts";
 import { invariant } from "../domain/errors.ts";
 import type { SandboxLease } from "../domain/sandbox.types.ts";
 import { quote, requireSuccess } from "../infrastructure/process.ts";
+import { antigravityInstall } from "../providers/antigravity-install.ts";
 import { agentInstallers } from "./agent-bootstrap.constants.ts";
 import type {
   AgentInstallation,
@@ -21,9 +22,9 @@ const installations: AgentInstallations = {
       install: `npm install --global${scripts} --prefix ${quote(prefix)} ${installer.package}`,
     };
   },
-  script: (installer, home) => ({
+  antigravity: (installer, home) => ({
     target: posix.join(home, installer.installed),
-    install: `curl -fsSL ${quote(installer.url)} | bash`,
+    install: antigravityInstall(posix.join(home, installer.installed)),
   }),
 };
 
@@ -33,7 +34,7 @@ function installation(
 ): AgentInstallation {
   return installer.kind === "npm"
     ? installations.npm(installer, home)
-    : installations.script(installer, home);
+    : installations.antigravity(installer, home);
 }
 
 export async function prepareAdapter(

@@ -8,6 +8,7 @@ export type DoctorAgent =
 export interface DoctorAgentProfile {
   readonly executable: string;
   readonly referenceVersion?: string;
+  readonly variables?: Command["variables"];
   diagnostics(): readonly AgentCliDiagnostic[];
   harness(): CliHarness;
 }

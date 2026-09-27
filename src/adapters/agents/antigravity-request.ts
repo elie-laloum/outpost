@@ -1,6 +1,7 @@
 import type { AgentInput } from "../../domain/agent.types.ts";
 import type { Command } from "../../domain/command.types.ts";
 import { invariant } from "../../domain/errors.ts";
+import { antigravityVariables } from "./antigravity.constants.ts";
 import type { AntigravitySettings } from "./antigravity.types.ts";
 import type { Bound } from "./settings.types.ts";
 
@@ -18,6 +19,7 @@ export function antigravityRequest(
   if (input.interactive)
     return {
       executable: "agy",
+      variables: antigravityVariables,
       arguments: [
         ...args,
         ...(input.text === undefined
@@ -30,6 +32,7 @@ export function antigravityRequest(
   args.push("--input-format", "stream-json", "--output-format", "stream-json");
   return {
     executable: "agy",
+    variables: antigravityVariables,
     arguments: args,
     stdin: `${JSON.stringify({ event: "user", message: { content: input.text ?? "" } })}\n`,
   };

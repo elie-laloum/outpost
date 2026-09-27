@@ -10,6 +10,7 @@ Traduction du journal `CHANGELOG.md` conservé à la racine du dépôt. Chaque v
 ## Non publié
 
 - Ajout du lancement Firecracker optionnel par jailer avec assets protégés appartenant à root, identité VMM non privilégiée, limites CPU/mémoire/processus par cgroup v2 et nettoyage conservateur. Le lancement direct reste compatible ; le provider reste expérimental en attente de validations plus larges des hôtes et de résistance aux attaques.
+- Épingler la CLI Antigravity 1.2.12 dans les images générées et le bootstrap distant avec des archives versionnées et des empreintes SHA-512 enregistrées. Exposer `agentVersions.antigravity`, la comparer dans doctor et désactiver les mises à jour automatiques dans les images générées, requêtes d’agent et diagnostics. Les binaires existants sont réutilisés ; les recettes d’images existantes doivent être actualisées puis reconstruites.
 
 - Ajoute `s3Transport({ deleteMode: "tombstone" })` pour les services comme R2 sans DELETE conditionnel atomique : des marqueurs PUT conditionnels bloquent suppressions périmées et recréations concurrentes, restent physiquement stockés et sont masqués des lectures et listes. Le mode DELETE conditionnel par défaut est inchangé.
 - Refuse les files BullMQ si Redis INFO ne confirme pas `maxmemory-policy=noeviction`, avec une erreur de configuration au lieu de permettre l’éviction de l’état des files.

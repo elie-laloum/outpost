@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Add opt-in Firecracker jailer execution with protected root-owned assets, an unprivileged VMM identity, cgroup v2 CPU/memory/process limits and conservative jail/cgroup cleanup. Direct execution remains compatible; the provider remains experimental pending broader host and adversarial validation.
+- Pin Antigravity CLI 1.2.12 in generated images and remote bootstrap using versioned archives and recorded SHA-512 digests. Expose `agentVersions.antigravity`, compare it in doctor, and disable automatic updates in generated images, agent requests and diagnostics. Existing binaries are reused; existing image recipes must be updated and rebuilt.
 
 - Add `s3Transport({ deleteMode: "tombstone" })` for services such as R2 without atomic conditional DELETE: conditional PUT markers fence stale deletions and concurrent recreation, remain physically stored, and are hidden from reads and lists. The default conditional DELETE mode is unchanged.
 - Refuse BullMQ queues unless Redis INFO confirms `maxmemory-policy=noeviction`, with a configuration error instead of allowing eviction of queue state.

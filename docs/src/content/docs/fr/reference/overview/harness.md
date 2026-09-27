@@ -34,7 +34,7 @@ Les presets CLI sont stables depuis la version 5.0.0 ; le moteur et ses définit
 - [defineHarnessHook](../../defineharnesshook/) et [defineHarnessPermissions](../../defineharnesspermissions/) contrôlent les appels d’outils et la fin de la boucle.
 - [claudeHarness](../../claudeharness/), [codexHarness](../../codexharness/), [antigravityHarness](../../antigravityharness/), [copilotHarness](../../copilotharness/) et [kimiHarness](../../kimiharness/) configurent les presets CLI avec [ClaudeSettings](../../claudesettings/), [CodexSettings](../../codexsettings/), [AntigravitySettings](../../antigravitysettings/), [CopilotSettings](../../copilotsettings/) et [KimiSettings](../../kimisettings/).
 - [AgentAuthentication](../../agentauthentication/), [AccountCredential](../../accountcredential/) et [UsageCredential](../../usagecredential/) choisissent comment un preset CLI s’authentifie.
-- [agentVersions](../../agentversions/) liste les versions de CLI épinglées pour les images générées et le bootstrap distant ; Antigravity n’y figure pas, car tous deux installent sa version courante avec le script d’installation officiel.
+- [agentVersions](../../agentversions/) liste les versions de CLI épinglées pour les images générées et le bootstrap distant, y compris les archives Antigravity vérifiées avec des empreintes SHA-512 épinglées.
 - [Harness](../../harness/) est le contrat commun de composition.
 - [HarnessToolContext](../../harnesstoolcontext/) décrit le sandbox, le signal d’annulation, le modèle et l’observateur accessibles à un outil.
 - [AgentAdapter](../../agentadapter/) décrit l’adaptateur de protocole CLI.
