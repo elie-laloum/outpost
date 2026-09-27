@@ -1,4 +1,7 @@
 import type { AgentAdapter, CliHarness } from "../../domain/agent.types.ts";
+import { invariant } from "../../domain/errors.ts";
+import { authenticationForm } from "../../domain/authentication.ts";
+import { kimiRegions } from "./kimi.constants.ts";
 import type { AgentModel } from "../../domain/model.types.ts";
 import { credentialPlanner } from "./authentication.ts";
 import { kimiCredentials } from "./kimi-authentication.ts";
@@ -13,7 +16,7 @@ function bindKimi(settings: Bound<KimiSettings>): AgentAdapter {
   supportModel(kimiModelSupport, settings.model);
   const credentials = credentialPlanner(
     "Kimi Code",
-    kimiCredentials,
+    kimiCredentials(settings.region),
     settings.authentication,
     settings.model,
   );
@@ -34,6 +37,17 @@ function bindKimi(settings: Bound<KimiSettings>): AgentAdapter {
 
 export function kimiHarness(settings: KimiSettings = {}): CliHarness {
   harnessSettings(settings);
+  invariant(
+    settings.region === undefined ||
+      Object.hasOwn(kimiRegions, settings.region),
+    'Kimi region must be "mainland-cn" or "global"',
+  );
+  invariant(
+    settings.region === undefined ||
+      settings.authentication === undefined ||
+      !authenticationForm(settings.authentication).form.startsWith("usage"),
+    "Kimi region selects account authentication; configure the API endpoint through variables for usage authentication",
+  );
   const configured = Object.freeze({
     ...settings,
     variables: Object.freeze({ ...settings.variables }),

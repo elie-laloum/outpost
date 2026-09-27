@@ -7,6 +7,10 @@ sidebar:
 
 Traduction du journal `CHANGELOG.md` conservé à la racine du dépôt. Chaque version publiée possède ses notes dans les deux langues.
 
+## Non publié
+
+- Corrige l’authentification des comptes Kimi Code internationaux avec `kimiHarness({ authentication: "account", region: "global" })` : copie le fichier OAuth propre à la région et l’identifiant d’appareil, puis configure la même région dans la sandbox. L’authentification par compte utilise `region: "global"` par défaut ; les comptes chinois doivent sélectionner explicitement `region: "mainland-cn"`. Les endpoints de compte contradictoires sont refusés pour les régions explicites comme pour celle par défaut.
+
 ## 6.0.1
 
 - Reconstruit entièrement le Guide anglais et français avec des explications ciblées et des snippets courts, directement utilisables. Introduit une nouvelle structure de pages, une navigation par besoin et une mise en page responsive propre au Guide.

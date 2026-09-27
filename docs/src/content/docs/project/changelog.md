@@ -7,6 +7,10 @@ sidebar:
 
 The release notes below are synchronized from the root `CHANGELOG.md`, the single source of release history.
 
+## Unreleased
+
+- Fix Kimi Code international account authentication with `kimiHarness({ authentication: "account", region: "global" })`: copy the region-scoped OAuth credential and device identifier, then provision the same region inside the sandbox. Account authentication defaults to `region: "global"` when omitted; Chinese accounts must select `region: "mainland-cn"` explicitly. Conflicting account endpoint overrides are rejected for both explicit and default regions.
+
 ## 6.0.1
 
 - Rebuild the English and French Guide from scratch with focused explanations and short, directly usable snippets. Introduce a new page structure, task-based navigation and a dedicated responsive Guide layout.

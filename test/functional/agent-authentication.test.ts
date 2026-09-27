@@ -12,6 +12,7 @@ import {
   claudeHarness,
   codexHarness,
   copilotHarness,
+  kimiHarness,
   createSandbox,
 } from "../../src/index.ts";
 import { executeProcess } from "../../src/infrastructure/process.ts";
@@ -222,4 +223,92 @@ test("sandboxes authenticate each selected adapter once and merge credentials in
   for (const selected of [first, first, second, first])
     await sandbox.dispatch({ agent: selected, brief: { text: "run" } });
   assert.deepEqual(plans, ["first", "second", "first"]);
+});
+
+test("Kimi account defaults to global and installs the scoped OAuth file and provisions the matching region", async (t) => {
+  const directory = await repository(t);
+  const profile = join(directory, "global-profile");
+  const home = join(directory, "sandbox-home");
+  await mkdir(join(profile, "credentials"), { recursive: true });
+  await mkdir(home);
+  const filename = "kimi-code-env-0e4f99c69cc27850.json";
+  await writeFile(
+    join(profile, "credentials", filename),
+    '{"access_token":"global-fixture"}',
+  );
+  await writeFile(
+    join(profile, "credentials", "kimi-code.json"),
+    "mainland-private",
+  );
+  await writeFile(
+    join(profile, "config.toml"),
+    'unrelated_api_key = "do-not-copy"',
+  );
+  await writeFile(join(profile, "device_id"), "global-device");
+  const calls: Command[] = [];
+  const lease = recordingLease(home, calls);
+  lease.invoke = async (command) => {
+    calls.push(command);
+    if (command.arguments?.[1] === credentialInstaller)
+      return executeProcess(command);
+    return { status: 0, stdout: "", stderr: "" };
+  };
+  const selected = agent({
+    harness: kimiHarness({
+      authentication: { account: { file: profile } },
+    }),
+  });
+  const variables = await authenticateAgent(
+    selected,
+    {},
+    lease,
+    "mounted",
+    signal,
+  );
+  assert.deepEqual(variables, {
+    KIMI_CODE_OAUTH_HOST: "https://auth.kimi.ai",
+    KIMI_CODE_BASE_URL: "https://api.kimi.ai/coding/v1",
+  });
+  assert.equal(
+    await readFile(join(home, ".kimi-code", "credentials", filename), "utf8"),
+    '{"access_token":"global-fixture"}',
+  );
+  assert.equal(
+    await readFile(join(home, ".kimi-code", "device_id"), "utf8"),
+    "global-device",
+  );
+  assert.deepEqual((await readdir(join(home, ".kimi-code"))).sort(), [
+    "credentials",
+    "device_id",
+  ]);
+  assert.deepEqual(await readdir(join(home, ".kimi-code", "credentials")), [
+    filename,
+  ]);
+  assert.deepEqual(calls[1]?.arguments?.slice(2), [
+    "kimi",
+    "login",
+    "--region",
+    "global",
+  ]);
+  assert.deepEqual(calls[1]?.variables, variables);
+  assert.equal(
+    await readFile(join(profile, "credentials", filename), "utf8"),
+    '{"access_token":"global-fixture"}',
+  );
+  calls.length = 0;
+  await assert.rejects(
+    authenticateAgent(
+      agent({
+        harness: kimiHarness({
+          authentication: { account: { file: profile } },
+        }),
+      }),
+      { KIMI_CODE_OAUTH_HOST: "https://auth.kimi.com" },
+      lease,
+      "mounted",
+      signal,
+    ),
+    /conflicts with account region/,
+  );
+  assert.equal(calls.length, 0);
 });

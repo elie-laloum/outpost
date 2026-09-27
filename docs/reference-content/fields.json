@@ -4551,8 +4551,8 @@
     "Déclarations d’environnement explicites ; les valeurs sont des chaînes."
   ],
   "KimiSettings.authentication": [
-    "Explicit authentication for this CLI harness: \"account\", \"usage\", { account: { file | key | variable } } or { usage: { key | variable } }. Unsupported forms fail when the agent is composed. Omission prepares nothing and keeps the access already configured in the execution environment.",
-    "Authentification explicite de ce harness CLI : \"account\", \"usage\", { account: { file | key | variable } } ou { usage: { key | variable } }. Les formes non prises en charge échouent à la composition de l’agent. Son absence ne prépare rien et conserve l’accès déjà configuré dans l’environnement d’exécution."
+    "Account authentication reads the OAuth file for the selected region and device_id from ~/.kimi-code or KIMI_CODE_HOME; account.file selects a dedicated profile directory. Usage forms accept KIMI_API_KEY or an explicit key/variable and require a model on agent(). Account key/variable forms are unsupported. Omission prepares no credentials.",
+    "Le mode account lit le fichier OAuth de la région choisie et device_id sous ~/.kimi-code ou KIMI_CODE_HOME ; account.file sélectionne un dossier de profil dédié. Les formes usage acceptent KIMI_API_KEY ou une clé/variable explicite et exigent un modèle sur agent(). Les formes account.key/variable ne sont pas prises en charge. Son absence ne prépare aucun identifiant."
   ],
   "KimiSettings.variables": [
     "Explicit environment declarations; values are strings.",
@@ -4629,5 +4629,9 @@
   "GeneratedCredential.content": [
     "Fixed file content written with mode 0600.",
     "Contenu fixe du fichier, écrit avec le mode 0600."
+  ],
+  "KimiSettings.region": [
+    "Account deployment: \"global\" for kimi.ai (default) or \"mainland-cn\" for kimi.com. Selects the matching OAuth file, account endpoints and sandbox login region without copying the host configuration. Requires account authentication when authentication is supplied; usage forms reject an explicit region. Omission selects global for accounts and does not change API authentication. Conflicting declared account endpoints are rejected, including with the default region.",
+    "Service du compte : \"global\" pour kimi.ai (par défaut) ou \"mainland-cn\" pour kimi.com. Sélectionne le fichier OAuth, les endpoints de compte et la région de connexion dans la sandbox sans copier la configuration hôte. Exige le mode compte lorsqu’une authentification est fournie ; les formes usage refusent une région explicite. Son absence sélectionne global pour les comptes et ne modifie pas l’authentification API. Les endpoints de compte déclarés contradictoires sont refusés, y compris avec la région par défaut."
   ]
 }

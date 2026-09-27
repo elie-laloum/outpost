@@ -328,16 +328,25 @@ test("Kimi copies its profile credentials or translates an API key for a named m
     harness: kimiHarness({ authentication: "account" }),
   });
   const result = plan(account);
+  assert.deepEqual(result.variables, {
+    KIMI_CODE_OAUTH_HOST: "https://auth.kimi.ai",
+    KIMI_CODE_BASE_URL: "https://api.kimi.ai/coding/v1",
+  });
   assert.deepEqual(
     result.host.map((credential) => credential.destination),
     [
-      { file: ".kimi-code/credentials/kimi-code.json" },
+      { file: ".kimi-code/credentials/kimi-code-env-0e4f99c69cc27850.json" },
       { file: ".kimi-code/device_id" },
     ],
   );
   assert.equal(result.host[0]?.source.home?.variable, "KIMI_CODE_HOME");
   const login = result.commands[0];
-  assert.deepEqual(login?.arguments?.slice(2), ["kimi", "login"]);
+  assert.deepEqual(login?.arguments?.slice(2), [
+    "kimi",
+    "login",
+    "--region",
+    "global",
+  ]);
   assert.ok((login?.deadlineMs ?? 0) > 0);
   const profile = agent({
     harness: kimiHarness({
@@ -346,7 +355,7 @@ test("Kimi copies its profile credentials or translates an API key for a named m
   });
   assert.match(
     hostCredential(plan(profile)).source.path,
-    /^~.\.kimi-work.credentials.kimi-code\.json$/,
+    /^~.\.kimi-work.credentials.kimi-code-env-0e4f99c69cc27850\.json$/,
   );
   assert.throws(
     () => agent({ harness: kimiHarness({ authentication: "usage" }) }),
@@ -374,5 +383,69 @@ test("Kimi copies its profile credentials or translates an API key for a named m
       .request({ text: "go" })
       .arguments?.slice(0, 2),
     ["--model", "kimi-code/fixture"],
+  );
+});
+
+test("Kimi validates account regions and keeps API authentication separate", () => {
+  assert.throws(
+    () => kimiHarness({ region: "unknown" as never }),
+    /Kimi region/,
+  );
+  assert.throws(
+    () => kimiHarness({ region: "global", authentication: "usage" }),
+    /region selects account authentication/,
+  );
+  const mainland = plan(
+    agent({
+      harness: kimiHarness({
+        authentication: "account",
+        region: "mainland-cn",
+      }),
+    }),
+  );
+  assert.equal(
+    mainland.variables.KIMI_CODE_OAUTH_HOST,
+    "https://auth.kimi.com",
+  );
+  assert.equal(
+    mainland.variables.KIMI_CODE_BASE_URL,
+    "https://api.kimi.com/coding/v1",
+  );
+  assert.deepEqual(mainland.commands[0]?.arguments?.slice(2), [
+    "kimi",
+    "login",
+    "--region",
+    "mainland-cn",
+  ]);
+  assert.match(
+    hostCredential(mainland).source.path,
+    /credentials[/\\]kimi-code\.json$/,
+  );
+  const selected = agent({
+    harness: kimiHarness({ region: "global", authentication: "account" }),
+  });
+  const result = plan(selected);
+  const implicit = agent({
+    harness: kimiHarness({ authentication: "account" }),
+  });
+  assert.deepEqual(plan(implicit), result);
+  assert.match(
+    hostCredential(result).source.path,
+    /kimi-code-env-0e4f99c69cc27850\.json$/,
+  );
+  assert.equal(hostCredential(result).source.home?.variable, "KIMI_CODE_HOME");
+  for (const selection of [selected, implicit])
+    for (const name of [
+      "KIMI_CODE_OAUTH_HOST",
+      "KIMI_OAUTH_HOST",
+      "KIMI_CODE_BASE_URL",
+    ])
+      assert.throws(
+        () => plan(selection, { [name]: "https://wrong.example" }),
+        /conflicts with account region/,
+      );
+  assert.deepEqual(
+    plan(selected, { KIMI_CODE_OAUTH_HOST: "https://auth.kimi.ai/" }).variables,
+    result.variables,
   );
 });
