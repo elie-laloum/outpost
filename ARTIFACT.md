@@ -268,7 +268,9 @@ Existe, mais partiel ou expérimental pour un usage en production.
 
 ### Retry et délais plus robustes
 
-**Faiblesse actuelle** — Un retry attend toujours le même délai, ce qui provoque des rafales d'appels sur une API qui répond « trop de requêtes ». Un workflow n'a pas de durée maximale globale.
+**Statut — implémenté, non publié :** Backoff exponentiel plafonné et aléa complet configurables, minimum `Retry-After` normalisé pour les erreurs HTTP de modèles, attentes annulables et `workflow.start({ timeoutMs })` coopératif par appel. Les réglages existants restent compatibles ; une reprise sur checkpoint renouvelle le délai et conserve l’autorisation explicite de rejeu. Documentation EN/FR et régressions hors ligne ajoutées.
+
+**Faiblesse initiale** — Un retry attend toujours le même délai, ce qui provoque des rafales d'appels sur une API qui répond « trop de requêtes ». Un workflow n'a pas de durée maximale globale.
 
 **Ce que ça complète** — Un délai progressif avec une part d'aléa, le respect de l'en-tête `Retry-After`, et un `timeoutMs` au niveau du workflow.
 

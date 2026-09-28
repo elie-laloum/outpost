@@ -10,6 +10,7 @@ La prochaine priorité d’Outpost est une exécution quotidienne fiable : un pr
 **Comptabilité des tokens non publiée :** les compteurs de session Copilot et Kimi, la propagation de l’usage incomplet et le refus des budgets exclusivement en tokens sont implémentés. Les régressions hors ligne de protocole, processus, workflow et checkpoint couvrent ces contrats. Les exécutions authentifiées et la comparaison avec la facturation restent dans les campagnes CLI réelles.
 
 **Réseau sortant (implémenté, non publié) :** les politiques natives Vercel sont copiées ; les politiques Daytona exigent une confirmation serveur avant préparation du workspace et refusent les combinaisons non prises en charge. La campagne réseau opt-in distingue les témoins inaccessibles et limites de compte du filtrage vérifié. L’application stricte Daytona sur un compte éligible, les listes d’autorisation des conteneurs et la validation adversariale élargie restent à mener. Consultez les [règles sortantes](../../guide/outbound-rules/).
+**Implémenté, non publié :** Les reprises de tâches proposent backoff exponentiel plafonné, aléa complet et attente minimale HTTP `Retry-After` normalisée. `workflow.start({ timeoutMs })` fournit un délai coopératif par appel, y compris à la reprise. Voir [l’ordonnancement](../../guide/task-scheduling/).
 
 ## Point de départ
 

@@ -10,6 +10,7 @@ Outpost's next priority is reliable everyday execution: a successful first run, 
 **Unreleased token accounting:** Copilot and Kimi session counters, incomplete-usage propagation and token-only budget rejection are implemented. Offline protocol, process, workflow and checkpoint regressions cover these contracts. Authenticated runs and comparison with vendor billing remain part of the live CLI campaigns.
 
 **Outbound networking (implemented, unreleased):** Vercel native policies are snapshotted; Daytona policies require server confirmation before workspace setup and reject unsupported combinations. The opt-in network campaign distinguishes unreachable baselines and account limitations from verified filtering. Strict Daytona enforcement on an eligible account, container allowlists and broader adversarial validation remain pending. See [outbound rules](../../guide/outbound-rules/).
+**Implemented, unreleased:** Task retries support capped exponential backoff, full jitter and normalized HTTP `Retry-After` minimum waits. `workflow.start({ timeoutMs })` provides a cooperative deadline per invocation, including resumed runs. See [scheduling](../../guide/task-scheduling/).
 
 ## Starting point
 

@@ -1061,8 +1061,8 @@
     "Politique explicite de reprise ; les effets peuvent se répéter."
   ],
   "Task.timeoutMs": [
-    "Time limit in milliseconds for each task attempt; cancellation is cooperative through context.signal.",
-    "Durée maximale en millisecondes de chaque tentative ; l’annulation est coopérative via context.signal."
+    "Positive integer time limit in milliseconds for each task attempt, up to 2147483647; cancellation is cooperative through context.signal.",
+    "Durée entière positive en millisecondes de chaque tentative, jusqu’à 2147483647 ; l’annulation est coopérative via context.signal."
   ],
   "TaskContext.signal": [
     "Cooperative cancellation for this operation.",
@@ -1097,8 +1097,8 @@
     "Nombre maximal total de tentatives, première exécution comprise."
   ],
   "Retry.delayMs": [
-    "Delay in milliseconds before a retry; defaults to zero.",
-    "Délai en millisecondes avant une reprise ; zéro par défaut."
+    "Base delay in milliseconds before a retry; defaults to zero. Exponential backoff doubles it after each failed attempt within this start() call.",
+    "Délai de base en millisecondes avant une reprise ; zéro par défaut. Le backoff exponentiel le double après chaque tentative échouée de cet appel à start()."
   ],
   "Retry.accepts": [
     "Predicate deciding whether a failure from the given attempt may be retried.",
@@ -1141,8 +1141,8 @@
     "Définitions de tâches composant le graphe, comprenant toutes les dépendances déclarées."
   ],
   "Workflow.start": [
-    "Execute the validated graph with the supplied concurrency, cancellation, budgets and checkpoint settings.",
-    "Exécute le graphe validé avec les réglages fournis de concurrence, annulation, budgets et checkpoints."
+    "Execute the validated graph with concurrency, cooperative cancellation and timeout, budgets and checkpoint settings. Each invocation receives a fresh optional timeoutMs deadline.",
+    "Exécute le graphe validé avec concurrence, annulation et délai coopératifs, budgets et checkpoints. Chaque appel reçoit un nouveau délai timeoutMs optionnel."
   ],
   "Workflow.diagram": [
     "Return a Mermaid diagram of task keys and dependency edges without executing tasks.",
@@ -1529,8 +1529,8 @@
     "Catégorie stable d’erreur Outpost utilisée pour le traitement programmatique des échecs."
   ],
   "OutpostError.details": [
-    "Structured diagnostic data attached to the fault code.",
-    "Données structurées de diagnostic attachées au code d’erreur."
+    "Structured diagnostics attached to the fault code. HTTP model errors include status and, when valid, retryAfterMs: the minimum wait in milliseconds for an explicitly configured task retry.",
+    "Diagnostics structurés attachés au code d’erreur. Les erreurs HTTP de modèles incluent status et, si valide, retryAfterMs : l’attente minimale en millisecondes d’une reprise de tâche explicitement configurée."
   ],
   "response.text": [
     "Build a validator that returns trimmed content of the last complete tag as a string.",
@@ -5289,5 +5289,25 @@
   "DaytonaOptions.egress": [
     "Optional deny-all, domain or IPv4 CIDR allowlist. Requires successful server confirmation before workspace setup; refusal deletes the sandbox. Requires Tier 3/4 and WRITE_SANDBOXES. Rejects native network options, domain/CIDR mixtures, denyCidrs and implicit wildcard apex access.",
     "Politique optionnelle deny-all, liste de domaines ou CIDR IPv4. Exige une confirmation serveur avant préparation du workspace ; un refus supprime la sandbox. Nécessite Tier 3/4 et WRITE_SANDBOXES. Refuse les options réseau natives, mélanges domaines/CIDR, denyCidrs et accès implicite à la racine par joker."
+  ],
+  "Retry.backoff": [
+    "Delay strategy: fixed by default, or exponential with a factor of two. Does not change attempt admission or the accepts predicate.",
+    "Stratégie de délai : fixed par défaut, ou exponential avec un facteur deux. Ne change ni l’admission des tentatives ni le prédicat accepts."
+  ],
+  "Retry.maxDelayMs": [
+    "Nonnegative local delay cap, applied before jitter. Defaults to 30000 ms for exponential backoff; fixed delays have no additional cap. A valid server retryAfterMs minimum can exceed it.",
+    "Plafond local positif ou nul, appliqué avant l’aléa. Vaut 30000 ms par défaut en mode exponentiel ; les délais fixes n’ont pas de plafond supplémentaire. Un minimum serveur retryAfterMs valide peut le dépasser."
+  ],
+  "Retry.jitter": [
+    "Randomization: none by default; full samples uniformly from zero to the capped local delay. The server retry minimum is applied afterwards and the result rounded up to milliseconds.",
+    "Aléa : none par défaut ; full tire uniformément entre zéro et le délai local plafonné. Le minimum serveur est appliqué ensuite et le résultat arrondi à la milliseconde supérieure."
+  ],
+  "WorkflowOptions.timeoutMs": [
+    "Positive integer deadline in milliseconds for this start() call, up to 2147483647. Includes checkpoint acquisition, conditions, attempts and retry waits. Expiration cooperatively cancels tasks and fails the workflow with an OutpostError timeout; cleanup is awaited. A resumed call receives a fresh deadline.",
+    "Délai entier positif en millisecondes pour cet appel à start(), jusqu’à 2147483647. Inclut acquisition du checkpoint, conditions, tentatives et attentes de reprise. Son expiration annule coopérativement les tâches et fait échouer le workflow avec une OutpostError timeout ; le nettoyage est attendu. Un appel de reprise reçoit un nouveau délai."
+  ],
+  "WorkflowEvent.delayMs": [
+    "Selected wait before the next task attempt, present on retry events; includes backoff, jitter and any valid server minimum.",
+    "Attente choisie avant la tentative suivante, présente sur les événements retry ; inclut backoff, aléa et minimum serveur valide."
   ]
 }

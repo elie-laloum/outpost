@@ -13,18 +13,18 @@ import type { ArtifactTaskOptions } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name        | Type                                                                    | Presence | Meaning                                                                                                  |
-| ----------- | ----------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------- |
-| `retry`     | `Retry \| undefined`                                                    | Optional | Explicit retry policy; repeated effects require care.                                                    |
-| `gate`      | `WorkflowGate \| undefined`                                             | Optional | Persisted approval or pause definition; execution requires a checkpoint and a matching trusted decision. |
-| `after`     | `readonly Task<unknown>[] \| undefined`                                 | Optional | Declared task dependencies whose values may be read.                                                     |
-| `key`       | `string`                                                                | Required | Stable task key identifying the node within its workflow graph.                                          |
-| `condition` | `((context: TaskContext) => boolean \| Promise<boolean>) \| undefined`  | Optional | Predicate evaluated before the first task attempt.                                                       |
-| `timeoutMs` | `number \| undefined`                                                   | Optional | Time limit in milliseconds for each task attempt; cancellation is cooperative through context.signal.    |
-| `store`     | `ArtifactStore`                                                         | Required | Artifact byte store used for immutable publication or bounded payload retrieval.                         |
-| `contract`  | `ArtifactContract<T>`                                                   | Required | Named, versioned artifact contract that defines encoding and validation.                                 |
-| `produce`   | `(context: TaskContext) => T \| Promise<T>`                             | Required | Compute the typed artifact value from the task context and declared dependencies.                        |
-| `parents`   | `((context: TaskContext) => readonly ArtifactReference[]) \| undefined` | Optional | Read parent artifact references from task dependencies to record publication lineage.                    |
+| Name        | Type                                                                    | Presence | Meaning                                                                                                                                  |
+| ----------- | ----------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `retry`     | `Retry \| undefined`                                                    | Optional | Explicit retry policy; repeated effects require care.                                                                                    |
+| `gate`      | `WorkflowGate \| undefined`                                             | Optional | Persisted approval or pause definition; execution requires a checkpoint and a matching trusted decision.                                 |
+| `after`     | `readonly Task<unknown>[] \| undefined`                                 | Optional | Declared task dependencies whose values may be read.                                                                                     |
+| `key`       | `string`                                                                | Required | Stable task key identifying the node within its workflow graph.                                                                          |
+| `condition` | `((context: TaskContext) => boolean \| Promise<boolean>) \| undefined`  | Optional | Predicate evaluated before the first task attempt.                                                                                       |
+| `timeoutMs` | `number \| undefined`                                                   | Optional | Positive integer time limit in milliseconds for each task attempt, up to 2147483647; cancellation is cooperative through context.signal. |
+| `store`     | `ArtifactStore`                                                         | Required | Artifact byte store used for immutable publication or bounded payload retrieval.                                                         |
+| `contract`  | `ArtifactContract<T>`                                                   | Required | Named, versioned artifact contract that defines encoding and validation.                                                                 |
+| `produce`   | `(context: TaskContext) => T \| Promise<T>`                             | Required | Compute the typed artifact value from the task context and declared dependencies.                                                        |
+| `parents`   | `((context: TaskContext) => readonly ArtifactReference[]) \| undefined` | Optional | Read parent artifact references from task dependencies to record publication lineage.                                                    |
 
 ## Signature
 

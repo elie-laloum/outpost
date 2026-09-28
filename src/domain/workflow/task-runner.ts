@@ -1,6 +1,6 @@
 import { checkpointValue } from "./checkpoint-value.ts";
 import { WorkflowBudgetExceeded, WorkflowUsageUnavailable } from "./budget.ts";
-import { setTimeout as delay } from "node:timers/promises";
+import { retryDelay, waitForRetry } from "./retry.ts";
 import type { Task, WorkflowExecutionState } from "../workflow.types.ts";
 
 export async function runTask(
@@ -41,6 +41,7 @@ export async function runTask(
       state.attempts = attempt;
       emit({ type: "attempt", key: item.key, attempt });
       await runtime.persist();
+      let delayMs = 0;
       const deadline = new AbortController();
       const timer =
         item.timeoutMs === undefined
@@ -66,12 +67,13 @@ export async function runTask(
           item.retry?.accepts?.(error, attempt) === false
         )
           throw error;
-        emit({ type: "retry", key: item.key, attempt });
+        delayMs = retryDelay(item.retry, cycle, error);
+        emit({ type: "retry", key: item.key, attempt, delayMs });
       } finally {
         runtime.closeAttempt(item);
         clearTimeout(timer);
       }
-      await delay(item.retry?.delayMs ?? 0, undefined, { signal });
+      await waitForRetry(delayMs, signal);
     }
   } catch (error) {
     state.error = error instanceof Error ? error.message : String(error);
