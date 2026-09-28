@@ -16,15 +16,16 @@ function reportFailure(error: unknown) {
 
 ## Common failures
 
-| Symptom                            | Check                                                                   |
-| ---------------------------------- | ----------------------------------------------------------------------- |
-| Missing account file               | File credential storage or explicit token on the harness.               |
-| Unsupported setting                | The selected harness’s model and authentication forms.                  |
-| Engine or executable unavailable   | Image contents and `outpost doctor`.                                    |
-| Response parsing fails             | Last complete tag, valid JSON and schema.                               |
-| Sandbox already busy               | Await the active operation or allocate another sandbox.                 |
-| Synchronization refuses host state | Concurrent edits and retained recovery data.                            |
-| Checkpoint owned                   | Stop the old runner, inspect revision and recover ownership explicitly. |
+| Symptom                            | Check                                                                              |
+| ---------------------------------- | ---------------------------------------------------------------------------------- |
+| Missing account file               | File credential storage or explicit token on the harness.                          |
+| Unsupported setting                | The selected harness’s model and authentication forms.                             |
+| Engine or executable unavailable   | Image contents and `outpost doctor`.                                               |
+| Response parsing fails             | Last complete tag, valid JSON and schema.                                          |
+| Sandbox already busy               | Await the active operation or allocate another sandbox.                            |
+| Synchronization refuses host state | Concurrent edits and retained recovery data.                                       |
+| Checkpoint owned                   | Stop the old runner, inspect revision and recover ownership explicitly.            |
+| Usage limit or HTTP 429            | Code `quota` and `quotaFault`; pause workflows with [`onQuota`](../quota-pauses/). |
 
 ## Retry deliberately
 

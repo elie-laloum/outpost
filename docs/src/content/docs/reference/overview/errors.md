@@ -10,7 +10,7 @@ Errors communicate why an Outpost operation failed and what information remains 
 
 ## How it works
 
-Use `OutpostError` and `FaultCode` to recognize documented failures without parsing prose. `recoveryDetails` extracts supported recovery information from an error. Keep operation failure, a nonzero command result and a failed workflow task distinct: their owning contracts expose outcomes differently.
+Use `OutpostError` and `FaultCode` to recognize documented failures without parsing prose. `recoveryDetails` extracts supported recovery information from an error. `quotaFault` recognizes usage and rate limits, including wrapped ones, and returns the reported reset time. Keep operation failure, a nonzero command result and a failed workflow task distinct: their owning contracts expose outcomes differently.
 
 ## Boundaries and responsibilities
 
@@ -21,5 +21,6 @@ Do not retry blindly after a failure with side effects. Inspect retained state a
 - [OutpostError](../../outposterror/)
 - [FaultCode](../../faultcode/)
 - [recoveryDetails](../../recoverydetails/)
+- [quotaFault](../../quotafault/)
 
 [Learn with the practical guide](../../../guide/operations/recovery/).

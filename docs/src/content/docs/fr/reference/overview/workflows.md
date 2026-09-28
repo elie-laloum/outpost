@@ -12,6 +12,8 @@ Un workflow est un graphe de tâches typées et de dépendances déclarées. Il 
 
 `task` définit une opération ; `workflow` valide et regroupe le graphe ; `start` l’exécute. Les tâches indépendantes peuvent être concurrentes dans la limite configurée. `agentTask` et `commandTask` utilisent une sandbox existante ; `isolatedTask` possède l’allocation de sa tentative d’agent.
 
+`start({ onQuota })` met une tâche en pause sur une erreur de quota Outpost et la reprend après la réinitialisation, dans le processus ou lors d’un démarrage ultérieur avec le même checkpoint. Voir les [pauses sur quota](../../../guide/quota-pauses/).
+
 `loopTask` ajoute des tours essai/vérification bornés avec feedback et progression durable par phase. Consultez les [boucles de vérification](../../../guide/verification-loops/) pour les budgets, le rejeu et les sessions appartenant à l’appelant.
 
 ## Limites et responsabilités

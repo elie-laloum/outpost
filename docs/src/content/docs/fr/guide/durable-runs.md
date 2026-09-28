@@ -30,6 +30,8 @@ console.log(result.value(scan));
 
 Utilisez la même définition de workflow, le même identifiant et la même version. Ajoutez `resume: "retry-incomplete"` aux options de checkpoint pour autoriser le rejeu des tâches inachevées et de leurs effets. Changez `version` lorsque les implémentations ou entrées changent ; elle participe à l’identité du checkpoint.
 
+Les tâches mises en pause par une limite d’usage reprennent sans cette autorisation lorsque l’exécution utilise les [pauses sur quota](../quota-pauses/).
+
 Les sorties doivent être du JSON sans perte ou `undefined`. Dates, fonctions, objets cycliques et valeurs ne supportant pas un aller-retour JSON doivent être convertis ou stockés en artefacts. Persistez de petites références pour les gros contenus.
 
 ## Récupérer la propriété

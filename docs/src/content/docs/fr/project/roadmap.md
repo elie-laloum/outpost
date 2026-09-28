@@ -9,6 +9,8 @@ La prochaine priorité d’Outpost est une exécution quotidienne fiable : un pr
 
 **Implémenté, non publié :** les [tâches interactives](../../guide/interactive-tasks/) persistent les questions adaptatives et réponses humaines entre les tours de conversation capturés. Le harness Outpost et les presets CLI portables partagent ce protocole ; Antigravity est refusé. Les tests locaux de processus et de modèles simulés couvrent reprise, validation et workspaces conservés. Les campagnes CLI/modèles réelles restent nécessaires. La suspension native dans un outil, les réponses signées et l’expiration restent prévues.
 
+**Implémenté, non publié :** les [pauses sur quota](../../guide/quota-pauses/) classent les limites d’usage et de débit des agents CLI et des fournisseurs de modèles et mettent les tâches de workflow en pause jusqu’à la réinitialisation, dans le processus ou entre démarrages grâce au checkpoint. Des tests déterministes de protocole, de processus et de workflow couvrent la classification et la reprise ; des campagnes réelles de limites pour chaque CLI restent nécessaires. L’analyse des heures de réinitialisation rédigées en texte, la poursuite de la conversation interrompue et la gestion des quotas pour les files et la spéculation restent prévues.
+
 ## Point de départ
 
 Implémenté, non publié : les [boucles de vérification](../../guide/verification-loops/) ajoutent des cycles agent/vérification bornés avec feedback, phases durables et budgets cumulés. Les tests déterministes couvrent la reprise et l’usage d’un codeur/relecteur simulé ; les campagnes de modèles authentifiés restent une validation distincte.

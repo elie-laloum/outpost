@@ -80,7 +80,7 @@ export const groups = [
     title: ["Workflows", "Workflows"],
     guide: "guide/workflows/graph",
     names:
-      "loopTask LoopTaskExhausted LoopCheckResult LoopTaskContext LoopTaskOptions LoopRoundRecord task workflow WorkflowFailure Retry Task TaskContext TaskOptions TaskRecord TaskStatus Workflow WorkflowEvent WorkflowTelemetry WorkflowOptions WorkflowBudget WorkflowUsage WorkflowBudgetExceeded WorkflowUsageUnavailable WorkflowResult agentTask commandTask isolatedTask interactiveAgentTask InteractiveAgentTaskOptions InteractiveAgentResult WorkflowInputQuestion WorkflowInputRequest WorkflowAnswer WorkflowAnswerRecord TaskInteraction TaskInteractionRecord TaskInteractionContext",
+      "loopTask LoopTaskExhausted LoopCheckResult LoopTaskContext LoopTaskOptions LoopRoundRecord task workflow WorkflowFailure Retry Task TaskContext TaskOptions TaskRecord TaskStatus Workflow WorkflowEvent WorkflowTelemetry WorkflowOptions WorkflowBudget WorkflowUsage WorkflowBudgetExceeded WorkflowUsageUnavailable WorkflowResult agentTask commandTask isolatedTask interactiveAgentTask InteractiveAgentTaskOptions InteractiveAgentResult WorkflowInputQuestion WorkflowInputRequest WorkflowAnswer WorkflowAnswerRecord TaskInteraction TaskInteractionRecord TaskInteractionContext WorkflowQuotaPolicy WorkflowQuotaPause",
   },
   {
     id: "providers",
@@ -108,7 +108,7 @@ export const groups = [
     id: "errors",
     title: ["Errors", "Erreurs"],
     guide: "guide/operations/recovery",
-    names: "OutpostError recoveryDetails FaultCode",
+    names: "OutpostError recoveryDetails quotaFault FaultCode QuotaFault",
   },
   {
     id: "storage-reservations",

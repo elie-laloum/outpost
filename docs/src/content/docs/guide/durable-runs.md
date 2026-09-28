@@ -30,6 +30,8 @@ console.log(result.value(scan));
 
 Use the same workflow definition, run ID and version. Add `resume: "retry-incomplete"` to checkpoint options to authorize replay of unfinished tasks and their side effects. Change `version` when task implementations or inputs change; it is part of checkpoint identity.
 
+Tasks paused by a usage limit resume without this authorization when the run uses [quota pauses](../quota-pauses/).
+
 Outputs must be lossless JSON or `undefined`. Dates, functions, cyclic objects and values that cannot round-trip as JSON must be converted or stored as artifacts. Persist small references for large payloads.
 
 ## Recover ownership

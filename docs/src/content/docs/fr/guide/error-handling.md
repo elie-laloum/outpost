@@ -16,15 +16,16 @@ function reportFailure(error: unknown) {
 
 ## Échecs courants
 
-| Symptôme                    | À vérifier                                                                              |
-| --------------------------- | --------------------------------------------------------------------------------------- |
-| Fichier de compte absent    | Stockage des identifiants en fichier ou jeton explicite sur le harness.                 |
-| Réglage non pris en charge  | Formes de modèle et d’authentification du harness sélectionné.                          |
-| Moteur ou exécutable absent | Contenu de l’image et `outpost doctor`.                                                 |
-| Échec d’analyse de réponse  | Dernière balise complète, JSON valide et schéma.                                        |
-| Sandbox occupée             | Attendre l’opération active ou allouer une autre sandbox.                               |
-| Synchronisation refusée     | Modifications concurrentes et données de récupération conservées.                       |
-| Checkpoint possédé          | Arrêter l’ancien runner, inspecter la révision et récupérer explicitement la propriété. |
+| Symptôme                    | À vérifier                                                                                       |
+| --------------------------- | ------------------------------------------------------------------------------------------------ |
+| Fichier de compte absent    | Stockage des identifiants en fichier ou jeton explicite sur le harness.                          |
+| Réglage non pris en charge  | Formes de modèle et d’authentification du harness sélectionné.                                   |
+| Moteur ou exécutable absent | Contenu de l’image et `outpost doctor`.                                                          |
+| Échec d’analyse de réponse  | Dernière balise complète, JSON valide et schéma.                                                 |
+| Sandbox occupée             | Attendre l’opération active ou allouer une autre sandbox.                                        |
+| Synchronisation refusée     | Modifications concurrentes et données de récupération conservées.                                |
+| Checkpoint possédé          | Arrêter l’ancien runner, inspecter la révision et récupérer explicitement la propriété.          |
+| Limite d’usage ou HTTP 429  | Code `quota` et `quotaFault` ; mettre les workflows en pause avec [`onQuota`](../quota-pauses/). |
 
 ## Reprendre délibérément
 

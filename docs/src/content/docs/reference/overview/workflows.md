@@ -12,6 +12,8 @@ A workflow is a graph of typed tasks and declared dependencies. It connects ordi
 
 `task` defines an operation; `workflow` validates and groups the graph; `start` executes it. Independent tasks may run concurrently within the configured limit. `agentTask` and `commandTask` use an existing sandbox, while `isolatedTask` owns allocation for its agent attempt.
 
+`start({ onQuota })` pauses a task on an Outpost quota error and resumes it after the reset, in process or on a later start with the same checkpoint. See [quota pauses](../../../guide/quota-pauses/).
+
 `loopTask` adds bounded attempt/check rounds with feedback and durable phase progress. See [verification loops](../../../guide/verification-loops/) for budgets, replay and caller-owned sessions.
 
 ## Boundaries and responsibilities

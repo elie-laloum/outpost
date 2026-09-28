@@ -392,8 +392,8 @@
     "Identifiant de conversation native à poursuivre ; fork demande une conversation distincte dérivée de celle-ci."
   ],
   "AgentEvent.kind": [
-    "Discriminator selecting the event payload: phase, summary, warning, text, text-delta, result, prompt, tool, tool-result, tool-denied, step, stop-prevented, compaction, conversation, usage, failure, finished or raw.",
-    "Discriminant sélectionnant les données de l’événement : phase, summary, warning, text, text-delta, result, prompt, tool, tool-result, tool-denied, step, stop-prevented, compaction, conversation, usage, failure, finished ou raw."
+    "Discriminator selecting the event payload: phase, summary, warning, text, text-delta, result, prompt, tool, tool-result, tool-denied, step, stop-prevented, compaction, conversation, usage, quota, failure, finished or raw.",
+    "Discriminant sélectionnant les données de l’événement : phase, summary, warning, text, text-delta, result, prompt, tool, tool-result, tool-denied, step, stop-prevented, compaction, conversation, usage, quota, failure, finished ou raw."
   ],
   "AgentEvent.name": [
     "Phase name for phase events, or tool name for tool and tool-result events.",
@@ -424,8 +424,8 @@
     "Compteurs d’usage de tokens portés par un événement usage ou summary."
   ],
   "AgentEvent.message": [
-    "Warning or failure message, or the message a stop hook sent back to the model.",
-    "Message d’avertissement ou d’échec, ou message qu’un hook stop a renvoyé au modèle."
+    "Warning, failure or quota message, or the message a stop hook sent back to the model.",
+    "Message d’avertissement, d’échec ou de quota, ou message qu’un hook stop a renvoyé au modèle."
   ],
   "AgentEvent.text": [
     "Text carried by the event: a streamed fragment, streamed text, final answer or submitted prompt according to kind.",
@@ -961,8 +961,8 @@
     "Clé de tâche stable identifiant le nœud dans son graphe de workflow."
   ],
   "TaskRecord.status": [
-    "Task lifecycle state, including waiting, active, done, failure, cancellation or gate pause/rejection.",
-    "État de cycle de vie de tâche, incluant attente, activité, réussite, échec, annulation ou pause/rejet d’une gate."
+    "Task lifecycle state, including waiting, active, done, failure, cancellation, gate pause/rejection or a quota pause.",
+    "État de cycle de vie de tâche, incluant attente, activité, réussite, échec, annulation, pause/rejet d’une gate ou pause sur quota."
   ],
   "TaskRecord.attempts": [
     "Number of attempts actually started for this task.",
@@ -1261,16 +1261,16 @@
     "Horodatage ISO d’émission de l’événement de workflow."
   ],
   "WorkflowEvent.type": [
-    "Lifecycle notification, including loop phases, input-request when a task suspends and input-answer when an accepted reply makes it ready to run.",
-    "Notification du cycle de vie, incluant les phases de boucle, input-request lors d’une suspension et input-answer lorsqu’une réponse acceptée rend la tâche exécutable."
+    "Lifecycle notification, including loop phases, input-request when a task suspends, input-answer when an accepted reply makes it ready to run, and quota when a quota error pauses a task or a paused task is released.",
+    "Notification du cycle de vie, incluant les phases de boucle, input-request lors d’une suspension, input-answer lorsqu’une réponse acceptée rend la tâche exécutable, et quota lorsqu’une erreur de quota met une tâche en pause ou qu’une tâche en pause est relancée."
   ],
   "WorkflowEvent.key": [
     "Stable task key identifying the node within its workflow graph.",
     "Clé de tâche stable identifiant le nœud dans son graphe de workflow."
   ],
   "WorkflowEvent.status": [
-    "Task lifecycle state, including waiting, active, done, failure, cancellation or gate pause/rejection.",
-    "État de cycle de vie de tâche, incluant attente, activité, réussite, échec, annulation ou pause/rejet d’une gate."
+    "Task lifecycle state, including waiting, active, done, failure, cancellation or gate pause/rejection. On quota events, waiting means the task will run again in this start() call and paused means it stays paused.",
+    "État de cycle de vie de tâche, incluant attente, activité, réussite, échec, annulation ou pause/rejet d’une gate. Sur les événements quota, waiting signifie que la tâche sera relancée dans cet appel start() et paused qu’elle reste en pause."
   ],
   "WorkflowEvent.attempt": [
     "One-based task attempt number.",
@@ -1529,8 +1529,8 @@
     "Catégorie stable d’erreur Outpost utilisée pour le traitement programmatique des échecs."
   ],
   "OutpostError.details": [
-    "Structured diagnostics attached to the fault code. HTTP model errors include status and, when valid, retryAfterMs: the minimum wait in milliseconds for an explicitly configured task retry.",
-    "Diagnostics structurés attachés au code d’erreur. Les erreurs HTTP de modèles incluent status et, si valide, retryAfterMs : l’attente minimale en millisecondes d’une reprise de tâche explicitement configurée."
+    "Structured diagnostics attached to the fault code. HTTP model errors include status and, when valid, retryAfterMs: the minimum wait in milliseconds for an explicitly configured task retry. Quota errors include resetAt when the reset time is known, and agent for CLI turns.",
+    "Diagnostics structurés attachés au code d’erreur. Les erreurs HTTP de modèles incluent status et, si valide, retryAfterMs : l’attente minimale en millisecondes d’une reprise de tâche explicitement configurée. Les erreurs de quota incluent resetAt lorsque l’heure de réinitialisation est connue, et agent pour les tours de CLI."
   ],
   "response.text": [
     "Build a validator that returns trimmed content of the last complete tag as a string.",
@@ -5107,8 +5107,8 @@
     "Identifiant de l’enfant intégré dans le dispatch, propagé depuis ses événements sans remplacer le contexte de workflow, tâche ou passe."
   ],
   "AgentEventDetails.kind": [
-    "Discriminator selecting the event payload: phase, summary, warning, text, text-delta, result, prompt, tool, tool-result, tool-denied, step, stop-prevented, compaction, conversation, usage, failure, finished or raw.",
-    "Discriminant sélectionnant les données de l’événement : phase, summary, warning, text, text-delta, result, prompt, tool, tool-result, tool-denied, step, stop-prevented, compaction, conversation, usage, failure, finished ou raw."
+    "Discriminator selecting the event payload: phase, summary, warning, text, text-delta, result, prompt, tool, tool-result, tool-denied, step, stop-prevented, compaction, conversation, usage, quota, failure, finished or raw.",
+    "Discriminant sélectionnant les données de l’événement : phase, summary, warning, text, text-delta, result, prompt, tool, tool-result, tool-denied, step, stop-prevented, compaction, conversation, usage, quota, failure, finished ou raw."
   ],
   "AgentEventDetails.name": [
     "Phase name for phase events, or tool name for tool and tool-result events.",
@@ -5139,8 +5139,8 @@
     "Compteurs d’usage de tokens portés par un événement usage ou summary."
   ],
   "AgentEventDetails.message": [
-    "Warning or failure message, or the message a stop hook sent back to the model.",
-    "Message d’avertissement ou d’échec, ou message qu’un hook stop a renvoyé au modèle."
+    "Warning, failure or quota message, or the message a stop hook sent back to the model.",
+    "Message d’avertissement, d’échec ou de quota, ou message qu’un hook stop a renvoyé au modèle."
   ],
   "AgentEventDetails.text": [
     "Text carried by the event: a streamed fragment, streamed text, final answer or submitted prompt according to kind.",
@@ -5411,8 +5411,8 @@
     "Délai entier positif en millisecondes pour cet appel à start(), jusqu’à 2147483647. Inclut acquisition du checkpoint, conditions, tentatives et attentes de reprise. Son expiration annule coopérativement les tâches et fait échouer le workflow avec une OutpostError timeout ; le nettoyage est attendu. Un appel de reprise reçoit un nouveau délai."
   ],
   "WorkflowEvent.delayMs": [
-    "Selected wait before the next task attempt, present on retry events; includes backoff, jitter and any valid server minimum.",
-    "Attente choisie avant la tentative suivante, présente sur les événements retry ; inclut backoff, aléa et minimum serveur valide."
+    "Selected wait before the next task attempt, present on retry events and on quota events that wait for a reset in process; includes backoff, jitter and any valid server minimum for retries.",
+    "Attente choisie avant la tentative suivante, présente sur les événements retry et sur les événements quota qui attendent une réinitialisation dans le processus ; inclut backoff, aléa et minimum serveur valide pour les reprises."
   ],
   "DaytonaOptions.egress": [
     "Optional deny-all, domain or IPv4 CIDR allowlist. Requires successful server confirmation before workspace setup; refusal deletes the sandbox. Requires Tier 3/4 and WRITE_SANDBOXES. Rejects native network options, domain/CIDR mixtures, denyCidrs and implicit wildcard apex access.",
@@ -5813,5 +5813,69 @@
   "LoopTaskContext.value": [
     "Read the completed output of a task listed in this task’s declared dependencies.",
     "Lit la sortie terminée d’une tâche figurant dans les dépendances déclarées de cette tâche."
+  ],
+  "AgentEvent.resetAt": [
+    "ISO timestamp at which a quota event says the usage or rate limit resets; present only when the CLI reports it in structured form.",
+    "Horodatage ISO auquel un événement quota indique la réinitialisation de la limite d’usage ou de débit ; présent uniquement lorsque la CLI le fournit sous forme structurée."
+  ],
+  "AgentEventDetails.resetAt": [
+    "ISO timestamp at which a quota event says the usage or rate limit resets; present only when the CLI reports it in structured form.",
+    "Horodatage ISO auquel un événement quota indique la réinitialisation de la limite d’usage ou de débit ; présent uniquement lorsque la CLI le fournit sous forme structurée."
+  ],
+  "AgentAdapter.quota": [
+    "Recognize a terminal usage-limit or rate-limit message in a failure event or stderr line. When the process then fails, the turn rejects with OutpostError code quota instead of process; transient retry notices must not match.",
+    "Reconnaît un message terminal de limite d’usage ou de débit dans un événement failure ou une ligne stderr. Si le processus échoue ensuite, le tour est rejeté avec le code OutpostError quota au lieu de process ; les avis de reprise transitoires ne doivent pas correspondre."
+  ],
+  "CliAgent.quota": [
+    "Recognize a terminal usage-limit or rate-limit message in a failure event or stderr line. When the process then fails, the turn rejects with OutpostError code quota instead of process; transient retry notices must not match.",
+    "Reconnaît un message terminal de limite d’usage ou de débit dans un événement failure ou une ligne stderr. Si le processus échoue ensuite, le tour est rejeté avec le code OutpostError quota au lieu de process ; les avis de reprise transitoires ne doivent pas correspondre."
+  ],
+  "TaskRecord.quota": [
+    "Persisted quota pause of a paused task: when it was recorded, the quota message and the reset time when known. Removed when the task runs again.",
+    "Pause sur quota persistée d’une tâche en pause : moment de l’enregistrement, message de quota et heure de réinitialisation lorsqu’elle est connue. Supprimée lorsque la tâche est relancée."
+  ],
+  "WorkflowEvent.resetAt": [
+    "Reported quota reset time on quota events, when the provider supplied one.",
+    "Heure de réinitialisation du quota sur les événements quota, lorsque le fournisseur l’a indiquée."
+  ],
+  "WorkflowOptions.onQuota": [
+    "Opt-in policy that pauses a task on a quota error instead of retrying or failing it; requires a checkpoint. Quota pauses release on a later start() once the reset is known to be reachable within maxWaitMs, or when it is unknown or past.",
+    "Politique optionnelle qui met une tâche en pause sur une erreur de quota au lieu de la reprendre ou de la faire échouer ; exige un checkpoint. Les pauses sur quota sont relâchées par un start() ultérieur dès que la réinitialisation est atteignable dans maxWaitMs, ou lorsqu’elle est inconnue ou passée."
+  ],
+  "WorkflowQuotaPolicy.action": [
+    "Behavior on a quota error; pause is the only supported action.",
+    "Comportement face à une erreur de quota ; pause est la seule action prise en charge."
+  ],
+  "WorkflowQuotaPolicy.maxWaitMs": [
+    "Longest wait in milliseconds for a known future reset inside the current start() call; a later or unknown reset leaves the task paused and the workflow returns paused. Nonnegative safe integer, default 0.",
+    "Attente maximale en millisecondes d’une réinitialisation future connue dans l’appel start() courant ; une réinitialisation plus lointaine ou inconnue laisse la tâche en pause et le workflow renvoie paused. Entier sûr positif ou nul, 0 par défaut."
+  ],
+  "WorkflowQuotaPause.requestedAt": [
+    "ISO timestamp when the quota error paused the task.",
+    "Horodatage ISO auquel l’erreur de quota a mis la tâche en pause."
+  ],
+  "WorkflowQuotaPause.message": [
+    "Quota message reported by the agent or model provider.",
+    "Message de quota signalé par l’agent ou le fournisseur de modèle."
+  ],
+  "WorkflowQuotaPause.resetAt": [
+    "ISO timestamp at which the limit resets, when the provider reported it; absent resets resume on the next start().",
+    "Horodatage ISO de réinitialisation de la limite, lorsque le fournisseur l’a indiqué ; sans cette valeur, la reprise a lieu au prochain start()."
+  ],
+  "QuotaFault.message": [
+    "Message of the quota error, suitable for logs and pause records.",
+    "Message de l’erreur de quota, adapté aux journaux et aux enregistrements de pause."
+  ],
+  "QuotaFault.resetAt": [
+    "Valid ISO reset timestamp carried by the error details; absent when unknown or malformed.",
+    "Horodatage ISO de réinitialisation valide porté par les détails de l’erreur ; absent s’il est inconnu ou invalide."
+  ],
+  "quotaFault.error": [
+    "Any caught value, typically a rejection from dispatch, a task or a model provider.",
+    "Toute valeur interceptée, généralement un rejet de dispatch, d’une tâche ou d’un fournisseur de modèle."
+  ],
+  "ReporterHandlers.quota": [
+    "Handle a usage-limit or rate-limit signal decoded from the agent protocol, with its reset time when reported; receives pass and at metadata and may return a promise. The signal alone does not fail the turn.",
+    "Traite : signal de limite d’usage ou de débit décodé du protocole agent, avec son heure de réinitialisation si elle est fournie ; reçoit pass et at et peut retourner une promesse. Le signal seul ne fait pas échouer le tour."
   ]
 }

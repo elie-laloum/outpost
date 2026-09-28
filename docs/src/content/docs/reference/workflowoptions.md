@@ -15,6 +15,7 @@ import type { WorkflowOptions } from "@elie-laloum/outpost";
 
 | Name               | Type                                            | Presence | Meaning                                                                                                                                                                                                                                                                                                             |
 | ------------------ | ----------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `onQuota`          | `WorkflowQuotaPolicy \| undefined`              | Optional | Opt-in policy that pauses a task on a quota error instead of retrying or failing it; requires a checkpoint. Quota pauses release on a later start() once the reset is known to be reachable within maxWaitMs, or when it is unknown or past.                                                                        |
 | `answers`          | `readonly WorkflowAnswer[] \| undefined`        | Optional | Responses to pending input requests; all answers are validated before any are applied and persisted before scheduling.                                                                                                                                                                                              |
 | `timeoutMs`        | `number \| undefined`                           | Optional | Positive integer deadline in milliseconds for this start() call, up to 2147483647. Includes checkpoint acquisition, conditions, attempts and retry waits. Expiration cooperatively cancels tasks and fails the workflow with an OutpostError timeout; cleanup is awaited. A resumed call receives a fresh deadline. |
 | `observation`      | `ObservationHub \| undefined`                   | Optional | Parent hub receiving workflow, task, agent and operation envelopes; historical observe callbacks still receive WorkflowEvent.                                                                                                                                                                                       |
@@ -32,6 +33,7 @@ import type { WorkflowOptions } from "@elie-laloum/outpost";
 
 ```ts
 export interface WorkflowOptions {
+  readonly onQuota?: WorkflowQuotaPolicy;
   readonly answers?: readonly WorkflowAnswer[];
   readonly timeoutMs?: number;
   readonly observation?: ObservationHub;
@@ -56,4 +58,5 @@ export interface WorkflowOptions {
 - [WorkflowDecision](../workflowdecision/)
 - [WorkflowDecisionVerifier](../workflowdecisionverifier/)
 - [WorkflowEvent](../workflowevent/)
+- [WorkflowQuotaPolicy](../workflowquotapolicy/)
 - [WorkflowTelemetry](../workflowtelemetry/)
