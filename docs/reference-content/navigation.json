@@ -1480,8 +1480,28 @@
         "attrs": { "data-api-kind": "function" }
       },
       {
+        "slug": "reference/recoverspeculation",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/checkspeculationintegration",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
         "slug": "reference/speculativeoutput",
         "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/speculationdurability",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/speculationrecoveryoptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/speculationintegration",
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/speculationoptions",

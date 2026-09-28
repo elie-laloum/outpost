@@ -1,18 +1,18 @@
-import { taskObservation } from "./task-observation.ts";
 import { randomUUID } from "node:crypto";
-import { invariant, recoveryDetails } from "../domain/errors.ts";
-import { workflowAccounting } from "../domain/workflow/budget.ts";
+import { invariant } from "../domain/errors.ts";
+import { openSpeculationStore } from "../infrastructure/speculation-store.ts";
+import {
+  speculationIdentity,
+  validateSpeculation,
+} from "./speculation-checkpoint.ts";
 import { speculativeHostSnapshot } from "./speculation-host.ts";
-import type { Sandbox } from "./outpost.types.ts";
-import { createSandbox } from "./sandbox.ts";
 import { speculationLimits } from "./speculation.constants.ts";
+import { runSpeculation } from "./speculation-run.ts";
+import type { SpeculationCheckpoint } from "./speculation-checkpoint.types.ts";
 import type {
   SpeculationOptions,
   SpeculationResult,
-  SpeculativeCandidateResult,
-  SpeculativeOutput,
 } from "./speculation.types.ts";
-import { taskUsage } from "./task-usage.ts";
 
 export async function speculate<T = undefined>(
   options: SpeculationOptions<T>,
@@ -37,181 +37,64 @@ export async function speculate<T = undefined>(
       concurrency <= speculationLimits.candidates,
     `Speculation concurrency must be 1 to ${speculationLimits.candidates}`,
   );
-  const stop = new AbortController();
-  const signal = options.signal
-    ? AbortSignal.any([options.signal, stop.signal])
-    : stop.signal;
-  let budgetError: unknown;
-  const accounting = workflowAccounting(options.budget, (error) => {
-    budgetError = error;
-    // Attempt limits stop admissions; already admitted candidates may finish.
-    if (error.dimension !== "attempts") stop.abort(error);
-  });
-  const before = await speculativeHostSnapshot(options.repository);
-  const baseline = before.head;
-  const id = randomUUID();
-  const records: SpeculativeCandidateResult<T>[] = candidates.map(
-    (candidate) => ({
-      key: candidate.key,
-      branch: `outpost/speculation/${id}/${candidate.key}`,
-      status: "skipped",
-    }),
+  const cleanupMs = options.cleanupMs ?? speculationLimits.cleanupMs;
+  invariant(
+    Number.isSafeInteger(cleanupMs) &&
+      cleanupMs > 0 &&
+      cleanupMs <= 2_147_483_647,
+    "Speculation cleanupMs must be a positive timer duration",
   );
-  let winner: SpeculativeCandidateResult<T> | undefined;
-  let next = 0;
-  async function worker(): Promise<void> {
-    while (!signal.aborted && !winner && !accounting.exhausted) {
-      const index = next++;
-      const candidate = candidates[index];
-      if (!candidate) return;
-      try {
-        accounting.admit();
-      } catch {
-        return;
-      }
-      const observation = taskObservation(
-        options.observation ?? candidate.request.observation,
-        candidate.request.observe,
-        { candidate: candidate.key },
-      );
-      const initial = records[index]!;
-      let sandbox: Sandbox | undefined;
-      let result: SpeculativeOutput<T> | undefined;
-      let error: unknown;
-      let accepted = false;
-      let cleanupFailed = false;
-      let retainedDirectory: string | undefined;
-      const usage = taskUsage(
-        { reportUsage: (value) => accounting.report(value) },
-        undefined,
-      );
-      try {
-        sandbox = await createSandbox({
-          ...options.sandbox,
-          ...(observation ? { observation } : {}),
-          repository: options.repository,
-          sandboxProvider: options.sandboxProvider,
-          branch: { mode: "named", name: initial.branch, from: baseline },
-          agent: candidate.agent,
-          signal,
-        });
-        signal.throwIfAborted();
-        invariant(
-          sandbox.workspace.baseline === baseline,
-          "Speculative workspace does not match the pinned baseline",
-        );
-        const {
-          resume: _resume,
-          fork: _fork,
-          ...output
-        } = await sandbox.dispatch({
-          ...candidate.request,
-          ...(observation ? { observation } : {}),
-          signal,
-          observe: usage.observe,
-        });
-        result = output;
-        usage.reconcile(output.usage);
-        signal.throwIfAborted();
-        accepted = await options.validate({
-          key: candidate.key,
-          result,
-          sandbox,
-          signal,
-        });
-        observation?.emit("workflow", {
-          kind: "candidate",
-          status: "validated",
-        });
-        signal.throwIfAborted();
-      } catch (cause) {
-        error = cause;
-      }
-      if (sandbox) {
-        try {
-          const disposal = await sandbox.close({
-            preserve: error !== undefined,
-          });
-          retainedDirectory = disposal.retainedDirectory;
-        } catch (cause) {
-          cleanupFailed = true;
-          error =
-            error === undefined
-              ? cause
-              : new AggregateError(
-                  [error, cause],
-                  "Speculative execution and cleanup failed",
-                );
-          retainedDirectory = sandbox.workspace.directory;
-        }
-      }
-      const recovery = recoveryDetails(error);
-      const recoveredDirectory =
-        typeof recovery?.directory === "string"
-          ? recovery.directory
-          : undefined;
-      const directory = sandbox?.workspace.directory ?? recoveredDirectory;
-      retainedDirectory ??= recoveredDirectory;
-      function candidateStatus(): SpeculativeCandidateResult<T>["status"] {
-        if (cleanupFailed) return "failed";
-        if (signal.aborted) return "cancelled";
-        if (error !== undefined) return "failed";
-        if (accepted && !winner) return "winner";
-        return "rejected";
-      }
-      observation?.emit("workflow", { kind: "candidate", status: "cleanup" });
-      const status = candidateStatus();
-      observation?.emit("workflow", {
-        kind: "candidate",
-        status: status === "winner" ? "accepted" : "rejected",
-      });
-      const record: SpeculativeCandidateResult<T> = {
-        ...initial,
-        status,
-        ...(directory ? { directory } : {}),
-        ...(retainedDirectory ? { retainedDirectory } : {}),
-        ...(result ? { result } : {}),
-        ...(error !== undefined ? { error } : {}),
-      };
-      records[index] = record;
-      await observation.close();
-      if (status === "winner") {
-        winner = record;
-        stop.abort(
-          new Error(`Speculative candidate ${candidate.key} selected`),
-        );
-      }
-    }
+  if (options.durability) {
+    invariant(
+      !!options.durability.version.trim(),
+      "Speculation durability version must not be empty",
+    );
+    invariant(
+      !!options.sandboxProvider.recover,
+      "Sandbox provider does not support durable speculation recovery",
+    );
   }
-  await Promise.all(
-    Array.from({ length: Math.min(concurrency, candidates.length) }, worker),
-  );
-  function outcome(): SpeculationResult<T>["status"] {
-    if (winner) return "winner";
-    if (options.signal?.aborted) return "aborted";
-    if (budgetError !== undefined) return "budget-exhausted";
-    return "no-winner";
+  const identity = await speculationIdentity(options);
+  const session = options.durability
+    ? await openSpeculationStore(
+        options.durability.transporter,
+        options.durability.runId,
+      )
+    : undefined;
+  let state: SpeculationCheckpoint<T>;
+  if (session?.initial !== undefined) {
+    validateSpeculation<T>(
+      session.initial,
+      identity,
+      candidates.map((candidate) => candidate.key),
+    );
+    state = session.initial;
+  } else {
+    const id = randomUUID();
+    state = {
+      format: 1,
+      identity,
+      id,
+      before: await speculativeHostSnapshot(options.repository),
+      usage: { attempts: 0, tokens: { input: 0, cached: 0, output: 0 } },
+      finished: false,
+      attempts: candidates.map((candidate) => ({
+        key: candidate.key,
+        attempt: 1,
+        branch: `outpost/speculation/${id}/${candidate.key}${session ? "/1" : ""}`,
+        phase: "waiting",
+        cleanup: "done",
+      })),
+    };
   }
-  const status = outcome();
-  const host = await speculativeHostSnapshot(options.repository).then(
-    (after) => ({
-      before,
-      after,
-      changed:
-        before.fingerprint !== after.fingerprint ||
-        before.branch !== after.branch,
-    }),
-    (error: unknown) => ({ before, changed: true, error }),
+  const result = await runSpeculation(
+    options,
+    state,
+    session,
+    concurrency,
+    cleanupMs,
   );
-  await options.observation?.flush();
-  return {
-    id,
-    baseline,
-    host,
-    status,
-    candidates: records,
-    usage: accounting.snapshot(),
-    ...(winner ? { winner } : {}),
-    ...(budgetError !== undefined ? { error: budgetError } : {}),
-  };
+  if (state.attempts.every((attempt) => attempt.cleanup === "done"))
+    await session?.release();
+  return result;
 }

@@ -92,6 +92,7 @@ Treat these as review and regression-test obligations when changing the affected
 - Resource activity is an observation, and storage reservations coordinate cooperating writers rather than imposing physical quotas. Transport-backed activity must not infer remote liveness from a PID. Transport checkpoint ownership and abandoned reservations require explicit recovery; conditional mutations must fence stale writers. Opt-in research providers and policies must reject unsupported capabilities explicitly.
 - Protect concurrent host edits during remote synchronization. Validate and back up before applying incoming changes. Preserve recovery artifacts whenever cleanup would discard recoverable work.
 - Keep branch integration explicit and correctly ordered. Never discard dirty or detached worktrees as routine cleanup.
+- Durable speculation requires a provider recovery capability and resource registration before allocation. Fence checkpoint writes by revision, require explicit recovery after stopping an abandoned coordinator, and authorize interrupted-attempt replay separately. Preserve cumulative budgets and old worktrees; a cleanup timeout leaves resources pending. Merge preflight records exact commits but does not authorize integration or prevent later host edits.
 - Do not silently fall back from an isolated provider to host execution. `localSandboxProvider()` is explicitly unisolated; mounted Git metadata is not an adversarial security boundary.
 
 ## Tests and coverage

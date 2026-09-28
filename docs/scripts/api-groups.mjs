@@ -164,6 +164,6 @@ export const groups = [
     title: ["Speculative execution", "Exécution spéculative"],
     guide: "guide/advanced/speculation",
     names:
-      "speculate SpeculationOptions SpeculationResult SpeculativeCandidate SpeculativeCandidateResult SpeculativeOutput SpeculativeHostSnapshot SpeculativeValidation",
+      "speculate recoverSpeculation checkSpeculationIntegration SpeculationDurability SpeculationRecoveryOptions SpeculationIntegration SpeculationOptions SpeculationResult SpeculativeCandidate SpeculativeCandidateResult SpeculativeOutput SpeculativeHostSnapshot SpeculativeValidation",
   },
 ];

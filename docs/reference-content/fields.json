@@ -5285,5 +5285,113 @@
   "HarnessSubagent.validate": [
     "Validate the parent model’s delegation input against the fixed prompt schema before invoking the child.",
     "Valide l’entrée de délégation du modèle parent selon le schéma prompt fixe avant d’appeler l’enfant."
+  ],
+  "SandboxContext.registerRecovery": [
+    "When supplied, await this callback with a stable resource ID before allocating the sandbox. Registration failure must prevent allocation; register exactly once.",
+    "Lorsqu’il est fourni, attendre ce callback avec un identifiant de ressource stable avant l’allocation. Un échec interdit l’allocation ; enregistrer exactement une fois."
+  ],
+  "SandboxProvider.recover": [
+    "Optional idempotent cleanup of a previously registered resource after its coordinator has stopped. Preserve recoverable repository data and honor cancellation/deadlines. Required for durable speculation.",
+    "Nettoyage optionnel et idempotent d’une ressource enregistrée après l’arrêt de son coordinateur. Préserver les données récupérables du dépôt et respecter annulation et délais. Requis pour la spéculation durable."
+  ],
+  "SpeculationOptions.durability": [
+    "Persist this race through Transport; requires provider recovery support. Omit for an in-memory race.",
+    "Persiste cette course via Transport ; exige la récupération du provider. Omettre pour une course en mémoire."
+  ],
+  "SpeculationOptions.cleanupMs": [
+    "Maximum wait in milliseconds for each close/recovery and for workers after cancellation; defaults to 30000. Unsettled resources remain pending.",
+    "Attente maximale en millisecondes par fermeture/récupération et pour les workers après annulation ; 30000 par défaut. Les ressources non terminées restent en attente."
+  ],
+  "SpeculationDurability.transporter": [
+    "Caller-owned transport storing conditional speculation checkpoints; choose localTransport under the repository .outpost/storage or an explicit remote transport.",
+    "Transport de l’appelant stockant les checkpoints conditionnels ; choisir localTransport sous .outpost/storage du dépôt ou un transport distant explicite."
+  ],
+  "SpeculationDurability.runId": [
+    "Stable nonempty identifier used to locate and exclusively own this race across calls.",
+    "Identifiant stable non vide permettant de retrouver et posséder exclusivement cette course entre appels."
+  ],
+  "SpeculationDurability.version": [
+    "Nonempty implementation/input version; change it when agents, validation, provider configuration or other semantics change. Incompatible resumes are rejected.",
+    "Version non vide des entrées/implémentations ; la changer si les agents, la validation, la configuration du provider ou leur sémantique changent. Les reprises incompatibles sont refusées."
+  ],
+  "SpeculationDurability.resume": [
+    "Explicit retry-incomplete authorization to replay interrupted candidates and their possible side effects. Completed candidates are retained.",
+    "Autorisation explicite retry-incomplete pour rejouer les candidats interrompus et leurs effets possibles. Les candidats terminés sont conservés."
+  ],
+  "SpeculationRecoveryOptions.transporter": [
+    "Transport containing the abandoned speculation ownership envelope.",
+    "Transport contenant l’enveloppe de propriété abandonnée de la course."
+  ],
+  "SpeculationRecoveryOptions.runId": [
+    "Identifier of the abandoned race whose ownership is being released.",
+    "Identifiant de la course abandonnée dont la propriété est libérée."
+  ],
+  "SpeculationRecoveryOptions.revision": [
+    "Exact current transport revision inspected by the operator; a mismatch rejects recovery and fences concurrent changes.",
+    "Révision exacte du transport inspectée par l’opérateur ; toute différence refuse la récupération et protège les modifications concurrentes."
+  ],
+  "SpeculationRecoveryOptions.coordinatorStopped": [
+    "Explicit confirmation that the old coordinator has stopped; a remote PID or elapsed time is insufficient evidence.",
+    "Confirmation explicite de l’arrêt de l’ancien coordinateur ; un PID distant ou un délai écoulé ne constitue pas une preuve."
+  ],
+  "recoverSpeculation.options": [
+    "Abandoned race identity, inspected revision and explicit confirmation that its coordinator has stopped.",
+    "Identité de la course abandonnée, révision inspectée et confirmation explicite de l’arrêt de son coordinateur."
+  ],
+  "checkSpeculationIntegration.repository": [
+    "Host Git checkout to inspect without changing its index or working files.",
+    "Checkout Git hôte à inspecter sans changer son index ni ses fichiers de travail."
+  ],
+  "checkSpeculationIntegration.branch": [
+    "Candidate ref to resolve to a commit and test against the current host HEAD.",
+    "Référence du candidat à résoudre en commit et à vérifier contre le HEAD hôte courant."
+  ],
+  "checkSpeculationIntegration.expectedCommit": [
+    "Optional validated candidate commit; block the preflight if the ref has moved since validation.",
+    "Commit validé optionnel du candidat ; bloque la vérification si la référence a changé depuis la validation."
+  ],
+  "SpeculationIntegration.status": [
+    "clean means a conflict-free merge of the recorded commits; conflict lists conflicting files; blocked reports dirty/detached or changing state and Git failures. This does not perform integration.",
+    "clean indique une fusion sans conflit des commits enregistrés ; conflict liste les fichiers en conflit ; blocked signale un état sale/détaché ou changeant et les erreurs Git. Aucune intégration n’est effectuée."
+  ],
+  "SpeculationIntegration.host": [
+    "Host snapshot used for this preflight; rerun the check if host state changes before integration.",
+    "Snapshot hôte utilisé pour cette vérification ; la relancer si l’état hôte change avant l’intégration."
+  ],
+  "SpeculationIntegration.candidateCommit": [
+    "Exact candidate commit tested against host.head when the preflight completes.",
+    "Commit exact du candidat vérifié contre host.head lorsque la vérification aboutit."
+  ],
+  "SpeculationIntegration.conflicts": [
+    "Paths reported by Git merge-tree for a conflicting merge; empty for clean or blocked checks.",
+    "Chemins signalés par Git merge-tree lors d’un conflit ; vide pour les vérifications clean ou blocked."
+  ],
+  "SpeculationIntegration.reason": [
+    "Explanation of a blocked preflight, including changed candidate refs or unavailable Git support.",
+    "Explication d’une vérification bloquée, notamment une référence candidate modifiée ou un support Git indisponible."
+  ],
+  "SpeculationResult.integration": [
+    "Fresh non-mutating merge preflight for the selected winner, tied to the validated candidate commit and current host snapshot.",
+    "Vérification de fusion récente sans mutation pour le gagnant, liée au commit candidat validé et au snapshot hôte courant."
+  ],
+  "SpeculationResult.previousAttempts": [
+    "Earlier interrupted candidate attempts retained by a durable resumed race, with branches and recovery locations.",
+    "Tentatives antérieures interrompues conservées par une course durable reprise, avec branches et emplacements de récupération."
+  ],
+  "SpeculativeCandidateResult.attempt": [
+    "One-based attempt number; a replay uses a new branch and consumes another shared attempt.",
+    "Numéro de tentative à partir de un ; un rejeu utilise une nouvelle branche et consomme une tentative supplémentaire du budget partagé."
+  ],
+  "SpeculativeCandidateResult.commit": [
+    "Candidate HEAD captured after successful validation; integration checks reject subsequent ref movement.",
+    "HEAD candidat capturé après validation réussie ; la vérification d’intégration refuse une modification ultérieure de la référence."
+  ],
+  "SpeculativeCandidateResult.cleanup": [
+    "done confirms owned cleanup completed; pending requires resource reconciliation and preserves recovery information.",
+    "done confirme la fin du nettoyage possédé ; pending exige une réconciliation des ressources et conserve les informations de récupération."
+  ],
+  "SpeculativeCandidateResult.resourceId": [
+    "Provider identity registered before allocation, used for explicit cleanup after coordinator failure.",
+    "Identité du provider enregistrée avant l’allocation, utilisée pour le nettoyage explicite après échec du coordinateur."
   ]
 }

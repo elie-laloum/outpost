@@ -7,6 +7,7 @@ export interface Volume {
 }
 
 export interface SandboxContext {
+  readonly registerRecovery?: (resourceId: string) => Promise<void>;
   readonly repository: string;
   readonly directory: string;
   readonly gitDirectories: readonly string[];
@@ -66,6 +67,10 @@ export interface SandboxLease {
 }
 
 export interface SandboxProvider {
+  readonly recover?: (
+    resourceId: string,
+    options?: TransferOptions,
+  ) => Promise<void>;
   readonly name: string;
   readonly placement: "mounted" | "remote" | "host";
   readonly variables?: Variables;

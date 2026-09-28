@@ -393,8 +393,13 @@ export type { QueuedTaskOptions } from "./application/queued-task.types.ts";
 
 export type { EgressPolicy } from "./domain/egress.types.ts";
 
+export { recoverSpeculation } from "./infrastructure/speculation-store.ts";
+export type { SpeculationRecoveryOptions } from "./infrastructure/speculation-store.types.ts";
+export { checkSpeculationIntegration } from "./application/speculation-integration.ts";
 export { speculate } from "./application/speculation.ts";
 export type {
+  SpeculationDurability,
+  SpeculationIntegration,
   SpeculationOptions,
   SpeculationResult,
   SpeculativeCandidate,

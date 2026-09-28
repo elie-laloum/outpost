@@ -244,9 +244,11 @@ Existe, mais partiel ou expérimental pour un usage en production.
 
 ### Spéculation récupérable
 
-**Faiblesse actuelle** — Si le processus qui coordonne la course plante, les candidats en cours sont perdus et leurs sandboxes peuvent rester actives. Les conflits ne sont pas vérifiés avant d'intégrer le gagnant.
+**Statut — implémenté, non publié, périmètre borné** : checkpoints via Transport avec propriété exclusive et révisions conditionnelles, reprise explicite après crash, budgets cumulés, conservation des anciennes tentatives, nettoyage borné et vérification de fusion Git sans mutation. Docker/Podman montés exposent une récupération par identifiant enregistré avant allocation. Les autres providers intégrés refusent le mode durable ; la récupération cloud/providers isolés et les campagnes multi-hôtes restent ouvertes. La spéculation conserve son statut expérimental.
 
-**Ce que ça complète** — Enregistrer qui possède chaque candidat dans le stockage, pouvoir reprendre la course, borner le nettoyage, et vérifier les conflits avant l'intégration.
+**Faiblesse initiale** — Si le processus qui coordonne la course plante, les candidats en cours sont perdus et leurs sandboxes peuvent rester actives. Les conflits ne sont pas vérifiés avant d'intégrer le gagnant.
+
+**Objectif du chantier** — Enregistrer qui possède chaque candidat dans le stockage, pouvoir reprendre la course, borner le nettoyage, et vérifier les conflits avant l'intégration.
 
 <a id="r-workers"></a>
 

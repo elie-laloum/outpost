@@ -169,3 +169,76 @@ test("custom providers retain their explicit placement", () => {
   );
   assert.throws(() => remoteSandboxProvider({ name: "", acquire }));
 });
+
+test("container recovery registers identity before allocation and refuses unknown identities", async (t) => {
+  const root = await repository(t);
+  const calls: Command[] = [];
+  let registered = "";
+  let exists = true;
+  const provider = containerProvider(
+    "docker",
+    { image: "test:1" },
+    async (command) => {
+      calls.push(command);
+      if (command.arguments?.[0] === "create")
+        assert.equal(command.arguments[2], registered);
+      if (command.arguments?.[0] === "container")
+        return { status: 0, stdout: exists ? registered : "", stderr: "" };
+      if (command.arguments?.[0] === "rm") exists = false;
+      return {
+        status: 0,
+        stdout: command.arguments?.[0] === "image" ? "1000:1000\n" : "",
+        stderr: "",
+      };
+    },
+  );
+  const lease = await provider.acquire({
+    repository: root,
+    directory: root,
+    gitDirectories: [join(root, ".git")],
+    variables: {},
+    registerRecovery: async (id) => {
+      registered = id;
+    },
+  });
+  assert.match(registered, /^outpost-/);
+  await provider.recover!(registered);
+  await provider.recover!(registered);
+  assert.equal(calls.filter((call) => call.arguments?.[0] === "rm").length, 1);
+  await assert.rejects(provider.recover!("unrelated"), /identity/);
+  await lease.release();
+  assert.equal(
+    containerProvider("docker", { repositoryMode: "isolated" }).recover,
+    undefined,
+  );
+});
+
+test("failed recovery registration prevents container creation", async (t) => {
+  const root = await repository(t);
+  let created = false;
+  const provider = containerProvider(
+    "podman",
+    { image: "test:1" },
+    async (command) => {
+      if (command.arguments?.[0] === "create") created = true;
+      return {
+        status: 0,
+        stdout: command.arguments?.[0] === "image" ? "1000:1000\n" : "",
+        stderr: "",
+      };
+    },
+  );
+  await assert.rejects(
+    provider.acquire({
+      repository: root,
+      directory: root,
+      gitDirectories: [join(root, ".git")],
+      variables: {},
+      registerRecovery: async () => {
+        throw new Error("storage unavailable");
+      },
+    }),
+    /storage unavailable/,
+  );
+  assert.equal(created, false);
+});

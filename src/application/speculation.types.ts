@@ -1,3 +1,4 @@
+import type { Transport } from "../domain/transport.types.ts";
 import type { Agent } from "../domain/agent.types.ts";
 import type {
   WorkflowBudget,
@@ -31,7 +32,24 @@ export interface SpeculativeValidation<T> {
   readonly signal: AbortSignal;
 }
 
+export interface SpeculationDurability {
+  readonly transporter: Transport;
+  readonly runId: string;
+  readonly version: string;
+  readonly resume?: "retry-incomplete";
+}
+
+export interface SpeculationIntegration {
+  readonly status: "clean" | "conflict" | "blocked";
+  readonly host: SpeculativeHostSnapshot;
+  readonly candidateCommit?: string;
+  readonly conflicts: readonly string[];
+  readonly reason?: string;
+}
+
 export interface SpeculationOptions<T = undefined> {
+  readonly durability?: SpeculationDurability;
+  readonly cleanupMs?: number;
   readonly observation?: import("../domain/observation.types.ts").ObservationHub;
   readonly repository: string;
   readonly sandboxProvider: NonNullable<SandboxOptions["sandboxProvider"]>;
@@ -55,6 +73,10 @@ export interface SpeculationOptions<T = undefined> {
 
 export interface SpeculativeCandidateResult<T = undefined> {
   readonly key: string;
+  readonly commit?: string;
+  readonly attempt?: number;
+  readonly cleanup?: "pending" | "done";
+  readonly resourceId?: string;
   readonly branch: string;
   readonly status: "winner" | "rejected" | "failed" | "cancelled" | "skipped";
   readonly directory?: string;
@@ -64,6 +86,8 @@ export interface SpeculativeCandidateResult<T = undefined> {
 }
 
 export interface SpeculationResult<T = undefined> {
+  readonly integration?: SpeculationIntegration;
+  readonly previousAttempts?: readonly SpeculativeCandidateResult<T>[];
   readonly id: string;
   readonly baseline: string;
   readonly host: {

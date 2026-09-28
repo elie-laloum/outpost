@@ -912,3 +912,41 @@ test(
     }
   },
 );
+
+test(
+  "real container recovery removes an orphan by its persisted identity and preserves mounted work",
+  { skip: !process.env.OUTPOST_CONTAINER_ENGINE },
+  async (t) => {
+    const root = await repository(t);
+    const provider = (
+      process.env.OUTPOST_CONTAINER_ENGINE === "podman"
+        ? podmanSandboxProvider
+        : dockerSandboxProvider
+    )({ image: containerImage, networks: "none" });
+    let resourceId = "";
+    const lease = await provider.acquire({
+      repository: root,
+      directory: root,
+      gitDirectories: [join(root, ".git")],
+      variables: {},
+      registerRecovery: async (id) => {
+        resourceId = id;
+      },
+    });
+    t.after(() => lease.release().catch(() => {}));
+    const command = await lease.invoke({
+      executable: "sh",
+      arguments: ["-c", "printf recovered > recovery.txt; exit 7"],
+    });
+    assert.equal(command.status, 7);
+    assert.ok(resourceId);
+    await provider.recover!(resourceId, { deadlineMs: 10_000 });
+    await provider.recover!(resourceId, { deadlineMs: 10_000 });
+    assert.equal(
+      await readFile(join(root, "recovery.txt"), "utf8"),
+      "recovered",
+    );
+    const removed = await lease.invoke({ executable: "true" });
+    assert.notEqual(removed.status, 0);
+  },
+);

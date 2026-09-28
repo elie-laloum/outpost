@@ -1,3 +1,4 @@
+import { recoverContainer } from "./container-recovery.ts";
 import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { basename } from "node:path";
@@ -68,6 +69,12 @@ export function containerProvider(
     name: engine,
     placement: config.repositoryMode === "isolated" ? "remote" : "mounted",
     variables: { ...config.variables },
+    ...(config.repositoryMode !== "isolated"
+      ? {
+          recover: (resourceId, recoveryOptions) =>
+            recoverContainer(engine, executor, resourceId, recoveryOptions),
+        }
+      : {}),
     async acquire(context) {
       context.signal?.throwIfAborted();
       const name = `outpost-${randomUUID()}`;
@@ -152,6 +159,8 @@ export function containerProvider(
             ],
             context.signal ? { signal: context.signal } : {},
           );
+        await context.registerRecovery?.(name);
+        context.signal?.throwIfAborted();
         await call(args, {
           ...(context.signal ? { signal: context.signal } : {}),
         });

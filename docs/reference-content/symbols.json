@@ -172,8 +172,8 @@
     "Définit un nœud qui envoie un travail durable dans la file et interroge sa progression. Déduit son identité de l’exécution et de la tâche, décode le résultat JSON et comptabilise l’usage renvoyé. Un worker enregistré exécute le gestionnaire distant."
   ],
   "speculate": [
-    "Run bounded agent candidates on separate branches from one baseline and retain the first candidate accepted by validate after cleanup. Cancel losing candidates and report host changes and cumulative usage. This opt-in prototype neither integrates nor pushes the winner automatically.",
-    "Exécute des candidats agents bornés sur des branches distinctes issues d’une même base et retient le premier accepté par validate après nettoyage. Annule les perdants et rapporte changements hôtes et usage cumulé. Ce prototype opt-in n’intègre ni ne pousse automatiquement le gagnant."
+    "Run bounded candidates from a pinned repository baseline, validate them in their live sandboxes and select one winner after its cleanup. Durable mode persists ownership, attempts, usage and outputs through Transport and requires explicit recovery/replay after a crash. Return preserved recovery locations and a Git merge preflight without integrating the branch.",
+    "Exécute des candidats bornés depuis un commit initial figé, les valide dans leurs sandboxes actives et sélectionne un gagnant après son nettoyage. Le mode durable persiste propriété, tentatives, usage et résultats via Transport et exige récupération/rejeu explicites après un crash. Renvoie les emplacements préservés et une vérification de fusion Git sans intégrer la branche."
   ],
   "openTelemetry": [
     "Create workflow and complete dispatch instrumentation from an injected tracer and meter. Pass the result as telemetry to workflow.start or dispatch, keeping observe for custom handlers. The previous workflow observe wiring remains supported. Errors are isolated through onError; close finishes outstanding spans without flushing or shutting down the SDK. Only this optional entry point loads OpenTelemetry.",
@@ -394,5 +394,25 @@
   "AgentEventDetails": [
     "Payload variants emitted by CLI adapters and the built-in harness, including child lifecycle events. AgentEvent adds child correlation metadata.",
     "Variantes de contenu émises par les adapters CLI et le harness intégré, incluant le cycle de vie des enfants. AgentEvent ajoute les métadonnées de corrélation enfant."
+  ],
+  "recoverSpeculation": [
+    "Release abandoned speculation ownership using an inspected transport revision after the previous coordinator has stopped. This fences stale writes; the next speculate call reconciles registered resources and requires explicit authorization before replaying incomplete candidates.",
+    "Libère la propriété abandonnée d’une course avec une révision du transport inspectée, après arrêt du coordinateur précédent. Bloque les écritures périmées ; le prochain appel à speculate réconcilie les ressources enregistrées et exige une autorisation explicite avant de rejouer les candidats incomplets."
+  ],
+  "checkSpeculationIntegration": [
+    "Resolve a candidate ref and use Git merge-tree to check it against the current host commit without modifying the index or worktree. Return conflict paths or a blocking reason, and pin both inspected commits. Rerun immediately before an explicit integration if either ref or host files change.",
+    "Résout une référence candidate et utilise Git merge-tree pour la vérifier contre le commit hôte courant sans modifier l’index ni le worktree. Renvoie les chemins en conflit ou une raison de blocage et identifie les commits inspectés. Relancer avant une intégration explicite si une référence ou les fichiers hôtes changent."
+  ],
+  "SpeculationDurability": [
+    "Configure durable candidate ownership and checkpoints for one versioned race. The caller owns the transport and authorizes interrupted work replay.",
+    "Configure la propriété durable des candidats et les checkpoints d’une course versionnée. L’appelant possède le transport et autorise le rejeu du travail interrompu."
+  ],
+  "SpeculationIntegration": [
+    "Describe a merge preflight tied to exact host and candidate commits. A clean result is an observation, not authorization to merge or a lock against subsequent edits.",
+    "Décrit une vérification de fusion liée aux commits exacts hôte et candidat. Un résultat clean est une observation, pas une autorisation de fusion ni un verrou contre des modifications ultérieures."
+  ],
+  "SpeculationRecoveryOptions": [
+    "Identify abandoned speculation ownership and the revision being explicitly recovered. Resource cleanup occurs on the next resumed race.",
+    "Identifie la propriété abandonnée d’une course et la révision explicitement récupérée. Le nettoyage des ressources intervient lors de la prochaine reprise."
   ]
 }

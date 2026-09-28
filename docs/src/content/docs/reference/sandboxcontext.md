@@ -13,18 +13,20 @@ import type { SandboxContext } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name             | Type                               | Presence | Meaning                                                                    |
-| ---------------- | ---------------------------------- | -------- | -------------------------------------------------------------------------- |
-| `repository`     | `string`                           | Required | Target host Git checkout.                                                  |
-| `directory`      | `string`                           | Required | Host workspace directory used for this execution.                          |
-| `gitDirectories` | `readonly string[]`                | Required | Host Git metadata directories required to access the workspace repository. |
-| `variables`      | `Readonly<Record<string, string>>` | Required | Explicit environment declarations; values are strings.                     |
-| `signal`         | `AbortSignal \| undefined`         | Optional | Cooperative cancellation for this operation.                               |
+| Name               | Type                                                   | Presence | Meaning                                                                                                                                                          |
+| ------------------ | ------------------------------------------------------ | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `registerRecovery` | `((resourceId: string) => Promise<void>) \| undefined` | Optional | When supplied, await this callback with a stable resource ID before allocating the sandbox. Registration failure must prevent allocation; register exactly once. |
+| `repository`       | `string`                                               | Required | Target host Git checkout.                                                                                                                                        |
+| `directory`        | `string`                                               | Required | Host workspace directory used for this execution.                                                                                                                |
+| `gitDirectories`   | `readonly string[]`                                    | Required | Host Git metadata directories required to access the workspace repository.                                                                                       |
+| `variables`        | `Readonly<Record<string, string>>`                     | Required | Explicit environment declarations; values are strings.                                                                                                           |
+| `signal`           | `AbortSignal \| undefined`                             | Optional | Cooperative cancellation for this operation.                                                                                                                     |
 
 ## Signature
 
 ```ts
 export interface SandboxContext {
+  readonly registerRecovery?: (resourceId: string) => Promise<void>;
   readonly repository: string;
   readonly directory: string;
   readonly gitDirectories: readonly string[];
