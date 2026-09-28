@@ -102,6 +102,10 @@ try {
     assert.equal(typeof api.LoopTaskExhausted,'function');
     const quota=api.quotaFault(new api.OutpostError('quota','limit',{resetAt:'2026-01-01T00:00:00.000Z'}));
     assert.deepEqual(quota,{message:'limit',resetAt:'2026-01-01T00:00:00.000Z'});
+    const replaying=api.replayAgent({journal:[{kind:'prompt',text:'work',source:'agent'},{kind:'summary',durationMs:1,status:0,tokens:{input:0,cached:0,output:0},source:'agent'}]});
+    assert.equal(replaying.kind,'replay');
+    assert.equal(replaying.remainingTurns,1);
+    assert.equal(new api.ReplayDivergence({kind:'exhausted',turn:2}).code,'replay');
     const transporter=api.localTransport({directory:'consumer-store'});
     const artifact=api.artifactStore({transporter});
     const id='a'.repeat(64);
@@ -217,6 +221,15 @@ const quotaPolicy: WorkflowQuotaPolicy = {action:'pause',maxWaitMs:60_000};
 const quotaOptions: WorkflowOptions = {onQuota:quotaPolicy};
 const quotaPause: WorkflowQuotaPause | undefined=verified.tasks[0]?.quota;
 const quotaSignal: QuotaFault | undefined=quotaFault(new Error('other'));
+import { replayAgent, ReplayDivergence, readJournal, type ReplayAgent, type ReplayAgentOptions, type ReplayDivergenceKind, type ReplayTurn, type WorkspaceCommitsEvent } from '@elie-laloum/outpost';
+const replayOptions: ReplayAgentOptions = {journal:[],divergence:'warn'};
+const replaying: ReplayAgent | undefined = replayOptions.journal.length ? replayAgent(replayOptions) : undefined;
+const replayedTurn: ReplayTurn | undefined = replaying?.turns[0];
+const divergenceKind: ReplayDivergenceKind = new ReplayDivergence({kind:'prompt',turn:1}).kind;
+const recordedCommits: WorkspaceCommitsEvent['kind'] = 'workspace-commits';
+const replayCoder: Agent | undefined = replaying;
+const replayLogging: Parameters<typeof dispatch>[0]['logging'] = {replayable:true};
+void readJournal;
 // @ts-expect-error Gemini CLI was removed without a compatibility export.
 import { geminiHarness } from '@elie-laloum/outpost';
 // @ts-expect-error Gemini CLI settings were removed.

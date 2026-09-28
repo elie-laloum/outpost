@@ -2,6 +2,7 @@ import type { Harness } from "./harness.types.ts";
 import type { AgentModel, ModelSpec } from "./model.types.ts";
 import type { Command, CommandResult, Variables } from "./command.types.ts";
 import type { ConversationStore } from "./conversation.types.ts";
+import type { ReplayAgent } from "./replay.types.ts";
 
 export interface Usage {
   readonly complete?: boolean;
@@ -211,7 +212,7 @@ export interface CustomAgent extends AgentFeatures {
   readonly model: AgentModel;
 }
 
-export type Agent = CliAgent | CustomAgent;
+export type Agent = CliAgent | CustomAgent | ReplayAgent;
 
 export interface CliAgentOptions {
   readonly harness: CliHarness;

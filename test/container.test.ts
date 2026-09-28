@@ -9,6 +9,9 @@ import { readFile, mkdir, writeFile, readlink, lstat } from "node:fs/promises";
 import { join } from "node:path";
 import {
   createSandbox,
+  dispatch,
+  readJournal,
+  replayAgent,
   codexHarness,
   claudeHarness,
   copilotHarness,
@@ -20,6 +23,8 @@ import { repository } from "./helpers.ts";
 import type { AgentEvent } from "../src/index.ts";
 import { conversations } from "../src/index.ts";
 import { executeProcess } from "../src/infrastructure/process.ts";
+import { repositoryTransport } from "../src/infrastructure/repository-transport.ts";
+import { git } from "../src/infrastructure/git.ts";
 import { imageRecipe } from "../src/cli/scaffold.constants.ts";
 
 const containerImage =
@@ -1084,6 +1089,70 @@ test(
     assert.equal(
       await readFile(join(result.value(next).directory, "draft.txt"), "utf8"),
       "preserved",
+    );
+  },
+);
+
+test(
+  "real container replays recorded commits through the sandbox",
+  { skip: !process.env.OUTPOST_CONTAINER_ENGINE },
+  async (t) => {
+    const root = await repository(t);
+    const sandboxProvider = (
+      process.env.OUTPOST_CONTAINER_ENGINE === "podman"
+        ? podmanSandboxProvider
+        : dockerSandboxProvider
+    )({ image: containerImage, networks: "none" });
+    const fixture = {
+      kind: "cli" as const,
+      harness: {
+        kind: "cli" as const,
+        bind() {
+          throw new Error("Already bound fixture");
+        },
+      },
+      name: "replay-fixture",
+      request: () => ({
+        executable: "node",
+        arguments: [
+          "-e",
+          `const fs = require("node:fs"); const { execFileSync } = require("node:child_process");
+          fs.writeFileSync("binary.bin", Buffer.from([0, 255, 7]));
+          fs.writeFileSync("notes.txt", "caf\u00e9\\n");
+          execFileSync("git", ["add", "."]);
+          execFileSync("git", ["commit", "-m", "Container replay"]);
+          console.log(JSON.stringify({ kind: "text", text: "<outpost>done</outpost>" }));`,
+        ],
+      }),
+      events: (line: string) => [JSON.parse(line) as AgentEvent],
+    };
+    const transporter = repositoryTransport(root);
+    const recorded = await dispatch({
+      repository: root,
+      sandboxProvider,
+      agent: fixture,
+      branch: { mode: "named", name: "recorded" },
+      brief: { text: "Record in a container" },
+      logging: { transporter, replayable: true },
+    });
+    assert.equal(recorded.commits.length, 1);
+    const replayed = await dispatch({
+      repository: root,
+      sandboxProvider,
+      agent: replayAgent({
+        journal: await readJournal({
+          transporter,
+          reference: recorded.logReference!,
+        }),
+      }),
+      branch: { mode: "named", name: "replayed" },
+      brief: { text: "Record in a container" },
+      logging: false,
+    });
+    assert.deepEqual(replayed.commits, recorded.commits);
+    assert.equal(
+      await git(root, ["rev-parse", "replayed^{tree}"]),
+      await git(root, ["rev-parse", "recorded^{tree}"]),
     );
   },
 );

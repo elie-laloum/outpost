@@ -10,4 +10,5 @@ export type FaultCode =
   | "session"
   | "provider"
   | "limit"
-  | "quota";
+  | "quota"
+  | "replay";

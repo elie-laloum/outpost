@@ -1,9 +1,12 @@
 import { access } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
 import { agentObservation } from "../domain/agent-observation.ts";
-import type { Usage } from "../domain/agent.types.ts";
+import type { Agent, Usage } from "../domain/agent.types.ts";
 import type { DispatchTelemetrySession } from "../domain/dispatch-telemetry.types.ts";
-import type { ObservationHub } from "../domain/observation.types.ts";
+import type {
+  ObservationHub,
+  ObservationSource,
+} from "../domain/observation.types.ts";
 import { createObservationHub } from "../domain/observation.ts";
 import {
   recordRecovery,
@@ -106,7 +109,7 @@ export async function observeDispatch<T, R extends ObservedDispatchResult>(
           pass: event.pass,
           ...(event.subagentId ? { subagentId: event.subagentId } : {}),
         })
-        .emit(options.agent?.kind === "custom" ? "harness" : "agent", event);
+        .emit(agentSource(options.agent), event);
     },
   };
   try {
@@ -174,6 +177,11 @@ export async function observeDispatch<T, R extends ObservedDispatchResult>(
     await observation.close();
     active.delete(observation);
   }
+}
+
+function agentSource(agent: Agent | undefined): ObservationSource {
+  if (agent?.kind === "replay") return agent.source;
+  return agent?.kind === "custom" ? "harness" : "agent";
 }
 
 function isCommit(

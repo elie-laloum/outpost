@@ -107,6 +107,20 @@ export {
 export type { CheckpointRecoveryOptions } from "./infrastructure/transport-checkpoint.types.ts";
 export { readJournal } from "./infrastructure/transport-journal.ts";
 export type { ReadJournalOptions } from "./infrastructure/transport-journal.types.ts";
+export { replayAgent, ReplayDivergence } from "./domain/replay.ts";
+export type {
+  RecordedCommit,
+  RecordedIdentity,
+  RecordedRevision,
+  ReplayAgent,
+  ReplayAgentOptions,
+  ReplayDivergenceDetails,
+  ReplayDivergenceKind,
+  ReplayDivergencePolicy,
+  ReplayFailure,
+  ReplayTurn,
+  WorkspaceCommitsEvent,
+} from "./domain/replay.types.ts";
 export { transportConversations } from "./infrastructure/transport-conversations.ts";
 export type { TransportConversationOptions } from "./infrastructure/transport-conversations.types.ts";
 export {

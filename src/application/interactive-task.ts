@@ -45,7 +45,7 @@ export function interactiveAgentTask(
       JSON.stringify({
         repository: settings.repository,
         agent: selected.name,
-        model: selected.model,
+        model: "model" in selected ? selected.model : undefined,
         brief: options.brief,
         maxTurns,
         conversationHome: options.conversationHome,

@@ -7,6 +7,7 @@ import { agentRequest } from "./agent-request.ts";
 import { boundedLines } from "./output-lines.ts";
 import { stopReason } from "./stop-reason.ts";
 import { customTurn } from "./custom-turn.ts";
+import { replayTurn } from "./replay-turn.ts";
 import type { Agent } from "../domain/agent.types.ts";
 import { OutpostError } from "../domain/errors.ts";
 import type { SandboxLease } from "../domain/sandbox.types.ts";
@@ -35,6 +36,8 @@ export async function turn(
       ...context,
       continuation,
     });
+  if (agent.kind === "replay")
+    return replayTurn(lease, agent, prompt, options, pass);
   const start = Date.now();
   const controller = new AbortController();
   const signal = options.signal
