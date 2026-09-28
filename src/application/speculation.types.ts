@@ -5,6 +5,7 @@ import type {
   WorkflowUsage,
 } from "../domain/workflow/budget.types.ts";
 import type { DispatchOptions } from "./execution.types.ts";
+import type { QuotaFault } from "../domain/quota.types.ts";
 import type {
   Sandbox,
   SandboxOptions,
@@ -78,7 +79,10 @@ export interface SpeculativeCandidateResult<T = undefined> {
   readonly cleanup?: "pending" | "done";
   readonly resourceId?: string;
   readonly branch: string;
-  readonly status: "winner" | "rejected" | "failed" | "cancelled" | "skipped";
+  readonly status:
+    "winner" | "rejected" | "failed" | "quota" | "cancelled" | "skipped";
+  /** Usage or rate limit that stopped this candidate. */
+  readonly quota?: QuotaFault;
   readonly directory?: string;
   readonly retainedDirectory?: string;
   readonly result?: SpeculativeOutput<T>;
@@ -96,7 +100,10 @@ export interface SpeculationResult<T = undefined> {
     readonly changed: boolean;
     readonly error?: unknown;
   };
-  readonly status: "winner" | "no-winner" | "aborted" | "budget-exhausted";
+  readonly status:
+    "winner" | "no-winner" | "quota" | "aborted" | "budget-exhausted";
+  /** Earliest known reset among candidates stopped by a usage or rate limit. */
+  readonly quota?: QuotaFault;
   readonly winner?: SpeculativeCandidateResult<T>;
   readonly candidates: readonly SpeculativeCandidateResult<T>[];
   readonly usage: WorkflowUsage;

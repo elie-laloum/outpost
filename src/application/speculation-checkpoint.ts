@@ -170,7 +170,7 @@ export function validateSpeculation<T>(
     throw invalid();
   if (
     value.status !== undefined &&
-    !["winner", "no-winner", "aborted", "budget-exhausted"].includes(
+    !["winner", "no-winner", "quota", "aborted", "budget-exhausted"].includes(
       String(value.status),
     )
   )
@@ -210,11 +210,28 @@ export function validateSpeculation<T>(
         !object(record) ||
         record.key !== item.key ||
         record.branch !== item.branch ||
-        !["winner", "rejected", "failed", "cancelled", "skipped"].includes(
-          String(record.status),
-        )
+        ![
+          "winner",
+          "rejected",
+          "failed",
+          "quota",
+          "cancelled",
+          "skipped",
+        ].includes(String(record.status)) ||
+        (record.status === "quota") !== (record.quota !== undefined)
       )
         throw invalid();
+      if (record.quota !== undefined) {
+        const quota = record.quota;
+        if (
+          !object(quota) ||
+          typeof quota.message !== "string" ||
+          (quota.resetAt !== undefined &&
+            (typeof quota.resetAt !== "string" ||
+              !Number.isFinite(Date.parse(quota.resetAt))))
+        )
+          throw invalid();
+      }
       if (record.status === "winner") {
         if (
           item.phase !== "settled" ||

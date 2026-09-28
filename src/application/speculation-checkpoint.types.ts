@@ -23,6 +23,6 @@ export interface SpeculationCheckpoint<T> {
   attempts: SpeculationAttempt<T>[];
   usage: WorkflowUsage;
   finished: boolean;
-  status?: "winner" | "no-winner" | "aborted" | "budget-exhausted";
+  status?: "winner" | "no-winner" | "quota" | "aborted" | "budget-exhausted";
   error?: string;
 }

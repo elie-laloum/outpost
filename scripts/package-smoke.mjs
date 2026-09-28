@@ -250,6 +250,13 @@ const cacheHit: true | undefined=verified.tasks[0]?.cacheHit;
 const cacheOutcome: TaskCacheOutcome | undefined=({} as WorkflowEvent).cache;
 import { repositoryFingerprint } from '@elie-laloum/outpost';
 const fingerprintKey=async (): Promise<string>=>repositoryFingerprint('.');
+import { agentTask, isolatedTask, type TaskContext, type QueueQuota, type QueueRequest, type SpeculationResult } from '@elie-laloum/outpost';
+const resumedConversation=(context: TaskContext): string | undefined=>context.quota?.conversation;
+const queueQuota: QueueQuota={resetAt:'2026-01-01T00:00:00.000Z',conversation:'c'};
+const resumedJob: QueueRequest={id:'job:quota:2',idempotencyKey:'job',handler:'work',input:null};
+const speculationQuota=(result: SpeculationResult): string | undefined=>result.status==='quota'?result.quota?.resetAt:undefined;
+type QuotaResumeOption=Parameters<typeof agentTask>[0]['quotaResume'] | Parameters<typeof isolatedTask>[0]['quotaResume'];
+const restart: QuotaResumeOption='restart';
 // @ts-expect-error Gemini CLI was removed without a compatibility export.
 import { geminiHarness } from '@elie-laloum/outpost';
 // @ts-expect-error Gemini CLI settings were removed.

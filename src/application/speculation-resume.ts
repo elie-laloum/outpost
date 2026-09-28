@@ -17,6 +17,7 @@ export async function resumeSpeculation<T>(
   const latest = new Map(
     state.attempts.map((attempt) => [attempt.key, attempt]),
   );
+  if (state.finished && state.status === "quota") reopenQuota(state, latest);
   if (
     state.attempts.some(
       (attempt) => attempt.phase !== "waiting" && attempt.phase !== "settled",
@@ -93,4 +94,26 @@ export async function resumeSpeculation<T>(
     latest.set(attempt.key, attempt);
   }
   return latest;
+}
+
+/** Queues a new attempt for every candidate a usage or rate limit stopped. */
+function reopenQuota<T>(
+  state: SpeculationCheckpoint<T>,
+  latest: Map<string, SpeculationAttempt<T>>,
+): void {
+  for (const previous of [...latest.values()]) {
+    if (previous.record?.status !== "quota") continue;
+    const attempt: SpeculationAttempt<T> = {
+      key: previous.key,
+      attempt: previous.attempt + 1,
+      branch: `outpost/speculation/${state.id}/${previous.key}/${previous.attempt + 1}`,
+      phase: "waiting",
+      cleanup: "done",
+    };
+    state.attempts.push(attempt);
+    latest.set(attempt.key, attempt);
+  }
+  state.finished = false;
+  delete state.status;
+  delete state.error;
 }

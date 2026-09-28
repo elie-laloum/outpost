@@ -7,6 +7,8 @@ import type { SpeculationStoreSession } from "../infrastructure/speculation-stor
 import { git } from "../infrastructure/git/command.ts";
 import { taskObservation } from "./task-observation.ts";
 import { invariant, recoveryDetails } from "../domain/errors.ts";
+import { quotaFault } from "../domain/quota.ts";
+import type { QuotaFault } from "../domain/quota.types.ts";
 import { workflowAccounting } from "../domain/workflow/budget.ts";
 import { speculativeHostSnapshot } from "./speculation-host.ts";
 import type { Sandbox } from "./outpost.types.ts";
@@ -240,10 +242,15 @@ export async function runSpeculation<T>(
           : undefined;
       const directory = sandbox?.workspace.directory ?? recoveredDirectory;
       retainedDirectory ??= recoveredDirectory;
+      const fault = quotaFault(error);
+      const quota: QuotaFault | undefined = fault && {
+        message: fault.message,
+        ...(fault.resetAt ? { resetAt: fault.resetAt } : {}),
+      };
       function candidateStatus(): SpeculativeCandidateResult<T>["status"] {
         if (cleanupFailed) return "failed";
         if (signal.aborted) return "cancelled";
-        if (error !== undefined) return "failed";
+        if (error !== undefined) return quota ? "quota" : "failed";
         if (accepted && !winner) return "winner";
         return "rejected";
       }
@@ -263,6 +270,7 @@ export async function runSpeculation<T>(
         ...(retainedDirectory ? { retainedDirectory } : {}),
         ...(result ? { result } : {}),
         ...(error !== undefined ? { error } : {}),
+        ...(status === "quota" ? { quota: quota! } : {}),
       };
       records[index] = record;
       attempt.record = record;
@@ -320,6 +328,7 @@ export async function runSpeculation<T>(
     if (winner) return "winner";
     if (options.signal?.aborted) return "aborted";
     if (budgetError !== undefined) return "budget-exhausted";
+    if (records.some((record) => record.status === "quota")) return "quota";
     return "no-winner";
   }
   sealed = true;
@@ -366,9 +375,22 @@ export async function runSpeculation<T>(
         }
       : {}),
     usage: accounting.snapshot(),
+    ...(status === "quota" ? { quota: earliestQuota(records) } : {}),
     ...(winner ? { winner } : {}),
     ...(budgetError !== undefined || state.error
       ? { error: budgetError ?? state.error }
       : {}),
   };
+}
+
+function earliestQuota(
+  records: readonly SpeculativeCandidateResult<unknown>[],
+): QuotaFault {
+  const faults = records.flatMap((record) =>
+    record.status === "quota" && record.quota ? [record.quota] : [],
+  );
+  const known = faults
+    .filter((fault) => fault.resetAt !== undefined)
+    .sort((a, b) => Date.parse(a.resetAt!) - Date.parse(b.resetAt!));
+  return known[0] ?? faults[0]!;
 }
