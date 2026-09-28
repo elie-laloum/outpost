@@ -419,3 +419,26 @@ test(
     await verifyProcessRecovery(t, first, "redis", configuration);
   },
 );
+
+test("BullMQ preserves effect keys and quota results", async (t) => {
+  const { first } = await fixture(t);
+  await first.enqueue({
+    id: "resumed:quota:2",
+    idempotencyKey: "resumed",
+    handler: "work",
+    input: null,
+  });
+  const job = await eventually(() => claim(first));
+  assert.equal(job.idempotencyKey, "resumed");
+  await first.complete(lease(job), {
+    value: null,
+    error: "usage limit",
+    quota: { resetAt: "2026-09-28T18:00:00.000Z", conversation: "c" },
+  });
+  const stored = await first.get("resumed:quota:2");
+  assert.equal(stored?.status, "failed");
+  assert.equal(
+    JSON.stringify(stored?.result?.quota),
+    '{"resetAt":"2026-09-28T18:00:00.000Z","conversation":"c"}',
+  );
+});

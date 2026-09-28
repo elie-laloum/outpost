@@ -2,6 +2,7 @@ import type {
   QueueClaim,
   QueueJob,
   QueueLease,
+  QueueQuota,
   QueueRequest,
   QueueResult,
 } from "./task-queue.types.ts";
@@ -50,6 +51,9 @@ export function queueRequest(value: unknown): QueueRequest {
   const data = queueObject(value);
   return {
     id: queueString(data.id),
+    ...(data.idempotencyKey === undefined
+      ? {}
+      : { idempotencyKey: queueString(data.idempotencyKey) }),
     handler: queueString(data.handler),
     input: queueJson(data.input),
     ...(data.deadline === undefined
@@ -79,12 +83,29 @@ export function queueLease(value: unknown): QueueLease {
     fence: queueNumber(data.fence),
   };
 }
+function queueQuota(value: unknown): QueueQuota {
+  const data = queueObject(value);
+  if (
+    data.resetAt !== undefined &&
+    !Number.isFinite(Date.parse(queueString(data.resetAt)))
+  )
+    throw new Error("Invalid queue quota reset");
+  return {
+    ...(data.resetAt === undefined ? {} : { resetAt: String(data.resetAt) }),
+    ...(data.conversation === undefined
+      ? {}
+      : { conversation: queueString(data.conversation) }),
+  };
+}
 export function queueResult(value: unknown): QueueResult {
   const data = queueObject(value);
   const usage = data.usage === undefined ? undefined : queueObject(data.usage);
+  if (data.quota !== undefined && data.error === undefined)
+    throw new Error("Queue quota requires an error");
   return {
     value: queueJson(data.value),
     ...(data.error === undefined ? {} : { error: queueString(data.error) }),
+    ...(data.quota === undefined ? {} : { quota: queueQuota(data.quota) }),
     ...(usage === undefined
       ? {}
       : {

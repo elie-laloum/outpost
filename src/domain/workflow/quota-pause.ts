@@ -49,7 +49,10 @@ export async function pauseForQuota(
   if (!fault || runtime.signal.aborted) return false;
   const state = runtime.record(item);
   const recovery = recoveryDetails(error);
-  const captured = typeof recovery?.transcript === "string";
+  const captured =
+    typeof recovery?.transcript === "string" ||
+    (fault.conversation !== undefined &&
+      recovery?.conversation === fault.conversation);
   state.quota = Object.freeze({
     requestedAt: new Date().toISOString(),
     message: fault.message,

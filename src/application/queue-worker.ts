@@ -12,6 +12,8 @@ import {
 } from "../domain/task-queue.ts";
 import type { QueueWorkerOptions } from "./queue-worker.types.ts";
 import type { QueueJob, QueueResult } from "../domain/task-queue.types.ts";
+import { recoveryDetails } from "../domain/errors.ts";
+import { quotaFault } from "../domain/quota.ts";
 
 export async function runQueueWorker(
   options: QueueWorkerOptions,
@@ -49,9 +51,18 @@ export async function runQueueWorker(
       let result: QueueResult;
       try {
         result = queueResult(
-          await handler(job.input, { signal, job, idempotencyKey: job.id }),
+          await handler(job.input, {
+            signal,
+            job,
+            idempotencyKey: job.idempotencyKey ?? job.id,
+          }),
         );
       } catch (error) {
+        const quota = quotaFault(error);
+        const captured =
+          typeof recoveryDetails(error)?.transcript === "string" &&
+          quota?.conversation !== undefined &&
+          quota.conversation.length <= queueMaxStringLength;
         result = {
           value: null,
           error:
@@ -59,6 +70,14 @@ export async function runQueueWorker(
               0,
               queueMaxStringLength,
             ) || "Queue handler failed",
+          ...(quota
+            ? {
+                quota: {
+                  ...(quota.resetAt ? { resetAt: quota.resetAt } : {}),
+                  ...(captured ? { conversation: quota.conversation } : {}),
+                },
+              }
+            : {}),
         };
       }
       if (!signal.aborted) await options.queue.complete(lease, result);

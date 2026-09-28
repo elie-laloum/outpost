@@ -16,7 +16,10 @@ import {
   workflow,
   workflowCheckpointStore,
   localTransport,
+  OutpostError,
 } from "../../src/index.ts";
+import { recordRecovery } from "../../src/domain/errors.ts";
+import { queueResult } from "../../src/domain/task-queue.ts";
 import type { TaskQueue, QueueHandler, QueueJob } from "../../src/index.ts";
 
 const token = "test-only-token-with-at-least-32-characters";
@@ -668,3 +671,85 @@ test(
     await verifyProcessRecovery(t, queue, "http", { url: server.url, token });
   },
 );
+
+test("a quota failure crosses the queue and the resumed job keeps its effect key", async (t) => {
+  const { queue } = await fixture(t);
+  const seen: { id: string; key: string; input: unknown }[] = [];
+  const running = worker(queue, "quota-worker", {
+    async implement(input, context) {
+      seen.push({
+        id: context.job.id,
+        key: context.idempotencyKey,
+        input,
+      });
+      if (seen.length === 1) {
+        const error = new OutpostError("quota", "usage limit", {
+          conversation: "session-9",
+        });
+        recordRecovery(error, { transcript: "/worker/session-9.jsonl" });
+        throw error;
+      }
+      return { value: "implemented" };
+    },
+  });
+  const directory = await mkdtemp(join(tmpdir(), "outpost-queue-quota-"));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const implement = queuedTask({
+    key: "implement",
+    queue,
+    handler: "implement",
+    pollMs: 10,
+    input: (context) => ({ resume: context.quota?.conversation ?? null }),
+    decode: String,
+  });
+  const graph = workflow("queued-quota", [implement]);
+  const checkpoint = {
+    store: workflowCheckpointStore({
+      transporter: localTransport({ directory }),
+    }),
+    runId: "queued-quota",
+    version: "1",
+  };
+  const paused = await graph.start({
+    checkpoint,
+    onQuota: { action: "pause" },
+  });
+  assert.equal(paused.status, "paused");
+  const pause = paused.tasks[0]!.quota!;
+  assert.equal(pause.message, "usage limit");
+  assert.equal(pause.conversation, "session-9");
+  const done = await graph.start({ checkpoint, onQuota: { action: "pause" } });
+  done.unwrap();
+  running.stop.abort();
+  await running.done;
+  assert.equal(done.value(implement), "implemented");
+  assert.equal(seen.length, 2);
+  assert.notEqual(seen[1]!.id, seen[0]!.id);
+  assert.match(seen[1]!.id, /:quota:2$/);
+  assert.equal(seen[1]!.key, seen[0]!.key);
+  assert.equal(seen[0]!.key, seen[0]!.id);
+  assert.equal(JSON.stringify(seen[1]!.input), '{"resume":"session-9"}');
+  assert.equal(
+    JSON.stringify((await queue.get(seen[0]!.id))?.result?.quota),
+    '{"conversation":"session-9"}',
+  );
+});
+
+test("queue results validate quota metadata", () => {
+  assert.throws(
+    () => queueResult({ value: null, quota: {} }),
+    /quota requires an error/,
+  );
+  assert.throws(
+    () => queueResult({ value: null, error: "x", quota: { resetAt: "soon" } }),
+    /quota reset/,
+  );
+  assert.deepEqual(
+    queueResult({
+      value: null,
+      error: "x",
+      quota: { resetAt: "2026-09-28T18:00:00.000Z", conversation: "c" },
+    }).quota,
+    { resetAt: "2026-09-28T18:00:00.000Z", conversation: "c" },
+  );
+});

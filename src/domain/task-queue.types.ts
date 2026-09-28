@@ -3,6 +3,8 @@ import type { WorkflowJson } from "./workflow/checkpoint.types.ts";
 
 export interface QueueRequest {
   readonly id: string;
+  /** Stable effect key for handlers when the job id differs, such as after a quota pause. */
+  readonly idempotencyKey?: string;
   readonly handler: string;
   readonly input: WorkflowJson;
   readonly deadline?: number;
@@ -11,6 +13,13 @@ export interface QueueResult {
   readonly value: WorkflowJson;
   readonly usage?: Usage;
   readonly error?: string;
+  /** Present when the handler failed on a usage or rate limit. */
+  readonly quota?: QueueQuota;
+}
+export interface QueueQuota {
+  readonly resetAt?: string;
+  /** Captured conversation the handler can continue after the pause. */
+  readonly conversation?: string;
 }
 export interface QueueJob extends QueueRequest {
   readonly status: "pending" | "active" | "done" | "failed" | "cancelled";

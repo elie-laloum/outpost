@@ -400,6 +400,7 @@ export { queuedTask } from "./application/queued-task.ts";
 export type {
   QueueRequest,
   QueueResult,
+  QueueQuota,
   QueueJob,
   QueueClaim,
   QueueLease,
