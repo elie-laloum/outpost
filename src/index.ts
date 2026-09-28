@@ -106,6 +106,7 @@ export {
 } from "./infrastructure/transport-checkpoint.ts";
 export type { CheckpointRecoveryOptions } from "./infrastructure/transport-checkpoint.types.ts";
 export { taskCacheStore } from "./infrastructure/transport-task-cache.ts";
+export { repositoryFingerprint } from "./application/repository-fingerprint.ts";
 export type { TaskCacheStoreOptions } from "./infrastructure/transport-task-cache.types.ts";
 export { readJournal } from "./infrastructure/transport-journal.ts";
 export type { ReadJournalOptions } from "./infrastructure/transport-journal.types.ts";

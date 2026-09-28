@@ -120,6 +120,7 @@ try {
       assert.deepEqual(cachedResult.value(item),{run:1});
       assert.equal(cachedResult.tasks[0].cacheHit===true,expected);
     }
+    assert.equal(typeof api.repositoryFingerprint,'function');
     const checkpoints=api.workflowCheckpointStore({transporter});
     const lease=await checkpoints.acquire('consumer');
     await lease.write({answer:42});
@@ -247,6 +248,8 @@ const cachedTask=task({key:'cached',cache:cacheOptions,perform:()=>({ok:true})})
 const cacheEntry: TaskCacheEntry | undefined=await cacheStore.read('a'.repeat(64));
 const cacheHit: true | undefined=verified.tasks[0]?.cacheHit;
 const cacheOutcome: TaskCacheOutcome | undefined=({} as WorkflowEvent).cache;
+import { repositoryFingerprint } from '@elie-laloum/outpost';
+const fingerprintKey=async (): Promise<string>=>repositoryFingerprint('.');
 // @ts-expect-error Gemini CLI was removed without a compatibility export.
 import { geminiHarness } from '@elie-laloum/outpost';
 // @ts-expect-error Gemini CLI settings were removed.
