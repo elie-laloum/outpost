@@ -1,5 +1,6 @@
 import type { AgentEvent } from "./agent.types.ts";
 import type { WorkflowEvent } from "./workflow.types.ts";
+import type { WorkspaceCommitsEvent } from "./replay.types.ts";
 
 export interface ObservationScope {
   readonly executionId?: string;
@@ -45,7 +46,9 @@ export type ObservationEvent =
       readonly branch?: string;
       readonly commits?: readonly import("./workspace.types.ts").Commit[];
       readonly usage: import("./agent.types.ts").Usage;
+      readonly error?: { readonly code?: string; readonly message: string };
     }
+  | WorkspaceCommitsEvent
   | {
       readonly kind: "command-output";
       readonly channel: "stdout" | "stderr";

@@ -7,6 +7,7 @@ import { commits } from "../infrastructure/git/history.ts";
 import { storageFor } from "./agent-storage.ts";
 import { warmContinuation } from "./continuation.ts";
 import { preflightDispatch } from "./dispatch-validation.ts";
+import { recordReplayChanges } from "./replay-recording.ts";
 import { execute } from "./execution.ts";
 import type { DispatchOptions, Execution } from "./execution.types.ts";
 import { notify } from "./observation.ts";
@@ -146,6 +147,12 @@ export async function dispatchInSandbox<T>(
     "commits.collect",
     async () =>
       commits(workspace.directory, baseline, options.limits?.collectMs),
+  );
+  await recordReplayChanges(
+    dispatch,
+    workspace.directory,
+    baseline,
+    options.limits?.collectMs,
   );
   if (failure) {
     recordRecovery(failure, {

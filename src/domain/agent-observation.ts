@@ -7,6 +7,7 @@ export function isAgentEvent(event: ObservationEvent): event is AgentEvent {
     case "operation":
     case "dispatch-start":
     case "dispatch-finished":
+    case "workspace-commits":
     case "command-output":
     case "candidate":
     case "queue":

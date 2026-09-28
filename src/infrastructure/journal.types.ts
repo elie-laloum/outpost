@@ -13,6 +13,7 @@ export type Logging =
   | {
       readonly transporter?: Transport;
       readonly verbose?: boolean;
+      readonly replayable?: boolean;
     };
 
 export type Journal = {

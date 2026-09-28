@@ -153,6 +153,10 @@ export async function observeDispatch<T, R extends ObservedDispatchResult>(
         ? { commits: recovery.commits }
         : {}),
       usage,
+      error: {
+        ...(error instanceof OutpostError ? { code: error.code } : {}),
+        message: error instanceof Error ? error.message : String(error),
+      },
     });
     try {
       session?.finish({ status, usage });

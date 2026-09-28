@@ -1,3 +1,4 @@
+import type { Variables } from "../../domain/command.types.ts";
 import { requireSuccess } from "../process.ts";
 import { gitDefaults } from "./git.constants.ts";
 
@@ -6,6 +7,7 @@ export async function git(
   args: readonly string[],
   deadlineMs: number = gitDefaults.deadlineMs,
   stdin?: string,
+  variables: Variables = {},
 ): Promise<string> {
   const result = await requireSuccess({
     executable: "git",
@@ -15,7 +17,7 @@ export async function git(
       ...args,
     ],
     directory: cwd,
-    variables: { LC_ALL: "C", GIT_TERMINAL_PROMPT: "0" },
+    variables: { ...variables, LC_ALL: "C", GIT_TERMINAL_PROMPT: "0" },
     deadlineMs,
     retain: gitDefaults.retainBytes,
     ...(stdin === undefined ? {} : { stdin }),
