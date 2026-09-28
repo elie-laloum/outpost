@@ -721,6 +721,10 @@
         "attrs": { "data-api-kind": "function" }
       },
       {
+        "slug": "reference/replayagent",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
         "slug": "reference/opentelemetry",
         "attrs": { "data-api-kind": "function" }
       },
@@ -737,6 +741,22 @@
         "attrs": { "data-api-kind": "type" }
       },
       { "slug": "reference/logging", "attrs": { "data-api-kind": "type" } },
+      {
+        "slug": "reference/replaydivergence",
+        "attrs": { "data-api-kind": "class" }
+      },
+      {
+        "slug": "reference/replaydivergencekind",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/replaydivergencepolicy",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/workspacecommitsevent",
+        "attrs": { "data-api-kind": "type" }
+      },
       { "slug": "reference/agentevent", "attrs": { "data-api-kind": "type" } },
       {
         "slug": "reference/agentobservation",
@@ -788,6 +808,38 @@
       },
       {
         "slug": "reference/dispatchtelemetryoutcome",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/type-replayagent",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/replayagentoptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/replayturn",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/replayfailure",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/replaydivergencedetails",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/recordedcommit",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/recordedidentity",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/recordedrevision",
         "attrs": { "data-api-kind": "interface" }
       },
       { "slug": "reference/usage", "attrs": { "data-api-kind": "interface" } },

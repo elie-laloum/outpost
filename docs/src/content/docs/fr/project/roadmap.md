@@ -13,6 +13,8 @@ La prochaine priorité d’Outpost est une exécution quotidienne fiable : un pr
 
 ## Point de départ
 
+Implémenté, non publié : [Enregistrer et rejouer](../../guide/record-replay/) rejoue le journal d’un dispatch sans appeler de modèle, reconstruit ses commits dans la sandbox et signale les divergences. Les tests déterministes couvrent les enregistrements CLI et harness, les échecs, les réparations, les passes et une vraie sandbox Docker. Le rejeu d’un workflow entier, les modifications non commitées et une commande CLI restent prévus.
+
 Implémenté, non publié : les [boucles de vérification](../../guide/verification-loops/) ajoutent des cycles agent/vérification bornés avec feedback, phases durables et budgets cumulés. Les tests déterministes couvrent la reprise et l’usage d’un codeur/relecteur simulé ; les campagnes de modèles authentifiés restent une validation distincte.
 
 Le socle comprend les sandboxes réutilisables, les workspaces Git, les adapters d’agents, les workflows typés et les outils de récupération. Le CLI, la configuration d’authentification et les fournisseurs Responses personnalisés sont documentés dans le [guide de démarrage](../../guide/command-line/). La [référence API](../../reference/diagnosesandbox/) décrit les contrats implémentés et le changelog les versions publiées. Une implémentation ou un test simulé ne prouve pas la réussite d’une campagne réelle sur un provider.

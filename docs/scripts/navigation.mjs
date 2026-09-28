@@ -74,6 +74,7 @@ export const chapters = [
       "guide/object-storage",
       "guide/live-events",
       "guide/audit-trails",
+      "guide/record-replay",
     ],
   ],
   [

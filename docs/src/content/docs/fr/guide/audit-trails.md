@@ -26,7 +26,7 @@ if (result.logReference) {
 
 ## Options du journal
 
-`logging: false` désactive le journal. `"stdout"` choisit la sortie standard. Un objet sélectionne un transport et éventuellement `verbose` pour conserver les événements bruts. Le `logReference` renvoyé fixe la révision de l’index ; `readJournal()` vérifie les segments liés et renvoie les événements persistés dans l’ordre.
+`logging: false` désactive le journal. `"stdout"` choisit la sortie standard. Un objet sélectionne un transport, éventuellement `verbose` pour conserver les événements bruts et `replayable` pour enregistrer les commits à [rejouer](../record-replay/). Le `logReference` renvoyé fixe la révision de l’index ; `readJournal()` vérifie les segments liés et renvoie les événements persistés dans l’ordre.
 
 Un journal ouvert expose son préfixe persisté. `maxEntries` et `maxBytes` bornent les lectures. Journaux et transcriptions peuvent contenir des données privées du dépôt : maîtrisez leur stockage et leur partage.
 
@@ -48,7 +48,7 @@ Enregistrez votre SDK OpenTelemetry et ses exportateurs avant de créer ces obje
 
 L’application possède l’arrêt des fournisseurs de traces et métriques. Les erreurs d’instrumentation sont isolées des résultats d’exécution. `createReporter()` permet un reporting personnalisé.
 
-API : [Logging](../../reference/logging/) · [readJournal](../../reference/readjournal/) · [DispatchTelemetry](../../reference/dispatchtelemetry/) · [createReporter](../../reference/createreporter/).
+API : [Logging](../../reference/logging/) · [readJournal](../../reference/readjournal/) · [replayAgent](../../reference/replayagent/) · [DispatchTelemetry](../../reference/dispatchtelemetry/) · [createReporter](../../reference/createreporter/).
 
 ## Corréler les traces par le hub
 

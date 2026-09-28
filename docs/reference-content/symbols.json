@@ -462,5 +462,13 @@
   "quotaFault": [
     "Return the message and reset time of an OutpostError with code quota, following up to eight wrapped causes. Returns undefined for any other value. Use it in retry.accepts or error handling to separate usage and rate limits from other failures; it does not wait or retry.",
     "Renvoie le message et l’heure de réinitialisation d’une OutpostError de code quota, en suivant jusqu’à huit causes imbriquées. Renvoie undefined pour toute autre valeur. Utilisez-la dans retry.accepts ou la gestion d’erreurs pour distinguer les limites d’usage et de débit des autres échecs ; elle n’attend ni ne relance."
+  ],
+  "replayAgent": [
+    "Create a single-use agent that replays one dispatch journal without calling a model. Each turn checks the rendered prompt, re-emits the recorded events and usage, and the last turn of each sandbox dispatch rebuilds the recorded commits inside the sandbox with their original identities, so an identical baseline yields identical commit IDs. Divergences raise ReplayDivergence or, with divergence: \"warn\", warnings. Replays cannot be resumed or forked.",
+    "Crée un agent à usage unique qui rejoue le journal d’un dispatch sans appeler de modèle. Chaque tour vérifie le prompt rendu et réémet les événements et l’usage enregistrés ; le dernier tour de chaque dispatch en sandbox reconstruit les commits enregistrés dans la sandbox avec leurs identités d’origine, si bien qu’une baseline identique donne des identifiants de commit identiques. Les divergences lèvent ReplayDivergence ou, avec divergence: \"warn\", des avertissements. Un rejeu ne peut être ni repris ni forké."
+  ],
+  "ReplayDivergence": [
+    "OutpostError with code replay, thrown when a replay differs from its journal. kind, turn, expected, actual and commit locate the difference; details holds the same fields.",
+    "OutpostError de code replay, levée quand un rejeu diffère de son journal. kind, turn, expected, actual et commit situent l’écart ; details contient les mêmes champs."
   ]
 }

@@ -24,8 +24,8 @@
     "Annulation coopérative de cette opération."
   ],
   "SandboxOptions.logging": [
-    "Configure the dispatch journal file and verbose event retention.",
-    "Configure le fichier journal du dispatch et la conservation des événements détaillés."
+    "Configure the dispatch journal transport, verbose event retention and replayable commit recording.",
+    "Configure le transport du journal du dispatch, la conservation des événements détaillés et l’enregistrement rejouable des commits."
   ],
   "SandboxOptions.bootstrap": [
     "Whether to install a missing selected agent automatically.",
@@ -536,8 +536,8 @@
     "Adapter natif de l’agent de code."
   ],
   "DispatchOptions.logging": [
-    "Configure the dispatch journal file and verbose event retention.",
-    "Configure le fichier journal du dispatch et la conservation des événements détaillés."
+    "Configure the dispatch journal transport, verbose event retention and replayable commit recording.",
+    "Configure le transport du journal du dispatch, la conservation des événements détaillés et l’enregistrement rejouable des commits."
   ],
   "DispatchOptions.label": [
     "Human-readable label used in execution reporting.",
@@ -3589,8 +3589,8 @@
     "Discriminant d’exécution : custom."
   ],
   "Agent.kind": [
-    "Execution discriminator: cli or custom.",
-    "Discriminant d’exécution : cli or custom."
+    "Execution discriminator: cli, custom or replay.",
+    "Discriminant d’exécution : cli, custom ou replay."
   ],
   "AgentHarness.kind": [
     "Execution discriminator: cli or custom.",
@@ -5877,5 +5877,218 @@
   "ReporterHandlers.quota": [
     "Handle a usage-limit or rate-limit signal decoded from the agent protocol, with its reset time when reported; receives pass and at metadata and may return a promise. The signal alone does not fail the turn.",
     "Traite : signal de limite d’usage ou de débit décodé du protocole agent, avec son heure de réinitialisation si elle est fournie ; reçoit pass et at et peut retourner une promesse. Le signal seul ne fait pas échouer le tour."
+  ],
+  "Agent.source": [
+    "Observation source used for replayed events: harness when the journal came from the Outpost harness, otherwise agent.",
+    "Source d’observation des événements rejoués : harness si le journal provient du harness Outpost, sinon agent."
+  ],
+  "Agent.divergence": [
+    "Divergence policy: fail throws ReplayDivergence; warn reports prompt, baseline and tree differences as warnings and continues.",
+    "Politique de divergence : fail lève ReplayDivergence ; warn signale les écarts de prompt, de baseline et d’arbre en avertissement puis continue."
+  ],
+  "Agent.turns": [
+    "Recorded turns parsed from the journal, in execution order.",
+    "Tours enregistrés extraits du journal, dans l’ordre d’exécution."
+  ],
+  "Agent.remainingTurns": [
+    "Number of recorded turns not yet consumed by a dispatch; 0 after a complete replay.",
+    "Nombre de tours enregistrés pas encore consommés par un dispatch ; 0 après un rejeu complet."
+  ],
+  "Agent.nextTurn": [
+    "Consume and return the next recorded turn, or undefined when the journal is exhausted. Dispatch calls it once per turn; a replay agent is single-use.",
+    "Consomme et renvoie le tour enregistré suivant, ou undefined quand le journal est épuisé. Le dispatch l’appelle une fois par tour ; un agent de rejeu ne sert qu’une fois."
+  ],
+  "ReplayAgent.source": [
+    "Observation source used for replayed events: harness when the journal came from the Outpost harness, otherwise agent.",
+    "Source d’observation des événements rejoués : harness si le journal provient du harness Outpost, sinon agent."
+  ],
+  "ReplayAgent.divergence": [
+    "Divergence policy: fail throws ReplayDivergence; warn reports prompt, baseline and tree differences as warnings and continues.",
+    "Politique de divergence : fail lève ReplayDivergence ; warn signale les écarts de prompt, de baseline et d’arbre en avertissement puis continue."
+  ],
+  "ReplayAgent.turns": [
+    "Recorded turns parsed from the journal, in execution order.",
+    "Tours enregistrés extraits du journal, dans l’ordre d’exécution."
+  ],
+  "ReplayAgent.remainingTurns": [
+    "Number of recorded turns not yet consumed by a dispatch; 0 after a complete replay.",
+    "Nombre de tours enregistrés pas encore consommés par un dispatch ; 0 après un rejeu complet."
+  ],
+  "ReplayAgent.nextTurn": [
+    "Consume and return the next recorded turn, or undefined when the journal is exhausted. Dispatch calls it once per turn; a replay agent is single-use.",
+    "Consomme et renvoie le tour enregistré suivant, ou undefined quand le journal est épuisé. Le dispatch l’appelle une fois par tour ; un agent de rejeu ne sert qu’une fois."
+  ],
+  "ReplayAgent.kind": [
+    "Execution discriminator for replay agents.",
+    "Discriminant d’exécution des agents de rejeu."
+  ],
+  "Logging.replayable": [
+    "Also record each sandbox dispatch’s commits as verified binary patches so replayAgent can rebuild them. Opt-in because the journal then contains repository content; failures to record become warnings.",
+    "Enregistre aussi les commits de chaque dispatch sous forme de patchs binaires vérifiés pour que replayAgent puisse les reconstruire. Optionnel car le journal contient alors du contenu du dépôt ; un échec d’enregistrement devient un avertissement."
+  ],
+  "ObservationEvent.baseline": [
+    "Commit and tree the sandbox dispatch started from, for workspace-commits.",
+    "Commit et arbre de départ du dispatch en sandbox, pour workspace-commits."
+  ],
+  "ObservationEvent.error": [
+    "Code and message of the error that failed or cancelled the dispatch, for dispatch-finished.",
+    "Code et message de l’erreur qui a fait échouer ou annulé le dispatch, pour dispatch-finished."
+  ],
+  "ObservationEvent.unavailable": [
+    "Reason the workspace commits could not be recorded for replay, for workspace-commits.",
+    "Raison pour laquelle les commits du workspace n’ont pas pu être enregistrés pour le rejeu, pour workspace-commits."
+  ],
+  "RecordedCommit.oid": [
+    "Object ID of the recorded commit.",
+    "Identifiant d’objet du commit enregistré."
+  ],
+  "RecordedCommit.tree": [
+    "Tree ID the patch must reproduce.",
+    "Identifiant de l’arbre que le patch doit reproduire."
+  ],
+  "RecordedCommit.author": [
+    "Author identity and date restored on the replayed commit.",
+    "Identité et date d’auteur restaurées sur le commit rejoué."
+  ],
+  "RecordedCommit.committer": [
+    "Committer identity and date restored on the replayed commit.",
+    "Identité et date du committer restaurées sur le commit rejoué."
+  ],
+  "RecordedCommit.message": [
+    "Exact commit message, without cleanup.",
+    "Message de commit exact, sans nettoyage."
+  ],
+  "RecordedCommit.patch": [
+    "Binary Git patch from the parent commit, verified at record time; empty for commits without changes.",
+    "Patch Git binaire depuis le commit parent, vérifié à l’enregistrement ; vide pour un commit sans changement."
+  ],
+  "RecordedIdentity.name": ["Git identity name.", "Nom de l’identité Git."],
+  "RecordedIdentity.email": [
+    "Git identity email.",
+    "E-mail de l’identité Git."
+  ],
+  "RecordedIdentity.date": [
+    "Git internal date: Unix seconds and time zone offset.",
+    "Date interne Git : secondes Unix et décalage horaire."
+  ],
+  "RecordedRevision.commit": [
+    "Commit the dispatch started from.",
+    "Commit de départ du dispatch."
+  ],
+  "RecordedRevision.tree": [
+    "Tree of that commit; replay compares it with the sandbox HEAD tree.",
+    "Arbre de ce commit ; le rejeu le compare à l’arbre du HEAD de la sandbox."
+  ],
+  "ReplayAgentOptions.journal": [
+    "Entries returned by readJournal for one dispatch. Record with logging.replayable to include workspace commits.",
+    "Entrées renvoyées par readJournal pour un dispatch. Enregistrez avec logging.replayable pour inclure les commits du workspace."
+  ],
+  "ReplayAgentOptions.divergence": [
+    "Divergence policy; defaults to fail. warn continues after prompt, baseline and tree differences but still fails when a patch cannot be applied or the journal is exhausted.",
+    "Politique de divergence ; fail par défaut. warn continue après un écart de prompt, de baseline ou d’arbre mais échoue toujours si un patch ne s’applique pas ou si le journal est épuisé."
+  ],
+  "replayAgent.options": [
+    "Journal to replay and divergence policy.",
+    "Journal à rejouer et politique de divergence."
+  ],
+  "replayAgent.options.journal": [
+    "Entries returned by readJournal for one dispatch. Record with logging.replayable to include workspace commits.",
+    "Entrées renvoyées par readJournal pour un dispatch. Enregistrez avec logging.replayable pour inclure les commits du workspace."
+  ],
+  "replayAgent.options.divergence": [
+    "Divergence policy; defaults to fail. warn continues after prompt, baseline and tree differences but still fails when a patch cannot be applied or the journal is exhausted.",
+    "Politique de divergence ; fail par défaut. warn continue après un écart de prompt, de baseline ou d’arbre mais échoue toujours si un patch ne s’applique pas ou si le journal est épuisé."
+  ],
+  "ReplayDivergence.kind": [
+    "Divergence category: prompt, baseline, tree, exhausted or unrecorded.",
+    "Catégorie de divergence : prompt, baseline, tree, exhausted ou unrecorded."
+  ],
+  "ReplayDivergence.turn": [
+    "One-based index of the recorded turn being replayed.",
+    "Index, à partir de 1, du tour enregistré en cours de rejeu."
+  ],
+  "ReplayDivergence.expected": [
+    "Recorded value: prompt text, tree ID or the reason the workspace commits were not recorded.",
+    "Valeur enregistrée : texte du prompt, identifiant d’arbre ou raison de l’absence des commits du workspace."
+  ],
+  "ReplayDivergence.actual": [
+    "Value observed during replay: rendered prompt, tree ID or Git apply error.",
+    "Valeur observée pendant le rejeu : prompt rendu, identifiant d’arbre ou erreur de git apply."
+  ],
+  "ReplayDivergence.commit": [
+    "Recorded commit whose patch or tree diverged, for tree divergences.",
+    "Commit enregistré dont le patch ou l’arbre a divergé, pour les divergences tree."
+  ],
+  "ReplayDivergenceDetails.kind": [
+    "Divergence category: prompt, baseline, tree, exhausted or unrecorded.",
+    "Catégorie de divergence : prompt, baseline, tree, exhausted ou unrecorded."
+  ],
+  "ReplayDivergenceDetails.turn": [
+    "One-based index of the recorded turn being replayed.",
+    "Index, à partir de 1, du tour enregistré en cours de rejeu."
+  ],
+  "ReplayDivergenceDetails.expected": [
+    "Recorded value: prompt text, tree ID or the reason the workspace commits were not recorded.",
+    "Valeur enregistrée : texte du prompt, identifiant d’arbre ou raison de l’absence des commits du workspace."
+  ],
+  "ReplayDivergenceDetails.actual": [
+    "Value observed during replay: rendered prompt, tree ID or Git apply error.",
+    "Valeur observée pendant le rejeu : prompt rendu, identifiant d’arbre ou erreur de git apply."
+  ],
+  "ReplayDivergenceDetails.commit": [
+    "Recorded commit whose patch or tree diverged, for tree divergences.",
+    "Commit enregistré dont le patch ou l’arbre a divergé, pour les divergences tree."
+  ],
+  "ReplayFailure.code": [
+    "Recorded error code; unknown codes become process.",
+    "Code d’erreur enregistré ; un code inconnu devient process."
+  ],
+  "ReplayFailure.message": [
+    "Recorded error message, rethrown after the turn is replayed.",
+    "Message d’erreur enregistré, relancé après le rejeu du tour."
+  ],
+  "ReplayTurn.prompt": [
+    "Prompt the recorded turn received; replay compares it with the rendered prompt.",
+    "Prompt reçu par le tour enregistré ; le rejeu le compare au prompt rendu."
+  ],
+  "ReplayTurn.events": [
+    "Agent or harness events re-emitted in order, without execution phases, prompts and summaries.",
+    "Événements d’agent ou de harness réémis dans l’ordre, sans phases d’exécution, prompts ni résumés."
+  ],
+  "ReplayTurn.text": [
+    "Turn text returned to the dispatch: the result event, else concatenated text events, else raw lines.",
+    "Texte du tour renvoyé au dispatch : l’événement result, sinon les événements text concaténés, sinon les lignes brutes."
+  ],
+  "ReplayTurn.usage": [
+    "Recorded turn usage reported again; no tokens are consumed.",
+    "Usage enregistré du tour, rapporté à nouveau ; aucun token n’est consommé."
+  ],
+  "ReplayTurn.conversation": [
+    "Recorded conversation ID, used only to follow response repairs inside the replay.",
+    "Identifiant de conversation enregistré, utilisé seulement pour suivre les réparations de réponse pendant le rejeu."
+  ],
+  "ReplayTurn.failure": [
+    "Recorded error of a turn that did not finish; replay rethrows it after the events and commits.",
+    "Erreur enregistrée d’un tour inachevé ; le rejeu la relance après les événements et les commits."
+  ],
+  "ReplayTurn.changes": [
+    "Workspace commits applied inside the sandbox after this turn, the last one of its sandbox dispatch.",
+    "Commits du workspace appliqués dans la sandbox après ce tour, le dernier de son dispatch en sandbox."
+  ],
+  "WorkspaceCommitsEvent.kind": [
+    "Event discriminator for recorded workspace commits.",
+    "Discriminant des commits de workspace enregistrés."
+  ],
+  "WorkspaceCommitsEvent.baseline": [
+    "Commit and tree the sandbox dispatch started from; absent when even the baseline could not be read.",
+    "Commit et arbre de départ du dispatch en sandbox ; absent si même la baseline n’a pas pu être lue."
+  ],
+  "WorkspaceCommitsEvent.commits": [
+    "Linear commits created by the dispatch, oldest first.",
+    "Commits linéaires créés par le dispatch, du plus ancien au plus récent."
+  ],
+  "WorkspaceCommitsEvent.unavailable": [
+    "Reason the commits were not recorded: non-linear or rewritten history, size limit, non-UTF-8 encoding, a patch that does not reproduce its tree, or a Git failure.",
+    "Raison de l’absence d’enregistrement : historique non linéaire ou réécrit, limite de taille, encodage non UTF-8, patch qui ne reproduit pas son arbre ou échec Git."
   ]
 }

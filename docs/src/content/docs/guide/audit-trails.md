@@ -26,7 +26,7 @@ if (result.logReference) {
 
 ## Journal options
 
-`logging: false` disables journaling. `"stdout"` selects stdout logging. An object selects a transport and optional `verbose` raw-event retention. The returned `logReference` pins the journal index revision; `readJournal()` verifies linked segments and returns committed events in order.
+`logging: false` disables journaling. `"stdout"` selects stdout logging. An object selects a transport, optional `verbose` raw-event retention and optional `replayable` commit recording for [record and replay](../record-replay/). The returned `logReference` pins the journal index revision; `readJournal()` verifies linked segments and returns committed events in order.
 
 An open journal exposes its committed prefix. `maxEntries` and `maxBytes` bound reads. Logs and transcripts can contain private repository content, so store and share them deliberately.
 
@@ -48,7 +48,7 @@ Register your OpenTelemetry SDK and exporters before creating these handles, the
 
 The application owns tracer/meter provider shutdown. Instrumentation failures are isolated from execution outcomes. Custom reporting is available through `createReporter()`.
 
-API: [Logging](../../reference/logging/) · [readJournal](../../reference/readjournal/) · [DispatchTelemetry](../../reference/dispatchtelemetry/) · [createReporter](../../reference/createreporter/).
+API: [Logging](../../reference/logging/) · [readJournal](../../reference/readjournal/) · [replayAgent](../../reference/replayagent/) · [DispatchTelemetry](../../reference/dispatchtelemetry/) · [createReporter](../../reference/createreporter/).
 
 ## Correlate traces through the hub
 
