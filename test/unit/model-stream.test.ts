@@ -287,3 +287,33 @@ test("Responses streams return the completed response with deltas", () => {
   );
   assert.throws(() => responsesStream().final(), { code: "response" });
 });
+
+test("streams classify rate-limit and insufficient-quota errors as quota", () => {
+  assert.throws(
+    () =>
+      anthropicStream().push({
+        data: JSON.stringify({
+          type: "error",
+          error: { type: "rate_limit_error" },
+        }),
+      }),
+    { code: "quota", details: { type: "rate_limit_error" } },
+  );
+  assert.throws(
+    () =>
+      responsesStream().push({
+        data: JSON.stringify({
+          type: "response.failed",
+          response: { error: { code: "insufficient_quota", message: "x" } },
+        }),
+      }),
+    { code: "quota", details: { code: "insufficient_quota" } },
+  );
+  assert.throws(
+    () =>
+      responsesStream().push({
+        data: JSON.stringify({ type: "error", code: "rate_limit_exceeded" }),
+      }),
+    { code: "quota" },
+  );
+});

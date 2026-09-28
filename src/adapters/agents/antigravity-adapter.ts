@@ -1,3 +1,5 @@
+import { quotaMatcher } from "./quota.ts";
+import { antigravityQuotaPatterns } from "./quota.constants.ts";
 import type { AgentAdapter, CliHarness } from "../../domain/agent.types.ts";
 import type { AgentModel } from "../../domain/model.types.ts";
 import { antigravityCredentials } from "./antigravity-authentication.ts";
@@ -32,6 +34,7 @@ function bindAntigravity(settings: Bound<AntigravitySettings>): AgentAdapter {
     }),
     request: (input) => antigravityRequest(settings, input),
     events: antigravityEvents,
+    quota: quotaMatcher(antigravityQuotaPatterns),
   } satisfies AgentAdapter);
 }
 

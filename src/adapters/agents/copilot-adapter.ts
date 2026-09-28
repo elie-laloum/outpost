@@ -1,3 +1,5 @@
+import { quotaMatcher } from "./quota.ts";
+import { copilotQuotaPatterns } from "./quota.constants.ts";
 import { copilotUsage } from "./copilot-usage.ts";
 import { sessionUsageCommand, sessionUsageResult } from "./session-usage.ts";
 import type { AgentAdapter, CliHarness } from "../../domain/agent.types.ts";
@@ -33,6 +35,7 @@ function bindCopilot(settings: Bound<CopilotSettings>): AgentAdapter {
     }),
     request: (input) => copilotRequest(settings, input),
     events: copilotEvents,
+    quota: quotaMatcher(copilotQuotaPatterns),
     usage: "session",
     usageCommand: (conversation) =>
       sessionUsageCommand("copilot", conversation),

@@ -4,6 +4,7 @@ import type { AgentEvent } from "../../domain/agent.types.ts";
 import { decodeLine } from "./event-decoder.ts";
 import { asRecord } from "./protocol.ts";
 import type { ProtocolRecord } from "./protocol.types.ts";
+import { copilotQuotaErrors } from "./quota.constants.ts";
 
 function message(event: ProtocolRecord): AgentEvent[] {
   const data = asRecord(event.data);
@@ -70,9 +71,11 @@ export function copilotEvents(line: string): AgentEvent[] {
     },
     "session.error": (event) => {
       const data = asRecord(event.data);
-      return typeof data.message === "string"
-        ? [{ kind: "warning", message: data.message }]
-        : [];
+      if (typeof data.message !== "string") return [];
+      return typeof data.errorType === "string" &&
+        copilotQuotaErrors.has(data.errorType)
+        ? [{ kind: "quota", message: data.message }]
+        : [{ kind: "warning", message: data.message }];
     },
     result,
   });

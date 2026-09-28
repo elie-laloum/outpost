@@ -9,4 +9,5 @@ export type FaultCode =
   | "response"
   | "session"
   | "provider"
-  | "limit";
+  | "limit"
+  | "quota";

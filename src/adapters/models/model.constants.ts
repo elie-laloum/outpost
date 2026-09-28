@@ -12,3 +12,9 @@ export const MODEL_REQUEST_FIELDS = new Set([
   "reasoning",
   "signal",
 ]);
+export const MODEL_QUOTA_STATUS = 429;
+export const MODEL_QUOTA_ERRORS = new Set([
+  "rate_limit_error",
+  "rate_limit_exceeded",
+  "insufficient_quota",
+]);

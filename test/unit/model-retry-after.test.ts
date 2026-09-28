@@ -48,7 +48,10 @@ test("HTTP failures preserve normalized Retry-After for both providers and strea
   ];
   const check = (error: unknown) => {
     assert.ok(error instanceof OutpostError);
-    assert.deepEqual(error.details, { status: 429, retryAfterMs: 2000 });
+    assert.equal(error.code, "quota");
+    const { resetAt, ...details } = error.details;
+    assert.deepEqual(details, { status: 429, retryAfterMs: 2000 });
+    assert.ok(Number.isFinite(Date.parse(String(resetAt))));
     assert.doesNotMatch(error.message, /private/);
     return true;
   };

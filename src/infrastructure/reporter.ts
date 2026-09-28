@@ -73,6 +73,11 @@ export function reporter(
       case "warning":
         write(`\n${prefix} ${event.kind}: ${event.message}\n`);
         break;
+      case "quota":
+        write(
+          `\n${prefix} quota: ${event.message}${event.resetAt ? ` · resets ${event.resetAt}` : ""}\n`,
+        );
+        break;
       case "conversation":
         if (options.verbose) write(`\n${prefix} conversation: ${event.id}\n`);
         break;

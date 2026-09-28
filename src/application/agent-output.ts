@@ -2,6 +2,7 @@ import { observationDefaults } from "../domain/observation.constants.ts";
 import { visitAgentEvent } from "../domain/agent-events.ts";
 import type { AgentAdapter, Usage } from "../domain/agent.types.ts";
 import { OutpostError } from "../domain/errors.ts";
+import type { QuotaFault } from "../domain/quota.types.ts";
 import { addUsage, usageDifference } from "../domain/usage.ts";
 import { executionDefaults } from "./execution.constants.ts";
 import type { AgentOutput, DispatchOptions } from "./execution.types.ts";
@@ -19,7 +20,8 @@ export function agentOutput(
     rawTail = "";
   let finalText: string | undefined,
     conversation: string | undefined,
-    failure: string | undefined;
+    failure: string | undefined,
+    quota: QuotaFault | undefined;
   let usage: Usage = { input: 0, cached: 0, output: 0 };
   let baseline: Usage | undefined = { input: 0, cached: 0, output: 0 };
   let reportedUsage = false,
@@ -41,6 +43,12 @@ export function agentOutput(
     },
     failure: (event) => {
       failure = event.message;
+    },
+    quota: (event) => {
+      quota = Object.freeze({
+        message: event.message,
+        ...(event.resetAt === undefined ? {} : { resetAt: event.resetAt }),
+      });
     },
     usage: (event) => recordUsage(event.tokens, event.cumulative),
   };
@@ -118,6 +126,9 @@ export function agentOutput(
     },
     get failure() {
       return failure;
+    },
+    get quota() {
+      return quota;
     },
     get completed() {
       return completed;

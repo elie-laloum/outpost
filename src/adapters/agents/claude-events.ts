@@ -3,6 +3,7 @@ import type { AgentEvent, Usage } from "../../domain/agent.types.ts";
 import { decodeEvent, decodeLine } from "./event-decoder.ts";
 import { asRecord, decodeRecord, numberOrZero } from "./protocol.ts";
 import type { EventDecoders, ProtocolRecord } from "./protocol.types.ts";
+import { claudeQuotaErrors } from "./quota.constants.ts";
 
 function tokens(value: unknown): Usage {
   const usage = asRecord(value);
@@ -20,10 +21,34 @@ function system(event: ProtocolRecord): AgentEvent[] {
     : [];
 }
 
+function rateLimit(event: ProtocolRecord): AgentEvent[] {
+  const info = asRecord(event.rate_limit_info);
+  if (info.status !== "rejected") return [];
+  const reset =
+    typeof info.resetsAt === "number" && Number.isSafeInteger(info.resetsAt)
+      ? new Date(info.resetsAt * 1000)
+      : undefined;
+  const limit =
+    typeof info.rateLimitType === "string" ? info.rateLimitType : "usage";
+  return [
+    {
+      kind: "quota",
+      message: `Claude Code ${limit} limit reached`,
+      ...(reset && Number.isFinite(reset.getTime())
+        ? { resetAt: reset.toISOString() }
+        : {}),
+    },
+  ];
+}
+
 function assistant(event: ProtocolRecord): AgentEvent[] {
+  const quota: AgentEvent[] =
+    typeof event.error === "string" && claudeQuotaErrors.has(event.error)
+      ? [{ kind: "quota", message: `Claude Code reported ${event.error}` }]
+      : [];
   const message = asRecord(event.message);
   const content = message.content;
-  if (!Array.isArray(content)) return [];
+  if (!Array.isArray(content)) return quota;
   const usage: AgentEvent[] = message.usage
     ? [
         {
@@ -37,6 +62,7 @@ function assistant(event: ProtocolRecord): AgentEvent[] {
       ]
     : [];
   return [
+    ...quota,
     ...usage,
     ...content.flatMap((part) =>
       decodeEvent(asRecord(part), {
@@ -108,6 +134,7 @@ export function claudeEvents(line: string): AgentEvent[] {
       return [];
     },
     result,
+    rate_limit_event: rateLimit,
   } satisfies EventDecoders);
 }
 

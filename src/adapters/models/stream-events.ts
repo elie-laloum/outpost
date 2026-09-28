@@ -1,6 +1,7 @@
 import { OutpostError } from "../../domain/errors.ts";
 import type { ServerSentEvent } from "../../infrastructure/sse.types.ts";
 import { object } from "./model-response.ts";
+import { MODEL_QUOTA_ERRORS } from "./model.constants.ts";
 
 export function eventData(event: ServerSentEvent): Record<string, unknown> {
   let value: unknown;
@@ -13,12 +14,21 @@ export function eventData(event: ServerSentEvent): Record<string, unknown> {
 }
 
 export function streamFailure(data: Record<string, unknown>): never {
-  const error = data.error;
-  const type =
-    error && typeof error === "object" && "type" in error
-      ? String(error.type)
-      : undefined;
-  throw new OutpostError("provider", "Model stream reported an error", {
-    ...(type ? { type } : {}),
-  });
+  const record = (value: unknown): Record<string, unknown> =>
+    value !== null && typeof value === "object"
+      ? (value as Record<string, unknown>)
+      : {};
+  const error = record(data.error ?? record(data.response).error);
+  const type = "type" in error ? String(error.type) : undefined;
+  const code = typeof error.code === "string" ? error.code : undefined;
+  const quota = [type, code].some(
+    (value) => value !== undefined && MODEL_QUOTA_ERRORS.has(value),
+  );
+  throw new OutpostError(
+    quota ? "quota" : "provider",
+    quota
+      ? "Model stream reported a usage or rate limit"
+      : "Model stream reported an error",
+    { ...(type ? { type } : {}), ...(quota && code ? { code } : {}) },
+  );
 }

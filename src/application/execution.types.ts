@@ -1,3 +1,4 @@
+import type { QuotaFault } from "../domain/quota.types.ts";
 import type { ObservationHub } from "../domain/observation.types.ts";
 import type { TransportReference } from "../domain/transport.types.ts";
 import type { Agent, AgentObservation, Usage } from "../domain/agent.types.ts";
@@ -50,6 +51,7 @@ export interface AgentOutput {
   recordUsage(tokens: Usage, cumulative?: boolean): void;
   setUsageBaseline(tokens: Usage | undefined): void;
   readonly failure: string | undefined;
+  readonly quota: QuotaFault | undefined;
   readonly completed: boolean;
   readonly conversation: string | undefined;
   append(chunk: string): void;

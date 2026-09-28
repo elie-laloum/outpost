@@ -125,6 +125,11 @@ export type AgentEventDetails =
       readonly cumulative?: boolean;
     }
   | { readonly kind: "failure"; readonly message: string }
+  | {
+      readonly kind: "quota";
+      readonly message: string;
+      readonly resetAt?: string;
+    }
   | { readonly kind: "finished" }
   | {
       readonly kind: "raw";
@@ -175,6 +180,8 @@ export interface AgentAdapter extends AgentFeatures {
   credentials?(variables: Variables): CredentialPlan;
   request(input: AgentInput): Command;
   events(line: string): readonly AgentEvent[];
+  /** Recognizes a usage-limit or rate-limit message in failure or stderr text. */
+  quota?(text: string): boolean;
   usageCommand?(conversation: string): Command | undefined;
   usageResult?(text: string): Usage | undefined;
 }

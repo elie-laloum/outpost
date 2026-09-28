@@ -12,6 +12,7 @@ import { OutpostError } from "../domain/errors.ts";
 import type { SandboxLease } from "../domain/sandbox.types.ts";
 import { activityWatchdog } from "./activity-watchdog.ts";
 import { agentOutput } from "./agent-output.ts";
+import { agentQuota } from "./agent-quota.ts";
 import {
   agentConnectionFailurePattern,
   executionDefaults,
@@ -40,17 +41,19 @@ export async function turn(
     ? AbortSignal.any([options.signal, controller.signal])
     : controller.signal;
   const output = agentOutput(agent, options, markers, pass);
+  const quota = agentQuota(agent, output);
   const watchdog = activityWatchdog(controller, options, pass);
   watchdog.refresh(false);
-  const stderr = boundedLines((text, truncated) =>
+  const stderr = boundedLines((text, truncated) => {
+    quota.observe(text);
     notify(options.observe, {
       kind: "stderr",
       text,
       truncated,
       pass,
       at: new Date().toISOString(),
-    }),
-  );
+    });
+  });
   let status = 0;
   let commandCompleted = false;
   let preparedConversation: string | undefined;
@@ -147,7 +150,8 @@ export async function turn(
         diagnosed.recovery = error.recovery;
         throw diagnosed;
       }
-      throw error;
+      stderr.flush();
+      throw quota.classify(error);
     }
     notify(
       options.warn,
@@ -171,9 +175,15 @@ export async function turn(
     );
   }
   options.signal?.throwIfAborted();
+  let outcome: ReturnType<typeof output.result>;
+  try {
+    outcome = output.result();
+  } catch (error) {
+    throw quota.classify(error);
+  }
   return {
     ...(preparedConversation ? { conversation: preparedConversation } : {}),
-    ...output.result(),
+    ...outcome,
     status,
     durationMs: Date.now() - start,
   };

@@ -1,3 +1,5 @@
+import { quotaMatcher } from "./quota.ts";
+import { claudeQuotaPatterns } from "./quota.constants.ts";
 import { invariant } from "../../domain/errors.ts";
 import type { AgentModel } from "../../domain/model.types.ts";
 import { credentialPlanner } from "./authentication.ts";
@@ -40,6 +42,7 @@ function bindClaude(settings: Bound<ClaudeSettings>): AgentAdapter {
     }),
     request: (input) => claudeRequest(settings, input),
     events: claudeEvents,
+    quota: quotaMatcher(claudeQuotaPatterns),
     transcriptUsage: claudeTranscriptUsage,
   } satisfies AgentAdapter);
 }

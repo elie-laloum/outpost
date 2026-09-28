@@ -1,3 +1,5 @@
+import { quotaMatcher } from "./quota.ts";
+import { codexQuotaPatterns } from "./quota.constants.ts";
 import type { AgentModel } from "../../domain/model.types.ts";
 import { credentialPlanner } from "./authentication.ts";
 import { codexCredentials } from "./codex-authentication.ts";
@@ -27,6 +29,7 @@ function bindCodex(settings: Bound<CodexSettings>): AgentAdapter {
     variables: Object.freeze({ ...settings.variables }),
     request: (input) => codexRequest(settings, input),
     events: codexEvents,
+    quota: quotaMatcher(codexQuotaPatterns),
   } satisfies AgentAdapter);
 }
 

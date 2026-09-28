@@ -1,3 +1,5 @@
+import { quotaMatcher } from "./quota.ts";
+import { kimiQuotaPatterns } from "./quota.constants.ts";
 import { kimiUsage } from "./kimi-usage.ts";
 import { sessionUsageCommand, sessionUsageResult } from "./session-usage.ts";
 import { forkKimi } from "./kimi-fork.ts";
@@ -37,6 +39,7 @@ function bindKimi(settings: Bound<KimiSettings>): AgentAdapter {
     }),
     request: (input) => kimiRequest(settings, input),
     events: kimiEvents,
+    quota: quotaMatcher(kimiQuotaPatterns),
     usage: "session",
     usageCommand: (conversation) => sessionUsageCommand("kimi", conversation),
     usageResult: (text) => sessionUsageResult(text, kimiUsage),

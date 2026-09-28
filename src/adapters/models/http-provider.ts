@@ -11,11 +11,13 @@ import type {
 } from "./model-protocol.types.ts";
 import {
   MODEL_MAX_TIMEOUT_MS,
+  MODEL_QUOTA_STATUS,
   MODEL_RESPONSE_BYTES,
   MODEL_TIMEOUT_MS,
 } from "./model.constants.ts";
 import { validateModelRequest } from "./model-request.ts";
 import { retryAfterMs } from "./retry-after.ts";
+import { resetTimestamp } from "../../domain/quota.ts";
 import { modelJson } from "./model-http.ts";
 
 export function httpModelProvider(
@@ -74,12 +76,18 @@ export function httpModelProvider(
     if (response.ok) return response;
     const retryAfter = retryAfterMs(response.headers.get("Retry-After"));
     await response.body?.cancel();
+    const quota = response.status === MODEL_QUOTA_STATUS;
+    const resetAt =
+      quota && retryAfter !== undefined
+        ? resetTimestamp(retryAfter)
+        : undefined;
     throw new OutpostError(
-      "provider",
+      quota ? "quota" : "provider",
       `Model request failed with HTTP ${response.status}`,
       {
         status: response.status,
         ...(retryAfter === undefined ? {} : { retryAfterMs: retryAfter }),
+        ...(resetAt === undefined ? {} : { resetAt }),
       },
     );
   };
