@@ -88,10 +88,10 @@ async function scheduleRun(
     } = state;
     const active = new Map<Task, Promise<void>>();
     const started = Date.now();
-    const decisions = prepareDecisions(state);
+    const decisions = await prepareDecisions(state);
     emit({ type: "start" });
     if (checkpoint?.initial) emit({ type: "resume" });
-    applyDecisions(state, decisions);
+    if (!signal.aborted) applyDecisions(state, decisions);
     await state.persist();
     try {
       while (true) {

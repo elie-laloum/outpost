@@ -52,3 +52,56 @@ Workers claim fenced leases, renew them and report results. A stale lease cannot
 Use `serveTaskQueue()` and `httpTaskQueue()` to expose a queue across processes over HTTP, with the configured token and a trusted transport boundary. Use [Redis workers](../redis-workers/) for the BullMQ backend. Cancellation and deadlines must be passed into handler operations.
 
 API: [sqliteTaskQueue](../../reference/sqlitetaskqueue/) · [runQueueWorker](../../reference/runqueueworker/) · [queuedTask](../../reference/queuedtask/) · [TaskQueue](../../reference/taskqueue/).
+
+## Deduplicate effects
+
+Implemented, unreleased: every `TaskContext` exposes `idempotencyKey`, derived from the workflow execution and task key. It remains stable across retries and checkpoint replay; a new execution gets a new key. Each remote `QueueHandlerContext` exposes the job ID as the same property. `queuedTask()` preserves its existing job ID calculation. Direct producers must supply unique IDs for distinct logical operations and avoid collisions when sharing an effect service across queues.
+
+Pass this key to the service performing the effect. For a database operation, store the receipt and business change in the same transaction with a unique constraint. For a remote API, use its persistent idempotency support. An in-memory set or a receipt written separately from the effect leaves a crash window.
+
+```ts
+import type { QueueHandler, WorkflowJson } from "@elie-laloum/outpost";
+
+function deliveryHandler(
+  deliverOnce: (
+    key: string,
+    input: WorkflowJson,
+    signal: AbortSignal,
+  ) => Promise<WorkflowJson>,
+): QueueHandler {
+  return async (input, { idempotencyKey, signal }) => ({
+    value: await deliverOnce(idempotencyKey, input, signal),
+  });
+}
+```
+
+`deliverOnce` must atomically deduplicate and retain its result for at least the replay period. If a handler performs several effects, derive separate keys for each operation. Fencing prevents stale queue writes; it does not stop an external service accepting a stale worker's request. Queue retention and effect receipts must cover your recovery window. Never delete receipts to force a retry without checking prior effects.
+
+## Rotate HTTP credentials
+
+Both queue HTTP endpoints accept fixed tokens as before. A server callback supplies accepted tokens for each request; a client callback supplies its current token, including heartbeats and completion calls.
+
+```ts
+import { serveTaskQueue, httpTaskQueue } from "@elie-laloum/outpost";
+import type { TaskQueue } from "@elie-laloum/outpost";
+
+async function connectRotatingQueue(
+  queue: TaskQueue,
+  acceptedTokens: () => Promise<readonly string[]>,
+  currentToken: () => Promise<string>,
+) {
+  const server = await serveTaskQueue({ queue, token: acceptedTokens });
+  const client = httpTaskQueue({ url: server.url, token: currentToken });
+  return { server, client };
+}
+```
+
+The caller closes `server` and the underlying queue separately. Publish both tokens on the server, update all clients, verify renewals with the new token, then remove the old one. A missing or failing server source denies access. Load credentials from your application's bounded secret cache; source callbacks must return promptly. Tokens grant all queue operations, not per-worker permissions. Use TLS termination and a private network boundary for remote traffic; never put tokens in URLs or logs. Revocation can abort a worker at its next heartbeat, so retain idempotency receipts before replacing it.
+
+## Operate workers
+
+Use a unique worker name per running process and deploy compatible handler versions before producers submit their jobs. Monitor queue age, failed jobs, lease-renewal errors and storage capacity. Synchronize approver clocks for proof expiry.
+
+For planned shutdown, stop producers, let jobs settle, then abort the worker signal and await `runQueueWorker()` before closing its queue. Abort during a handler interrupts it cooperatively and leaves unfinished work reclaimable after lease expiry; handlers must propagate the signal. This API does not provide a separate drain command.
+
+After a crash, first confirm the old process is stopped. Wait for the lease to expire, start a replacement and inspect the retained result and effect receipts. Recover an abandoned workflow checkpoint only through the explicit recovery procedure, then authorize `resume: "retry-incomplete"` where required. Do not infer that a remote process is stopped from its PID. See [durable runs](../durable-runs/) and [Redis workers](../redis-workers/) for backend-specific ownership and recovery.

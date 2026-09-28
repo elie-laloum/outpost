@@ -5,6 +5,7 @@ import type {
 } from "../domain/task-queue.types.ts";
 import type { WorkflowJson } from "../domain/workflow/checkpoint.types.ts";
 export interface QueueHandlerContext {
+  readonly idempotencyKey: string;
   readonly signal: AbortSignal;
   readonly job: QueueJob;
 }

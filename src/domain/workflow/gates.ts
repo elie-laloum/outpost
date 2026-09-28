@@ -13,11 +13,21 @@ function gateTask(
   kind: WorkflowGate["kind"],
   options: WorkflowGateOptions,
 ): Task<WorkflowDecisionRecord> {
-  validateGate({ kind, prompt: options.prompt, actors: options.actors });
+  validateGate({
+    kind,
+    prompt: options.prompt,
+    actors: options.actors,
+    ...(options.authentication !== undefined
+      ? { authentication: options.authentication }
+      : {}),
+  });
   return task({
     key: options.key,
     after: options.after ?? [],
     gate: Object.freeze({
+      ...(options.authentication !== undefined
+        ? { authentication: options.authentication }
+        : {}),
       kind,
       prompt: options.prompt,
       actors: Object.freeze([...options.actors]),
@@ -55,10 +65,18 @@ export async function pauseGate(
   await runtime.persist();
 }
 
-export function prepareDecisions(
+export async function prepareDecisions(
   runtime: WorkflowExecutionState,
-): readonly WorkflowDecisionRecord[] {
-  const decisions = (runtime.options.decisions ?? []).map((decision) =>
+): Promise<readonly WorkflowDecisionRecord[]> {
+  const inputs = (runtime.options.decisions ?? []).map((decision) =>
+    Object.freeze({
+      ...decision,
+      ...(decision.proof
+        ? { proof: Object.freeze({ ...decision.proof }) }
+        : {}),
+    }),
+  );
+  const decisions = inputs.map((decision) =>
     Object.freeze({
       executionId: decision.executionId,
       key: decision.key,
@@ -96,7 +114,37 @@ export function prepareDecisions(
       );
     seen.add(decision.key);
   }
-  return decisions;
+  const verified: WorkflowDecisionRecord[] = [];
+  for (const [index, decision] of decisions.entries()) {
+    const input = inputs[index]!;
+    const signed = pending.get(decision.key)!.gate!.authentication === "signed";
+    if (!signed && !input.proof) {
+      verified.push(decision);
+      continue;
+    }
+    if (!input.proof || !runtime.options.decisionVerifier)
+      throw new Error(`Signed workflow decision required: ${decision.key}`);
+    const verification = await runtime.options.decisionVerifier(input);
+    if (
+      !verification ||
+      typeof verification.keyId !== "string" ||
+      !verification.keyId.trim() ||
+      verification.keyId !== input.proof.keyId ||
+      typeof verification.verifiedAt !== "string" ||
+      !Number.isFinite(Date.parse(verification.verifiedAt))
+    )
+      throw new Error("Invalid workflow decision verification");
+    verified.push(
+      Object.freeze({
+        ...decision,
+        verification: Object.freeze({
+          keyId: verification.keyId,
+          verifiedAt: verification.verifiedAt,
+        }),
+      }),
+    );
+  }
+  return verified;
 }
 
 export function applyDecisions(

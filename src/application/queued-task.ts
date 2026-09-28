@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+import { taskIdempotencyKey } from "../domain/workflow/idempotency.ts";
 import { setTimeout as delay } from "node:timers/promises";
 import { task } from "../domain/workflow.ts";
 import { queueDefaultPollMs } from "../domain/task-queue.constants.ts";
@@ -24,9 +24,7 @@ export function queuedTask<T>(options: QueuedTaskOptions<T>): Task<T> {
     ...definition,
     async perform(context) {
       context.signal.throwIfAborted();
-      const id = createHash("sha256")
-        .update(JSON.stringify([context.executionId, definition.key]))
-        .digest("hex");
+      const id = taskIdempotencyKey(context.executionId, definition.key);
       let job = await queue.enqueue({
         id,
         handler,

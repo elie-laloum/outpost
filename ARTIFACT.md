@@ -252,9 +252,11 @@ Existe, mais partiel ou expérimental pour un usage en production.
 
 ### Workflows sur plusieurs workers
 
-**Faiblesse actuelle** — L'auteur d'une approbation est une donnée fournie par ton application, sans vérification. Rien n'est prévu pour faire tourner les identifiants, et une tâche interrompue peut répéter ses effets.
+**Statut — implémenté, non publié** : gates signés Ed25519 avec clés d’approbateurs révocables, rotation des jetons HTTP à chaque requête et clés d’idempotence stables dans les contextes de tâches et workers. Guide d’exploitation bilingue et régressions de crash entre effet et résultat avec déduplication persistante. La validation de bascule en production reste distincte ; aucun effet exactement une fois n’est garanti par la file seule.
 
-**Ce que ça complète** — Une identité vérifiée des approbateurs (signature ou jeton), la rotation des identifiants, une clé d'idempotence transmise à chaque tâche, et un guide d'exploitation.
+**Faiblesse initiale** — L'auteur d'une approbation est une donnée fournie par ton application, sans vérification. Rien n'est prévu pour faire tourner les identifiants, et une tâche interrompue peut répéter ses effets.
+
+**Périmètre traité** — Une identité vérifiée des approbateurs (signature ou jeton), la rotation des identifiants, une clé d'idempotence transmise à chaque tâche, et un guide d'exploitation.
 
 <a id="r-network"></a>
 

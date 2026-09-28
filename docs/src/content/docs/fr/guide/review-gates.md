@@ -75,3 +75,65 @@ Les noms d’acteurs sont des métadonnées fiables fournies par votre applicati
 Une phrase demandant à l’agent d’attendre n’est pas une validation imposée. Le graphe de dépendances doit imposer l’attente.
 
 API : [approvalTask](../../reference/approvaltask/) · [pauseTask](../../reference/pausetask/) · [WorkflowDecision](../../reference/workflowdecision/).
+
+## Exiger une décision signée
+
+Implémenté, non publié : définissez `authentication: "signed"` sur `approvalTask()` ou `pauseTask()`. Cette exigence participe à l’identité du checkpoint : la retirer à la reprise est refusé. Fournissez `decisionVerifier` lors de la soumission des preuves. Sans cette option, le gate conserve la confiance dans l’acteur fourni par l’application décrite plus haut.
+
+```ts
+import { approvalTask } from "@elie-laloum/outpost";
+
+const review = approvalTask({
+  key: "review",
+  prompt: "Approve deployment?",
+  actors: ["maintainer"],
+  authentication: "signed",
+});
+```
+
+Signez la demande exacte après authentification de l’utilisateur et confirmation de son intention. La signature couvre l’exécution, la tâche, la demande, l’acteur, l’action, le motif, l’identifiant de clé et l’expiration. Le service de signature possède la clé privée ; les workers n’ont besoin que des clés publiques de confiance associées aux approbateurs.
+
+```ts
+import {
+  signWorkflowDecision,
+  ed25519DecisionVerifier,
+} from "@elie-laloum/outpost";
+import type {
+  Workflow,
+  WorkflowCheckpointOptions,
+  WorkflowDecision,
+  WorkflowApproverKey,
+} from "@elie-laloum/outpost";
+import type { KeyObject } from "node:crypto";
+
+async function submitSignedReview(
+  pipeline: Workflow,
+  checkpoint: WorkflowCheckpointOptions,
+  decision: WorkflowDecision,
+  privateKey: KeyObject,
+  keyId: string,
+  loadKeys: () => Promise<readonly WorkflowApproverKey[]>,
+) {
+  const signed = signWorkflowDecision({
+    decision,
+    privateKey,
+    keyId,
+    expiresAt: new Date(Date.now() + 60_000).toISOString(),
+  });
+  return pipeline.start({
+    checkpoint,
+    decisions: [signed],
+    decisionVerifier: ed25519DecisionVerifier({ keys: loadKeys }),
+  });
+}
+```
+
+La vérification refuse les acteurs non autorisés, décisions altérées, preuves expirées, identifiants de clé inconnus ou dupliqués et demandes réutilisées. Toutes les décisions soumises sont validées avant toute application. L’audit conserve l’identifiant de clé vérifiée et la date de vérification ; aucune clé privée ni aucun jeton bearer n’est stocké.
+
+Les callbacks de vérification doivent répondre rapidement. Si le délai global expire pendant la vérification, le runtime attend la fin du callback mais n’applique pas son approbation tardive.
+
+## Faire tourner les clés des approbateurs
+
+Publiez une nouvelle clé publique avec un `keyId` unique et le même acteur, basculez le service de signature vers sa clé privée, puis retirez l’ancienne clé publique après la période de chevauchement. Le vérificateur recharge les clés à chaque décision. Retirer une clé refuse immédiatement les nouvelles preuves correspondantes ; les approbations déjà persistées restent acceptées, même après expiration. Le stockage des checkpoints reste une frontière de confiance : ces signatures n’authentifient pas le checkpoint lui-même.
+
+Séparez au besoin les contrôles d’accès applicatifs aux clés de signature et à la soumission des décisions. Un `WorkflowDecisionVerifier` personnalisé est du code de confiance et doit vérifier lui-même signature, acteur et expiration. Consultez [l’exploitation des workers](../background-jobs/#exploiter-les-workers) pour les identifiants des files et la reprise.

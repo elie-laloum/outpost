@@ -1,7 +1,8 @@
 import type { TaskQueue } from "../domain/task-queue.types.ts";
 export interface QueueServerOptions {
   readonly queue: TaskQueue;
-  readonly token: string;
+  readonly token:
+    string | (() => readonly string[] | Promise<readonly string[]>);
   readonly host?: string;
   readonly port?: number;
 }
@@ -11,6 +12,6 @@ export interface QueueServer {
 }
 export interface QueueClientOptions {
   readonly url: string;
-  readonly token: string;
+  readonly token: string | (() => string | Promise<string>);
   readonly timeoutMs?: number;
 }

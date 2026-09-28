@@ -19,13 +19,13 @@ Expose une file appartenant à l’appelant via HTTP avec authentification expli
 
 ## Paramètres et propriétés
 
-| Nom             | Type                  | Présence  | Rôle                                                                                     |
-| --------------- | --------------------- | --------- | ---------------------------------------------------------------------------------------- |
-| `options`       | `QueueServerOptions`  | Requis    | File appartenant à l’appelant, jeton bearer et adresse/port d’écoute HTTP.               |
-| `options.queue` | `TaskQueue`           | Requis    | File de tâches utilisée pour envoyer, prendre en charge et persister l’état des travaux. |
-| `options.token` | `string`              | Requis    | Identifiant de transport explicite ; jamais dans une URL.                                |
-| `options.host`  | `string \| undefined` | Optionnel | Adresse d’écoute HTTP ; loopback par défaut pour un accès local uniquement.              |
-| `options.port`  | `number \| undefined` | Optionnel | Port TCP du serveur HTTP de file ; zéro laisse le système choisir un port disponible.    |
+| Nom             | Type                                                                | Présence  | Rôle                                                                                                                                                                                      |
+| --------------- | ------------------------------------------------------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `options`       | `QueueServerOptions`                                                | Requis    | File appartenant à l’appelant, jeton bearer et adresse/port d’écoute HTTP.                                                                                                                |
+| `options.queue` | `TaskQueue`                                                         | Requis    | File de tâches utilisée pour envoyer, prendre en charge et persister l’état des travaux.                                                                                                  |
+| `options.token` | `string \| (() => readonly string[] \| Promise<readonly string[]>)` | Requis    | Jeton bearer fixe ou callback renvoyant les jetons acceptés à chaque requête. Faites coexister ancien et nouveau jetons pendant la rotation ; une source vide ou en échec refuse l’accès. |
+| `options.host`  | `string \| undefined`                                               | Optionnel | Adresse d’écoute HTTP ; loopback par défaut pour un accès local uniquement.                                                                                                               |
+| `options.port`  | `number \| undefined`                                               | Optionnel | Port TCP du serveur HTTP de file ; zéro laisse le système choisir un port disponible.                                                                                                     |
 
 ## Retour
 

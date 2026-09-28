@@ -7,6 +7,8 @@ function object(value: unknown): value is Record<string, unknown> {
 }
 
 export function validateGate(gate: WorkflowGate): void {
+  if (gate.authentication !== undefined && gate.authentication !== "signed")
+    throw new Error("Invalid gate authentication policy");
   if (!["approval", "pause"].includes(gate.kind))
     throw new Error("Invalid workflow gate kind");
   if (!gate.prompt.trim()) throw new Error("Gate prompt cannot be empty");
@@ -53,6 +55,7 @@ export function validateGateRecord(
     !request.id.trim() ||
     typeof request.requestedAt !== "string" ||
     !Number.isFinite(Date.parse(request.requestedAt)) ||
+    request.authentication !== gate.authentication ||
     request.kind !== gate.kind ||
     request.prompt !== gate.prompt ||
     JSON.stringify(request.actors) !== JSON.stringify(gate.actors)
@@ -78,6 +81,17 @@ export function validateGateRecord(
     !Number.isFinite(Date.parse(decision.decidedAt))
   )
     throw invalid();
+  const verification = decision.verification;
+  if (gate.authentication === "signed" || verification !== undefined) {
+    if (
+      !object(verification) ||
+      typeof verification.keyId !== "string" ||
+      !verification.keyId.trim() ||
+      typeof verification.verifiedAt !== "string" ||
+      !Number.isFinite(Date.parse(verification.verifiedAt))
+    )
+      throw invalid();
+  }
   if (
     record.status === "done" &&
     (!object(output) ||
@@ -85,7 +99,9 @@ export function validateGateRecord(
       !object(output.value) ||
       Object.keys(output.value).length !== Object.keys(decision).length ||
       !Object.entries(decision).every(
-        ([key, value]) => object(output.value) && output.value[key] === value,
+        ([key, value]) =>
+          object(output.value) &&
+          JSON.stringify(output.value[key]) === JSON.stringify(value),
       ))
   )
     throw invalid();
