@@ -3,7 +3,7 @@ title: "Connexions aux modèles"
 description: "Choisir un protocole HTTP pour la boucle intégrée."
 ---
 
-Le contrat `ModelProvider` et `openaiModelProvider()` sont stabilisés pour la prochaine version. `anthropicModelProvider()` conserve son statut expérimental jusqu’à la validation authentifiée de la délégation. Les requêtes modèles sont exécutées dans le processus Outpost.
+Le contrat `ModelProvider`, `openaiModelProvider()` et `anthropicModelProvider()` sont stabilisés pour la prochaine version. Les requêtes modèles sont exécutées dans le processus Outpost.
 
 Choisissez le fournisseur selon le protocole, puis passez-le à `harness({ modelProvider })`. Les identifiants sont explicites et restent dans le client côté hôte.
 
@@ -41,7 +41,7 @@ API : [openaiModelProvider](../../reference/openaimodelprovider/) · [anthropicM
 
 ## Validation
 
-La validation locale de septembre 2026 couvre OpenAI Responses et Chat Completions avec `gpt-5.6-luna`, la délégation et l’édition dans Docker, puis cache, limites, interruption et flux incomplet. Responses utilise le raisonnement `low` ; Chat Completions utilise `none`, car le service a refusé les outils avec `low`. Anthropic reste expérimental après un refus d’authentification HTTP 401 ; sa précédente campagne sans délégation utilisait `claude-haiku-4-5-20251001`.
+La validation locale de septembre 2026 couvre OpenAI Responses et Chat Completions avec `gpt-5.6-luna`, la délégation et l’édition dans Docker, puis cache, limites, interruption et flux incomplet. Responses utilise le raisonnement `low` ; Chat Completions utilise `none`, car le service a refusé les outils avec `low`. Le 28 septembre, sept scénarios Anthropic authentifiés ont réussi avec `claude-haiku-4-5-20251001`, sans raisonnement activé : édition/tests/commit par un enfant et continuation du parent dans Docker, cache réel, annulation, limites de sortie et d’étapes, budgets de tokens et rejet d’un flux réel interrompu artificiellement. Cela satisfait le prérequis de validation de la délégation pour l’adaptateur ; les autres modèles et configurations de raisonnement nécessitent leurs propres preuves réelles.
 
 Dans le dépôt source, `node scripts/harness-live.mjs offline docker coding` exécute une fixture déterministe dans un vrai conteneur. Remplacez `docker` par `podman`, `vercel` ou `daytona` avec les prérequis correspondants. Pour une campagne payante, chargez vos identifiants puis utilisez `node scripts/harness-live.mjs responses docker coding --live`. Les protocoles `chat-completions` et `anthropic` acceptent les mêmes scénarios : `coding`, `cache`, `cancel`, `truncation`, `steps`, `usage`, `network`.
 

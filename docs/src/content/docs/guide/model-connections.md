@@ -3,7 +3,7 @@ title: "Model connections"
 description: "Choose an HTTP protocol for the built-in loop."
 ---
 
-The `ModelProvider` contract and `openaiModelProvider()` are stabilized for the next release. `anthropicModelProvider()` remains experimental pending authenticated delegation validation. Model requests run in the Outpost process.
+The `ModelProvider` contract, `openaiModelProvider()` and `anthropicModelProvider()` are stabilized for the next release. Model requests run in the Outpost process.
 
 Choose a model provider by protocol, then pass it to `harness({ modelProvider })`. Credentials are explicit and remain with the host-side client.
 
@@ -41,7 +41,7 @@ API: [openaiModelProvider](../../reference/openaimodelprovider/) · [anthropicMo
 
 ## Validation
 
-Local September 2026 validation covers OpenAI Responses and Chat Completions with `gpt-5.6-luna`, delegation and editing in Docker, then cache, limits, cancellation and incomplete streams. Responses uses `low` reasoning; Chat Completions uses `none`, because the service rejected tools with `low`. Anthropic remains experimental after HTTP 401 authentication rejection; its previous campaign without delegation used `claude-haiku-4-5-20251001`.
+Local September 2026 validation covers OpenAI Responses and Chat Completions with `gpt-5.6-luna`, delegation and editing in Docker, then cache, limits, cancellation and incomplete streams. Responses uses `low` reasoning; Chat Completions uses `none`, because the service rejected tools with `low`. On September 28, seven authenticated Anthropic scenarios passed with `claude-haiku-4-5-20251001` and thinking disabled: child editing/tests/commit and parent continuation in Docker, a real cache hit, cancellation, output and step limits, token budgets and rejection of an artificially interrupted real stream. This clears the delegation validation requirement for the adapter; other models and reasoning configurations still need their own live evidence.
 
 In the source repository, `node scripts/harness-live.mjs offline docker coding` runs a deterministic fixture inside a real container. Replace `docker` with `podman`, `vercel` or `daytona` with their corresponding prerequisites. For a paid campaign, load your credentials and run `node scripts/harness-live.mjs responses docker coding --live`. The `chat-completions` and `anthropic` protocols accept the same scenarios: `coding`, `cache`, `cancel`, `truncation`, `steps`, `usage`, `network`.
 

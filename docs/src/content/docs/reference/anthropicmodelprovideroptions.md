@@ -5,10 +5,6 @@ sidebar:
   order: 20
 ---
 
-:::caution[Experimental]
-The Anthropic adapter remains experimental pending a fresh authenticated delegation campaign. Earlier tool, streaming, cache and continuation runs passed, but the current credential is rejected with HTTP 401; this is not a validated failure of the protocol implementation. The ModelProvider contract and built-in harness are stable.
-:::
-
 ## Import
 
 ```ts

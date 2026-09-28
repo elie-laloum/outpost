@@ -300,12 +300,7 @@ for (const [locale, label] of [
       await page.goto(`${locale}reference/${name}/`);
       const content = page.locator(".sl-markdown-content");
       const warning = content.locator(":scope > .starlight-aside").first();
-      const experimental = [
-        "firecracker",
-        "firecrackeroptions",
-        "anthropicmodelprovider",
-        "anthropicmodelprovideroptions",
-      ].includes(name);
+      const experimental = ["firecracker", "firecrackeroptions"].includes(name);
       if (!experimental) {
         await expect(
           content.locator(":scope > .starlight-aside--caution"),
@@ -325,10 +320,7 @@ for (const [locale, label] of [
   }
 }
 
-for (const [locale, label, familyName] of [
-  ["", "Experimental", "Models"],
-  ["fr/", "Expérimental", "Models"],
-]) {
+for (const locale of ["", "fr/"]) {
   test(`direct model reference icons are accessible (${locale || "en"})`, async ({
     page,
   }) => {
@@ -340,7 +332,7 @@ for (const [locale, label, familyName] of [
       })
       .filter({ visible: true });
     const family = factory.locator("xpath=ancestor::details[1]");
-    await expect(family.locator("summary").first()).toContainText(familyName);
+    await expect(family.locator("summary").first()).toContainText("Models");
     for (const name of [
       "openaiModelProvider",
       "OpenAIModelProviderOptions",
@@ -350,25 +342,9 @@ for (const [locale, label, familyName] of [
       "anthropicModelProvider",
       "AnthropicModelProviderOptions",
     ]) {
-      const experimental = name.toLowerCase().startsWith("anthropic");
-      const link = family.getByRole("link", {
-        name: experimental ? `${name} — ${label}` : name,
-        exact: true,
-      });
+      const link = family.getByRole("link", { name, exact: true });
       await expect(link).toHaveCount(1);
-      if (!experimental) {
-        await expect(link).not.toHaveAttribute(
-          "data-api-status",
-          "experimental",
-        );
-        continue;
-      }
-      await expect(link).toHaveAttribute("data-api-status", "experimental");
-      expect(
-        await link.evaluate(
-          (element) => getComputedStyle(element, "::after").maskImage,
-        ),
-      ).not.toBe("none");
+      await expect(link).not.toHaveAttribute("data-api-status", "experimental");
     }
   });
 }

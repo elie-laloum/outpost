@@ -93,7 +93,6 @@ export const groups = [
   {
     id: "model-providers",
     title: ["Model providers", "Fournisseurs de modèles"],
-    experimental: ["anthropicModelProvider", "AnthropicModelProviderOptions"],
     guide: "guide/advanced/model-providers",
     names:
       "openaiModelProvider anthropicModelProvider AnthropicModelProviderOptions OpenAIModelProviderOptions ModelProvider ModelRequest ModelResult ModelMessage ModelContentBlock ModelTextBlock ModelToolCallBlock ModelToolResultBlock ModelReasoningBlock ModelToolSpec ModelStopReason ModelStreamEvent",

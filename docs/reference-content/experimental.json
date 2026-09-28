@@ -6,13 +6,5 @@
   "FirecrackerOptions": [
     "Experimental Firecracker configuration with manually prepared boot assets, networking and SSH. The optional jailer configuration requires privileged setup, protected host paths and dedicated cgroup v2 controllers. Production validation remains incomplete. See the [prerequisites and limits](../../guide/microvms/).",
     "Configuration Firecracker expérimentale avec assets de démarrage, réseau et SSH préparés manuellement. La configuration optionnelle du jailer exige une préparation privilégiée, des chemins hôte protégés et des contrôleurs cgroup v2 dédiés. La validation pour la production reste incomplète. Consultez les [prérequis et limites](../../guide/microvms/)."
-  ],
-  "anthropicModelProvider": [
-    "The Anthropic adapter remains experimental pending a fresh authenticated delegation campaign. Earlier tool, streaming, cache and continuation runs passed, but the current credential is rejected with HTTP 401; this is not a validated failure of the protocol implementation. The ModelProvider contract and built-in harness are stable.",
-    "L’adaptateur Anthropic reste expérimental dans l’attente d’une nouvelle campagne authentifiée de délégation. Les précédents tests d’outils, streaming, cache et continuation avaient réussi, mais l’identifiant actuel est refusé avec HTTP 401 ; cela ne démontre pas un défaut du protocole. Le contrat ModelProvider et le harness intégré sont stables."
-  ],
-  "AnthropicModelProviderOptions": [
-    "The Anthropic adapter remains experimental pending a fresh authenticated delegation campaign. Earlier tool, streaming, cache and continuation runs passed, but the current credential is rejected with HTTP 401; this is not a validated failure of the protocol implementation. The ModelProvider contract and built-in harness are stable.",
-    "L’adaptateur Anthropic reste expérimental dans l’attente d’une nouvelle campagne authentifiée de délégation. Les précédents tests d’outils, streaming, cache et continuation avaient réussi, mais l’identifiant actuel est refusé avec HTTP 401 ; cela ne démontre pas un défaut du protocole. Le contrat ModelProvider et le harness intégré sont stables."
   ]
 }

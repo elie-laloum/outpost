@@ -6,7 +6,7 @@ sidebar:
   order: 0
 ---
 
-The `ModelProvider` contract and OpenAI adapter are stabilized for the next release. The Anthropic adapter remains experimental pending fresh authenticated delegation validation.
+The `ModelProvider` contract and OpenAI and Anthropic adapters are stabilized for the next release. See the [validation record](../../../guide/model-connections/#validation) for the tested models and configurations.
 
 A model provider supplies the request transport used by a custom harness. `openaiModelProvider()` supports Chat Completions and Responses services; `anthropicModelProvider()` supports Anthropic Messages and optional system-prefix caching. Sandbox allocation is independent.
 

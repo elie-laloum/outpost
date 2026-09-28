@@ -994,11 +994,7 @@
       },
       {
         "slug": "reference/anthropicmodelprovider",
-        "attrs": {
-          "data-api-kind": "function",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/modelcontentblock",
@@ -1014,11 +1010,7 @@
       },
       {
         "slug": "reference/anthropicmodelprovideroptions",
-        "attrs": {
-          "data-api-kind": "interface",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/openaimodelprovideroptions",
