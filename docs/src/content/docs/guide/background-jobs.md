@@ -49,6 +49,8 @@ try {
 
 Workers claim fenced leases, renew them and report results. A stale lease cannot finalize a replacement owner’s job. Interrupted work can still repeat external side effects: handlers must be idempotent or deduplicate effects themselves.
 
+A handler that fails on a usage or rate limit reports it in `QueueResult.quota`; with [quota pauses](../quota-pauses/#queued-tasks), the workflow pauses and later publishes a new job that keeps the original `idempotencyKey`.
+
 Use `serveTaskQueue()` and `httpTaskQueue()` to expose a queue across processes over HTTP, with the configured token and a trusted transport boundary. Use [Redis workers](../redis-workers/) for the BullMQ backend. Cancellation and deadlines must be passed into handler operations.
 
 API: [sqliteTaskQueue](../../reference/sqlitetaskqueue/) · [runQueueWorker](../../reference/runqueueworker/) · [queuedTask](../../reference/queuedtask/) · [TaskQueue](../../reference/taskqueue/).

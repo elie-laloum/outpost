@@ -72,6 +72,63 @@ A quota error ends the current attempt; it does not consume `retry` attempts. Th
 
 Enabling `onQuota` authorizes the interrupted attempt to run again, like a retry; no `resume: "retry-incomplete"` is needed. Cancelling during a wait leaves the task paused. Every new run counts as an attempt against `budget.attempts`. A [verification loop](../verification-loops/) resumes the phase that hit the limit.
 
-A rerun starts a new agent dispatch. The interrupted conversation is available in the quota error's `details.conversation` for CLI agents, but the task does not continue it automatically.
+## Continue the interrupted conversation
+
+The first attempt after a pause receives `context.quota`. It carries the conversation when it was captured, and the retained work branch.
+
+- `agentTask` and `isolatedTask` continue that conversation. The new turn sends a short resume instruction instead of the original brief, and keeps the response tag when a structured response is expected. Set `quotaResume: "restart"` to send the original request again.
+- `agentTask` keeps its caller-owned sandbox and workspace. `isolatedTask` allocates a new sandbox: a `current` or `named` branch reuses the same checkout, and an automatically integrated workspace starts from the interrupted branch. Uncommitted changes of an integrated attempt stay in its [retained worktree](../failure-recovery/).
+- `interactiveAgentTask` continues the conversation of the interrupted turn.
+- Continuation needs a resumable agent with conversation capture: Claude Code, Codex, Copilot or Kimi. Antigravity and disabled capture start a new conversation. So does a request with its own `continuation` or several `passes`.
+
+Custom tasks can read `context.quota` to decide how to resume.
+
+## Queued tasks
+
+A worker whose handler fails with a quota error stores it in `QueueResult.quota`, and `queuedTask` rejects with code `quota`. The first attempt after the pause publishes a new job, `<key>:quota:<attempt>`, because the failed job cannot run again. The handler still receives the original `idempotencyKey`, so effect deduplication keeps working.
+
+Pass the conversation to the handler through the input:
+
+```ts
+import { queuedTask } from "@elie-laloum/outpost";
+import type { TaskQueue } from "@elie-laloum/outpost";
+
+function implement(queue: TaskQueue) {
+  return queuedTask({
+    key: "implement",
+    queue,
+    handler: "implement",
+    input: (context) => ({ continueFrom: context.quota?.conversation ?? null }),
+    decode: String,
+  });
+}
+```
+
+The handler can then dispatch with `continuation: { id: input.continueFrom }`. Workers forward only conversations captured by the handler's dispatch.
+
+## Speculation
+
+A candidate stopped by a limit settles with status `quota`. When nothing wins, `speculate()` returns status `quota` and `result.quota` holds the earliest known reset. Throw it from a workflow task to pause the workflow:
+
+```ts
+import { OutpostError, speculate, task } from "@elie-laloum/outpost";
+import type { SpeculationOptions } from "@elie-laloum/outpost";
+
+function race(options: SpeculationOptions) {
+  return task({
+    key: "race",
+    async perform() {
+      const result = await speculate(options);
+      if (result.status === "quota" && result.quota)
+        throw new OutpostError("quota", result.quota.message, {
+          ...(result.quota.resetAt ? { resetAt: result.quota.resetAt } : {}),
+        });
+      return result.winner?.branch ?? null;
+    },
+  });
+}
+```
+
+With [durability](../candidate-selection/#durable-races-and-recovery), the next `speculate()` call reruns only the candidates stopped by a limit, as new attempts from the baseline; budgets stay cumulative. Candidates do not continue their previous conversation. Without durability, every candidate runs again.
 
 API: [WorkflowQuotaPolicy](../../reference/workflowquotapolicy/) · [WorkflowQuotaPause](../../reference/workflowquotapause/) · [quotaFault](../../reference/quotafault/) · [WorkflowOptions](../../reference/workflowoptions/).

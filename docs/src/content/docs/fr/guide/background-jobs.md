@@ -49,6 +49,8 @@ try {
 
 Les workers acquièrent des baux protégés contre les anciens propriétaires, les renouvellent et rapportent les résultats. Un bail périmé ne peut pas finaliser le travail de son remplaçant. Une interruption peut néanmoins répéter les effets externes : les handlers doivent être idempotents ou dédupliquer eux-mêmes leurs effets.
 
+Un handler qui échoue sur une limite d’usage ou de débit la signale dans `QueueResult.quota` ; avec les [pauses sur quota](../quota-pauses/#tâches-en-file), le workflow se met en pause puis publie un nouveau job qui conserve l’`idempotencyKey` d’origine.
+
 Utilisez `serveTaskQueue()` et `httpTaskQueue()` pour exposer une file entre processus via HTTP, avec le jeton configuré et une frontière de transport fiable. Utilisez les [workers Redis](../redis-workers/) pour BullMQ. Transmettez annulation et délais aux opérations des handlers.
 
 API : [sqliteTaskQueue](../../reference/sqlitetaskqueue/) · [runQueueWorker](../../reference/runqueueworker/) · [queuedTask](../../reference/queuedtask/) · [TaskQueue](../../reference/taskqueue/).

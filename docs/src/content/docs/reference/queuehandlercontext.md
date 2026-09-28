@@ -13,11 +13,11 @@ import type { QueueHandlerContext } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name             | Type          | Presence | Meaning                                                                                                              |
-| ---------------- | ------------- | -------- | -------------------------------------------------------------------------------------------------------------------- |
-| `idempotencyKey` | `string`      | Required | Job ID shared by every lease and retry of this logical job; use it for persistent deduplication of external effects. |
-| `signal`         | `AbortSignal` | Required | Cooperative cancellation for this operation.                                                                         |
-| `job`            | `QueueJob`    | Required | Claimed persisted job, including its input and lease generation.                                                     |
+| Name             | Type          | Presence | Meaning                                                                                                                                                                                      |
+| ---------------- | ------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `idempotencyKey` | `string`      | Required | Stable effect key of this logical job: the request’s idempotencyKey when set, otherwise the job ID shared by every lease and retry. Use it for persistent deduplication of external effects. |
+| `signal`         | `AbortSignal` | Required | Cooperative cancellation for this operation.                                                                                                                                                 |
+| `job`            | `QueueJob`    | Required | Claimed persisted job, including its input and lease generation.                                                                                                                             |
 
 ## Signature
 

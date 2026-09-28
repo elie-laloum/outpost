@@ -185,6 +185,7 @@ export type {
 } from "./domain/workflow.ts";
 
 export { agentTask, commandTask, isolatedTask } from "./application/tasks.ts";
+export type { QuotaResumePolicy } from "./application/quota-resume.types.ts";
 
 export {
   antigravityHarness,

@@ -9,7 +9,7 @@ Outpost's next priority is reliable everyday execution: a successful first run, 
 
 **Implemented, unreleased:** [interactive agent tasks](../../guide/interactive-tasks/) persist adaptive questions and human answers between captured conversation turns. The Outpost harness and portable CLI presets share this protocol; Antigravity is rejected. Local process and simulated-model tests cover resume, validation and retained workspaces. Live CLI/model campaigns remain required. Native suspension inside a tool, signed answers and question expiration remain planned.
 
-**Implemented, unreleased:** [quota pauses](../../guide/quota-pauses/) classify usage and rate limits from CLI agents and model providers and pause workflow tasks until the reset, in process or across starts through the checkpoint. Deterministic protocol, process and workflow tests cover classification and resumption; live limit campaigns for each CLI remain required. Parsing human-readable reset times, continuing the interrupted conversation and quota handling for queues and speculation remain planned.
+**Implemented, unreleased:** [quota pauses](../../guide/quota-pauses/) classify usage and rate limits from CLI agents and model providers and pause workflow tasks until the reset, in process or across starts through the checkpoint. Resumed tasks continue the captured conversation, queued tasks republish a new job with a stable effect key, and durable speculation reruns quota-stopped candidates. Deterministic protocol, process, queue (SQLite, HTTP, BullMQ) and workflow tests cover classification and resumption; live limit campaigns for each CLI remain required. Parsing human-readable reset times and continuing speculative candidates' conversations remain planned.
 
 ## Starting point
 

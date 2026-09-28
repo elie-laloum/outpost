@@ -2789,8 +2789,8 @@
     "Snapshots du checkout hôte avant et après la course, avec détection de changements et éventuelle erreur d’inspection."
   ],
   "SpeculationResult.status": [
-    "Race outcome: winner, no-winner, aborted or budget-exhausted.",
-    "Résultat de la course : winner, no-winner, aborted ou budget-exhausted."
+    "Race outcome: winner, no-winner, quota when no candidate won and at least one stopped on a usage or rate limit, aborted or budget-exhausted.",
+    "Résultat de la course : winner, no-winner, quota lorsqu’aucun candidat n’a gagné et qu’au moins un s’est arrêté sur une limite d’usage ou de débit, aborted ou budget-exhausted."
   ],
   "SpeculationResult.winner": [
     "Selected candidate that passed validation and completed cleanup, when one exists.",
@@ -2833,8 +2833,8 @@
     "Nom de la branche de travail utilisée ou observée pendant l’exécution."
   ],
   "SpeculativeCandidateResult.status": [
-    "Candidate outcome: winner, rejected, failed, cancelled or skipped.",
-    "Résultat du candidat : winner, rejected, failed, cancelled ou skipped."
+    "Candidate outcome: winner, rejected, failed, quota (stopped by a usage or rate limit), cancelled or skipped.",
+    "Résultat du candidat : winner, rejected, failed, quota (arrêté par une limite d’usage ou de débit), cancelled ou skipped."
   ],
   "SpeculativeCandidateResult.directory": [
     "Host workspace directory used for this execution.",
@@ -5447,8 +5447,8 @@
     "Identité SHA-256 stable de executionId et de la clé de tâche, conservée lors des retries et reprises. À transmettre à un service d’effets avec déduplication persistante."
   ],
   "QueueHandlerContext.idempotencyKey": [
-    "Job ID shared by every lease and retry of this logical job; use it for persistent deduplication of external effects.",
-    "Identifiant du job commun à tous ses baux et reprises ; à utiliser pour dédupliquer durablement les effets externes."
+    "Stable effect key of this logical job: the request’s idempotencyKey when set, otherwise the job ID shared by every lease and retry. Use it for persistent deduplication of external effects.",
+    "Clé d’effet stable de ce job logique : l’idempotencyKey de la requête si elle est définie, sinon l’identifiant du job partagé par chaque bail et reprise. Utilisez-la pour une déduplication persistante des effets externes."
   ],
   "signWorkflowDecision.options": [
     "Exact decision, Ed25519 private key, key identifier and future expiration to sign.",
@@ -6182,5 +6182,53 @@
   "repositoryFingerprint.repository": [
     "Path to a Git repository or one of its subdirectories; the fingerprint always covers the whole working tree.",
     "Chemin d’un dépôt Git ou de l’un de ses sous-répertoires ; l’empreinte couvre toujours tout l’arbre de travail."
+  ],
+  "WorkflowQuotaPause.conversation": [
+    "Conversation of the interrupted attempt, recorded only when it was captured and can be restored in a new sandbox.",
+    "Conversation de la tentative interrompue, enregistrée seulement si elle a été capturée et peut être restaurée dans un nouveau sandbox."
+  ],
+  "WorkflowQuotaPause.branch": [
+    "Work branch retained by the interrupted attempt, used to start an integrated isolated dispatch from its committed work.",
+    "Branche de travail conservée par la tentative interrompue, utilisée pour démarrer un dispatch isolé intégré depuis son travail commité."
+  ],
+  "QuotaFault.conversation": [
+    "Agent conversation reported with the quota error; availability for continuation depends on capture.",
+    "Conversation d’agent signalée avec l’erreur de quota ; sa reprise dépend de sa capture."
+  ],
+  "TaskContext.quota": [
+    "Quota pause resumed by this attempt, with the captured conversation and retained branch when known; present only on the first attempt after the pause and never persisted separately.",
+    "Pause sur quota reprise par cette tentative, avec la conversation capturée et la branche conservée lorsqu’elles sont connues ; présente seulement lors de la première tentative après la pause et jamais persistée séparément."
+  ],
+  "AgentTaskOptions.quotaResume": [
+    "After a quota pause, continue the captured conversation with a resume instruction (continue, default) or send the original request again (restart). Continuation is skipped when the agent cannot resume, the request supplies its own continuation or uses several passes.",
+    "Après une pause sur quota, poursuit la conversation capturée avec une consigne de reprise (continue, par défaut) ou renvoie la requête d’origine (restart). La poursuite est ignorée si l’agent ne peut pas reprendre, si la requête fournit sa propre continuation ou utilise plusieurs passes."
+  ],
+  "IsolatedTaskOptions.quotaResume": [
+    "After a quota pause, continue the captured conversation in the new dispatch (continue, default) or start a new one (restart). Automatically integrated workspaces then start from the interrupted branch; uncommitted changes stay in its retained worktree.",
+    "Après une pause sur quota, poursuit la conversation capturée dans le nouveau dispatch (continue, par défaut) ou en démarre une nouvelle (restart). Les workspaces intégrés automatiquement partent alors de la branche interrompue ; les changements non commités restent dans son worktree conservé."
+  ],
+  "QueueRequest.idempotencyKey": [
+    "Effect key passed to the handler instead of the job ID; queuedTask sets it to the original key when a quota pause republishes the task under a new job ID.",
+    "Clé d’effet transmise au handler à la place de l’identifiant du job ; queuedTask y place la clé d’origine lorsqu’une pause sur quota republie la tâche sous un nouvel identifiant."
+  ],
+  "QueueResult.quota": [
+    "Usage or rate limit that failed the handler, with its reset time and captured conversation when known; requires error.",
+    "Limite d’usage ou de débit ayant fait échouer le handler, avec son heure de réinitialisation et sa conversation capturée lorsqu’elles sont connues ; exige error."
+  ],
+  "QueueQuota.resetAt": [
+    "ISO time at which the limit resets, when the handler’s error reported it.",
+    "Heure ISO de réinitialisation de la limite, lorsque l’erreur du handler l’indiquait."
+  ],
+  "QueueQuota.conversation": [
+    "Captured conversation of the interrupted handler run; the workflow passes it back through TaskContext.quota so the next input can continue it.",
+    "Conversation capturée de l’exécution interrompue du handler ; le workflow la restitue via TaskContext.quota pour que l’entrée suivante puisse la poursuivre."
+  ],
+  "SpeculationResult.quota": [
+    "Limit reported with status quota: the earliest known reset among quota-stopped candidates, or the first limit when none is known.",
+    "Limite indiquée avec le statut quota : la réinitialisation connue la plus proche parmi les candidats arrêtés, ou la première limite si aucune n’est connue."
+  ],
+  "SpeculativeCandidateResult.quota": [
+    "Usage or rate limit that stopped this candidate; durable resumption reruns such candidates as new attempts from the baseline.",
+    "Limite d’usage ou de débit ayant arrêté ce candidat ; la reprise durable relance ces candidats en nouvelles tentatives depuis la baseline."
   ]
 }

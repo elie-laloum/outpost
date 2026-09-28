@@ -13,18 +13,19 @@ import type { SpeculationResult } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name               | Type                                                                                                                                           | Presence | Meaning                                                                                                                       |
-| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `integration`      | `SpeculationIntegration \| undefined`                                                                                                          | Optional | Fresh non-mutating merge preflight for the selected winner, tied to the validated candidate commit and current host snapshot. |
-| `previousAttempts` | `readonly SpeculativeCandidateResult<T>[] \| undefined`                                                                                        | Optional | Earlier interrupted candidate attempts retained by a durable resumed race, with branches and recovery locations.              |
-| `id`               | `string`                                                                                                                                       | Required | Unique identifier of this speculative race.                                                                                   |
-| `baseline`         | `string`                                                                                                                                       | Required | Git commit used as the initial snapshot for measuring new work.                                                               |
-| `host`             | `{ readonly before: SpeculativeHostSnapshot; readonly after?: SpeculativeHostSnapshot; readonly changed: boolean; readonly error?: unknown; }` | Required | Host checkout snapshots before and after the race, with change detection and any inspection error.                            |
-| `status`           | `"aborted" \| "winner" \| "no-winner" \| "budget-exhausted"`                                                                                   | Required | Race outcome: winner, no-winner, aborted or budget-exhausted.                                                                 |
-| `winner`           | `SpeculativeCandidateResult<T> \| undefined`                                                                                                   | Optional | Selected candidate that passed validation and completed cleanup, when one exists.                                             |
-| `candidates`       | `readonly SpeculativeCandidateResult<T>[]`                                                                                                     | Required | Final status, branch, retained work and available output of every candidate.                                                  |
-| `usage`            | `WorkflowUsage`                                                                                                                                | Required | Cumulative admitted attempts and observed token usage, including restored accounting.                                         |
-| `error`            | `unknown`                                                                                                                                      | Optional | Original failure encountered during candidate execution, validation or race cleanup.                                          |
+| Name               | Type                                                                                                                                           | Presence | Meaning                                                                                                                                      |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `integration`      | `SpeculationIntegration \| undefined`                                                                                                          | Optional | Fresh non-mutating merge preflight for the selected winner, tied to the validated candidate commit and current host snapshot.                |
+| `previousAttempts` | `readonly SpeculativeCandidateResult<T>[] \| undefined`                                                                                        | Optional | Earlier interrupted candidate attempts retained by a durable resumed race, with branches and recovery locations.                             |
+| `id`               | `string`                                                                                                                                       | Required | Unique identifier of this speculative race.                                                                                                  |
+| `baseline`         | `string`                                                                                                                                       | Required | Git commit used as the initial snapshot for measuring new work.                                                                              |
+| `host`             | `{ readonly before: SpeculativeHostSnapshot; readonly after?: SpeculativeHostSnapshot; readonly changed: boolean; readonly error?: unknown; }` | Required | Host checkout snapshots before and after the race, with change detection and any inspection error.                                           |
+| `status`           | `"aborted" \| "quota" \| "winner" \| "no-winner" \| "budget-exhausted"`                                                                        | Required | Race outcome: winner, no-winner, quota when no candidate won and at least one stopped on a usage or rate limit, aborted or budget-exhausted. |
+| `quota`            | `QuotaFault \| undefined`                                                                                                                      | Optional | Limit reported with status quota: the earliest known reset among quota-stopped candidates, or the first limit when none is known.            |
+| `winner`           | `SpeculativeCandidateResult<T> \| undefined`                                                                                                   | Optional | Selected candidate that passed validation and completed cleanup, when one exists.                                                            |
+| `candidates`       | `readonly SpeculativeCandidateResult<T>[]`                                                                                                     | Required | Final status, branch, retained work and available output of every candidate.                                                                 |
+| `usage`            | `WorkflowUsage`                                                                                                                                | Required | Cumulative admitted attempts and observed token usage, including restored accounting.                                                        |
+| `error`            | `unknown`                                                                                                                                      | Optional | Original failure encountered during candidate execution, validation or race cleanup.                                                         |
 
 ## Signature
 
@@ -40,7 +41,10 @@ export interface SpeculationResult<T = undefined> {
     readonly changed: boolean;
     readonly error?: unknown;
   };
-  readonly status: "winner" | "no-winner" | "aborted" | "budget-exhausted";
+  readonly status:
+    "winner" | "no-winner" | "quota" | "aborted" | "budget-exhausted";
+  /** Earliest known reset among candidates stopped by a usage or rate limit. */
+  readonly quota?: QuotaFault;
   readonly winner?: SpeculativeCandidateResult<T>;
   readonly candidates: readonly SpeculativeCandidateResult<T>[];
   readonly usage: WorkflowUsage;
@@ -50,6 +54,7 @@ export interface SpeculationResult<T = undefined> {
 
 ## Related contracts
 
+- [QuotaFault](../type-quotafault/)
 - [SpeculationIntegration](../speculationintegration/)
 - [SpeculativeCandidateResult](../speculativecandidateresult/)
 - [SpeculativeHostSnapshot](../speculativehostsnapshot/)

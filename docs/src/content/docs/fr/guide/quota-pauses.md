@@ -72,6 +72,63 @@ Une erreur de quota termine la tentative en cours sans consommer les tentatives 
 
 Activer `onQuota` autorise la relance de la tentative interrompue, comme un retry ; `resume: "retry-incomplete"` n’est pas nécessaire. Une annulation pendant l’attente laisse la tâche en pause. Chaque relance compte comme une tentative dans `budget.attempts`. Une [boucle de vérification](../verification-loops/) reprend la phase qui a atteint la limite.
 
-Une relance démarre un nouveau dispatch d’agent. Pour les agents CLI, la conversation interrompue figure dans `details.conversation` de l’erreur de quota, mais la tâche ne la poursuit pas automatiquement.
+## Poursuivre la conversation interrompue
+
+La première tentative après une pause reçoit `context.quota`. Il porte la conversation lorsqu’elle a été capturée, ainsi que la branche de travail conservée.
+
+- `agentTask` et `isolatedTask` poursuivent cette conversation. Le nouveau tour envoie une courte consigne de reprise au lieu du brief d’origine, et conserve la balise de réponse lorsqu’une réponse structurée est attendue. Utilisez `quotaResume: "restart"` pour renvoyer la requête d’origine.
+- `agentTask` conserve le sandbox et le workspace fournis par l’appelant. `isolatedTask` alloue un nouveau sandbox : une branche `current` ou `named` réutilise le même checkout, et un workspace intégré automatiquement part de la branche interrompue. Les changements non commités d’une tentative intégrée restent dans son [worktree conservé](../failure-recovery/).
+- `interactiveAgentTask` poursuit la conversation du tour interrompu.
+- La poursuite exige un agent capable de reprendre avec capture des conversations : Claude Code, Codex, Copilot ou Kimi. Antigravity et la capture désactivée démarrent une nouvelle conversation, tout comme une requête qui fournit sa propre `continuation` ou plusieurs `passes`.
+
+Les tâches personnalisées peuvent lire `context.quota` pour décider comment reprendre.
+
+## Tâches en file
+
+Un worker dont le handler échoue sur une erreur de quota l’enregistre dans `QueueResult.quota`, et `queuedTask` rejette avec le code `quota`. La première tentative après la pause publie un nouveau job, `<clé>:quota:<tentative>`, car le job échoué ne peut pas être relancé. Le handler reçoit toujours l’`idempotencyKey` d’origine : la déduplication des effets reste valable.
+
+Transmettez la conversation au handler via l’entrée :
+
+```ts
+import { queuedTask } from "@elie-laloum/outpost";
+import type { TaskQueue } from "@elie-laloum/outpost";
+
+function implement(queue: TaskQueue) {
+  return queuedTask({
+    key: "implement",
+    queue,
+    handler: "implement",
+    input: (context) => ({ continueFrom: context.quota?.conversation ?? null }),
+    decode: String,
+  });
+}
+```
+
+Le handler peut alors lancer un dispatch avec `continuation: { id: input.continueFrom }`. Les workers ne transmettent que les conversations capturées par le dispatch du handler.
+
+## Spéculation
+
+Un candidat arrêté par une limite se termine avec le statut `quota`. Sans gagnant, `speculate()` renvoie le statut `quota`, et `result.quota` contient la réinitialisation connue la plus proche. Levez-la depuis une tâche de workflow pour mettre le workflow en pause :
+
+```ts
+import { OutpostError, speculate, task } from "@elie-laloum/outpost";
+import type { SpeculationOptions } from "@elie-laloum/outpost";
+
+function race(options: SpeculationOptions) {
+  return task({
+    key: "race",
+    async perform() {
+      const result = await speculate(options);
+      if (result.status === "quota" && result.quota)
+        throw new OutpostError("quota", result.quota.message, {
+          ...(result.quota.resetAt ? { resetAt: result.quota.resetAt } : {}),
+        });
+      return result.winner?.branch ?? null;
+    },
+  });
+}
+```
+
+Avec la [durabilité](../candidate-selection/#courses-durables-et-récupération), l’appel suivant à `speculate()` relance seulement les candidats arrêtés par une limite, en nouvelles tentatives depuis la baseline ; les budgets restent cumulés. Les candidats ne poursuivent pas leur conversation précédente. Sans durabilité, tous les candidats sont relancés.
 
 API : [WorkflowQuotaPolicy](../../reference/workflowquotapolicy/) · [WorkflowQuotaPause](../../reference/workflowquotapause/) · [quotaFault](../../reference/quotafault/) · [WorkflowOptions](../../reference/workflowoptions/).

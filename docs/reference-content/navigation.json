@@ -924,6 +924,10 @@
         "attrs": { "data-api-kind": "type" }
       },
       {
+        "slug": "reference/quotaresumepolicy",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
         "slug": "reference/taskcachemode",
         "attrs": { "data-api-kind": "type" }
       },
@@ -1624,6 +1628,10 @@
       },
       {
         "slug": "reference/queueresult",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/queuequota",
         "attrs": { "data-api-kind": "interface" }
       },
       {

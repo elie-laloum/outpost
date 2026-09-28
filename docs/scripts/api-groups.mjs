@@ -80,7 +80,7 @@ export const groups = [
     title: ["Workflows", "Workflows"],
     guide: "guide/workflows/graph",
     names:
-      "loopTask LoopTaskExhausted LoopCheckResult LoopTaskContext LoopTaskOptions LoopRoundRecord task workflow WorkflowFailure Retry Task TaskContext TaskOptions TaskRecord TaskStatus Workflow WorkflowEvent WorkflowTelemetry WorkflowOptions WorkflowBudget WorkflowUsage WorkflowBudgetExceeded WorkflowUsageUnavailable WorkflowResult agentTask commandTask isolatedTask interactiveAgentTask InteractiveAgentTaskOptions InteractiveAgentResult WorkflowInputQuestion WorkflowInputRequest WorkflowAnswer WorkflowAnswerRecord TaskInteraction TaskInteractionRecord TaskInteractionContext WorkflowQuotaPolicy WorkflowQuotaPause repositoryFingerprint TaskCacheOptions TaskCacheStore TaskCacheEntry TaskCacheAccessOptions TaskCacheMode TaskCacheOutcome",
+      "loopTask LoopTaskExhausted LoopCheckResult LoopTaskContext LoopTaskOptions LoopRoundRecord task workflow WorkflowFailure Retry Task TaskContext TaskOptions TaskRecord TaskStatus Workflow WorkflowEvent WorkflowTelemetry WorkflowOptions WorkflowBudget WorkflowUsage WorkflowBudgetExceeded WorkflowUsageUnavailable WorkflowResult agentTask commandTask isolatedTask interactiveAgentTask InteractiveAgentTaskOptions InteractiveAgentResult WorkflowInputQuestion WorkflowInputRequest WorkflowAnswer WorkflowAnswerRecord TaskInteraction TaskInteractionRecord TaskInteractionContext WorkflowQuotaPolicy WorkflowQuotaPause QuotaResumePolicy repositoryFingerprint TaskCacheOptions TaskCacheStore TaskCacheEntry TaskCacheAccessOptions TaskCacheMode TaskCacheOutcome",
   },
   {
     id: "providers",
@@ -157,7 +157,7 @@ export const groups = [
     title: ["Distributed execution", "Exécution distribuée"],
     guide: "guide/advanced/distributed",
     names:
-      "sqliteTaskQueue bullmqTaskQueue BullMQTaskQueue BullMQTaskQueueOptions serveTaskQueue httpTaskQueue runQueueWorker queuedTask QueueRequest QueueResult QueueJob QueueClaim QueueLease TaskQueue DurableTaskQueue QueueServerOptions QueueServer QueueClientOptions QueueHandlerContext QueueHandler QueueWorkerOptions QueuedTaskOptions",
+      "sqliteTaskQueue bullmqTaskQueue BullMQTaskQueue BullMQTaskQueueOptions serveTaskQueue httpTaskQueue runQueueWorker queuedTask QueueRequest QueueResult QueueQuota QueueJob QueueClaim QueueLease TaskQueue DurableTaskQueue QueueServerOptions QueueServer QueueClientOptions QueueHandlerContext QueueHandler QueueWorkerOptions QueuedTaskOptions",
   },
   {
     id: "speculation",

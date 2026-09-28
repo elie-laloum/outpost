@@ -62,6 +62,8 @@ After a coordinator crash:
 3. Call `recoverSpeculation({ transporter, runId, revision, coordinatorStopped: true })`. A changed revision rejects recovery. This releases ownership; it does not itself delete resources.
 4. Call `speculate()` with the same configuration and `durability.resume: "retry-incomplete"` to authorize replay. Registered resources are reconciled before new attempts. A completed race is returned without allocating candidates again.
 
+A race finished with status `quota` is not final: the next call reruns only the candidates a usage or rate limit stopped, as new attempts. See [quota pauses](../quota-pauses/#speculation).
+
 Validated candidates survive a crash between validation and cleanup. Interrupted executions run on a new branch from the original baseline; their old branches and worktrees remain available in `previousAttempts`. Durable mode preserves candidate worktrees even on success. Workspaces, Git history and any filesystem transcripts must still be accessible: putting the checkpoint in S3 does not make the checkout portable. This resumes orchestration, not an interrupted agent process. Replay can repeat external effects and consumes another attempt; it does not provide exactly-once execution.
 
 Observed usage and attempt counts are cumulative. A crash during execution marks usage incomplete because unreported tokens cannot be reconstructed. Token-only budgets then refuse further admissions; supply an attempt budget as well. Checkpoint writes use conditional revisions to fence old coordinators. A storage error stops admissions; ownership remains for explicit recovery. Errors persist as diagnostic strings, not live Error instances.
