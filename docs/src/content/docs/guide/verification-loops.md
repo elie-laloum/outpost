@@ -3,7 +3,7 @@ title: "Verification loops"
 description: "Repeat work with feedback until a check accepts it or a limit is reached."
 ---
 
-`loopTask()` alternates `attempt` and `check` inside one workflow node. It is implemented but not yet released. A rejected check supplies text feedback to the next round; a successful check exposes the accepted attempt result to dependent tasks.
+`loopTask()` alternates `attempt` and `check` inside one workflow node. It is available since 8.0.0. A rejected check supplies text feedback to the next round; a successful check exposes the accepted attempt result to dependent tasks.
 
 ```ts
 import { loopTask, workflow } from "@elie-laloum/outpost";

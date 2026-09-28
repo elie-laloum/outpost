@@ -3,7 +3,7 @@ title: "Pauses sur quota"
 description: "Mettre un workflow en pause quand un abonnement ou une API atteint sa limite, puis le reprendre après la réinitialisation."
 ---
 
-Implémenté sur main, pas encore publié. Avec `onQuota`, une tâche qui atteint une limite d’usage ou reçoit un HTTP 429 se met en pause au lieu d’échouer. Le workflow la reprend après la réinitialisation, dans le même appel à `start()` ou dans un appel ultérieur avec le même checkpoint.
+Disponible depuis la 8.0.0. Avec `onQuota`, une tâche qui atteint une limite d’usage ou reçoit un HTTP 429 se met en pause au lieu d’échouer. Le workflow la reprend après la réinitialisation, dans le même appel à `start()` ou dans un appel ultérieur avec le même checkpoint.
 
 ```ts
 import {

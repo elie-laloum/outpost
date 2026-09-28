@@ -3,7 +3,7 @@ title: "Task result cache"
 description: "Reuse a task's JSON result instead of executing it again with the same inputs."
 ---
 
-Implemented on main, not yet released. A task with a `cache` fingerprints its inputs and stores its JSON result in a Transport. A later execution with the same fingerprint restores that result instead of running the task, so a repeated review or analysis is not paid for twice.
+Available since 8.0.0. A task with a `cache` fingerprints its inputs and stores its JSON result in a Transport. A later execution with the same fingerprint restores that result instead of running the task, so a repeated review or analysis is not paid for twice.
 
 ```ts
 import { mkdtemp } from "node:fs/promises";

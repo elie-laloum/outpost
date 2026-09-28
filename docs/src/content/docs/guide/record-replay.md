@@ -3,7 +3,7 @@ title: "Record and replay"
 description: "Keep a real dispatch and replay it without calling a model."
 ---
 
-`replayAgent()` replays a recorded dispatch journal. It is implemented but not yet released. The replay re-emits the recorded events, returns the recorded text and usage, and rebuilds the recorded commits. It never calls a model. Use it to reproduce a bug or to turn a real run into a deterministic test.
+`replayAgent()` replays a recorded dispatch journal. It is available since 8.0.0. The replay re-emits the recorded events, returns the recorded text and usage, and rebuilds the recorded commits. It never calls a model. Use it to reproduce a bug or to turn a real run into a deterministic test.
 
 ```ts
 import {

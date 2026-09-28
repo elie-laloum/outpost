@@ -3,7 +3,7 @@ title: "Quota pauses"
 description: "Pause a workflow when a subscription or API limit is reached and resume it after the reset."
 ---
 
-Implemented on main, not yet released. With `onQuota`, a task that hits a usage limit or an HTTP 429 pauses instead of failing. The workflow resumes it after the reset, either in the same `start()` call or in a later one with the same checkpoint.
+Available since 8.0.0. With `onQuota`, a task that hits a usage limit or an HTTP 429 pauses instead of failing. The workflow resumes it after the reset, either in the same `start()` call or in a later one with the same checkpoint.
 
 ```ts
 import {

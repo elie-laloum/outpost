@@ -3,7 +3,7 @@ title: "Enregistrer et rejouer"
 description: "Conserver un dispatch réel et le rejouer sans appeler de modèle."
 ---
 
-`replayAgent()` rejoue le journal enregistré d’un dispatch. Il est implémenté mais pas encore publié. Le rejeu réémet les événements enregistrés, renvoie le texte et l’usage enregistrés et reconstruit les commits enregistrés. Il n’appelle jamais de modèle. Utilisez-le pour reproduire un bug ou pour transformer une exécution réelle en test déterministe.
+`replayAgent()` rejoue le journal enregistré d’un dispatch. Il est disponible depuis la 8.0.0. Le rejeu réémet les événements enregistrés, renvoie le texte et l’usage enregistrés et reconstruit les commits enregistrés. Il n’appelle jamais de modèle. Utilisez-le pour reproduire un bug ou pour transformer une exécution réelle en test déterministe.
 
 ```ts
 import {

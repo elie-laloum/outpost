@@ -3,7 +3,7 @@ title: "Cache de tâches"
 description: "Réutiliser le résultat JSON d’une tâche au lieu de la réexécuter avec les mêmes entrées."
 ---
 
-Implémenté sur main, pas encore publié. Une tâche dotée d’un `cache` calcule l’empreinte de ses entrées et enregistre son résultat JSON dans un Transport. Une exécution ultérieure avec la même empreinte restaure ce résultat au lieu de lancer la tâche : une relecture ou une analyse répétée n’est pas payée deux fois.
+Disponible depuis la 8.0.0. Une tâche dotée d’un `cache` calcule l’empreinte de ses entrées et enregistre son résultat JSON dans un Transport. Une exécution ultérieure avec la même empreinte restaure ce résultat au lieu de lancer la tâche : une relecture ou une analyse répétée n’est pas payée deux fois.
 
 ```ts
 import { mkdtemp } from "node:fs/promises";

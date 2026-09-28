@@ -3,7 +3,7 @@ title: "Tâches interactives"
 description: "Persister une question, libérer le sandbox et reprendre la conversation après une réponse humaine."
 ---
 
-Implémenté sur main, pas encore publié. `interactiveAgentTask()` maintient une tâche de workflow inachevée sur plusieurs tours question/réponse. Une question termine le tour de l’agent, capture sa conversation et renvoie `waiting-input` ; les tâches dépendantes restent bloquées. Un appel ultérieur à `start({ answers })` reprend la conversation, et la prochaine question peut dépendre des réponses précédentes.
+Disponible depuis la 8.0.0. `interactiveAgentTask()` maintient une tâche de workflow inachevée sur plusieurs tours question/réponse. Une question termine le tour de l’agent, capture sa conversation et renvoie `waiting-input` ; les tâches dépendantes restent bloquées. Un appel ultérieur à `start({ answers })` reprend la conversation, et la prochaine question peut dépendre des réponses précédentes.
 
 Contrairement aux [gates de validation](../review-gates/), les questions sont générées durant l’exécution. Il s’agit d’un dialogue entre tours terminés, pas d’une suspension dans un outil en cours ni d’un terminal interactif.
 

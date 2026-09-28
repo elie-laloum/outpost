@@ -3,7 +3,7 @@ title: "Boucles de vérification"
 description: "Répéter le travail avec un feedback jusqu’à validation ou atteinte d’une limite."
 ---
 
-`loopTask()` alterne `attempt` et `check` dans un seul nœud de workflow. Cette fonctionnalité est implémentée mais pas encore publiée. Une vérification refusée fournit un feedback textuel au tour suivant ; une vérification réussie expose le résultat accepté aux tâches dépendantes.
+`loopTask()` alterne `attempt` et `check` dans un seul nœud de workflow. Cette fonctionnalité est disponible depuis la 8.0.0. Une vérification refusée fournit un feedback textuel au tour suivant ; une vérification réussie expose le résultat accepté aux tâches dépendantes.
 
 ```ts
 import { loopTask, workflow } from "@elie-laloum/outpost";

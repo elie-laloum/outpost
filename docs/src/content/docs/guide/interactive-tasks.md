@@ -3,7 +3,7 @@ title: "Interactive tasks"
 description: "Persist a question, release the sandbox and continue the conversation after a human answer."
 ---
 
-Implemented on main, not yet released. `interactiveAgentTask()` keeps one workflow task unfinished across several question/answer turns. A question ends the agent turn, captures its conversation and returns `waiting-input`; dependent tasks remain blocked. A later `start({ answers })` resumes the conversation, and the next question can depend on previous answers.
+Available since 8.0.0. `interactiveAgentTask()` keeps one workflow task unfinished across several question/answer turns. A question ends the agent turn, captures its conversation and returns `waiting-input`; dependent tasks remain blocked. A later `start({ answers })` resumes the conversation, and the next question can depend on previous answers.
 
 Unlike [review gates](../review-gates/), questions are generated during execution. This is a dialogue between completed agent turns, not suspension inside a running tool or an interactive terminal.
 

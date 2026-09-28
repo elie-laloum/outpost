@@ -4,6 +4,8 @@
 
 Outpost is a TypeScript library for running coding agents in reusable sandboxes, managing their Git workspaces and composing typed workflows. Claude Code, Codex, Antigravity, GitHub Copilot CLI and Kimi Code adapters work with Docker, Podman, Vercel, Daytona or explicit host execution. Each harness authenticates explicitly with your account login or an API key. Claude Code, Codex and Kimi support native capture, resume and fork. Copilot supports capture and resume; Antigravity resumes conversations only while their sandbox remains open. These continuation additions are available in 7.0.0.
 
+Version 8.0.0 adds verification loops, interactive agent tasks, dispatch record and replay, task result caching and quota pauses that resume interrupted conversations. It extends public status, event and fault unions and reclassifies model-provider rate limits as `quota`: see the [changelog](CHANGELOG.md#800) for migration notes.
+
 Version 7.0.0 stabilizes the built-in harness and adds bounded subagents, unified observation, native CLI continuation, signed workflow decisions and recoverable speculation. It extends public TypeScript unions and context contracts: see the [changelog](CHANGELOG.md#700) for migration notes. Firecracker and speculation remain experimental; the [roadmap](https://elie-laloum.github.io/outpost/project/roadmap/) records remaining validation and planned work.
 
 ## Get started
