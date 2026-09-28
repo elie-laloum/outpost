@@ -19,6 +19,7 @@ export function vercelSandboxProvider(
   ) => (await import("@vercel/sandbox")).Sandbox.create(config),
 ): SandboxProvider {
   const networkPolicy = vercelNetworkPolicy(options);
+  const create: NonNullable<VercelOptions["create"]> = { ...options.create };
   return {
     name: "vercel",
     placement: "remote",
@@ -26,9 +27,11 @@ export function vercelSandboxProvider(
     async acquire(context) {
       context.signal?.throwIfAborted();
       const sandbox = await connect({
-        ...options.create,
-        ...(networkPolicy === undefined ? {} : { networkPolicy }),
-        env: { ...options.create?.env, ...context.variables },
+        ...create,
+        ...(networkPolicy === undefined
+          ? {}
+          : { networkPolicy: structuredClone(networkPolicy) }),
+        env: { ...create.env, ...context.variables },
       });
       const root = options.root ?? cloudRoots.vercel;
       let closed = false;

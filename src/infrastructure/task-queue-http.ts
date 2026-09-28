@@ -49,7 +49,23 @@ async function message(stream: AsyncIterable<Uint8Array>): Promise<unknown> {
 export async function serveTaskQueue(
   options: QueueServerOptions,
 ): Promise<QueueServer> {
-  const expected = Buffer.from(tokenValue(options.token));
+  const token = options.token;
+  if (typeof token === "string") tokenValue(token);
+  async function authenticated(supplied: Buffer): Promise<boolean> {
+    const values =
+      typeof token === "string"
+        ? [tokenValue(token)]
+        : (await token()).map(tokenValue);
+    let accepted = false;
+    for (const value of values) {
+      const expected = Buffer.from(value);
+      const matches =
+        supplied.length === expected.length &&
+        timingSafeEqual(supplied, expected);
+      accepted = matches || accepted;
+    }
+    return accepted;
+  }
   const queue = options.queue;
   const server = createServer(
     {
@@ -59,10 +75,13 @@ export async function serveTaskQueue(
     },
     async (request, response) => {
       const supplied = Buffer.from(request.headers.authorization ?? "");
-      if (
-        supplied.length !== expected.length ||
-        !timingSafeEqual(supplied, expected)
-      ) {
+      let accepted = false;
+      try {
+        accepted = await authenticated(supplied);
+      } catch {
+        /* Reject unavailable credential sources. */
+      }
+      if (!accepted) {
         response.writeHead(401).end();
         request.resume();
         return;
@@ -129,7 +148,9 @@ export async function serveTaskQueue(
   };
 }
 export function httpTaskQueue(options: QueueClientOptions): TaskQueue {
-  const authorization = tokenValue(options.token);
+  const token = options.token;
+  const fixedAuthorization =
+    typeof token === "string" ? tokenValue(token) : undefined;
   const url = new URL(options.url);
   if (
     !["http:", "https:"].includes(url.protocol) ||
@@ -147,6 +168,10 @@ export function httpTaskQueue(options: QueueClientOptions): TaskQueue {
     const body = JSON.stringify(data);
     if (Buffer.byteLength(body) > queueMaxBytes)
       throw new Error("Queue message exceeds size limit");
+    const authorization =
+      typeof token === "string"
+        ? fixedAuthorization!
+        : tokenValue(await token());
     const response = await fetch(endpoint, {
       method: "POST",
       headers: { authorization, "content-type": "application/json" },

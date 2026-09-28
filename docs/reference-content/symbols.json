@@ -160,8 +160,8 @@
     "Expose une file appartenant à l’appelant via HTTP avec authentification explicite par jeton bearer. Le serveur écoute loopback par défaut et ne fournit pas TLS. Fermer le serveur arrête l’écoute sans prendre possession du stockage de la file."
   ],
   "httpTaskQueue": [
-    "Create a TaskQueue client for the supplied HTTP endpoint and bearer token. Each request is subject to timeoutMs; this client transports queue operations and does not execute handlers locally.",
-    "Crée un client TaskQueue pour l’endpoint HTTP et le jeton bearer fournis. Chaque requête est soumise à timeoutMs ; ce client transporte les opérations de file sans exécuter de gestionnaire localement."
+    "Create a TaskQueue client with a fixed bearer token or a token source resolved per request. timeoutMs bounds HTTP exchange after token resolution; credential callbacks must return promptly. The client never executes handlers locally.",
+    "Crée un client TaskQueue avec jeton bearer fixe ou source résolue à chaque requête. timeoutMs borne l’échange HTTP après résolution du jeton ; les callbacks doivent répondre rapidement. Le client n’exécute jamais les handlers localement."
   ],
   "runQueueWorker": [
     "Poll for jobs whose handler is registered, run one job at a time and renew its fenced lease while executing. Record JSON results and observed usage, honor cancellation and deadlines, and reject stale completions; external effects may repeat after lease loss.",
@@ -276,8 +276,8 @@
     "Crée un provider distant Vercel Sandbox, avec chargement du SDK optionnel à l’acquisition. L’état du dépôt est envoyé puis resynchronisé avec protection des modifications hôtes concurrentes. Une fonction connect fournie peut remplacer la création de sandbox du SDK pour une intégration."
   ],
   "daytonaSandboxProvider": [
-    "Create a remote Daytona provider with separate SDK connection and sandbox creation settings. Repository transfers use the acquired remote environment, and synchronization validates concurrent host edits before applying changes.",
-    "Crée un provider distant Daytona avec réglages distincts de connexion SDK et de création de sandbox. Les transferts utilisent l’environnement distant acquis et la synchronisation valide les modifications hôtes concurrentes avant application."
+    "Create a remote Daytona provider with separate SDK connection and sandbox creation settings. Repository transfers use the acquired remote environment, and synchronization validates concurrent host edits before applying changes. Optional egress is validated before allocation and confirmed through the server network-update API before workspace setup; failure triggers deletion. Native image startup precedes that confirmation. See [outbound rules](../../guide/outbound-rules/).",
+    "Crée un provider distant Daytona avec réglages distincts de connexion SDK et de création de sandbox. Les transferts utilisent l’environnement distant acquis et la synchronisation valide les modifications hôtes concurrentes avant application. La politique egress optionnelle est validée avant allocation et confirmée par l’API réseau du serveur avant préparation du workspace ; un échec déclenche la suppression. Le démarrage natif de l’image précède cette confirmation. Consultez les [règles sortantes](../../guide/outbound-rules/)."
   ],
   "firecrackerSandboxProvider": [
     "Create an opt-in Firecracker microVM provider from explicit kernel, rootfs, TAP and SSH settings. The host must provide KVM and a prepared guest; allocation does not fall back to host execution. The acquired lease owns VM shutdown.",
@@ -414,5 +414,37 @@
   "SpeculationRecoveryOptions": [
     "Identify abandoned speculation ownership and the revision being explicitly recovered. Resource cleanup occurs on the next resumed race.",
     "Identifie la propriété abandonnée d’une course et la révision explicitement récupérée. Le nettoyage des ressources intervient lors de la prochaine reprise."
+  ],
+  "signWorkflowDecision": [
+    "Sign one exact workflow decision with an application-owned Ed25519 private key. Returns an immutable decision with an expiring proof; it neither submits the decision nor stores the key.",
+    "Signe une décision exacte avec une clé privée Ed25519 appartenant à l’application. Renvoie une décision immuable avec une preuve expirante ; ne soumet pas la décision et ne stocke pas la clé."
+  ],
+  "ed25519DecisionVerifier": [
+    "Create a verifier that resolves trusted approver keys on every decision, checks the Ed25519 signature, actor binding and expiry, and returns audit metadata. Missing, duplicate or revoked key identifiers are rejected.",
+    "Crée un vérificateur qui résout les clés de confiance à chaque décision, vérifie la signature Ed25519, l’acteur associé et l’expiration, puis renvoie les métadonnées d’audit. Les identifiants de clé absents, dupliqués ou révoqués sont refusés."
+  ],
+  "WorkflowDecisionProof": [
+    "Expiring signature binding the actor and complete decision to one pending workflow request.",
+    "Signature expirante liant l’acteur et la décision complète à une demande de workflow en attente."
+  ],
+  "WorkflowDecisionVerification": [
+    "Non-secret audit metadata retained after successful decision verification. Previously accepted decisions remain valid after key rotation.",
+    "Métadonnées d’audit non secrètes conservées après vérification. Les décisions déjà acceptées restent valides après rotation des clés."
+  ],
+  "WorkflowDecisionVerifier": [
+    "Trusted application boundary that verifies a complete signed decision or rejects. The scheduler also checks the pending request and authorized actor before persisting any decision.",
+    "Frontière de confiance applicative qui vérifie une décision signée complète ou la refuse. L’ordonnanceur vérifie aussi la demande en attente et l’acteur autorisé avant toute persistance."
+  ],
+  "WorkflowDecisionSigningOptions": [
+    "Decision, key and expiration used to produce an Ed25519 proof; signing does not execute a workflow.",
+    "Décision, clé et expiration utilisées pour produire une preuve Ed25519 ; signer n’exécute pas le workflow."
+  ],
+  "WorkflowApproverKey": [
+    "One trusted public key bound to a single approver and a unique rotation identifier.",
+    "Une clé publique de confiance associée à un approbateur et à un identifiant de rotation unique."
+  ],
+  "WorkflowDecisionVerifierOptions": [
+    "Live trusted-key source used by the Ed25519 verifier for rotation and revocation.",
+    "Source actualisable des clés de confiance utilisée par le vérificateur Ed25519 pour rotation et révocation."
   ]
 }

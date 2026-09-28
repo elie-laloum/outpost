@@ -1,3 +1,4 @@
+import { verifyProcessRecovery } from "./fixtures/queue-process-recovery.ts";
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import type { TestContext } from "node:test";
@@ -408,3 +409,13 @@ test("BullMQ refuses eviction policies that can discard queue locks", async () =
     await inspector.close();
   }
 });
+
+test(
+  "Redis process crash after an external effect resumes with persistent deduplication",
+  { timeout: 15000 },
+  async (t) => {
+    const { first, options } = await fixture(t);
+    const { onError, ...configuration } = options;
+    await verifyProcessRecovery(t, first, "redis", configuration);
+  },
+);

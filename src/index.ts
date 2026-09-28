@@ -327,6 +327,9 @@ export type {
   WorkflowPauseRequest,
   WorkflowDecision,
   WorkflowDecisionRecord,
+  WorkflowDecisionProof,
+  WorkflowDecisionVerification,
+  WorkflowDecisionVerifier,
 } from "./domain/workflow/gates.types.ts";
 
 export { inspectRecovery } from "./application/recovery-inspection.ts";
@@ -442,3 +445,13 @@ export type {
   ObservationHubOptions,
   ObservationSink,
 } from "./domain/observation.types.ts";
+
+export {
+  signWorkflowDecision,
+  ed25519DecisionVerifier,
+} from "./infrastructure/workflow-decision-signature.ts";
+export type {
+  WorkflowDecisionSigningOptions,
+  WorkflowApproverKey,
+  WorkflowDecisionVerifierOptions,
+} from "./infrastructure/workflow-decision-signature.types.ts";

@@ -997,8 +997,8 @@
     "Instruction expliquant la décision d’approbation ou de reprise demandée à l’acteur de confiance."
   ],
   "WorkflowGate.actors": [
-    "Nonempty list of trusted actor names allowed to decide this gate; callers authenticate actors externally.",
-    "Liste non vide des noms d’acteurs de confiance autorisés à décider cette gate ; leur authentification relève de l’appelant."
+    "Nonempty list of actors authorized to decide this gate. Signed gates additionally require a verified key bound to the selected actor.",
+    "Liste non vide des acteurs autorisés à décider ce gate. Les gates signés exigent aussi une clé vérifiée associée à l’acteur choisi."
   ],
   "WorkflowDecisionRecord.decidedAt": [
     "ISO timestamp assigned when the decision was validated and recorded.",
@@ -1021,8 +1021,8 @@
     "approve pour une approbation, resume pour une pause, ou reject pour terminer l’une ou l’autre par rejet."
   ],
   "WorkflowDecision.actor": [
-    "Trusted caller-supplied actor name that must appear in the gate’s actors list.",
-    "Nom d’acteur fourni par un appelant de confiance et devant figurer dans la liste actors de la gate."
+    "Actor name that must be allowed by the gate; signed gates also verify the public key bound to this actor.",
+    "Nom d’acteur autorisé par le gate ; les gates signés vérifient aussi la clé publique associée à cet acteur."
   ],
   "WorkflowDecision.reason": [
     "Nonempty explanation supplied by the trusted actor for the decision.",
@@ -2277,8 +2277,8 @@
     "Instruction expliquant la décision d’approbation ou de reprise demandée à l’acteur de confiance."
   ],
   "WorkflowGateOptions.actors": [
-    "Nonempty list of trusted actor names allowed to decide this gate; callers authenticate actors externally.",
-    "Liste non vide des noms d’acteurs de confiance autorisés à décider cette gate ; leur authentification relève de l’appelant."
+    "Nonempty, unique actor names permitted to decide the gate being created; signed authentication binds the selected actor to a trusted key.",
+    "Noms d’acteurs non vides et uniques autorisés à décider le gate créé ; l’authentification signée lie l’acteur choisi à une clé de confiance."
   ],
   "pauseTask.options": [
     "Gate key, dependencies, pause prompt and trusted actors allowed to resume or reject.",
@@ -2593,8 +2593,8 @@
     "File de tâches utilisée pour envoyer, prendre en charge et persister l’état des travaux."
   ],
   "QueueServerOptions.token": [
-    "Explicit transport credential; never place it in a URL.",
-    "Identifiant de transport explicite ; jamais dans une URL."
+    "Fixed bearer token or callback returning the currently accepted tokens on every request. Overlap old and new tokens during rotation; empty or failed sources deny access.",
+    "Jeton bearer fixe ou callback renvoyant les jetons acceptés à chaque requête. Faites coexister ancien et nouveau jetons pendant la rotation ; une source vide ou en échec refuse l’accès."
   ],
   "QueueServerOptions.host": [
     "HTTP bind address; defaults to loopback for local-only access.",
@@ -2621,8 +2621,8 @@
     "URL HTTP de base du serveur de file de tâches."
   ],
   "QueueClientOptions.token": [
-    "Explicit transport credential; never place it in a URL.",
-    "Identifiant de transport explicite ; jamais dans une URL."
+    "Fixed bearer token or callback resolving the current token for each request, including lease renewal and completion.",
+    "Jeton bearer fixe ou callback résolvant le jeton courant à chaque requête, y compris renouvellement du bail et finalisation."
   ],
   "QueueClientOptions.timeoutMs": [
     "Time limit in milliseconds for each HTTP queue request.",
@@ -2705,16 +2705,16 @@
     "deny-all bloque le trafic sortant ; allowlist le restreint aux destinations déclarées si pris en charge."
   ],
   "EgressPolicy.domains": [
-    "Allowed outbound domain names for providers supporting domain allowlists.",
-    "Noms de domaines sortants autorisés pour les providers prenant en charge ces listes."
+    "Exact DNS names or leading *. subdomain patterns, without scheme, path or port. No destinations are added automatically. Daytona wildcards require the apex to be explicitly listed too.",
+    "Noms DNS exacts ou motifs de sous-domaines commençant par *., sans protocole, chemin ni port. Aucune destination n’est ajoutée automatiquement. Les jokers Daytona exigent aussi la racine explicite."
   ],
   "EgressPolicy.allowCidrs": [
-    "Network ranges explicitly allowed by the provider’s egress policy.",
-    "Plages réseau explicitement autorisées par la politique sortante du provider."
+    "Allowed IP ranges, independently of domain rules. Vercel accepts IPv4/IPv6; Daytona accepts up to 10 IPv4 CIDRs without domain rules. Broad ranges grant broad IP access.",
+    "Plages IP autorisées indépendamment des domaines. Vercel accepte IPv4/IPv6 ; Daytona accepte au plus 10 CIDR IPv4 sans règle de domaine. Des plages larges donnent un accès IP large."
   ],
   "EgressPolicy.denyCidrs": [
-    "Network ranges explicitly denied by the provider’s egress policy.",
-    "Plages réseau explicitement interdites par la politique sortante du provider."
+    "IP ranges denied even when a domain or CIDR allows access. Supported by Vercel; non-empty lists are rejected by Daytona.",
+    "Plages IP refusées même si un domaine ou CIDR autorise l’accès. Prises en charge par Vercel ; les listes non vides sont refusées par Daytona."
   ],
   "speculate.options": [
     "Repository, provider, bounded candidates, admission budget and winner-validation callback.",
@@ -2853,8 +2853,8 @@
     "Échec d’origine rencontré pendant l’exécution, la validation d’un candidat ou le nettoyage de la course."
   ],
   "ContainerOptions.egress": [
-    "Explicit outbound network policy; unsupported restrictions are rejected by the provider.",
-    "Politique réseau sortante explicite ; le provider rejette les restrictions non prises en charge."
+    "Optional deny-all policy using network none; allowlists and conflicting configured networks are rejected.",
+    "Politique deny-all optionnelle utilisant le réseau none ; les listes d’autorisation et réseaux configurés incompatibles sont refusés."
   ],
   "ContainerOptions.repositoryMode": [
     "mounted shares the host checkout and Git metadata; isolated uses the opt-in private repository transfer mode.",
@@ -2925,8 +2925,8 @@
     "Déclarations d’environnement explicites ; les valeurs sont des chaînes."
   ],
   "VercelOptions.egress": [
-    "Explicit outbound network policy; unsupported restrictions are rejected by the provider.",
-    "Politique réseau sortante explicite ; le provider rejette les restrictions non prises en charge."
+    "Optional native firewall restriction, copied when composing the provider. Conflicts with create.networkPolicy. Domain filtering uses TLS SNI; allowed CIDRs independently grant IP access and denied CIDRs take priority.",
+    "Restriction optionnelle du pare-feu natif, copiée à la composition du provider. Incompatible avec create.networkPolicy. Les domaines sont filtrés par TLS SNI ; les CIDR autorisés donnent un accès IP indépendant et les CIDR refusés sont prioritaires."
   ],
   "VercelOptions.create": [
     "Sandbox creation options forwarded to the provider’s SDK.",
@@ -2949,8 +2949,8 @@
     "Réglages de connexion du client SDK Daytona, distincts des options de création de sandbox."
   ],
   "DaytonaOptions.create": [
-    "Sandbox creation options forwarded to the provider’s SDK.",
-    "Options de création de sandbox transmises au SDK du provider."
+    "Sandbox creation settings forwarded to the SDK. Native networking without egress follows account-specific Daytona behavior without Outpost enforcement confirmation. Trust image startup code, which can run before acquisition completes.",
+    "Réglages de création transmis au SDK. Le réseau natif sans egress suit le comportement Daytona du compte sans confirmation Outpost. Le code de démarrage de l’image doit être fiable : il peut s’exécuter avant la fin de l’acquisition."
   ],
   "DaytonaOptions.variables": [
     "Explicit environment declarations; values are strings.",
@@ -5413,5 +5413,105 @@
   "WorkflowEvent.delayMs": [
     "Selected wait before the next task attempt, present on retry events; includes backoff, jitter and any valid server minimum.",
     "Attente choisie avant la tentative suivante, présente sur les événements retry ; inclut backoff, aléa et minimum serveur valide."
+  ],
+  "DaytonaOptions.egress": [
+    "Optional deny-all, domain or IPv4 CIDR allowlist. Requires successful server confirmation before workspace setup; refusal deletes the sandbox. Requires Tier 3/4 and WRITE_SANDBOXES. Rejects native network options, domain/CIDR mixtures, denyCidrs and implicit wildcard apex access.",
+    "Politique optionnelle deny-all, liste de domaines ou CIDR IPv4. Exige une confirmation serveur avant préparation du workspace ; un refus supprime la sandbox. Nécessite Tier 3/4 et WRITE_SANDBOXES. Refuse les options réseau natives, mélanges domaines/CIDR, denyCidrs et accès implicite à la racine par joker."
+  ],
+  "WorkflowGate.authentication": [
+    "Require signed decisions when set to signed; omitted preserves application-trusted actor metadata. This requirement is part of checkpoint identity.",
+    "Exige des décisions signées avec signed ; omis, conserve la confiance dans l’acteur fourni par l’application. Cette exigence fait partie de l’identité du checkpoint."
+  ],
+  "WorkflowGateOptions.authentication": [
+    "Require a verified proof for this approval or pause gate and persist that requirement in the graph identity.",
+    "Exige une preuve vérifiée pour ce gate d’approbation ou de pause et inscrit cette exigence dans l’identité du graphe."
+  ],
+  "WorkflowPauseRequest.authentication": [
+    "Signature requirement copied from the gate into this pending request.",
+    "Exigence de signature copiée du gate dans cette demande en attente."
+  ],
+  "WorkflowDecision.proof": [
+    "Optional Ed25519 proof over this exact decision; required by signed gates and checked before any decision is applied.",
+    "Preuve Ed25519 optionnelle portant sur cette décision exacte ; requise par les gates signés et vérifiée avant application des décisions."
+  ],
+  "WorkflowDecisionRecord.verification": [
+    "Verified key identifier and verification time retained for audit; contains neither a private key nor a bearer token.",
+    "Identifiant de clé vérifiée et date de vérification conservés pour audit ; ne contient ni clé privée ni jeton bearer."
+  ],
+  "WorkflowOptions.decisionVerifier": [
+    "Trusted verifier invoked for each submitted proof; required to accept decisions on signed gates. Verification failures leave all pending decisions unapplied.",
+    "Vérificateur de confiance appelé pour chaque preuve soumise ; requis pour les gates signés. Un échec laisse toutes les décisions en attente inappliquées."
+  ],
+  "TaskContext.idempotencyKey": [
+    "Stable SHA-256 identity of executionId and task key, preserved across retries and checkpoint replay. Pass it to an effect service with persistent deduplication.",
+    "Identité SHA-256 stable de executionId et de la clé de tâche, conservée lors des retries et reprises. À transmettre à un service d’effets avec déduplication persistante."
+  ],
+  "QueueHandlerContext.idempotencyKey": [
+    "Job ID shared by every lease and retry of this logical job; use it for persistent deduplication of external effects.",
+    "Identifiant du job commun à tous ses baux et reprises ; à utiliser pour dédupliquer durablement les effets externes."
+  ],
+  "signWorkflowDecision.options": [
+    "Exact decision, Ed25519 private key, key identifier and future expiration to sign.",
+    "Décision exacte, clé privée Ed25519, identifiant de clé et expiration future à signer."
+  ],
+  "ed25519DecisionVerifier.options": [
+    "Live trusted public-key source owned by the application.",
+    "Source actualisable des clés publiques de confiance appartenant à l’application."
+  ],
+  "WorkflowDecisionVerifier.decision": [
+    "Complete decision and proof to authenticate; reject invalid signatures, identity bindings, revoked keys and expired proofs.",
+    "Décision complète et preuve à authentifier ; refuser signatures invalides, mauvaises associations d’identité, clés révoquées et preuves expirées."
+  ],
+  "WorkflowDecisionSigningOptions.decision": [
+    "Exact execution, pending request, task, actor, action and reason to sign, without an existing proof.",
+    "Exécution, demande en attente, tâche, acteur, action et motif exacts à signer, sans preuve préexistante."
+  ],
+  "WorkflowDecisionSigningOptions.keyId": [
+    "Unique identifier of the corresponding trusted public key; included in the signed payload.",
+    "Identifiant unique de la clé publique de confiance correspondante ; inclus dans le contenu signé."
+  ],
+  "WorkflowDecisionSigningOptions.privateKey": [
+    "Application-owned Ed25519 private KeyObject; never persisted by Outpost.",
+    "KeyObject privé Ed25519 appartenant à l’application ; jamais persisté par Outpost."
+  ],
+  "WorkflowDecisionSigningOptions.expiresAt": [
+    "Future expiration timestamp parseable by Date.parse; the exact string is signed.",
+    "Date d’expiration future interprétable par Date.parse ; la chaîne exacte est signée."
+  ],
+  "WorkflowDecisionProof.keyId": [
+    "Trusted approver key identifier bound into the signature.",
+    "Identifiant de clé d’approbateur de confiance lié à la signature."
+  ],
+  "WorkflowDecisionProof.expiresAt": [
+    "Signed expiration timestamp; verification rejects at or after this instant.",
+    "Date d’expiration signée ; la vérification refuse la preuve dès cet instant."
+  ],
+  "WorkflowDecisionProof.signature": [
+    "Base64url Ed25519 signature of the versioned canonical decision payload.",
+    "Signature Ed25519 en base64url du contenu canonique versionné de la décision."
+  ],
+  "WorkflowDecisionVerification.keyId": [
+    "Identifier of the trusted key that verified this decision.",
+    "Identifiant de la clé de confiance ayant vérifié cette décision."
+  ],
+  "WorkflowDecisionVerification.verifiedAt": [
+    "Timestamp at which the decision proof was successfully verified.",
+    "Date à laquelle la preuve de décision a été vérifiée avec succès."
+  ],
+  "WorkflowApproverKey.keyId": [
+    "Unique key identifier in the current trusted key set; duplicate identifiers fail verification.",
+    "Identifiant unique dans l’ensemble courant des clés de confiance ; les doublons font échouer la vérification."
+  ],
+  "WorkflowApproverKey.actor": [
+    "Only actor authorized to sign decisions with this public key.",
+    "Seul acteur autorisé à signer des décisions avec cette clé publique."
+  ],
+  "WorkflowApproverKey.publicKey": [
+    "Ed25519 public KeyObject used to check the proof; the verifier never needs the private key.",
+    "KeyObject public Ed25519 utilisé pour vérifier la preuve ; le vérificateur n’a jamais besoin de la clé privée."
+  ],
+  "WorkflowDecisionVerifierOptions.keys": [
+    "Resolve trusted actor/public-key bindings on every verification. Remove a key to revoke new proofs; source errors reject the decision.",
+    "Résout les associations acteur/clé publique à chaque vérification. Retirer une clé révoque les nouvelles preuves ; une erreur de source refuse la décision."
   ]
 }

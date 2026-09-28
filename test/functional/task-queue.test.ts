@@ -1,3 +1,4 @@
+import { verifyProcessRecovery } from "../fixtures/queue-process-recovery.ts";
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import type { TestContext } from "node:test";
@@ -581,3 +582,89 @@ test("HTTP heartbeat extends ownership beyond the initial expiry before publishi
     await running.done;
   }
 });
+
+test("HTTP credentials rotate while a handler holds its lease and revoked sources fail closed", async (t) => {
+  const { store } = await fixture(t);
+  const next = "new-test-only-token-with-at-least-32-characters";
+  let accepted = [token];
+  let current = token;
+  let unavailable = false;
+  const server = await serveTaskQueue({
+    queue: store,
+    token: async () => {
+      if (unavailable) throw new Error("sensitive credential source error");
+      return accepted;
+    },
+  });
+  t.after(() => server.close());
+  const queue = httpTaskQueue({ url: server.url, token: async () => current });
+  await queue.enqueue({ id: "rotation", handler: "work", input: null });
+  let enter!: () => void;
+  let finish!: () => void;
+  const entered = {
+    promise: new Promise<void>((resolve) => {
+      enter = resolve;
+    }),
+    resolve: () => enter(),
+  };
+  const release = {
+    promise: new Promise<void>((resolve) => {
+      finish = resolve;
+    }),
+    resolve: () => finish(),
+  };
+  const runner = worker(
+    queue,
+    "rotating",
+    {
+      work: async (_input, context) => {
+        assert.equal(context.idempotencyKey, "rotation");
+        entered.resolve();
+        await release.promise;
+        context.signal.throwIfAborted();
+        return { value: "done" };
+      },
+    },
+    300,
+  );
+  t.after(async () => {
+    release.resolve();
+    runner.stop.abort();
+    await runner.done;
+  });
+  await entered.promise;
+  accepted = [token, next];
+  current = next;
+  await queue.get("rotation");
+  accepted = [next];
+  await assert.rejects(
+    httpTaskQueue({ url: server.url, token }).get("rotation"),
+    /401/,
+  );
+  const before = (await queue.get("rotation"))!.expires!;
+  for (
+    let i = 0;
+    i < 100 && (await queue.get("rotation"))!.expires! <= before;
+    i++
+  )
+    await delay(10);
+  assert.ok((await queue.get("rotation"))!.expires! > before);
+  release.resolve();
+  assert.equal((await until(queue, "rotation", "done")).result?.value, "done");
+  runner.stop.abort();
+  await runner.done;
+  unavailable = true;
+  await assert.rejects(queue.get("rotation"), /401/);
+  unavailable = false;
+  accepted = [];
+  await assert.rejects(queue.get("rotation"), /401/);
+});
+
+test(
+  "HTTP process crash after an external effect resumes with persistent deduplication",
+  { timeout: 15000 },
+  async (t) => {
+    const { queue, server } = await fixture(t);
+    await verifyProcessRecovery(t, queue, "http", { url: server.url, token });
+  },
+);

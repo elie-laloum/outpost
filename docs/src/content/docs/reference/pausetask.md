@@ -19,13 +19,14 @@ Define a checkpoint-backed pause that waits for an explicit resume or reject dec
 
 ## Parameters and properties
 
-| Name             | Type                                    | Presence | Meaning                                                                                                   |
-| ---------------- | --------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------- |
-| `options`        | `WorkflowGateOptions`                   | Required | Gate key, dependencies, pause prompt and trusted actors allowed to resume or reject.                      |
-| `options.key`    | `string`                                | Required | Stable task key identifying the node within its workflow graph.                                           |
-| `options.after`  | `readonly Task<unknown>[] \| undefined` | Optional | Declared task dependencies whose values may be read.                                                      |
-| `options.prompt` | `string`                                | Required | Instruction explaining the approval or pause decision requested from the trusted actor.                   |
-| `options.actors` | `readonly string[]`                     | Required | Nonempty list of trusted actor names allowed to decide this gate; callers authenticate actors externally. |
+| Name                     | Type                                    | Presence | Meaning                                                                                                                                   |
+| ------------------------ | --------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `options`                | `WorkflowGateOptions`                   | Required | Gate key, dependencies, pause prompt and trusted actors allowed to resume or reject.                                                      |
+| `options.authentication` | `"signed" \| undefined`                 | Optional | Require a verified proof for this approval or pause gate and persist that requirement in the graph identity.                              |
+| `options.key`            | `string`                                | Required | Stable task key identifying the node within its workflow graph.                                                                           |
+| `options.after`          | `readonly Task<unknown>[] \| undefined` | Optional | Declared task dependencies whose values may be read.                                                                                      |
+| `options.prompt`         | `string`                                | Required | Instruction explaining the approval or pause decision requested from the trusted actor.                                                   |
+| `options.actors`         | `readonly string[]`                     | Required | Nonempty, unique actor names permitted to decide the gate being created; signed authentication binds the selected actor to a trusted key. |
 
 ## Returns
 

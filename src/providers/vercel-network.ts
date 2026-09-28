@@ -6,7 +6,7 @@ export function vercelNetworkPolicy(
   options: VercelOptions,
 ): NonNullable<VercelOptions["create"]>["networkPolicy"] {
   const policy = validateEgress(options.egress);
-  if (!policy) return options.create?.networkPolicy;
+  if (!policy) return structuredClone(options.create?.networkPolicy);
   invariant(
     options.create?.networkPolicy === undefined,
     "Use egress or create.networkPolicy, not both",

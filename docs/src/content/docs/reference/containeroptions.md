@@ -16,7 +16,7 @@ import type { ContainerOptions } from "@elie-laloum/outpost/providers/podman";
 
 | Name             | Type                                                           | Presence | Meaning                                                                                                       |
 | ---------------- | -------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------- |
-| `egress`         | `EgressPolicy \| undefined`                                    | Optional | Explicit outbound network policy; unsupported restrictions are rejected by the provider.                      |
+| `egress`         | `EgressPolicy \| undefined`                                    | Optional | Optional deny-all policy using network none; allowlists and conflicting configured networks are rejected.     |
 | `repositoryMode` | `"mounted" \| "isolated" \| undefined`                         | Optional | mounted shares the host checkout and Git metadata; isolated uses the opt-in private repository transfer mode. |
 | `caches`         | `readonly DependencyCache[] \| undefined`                      | Optional | Engine-managed dependency cache volumes with independently owned lifetimes.                                   |
 | `image`          | `string \| undefined`                                          | Optional | Container or guest image reference.                                                                           |

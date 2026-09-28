@@ -58,7 +58,7 @@ try {
     [
       "--input-type=module",
       "-e",
-      "import {openaiModelProvider, antigravityHarness, copilotHarness, kimiHarness, response, workflow, conversations, reporter, recoveryDetails, diagnoseAgentProtocol, diagnoseSandbox, planRecoveryRetention, pruneRecoveryRetention, assertRecoveryQuota, verifyRecoveryTransfer} from '@elie-laloum/outpost'; import {dockerSandboxProvider} from '@elie-laloum/outpost/providers/docker'; import {firecrackerSandboxProvider} from '@elie-laloum/outpost/providers/firecracker'; if(typeof firecrackerSandboxProvider!=='function')throw Error('Missing Firecracker provider'); if((await response.text({tag:'ok'}).read('<ok>yes</ok>'))!=='yes'||dockerSandboxProvider().name!=='docker')throw Error('Package import failed'); for(const item of [openaiModelProvider,antigravityHarness,copilotHarness,kimiHarness,conversations.capture,reporter,recoveryDetails,diagnoseSandbox,planRecoveryRetention,pruneRecoveryRetention,assertRecoveryQuota,verifyRecoveryTransfer])if(typeof item!=='function')throw Error('Missing public extension'); for(const name of ['codex','claude','antigravity','copilot','kimi'])if(diagnoseAgentProtocol(name).hasFailures)throw Error('Protocol fixtures failed'); (await workflow('empty',[]).start()).unwrap()",
+      "import {signWorkflowDecision, ed25519DecisionVerifier, openaiModelProvider, antigravityHarness, copilotHarness, kimiHarness, response, workflow, conversations, reporter, recoveryDetails, diagnoseAgentProtocol, diagnoseSandbox, planRecoveryRetention, pruneRecoveryRetention, assertRecoveryQuota, verifyRecoveryTransfer} from '@elie-laloum/outpost'; import {dockerSandboxProvider} from '@elie-laloum/outpost/providers/docker'; import {firecrackerSandboxProvider} from '@elie-laloum/outpost/providers/firecracker'; if(typeof firecrackerSandboxProvider!=='function')throw Error('Missing Firecracker provider'); if((await response.text({tag:'ok'}).read('<ok>yes</ok>'))!=='yes'||dockerSandboxProvider().name!=='docker')throw Error('Package import failed'); for(const item of [signWorkflowDecision,ed25519DecisionVerifier,openaiModelProvider,antigravityHarness,copilotHarness,kimiHarness,conversations.capture,reporter,recoveryDetails,diagnoseSandbox,planRecoveryRetention,pruneRecoveryRetention,assertRecoveryQuota,verifyRecoveryTransfer])if(typeof item!=='function')throw Error('Missing public extension'); for(const name of ['codex','claude','antigravity','copilot','kimi'])if(diagnoseAgentProtocol(name).hasFailures)throw Error('Protocol fixtures failed'); (await workflow('empty',[]).start()).unwrap()",
     ],
     { cwd: temporary, stdio: "inherit" },
   );
@@ -392,6 +392,33 @@ void [options, open, compatible];
 `,
   );
   checkTypes(bullmqConsumer);
+  const daytonaSdk = JSON.parse(
+    readFileSync(resolve("node_modules/@daytona/sdk/package.json"), "utf8"),
+  );
+  runNpm(
+    [
+      "install",
+      "--ignore-scripts",
+      "--no-audit",
+      "--no-fund",
+      `@daytona/sdk@${daytonaSdk.version}`,
+      "@types/ws@^8",
+    ],
+    temporary,
+  );
+  const daytonaConsumer = join(temporary, "daytona.ts");
+  writeFileSync(
+    daytonaConsumer,
+    `import {daytonaSandboxProvider, type EgressPolicy} from '@elie-laloum/outpost/providers/daytona';
+const egress: EgressPolicy = {mode:'allowlist',domains:['api.openai.com']};
+if(daytonaSandboxProvider({egress}).name !== 'daytona') throw new Error('Missing Daytona provider');
+`,
+  );
+  checkTypes(daytonaConsumer);
+  execFileSync(process.execPath, [daytonaConsumer], {
+    cwd: temporary,
+    stdio: "inherit",
+  });
   console.log("Packed package imports and initializes successfully.");
 } finally {
   rmSync(temporary, { recursive: true, force: true });

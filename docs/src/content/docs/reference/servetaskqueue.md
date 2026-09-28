@@ -19,13 +19,13 @@ Expose a caller-owned task queue over HTTP with explicit bearer-token authentica
 
 ## Parameters and properties
 
-| Name            | Type                  | Presence | Meaning                                                                                      |
-| --------------- | --------------------- | -------- | -------------------------------------------------------------------------------------------- |
-| `options`       | `QueueServerOptions`  | Required | Caller-owned queue, bearer token and HTTP bind address/port.                                 |
-| `options.queue` | `TaskQueue`           | Required | Task queue used to enqueue, claim and persist job state.                                     |
-| `options.token` | `string`              | Required | Explicit transport credential; never place it in a URL.                                      |
-| `options.host`  | `string \| undefined` | Optional | HTTP bind address; defaults to loopback for local-only access.                               |
-| `options.port`  | `number \| undefined` | Optional | TCP port for the queue HTTP server; zero lets the operating system choose an available port. |
+| Name            | Type                                                                | Presence | Meaning                                                                                                                                                                   |
+| --------------- | ------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `options`       | `QueueServerOptions`                                                | Required | Caller-owned queue, bearer token and HTTP bind address/port.                                                                                                              |
+| `options.queue` | `TaskQueue`                                                         | Required | Task queue used to enqueue, claim and persist job state.                                                                                                                  |
+| `options.token` | `string \| (() => readonly string[] \| Promise<readonly string[]>)` | Required | Fixed bearer token or callback returning the currently accepted tokens on every request. Overlap old and new tokens during rotation; empty or failed sources deny access. |
+| `options.host`  | `string \| undefined`                                               | Optional | HTTP bind address; defaults to loopback for local-only access.                                                                                                            |
+| `options.port`  | `number \| undefined`                                               | Optional | TCP port for the queue HTTP server; zero lets the operating system choose an available port.                                                                              |
 
 ## Returns
 
