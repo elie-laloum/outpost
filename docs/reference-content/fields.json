@@ -5513,5 +5513,129 @@
   "WorkflowDecisionVerifierOptions.keys": [
     "Resolve trusted actor/public-key bindings on every verification. Remove a key to revoke new proofs; source errors reject the decision.",
     "Résout les associations acteur/clé publique à chaque vérification. Retirer une clé révoque les nouvelles preuves ; une erreur de source refuse la décision."
+  ],
+  "loopTask.options": [
+    "Task identity, dependencies, bounded attempt callback and acceptance check.",
+    "Identité de tâche, dépendances, callback d’essai borné et vérification d’acceptation."
+  ],
+  "LoopTaskOptions.key": [
+    "Stable node key used by dependencies, checkpoints and loop events.",
+    "Clé stable du nœud utilisée par les dépendances, checkpoints et événements de boucle."
+  ],
+  "LoopTaskOptions.after": [
+    "Dependencies that must succeed before the first round; their outputs are available through context.value.",
+    "Dépendances devant réussir avant le premier tour ; leurs résultats sont accessibles via context.value."
+  ],
+  "LoopTaskOptions.condition": [
+    "Optional admission predicate evaluated before running or resuming the loop; false skips the node.",
+    "Prédicat optionnel évalué avant exécution ou reprise de la boucle ; false ignore le nœud."
+  ],
+  "LoopTaskOptions.timeoutMs": [
+    "Cooperative deadline for one round execution, including attempt and check; renewed when an interrupted phase resumes.",
+    "Délai coopératif pour une exécution de tour, essai et vérification compris ; renouvelé à la reprise d’une phase interrompue."
+  ],
+  "LoopTaskOptions.maxRounds": [
+    "Positive safe integer limiting logical rounds across resumes. Replaying an interrupted phase uses its existing round but consumes another workflow attempt.",
+    "Entier sûr strictement positif limitant les tours logiques, reprises comprises. Rejouer une phase interrompue conserve son tour mais consomme une tentative supplémentaire du workflow."
+  ],
+  "LoopTaskOptions.attempt": [
+    "Produce the candidate output from the phase context and previous rejected check feedback; feedback is undefined in round one. Persisted outputs must be lossless JSON or undefined.",
+    "Produit le résultat candidat depuis le contexte de phase et le feedback du refus précédent ; feedback vaut undefined au premier tour. Les résultats persistés doivent être du JSON sans perte ou undefined."
+  ],
+  "LoopTaskOptions.check": [
+    "Accept the candidate with done: true or request another round with done: false and text feedback. May invoke a reviewer agent; report its usage through the context. Exceptions fail the task.",
+    "Accepte le candidat avec done: true ou demande un autre tour avec done: false et un feedback textuel. Peut appeler un agent relecteur ; déclarer son usage via le contexte. Une exception fait échouer la tâche."
+  ],
+  "LoopTaskContext.round": [
+    "One-based logical round number, stable when an interrupted phase is replayed.",
+    "Numéro du tour logique à partir de un, stable lors du rejeu d’une phase interrompue."
+  ],
+  "LoopTaskContext.phase": [
+    "Current callback phase: attempt produces a candidate; check verifies it.",
+    "Phase du callback courant : attempt produit un candidat ; check le vérifie."
+  ],
+  "LoopTaskContext.idempotencyKey": [
+    "Effect key scoped to execution, task, logical round and phase; stable across replay of that phase. External deduplication remains caller-owned.",
+    "Clé d’effet liée à l’exécution, la tâche, le tour logique et la phase ; stable lors du rejeu de cette phase. La déduplication externe reste à la charge de l’appelant."
+  ],
+  "LoopTaskContext.attempt": [
+    "Cumulative workflow attempt number for this loop, incremented for new rounds and replayed phases. Both callbacks in an uninterrupted round share it.",
+    "Numéro de tentative cumulé de cette boucle, incrémenté pour les nouveaux tours et phases rejouées. Les deux callbacks d’un tour ininterrompu le partagent."
+  ],
+  "LoopTaskContext.reportUsage": [
+    "Synchronously add usage from this phase to the workflow budget, including failed model requests. Usage is not inferred from arbitrary callback results.",
+    "Ajoute synchroniquement l’usage de cette phase au budget du workflow, y compris les appels modèle échoués. L’usage n’est pas déduit des résultats arbitraires des callbacks."
+  ],
+  "LoopTaskContext.reportUsageOnce": [
+    "Deduplicate a durable usage receipt within this task. Scope receipts to each distinct charged operation; a replayed paid request requires a new receipt.",
+    "Déduplique un reçu durable d’usage dans cette tâche. Utiliser un reçu par opération facturée distincte ; un appel payant rejoué exige un nouveau reçu."
+  ],
+  "LoopCheckResult.done": [
+    "True accepts this candidate and completes the loop; false advances to another round if the limit permits.",
+    "True accepte ce candidat et termine la boucle ; false passe au tour suivant si la limite le permet."
+  ],
+  "LoopCheckResult.feedback": [
+    "Required text when done is false, passed unchanged to the next attempt and preserved on exhaustion.",
+    "Texte requis lorsque done vaut false, transmis sans modification à l’essai suivant et conservé à l’épuisement."
+  ],
+  "LoopRoundRecord.round": [
+    "One-based logical round recorded in execution order.",
+    "Tour logique numéroté à partir de un, enregistré dans l’ordre d’exécution."
+  ],
+  "LoopRoundRecord.phase": [
+    "Last saved transition: attempt awaits a candidate, check has one, complete has a verification decision.",
+    "Dernière transition sauvegardée : attempt attend un candidat, check en possède un, complete possède une décision de vérification."
+  ],
+  "LoopRoundRecord.output": [
+    "Encoded candidate output saved before verification when checkpointing is enabled; absent for in-memory-only loops and unfinished attempts.",
+    "Résultat candidat encodé et sauvegardé avant vérification avec les checkpoints ; absent pour les boucles en mémoire seule et les essais inachevés."
+  ],
+  "LoopRoundRecord.check": [
+    "Accepted or rejected verification decision for a completed round, including feedback on rejection.",
+    "Décision d’acceptation ou de refus d’un tour terminé, avec feedback en cas de refus."
+  ],
+  "TaskRecord.rounds": [
+    "Ordered progress of a loop task, including completed rounds and the current phase; absent for ordinary tasks.",
+    "Progression ordonnée d’une tâche de boucle, avec tours terminés et phase courante ; absent pour les tâches ordinaires."
+  ],
+  "WorkflowEvent.round": [
+    "Logical round number on loop phase events.",
+    "Numéro du tour logique pour les événements de phase de boucle."
+  ],
+  "WorkflowEvent.phase": [
+    "Saved phase on loop events: attempt, check or complete.",
+    "Phase sauvegardée sur les événements de boucle : attempt, check ou complete."
+  ],
+  "LoopTaskExhausted.key": [
+    "Key of the loop task whose verification never succeeded.",
+    "Clé de la tâche dont la vérification n’a jamais réussi."
+  ],
+  "LoopTaskExhausted.maxRounds": [
+    "Configured logical round limit reached by this loop.",
+    "Limite de tours logiques configurée et atteinte par cette boucle."
+  ],
+  "LoopTaskExhausted.feedback": [
+    "Text returned by the last rejected verification.",
+    "Texte renvoyé par la dernière vérification refusée."
+  ],
+  "LoopTaskContext.observation": [
+    "Task-scoped hub with workflow execution, task key and attempt; pass it to custom nested work such as speculate.",
+    "Hub de la tâche avec exécution du workflow, clé et tentative ; le transmettre aux opérations imbriquées personnalisées comme speculate."
+  ],
+  "LoopTaskContext.signal": [
+    "Cooperative cancellation for this operation.",
+    "Annulation coopérative de cette opération."
+  ],
+  "LoopTaskContext.executionId": [
+    "Identity of the workflow execution, preserved across checkpoint resumption.",
+    "Identité de l’exécution de workflow, conservée lors de la reprise d’un checkpoint."
+  ],
+  "LoopTaskContext.checkpoint": [
+    "Persist the current workflow state when durable execution is enabled.",
+    "Persiste l’état courant du workflow lorsque l’exécution durable est activée."
+  ],
+  "LoopTaskContext.value": [
+    "Read the completed output of a task listed in this task’s declared dependencies.",
+    "Lit la sortie terminée d’une tâche figurant dans les dépendances déclarées de cette tâche."
   ]
 }

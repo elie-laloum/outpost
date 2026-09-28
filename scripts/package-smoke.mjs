@@ -94,6 +94,12 @@ try {
       assert.equal(name in exports,false,name);
       assert.equal(typeof exports[name+'SandboxProvider'],'function');
     }
+    const loop=api.loopTask({key:'loop',maxRounds:2,attempt:(ctx)=>ctx.round,check:(_,value)=>value===2?{done:true}:{done:false,feedback:'again'}});
+    const verified=await api.workflow('loop',[loop]).start();
+    verified.unwrap();
+    assert.equal(verified.value(loop),2);
+    assert.equal(verified.usage.attempts,2);
+    assert.equal(typeof api.LoopTaskExhausted,'function');
     const transporter=api.localTransport({directory:'consumer-store'});
     const artifact=api.artifactStore({transporter});
     const id='a'.repeat(64);
@@ -198,6 +204,12 @@ try {
   writeFileSync(
     consumer,
     `import { agent as composeAgent,  dispatch, codexHarness, claudeHarness, antigravityHarness, copilotHarness, kimiHarness, response, createSandbox, type AntigravitySettings, type CopilotSettings, type KimiSettings, type AgentAuthentication, type AccountCredential, type UsageCredential, type EgressPolicy } from '@elie-laloum/outpost';
+import { loopTask, workflow, type LoopTaskContext, type LoopTaskOptions, type LoopCheckResult, type LoopRoundRecord } from '@elie-laloum/outpost';
+const loopOptions: LoopTaskOptions<number> = {key:'fix',maxRounds:2,attempt:(ctx: LoopTaskContext)=>ctx.round,check:(_,value): LoopCheckResult=>value===2?{done:true}:{done:false,feedback:'again'}};
+const loop=loopTask(loopOptions);
+const verified=await workflow('fix',[loop]).start();
+const number: number=verified.value(loop);
+const history: readonly LoopRoundRecord[] | undefined=verified.tasks[0]?.rounds;
 // @ts-expect-error Gemini CLI was removed without a compatibility export.
 import { geminiHarness } from '@elie-laloum/outpost';
 // @ts-expect-error Gemini CLI settings were removed.

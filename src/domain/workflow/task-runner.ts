@@ -1,3 +1,5 @@
+import { loopDefinition } from "./loop-task.ts";
+import { runLoopTask } from "./loop-runner.ts";
 import { checkpointValue } from "./checkpoint-value.ts";
 import { WorkflowBudgetExceeded, WorkflowUsageUnavailable } from "./budget.ts";
 import { retryDelay, waitForRetry } from "./retry.ts";
@@ -30,6 +32,14 @@ export async function runTask(
     if (item.condition && !(await item.condition(context(item, 0, signal)))) {
       signal.throwIfAborted();
       finish(item, "skipped");
+      return;
+    }
+    const loop = loopDefinition(item);
+    if (loop) {
+      const value = await runLoopTask(item, loop, runtime);
+      signal.throwIfAborted();
+      values.set(item, value);
+      finish(item, "done");
       return;
     }
     const limit = item.retry?.attempts ?? 1;

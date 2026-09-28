@@ -9,6 +9,8 @@ La prochaine priorité d’Outpost est une exécution quotidienne fiable : un pr
 
 ## Point de départ
 
+Implémenté, non publié : les [boucles de vérification](../../guide/verification-loops/) ajoutent des cycles agent/vérification bornés avec feedback, phases durables et budgets cumulés. Les tests déterministes couvrent la reprise et l’usage d’un codeur/relecteur simulé ; les campagnes de modèles authentifiés restent une validation distincte.
+
 Le socle comprend les sandboxes réutilisables, les workspaces Git, les adapters d’agents, les workflows typés et les outils de récupération. Le CLI, la configuration d’authentification et les fournisseurs Responses personnalisés sont documentés dans le [guide de démarrage](../../guide/command-line/). La [référence API](../../reference/diagnosesandbox/) décrit les contrats implémentés et le changelog les versions publiées. Une implémentation ou un test simulé ne prouve pas la réussite d’une campagne réelle sur un provider.
 
 Disponible depuis la version 4.2.0 : les [transports de stockage local/S3](../../guide/persistence/) couvrent artefacts, checkpoints, journaux, conversations, archives de récupération, réservations, activités et inventaire/rétention/quotas. Les tests locaux et du protocole S3 simulé exercent conflits et restauration. Les campagnes authentifiées AWS/S3 compatible sur les interruptions et la pagination, la réconciliation opérationnelle des propriétaires abandonnés et tout adaptateur NFS restent des validations ou travaux futurs.

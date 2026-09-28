@@ -1,5 +1,9 @@
 # Historique des versions
 
+## Non publié
+
+- Ajoute `loopTask` pour les cycles essai/vérification bornés avec feedback, reprise durable par phase, budgets cumulés, clés d’idempotence par phase et `LoopTaskExhausted`. `WorkflowEvent.type` ajoute `loop` ; adapter les traitements exhaustifs. Les exceptions exigent une reprise explicite ; les checkpoints de boucle exigent des résultats JSON.
+
 ## 7.0.0
 
 Cette version majeure étend les unions publiques d’événements et de conversations et ajoute des champs de contexte obligatoires. Adaptez les traitements exhaustifs de `AgentEvent`, `WorkflowEvent.type`, `ModelStreamEvent`, `ConversationFormat` et `StoredConversationFormat` ; les producteurs de contexte personnalisés et doublures de test doivent fournir `TaskContext.idempotencyKey` et `QueueHandlerContext.idempotencyKey`. Les points d’entrée existants restent disponibles. Les files Redis exigent désormais `maxmemory-policy=noeviction` et les budgets de workflow exclusivement en tokens refusent un usage incomplet. Firecracker et la spéculation restent expérimentaux ; la 7.0.0 ne réalise pas toutes les orientations de la roadmap.

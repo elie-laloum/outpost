@@ -31,6 +31,7 @@ Independent tasks can run concurrently. Dependent tasks start after their depend
 
 | Factory        | Use                                                |
 | -------------- | -------------------------------------------------- |
+| `loopTask`     | Bounded attempts with feedback from verification.  |
 | `task`         | Application code returning a value.                |
 | `agentTask`    | An agent request on an existing sandbox.           |
 | `commandTask`  | A command on an existing sandbox.                  |
@@ -40,3 +41,5 @@ Independent tasks can run concurrently. Dependent tasks start after their depend
 A workflow does not create a shared Git transaction. Each task must honor resource ownership and cancellation. Use [scheduling](../task-scheduling/) to control concurrency and retry behavior.
 
 API: [task](../../reference/task/) · [workflow](../../reference/workflow/) · [TaskContext](../../reference/taskcontext/).
+
+Use [verification loops](../verification-loops/) when a failed check should guide another attempt.

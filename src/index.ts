@@ -455,3 +455,11 @@ export type {
   WorkflowApproverKey,
   WorkflowDecisionVerifierOptions,
 } from "./infrastructure/workflow-decision-signature.types.ts";
+
+export { loopTask, LoopTaskExhausted } from "./domain/workflow/loop-task.ts";
+export type {
+  LoopCheckResult,
+  LoopTaskContext,
+  LoopTaskOptions,
+  LoopRoundRecord,
+} from "./domain/workflow/loop-task.types.ts";

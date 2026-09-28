@@ -1,3 +1,4 @@
+import type { LoopRoundRecord } from "./workflow/loop-task.types.ts";
 import type { ObservationHub } from "./observation.types.ts";
 import type {
   WorkflowDecision,
@@ -60,6 +61,7 @@ export type TaskStatus =
   | "rejected";
 
 export interface TaskRecord {
+  rounds?: readonly LoopRoundRecord[];
   usageReceipts?: readonly string[];
   pause?: WorkflowPauseRequest;
   decision?: WorkflowDecisionRecord;
@@ -76,6 +78,7 @@ export interface WorkflowEvent {
   readonly workflow: string;
   readonly timestamp: string;
   readonly type:
+    | "loop"
     | "start"
     | "task"
     | "attempt"
@@ -87,6 +90,8 @@ export interface WorkflowEvent {
     | "checkpoint"
     | "resume"
     | "budget-exceeded";
+  readonly round?: number;
+  readonly phase?: "attempt" | "check" | "complete";
   readonly key?: string;
   readonly status?: TaskStatus;
   readonly attempt?: number;

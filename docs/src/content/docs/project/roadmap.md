@@ -9,6 +9,8 @@ Outpost's next priority is reliable everyday execution: a successful first run, 
 
 ## Starting point
 
+Implemented, unreleased: [verification loops](../../guide/verification-loops/) add bounded agent/check cycles with feedback, durable round phases and cumulative budgets. Deterministic tests cover recovery and scripted coder/reviewer usage; authenticated model campaigns remain separate validation.
+
 The foundation includes reusable sandboxes, Git workspaces, agent adapters, typed workflows and recovery tools. The CLI, authentication setup and custom Responses providers are documented in the [setup guide](../../guide/command-line/). Use the [API reference](../../reference/diagnosesandbox/) for implemented contracts and the changelog for released versions. An implementation or simulated test is not evidence of a successful live provider campaign.
 
 Available since 4.2.0: [local/S3 storage transports](../../guide/persistence/) cover artifacts, checkpoints, journals, conversations, recovery archives, reservations, activity and inventory/retention/quotas. Local and simulated S3 protocol tests exercise conflicts and restoration. Authenticated AWS/S3-compatible crash and pagination campaigns, operational reconciliation of abandoned owners and any NFS adapter remain validation or future work.

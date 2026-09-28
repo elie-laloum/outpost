@@ -54,6 +54,7 @@ export const chapters = [
     [
       "guide/task-dependencies",
       "guide/task-scheduling",
+      "guide/verification-loops",
       "guide/token-budgets",
       "guide/parallel-repositories",
       "guide/durable-runs",

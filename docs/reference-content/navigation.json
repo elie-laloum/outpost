@@ -808,6 +808,10 @@
         "slug": "reference/overview/workflows",
         "attrs": { "data-reference-overview": "" }
       },
+      {
+        "slug": "reference/looptask",
+        "attrs": { "data-api-kind": "function" }
+      },
       { "slug": "reference/task", "attrs": { "data-api-kind": "function" } },
       {
         "slug": "reference/workflow",
@@ -826,6 +830,14 @@
         "attrs": { "data-api-kind": "function" }
       },
       {
+        "slug": "reference/looptaskexhausted",
+        "attrs": { "data-api-kind": "class" }
+      },
+      {
+        "slug": "reference/loopcheckresult",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
         "slug": "reference/workflowfailure",
         "attrs": { "data-api-kind": "class" }
       },
@@ -838,6 +850,18 @@
       {
         "slug": "reference/workflowusageunavailable",
         "attrs": { "data-api-kind": "class" }
+      },
+      {
+        "slug": "reference/looptaskcontext",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/looptaskoptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/looproundrecord",
+        "attrs": { "data-api-kind": "interface" }
       },
       { "slug": "reference/retry", "attrs": { "data-api-kind": "interface" } },
       {

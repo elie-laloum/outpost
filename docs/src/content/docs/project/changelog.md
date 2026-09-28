@@ -7,6 +7,10 @@ sidebar:
 
 The release notes below are synchronized from the root `CHANGELOG.md`, the single source of release history.
 
+## Unreleased
+
+- Add `loopTask` for bounded attempt/check cycles with feedback, durable phase recovery, cumulative budgets, phase-specific idempotency keys and `LoopTaskExhausted`. `WorkflowEvent.type` gains `loop`; update exhaustive consumers. Callback errors require explicit resume; loop checkpoints require JSON outputs.
+
 ## 7.0.0
 
 This major release extends public event and conversation unions and adds required context fields. Update exhaustive handling of `AgentEvent`, `WorkflowEvent.type`, `ModelStreamEvent`, `ConversationFormat` and `StoredConversationFormat`; custom context producers and test doubles must provide `TaskContext.idempotencyKey` and `QueueHandlerContext.idempotencyKey`. Existing entry points remain available. Redis queues now require `maxmemory-policy=noeviction`, and token-only workflow budgets reject incomplete usage. Firecracker and speculation remain experimental; 7.0.0 does not complete every roadmap direction.
