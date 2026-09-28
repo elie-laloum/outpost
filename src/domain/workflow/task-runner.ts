@@ -5,20 +5,32 @@ import { checkpointValue } from "./checkpoint-value.ts";
 import { WorkflowBudgetExceeded, WorkflowUsageUnavailable } from "./budget.ts";
 import { awaitQuotaReset, pauseForQuota } from "./quota-pause.ts";
 import { retryDelay, waitForRetry } from "./retry.ts";
+import { lookupTaskCache, storeTaskCache } from "./task-cache.ts";
 import { quotaFault } from "../quota.ts";
 import type { Task, WorkflowExecutionState } from "../workflow.types.ts";
+import type { TaskCacheLookup } from "./task-cache.types.ts";
 
 export async function runTask(
   item: Task,
   runtime: WorkflowExecutionState,
 ): Promise<void> {
-  const { record, signal, context, emit, finish, errors, options, stop } =
-    runtime;
+  const {
+    record,
+    signal,
+    context,
+    emit,
+    finish,
+    errors,
+    options,
+    stop,
+    values,
+  } = runtime;
   const state = record(item);
   if (state.quota && !(await awaitQuotaReset(item, runtime, true))) return;
   state.status = "active";
   delete state.error;
   delete state.finishedAt;
+  delete state.cacheHit;
   state.startedAt = new Date().toISOString();
   emit({ type: "task", key: item.key, status: "active", attempt: 0 });
   try {
@@ -29,9 +41,18 @@ export async function runTask(
       finish(item, "skipped");
       return;
     }
+    const cache = item.cache
+      ? await lookupTaskCache(item, item.cache, runtime)
+      : undefined;
+    if (cache?.hit) {
+      values.set(item, cache.value);
+      state.cacheHit = true;
+      finish(item, "done");
+      return;
+    }
     while (true) {
       try {
-        await perform(item, runtime);
+        await perform(item, runtime, cache);
         return;
       } catch (error) {
         if (!(await pauseForQuota(item, runtime, error))) throw error;
@@ -61,18 +82,30 @@ export async function runTask(
   }
 }
 
+async function complete(
+  item: Task,
+  runtime: WorkflowExecutionState,
+  cache: TaskCacheLookup | undefined,
+  value: unknown,
+): Promise<void> {
+  if (item.cache && cache && !cache.hit)
+    await storeTaskCache(item, item.cache, runtime, cache.fingerprint, value);
+  runtime.values.set(item, value);
+  runtime.finish(item, "done");
+}
+
 async function perform(
   item: Task,
   runtime: WorkflowExecutionState,
+  cache: TaskCacheLookup | undefined,
 ): Promise<void> {
-  const { record, signal, context, emit, finish, values, options } = runtime;
+  const { record, signal, context, emit, finish, options } = runtime;
   const state = record(item);
   const loop = loopDefinition(item);
   if (loop) {
     const value = await runLoopTask(item, loop, runtime);
     signal.throwIfAborted();
-    values.set(item, value);
-    finish(item, "done");
+    await complete(item, runtime, cache, value);
     return;
   }
   const limit = item.retry?.attempts ?? 1;
@@ -85,6 +118,8 @@ async function perform(
     emit({ type: "attempt", key: item.key, attempt });
     await runtime.persist();
     let delayMs = 0;
+    let completed = false;
+    let value: unknown;
     const deadline = new AbortController();
     const timer =
       item.timeoutMs === undefined
@@ -96,12 +131,10 @@ async function perform(
     const taskSignal = AbortSignal.any([signal, deadline.signal]);
     try {
       taskSignal.throwIfAborted();
-      const value = await item.perform(context(item, attempt, taskSignal));
+      value = await item.perform(context(item, attempt, taskSignal));
       taskSignal.throwIfAborted();
       if (options.checkpoint) checkpointValue(value);
-      values.set(item, value);
-      finish(item, "done");
-      return;
+      completed = true;
     } catch (error) {
       runtime.closeAttempt(item);
       if (error instanceof InputSuspension && item.interaction) {
@@ -126,6 +159,10 @@ async function perform(
     } finally {
       runtime.closeAttempt(item);
       clearTimeout(timer);
+    }
+    if (completed) {
+      await complete(item, runtime, cache, value);
+      return;
     }
     await waitForRetry(delayMs, signal);
   }

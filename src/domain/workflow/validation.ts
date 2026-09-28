@@ -15,14 +15,21 @@ export function validate(tasks: readonly Task[]): void {
   for (const item of tasks) {
     if (item.interaction) {
       validateInteraction(item.interaction);
+      if (item.cache)
+        throw new Error("Interactions and gates cannot use a task cache");
       if (item.gate)
         throw new Error("A task cannot be both an interaction and a gate");
     }
     if (item.gate) {
       validateGate(item.gate);
-      if (item.condition || item.retry || item.timeoutMs !== undefined)
+      if (
+        item.condition ||
+        item.retry ||
+        item.timeoutMs !== undefined ||
+        item.cache
+      )
         throw new Error(
-          "Workflow gates cannot have conditions, retries or timeouts",
+          "Workflow gates cannot have conditions, retries, timeouts or caches",
         );
     }
     if (keys.has(item.key)) throw new Error(`Duplicate task: ${item.key}`);

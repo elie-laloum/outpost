@@ -111,6 +111,15 @@ try {
     const id='a'.repeat(64);
     await artifact.put(id,new Uint8Array([0,255]));
     assert.deepEqual([...await artifact.get(id)],[0,255]);
+    let cachedRuns=0;
+    const cachedTask=()=>api.task({key:'cached',cache:{store:api.taskCacheStore({transporter}),version:'1',key:()=>['smoke']},perform:()=>({run:++cachedRuns})});
+    for (const expected of [false,true]) {
+      const item=cachedTask();
+      const cachedResult=await api.workflow('cache',[item]).start();
+      cachedResult.unwrap();
+      assert.deepEqual(cachedResult.value(item),{run:1});
+      assert.equal(cachedResult.tasks[0].cacheHit===true,expected);
+    }
     const checkpoints=api.workflowCheckpointStore({transporter});
     const lease=await checkpoints.acquire('consumer');
     await lease.write({answer:42});
@@ -230,6 +239,14 @@ const recordedCommits: WorkspaceCommitsEvent['kind'] = 'workspace-commits';
 const replayCoder: Agent | undefined = replaying;
 const replayLogging: Parameters<typeof dispatch>[0]['logging'] = {replayable:true};
 void readJournal;
+import { task, taskCacheStore, localTransport, type TaskCacheOptions, type TaskCacheStore, type TaskCacheEntry, type TaskCacheStoreOptions, type TaskCacheOutcome, type WorkflowEvent } from '@elie-laloum/outpost';
+const cacheStoreOptions: TaskCacheStoreOptions = {transporter:localTransport({directory:'typed-cache'}),maxBytes:1024};
+const cacheStore: TaskCacheStore = taskCacheStore(cacheStoreOptions);
+const cacheOptions: TaskCacheOptions = {store:cacheStore,version:'1',key:()=>['commit',{brief:'b'}],maxAgeMs:60_000,mode:'reuse'};
+const cachedTask=task({key:'cached',cache:cacheOptions,perform:()=>({ok:true})});
+const cacheEntry: TaskCacheEntry | undefined=await cacheStore.read('a'.repeat(64));
+const cacheHit: true | undefined=verified.tasks[0]?.cacheHit;
+const cacheOutcome: TaskCacheOutcome | undefined=({} as WorkflowEvent).cache;
 // @ts-expect-error Gemini CLI was removed without a compatibility export.
 import { geminiHarness } from '@elie-laloum/outpost';
 // @ts-expect-error Gemini CLI settings were removed.

@@ -19,6 +19,10 @@ import type {
   WorkflowPauseRequest,
 } from "./workflow/gates.types.ts";
 import type { WorkflowCheckpointOptions } from "./workflow/checkpoint.types.ts";
+import type {
+  TaskCacheOptions,
+  TaskCacheOutcome,
+} from "./workflow/task-cache.types.ts";
 import type { Usage } from "./agent.types.ts";
 import type {
   WorkflowAccounting,
@@ -57,6 +61,7 @@ export interface Task<T = unknown> {
   readonly condition?: (context: TaskContext) => boolean | Promise<boolean>;
   readonly retry?: Retry;
   readonly timeoutMs?: number;
+  readonly cache?: TaskCacheOptions;
 }
 
 export type TaskOptions<T> = Omit<Task<T>, "after"> & {
@@ -75,6 +80,7 @@ export type TaskStatus =
   | "rejected";
 
 export interface TaskRecord {
+  cacheHit?: true;
   quota?: WorkflowQuotaPause;
   interaction?: TaskInteractionRecord;
   rounds?: readonly LoopRoundRecord[];
@@ -94,6 +100,7 @@ export interface WorkflowEvent {
   readonly workflow: string;
   readonly timestamp: string;
   readonly type:
+    | "cache"
     | "quota"
     | "input-request"
     | "input-answer"
@@ -109,6 +116,8 @@ export interface WorkflowEvent {
     | "checkpoint"
     | "resume"
     | "budget-exceeded";
+  readonly cache?: TaskCacheOutcome;
+  readonly error?: string;
   readonly resetAt?: string;
   readonly round?: number;
   readonly phase?: "attempt" | "check" | "complete";
@@ -165,6 +174,7 @@ export type WorkflowNotification = Omit<
   "executionId" | "workflow" | "timestamp"
 >;
 export interface WorkflowExecutionState {
+  readonly workflow: string;
   readonly observation: ObservationHub;
   readonly executionId: string;
   readonly stop: AbortController;

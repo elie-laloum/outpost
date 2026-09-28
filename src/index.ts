@@ -105,6 +105,8 @@ export {
   recoverWorkflowCheckpoint,
 } from "./infrastructure/transport-checkpoint.ts";
 export type { CheckpointRecoveryOptions } from "./infrastructure/transport-checkpoint.types.ts";
+export { taskCacheStore } from "./infrastructure/transport-task-cache.ts";
+export type { TaskCacheStoreOptions } from "./infrastructure/transport-task-cache.types.ts";
 export { readJournal } from "./infrastructure/transport-journal.ts";
 export type { ReadJournalOptions } from "./infrastructure/transport-journal.types.ts";
 export { replayAgent, ReplayDivergence } from "./domain/replay.ts";
@@ -492,6 +494,14 @@ export type {
   TaskInteractionContext,
 } from "./domain/workflow/input.types.ts";
 export { loopTask, LoopTaskExhausted } from "./domain/workflow/loop-task.ts";
+export type {
+  TaskCacheAccessOptions,
+  TaskCacheEntry,
+  TaskCacheMode,
+  TaskCacheOptions,
+  TaskCacheOutcome,
+  TaskCacheStore,
+} from "./domain/workflow/task-cache.types.ts";
 export type {
   LoopCheckResult,
   LoopTaskContext,

@@ -231,6 +231,7 @@ export function workflowState(
   }
 
   const runtime: WorkflowExecutionState = {
+    workflow: name,
     observation,
     async persist() {
       await checkpoint?.save(runtime);

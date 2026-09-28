@@ -12,10 +12,18 @@ import type {
   IsolatedTaskOptions,
 } from "./tasks.types.ts";
 
+function uncached(options: object): void {
+  if ("cache" in options && options.cache !== undefined)
+    throw new Error(
+      "Dispatch results are not JSON; cache a task that returns a JSON projection",
+    );
+}
+
 export function agentTask<T>(
-  options: Omit<TaskOptions<DispatchResult<T>>, "perform"> &
+  options: Omit<TaskOptions<DispatchResult<T>>, "perform" | "cache"> &
     AgentTaskOptions<T>,
 ): Task<DispatchResult<T>> {
+  uncached(options);
   const { sandbox, request, ...definition } = options;
   return task({
     ...definition,
@@ -43,9 +51,10 @@ export function agentTask<T>(
 }
 
 export function isolatedTask<T>(
-  options: Omit<TaskOptions<DispatchResult<T>>, "perform"> &
+  options: Omit<TaskOptions<DispatchResult<T>>, "perform" | "cache"> &
     IsolatedTaskOptions<T>,
 ): Task<DispatchResult<T>> {
+  uncached(options);
   const { request, ...definition } = options;
   return task({
     ...definition,

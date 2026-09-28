@@ -11,7 +11,7 @@ export interface LoopTaskContext extends TaskContext {
 
 export interface LoopTaskOptions<T> extends Pick<
   TaskOptions<T>,
-  "key" | "after" | "condition" | "timeoutMs"
+  "key" | "after" | "condition" | "timeoutMs" | "cache"
 > {
   readonly maxRounds: number;
   readonly attempt: (

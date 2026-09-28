@@ -68,6 +68,14 @@ export function validateCheckpoint(
     for (const field of ["startedAt", "finishedAt", "error"])
       if (record[field] !== undefined && typeof record[field] !== "string")
         throw invalid();
+    if (
+      record.cacheHit !== undefined &&
+      (record.cacheHit !== true ||
+        record.status !== "done" ||
+        record.attempts !== 0 ||
+        record.rounds !== undefined)
+    )
+      throw invalid();
     validateUsageReceipts(record.usageReceipts);
     validateLoopRecord(
       record,
