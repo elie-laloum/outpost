@@ -1,3 +1,4 @@
+import type { EgressPolicy } from "../domain/egress.types.ts";
 import type {
   CreateSandboxFromImageParams,
   CreateSandboxFromSnapshotParams,
@@ -8,6 +9,7 @@ import type { Variables } from "../domain/command.types.ts";
 import type { SandboxContext } from "../domain/sandbox.types.ts";
 
 export interface DaytonaOptions {
+  readonly egress?: EgressPolicy;
   readonly connection?: DaytonaConfig;
   readonly create?:
     CreateSandboxFromImageParams | CreateSandboxFromSnapshotParams;

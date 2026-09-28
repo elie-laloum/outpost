@@ -392,6 +392,33 @@ void [options, open, compatible];
 `,
   );
   checkTypes(bullmqConsumer);
+  const daytonaSdk = JSON.parse(
+    readFileSync(resolve("node_modules/@daytona/sdk/package.json"), "utf8"),
+  );
+  runNpm(
+    [
+      "install",
+      "--ignore-scripts",
+      "--no-audit",
+      "--no-fund",
+      `@daytona/sdk@${daytonaSdk.version}`,
+      "@types/ws@^8",
+    ],
+    temporary,
+  );
+  const daytonaConsumer = join(temporary, "daytona.ts");
+  writeFileSync(
+    daytonaConsumer,
+    `import {daytonaSandboxProvider, type EgressPolicy} from '@elie-laloum/outpost/providers/daytona';
+const egress: EgressPolicy = {mode:'allowlist',domains:['api.openai.com']};
+if(daytonaSandboxProvider({egress}).name !== 'daytona') throw new Error('Missing Daytona provider');
+`,
+  );
+  checkTypes(daytonaConsumer);
+  execFileSync(process.execPath, [daytonaConsumer], {
+    cwd: temporary,
+    stdio: "inherit",
+  });
   console.log("Packed package imports and initializes successfully.");
 } finally {
   rmSync(temporary, { recursive: true, force: true });

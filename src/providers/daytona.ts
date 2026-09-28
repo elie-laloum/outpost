@@ -1,10 +1,13 @@
 import type { Daytona, DaytonaConfig } from "@daytona/sdk";
-import { invariant } from "../domain/errors.ts";
 import { posix } from "node:path";
 import type { SandboxProvider } from "../domain/sandbox.types.ts";
 import { fileBatches } from "./file-batches.ts";
 import { registerCleanup } from "../infrastructure/shutdown.ts";
 import { cloudRoots } from "./cloud.constants.ts";
+import {
+  daytonaNetworkPolicy,
+  confirmDaytonaNetworkPolicy,
+} from "./daytona-network.ts";
 import { daytonaCommand } from "./daytona-command.ts";
 import { daytonaFiles } from "./daytona-files.ts";
 import type { DaytonaOptions } from "./daytona.types.ts";
@@ -18,10 +21,8 @@ export function daytonaSandboxProvider(
   ) => Promise<Pick<Daytona, "create" | "delete">> = async (config) =>
     new (await import("@daytona/sdk")).Daytona(config),
 ): SandboxProvider {
-  invariant(
-    !("egress" in options) || options.egress === undefined,
-    "Daytona does not support Outpost egress policies; configure provider-native networking explicitly",
-  );
+  const networkPolicy = daytonaNetworkPolicy(options);
+  const create = { ...options.create, ...networkPolicy };
   return {
     name: "daytona",
     placement: "remote",
@@ -29,7 +30,7 @@ export function daytonaSandboxProvider(
     async acquire(context) {
       context.signal?.throwIfAborted();
       const client = await connect(options.connection);
-      const sandbox = await client.create(options.create ?? {});
+      const sandbox = await client.create({ ...create });
       let closed = false,
         releasing: Promise<void> | undefined;
       let unregister = () => {};
@@ -48,6 +49,11 @@ export function daytonaSandboxProvider(
       let home: string;
       let root: string;
       try {
+        context.signal?.throwIfAborted();
+        if (networkPolicy) {
+          await confirmDaytonaNetworkPolicy(sandbox, networkPolicy);
+          context.signal?.throwIfAborted();
+        }
         home = (await sandbox.getUserHomeDir()) ?? cloudRoots.daytonaHome;
         root = options.root ?? posix.join(home, "outpost");
         await sandbox.fs.createFolder(root, "755");
@@ -79,3 +85,5 @@ export function daytonaSandboxProvider(
     },
   };
 }
+
+export type { EgressPolicy } from "../domain/egress.types.ts";

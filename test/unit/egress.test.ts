@@ -7,6 +7,9 @@ import { daytonaSandboxProvider } from "../../src/providers/daytona.ts";
 import { vercelSandboxProvider } from "../../src/providers/vercel.ts";
 import { vercelNetworkPolicy } from "../../src/providers/vercel-network.ts";
 import type { VercelOptions } from "../../src/providers/vercel.types.ts";
+import { daytonaNetworkPolicy } from "../../src/providers/daytona-network.ts";
+import type { Sandbox as DaytonaSandbox } from "@daytona/sdk";
+import type { DaytonaOptions } from "../../src/providers/daytona.types.ts";
 import type { Command } from "../../src/index.ts";
 import { repository } from "../helpers.ts";
 
@@ -188,8 +191,248 @@ test("Vercel sends egress before allocation and snapshots the caller policy", as
 test("unsupported providers reject policies supplied through shared configuration", () => {
   const options = { variables: {}, egress: { mode: "deny-all" } };
   assert.throws(() => localSandboxProvider(options), /cannot enforce egress/);
-  assert.throws(
-    () => daytonaSandboxProvider(options),
-    /does not support Outpost egress/,
+});
+
+test("Vercel snapshots native firewall rules before caller mutation", () => {
+  const native = { allow: ["example.com"], subnets: { deny: ["10.0.0.0/8"] } };
+  const policy = vercelNetworkPolicy({ create: { networkPolicy: native } });
+  native.allow.push("*");
+  native.subnets.deny.length = 0;
+  assert.deepEqual(policy, {
+    allow: ["example.com"],
+    subnets: { deny: ["10.0.0.0/8"] },
+  });
+});
+
+test("Daytona translates only representable restrictions", () => {
+  assert.equal(daytonaNetworkPolicy({}), undefined);
+  assert.deepEqual(daytonaNetworkPolicy({ egress: { mode: "deny-all" } }), {
+    networkBlockAll: true,
+  });
+  assert.deepEqual(
+    daytonaNetworkPolicy({
+      egress: { mode: "allowlist", domains: ["example.com", "*.example.com"] },
+    }),
+    { domainAllowList: "example.com,*.example.com" },
   );
+  assert.deepEqual(
+    daytonaNetworkPolicy({
+      egress: { mode: "allowlist", allowCidrs: ["10.0.0.0/8", "192.0.2.0/24"] },
+    }),
+    { networkAllowList: "10.0.0.0/8,192.0.2.0/24" },
+  );
+  for (const egress of [
+    { mode: "allowlist", domains: ["example.com"], denyCidrs: ["10.0.0.0/8"] },
+    { mode: "allowlist", domains: ["example.com"], allowCidrs: ["10.0.0.0/8"] },
+    { mode: "allowlist", allowCidrs: ["::/0"] },
+    { mode: "allowlist", domains: ["*.example.com"] },
+    {
+      mode: "allowlist",
+      domains: Array.from(
+        { length: 101 },
+        (_, index) => `host${index}.example.com`,
+      ),
+    },
+    {
+      mode: "allowlist",
+      allowCidrs: Array.from(
+        { length: 11 },
+        (_, index) => `10.0.0.${index}/32`,
+      ),
+    },
+  ] as const)
+    assert.throws(() => daytonaSandboxProvider({ egress }), {
+      code: "configuration",
+    });
+  for (const create of [
+    { networkBlockAll: false },
+    { networkAllowList: "" },
+    { domainAllowList: "example.com" },
+    { outboundProxyUrl: "http://proxy.example.com" },
+  ])
+    assert.throws(
+      () => daytonaSandboxProvider({ create, egress: { mode: "deny-all" } }),
+      /not both/,
+    );
+});
+
+test("Daytona confirms a frozen policy before workspace setup and releases once", async () => {
+  const calls: string[] = [];
+  const domains = ["example.com"];
+  const create = { language: "typescript" };
+  const sandbox = {
+    updateNetworkSettings: async (settings: unknown) => {
+      assert.deepEqual(settings, { domainAllowList: "example.com" });
+      calls.push("confirm");
+    },
+    getUserHomeDir: async () => {
+      calls.push("home");
+      return "/home/test";
+    },
+    fs: {
+      createFolder: async () => {
+        calls.push("folder");
+      },
+    },
+  } as unknown as DaytonaSandbox;
+  const provider = daytonaSandboxProvider(
+    { egress: { mode: "allowlist", domains }, create },
+    async () => ({
+      create: async (settings) => {
+        assert.deepEqual(settings, {
+          language: "typescript",
+          domainAllowList: "example.com",
+        });
+        calls.push("create");
+        return sandbox;
+      },
+      delete: async () => {
+        calls.push("delete");
+      },
+    }),
+  );
+  domains.push("*.other.com");
+  Object.assign(create, {
+    networkBlockAll: false,
+    domainAllowList: "*.other.com",
+  });
+  const lease = await provider.acquire({
+    repository: "/repo",
+    directory: "/repo",
+    gitDirectories: [],
+    variables: {},
+  });
+  await lease.release();
+  await lease.release();
+  assert.deepEqual(calls, ["create", "confirm", "home", "folder", "delete"]);
+});
+
+test("Daytona rejects unconfirmed enforcement and cleans up before any workspace operation", async () => {
+  for (const failure of [
+    "rejected",
+    "missing-method",
+    "cleanup-failed",
+    "cancelled",
+    "late-allocation",
+  ] as const) {
+    const controller = new AbortController();
+    const cause = new Error("network policy rejected");
+    let deleted = 0,
+      commands = 0,
+      confirmations = 0;
+    const sandbox = {
+      ...(failure === "missing-method"
+        ? {}
+        : {
+            updateNetworkSettings: async () => {
+              confirmations++;
+              if (failure === "cancelled") {
+                controller.abort();
+                return;
+              }
+              throw cause;
+            },
+          }),
+      getUserHomeDir: async () => {
+        commands++;
+        return "/home/test";
+      },
+    } as unknown as DaytonaSandbox;
+    const provider = daytonaSandboxProvider(
+      { egress: { mode: "deny-all" } },
+      async () => ({
+        create: async () => {
+          if (failure === "late-allocation") controller.abort();
+          return sandbox;
+        },
+        delete: async () => {
+          deleted++;
+          if (failure === "cleanup-failed") throw new Error("cleanup failed");
+        },
+      }),
+    );
+    await assert.rejects(
+      provider.acquire({
+        repository: "/repo",
+        directory: "/repo",
+        gitDirectories: [],
+        variables: {},
+        signal: controller.signal,
+      }),
+      (error: unknown) => {
+        if (failure === "cleanup-failed") {
+          assert.ok(error instanceof AggregateError);
+          assert.equal(error.errors.length, 2);
+          return true;
+        }
+        if (controller.signal.aborted) {
+          assert.equal(error, controller.signal.reason);
+          return true;
+        }
+        assert.ok(error instanceof Error);
+        assert.match(error.message, /could not confirm egress/);
+        if (failure === "rejected") assert.equal(error.cause, cause);
+        return true;
+      },
+    );
+    assert.equal(deleted, 1, failure);
+    assert.equal(commands, 0, failure);
+    if (failure === "late-allocation") assert.equal(confirmations, 0);
+  }
+});
+
+test("Daytona native configuration remains available without Outpost enforcement claims", async () => {
+  const create: NonNullable<DaytonaOptions["create"]> = {
+    networkBlockAll: true,
+  };
+  const provider = daytonaSandboxProvider({ create }, async () => ({
+    create: async (settings) => {
+      assert.deepEqual(settings, { networkBlockAll: true });
+      throw new Error("allocation probe");
+    },
+    delete: async () => {},
+  }));
+  create.networkBlockAll = false;
+  await assert.rejects(
+    provider.acquire({
+      repository: "/repo",
+      directory: "/repo",
+      gitDirectories: [],
+      variables: {},
+    }),
+    /allocation probe/,
+  );
+});
+
+test("Vercel snapshots absent native settings and isolates successive allocations", async () => {
+  for (const native of [undefined, { allow: ["example.com"] }]) {
+    const create: NonNullable<VercelOptions["create"]> = native
+      ? { networkPolicy: native }
+      : {};
+    let calls = 0;
+    const provider = vercelSandboxProvider({ create }, async (settings) => {
+      calls++;
+      assert.deepEqual(
+        structuredClone(settings?.networkPolicy),
+        native ? { allow: ["example.com"] } : undefined,
+      );
+      const policy = settings?.networkPolicy;
+      if (policy && typeof policy === "object" && Array.isArray(policy.allow))
+        policy.allow.push("*");
+      throw new Error("allocation probe");
+    });
+    create.networkPolicy = "allow-all";
+    for (let attempt = 0; attempt < 2; attempt++) {
+      await assert.rejects(
+        provider.acquire({
+          repository: "/repo",
+          directory: "/repo",
+          gitDirectories: [],
+          variables: {},
+        }),
+        /allocation probe/,
+      );
+    }
+    assert.equal(calls, 2);
+  }
 });

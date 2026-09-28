@@ -276,8 +276,8 @@
     "Crée un provider distant Vercel Sandbox, avec chargement du SDK optionnel à l’acquisition. L’état du dépôt est envoyé puis resynchronisé avec protection des modifications hôtes concurrentes. Une fonction connect fournie peut remplacer la création de sandbox du SDK pour une intégration."
   ],
   "daytonaSandboxProvider": [
-    "Create a remote Daytona provider with separate SDK connection and sandbox creation settings. Repository transfers use the acquired remote environment, and synchronization validates concurrent host edits before applying changes.",
-    "Crée un provider distant Daytona avec réglages distincts de connexion SDK et de création de sandbox. Les transferts utilisent l’environnement distant acquis et la synchronisation valide les modifications hôtes concurrentes avant application."
+    "Create a remote Daytona provider with separate SDK connection and sandbox creation settings. Repository transfers use the acquired remote environment, and synchronization validates concurrent host edits before applying changes. Optional egress is validated before allocation and confirmed through the server network-update API before workspace setup; failure triggers deletion. Native image startup precedes that confirmation. See [outbound rules](../../guide/outbound-rules/).",
+    "Crée un provider distant Daytona avec réglages distincts de connexion SDK et de création de sandbox. Les transferts utilisent l’environnement distant acquis et la synchronisation valide les modifications hôtes concurrentes avant application. La politique egress optionnelle est validée avant allocation et confirmée par l’API réseau du serveur avant préparation du workspace ; un échec déclenche la suppression. Le démarrage natif de l’image précède cette confirmation. Consultez les [règles sortantes](../../guide/outbound-rules/)."
   ],
   "firecrackerSandboxProvider": [
     "Create an opt-in Firecracker microVM provider from explicit kernel, rootfs, TAP and SSH settings. The host must provide KVM and a prepared guest; allocation does not fall back to host execution. The acquired lease owns VM shutdown.",

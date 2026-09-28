@@ -9,6 +9,8 @@ Outpost's next priority is reliable everyday execution: a successful first run, 
 
 **Unreleased token accounting:** Copilot and Kimi session counters, incomplete-usage propagation and token-only budget rejection are implemented. Offline protocol, process, workflow and checkpoint regressions cover these contracts. Authenticated runs and comparison with vendor billing remain part of the live CLI campaigns.
 
+**Outbound networking (implemented, unreleased):** Vercel native policies are snapshotted; Daytona policies require server confirmation before workspace setup and reject unsupported combinations. The opt-in network campaign distinguishes unreachable baselines and account limitations from verified filtering. Strict Daytona enforcement on an eligible account, container allowlists and broader adversarial validation remain pending. See [outbound rules](../../guide/outbound-rules/).
+
 ## Starting point
 
 The foundation includes reusable sandboxes, Git workspaces, agent adapters, typed workflows and recovery tools. The CLI, authentication setup and custom Responses providers are documented in the [setup guide](../../guide/command-line/). Use the [API reference](../../reference/diagnosesandbox/) for implemented contracts and the changelog for released versions. An implementation or simulated test is not evidence of a successful live provider campaign.

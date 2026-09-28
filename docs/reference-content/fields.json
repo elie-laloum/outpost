@@ -2705,16 +2705,16 @@
     "deny-all bloque le trafic sortant ; allowlist le restreint aux destinations déclarées si pris en charge."
   ],
   "EgressPolicy.domains": [
-    "Allowed outbound domain names for providers supporting domain allowlists.",
-    "Noms de domaines sortants autorisés pour les providers prenant en charge ces listes."
+    "Exact DNS names or leading *. subdomain patterns, without scheme, path or port. No destinations are added automatically. Daytona wildcards require the apex to be explicitly listed too.",
+    "Noms DNS exacts ou motifs de sous-domaines commençant par *., sans protocole, chemin ni port. Aucune destination n’est ajoutée automatiquement. Les jokers Daytona exigent aussi la racine explicite."
   ],
   "EgressPolicy.allowCidrs": [
-    "Network ranges explicitly allowed by the provider’s egress policy.",
-    "Plages réseau explicitement autorisées par la politique sortante du provider."
+    "Allowed IP ranges, independently of domain rules. Vercel accepts IPv4/IPv6; Daytona accepts up to 10 IPv4 CIDRs without domain rules. Broad ranges grant broad IP access.",
+    "Plages IP autorisées indépendamment des domaines. Vercel accepte IPv4/IPv6 ; Daytona accepte au plus 10 CIDR IPv4 sans règle de domaine. Des plages larges donnent un accès IP large."
   ],
   "EgressPolicy.denyCidrs": [
-    "Network ranges explicitly denied by the provider’s egress policy.",
-    "Plages réseau explicitement interdites par la politique sortante du provider."
+    "IP ranges denied even when a domain or CIDR allows access. Supported by Vercel; non-empty lists are rejected by Daytona.",
+    "Plages IP refusées même si un domaine ou CIDR autorise l’accès. Prises en charge par Vercel ; les listes non vides sont refusées par Daytona."
   ],
   "speculate.options": [
     "Repository, provider, bounded candidates, admission budget and winner-validation callback.",
@@ -2853,8 +2853,8 @@
     "Échec d’origine rencontré pendant l’exécution, la validation d’un candidat ou le nettoyage de la course."
   ],
   "ContainerOptions.egress": [
-    "Explicit outbound network policy; unsupported restrictions are rejected by the provider.",
-    "Politique réseau sortante explicite ; le provider rejette les restrictions non prises en charge."
+    "Optional deny-all policy using network none; allowlists and conflicting configured networks are rejected.",
+    "Politique deny-all optionnelle utilisant le réseau none ; les listes d’autorisation et réseaux configurés incompatibles sont refusés."
   ],
   "ContainerOptions.repositoryMode": [
     "mounted shares the host checkout and Git metadata; isolated uses the opt-in private repository transfer mode.",
@@ -2925,8 +2925,8 @@
     "Déclarations d’environnement explicites ; les valeurs sont des chaînes."
   ],
   "VercelOptions.egress": [
-    "Explicit outbound network policy; unsupported restrictions are rejected by the provider.",
-    "Politique réseau sortante explicite ; le provider rejette les restrictions non prises en charge."
+    "Optional native firewall restriction, copied when composing the provider. Conflicts with create.networkPolicy. Domain filtering uses TLS SNI; allowed CIDRs independently grant IP access and denied CIDRs take priority.",
+    "Restriction optionnelle du pare-feu natif, copiée à la composition du provider. Incompatible avec create.networkPolicy. Les domaines sont filtrés par TLS SNI ; les CIDR autorisés donnent un accès IP indépendant et les CIDR refusés sont prioritaires."
   ],
   "VercelOptions.create": [
     "Sandbox creation options forwarded to the provider’s SDK.",
@@ -2949,8 +2949,8 @@
     "Réglages de connexion du client SDK Daytona, distincts des options de création de sandbox."
   ],
   "DaytonaOptions.create": [
-    "Sandbox creation options forwarded to the provider’s SDK.",
-    "Options de création de sandbox transmises au SDK du provider."
+    "Sandbox creation settings forwarded to the SDK. Native networking without egress follows account-specific Daytona behavior without Outpost enforcement confirmation. Trust image startup code, which can run before acquisition completes.",
+    "Réglages de création transmis au SDK. Le réseau natif sans egress suit le comportement Daytona du compte sans confirmation Outpost. Le code de démarrage de l’image doit être fiable : il peut s’exécuter avant la fin de l’acquisition."
   ],
   "DaytonaOptions.variables": [
     "Explicit environment declarations; values are strings.",
@@ -5285,5 +5285,9 @@
   "HarnessSubagent.validate": [
     "Validate the parent model’s delegation input against the fixed prompt schema before invoking the child.",
     "Valide l’entrée de délégation du modèle parent selon le schéma prompt fixe avant d’appeler l’enfant."
+  ],
+  "DaytonaOptions.egress": [
+    "Optional deny-all, domain or IPv4 CIDR allowlist. Requires successful server confirmation before workspace setup; refusal deletes the sandbox. Requires Tier 3/4 and WRITE_SANDBOXES. Rejects native network options, domain/CIDR mixtures, denyCidrs and implicit wildcard apex access.",
+    "Politique optionnelle deny-all, liste de domaines ou CIDR IPv4. Exige une confirmation serveur avant préparation du workspace ; un refus supprime la sandbox. Nécessite Tier 3/4 et WRITE_SANDBOXES. Refuse les options réseau natives, mélanges domaines/CIDR, denyCidrs et accès implicite à la racine par joker."
   ]
 }

@@ -260,9 +260,9 @@ Existe, mais partiel ou expérimental pour un usage en production.
 
 ### Politiques réseau
 
-**Faiblesse actuelle** — La fonctionnalité est expérimentale et le blocage total ne marche que sur Docker et Podman. Aucune liste d'autorisation n'existe, donc un agent CLI bloqué ne peut plus joindre son propre modèle.
+**État — implémentation renforcée, non publiée** : les politiques Vercel sont copiées pour empêcher une mutation ultérieure de l’appelant. Daytona traduit les règles représentables et exige une confirmation serveur avant préparation du workspace ; un refus déclenche la suppression. Les mélanges domaines/CIDR, exclusions CIDR, IPv6 Daytona et jokers autorisant implicitement la racine sont refusés. Docker/Podman conservent le blocage total ; leurs listes d’autorisation restent un chantier distinct.
 
-**Ce que ça complète** — Des listes d'autorisation par domaine (API du modèle, registres de paquets), leur prise en charge sur les fournisseurs cloud qui le permettent, et un comportement mesuré.
+**Validation** — Régressions hors ligne et campagne réseau opt-in avec témoin sans restriction, domaines exacts, jokers, redirections, IP et réutilisation. Vercel valide les domaines, redirections et règles IPv4/CIDR ; IPv6 reste non vérifié faute de témoin. Le compte Daytona refuse les trois formes de restriction. Les tests Docker réels passent ; Podman est indisponible. Les résultats réels et limites sont conservés dans `temp/network-policies/SUMMARY.md`. Un témoin inaccessible ou un compte Daytona non éligible ne prouve pas le filtrage. La validation stricte Daytona Tier 3/4 et les scénarios adversariaux élargis restent ouverts.
 
 <a id="r-retry"></a>
 
