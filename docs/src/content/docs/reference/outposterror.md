@@ -19,15 +19,15 @@ Error with a stable fault code and structured details for execution, configurati
 
 ## Parameters and properties
 
-| Name       | Type                                | Presence | Meaning                                                                         |
-| ---------- | ----------------------------------- | -------- | ------------------------------------------------------------------------------- |
-| `recovery` | `Readonly<Record<string, unknown>>` | Required | Metadata describing retained workspace and transfer artifacts after failure.    |
-| `code`     | `FaultCode`                         | Required | Stable Outpost fault category used for programmatic failure handling.           |
-| `details`  | `Readonly<Record<string, unknown>>` | Required | Structured diagnostic data attached to the fault code.                          |
-| `name`     | `string`                            | Required | Error class name used to distinguish this failure from other JavaScript errors. |
-| `message`  | `string`                            | Required | Human-readable explanation of the failure.                                      |
-| `stack`    | `string \| undefined`               | Optional | JavaScript stack trace for the error, when available.                           |
-| `cause`    | `unknown`                           | Optional | Original failure attached to this error.                                        |
+| Name       | Type                                | Presence | Meaning                                                                                                                                                                                      |
+| ---------- | ----------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `recovery` | `Readonly<Record<string, unknown>>` | Required | Metadata describing retained workspace and transfer artifacts after failure.                                                                                                                 |
+| `code`     | `FaultCode`                         | Required | Stable Outpost fault category used for programmatic failure handling.                                                                                                                        |
+| `details`  | `Readonly<Record<string, unknown>>` | Required | Structured diagnostics attached to the fault code. HTTP model errors include status and, when valid, retryAfterMs: the minimum wait in milliseconds for an explicitly configured task retry. |
+| `name`     | `string`                            | Required | Error class name used to distinguish this failure from other JavaScript errors.                                                                                                              |
+| `message`  | `string`                            | Required | Human-readable explanation of the failure.                                                                                                                                                   |
+| `stack`    | `string \| undefined`               | Optional | JavaScript stack trace for the error, when available.                                                                                                                                        |
+| `cause`    | `unknown`                           | Optional | Original failure attached to this error.                                                                                                                                                     |
 
 ## Signature
 

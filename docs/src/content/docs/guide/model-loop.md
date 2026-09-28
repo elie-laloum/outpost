@@ -100,3 +100,5 @@ Step and tool-call limits apply to each loop independently. Token limits include
 When enabled, child transcripts use the child’s conversation store, record `parentConversation` and `parentCallId`, and are captured even after failure. Parent continuation reuses recorded tool results; it does not automatically resume or re-run a child. Interrupted calls remain explicit errors. Use the child conversation identifier with an explicit dispatch to resume it. Child lifecycle events link a unique execution `id`, the delegation `callId` and the optional conversation; other child events and their observation scopes carry `subagentId`. Interactive terminal attachment remains unsupported for built-in harnesses.
 
 API: [defineHarnessSubagent](../../reference/defineharnesssubagent/) · [HarnessSubagentOptions](../../reference/harnesssubagentoptions/).
+
+HTTP failures preserve valid `Retry-After` headers for explicit [task retries](../task-scheduling/).
