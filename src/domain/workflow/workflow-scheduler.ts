@@ -1,3 +1,5 @@
+import { OutpostError } from "../errors.ts";
+import { maxTimerMs } from "./retry.constants.ts";
 import { applyDecisions, pauseGate, prepareDecisions } from "./gates.ts";
 import { openCheckpoint } from "./checkpoint.ts";
 import type { WorkflowCheckpointSession } from "./checkpoint.types.ts";
@@ -23,12 +25,41 @@ export async function schedule(
     throw new Error("Workflow gates and decisions require a checkpoint");
   if (options.decisions && !options.decisions.length)
     throw new Error("Workflow decisions cannot be empty");
-  const checkpoint = options.checkpoint
-    ? await openCheckpoint(name, tasks, options.checkpoint)
-    : undefined;
+  if (options.timeoutMs !== undefined) {
+    positive(options.timeoutMs, "Workflow timeoutMs");
+    if (options.timeoutMs > maxTimerMs)
+      throw new Error("Workflow timeoutMs exceeds the supported timer range");
+  }
+  const deadline = new AbortController();
+  const timer =
+    options.timeoutMs === undefined
+      ? undefined
+      : setTimeout(
+          () =>
+            deadline.abort(
+              new OutpostError("timeout", `Workflow ${name} timed out`, {
+                timeoutMs: options.timeoutMs,
+              }),
+            ),
+          options.timeoutMs,
+        );
+  const signal = options.signal
+    ? AbortSignal.any([options.signal, deadline.signal])
+    : deadline.signal;
+  let checkpoint: WorkflowCheckpointSession | undefined;
   try {
-    return await scheduleRun(name, tasks, options, checkpoint);
+    checkpoint = options.checkpoint
+      ? await openCheckpoint(name, tasks, options.checkpoint)
+      : undefined;
+    return await scheduleRun(
+      name,
+      tasks,
+      { ...options, signal },
+      checkpoint,
+      deadline.signal,
+    );
   } finally {
+    clearTimeout(timer);
     await checkpoint?.release();
   }
 }
@@ -37,7 +68,8 @@ async function scheduleRun(
   name: string,
   tasks: readonly Task[],
   options: WorkflowOptions,
-  checkpoint?: WorkflowCheckpointSession,
+  checkpoint: WorkflowCheckpointSession | undefined,
+  deadline: AbortSignal,
 ): Promise<WorkflowResult> {
   const concurrency = options.concurrency ?? 1;
   positive(concurrency, "concurrency");
@@ -59,7 +91,7 @@ async function scheduleRun(
     const decisions = await prepareDecisions(state);
     emit({ type: "start" });
     if (checkpoint?.initial) emit({ type: "resume" });
-    applyDecisions(state, decisions);
+    if (!signal.aborted) applyDecisions(state, decisions);
     await state.persist();
     try {
       while (true) {
@@ -116,7 +148,8 @@ async function scheduleRun(
     let status: WorkflowResult["status"] = "done";
     if (paused) status = "paused";
     if (errors.length) status = "failed";
-    if (options.signal?.aborted) status = "cancelled";
+    if (options.signal?.aborted)
+      status = timedOut(options, deadline) ? "failed" : "cancelled";
     emit({ type: "finish", status, durationMs: Date.now() - started });
     await state.observation.close();
     observerErrors.push(...state.observation.errors);
@@ -145,9 +178,16 @@ async function scheduleRun(
   } catch (error) {
     state.emit({
       type: "finish",
-      status: options.signal?.aborted ? "cancelled" : "failed",
+      status:
+        options.signal?.aborted && !timedOut(options, deadline)
+          ? "cancelled"
+          : "failed",
     });
     await state.observation.close();
     throw error;
   }
+}
+
+function timedOut(options: WorkflowOptions, deadline: AbortSignal): boolean {
+  return deadline.aborted && options.signal?.reason === deadline.reason;
 }

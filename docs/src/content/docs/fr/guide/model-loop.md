@@ -100,3 +100,5 @@ Les limites d’étapes et d’appels d’outils s’appliquent indépendamment 
 Lorsqu’ils sont activés, les transcripts enfants utilisent le stockage de conversation enfant, enregistrent `parentConversation` et `parentCallId` et sont capturés même après échec. La continuation du parent réutilise les résultats d’outils enregistrés ; elle ne reprend ni ne relance automatiquement un enfant. Les appels interrompus restent des erreurs explicites. Utilisez l’identifiant de conversation enfant dans un dispatch explicite pour le reprendre. Les événements de cycle de vie enfant relient un `id` d’exécution unique, le `callId` de délégation et la conversation optionnelle ; les autres événements enfants et leur contexte d’observation portent `subagentId`. Le terminal interactif reste indisponible pour les harness intégrés.
 
 API : [defineHarnessSubagent](../../reference/defineharnesssubagent/) · [HarnessSubagentOptions](../../reference/harnesssubagentoptions/).
+
+Les erreurs HTTP conservent les en-têtes `Retry-After` valides pour les [reprises de tâches](../task-scheduling/) explicites.

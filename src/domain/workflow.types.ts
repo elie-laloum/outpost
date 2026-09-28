@@ -29,6 +29,9 @@ export interface TaskContext {
 export interface Retry {
   readonly attempts: number;
   readonly delayMs?: number;
+  readonly backoff?: "fixed" | "exponential";
+  readonly maxDelayMs?: number;
+  readonly jitter?: "none" | "full";
   readonly accepts?: (error: unknown, attempt: number) => boolean;
 }
 
@@ -89,6 +92,7 @@ export interface WorkflowEvent {
   readonly attempt?: number;
   readonly usage?: Usage;
   readonly durationMs?: number;
+  readonly delayMs?: number;
 }
 
 export interface WorkflowTelemetry {
@@ -96,6 +100,7 @@ export interface WorkflowTelemetry {
 }
 
 export interface WorkflowOptions {
+  readonly timeoutMs?: number;
   readonly observation?: ObservationHub;
   readonly decisionVerifier?: WorkflowDecisionVerifier;
   readonly decisions?: readonly WorkflowDecision[];

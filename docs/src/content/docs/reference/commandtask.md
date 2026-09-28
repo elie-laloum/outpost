@@ -19,17 +19,17 @@ Define a workflow node that runs a command in an existing caller-owned sandbox. 
 
 ## Parameters and properties
 
-| Name                | Type                                                                   | Presence | Meaning                                                                                                  |
-| ------------------- | ---------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------- |
-| `options`           | `Omit<TaskOptions<CommandResult>, "perform"> & CommandTaskOptions`     | Required | Task scheduling settings, existing sandbox and command or command factory.                               |
-| `options.retry`     | `Retry \| undefined`                                                   | Optional | Explicit retry policy; repeated effects require care.                                                    |
-| `options.key`       | `string`                                                               | Required | Stable task key identifying the node within its workflow graph.                                          |
-| `options.gate`      | `WorkflowGate \| undefined`                                            | Optional | Persisted approval or pause definition; execution requires a checkpoint and a matching trusted decision. |
-| `options.after`     | `readonly Task<unknown>[] \| undefined`                                | Optional | Declared task dependencies whose values may be read.                                                     |
-| `options.condition` | `((context: TaskContext) => boolean \| Promise<boolean>) \| undefined` | Optional | Predicate evaluated before the first task attempt.                                                       |
-| `options.timeoutMs` | `number \| undefined`                                                  | Optional | Time limit in milliseconds for each task attempt; cancellation is cooperative through context.signal.    |
-| `options.sandbox`   | `Sandbox`                                                              | Required | Existing caller-owned sandbox reused by the task; the task does not close it.                            |
-| `options.command`   | `Command \| ((context: TaskContext) => Command)`                       | Required | Command to run, or factory that builds it from task dependency values.                                   |
+| Name                | Type                                                                   | Presence | Meaning                                                                                                                                  |
+| ------------------- | ---------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `options`           | `Omit<TaskOptions<CommandResult>, "perform"> & CommandTaskOptions`     | Required | Task scheduling settings, existing sandbox and command or command factory.                                                               |
+| `options.retry`     | `Retry \| undefined`                                                   | Optional | Explicit retry policy; repeated effects require care.                                                                                    |
+| `options.key`       | `string`                                                               | Required | Stable task key identifying the node within its workflow graph.                                                                          |
+| `options.gate`      | `WorkflowGate \| undefined`                                            | Optional | Persisted approval or pause definition; execution requires a checkpoint and a matching trusted decision.                                 |
+| `options.after`     | `readonly Task<unknown>[] \| undefined`                                | Optional | Declared task dependencies whose values may be read.                                                                                     |
+| `options.condition` | `((context: TaskContext) => boolean \| Promise<boolean>) \| undefined` | Optional | Predicate evaluated before the first task attempt.                                                                                       |
+| `options.timeoutMs` | `number \| undefined`                                                  | Optional | Positive integer time limit in milliseconds for each task attempt, up to 2147483647; cancellation is cooperative through context.signal. |
+| `options.sandbox`   | `Sandbox`                                                              | Required | Existing caller-owned sandbox reused by the task; the task does not close it.                                                            |
+| `options.command`   | `Command \| ((context: TaskContext) => Command)`                       | Required | Command to run, or factory that builds it from task dependency values.                                                                   |
 
 ## Returns
 

@@ -19,17 +19,17 @@ OutpostError spécialisée pour balise absente, JSON invalide ou rejet par sché
 
 ## Paramètres et propriétés
 
-| Nom        | Type                                | Présence  | Rôle                                                                                     |
-| ---------- | ----------------------------------- | --------- | ---------------------------------------------------------------------------------------- |
-| `tag`      | `string`                            | Requis    | Identifiant de balise de type XML.                                                       |
-| `raw`      | `string \| undefined`               | Requis    | Contenu brut de la réponse balisée disponible lors de l’échec de validation.             |
-| `recovery` | `Readonly<Record<string, unknown>>` | Requis    | Métadonnées décrivant le workspace et les artefacts de transfert conservés après échec.  |
-| `code`     | `FaultCode`                         | Requis    | Catégorie stable d’erreur Outpost utilisée pour le traitement programmatique des échecs. |
-| `details`  | `Readonly<Record<string, unknown>>` | Requis    | Données structurées de diagnostic attachées au code d’erreur.                            |
-| `name`     | `string`                            | Requis    | Nom de classe d’erreur permettant de distinguer cet échec des autres erreurs JavaScript. |
-| `message`  | `string`                            | Requis    | Explication lisible de l’échec.                                                          |
-| `stack`    | `string \| undefined`               | Optionnel | Trace de pile JavaScript de l’erreur lorsqu’elle est disponible.                         |
-| `cause`    | `unknown`                           | Optionnel | Échec d’origine attaché à cette erreur.                                                  |
+| Nom        | Type                                | Présence  | Rôle                                                                                                                                                                                                             |
+| ---------- | ----------------------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `tag`      | `string`                            | Requis    | Identifiant de balise de type XML.                                                                                                                                                                               |
+| `raw`      | `string \| undefined`               | Requis    | Contenu brut de la réponse balisée disponible lors de l’échec de validation.                                                                                                                                     |
+| `recovery` | `Readonly<Record<string, unknown>>` | Requis    | Métadonnées décrivant le workspace et les artefacts de transfert conservés après échec.                                                                                                                          |
+| `code`     | `FaultCode`                         | Requis    | Catégorie stable d’erreur Outpost utilisée pour le traitement programmatique des échecs.                                                                                                                         |
+| `details`  | `Readonly<Record<string, unknown>>` | Requis    | Diagnostics structurés attachés au code d’erreur. Les erreurs HTTP de modèles incluent status et, si valide, retryAfterMs : l’attente minimale en millisecondes d’une reprise de tâche explicitement configurée. |
+| `name`     | `string`                            | Requis    | Nom de classe d’erreur permettant de distinguer cet échec des autres erreurs JavaScript.                                                                                                                         |
+| `message`  | `string`                            | Requis    | Explication lisible de l’échec.                                                                                                                                                                                  |
+| `stack`    | `string \| undefined`               | Optionnel | Trace de pile JavaScript de l’erreur lorsqu’elle est disponible.                                                                                                                                                 |
+| `cause`    | `unknown`                           | Optionnel | Échec d’origine attaché à cette erreur.                                                                                                                                                                          |
 
 ## Signature
 

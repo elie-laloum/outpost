@@ -130,6 +130,8 @@ async function submitSignedReview(
 
 Verification rejects unauthorized actors, altered decisions, expired proofs, unknown or duplicated key identifiers and reused requests. All submitted decisions are validated before any is applied. Audit records retain the verified key identifier and verification time; no private key or bearer token is stored.
 
+Verifier callbacks must return promptly. If the workflow deadline expires while verification is pending, the runtime waits for the callback to settle but does not apply its late approval.
+
 ## Rotate approver keys
 
 Publish a new public key with a unique `keyId` and the same actor binding, switch the signing service to its private key, then remove the old public key after the overlap period. The verifier reloads keys on each decision. Removing a key immediately rejects new proofs using it; already persisted approvals remain accepted, including after expiry. Checkpoint storage remains a trusted boundary: these signatures do not authenticate the checkpoint itself.

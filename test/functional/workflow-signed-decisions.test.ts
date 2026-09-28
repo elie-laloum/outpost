@@ -351,3 +351,57 @@ test("public verifier snapshots decisions before asynchronous key resolution", a
   });
   assert.equal((await verifier(mutable)).keyId, "old");
 });
+
+test("a workflow deadline during signature verification cannot persist a late approval", async (t) => {
+  const { setTimeout: delay } = await import("node:timers/promises");
+  const directory = await mkdtemp(join(tmpdir(), "outpost-signed-deadline-"));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const checkpoint = {
+    store: workflowCheckpointStore({
+      transporter: localTransport({ directory }),
+    }),
+    runId: "deadline",
+    version: "1",
+  };
+  const gate = approvalTask({
+    key: "review",
+    prompt: "Ship?",
+    actors: ["maintainer"],
+    authentication: "signed",
+  });
+  const graph = workflow("deadline", [gate]);
+  const paused = await graph.start({ checkpoint });
+  const decision = signWorkflowDecision({
+    decision: {
+      executionId: paused.executionId,
+      key: gate.key,
+      requestId: paused.tasks[0]!.pause!.id,
+      actor: "maintainer",
+      reason: "Reviewed",
+      action: "approve",
+    },
+    privateKey: oldKey.privateKey,
+    keyId: "old",
+    expiresAt: future(),
+  });
+  const decisionVerifier = ed25519DecisionVerifier({
+    keys: async () => {
+      await delay(50);
+      return [
+        { keyId: "old", actor: "maintainer", publicKey: oldKey.publicKey },
+      ];
+    },
+  });
+  const result = await graph.start({
+    checkpoint,
+    decisions: [decision],
+    decisionVerifier,
+    timeoutMs: 10,
+  });
+  assert.equal(result.status, "failed");
+  assert.equal(result.tasks[0]!.status, "paused");
+  assert.equal(result.tasks[0]!.decision, undefined);
+  const restored = await graph.start({ checkpoint });
+  assert.equal(restored.status, "paused");
+  assert.equal(restored.tasks[0]!.decision, undefined);
+});

@@ -130,6 +130,8 @@ async function submitSignedReview(
 
 La vérification refuse les acteurs non autorisés, décisions altérées, preuves expirées, identifiants de clé inconnus ou dupliqués et demandes réutilisées. Toutes les décisions soumises sont validées avant toute application. L’audit conserve l’identifiant de clé vérifiée et la date de vérification ; aucune clé privée ni aucun jeton bearer n’est stocké.
 
+Les callbacks de vérification doivent répondre rapidement. Si le délai global expire pendant la vérification, le runtime attend la fin du callback mais n’applique pas son approbation tardive.
+
 ## Faire tourner les clés des approbateurs
 
 Publiez une nouvelle clé publique avec un `keyId` unique et le même acteur, basculez le service de signature vers sa clé privée, puis retirez l’ancienne clé publique après la période de chevauchement. Le vérificateur recharge les clés à chaque décision. Retirer une clé refuse immédiatement les nouvelles preuves correspondantes ; les approbations déjà persistées restent acceptées, même après expiration. Le stockage des checkpoints reste une frontière de confiance : ces signatures n’authentifient pas le checkpoint lui-même.
