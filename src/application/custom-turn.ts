@@ -1,12 +1,10 @@
 import type { AgentEvent, CustomAgent, Usage } from "../domain/agent.types.ts";
-import type {
-  ModelProvider,
-  ModelRequest,
-  ModelResult,
-  ModelStreamEvent,
-} from "../domain/model.types.ts";
+import type { ModelResult } from "../domain/model.types.ts";
 import type { SandboxLease } from "../domain/sandbox.types.ts";
 import { invariant, OutpostError } from "../domain/errors.ts";
+import { harnessBudget } from "./harness-budget.ts";
+import { harnessModelProvider } from "./harness-model-provider.ts";
+import { MAX_DELEGATION_DEPTH } from "../domain/subagent.constants.ts";
 import { addUsage } from "../domain/usage.ts";
 import { activityWatchdog } from "./activity-watchdog.ts";
 import { executionDefaults } from "./execution.constants.ts";
@@ -55,64 +53,31 @@ export async function customTurn(
     watchdog.refresh(false);
     notify(options.observe, { ...event, pass, at: new Date().toISOString() });
   };
-  const provider = agent.harness.modelProvider;
-  const scoped = (request: ModelRequest): ModelRequest => {
-    const { reasoning, maxOutputTokens } = agent.model;
-    return {
-      ...(reasoning === undefined ? {} : { reasoning }),
-      ...(maxOutputTokens === undefined ? {} : { maxOutputTokens }),
-      ...request,
-      signal,
+  const budget = harnessBudget(agent.harness.limits);
+  const account = (result: ModelResult, subagentId?: string): void => {
+    const tokens = result.usage ?? {
+      input: 0,
+      cached: 0,
+      output: 0,
+      complete: false,
     };
-  };
-  const account = (result: ModelResult): ModelResult => {
-    signal.throwIfAborted();
-    invariant(
-      result && typeof result.text === "string",
-      "Model provider must return text",
-    );
-    if (result.usage) {
-      usage = addUsage(usage, result.usage);
-      notify(options.observe, {
-        kind: "usage",
-        tokens: result.usage,
-        pass,
-        at: new Date().toISOString(),
-      });
-    }
+    usage = addUsage(usage, tokens);
+    notify(options.observe, {
+      kind: "usage",
+      tokens,
+      ...(subagentId ? { subagentId } : {}),
+      pass,
+      at: new Date().toISOString(),
+    });
     watchdog.refresh(false);
-    return result;
   };
-  async function* stream(
-    request: ModelRequest,
-  ): AsyncGenerator<ModelStreamEvent> {
-    signal.throwIfAborted();
-    let finish!: () => void;
-    track(new Promise<void>((resolve) => (finish = resolve)));
-    try {
-      for await (const event of provider.stream!(scoped(request))) {
-        signal.throwIfAborted();
-        watchdog.refresh(false);
-        yield event.type === "result"
-          ? { type: "result", result: account(event.result) }
-          : event;
-      }
-    } finally {
-      finish();
-    }
-  }
-  const modelProvider: ModelProvider = {
-    name: provider.name,
-    ...(provider.stream ? { stream } : {}),
-    request(request) {
-      return track(
-        (async () => {
-          signal.throwIfAborted();
-          return account(await provider.request(scoped(request)));
-        })(),
-      );
-    },
-  };
+  const modelScope = { track, account };
+  const modelProvider = harnessModelProvider({
+    agent,
+    signal,
+    budget,
+    ...modelScope,
+  });
   const sandbox: SandboxLease = {
     root: lease.root,
     home: lease.home,
@@ -179,6 +144,16 @@ export async function customTurn(
     const text = await harnessLoop(
       {
         agent,
+        repository: context.repository,
+        ...(transcript ? { conversation: transcript.id } : {}),
+        budget,
+        modelScope,
+        permissions: agent.harness.permissions
+          ? [agent.harness.permissions]
+          : [],
+        depth: 0,
+        maxDepth:
+          agent.harness.limits.maxDelegationDepth ?? MAX_DELEGATION_DEPTH,
         verbose: options.observation?.verbose ?? false,
         tools: context.repair
           ? agent.harness.tools.filter((tool) => tool.readOnly)

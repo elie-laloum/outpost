@@ -5,10 +5,6 @@ sidebar:
   order: 10
 ---
 
-:::caution[Experimental]
-Experimental: part of the built-in harness engine introduced in 5.0.0. The contract may change in a later release.
-:::
-
 ## Import
 
 ```ts

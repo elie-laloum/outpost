@@ -7,6 +7,7 @@ export interface ObservationScope {
   readonly attempt?: number;
   readonly dispatchId?: string;
   readonly pass?: number;
+  readonly subagentId?: string;
   readonly candidate?: string;
 }
 

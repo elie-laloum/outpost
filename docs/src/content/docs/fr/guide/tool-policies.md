@@ -3,7 +3,7 @@ title: "Politiques des outils"
 description: "Autoriser, refuser et intercepter les appels d’outils de la boucle."
 ---
 
-La boucle expérimentale accepte `permissions` et `hooks` sur `harness()`. Les permissions fournissent des règles ordonnées ; les hooks fournissent un comportement propre à chaque phase.
+La boucle intégrée accepte `permissions` et `hooks` sur `harness()`. Les permissions fournissent des règles ordonnées ; les hooks fournissent un comportement propre à chaque phase.
 
 ```ts
 import {

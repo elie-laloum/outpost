@@ -291,13 +291,27 @@ for (const [locale, label] of [
     "modelprovider",
     "modelrequest",
     "modelresult",
+    "anthropicmodelprovider",
+    "anthropicmodelprovideroptions",
   ]) {
-    test(`experimental warning precedes API content (${locale}${name})`, async ({
+    test(`reference warning matches stability (${locale}${name})`, async ({
       page,
     }) => {
       await page.goto(`${locale}reference/${name}/`);
       const content = page.locator(".sl-markdown-content");
       const warning = content.locator(":scope > .starlight-aside").first();
+      const experimental = [
+        "firecracker",
+        "firecrackeroptions",
+        "anthropicmodelprovider",
+        "anthropicmodelprovideroptions",
+      ].includes(name);
+      if (!experimental) {
+        await expect(
+          content.locator(":scope > .starlight-aside--caution"),
+        ).toHaveCount(0);
+        return;
+      }
       await expect(warning).toBeVisible();
       await expect(warning).toHaveClass(/starlight-aside--caution/);
       await expect(warning).toContainText(label);
@@ -321,7 +335,7 @@ for (const [locale, label, familyName] of [
     await page.goto(`${locale}reference/openaicompatible/`);
     const factory = page
       .getByRole("link", {
-        name: `openaiModelProvider — ${label}`,
+        name: "openaiModelProvider",
         exact: true,
       })
       .filter({ visible: true });
@@ -333,11 +347,22 @@ for (const [locale, label, familyName] of [
       "ModelProvider",
       "ModelRequest",
       "ModelResult",
+      "anthropicModelProvider",
+      "AnthropicModelProviderOptions",
     ]) {
+      const experimental = name.toLowerCase().startsWith("anthropic");
       const link = family.getByRole("link", {
-        name: `${name} — ${label}`,
+        name: experimental ? `${name} — ${label}` : name,
         exact: true,
       });
+      await expect(link).toHaveCount(1);
+      if (!experimental) {
+        await expect(link).not.toHaveAttribute(
+          "data-api-status",
+          "experimental",
+        );
+        continue;
+      }
       await expect(link).toHaveAttribute("data-api-status", "experimental");
       expect(
         await link.evaluate(
@@ -442,9 +467,9 @@ for (const locale of ["", "fr/"]) {
   }
 }
 
-for (const [locale, overview, label] of [
-  ["", "Overview", "Experimental"],
-  ["fr/", "Vue d’ensemble", "Expérimental"],
+for (const [locale, overview] of [
+  ["", "Overview"],
+  ["fr/", "Vue d’ensemble"],
 ]) {
   test(`Harness is a first-level family in Agents & models (${locale || "en"})`, async ({
     page,
@@ -474,12 +499,16 @@ for (const [locale, overview, label] of [
         1,
       );
     }
-    for (const name of ["harness", "defineHarnessTool", "HarnessToolContext"]) {
-      const link = family.getByRole("link", {
-        name: `${name} — ${label}`,
-        exact: true,
-      });
-      await expect(link).toHaveAttribute("data-api-status", "experimental");
+    for (const name of [
+      "harness",
+      "defineHarnessTool",
+      "HarnessToolContext",
+      "defineHarnessSubagent",
+      "HarnessSubagentOptions",
+    ]) {
+      const link = family.getByRole("link", { name, exact: true });
+      await expect(link).toHaveCount(1);
+      await expect(link).not.toHaveAttribute("data-api-status", "experimental");
     }
     await family.getByRole("link", { name: overview, exact: true }).click();
     await expect(page).toHaveURL(

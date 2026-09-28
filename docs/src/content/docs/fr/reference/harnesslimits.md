@@ -5,10 +5,6 @@ sidebar:
   order: 20
 ---
 
-:::caution[Expérimental]
-Expérimental : élément du moteur de harness intégré introduit en 5.0.0. Le contrat peut changer dans une version ultérieure.
-:::
-
 ## Import
 
 ```ts
@@ -17,17 +13,19 @@ import type { HarnessLimits } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom            | Type                                            | Présence  | Rôle                                                                                                                                                                                        |
-| -------------- | ----------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `maxSteps`     | `number \| undefined`                           | Optionnel | Nombre maximal de requêtes au modèle dans une passe ; 100 par défaut.                                                                                                                       |
-| `maxToolCalls` | `number \| undefined`                           | Optionnel | Nombre maximal d’appels d’outils dans une passe ; seulement borné par maxSteps s’il est omis.                                                                                               |
-| `usage`        | `Partial<Omit<Usage, "complete">> \| undefined` | Optionnel | Budget de tokens par compteur (input, cached, cacheCreated, output), vérifié avant chaque nouvelle requête. Exige un fournisseur qui rapporte l’usage ; la dernière étape peut le dépasser. |
+| Nom                  | Type                                            | Présence  | Rôle                                                                                                                                                                                                                                                                                                  |
+| -------------------- | ----------------------------------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `maxSteps`           | `number \| undefined`                           | Optionnel | Nombre maximal de requêtes au modèle dans une passe ; 100 par défaut.                                                                                                                                                                                                                                 |
+| `maxDelegationDepth` | `number \| undefined`                           | Optionnel | Nombre maximal de niveaux supplémentaires de délégation depuis ce harness ; 3 par défaut, 0 désactive la délégation et la limite d’un ancêtre ne peut pas être augmentée.                                                                                                                             |
+| `maxToolCalls`       | `number \| undefined`                           | Optionnel | Nombre maximal d’appels d’outils dans une passe ; seulement borné par maxSteps s’il est omis.                                                                                                                                                                                                         |
+| `usage`              | `Partial<Omit<Usage, "complete">> \| undefined` | Optionnel | Plafonds de tokens observés par tour, incluant les résumés de contexte et tous les descendants. Contrôlés après chaque réponse complète et avant une nouvelle requête ; un dépassement échoue même sur la réponse finale. L’usage absent ou partiel fait échouer une exécution avec budget de tokens. |
 
 ## Signature
 
 ```ts
 export interface HarnessLimits {
   readonly maxSteps?: number;
+  readonly maxDelegationDepth?: number;
   readonly maxToolCalls?: number;
   readonly usage?: Partial<Omit<Usage, "complete">>;
 }

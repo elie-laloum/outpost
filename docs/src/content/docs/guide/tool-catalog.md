@@ -3,7 +3,7 @@ title: "Tools and toolsets"
 description: "Expose a bounded set of sandbox operations to a model."
 ---
 
-For the experimental model loop, pass tools to `harness({ tools })`. Built-in toolsets cover files, search, edits, Git and shell commands.
+For the built-in model loop, pass tools to `harness({ tools })`. Built-in toolsets cover files, search, edits, Git and shell commands.
 
 ## Define a tool
 

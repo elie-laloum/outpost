@@ -3,7 +3,7 @@ title: "Outils et ensembles d’outils"
 description: "Exposer au modèle un ensemble borné d’opérations de sandbox."
 ---
 
-Pour la boucle de modèle expérimentale, passez les outils à `harness({ tools })`. Les ensembles intégrés couvrent fichiers, recherche, édition, Git et commandes shell.
+Pour la boucle de modèle intégrée, passez les outils à `harness({ tools })`. Les ensembles intégrés couvrent fichiers, recherche, édition, Git et commandes shell.
 
 ## Définir un outil
 

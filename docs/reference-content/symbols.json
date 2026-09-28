@@ -386,5 +386,13 @@
   "WorkflowUsageUnavailable": [
     "Error reported when incomplete token accounting makes a token-only workflow or speculation budget unenforceable. Configure budget.attempts and execution time limits to allow bounded fallback. Its usage dimension cancels admitted work and prevents retries.",
     "Erreur signalant qu’une comptabilité incomplète empêche de contrôler un budget de workflow ou de spéculation exclusivement en tokens. Configurez budget.attempts et des délais d’exécution pour autoriser un repli borné. Sa dimension usage annule le travail admis et empêche les retries."
+  ],
+  "defineHarnessSubagent": [
+    "Define a serialized tool that runs a built-in child agent with a fresh history in the parent’s borrowed sandbox. The parent supplies { prompt }; the result is JSON text containing text and an optional conversation identifier. Child tokens count once toward dispatch and every ancestor budget; cancellation and declarative permissions propagate. The tool cannot execute outside the harness runtime.",
+    "Définit un outil sérialisé exécutant un agent enfant intégré avec un historique neuf dans la sandbox empruntée du parent. Le parent fournit { prompt } ; le résultat est un texte JSON contenant text et un identifiant conversation optionnel. Les tokens enfants comptent une seule fois dans le dispatch et dans chaque budget ancêtre ; annulation et permissions déclaratives se propagent. L’outil ne peut pas être exécuté hors du runtime du harness."
+  ],
+  "AgentEventDetails": [
+    "Payload variants emitted by CLI adapters and the built-in harness, including child lifecycle events. AgentEvent adds child correlation metadata.",
+    "Variantes de contenu émises par les adapters CLI et le harness intégré, incluant le cycle de vie des enfants. AgentEvent ajoute les métadonnées de corrélation enfant."
   ]
 }

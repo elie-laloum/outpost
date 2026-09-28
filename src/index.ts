@@ -1,4 +1,10 @@
 export { agent } from "./domain/agent.ts";
+export { defineHarnessSubagent } from "./domain/subagent.ts";
+export type {
+  HarnessSubagent,
+  HarnessSubagentInput,
+  HarnessSubagentOptions,
+} from "./domain/subagent.types.ts";
 export { harness } from "./domain/harness.ts";
 export {
   defineHarnessContextStrategy,

@@ -7,6 +7,8 @@ export type TranscriptRecord =
       readonly id: string;
       readonly model: string;
       readonly parent?: string;
+      readonly parentConversation?: string;
+      readonly parentCallId?: string;
       readonly createdAt: string;
     }
   | { readonly type: "message"; readonly message: ModelMessage }

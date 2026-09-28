@@ -27,6 +27,7 @@ export type HarnessInstructionsOption =
 
 export interface HarnessLimits {
   readonly maxSteps?: number;
+  readonly maxDelegationDepth?: number;
   readonly maxToolCalls?: number;
   readonly usage?: Partial<Omit<Usage, "complete">>;
 }

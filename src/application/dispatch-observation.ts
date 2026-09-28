@@ -102,7 +102,10 @@ export async function observeDispatch<T, R extends ObservedDispatchResult>(
       if (event.kind === "usage") current = addUsage(current, event.tokens);
       if (event.kind === "summary") current = event.tokens;
       observation
-        .child({ pass: event.pass })
+        .child({
+          pass: event.pass,
+          ...(event.subagentId ? { subagentId: event.subagentId } : {}),
+        })
         .emit(options.agent?.kind === "custom" ? "harness" : "agent", event);
     },
   };

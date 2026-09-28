@@ -84,6 +84,8 @@ jobs:
       - run: printf 'hello\n' | script -qec 'node test/fixtures/container-terminal.ts' /dev/null
         env:
           OUTPOST_CONTAINER_ENGINE: ${{ matrix.engine }}
+      - name: Validate built-in harness delegation and coding tools
+        run: node scripts/harness-live.mjs offline ${{ matrix.engine }} coding
       - run: node test/fixtures/codex-compatible.ts
         env:
           OUTPOST_CONTAINER_ENGINE: ${{ matrix.engine }}

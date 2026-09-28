@@ -18,7 +18,7 @@ import type { OperationEvent } from "@elie-laloum/outpost";
 | `kind`       | `"operation"`                         | Required | Discriminant for an Outpost lifecycle operation.                                      |
 | `id`         | `string`                              | Required | Unique identifier shared by the start and terminal event of this operation.           |
 | `name`       | `string`                              | Required | Stable operation name, without command arguments, credentials or repository contents. |
-| `status`     | `"finished" \| "failed" \| "started"` | Required | Started, finished successfully or failed; terminal events carry elapsed duration.     |
+| `status`     | `"started" \| "finished" \| "failed"` | Required | Started, finished successfully or failed; terminal events carry elapsed duration.     |
 | `durationMs` | `number \| undefined`                 | Optional | Elapsed monotonic duration in milliseconds on finished or failed events.              |
 
 ## Signature

@@ -18,11 +18,11 @@ Le moteur intégré renvoie un [`Harness`](../../type-customharness/) configuré
 
 ## Frontières et responsabilités
 
-Construire un harness ne lance ni processus, ni connexion, ni requête réseau ; les fichiers d’identifiants de l’hôte ne sont lus qu’à la préparation d’une sandbox, et Outpost ne lit jamais un trousseau système. Une CLI possède sa boucle interne modèle/outils. Claude Code et Codex prennent en charge capture, reprise et fork natifs ; Antigravity, Copilot et Kimi ne prennent en charge que les nouvelles sessions, acceptent un nom de modèle sans `reasoning` ni `maxOutputTokens` et exigent `repairs: 0`.
+Construire un harness ne lance ni processus, ni connexion, ni requête réseau ; les fichiers d’identifiants de l’hôte ne sont lus qu’à la préparation d’une sandbox, et Outpost ne lit jamais un trousseau système. Une CLI possède sa boucle interne modèle/outils. Claude Code et Codex prennent en charge capture, reprise et fork natifs ; Kimi prend aussi en charge capture, reprise et fork ; Copilot prend en charge capture et reprise ; Antigravity reprend uniquement dans la même sandbox ouverte. Leurs modèles restent des noms sans `reasoning` ni `maxOutputTokens`.
 
 Le moteur d’Outpost tourne dans le processus Outpost. Chaque étape est une requête au modèle ; les outils passent par le sandbox emprunté, et les limites font échouer la passe avec le code `limit` au lieu de réussir. Les passes sont enregistrées dans des transcriptions qui permettent continuation, fork et réparations de réponse, et des stratégies de contexte peuvent compacter les longs historiques. Le terminal interactif n’est pas pris en charge. `AgentAdapter` et `AgentInput` décrivent la construction des commandes CLI et le décodage des événements. L’allocation du sandbox relève de [Providers](../providers/).
 
-Les presets CLI sont stables depuis la version 5.0.0 ; le moteur et ses définitions sont expérimentaux.
+Les presets CLI sont stables depuis la version 5.0.0. Le moteur intégré et ses définitions sont stabilisés pour la prochaine version. `defineHarnessSubagent()` expose un enfant intégré comme outil sérialisé avec son historique et ses limites ; il emprunte la sandbox et ses tokens comptent aussi dans les budgets ancêtres.
 
 ## Points d’entrée
 

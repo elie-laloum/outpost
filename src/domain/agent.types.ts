@@ -11,7 +11,19 @@ export interface Usage {
   readonly output: number;
 }
 
-export type AgentEvent =
+export type AgentEvent = AgentEventDetails & {
+  readonly subagentId?: string;
+};
+
+export type AgentEventDetails =
+  | {
+      readonly kind: "subagent";
+      readonly id: string;
+      readonly callId: string;
+      readonly name: string;
+      readonly status: "started" | "finished" | "failed";
+      readonly conversation?: string;
+    }
   | {
       readonly kind: "message-usage";
       readonly tokens: Usage;

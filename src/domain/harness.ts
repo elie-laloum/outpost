@@ -97,6 +97,12 @@ function limits(value: HarnessLimits): ResolvedHarnessLimits {
     value !== null && typeof value === "object",
     "Harness limits must be an object",
   );
+  if (value.maxDelegationDepth !== undefined)
+    invariant(
+      Number.isSafeInteger(value.maxDelegationDepth) &&
+        value.maxDelegationDepth >= 0,
+      "Harness maxDelegationDepth must be a nonnegative integer",
+    );
   const maxSteps = positive(
     value.maxSteps ?? HARNESS_DEFAULTS.maxSteps,
     "Harness maxSteps",
@@ -118,6 +124,9 @@ function limits(value: HarnessLimits): ResolvedHarnessLimits {
   }
   return Object.freeze({
     maxSteps,
+    ...(value.maxDelegationDepth === undefined
+      ? {}
+      : { maxDelegationDepth: value.maxDelegationDepth }),
     ...(value.maxToolCalls === undefined
       ? {}
       : { maxToolCalls: value.maxToolCalls }),

@@ -37,6 +37,12 @@ export async function openTranscript(
             version: 1,
             id,
             model: options.model,
+            ...(options.parentConversation
+              ? { parentConversation: options.parentConversation }
+              : {}),
+            ...(options.parentCallId
+              ? { parentCallId: options.parentCallId }
+              : {}),
             ...(continuation ? { parent: continuation.id } : {}),
             createdAt: new Date().toISOString(),
           },

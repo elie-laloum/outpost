@@ -3,7 +3,7 @@ title: "Loadable skills"
 description: "Load focused instructions and tools only when needed."
 ---
 
-The experimental harness lists skill descriptions in its system instructions. The model calls `load_skill` to obtain the instructions and enable the skill’s tools.
+The built-in harness lists skill descriptions in its system instructions. The model calls `load_skill` to obtain the instructions and enable the skill’s tools.
 
 ```ts
 import { defineHarnessSkill, harnessGitTools } from "@elie-laloum/outpost";

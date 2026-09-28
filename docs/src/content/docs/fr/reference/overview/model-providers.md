@@ -6,15 +6,13 @@ sidebar:
   order: 0
 ---
 
-:::caution[Expérimental]
-Les requêtes bornées avec messages, appels d’outils, rejeu du raisonnement, cache d’historique et streaming sont implémentées. Le moteur intégré de `harness()` les pilote.
-:::
+Le contrat `ModelProvider` et l’adaptateur OpenAI sont stabilisés pour la prochaine version. L’adaptateur Anthropic reste expérimental dans l’attente d’une nouvelle validation authentifiée de délégation.
 
 Un fournisseur de modèles porte le transport de requêtes utilisé par un harness personnalisé. `openaiModelProvider()` prend en charge les services Chat Completions et Responses ; `anthropicModelProvider()` utilise Anthropic Messages avec cache optionnel du préfixe système. L’allocation du sandbox est indépendante.
 
 ## Fonctionnement
 
-Configurez endpoint, credentials explicites et limites, puis transmettez le fournisseur à `harness({ modelProvider, run })`. Le callback utilise `context.modelProvider.request()` avec le modèle de l’agent. Les requêtes tournent dans le processus Outpost et héritent de l’annulation ; l’usage rapporté est cumulé une fois par appel.
+Configurez l’endpoint, les identifiants explicites et les bornes des requêtes, puis passez le fournisseur à `harness({ modelProvider, tools, instructions, limits })`. Composez ce harness avec `agent({ harness, model })` ; la boucle Outpost appelle le modèle et exécute ses outils dans la sandbox empruntée. Les requêtes tournent dans le processus Outpost, propagent l’annulation et comptabilisent une seule fois l’usage rapporté, y compris celui des enfants et des résumés de contexte.
 
 ## Frontières et responsabilités
 

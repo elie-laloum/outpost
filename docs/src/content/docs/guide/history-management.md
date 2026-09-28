@@ -3,7 +3,7 @@ title: "Context management"
 description: "Keep model-loop history within practical bounds."
 ---
 
-Set `context` on the experimental harness to rewrite history before a model request. Choose a strategy based on what you can afford to lose.
+Set `context` on the built-in harness to rewrite history before a model request. Choose a strategy based on what you can afford to lose.
 
 ```ts
 import { summarizeHistory, truncateToolResults } from "@elie-laloum/outpost";

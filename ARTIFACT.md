@@ -100,6 +100,8 @@ Déjà codé, reste à prouver en conditions réelles.
 
 ### Harness intégré face aux vrais modèles
 
+**État — validation bornée, point encore ouvert** : la campagne initiale a réussi 21 scénarios sur trois protocoles (`temp/harness-live/SUMMARY.md`). La stabilisation ajoute 14 scénarios réels OpenAI, dont délégation et édition dans Docker ; résultats récupérés dans `temp/harness-stable-live/recovered-command-results.json`. La nouvelle validation Anthropic est bloquée par HTTP 401. La comparaison qualitative avec les CLI, la revue manuelle des réponses et la facturation restent à confirmer ; ne pas confondre ces validations avec la stabilité des contrats du moteur.
+
 **Ce qu'on teste** — `harness()` avec `openaiModelProvider` (API Responses et Chat Completions) et `anthropicModelProvider` sur des tâches qui utilisent des outils, en streaming, avec continuation d'une conversation.
 
 **Ce que ça vérifie** — Les appels d'outils sont bien formés, le raisonnement n'est rejoué qu'au même modèle, le cache fonctionne (tokens en cache supérieurs à zéro), la raison d'arrêt est correcte en cas de coupure, et les limites d'étapes et de tokens sont respectées.
@@ -232,9 +234,11 @@ Existe, mais partiel ou expérimental pour un usage en production.
 
 ### Sortir le harness intégré de l'expérimental
 
-**Faiblesse actuelle** — Toute l'API du moteur maison peut encore changer. Il n'a ni sous-agents ni terminal interactif, et il n'a été validé qu'avec des fournisseurs simulés.
+**Statut — contrats stabilisés, implémenté et non publié** : le moteur intégré, les contrats publics et l’adaptateur OpenAI sont stabilisés. `defineHarnessSubagent()` exécute un enfant avec budget propre, historique séparé et sandbox empruntée ; permissions, annulation, profondeur et budgets cumulés sont contrôlés. Les réponses finales et les résumés comptent désormais dans les plafonds de tokens.
 
-**Ce que ça complète** — Après les tests réels, figer les contrats et ajouter les sous-agents (un harness enfant avec son propre budget, appelé comme un outil), puis retirer la mention expérimentale.
+**Validation** — 14 scénarios réels OpenAI réussis (Responses/Chat Completions), dont édition/tests/commit par un enfant dans Docker et continuation ; scénarios à modèle simulé réussis sur les vrais backends Docker, Vercel et Daytona. Les résultats console sont conservés dans la session ; les rapports bruts de cette nouvelle campagne ont été perdus avec le worktree temporaire. Sources restaurées dans un worktree persistant et revalidées. La campagne précédente reste dans `temp/harness-live/`.
+
+**Limites restantes** — Anthropic conserve son statut expérimental : HTTP 401 avec l’identifiant actuel, nouvelle validation authentifiée de délégation requise. Podman absent localement, scénario ajouté à sa matrice CI. Terminal interactif, reprise automatique d’un enfant en cours, comparaison qualitative avec les CLI et confirmation de facturation restent distincts. Aucun changement de version ni publication.
 
 <a id="r-speculation"></a>
 

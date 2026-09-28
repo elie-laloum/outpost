@@ -18,11 +18,11 @@ The built-in engine returns a [`Harness`](../../type-customharness/) configured 
 
 ## Boundaries and responsibilities
 
-Constructing a harness starts no process, login or network request; host credential files are read only when a sandbox is prepared, and Outpost never reads a system keychain. A CLI owns its internal model/tool loop. Claude Code and Codex support native capture, resume and fork; Antigravity, Copilot and Kimi support fresh sessions only, accept a model name without `reasoning` or `maxOutputTokens`, and require `repairs: 0`.
+Constructing a harness starts no process, login or network request; host credential files are read only when a sandbox is prepared, and Outpost never reads a system keychain. A CLI owns its internal model/tool loop. Claude Code and Codex support native capture, resume and fork; Kimi also supports capture, resume and fork; Copilot supports capture and resume; Antigravity resumes only in the same open sandbox. Their models remain names without `reasoning` or `maxOutputTokens`.
 
 The Outpost engine runs in the Outpost process. Each step is one model request; tools run through the borrowed sandbox, and limits fail the turn with the `limit` code instead of succeeding. Turns are recorded as transcripts that support continuation, fork and response repairs, and context strategies can compact long histories. Interactive attachment is unsupported. `AgentAdapter` and `AgentInput` describe CLI command construction and event decoding. Sandbox allocation belongs to [Providers](../providers/).
 
-CLI presets are stable since 5.0.0; the engine and its definitions are experimental.
+CLI presets are stable since 5.0.0. The built-in engine and its definitions are stabilized for the next release. `defineHarnessSubagent()` exposes a built-in child as a serialized tool with its own history and limits; it borrows the sandbox and its tokens also count toward ancestor budgets.
 
 ## Entry points
 

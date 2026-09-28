@@ -1,4 +1,3 @@
-import type { Usage } from "../domain/agent.types.ts";
 import { OutpostError } from "../domain/errors.ts";
 import type {
   ModelContentBlock,
@@ -9,7 +8,6 @@ import type {
   ModelToolSpec,
 } from "../domain/model.types.ts";
 import { loadedSkills } from "../domain/skill.ts";
-import { addUsage } from "../domain/usage.ts";
 import type {
   HarnessHistory,
   HarnessRuntime,
@@ -95,7 +93,6 @@ export async function harnessLoop(
     role: "user",
     content: [{ type: "text", text: prompt }],
   });
-  let usage: Usage = { input: 0, cached: 0, output: 0 };
   let toolCalls = 0;
   const announcedSkills = new Set<string>();
   for (let step = 1; ; step++) {
@@ -105,9 +102,7 @@ export async function harnessLoop(
         "maxSteps",
         `Harness reached ${harness.limits.maxSteps} steps without a final answer`,
       );
-    const exceeded = exceededUsage(usage, harness.limits.usage);
-    if (exceeded)
-      throw limit("usage", `Harness exceeded its ${exceeded} token budget`);
+    runtime.budget.check();
     const newlyLoaded = [...loadedSkills(history.messages)].filter(
       (name) => !announcedSkills.has(name),
     );
@@ -124,12 +119,6 @@ export async function harnessLoop(
       ...(tools.length ? { tools } : {}),
       ...(harness.cache ? { cache: true } : {}),
     });
-    if (harness.limits.usage && !result.usage)
-      throw new OutpostError(
-        "configuration",
-        "Harness usage limits require a model provider that reports usage",
-      );
-    if (result.usage) usage = addUsage(usage, result.usage);
     await afterModel(runtime, result, step);
     const content: readonly ModelContentBlock[] = result.content ?? [
       { type: "text", text: result.text },
@@ -144,6 +133,7 @@ export async function harnessLoop(
     const reason = result.stopReason ?? inferredStop(content);
     const answer = await stopHandlers[reason](runtime, state, result, content);
     toolCalls = state.toolCalls;
+    runtime.budget.check();
     if (answer !== undefined) return answer;
   }
 }
@@ -170,17 +160,6 @@ function inferredStop(content: readonly ModelContentBlock[]): ModelStopReason {
   return content.some((block) => block.type === "tool-call")
     ? "tool-calls"
     : "end";
-}
-
-function exceededUsage(
-  usage: Usage,
-  limits: Partial<Omit<Usage, "complete">> | undefined,
-): string | undefined {
-  return Object.entries(limits ?? {}).find(
-    ([key, value]) =>
-      (usage[key as Exclude<keyof Usage, "complete">] ?? 0) >
-      (value ?? Infinity),
-  )?.[0];
 }
 
 function limit(name: string, message: string): OutpostError {

@@ -5,10 +5,6 @@ sidebar:
   order: 0
 ---
 
-:::caution[Experimental]
-Experimental: provider contract for custom harnesses with messages, tool calls, replayable reasoning, history caching and streaming. It may change in a later release.
-:::
-
 ## Import
 
 ```ts

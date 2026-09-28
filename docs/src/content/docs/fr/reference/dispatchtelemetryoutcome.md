@@ -15,7 +15,7 @@ import type { DispatchTelemetryOutcome } from "@elie-laloum/outpost";
 
 | Nom         | Type                                | Présence  | Rôle                                                                                                                               |
 | ----------- | ----------------------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `status`    | `"done" \| "failed" \| "cancelled"` | Requis    | done quand le dispatch se résout, cancelled pour une annulation explicite, failed pour les autres rejets dont les délais dépassés. |
+| `status`    | `"failed" \| "done" \| "cancelled"` | Requis    | done quand le dispatch se résout, cancelled pour une annulation explicite, failed pour les autres rejets dont les délais dépassés. |
 | `usage`     | `Usage`                             | Requis    | Totaux du résultat en cas de succès, consommation connue réconciliée en cas d’échec.                                               |
 | `completed` | `boolean \| undefined`              | Optionnel | Indique si le dispatch réussi a satisfait sa condition de complétion ; absent en cas de rejet.                                     |
 

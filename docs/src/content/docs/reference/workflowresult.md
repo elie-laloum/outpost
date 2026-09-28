@@ -17,7 +17,7 @@ import type { WorkflowResult } from "@elie-laloum/outpost";
 | ---------------- | ----------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | `executionId`    | `string`                                        | Required | Identity of the workflow execution, preserved across checkpoint resumption.                                                    |
 | `name`           | `string`                                        | Required | Name of the workflow definition, included in its execution reports.                                                            |
-| `status`         | `"done" \| "failed" \| "cancelled" \| "paused"` | Required | Overall execution outcome: done, failed, cancelled or paused.                                                                  |
+| `status`         | `"failed" \| "done" \| "cancelled" \| "paused"` | Required | Overall execution outcome: done, failed, cancelled or paused.                                                                  |
 | `tasks`          | `readonly Readonly<TaskRecord>[]`               | Required | Final task records with statuses, attempt counts, errors and pending gates.                                                    |
 | `errors`         | `readonly unknown[]`                            | Required | Task and scheduling failures collected during the workflow execution.                                                          |
 | `observerErrors` | `readonly unknown[]`                            | Required | Exceptions thrown by telemetry and observe callbacks, collected independently without changing workflow status or task errors. |

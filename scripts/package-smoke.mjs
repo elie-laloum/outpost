@@ -106,6 +106,11 @@ try {
     const resumed=await checkpoints.acquire('consumer');
     assert.deepEqual(await resumed.read(),{answer:42});
     await resumed.release();
+    const child=api.agent({model:'fixture',harness:api.harness({modelProvider:{name:'fixture',request:async()=>({text:'done'})}})});
+    const delegate=api.defineHarnessSubagent({name:'review',description:'Review fixture',agent:child});
+    assert.equal(delegate.readOnly,false);
+    assert.deepEqual(await delegate.validate({prompt:'Review'}),{value:{prompt:'Review'}});
+    assert.equal(api.harness({modelProvider:child.harness.modelProvider,tools:[delegate]}).tools[0],delegate);
     const modelProvider=api.anthropicModelProvider({apiKey:'unused'});
     assert.equal('generate' in modelProvider,false);
     assert.equal(typeof modelProvider.stream,'function');

@@ -1,3 +1,6 @@
+import { isHarnessSubagent } from "../domain/subagent.ts";
+import { runSubagent } from "./harness-subagent.ts";
+import type { HarnessToolContext } from "../domain/tool.types.ts";
 import { observationDefaults } from "../domain/observation.constants.ts";
 import { OutpostError } from "../domain/errors.ts";
 import {
@@ -129,10 +132,11 @@ function permission(
   tool: HarnessTool,
   input: unknown,
 ): string | undefined {
-  const permissions = runtime.agent.harness.permissions;
-  if (!permissions) return undefined;
-  const decision = permissions.evaluate(tool.name, tool.resources(input));
-  return decision.allowed ? undefined : decision.reason;
+  for (const permissions of runtime.permissions) {
+    const decision = permissions.evaluate(tool.name, tool.resources(input));
+    if (!decision.allowed) return decision.reason;
+  }
+  return undefined;
 }
 
 function denied(
@@ -202,6 +206,7 @@ async function executeCall(
     return normalized(await runTool(runtime, prepared));
   } catch (error) {
     runtime.signal.throwIfAborted();
+    runtime.budget.check();
     if (runtime.agent.harness.toolExecution.onError === "fail") throw error;
     return failed(error instanceof Error ? error.message : String(error));
   }
@@ -230,9 +235,14 @@ async function runTool(
     if (signal.aborted) fail();
     signal.addEventListener("abort", fail, { once: true });
   });
-  const execution = Promise.resolve().then(() =>
-    tool!.execute(input, {
-      sandbox: scopedLease(runtime.sandbox, signal, runtime, call.id),
+  const execution = Promise.resolve().then(() => {
+    const context: HarnessToolContext = {
+      sandbox: scopedLease(
+        runtime.sandbox,
+        signal,
+        runtime,
+        isHarnessSubagent(tool!) ? undefined : call.id,
+      ),
       signal,
       callId: call.id,
       model: runtime.agent.model,
@@ -245,8 +255,11 @@ async function runTool(
           );
         runtime.emit(event);
       },
-    }),
-  );
+    };
+    return isHarnessSubagent(tool!)
+      ? runtime.modelScope.track(runSubagent(runtime, tool!, input, context))
+      : tool!.execute(input, context);
+  });
   execution.catch(() => undefined);
   aborted.catch(() => undefined);
   try {
@@ -262,7 +275,7 @@ function scopedLease(
   lease: SandboxLease,
   signal: AbortSignal,
   runtime: HarnessRuntime,
-  callId: string,
+  callId: string | undefined,
 ): SandboxLease {
   const combine = (own?: AbortSignal) =>
     own ? AbortSignal.any([own, signal]) : signal;
@@ -277,7 +290,7 @@ function scopedLease(
         observe(channel, text) {
           for (
             let offset = 0;
-            offset < text.length;
+            callId !== undefined && offset < text.length;
             offset += observationDefaults.outputCharacters
           )
             runtime.emit({

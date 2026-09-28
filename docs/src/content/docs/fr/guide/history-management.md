@@ -3,7 +3,7 @@ title: "Gestion du contexte"
 description: "Maintenir l’historique de la boucle dans des bornes utiles."
 ---
 
-Définissez `context` sur le harness expérimental pour réécrire l’historique avant une requête au modèle. Choisissez la stratégie selon les informations que vous pouvez perdre.
+Définissez `context` sur le harness intégré pour réécrire l’historique avant une requête au modèle. Choisissez la stratégie selon les informations que vous pouvez perdre.
 
 ```ts
 import { summarizeHistory, truncateToolResults } from "@elie-laloum/outpost";

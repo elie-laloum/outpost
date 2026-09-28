@@ -6,7 +6,7 @@ sidebar:
 ---
 
 :::caution[Expérimental]
-Expérimental : contrat de fournisseur pour les harness personnalisés, avec messages, appels d’outils, raisonnement rejouable, cache d’historique et streaming. Il peut changer dans une version ultérieure.
+L’adaptateur Anthropic reste expérimental dans l’attente d’une nouvelle campagne authentifiée de délégation. Les précédents tests d’outils, streaming, cache et continuation avaient réussi, mais l’identifiant actuel est refusé avec HTTP 401 ; cela ne démontre pas un défaut du protocole. Le contrat ModelProvider et le harness intégré sont stables.
 :::
 
 ## Import

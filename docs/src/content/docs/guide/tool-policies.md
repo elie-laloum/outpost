@@ -3,7 +3,7 @@ title: "Tool policies"
 description: "Allow, deny and intercept model-loop tool calls."
 ---
 
-The experimental loop accepts `permissions` and `hooks` on `harness()`. Permissions provide ordered rules; hooks provide phase-specific behavior.
+The built-in loop accepts `permissions` and `hooks` on `harness()`. Permissions provide ordered rules; hooks provide phase-specific behavior.
 
 ```ts
 import {

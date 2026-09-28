@@ -3,7 +3,7 @@ title: "Skills à la demande"
 description: "Charger des instructions et outils ciblés à la demande."
 ---
 
-Le harness expérimental liste les descriptions de skills dans ses instructions système. Le modèle appelle `load_skill` pour obtenir les instructions et activer les outils du skill.
+Le harness intégré liste les descriptions de skills dans ses instructions système. Le modèle appelle `load_skill` pour obtenir les instructions et activer les outils du skill.
 
 ```ts
 import { defineHarnessSkill, harnessGitTools } from "@elie-laloum/outpost";

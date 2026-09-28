@@ -13,14 +13,15 @@ import type { ObservationScope } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name          | Type                  | Presence | Meaning                                                                    |
-| ------------- | --------------------- | -------- | -------------------------------------------------------------------------- |
-| `executionId` | `string \| undefined` | Optional | Workflow execution identifier, preserved when resuming its checkpoint.     |
-| `taskKey`     | `string \| undefined` | Optional | Declared workflow task key producing this event.                           |
-| `attempt`     | `number \| undefined` | Optional | Task attempt number; condition evaluation may use zero.                    |
-| `dispatchId`  | `string \| undefined` | Optional | Unique identifier for one cold or warm dispatch, shared across its passes. |
-| `pass`        | `number \| undefined` | Optional | Agent pass number within the dispatch.                                     |
-| `candidate`   | `string \| undefined` | Optional | Declared speculative candidate key.                                        |
+| Name          | Type                  | Presence | Meaning                                                                                                                     |
+| ------------- | --------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `executionId` | `string \| undefined` | Optional | Workflow execution identifier, preserved when resuming its checkpoint.                                                      |
+| `taskKey`     | `string \| undefined` | Optional | Declared workflow task key producing this event.                                                                            |
+| `attempt`     | `number \| undefined` | Optional | Task attempt number; condition evaluation may use zero.                                                                     |
+| `dispatchId`  | `string \| undefined` | Optional | Unique identifier for one cold or warm dispatch, shared across its passes.                                                  |
+| `pass`        | `number \| undefined` | Optional | Agent pass number within the dispatch.                                                                                      |
+| `subagentId`  | `string \| undefined` | Optional | Built-in child identifier within the dispatch, propagated from child events without replacing workflow, task or pass scope. |
+| `candidate`   | `string \| undefined` | Optional | Declared speculative candidate key.                                                                                         |
 
 ## Signature
 
@@ -31,6 +32,7 @@ export interface ObservationScope {
   readonly attempt?: number;
   readonly dispatchId?: string;
   readonly pass?: number;
+  readonly subagentId?: string;
   readonly candidate?: string;
 }
 ```

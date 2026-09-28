@@ -6,6 +6,8 @@ export interface TranscriptOptions {
   readonly repository: string;
   readonly store: ConversationStore;
   readonly model: string;
+  readonly parentConversation?: string;
+  readonly parentCallId?: string;
   readonly continuation?: { readonly id: string; readonly fork?: boolean };
 }
 

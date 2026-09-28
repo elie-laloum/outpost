@@ -416,8 +416,8 @@
     "Durée d’exécution écoulée en millisecondes."
   ],
   "AgentEvent.status": [
-    "Process exit code; zero denotes success.",
-    "Code de sortie du processus ; zéro indique le succès."
+    "Process exit status for summaries, or started, finished or failed for a child lifecycle event.",
+    "Statut de sortie du processus pour les résumés, ou started, finished ou failed pour le cycle de vie d’un enfant."
   ],
   "AgentEvent.tokens": [
     "Token usage counters carried by a usage or summary event.",
@@ -436,8 +436,8 @@
     "Arguments bruts fournis à l’outil nommé par cet événement tool."
   ],
   "AgentEvent.id": [
-    "Native conversation identifier used to locate or continue the session.",
-    "Identifiant de conversation native utilisé pour localiser ou poursuivre la session."
+    "Conversation identifier for conversation events, or unique child execution identifier for subagent lifecycle events.",
+    "Identifiant de conversation pour les événements conversation, ou identifiant unique d’exécution enfant pour les événements de cycle de vie subagent."
   ],
   "AgentEvent.value": [
     "Unrecognized raw protocol value preserved for observation.",
@@ -3901,8 +3901,8 @@
     "Nombre maximal d’appels d’outils dans une passe ; seulement borné par maxSteps s’il est omis."
   ],
   "HarnessLimits.usage": [
-    "Token budget per counter (input, cached, cacheCreated, output), checked before each new request. Requires a provider that reports usage; the last step may exceed it.",
-    "Budget de tokens par compteur (input, cached, cacheCreated, output), vérifié avant chaque nouvelle requête. Exige un fournisseur qui rapporte l’usage ; la dernière étape peut le dépasser."
+    "Observed token ceilings per turn, including context summaries and all descendants. Checked after each complete response and before another request; exceeding a ceiling fails even on the final answer. Missing or partial usage rejects token-budgeted execution.",
+    "Plafonds de tokens observés par tour, incluant les résumés de contexte et tous les descendants. Contrôlés après chaque réponse complète et avant une nouvelle requête ; un dépassement échoue même sur la réponse finale. L’usage absent ou partiel fait échouer une exécution avec budget de tokens."
   ],
   "HarnessToolExecution.concurrency": [
     "Maximum number of read-only tools running at once; other tools run one at a time. Defaults to 4.",
@@ -5069,5 +5069,221 @@
   "ReporterHandlers.tool-output": [
     "Handle tool command output correlated by callId; asynchronous handlers are serialized and their failures remain observer errors.",
     "Traite les événements de sorties de commandes d’outil corrélées par callId ; les gestionnaires asynchrones sont sérialisés et leurs échecs restent des erreurs d’observation."
+  ],
+  "defineHarnessSubagent.options": [
+    "Name, model-visible description and explicitly composed built-in child agent. Defining the tool does not run it.",
+    "Nom, description visible du modèle et agent enfant intégré composé explicitement. Définir l’outil ne l’exécute pas."
+  ],
+  "HarnessSubagentOptions.name": [
+    "Unique tool name exposed to the parent model, using 1–64 letters, digits, underscores or hyphens.",
+    "Nom d’outil unique présenté au modèle parent, composé de 1 à 64 lettres, chiffres, tirets ou underscores."
+  ],
+  "HarnessSubagentOptions.description": [
+    "Explain when the parent should delegate to this child; sent with the tool schema.",
+    "Explique quand le parent doit déléguer à cet enfant ; transmis avec le schéma de l’outil."
+  ],
+  "HarnessSubagentOptions.agent": [
+    "Built-in agent created with agent({ harness: harness(...), model }); owns child instructions, tools and limits. CLI agents are rejected.",
+    "Agent intégré créé avec agent({ harness: harness(...), model }) ; définit les instructions, outils et limites de l’enfant. Les agents CLI sont refusés."
+  ],
+  "HarnessSubagentInput.prompt": [
+    "Nonempty task text supplied by the parent model. Parent message history is not copied into the child conversation.",
+    "Texte non vide de la tâche fourni par le modèle parent. L’historique du parent n’est pas copié dans la conversation enfant."
+  ],
+  "HarnessSubagent.subagent": [
+    "Explicit built-in child configuration, executed by the runtime in the parent’s borrowed sandbox with intersected permissions and cumulative ancestor token budgets.",
+    "Configuration explicite de l’enfant intégré, exécutée par le runtime dans la sandbox empruntée du parent avec intersection des permissions et budgets de tokens cumulés des ancêtres."
+  ],
+  "HarnessLimits.maxDelegationDepth": [
+    "Maximum additional levels of child delegation from this harness; defaults to 3, accepts 0 to disable delegation and cannot raise an ancestor limit.",
+    "Nombre maximal de niveaux supplémentaires de délégation depuis ce harness ; 3 par défaut, 0 désactive la délégation et la limite d’un ancêtre ne peut pas être augmentée."
+  ],
+  "AgentEvent.subagentId": [
+    "Identifier of the built-in child that emitted the event; absent for the root harness. Lifecycle events link that identifier to the delegating tool call.",
+    "Identifiant de l’enfant intégré qui a émis l’événement ; absent pour le harness racine. Les événements de cycle de vie relient cet identifiant à l’appel d’outil de délégation."
+  ],
+  "ObservationScope.subagentId": [
+    "Built-in child identifier within the dispatch, propagated from child events without replacing workflow, task or pass scope.",
+    "Identifiant de l’enfant intégré dans le dispatch, propagé depuis ses événements sans remplacer le contexte de workflow, tâche ou passe."
+  ],
+  "AgentEventDetails.kind": [
+    "Discriminator selecting the event payload: phase, summary, warning, text, text-delta, result, prompt, tool, tool-result, tool-denied, step, stop-prevented, compaction, conversation, usage, failure, finished or raw.",
+    "Discriminant sélectionnant les données de l’événement : phase, summary, warning, text, text-delta, result, prompt, tool, tool-result, tool-denied, step, stop-prevented, compaction, conversation, usage, failure, finished ou raw."
+  ],
+  "AgentEventDetails.name": [
+    "Phase name for phase events, or tool name for tool and tool-result events.",
+    "Nom de la phase pour les événements phase, ou nom de l’outil pour les événements tool et tool-result."
+  ],
+  "AgentEventDetails.agent": [
+    "Agent CLI identifier to report or diagnose: claude, codex, antigravity (executable agy), copilot or kimi.",
+    "Identifiant du CLI d’agent à rapporter ou diagnostiquer : claude, codex, antigravity (exécutable agy), copilot ou kimi."
+  ],
+  "AgentEventDetails.branch": [
+    "Name of the work branch used or observed during execution.",
+    "Nom de la branche de travail utilisée ou observée pendant l’exécution."
+  ],
+  "AgentEventDetails.directory": [
+    "Host workspace directory used for this execution.",
+    "Dossier hôte du workspace utilisé pour cette exécution."
+  ],
+  "AgentEventDetails.durationMs": [
+    "Elapsed execution time in milliseconds.",
+    "Durée d’exécution écoulée en millisecondes."
+  ],
+  "AgentEventDetails.status": [
+    "Process exit status for summaries, or started, finished or failed for a child lifecycle event.",
+    "Statut de sortie du processus pour les résumés, ou started, finished ou failed pour le cycle de vie d’un enfant."
+  ],
+  "AgentEventDetails.tokens": [
+    "Token usage counters carried by a usage or summary event.",
+    "Compteurs d’usage de tokens portés par un événement usage ou summary."
+  ],
+  "AgentEventDetails.message": [
+    "Warning or failure message, or the message a stop hook sent back to the model.",
+    "Message d’avertissement ou d’échec, ou message qu’un hook stop a renvoyé au modèle."
+  ],
+  "AgentEventDetails.text": [
+    "Text carried by the event: a streamed fragment, streamed text, final answer or submitted prompt according to kind.",
+    "Texte porté par l’événement : fragment diffusé, texte diffusé, réponse finale ou prompt soumis selon la variante."
+  ],
+  "AgentEventDetails.input": [
+    "Raw arguments supplied to the tool named by this tool event.",
+    "Arguments bruts fournis à l’outil nommé par cet événement tool."
+  ],
+  "AgentEventDetails.id": [
+    "Conversation identifier for conversation events, or unique child execution identifier for subagent lifecycle events.",
+    "Identifiant de conversation pour les événements conversation, ou identifiant unique d’exécution enfant pour les événements de cycle de vie subagent."
+  ],
+  "AgentEventDetails.value": [
+    "Unrecognized raw protocol value preserved for observation.",
+    "Valeur brute de protocole non reconnue conservée pour observation."
+  ],
+  "AgentEventDetails.callId": [
+    "Identifier linking a tool event to its tool-result event; set by custom harnesses.",
+    "Identifiant qui relie un événement tool à son événement tool-result ; fourni par les harness personnalisés."
+  ],
+  "AgentEventDetails.isError": [
+    "Whether the tool call failed or reported an error.",
+    "Indique si l’appel d’outil a échoué ou signalé une erreur."
+  ],
+  "AgentEventDetails.preview": [
+    "Beginning of the tool result, bounded for logs and reporters.",
+    "Début du résultat de l’outil, borné pour les journaux et les rapporteurs."
+  ],
+  "AgentEventDetails.characters": [
+    "Full length of the tool result before any truncation.",
+    "Longueur complète du résultat de l’outil avant toute troncature."
+  ],
+  "AgentEventDetails.index": [
+    "One-based step number of a custom harness turn.",
+    "Numéro d’étape, à partir de 1, d’une passe de harness personnalisé."
+  ],
+  "AgentEventDetails.reason": [
+    "Reason for tool denial or forced termination; stopped distinguishes completion, idle timeout, deadline, cancellation and oversized protocol output.",
+    "Motif de refus d’outil ou d’arrêt forcé ; stopped distingue complétion, inactivité, deadline, annulation et sortie de protocole trop volumineuse."
+  ],
+  "AgentEventDetails.strategy": [
+    "Name of the context strategy that rewrote the history.",
+    "Nom de la stratégie de contexte qui a réécrit l’historique."
+  ],
+  "AgentEventDetails.messages": [
+    "Number of messages in the history after compaction.",
+    "Nombre de messages de l’historique après compaction."
+  ],
+  "AgentEventDetails.cumulative": [
+    "On CLI usage events, true identifies a total for the current command. The runtime converts it to nonnegative deltas before notifying observers; omission means an incremental usage event.",
+    "Sur les événements d’usage CLI, true indique un total pour la commande courante. Le runtime le convertit en deltas positifs ou nuls avant de notifier les observateurs ; l’absence indique un événement incrémental."
+  ],
+  "AgentEventDetails.messageId": [
+    "CLI identifier of the message whose usage is reported.",
+    "Identifiant CLI du message dont l’usage est rapporté."
+  ],
+  "AgentEventDetails.parentCallId": [
+    "Parent tool call supplied by a CLI for a nested agent message or tool event.",
+    "Appel d’outil parent fourni par la CLI pour un message de sous-agent ou un événement d’outil."
+  ],
+  "AgentEventDetails.truncated": [
+    "Whether the stderr fragment or oversized raw preview was bounded before delivery.",
+    "Indique si le fragment stderr ou l’aperçu brut trop volumineux a été borné avant livraison."
+  ],
+  "AgentEventDetails.changes": [
+    "Structured file changes exposed by the CLI; the adapter preserves the supplied protocol data.",
+    "Modifications de fichiers structurées exposées par la CLI ; l’adapter conserve les données fournies."
+  ],
+  "AgentEventDetails.request": [
+    "Model request observed only when the hub explicitly enables verbose payloads; may contain private instructions and messages.",
+    "Requête modèle observée uniquement si le hub active explicitement les contenus détaillés ; peut contenir des instructions et messages privés."
+  ],
+  "AgentEventDetails.response": [
+    "Model response observed only when verbose payloads are enabled, including tool calls and replayable content.",
+    "Réponse modèle observée uniquement lorsque les contenus détaillés sont activés, avec appels d’outils et contenu rejouable."
+  ],
+  "AgentEventDetails.attempt": [
+    "Retry attempt explicitly reported by a model provider; Outpost does not infer hidden retries.",
+    "Tentative de reprise explicitement signalée par un fournisseur modèle ; Outpost ne déduit pas les reprises cachées."
+  ],
+  "AgentEventDetails.phase": [
+    "Harness hook phase that completed.",
+    "Phase du hook de harness qui vient de se terminer."
+  ],
+  "AgentEventDetails.changed": [
+    "Whether a hook returned a decision or changed its observable input.",
+    "Indique si le hook a renvoyé une décision ou modifié son entrée observable."
+  ],
+  "AgentEventDetails.count": [
+    "Number of nonempty instruction sources resolved for this harness turn.",
+    "Nombre de sources d’instructions non vides résolues pour ce tour de harness."
+  ],
+  "AgentEventDetails.names": [
+    "Skills newly loaded into the conversation and available to subsequent model steps.",
+    "Skills nouvellement chargés dans la conversation et disponibles aux étapes modèle suivantes."
+  ],
+  "AgentEventDetails.channel": [
+    "Command output stream for the tool-output event: stdout or stderr.",
+    "Flux de sortie de la commande pour l’événement tool-output : stdout ou stderr."
+  ],
+  "AgentEventDetails.bytes": [
+    "Observed UTF-8 byte size of an oversized protocol line or buffered prefix before termination.",
+    "Taille UTF-8 constatée d’une ligne de protocole trop volumineuse ou du préfixe reçu avant l’arrêt."
+  ],
+  "AgentEventDetails.subagentId": [
+    "Identifier of the built-in child that emitted the event; absent for the root harness. Lifecycle events link that identifier to the delegating tool call.",
+    "Identifiant de l’enfant intégré qui a émis l’événement ; absent pour le harness racine. Les événements de cycle de vie relient cet identifiant à l’appel d’outil de délégation."
+  ],
+  "AgentEventDetails.conversation": [
+    "Persisted child conversation identifier when the child enables transcript storage.",
+    "Identifiant de conversation enfant persistée lorsque l’enfant active le stockage des transcripts."
+  ],
+  "AgentEvent.conversation": [
+    "Persisted child conversation identifier when the child enables transcript storage.",
+    "Identifiant de conversation enfant persistée lorsque l’enfant active le stockage des transcripts."
+  ],
+  "ReporterHandlers.subagent": [
+    "Handle a built-in child start, completion or failure, with the delegation call and optional transcript identifier.",
+    "Traite le démarrage, la fin ou l’échec d’un enfant intégré, avec l’appel de délégation et l’identifiant de transcript optionnel."
+  ],
+  "AgentEventHandlers.subagent": [
+    "Handle a built-in child start, completion or failure, with the delegation call and optional transcript identifier.",
+    "Traite le démarrage, la fin ou l’échec d’un enfant intégré, avec l’appel de délégation et l’identifiant de transcript optionnel."
+  ],
+  "HarnessSubagent.execute": [
+    "Direct execution is rejected; the harness runtime supplies cancellation, budgets, permissions and transcript ownership when this tool is called.",
+    "L’exécution directe est refusée ; le runtime du harness fournit annulation, budgets, permissions et gestion du transcript lors de l’appel de cet outil."
+  ],
+  "HarnessSubagent.readOnly": [
+    "Always false: delegations are serialized even if the child only declares read-only tools.",
+    "Toujours false : les délégations sont sérialisées même si l’enfant ne déclare que des outils en lecture seule."
+  ],
+  "HarnessSubagent.resources": [
+    "The delegation call declares no paths or command. Each descendant tool declares its own resources, checked against both child and ancestor permissions.",
+    "L’appel de délégation ne déclare ni chemin ni commande. Chaque outil descendant déclare ses propres ressources, vérifiées selon les permissions de l’enfant et des ancêtres."
+  ],
+  "HarnessSubagent.inputSchema": [
+    "Fixed JSON object schema requiring one nonempty prompt string and rejecting additional properties.",
+    "Schéma JSON fixe exigeant une chaîne prompt non vide et refusant les propriétés supplémentaires."
+  ],
+  "HarnessSubagent.validate": [
+    "Validate the parent model’s delegation input against the fixed prompt schema before invoking the child.",
+    "Valide l’entrée de délégation du modèle parent selon le schéma prompt fixe avant d’appeler l’enfant."
   ]
 }

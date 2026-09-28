@@ -6,15 +6,13 @@ sidebar:
   order: 0
 ---
 
-:::caution[Experimental]
-Bounded requests with messages, tool calls, reasoning replay, history caching and streaming are implemented. The built-in engine of `harness()` drives them.
-:::
+The `ModelProvider` contract and OpenAI adapter are stabilized for the next release. The Anthropic adapter remains experimental pending fresh authenticated delegation validation.
 
 A model provider supplies the request transport used by a custom harness. `openaiModelProvider()` supports Chat Completions and Responses services; `anthropicModelProvider()` supports Anthropic Messages and optional system-prefix caching. Sandbox allocation is independent.
 
 ## How it works
 
-Configure the endpoint, explicit credentials and request bounds, then pass the provider to `harness({ modelProvider, run })`. The callback uses `context.modelProvider.request()` with the agent's model. Requests run in the Outpost process and inherit cancellation; reported usage is accumulated once per call.
+Configure the endpoint, explicit credentials and request bounds, then pass the provider to `harness({ modelProvider, tools, instructions, limits })`. Compose that harness with `agent({ harness, model })`; the Outpost loop calls the model and runs its tools in the borrowed sandbox. Requests run in the Outpost process, propagate cancellation and account for reported usage once, including children and context summaries.
 
 ## Boundaries and responsibilities
 

@@ -319,35 +319,23 @@
       },
       {
         "slug": "reference/function-harness",
-        "attrs": {
-          "data-api-kind": "function",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/defineharnesssubagent",
+        "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/defineharnesstool",
-        "attrs": {
-          "data-api-kind": "function",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/defineharnesstoolset",
-        "attrs": {
-          "data-api-kind": "function",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/defineharnessinstructions",
-        "attrs": {
-          "data-api-kind": "function",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/antigravityharness",
@@ -371,188 +359,90 @@
       },
       {
         "slug": "reference/defineharnesshook",
-        "attrs": {
-          "data-api-kind": "function",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/defineharnesspermissions",
-        "attrs": {
-          "data-api-kind": "function",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/harnessfiletools",
-        "attrs": {
-          "data-api-kind": "function",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/harnessedittools",
-        "attrs": {
-          "data-api-kind": "function",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/harnesssearchtools",
-        "attrs": {
-          "data-api-kind": "function",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/harnessgittools",
-        "attrs": {
-          "data-api-kind": "function",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/harnessshelltools",
-        "attrs": {
-          "data-api-kind": "function",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/defineharnesscontextstrategy",
-        "attrs": {
-          "data-api-kind": "function",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/truncatetoolresults",
-        "attrs": {
-          "data-api-kind": "function",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/summarizehistory",
-        "attrs": {
-          "data-api-kind": "function",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/defineharnessskill",
-        "attrs": {
-          "data-api-kind": "function",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "function" }
       },
       { "slug": "reference/harness", "attrs": { "data-api-kind": "type" } },
       {
         "slug": "reference/harnessinstructionsource",
-        "attrs": {
-          "data-api-kind": "type",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/harnessinstructionsoption",
-        "attrs": {
-          "data-api-kind": "type",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/harnesstoolevent",
-        "attrs": {
-          "data-api-kind": "type",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "type" }
       },
-      {
-        "slug": "reference/jsonschema",
-        "attrs": {
-          "data-api-kind": "type",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
-      },
-      {
-        "slug": "reference/tooloutput",
-        "attrs": {
-          "data-api-kind": "type",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
-      },
+      { "slug": "reference/jsonschema", "attrs": { "data-api-kind": "type" } },
+      { "slug": "reference/tooloutput", "attrs": { "data-api-kind": "type" } },
       {
         "slug": "reference/toolvalidation",
-        "attrs": {
-          "data-api-kind": "type",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/harnesshookinput",
-        "attrs": {
-          "data-api-kind": "type",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/harnesshookphase",
-        "attrs": {
-          "data-api-kind": "type",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/harnesshookresult",
-        "attrs": {
-          "data-api-kind": "type",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/permissiondecision",
-        "attrs": {
-          "data-api-kind": "type",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/permissioneffect",
-        "attrs": {
-          "data-api-kind": "type",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/harnesscontextresult",
-        "attrs": {
-          "data-api-kind": "type",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/agentauthentication",
@@ -571,248 +461,140 @@
         "attrs": { "data-api-kind": "constant" }
       },
       {
+        "slug": "reference/harnesssubagent",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/harnesssubagentinput",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/harnesssubagentoptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
         "slug": "reference/cliharness",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/type-customharness",
-        "attrs": {
-          "data-api-kind": "interface",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/customharnessoptions",
-        "attrs": {
-          "data-api-kind": "interface",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/harnesslimits",
-        "attrs": {
-          "data-api-kind": "interface",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/harnesstoolexecution",
-        "attrs": {
-          "data-api-kind": "interface",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/harnessinstructions",
-        "attrs": {
-          "data-api-kind": "interface",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/harnessinstructioncontext",
-        "attrs": {
-          "data-api-kind": "interface",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/harnesstool",
-        "attrs": {
-          "data-api-kind": "interface",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/harnesstooloptions",
-        "attrs": {
-          "data-api-kind": "interface",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/harnesstoolcontext",
-        "attrs": {
-          "data-api-kind": "interface",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/harnesstoolset",
-        "attrs": {
-          "data-api-kind": "interface",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/harnesstoolsetoptions",
-        "attrs": {
-          "data-api-kind": "interface",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/standardjsonschema",
-        "attrs": {
-          "data-api-kind": "interface",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/harnesshook",
-        "attrs": {
-          "data-api-kind": "interface",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/harnesshookcontext",
-        "attrs": {
-          "data-api-kind": "interface",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/harnesshookdecisions",
-        "attrs": {
-          "data-api-kind": "interface",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/harnesshookevents",
-        "attrs": {
-          "data-api-kind": "interface",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/harnesshookoptions",
-        "attrs": {
-          "data-api-kind": "interface",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/harnesstoolresultview",
-        "attrs": {
-          "data-api-kind": "interface",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/harnesspermissionrule",
-        "attrs": {
-          "data-api-kind": "interface",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/harnesspermissions",
-        "attrs": {
-          "data-api-kind": "interface",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/harnesspermissionsoptions",
-        "attrs": {
-          "data-api-kind": "interface",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/toolresources",
-        "attrs": {
-          "data-api-kind": "interface",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/shelltoolsoptions",
-        "attrs": {
-          "data-api-kind": "interface",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/harnesscontextinput",
-        "attrs": {
-          "data-api-kind": "interface",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/harnesscontextstrategy",
-        "attrs": {
-          "data-api-kind": "interface",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/harnesscontextstrategyoptions",
-        "attrs": {
-          "data-api-kind": "interface",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/summarizehistoryoptions",
-        "attrs": {
-          "data-api-kind": "interface",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/truncatetoolresultsoptions",
-        "attrs": {
-          "data-api-kind": "interface",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/harnessskill",
-        "attrs": {
-          "data-api-kind": "interface",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/harnessskilloptions",
-        "attrs": {
-          "data-api-kind": "interface",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/antigravitysettings",
@@ -1208,11 +990,7 @@
       },
       {
         "slug": "reference/openaimodelprovider",
-        "attrs": {
-          "data-api-kind": "function",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/anthropicmodelprovider",
@@ -1224,27 +1002,15 @@
       },
       {
         "slug": "reference/modelcontentblock",
-        "attrs": {
-          "data-api-kind": "type",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/modelstopreason",
-        "attrs": {
-          "data-api-kind": "type",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/modelstreamevent",
-        "attrs": {
-          "data-api-kind": "type",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/anthropicmodelprovideroptions",
@@ -1256,83 +1022,43 @@
       },
       {
         "slug": "reference/openaimodelprovideroptions",
-        "attrs": {
-          "data-api-kind": "interface",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/modelprovider",
-        "attrs": {
-          "data-api-kind": "interface",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/modelrequest",
-        "attrs": {
-          "data-api-kind": "interface",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/modelresult",
-        "attrs": {
-          "data-api-kind": "interface",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/modelmessage",
-        "attrs": {
-          "data-api-kind": "interface",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/modeltextblock",
-        "attrs": {
-          "data-api-kind": "interface",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/modeltoolcallblock",
-        "attrs": {
-          "data-api-kind": "interface",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/modeltoolresultblock",
-        "attrs": {
-          "data-api-kind": "interface",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/modelreasoningblock",
-        "attrs": {
-          "data-api-kind": "interface",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/modeltoolspec",
-        "attrs": {
-          "data-api-kind": "interface",
-          "data-api-status": "experimental",
-          "title": "Experimental / Expérimental"
-        }
+        "attrs": { "data-api-kind": "interface" }
       }
     ]
   },

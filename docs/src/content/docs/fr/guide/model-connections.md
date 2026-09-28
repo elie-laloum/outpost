@@ -3,9 +3,7 @@ title: "Connexions aux modèles"
 description: "Choisir un protocole HTTP pour la boucle intégrée."
 ---
 
-:::note[Expérimental]
-Ces fournisseurs implémentent le contrat expérimental `ModelProvider` de la boucle intégrée.
-:::
+Le contrat `ModelProvider` et `openaiModelProvider()` sont stabilisés pour la prochaine version. `anthropicModelProvider()` conserve son statut expérimental jusqu’à la validation authentifiée de la délégation. Les requêtes modèles sont exécutées dans le processus Outpost.
 
 Choisissez le fournisseur selon le protocole, puis passez-le à `harness({ modelProvider })`. Les identifiants sont explicites et restent dans le client côté hôte.
 
@@ -40,3 +38,11 @@ Les modèles sont des noms ou des objets avec les réglages de raisonnement et d
 Le `cache` du harness demande la mise en cache du préfixe. `cacheSystem` d’Anthropic ajoute explicitement un point de cache système ; les succès du cache ne sont pas garantis.
 
 API : [openaiModelProvider](../../reference/openaimodelprovider/) · [anthropicModelProvider](../../reference/anthropicmodelprovider/) · [ModelProvider](../../reference/modelprovider/).
+
+## Validation
+
+La validation locale de septembre 2026 couvre OpenAI Responses et Chat Completions avec `gpt-5.6-luna`, la délégation et l’édition dans Docker, puis cache, limites, interruption et flux incomplet. Responses utilise le raisonnement `low` ; Chat Completions utilise `none`, car le service a refusé les outils avec `low`. Anthropic reste expérimental après un refus d’authentification HTTP 401 ; sa précédente campagne sans délégation utilisait `claude-haiku-4-5-20251001`.
+
+Dans le dépôt source, `node scripts/harness-live.mjs offline docker coding` exécute une fixture déterministe dans un vrai conteneur. Remplacez `docker` par `podman`, `vercel` ou `daytona` avec les prérequis correspondants. Pour une campagne payante, chargez vos identifiants puis utilisez `node scripts/harness-live.mjs responses docker coding --live`. Les protocoles `chat-completions` et `anthropic` acceptent les mêmes scénarios : `coding`, `cache`, `cancel`, `truncation`, `steps`, `usage`, `network`.
+
+Les rapports et le registre budgétaire sont écrits dans `temp/harness-stable-live`, ou dans `OUTPOST_HARNESS_REPORT_DIRECTORY`. Le plafond commun de réservations est de 5 $ ; chaque appel réserve une estimation conservatrice avant envoi. Les appels interrompus ne sont pas remboursés dans ce registre et l’estimation ne remplace pas la facture. Conservez ce dossier sur un stockage persistant et ne réinitialisez pas le budget pour contourner le plafond. Les frais de sandbox sont distincts. Cette campagne synthétique ne constitue pas un benchmark face aux CLI.

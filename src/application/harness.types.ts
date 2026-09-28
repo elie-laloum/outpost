@@ -1,3 +1,6 @@
+import type { HarnessBudget } from "./harness-budget.types.ts";
+import type { HarnessPermissions } from "../domain/permissions.types.ts";
+import type { HarnessModelScope } from "./harness-model-provider.types.ts";
 import type { AgentEvent, CustomAgent } from "../domain/agent.types.ts";
 import type {
   ModelContentBlock,
@@ -12,6 +15,13 @@ import type { DispatchOptions, TurnContext } from "./execution.types.ts";
 
 export interface HarnessRuntime {
   readonly verbose?: boolean;
+  readonly repository: string;
+  readonly conversation?: string | undefined;
+  readonly budget: HarnessBudget;
+  readonly permissions: readonly HarnessPermissions[];
+  readonly depth: number;
+  readonly maxDepth: number;
+  readonly modelScope: Pick<HarnessModelScope, "track" | "account">;
   readonly agent: CustomAgent;
   readonly tools: readonly HarnessTool[];
   readonly modelProvider: ModelProvider;

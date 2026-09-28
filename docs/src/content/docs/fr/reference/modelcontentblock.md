@@ -5,10 +5,6 @@ sidebar:
   order: 10
 ---
 
-:::caution[Expérimental]
-Expérimental : contrat de fournisseur pour les harness personnalisés, avec messages, appels d’outils, raisonnement rejouable, cache d’historique et streaming. Il peut changer dans une version ultérieure.
-:::
-
 ## Import
 
 ```ts
