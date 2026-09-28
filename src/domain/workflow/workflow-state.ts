@@ -90,6 +90,7 @@ export function workflowState(
         ...(entry.decision
           ? { decision: Object.freeze({ ...entry.decision }) }
           : {}),
+        ...(entry.quota ? { quota: Object.freeze({ ...entry.quota }) } : {}),
         status:
           ["done", "paused", "rejected", "waiting-input"].includes(
             entry.status,

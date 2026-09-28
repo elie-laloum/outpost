@@ -1,5 +1,6 @@
 import { prepareAnswers, applyAnswers } from "./input.ts";
 import { OutpostError } from "../errors.ts";
+import { quotaResumes, validateQuotaPolicy } from "./quota-pause.ts";
 import { maxTimerMs } from "./retry.constants.ts";
 import { applyDecisions, pauseGate, prepareDecisions } from "./gates.ts";
 import { openCheckpoint } from "./checkpoint.ts";
@@ -26,6 +27,11 @@ export async function schedule(
     throw new Error("Workflow interactions and answers require a checkpoint");
   if (options.answers && !options.answers.length)
     throw new Error("Workflow answers cannot be empty");
+  if (options.onQuota) {
+    if (!options.checkpoint)
+      throw new Error("Workflow quota pauses require a checkpoint");
+    validateQuotaPolicy(options.onQuota);
+  }
   if (
     !options.checkpoint &&
     (tasks.some((item) => item.gate) || options.decisions?.length)
@@ -105,12 +111,15 @@ async function scheduleRun(
       applyAnswers(state, answers);
     }
     await state.persist();
+    const resumes = quotaResumes(state);
     try {
       while (true) {
         let changed = false;
         for (const item of tasks) {
-          if (record(item).status !== "waiting") continue;
+          const resumed = resumes.has(item);
+          if (record(item).status !== "waiting" && !resumed) continue;
           if (signal.aborted || state.accounting.exhausted) {
+            if (resumes.delete(item)) continue;
             finish(item, "cancelled");
             changed = true;
             continue;
@@ -133,6 +142,7 @@ async function scheduleRun(
             !dependencies.every((status) => status === "done")
           )
             continue;
+          resumes.delete(item);
           const running = (
             item.gate ? pauseGate(item, state) : runTask(item, state)
           ).finally(() => {

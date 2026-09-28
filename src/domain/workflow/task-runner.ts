@@ -3,25 +3,19 @@ import { loopDefinition } from "./loop-task.ts";
 import { runLoopTask } from "./loop-runner.ts";
 import { checkpointValue } from "./checkpoint-value.ts";
 import { WorkflowBudgetExceeded, WorkflowUsageUnavailable } from "./budget.ts";
+import { awaitQuotaReset, pauseForQuota } from "./quota-pause.ts";
 import { retryDelay, waitForRetry } from "./retry.ts";
+import { quotaFault } from "../quota.ts";
 import type { Task, WorkflowExecutionState } from "../workflow.types.ts";
 
 export async function runTask(
   item: Task,
   runtime: WorkflowExecutionState,
 ): Promise<void> {
-  const {
-    record,
-    signal,
-    context,
-    emit,
-    finish,
-    values,
-    errors,
-    options,
-    stop,
-  } = runtime;
+  const { record, signal, context, emit, finish, errors, options, stop } =
+    runtime;
   const state = record(item);
+  if (state.quota && !(await awaitQuotaReset(item, runtime, true))) return;
   state.status = "active";
   delete state.error;
   delete state.finishedAt;
@@ -35,66 +29,18 @@ export async function runTask(
       finish(item, "skipped");
       return;
     }
-    const loop = loopDefinition(item);
-    if (loop) {
-      const value = await runLoopTask(item, loop, runtime);
-      signal.throwIfAborted();
-      values.set(item, value);
-      finish(item, "done");
-      return;
-    }
-    const limit = item.retry?.attempts ?? 1;
-    const priorAttempts = state.attempts;
-    for (let cycle = 1; cycle <= limit; cycle++) {
-      const attempt = priorAttempts + cycle;
-      signal.throwIfAborted();
-      runtime.accounting.admit();
-      state.attempts = attempt;
-      emit({ type: "attempt", key: item.key, attempt });
-      await runtime.persist();
-      let delayMs = 0;
-      const deadline = new AbortController();
-      const timer =
-        item.timeoutMs === undefined
-          ? undefined
-          : setTimeout(
-              () => deadline.abort(new Error(`${item.key} timed out`)),
-              item.timeoutMs,
-            );
-      const taskSignal = AbortSignal.any([signal, deadline.signal]);
+    while (true) {
       try {
-        taskSignal.throwIfAborted();
-        const value = await item.perform(context(item, attempt, taskSignal));
-        taskSignal.throwIfAborted();
-        if (options.checkpoint) checkpointValue(value);
-        values.set(item, value);
-        finish(item, "done");
+        await perform(item, runtime);
         return;
       } catch (error) {
-        runtime.closeAttempt(item);
-        if (error instanceof InputSuspension && item.interaction) {
-          state.interaction = error.interaction;
-          finish(item, "waiting-input");
-          emit({
-            type: "input-request",
-            key: item.key,
-            status: "waiting-input",
-          });
-          return;
-        }
-        if (
-          signal.aborted ||
-          cycle === limit ||
-          item.retry?.accepts?.(error, attempt) === false
-        )
-          throw error;
-        delayMs = retryDelay(item.retry, cycle, error);
-        emit({ type: "retry", key: item.key, attempt, delayMs });
-      } finally {
-        runtime.closeAttempt(item);
-        clearTimeout(timer);
+        if (!(await pauseForQuota(item, runtime, error))) throw error;
+        if (!(await awaitQuotaReset(item, runtime, false))) return;
+        state.status = "active";
+        delete state.finishedAt;
+        emit({ type: "task", key: item.key, status: "active", attempt: 0 });
+        await runtime.persist();
       }
-      await waitForRetry(delayMs, signal);
     }
   } catch (error) {
     state.error = error instanceof Error ? error.message : String(error);
@@ -112,5 +58,75 @@ export async function runTask(
     }
   } finally {
     await runtime.persist();
+  }
+}
+
+async function perform(
+  item: Task,
+  runtime: WorkflowExecutionState,
+): Promise<void> {
+  const { record, signal, context, emit, finish, values, options } = runtime;
+  const state = record(item);
+  const loop = loopDefinition(item);
+  if (loop) {
+    const value = await runLoopTask(item, loop, runtime);
+    signal.throwIfAborted();
+    values.set(item, value);
+    finish(item, "done");
+    return;
+  }
+  const limit = item.retry?.attempts ?? 1;
+  const priorAttempts = state.attempts;
+  for (let cycle = 1; cycle <= limit; cycle++) {
+    const attempt = priorAttempts + cycle;
+    signal.throwIfAborted();
+    runtime.accounting.admit();
+    state.attempts = attempt;
+    emit({ type: "attempt", key: item.key, attempt });
+    await runtime.persist();
+    let delayMs = 0;
+    const deadline = new AbortController();
+    const timer =
+      item.timeoutMs === undefined
+        ? undefined
+        : setTimeout(
+            () => deadline.abort(new Error(`${item.key} timed out`)),
+            item.timeoutMs,
+          );
+    const taskSignal = AbortSignal.any([signal, deadline.signal]);
+    try {
+      taskSignal.throwIfAborted();
+      const value = await item.perform(context(item, attempt, taskSignal));
+      taskSignal.throwIfAborted();
+      if (options.checkpoint) checkpointValue(value);
+      values.set(item, value);
+      finish(item, "done");
+      return;
+    } catch (error) {
+      runtime.closeAttempt(item);
+      if (error instanceof InputSuspension && item.interaction) {
+        state.interaction = error.interaction;
+        finish(item, "waiting-input");
+        emit({
+          type: "input-request",
+          key: item.key,
+          status: "waiting-input",
+        });
+        return;
+      }
+      if (
+        signal.aborted ||
+        cycle === limit ||
+        (options.onQuota && quotaFault(error)) ||
+        item.retry?.accepts?.(error, attempt) === false
+      )
+        throw error;
+      delayMs = retryDelay(item.retry, cycle, error);
+      emit({ type: "retry", key: item.key, attempt, delayMs });
+    } finally {
+      runtime.closeAttempt(item);
+      clearTimeout(timer);
+    }
+    await waitForRetry(delayMs, signal);
   }
 }

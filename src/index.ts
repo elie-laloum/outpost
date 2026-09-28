@@ -212,6 +212,9 @@ export { OutpostError, recoveryDetails } from "./domain/errors.ts";
 
 export type { FaultCode } from "./domain/errors.ts";
 
+export { quotaFault } from "./domain/quota.ts";
+export type { QuotaFault } from "./domain/quota.types.ts";
+
 export type {
   AgentAdapter,
   AgentEvent,
@@ -331,6 +334,10 @@ export type {
   WorkflowDecisionVerification,
   WorkflowDecisionVerifier,
 } from "./domain/workflow/gates.types.ts";
+export type {
+  WorkflowQuotaPause,
+  WorkflowQuotaPolicy,
+} from "./domain/workflow/quota-pause.types.ts";
 
 export { inspectRecovery } from "./application/recovery-inspection.ts";
 export type {

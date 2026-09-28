@@ -100,6 +100,8 @@ try {
     assert.equal(verified.value(loop),2);
     assert.equal(verified.usage.attempts,2);
     assert.equal(typeof api.LoopTaskExhausted,'function');
+    const quota=api.quotaFault(new api.OutpostError('quota','limit',{resetAt:'2026-01-01T00:00:00.000Z'}));
+    assert.deepEqual(quota,{message:'limit',resetAt:'2026-01-01T00:00:00.000Z'});
     const transporter=api.localTransport({directory:'consumer-store'});
     const artifact=api.artifactStore({transporter});
     const id='a'.repeat(64);
@@ -210,6 +212,11 @@ const loop=loopTask(loopOptions);
 const verified=await workflow('fix',[loop]).start();
 const number: number=verified.value(loop);
 const history: readonly LoopRoundRecord[] | undefined=verified.tasks[0]?.rounds;
+import { quotaFault, type QuotaFault, type WorkflowQuotaPolicy, type WorkflowQuotaPause, type WorkflowOptions } from '@elie-laloum/outpost';
+const quotaPolicy: WorkflowQuotaPolicy = {action:'pause',maxWaitMs:60_000};
+const quotaOptions: WorkflowOptions = {onQuota:quotaPolicy};
+const quotaPause: WorkflowQuotaPause | undefined=verified.tasks[0]?.quota;
+const quotaSignal: QuotaFault | undefined=quotaFault(new Error('other'));
 // @ts-expect-error Gemini CLI was removed without a compatibility export.
 import { geminiHarness } from '@elie-laloum/outpost';
 // @ts-expect-error Gemini CLI settings were removed.

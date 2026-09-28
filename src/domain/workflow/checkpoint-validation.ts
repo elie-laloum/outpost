@@ -1,4 +1,5 @@
 import { validateLoopRecord } from "./loop-validation.ts";
+import { validateQuotaRecord } from "./quota-validation.ts";
 import { validateInteractionRecord } from "./input-validation.ts";
 import { validateUsageReceipts } from "./usage-receipt.ts";
 import { validateGateRecord } from "./gate-validation.ts";
@@ -69,6 +70,10 @@ export function validateCheckpoint(
         throw invalid();
     validateUsageReceipts(record.usageReceipts);
     validateLoopRecord(
+      record,
+      tasks.find((item) => item.key === record.key)!,
+    );
+    validateQuotaRecord(
       record,
       tasks.find((item) => item.key === record.key)!,
     );

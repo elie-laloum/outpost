@@ -6,6 +6,10 @@ import type {
   WorkflowInputRequest,
 } from "./workflow/input.types.ts";
 import type { LoopRoundRecord } from "./workflow/loop-task.types.ts";
+import type {
+  WorkflowQuotaPause,
+  WorkflowQuotaPolicy,
+} from "./workflow/quota-pause.types.ts";
 import type { ObservationHub } from "./observation.types.ts";
 import type {
   WorkflowDecision,
@@ -71,6 +75,7 @@ export type TaskStatus =
   | "rejected";
 
 export interface TaskRecord {
+  quota?: WorkflowQuotaPause;
   interaction?: TaskInteractionRecord;
   rounds?: readonly LoopRoundRecord[];
   usageReceipts?: readonly string[];
@@ -89,6 +94,7 @@ export interface WorkflowEvent {
   readonly workflow: string;
   readonly timestamp: string;
   readonly type:
+    | "quota"
     | "input-request"
     | "input-answer"
     | "loop"
@@ -103,6 +109,7 @@ export interface WorkflowEvent {
     | "checkpoint"
     | "resume"
     | "budget-exceeded";
+  readonly resetAt?: string;
   readonly round?: number;
   readonly phase?: "attempt" | "check" | "complete";
   readonly key?: string;
@@ -118,6 +125,7 @@ export interface WorkflowTelemetry {
 }
 
 export interface WorkflowOptions {
+  readonly onQuota?: WorkflowQuotaPolicy;
   readonly answers?: readonly WorkflowAnswer[];
   readonly timeoutMs?: number;
   readonly observation?: ObservationHub;

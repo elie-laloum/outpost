@@ -34,7 +34,8 @@ export function validateGateRecord(
     if (
       request !== undefined ||
       decision !== undefined ||
-      ["paused", "rejected"].includes(String(record.status))
+      record.status === "rejected" ||
+      (record.status === "paused" && record.quota === undefined)
     )
       throw invalid();
     return;
