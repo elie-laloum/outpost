@@ -519,6 +519,7 @@ test("checkpoint restart preserves graph identity across host locales", async (t
 });
 
 test("workflow timeout checkpoints completed values and renews its deadline on explicit resume", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
   const { setTimeout: delay } = await import("node:timers/promises");
   const directory = await temporary(t);
   const checkpoint = {
@@ -540,7 +541,13 @@ test("workflow timeout checkpoints completed values and renews its deadline on e
     key: "target",
     after: [source],
     async perform({ signal, attempt, value }) {
-      if (attempt === 1) await delay(10000, undefined, { signal });
+      if (attempt === 1) {
+        const waiting = delay(10000, undefined, { signal });
+        t.mock.timers.tick(200);
+        await waiting;
+      }
+      t.mock.timers.tick(1999);
+      assert.equal(signal.aborted, false);
       return value(source) + attempt;
     },
   });
