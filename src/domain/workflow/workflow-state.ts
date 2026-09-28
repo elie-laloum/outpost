@@ -1,3 +1,4 @@
+import { taskIdempotencyKey } from "./idempotency.ts";
 import { createObservationHub } from "../observation.ts";
 import { maxUsageReceiptsPerTask } from "./usage-receipt.constants.ts";
 import { validateUsageReceipt } from "./usage-receipt.ts";
@@ -190,6 +191,7 @@ export function workflowState(
       signal: taskSignal,
       attempt,
       executionId,
+      idempotencyKey: taskIdempotencyKey(executionId, item.key),
       checkpoint: () => runtime.persist(),
       reportUsage: (usage) => report(usage),
       reportUsageOnce: (receipt, usage) => {

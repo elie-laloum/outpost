@@ -143,7 +143,7 @@ export const groups = [
     title: ["Approval and pause gates", "Approbations et pauses"],
     guide: "guide/advanced/approvals",
     names:
-      "approvalTask pauseTask WorkflowGate WorkflowGateOptions WorkflowPauseRequest WorkflowDecision WorkflowDecisionRecord",
+      "approvalTask pauseTask signWorkflowDecision ed25519DecisionVerifier WorkflowDecisionProof WorkflowDecisionVerification WorkflowDecisionVerifier WorkflowDecisionSigningOptions WorkflowApproverKey WorkflowDecisionVerifierOptions WorkflowGate WorkflowGateOptions WorkflowPauseRequest WorkflowDecision WorkflowDecisionRecord",
   },
   {
     id: "artifacts",

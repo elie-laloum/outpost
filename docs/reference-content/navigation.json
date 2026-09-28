@@ -1281,6 +1281,38 @@
         "attrs": { "data-api-kind": "function" }
       },
       {
+        "slug": "reference/signworkflowdecision",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/ed25519decisionverifier",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/workflowdecisionverifier",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/workflowdecisionproof",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/workflowdecisionverification",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/workflowdecisionsigningoptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/workflowapproverkey",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/workflowdecisionverifieroptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
         "slug": "reference/workflowgate",
         "attrs": { "data-api-kind": "interface" }
       },

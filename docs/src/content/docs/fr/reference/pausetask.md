@@ -19,13 +19,14 @@ Définit une pause persistée par checkpoint qui attend une décision explicite 
 
 ## Paramètres et propriétés
 
-| Nom              | Type                                    | Présence  | Rôle                                                                                                                        |
-| ---------------- | --------------------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `options`        | `WorkflowGateOptions`                   | Requis    | Clé de gate, dépendances, demande de pause et acteurs de confiance autorisés à reprendre ou rejeter.                        |
-| `options.key`    | `string`                                | Requis    | Clé de tâche stable identifiant le nœud dans son graphe de workflow.                                                        |
-| `options.after`  | `readonly Task<unknown>[] \| undefined` | Optionnel | Dépendances déclarées dont les valeurs peuvent être lues.                                                                   |
-| `options.prompt` | `string`                                | Requis    | Instruction expliquant la décision d’approbation ou de reprise demandée à l’acteur de confiance.                            |
-| `options.actors` | `readonly string[]`                     | Requis    | Liste non vide des noms d’acteurs de confiance autorisés à décider cette gate ; leur authentification relève de l’appelant. |
+| Nom                      | Type                                    | Présence  | Rôle                                                                                                                                         |
+| ------------------------ | --------------------------------------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `options`                | `WorkflowGateOptions`                   | Requis    | Clé de gate, dépendances, demande de pause et acteurs de confiance autorisés à reprendre ou rejeter.                                         |
+| `options.authentication` | `"signed" \| undefined`                 | Optionnel | Exige une preuve vérifiée pour ce gate d’approbation ou de pause et inscrit cette exigence dans l’identité du graphe.                        |
+| `options.key`            | `string`                                | Requis    | Clé de tâche stable identifiant le nœud dans son graphe de workflow.                                                                         |
+| `options.after`          | `readonly Task<unknown>[] \| undefined` | Optionnel | Dépendances déclarées dont les valeurs peuvent être lues.                                                                                    |
+| `options.prompt`         | `string`                                | Requis    | Instruction expliquant la décision d’approbation ou de reprise demandée à l’acteur de confiance.                                             |
+| `options.actors`         | `readonly string[]`                     | Requis    | Noms d’acteurs non vides et uniques autorisés à décider le gate créé ; l’authentification signée lie l’acteur choisi à une clé de confiance. |
 
 ## Retour
 

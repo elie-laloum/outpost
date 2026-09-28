@@ -48,7 +48,9 @@ export async function runQueueWorker(
       if (!handler) throw new Error("Worker handler unavailable");
       let result: QueueResult;
       try {
-        result = queueResult(await handler(job.input, { signal, job }));
+        result = queueResult(
+          await handler(job.input, { signal, job, idempotencyKey: job.id }),
+        );
       } catch (error) {
         result = {
           value: null,

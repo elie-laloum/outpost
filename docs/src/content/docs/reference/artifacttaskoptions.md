@@ -16,9 +16,9 @@ import type { ArtifactTaskOptions } from "@elie-laloum/outpost";
 | Name        | Type                                                                    | Presence | Meaning                                                                                                  |
 | ----------- | ----------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------- |
 | `retry`     | `Retry \| undefined`                                                    | Optional | Explicit retry policy; repeated effects require care.                                                    |
+| `key`       | `string`                                                                | Required | Stable task key identifying the node within its workflow graph.                                          |
 | `gate`      | `WorkflowGate \| undefined`                                             | Optional | Persisted approval or pause definition; execution requires a checkpoint and a matching trusted decision. |
 | `after`     | `readonly Task<unknown>[] \| undefined`                                 | Optional | Declared task dependencies whose values may be read.                                                     |
-| `key`       | `string`                                                                | Required | Stable task key identifying the node within its workflow graph.                                          |
 | `condition` | `((context: TaskContext) => boolean \| Promise<boolean>) \| undefined`  | Optional | Predicate evaluated before the first task attempt.                                                       |
 | `timeoutMs` | `number \| undefined`                                                   | Optional | Time limit in milliseconds for each task attempt; cancellation is cooperative through context.signal.    |
 | `store`     | `ArtifactStore`                                                         | Required | Artifact byte store used for immutable publication or bounded payload retrieval.                         |

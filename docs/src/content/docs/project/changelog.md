@@ -9,6 +9,8 @@ The release notes below are synchronized from the root `CHANGELOG.md`, the singl
 
 ## Unreleased
 
+- Add opt-in signed approval/pause gates with rotating Ed25519 approver keys, per-request HTTP queue credential rotation and stable task/worker idempotency keys. Document persistent effect deduplication and multi-worker recovery; queues still do not guarantee exactly-once external effects.
+
 - Stabilize the built-in harness and OpenAI/Anthropic model contracts (implemented, unreleased), with authenticated delegation validated for both integrations. Add `defineHarnessSubagent()` with serialized shared-sandbox execution, separate captured histories, inherited permissions, bounded depth and cumulative ancestor token budgets. Count final responses and context summaries toward token ceilings, reject incomplete accounting and correlate child lifecycle/usage events. Add deterministic container CI and an opt-in, budgeted live campaign.
 - Add scoped observation hubs with bounded pluggable sinks, correlated workflow/agent/operation events, process stop diagnostics, normalized CLI tool results and opt-in model payloads. Journals and reporters use the shared delivery policy; sink failures are reported independently of execution. OpenTelemetry can consume the unified stream without changing metric names.
 - Add native session capture, warm/cold resume and response repairs for Copilot and Kimi, plus native Kimi fork. Antigravity supports warm resume and repairs only; portable capture/cold resume and automated fork remain unsupported. Copilot automated fork is explicitly refused. Session bundles preserve supported native files and can be archived through Transport.

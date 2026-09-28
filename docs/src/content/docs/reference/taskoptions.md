@@ -16,8 +16,8 @@ import type { TaskOptions } from "@elie-laloum/outpost";
 | Name        | Type                                                                   | Presence | Meaning                                                                                                  |
 | ----------- | ---------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------- |
 | `retry`     | `Retry \| undefined`                                                   | Optional | Explicit retry policy; repeated effects require care.                                                    |
-| `gate`      | `WorkflowGate \| undefined`                                            | Optional | Persisted approval or pause definition; execution requires a checkpoint and a matching trusted decision. |
 | `key`       | `string`                                                               | Required | Stable task key identifying the node within its workflow graph.                                          |
+| `gate`      | `WorkflowGate \| undefined`                                            | Optional | Persisted approval or pause definition; execution requires a checkpoint and a matching trusted decision. |
 | `perform`   | `(context: TaskContext) => T \| Promise<T>`                            | Required | Callback executed for each task attempt; returns its output and must honor context.signal.               |
 | `condition` | `((context: TaskContext) => boolean \| Promise<boolean>) \| undefined` | Optional | Predicate evaluated before the first task attempt.                                                       |
 | `timeoutMs` | `number \| undefined`                                                  | Optional | Time limit in milliseconds for each task attempt; cancellation is cooperative through context.signal.    |

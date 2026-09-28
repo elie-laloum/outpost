@@ -1,6 +1,7 @@
 import type { ObservationHub } from "./observation.types.ts";
 import type {
   WorkflowDecision,
+  WorkflowDecisionVerifier,
   WorkflowDecisionRecord,
   WorkflowGate,
   WorkflowPauseRequest,
@@ -14,6 +15,7 @@ import type {
 } from "./workflow/budget.types.ts";
 
 export interface TaskContext {
+  readonly idempotencyKey: string;
   readonly observation?: ObservationHub;
   readonly signal: AbortSignal;
   readonly attempt: number;
@@ -95,6 +97,7 @@ export interface WorkflowTelemetry {
 
 export interface WorkflowOptions {
   readonly observation?: ObservationHub;
+  readonly decisionVerifier?: WorkflowDecisionVerifier;
   readonly decisions?: readonly WorkflowDecision[];
   readonly checkpoint?: WorkflowCheckpointOptions;
   readonly signal?: AbortSignal;
