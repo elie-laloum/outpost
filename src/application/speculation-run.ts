@@ -329,6 +329,8 @@ export async function runSpeculation<T>(
       before,
       after,
       changed:
+        before.head !== after.head ||
+        before.dirty !== after.dirty ||
         before.fingerprint !== after.fingerprint ||
         before.branch !== after.branch,
     }),

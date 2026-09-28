@@ -19,16 +19,16 @@ Define an agent workflow node whose request callback selects a repository, provi
 
 ## Parameters and properties
 
-| Name                | Type                                                                                  | Presence | Meaning                                                                                                    |
-| ------------------- | ------------------------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------- |
-| `options`           | `Omit<TaskOptions<DispatchResult<T>>, "perform"> & IsolatedTaskOptions<T>`            | Required | Task scheduling settings and request factory selecting a separate repository and sandbox for each attempt. |
-| `options.retry`     | `Retry \| undefined`                                                                  | Optional | Explicit retry policy; repeated effects require care.                                                      |
-| `options.gate`      | `WorkflowGate \| undefined`                                                           | Optional | Persisted approval or pause definition; execution requires a checkpoint and a matching trusted decision.   |
-| `options.after`     | `readonly Task<unknown>[] \| undefined`                                               | Optional | Declared task dependencies whose values may be read.                                                       |
-| `options.key`       | `string`                                                                              | Required | Stable task key identifying the node within its workflow graph.                                            |
-| `options.condition` | `((context: TaskContext) => boolean \| Promise<boolean>) \| undefined`                | Optional | Predicate evaluated before the first task attempt.                                                         |
-| `options.timeoutMs` | `number \| undefined`                                                                 | Optional | Time limit in milliseconds for each task attempt; cancellation is cooperative through context.signal.      |
-| `options.request`   | `(context: TaskContext) => IsolatedTaskRequest<T> \| Promise<IsolatedTaskRequest<T>>` | Required | Build repository, provider, agent and brief options for a separately allocated dispatch at each attempt.   |
+| Name                | Type                                                                                  | Presence | Meaning                                                                                                                                  |
+| ------------------- | ------------------------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `options`           | `Omit<TaskOptions<DispatchResult<T>>, "perform"> & IsolatedTaskOptions<T>`            | Required | Task scheduling settings and request factory selecting a separate repository and sandbox for each attempt.                               |
+| `options.retry`     | `Retry \| undefined`                                                                  | Optional | Explicit retry policy; repeated effects require care.                                                                                    |
+| `options.gate`      | `WorkflowGate \| undefined`                                                           | Optional | Persisted approval or pause definition; execution requires a checkpoint and a matching trusted decision.                                 |
+| `options.after`     | `readonly Task<unknown>[] \| undefined`                                               | Optional | Declared task dependencies whose values may be read.                                                                                     |
+| `options.key`       | `string`                                                                              | Required | Stable task key identifying the node within its workflow graph.                                                                          |
+| `options.condition` | `((context: TaskContext) => boolean \| Promise<boolean>) \| undefined`                | Optional | Predicate evaluated before the first task attempt.                                                                                       |
+| `options.timeoutMs` | `number \| undefined`                                                                 | Optional | Positive integer time limit in milliseconds for each task attempt, up to 2147483647; cancellation is cooperative through context.signal. |
+| `options.request`   | `(context: TaskContext) => IsolatedTaskRequest<T> \| Promise<IsolatedTaskRequest<T>>` | Required | Build repository, provider, agent and brief options for a separately allocated dispatch at each attempt.                                 |
 
 ## Returns
 

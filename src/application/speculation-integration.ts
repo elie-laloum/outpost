@@ -57,6 +57,8 @@ export async function checkSpeculationIntegration(
       await git(repository, ["rev-parse", "--verify", `${branch}^{commit}`])
     ).trim();
     if (
+      after.head !== host.head ||
+      after.dirty !== host.dirty ||
       after.fingerprint !== host.fingerprint ||
       after.branch !== host.branch ||
       currentCandidate !== candidateCommit

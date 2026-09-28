@@ -14,7 +14,7 @@ import {
   workflow,
   localTransport,
 } from "../../src/index.ts";
-import type { WorkflowCheckpointStore } from "../../src/index.ts";
+import type { Retry, WorkflowCheckpointStore } from "../../src/index.ts";
 
 async function temporary(t: TestContext) {
   const directory = await mkdtemp(join(tmpdir(), "outpost-checkpoint-"));
@@ -516,4 +516,73 @@ test("checkpoint restart preserves graph identity across host locales", async (t
     assert.equal(result.status, 0, result.stderr);
     assert.equal(result.stdout.trim(), "a");
   }
+});
+
+test("workflow timeout checkpoints completed values and renews its deadline on explicit resume", async (t) => {
+  const { setTimeout: delay } = await import("node:timers/promises");
+  const directory = await temporary(t);
+  const checkpoint = {
+    store: workflowCheckpointStore({
+      transporter: localTransport({ directory }),
+    }),
+    runId: "timeout",
+    version: "1",
+  };
+  let sourceCalls = 0;
+  const source = task({
+    key: "source",
+    perform() {
+      sourceCalls++;
+      return 7;
+    },
+  });
+  const target = task({
+    key: "target",
+    after: [source],
+    async perform({ signal, attempt, value }) {
+      if (attempt === 1) await delay(10000, undefined, { signal });
+      return value(source) + attempt;
+    },
+  });
+  const graph = workflow("deadline", [source, target]);
+  const first = await graph.start({ checkpoint, timeoutMs: 200 });
+  assert.equal(first.status, "failed");
+  assert.equal(first.value(source), 7);
+  assert.equal(first.tasks[1]?.attempts, 1);
+  await assert.rejects(
+    graph.start({ checkpoint, timeoutMs: 200 }),
+    /explicitly authorize replay/,
+  );
+  const resumed = await graph.start({
+    checkpoint: { ...checkpoint, resume: "retry-incomplete" },
+    timeoutMs: 2000,
+  });
+  resumed.unwrap();
+  assert.equal(resumed.value(target), 9);
+  assert.equal(sourceCalls, 1);
+  assert.equal(resumed.executionId, first.executionId);
+});
+
+test("checkpoint identity includes retry backoff, jitter and cap", async (t) => {
+  const directory = await temporary(t);
+  const checkpoint = {
+    store: workflowCheckpointStore({
+      transporter: localTransport({ directory }),
+    }),
+    runId: "retry-policy",
+    version: "1",
+  };
+  const definition = (retry: Retry) =>
+    workflow("retry", [task({ key: "task", retry, perform: () => 1 })]);
+  await definition({ attempts: 2 }).start({ checkpoint });
+  for (const retry of [
+    { attempts: 2, backoff: "exponential" as const },
+    { attempts: 2, jitter: "full" as const },
+    { attempts: 2, maxDelayMs: 100 },
+  ])
+    await assert.rejects(
+      definition(retry).start({ checkpoint }),
+      /incompatible/,
+    );
+  (await definition({ attempts: 2 }).start({ checkpoint })).unwrap();
 });

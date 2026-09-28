@@ -23,6 +23,9 @@ export async function openCheckpoint(
       timeoutMs: item.timeoutMs,
       retry: item.retry?.attempts,
       delayMs: item.retry?.delayMs,
+      backoff: item.retry?.backoff,
+      maxDelayMs: item.retry?.maxDelayMs,
+      jitter: item.retry?.jitter,
       condition: !!item.condition,
       accepts: !!item.retry?.accepts,
     }))
