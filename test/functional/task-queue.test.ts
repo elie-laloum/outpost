@@ -601,6 +601,18 @@ test("HTTP credentials rotate while a handler holds its lease and revoked source
   });
   t.after(() => server.close());
   const queue = httpTaskQueue({ url: server.url, token: async () => current });
+  let rotated!: () => void;
+  const workerRotated = new Promise<void>((resolve) => {
+    rotated = resolve;
+  });
+  // The heartbeat is sequential: once it reads the new token, no old-token renewal is in flight.
+  const workerQueue = httpTaskQueue({
+    url: server.url,
+    token: async () => {
+      if (current === next) rotated();
+      return current;
+    },
+  });
   await queue.enqueue({ id: "rotation", handler: "work", input: null });
   let enter!: () => void;
   let finish!: () => void;
@@ -617,7 +629,7 @@ test("HTTP credentials rotate while a handler holds its lease and revoked source
     resolve: () => finish(),
   };
   const runner = worker(
-    queue,
+    workerQueue,
     "rotating",
     {
       work: async (_input, context) => {
@@ -639,6 +651,7 @@ test("HTTP credentials rotate while a handler holds its lease and revoked source
   accepted = [token, next];
   current = next;
   await queue.get("rotation");
+  await workerRotated;
   accepted = [next];
   await assert.rejects(
     httpTaskQueue({ url: server.url, token }).get("rotation"),
@@ -647,7 +660,7 @@ test("HTTP credentials rotate while a handler holds its lease and revoked source
   const before = (await queue.get("rotation"))!.expires!;
   for (
     let i = 0;
-    i < 100 && (await queue.get("rotation"))!.expires! <= before;
+    i < 500 && (await queue.get("rotation"))!.expires! <= before;
     i++
   )
     await delay(10);

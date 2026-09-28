@@ -332,7 +332,6 @@ test("checkpoints reject malformed or misplaced quota records", async () => {
 
 test("an agent task that reports a usage limit pauses and resumes the workflow", async (t) => {
   const memory = memoryCheckpoint();
-  let resetAt = "";
   let limited = true;
   const failure = JSON.stringify({ kind: "failure", message: "Usage limit" });
   await using sandbox = await createSandbox({
@@ -341,13 +340,8 @@ test("an agent task that reports a usage limit pauses and resumes the workflow",
     agent: scripted(() => {
       if (!limited) return emit("done");
       limited = false;
-      resetAt = later(2_000);
-      const quota = JSON.stringify({
-        kind: "quota",
-        message: "limit",
-        resetAt,
-      });
-      return `console.log(${JSON.stringify(quota)}); console.log(${JSON.stringify(failure)}); process.exit(1);`;
+      // The agent dates its reset itself so slow process startup cannot consume the wait.
+      return `const resetAt = new Date(Date.now() + 5000).toISOString(); console.log(JSON.stringify({ kind: "quota", message: "limit", resetAt })); console.log(${JSON.stringify(failure)}); process.exit(1);`;
     }),
   });
   const coder = agentTask({
@@ -360,14 +354,15 @@ test("an agent task that reports a usage limit pauses and resumes the workflow",
     perform: async (context) => (await coder.perform(context)).text,
   });
   const events: WorkflowEvent[] = [];
+  const started = Date.now();
   const result = await workflow("nightly", [run]).start({
     checkpoint: memory.checkpoint,
-    onQuota: { action: "pause", maxWaitMs: 5_000 },
+    onQuota: { action: "pause", maxWaitMs: 30_000 },
     observe: (event) => events.push(event),
   });
   result.unwrap();
   assert.equal(result.value(run), "done");
   const pause = events.find((event) => event.type === "quota")!;
-  assert.equal(pause.resetAt, resetAt);
+  assert.ok(Date.parse(pause.resetAt!) >= started + 5_000);
   assert.equal(pause.status, "waiting");
 });

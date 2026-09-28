@@ -18,7 +18,7 @@ const committing = `import {writeFileSync, rmSync, chmodSync} from 'node:fs'; im
 writeFileSync('notes.txt','caf\\u00e9\\r\\nsecond\\n'); writeFileSync('image.bin', Buffer.from([0,255,1,254,0,128]));
 execFileSync('git',['add','.']); execFileSync('git',['commit','--cleanup=verbatim','-m','Add files\\n\\nBody line  \\n']);
 rmSync('base.txt'); writeFileSync('script.sh','#!/bin/sh\\n'); chmodSync('script.sh', 0o755);
-execFileSync('git',['add','-A']); execFileSync('git',['commit','-m','Rework']);
+execFileSync('git',['add','-A']); execFileSync('git',['update-index','--chmod=+x','script.sh']); execFileSync('git',['commit','-m','Rework']);
 ${emit("<outpost>done</outpost>")}`;
 
 async function recorded(root: string, reference: unknown) {
