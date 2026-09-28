@@ -18,6 +18,8 @@ Import `firecrackerSandboxProvider` from `@elie-laloum/outpost/providers/firecra
 
 Prepare KVM permissions, the TAP device, guest runtime, SSH server and trusted host key before allocation. Optional CPU, memory and boot-deadline settings bound resources and startup wait.
 
+The SSH user must own the guest `root` (default `/workspace`), or be able to create it. Outpost keeps its Git synchronization files inside that workspace, so the rest of the guest filesystem can stay read-only for that user.
+
 Provider ownership covers the allocated runtime; it does not provision your host networking or prepare the root filesystem. Validate actual boot, command cancellation, transfers and cleanup on the intended host before adopting it. The [roadmap](../../project/roadmap/) records remaining operational validation.
 
 API: [firecrackerSandboxProvider](../../reference/firecrackersandboxprovider/) · [FirecrackerOptions](../../reference/firecrackeroptions/).

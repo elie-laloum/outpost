@@ -38,9 +38,10 @@ export async function seedRemote(
     randomUUID(),
   );
   await mkdir(recovery, { recursive: true });
+  // The root's parent may be read-only for the sandbox user; its own .git is writable.
   const remoteBundle = posix.join(
     lease.root.replaceAll("\\", "/"),
-    "..",
+    ".git",
     `outpost-${randomUUID()}.bundle`,
   );
   let initializing = true,

@@ -6,6 +6,7 @@ import { openWorkspace } from "../../src/index.ts";
 import { seedRemote } from "../../src/application/remote-workspace.ts";
 import { localSandboxProvider } from "../../src/providers/local.ts";
 import { git } from "../../src/infrastructure/git.ts";
+import { inside } from "../../src/infrastructure/files.ts";
 import { repository } from "../helpers.ts";
 
 test("remote synchronization preserves commit identity and handles repeated dirty-to-committed transitions", async (t) => {
@@ -128,4 +129,53 @@ test("remote seeds only commits, preserves unrelated staged and untracked files,
     await readFile(join(workspace.directory, "base.txt"), "utf8"),
     "private draft\n",
   );
+});
+
+test("remote synchronization keeps transfer files inside the sandbox root", async (t) => {
+  const root = await repository(t),
+    workspace = await openWorkspace({
+      repository: root,
+      branch: { mode: "named", name: "confined-sync" },
+    });
+  t.after(() => workspace.close({ preserve: true }));
+  const remote = join(root, ".outpost", "recovery", "remote");
+  await mkdir(remote, { recursive: true });
+  const local = await localSandboxProvider().acquire({
+    repository: remote,
+    directory: remote,
+    gitDirectories: [],
+    variables: {},
+  });
+  t.after(() => local.release());
+  // Like a microVM user who may write only below its workspace root.
+  const confined = (path: string) => {
+    if (!inside(remote, path))
+      throw new Error(`EACCES: permission denied, open '${path}'`);
+  };
+  const lease = {
+    ...local,
+    upload: async (...args: Parameters<typeof local.upload>) => {
+      confined(args[1]);
+      await local.upload(...args);
+    },
+    download: async (...args: Parameters<typeof local.download>) => {
+      confined(args[0]);
+      await local.download(...args);
+    },
+  };
+  await writeFile(join(workspace.directory, "base.txt"), "host dirty\n");
+  const sync = await seedRemote(workspace, lease, { includeUncommitted: true });
+  t.after(() => sync.close());
+  assert.equal(
+    await readFile(join(remote, "base.txt"), "utf8"),
+    "host dirty\n",
+  );
+  await git(remote, ["commit", "-am", "Remote commit"]);
+  const oid = (await git(remote, ["rev-parse", "HEAD"])).trim();
+  await sync.pull();
+  assert.equal(
+    (await git(workspace.directory, ["rev-parse", "HEAD"])).trim(),
+    oid,
+  );
+  assert.equal(await git(remote, ["status", "--porcelain", "--ignored"]), "");
 });
