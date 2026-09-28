@@ -11,6 +11,7 @@ Traduction du journal `CHANGELOG.md` conservé à la racine du dépôt. Chaque v
 
 - Ajoute `interactiveAgentTask()` avec tours question/réponse durables pour le harness Outpost et les conversations CLI portables, worktrees conservés, validation des acteurs, usage cumulé et rejeu explicite des tours interrompus. Antigravity et la capture désactivée sont refusés. L’attente libère le sandbox ; la suspension dans un outil, les réponses signées et l’expiration restent prévues ultérieurement.
 - Étend `TaskStatus` et `WorkflowResult.status` avec `waiting-input`, et `WorkflowEvent.type` avec `input-request`/`input-answer`. Les producteurs de résultats doivent fournir `inputRequests` ; les consommateurs traitant exhaustivement les statuts doivent intégrer ces ajouts. Aucune version de paquet ni publication n’est implicite.
+- Ajoute `loopTask` pour les cycles essai/vérification bornés avec feedback, reprise durable par phase, budgets cumulés, clés d’idempotence par phase et `LoopTaskExhausted`. `WorkflowEvent.type` ajoute `loop` ; adapter les traitements exhaustifs. Les exceptions exigent une reprise explicite ; les checkpoints de boucle exigent des résultats JSON.
 
 ## 7.0.0
 

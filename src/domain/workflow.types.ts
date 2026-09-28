@@ -5,6 +5,7 @@ import type {
   WorkflowAnswer,
   WorkflowInputRequest,
 } from "./workflow/input.types.ts";
+import type { LoopRoundRecord } from "./workflow/loop-task.types.ts";
 import type { ObservationHub } from "./observation.types.ts";
 import type {
   WorkflowDecision,
@@ -71,6 +72,7 @@ export type TaskStatus =
 
 export interface TaskRecord {
   interaction?: TaskInteractionRecord;
+  rounds?: readonly LoopRoundRecord[];
   usageReceipts?: readonly string[];
   pause?: WorkflowPauseRequest;
   decision?: WorkflowDecisionRecord;
@@ -89,6 +91,7 @@ export interface WorkflowEvent {
   readonly type:
     | "input-request"
     | "input-answer"
+    | "loop"
     | "start"
     | "task"
     | "attempt"
@@ -100,6 +103,8 @@ export interface WorkflowEvent {
     | "checkpoint"
     | "resume"
     | "budget-exceeded";
+  readonly round?: number;
+  readonly phase?: "attempt" | "check" | "complete";
   readonly key?: string;
   readonly status?: TaskStatus;
   readonly attempt?: number;

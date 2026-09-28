@@ -31,6 +31,7 @@ Les tâches indépendantes peuvent tourner en parallèle. Les tâches dépendant
 
 | Fabrique       | Usage                                                    |
 | -------------- | -------------------------------------------------------- |
+| `loopTask`     | Essais bornés avec feedback de vérification.             |
 | `task`         | Code applicatif renvoyant une valeur.                    |
 | `agentTask`    | Requête d’agent dans une sandbox existante.              |
 | `commandTask`  | Commande dans une sandbox existante.                     |
@@ -40,3 +41,5 @@ Les tâches indépendantes peuvent tourner en parallèle. Les tâches dépendant
 Un workflow ne crée pas de transaction Git commune. Chaque tâche doit respecter la propriété des ressources et l’annulation. Utilisez l’[ordonnancement](../task-scheduling/) pour contrôler concurrence et reprises.
 
 API : [task](../../reference/task/) · [workflow](../../reference/workflow/) · [TaskContext](../../reference/taskcontext/).
+
+Utilisez les [boucles de vérification](../verification-loops/) lorsqu’un contrôle échoué doit guider un nouvel essai.

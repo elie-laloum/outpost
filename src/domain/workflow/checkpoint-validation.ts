@@ -1,3 +1,4 @@
+import { validateLoopRecord } from "./loop-validation.ts";
 import { validateInteractionRecord } from "./input-validation.ts";
 import { validateUsageReceipts } from "./usage-receipt.ts";
 import { validateGateRecord } from "./gate-validation.ts";
@@ -67,6 +68,10 @@ export function validateCheckpoint(
       if (record[field] !== undefined && typeof record[field] !== "string")
         throw invalid();
     validateUsageReceipts(record.usageReceipts);
+    validateLoopRecord(
+      record,
+      tasks.find((item) => item.key === record.key)!,
+    );
     validateInteractionRecord(
       record,
       tasks.find((item) => item.key === record.key)!,

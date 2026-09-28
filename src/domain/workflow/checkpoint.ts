@@ -1,3 +1,4 @@
+import { loopDefinition } from "./loop-task.ts";
 import { createHash } from "node:crypto";
 import type { Task, WorkflowExecutionState } from "../workflow.types.ts";
 import type {
@@ -19,6 +20,9 @@ export async function openCheckpoint(
     .map((item) => ({
       key: item.key,
       ...(item.interaction ? { interaction: item.interaction } : {}),
+      ...(loopDefinition(item)
+        ? { maxRounds: loopDefinition(item)!.maxRounds }
+        : {}),
       ...(item.gate ? { gate: item.gate } : {}),
       after: item.after.map((dependency) => dependency.key).sort(),
       timeoutMs: item.timeoutMs,

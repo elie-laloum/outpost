@@ -312,31 +312,42 @@ await workflow("review", [files, reviews]).start({ concurrency: 4 });
 
 ### Boucle jusqu'à réussite
 
-**Fonctionnel** — Faire coder l'agent, vérifier, lui renvoyer l'erreur et recommencer jusqu'à ce que ça passe ou qu'on atteigne une limite. C'est aussi le mécanisme d'une relecture par un second agent.
+**Statut — implémenté, non publié.** `loopTask({ key, attempt, check, maxRounds })` alterne travail et vérification, transmet le feedback au tour suivant et renvoie le dernier résultat accepté. Une vérification peut lancer une commande ou un second agent.
 
-**Projection technique** — `loopTask({ attempt, check, maxRounds })` : chaque tour est enregistré dans le checkpoint et compté dans le budget. Le retour de `check` est ajouté au brief suivant, ou envoyé comme continuation de conversation quand l'agent le permet.
+**Durabilité et limites** — Chaque tour conserve ses phases dans le checkpoint. Une reprise autorisée réutilise le candidat sauvegardé sans refaire son essai ; budgets et limite de tours restent cumulés. Une exception interrompt la tâche ; `LoopTaskExhausted` expose le dernier feedback lorsque la limite est atteinte. Les callbacks gèrent explicitement leur sandbox, leur continuation et la déclaration d’usage ; les helpers `agentTask.perform(ctx)` relient usage, observation et annulation. Les résultats persistés doivent être du JSON sans perte ou `undefined`.
 
-**Exemple (API proposée)**
+**Validation** — Tests déterministes des tours, budgets, délais, annulation et reprise par phase, avec un codeur et un relecteur simulés. Aucun appel modèle payant n’est nécessaire à ces tests. Les campagnes authentifiées restent distinctes.
+
+**Exemple (API implémentée)**
 
 ```ts
 const fix = loopTask({
   key: "fix-tests",
   maxRounds: 4,
-  attempt: (ctx, feedback) =>
-    session.dispatch({
-      brief: { text: `Fix the failing tests.\n${feedback ?? ""}` },
-    }),
-  async check() {
+  async attempt(ctx, feedback) {
+    const result = await agentTask({
+      key: "coder",
+      sandbox: session,
+      request: () => ({
+        brief: { text: `Fix the failing tests.\n${feedback ?? ""}` },
+      }),
+    }).perform(ctx);
+    return { text: result.text };
+  },
+  async check(ctx) {
     const run = await session.command({
       executable: "npm",
       arguments: ["test"],
+      signal: ctx.signal,
     });
     return run.status === 0
       ? { done: true }
-      : { done: false, feedback: run.stdout };
+      : { done: false, feedback: `${run.stdout}\n${run.stderr}` };
   },
 });
 ```
+
+Voir le [guide des boucles de vérification](docs/src/content/docs/fr/guide/verification-loops.md) et la [référence API](docs/src/content/docs/fr/reference/looptask.md).
 
 <a id="f-quota"></a>
 

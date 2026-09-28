@@ -470,3 +470,10 @@ export type {
   TaskInteractionRecord,
   TaskInteractionContext,
 } from "./domain/workflow/input.types.ts";
+export { loopTask, LoopTaskExhausted } from "./domain/workflow/loop-task.ts";
+export type {
+  LoopCheckResult,
+  LoopTaskContext,
+  LoopTaskOptions,
+  LoopRoundRecord,
+} from "./domain/workflow/loop-task.types.ts";

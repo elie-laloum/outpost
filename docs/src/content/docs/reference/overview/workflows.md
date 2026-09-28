@@ -12,12 +12,15 @@ A workflow is a graph of typed tasks and declared dependencies. It connects ordi
 
 `task` defines an operation; `workflow` validates and groups the graph; `start` executes it. Independent tasks may run concurrently within the configured limit. `agentTask` and `commandTask` use an existing sandbox, while `isolatedTask` owns allocation for its agent attempt.
 
+`loopTask` adds bounded attempt/check rounds with feedback and durable phase progress. See [verification loops](../../../guide/verification-loops/) for budgets, replay and caller-owned sessions.
+
 ## Boundaries and responsibilities
 
 Retries can repeat side effects. Budgets control admission using attempts and observed usage rather than guaranteeing a currency ceiling. Parallel tasks still need independent sandbox/workspace ownership. Checkpoints add persistence; they do not make external side effects transactional.
 
 ## Entry points
 
+- [loopTask](../../looptask/)
 - [task](../../task/)
 - [workflow](../../workflow/)
 - [TaskContext](../../taskcontext/)

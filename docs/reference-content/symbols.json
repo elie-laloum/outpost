@@ -450,5 +450,13 @@
   "interactiveAgentTask": [
     "Define a checkpointed agent dialogue with durable human-input waits between turns. The task allocates and closes a sandbox per turn, captures its conversation and retains a named worktree without integrating it. Both the Outpost harness and CLI adapters require portable capture and resume. The result is lossless JSON plus conversation and workspace references; interrupted turns require explicit replay authorization.",
     "Définit un dialogue d’agent avec checkpoint et attentes humaines durables entre les tours. La tâche alloue et ferme un sandbox par tour, capture sa conversation et conserve un worktree nommé sans l’intégrer. Le harness Outpost comme les adaptateurs CLI exigent capture portable et reprise. Le résultat contient du JSON sans perte et les références de conversation et de workspace ; les tours interrompus exigent une autorisation explicite de rejeu."
+  ],
+  "loopTask": [
+    "Define a bounded attempt/check workflow node. Failed checks supply feedback to the next round; callback exceptions fail the task. The workflow persists phase progress, admits every round execution against its cumulative budget and returns the accepted attempt output. It owns neither the sandbox nor agent conversations.",
+    "Définit un nœud de workflow borné alternant essai et vérification. Les vérifications négatives fournissent le feedback du tour suivant ; une exception fait échouer la tâche. Le workflow persiste les phases, impute chaque exécution de tour au budget cumulé et renvoie le résultat accepté. Il ne possède ni sandbox ni conversations."
+  ],
+  "LoopTaskExhausted": [
+    "Error recorded when the last permitted round fails verification. Inspect key, maxRounds and feedback through WorkflowResult.errors; resuming the same checkpoint does not reset the limit.",
+    "Erreur enregistrée lorsque la vérification du dernier tour autorisé échoue. Consultez key, maxRounds et feedback via WorkflowResult.errors ; reprendre le même checkpoint ne réinitialise pas la limite."
   ]
 }

@@ -686,3 +686,50 @@ test("a completed dialogue checkpoint is reused after finalization fails without
   assert.equal(result.value(item).output, "done");
   assert.equal(calls, 1);
 });
+
+test("durable loops and interactive tasks compose without replaying completed rounds", async (t) => {
+  const { loopTask } = await import("../../src/index.ts");
+  const checkpoint = checkpointFor(await repository(t));
+  let rounds = 0;
+  const build = () => {
+    const prepare = loopTask({
+      key: "prepare",
+      maxRounds: 2,
+      attempt: (context) => {
+        rounds++;
+        return context.round;
+      },
+      check: (_, value) =>
+        value === 2 ? { done: true } : { done: false, feedback: "Try again" },
+    });
+    const ask = task({
+      ...definition,
+      after: [prepare],
+      perform(context) {
+        assert.equal(context.value(prepare), 2);
+        if (context.interaction!.answer)
+          return context.interaction!.answer.value;
+        return context.interaction!.suspend(question, { prepared: true });
+      },
+    });
+    const verify = loopTask({
+      key: "verify",
+      after: [ask],
+      maxRounds: 1,
+      attempt: (context) => context.value(ask),
+      check: () => ({ done: true }),
+    });
+    return { graph: workflow("composed", [prepare, ask, verify]), verify };
+  };
+  const initial = await build().graph.start({ checkpoint });
+  assert.equal(initial.status, "waiting-input");
+  const next = build();
+  const final = await next.graph.start({
+    checkpoint,
+    answers: [answerFor(initial)],
+  });
+  final.unwrap();
+  assert.equal(final.value(next.verify), "clothes");
+  assert.equal(rounds, 2);
+  assert.equal(final.usage.attempts, 5);
+});

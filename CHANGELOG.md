@@ -4,6 +4,7 @@
 
 - Add `interactiveAgentTask()` with durable question/answer turns for the Outpost harness and portable CLI conversations, preserved worktrees, actor validation, cumulative usage and explicit interrupted-turn replay. Antigravity and disabled capture are rejected. Pending questions release the sandbox; in-tool suspension, signed answers and question expiry remain future work.
 - Extend `TaskStatus` and `WorkflowResult.status` with `waiting-input`, and `WorkflowEvent.type` with `input-request`/`input-answer`. Result producers must now provide `inputRequests`; consumers with exhaustive status handling must account for these additions. No package version or publication is implied.
+- Add `loopTask` for bounded attempt/check cycles with feedback, durable phase recovery, cumulative budgets, phase-specific idempotency keys and `LoopTaskExhausted`. `WorkflowEvent.type` gains `loop`; update exhaustive consumers. Callback errors require explicit resume; loop checkpoints require JSON outputs.
 
 ## 7.0.0
 

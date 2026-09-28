@@ -12,12 +12,15 @@ Un workflow est un graphe de tâches typées et de dépendances déclarées. Il 
 
 `task` définit une opération ; `workflow` valide et regroupe le graphe ; `start` l’exécute. Les tâches indépendantes peuvent être concurrentes dans la limite configurée. `agentTask` et `commandTask` utilisent une sandbox existante ; `isolatedTask` possède l’allocation de sa tentative d’agent.
 
+`loopTask` ajoute des tours essai/vérification bornés avec feedback et progression durable par phase. Consultez les [boucles de vérification](../../../guide/verification-loops/) pour les budgets, le rejeu et les sessions appartenant à l’appelant.
+
 ## Limites et responsabilités
 
 Les retries peuvent répéter des effets externes. Les budgets contrôlent l’admission selon les tentatives et l’usage observé, sans garantir un plafond monétaire. Les tâches parallèles nécessitent toujours une propriété indépendante des sandboxes et workspaces. Les checkpoints ajoutent la persistance ; ils ne rendent pas transactionnels les effets externes.
 
 ## Points d’entrée
 
+- [loopTask](../../looptask/)
 - [task](../../task/)
 - [workflow](../../workflow/)
 - [TaskContext](../../taskcontext/)
