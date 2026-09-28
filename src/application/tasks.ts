@@ -5,6 +5,7 @@ import { OutpostError } from "../domain/errors.ts";
 import type { CommandResult } from "../domain/ports.ts";
 import { task, type Task, type TaskOptions } from "../domain/workflow.ts";
 import type { DispatchResult } from "./outpost.ts";
+import { quotaContinuation, quotaWorkspace } from "./quota-resume.ts";
 import { dispatch } from "./outpost.ts";
 import type {
   AgentTaskOptions,
@@ -24,11 +25,11 @@ export function agentTask<T>(
     AgentTaskOptions<T>,
 ): Task<DispatchResult<T>> {
   uncached(options);
-  const { sandbox, request, ...definition } = options;
+  const { sandbox, request, quotaResume, ...definition } = options;
   return task({
     ...definition,
     async perform(context) {
-      const options = request(context);
+      const options = quotaContinuation(context, request(context), quotaResume);
       const usage = taskUsage(context, undefined);
       const observation = taskObservation(
         context.observation ?? options.observation,
@@ -55,11 +56,14 @@ export function isolatedTask<T>(
     IsolatedTaskOptions<T>,
 ): Task<DispatchResult<T>> {
   uncached(options);
-  const { request, ...definition } = options;
+  const { request, quotaResume, ...definition } = options;
   return task({
     ...definition,
     async perform(context) {
-      const options = await request(context);
+      const options = quotaWorkspace(
+        context,
+        quotaContinuation(context, await request(context), quotaResume),
+      );
       const usage = taskUsage(context, undefined);
       const observation = taskObservation(
         context.observation ?? options.observation,

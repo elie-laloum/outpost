@@ -5,6 +5,7 @@ import { maxUsageReceiptsPerTask } from "./usage-receipt.constants.ts";
 import { validateUsageReceipt } from "./usage-receipt.ts";
 import type { Usage } from "../agent.types.ts";
 import type { WorkflowCheckpointSession } from "./checkpoint.types.ts";
+import type { WorkflowQuotaPause } from "./quota-pause.types.ts";
 import { workflowAccounting } from "./budget.ts";
 import { randomUUID } from "node:crypto";
 import type {
@@ -47,6 +48,7 @@ export function workflowState(
     : stop.signal;
   const values = new Map<Task, unknown>();
   const activeAttempts = new Map<Task, number>();
+  const quotaResumes = new Map<Task, WorkflowQuotaPause>();
   const records = new Map<Task, TaskRecord>(
     tasks.map((item) => [
       item,
@@ -207,6 +209,9 @@ export function workflowState(
             ),
           }
         : {}),
+      ...(attempt > 0 && quotaResumes.has(item)
+        ? { quota: quotaResumes.get(item)! }
+        : {}),
       observation: observation.child({ taskKey: item.key, attempt }),
       signal: taskSignal,
       attempt,
@@ -241,7 +246,9 @@ export function workflowState(
     accounting,
     closeAttempt(item) {
       activeAttempts.delete(item);
+      quotaResumes.delete(item);
     },
+    quotaResumes,
     stop,
     signal,
     values,

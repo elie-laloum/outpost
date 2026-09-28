@@ -8,11 +8,14 @@ export function quotaFault(error: unknown): QuotaFault | undefined {
   let current = error;
   for (let depth = 0; depth < maxQuotaCauseDepth; depth++) {
     if (current instanceof OutpostError && current.code === "quota") {
-      const resetAt = current.details.resetAt;
+      const { resetAt, conversation } = current.details;
       return Object.freeze({
         message: current.message,
         ...(typeof resetAt === "string" && Number.isFinite(Date.parse(resetAt))
           ? { resetAt }
+          : {}),
+        ...(typeof conversation === "string" && conversation
+          ? { conversation }
           : {}),
       });
     }

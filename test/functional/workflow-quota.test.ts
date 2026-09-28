@@ -297,6 +297,12 @@ test("checkpoints reject malformed or misplaced quota records", async () => {
       Object.assign(records[0]!.quota!, { extra: true });
     },
     (records) => {
+      Object.assign(records[0]!.quota!, { conversation: "" });
+    },
+    (records) => {
+      Object.assign(records[0]!.quota!, { branch: 42 });
+    },
+    (records) => {
       records[0]!.status = "done";
     },
     (records) => {
@@ -335,7 +341,7 @@ test("an agent task that reports a usage limit pauses and resumes the workflow",
     agent: scripted(() => {
       if (!limited) return emit("done");
       limited = false;
-      resetAt = later(500);
+      resetAt = later(2_000);
       const quota = JSON.stringify({
         kind: "quota",
         message: "limit",

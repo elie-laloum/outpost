@@ -1,3 +1,4 @@
+import { recoveryDetails } from "../errors.ts";
 import { quotaFault } from "../quota.ts";
 import { waitForRetry } from "./retry.ts";
 import type { Task, WorkflowExecutionState } from "../workflow.types.ts";
@@ -47,10 +48,18 @@ export async function pauseForQuota(
   const fault = runtime.options.onQuota ? quotaFault(error) : undefined;
   if (!fault || runtime.signal.aborted) return false;
   const state = runtime.record(item);
+  const recovery = recoveryDetails(error);
+  const captured = typeof recovery?.transcript === "string";
   state.quota = Object.freeze({
     requestedAt: new Date().toISOString(),
     message: fault.message,
     ...(fault.resetAt === undefined ? {} : { resetAt: fault.resetAt }),
+    ...(captured && fault.conversation
+      ? { conversation: fault.conversation }
+      : {}),
+    ...(typeof recovery?.branch === "string" && recovery.branch
+      ? { branch: recovery.branch }
+      : {}),
   });
   runtime.finish(item, "paused");
   await runtime.persist();
@@ -85,6 +94,7 @@ export async function awaitQuotaReset(
     if (runtime.signal.aborted) return false;
     throw error;
   }
+  runtime.quotaResumes.set(item, pause);
   delete state.quota;
   return true;
 }

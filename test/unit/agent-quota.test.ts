@@ -200,6 +200,7 @@ test("a failed turn with a quota signal becomes a quota error with its reset", a
       assert.deepEqual(quotaFault(error), {
         message: "You hit your usage limit",
         resetAt,
+        conversation: "session",
       });
       return true;
     },

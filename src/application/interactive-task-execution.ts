@@ -5,6 +5,7 @@ import { openWorkspace } from "./workspace.ts";
 import { taskUsage } from "./task-usage.ts";
 import { interactiveTurnInstructions } from "./interactive-task.constants.ts";
 import { interactiveResponse } from "./interactive-task-protocol.ts";
+import { quotaResumeInstructions } from "./quota-resume.constants.ts";
 import type {
   InteractiveAgentTaskOptions,
   InteractiveAgentState,
@@ -54,18 +55,20 @@ export async function executeInteractiveTurn(
     });
     try {
       const usage = taskUsage(context, undefined);
-      const input = state.conversation
-        ? `Human answer (JSON): ${JSON.stringify(interaction.answer!.value)}`
-        : options.brief;
+      const interrupted = context.quota?.conversation;
+      const conversation = interrupted ?? state.conversation;
+      const input = interrupted
+        ? quotaResumeInstructions
+        : state.conversation
+          ? `Human answer (JSON): ${JSON.stringify(interaction.answer!.value)}`
+          : options.brief;
       const result = await sandbox.dispatch({
         brief: { text: `${input}\n\n${interactiveTurnInstructions}` },
         response: interactiveResponse,
         signal: context.signal,
         ...(context.observation ? { observation: context.observation } : {}),
         observe: usage.observe,
-        ...(state.conversation
-          ? { continuation: { id: state.conversation } }
-          : {}),
+        ...(conversation ? { continuation: { id: conversation } } : {}),
       });
       usage.reconcile(result.usage);
       context.signal.throwIfAborted();

@@ -23,11 +23,21 @@ export function validateQuotaRecord(
   const fields = pause as Record<string, unknown>;
   if (
     Object.keys(fields).some(
-      (key) => !["requestedAt", "message", "resetAt"].includes(key),
+      (key) =>
+        ![
+          "requestedAt",
+          "message",
+          "resetAt",
+          "conversation",
+          "branch",
+        ].includes(key),
     ) ||
     !timestamp(fields.requestedAt) ||
     typeof fields.message !== "string" ||
-    (fields.resetAt !== undefined && !timestamp(fields.resetAt))
+    (fields.resetAt !== undefined && !timestamp(fields.resetAt)) ||
+    [fields.conversation, fields.branch].some(
+      (value) => value !== undefined && (typeof value !== "string" || !value),
+    )
   )
     throw invalid();
 }

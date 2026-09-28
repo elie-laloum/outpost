@@ -31,6 +31,8 @@ import type {
 } from "./workflow/budget.types.ts";
 
 export interface TaskContext {
+  /** Quota pause resumed by this attempt; present only on the first attempt after it. */
+  readonly quota?: WorkflowQuotaPause;
   readonly interaction?: TaskInteractionContext;
   readonly idempotencyKey: string;
   readonly observation?: ObservationHub;
@@ -185,6 +187,7 @@ export interface WorkflowExecutionState {
   readonly observerErrors: unknown[];
   readonly options: WorkflowOptions;
   readonly accounting: WorkflowAccounting;
+  readonly quotaResumes: Map<Task, WorkflowQuotaPause>;
   persist(): Promise<void>;
   closeAttempt(task: Task): void;
   record(task: Task): TaskRecord;
