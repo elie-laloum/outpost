@@ -4,12 +4,16 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
+  inspectRecovery,
   localTransport,
+  planRecoveryRetention,
+  pruneRecoveryRetention,
   task,
   taskCacheStore,
   workflow,
   workflowCheckpointStore,
 } from "../../src/index.ts";
+import { repository } from "../helpers.ts";
 import type {
   TaskCacheEntry,
   Transport,
@@ -222,5 +226,78 @@ test("checkpoints persist cache hits and reject inconsistent hit records", async
   await assert.rejects(
     definitions().graph.start({ checkpoint }),
     /Invalid or incompatible workflow checkpoint/,
+  );
+});
+
+test("retention inventories task cache entries and prunes them only when selected", async (t) => {
+  const transporter = await storage(t);
+  const store = taskCacheStore({ transporter });
+  const fingerprint = "e".repeat(64);
+  await store.write(entry(fingerprint, "kept"));
+  const retained = await planRecoveryRetention({
+    transporter,
+    policy: { version: 1, scopes: ["closed-logs"], minAgeMs: 0 },
+  });
+  assert.equal(retained.complete, true);
+  assert.deepEqual(
+    retained.entries.map((value) => [
+      value.category,
+      value.eligible,
+      value.reason,
+    ]),
+    [["task-cache", false, "TASK_CACHE_NOT_SELECTED"]],
+  );
+  const young = await planRecoveryRetention({
+    transporter,
+    policy: { version: 1, scopes: ["task-cache"], minAgeMs: 3_600_000 },
+  });
+  assert.equal(
+    young.entries[0]?.reason,
+    "RETENTION_AGE_OR_INCOMPLETE_INVENTORY",
+  );
+  const policy = {
+    version: 1 as const,
+    scopes: ["task-cache" as const],
+    minAgeMs: 0,
+  };
+  const plan = await planRecoveryRetention({ transporter, policy });
+  assert.equal(plan.entries[0]?.eligible, true);
+  const result = await pruneRecoveryRetention(plan, { transporter });
+  assert.deepEqual(result.removed, [`task-cache/${fingerprint}.json`]);
+  assert.equal(await store.read(fingerprint), undefined);
+  await assert.rejects(
+    planRecoveryRetention({
+      transporter,
+      policy: { version: 1, scopes: ["caches" as never], minAgeMs: 0 },
+    }),
+    /closed-logs or task-cache/,
+  );
+});
+
+test("repository retention covers task cache entries in the default storage", async (t) => {
+  const path = await repository(t);
+  const transporter = localTransport({
+    directory: join(path, ".outpost", "storage"),
+  });
+  const fingerprint = "f".repeat(64);
+  await taskCacheStore({ transporter }).write(entry(fingerprint, "local"));
+  const inspection = await inspectRecovery({ repository: path });
+  assert.equal(inspection.complete, true);
+  const policy = {
+    version: 1 as const,
+    scopes: ["task-cache" as const],
+    minAgeMs: 0,
+  };
+  const plan = await planRecoveryRetention({ repository: path, policy });
+  const candidate = plan.entries.find(
+    (value) => value.category === "task-cache",
+  );
+  assert.equal(candidate?.eligible, true);
+  assert.ok((candidate?.bytes ?? 0) > 0);
+  const result = await pruneRecoveryRetention(plan);
+  assert.ok(result.removed.includes(candidate!.path));
+  assert.equal(
+    await taskCacheStore({ transporter }).read(fingerprint),
+    undefined,
   );
 });

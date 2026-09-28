@@ -127,15 +127,15 @@ async function planRetentionOperation(
     transporter: repositoryTransport(inspection.repository),
     policy: {
       version: 1,
-      scopes: policy.scopes.filter((scope) => scope === "closed-logs"),
+      scopes: policy.scopes.filter((scope) => scope !== "clean-workspaces"),
       minAgeMs: policy.minAgeMs,
     },
     ...(options.maxEntries === undefined
       ? {}
       : { maxEntries: options.maxEntries }),
   });
-  for (const entry of logs.entries.filter(
-    (entry) => entry.category === "logs",
+  for (const entry of logs.entries.filter((entry) =>
+    ["logs", "task-cache"].includes(entry.category),
   )) {
     let bytes = 0;
     for (const object of entry.objects ?? []) {
@@ -273,7 +273,9 @@ async function pruneRetentionOperation(
             source: "transport",
             policy: {
               version: 1,
-              scopes: ["closed-logs"],
+              scopes: plan.policy.scopes.filter(
+                (scope) => scope !== "clean-workspaces",
+              ),
               minAgeMs: plan.policy.minAgeMs,
             },
             entries: [candidate],

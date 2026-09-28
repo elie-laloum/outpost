@@ -2,7 +2,9 @@ import type { Transport, TransportEntry } from "../domain/transport.types.ts";
 import type { RecoveryInspection } from "./recovery-inspection.types.ts";
 export interface RecoveryRetentionPolicy {
   readonly version: 1;
-  readonly scopes: readonly ("clean-workspaces" | "closed-logs")[];
+  readonly scopes: readonly (
+    "clean-workspaces" | "closed-logs" | "task-cache"
+  )[];
   readonly minAgeMs: number;
   readonly maxBytes?: number;
   readonly maxWorkspaces?: number;

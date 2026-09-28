@@ -3,7 +3,9 @@ import type {
   TransportStoreOptions,
   TransportEntry,
 } from "../domain/transport.types.ts";
+import type { StorageEntry } from "../infrastructure/storage-inventory.types.ts";
 import type {
+  RecoveryRetentionPolicy,
   RecoveryRetentionOptions,
   RecoveryRetentionPlan,
   RecoveryRetentionEntry,
@@ -13,6 +15,43 @@ import { inspectTransportRecovery } from "./transport-inspection.ts";
 import { journalSnapshot } from "../infrastructure/transport-journal.ts";
 import { jsonObject } from "../infrastructure/transport-json.ts";
 import { retentionPolicy } from "./recovery-retention-policy.ts";
+
+function cacheEntry(
+  entry: StorageEntry,
+  policy: RecoveryRetentionPolicy,
+  complete: boolean,
+  inspectedAt: string,
+): RecoveryRetentionEntry {
+  invariant(
+    entry.revision && entry.modifiedAt,
+    "Missing transport entry version",
+  );
+  const object = {
+    key: entry.path,
+    revision: entry.revision,
+    size: entry.bytes,
+    modifiedAt: entry.modifiedAt,
+  };
+  const selected = policy.scopes.includes("task-cache");
+  const eligible =
+    selected &&
+    complete &&
+    Date.parse(inspectedAt) - Date.parse(entry.modifiedAt) >= policy.minAgeMs;
+  let reason = selected
+    ? "RETENTION_AGE_OR_INCOMPLETE_INVENTORY"
+    : "TASK_CACHE_NOT_SELECTED";
+  if (eligible) reason = "ELIGIBLE";
+  return {
+    path: entry.path,
+    category: "task-cache",
+    bytes: entry.bytes,
+    eligible,
+    reason,
+    objects: [object],
+    revision: entry.revision,
+    modifiedAt: entry.modifiedAt,
+  };
+}
 
 export async function planTransportRetention(
   options: RecoveryRetentionOptions,
@@ -96,6 +135,12 @@ export async function planTransportRetention(
         });
         continue;
       }
+      if (category.name === "task-cache") {
+        entries.push(
+          cacheEntry(entry, options.policy, inspection.complete, inspectedAt),
+        );
+        continue;
+      }
       entries.push({
         path: entry.path,
         category: category.name,
@@ -155,7 +200,7 @@ export async function pruneTransportRetention(
       continue;
     }
     try {
-      invariant(entry.revision && entry.objects, "Missing log revisions");
+      invariant(entry.revision && entry.objects, "Missing entry revisions");
       await options.transporter.remove(entry.path, {
         ifRevision: entry.revision,
       });

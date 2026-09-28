@@ -8,7 +8,8 @@ export type StorageCategoryName =
   | "checkpoints"
   | "conversations"
   | "reservations"
-  | "resources";
+  | "resources"
+  | "task-cache";
 export type StorageEntryKind =
   "file" | "directory" | "symlink" | "other" | "unknown";
 

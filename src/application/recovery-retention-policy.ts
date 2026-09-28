@@ -16,11 +16,12 @@ export function retentionPolicy(
     "scopes" in value &&
       Array.isArray(value.scopes) &&
       value.scopes.length > 0 &&
-      value.scopes.every(
-        (scope: unknown) =>
-          scope === "clean-workspaces" || scope === "closed-logs",
+      value.scopes.every((scope: unknown) =>
+        ["clean-workspaces", "closed-logs", "task-cache"].includes(
+          String(scope),
+        ),
       ),
-    "Retention scopes must contain clean-workspaces or closed-logs",
+    "Retention scopes must contain clean-workspaces, closed-logs or task-cache",
   );
   invariant(
     "minAgeMs" in value &&
