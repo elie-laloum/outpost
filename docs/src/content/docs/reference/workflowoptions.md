@@ -15,6 +15,7 @@ import type { WorkflowOptions } from "@elie-laloum/outpost";
 
 | Name               | Type                                            | Presence | Meaning                                                                                                                                                                                                                                                                                                             |
 | ------------------ | ----------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `answers`          | `readonly WorkflowAnswer[] \| undefined`        | Optional | Responses to pending input requests; all answers are validated before any are applied and persisted before scheduling.                                                                                                                                                                                              |
 | `timeoutMs`        | `number \| undefined`                           | Optional | Positive integer deadline in milliseconds for this start() call, up to 2147483647. Includes checkpoint acquisition, conditions, attempts and retry waits. Expiration cooperatively cancels tasks and fails the workflow with an OutpostError timeout; cleanup is awaited. A resumed call receives a fresh deadline. |
 | `observation`      | `ObservationHub \| undefined`                   | Optional | Parent hub receiving workflow, task, agent and operation envelopes; historical observe callbacks still receive WorkflowEvent.                                                                                                                                                                                       |
 | `decisionVerifier` | `WorkflowDecisionVerifier \| undefined`         | Optional | Trusted verifier invoked for each submitted proof; required to accept decisions on signed gates. Verification failures leave all pending decisions unapplied.                                                                                                                                                       |
@@ -31,6 +32,7 @@ import type { WorkflowOptions } from "@elie-laloum/outpost";
 
 ```ts
 export interface WorkflowOptions {
+  readonly answers?: readonly WorkflowAnswer[];
   readonly timeoutMs?: number;
   readonly observation?: ObservationHub;
   readonly decisionVerifier?: WorkflowDecisionVerifier;
@@ -48,6 +50,7 @@ export interface WorkflowOptions {
 ## Related contracts
 
 - [ObservationHub](../observationhub/)
+- [WorkflowAnswer](../workflowanswer/)
 - [WorkflowBudget](../workflowbudget/)
 - [WorkflowCheckpointOptions](../workflowcheckpointoptions/)
 - [WorkflowDecision](../workflowdecision/)

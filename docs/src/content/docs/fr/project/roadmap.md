@@ -7,6 +7,8 @@ sidebar:
 
 La prochaine priorité d’Outpost est une exécution quotidienne fiable : un premier lancement réussi, des erreurs compréhensibles et une récupération éprouvée en conditions réelles. Les horizons ci-dessous indiquent un ordre, pas des dates ni des versions promises. Le [changelog](../changelog/) consigne les livraisons ; cette page décrit le travail à venir.
 
+**Implémenté, non publié :** les [tâches interactives](../../guide/interactive-tasks/) persistent les questions adaptatives et réponses humaines entre les tours de conversation capturés. Le harness Outpost et les presets CLI portables partagent ce protocole ; Antigravity est refusé. Les tests locaux de processus et de modèles simulés couvrent reprise, validation et workspaces conservés. Les campagnes CLI/modèles réelles restent nécessaires. La suspension native dans un outil, les réponses signées et l’expiration restent prévues.
+
 ## Point de départ
 
 Le socle comprend les sandboxes réutilisables, les workspaces Git, les adapters d’agents, les workflows typés et les outils de récupération. Le CLI, la configuration d’authentification et les fournisseurs Responses personnalisés sont documentés dans le [guide de démarrage](../../guide/command-line/). La [référence API](../../reference/diagnosesandbox/) décrit les contrats implémentés et le changelog les versions publiées. Une implémentation ou un test simulé ne prouve pas la réussite d’une campagne réelle sur un provider.

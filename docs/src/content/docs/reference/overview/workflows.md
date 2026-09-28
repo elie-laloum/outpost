@@ -27,3 +27,5 @@ Retries can repeat side effects. Budgets control admission using attempts and ob
 - [isolatedTask](../../isolatedtask/)
 
 [Learn with the practical guide](../../../guide/workflows/graph/).
+
+`interactiveAgentTask` owns a fresh sandbox per dialogue turn and retains its worktree and conversation while waiting for a human answer. See [interactive tasks](../../../guide/interactive-tasks/) for durable input, supported harnesses and recovery.

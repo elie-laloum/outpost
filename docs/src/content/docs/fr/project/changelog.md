@@ -7,6 +7,11 @@ sidebar:
 
 Traduction du journal `CHANGELOG.md` conservé à la racine du dépôt. Chaque version publiée possède ses notes dans les deux langues.
 
+## Non publié
+
+- Ajoute `interactiveAgentTask()` avec tours question/réponse durables pour le harness Outpost et les conversations CLI portables, worktrees conservés, validation des acteurs, usage cumulé et rejeu explicite des tours interrompus. Antigravity et la capture désactivée sont refusés. L’attente libère le sandbox ; la suspension dans un outil, les réponses signées et l’expiration restent prévues ultérieurement.
+- Étend `TaskStatus` et `WorkflowResult.status` avec `waiting-input`, et `WorkflowEvent.type` avec `input-request`/`input-answer`. Les producteurs de résultats doivent fournir `inputRequests` ; les consommateurs traitant exhaustivement les statuts doivent intégrer ces ajouts. Aucune version de paquet ni publication n’est implicite.
+
 ## 7.0.0
 
 Cette version majeure étend les unions publiques d’événements et de conversations et ajoute des champs de contexte obligatoires. Adaptez les traitements exhaustifs de `AgentEvent`, `WorkflowEvent.type`, `ModelStreamEvent`, `ConversationFormat` et `StoredConversationFormat` ; les producteurs de contexte personnalisés et doublures de test doivent fournir `TaskContext.idempotencyKey` et `QueueHandlerContext.idempotencyKey`. Les points d’entrée existants restent disponibles. Les files Redis exigent désormais `maxmemory-policy=noeviction` et les budgets de workflow exclusivement en tokens refusent un usage incomplet. Firecracker et la spéculation restent expérimentaux ; la 7.0.0 ne réalise pas toutes les orientations de la roadmap.

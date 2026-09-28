@@ -15,6 +15,7 @@ import type { TaskRecord } from "@elie-laloum/outpost";
 
 | Nom             | Type                                  | Présence  | Rôle                                                                                                              |
 | --------------- | ------------------------------------- | --------- | ----------------------------------------------------------------------------------------------------------------- |
+| `interaction`   | `TaskInteractionRecord \| undefined`  | Optionnel | État de continuation persisté, dernière question et réponse acceptée d’une tâche interactive.                     |
 | `usageReceipts` | `readonly string[] \| undefined`      | Optionnel | Identifiants de reçus persistés empêchant de comptabiliser plusieurs fois le même rapport d’usage.                |
 | `pause`         | `WorkflowPauseRequest \| undefined`   | Optionnel | Demande de gate persistée en attente, avec son identifiant unique et ses acteurs autorisés.                       |
 | `decision`      | `WorkflowDecisionRecord \| undefined` | Optionnel | Décision validée enregistrée pour la gate de la tâche.                                                            |
@@ -29,6 +30,7 @@ import type { TaskRecord } from "@elie-laloum/outpost";
 
 ```ts
 export interface TaskRecord {
+  interaction?: TaskInteractionRecord;
   usageReceipts?: readonly string[];
   pause?: WorkflowPauseRequest;
   decision?: WorkflowDecisionRecord;
@@ -43,6 +45,7 @@ export interface TaskRecord {
 
 ## Contrats associés
 
+- [TaskInteractionRecord](../taskinteractionrecord/)
 - [TaskStatus](../taskstatus/)
 - [WorkflowDecisionRecord](../workflowdecisionrecord/)
 - [WorkflowPauseRequest](../workflowpauserequest/)

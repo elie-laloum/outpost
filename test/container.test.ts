@@ -950,3 +950,140 @@ test(
     assert.notEqual(removed.status, 0);
   },
 );
+
+test(
+  "durable interactive tasks release containers between questions and restore files and history",
+  { skip: !process.env.OUTPOST_CONTAINER_ENGINE },
+  async (t) => {
+    const {
+      agent,
+      harness,
+      defineHarnessTool,
+      interactiveAgentTask,
+      workflow,
+      workflowCheckpointStore,
+      localTransport,
+    } = await import("../src/index.ts");
+    const root = await repository(t);
+    const factory =
+      process.env.OUTPOST_CONTAINER_ENGINE === "podman"
+        ? podmanSandboxProvider
+        : dockerSandboxProvider;
+    const provider = factory({ image: containerImage, networks: "none" });
+    const checkpoint = {
+      store: workflowCheckpointStore({
+        transporter: localTransport({
+          directory: join(root, ".outpost", "storage"),
+        }),
+      }),
+      runId: "interview",
+      version: "1",
+    };
+    let calls = 0;
+    const make = () =>
+      interactiveAgentTask({
+        key: "ask",
+        repository: root,
+        actors: ["owner"],
+        brief: "Prepare a draft, ask its subject, then verify the draft.",
+        sandboxProvider: provider,
+        bootstrap: false,
+        agent: agent({
+          model: "fixture",
+          harness: harness({
+            tools: [
+              defineHarnessTool({
+                name: "draft",
+                description: "Write or verify the draft in the sandbox.",
+                input: {
+                  type: "object",
+                  properties: { verify: { type: "boolean" } },
+                  required: ["verify"],
+                  additionalProperties: false,
+                },
+                async execute(input: { verify: boolean }, context) {
+                  const result = await context.sandbox.invoke({
+                    executable: "sh",
+                    arguments: [
+                      "-c",
+                      input.verify
+                        ? 'test "$(cat draft.txt)" = preserved && printf verified'
+                        : "printf preserved > draft.txt",
+                    ],
+                  });
+                  assert.equal(result.status, 0, result.stderr);
+                  return input.verify ? result.stdout : "written";
+                },
+              }),
+            ],
+            modelProvider: {
+              name: "container-interview",
+              async request(request) {
+                calls++;
+                const usage = { input: 1, cached: 0, output: 1 };
+                if (calls === 1 || calls === 3)
+                  return {
+                    text: "",
+                    content: [
+                      {
+                        type: "tool-call",
+                        id: `call-${calls}`,
+                        name: "draft",
+                        input: { verify: calls === 3 },
+                      },
+                    ],
+                    stopReason: "tool-calls",
+                    usage,
+                  };
+                if (calls === 4) {
+                  assert.match(
+                    JSON.stringify(request.messages),
+                    /human-subject/,
+                  );
+                  assert.match(JSON.stringify(request.messages), /verified/);
+                }
+                const value =
+                  calls === 2
+                    ? { kind: "question", question: "Subject?" }
+                    : { kind: "completed", output: "verified" };
+                const text = `<interaction>${JSON.stringify(value)}</interaction>`;
+                return {
+                  text,
+                  content: [{ type: "text", text }],
+                  stopReason: "end",
+                  usage,
+                };
+              },
+            },
+          }),
+        }),
+      });
+    const first = await workflow("interview", [make()]).start({ checkpoint });
+    assert.equal(
+      first.status,
+      "waiting-input",
+      first.errors.map(String).join(),
+    );
+    const pending = first.inputRequests[0]!;
+    const next = make();
+    const result = await workflow("interview", [next]).start({
+      checkpoint,
+      answers: [
+        {
+          executionId: first.executionId,
+          key: pending.key,
+          requestId: pending.id,
+          actor: "owner",
+          value: "human-subject",
+        },
+      ],
+    });
+    result.unwrap();
+    assert.equal(result.value(next).output, "verified");
+    assert.equal(calls, 4);
+    assert.equal(
+      await readFile(join(result.value(next).directory, "draft.txt"), "utf8"),
+      "preserved",
+    );
+  },
+);

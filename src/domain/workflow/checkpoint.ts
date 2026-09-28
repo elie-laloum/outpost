@@ -18,6 +18,7 @@ export async function openCheckpoint(
   const graph = tasks
     .map((item) => ({
       key: item.key,
+      ...(item.interaction ? { interaction: item.interaction } : {}),
       ...(item.gate ? { gate: item.gate } : {}),
       after: item.after.map((dependency) => dependency.key).sort(),
       timeoutMs: item.timeoutMs,
@@ -44,14 +45,18 @@ export async function openCheckpoint(
       validateCheckpoint(saved, identity, tasks);
       initial = saved;
       const settledGate = saved.records.some((record) =>
-        ["paused", "rejected"].includes(record.status),
+        ["paused", "rejected", "waiting-input"].includes(record.status),
       );
       if (
         saved.records.some(
           (record) =>
-            !["done", "skipped", "paused", "rejected"].includes(
-              record.status,
-            ) &&
+            ![
+              "done",
+              "skipped",
+              "paused",
+              "rejected",
+              "waiting-input",
+            ].includes(record.status) &&
             !(
               settledGate &&
               record.status === "waiting" &&

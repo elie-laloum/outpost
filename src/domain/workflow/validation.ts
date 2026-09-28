@@ -1,3 +1,4 @@
+import { validateInteraction } from "./input-validation.ts";
 import { validateGate } from "./gate-validation.ts";
 import type { Task } from "../workflow.types.ts";
 
@@ -12,6 +13,11 @@ export function validate(tasks: readonly Task[]): void {
   const visiting = new Set<Task>();
   const visited = new Set<Task>();
   for (const item of tasks) {
+    if (item.interaction) {
+      validateInteraction(item.interaction);
+      if (item.gate)
+        throw new Error("A task cannot be both an interaction and a gate");
+    }
     if (item.gate) {
       validateGate(item.gate);
       if (item.condition || item.retry || item.timeoutMs !== undefined)

@@ -137,3 +137,5 @@ Les callbacks de vérification doivent répondre rapidement. Si le délai global
 Publiez une nouvelle clé publique avec un `keyId` unique et le même acteur, basculez le service de signature vers sa clé privée, puis retirez l’ancienne clé publique après la période de chevauchement. Le vérificateur recharge les clés à chaque décision. Retirer une clé refuse immédiatement les nouvelles preuves correspondantes ; les approbations déjà persistées restent acceptées, même après expiration. Le stockage des checkpoints reste une frontière de confiance : ces signatures n’authentifient pas le checkpoint lui-même.
 
 Séparez au besoin les contrôles d’accès applicatifs aux clés de signature et à la soumission des décisions. Un `WorkflowDecisionVerifier` personnalisé est du code de confiance et doit vérifier lui-même signature, acteur et expiration. Consultez [l’exploitation des workers](../background-jobs/#exploiter-les-workers) pour les identifiants des files et la reprise.
+
+Pour des questions adaptatives générées par un agent, utilisez les [tâches interactives](../interactive-tasks/). Leurs réponses reprennent la conversation au lieu de terminer une gate prédéfinie.

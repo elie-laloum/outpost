@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Add `interactiveAgentTask()` with durable question/answer turns for the Outpost harness and portable CLI conversations, preserved worktrees, actor validation, cumulative usage and explicit interrupted-turn replay. Antigravity and disabled capture are rejected. Pending questions release the sandbox; in-tool suspension, signed answers and question expiry remain future work.
+- Extend `TaskStatus` and `WorkflowResult.status` with `waiting-input`, and `WorkflowEvent.type` with `input-request`/`input-answer`. Result producers must now provide `inputRequests`; consumers with exhaustive status handling must account for these additions. No package version or publication is implied.
+
 ## 7.0.0
 
 This major release extends public event and conversation unions and adds required context fields. Update exhaustive handling of `AgentEvent`, `WorkflowEvent.type`, `ModelStreamEvent`, `ConversationFormat` and `StoredConversationFormat`; custom context producers and test doubles must provide `TaskContext.idempotencyKey` and `QueueHandlerContext.idempotencyKey`. Existing entry points remain available. Redis queues now require `maxmemory-policy=noeviction`, and token-only workflow budgets reject incomplete usage. Firecracker and speculation remain experimental; 7.0.0 does not complete every roadmap direction.

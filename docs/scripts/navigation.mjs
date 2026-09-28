@@ -58,6 +58,7 @@ export const chapters = [
       "guide/parallel-repositories",
       "guide/durable-runs",
       "guide/review-gates",
+      "guide/interactive-tasks",
       "guide/shared-artifacts",
       "guide/background-jobs",
       "guide/redis-workers",

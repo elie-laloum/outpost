@@ -1,3 +1,4 @@
+import { interactionContext, immutableInput } from "./input.ts";
 import { taskIdempotencyKey } from "./idempotency.ts";
 import { createObservationHub } from "../observation.ts";
 import { maxUsageReceiptsPerTask } from "./usage-receipt.constants.ts";
@@ -59,17 +60,22 @@ export function workflowState(
     );
     const settledPause =
       saved.records.some((entry) =>
-        ["paused", "rejected"].includes(entry.status),
+        ["paused", "rejected", "waiting-input"].includes(entry.status),
       ) &&
       saved.records.every(
         (entry) =>
-          ["done", "skipped", "paused", "rejected"].includes(entry.status) ||
+          ["done", "skipped", "paused", "rejected", "waiting-input"].includes(
+            entry.status,
+          ) ||
           (entry.status === "waiting" && entry.attempts === 0),
       );
     for (const item of tasks) {
       const entry = saved.records.find((entry) => entry.key === item.key)!;
       records.set(item, {
         ...entry,
+        ...(entry.interaction
+          ? { interaction: immutableInput(entry.interaction) }
+          : {}),
         ...(entry.usageReceipts
           ? { usageReceipts: Object.freeze([...entry.usageReceipts]) }
           : {}),
@@ -85,7 +91,9 @@ export function workflowState(
           ? { decision: Object.freeze({ ...entry.decision }) }
           : {}),
         status:
-          ["done", "paused", "rejected"].includes(entry.status) ||
+          ["done", "paused", "rejected", "waiting-input"].includes(
+            entry.status,
+          ) ||
           complete ||
           (settledPause && entry.status === "skipped")
             ? entry.status
@@ -187,6 +195,17 @@ export function workflowState(
     }
 
     return {
+      ...(item.interaction
+        ? {
+            interaction: interactionContext(
+              item,
+              runtime,
+              attempt,
+              taskSignal,
+              () => activeAttempts.get(item) === attempt,
+            ),
+          }
+        : {}),
       observation: observation.child({ taskKey: item.key, attempt }),
       signal: taskSignal,
       attempt,

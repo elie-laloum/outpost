@@ -15,6 +15,7 @@ import type { TaskContext } from "@elie-laloum/outpost";
 
 | Name              | Type                                                     | Presence | Meaning                                                                                                                                                          |
 | ----------------- | -------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `interaction`     | `TaskInteractionContext \| undefined`                    | Optional | Durable state and suspension operations, supplied only for tasks declaring an interaction.                                                                       |
 | `idempotencyKey`  | `string`                                                 | Required | Stable SHA-256 identity of executionId and task key, preserved across retries and checkpoint replay. Pass it to an effect service with persistent deduplication. |
 | `observation`     | `ObservationHub \| undefined`                            | Optional | Task-scoped hub with workflow execution, task key and attempt; pass it to custom nested work such as speculate.                                                  |
 | `signal`          | `AbortSignal`                                            | Required | Cooperative cancellation for this operation.                                                                                                                     |
@@ -29,6 +30,7 @@ import type { TaskContext } from "@elie-laloum/outpost";
 
 ```ts
 export interface TaskContext {
+  readonly interaction?: TaskInteractionContext;
   readonly idempotencyKey: string;
   readonly observation?: ObservationHub;
   readonly signal: AbortSignal;
@@ -45,4 +47,5 @@ export interface TaskContext {
 
 - [ObservationHub](../observationhub/)
 - [Task](../type-task/)
+- [TaskInteractionContext](../taskinteractioncontext/)
 - [Usage](../usage/)

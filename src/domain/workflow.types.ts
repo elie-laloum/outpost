@@ -1,3 +1,10 @@
+import type {
+  TaskInteraction,
+  TaskInteractionContext,
+  TaskInteractionRecord,
+  WorkflowAnswer,
+  WorkflowInputRequest,
+} from "./workflow/input.types.ts";
 import type { ObservationHub } from "./observation.types.ts";
 import type {
   WorkflowDecision,
@@ -15,6 +22,7 @@ import type {
 } from "./workflow/budget.types.ts";
 
 export interface TaskContext {
+  readonly interaction?: TaskInteractionContext;
   readonly idempotencyKey: string;
   readonly observation?: ObservationHub;
   readonly signal: AbortSignal;
@@ -36,6 +44,7 @@ export interface Retry {
 }
 
 export interface Task<T = unknown> {
+  readonly interaction?: TaskInteraction;
   readonly key: string;
   readonly gate?: WorkflowGate;
   readonly after: readonly Task[];
@@ -50,6 +59,7 @@ export type TaskOptions<T> = Omit<Task<T>, "after"> & {
 };
 
 export type TaskStatus =
+  | "waiting-input"
   | "waiting"
   | "active"
   | "done"
@@ -60,6 +70,7 @@ export type TaskStatus =
   | "rejected";
 
 export interface TaskRecord {
+  interaction?: TaskInteractionRecord;
   usageReceipts?: readonly string[];
   pause?: WorkflowPauseRequest;
   decision?: WorkflowDecisionRecord;
@@ -76,6 +87,8 @@ export interface WorkflowEvent {
   readonly workflow: string;
   readonly timestamp: string;
   readonly type:
+    | "input-request"
+    | "input-answer"
     | "start"
     | "task"
     | "attempt"
@@ -100,6 +113,7 @@ export interface WorkflowTelemetry {
 }
 
 export interface WorkflowOptions {
+  readonly answers?: readonly WorkflowAnswer[];
   readonly timeoutMs?: number;
   readonly observation?: ObservationHub;
   readonly decisionVerifier?: WorkflowDecisionVerifier;
@@ -114,9 +128,10 @@ export interface WorkflowOptions {
 }
 
 export interface WorkflowResult {
+  readonly inputRequests: readonly WorkflowInputRequest[];
   readonly executionId: string;
   readonly name: string;
-  readonly status: "done" | "failed" | "cancelled" | "paused";
+  readonly status: "done" | "failed" | "cancelled" | "paused" | "waiting-input";
   readonly tasks: readonly Readonly<TaskRecord>[];
   readonly errors: readonly unknown[];
   readonly observerErrors: readonly unknown[];

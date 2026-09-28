@@ -1,3 +1,4 @@
+import { prepareAnswers, applyAnswers } from "./input.ts";
 import { OutpostError } from "../errors.ts";
 import { maxTimerMs } from "./retry.constants.ts";
 import { applyDecisions, pauseGate, prepareDecisions } from "./gates.ts";
@@ -18,6 +19,13 @@ export async function schedule(
   tasks: readonly Task[],
   options: WorkflowOptions,
 ): Promise<WorkflowResult> {
+  if (
+    !options.checkpoint &&
+    (tasks.some((item) => item.interaction) || options.answers?.length)
+  )
+    throw new Error("Workflow interactions and answers require a checkpoint");
+  if (options.answers && !options.answers.length)
+    throw new Error("Workflow answers cannot be empty");
   if (
     !options.checkpoint &&
     (tasks.some((item) => item.gate) || options.decisions?.length)
@@ -88,10 +96,14 @@ async function scheduleRun(
     } = state;
     const active = new Map<Task, Promise<void>>();
     const started = Date.now();
+    const answers = prepareAnswers(state);
     const decisions = await prepareDecisions(state);
     emit({ type: "start" });
     if (checkpoint?.initial) emit({ type: "resume" });
-    if (!signal.aborted) applyDecisions(state, decisions);
+    if (!signal.aborted) {
+      applyDecisions(state, decisions);
+      applyAnswers(state, answers);
+    }
     await state.persist();
     try {
       while (true) {
@@ -147,6 +159,8 @@ async function scheduleRun(
     );
     let status: WorkflowResult["status"] = "done";
     if (paused) status = "paused";
+    if ([...records.values()].some((entry) => entry.status === "waiting-input"))
+      status = "waiting-input";
     if (errors.length) status = "failed";
     if (options.signal?.aborted)
       status = timedOut(options, deadline) ? "failed" : "cancelled";
@@ -156,6 +170,13 @@ async function scheduleRun(
     const result: WorkflowResult = Object.freeze({
       executionId,
       name,
+      inputRequests: Object.freeze(
+        [...records.values()].flatMap((record) =>
+          record.status === "waiting-input" && record.interaction?.request
+            ? [record.interaction.request]
+            : [],
+        ),
+      ),
       status,
       usage: state.accounting.snapshot(),
       tasks: Object.freeze(

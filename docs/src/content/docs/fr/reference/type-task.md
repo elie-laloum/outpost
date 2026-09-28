@@ -13,20 +13,22 @@ import type { Task } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom         | Type                                                                   | Présence  | Rôle                                                                                                                               |
-| ----------- | ---------------------------------------------------------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `key`       | `string`                                                               | Requis    | Clé de tâche stable identifiant le nœud dans son graphe de workflow.                                                               |
-| `gate`      | `WorkflowGate \| undefined`                                            | Optionnel | Définition persistée d’approbation ou pause ; son exécution exige un checkpoint et une décision de confiance correspondante.       |
-| `after`     | `readonly Task<unknown>[]`                                             | Requis    | Dépendances déclarées dont les valeurs peuvent être lues.                                                                          |
-| `perform`   | `(context: TaskContext) => T \| Promise<T>`                            | Requis    | Callback exécuté à chaque tentative ; renvoie sa sortie et doit respecter context.signal.                                          |
-| `condition` | `((context: TaskContext) => boolean \| Promise<boolean>) \| undefined` | Optionnel | Prédicat évalué avant la première tentative.                                                                                       |
-| `retry`     | `Retry \| undefined`                                                   | Optionnel | Politique explicite de reprise ; les effets peuvent se répéter.                                                                    |
-| `timeoutMs` | `number \| undefined`                                                  | Optionnel | Durée entière positive en millisecondes de chaque tentative, jusqu’à 2147483647 ; l’annulation est coopérative via context.signal. |
+| Nom           | Type                                                                   | Présence  | Rôle                                                                                                                               |
+| ------------- | ---------------------------------------------------------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `interaction` | `TaskInteraction \| undefined`                                         | Optionnel | Contrat optionnel de saisie humaine durable ; exige un checkpoint et ne peut pas être combiné avec une gate.                       |
+| `key`         | `string`                                                               | Requis    | Clé de tâche stable identifiant le nœud dans son graphe de workflow.                                                               |
+| `gate`        | `WorkflowGate \| undefined`                                            | Optionnel | Définition persistée d’approbation ou pause ; son exécution exige un checkpoint et une décision de confiance correspondante.       |
+| `after`       | `readonly Task<unknown>[]`                                             | Requis    | Dépendances déclarées dont les valeurs peuvent être lues.                                                                          |
+| `perform`     | `(context: TaskContext) => T \| Promise<T>`                            | Requis    | Callback exécuté à chaque tentative ; renvoie sa sortie et doit respecter context.signal.                                          |
+| `condition`   | `((context: TaskContext) => boolean \| Promise<boolean>) \| undefined` | Optionnel | Prédicat évalué avant la première tentative.                                                                                       |
+| `retry`       | `Retry \| undefined`                                                   | Optionnel | Politique explicite de reprise ; les effets peuvent se répéter.                                                                    |
+| `timeoutMs`   | `number \| undefined`                                                  | Optionnel | Durée entière positive en millisecondes de chaque tentative, jusqu’à 2147483647 ; l’annulation est coopérative via context.signal. |
 
 ## Signature
 
 ```ts
 export interface Task<T = unknown> {
+  readonly interaction?: TaskInteraction;
   readonly key: string;
   readonly gate?: WorkflowGate;
   readonly after: readonly Task[];
@@ -41,4 +43,5 @@ export interface Task<T = unknown> {
 
 - [Retry](../retry/)
 - [TaskContext](../taskcontext/)
+- [TaskInteraction](../taskinteraction/)
 - [WorkflowGate](../workflowgate/)

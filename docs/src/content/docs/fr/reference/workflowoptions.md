@@ -15,6 +15,7 @@ import type { WorkflowOptions } from "@elie-laloum/outpost";
 
 | Nom                | Type                                            | Présence  | Rôle                                                                                                                                                                                                                                                                                                                                                     |
 | ------------------ | ----------------------------------------------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `answers`          | `readonly WorkflowAnswer[] \| undefined`        | Optionnel | Réponses aux demandes en attente ; toutes sont validées avant application et persistées avant ordonnancement.                                                                                                                                                                                                                                            |
 | `timeoutMs`        | `number \| undefined`                           | Optionnel | Délai entier positif en millisecondes pour cet appel à start(), jusqu’à 2147483647. Inclut acquisition du checkpoint, conditions, tentatives et attentes de reprise. Son expiration annule coopérativement les tâches et fait échouer le workflow avec une OutpostError timeout ; le nettoyage est attendu. Un appel de reprise reçoit un nouveau délai. |
 | `observation`      | `ObservationHub \| undefined`                   | Optionnel | Hub parent recevant les enveloppes de workflow, tâche, agent et opération ; les callbacks observe historiques reçoivent toujours WorkflowEvent.                                                                                                                                                                                                          |
 | `decisionVerifier` | `WorkflowDecisionVerifier \| undefined`         | Optionnel | Vérificateur de confiance appelé pour chaque preuve soumise ; requis pour les gates signés. Un échec laisse toutes les décisions en attente inappliquées.                                                                                                                                                                                                |
@@ -31,6 +32,7 @@ import type { WorkflowOptions } from "@elie-laloum/outpost";
 
 ```ts
 export interface WorkflowOptions {
+  readonly answers?: readonly WorkflowAnswer[];
   readonly timeoutMs?: number;
   readonly observation?: ObservationHub;
   readonly decisionVerifier?: WorkflowDecisionVerifier;
@@ -48,6 +50,7 @@ export interface WorkflowOptions {
 ## Contrats associés
 
 - [ObservationHub](../observationhub/)
+- [WorkflowAnswer](../workflowanswer/)
 - [WorkflowBudget](../workflowbudget/)
 - [WorkflowCheckpointOptions](../workflowcheckpointoptions/)
 - [WorkflowDecision](../workflowdecision/)

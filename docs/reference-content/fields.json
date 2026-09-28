@@ -917,8 +917,8 @@
     "Nom de la définition de workflow, inclus dans ses rapports d’exécution."
   ],
   "WorkflowResult.status": [
-    "Overall execution outcome: done, failed, cancelled or paused.",
-    "Résultat global de l’exécution : done, failed, cancelled ou paused."
+    "Overall outcome; waiting-input takes precedence over paused, while failures and cancellation take precedence over both.",
+    "Résultat global ; waiting-input prévaut sur paused, tandis que les échecs et annulations prévalent sur les deux."
   ],
   "WorkflowResult.tasks": [
     "Final task records with statuses, attempt counts, errors and pending gates.",
@@ -1261,8 +1261,8 @@
     "Horodatage ISO d’émission de l’événement de workflow."
   ],
   "WorkflowEvent.type": [
-    "Event category: run start/finish, task transition, attempt, retry or usage report.",
-    "Catégorie d’événement : début/fin d’exécution, transition de tâche, tentative, reprise ou rapport d’usage."
+    "Lifecycle notification, including input-request when a task suspends and input-answer when an accepted reply makes it ready to run.",
+    "Notification du cycle de vie, incluant input-request lors d’une suspension et input-answer lorsqu’une réponse acceptée rend la tâche exécutable."
   ],
   "WorkflowEvent.key": [
     "Stable task key identifying the node within its workflow graph.",
@@ -5513,5 +5513,181 @@
   "WorkflowDecisionVerifierOptions.keys": [
     "Resolve trusted actor/public-key bindings on every verification. Remove a key to revoke new proofs; source errors reject the decision.",
     "Résout les associations acteur/clé publique à chaque vérification. Retirer une clé révoque les nouvelles preuves ; une erreur de source refuse la décision."
+  ],
+  "interactiveAgentTask.options": [
+    "Agent, repository, authorized respondents and bounded dialogue settings.",
+    "Agent, dépôt, répondants autorisés et paramètres du dialogue borné."
+  ],
+  "InteractiveAgentTaskOptions.key": [
+    "Stable workflow task key; also participates in the retained branch identity.",
+    "Clé stable de la tâche ; participe également à l’identité de la branche conservée."
+  ],
+  "InteractiveAgentTaskOptions.after": [
+    "Dependencies that must finish successfully before the first turn.",
+    "Dépendances devant réussir avant le premier tour."
+  ],
+  "InteractiveAgentTaskOptions.repository": [
+    "Host Git checkout containing the retained worktree and default conversation storage; must remain accessible on resume.",
+    "Checkout Git hôte contenant le worktree conservé et le stockage des conversations par défaut ; doit rester accessible à la reprise."
+  ],
+  "InteractiveAgentTaskOptions.agent": [
+    "Composed CLI or Outpost agent with portable conversation capture and continuation enabled.",
+    "Agent CLI ou Outpost composé, avec capture portable et continuation des conversations activées."
+  ],
+  "InteractiveAgentTaskOptions.brief": [
+    "Literal initial instructions; human replies are supplied separately on subsequent turns.",
+    "Instructions initiales littérales ; les réponses humaines sont fournies séparément aux tours suivants."
+  ],
+  "InteractiveAgentTaskOptions.actors": [
+    "Nonempty unique identifiers allowed to answer; the application must authenticate their users.",
+    "Identifiants uniques et non vides autorisés à répondre ; l’application doit authentifier les utilisateurs."
+  ],
+  "InteractiveAgentTaskOptions.sandboxProvider": [
+    "Execution provider used to allocate a fresh sandbox for each turn; omitting it uses normal sandbox defaults.",
+    "Provider allouant un nouveau sandbox par tour ; son absence utilise les valeurs par défaut habituelles."
+  ],
+  "InteractiveAgentTaskOptions.bootstrap": [
+    "Whether the sandbox may install a missing CLI agent when preparing each turn.",
+    "Indique si le sandbox peut installer une CLI absente lors de la préparation de chaque tour."
+  ],
+  "InteractiveAgentTaskOptions.conversationHome": [
+    "Host home used to locate captured native conversations across turns.",
+    "Home hôte utilisé pour retrouver les conversations natives capturées entre les tours."
+  ],
+  "InteractiveAgentTaskOptions.maxTurns": [
+    "Maximum completed agent turns, including the final result; defaults to 12. A question at the last turn fails instead of waiting indefinitely.",
+    "Nombre maximal de tours terminés, résultat final inclus ; 12 par défaut. Une question au dernier tour échoue au lieu de rester en attente."
+  ],
+  "InteractiveAgentTaskOptions.timeoutMs": [
+    "Cooperative deadline for each executing task attempt, excluding time waiting for a human answer.",
+    "Délai coopératif de chaque tentative exécutée, excluant le temps d’attente d’une réponse humaine."
+  ],
+  "InteractiveAgentResult.output": [
+    "Lossless JSON output from the completed agent dialogue.",
+    "Sortie JSON sans perte du dialogue terminé."
+  ],
+  "InteractiveAgentResult.conversation": [
+    "Captured conversation identifier from the final turn.",
+    "Identifiant de conversation capturée du dernier tour."
+  ],
+  "InteractiveAgentResult.branch": [
+    "Retained named work branch; no automatic integration or push occurs.",
+    "Branche de travail nommée conservée ; aucune intégration ni aucun push automatique."
+  ],
+  "InteractiveAgentResult.directory": [
+    "Retained worktree directory containing project files, including uncommitted edits.",
+    "Répertoire du worktree conservé contenant les fichiers du projet, y compris les modifications non commitées."
+  ],
+  "InteractiveAgentResult.turns": [
+    "Number of completed dialogue turns; repair requests remain within their turn.",
+    "Nombre de tours de dialogue terminés ; les demandes de réparation restent dans leur tour."
+  ],
+  "WorkflowInputQuestion.question": [
+    "Nonempty human-readable question to display to the respondent.",
+    "Question lisible et non vide à afficher au répondant."
+  ],
+  "WorkflowInputQuestion.choices": [
+    "Optional nonempty list of unique answer choices.",
+    "Liste optionnelle non vide de choix de réponse uniques."
+  ],
+  "WorkflowInputQuestion.allowFreeText": [
+    "Whether answers outside choices are accepted; omitted means true. False requires choices.",
+    "Autorise les réponses hors des choix ; true si omis. false exige des choix."
+  ],
+  "WorkflowInputRequest.id": [
+    "Unique identifier of this persisted question, required when submitting its answer.",
+    "Identifiant unique de cette question persistée, requis pour soumettre sa réponse."
+  ],
+  "WorkflowInputRequest.executionId": [
+    "Workflow execution owning this pending request.",
+    "Exécution de workflow propriétaire de cette demande en attente."
+  ],
+  "WorkflowInputRequest.key": [
+    "Key of the task suspended on this request.",
+    "Clé de la tâche suspendue sur cette demande."
+  ],
+  "WorkflowInputRequest.requestedAt": [
+    "ISO timestamp when the question was created.",
+    "Horodatage ISO de création de la question."
+  ],
+  "WorkflowAnswer.executionId": [
+    "Execution identifier copied from the pending input request.",
+    "Identifiant d’exécution recopié depuis la demande en attente."
+  ],
+  "WorkflowAnswer.key": [
+    "Task key copied from the pending input request.",
+    "Clé de tâche recopiée depuis la demande en attente."
+  ],
+  "WorkflowAnswer.requestId": [
+    "Exact pending question identifier; stale or consumed requests are rejected.",
+    "Identifiant exact de la question en attente ; les demandes périmées ou consommées sont refusées."
+  ],
+  "WorkflowAnswer.actor": [
+    "Application-authenticated respondent identifier, checked against the task actors.",
+    "Identifiant du répondant authentifié par l’application, vérifié contre les acteurs de la tâche."
+  ],
+  "WorkflowAnswer.value": [
+    "Nonblank answer text; must equal a listed choice when free text is disabled.",
+    "Texte de réponse non vide ; doit correspondre à un choix proposé lorsque le texte libre est désactivé."
+  ],
+  "WorkflowAnswerRecord.answeredAt": [
+    "ISO timestamp when the workflow accepted and recorded this answer.",
+    "Horodatage ISO d’acceptation et d’enregistrement de cette réponse par le workflow."
+  ],
+  "TaskInteraction.actors": [
+    "Unique application-trusted actor identifiers authorized to answer this task.",
+    "Identifiants uniques d’acteurs de confiance autorisés à répondre à cette tâche."
+  ],
+  "TaskInteraction.identity": [
+    "Stable interaction configuration fingerprint included in checkpoint compatibility checks.",
+    "Empreinte stable de configuration de l’interaction incluse dans les vérifications de compatibilité du checkpoint."
+  ],
+  "TaskInteractionRecord.state": [
+    "Immutable lossless JSON continuation state saved by the task.",
+    "État de continuation JSON sans perte et immuable enregistré par la tâche."
+  ],
+  "TaskInteractionRecord.request": [
+    "Most recent persisted question, pending until its answer is accepted.",
+    "Dernière question persistée, en attente jusqu’à l’acceptation de sa réponse."
+  ],
+  "TaskInteractionRecord.answer": [
+    "Accepted response to request, persisted before the task is scheduled again; replaced at the next suspension.",
+    "Réponse acceptée à request, persistée avant le nouvel ordonnancement de la tâche ; remplacée à la suspension suivante."
+  ],
+  "TaskInteractionContext.state": [
+    "Latest immutable task continuation state restored from the checkpoint, or undefined before the first save.",
+    "Dernier état de continuation immuable restauré depuis le checkpoint, ou undefined avant le premier enregistrement."
+  ],
+  "TaskInteractionContext.answer": [
+    "Accepted human reply available to the resumed task attempt.",
+    "Réponse humaine acceptée disponible dans la tentative reprise."
+  ],
+  "TaskInteractionContext.save": [
+    "Validate, copy and persist JSON state during the current active attempt. Does not suspend execution.",
+    "Valide, copie et persiste l’état JSON durant la tentative active courante. Ne suspend pas l’exécution."
+  ],
+  "TaskInteractionContext.suspend": [
+    "Store a new question and continuation state, then end this attempt through a suspension signal. Do not catch that signal; the scheduler persists waiting-input before returning.",
+    "Enregistre une nouvelle question et l’état de continuation, puis termine la tentative via un signal de suspension. Ne pas intercepter ce signal ; le scheduler persiste waiting-input avant de rendre la main."
+  ],
+  "Task.interaction": [
+    "Opt-in durable human-input contract; requires checkpointed scheduling and cannot be combined with a gate.",
+    "Contrat optionnel de saisie humaine durable ; exige un checkpoint et ne peut pas être combiné avec une gate."
+  ],
+  "TaskContext.interaction": [
+    "Durable state and suspension operations, supplied only for tasks declaring an interaction.",
+    "État durable et opérations de suspension, fournis uniquement aux tâches déclarant une interaction."
+  ],
+  "TaskRecord.interaction": [
+    "Persisted continuation state, latest question and accepted answer for an interactive task.",
+    "État de continuation persisté, dernière question et réponse acceptée d’une tâche interactive."
+  ],
+  "WorkflowOptions.answers": [
+    "Responses to pending input requests; all answers are validated before any are applied and persisted before scheduling.",
+    "Réponses aux demandes en attente ; toutes sont validées avant application et persistées avant ordonnancement."
+  ],
+  "WorkflowResult.inputRequests": [
+    "Immutable pending questions from tasks in waiting-input; empty when no human input is pending.",
+    "Questions immuables des tâches en waiting-input ; vide lorsqu’aucune réponse humaine n’est attendue."
   ]
 }

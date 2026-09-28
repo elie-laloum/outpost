@@ -15,6 +15,7 @@ import type { TaskStatus } from "@elie-laloum/outpost";
 
 ```ts
 export type TaskStatus =
+  | "waiting-input"
   | "waiting"
   | "active"
   | "done"

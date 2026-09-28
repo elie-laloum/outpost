@@ -1,3 +1,4 @@
+import { validateInteractionRecord } from "./input-validation.ts";
 import { validateUsageReceipts } from "./usage-receipt.ts";
 import { validateGateRecord } from "./gate-validation.ts";
 import type { WorkflowCheckpoint } from "./checkpoint.types.ts";
@@ -50,6 +51,7 @@ export function validateCheckpoint(
       !keys.delete(record.key) ||
       !integer(record.attempts) ||
       ![
+        "waiting-input",
         "waiting",
         "active",
         "done",
@@ -65,6 +67,11 @@ export function validateCheckpoint(
       if (record[field] !== undefined && typeof record[field] !== "string")
         throw invalid();
     validateUsageReceipts(record.usageReceipts);
+    validateInteractionRecord(
+      record,
+      tasks.find((item) => item.key === record.key)!,
+      value.executionId,
+    );
     attempts += record.attempts;
     const output = Object.hasOwn(value.values, record.key)
       ? value.values[record.key]
@@ -97,7 +104,7 @@ export function validateCheckpoint(
   const records = new Map(value.records.map((entry) => [entry.key, entry]));
   for (const item of tasks)
     if (
-      ["done", "paused", "rejected"].includes(
+      ["done", "paused", "rejected", "waiting-input"].includes(
         String(records.get(item.key)?.status),
       ) &&
       item.after.some(

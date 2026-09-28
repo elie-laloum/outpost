@@ -19,16 +19,17 @@ Define and freeze a workflow node whose perform callback runs when its dependenc
 
 ## Parameters and properties
 
-| Name                | Type                                                                   | Presence | Meaning                                                                                                                                  |
-| ------------------- | ---------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `options`           | `TaskOptions<T>`                                                       | Required | Task identity, dependency edges, perform callback and attempt policy.                                                                    |
-| `options.retry`     | `Retry \| undefined`                                                   | Optional | Explicit retry policy; repeated effects require care.                                                                                    |
-| `options.key`       | `string`                                                               | Required | Stable task key identifying the node within its workflow graph.                                                                          |
-| `options.gate`      | `WorkflowGate \| undefined`                                            | Optional | Persisted approval or pause definition; execution requires a checkpoint and a matching trusted decision.                                 |
-| `options.perform`   | `(context: TaskContext) => T \| Promise<T>`                            | Required | Callback executed for each task attempt; returns its output and must honor context.signal.                                               |
-| `options.condition` | `((context: TaskContext) => boolean \| Promise<boolean>) \| undefined` | Optional | Predicate evaluated before the first task attempt.                                                                                       |
-| `options.timeoutMs` | `number \| undefined`                                                  | Optional | Positive integer time limit in milliseconds for each task attempt, up to 2147483647; cancellation is cooperative through context.signal. |
-| `options.after`     | `readonly Task<unknown>[] \| undefined`                                | Optional | Declared task dependencies whose values may be read.                                                                                     |
+| Name                  | Type                                                                   | Presence | Meaning                                                                                                                                  |
+| --------------------- | ---------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `options`             | `TaskOptions<T>`                                                       | Required | Task identity, dependency edges, perform callback and attempt policy.                                                                    |
+| `options.retry`       | `Retry \| undefined`                                                   | Optional | Explicit retry policy; repeated effects require care.                                                                                    |
+| `options.key`         | `string`                                                               | Required | Stable task key identifying the node within its workflow graph.                                                                          |
+| `options.gate`        | `WorkflowGate \| undefined`                                            | Optional | Persisted approval or pause definition; execution requires a checkpoint and a matching trusted decision.                                 |
+| `options.interaction` | `TaskInteraction \| undefined`                                         | Optional | Opt-in durable human-input contract; requires checkpointed scheduling and cannot be combined with a gate.                                |
+| `options.perform`     | `(context: TaskContext) => T \| Promise<T>`                            | Required | Callback executed for each task attempt; returns its output and must honor context.signal.                                               |
+| `options.condition`   | `((context: TaskContext) => boolean \| Promise<boolean>) \| undefined` | Optional | Predicate evaluated before the first task attempt.                                                                                       |
+| `options.timeoutMs`   | `number \| undefined`                                                  | Optional | Positive integer time limit in milliseconds for each task attempt, up to 2147483647; cancellation is cooperative through context.signal. |
+| `options.after`       | `readonly Task<unknown>[] \| undefined`                                | Optional | Declared task dependencies whose values may be read.                                                                                     |
 
 ## Returns
 

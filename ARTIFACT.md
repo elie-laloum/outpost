@@ -892,3 +892,45 @@ npx outpost bench --suite bench/ --agents claude,codex,kimi --repeat 3 --json > 
 npx outpost init --recipe fix-ci --repository ../app
 node run.ts
 ```
+
+<a id="f-interactive"></a>
+
+## Tâches interactives avec suspensions durables
+
+**Contrat retenu** — Une même `interactiveAgentTask()` permet un dialogue adaptatif avec le harness Outpost et les presets CLI disposant de capture et de reprise portable. Une question termine le tour de l’agent, mais laisse la tâche et ses dépendances en attente. Une réponse reprend la conversation et peut conduire à une nouvelle question.
+
+**Livraison initiale (implémentée, non publiée)** — Dialogue entre deux tours pour tous les harnesses compatibles. Checkpoint obligatoire, demandes identifiées et réponses rattachées à l’exécution, acteurs autorisés, usage cumulatif et nombre de tours borné. Chaque tour possède un sandbox éphémère ; le worktree nommé et les transcripts restent conservés. L’intégration Git reste explicite. Antigravity et les configurations sans capture portable sont refusés avant exécution.
+
+**Durabilité** — Persister la réponse avant de lancer le tour suivant ; conserver l’état et la question avant de rendre `waiting-input`. Une réponse périmée ou déjà consommée est refusée. Une interruption au milieu d’un tour exige l’autorisation explicite de rejouer ce tour, comme les tâches durables existantes ; aucun exactly-once n’est promis pour ses effets externes. Le checkpoint ne rend pas le checkout portable : le dépôt, le worktree et le stockage des conversations doivent rester accessibles.
+
+**API implémentée**
+
+```ts
+const clarify = interactiveAgentTask({
+  key: "clarify",
+  repository,
+  agent: assistant,
+  brief: "Définis avec moi les besoins de mon application.",
+  actors: ["owner"],
+  maxTurns: 12,
+});
+const pipeline = workflow("discovery", [clarify]);
+const pending = await pipeline.start({ checkpoint });
+const question = pending.inputRequests[0];
+if (question) {
+  await pipeline.start({
+    checkpoint,
+    answers: [
+      {
+        executionId: pending.executionId,
+        key: question.key,
+        requestId: question.id,
+        actor: "owner",
+        value: "Une boutique de vêtements",
+      },
+    ],
+  });
+}
+```
+
+**Suite distincte** — La suspension native au milieu d’un appel `ask_user` du harness intégré reste une extension future. Elle exige de persister et reprendre l’appel d’outil exact ; l’attente d’une Promise en mémoire ne constitue pas une suspension durable. Les réponses signées et l’expiration des questions ne font pas partie de cette première livraison.

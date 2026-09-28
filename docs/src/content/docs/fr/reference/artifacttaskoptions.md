@@ -13,18 +13,19 @@ import type { ArtifactTaskOptions } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom         | Type                                                                    | Présence  | Rôle                                                                                                                               |
-| ----------- | ----------------------------------------------------------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `retry`     | `Retry \| undefined`                                                    | Optionnel | Politique explicite de reprise ; les effets peuvent se répéter.                                                                    |
-| `key`       | `string`                                                                | Requis    | Clé de tâche stable identifiant le nœud dans son graphe de workflow.                                                               |
-| `gate`      | `WorkflowGate \| undefined`                                             | Optionnel | Définition persistée d’approbation ou pause ; son exécution exige un checkpoint et une décision de confiance correspondante.       |
-| `after`     | `readonly Task<unknown>[] \| undefined`                                 | Optionnel | Dépendances déclarées dont les valeurs peuvent être lues.                                                                          |
-| `condition` | `((context: TaskContext) => boolean \| Promise<boolean>) \| undefined`  | Optionnel | Prédicat évalué avant la première tentative.                                                                                       |
-| `timeoutMs` | `number \| undefined`                                                   | Optionnel | Durée entière positive en millisecondes de chaque tentative, jusqu’à 2147483647 ; l’annulation est coopérative via context.signal. |
-| `store`     | `ArtifactStore`                                                         | Requis    | Store d’octets d’artefacts utilisé pour la publication immuable ou la lecture bornée des données.                                  |
-| `contract`  | `ArtifactContract<T>`                                                   | Requis    | Contrat d’artefact nommé et versionné définissant encodage et validation.                                                          |
-| `produce`   | `(context: TaskContext) => T \| Promise<T>`                             | Requis    | Calcule la valeur typée de l’artefact depuis le contexte de tâche et les dépendances déclarées.                                    |
-| `parents`   | `((context: TaskContext) => readonly ArtifactReference[]) \| undefined` | Optionnel | Lit les références parentes d’artefacts depuis les dépendances pour enregistrer la filiation à la publication.                     |
+| Nom           | Type                                                                    | Présence  | Rôle                                                                                                                               |
+| ------------- | ----------------------------------------------------------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `retry`       | `Retry \| undefined`                                                    | Optionnel | Politique explicite de reprise ; les effets peuvent se répéter.                                                                    |
+| `key`         | `string`                                                                | Requis    | Clé de tâche stable identifiant le nœud dans son graphe de workflow.                                                               |
+| `gate`        | `WorkflowGate \| undefined`                                             | Optionnel | Définition persistée d’approbation ou pause ; son exécution exige un checkpoint et une décision de confiance correspondante.       |
+| `after`       | `readonly Task<unknown>[] \| undefined`                                 | Optionnel | Dépendances déclarées dont les valeurs peuvent être lues.                                                                          |
+| `interaction` | `TaskInteraction \| undefined`                                          | Optionnel | Contrat optionnel de saisie humaine durable ; exige un checkpoint et ne peut pas être combiné avec une gate.                       |
+| `condition`   | `((context: TaskContext) => boolean \| Promise<boolean>) \| undefined`  | Optionnel | Prédicat évalué avant la première tentative.                                                                                       |
+| `timeoutMs`   | `number \| undefined`                                                   | Optionnel | Durée entière positive en millisecondes de chaque tentative, jusqu’à 2147483647 ; l’annulation est coopérative via context.signal. |
+| `store`       | `ArtifactStore`                                                         | Requis    | Store d’octets d’artefacts utilisé pour la publication immuable ou la lecture bornée des données.                                  |
+| `contract`    | `ArtifactContract<T>`                                                   | Requis    | Contrat d’artefact nommé et versionné définissant encodage et validation.                                                          |
+| `produce`     | `(context: TaskContext) => T \| Promise<T>`                             | Requis    | Calcule la valeur typée de l’artefact depuis le contexte de tâche et les dépendances déclarées.                                    |
+| `parents`     | `((context: TaskContext) => readonly ArtifactReference[]) \| undefined` | Optionnel | Lit les références parentes d’artefacts depuis les dépendances pour enregistrer la filiation à la publication.                     |
 
 ## Signature
 

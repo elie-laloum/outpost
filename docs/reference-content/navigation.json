@@ -826,6 +826,10 @@
         "attrs": { "data-api-kind": "function" }
       },
       {
+        "slug": "reference/interactiveagenttask",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
         "slug": "reference/workflowfailure",
         "attrs": { "data-api-kind": "class" }
       },
@@ -838,6 +842,10 @@
       {
         "slug": "reference/workflowusageunavailable",
         "attrs": { "data-api-kind": "class" }
+      },
+      {
+        "slug": "reference/interactiveagentresult",
+        "attrs": { "data-api-kind": "type" }
       },
       { "slug": "reference/retry", "attrs": { "data-api-kind": "interface" } },
       {
@@ -878,6 +886,38 @@
       },
       {
         "slug": "reference/workflowresult",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/interactiveagenttaskoptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/workflowinputquestion",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/workflowinputrequest",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/workflowanswer",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/workflowanswerrecord",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/taskinteraction",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/taskinteractionrecord",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/taskinteractioncontext",
         "attrs": { "data-api-kind": "interface" }
       }
     ]

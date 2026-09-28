@@ -455,3 +455,18 @@ export type {
   WorkflowApproverKey,
   WorkflowDecisionVerifierOptions,
 } from "./infrastructure/workflow-decision-signature.types.ts";
+
+export { interactiveAgentTask } from "./application/interactive-task.ts";
+export type {
+  InteractiveAgentTaskOptions,
+  InteractiveAgentResult,
+} from "./application/interactive-task.types.ts";
+export type {
+  WorkflowInputQuestion,
+  WorkflowInputRequest,
+  WorkflowAnswer,
+  WorkflowAnswerRecord,
+  TaskInteraction,
+  TaskInteractionRecord,
+  TaskInteractionContext,
+} from "./domain/workflow/input.types.ts";

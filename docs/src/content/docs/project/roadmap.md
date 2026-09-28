@@ -7,6 +7,8 @@ sidebar:
 
 Outpost's next priority is reliable everyday execution: a successful first run, explainable failures and recovery that has been exercised under real conditions. The horizons below express ordering, not promised dates or release numbers. The [changelog](../changelog/) records deliveries; this page describes the work ahead.
 
+**Implemented, unreleased:** [interactive agent tasks](../../guide/interactive-tasks/) persist adaptive questions and human answers between captured conversation turns. The Outpost harness and portable CLI presets share this protocol; Antigravity is rejected. Local process and simulated-model tests cover resume, validation and retained workspaces. Live CLI/model campaigns remain required. Native suspension inside a tool, signed answers and question expiration remain planned.
+
 ## Starting point
 
 The foundation includes reusable sandboxes, Git workspaces, agent adapters, typed workflows and recovery tools. The CLI, authentication setup and custom Responses providers are documented in the [setup guide](../../guide/command-line/). Use the [API reference](../../reference/diagnosesandbox/) for implemented contracts and the changelog for released versions. An implementation or simulated test is not evidence of a successful live provider campaign.

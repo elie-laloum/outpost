@@ -1,3 +1,4 @@
+import { InputSuspension } from "./input.ts";
 import { checkpointValue } from "./checkpoint-value.ts";
 import { WorkflowBudgetExceeded, WorkflowUsageUnavailable } from "./budget.ts";
 import { retryDelay, waitForRetry } from "./retry.ts";
@@ -61,6 +62,16 @@ export async function runTask(
         return;
       } catch (error) {
         runtime.closeAttempt(item);
+        if (error instanceof InputSuspension && item.interaction) {
+          state.interaction = error.interaction;
+          finish(item, "waiting-input");
+          emit({
+            type: "input-request",
+            key: item.key,
+            status: "waiting-input",
+          });
+          return;
+        }
         if (
           signal.aborted ||
           cycle === limit ||

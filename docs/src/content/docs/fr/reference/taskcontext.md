@@ -15,6 +15,7 @@ import type { TaskContext } from "@elie-laloum/outpost";
 
 | Nom               | Type                                                     | Présence  | Rôle                                                                                                                                                                      |
 | ----------------- | -------------------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `interaction`     | `TaskInteractionContext \| undefined`                    | Optionnel | État durable et opérations de suspension, fournis uniquement aux tâches déclarant une interaction.                                                                        |
 | `idempotencyKey`  | `string`                                                 | Requis    | Identité SHA-256 stable de executionId et de la clé de tâche, conservée lors des retries et reprises. À transmettre à un service d’effets avec déduplication persistante. |
 | `observation`     | `ObservationHub \| undefined`                            | Optionnel | Hub de la tâche avec exécution du workflow, clé et tentative ; le transmettre aux opérations imbriquées personnalisées comme speculate.                                   |
 | `signal`          | `AbortSignal`                                            | Requis    | Annulation coopérative de cette opération.                                                                                                                                |
@@ -29,6 +30,7 @@ import type { TaskContext } from "@elie-laloum/outpost";
 
 ```ts
 export interface TaskContext {
+  readonly interaction?: TaskInteractionContext;
   readonly idempotencyKey: string;
   readonly observation?: ObservationHub;
   readonly signal: AbortSignal;
@@ -45,4 +47,5 @@ export interface TaskContext {
 
 - [ObservationHub](../observationhub/)
 - [Task](../type-task/)
+- [TaskInteractionContext](../taskinteractioncontext/)
 - [Usage](../usage/)
