@@ -19,6 +19,7 @@ import type { LoopTaskOptions } from "@elie-laloum/outpost";
 | `attempt`   | `(context: LoopTaskContext, feedback: string \| undefined) => T \| Promise<T>`         | Required | Produce the candidate output from the phase context and previous rejected check feedback; feedback is undefined in round one. Persisted outputs must be lossless JSON or undefined.            |
 | `check`     | `(context: LoopTaskContext, result: T) => LoopCheckResult \| Promise<LoopCheckResult>` | Required | Accept the candidate with done: true or request another round with done: false and text feedback. May invoke a reviewer agent; report its usage through the context. Exceptions fail the task. |
 | `key`       | `string`                                                                               | Required | Stable node key used by dependencies, checkpoints and loop events.                                                                                                                             |
+| `cache`     | `TaskCacheOptions \| undefined`                                                        | Optional | Opt-in cache for the accepted loop result; a hit skips every round and records no rounds.                                                                                                      |
 | `after`     | `readonly Task<unknown>[] \| undefined`                                                | Optional | Dependencies that must succeed before the first round; their outputs are available through context.value.                                                                                      |
 | `condition` | `((context: TaskContext) => boolean \| Promise<boolean>) \| undefined`                 | Optional | Optional admission predicate evaluated before running or resuming the loop; false skips the node.                                                                                              |
 | `timeoutMs` | `number \| undefined`                                                                  | Optional | Cooperative deadline for one round execution, including attempt and check; renewed when an interrupted phase resumes.                                                                          |
@@ -28,7 +29,7 @@ import type { LoopTaskOptions } from "@elie-laloum/outpost";
 ```ts
 export interface LoopTaskOptions<T> extends Pick<
   TaskOptions<T>,
-  "key" | "after" | "condition" | "timeoutMs"
+  "key" | "after" | "condition" | "timeoutMs" | "cache"
 > {
   readonly maxRounds: number;
   readonly attempt: (

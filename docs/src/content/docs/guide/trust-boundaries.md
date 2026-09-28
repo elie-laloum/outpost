@@ -17,6 +17,6 @@ Outpost reads only selected CLI credential files and never a system keychain. Is
 
 ## Application authority
 
-An approval actor, artifact producer and recorded remote PID are metadata. Your application authenticates users, authorizes publication and determines whether a remote owner has actually stopped. Hashes and conditional writes protect integrity and concurrency; they do not establish identity.
+An approval actor, artifact producer and recorded remote PID are metadata. Your application authenticates users, authorizes publication and determines whether a remote owner has actually stopped. Hashes and conditional writes protect integrity and concurrency; they do not establish identity. Likewise, whoever can write a [task cache](../task-cache/) transport controls the results that cached tasks restore.
 
 Use [outbound rules](../outbound-rules/) when supported, but verify the chosen provider’s capability before treating a policy as enforced.

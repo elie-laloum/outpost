@@ -15,6 +15,7 @@ import type { TaskRecord } from "@elie-laloum/outpost";
 
 | Nom             | Type                                      | Présence  | Rôle                                                                                                                                                                                        |
 | --------------- | ----------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `cacheHit`      | `true \| undefined`                       | Optionnel | true lorsque la valeur de la tâche a été restaurée depuis son cache dans cette exécution ; la tâche compte alors zéro tentative.                                                            |
 | `quota`         | `WorkflowQuotaPause \| undefined`         | Optionnel | Pause sur quota persistée d’une tâche en pause : moment de l’enregistrement, message de quota et heure de réinitialisation lorsqu’elle est connue. Supprimée lorsque la tâche est relancée. |
 | `interaction`   | `TaskInteractionRecord \| undefined`      | Optionnel | État de continuation persisté, dernière question et réponse acceptée d’une tâche interactive.                                                                                               |
 | `rounds`        | `readonly LoopRoundRecord[] \| undefined` | Optionnel | Progression ordonnée d’une tâche de boucle, avec tours terminés et phase courante ; absent pour les tâches ordinaires.                                                                      |
@@ -32,6 +33,7 @@ import type { TaskRecord } from "@elie-laloum/outpost";
 
 ```ts
 export interface TaskRecord {
+  cacheHit?: true;
   quota?: WorkflowQuotaPause;
   interaction?: TaskInteractionRecord;
   rounds?: readonly LoopRoundRecord[];

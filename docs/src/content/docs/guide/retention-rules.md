@@ -15,7 +15,7 @@ Build `retention.json` from `RecoveryRetentionPolicy`: select the age and size l
 
 `planRecoveryRetention()` produces a plan. `pruneRecoveryRetention()` rechecks candidates and ownership before removing eligible data. Active, uncertain or recoverable work is not equivalent to expired closed logs.
 
-This policy targets closed logs older than seven days, with a retained-storage target of 1 GiB. It does not make active or protected data eligible.
+This policy targets closed logs older than seven days, with a retained-storage target of 1 GiB. It does not make active or protected data eligible. Add the `task-cache` scope to also prune [task cache](../task-cache/) entries older than `minAgeMs`; a pruned entry only makes the next execution run the task again.
 
 ```json title="retention.json"
 {

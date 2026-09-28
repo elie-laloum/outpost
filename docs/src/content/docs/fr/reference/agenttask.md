@@ -19,18 +19,18 @@ Définit un nœud de workflow qui lance un agent dans une sandbox existante appa
 
 ## Paramètres et propriétés
 
-| Nom                   | Type                                                                    | Présence  | Rôle                                                                                                                               |
-| --------------------- | ----------------------------------------------------------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `options`             | `Omit<TaskOptions<DispatchResult<T>>, "perform"> & AgentTaskOptions<T>` | Requis    | Réglages d’ordonnancement, sandbox existante et fabrique de requêtes de dispatch.                                                  |
-| `options.retry`       | `Retry \| undefined`                                                    | Optionnel | Politique explicite de reprise ; les effets peuvent se répéter.                                                                    |
-| `options.key`         | `string`                                                                | Requis    | Clé de tâche stable identifiant le nœud dans son graphe de workflow.                                                               |
-| `options.gate`        | `WorkflowGate \| undefined`                                             | Optionnel | Définition persistée d’approbation ou pause ; son exécution exige un checkpoint et une décision de confiance correspondante.       |
-| `options.after`       | `readonly Task<unknown>[] \| undefined`                                 | Optionnel | Dépendances déclarées dont les valeurs peuvent être lues.                                                                          |
-| `options.interaction` | `TaskInteraction \| undefined`                                          | Optionnel | Contrat optionnel de saisie humaine durable ; exige un checkpoint et ne peut pas être combiné avec une gate.                       |
-| `options.condition`   | `((context: TaskContext) => boolean \| Promise<boolean>) \| undefined`  | Optionnel | Prédicat évalué avant la première tentative.                                                                                       |
-| `options.timeoutMs`   | `number \| undefined`                                                   | Optionnel | Durée entière positive en millisecondes de chaque tentative, jusqu’à 2147483647 ; l’annulation est coopérative via context.signal. |
-| `options.sandbox`     | `Sandbox`                                                               | Requis    | Sandbox existante appartenant à l’appelant et réutilisée par la tâche ; la tâche ne la ferme pas.                                  |
-| `options.request`     | `(context: TaskContext) => DispatchOptions<T>`                          | Requis    | Construit les options de dispatch depuis les dépendances pour la sandbox existante.                                                |
+| Nom                   | Type                                                                               | Présence  | Rôle                                                                                                                               |
+| --------------------- | ---------------------------------------------------------------------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `options`             | `Omit<TaskOptions<DispatchResult<T>>, "cache" \| "perform"> & AgentTaskOptions<T>` | Requis    | Réglages d’ordonnancement, sandbox existante et fabrique de requêtes de dispatch.                                                  |
+| `options.retry`       | `Retry \| undefined`                                                               | Optionnel | Politique explicite de reprise ; les effets peuvent se répéter.                                                                    |
+| `options.key`         | `string`                                                                           | Requis    | Clé de tâche stable identifiant le nœud dans son graphe de workflow.                                                               |
+| `options.gate`        | `WorkflowGate \| undefined`                                                        | Optionnel | Définition persistée d’approbation ou pause ; son exécution exige un checkpoint et une décision de confiance correspondante.       |
+| `options.after`       | `readonly Task<unknown>[] \| undefined`                                            | Optionnel | Dépendances déclarées dont les valeurs peuvent être lues.                                                                          |
+| `options.interaction` | `TaskInteraction \| undefined`                                                     | Optionnel | Contrat optionnel de saisie humaine durable ; exige un checkpoint et ne peut pas être combiné avec une gate.                       |
+| `options.condition`   | `((context: TaskContext) => boolean \| Promise<boolean>) \| undefined`             | Optionnel | Prédicat évalué avant la première tentative.                                                                                       |
+| `options.timeoutMs`   | `number \| undefined`                                                              | Optionnel | Durée entière positive en millisecondes de chaque tentative, jusqu’à 2147483647 ; l’annulation est coopérative via context.signal. |
+| `options.sandbox`     | `Sandbox`                                                                          | Requis    | Sandbox existante appartenant à l’appelant et réutilisée par la tâche ; la tâche ne la ferme pas.                                  |
+| `options.request`     | `(context: TaskContext) => DispatchOptions<T>`                                     | Requis    | Construit les options de dispatch depuis les dépendances pour la sandbox existante.                                                |
 
 ## Retour
 
@@ -40,7 +40,7 @@ Définit un nœud de workflow qui lance un agent dans une sandbox existante appa
 
 ```ts
 export declare function agentTask<T>(
-  options: Omit<TaskOptions<DispatchResult<T>>, "perform"> &
+  options: Omit<TaskOptions<DispatchResult<T>>, "perform" | "cache"> &
     AgentTaskOptions<T>,
 ): Task<DispatchResult<T>>;
 ```

@@ -16,6 +16,8 @@ A workflow is a graph of typed tasks and declared dependencies. It connects ordi
 
 `loopTask` adds bounded attempt/check rounds with feedback and durable phase progress. See [verification loops](../../../guide/verification-loops/) for budgets, replay and caller-owned sessions.
 
+A task `cache` restores a stored JSON result when the workflow, task, version and key match, without executing the task or replaying its side effects. See the [task result cache](../../../guide/task-cache/) for keys, `repositoryFingerprint`, failures and trust.
+
 ## Boundaries and responsibilities
 
 Retries can repeat side effects. Budgets control admission using attempts and observed usage rather than guaranteeing a currency ceiling. Parallel tasks still need independent sandbox/workspace ownership. Checkpoints add persistence; they do not make external side effects transactional.

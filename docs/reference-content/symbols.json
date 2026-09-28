@@ -470,5 +470,13 @@
   "ReplayDivergence": [
     "OutpostError with code replay, thrown when a replay differs from its journal. kind, turn, expected, actual and commit locate the difference; details holds the same fields.",
     "OutpostError de code replay, levée quand un rejeu diffère de son journal. kind, turn, expected, actual et commit situent l’écart ; details contient les mêmes champs."
+  ],
+  "taskCacheStore": [
+    "Create a task cache store over a caller-owned Transport. Entries live under task-cache/<fingerprint>.json; writes replace older entries conditionally and keep a concurrent writer’s entry. Reads validate the entry and its size. Entries are not authenticated: anyone who can write the transport controls restored results.",
+    "Crée un store de cache de tâches sur un Transport appartenant à l’appelant. Les entrées sont stockées sous task-cache/<empreinte>.json ; les écritures remplacent conditionnellement les anciennes entrées et conservent celle d’un écrivain concurrent. Les lectures valident l’entrée et sa taille. Les entrées ne sont pas authentifiées : quiconque peut écrire dans le transport contrôle les résultats restaurés."
+  ],
+  "repositoryFingerprint": [
+    "Return a SHA-256 digest of a repository’s HEAD commit, tracked working-tree changes, index and untracked files, excluding .outpost/. Use it in task cache keys so uncommitted edits change the key. It reads the repository without modifying it and fails outside a Git repository.",
+    "Renvoie une empreinte SHA-256 du commit HEAD d’un dépôt, des modifications suivies de l’arbre de travail, de l’index et des fichiers non suivis, hors .outpost/. Utilisez-la dans les clés de cache pour que les modifications non commitées changent la clé. Elle lit le dépôt sans le modifier et échoue hors d’un dépôt Git."
   ]
 }

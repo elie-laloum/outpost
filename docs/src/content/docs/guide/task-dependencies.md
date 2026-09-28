@@ -42,4 +42,4 @@ A workflow does not create a shared Git transaction. Each task must honor resour
 
 API: [task](../../reference/task/) · [workflow](../../reference/workflow/) · [TaskContext](../../reference/taskcontext/).
 
-Use [verification loops](../verification-loops/) when a failed check should guide another attempt.
+Use [verification loops](../verification-loops/) when a failed check should guide another attempt. Add a [task cache](../task-cache/) to reuse a JSON result when the task’s inputs have not changed.

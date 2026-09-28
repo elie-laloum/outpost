@@ -21,7 +21,7 @@ Définit un nœud d’agent dont le callback request choisit le dépôt, le prov
 
 | Nom                   | Type                                                                                  | Présence  | Rôle                                                                                                                               |
 | --------------------- | ------------------------------------------------------------------------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `options`             | `Omit<TaskOptions<DispatchResult<T>>, "perform"> & IsolatedTaskOptions<T>`            | Requis    | Réglages d’ordonnancement et fabrique de requêtes choisissant un dépôt et une sandbox distincts à chaque tentative.                |
+| `options`             | `Omit<TaskOptions<DispatchResult<T>>, "cache" \| "perform"> & IsolatedTaskOptions<T>` | Requis    | Réglages d’ordonnancement et fabrique de requêtes choisissant un dépôt et une sandbox distincts à chaque tentative.                |
 | `options.retry`       | `Retry \| undefined`                                                                  | Optionnel | Politique explicite de reprise ; les effets peuvent se répéter.                                                                    |
 | `options.key`         | `string`                                                                              | Requis    | Clé de tâche stable identifiant le nœud dans son graphe de workflow.                                                               |
 | `options.gate`        | `WorkflowGate \| undefined`                                                           | Optionnel | Définition persistée d’approbation ou pause ; son exécution exige un checkpoint et une décision de confiance correspondante.       |
@@ -39,7 +39,7 @@ Définit un nœud d’agent dont le callback request choisit le dépôt, le prov
 
 ```ts
 export declare function isolatedTask<T>(
-  options: Omit<TaskOptions<DispatchResult<T>>, "perform"> &
+  options: Omit<TaskOptions<DispatchResult<T>>, "perform" | "cache"> &
     IsolatedTaskOptions<T>,
 ): Task<DispatchResult<T>>;
 ```

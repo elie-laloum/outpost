@@ -17,6 +17,6 @@ Outpost lit uniquement les fichiers CLI sélectionnés et jamais un trousseau sy
 
 ## Autorité applicative
 
-Acteur d’approbation, producteur d’artefact et PID distant enregistré sont des métadonnées. Votre application authentifie les utilisateurs, autorise la publication et établit si un propriétaire distant est réellement arrêté. Empreintes et écritures conditionnelles protègent intégrité et concurrence ; elles n’établissent pas l’identité.
+Acteur d’approbation, producteur d’artefact et PID distant enregistré sont des métadonnées. Votre application authentifie les utilisateurs, autorise la publication et établit si un propriétaire distant est réellement arrêté. Empreintes et écritures conditionnelles protègent intégrité et concurrence ; elles n’établissent pas l’identité. De même, quiconque peut écrire dans le transport d’un [cache de tâches](../task-cache/) contrôle les résultats que les tâches en cache restaurent.
 
 Utilisez les [règles de sortie](../outbound-rules/) lorsqu’elles sont prises en charge, mais vérifiez les capacités du fournisseur avant de considérer une politique comme imposée.

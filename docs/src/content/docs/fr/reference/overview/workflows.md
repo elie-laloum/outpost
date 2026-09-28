@@ -16,6 +16,8 @@ Un workflow est un graphe de tâches typées et de dépendances déclarées. Il 
 
 `loopTask` ajoute des tours essai/vérification bornés avec feedback et progression durable par phase. Consultez les [boucles de vérification](../../../guide/verification-loops/) pour les budgets, le rejeu et les sessions appartenant à l’appelant.
 
+Un `cache` de tâche restaure un résultat JSON enregistré lorsque workflow, tâche, version et clé correspondent, sans exécuter la tâche ni rejouer ses effets de bord. Consultez le [cache de tâches](../../../guide/task-cache/) pour les clés, `repositoryFingerprint`, les échecs et la confiance.
+
 ## Limites et responsabilités
 
 Les retries peuvent répéter des effets externes. Les budgets contrôlent l’admission selon les tentatives et l’usage observé, sans garantir un plafond monétaire. Les tâches parallèles nécessitent toujours une propriété indépendante des sandboxes et workspaces. Les checkpoints ajoutent la persistance ; ils ne rendent pas transactionnels les effets externes.

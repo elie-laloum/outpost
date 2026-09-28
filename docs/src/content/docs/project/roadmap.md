@@ -15,6 +15,8 @@ Outpost's next priority is reliable everyday execution: a successful first run, 
 
 Implemented, unreleased: [record and replay](../../guide/record-replay/) replays a dispatch journal without calling a model, rebuilding its commits inside the sandbox and reporting divergences. Deterministic tests cover CLI and harness recordings, failures, repairs, passes and a real Docker sandbox. Replaying a whole workflow, uncommitted changes and a CLI command remain planned.
 
+Implemented, unreleased: the [task result cache](../../guide/task-cache/) reuses a task's JSON result when the workflow, task, version and key match, with `repositoryFingerprint()` for repository-state keys, expiry, refresh and a `task-cache` retention scope. Deterministic tests cover hits, invalid and concurrent entries, checkpoints and retention. Single-flight coordination between concurrent executions and authenticated entries remain future work.
+
 Implemented, unreleased: [verification loops](../../guide/verification-loops/) add bounded agent/check cycles with feedback, durable round phases and cumulative budgets. Deterministic tests cover recovery and scripted coder/reviewer usage; authenticated model campaigns remain separate validation.
 
 The foundation includes reusable sandboxes, Git workspaces, agent adapters, typed workflows and recovery tools. The CLI, authentication setup and custom Responses providers are documented in the [setup guide](../../guide/command-line/). Use the [API reference](../../reference/diagnosesandbox/) for implemented contracts and the changelog for released versions. An implementation or simulated test is not evidence of a successful live provider campaign.

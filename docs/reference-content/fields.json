@@ -1261,8 +1261,8 @@
     "Horodatage ISO d’émission de l’événement de workflow."
   ],
   "WorkflowEvent.type": [
-    "Lifecycle notification, including loop phases, input-request when a task suspends, input-answer when an accepted reply makes it ready to run, and quota when a quota error pauses a task or a paused task is released.",
-    "Notification du cycle de vie, incluant les phases de boucle, input-request lors d’une suspension, input-answer lorsqu’une réponse acceptée rend la tâche exécutable, et quota lorsqu’une erreur de quota met une tâche en pause ou qu’une tâche en pause est relancée."
+    "Lifecycle notification, including loop phases, input-request when a task suspends, input-answer when an accepted reply makes it ready to run, quota when a quota error pauses a task or a paused task is released, and cache for task cache outcomes.",
+    "Notification du cycle de vie, incluant les phases de boucle, input-request lors d’une suspension, input-answer lorsqu’une réponse acceptée rend la tâche exécutable, quota lorsqu’une erreur de quota met une tâche en pause ou qu’une tâche en pause est relancée, et cache pour les résultats du cache de tâches."
   ],
   "WorkflowEvent.key": [
     "Stable task key identifying the node within its workflow graph.",
@@ -1625,8 +1625,8 @@
     "Version de ce format d’enregistrement sérialisé ; actuellement 1."
   ],
   "RecoveryRetentionPolicy.scopes": [
-    "Storage classes eligible for pruning: clean workspaces and/or closed logs.",
-    "Classes de stockage éligibles au nettoyage : workspaces propres et/ou journaux fermés."
+    "Storage classes eligible for pruning: clean workspaces, closed logs and/or task cache entries.",
+    "Classes de stockage éligibles au nettoyage : workspaces propres, journaux fermés et/ou entrées du cache de tâches."
   ],
   "RecoveryRetentionPolicy.minAgeMs": [
     "Minimum age in milliseconds before a retention candidate is eligible.",
@@ -6090,5 +6090,97 @@
   "WorkspaceCommitsEvent.unavailable": [
     "Reason the commits were not recorded: non-linear or rewritten history, size limit, non-UTF-8 encoding, a patch that does not reproduce its tree, or a Git failure.",
     "Raison de l’absence d’enregistrement : historique non linéaire ou réécrit, limite de taille, encodage non UTF-8, patch qui ne reproduit pas son arbre ou échec Git."
+  ],
+  "Task.cache": [
+    "Opt-in result cache: a hit restores the stored lossless JSON value without an attempt, usage or side effects. Rejected on gates, interactions and dispatch-result tasks.",
+    "Cache de résultat optionnel : une correspondance restaure la valeur JSON sans perte enregistrée, sans tentative, sans usage ni effet de bord. Refusé sur les gates, interactions et tâches renvoyant un résultat de dispatch."
+  ],
+  "LoopTaskOptions.cache": [
+    "Opt-in cache for the accepted loop result; a hit skips every round and records no rounds.",
+    "Cache optionnel du résultat accepté de la boucle ; une correspondance saute tous les tours et n’enregistre aucun tour."
+  ],
+  "TaskRecord.cacheHit": [
+    "true when the task value was restored from its task cache in this execution; the task then has zero attempts.",
+    "true lorsque la valeur de la tâche a été restaurée depuis son cache dans cette exécution ; la tâche compte alors zéro tentative."
+  ],
+  "WorkflowEvent.cache": [
+    "Task cache outcome on cache events: hit, miss (absent, expired or refresh mode), stored, or failed when the store or an entry was unusable.",
+    "Résultat du cache sur les événements cache : hit, miss (absent, expiré ou mode refresh), stored, ou failed lorsque le store ou une entrée était inutilisable."
+  ],
+  "WorkflowEvent.error": [
+    "Store or entry error message on failed cache events; the task continues without the cache.",
+    "Message d’erreur du store ou de l’entrée sur les événements cache failed ; la tâche continue sans cache."
+  ],
+  "TaskCacheOptions.store": [
+    "Caller-owned store that reads and writes cache entries, such as taskCacheStore over a Transport.",
+    "Store appartenant à l’appelant qui lit et écrit les entrées de cache, par exemple taskCacheStore sur un Transport."
+  ],
+  "TaskCacheOptions.version": [
+    "Non-empty version included in the fingerprint; change it when the task implementation, agent, prompt or output contract changes.",
+    "Version non vide incluse dans l’empreinte ; changez-la lorsque l’implémentation de la tâche, l’agent, le prompt ou le contrat de sortie change."
+  ],
+  "TaskCacheOptions.key": [
+    "Return the lossless JSON inputs that determine the result, such as a repository fingerprint, brief and model. Runs before each execution with attempt 0 and may read declared dependencies; an error fails the task.",
+    "Renvoie les entrées JSON sans perte qui déterminent le résultat, par exemple l’empreinte du dépôt, le brief et le modèle. S’exécute avant chaque exécution avec attempt 0 et peut lire les dépendances déclarées ; une erreur fait échouer la tâche."
+  ],
+  "TaskCacheOptions.maxAgeMs": [
+    "Positive age limit in milliseconds; an older entry is a miss and is replaced after the task succeeds.",
+    "Âge maximal positif en millisecondes ; une entrée plus ancienne est un miss et est remplacée après la réussite de la tâche."
+  ],
+  "TaskCacheOptions.mode": [
+    "reuse (default) reads the store first; refresh ignores existing entries, executes the task and replaces the entry.",
+    "reuse (par défaut) lit d’abord le store ; refresh ignore les entrées existantes, exécute la tâche et remplace l’entrée."
+  ],
+  "TaskCacheStore.read": [
+    "Return the valid entry stored for a fingerprint, or undefined when none exists. The workflow validates the entry again and treats errors as a miss.",
+    "Renvoie l’entrée valide stockée pour une empreinte, ou undefined si aucune n’existe. Le workflow revalide l’entrée et traite les erreurs comme un miss."
+  ],
+  "TaskCacheStore.write": [
+    "Persist an entry for its fingerprint, replacing an older one; a failure is reported as a failed cache event without changing the task outcome.",
+    "Enregistre une entrée pour son empreinte en remplaçant l’ancienne ; un échec est signalé par un événement cache failed sans changer le résultat de la tâche."
+  ],
+  "TaskCacheEntry.format": [
+    "Version of this serialized entry format; currently 1.",
+    "Version de ce format d’entrée sérialisé ; actuellement 1."
+  ],
+  "TaskCacheEntry.fingerprint": [
+    "SHA-256 hex digest of the workflow name, task key, cache version and canonical key; entries whose fingerprint differs are rejected.",
+    "Empreinte SHA-256 hexadécimale du nom du workflow, de la clé de tâche, de la version du cache et de la clé canonique ; une entrée dont l’empreinte diffère est refusée."
+  ],
+  "TaskCacheEntry.workflow": [
+    "Name of the workflow that stored the entry.",
+    "Nom du workflow qui a enregistré l’entrée."
+  ],
+  "TaskCacheEntry.task": [
+    "Key of the task whose result the entry holds.",
+    "Clé de la tâche dont l’entrée contient le résultat."
+  ],
+  "TaskCacheEntry.version": [
+    "Cache version declared by the task when the entry was stored.",
+    "Version du cache déclarée par la tâche lors de l’enregistrement de l’entrée."
+  ],
+  "TaskCacheEntry.createdAt": [
+    "ISO timestamp when the result was stored; compared with maxAgeMs.",
+    "Horodatage ISO de l’enregistrement du résultat ; comparé à maxAgeMs."
+  ],
+  "TaskCacheEntry.value": [
+    "Stored task result: lossless JSON or top-level undefined.",
+    "Résultat de tâche enregistré : JSON sans perte ou undefined au premier niveau."
+  ],
+  "TaskCacheAccessOptions.signal": [
+    "Workflow cancellation signal forwarded to the store read or write.",
+    "Signal d’annulation du workflow transmis à la lecture ou à l’écriture du store."
+  ],
+  "TaskCacheStoreOptions.maxBytes": [
+    "Positive maximum serialized entry size in bytes, default 16 MiB; enforced when writing and reading.",
+    "Taille maximale positive d’une entrée sérialisée en octets, 16 Mio par défaut ; appliquée à l’écriture et à la lecture."
+  ],
+  "taskCacheStore.options": [
+    "Transport that stores entries under task-cache/ and an optional entry size bound.",
+    "Transport qui stocke les entrées sous task-cache/ et limite optionnelle de taille des entrées."
+  ],
+  "repositoryFingerprint.repository": [
+    "Path to a Git repository or one of its subdirectories; the fingerprint always covers the whole working tree.",
+    "Chemin d’un dépôt Git ou de l’un de ses sous-répertoires ; l’empreinte couvre toujours tout l’arbre de travail."
   ]
 }

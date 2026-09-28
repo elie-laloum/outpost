@@ -28,7 +28,7 @@ console.log(result.value(scan));
 
 ## Reprendre le travail incomplet
 
-Utilisez la même définition de workflow, le même identifiant et la même version. Ajoutez `resume: "retry-incomplete"` aux options de checkpoint pour autoriser le rejeu des tâches inachevées et de leurs effets. Changez `version` lorsque les implémentations ou entrées changent ; elle participe à l’identité du checkpoint.
+Utilisez la même définition de workflow, le même identifiant et la même version. Ajoutez `resume: "retry-incomplete"` aux options de checkpoint pour autoriser le rejeu des tâches inachevées et de leurs effets. Changez `version` lorsque les implémentations ou entrées changent ; elle participe à l’identité du checkpoint. Pour réutiliser des résultats entre exécutions différentes plutôt que reprendre une exécution, utilisez un [cache de tâches](../task-cache/).
 
 Les tâches mises en pause par une limite d’usage reprennent sans cette autorisation lorsque l’exécution utilise les [pauses sur quota](../quota-pauses/).
 

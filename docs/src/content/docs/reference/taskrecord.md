@@ -15,6 +15,7 @@ import type { TaskRecord } from "@elie-laloum/outpost";
 
 | Name            | Type                                      | Presence | Meaning                                                                                                                                          |
 | --------------- | ----------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `cacheHit`      | `true \| undefined`                       | Optional | true when the task value was restored from its task cache in this execution; the task then has zero attempts.                                    |
 | `quota`         | `WorkflowQuotaPause \| undefined`         | Optional | Persisted quota pause of a paused task: when it was recorded, the quota message and the reset time when known. Removed when the task runs again. |
 | `interaction`   | `TaskInteractionRecord \| undefined`      | Optional | Persisted continuation state, latest question and accepted answer for an interactive task.                                                       |
 | `rounds`        | `readonly LoopRoundRecord[] \| undefined` | Optional | Ordered progress of a loop task, including completed rounds and the current phase; absent for ordinary tasks.                                    |
@@ -32,6 +33,7 @@ import type { TaskRecord } from "@elie-laloum/outpost";
 
 ```ts
 export interface TaskRecord {
+  cacheHit?: true;
   quota?: WorkflowQuotaPause;
   interaction?: TaskInteractionRecord;
   rounds?: readonly LoopRoundRecord[];

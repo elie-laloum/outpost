@@ -23,6 +23,10 @@
         "attrs": { "data-api-kind": "function" }
       },
       {
+        "slug": "reference/taskcachestore",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
         "slug": "reference/recoverworkflowcheckpoint",
         "attrs": { "data-api-kind": "function" }
       },
@@ -104,6 +108,10 @@
       },
       {
         "slug": "reference/recoveryarchiverestoreoptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/taskcachestoreoptions",
         "attrs": { "data-api-kind": "interface" }
       }
     ]
@@ -886,6 +894,10 @@
         "attrs": { "data-api-kind": "function" }
       },
       {
+        "slug": "reference/repositoryfingerprint",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
         "slug": "reference/looptaskexhausted",
         "attrs": { "data-api-kind": "class" }
       },
@@ -909,6 +921,14 @@
       },
       {
         "slug": "reference/interactiveagentresult",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/taskcachemode",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/taskcacheoutcome",
         "attrs": { "data-api-kind": "type" }
       },
       {
@@ -1002,6 +1022,22 @@
       },
       {
         "slug": "reference/workflowquotapause",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/taskcacheoptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/type-taskcachestore",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/taskcacheentry",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/taskcacheaccessoptions",
         "attrs": { "data-api-kind": "interface" }
       }
     ]

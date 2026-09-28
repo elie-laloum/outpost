@@ -15,7 +15,7 @@ Construisez `retention.json` selon `RecoveryRetentionPolicy` : choisissez les li
 
 `planRecoveryRetention()` produit le plan. `pruneRecoveryRetention()` revérifie candidats et propriété avant de supprimer les données éligibles. Du travail actif, incertain ou récupérable n’équivaut pas à des journaux fermés expirés.
 
-Cette politique vise les journaux fermés de plus de sept jours, avec une cible de stockage conservé de 1 Gio. Elle ne rend pas les données actives ou protégées éligibles.
+Cette politique vise les journaux fermés de plus de sept jours, avec une cible de stockage conservé de 1 Gio. Elle ne rend pas les données actives ou protégées éligibles. Ajoutez le périmètre `task-cache` pour supprimer aussi les entrées du [cache de tâches](../task-cache/) plus anciennes que `minAgeMs` ; une entrée supprimée oblige seulement la prochaine exécution à relancer la tâche.
 
 ```json title="retention.json"
 {

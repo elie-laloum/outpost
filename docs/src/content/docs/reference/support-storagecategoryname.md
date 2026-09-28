@@ -18,5 +18,6 @@ export type StorageCategoryName =
   | "checkpoints"
   | "conversations"
   | "reservations"
-  | "resources";
+  | "resources"
+  | "task-cache";
 ```

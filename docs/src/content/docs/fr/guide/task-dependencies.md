@@ -42,4 +42,4 @@ Un workflow ne crée pas de transaction Git commune. Chaque tâche doit respecte
 
 API : [task](../../reference/task/) · [workflow](../../reference/workflow/) · [TaskContext](../../reference/taskcontext/).
 
-Utilisez les [boucles de vérification](../verification-loops/) lorsqu’un contrôle échoué doit guider un nouvel essai.
+Utilisez les [boucles de vérification](../verification-loops/) lorsqu’un contrôle échoué doit guider un nouvel essai. Ajoutez un [cache de tâches](../task-cache/) pour réutiliser un résultat JSON lorsque les entrées de la tâche n’ont pas changé.

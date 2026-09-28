@@ -4,7 +4,7 @@ export const groups = [
     title: ["Storage transports", "Transports de stockage"],
     guide: "guide/operations/storage-transports",
     names:
-      "localTransport s3Transport artifactStore workflowCheckpointStore recoverWorkflowCheckpoint readJournal transportConversations archiveRecovery materializeRecoveryArchive TransportConflict Transport TransportEntry TransportObject TransportReadOptions TransportWriteOptions TransportReference TransportStoreOptions LocalTransportOptions S3TransportOptions ArtifactStoreOptions CheckpointRecoveryOptions ReadJournalOptions TransportConversationOptions RecoveryArchiveOptions RecoveryArchiveRestoreOptions",
+      "localTransport s3Transport artifactStore workflowCheckpointStore taskCacheStore recoverWorkflowCheckpoint readJournal transportConversations archiveRecovery materializeRecoveryArchive TransportConflict Transport TransportEntry TransportObject TransportReadOptions TransportWriteOptions TransportReference TransportStoreOptions LocalTransportOptions S3TransportOptions ArtifactStoreOptions CheckpointRecoveryOptions ReadJournalOptions TransportConversationOptions RecoveryArchiveOptions RecoveryArchiveRestoreOptions TaskCacheStoreOptions",
   },
   {
     id: "diagnostics",
@@ -80,7 +80,7 @@ export const groups = [
     title: ["Workflows", "Workflows"],
     guide: "guide/workflows/graph",
     names:
-      "loopTask LoopTaskExhausted LoopCheckResult LoopTaskContext LoopTaskOptions LoopRoundRecord task workflow WorkflowFailure Retry Task TaskContext TaskOptions TaskRecord TaskStatus Workflow WorkflowEvent WorkflowTelemetry WorkflowOptions WorkflowBudget WorkflowUsage WorkflowBudgetExceeded WorkflowUsageUnavailable WorkflowResult agentTask commandTask isolatedTask interactiveAgentTask InteractiveAgentTaskOptions InteractiveAgentResult WorkflowInputQuestion WorkflowInputRequest WorkflowAnswer WorkflowAnswerRecord TaskInteraction TaskInteractionRecord TaskInteractionContext WorkflowQuotaPolicy WorkflowQuotaPause",
+      "loopTask LoopTaskExhausted LoopCheckResult LoopTaskContext LoopTaskOptions LoopRoundRecord task workflow WorkflowFailure Retry Task TaskContext TaskOptions TaskRecord TaskStatus Workflow WorkflowEvent WorkflowTelemetry WorkflowOptions WorkflowBudget WorkflowUsage WorkflowBudgetExceeded WorkflowUsageUnavailable WorkflowResult agentTask commandTask isolatedTask interactiveAgentTask InteractiveAgentTaskOptions InteractiveAgentResult WorkflowInputQuestion WorkflowInputRequest WorkflowAnswer WorkflowAnswerRecord TaskInteraction TaskInteractionRecord TaskInteractionContext WorkflowQuotaPolicy WorkflowQuotaPause repositoryFingerprint TaskCacheOptions TaskCacheStore TaskCacheEntry TaskCacheAccessOptions TaskCacheMode TaskCacheOutcome",
   },
   {
     id: "providers",

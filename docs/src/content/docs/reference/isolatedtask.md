@@ -21,7 +21,7 @@ Define an agent workflow node whose request callback selects a repository, provi
 
 | Name                  | Type                                                                                  | Presence | Meaning                                                                                                                                  |
 | --------------------- | ------------------------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `options`             | `Omit<TaskOptions<DispatchResult<T>>, "perform"> & IsolatedTaskOptions<T>`            | Required | Task scheduling settings and request factory selecting a separate repository and sandbox for each attempt.                               |
+| `options`             | `Omit<TaskOptions<DispatchResult<T>>, "cache" \| "perform"> & IsolatedTaskOptions<T>` | Required | Task scheduling settings and request factory selecting a separate repository and sandbox for each attempt.                               |
 | `options.retry`       | `Retry \| undefined`                                                                  | Optional | Explicit retry policy; repeated effects require care.                                                                                    |
 | `options.key`         | `string`                                                                              | Required | Stable task key identifying the node within its workflow graph.                                                                          |
 | `options.gate`        | `WorkflowGate \| undefined`                                                           | Optional | Persisted approval or pause definition; execution requires a checkpoint and a matching trusted decision.                                 |
@@ -39,7 +39,7 @@ Define an agent workflow node whose request callback selects a repository, provi
 
 ```ts
 export declare function isolatedTask<T>(
-  options: Omit<TaskOptions<DispatchResult<T>>, "perform"> &
+  options: Omit<TaskOptions<DispatchResult<T>>, "perform" | "cache"> &
     IsolatedTaskOptions<T>,
 ): Task<DispatchResult<T>>;
 ```
