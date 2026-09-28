@@ -9,6 +9,7 @@ coverage/
 .outpost/workspaces/
 .outpost/locks/
 .outpost/logs/
+.outpost/storage/
 .outpost/recovery/
 
 docs/.astro/

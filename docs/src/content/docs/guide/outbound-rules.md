@@ -4,7 +4,7 @@ description: "Request explicit provider-supported network restrictions."
 ---
 
 :::note[Experimental]
-Egress policies are opt-in. Daytona support and immutable Vercel configuration are implemented for the next release. Provider-specific live validation remains necessary.
+Egress policies are opt-in. Daytona support and immutable Vercel configuration are available in 7.0.0. Provider-specific live validation remains necessary.
 :::
 
 Set `egress` on the sandbox provider. Outpost validates unsupported combinations before allocation; a cloud service can still reject a policy during acquisition. An omitted policy preserves the provider's existing network defaults.

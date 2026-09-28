@@ -3,7 +3,7 @@ title: "Model loop"
 description: "Let Outpost drive model requests and tools."
 ---
 
-The built-in engine and its public contracts are stabilized for the next release. This change is implemented and not yet published.
+The built-in engine and its public contracts are stable in 7.0.0.
 
 `harness()` configures Outpost’s own loop: request a model response, validate tool calls, execute tools in the borrowed sandbox, then request the next step.
 

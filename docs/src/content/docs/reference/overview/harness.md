@@ -22,7 +22,7 @@ Constructing a harness starts no process, login or network request; host credent
 
 The Outpost engine runs in the Outpost process. Each step is one model request; tools run through the borrowed sandbox, and limits fail the turn with the `limit` code instead of succeeding. Turns are recorded as transcripts that support continuation, fork and response repairs, and context strategies can compact long histories. Interactive attachment is unsupported. `AgentAdapter` and `AgentInput` describe CLI command construction and event decoding. Sandbox allocation belongs to [Providers](../providers/).
 
-CLI presets are stable since 5.0.0. The built-in engine and its definitions are stabilized for the next release. `defineHarnessSubagent()` exposes a built-in child as a serialized tool with its own history and limits; it borrows the sandbox and its tokens also count toward ancestor budgets.
+CLI presets are stable since 5.0.0. The built-in engine and its definitions are stable in 7.0.0. `defineHarnessSubagent()` exposes a built-in child as a serialized tool with its own history and limits; it borrows the sandbox and its tokens also count toward ancestor budgets.
 
 ## Entry points
 

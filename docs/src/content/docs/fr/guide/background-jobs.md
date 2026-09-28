@@ -55,7 +55,7 @@ API : [sqliteTaskQueue](../../reference/sqlitetaskqueue/) · [runQueueWorker](..
 
 ## Dédupliquer les effets
 
-Implémenté, non publié : chaque `TaskContext` expose `idempotencyKey`, dérivée de l’exécution du workflow et de la clé de tâche. Elle reste stable lors des retries et reprises de checkpoint ; une nouvelle exécution reçoit une nouvelle clé. Chaque `QueueHandlerContext` distant expose l’identifiant du job sous cette même propriété. `queuedTask()` conserve son calcul d’identifiant existant. Les producteurs directs doivent choisir des identifiants uniques pour les opérations distinctes et éviter les collisions entre files partageant un service d’effets.
+Disponible en 7.0.0 : chaque `TaskContext` expose `idempotencyKey`, dérivée de l’exécution du workflow et de la clé de tâche. Elle reste stable lors des retries et reprises de checkpoint ; une nouvelle exécution reçoit une nouvelle clé. Chaque `QueueHandlerContext` distant expose l’identifiant du job sous cette même propriété. `queuedTask()` conserve son calcul d’identifiant existant. Les producteurs directs doivent choisir des identifiants uniques pour les opérations distinctes et éviter les collisions entre files partageant un service d’effets.
 
 Transmettez cette clé au service réalisant l’effet. En base de données, enregistrez le reçu et la modification métier dans la même transaction avec une contrainte d’unicité. Pour une API distante, utilisez son mécanisme d’idempotence persistante. Un ensemble en mémoire ou un reçu écrit séparément de l’effet laisse une fenêtre de crash.
 

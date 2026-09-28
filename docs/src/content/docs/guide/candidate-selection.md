@@ -51,7 +51,7 @@ API: [speculate](../../reference/speculate/) · [SpeculationResult](../../refere
 
 ## Durable races and recovery
 
-These additions are implemented but unreleased; speculation remains experimental. Add `durability: { transporter, runId: "parser-race", version: "1" }` to the options above. Use `localTransport({ directory: join(repository, ".outpost", "storage") })` for local persistence, or an explicitly configured remote Transport. The caller owns the transport. Change `version` when agent implementations, validation or provider settings change. Results must contain lossless JSON values or top-level `undefined`.
+These additions are available in 7.0.0; speculation remains experimental. Add `durability: { transporter, runId: "parser-race", version: "1" }` to the options above. Use `localTransport({ directory: join(repository, ".outpost", "storage") })` for local persistence, or an explicitly configured remote Transport. The caller owns the transport. Change `version` when agent implementations, validation or provider settings change. Results must contain lossless JSON values or top-level `undefined`.
 
 Mounted Docker/Podman providers support durable cleanup. Local host execution, isolated containers, Vercel, Daytona and Firecracker currently reject durable races unless a custom provider implements the recovery contract. A custom provider must await `context.registerRecovery(resourceId)` exactly once before allocation and implement idempotent `recover(resourceId, options)` that preserves repository data. Registering after allocation leaves an unrecoverable crash window and violates this contract.
 

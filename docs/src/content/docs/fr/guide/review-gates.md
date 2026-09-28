@@ -78,7 +78,7 @@ API : [approvalTask](../../reference/approvaltask/) · [pauseTask](../../referen
 
 ## Exiger une décision signée
 
-Implémenté, non publié : définissez `authentication: "signed"` sur `approvalTask()` ou `pauseTask()`. Cette exigence participe à l’identité du checkpoint : la retirer à la reprise est refusé. Fournissez `decisionVerifier` lors de la soumission des preuves. Sans cette option, le gate conserve la confiance dans l’acteur fourni par l’application décrite plus haut.
+Disponible en 7.0.0 : définissez `authentication: "signed"` sur `approvalTask()` ou `pauseTask()`. Cette exigence participe à l’identité du checkpoint : la retirer à la reprise est refusé. Fournissez `decisionVerifier` lors de la soumission des preuves. Sans cette option, le gate conserve la confiance dans l’acteur fourni par l’application décrite plus haut.
 
 ```ts
 import { approvalTask } from "@elie-laloum/outpost";

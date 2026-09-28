@@ -3,7 +3,7 @@ title: "Boucle de modèle"
 description: "Laisser Outpost piloter les requêtes de modèle et les outils."
 ---
 
-Le moteur intégré et ses contrats publics sont stabilisés dans la prochaine version. Cette évolution est implémentée, pas encore publiée.
+Le moteur intégré et ses contrats publics sont stables en 7.0.0.
 
 `harness()` configure la boucle d’Outpost : demander une réponse au modèle, valider les appels d’outils, les exécuter dans la sandbox empruntée, puis demander l’étape suivante.
 

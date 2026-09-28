@@ -78,7 +78,7 @@ API: [approvalTask](../../reference/approvaltask/) · [pauseTask](../../referenc
 
 ## Require a signed decision
 
-Implemented, unreleased: set `authentication: "signed"` on `approvalTask()` or `pauseTask()`. This requirement participates in checkpoint identity: removing it on restart is rejected. Supply `decisionVerifier` when submitting proofs. Gates without this option retain the application-trusted actor contract above.
+Available in 7.0.0: set `authentication: "signed"` on `approvalTask()` or `pauseTask()`. This requirement participates in checkpoint identity: removing it on restart is rejected. Supply `decisionVerifier` when submitting proofs. Gates without this option retain the application-trusted actor contract above.
 
 ```ts
 import { approvalTask } from "@elie-laloum/outpost";

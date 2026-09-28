@@ -3,7 +3,7 @@ title: "Connexions aux modèles"
 description: "Choisir un protocole HTTP pour la boucle intégrée."
 ---
 
-Le contrat `ModelProvider`, `openaiModelProvider()` et `anthropicModelProvider()` sont stabilisés pour la prochaine version. Les requêtes modèles sont exécutées dans le processus Outpost.
+Le contrat `ModelProvider`, `openaiModelProvider()` et `anthropicModelProvider()` sont stables en 7.0.0. Les requêtes modèles sont exécutées dans le processus Outpost.
 
 Choisissez le fournisseur selon le protocole, puis passez-le à `harness({ modelProvider })`. Les identifiants sont explicites et restent dans le client côté hôte.
 

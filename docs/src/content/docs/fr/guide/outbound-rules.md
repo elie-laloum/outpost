@@ -4,7 +4,7 @@ description: "Demander des restrictions réseau explicitement prises en charge p
 ---
 
 :::note[Expérimental]
-Les politiques réseau sont opt-in. Le support Daytona et la configuration Vercel immuable sont implémentés pour la prochaine version. La validation réelle propre à chaque provider reste nécessaire.
+Les politiques réseau sont opt-in. Le support Daytona et la configuration Vercel immuable sont disponibles en 7.0.0. La validation réelle propre à chaque provider reste nécessaire.
 :::
 
 Définissez `egress` sur le provider de sandbox. Outpost valide les combinaisons non prises en charge avant allocation ; un service cloud peut encore refuser une politique pendant l’acquisition. Sans politique, les valeurs réseau par défaut du provider restent applicables.

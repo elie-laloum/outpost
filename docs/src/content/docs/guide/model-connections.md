@@ -3,7 +3,7 @@ title: "Model connections"
 description: "Choose an HTTP protocol for the built-in loop."
 ---
 
-The `ModelProvider` contract, `openaiModelProvider()` and `anthropicModelProvider()` are stabilized for the next release. Model requests run in the Outpost process.
+The `ModelProvider` contract, `openaiModelProvider()` and `anthropicModelProvider()` are stable in 7.0.0. Model requests run in the Outpost process.
 
 Choose a model provider by protocol, then pass it to `harness({ modelProvider })`. Credentials are explicit and remain with the host-side client.
 

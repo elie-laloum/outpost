@@ -55,7 +55,7 @@ API: [sqliteTaskQueue](../../reference/sqlitetaskqueue/) · [runQueueWorker](../
 
 ## Deduplicate effects
 
-Implemented, unreleased: every `TaskContext` exposes `idempotencyKey`, derived from the workflow execution and task key. It remains stable across retries and checkpoint replay; a new execution gets a new key. Each remote `QueueHandlerContext` exposes the job ID as the same property. `queuedTask()` preserves its existing job ID calculation. Direct producers must supply unique IDs for distinct logical operations and avoid collisions when sharing an effect service across queues.
+Available in 7.0.0: every `TaskContext` exposes `idempotencyKey`, derived from the workflow execution and task key. It remains stable across retries and checkpoint replay; a new execution gets a new key. Each remote `QueueHandlerContext` exposes the job ID as the same property. `queuedTask()` preserves its existing job ID calculation. Direct producers must supply unique IDs for distinct logical operations and avoid collisions when sharing an effect service across queues.
 
 Pass this key to the service performing the effect. For a database operation, store the receipt and business change in the same transaction with a unique constraint. For a remote API, use its persistent idempotency support. An in-memory set or a receipt written separately from the effect leaves a crash window.
 

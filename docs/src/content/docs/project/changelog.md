@@ -7,14 +7,16 @@ sidebar:
 
 The release notes below are synchronized from the root `CHANGELOG.md`, the single source of release history.
 
-## Unreleased
+## 7.0.0
+
+This major release extends public event and conversation unions and adds required context fields. Update exhaustive handling of `AgentEvent`, `WorkflowEvent.type`, `ModelStreamEvent`, `ConversationFormat` and `StoredConversationFormat`; custom context producers and test doubles must provide `TaskContext.idempotencyKey` and `QueueHandlerContext.idempotencyKey`. Existing entry points remain available. Redis queues now require `maxmemory-policy=noeviction`, and token-only workflow budgets reject incomplete usage. Firecracker and speculation remain experimental; 7.0.0 does not complete every roadmap direction.
 
 - Add opt-in durable speculation through Transport with fenced ownership, explicit crash recovery, cumulative budgets, preserved attempts, bounded cleanup and Git merge preflight. Mounted Docker/Podman support resource reconciliation; unsupported providers reject durable mode. Speculation remains experimental.
 - Add confirmed Daytona egress policies with explicit rejection of unsupported rules and account capabilities; snapshot Vercel native firewall configuration against caller mutation. Add opt-in network probes and bilingual capability/ownership documentation. Container allowlists remain unsupported.
 - Add opt-in signed approval/pause gates with rotating Ed25519 approver keys, per-request HTTP queue credential rotation and stable task/worker idempotency keys. Document persistent effect deduplication and multi-worker recovery; queues still do not guarantee exactly-once external effects.
 - Add opt-in capped exponential task retries and full jitter, preserve HTTP model Retry-After minimum waits, and expose selected retry delays. Add cooperative workflow.start({ timeoutMs }) deadlines renewed on resume, preserving checkpoint compatibility and explicit replay authorization.
 
-- Stabilize the built-in harness and OpenAI/Anthropic model contracts (implemented, unreleased), with authenticated delegation validated for both integrations. Add `defineHarnessSubagent()` with serialized shared-sandbox execution, separate captured histories, inherited permissions, bounded depth and cumulative ancestor token budgets. Count final responses and context summaries toward token ceilings, reject incomplete accounting and correlate child lifecycle/usage events. Add deterministic container CI and an opt-in, budgeted live campaign.
+- Stabilize the built-in harness and OpenAI/Anthropic model contracts, with authenticated delegation validated for both integrations. Add `defineHarnessSubagent()` with serialized shared-sandbox execution, separate captured histories, inherited permissions, bounded depth and cumulative ancestor token budgets. Count final responses and context summaries toward token ceilings, reject incomplete accounting and correlate child lifecycle/usage events. Add deterministic container CI and an opt-in, budgeted live campaign.
 - Add scoped observation hubs with bounded pluggable sinks, correlated workflow/agent/operation events, process stop diagnostics, normalized CLI tool results and opt-in model payloads. Journals and reporters use the shared delivery policy; sink failures are reported independently of execution. OpenTelemetry can consume the unified stream without changing metric names.
 - Add native session capture, warm/cold resume and response repairs for Copilot and Kimi, plus native Kimi fork. Antigravity supports warm resume and repairs only; portable capture/cold resume and automated fork remain unsupported. Copilot automated fork is explicitly refused. Session bundles preserve supported native files and can be archived through Transport.
 
