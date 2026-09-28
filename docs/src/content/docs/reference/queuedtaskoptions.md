@@ -15,11 +15,11 @@ import type { QueuedTaskOptions } from "@elie-laloum/outpost";
 
 | Name        | Type                                                                   | Presence | Meaning                                                                                                  |
 | ----------- | ---------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------- |
+| `retry`     | `Retry \| undefined`                                                   | Optional | Explicit retry policy; repeated effects require care.                                                    |
+| `gate`      | `WorkflowGate \| undefined`                                            | Optional | Persisted approval or pause definition; execution requires a checkpoint and a matching trusted decision. |
 | `after`     | `readonly Task<unknown>[] \| undefined`                                | Optional | Declared task dependencies whose values may be read.                                                     |
 | `key`       | `string`                                                               | Required | Stable task key identifying the node within its workflow graph.                                          |
-| `gate`      | `WorkflowGate \| undefined`                                            | Optional | Persisted approval or pause definition; execution requires a checkpoint and a matching trusted decision. |
 | `condition` | `((context: TaskContext) => boolean \| Promise<boolean>) \| undefined` | Optional | Predicate evaluated before the first task attempt.                                                       |
-| `retry`     | `Retry \| undefined`                                                   | Optional | Explicit retry policy; repeated effects require care.                                                    |
 | `timeoutMs` | `number \| undefined`                                                  | Optional | Time limit in milliseconds for each task attempt; cancellation is cooperative through context.signal.    |
 | `queue`     | `TaskQueue`                                                            | Required | Task queue used to enqueue, claim and persist job state.                                                 |
 | `handler`   | `string`                                                               | Required | Registered worker handler name that will execute this JSON job.                                          |

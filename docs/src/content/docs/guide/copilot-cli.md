@@ -26,7 +26,7 @@ Run `copilot login` on the host and select `authentication: "account"`. Outpost 
 
 ## Session support
 
-Requests start a new session. Native conversation capture, resume, fork and automatic response repairs are unavailable. A sequence of requests can share files in a sandbox, but that does not create a shared conversation.
+Native capture, warm and cold resume, and automatic response repairs are supported. Outpost resumes the exact session ID with `--resume`; it preserves history, metadata, plans, checkpoints and persistent files in a bounded session bundle. Automated fork is explicitly rejected: the interactive `/fork` command does not establish a supported headless fork contract. See [chat history](../chat-history/) and [GitHub’s session storage](https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-best-practices).
 
 See [GitHub’s CLI quickstart](https://docs.github.com/en/copilot/get-started/cli-quickstart) for Copilot access and login requirements.
 
@@ -34,7 +34,7 @@ See [GitHub’s CLI quickstart](https://docs.github.com/en/copilot/get-started/c
 
 Outpost reads the session’s `session.shutdown.modelMetrics` from `COPILOT_HOME/session-state/<id>/events.jsonl` (default: `~/.copilot`) inside the sandbox after the command exits. Available `assistant.usage` events are counted during execution; the final session total reconciles them without adding them twice. Premium requests and billing credits are not token counts.
 
-The pinned Copilot CLI is 1.0.88. Input, output, cache reads and cache writes retain the CLI’s reported counters; do not add cache counters to input to estimate a bill. Missing fields, unreadable files or interrupted collection produce `usage.complete === false` and an explicit warning. No native transcript capture or resume is enabled by this reader.
+The pinned Copilot CLI is 1.0.88. Input, output, cache reads and cache writes retain the CLI’s reported counters; do not add cache counters to input to estimate a bill. Missing fields, unreadable files or interrupted collection produce `usage.complete === false` and an explicit warning.
 
 Collection is bounded and may only finish after the model has spent tokens. Combine an attempt budget with a task timeout or dispatch deadline; see [Usage budgets](../token-budgets/).
 

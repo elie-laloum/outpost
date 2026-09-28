@@ -1,3 +1,4 @@
+import { toolResult } from "./tool-result.ts";
 import type { AgentEvent, Usage } from "../../domain/agent.types.ts";
 import { decodeEvent, decodeLine } from "./event-decoder.ts";
 import { asRecord, decodeRecord, numberOrZero } from "./protocol.ts";
@@ -20,19 +21,59 @@ function system(event: ProtocolRecord): AgentEvent[] {
 }
 
 function assistant(event: ProtocolRecord): AgentEvent[] {
-  const content = asRecord(event.message).content;
+  const message = asRecord(event.message);
+  const content = message.content;
   if (!Array.isArray(content)) return [];
-  return content.flatMap((part) =>
-    decodeEvent(asRecord(part), {
-      text: (block) =>
-        typeof block.text === "string"
-          ? [{ kind: "text", text: block.text }]
-          : [],
-      tool_use: (block) => [
-        { kind: "tool", name: String(block.name), input: block.input },
-      ],
-    }),
-  );
+  const usage: AgentEvent[] = message.usage
+    ? [
+        {
+          kind: "message-usage",
+          tokens: tokens(message.usage),
+          ...(typeof message.id === "string" ? { messageId: message.id } : {}),
+          ...(typeof event.parent_tool_use_id === "string"
+            ? { parentCallId: event.parent_tool_use_id }
+            : {}),
+        },
+      ]
+    : [];
+  return [
+    ...usage,
+    ...content.flatMap((part) =>
+      decodeEvent(asRecord(part), {
+        text: (block) =>
+          typeof block.text === "string"
+            ? [{ kind: "text", text: block.text }]
+            : [],
+        thinking: (block) =>
+          typeof block.thinking === "string"
+            ? [{ kind: "reasoning", text: block.thinking }]
+            : [],
+        tool_result: (block) =>
+          toolResult(
+            block.tool_use_id,
+            undefined,
+            block.content,
+            block.is_error === true,
+          ).map((value) => ({
+            ...value,
+            ...(typeof event.parent_tool_use_id === "string"
+              ? { parentCallId: event.parent_tool_use_id }
+              : {}),
+          })),
+        tool_use: (block) => [
+          {
+            kind: "tool",
+            name: String(block.name),
+            input: block.input,
+            ...(typeof block.id === "string" ? { callId: block.id } : {}),
+            ...(typeof event.parent_tool_use_id === "string"
+              ? { parentCallId: event.parent_tool_use_id }
+              : {}),
+          },
+        ],
+      }),
+    ),
+  ];
 }
 
 function result(event: ProtocolRecord): AgentEvent[] {
@@ -57,6 +98,15 @@ export function claudeEvents(line: string): AgentEvent[] {
   return decodeLine(line, {
     system,
     assistant,
+    user: assistant,
+    stream_event: (event) => {
+      const delta = asRecord(asRecord(event.event).delta);
+      if (delta.type === "text_delta" && typeof delta.text === "string")
+        return [{ kind: "text-delta", text: delta.text }];
+      if (delta.type === "thinking_delta" && typeof delta.thinking === "string")
+        return [{ kind: "reasoning", text: delta.thinking }];
+      return [];
+    },
     result,
   } satisfies EventDecoders);
 }

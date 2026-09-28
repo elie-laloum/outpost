@@ -11,6 +11,8 @@ export function claudeRequest(
   const args: string[] = [];
   if (!input.interactive)
     args.push("--print", "--verbose", "--output-format", "stream-json");
+  if (!input.interactive && settings.partialMessages)
+    args.push("--include-partial-messages");
   if (settings.model) args.push("--model", settings.model.name);
   if (settings.model?.reasoning)
     args.push("--effort", settings.model.reasoning);

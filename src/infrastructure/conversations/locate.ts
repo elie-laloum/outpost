@@ -1,3 +1,4 @@
+import { sessionConversations } from "./session-bundle.ts";
 import { stat } from "node:fs/promises";
 import { homedir } from "node:os";
 import { OutpostError } from "../../domain/errors.ts";
@@ -13,8 +14,17 @@ export async function locateConversation(
   format: ConversationFormat,
   id: string,
   repository: string,
-  home = homedir(),
+  home?: string,
 ): Promise<ConversationLocation> {
+  if (format === "copilot" || format === "kimi") {
+    const record = await sessionConversations(format).locate(
+      id,
+      repository,
+      home,
+    );
+    return { ...record, format };
+  }
+  home ??= homedir();
   validId(id);
   const layout = conversationLayout(format);
   const expected = layout.preferredPath?.(id, repository, home);

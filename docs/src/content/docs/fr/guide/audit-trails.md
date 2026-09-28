@@ -49,3 +49,9 @@ Enregistrez votre SDK OpenTelemetry et ses exportateurs avant de créer ces obje
 L’application possède l’arrêt des fournisseurs de traces et métriques. Les erreurs d’instrumentation sont isolées des résultats d’exécution. `createReporter()` permet un reporting personnalisé.
 
 API : [Logging](../../reference/logging/) · [readJournal](../../reference/readjournal/) · [DispatchTelemetry](../../reference/dispatchtelemetry/) · [createReporter](../../reference/createreporter/).
+
+## Corréler les traces par le hub
+
+Branchez `telemetry.sink` dans `createObservationHub({ sinks: [telemetry.sink] })`, puis transmettez ce hub par `observation`. Les spans de workflow, tâche, tentative, dispatch et opération sont ainsi liés, en conservant les noms de métriques existants. Utilisez ce branchement une seule fois par instance ; le combiner avec le branchement historique `telemetry` pour le même run compterait deux fois les événements. OpenTelemetry reste une dépendance optionnelle par sous-chemin.
+
+Les journaux de dispatch sont des récepteurs du hub. Ils contiennent les opérations contextualisées de préparation jusqu’au nettoyage et un `dispatch-finished` terminal, y compris lors d’échecs précoces. `logging.verbose` conserve événements bruts, deltas, stderr, raisonnement et sorties d’outils diffusées ; le journal normal exclut ces événements détaillés. Les requêtes/réponses modèle complètes nécessitent en plus `createObservationHub({ verbose: true })` pour être produites. Les erreurs de livraison du journal sont des erreurs d’observation et peuvent laisser un journal incomplet ; consultez `observerErrors` et les diagnostics du hub.

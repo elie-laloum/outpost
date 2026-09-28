@@ -62,6 +62,11 @@ export async function beforeTool(
       call: current,
       ...context(runtime, step),
     });
+    runtime.emit({
+      kind: "hook",
+      phase: "before-tool",
+      changed: decision !== undefined,
+    });
     if (decision === undefined) continue;
     expect(
       decision !== null && typeof decision === "object",
@@ -97,6 +102,11 @@ export async function afterTool(
       result: current,
       ...context(runtime, step),
     });
+    runtime.emit({
+      kind: "hook",
+      phase: "after-tool",
+      changed: decision !== undefined,
+    });
     if (decision === undefined) continue;
     expect(
       decision !== null && typeof decision === "object" && "result" in decision,
@@ -114,6 +124,11 @@ export async function stopRequest(
 ): Promise<string | undefined> {
   for (const hook of hooks(runtime, "stop")) {
     const decision = await hook.run({ text, ...context(runtime, step) });
+    runtime.emit({
+      kind: "hook",
+      phase: "stop",
+      changed: decision !== undefined,
+    });
     if (decision === undefined) continue;
     expect(
       decision !== null &&
@@ -134,13 +149,19 @@ async function each<Phase extends HarnessHookPhase>(
   step: number,
 ): Promise<readonly HarnessHookResult<Phase>[]> {
   const decisions: HarnessHookResult<Phase>[] = [];
-  for (const hook of hooks(runtime, phase))
-    decisions.push(
-      await hook.run({
-        ...event,
-        ...context(runtime, step),
-      } as HarnessHookInput<Phase>),
-    );
+  for (const hook of hooks(runtime, phase)) {
+    const before = snapshot(event);
+    const decision = await hook.run({
+      ...event,
+      ...context(runtime, step),
+    } as HarnessHookInput<Phase>);
+    runtime.emit({
+      kind: "hook",
+      phase,
+      changed: decision !== undefined || before !== snapshot(event),
+    });
+    decisions.push(decision);
+  }
   return decisions;
 }
 
@@ -165,4 +186,12 @@ function context(runtime: HarnessRuntime, step: number): HarnessHookContext {
 
 function expect(condition: unknown, message: string): asserts condition {
   if (!condition) throw new OutpostError("configuration", message);
+}
+
+function snapshot(value: unknown): string | undefined {
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return undefined;
+  }
 }

@@ -1,3 +1,4 @@
+import { validId } from "../../infrastructure/conversations/identity.ts";
 import type { AgentInput } from "../../domain/agent.types.ts";
 import { authenticationForm } from "../../domain/authentication.ts";
 import type { Command } from "../../domain/command.types.ts";
@@ -18,10 +19,14 @@ export function kimiRequest(
   input: AgentInput,
 ): Command {
   invariant(
-    !input.continuation,
-    "Kimi Code does not support continuation or fork in Outpost",
+    !input.continuation?.fork,
+    "Kimi Code requires native fork preparation in Outpost",
   );
   const args = [...modelOption(settings)];
+  if (input.continuation) {
+    validId(input.continuation.id);
+    args.push("--session", input.continuation.id);
+  }
   if (input.interactive) {
     invariant(
       input.text === undefined,

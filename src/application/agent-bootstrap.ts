@@ -69,6 +69,17 @@ export async function prepareAdapter(
   );
   return {
     ...agent,
+    ...(agent.fork
+      ? {
+          fork: (
+            id: string,
+            invoke: Parameters<NonNullable<typeof agent.fork>>[1],
+          ) =>
+            agent.fork!(id, (command) =>
+              invoke({ ...command, executable: path }),
+            ),
+        }
+      : {}),
     request(input) {
       return { ...agent.request(input), executable: path };
     },

@@ -11,6 +11,7 @@ export interface WorkspaceLease extends WorkspaceRecord {
 }
 
 export interface AcquireWorkspaceOptions {
+  readonly observation?: import("../../domain/observation.types.ts").ObservationHub;
   readonly repository?: string;
   readonly branch?: BranchPolicy;
   readonly copies?: readonly string[];

@@ -26,7 +26,7 @@ const coder = agent({
 
 ## Comportement
 
-Seules les sessions neuves sont prises en charge. La capture native, la reprise, le fork et la réparation automatique des réponses ne sont pas disponibles. Utilisez les sorties explicites des tâches du workflow pour transmettre des résultats à une autre requête.
+Reprenez une conversation émise dans la même sandbox ouverte avec `sandbox.resume(id, options)` ou `resume()` sur un résultat à chaud. Les réparations automatiques de réponse réutilisent cette conversation. Outpost ne dispose pas de format de capture portable vérifié pour Antigravity : la reprise à froid après fermeture de la sandbox et le fork automatisé sont refusés. Un dispatch sans continuation démarre toujours une session neuve. Voir [l’historique](../chat-history/) et [la commande de reprise Google](https://www.antigravity.google/docs/cli/commands/resume/).
 
 ## Installation épinglée
 

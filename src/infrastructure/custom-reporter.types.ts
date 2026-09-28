@@ -7,6 +7,8 @@ export type ReporterHandlers = {
 };
 
 export interface CustomReporterOptions {
+  readonly capacity?: number;
+  readonly deliveryTimeoutMs?: number;
   readonly onError?: (
     error: unknown,
     event: AgentObservation,

@@ -67,6 +67,16 @@ export function readModelResponse(
           provider: context.identity,
           model: context.model,
           data: item,
+          ...(Array.isArray(item.summary)
+            ? {
+                text: item.summary
+                  .flatMap((value) => {
+                    const entry = object(value);
+                    return typeof entry.text === "string" ? [entry.text] : [];
+                  })
+                  .join("\n"),
+              }
+            : {}),
         },
       ];
     if (item.type === "function_call") return [functionCall(item)];

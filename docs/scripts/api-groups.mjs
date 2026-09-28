@@ -132,7 +132,7 @@ export const groups = [
     title: ["Observability", "Observabilité"],
     guide: "guide/agents/observability",
     names:
-      "reporter ReporterOptions createReporter CustomReporter CustomReporterOptions ReporterHandlers DispatchTelemetry DispatchTelemetrySession DispatchTelemetryOutcome Logging AgentEvent AgentObservation Usage openTelemetry OpenTelemetryOptions OpenTelemetryObserver",
+      "createObservationHub Observation ObservationScope ObservationSource ObservationEvent OperationEvent ObservationHub ObservationHubOptions ObservationSink reporter ReporterOptions createReporter CustomReporter CustomReporterOptions ReporterHandlers DispatchTelemetry DispatchTelemetrySession DispatchTelemetryOutcome Logging AgentEvent AgentObservation Usage openTelemetry OpenTelemetryOptions OpenTelemetryObserver",
   },
   {
     id: "workflows",

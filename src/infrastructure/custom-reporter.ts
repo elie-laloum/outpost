@@ -1,3 +1,5 @@
+import { agentObservation } from "../domain/agent-observation.ts";
+import { createObservationHub } from "../domain/observation.ts";
 import type { AgentObservation } from "../domain/agent.types.ts";
 import type {
   CustomReporter,
@@ -9,31 +11,37 @@ export function createReporter(
   handlers: ReporterHandlers,
   options: CustomReporterOptions = {},
 ): CustomReporter {
-  let pending = Promise.resolve();
-  let failed = false;
-  let failure: unknown;
+  const hub = createObservationHub({
+    ...(options.capacity === undefined ? {} : { capacity: options.capacity }),
+    ...(options.deliveryTimeoutMs === undefined
+      ? {}
+      : { deliveryTimeoutMs: options.deliveryTimeoutMs }),
+    sinks: [
+      {
+        async observe(value) {
+          const event = agentObservation(value);
+          if (!event) return;
+          const handler = handlers[event.kind] as
+            ((event: AgentObservation) => void | Promise<void>) | undefined;
+          try {
+            await handler?.(event);
+          } catch (error) {
+            try {
+              await options.onError?.(error, event);
+            } catch {}
+            throw error;
+          }
+        },
+      },
+    ],
+  });
   const report = (event: AgentObservation): void => {
-    const handler = handlers[event.kind] as
-      ((event: AgentObservation) => void | Promise<void>) | undefined;
-    if (!handler) return;
-    pending = pending.then(async () => {
-      try {
-        await handler(event);
-      } catch (error) {
-        if (!failed) {
-          failed = true;
-          failure = error;
-        }
-        try {
-          await options.onError?.(error, event);
-        } catch {}
-      }
-    });
+    hub.child({ pass: event.pass }).emit("agent", event);
   };
   return Object.assign(report, {
     async flush() {
-      await pending;
-      if (failed) throw failure;
+      await hub.flush();
+      if (hub.errors.length) throw hub.errors[0];
     },
   });
 }

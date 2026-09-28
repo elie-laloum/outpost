@@ -38,8 +38,13 @@ export interface SandboxAgents {
   selectAgent(
     agent: Agent | undefined,
     signal: AbortSignal,
+    observation?: import("../domain/observation.types.ts").ObservationHub,
   ): Promise<SelectedAgent>;
-  restore(id: string, agent: Agent): Promise<void>;
+  restore(
+    id: string,
+    agent: Agent,
+    executionLease: SandboxLease,
+  ): Promise<void>;
   remember(agent: Agent, id: string): void;
 }
 

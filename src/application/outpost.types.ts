@@ -1,3 +1,4 @@
+import type { ObservationHub } from "../domain/observation.types.ts";
 import type {
   Transport,
   TransportReference,
@@ -24,6 +25,7 @@ import type { DispatchOptions, Execution } from "./execution.types.ts";
 import type { VariableQuestion } from "./interactive-brief.types.ts";
 
 export interface WorkspaceOptions {
+  readonly observation?: ObservationHub;
   readonly storageQuota?: Omit<StorageReservationOptions, "signal">;
   readonly signal?: AbortSignal;
   readonly repository?: string;
@@ -90,6 +92,7 @@ export interface AttachResult extends CommandResult, Disposal {
 }
 
 export interface DispatchResult<T> extends Execution<T> {
+  readonly observerErrors?: readonly unknown[];
   readonly branch: string;
   readonly directory: string;
   readonly commits: readonly Commit[];

@@ -1,4 +1,5 @@
 import { copilotShutdown, copilotUsage } from "./copilot-usage.ts";
+import { toolResult } from "./tool-result.ts";
 import type { AgentEvent } from "../../domain/agent.types.ts";
 import { decodeLine } from "./event-decoder.ts";
 import { asRecord } from "./protocol.ts";
@@ -52,6 +53,21 @@ export function copilotEvents(line: string): AgentEvent[] {
       { kind: "usage", tokens: copilotUsage(event.data) },
     ],
     "session.shutdown": copilotShutdown,
+    "assistant.reasoning": (event) => {
+      const data = asRecord(event.data);
+      return typeof data.content === "string"
+        ? [{ kind: "reasoning", text: data.content }]
+        : [];
+    },
+    "tool.execution_complete": (event) => {
+      const data = asRecord(event.data);
+      return toolResult(
+        data.toolCallId,
+        undefined,
+        data.result ?? data.error,
+        data.success === false,
+      );
+    },
     "session.error": (event) => {
       const data = asRecord(event.data);
       return typeof data.message === "string"

@@ -15,7 +15,7 @@ Localise un transcript natif existant selon son format, son identifiant et son d
 
 | Nom          | Type                  | Présence  | Rôle                                                                                |
 | ------------ | --------------------- | --------- | ----------------------------------------------------------------------------------- |
-| `format`     | `ConversationFormat`  | Requis    | Organisation native des transcripts : claude ou codex.                              |
+| `format`     | `ConversationFormat`  | Requis    | Organisation native des transcripts : claude, codex, copilot ou kimi.               |
 | `id`         | `string`              | Requis    | Identifiant de conversation native utilisé pour localiser ou poursuivre la session. |
 | `repository` | `string`              | Requis    | Checkout Git hôte ciblé.                                                            |
 | `home`       | `string \| undefined` | Optionnel | Home d’agent hôte utilisé pour localiser ou persister les transcripts natifs.       |

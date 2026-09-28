@@ -29,18 +29,18 @@ Crée un callback d’observation qui formate progression, avertissements et bil
 
 ## Retour
 
-`(event: AgentEvent & ReportPass) => void`
+`(event: ObservationEvent & ReportPass) => void`
 
 ## Signature
 
 ```ts
 export declare function reporter(
   options?: ReporterOptions,
-): (event: AgentEvent & ReportPass) => void;
+): (event: ObservationEvent & ReportPass) => void;
 ```
 
 ## Contrats associés
 
-- [AgentEvent](../agentevent/)
+- [ObservationEvent](../observationevent/)
 - [ReporterOptions](../reporteroptions/)
 - [ReportPass](../support-reportpass/)

@@ -15,6 +15,7 @@ import type { WorkflowOptions } from "@elie-laloum/outpost";
 
 | Name          | Type                                            | Presence | Meaning                                                                                                                                                                                                                                   |
 | ------------- | ----------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `observation` | `ObservationHub \| undefined`                   | Optional | Parent hub receiving workflow, task, agent and operation envelopes; historical observe callbacks still receive WorkflowEvent.                                                                                                             |
 | `decisions`   | `readonly WorkflowDecision[] \| undefined`      | Optional | Explicit decisions for persisted pending gates.                                                                                                                                                                                           |
 | `checkpoint`  | `WorkflowCheckpointOptions \| undefined`        | Optional | Durable execution storage and replay configuration.                                                                                                                                                                                       |
 | `signal`      | `AbortSignal \| undefined`                      | Optional | Cooperative cancellation for this operation.                                                                                                                                                                                              |
@@ -28,6 +29,7 @@ import type { WorkflowOptions } from "@elie-laloum/outpost";
 
 ```ts
 export interface WorkflowOptions {
+  readonly observation?: ObservationHub;
   readonly decisions?: readonly WorkflowDecision[];
   readonly checkpoint?: WorkflowCheckpointOptions;
   readonly signal?: AbortSignal;
@@ -41,6 +43,7 @@ export interface WorkflowOptions {
 
 ## Related contracts
 
+- [ObservationHub](../observationhub/)
 - [WorkflowBudget](../workflowbudget/)
 - [WorkflowCheckpointOptions](../workflowcheckpointoptions/)
 - [WorkflowDecision](../workflowdecision/)

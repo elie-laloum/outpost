@@ -19,13 +19,14 @@ Download a pinned recovery archive into a new local directory, preserving suppor
 
 ## Parameters and properties
 
-| Name                  | Type                            | Presence | Meaning                                                                                                                    |
-| --------------------- | ------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `options`             | `RecoveryArchiveRestoreOptions` | Required | Pinned archive reference, transport, new local destination and verification bound.                                         |
-| `options.reference`   | `TransportReference`            | Required | Pinned manifest returned by archiveRecovery; every chunk revision and SHA-256 is checked.                                  |
-| `options.destination` | `string`                        | Required | New local directory whose parent already exists. Existing destinations are refused; partial data is retained on failure.   |
-| `options.maxBytes`    | `number \| undefined`           | Optional | Positive total restored payload limit, default 1 GiB; also bounds recovery integrity verification.                         |
-| `options.transporter` | `Transport`                     | Required | Caller-owned object transport used by the store or operation. Closing a workflow or sandbox does not close this transport. |
+| Name                  | Type                            | Presence | Meaning                                                                                                                        |
+| --------------------- | ------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `options`             | `RecoveryArchiveRestoreOptions` | Required | Pinned archive reference, transport, new local destination and verification bound.                                             |
+| `options.reference`   | `TransportReference`            | Required | Pinned manifest returned by archiveRecovery; every chunk revision and SHA-256 is checked.                                      |
+| `options.destination` | `string`                        | Required | New local directory whose parent already exists. Existing destinations are refused; partial data is retained on failure.       |
+| `options.maxBytes`    | `number \| undefined`           | Optional | Positive total restored payload limit, default 1 GiB; also bounds recovery integrity verification.                             |
+| `options.transporter` | `Transport`                     | Required | Caller-owned object transport used by the store or operation. Closing a workflow or sandbox does not close this transport.     |
+| `observation`         | `ObservationHub \| undefined`   | Optional | Optional hub receiving start and terminal events for archive materialization; never persisted in the recovery plan or archive. |
 
 ## Returns
 
@@ -36,9 +37,11 @@ Download a pinned recovery archive into a new local directory, preserving suppor
 ```ts
 export declare function materializeRecoveryArchive(
   options: RecoveryArchiveRestoreOptions,
+  observation?: ObservationHub,
 ): Promise<string>;
 ```
 
 ## Related contracts
 
+- [ObservationHub](../observationhub/)
 - [RecoveryArchiveRestoreOptions](../recoveryarchiverestoreoptions/)

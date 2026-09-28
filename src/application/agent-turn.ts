@@ -3,6 +3,9 @@ import {
   prepareAgentUsage,
   warnUsage,
 } from "./agent-usage.ts";
+import { agentRequest } from "./agent-request.ts";
+import { boundedLines } from "./output-lines.ts";
+import { stopReason } from "./stop-reason.ts";
 import { customTurn } from "./custom-turn.ts";
 import type { Agent } from "../domain/agent.types.ts";
 import { OutpostError } from "../domain/errors.ts";
@@ -39,8 +42,18 @@ export async function turn(
   const output = agentOutput(agent, options, markers, pass);
   const watchdog = activityWatchdog(controller, options, pass);
   watchdog.refresh(false);
+  const stderr = boundedLines((text, truncated) =>
+    notify(options.observe, {
+      kind: "stderr",
+      text,
+      truncated,
+      pass,
+      at: new Date().toISOString(),
+    }),
+  );
   let status = 0;
   let commandCompleted = false;
+  let preparedConversation: string | undefined;
   try {
     if (agent.usage === "session")
       warnUsage(
@@ -58,10 +71,28 @@ export async function turn(
     }
     await prepareAgentUsage(lease, agent, output, continuation, signal);
     signal.throwIfAborted();
-    const command = agent.request({
-      text: prompt,
-      ...(continuation ? { continuation } : {}),
-    });
+    const command = await agentRequest(
+      agent,
+      {
+        text: prompt,
+        ...(continuation ? { continuation } : {}),
+      },
+      (command) =>
+        lease.invoke({
+          ...command,
+          signal,
+          deadlineMs: options.deadlineMs ?? executionDefaults.deadlineMs,
+        }),
+      (id) => {
+        preparedConversation = id;
+        notify(options.observe, {
+          kind: "conversation",
+          id,
+          pass,
+          at: new Date().toISOString(),
+        });
+      },
+    );
     const result = await lease.invoke({
       ...command,
       signal,
@@ -74,6 +105,7 @@ export async function turn(
             controller.abort(cause);
           }
         }
+        if (channel === "stderr") stderr.append(chunk);
         watchdog.refresh(output.completed);
       },
     });
@@ -83,9 +115,17 @@ export async function turn(
     if (status !== 0)
       throw new OutpostError("process", `Agent exited with status ${status}`, {
         ...result,
-        conversation: output.conversation,
+        conversation: output.conversation ?? preparedConversation,
       });
   } catch (cause) {
+    const reason = stopReason(options.signal, controller.signal.reason, cause);
+    if (reason)
+      notify(options.observe, {
+        kind: "stopped",
+        reason,
+        pass,
+        at: new Date().toISOString(),
+      });
     options.signal?.throwIfAborted();
     if (controller.signal.reason !== "completion") {
       const error =
@@ -114,6 +154,7 @@ export async function turn(
       "Agent remained active after completion; its command was stopped and trailing output retained",
     );
   } finally {
+    stderr.flush();
     watchdog.close();
     try {
       output.flush();
@@ -130,5 +171,10 @@ export async function turn(
     );
   }
   options.signal?.throwIfAborted();
-  return { ...output.result(), status, durationMs: Date.now() - start };
+  return {
+    ...(preparedConversation ? { conversation: preparedConversation } : {}),
+    ...output.result(),
+    status,
+    durationMs: Date.now() - start,
+  };
 }

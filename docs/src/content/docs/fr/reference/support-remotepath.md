@@ -15,7 +15,7 @@ Calcule le chemin du transcript natif à l’intérieur d’un bail de sandbox �
 
 | Nom        | Type                 | Présence | Rôle                                                                                                     |
 | ---------- | -------------------- | -------- | -------------------------------------------------------------------------------------------------------- |
-| `format`   | `ConversationFormat` | Requis   | Organisation native des transcripts : claude ou codex.                                                   |
+| `format`   | `ConversationFormat` | Requis   | Organisation native des transcripts : claude, codex, copilot ou kimi.                                    |
 | `id`       | `string`             | Requis   | Identifiant de conversation native utilisé pour localiser ou poursuivre la session.                      |
 | `lease`    | `SandboxLease`       | Requis   | Bail d’exécution de sandbox utilisé pour accéder au home natif de l’agent et transférer les transcripts. |
 | `original` | `string`             | Requis   | Nom d’origine du fichier de transcript natif lorsque nécessaire pour conserver le nom de session Codex.  |

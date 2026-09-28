@@ -11,6 +11,7 @@ import type { HarnessTool } from "../domain/tool.types.ts";
 import type { DispatchOptions, TurnContext } from "./execution.types.ts";
 
 export interface HarnessRuntime {
+  readonly verbose?: boolean;
   readonly agent: CustomAgent;
   readonly tools: readonly HarnessTool[];
   readonly modelProvider: ModelProvider;

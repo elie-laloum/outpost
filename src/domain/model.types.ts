@@ -31,6 +31,7 @@ export interface ModelToolResultBlock {
 }
 
 export interface ModelReasoningBlock {
+  readonly text?: string;
   readonly type: "reasoning";
   readonly provider: string;
   readonly model: string;
@@ -76,6 +77,12 @@ export interface ModelResult {
 }
 
 export type ModelStreamEvent =
+  | { readonly type: "reasoning"; readonly text: string }
+  | {
+      readonly type: "retry";
+      readonly attempt: number;
+      readonly message?: string;
+    }
   | { readonly type: "text-delta"; readonly text: string }
   | { readonly type: "result"; readonly result: ModelResult };
 

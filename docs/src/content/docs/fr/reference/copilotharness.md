@@ -13,7 +13,7 @@ import { copilotHarness } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Crée un harness GitHub Copilot CLI à partir des réglages d’exécution, d’authentification et de permissions, sans lancer la CLI. Composez-le avec agent({ harness, model }) pour sélectionner séparément un nom de modèle ; reasoning et maxOutputTokens sont refusés. Chaque exécution démarre une session neuve : capture native, reprise, fork et réparations automatiques des réponses ne sont pas pris en charge. La CLI possède sa boucle interne modèle/outils.
+Crée un harness GitHub Copilot CLI à partir des réglages d’exécution, d’authentification et de permissions, sans lancer la CLI. Composez-le avec agent({ harness, model }) pour sélectionner séparément un nom de modèle ; reasoning et maxOutputTokens sont refusés. Les bundles natifs permettent capture, reprise à chaud/à froid et réparations. Le fork automatisé est refusé. La CLI possède sa boucle interne modèle/outils.
 
 [Exemple complet et règles détaillées](../../guide/agents/harness/).
 

@@ -15,6 +15,7 @@ import type { DispatchOptions } from "@elie-laloum/outpost";
 
 | Nom             | Type                                                             | Présence  | Rôle                                                                                                                                          |
 | --------------- | ---------------------------------------------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `observation`   | `ObservationHub \| undefined`                                    | Optionnel | Hub parent facultatif ; le dispatch crée un enfant avec son dispatchId et le vide avant retour ou exception.                                  |
 | `agent`         | `Agent \| undefined`                                             | Optionnel | Adapter natif de l’agent de code.                                                                                                             |
 | `logging`       | `Logging \| undefined`                                           | Optionnel | Configure le fichier journal du dispatch et la conservation des événements détaillés.                                                         |
 | `label`         | `string \| undefined`                                            | Optionnel | Libellé lisible utilisé dans les rapports d’exécution.                                                                                        |
@@ -38,6 +39,7 @@ import type { DispatchOptions } from "@elie-laloum/outpost";
 
 ```ts
 export interface DispatchOptions<T = undefined> {
+  readonly observation?: ObservationHub;
   readonly agent?: Agent;
   readonly logging?: Logging;
   readonly label?: string;
@@ -69,4 +71,5 @@ export interface DispatchOptions<T = undefined> {
 - [Brief](../brief/)
 - [DispatchTelemetry](../dispatchtelemetry/)
 - [Logging](../logging/)
+- [ObservationHub](../observationhub/)
 - [ResponseSpec](../responsespec/)

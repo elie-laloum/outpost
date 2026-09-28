@@ -1,3 +1,4 @@
+import { toolResult } from "./tool-result.ts";
 import type { AgentEvent } from "../../domain/agent.types.ts";
 import { decodeLine } from "./event-decoder.ts";
 import { asRecord } from "./protocol.ts";
@@ -27,6 +28,8 @@ function assistant(event: ProtocolRecord): AgentEvent[] {
         ]
       : [];
   });
+  if (typeof event.reasoning_content === "string" && event.reasoning_content)
+    tools.push({ kind: "reasoning", text: event.reasoning_content });
   return typeof event.content === "string" && event.content
     ? [{ kind: "text", text: event.content }, ...tools]
     : tools;
@@ -48,6 +51,13 @@ export function kimiEvents(line: string): AgentEvent[] {
     line,
     {
       assistant,
+      tool: (event) =>
+        toolResult(
+          event.tool_call_id,
+          event.name,
+          event.content,
+          event.is_error === true,
+        ),
       meta: (event) => {
         const decode =
           typeof event.type === "string" && Object.hasOwn(meta, event.type)

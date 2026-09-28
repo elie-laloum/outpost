@@ -1,3 +1,5 @@
+import { observedOperation } from "../domain/observed-operation.ts";
+import { observedLease } from "./observed-lease.ts";
 import { lstat } from "node:fs/promises";
 import { join, posix } from "node:path";
 import type { Agent } from "../domain/agent.types.ts";
@@ -109,13 +111,19 @@ export async function provisionSandbox(
     acquisitionStarted = true;
     lease = boundedTransfers(
       trackedSandboxLease(
-        await sandboxProvider.acquire({
-          repository: workspace.repository,
-          directory: workspace.directory,
-          gitDirectories: workspace.gitDirectories,
-          variables,
-          signal: setupSignal,
-        }),
+        await observedOperation(
+          options.observation,
+          "sandbox",
+          "sandbox.acquire",
+          async () =>
+            sandboxProvider.acquire({
+              repository: workspace.repository,
+              directory: workspace.directory,
+              gitDirectories: workspace.gitDirectories,
+              variables,
+              signal: setupSignal,
+            }),
+        ),
         activity,
       ),
       {
@@ -124,15 +132,25 @@ export async function provisionSandbox(
           : {}),
       },
     );
+    lease = observedLease(lease, options.observation);
     if (sandboxProvider.placement === "remote") {
-      sync = await seedRemote(workspace, lease, {
-        ...(options.recoveryTransport
-          ? { recoveryTransport: options.recoveryTransport }
-          : {}),
-        ...(options.includeUncommitted ? { includeUncommitted: true } : {}),
-        ...(options.limits ? { limits: options.limits } : {}),
-        signal: setupSignal,
-      });
+      sync = await observedOperation(
+        options.observation,
+        "transfer",
+        "repository.seed",
+        async () =>
+          seedRemote(workspace, lease!, {
+            ...(options.observation
+              ? { observation: options.observation }
+              : {}),
+            ...(options.recoveryTransport
+              ? { recoveryTransport: options.recoveryTransport }
+              : {}),
+            ...(options.includeUncommitted ? { includeUncommitted: true } : {}),
+            ...(options.limits ? { limits: options.limits } : {}),
+            signal: setupSignal,
+          }),
+      );
       const copiedFiles: string[] = [];
       for (const path of options.copies ?? []) {
         const info = await lstat(join(workspace.directory, path)).catch(
@@ -159,7 +177,12 @@ export async function provisionSandbox(
       if (options.bootstrap !== false && options.agent)
         prepared.set(
           options.agent,
-          await prepareAdapter(options.agent, lease, setupSignal),
+          await observedOperation(
+            options.observation,
+            "sandbox",
+            "agent.bootstrap",
+            async () => prepareAdapter(options.agent!, lease!, setupSignal),
+          ),
         );
     }
     const initialized = await Promise.allSettled(
@@ -169,6 +192,8 @@ export async function provisionSandbox(
           workspace.directory,
           executeProcess,
           setupSignal,
+          false,
+          options.observation,
         ),
         hooks(
           lifecycle?.sandboxReady ?? [],
@@ -176,6 +201,7 @@ export async function provisionSandbox(
           lease.invoke.bind(lease),
           setupSignal,
           true,
+          options.observation,
         ),
       ].map((pending) =>
         pending.catch((cause) => {
@@ -188,13 +214,23 @@ export async function provisionSandbox(
     if (failure?.status === "rejected") throw failure.reason;
     await activity.phase("ready");
   } catch (cause) {
-    await startupFailure(workspace, cause, options);
+    await observedOperation(
+      options.observation,
+      "recovery",
+      "sandbox.startup-failure",
+      async () => startupFailure(workspace, cause, options),
+    );
     const allocationUncertain = acquisitionStarted && !lease;
     let cleanupFailed = allocationUncertain;
     await activity?.phase("closing").catch(() => {
       cleanupFailed = true;
     });
-    await lease?.release().catch(() => {
+    await observedOperation(
+      options.observation,
+      "sandbox",
+      "sandbox.release",
+      async () => lease?.release(),
+    ).catch(() => {
       cleanupFailed = true;
     });
     if (activity && !(await activity.idle())) cleanupFailed = true;

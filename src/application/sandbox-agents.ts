@@ -1,3 +1,5 @@
+import type { SandboxLease } from "../domain/sandbox.types.ts";
+import { observedOperation } from "../domain/observed-operation.ts";
 import type { Agent } from "../domain/agent.types.ts";
 import type { Command } from "../domain/command.types.ts";
 import { invariant } from "../domain/errors.ts";
@@ -19,13 +21,19 @@ export function sandboxAgents(context: ProvisionedSandbox): SandboxAgents {
   const selectAgent = async (
     selected: Agent | undefined,
     signal: AbortSignal,
+    observation = options.observation,
   ) => {
     invariant(selected, "Provide an agent on the sandbox or this operation");
     if (!prepared.has(selected))
       prepared.set(
         selected,
         sandboxProvider.placement === "remote" && options.bootstrap !== false
-          ? await prepareAdapter(selected, runtime, signal)
+          ? await observedOperation(
+              observation,
+              "sandbox",
+              "agent.bootstrap",
+              async () => prepareAdapter(selected, runtime, signal),
+            )
           : selected,
       );
     const variables = await resolveVariables(
@@ -40,12 +48,18 @@ export function sandboxAgents(context: ProvisionedSandbox): SandboxAgents {
     )
       authenticated.set(adapter.name, {
         adapter,
-        variables: await authenticateAgent(
-          adapter,
-          variables,
-          runtime,
-          sandboxProvider.placement,
-          signal,
+        variables: await observedOperation(
+          observation,
+          "sandbox",
+          "agent.authenticate",
+          async () =>
+            authenticateAgent(
+              adapter,
+              variables,
+              runtime,
+              sandboxProvider.placement,
+              signal,
+            ),
         ),
       });
     const credentials =
@@ -66,7 +80,11 @@ export function sandboxAgents(context: ProvisionedSandbox): SandboxAgents {
   };
   const conversationKey = (agent: Agent, id: string) =>
     `${agent.storage?.name ?? agent.conversations ?? agent.name}:${id}`;
-  const restore = async (id: string, agent: Agent) => {
+  const restore = async (
+    id: string,
+    agent: Agent,
+    executionLease: SandboxLease,
+  ) => {
     if (known.has(conversationKey(agent, id))) return;
     const storage = storageFor(agent);
     invariant(storage, "This adapter does not support native conversations");
@@ -75,16 +93,12 @@ export function sandboxAgents(context: ProvisionedSandbox): SandboxAgents {
       workspace.repository,
       options.conversationHome,
     );
-    if (
-      found.reference !== undefined ||
-      sandboxProvider.placement !== "host" ||
-      workspace.directory !== workspace.repository
-    )
-      await storage.restore(found, {
-        repository: workspace.repository,
-        sandbox: runtime,
-        staging,
-      });
+    await storage.restore(found, {
+      repository: workspace.repository,
+      sandbox: executionLease,
+      staging,
+      local: sandboxProvider.placement === "host",
+    });
     known.add(conversationKey(agent, id));
   };
 

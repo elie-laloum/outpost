@@ -8,6 +8,19 @@ export async function startupFailure(
   cause: unknown,
   options: StartupRecoveryOptions,
 ): Promise<void> {
+  if (options.observation) {
+    options.observation.emit("sandbox", {
+      kind: "phase",
+      name: "preparation failed",
+      branch: workspace.branch,
+      directory: workspace.directory,
+    });
+    recordRecovery(cause, {
+      branch: workspace.branch,
+      directory: workspace.directory,
+    });
+    return;
+  }
   try {
     const log = await journal(
       workspace.repository,

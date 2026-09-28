@@ -486,9 +486,9 @@ test(
         checks
           .filter((check) => check.id.startsWith("agent.cli."))
           .map((check) => check.id),
-        agent === "codex" || agent === "claude"
+        agent === "codex" || agent === "claude" || agent === "kimi"
           ? ["agent.cli.start", "agent.cli.resume", "agent.cli.fork"]
-          : ["agent.cli.start"],
+          : ["agent.cli.start", "agent.cli.resume"],
       );
       const version = checks.find(
         (check) => check.id === "agent.sandbox",
@@ -869,6 +869,8 @@ test(
       });
       const selected = {
         ...adapter,
+        capture: false,
+        resumable: false,
         request: () => ({
           executable: "node",
           arguments: [

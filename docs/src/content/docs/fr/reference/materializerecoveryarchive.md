@@ -26,6 +26,7 @@ Télécharge une archive versionnée dans un nouveau dossier local en conservant
 | `options.destination` | `string`                        | Requis    | Nouveau dossier local dont le parent existe. Les destinations existantes sont refusées ; les données partielles sont conservées en cas d’échec. |
 | `options.maxBytes`    | `number \| undefined`           | Optionnel | Limite positive totale des contenus restaurés, 1 Gio par défaut ; borne aussi la vérification d’intégrité de récupération.                      |
 | `options.transporter` | `Transport`                     | Requis    | Transport objet appartenant à l’appelant, utilisé par le store ou l’opération. Fermer un workflow ou une sandbox ne ferme pas ce transport.     |
+| `observation`         | `ObservationHub \| undefined`   | Optionnel | Hub facultatif recevant le début et la fin de matérialisation d’archive ; jamais persisté dans le plan ni l’archive.                            |
 
 ## Retour
 
@@ -36,9 +37,11 @@ Télécharge une archive versionnée dans un nouveau dossier local en conservant
 ```ts
 export declare function materializeRecoveryArchive(
   options: RecoveryArchiveRestoreOptions,
+  observation?: ObservationHub,
 ): Promise<string>;
 ```
 
 ## Contrats associés
 
+- [ObservationHub](../observationhub/)
 - [RecoveryArchiveRestoreOptions](../recoveryarchiverestoreoptions/)

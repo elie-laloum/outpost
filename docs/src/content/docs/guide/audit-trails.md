@@ -49,3 +49,9 @@ Register your OpenTelemetry SDK and exporters before creating these handles, the
 The application owns tracer/meter provider shutdown. Instrumentation failures are isolated from execution outcomes. Custom reporting is available through `createReporter()`.
 
 API: [Logging](../../reference/logging/) · [readJournal](../../reference/readjournal/) · [DispatchTelemetry](../../reference/dispatchtelemetry/) · [createReporter](../../reference/createreporter/).
+
+## Correlate traces through the hub
+
+Attach `telemetry.sink` to `createObservationHub({ sinks: [telemetry.sink] })`, then pass that hub through `observation`. This links workflow, task, attempt, dispatch and operation spans while retaining existing metric names. Use this wiring once per telemetry instance; combining it with legacy `telemetry` wiring for the same run would count events twice. OpenTelemetry remains an optional subpath dependency.
+
+Dispatch journals are hub receivers. They contain scoped operations from preparation through cleanup and a terminal `dispatch-finished`, including early failures. `logging.verbose` retains raw events, deltas, stderr, reasoning and streamed tool output; the normal journal excludes these verbose events. Full model requests/responses additionally require `createObservationHub({ verbose: true })` before they are produced. Journal delivery failures are observation errors and can leave an incomplete journal; inspect `observerErrors` and hub diagnostics.

@@ -1,3 +1,5 @@
+import { observedOperation } from "../domain/observed-operation.ts";
+import type { ObservationHub } from "../domain/observation.types.ts";
 import type { TransportStoreOptions } from "../domain/transport.types.ts";
 import {
   planTransportRetention,
@@ -70,7 +72,7 @@ async function workspaceReason(
   return "ELIGIBLE";
 }
 
-export async function planRecoveryRetention(
+async function planRetentionOperation(
   options: RecoveryRetentionOptions,
 ): Promise<RecoveryRetentionPlan> {
   if (options.transporter) return planTransportRetention(options);
@@ -209,7 +211,7 @@ export async function planRecoveryRetention(
   };
 }
 
-export async function pruneRecoveryRetention(
+async function pruneRetentionOperation(
   plan: RecoveryRetentionPlan,
   options?: TransportStoreOptions,
 ): Promise<RecoveryPruneResult> {
@@ -328,4 +330,23 @@ export async function assertRecoveryQuota(
         complete: inspection.complete,
       },
     );
+}
+
+export function planRecoveryRetention(
+  options: RecoveryRetentionOptions,
+  observation?: ObservationHub,
+): Promise<RecoveryRetentionPlan> {
+  return observedOperation(observation, "recovery", "retention.plan", () =>
+    planRetentionOperation(options),
+  );
+}
+
+export function pruneRecoveryRetention(
+  plan: RecoveryRetentionPlan,
+  options?: TransportStoreOptions,
+  observation?: ObservationHub,
+): Promise<RecoveryPruneResult> {
+  return observedOperation(observation, "recovery", "retention.prune", () =>
+    pruneRetentionOperation(plan, options),
+  );
 }

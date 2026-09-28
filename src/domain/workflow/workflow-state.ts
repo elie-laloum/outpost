@@ -1,3 +1,4 @@
+import { createObservationHub } from "../observation.ts";
 import { maxUsageReceiptsPerTask } from "./usage-receipt.constants.ts";
 import { validateUsageReceipt } from "./usage-receipt.ts";
 import type { Usage } from "../agent.types.ts";
@@ -21,6 +22,23 @@ export function workflowState(
   checkpoint?: WorkflowCheckpointSession,
 ): WorkflowExecutionState {
   const executionId = checkpoint?.initial?.executionId ?? randomUUID();
+  const observation = (options.observation ?? createObservationHub()).child(
+    { executionId },
+    [
+      {
+        observe(value) {
+          if (value.event.kind === "workflow")
+            return options.telemetry?.observe(value.event.event);
+        },
+      },
+      {
+        observe(value) {
+          if (value.event.kind === "workflow")
+            return options.observe?.(value.event.event);
+        },
+      },
+    ],
+  );
   const stop = new AbortController();
   const signal = options.signal
     ? AbortSignal.any([options.signal, stop.signal])
@@ -86,6 +104,7 @@ export function workflowState(
     options.budget,
     (error) => {
       errors.push(error);
+      emit({ type: "budget-exceeded" });
       if (error.dimension !== "attempts") stop.abort(error);
     },
     saved?.usage,
@@ -100,16 +119,12 @@ export function workflowState(
       workflow: name,
       timestamp: new Date().toISOString(),
     };
-    try {
-      options.telemetry?.observe(notification);
-    } catch (error) {
-      observerErrors.push(error);
-    }
-    try {
-      options.observe?.(notification);
-    } catch (error) {
-      observerErrors.push(error);
-    }
+    observation
+      .child({
+        ...(event.key ? { taskKey: event.key } : {}),
+        ...(event.attempt === undefined ? {} : { attempt: event.attempt }),
+      })
+      .emit("workflow", { kind: "workflow", event: notification });
   }
   function finish(item: Task, status: TaskStatus): void {
     Object.assign(record(item), {
@@ -171,6 +186,7 @@ export function workflowState(
     }
 
     return {
+      observation: observation.child({ taskKey: item.key, attempt }),
       signal: taskSignal,
       attempt,
       executionId,
@@ -193,8 +209,10 @@ export function workflowState(
   }
 
   const runtime: WorkflowExecutionState = {
+    observation,
     async persist() {
       await checkpoint?.save(runtime);
+      if (checkpoint) emit({ type: "checkpoint" });
     },
     executionId,
     accounting,

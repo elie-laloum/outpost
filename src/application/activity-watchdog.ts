@@ -22,6 +22,7 @@ export function activityWatchdog(
             new OutpostError(
               "timeout",
               "Agent produced no output before the idle deadline",
+              { stopReason: "idle-timeout" },
             ),
           ),
         options.idleMs ?? executionDefaults.idleMs,
@@ -38,7 +39,6 @@ export function activityWatchdog(
   const warnings = setInterval(() => {
     if (holds === 0 && Date.now() - lastActivity >= warningInterval) {
       const message = `Agent has been idle for ${Math.floor((Date.now() - lastActivity) / 1000)} seconds`;
-      notify(options.warn, message);
       notify(options.observe, {
         kind: "warning",
         message,

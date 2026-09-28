@@ -9,6 +9,9 @@ The release notes below are synchronized from the root `CHANGELOG.md`, the singl
 
 ## Unreleased
 
+- Add scoped observation hubs with bounded pluggable sinks, correlated workflow/agent/operation events, process stop diagnostics, normalized CLI tool results and opt-in model payloads. Journals and reporters use the shared delivery policy; sink failures are reported independently of execution. OpenTelemetry can consume the unified stream without changing metric names.
+- Add native session capture, warm/cold resume and response repairs for Copilot and Kimi, plus native Kimi fork. Antigravity supports warm resume and repairs only; portable capture/cold resume and automated fork remain unsupported. Copilot automated fork is explicitly refused. Session bundles preserve supported native files and can be archived through Transport.
+
 - Add opt-in Firecracker jailer execution with protected root-owned assets, an unprivileged VMM identity, cgroup v2 CPU/memory/process limits and conservative jail/cgroup cleanup. Direct execution remains compatible; the provider remains experimental pending broader host and adversarial validation.
 - Pin Antigravity CLI 1.2.12 in generated images and remote bootstrap using versioned archives and recorded SHA-512 digests. Expose `agentVersions.antigravity`, compare it in doctor, and disable automatic updates in generated images, agent requests and diagnostics. Existing binaries are reused; existing image recipes must be updated and rebuilt.
 - Collect Copilot and Kimi token usage from sandbox session files, including Kimi sub-agents, and reconcile Copilot streamed usage without double counting. Missing or partial counters carry `Usage.complete: false` through dispatch, workflows, speculation and checkpoints. Token-only workflow budgets fail with `WorkflowUsageUnavailable` when accounting is incomplete; configure an attempt budget and execution time limits for bounded fallback.

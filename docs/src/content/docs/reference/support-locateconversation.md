@@ -15,7 +15,7 @@ Locate an existing native transcript by format, conversation ID and repository i
 
 | Name         | Type                  | Presence | Meaning                                                                |
 | ------------ | --------------------- | -------- | ---------------------------------------------------------------------- |
-| `format`     | `ConversationFormat`  | Required | Native transcript layout: claude or codex.                             |
+| `format`     | `ConversationFormat`  | Required | Native transcript layout: claude, codex, copilot or kimi.              |
 | `id`         | `string`              | Required | Native conversation identifier used to locate or continue the session. |
 | `repository` | `string`              | Required | Target host Git checkout.                                              |
 | `home`       | `string \| undefined` | Optional | Host agent home used to locate or persist native transcripts.          |

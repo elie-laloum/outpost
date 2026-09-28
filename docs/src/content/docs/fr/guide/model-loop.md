@@ -41,3 +41,9 @@ Définissez `MODEL_NAME` avec un modèle disponible sur votre service, puis pass
 La boucle prend en charge les [politiques d’outils](../tool-policies/), la [gestion du contexte](../history-management/) et les [skills à la demande](../loadable-skills/). Ces réglages configurent la boucle intégrée, pas les mécanismes internes des CLI Codex ou Claude.
 
 API : [harness](../../reference/function-harness/) · [HarnessOptions](../../reference/customharnessoptions/).
+
+## Observer la boucle
+
+Le [hub d’observation](../live-events/) reçoit chargement des instructions/skills, décisions des hooks, sorties d’outils corrélées par `callId`, raisonnement lisible et erreurs modèle. Les fournisseurs peuvent émettre des événements de raisonnement et de reprise ; Outpost ne déduit pas les reprises cachées dans un client HTTP et n’ajoute pas de politique de reprise. Les blocs de rejeu peuvent rester opaques même en l’absence de raisonnement lisible.
+
+Les événements complets `model-request` et `model-response` nécessitent un hub explicitement détaillé. Leur contenu peut inclure une conversation privée ; ils sont exclus du journal normal. `tool-result` conserve son aperçu borné tandis que `tool-output` expose les sorties de commandes à leur arrivée.

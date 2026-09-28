@@ -15,6 +15,7 @@ import type { DispatchOptions } from "@elie-laloum/outpost";
 
 | Name            | Type                                                             | Presence | Meaning                                                                                                                                              |
 | --------------- | ---------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `observation`   | `ObservationHub \| undefined`                                    | Optional | Optional parent hub; dispatch creates a child with its own dispatchId and drains it before returning or throwing.                                    |
 | `agent`         | `Agent \| undefined`                                             | Optional | Native coding-agent adapter.                                                                                                                         |
 | `logging`       | `Logging \| undefined`                                           | Optional | Configure the dispatch journal file and verbose event retention.                                                                                     |
 | `label`         | `string \| undefined`                                            | Optional | Human-readable label used in execution reporting.                                                                                                    |
@@ -38,6 +39,7 @@ import type { DispatchOptions } from "@elie-laloum/outpost";
 
 ```ts
 export interface DispatchOptions<T = undefined> {
+  readonly observation?: ObservationHub;
   readonly agent?: Agent;
   readonly logging?: Logging;
   readonly label?: string;
@@ -69,4 +71,5 @@ export interface DispatchOptions<T = undefined> {
 - [Brief](../brief/)
 - [DispatchTelemetry](../dispatchtelemetry/)
 - [Logging](../logging/)
+- [ObservationHub](../observationhub/)
 - [ResponseSpec](../responsespec/)

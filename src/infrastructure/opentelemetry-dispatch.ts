@@ -1,9 +1,13 @@
-import { context, SpanStatusCode } from "@opentelemetry/api";
+import { context, trace, SpanStatusCode } from "@opentelemetry/api";
 import type {
   DispatchTelemetryOutcome,
   DispatchTelemetrySession,
 } from "../domain/dispatch-telemetry.types.ts";
-import type { OpenTelemetryOptions } from "./opentelemetry.types.ts";
+import type { Context } from "@opentelemetry/api";
+import type {
+  OpenTelemetryOptions,
+  TelemetryDispatch,
+} from "./opentelemetry.types.ts";
 import { telemetryNames } from "./opentelemetry.constants.ts";
 import { usageDimensions } from "../domain/workflow/budget.constants.ts";
 
@@ -33,17 +37,18 @@ export function dispatchTelemetry(options: OpenTelemetryOptions) {
   const sessions = new Set<DispatchTelemetrySession>();
   let closed = false;
   return {
-    startDispatch(): DispatchTelemetrySession {
-      if (closed) return { finish() {} };
+    startDispatch(parent: Context = context.active()): TelemetryDispatch {
+      if (closed) return { context: parent, finish() {} };
       const started = Date.now();
       const span = safe(() =>
         options.tracer.startSpan(
           "outpost.dispatch",
           { startTime: started },
-          context.active(),
+          parent,
         ),
       );
-      const session: DispatchTelemetrySession = {
+      const session: TelemetryDispatch = {
+        context: span ? trace.setSpan(parent, span) : parent,
         finish(outcome: DispatchTelemetryOutcome) {
           if (!sessions.delete(session)) return;
           const at = Date.now();

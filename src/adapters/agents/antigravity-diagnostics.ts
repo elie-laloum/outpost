@@ -5,5 +5,6 @@ export function antigravityDiagnostics() {
   return helpDiagnostics(
     (input) => antigravityRequest({}, input),
     "Usage of agy:",
+    true,
   );
 }

@@ -19,9 +19,10 @@ Revalidate a restoration plan and materialize the selected retained state into i
 
 ## Parameters and properties
 
-| Name   | Type                  | Presence | Meaning                                                                                  |
-| ------ | --------------------- | -------- | ---------------------------------------------------------------------------------------- |
-| `plan` | `RecoveryRestorePlan` | Required | Restoration plan binding source, destination, selected state and integrity fingerprints. |
+| Name          | Type                          | Presence | Meaning                                                                                                                     |
+| ------------- | ----------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `plan`        | `RecoveryRestorePlan`         | Required | Restoration plan binding source, destination, selected state and integrity fingerprints.                                    |
+| `observation` | `ObservationHub \| undefined` | Optional | Optional hub receiving start and terminal events for recovery restoration; never persisted in the recovery plan or archive. |
 
 ## Returns
 
@@ -32,10 +33,12 @@ Revalidate a restoration plan and materialize the selected retained state into i
 ```ts
 export declare function restoreRecoveryTransfer(
   plan: RecoveryRestorePlan,
+  observation?: ObservationHub,
 ): Promise<RecoveryRestoreResult>;
 ```
 
 ## Related contracts
 
+- [ObservationHub](../observationhub/)
 - [RecoveryRestorePlan](../recoveryrestoreplan/)
 - [RecoveryRestoreResult](../recoveryrestoreresult/)

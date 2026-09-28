@@ -20,6 +20,8 @@ import { repository, scripted, emit } from "../helpers.ts";
 function kimiFixture(home: string, status = 0, hang = false) {
   return {
     ...agent({ harness: kimiHarness({ variables: { KIMI_CODE_HOME: home } }) }),
+    capture: false,
+    resumable: false,
     request: () => ({
       executable: process.execPath,
       arguments: [

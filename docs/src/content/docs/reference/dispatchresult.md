@@ -15,6 +15,7 @@ import type { DispatchResult } from "@elie-laloum/outpost";
 
 | Name                  | Type                                                                             | Presence | Meaning                                                                                                                                |
 | --------------------- | -------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `observerErrors`      | `readonly unknown[] \| undefined`                                                | Optional | Collected sink and journal failures, separate from execution success; a supplied shared hub also exposes its accumulated diagnostics.  |
 | `branch`              | `string`                                                                         | Required | Name of the work branch used or observed during execution.                                                                             |
 | `directory`           | `string`                                                                         | Required | Host workspace directory used for this execution.                                                                                      |
 | `commits`             | `readonly Commit[]`                                                              | Required | Collected Git commit identities and subjects.                                                                                          |
@@ -36,6 +37,7 @@ import type { DispatchResult } from "@elie-laloum/outpost";
 
 ```ts
 export interface DispatchResult<T> extends Execution<T> {
+  readonly observerErrors?: readonly unknown[];
   readonly branch: string;
   readonly directory: string;
   readonly commits: readonly Commit[];

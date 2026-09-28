@@ -1,6 +1,6 @@
 import type { Harness } from "./harness.types.ts";
 import type { AgentModel, ModelSpec } from "./model.types.ts";
-import type { Command, Variables } from "./command.types.ts";
+import type { Command, CommandResult, Variables } from "./command.types.ts";
 import type { ConversationStore } from "./conversation.types.ts";
 
 export interface Usage {
@@ -12,6 +12,53 @@ export interface Usage {
 }
 
 export type AgentEvent =
+  | {
+      readonly kind: "message-usage";
+      readonly tokens: Usage;
+      readonly messageId?: string;
+      readonly parentCallId?: string;
+    }
+  | {
+      readonly kind: "stderr";
+      readonly text: string;
+      readonly truncated?: boolean;
+    }
+  | {
+      readonly kind: "stopped";
+      readonly reason:
+        | "completion"
+        | "idle-timeout"
+        | "deadline"
+        | "aborted"
+        | "oversized-event";
+    }
+  | {
+      readonly kind: "reasoning";
+      readonly text: string;
+      readonly parentCallId?: string;
+    }
+  | {
+      readonly kind: "file-change";
+      readonly changes: unknown;
+      readonly callId?: string;
+    }
+  | { readonly kind: "model-request"; readonly request: unknown }
+  | { readonly kind: "model-response"; readonly response: unknown }
+  | {
+      readonly kind: "model-retry";
+      readonly attempt: number;
+      readonly message?: string;
+    }
+  | { readonly kind: "model-error"; readonly message: string }
+  | { readonly kind: "hook"; readonly phase: string; readonly changed: boolean }
+  | { readonly kind: "instructions-loaded"; readonly count: number }
+  | { readonly kind: "skills-loaded"; readonly names: readonly string[] }
+  | {
+      readonly kind: "tool-output";
+      readonly callId: string;
+      readonly channel: "stdout" | "stderr";
+      readonly text: string;
+    }
   | {
       readonly kind: "phase";
       readonly name: string;
@@ -35,6 +82,7 @@ export type AgentEvent =
       readonly name: string;
       readonly input: unknown;
       readonly callId?: string;
+      readonly parentCallId?: string;
     }
   | {
       readonly kind: "tool-result";
@@ -43,6 +91,7 @@ export type AgentEvent =
       readonly isError: boolean;
       readonly preview: string;
       readonly characters: number;
+      readonly parentCallId?: string;
     }
   | { readonly kind: "step"; readonly index: number }
   | {
@@ -65,11 +114,19 @@ export type AgentEvent =
     }
   | { readonly kind: "failure"; readonly message: string }
   | { readonly kind: "finished" }
-  | { readonly kind: "raw"; readonly value: unknown };
+  | {
+      readonly kind: "raw";
+      readonly value: unknown;
+      readonly bytes?: number;
+      readonly truncated?: boolean;
+    };
 
 export type AgentObservation = AgentEvent & {
   readonly pass: number;
   readonly at: string;
+  readonly seq?: number;
+  readonly source?: import("./observation.types.ts").ObservationSource;
+  readonly scope?: import("./observation.types.ts").ObservationScope;
 };
 
 export type AgentEventHandlers = {
@@ -90,14 +147,19 @@ export interface AgentFeatures {
   readonly requiresFinishedEvent?: boolean;
   readonly usage?: "events" | "session" | "unavailable";
   readonly variables?: Variables;
-  readonly conversations?: "claude" | "codex";
+  readonly conversations?: "claude" | "codex" | "copilot" | "kimi";
   readonly storage?: ConversationStore;
   readonly capture?: boolean;
   readonly resumable?: boolean;
+  readonly forkable?: boolean;
   transcriptUsage?(text: string): Usage | undefined;
 }
 
 export interface AgentAdapter extends AgentFeatures {
+  fork?(
+    id: string,
+    invoke: (command: Command) => Promise<CommandResult>,
+  ): Promise<string>;
   credentials?(variables: Variables): CredentialPlan;
   request(input: AgentInput): Command;
   events(line: string): readonly AgentEvent[];

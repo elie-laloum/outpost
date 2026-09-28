@@ -9,12 +9,14 @@ export async function journal(
   repository: string,
   logging: Logging = {},
   label?: string,
+  started = true,
 ): Promise<Journal> {
   if (logging && logging !== "stdout")
     return transportJournal(
       logging.transporter ?? repositoryTransport(repository),
       logging.verbose ?? false,
       label,
+      started,
     );
   const display = reporter({ ...(label ? { label } : {}) });
   let closed = false;

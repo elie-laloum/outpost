@@ -927,6 +927,10 @@
         "attrs": { "data-reference-overview": "" }
       },
       {
+        "slug": "reference/createobservationhub",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
         "slug": "reference/reporter",
         "attrs": { "data-api-kind": "function" }
       },
@@ -939,6 +943,14 @@
         "attrs": { "data-api-kind": "function" }
       },
       {
+        "slug": "reference/observationsource",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/observationevent",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
         "slug": "reference/reporterhandlers",
         "attrs": { "data-api-kind": "type" }
       },
@@ -947,6 +959,30 @@
       {
         "slug": "reference/agentobservation",
         "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/observation",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/observationscope",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/operationevent",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/observationhub",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/observationhuboptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/observationsink",
+        "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/reporteroptions",

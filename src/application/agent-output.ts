@@ -1,3 +1,4 @@
+import { observationDefaults } from "../domain/observation.constants.ts";
 import { visitAgentEvent } from "../domain/agent-events.ts";
 import type { AgentAdapter, Usage } from "../domain/agent.types.ts";
 import { OutpostError } from "../domain/errors.ts";
@@ -12,6 +13,7 @@ export function agentOutput(
   markers: readonly string[],
   pass: number,
 ): AgentOutput {
+  const calls = new Map<string, string>();
   let pending = "",
     text = "",
     rawTail = "";
@@ -61,8 +63,20 @@ export function agentOutput(
   }
   function consume(line: string): void {
     const at = new Date().toISOString();
+    if (oversized(line)) return;
+    const events = agent.events(line);
     notify(options.observe, { kind: "raw", value: line, pass, at });
-    for (const event of agent.events(line)) {
+    for (const decoded of events) {
+      if (decoded.kind === "tool" && decoded.callId) {
+        if (calls.size >= observationDefaults.toolCallLimit)
+          calls.delete(calls.keys().next().value!);
+        calls.set(decoded.callId, decoded.name);
+      }
+      const event =
+        decoded.kind === "tool-result" && !decoded.name
+          ? { ...decoded, name: calls.get(decoded.callId) ?? decoded.callId }
+          : decoded;
+      if (event.kind === "tool-result") calls.delete(event.callId);
       visitAgentEvent(event, handlers);
       if (event.kind !== "raw" && event.kind !== "usage")
         notify(options.observe, { ...event, pass, at });
@@ -70,6 +84,21 @@ export function agentOutput(
     completed =
       (!agent.requiresFinishedEvent || finished) &&
       markers.some((marker) => (finalText ?? text).includes(marker));
+  }
+  function oversized(line: string): boolean {
+    const bytes = Buffer.byteLength(line);
+    if (bytes <= executionDefaults.eventBytes) return false;
+    notify(options.observe, {
+      kind: "raw",
+      value: line.slice(0, observationDefaults.previewCharacters),
+      bytes,
+      truncated: true,
+      pass,
+      at: new Date().toISOString(),
+    });
+    throw new OutpostError("process", "Agent emitted an oversized event", {
+      stopReason: "oversized-event",
+    });
   }
   return {
     get usage() {
@@ -104,8 +133,7 @@ export function agentOutput(
         consume(pending.slice(0, end));
         pending = pending.slice(end + 1);
       }
-      if (pending.length > executionDefaults.eventBytes)
-        throw new OutpostError("process", "Agent emitted an oversized event");
+      oversized(pending);
     },
     flush() {
       if (pending) consume(pending);

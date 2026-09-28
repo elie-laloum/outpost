@@ -1,3 +1,4 @@
+import { observedOperation } from "../../domain/observed-operation.ts";
 import { join } from "node:path";
 import { OutpostError } from "../../domain/errors.ts";
 import type {
@@ -32,7 +33,12 @@ export function workspaceLease(
           "Host branch changed during the job",
           { expected: baseBranch, current, directory: workdir },
         );
-      const releaseMerge = await lock(repository, `merge:${baseBranch}`);
+      const releaseMerge = await observedOperation(
+        options.observation,
+        "git",
+        "integration.lock",
+        async () => lock(repository, `merge:${baseBranch}`),
+      );
       try {
         await git(
           repository,
@@ -47,7 +53,12 @@ export function workspaceLease(
           cause,
         );
       } finally {
-        await releaseMerge();
+        await observedOperation(
+          options.observation,
+          "git",
+          "integration.unlock",
+          async () => releaseMerge(),
+        );
       }
     },
     dispose(preserve = false) {
@@ -81,7 +92,12 @@ export function workspaceLease(
             );
           return {};
         } finally {
-          await unlock();
+          await observedOperation(
+            options.observation,
+            "git",
+            "workspace.unlock",
+            async () => unlock(),
+          );
         }
       })();
       return disposal;

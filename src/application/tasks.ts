@@ -1,3 +1,5 @@
+import { observationDefaults } from "../domain/observation.constants.ts";
+import { taskObservation } from "./task-observation.ts";
 import { taskUsage } from "./task-usage.ts";
 import { OutpostError } from "../domain/errors.ts";
 import type { CommandResult } from "../domain/ports.ts";
@@ -19,14 +21,23 @@ export function agentTask<T>(
     ...definition,
     async perform(context) {
       const options = request(context);
-      const usage = taskUsage(context, options.observe);
-      const result = await sandbox.dispatch({
-        ...options,
-        signal: context.signal,
-        observe: usage.observe,
-      });
-      usage.reconcile(result.usage);
-      return result;
+      const usage = taskUsage(context, undefined);
+      const observation = taskObservation(
+        context.observation ?? options.observation,
+        options.observe,
+      );
+      try {
+        const result = await sandbox.dispatch({
+          ...options,
+          observation,
+          signal: context.signal,
+          observe: usage.observe,
+        });
+        usage.reconcile(result.usage);
+        return result;
+      } finally {
+        await observation.close();
+      }
     },
   });
 }
@@ -40,14 +51,23 @@ export function isolatedTask<T>(
     ...definition,
     async perform(context) {
       const options = await request(context);
-      const usage = taskUsage(context, options.observe);
-      const result = await dispatch({
-        ...options,
-        signal: context.signal,
-        observe: usage.observe,
-      });
-      usage.reconcile(result.usage);
-      return result;
+      const usage = taskUsage(context, undefined);
+      const observation = taskObservation(
+        context.observation ?? options.observation,
+        options.observe,
+      );
+      try {
+        const result = await dispatch({
+          ...options,
+          observation,
+          signal: context.signal,
+          observe: usage.observe,
+        });
+        usage.reconcile(result.usage);
+        return result;
+      } finally {
+        await observation.close();
+      }
     },
   });
 }
@@ -63,6 +83,22 @@ export function commandTask(
         typeof command === "function" ? command(context) : command;
       const result = await sandbox.command({
         ...invocation,
+        observe(channel, text) {
+          for (
+            let offset = 0;
+            offset < text.length;
+            offset += observationDefaults.outputCharacters
+          )
+            context.observation?.emit("sandbox", {
+              kind: "command-output",
+              channel,
+              text: text.slice(
+                offset,
+                offset + observationDefaults.outputCharacters,
+              ),
+            });
+          invocation.observe?.(channel, text);
+        },
         signal: context.signal,
       });
       if (result.status !== 0)

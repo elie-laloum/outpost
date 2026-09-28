@@ -1,3 +1,4 @@
+import { observedOperation } from "../domain/observed-operation.ts";
 import { randomUUID } from "node:crypto";
 import { mkdir, readFile, rm } from "node:fs/promises";
 import { join, posix } from "node:path";
@@ -146,27 +147,38 @@ export async function seedRemote(
       const transfer = join(recovery, randomUUID());
       await mkdir(transfer, { recursive: true });
       try {
-        const changes = await downloadChanges(context, synchronized, transfer);
-        await validateChanges(
-          context,
-          changes,
-          synchronized,
-          expected,
-          transfer,
+        const changes = await observedOperation(
+          options.observation,
+          "transfer",
+          "repository.download",
+          async () => downloadChanges(context, synchronized, transfer),
         );
-        const backup = await backupHost(
-          context,
-          changes,
-          synchronized,
-          transfer,
+        await observedOperation(
+          options.observation,
+          "recovery",
+          "changes.validate",
+          async () =>
+            validateChanges(context, changes, synchronized, expected, transfer),
         );
-        await applyChanges(
-          context,
-          changes,
-          backup,
-          synchronized,
-          expected,
-          transfer,
+        const backup = await observedOperation(
+          options.observation,
+          "recovery",
+          "host.backup",
+          async () => backupHost(context, changes, synchronized, transfer),
+        );
+        await observedOperation(
+          options.observation,
+          "git",
+          "changes.apply",
+          async () =>
+            applyChanges(
+              context,
+              changes,
+              backup,
+              synchronized,
+              expected,
+              transfer,
+            ),
         );
         context.transferred?.clear();
         for (const entry of changes.manifest ?? [])

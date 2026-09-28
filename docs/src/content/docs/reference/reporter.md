@@ -29,18 +29,18 @@ Create an agent observation callback that formats progress, warnings and pass su
 
 ## Returns
 
-`(event: AgentEvent & ReportPass) => void`
+`(event: ObservationEvent & ReportPass) => void`
 
 ## Signature
 
 ```ts
 export declare function reporter(
   options?: ReporterOptions,
-): (event: AgentEvent & ReportPass) => void;
+): (event: ObservationEvent & ReportPass) => void;
 ```
 
 ## Related contracts
 
-- [AgentEvent](../agentevent/)
+- [ObservationEvent](../observationevent/)
 - [ReporterOptions](../reporteroptions/)
 - [ReportPass](../support-reportpass/)

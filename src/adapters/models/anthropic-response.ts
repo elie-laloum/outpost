@@ -68,6 +68,9 @@ function reasoning(
     provider: context.identity,
     model: context.model,
     data: block,
+    ...(typeof block.thinking === "string" && block.thinking
+      ? { text: block.thinking }
+      : {}),
   };
 }
 

@@ -44,6 +44,11 @@ export async function preflightDispatch(
       agent?.resumable !== false,
       `${agent?.name} does not support continuation or fork in Outpost`,
     );
+  if (options.continuation?.fork)
+    invariant(
+      agent?.forkable !== false,
+      `${agent?.name} does not support automated fork in Outpost`,
+    );
   if (!options.response) return;
   if (options.response.repairs > 0)
     invariant(

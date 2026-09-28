@@ -3,7 +3,7 @@ title: "Historique de discussion"
 description: "Continuer une conversation d’agent ou en dériver une autre."
 ---
 
-Codex et Claude Code peuvent capturer leurs conversations natives. Continuez-en une avec `result.resume()` ou créez une conversation distincte avec `result.fork()`.
+Codex, Claude Code, Copilot et Kimi peuvent capturer leurs conversations natives. Le fork est pris en charge par Codex, Claude Code et Kimi. Continuez-en une avec `result.resume()` ou créez une conversation distincte avec `result.fork()`.
 
 ```ts
 import { dispatch } from "@elie-laloum/outpost";
@@ -26,12 +26,16 @@ console.log(next.text);
 
 Dans une sandbox ouverte, utilisez `sandbox.resume(id, options)` ou `sandbox.fork(id, options)`. Un résultat à froid restaure sa conversation capturée dans un environnement ultérieur. L’identifiant de conversation et sa transcription sont distincts de la branche et du workspace Git.
 
-Désactiver la capture empêche le résultat de fournir une conversation enregistrée pour restauration ultérieure. Antigravity, Copilot et Kimi prennent uniquement en charge les sessions neuves.
+Désactiver la capture empêche le résultat de fournir une conversation enregistrée pour restauration ultérieure. Antigravity reprend seulement une conversation émise dans la même sandbox ouverte ; il refuse la reprise à froid et le fork automatisé. Copilot refuse le fork automatisé.
 
 ## Stockage
 
-`conversations()` gère les formats natifs ; `harnessConversations()` stocke les transcriptions de la boucle intégrée. `transportConversations()` archive les formats pris en charge via un transport. La restauration réécrit les chemins de workspace pris en charge lorsque la transcription se déplace.
+`conversations.native()` gère les formats natifs ; `harnessConversations()` stocke les transcriptions de la boucle intégrée. `transportConversations()` archive les formats pris en charge via un transport. La restauration réécrit les chemins de workspace pris en charge lorsque la transcription se déplace.
 
 Séparez l’accès aux transcriptions de l’authentification. Une conversation enregistrée ne fournit pas d’identifiants de compte, et supprimer les identifiants ne supprime pas le contenu des conversations.
+
+Copilot et Kimi capturent un bundle JSON par session sous `.outpost/conversations/<format>/` dans le dépôt (ou sous `conversationHome` si fourni). `conversations.native("copilot")`, `conversations.native("kimi")` et `transportConversations()` prennent ces bundles en charge. `transcript` désigne le bundle, pas un historique JSONL unique. La capture est limitée à 64 Mio de données et 4 096 fichiers ; fichiers obligatoires absents, liens symboliques et métadonnées non prises en charge sont explicitement refusés. La restauration prépare et valide tous les fichiers avant de remplacer une session existante, en conservant son ancien dossier sous `.outpost-recovery/` dans le home de la CLI.
+
+La capture Kimi exclut logs de diagnostic, tâches de fond, tâches cron, notifications et fichiers de verrou. Elle restaure la conversation, pas les processus ou planifications. Une session Kimi déjà présente sous un autre workspace dans le home cible est refusée ; utilisez un home de sandbox privé pour une continuation portable. Fournissez séparément les identifiants et la configuration personnalisée des outils/modèles. L’exécution locale partage le stockage natif de l’hôte ; une restauration peut y relocaliser les métadonnées de session.
 
 API : [DispatchResult](../../reference/dispatchresult/) · [ConversationStore](../../reference/conversationstore/) · [transportConversations](../../reference/transportconversations/).

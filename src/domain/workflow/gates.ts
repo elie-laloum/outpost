@@ -50,6 +50,7 @@ export async function pauseGate(
     id: randomUUID(),
     requestedAt: new Date().toISOString(),
   });
+  runtime.emit({ type: "gate", key: item.key, status: "paused" });
   runtime.finish(item, "paused");
   await runtime.persist();
 }
@@ -109,6 +110,11 @@ export function applyDecisions(
     const item = pending.get(decision.key)!;
     const record = runtime.record(item);
     record.decision = decision;
+    runtime.emit({
+      type: "decision",
+      key: item.key,
+      status: decision.action === "reject" ? "rejected" : "done",
+    });
     if (decision.action === "reject") {
       record.error = `${item.key} rejected by ${decision.actor}: ${decision.reason}`;
       runtime.errors.push(new Error(record.error));

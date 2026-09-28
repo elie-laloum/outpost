@@ -1,4 +1,4 @@
-export type ConversationFormat = "claude" | "codex";
+export type ConversationFormat = "claude" | "codex" | "copilot" | "kimi";
 
 export type StoredConversationFormat = ConversationFormat | "harness";
 

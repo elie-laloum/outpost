@@ -9,13 +9,13 @@ Supporting contract not directly exported; use TypeScript inference or the publi
 
 ## Purpose and behavior
 
-Create the native ConversationStore for the selected Claude or Codex format, binding locate, capture and restore to that format’s filesystem layout.
+Create the native ConversationStore for the selected Claude, Codex, Copilot or Kimi format, binding locate, capture and restore to that format’s filesystem layout. Copilot/Kimi use bounded JSON session bundles rather than a single transcript.
 
 ## Parameters and properties
 
-| Name     | Type                 | Presence | Meaning                                    |
-| -------- | -------------------- | -------- | ------------------------------------------ |
-| `format` | `ConversationFormat` | Required | Native transcript layout: claude or codex. |
+| Name     | Type                 | Presence | Meaning                                                   |
+| -------- | -------------------- | -------- | --------------------------------------------------------- |
+| `format` | `ConversationFormat` | Required | Native transcript layout: claude, codex, copilot or kimi. |
 
 ## Returns
 

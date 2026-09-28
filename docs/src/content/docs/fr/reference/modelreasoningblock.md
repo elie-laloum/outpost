@@ -17,17 +17,19 @@ import type { ModelReasoningBlock } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom        | Type          | Présence | Rôle                                                                                                                                           |
-| ---------- | ------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `type`     | `"reasoning"` | Requis   | Discriminant du bloc : reasoning.                                                                                                              |
-| `provider` | `string`      | Requis   | Identité du fournisseur qui a produit le bloc ; les autres fournisseurs ne le reçoivent jamais.                                                |
-| `model`    | `string`      | Requis   | Modèle qui a produit le bloc ; il n’est rejoué qu’à ce même modèle.                                                                            |
-| `data`     | `unknown`     | Requis   | Charge opaque du service, comme un bloc thinking Anthropic avec sa signature ou un élément de raisonnement chiffré OpenAI. Ne la modifiez pas. |
+| Nom        | Type                  | Présence  | Rôle                                                                                                                                           |
+| ---------- | --------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `text`     | `string \| undefined` | Optionnel | Raisonnement lisible ou résumé éventuellement exposé par le fournisseur, distinct des données opaques de rejeu.                                |
+| `type`     | `"reasoning"`         | Requis    | Discriminant du bloc : reasoning.                                                                                                              |
+| `provider` | `string`              | Requis    | Identité du fournisseur qui a produit le bloc ; les autres fournisseurs ne le reçoivent jamais.                                                |
+| `model`    | `string`              | Requis    | Modèle qui a produit le bloc ; il n’est rejoué qu’à ce même modèle.                                                                            |
+| `data`     | `unknown`             | Requis    | Charge opaque du service, comme un bloc thinking Anthropic avec sa signature ou un élément de raisonnement chiffré OpenAI. Ne la modifiez pas. |
 
 ## Signature
 
 ```ts
 export interface ModelReasoningBlock {
+  readonly text?: string;
   readonly type: "reasoning";
   readonly provider: string;
   readonly model: string;

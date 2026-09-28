@@ -2,7 +2,10 @@ import type {
   Transport,
   TransportReference,
 } from "../domain/transport.types.ts";
-import type { AgentEvent } from "../domain/agent.types.ts";
+import type {
+  ObservationEvent,
+  Observation,
+} from "../domain/observation.types.ts";
 
 export type Logging =
   | false
@@ -14,6 +17,8 @@ export type Logging =
 
 export type Journal = {
   reference?: TransportReference;
-  record(event: AgentEvent): void;
+  record(
+    event: ObservationEvent & Partial<Omit<Observation, "event">>,
+  ): void | Promise<void>;
   close(): Promise<void>;
 };

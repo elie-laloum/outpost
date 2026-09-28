@@ -10,6 +10,7 @@ test("failure usage replaces streamed totals with authoritative summaries across
     observeDispatch(
       {
         brief: { text: "test" },
+        logging: false,
         telemetry: {
           startDispatch() {
             return {
@@ -57,3 +58,35 @@ test("failure usage replaces streamed totals with authoritative summaries across
   assert.equal(outcomes[0]?.status, "failed");
   assert.deepEqual(outcomes[0]?.usage, { input: 10, cached: 3, output: 5 });
 });
+
+test(
+  "an unresponsive journal cannot block dispatch completion",
+  { timeout: 1000 },
+  async () => {
+    const { createObservationHub } = await import("../../src/index.ts");
+    const result = await observeDispatch(
+      {
+        brief: { text: "test" },
+        observation: createObservationHub({ deliveryTimeoutMs: 10 }),
+        logging: {
+          transporter: {
+            name: "stalled",
+            async read() {
+              return undefined;
+            },
+            write() {
+              return new Promise(() => {});
+            },
+            async remove() {},
+            async *list() {},
+          },
+        },
+      },
+      async () => ({
+        usage: { input: 0, cached: 0, output: 0 },
+        completed: true,
+      }),
+    );
+    assert.equal(result.completed, true);
+  },
+);
