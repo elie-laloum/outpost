@@ -177,7 +177,7 @@ test("container recovery registers identity before allocation and refuses unknow
   let exists = true;
   const provider = containerProvider(
     "docker",
-    { image: "test:1" },
+    { image: "test:1", user: { uid: 1000, gid: 1000 } },
     async (command) => {
       calls.push(command);
       if (command.arguments?.[0] === "create")
@@ -218,8 +218,10 @@ test("failed recovery registration prevents container creation", async (t) => {
   let created = false;
   const provider = containerProvider(
     "podman",
-    { image: "test:1" },
+    { image: "test:1", user: { uid: 1000, gid: 1000 } },
     async (command) => {
+      if (command.arguments?.[0] === "machine")
+        return { status: 0, stdout: '[{"Running":true}]', stderr: "" };
       if (command.arguments?.[0] === "create") created = true;
       return {
         status: 0,
