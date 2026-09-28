@@ -4,6 +4,7 @@ import { spawn } from "node:child_process";
 import { once } from "node:events";
 import { writeFile, readFile } from "node:fs/promises";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import {
   speculate,
   recoverSpeculation,
@@ -85,7 +86,9 @@ for (const phase of ["allocation", "validation", "cleanup"])
     const child = spawn(
       process.execPath,
       [
-        new URL("../fixtures/speculation-crash.ts", import.meta.url).pathname,
+        fileURLToPath(
+          new URL("../fixtures/speculation-crash.ts", import.meta.url),
+        ),
         repo,
         directory,
         phase,
