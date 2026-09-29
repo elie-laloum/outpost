@@ -90,6 +90,34 @@ test("local transport creates nested storage beneath an existing filesystem root
   assert.equal(await transporter.read("nested/payload"), undefined);
 });
 
+test("local transport reads and lists objects replaced by concurrent writers", async (t) => {
+  const transporter = localTransport({ directory: await temporary(t) });
+  let revision = (
+    await transporter.write("activity/owner", Uint8Array.of(0), {
+      ifRevision: null,
+    })
+  ).revision;
+  let writing = true;
+  const writer = (async () => {
+    for (let index = 1; index < 150; index++)
+      revision = (
+        await transporter.write("activity/owner", Uint8Array.of(index % 256), {
+          ifRevision: revision,
+        })
+      ).revision;
+    writing = false;
+  })();
+  let reads = 0;
+  while (writing) {
+    assert.ok(await transporter.read("activity/owner"));
+    for await (const entry of transporter.list("activity/"))
+      assert.equal(entry.key, "activity/owner");
+    reads++;
+  }
+  await writer;
+  assert.ok(reads > 0);
+});
+
 for (const [name, factory] of Object.entries(adapters)) {
   test(`${name}: binary writes, versions, concurrent creates, stale deletes and bounded reads`, async (t) => {
     const transporter = await factory(t);

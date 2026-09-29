@@ -5,4 +5,5 @@ export const transportDefaults = Object.freeze({
   retryMs: 10,
   maxEntries: 100_000,
   mutationAttempts: 100,
+  replacedReadAttempts: 20,
 });

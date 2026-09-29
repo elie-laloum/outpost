@@ -14,7 +14,10 @@ import type {
 import type { LocalTransportOptions } from "./local-transport.types.ts";
 import { lock } from "./git/lock.ts";
 import { OutpostError } from "../domain/errors.ts";
-import { readInspectionFile } from "./inspection-file.ts";
+import {
+  InspectionFileChanged,
+  readInspectionFile,
+} from "./inspection-file.ts";
 import { decodeObject, encodeObject, readLimit } from "./transport-envelope.ts";
 import { transportDefaults } from "./transport.constants.ts";
 
@@ -40,13 +43,24 @@ export function localTransport(options: LocalTransportOptions): Transport {
     const limit = readLimit(options.maxBytes);
     try {
       const target = path(key);
-      const info = await lstat(target);
-      const data = await readInspectionFile(
-        target,
-        Math.min(info.size, limit + transportDefaults.headerBytes) || 1,
-      );
-      options.signal?.throwIfAborted();
-      return decodeObject(data, key, limit);
+      for (let attempt = 1; ; attempt++) {
+        const info = await lstat(target);
+        try {
+          const data = await readInspectionFile(
+            target,
+            Math.min(info.size, limit + transportDefaults.headerBytes) || 1,
+          );
+          options.signal?.throwIfAborted();
+          return decodeObject(data, key, limit);
+        } catch (error) {
+          // Writers replace objects atomically; read the replacement instead.
+          if (
+            !(error instanceof InspectionFileChanged) ||
+            attempt >= transportDefaults.replacedReadAttempts
+          )
+            throw error;
+        }
+      }
     } catch (error) {
       if (
         error &&

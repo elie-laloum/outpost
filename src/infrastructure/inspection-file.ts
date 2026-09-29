@@ -4,6 +4,14 @@ import { positive } from "../domain/errors.ts";
 import { inspectionFileFlags } from "./inspection-file.constants.ts";
 import { isDirectInspectionPath } from "./inspection-path.ts";
 
+/** Raised when the inspected path was replaced or modified during the read. */
+export class InspectionFileChanged extends Error {
+  constructor() {
+    super("Inspection file changed");
+    this.name = "InspectionFileChanged";
+  }
+}
+
 function unchanged(before: Stats, after: Stats): boolean {
   return (
     before.dev === after.dev &&
@@ -27,7 +35,7 @@ export async function readInspectionFile(
   try {
     const opened = await file.stat();
     if (!opened.isFile() || !unchanged(before, opened))
-      throw new Error("Inspection file changed");
+      throw new InspectionFileChanged();
     const buffer = Buffer.alloc(maxBytes + 1);
     let length = 0;
     while (length < buffer.length) {
@@ -45,7 +53,7 @@ export async function readInspectionFile(
       !unchanged(opened, await file.stat()) ||
       !unchanged(opened, await lstat(path))
     )
-      throw new Error("Inspection file changed");
+      throw new InspectionFileChanged();
     return buffer.subarray(0, length);
   } finally {
     await file.close();
