@@ -1,0 +1,1 @@
+[{"method":"GET","path":"/books"},{"method":"GET","path":"/books/:id"},{"method":"POST","path":"/books"},{"method":"DELETE","path":"/books/:id"},{"method":"GET","path":"/authors"}]
