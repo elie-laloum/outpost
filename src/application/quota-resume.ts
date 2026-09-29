@@ -22,6 +22,7 @@ export function quotaContinuation<O extends DispatchOptions<unknown>>(
     policy === "restart" ||
     !conversation ||
     options.continuation ||
+    options.agent?.kind === "fallback" ||
     options.agent?.resumable === false ||
     (options.passes ?? executionDefaults.passes) !== 1
   )

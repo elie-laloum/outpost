@@ -1,7 +1,8 @@
 import type { QuotaFault } from "../domain/quota.types.ts";
 import type { ObservationHub } from "../domain/observation.types.ts";
 import type { TransportReference } from "../domain/transport.types.ts";
-import type { Agent, AgentObservation, Usage } from "../domain/agent.types.ts";
+import type { AgentObservation, Usage } from "../domain/agent.types.ts";
+import type { DispatchAgent } from "../domain/fallback-agent.types.ts";
 import type { DispatchTelemetry } from "../domain/dispatch-telemetry.types.ts";
 import type { Brief } from "../domain/prompts.types.ts";
 import type { ResponseSpec } from "../domain/response.types.ts";
@@ -9,7 +10,7 @@ import type { Logging } from "../infrastructure/journal.types.ts";
 
 export interface DispatchOptions<T = undefined> {
   readonly observation?: ObservationHub;
-  readonly agent?: Agent;
+  readonly agent?: DispatchAgent;
   readonly logging?: Logging;
   readonly label?: string;
   readonly brief: Brief;

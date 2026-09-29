@@ -4,6 +4,10 @@ import type {
   TransportReference,
 } from "../domain/transport.types.ts";
 import type { Agent } from "../domain/agent.types.ts";
+import type {
+  DispatchAgent,
+  FallbackRecord,
+} from "../domain/fallback-agent.types.ts";
 import type { Command, CommandResult } from "../domain/command.types.ts";
 import type { Brief } from "../domain/prompts.types.ts";
 import type { SandboxProvider } from "../domain/sandbox.types.ts";
@@ -42,7 +46,7 @@ export interface Workspace extends WorkspaceRecord {
       SandboxOptions,
       Exclude<keyof WorkspaceOptions, "hooks" | "label"> | "workspace"
     > &
-      DispatchOptions<T> & { readonly agent: Agent },
+      DispatchOptions<T> & { readonly agent: DispatchAgent },
   ): Promise<DispatchResult<T>>;
   sandbox(
     options?: Omit<
@@ -64,7 +68,7 @@ export interface Workspace extends WorkspaceRecord {
 
 export interface SandboxOptions extends WorkspaceOptions {
   readonly includeUncommitted?: boolean;
-  readonly agent?: Agent;
+  readonly agent?: DispatchAgent;
   readonly sandboxProvider?: SandboxProvider;
   readonly workspace?: Workspace;
   readonly hooks?: LifecycleHooks;
@@ -100,6 +104,8 @@ export interface DispatchResult<T> extends Execution<T> {
   readonly transcriptReference?: TransportReference;
   readonly logReference?: TransportReference;
   readonly retainedDirectory?: string;
+  /** Candidate that ran and candidates that failed before it, for fallback agents. */
+  readonly fallback?: FallbackRecord;
   resume<U = undefined>(
     options: ContinuationOptions<U>,
   ): Promise<DispatchResult<U>>;
@@ -107,6 +113,9 @@ export interface DispatchResult<T> extends Execution<T> {
     options: ContinuationOptions<U>,
   ): Promise<DispatchResult<U>>;
 }
+
+export type DispatchRequest<T> = SandboxOptions &
+  DispatchOptions<T> & { readonly agent: DispatchAgent };
 
 export type ContinuationOptions<T = undefined> = DispatchOptions<T> &
   Omit<SandboxOptions, "agent">;

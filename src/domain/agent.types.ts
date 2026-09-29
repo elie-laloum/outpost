@@ -3,6 +3,10 @@ import type { AgentModel, ModelSpec } from "./model.types.ts";
 import type { Command, CommandResult, Variables } from "./command.types.ts";
 import type { ConversationStore } from "./conversation.types.ts";
 import type { ReplayAgent } from "./replay.types.ts";
+import type {
+  FallbackCandidate,
+  FallbackTrigger,
+} from "./fallback-agent.types.ts";
 
 export interface Usage {
   readonly complete?: boolean;
@@ -128,6 +132,14 @@ export type AgentEventDetails =
   | { readonly kind: "failure"; readonly message: string }
   | {
       readonly kind: "quota";
+      readonly message: string;
+      readonly resetAt?: string;
+    }
+  | {
+      readonly kind: "fallback";
+      readonly from: FallbackCandidate;
+      readonly to: FallbackCandidate;
+      readonly failure: FallbackTrigger;
       readonly message: string;
       readonly resetAt?: string;
     }

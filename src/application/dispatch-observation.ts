@@ -14,6 +14,7 @@ import {
   OutpostError,
 } from "../domain/errors.ts";
 import { addUsage } from "../domain/usage.ts";
+import { dispatchCandidates } from "../domain/fallback-agent.ts";
 import { journal } from "../infrastructure/journal.ts";
 import type { Journal } from "../infrastructure/journal.types.ts";
 import type { ObservedDispatchResult } from "./dispatch-observation.types.ts";
@@ -90,6 +91,7 @@ export async function observeDispatch<T, R extends ObservedDispatchResult>(
   const empty = (): Usage => ({ input: 0, cached: 0, output: 0 });
   let previous = empty(),
     current = empty();
+  let running = options.agent && dispatchCandidates(options.agent)[0];
   const { telemetry: _telemetry, ...settings } = options;
   const observed: DispatchOptions<T> = {
     ...settings,
@@ -104,12 +106,14 @@ export async function observeDispatch<T, R extends ObservedDispatchResult>(
       }
       if (event.kind === "usage") current = addUsage(current, event.tokens);
       if (event.kind === "summary") current = event.tokens;
+      if (event.kind === "fallback" && options.agent?.kind === "fallback")
+        running = options.agent.agents[event.to.index];
       observation
         .child({
           pass: event.pass,
           ...(event.subagentId ? { subagentId: event.subagentId } : {}),
         })
-        .emit(agentSource(options.agent), event);
+        .emit(agentSource(running), event);
     },
   };
   try {

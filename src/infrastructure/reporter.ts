@@ -1,3 +1,4 @@
+import type { FallbackCandidate } from "../domain/fallback-agent.types.ts";
 import type { ObservationEvent } from "../domain/observation.types.ts";
 import type { ReporterOptions, ReportPass } from "./reporter.types.ts";
 
@@ -78,6 +79,11 @@ export function reporter(
           `\n${prefix} quota: ${event.message}${event.resetAt ? ` · resets ${event.resetAt}` : ""}\n`,
         );
         break;
+      case "fallback":
+        write(
+          `\n${prefix} fallback: ${candidateLabel(event.from)} → ${candidateLabel(event.to)} · ${event.failure}: ${event.message}\n`,
+        );
+        break;
       case "conversation":
         if (options.verbose) write(`\n${prefix} conversation: ${event.id}\n`);
         break;
@@ -92,4 +98,10 @@ export function reporter(
         break;
     }
   };
+}
+
+function candidateLabel(candidate: FallbackCandidate): string {
+  return candidate.model
+    ? `${candidate.name} (${candidate.model})`
+    : candidate.name;
 }

@@ -1,5 +1,8 @@
 import type { ResourceActivity } from "../infrastructure/resource-activity.types.ts";
 import type { Agent } from "../domain/agent.types.ts";
+import type { ConversationRecord } from "../domain/conversation.types.ts";
+import type { FallbackRecord } from "../domain/fallback-agent.types.ts";
+import type { Execution } from "./execution.types.ts";
 import type { Variables } from "../domain/command.types.ts";
 import type { SandboxLease, SandboxProvider } from "../domain/sandbox.types.ts";
 import type { LifecycleHooks } from "../domain/workspace.types.ts";
@@ -56,4 +59,24 @@ export interface OperationGate {
 export interface AuthenticatedAgent {
   readonly adapter: Agent;
   readonly variables: Variables;
+}
+
+export interface CandidateSession {
+  readonly selected: Agent;
+  readonly conversations: Set<string>;
+  readonly captured: Map<string, ConversationRecord>;
+  save(id: string): Promise<ConversationRecord>;
+  conversation: string | undefined;
+}
+
+export interface CandidateExecution<T> {
+  readonly session: CandidateSession;
+  readonly execution: Execution<T>;
+  readonly fallback?: FallbackRecord;
+}
+
+export interface PreparedCandidate {
+  readonly session: CandidateSession;
+  readonly adapter: Agent;
+  readonly executionLease: SandboxLease;
 }

@@ -1,5 +1,5 @@
 import type { Transport } from "../domain/transport.types.ts";
-import type { Agent } from "../domain/agent.types.ts";
+import type { DispatchAgent } from "../domain/fallback-agent.types.ts";
 import type {
   WorkflowBudget,
   WorkflowUsage,
@@ -14,7 +14,7 @@ import type {
 
 export interface SpeculativeCandidate<T = undefined> {
   readonly key: string;
-  readonly agent: Agent;
+  readonly agent: DispatchAgent;
   readonly request: Omit<
     DispatchOptions<T>,
     "agent" | "signal" | "continuation"

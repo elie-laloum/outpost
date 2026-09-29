@@ -19,18 +19,21 @@ export async function attachInSandbox(
   settings: AttachOptions,
 ): Promise<AttachResult> {
   const { options, sandboxProvider, workspace, sync, stop } = context;
+  const chosen = settings.agent ?? options.agent;
   invariant(
-    (settings.agent ?? options.agent)?.kind === "cli",
+    chosen?.kind !== "fallback",
+    "Interactive attachment requires a single agent; fallback agents only apply to dispatch",
+  );
+  invariant(
+    chosen?.kind === "cli",
     "This harness does not support interactive attachment",
   );
   invariant(
-    !settings.continuation ||
-      (settings.agent ?? options.agent)?.resumable !== false,
+    !settings.continuation || chosen.resumable !== false,
     "This adapter does not support continuation",
   );
   invariant(
-    !settings.continuation?.fork ||
-      (settings.agent ?? options.agent)?.forkable !== false,
+    !settings.continuation?.fork || chosen.forkable !== false,
     "This adapter does not support automated fork",
   );
   const { selectAgent, restore } = agents;
@@ -38,7 +41,7 @@ export async function attachInSandbox(
     ? AbortSignal.any([settings.signal, stop.signal])
     : stop.signal;
   const { selected, adapter, executionLease } = await selectAgent(
-    settings.agent ?? options.agent,
+    chosen,
     signal,
   );
   if (settings.continuation)

@@ -1,22 +1,22 @@
-import type { RequiredAgent, Usage } from "../domain/agent.types.ts";
+import type { Usage } from "../domain/agent.types.ts";
+import { dispatchCandidates } from "../domain/fallback-agent.ts";
 import { invariant, recordRecovery } from "../domain/errors.ts";
 import { addUsage } from "../domain/usage.ts";
 import { storageFor } from "./agent-storage.ts";
 import { continuationConfiguration } from "./continuation.ts";
 import { preflightDispatch } from "./dispatch-validation.ts";
 import { executionDefaults } from "./execution.constants.ts";
-import type { DispatchOptions } from "./execution.types.ts";
 import { notify } from "./observation.ts";
 import type {
   ContinuationOptions,
+  DispatchRequest,
   DispatchResult,
-  SandboxOptions,
 } from "./outpost.types.ts";
 import { observeDispatch } from "./dispatch-observation.ts";
 import { createSandbox } from "./sandbox.ts";
 
 export async function dispatch<T = undefined>(
-  options: SandboxOptions & DispatchOptions<T> & RequiredAgent,
+  options: DispatchRequest<T>,
 ): Promise<DispatchResult<T>> {
   const { telemetry: _telemetry, ...configuration } = options;
   return observeDispatch(
@@ -27,28 +27,38 @@ export async function dispatch<T = undefined>(
 }
 
 async function dispatchOperation<T>(
-  options: SandboxOptions & DispatchOptions<T> & RequiredAgent,
-  original: SandboxOptions & DispatchOptions<T> & RequiredAgent,
+  options: DispatchRequest<T>,
+  original: DispatchRequest<T>,
 ): Promise<DispatchResult<T>> {
   options.signal?.throwIfAborted();
-  await preflightDispatch(
-    options,
-    options.workspace?.repository ?? options.repository ?? process.cwd(),
-    options.agent,
+  invariant(
+    options.agent.kind !== "fallback" || !options.continuation,
+    "Fallback agents cannot continue a conversation; resume with the agent that produced it",
   );
+  for (const candidate of dispatchCandidates(options.agent))
+    await preflightDispatch(
+      options,
+      options.workspace?.repository ?? options.repository ?? process.cwd(),
+      candidate,
+    );
   if ((options.passes ?? executionDefaults.passes) > 1) {
     const outputs: DispatchResult<T>[] = [];
+    let offset = 0;
     for (let index = 0; index < options.passes!; index++) {
       options.signal?.throwIfAborted();
+      let passes = 1;
       const output = await dispatchOperation(
         {
           ...options,
           passes: 1,
-          observe: (event) =>
-            notify(options.observe, { ...event, pass: index + 1 }),
+          observe: (event) => {
+            passes = Math.max(passes, event.pass);
+            notify(options.observe, { ...event, pass: offset + event.pass });
+          },
         },
         original,
       );
+      offset += passes;
       outputs.push(output);
       if (output.completed) break;
     }
@@ -65,7 +75,7 @@ async function dispatchOperation<T>(
       } as Usage),
     };
   }
-  if (options.continuation) {
+  if (options.continuation && options.agent.kind !== "fallback") {
     const storage = storageFor(options.agent);
     invariant(storage, "This adapter does not support native conversations");
     await storage.locate(
@@ -89,6 +99,10 @@ async function dispatchOperation<T>(
     successful = true;
     const disposed = await sandbox.close();
     const continuation = output.conversation;
+    const agent =
+      options.agent.kind === "fallback" && output.fallback
+        ? options.agent.agents[output.fallback.selected.index]!
+        : options.agent;
     return {
       ...output,
       ...disposed,
@@ -96,6 +110,7 @@ async function dispatchOperation<T>(
         invariant(continuation, "No conversation was emitted");
         return dispatch({
           ...continuationConfiguration(configuration, next),
+          agent,
           ...next,
           continuation: { id: continuation },
         });
@@ -104,6 +119,7 @@ async function dispatchOperation<T>(
         invariant(continuation, "No conversation was emitted");
         return dispatch({
           ...continuationConfiguration(configuration, next),
+          agent,
           ...next,
           continuation: { id: continuation, fork: true },
         });

@@ -61,6 +61,13 @@ test("human reporter exposes phases, duration and raw token counts while quiet m
     sink({ kind: "warning", message: "idle" });
     sink({ kind: "failure", message: "failed" });
     sink({
+      kind: "fallback",
+      from: { index: 0, name: "claude", model: "opus" },
+      to: { index: 1, name: "codex" },
+      failure: "quota",
+      message: "limit reached",
+    });
+    sink({
       kind: "summary",
       durationMs: 1234,
       status: 0,
@@ -79,6 +86,10 @@ test("human reporter exposes phases, duration and raw token counts while quiet m
   assert.match(normal, /tool failed: read\n/);
   assert.match(normal, /tool denied: rm · unsafe/);
   assert.match(normal, /stop prevented: run tests first/);
+  assert.match(
+    normal,
+    /fallback: claude \(opus\) → codex · quota: limit reached/,
+  );
   assert.doesNotMatch(normal, /missing-file|step 3/);
   assert.match(verbose, /tool failed: read missing-file/);
   assert.match(verbose, /step 3/);

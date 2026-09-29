@@ -3,6 +3,7 @@ import { observedLease } from "./observed-lease.ts";
 import { lstat } from "node:fs/promises";
 import { join, posix } from "node:path";
 import type { Agent } from "../domain/agent.types.ts";
+import { dispatchCandidates } from "../domain/fallback-agent.ts";
 import { invariant } from "../domain/errors.ts";
 import type { SandboxLease } from "../domain/sandbox.types.ts";
 import { git } from "../infrastructure/git/command.ts";
@@ -174,14 +175,15 @@ export async function provisionSandbox(
       await uploadFiles(lease, workspace.directory, [...new Set(copiedFiles)], {
         signal: setupSignal,
       });
-      if (options.bootstrap !== false && options.agent)
+      const initial = options.agent && dispatchCandidates(options.agent)[0];
+      if (options.bootstrap !== false && initial)
         prepared.set(
-          options.agent,
+          initial,
           await observedOperation(
             options.observation,
             "sandbox",
             "agent.bootstrap",
-            async () => prepareAdapter(options.agent!, lease!, setupSignal),
+            async () => prepareAdapter(initial, lease!, setupSignal),
           ),
         );
     }

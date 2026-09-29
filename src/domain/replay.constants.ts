@@ -23,6 +23,7 @@ export const replayExecutionEvents: ReadonlySet<string> = new Set([
   "phase",
   "prompt",
   "summary",
+  "fallback",
 ]);
 
 export const replayFaultCodes: ReadonlySet<string> = new Set([

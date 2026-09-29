@@ -1,18 +1,24 @@
 import { observedOperation } from "../domain/observed-operation.ts";
 import { readFile } from "node:fs/promises";
+import type { Agent } from "../domain/agent.types.ts";
 import type { ConversationRecord } from "../domain/conversation.types.ts";
 import { invariant, recordRecovery } from "../domain/errors.ts";
+import { dispatchCandidates } from "../domain/fallback-agent.ts";
+import { addUsage } from "../domain/usage.ts";
 import { git } from "../infrastructure/git/command.ts";
 import { commits } from "../infrastructure/git/history.ts";
+import { runWithFallback } from "./agent-fallback.ts";
 import { storageFor } from "./agent-storage.ts";
 import { warmContinuation } from "./continuation.ts";
 import { preflightDispatch } from "./dispatch-validation.ts";
 import { recordReplayChanges } from "./replay-recording.ts";
 import { execute } from "./execution.ts";
-import type { DispatchOptions, Execution } from "./execution.types.ts";
-import { notify } from "./observation.ts";
+import type { DispatchOptions } from "./execution.types.ts";
 import type { Sandbox, WarmDispatchResult } from "./outpost.types.ts";
 import type {
+  CandidateExecution,
+  CandidateSession,
+  PreparedCandidate,
   ProvisionedSandbox,
   SandboxAgents,
 } from "./sandbox-session.types.ts";
@@ -25,68 +31,87 @@ export async function dispatchInSandbox<T>(
 ): Promise<WarmDispatchResult<T>> {
   const { options, sandboxProvider, workspace, sync, stop, staging } = context;
   const { selectAgent, restore } = agents;
-  await preflightDispatch(
-    dispatch,
-    workspace.repository,
-    dispatch.agent ?? options.agent,
+  const requested = dispatch.agent ?? options.agent;
+  invariant(requested, "Provide an agent on the sandbox or this operation");
+  invariant(
+    requested.kind !== "fallback" || !dispatch.continuation,
+    "Fallback agents cannot continue a conversation; resume with the agent that produced it",
   );
+  for (const candidate of dispatchCandidates(requested))
+    await preflightDispatch(dispatch, workspace.repository, candidate);
   const signal = dispatch.signal
     ? AbortSignal.any([dispatch.signal, stop.signal])
     : stop.signal;
-  const { selected, adapter, executionLease } = await observedOperation(
-    dispatch.observation,
-    "sandbox",
-    "agent.prepare",
-    async () =>
-      selectAgent(
-        dispatch.agent ?? options.agent,
-        signal,
-        dispatch.observation,
-      ),
-  );
-  if (dispatch.continuation)
-    await observedOperation(
+  const sessions: CandidateSession[] = [];
+  let transcript: ConversationRecord | undefined;
+  const prepare = async (requestedAgent: Agent): Promise<PreparedCandidate> => {
+    const { selected, adapter, executionLease } = await observedOperation(
       dispatch.observation,
-      "conversation",
-      "conversation.restore",
-      async () => restore(dispatch.continuation!.id, selected, executionLease),
+      "sandbox",
+      "agent.prepare",
+      async () => selectAgent(requestedAgent, signal, dispatch.observation),
     );
+    const storage = storageFor(selected);
+    const continued = dispatch.continuation;
+    const session: CandidateSession = {
+      selected,
+      conversations: new Set(
+        continued && !continued.fork ? [continued.id] : [],
+      ),
+      captured: new Map(),
+      conversation: continued?.id,
+      async save(id) {
+        invariant(storage, "Conversation storage is unavailable");
+        const location = await observedOperation(
+          dispatch.observation,
+          "conversation",
+          "conversation.capture",
+          async () =>
+            storage.capture(id, {
+              repository: workspace.repository,
+              sandbox: executionLease,
+              staging,
+              ...(options.conversationHome
+                ? { home: options.conversationHome }
+                : {}),
+              ...(dispatch.warn ? { warn: dispatch.warn } : {}),
+              local: sandboxProvider.placement === "host",
+            }),
+        );
+        session.captured.set(id, location);
+        transcript = location;
+        return location;
+      },
+    };
+    sessions.push(session);
+    if (continued)
+      await observedOperation(
+        dispatch.observation,
+        "conversation",
+        "conversation.restore",
+        async () => restore(continued.id, selected, executionLease),
+      );
+    return { session, adapter, executionLease };
+  };
+  let initial: PreparedCandidate | undefined = await prepare(
+    dispatchCandidates(requested)[0]!,
+  );
   const baseline = (
     await git(workspace.directory, ["rev-parse", "HEAD"])
   ).trim();
-  let execution: Execution<T> | undefined,
-    transcript: ConversationRecord | undefined;
-  const captured = new Map<string, ConversationRecord>();
-  const storage = storageFor(selected);
-  let failure: unknown;
-  let conversation = dispatch.continuation?.id;
-  const conversations = new Set<string>(
-    conversation && !dispatch.continuation?.fork ? [conversation] : [],
-  );
-  const save = async (id: string) => {
-    invariant(storage, "Conversation storage is unavailable");
-    const location = await observedOperation(
-      dispatch.observation,
-      "conversation",
-      "conversation.capture",
-      async () =>
-        storage.capture(id, {
-          repository: workspace.repository,
-          sandbox: executionLease,
-          staging,
-          ...(options.conversationHome
-            ? { home: options.conversationHome }
-            : {}),
-          ...(dispatch.warn ? { warn: dispatch.warn } : {}),
-          local: sandboxProvider.placement === "host",
-        }),
-    );
-    captured.set(id, location);
-    transcript = location;
-    return location;
-  };
-  try {
-    execution = await execute(
+  const run = async (
+    requestedAgent: Agent,
+    observe: NonNullable<DispatchOptions["observe"]>,
+  ): Promise<CandidateExecution<T>> => {
+    const prepared =
+      initial?.session.selected === requestedAgent
+        ? initial
+        : await prepare(requestedAgent);
+    initial = undefined;
+    const { session, adapter, executionLease } = prepared;
+    const { selected } = session;
+    const storage = storageFor(selected);
+    const execution = await execute(
       workspace,
       executionLease,
       adapter,
@@ -96,17 +121,17 @@ export async function dispatchInSandbox<T>(
         signal,
         observe(event) {
           if (event.kind === "conversation") {
-            conversation = event.id;
-            conversations.add(event.id);
+            session.conversation = event.id;
+            session.conversations.add(event.id);
             agents.remember(selected, event.id);
           }
-          notify(dispatch.observe, event);
+          observe(event);
         },
       },
       async (turn) => {
         if (!turn.conversation || !storage || selected.capture === false)
           return turn;
-        const location = await save(turn.conversation);
+        const location = await session.save(turn.conversation);
         const usage = selected.transcriptUsage?.(
           await readFile(location.file, "utf8"),
         );
@@ -120,6 +145,27 @@ export async function dispatchInSandbox<T>(
         };
       },
     );
+    return { session, execution };
+  };
+  let outcome: CandidateExecution<T> | undefined;
+  let failure: unknown;
+  try {
+    const { value, failedUsage, fallback } = await runWithFallback(
+      requested,
+      dispatch.observe,
+      signal,
+      run,
+    );
+    outcome = {
+      session: value.session,
+      execution: fallback
+        ? {
+            ...value.execution,
+            usage: addUsage(failedUsage, value.execution.usage),
+          }
+        : value.execution,
+      ...(fallback ? { fallback } : {}),
+    };
   } catch (cause) {
     failure = cause;
   }
@@ -130,9 +176,10 @@ export async function dispatchInSandbox<T>(
       "repository.refresh",
       async () => sync?.pull(),
     );
-    if (storage && selected.capture !== false)
-      for (const id of conversations)
-        if (failure || !captured.has(id)) await save(id);
+    for (const session of sessions)
+      if (session.selected.capture !== false && storageFor(session.selected))
+        for (const id of session.conversations)
+          if (failure || !session.captured.has(id)) await session.save(id);
   } catch (cause) {
     failure = failure
       ? new AggregateError(
@@ -164,7 +211,9 @@ export async function dispatchInSandbox<T>(
     });
     throw failure;
   }
-  invariant(execution, "Execution did not produce a result");
+  invariant(outcome, "Execution did not produce a result");
+  const { session, execution, fallback } = outcome;
+  const { selected } = session;
   return {
     ...execution,
     branch: workspace.branch,
@@ -174,15 +223,16 @@ export async function dispatchInSandbox<T>(
     ...(transcript?.reference
       ? { transcriptReference: transcript.reference }
       : {}),
+    ...(fallback ? { fallback } : {}),
     resume<U>(next: DispatchOptions<U>) {
       warmContinuation(next);
-      invariant(conversation, "No conversation was emitted");
-      return result.resume(conversation, { agent: selected, ...next });
+      invariant(session.conversation, "No conversation was emitted");
+      return result.resume(session.conversation, { agent: selected, ...next });
     },
     fork<U>(next: DispatchOptions<U>) {
       warmContinuation(next);
-      invariant(conversation, "No conversation was emitted");
-      return result.fork(conversation, { agent: selected, ...next });
+      invariant(session.conversation, "No conversation was emitted");
+      return result.fork(session.conversation, { agent: selected, ...next });
     },
   };
 }
