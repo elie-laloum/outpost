@@ -13,7 +13,7 @@ import { createWorkflowCheckpointStore } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Construit un store dont le jeton de propriété et le checkpoint partagent un objet conditionnel. L’acquisition refuse un propriétaire existant. La libération préserve valeurs et usage. La propriété n’expire pas automatiquement ; après un crash, arrêter l’ancien exécuteur et récupérer explicitement sa révision observée avant reprise.
+Crée un WorkflowCheckpointStore qui conserve le checkpoint et le propriétaire de chaque exécution dans un seul objet, checkpoints/&lt;SHA-256 du runId>.json. acquire() échoue tant qu’un propriétaire est enregistré, et la libération conserve la progression. La propriété n’expire jamais : après un crash, arrêtez l’ancien exécuteur et appelez recoverWorkflowCheckpoint().
 
 [Exemple complet et règles détaillées](../../guide/durable-runs/).
 
@@ -21,7 +21,7 @@ Construit un store dont le jeton de propriété et le checkpoint partagent un ob
 
 | Nom                   | Type                    | Présence | Rôle                                                                                                                                        |
 | --------------------- | ----------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `options`             | `TransportStoreOptions` | Requis   | Transport conservant les enveloppes de checkpoint et leur propriété exclusive par exécution.                                                |
+| `options`             | `TransportStoreOptions` | Requis   | Transport qui contient un objet par exécution sous checkpoints/, avec son checkpoint et son propriétaire.                                   |
 | `options.transporter` | `Transport`             | Requis   | Transport objet appartenant à l’appelant, utilisé par le store ou l’opération. Fermer un workflow ou une sandbox ne ferme pas ce transport. |
 
 ## Retour

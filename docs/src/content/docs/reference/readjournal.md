@@ -13,7 +13,7 @@ import { readJournal } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Read committed journal events in chronological order from a pinned index revision. Every linked segment revision is checked; cycles, missing segments and entry-limit overruns fail. An open journal exposes only its committed prefix.
+Return a journal’s events in chronological order, reading its index at exactly reference.revision. Rejects with TransportConflict when the index has moved or a segment is missing, and with an error on a cycle or when maxEntries or maxBytes is exceeded.
 
 [Complete example and detailed rules](../../guide/journals/).
 
@@ -22,9 +22,9 @@ Read committed journal events in chronological order from a pinned index revisio
 | Name                  | Type                  | Presence | Meaning                                                                                                                    |
 | --------------------- | --------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------- |
 | `options`             | `ReadJournalOptions`  | Required | Transport, pinned journal index revision and traversal bound.                                                              |
-| `options.reference`   | `TransportReference`  | Required | Journal index reference from DispatchResult.logReference or inspection; determines the committed event chain to read.      |
-| `options.maxEntries`  | `number \| undefined` | Optional | Positive maximum number of retained events to traverse, default 100,000; cycles and excess entries fail.                   |
-| `options.maxBytes`    | `number \| undefined` | Optional | Total byte limit for journal segment payloads read into memory, default 64 MiB.                                            |
+| `options.reference`   | `TransportReference`  | Required | Journal index reference, usually DispatchResult.logReference; the index must still have this revision.                     |
+| `options.maxEntries`  | `number \| undefined` | Optional | Most events to read, default 100000; a longer chain rejects.                                                               |
+| `options.maxBytes`    | `number \| undefined` | Optional | Total bytes of event segments to read, default 64 MiB; exceeding it rejects.                                               |
 | `options.transporter` | `Transport`           | Required | Caller-owned object transport used by the store or operation. Closing a workflow or sandbox does not close this transport. |
 
 ## Returns

@@ -13,7 +13,7 @@ import { TransportConflict } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-A conditional object mutation or pinned read found a different revision. Re-read state before deciding whether a retry is valid; never replace the condition with an unconditional write.
+Thrown when a conditional write or removal, or a read pinned to a revision, finds another revision or no object; key names the object. Re-read the object before deciding whether to retry.
 
 [Complete example and detailed rules](../../guide/storage/).
 

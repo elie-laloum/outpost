@@ -13,18 +13,18 @@ import { createTransportConversations } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Enveloppe un ConversationStore de base, par exemple createKimiConversations() ou createHarnessConversations(), pour archiver ses captures en snapshots de transport sous un espace de noms stable du projet et le format du store de base. Le passer à l’option conversations du preset correspondant ou de createHarness() ; le store déclare le format de base, donc un harness incompatible échoue dès sa création. La capture préserve la relocalisation, les transcripts enfants et les bundles de session du store de base ; locate matérialise un snapshot immuable sous le dossier de récupération du dépôt cible. Les chemins file restent lisibles et reference identifie l’index distant. Fichiers natifs et identifiants restent distincts ; les archives ne sont ni chiffrées ni authentifiées.
+Enveloppe un ConversationStore de base qui déclare un format, par exemple createKimiConversations(), pour archiver aussi chaque capture sous conversations/&lt;namespace>/&lt;format>/&lt;id>. locate() matérialise le dernier snapshot sous .outpost/recovery/conversations du dépôt et restore() délègue au store de base. Les archives ne sont ni chiffrées ni authentifiées.
 
 [Exemple complet et règles détaillées](../../guide/conversations/).
 
 ## Paramètres et propriétés
 
-| Nom                   | Type                           | Présence | Rôle                                                                                                                                                                         |
-| --------------------- | ------------------------------ | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `base`                | `ConversationStore`            | Requis   | Store dont les captures sont archivées, par exemple createKimiConversations() ou createHarnessConversations() ; il doit déclarer un format, qui nomme les clés de transport. |
-| `options`             | `TransportConversationOptions` | Requis   | Transport et espace de noms stable du projet, partagé par les exécuteurs restaurant ces conversations.                                                                       |
-| `options.namespace`   | `string`                       | Requis   | Espace de noms logique stable du projet, indépendant des chemins des checkouts. Utiliser des espaces distincts pour des projets différents.                                  |
-| `options.transporter` | `Transport`                    | Requis   | Transport objet appartenant à l’appelant, utilisé par le store ou l’opération. Fermer un workflow ou une sandbox ne ferme pas ce transport.                                  |
+| Nom                   | Type                           | Présence | Rôle                                                                                                                                                                                                                                 |
+| --------------------- | ------------------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `base`                | `ConversationStore`            | Requis   | Store dont les captures sont archivées, par exemple createKimiConversations() ou createHarnessConversations(). Sans format, la création échoue avec le code configuration.                                                           |
+| `options`             | `TransportConversationOptions` | Requis   | Transport et espace de noms stable du projet, partagé par les exécuteurs restaurant ces conversations.                                                                                                                               |
+| `options.namespace`   | `string`                       | Requis   | Nom du projet dans les clés, conversations/&lt;namespace>/&lt;format>/&lt;id> ; doit être une clé de transport valide. Utilisez la même valeur sur chaque machine qui reprend ces conversations, et une valeur distincte par projet. |
+| `options.transporter` | `Transport`                    | Requis   | Transport objet appartenant à l’appelant, utilisé par le store ou l’opération. Fermer un workflow ou une sandbox ne ferme pas ce transport.                                                                                          |
 
 ## Retour
 

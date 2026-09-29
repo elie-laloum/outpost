@@ -13,7 +13,7 @@ import { readJournal } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Lit les événements validés d’un journal dans l’ordre chronologique depuis une révision exacte de l’index. Chaque révision de segment est vérifiée ; cycles, segments absents et dépassements de limite provoquent un échec. Un journal ouvert expose uniquement son préfixe validé.
+Renvoie les événements d’un journal dans l’ordre chronologique, en lisant son index exactement à reference.revision. Échoue avec TransportConflict si l’index a changé ou si un segment manque, et avec une erreur sur un cycle ou au-delà de maxEntries ou maxBytes.
 
 [Exemple complet et règles détaillées](../../guide/journals/).
 
@@ -22,9 +22,9 @@ Lit les événements validés d’un journal dans l’ordre chronologique depuis
 | Nom                   | Type                  | Présence  | Rôle                                                                                                                                        |
 | --------------------- | --------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
 | `options`             | `ReadJournalOptions`  | Requis    | Transport, révision exacte de l’index du journal et limite de parcours.                                                                     |
-| `options.reference`   | `TransportReference`  | Requis    | Référence de l’index issue de DispatchResult.logReference ou de l’inspection ; détermine la chaîne d’événements validés à lire.             |
-| `options.maxEntries`  | `number \| undefined` | Optionnel | Nombre maximal positif d’événements à parcourir, 100 000 par défaut ; cycles et dépassements provoquent un échec.                           |
-| `options.maxBytes`    | `number \| undefined` | Optionnel | Limite totale des contenus de segments lus en mémoire, 64 Mio par défaut.                                                                   |
+| `options.reference`   | `TransportReference`  | Requis    | Référence de l’index du journal, en général DispatchResult.logReference ; l’index doit encore avoir cette révision.                         |
+| `options.maxEntries`  | `number \| undefined` | Optionnel | Nombre maximal d’événements à lire, 100000 par défaut ; une chaîne plus longue est refusée.                                                 |
+| `options.maxBytes`    | `number \| undefined` | Optionnel | Total d’octets des segments d’événements à lire, 64 Mio par défaut ; un dépassement est refusé.                                             |
 | `options.transporter` | `Transport`           | Requis    | Transport objet appartenant à l’appelant, utilisé par le store ou l’opération. Fermer un workflow ou une sandbox ne ferme pas ce transport. |
 
 ## Retour

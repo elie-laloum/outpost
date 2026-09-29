@@ -13,10 +13,10 @@ import type { TransportConversationOptions } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom           | Type        | Présence | Rôle                                                                                                                                        |
-| ------------- | ----------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `namespace`   | `string`    | Requis   | Espace de noms logique stable du projet, indépendant des chemins des checkouts. Utiliser des espaces distincts pour des projets différents. |
-| `transporter` | `Transport` | Requis   | Transport objet appartenant à l’appelant, utilisé par le store ou l’opération. Fermer un workflow ou une sandbox ne ferme pas ce transport. |
+| Nom           | Type        | Présence | Rôle                                                                                                                                                                                                                                 |
+| ------------- | ----------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `namespace`   | `string`    | Requis   | Nom du projet dans les clés, conversations/&lt;namespace>/&lt;format>/&lt;id> ; doit être une clé de transport valide. Utilisez la même valeur sur chaque machine qui reprend ces conversations, et une valeur distincte par projet. |
+| `transporter` | `Transport` | Requis   | Transport objet appartenant à l’appelant, utilisé par le store ou l’opération. Fermer un workflow ou une sandbox ne ferme pas ce transport.                                                                                          |
 
 ## Signature
 

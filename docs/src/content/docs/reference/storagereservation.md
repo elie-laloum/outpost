@@ -13,13 +13,13 @@ import type { StorageReservation } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name                    | Type                  | Presence | Meaning                                                                                               |
-| ----------------------- | --------------------- | -------- | ----------------------------------------------------------------------------------------------------- |
-| `id`                    | `string`              | Required | Unique identity of this coordinated storage reservation.                                              |
-| `repository`            | `string`              | Required | Target host Git checkout.                                                                             |
-| `reserveBytes`          | `number`              | Required | Additional bytes requested for admission alongside existing storage usage.                            |
-| `release`               | `() => Promise<void>` | Required | Release this coordinated reservation so other cooperating writers can reclaim its admission capacity. |
-| `[Symbol.asyncDispose]` | `() => Promise<void>` | Required | Close this resource through JavaScript asynchronous resource disposal.                                |
+| Name                    | Type                  | Presence | Meaning                                                                                                                               |
+| ----------------------- | --------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                    | `string`              | Required | Random UUID that keys this reservation in reservations/ledger.                                                                        |
+| `repository`            | `string`              | Required | Top-level directory of the resolved Git checkout.                                                                                     |
+| `reserveBytes`          | `number`              | Required | Bytes this reservation holds in the ledger.                                                                                           |
+| `release`               | `() => Promise<void>` | Required | Remove this entry from the ledger with a conditional write. Later calls resolve without effect; a release that failed can be retried. |
+| `[Symbol.asyncDispose]` | `() => Promise<void>` | Required | Same as release(), so an await using scope releases the reservation when it ends.                                                     |
 
 ## Signature
 

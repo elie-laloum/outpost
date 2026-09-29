@@ -13,10 +13,10 @@ import type { TransportWriteOptions } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name         | Type                       | Presence | Meaning                                                                                                                     |
-| ------------ | -------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `signal`     | `AbortSignal \| undefined` | Optional | Abort a mutation. A network interruption can leave its outcome uncertain; reread before deciding to retry.                  |
-| `ifRevision` | `string \| null`           | Required | Expected current revision; null creates an absent object and is forbidden for deletion. Mismatches raise TransportConflict. |
+| Name         | Type                       | Presence | Meaning                                                                                                                                               |
+| ------------ | -------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `signal`     | `AbortSignal \| undefined` | Optional | Abort a mutation. A network interruption can leave its outcome uncertain; reread before deciding to retry.                                            |
+| `ifRevision` | `string \| null`           | Required | Revision the object must currently have, or null to require that the key is absent. A mismatch rejects with TransportConflict; remove() rejects null. |
 
 ## Signature
 

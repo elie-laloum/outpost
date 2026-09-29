@@ -13,7 +13,7 @@ import { createArtifactStore } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Build an ArtifactStore over a transport. Publication creates immutable blobs or accepts identical existing bytes; conflicts with different bytes fail. Existing artifact contracts and portable references remain unchanged.
+Create an ArtifactStore that keeps each artifact as the immutable object artifacts/&lt;id>.blob. Publishing an existing id succeeds only with identical bytes, otherwise it rejects with Existing object content integrity mismatch; reading a missing id rejects with Artifact does not exist.
 
 [Complete example and detailed rules](../../guide/artifacts/).
 

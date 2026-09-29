@@ -13,7 +13,7 @@ import { createTaskCacheStore } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Create a task cache store over a caller-owned Transport. Entries live under task-cache/&lt;fingerprint>.json; writes replace older entries conditionally and keep a concurrent writer’s entry. Reads validate the entry and its size. Entries are not authenticated: anyone who can write the transport controls restored results.
+Create a TaskCacheStore that keeps each entry as task-cache/&lt;fingerprint>.json. A write replaces the stored entry conditionally and keeps a concurrent writer’s entry; a read validates the entry and rejects one above maxBytes. Entries are not authenticated: anyone who can write the transport controls restored results.
 
 [Complete example and detailed rules](../../guide/task-cache/).
 

@@ -1,28 +1,57 @@
 ---
 title: Transports de stockage — Vue d’ensemble
-description: Conserver les données des workflows dans un stockage objet local ou S3.
+description: "Stocker des objets versionnés sur disque ou dans S3, et construire dessus les stores de checkpoints, artefacts, cache, journaux et conversations."
 sidebar:
   label: Vue d’ensemble
   order: 0
 ---
 
-Un transport conserve des objets binaires versionnés sous des clés logiques. Les stores gardent leurs règles d’artefacts, checkpoints, journaux et conversations ; le transport fournit les lectures bornées et les mutations conditionnelles.
+## Quel store pour quelles données
 
-## Fonctionnement
+Chaque store donne un sens et un préfixe de clé à ses objets ; le transport que vous passez décide où vont les octets.
 
-Utilisez `createLocalTransport` pour un dossier privé ou `createS3Transport`, depuis le point d’entrée optionnel `transports/s3`, avec un client S3 appartenant à l’appelant. Composez les stores sur le transport et conservez leurs références indépendamment des sandboxes. L’inspection observe les métadonnées ; la rétention revalide les journaux fermés avant suppression.
+| Données                    | Écrites par                                     | Préfixe de clé   | Limite de taille                                |
+| -------------------------- | ----------------------------------------------- | ---------------- | ----------------------------------------------- |
+| Checkpoints de workflow    | `createWorkflowCheckpointStore()`               | `checkpoints/`   | 16 Mio par checkpoint                           |
+| Artefacts                  | `createArtifactStore()`                         | `artifacts/`     | `maxBytes`, 16 Mio par défaut                   |
+| Entrées du cache de tâches | `createTaskCacheStore()`                        | `task-cache/`    | `maxBytes`, 16 Mio par défaut                   |
+| Journaux de dispatch       | `logging.transporter`, lus avec `readJournal()` | `logs/`          | `readJournal()` lit 64 Mio et 100000 événements |
+| Conversations              | `createTransportConversations()`                | `conversations/` | 1 Gio par capture                               |
+| Transferts de récupération | `recoveryTransport` ou `archiveRecovery()`      | `recovery/`      | `maxBytes`, 1 Gio par défaut                    |
 
-## Limites et responsabilités
+Journaux, activité des ressources et réservations de stockage utilisent par défaut un transport local sous `.outpost/storage` du dépôt. Les autres stores exigent un transport que vous créez.
 
-Les checkpoints gardent une propriété explicite jusqu’à libération ou récupération autorisée. Archives et conversations natives matérialisent les fichiers nécessaires à Git ou à l’agent. Workspaces, SQLite et montages exigent toujours un système de fichiers. L’activité distante reste une observation dont la propriété n’est pas vérifiée ; elle ne prouve pas l’arrêt d’une autre machine. Composez les stores avec createLocalTransport pour le disque ; les factories de stores par dossier sont supprimées.
+## Local ou S3
+
+Les deux transports stockent au plus 64 Mio par objet, lisent au plus `maxBytes` (64 Mio par défaut) et refusent un `ifRevision` périmé avec `TransportConflict`.
+
+|                         | `createLocalTransport()`                                                          | `createS3Transport()`                                                  |
+| ----------------------- | --------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| Import                  | `@elie-laloum/outpost`                                                            | `@elie-laloum/outpost/transports/s3`, avec `@aws-sdk/client-s3`        |
+| Emplacement des objets  | Un fichier par clé, réservé au propriétaire, sous `<directory>/objects`           | Un objet par clé sous `prefix`, dans un bucket existant                |
+| Écriture conditionnelle | Fichier de verrou par clé, puis contrôle de révision ; attente du verrou 30000 ms | PUT avec `If-Match` ou `If-None-Match: *`                              |
+| Suppression             | Supprime le fichier sous le verrou                                                | DELETE conditionnel, ou marqueur masqué avec `deleteMode: "tombstone"` |
+| Révision                | Identifiant aléatoire stocké dans l’en-tête de l’objet                            | L’ETag de l’objet                                                      |
+| Partagé par             | Les processus d’une même machine                                                  | Toute machine ayant accès au bucket                                    |
+| Durée de vie du client  | —                                                                                 | La vôtre : Outpost ne détruit jamais le `S3Client`                     |
+
+:::caution
+Utilisez `deleteMode: "tombstone"` sur R2, et le même mode pour tous les écrivains d’un préfixe. Ne purgez les marqueurs qu’après avoir arrêté tous les écrivains.
+:::
 
 ## Points d’entrée
 
+Guide : [Où vivent les données](../../../guide/storage/) · [S3 et R2](../../../guide/object-storage/) · [Journaux](../../../guide/journals/)
+
 - [createLocalTransport](../../createlocaltransport/)
 - [createS3Transport](../../creates3transport/)
-- [createArtifactStore](../../createartifactstore/)
 - [createWorkflowCheckpointStore](../../createworkflowcheckpointstore/)
+- [recoverWorkflowCheckpoint](../../recoverworkflowcheckpoint/)
+- [createArtifactStore](../../createartifactstore/)
+- [createTaskCacheStore](../../createtaskcachestore/)
+- [readJournal](../../readjournal/)
+- [createTransportConversations](../../createtransportconversations/)
+- [archiveRecovery](../../archiverecovery/)
 - [Transport](../../transport/)
-- [inspectRecovery](../../inspectrecovery/)
-
-[Lire le guide pratique](../../../guide/storage/).
+- [TransportConflict](../../transportconflict/)
+- [S3TransportOptions](../../s3transportoptions/)

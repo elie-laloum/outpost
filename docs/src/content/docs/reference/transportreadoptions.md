@@ -13,10 +13,10 @@ import type { TransportReadOptions } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name       | Type                       | Presence | Meaning                                                                                                   |
-| ---------- | -------------------------- | -------- | --------------------------------------------------------------------------------------------------------- |
-| `signal`   | `AbortSignal \| undefined` | Optional | Abort the read or listing without treating cancellation as an absent object.                              |
-| `maxBytes` | `number \| undefined`      | Optional | Maximum payload bytes for one read, default 64 MiB. Listing returns metadata and does not use this limit. |
+| Name       | Type                       | Presence | Meaning                                                                                     |
+| ---------- | -------------------------- | -------- | ------------------------------------------------------------------------------------------- |
+| `signal`   | `AbortSignal \| undefined` | Optional | Aborts the read or listing; the call rejects instead of returning undefined.                |
+| `maxBytes` | `number \| undefined`      | Optional | Largest payload a read accepts, default 64 MiB; a larger object rejects. list() ignores it. |
 
 ## Signature
 

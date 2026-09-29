@@ -13,7 +13,7 @@ import { createArtifactStore } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Construit un ArtifactStore sur un transport. La publication crée des blobs immuables ou accepte des octets existants identiques ; un contenu différent provoque un échec. Les contrats et références portables d’artefacts restent inchangés.
+Crée un ArtifactStore qui conserve chaque artefact dans l’objet immuable artifacts/&lt;id>.blob. Republier un id existant ne réussit qu’avec des octets identiques, sinon l’appel échoue avec Existing object content integrity mismatch ; lire un id absent échoue avec Artifact does not exist.
 
 [Exemple complet et règles détaillées](../../guide/artifacts/).
 

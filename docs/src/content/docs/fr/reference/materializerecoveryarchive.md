@@ -13,7 +13,7 @@ import { materializeRecoveryArchive } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Télécharge une archive versionnée dans un nouveau dossier local en conservant les modes et liens symboliques pris en charge. Vérifie révisions, SHA-256 et sommes de contrôle de récupération. Conserve la source et toute destination partielle en cas d’échec. Utiliser ensuite les API de planification et restauration avec le dépôt source pour produire un checkout.
+Télécharge une archive de récupération dans destination, en vérifiant la révision et le SHA-256 de chaque bloc puis les sommes de contrôle du transfert, et renvoie destination. Liens symboliques et modes de fichiers sont restaurés ; en cas d’échec, la destination partielle est conservée. Ramenez ensuite le travail avec planRecoveryRestore() et restoreRecoveryTransfer().
 
 [Exemple complet et règles détaillées](../../guide/recovery/).
 
@@ -26,7 +26,7 @@ Télécharge une archive versionnée dans un nouveau dossier local en conservant
 | `options.destination` | `string`                        | Requis    | Nouveau dossier local dont le parent existe. Les destinations existantes sont refusées ; les données partielles sont conservées en cas d’échec. |
 | `options.maxBytes`    | `number \| undefined`           | Optionnel | Limite positive totale des contenus restaurés, 1 Gio par défaut ; borne aussi la vérification d’intégrité de récupération.                      |
 | `options.transporter` | `Transport`                     | Requis    | Transport objet appartenant à l’appelant, utilisé par le store ou l’opération. Fermer un workflow ou une sandbox ne ferme pas ce transport.     |
-| `observation`         | `ObservationHub \| undefined`   | Optionnel | Hub facultatif recevant le début et la fin de matérialisation d’archive ; jamais persisté dans le plan ni l’archive.                            |
+| `observation`         | `ObservationHub \| undefined`   | Optionnel | Hub qui reçoit les événements de début et de fin du téléchargement de l’archive.                                                                |
 
 ## Retour
 

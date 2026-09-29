@@ -84,20 +84,20 @@
     "Commandes de préparation : workspaceReady une fois à l’ouverture du workspace, puis hostReady et sandboxReady pour chaque sandbox qui l’utilise, sauf si cette sandbox passe ses propres hooks. Chaque commande s’arrête après 600000 (10 minutes) sauf si elle fixe deadlineMs ; une sortie non nulle échoue avec le code process."
   ],
   "StorageReservationOptions.maxBytes": [
-    "Maximum admitted total of observed storage and active reservations, in bytes.",
-    "Total maximal admis du stockage observé et des réservations actives, en octets."
+    "Limit for observed usage plus active reservations plus this request, in bytes; above it, admission rejects with code configuration. Must be a non-negative safe integer.",
+    "Limite de l’usage observé, des réservations actives et de cette demande réunis, en octets ; au-delà, l’admission rejette avec le code configuration. Doit être un entier sûr positif ou nul."
   ],
   "StorageReservationOptions.reserveBytes": [
-    "Additional bytes requested for admission alongside existing storage usage.",
-    "Octets supplémentaires demandés à l’admission en plus du stockage déjà utilisé."
+    "Bytes this reservation holds in the ledger until it is released. Must be a non-negative safe integer.",
+    "Octets que cette réservation occupe dans le registre jusqu’à sa libération. Doit être un entier sûr positif ou nul."
   ],
   "StorageReservationOptions.maxEntries": [
-    "Maximum filesystem entries inspected before marking the inventory incomplete.",
-    "Nombre maximal d’entrées de fichiers inspectées avant de déclarer l’inventaire incomplet."
+    "Maximum files and directories scanned under .outpost, or objects listed from an explicit transporter, default 100000. Exceeding it rejects admission with code configuration.",
+    "Nombre maximal de fichiers et répertoires parcourus sous .outpost, ou d’objets listés depuis un transporter explicite, 100000 par défaut. Au-delà, l’admission rejette avec le code configuration."
   ],
   "StorageReservationOptions.signal": [
-    "Cooperative cancellation for this operation.",
-    "Annulation coopérative de cette opération."
+    "Cancels admission with the abort reason until the entry is written. release() ignores it.",
+    "Annule l’admission avec la raison de l’annulation tant que l’entrée n’est pas écrite. release() l’ignore."
   ],
   "BranchPolicy.mode": [
     "current works in the checkout itself; named works on the branch name in a worktree under .outpost/workspaces; integrate creates an outpost/<label>-<id> branch there, which integrate() merges into the base branch.",
@@ -2126,32 +2126,32 @@
     "Indique si au moins un contrôle de diagnostic a échoué."
   ],
   "reserveRecoveryStorage.options": [
-    "Repository, storage admission limit, bytes to reserve and acquisition cancellation.",
-    "Dépôt, limite d’admission du stockage, octets à réserver et annulation de l’acquisition."
+    "Repository, byte limit, bytes to reserve, ledger transport, scan limit and cancellation.",
+    "Dépôt, limite en octets, octets à réserver, transport du registre, limite d’inventaire et annulation."
   ],
   "RecoveryStorageReservationOptions.repository": [
-    "Target host Git checkout.",
-    "Checkout Git hôte ciblé."
+    "Git checkout whose writers share the ledger, default process.cwd(), resolved to its top-level directory. Without transporter, its .outpost holds the ledger and is measured; a missing directory rejects with code workspace.",
+    "Checkout Git dont les écrivains partagent le registre, process.cwd() par défaut, résolu vers son répertoire racine. Sans transporter, son .outpost contient le registre et sert à mesurer l’usage ; un répertoire absent rejette avec le code workspace."
   ],
   "StorageReservation.id": [
-    "Unique identity of this coordinated storage reservation.",
-    "Identité unique de cette réservation coordonnée de stockage."
+    "Random UUID that keys this reservation in reservations/ledger.",
+    "UUID aléatoire qui identifie cette réservation dans reservations/ledger."
   ],
   "StorageReservation.repository": [
-    "Target host Git checkout.",
-    "Checkout Git hôte ciblé."
+    "Top-level directory of the resolved Git checkout.",
+    "Répertoire racine du checkout Git résolu."
   ],
   "StorageReservation.reserveBytes": [
-    "Additional bytes requested for admission alongside existing storage usage.",
-    "Octets supplémentaires demandés à l’admission en plus du stockage déjà utilisé."
+    "Bytes this reservation holds in the ledger.",
+    "Octets que cette réservation occupe dans le registre."
   ],
   "StorageReservation.release": [
-    "Release this coordinated reservation so other cooperating writers can reclaim its admission capacity.",
-    "Libère cette réservation coordonnée afin que les autres écrivains coopératifs retrouvent sa capacité d’admission."
+    "Remove this entry from the ledger with a conditional write. Later calls resolve without effect; a release that failed can be retried.",
+    "Retire cette entrée du registre par une écriture conditionnelle. Les appels suivants se résolvent sans effet ; une libération en échec peut être relancée."
   ],
   "StorageReservation.[Symbol.asyncDispose]": [
-    "Close this resource through JavaScript asynchronous resource disposal.",
-    "Ferme cette ressource via le mécanisme de libération asynchrone JavaScript."
+    "Same as release(), so an await using scope releases the reservation when it ends.",
+    "Équivaut à release() : un bloc await using libère la réservation à sa sortie."
   ],
   "planRecoveryRestore.options": [
     "Retained transfer source, repository, new destination, selected side and verification byte bound.",
@@ -2995,80 +2995,80 @@
     "Clé logique dont la révision attendue ne correspondait pas à l’objet stocké."
   ],
   "Transport.name": [
-    "Diagnostic adapter name; callers must use the transport contract rather than branch on this name.",
-    "Nom de diagnostic de l’adaptateur ; les appelants utilisent le contrat du transport sans sélectionner un comportement par ce nom."
+    "Adapter name for diagnostics: local or s3 for the built-in transports.",
+    "Nom de l’adaptateur pour le diagnostic : local ou s3 pour les transports intégrés."
   ],
   "Transport.read": [
-    "Read one complete object with a byte limit; return undefined only when it is absent. Revisions identify the exact bytes read.",
-    "Lit un objet complet avec une limite d’octets ; renvoie undefined uniquement s’il est absent. La révision identifie précisément les octets lus."
+    "Reads one complete object, or returns undefined when the key is absent. An object larger than maxBytes rejects instead of being truncated.",
+    "Lit un objet complet, ou renvoie undefined si la clé est absente. Un objet plus grand que maxBytes est refusé au lieu d’être tronqué."
   ],
   "Transport.write": [
-    "Atomically publish up to 64 MiB only when the expected revision matches, or create when ifRevision is null. Every successful write returns a fresh revision, including identical bytes.",
-    "Publie atomiquement jusqu’à 64 Mio si la révision attendue correspond, ou crée l’objet si ifRevision vaut null. Chaque écriture réussie renvoie une nouvelle révision, même pour des octets identiques."
+    "Atomically stores up to 64 MiB when ifRevision matches the current revision, or is null and the key is absent; otherwise rejects with TransportConflict. Each success returns a new revision, even for identical bytes.",
+    "Stocke atomiquement jusqu’à 64 Mio si ifRevision correspond à la révision courante, ou vaut null et la clé est absente ; sinon échoue avec TransportConflict. Chaque succès renvoie une nouvelle révision, même pour des octets identiques."
   ],
   "Transport.remove": [
-    "Delete only the supplied existing revision; null is invalid. A conflict must never remove a replacement written by another owner.",
-    "Supprime uniquement la révision existante fournie ; null est invalide. Un conflit ne doit jamais supprimer un remplacement écrit par un autre propriétaire."
+    "Deletes the object only when its current revision equals ifRevision; a missing object or another revision rejects with TransportConflict. ifRevision null is rejected.",
+    "Supprime l’objet seulement si sa révision courante vaut ifRevision ; un objet absent ou une autre révision provoque TransportConflict. ifRevision null est refusé."
   ],
   "Transport.list": [
-    "Iterate metadata for keys beginning with the prefix, handling backend pagination. A listing is an observation, not a transaction across objects.",
-    "Parcourt les métadonnées des clés commençant par le préfixe, avec pagination du backend. Le listing est une observation, pas une transaction entre objets."
+    "Yields the metadata of every object whose key starts with prefix, across backend pages. It is not a snapshot: objects changed during the listing may or may not appear.",
+    "Produit les métadonnées de chaque objet dont la clé commence par prefix, sur toutes les pages du backend. Ce n’est pas un instantané : les objets modifiés pendant le listing peuvent apparaître ou non."
   ],
   "TransportReadOptions.signal": [
-    "Abort the read or listing without treating cancellation as an absent object.",
-    "Annule la lecture ou le listing sans assimiler l’annulation à un objet absent."
+    "Aborts the read or listing; the call rejects instead of returning undefined.",
+    "Annule la lecture ou le listing ; l’appel échoue au lieu de renvoyer undefined."
   ],
   "TransportReadOptions.maxBytes": [
-    "Maximum payload bytes for one read, default 64 MiB. Listing returns metadata and does not use this limit.",
-    "Nombre maximal d’octets utiles pour une lecture, 64 Mio par défaut. Le listing renvoie des métadonnées et n’utilise pas cette limite."
+    "Largest payload a read accepts, default 64 MiB; a larger object rejects. list() ignores it.",
+    "Plus grand contenu accepté par une lecture, 64 Mio par défaut ; un objet plus grand est refusé. list() l’ignore."
   ],
   "TransportObject.bytes": [
     "Complete binary payload, without the adapter’s storage envelope.",
     "Contenu binaire complet, sans l’enveloppe de stockage de l’adaptateur."
   ],
   "TransportEntry.key": [
-    "Relative logical object key; slash-separated safe segments, up to 512 characters. It is not a filesystem path or URL.",
-    "Clé logique relative ; segments sûrs séparés par des slashs, jusqu’à 512 caractères. Ce n’est ni un chemin de fichier ni une URL."
+    "Logical key: /-separated segments of letters, digits, ., _ and -, none starting with a dot, up to 512 characters. It is not a file path or URL.",
+    "Clé logique : segments séparés par / composés de lettres, chiffres, ., _ et -, sans point initial, jusqu’à 512 caractères. Ce n’est ni un chemin de fichier ni une URL."
   ],
   "TransportEntry.revision": [
-    "Opaque version token used for conditional writes and deletes; do not interpret it as a content digest.",
-    "Jeton de version opaque utilisé pour les écritures et suppressions conditionnelles ; ce n’est pas un digest du contenu."
+    "Opaque token of this version, passed as ifRevision to replace or remove it. It changes on every write and is not a content digest.",
+    "Jeton opaque de cette version, passé comme ifRevision pour la remplacer ou la supprimer. Il change à chaque écriture et n’est pas un digest du contenu."
   ],
   "TransportEntry.size": [
     "Payload size in bytes, excluding the transport envelope and backend storage overhead.",
     "Taille utile en octets, hors enveloppe du transport et surcoûts du backend."
   ],
   "TransportEntry.modifiedAt": [
-    "ISO timestamp of the stored version, used as a retention observation.",
-    "Horodatage ISO de la version stockée, utilisé comme observation pour la rétention."
+    "ISO timestamp of the stored version; retention computes object age from it.",
+    "Horodatage ISO de la version stockée ; la rétention en déduit l’âge de l’objet."
   ],
   "TransportWriteOptions.signal": [
     "Abort a mutation. A network interruption can leave its outcome uncertain; reread before deciding to retry.",
     "Annule une mutation. Une interruption réseau peut rendre son résultat incertain ; relire avant de décider de réessayer."
   ],
   "TransportWriteOptions.ifRevision": [
-    "Expected current revision; null creates an absent object and is forbidden for deletion. Mismatches raise TransportConflict.",
-    "Révision courante attendue ; null crée un objet absent et est interdit pour la suppression. Une différence provoque TransportConflict."
+    "Revision the object must currently have, or null to require that the key is absent. A mismatch rejects with TransportConflict; remove() rejects null.",
+    "Révision que l’objet doit avoir actuellement, ou null pour exiger que la clé soit absente. Une différence provoque TransportConflict ; remove() refuse null."
   ],
   "TransportReference.key": [
     "Logical key in the configured transport; the reference contains no credentials or backend client.",
     "Clé logique dans le transport configuré ; la référence ne contient ni identifiants ni client du backend."
   ],
   "TransportReference.revision": [
-    "Exact revision to read; a replacement is rejected instead of silently changing the referenced result.",
-    "Révision exacte à lire ; un remplacement est refusé au lieu de modifier silencieusement le résultat référencé."
+    "Exact revision to read; a replaced or deleted object rejects with TransportConflict instead of returning other bytes.",
+    "Révision exacte à lire ; un objet remplacé ou supprimé provoque TransportConflict au lieu de renvoyer d’autres octets."
   ],
   "TransportStoreOptions.transporter": [
     "Caller-owned object transport used by the store or operation. Closing a workflow or sandbox does not close this transport.",
     "Transport objet appartenant à l’appelant, utilisé par le store ou l’opération. Fermer un workflow ou une sandbox ne ferme pas ce transport."
   ],
   "createLocalTransport.options": [
-    "Private root directory for the versioned local object layout.",
-    "Dossier racine privé pour le format local d’objets versionnés."
+    "Directory that holds the objects and their lock files.",
+    "Dossier qui contient les objets et leurs fichiers de verrou."
   ],
   "LocalTransportOptions.directory": [
-    "Root of the objects and local mutation locks; resolved when the factory is called. Symlink directories are rejected. This layout differs from legacy file stores.",
-    "Racine des objets et verrous de mutation locaux ; résolue à l’appel de la fabrique. Les dossiers symboliques sont refusés. Ce format diffère des anciens stores de fichiers."
+    "Root directory, resolved when the factory is called; objects go under objects/ and locks under .outpost/locks. A symlinked root rejects the first write.",
+    "Dossier racine, résolu à l’appel de la fabrique ; les objets vont sous objects/ et les verrous sous .outpost/locks. Une racine qui est un lien symbolique fait échouer la première écriture."
   ],
   "createArtifactStore.options": [
     "Transport and per-artifact payload bound for immutable publication and verified reads.",
@@ -3079,8 +3079,8 @@
     "Taille maximale positive d’un artefact en octets, 16 Mio par défaut ; vérifiée avant publication et pendant la lecture."
   ],
   "createWorkflowCheckpointStore.options": [
-    "Transport that owns checkpoint envelopes and their exclusive run ownership records.",
-    "Transport conservant les enveloppes de checkpoint et leur propriété exclusive par exécution."
+    "Transport that holds one object per run under checkpoints/, with its checkpoint and owner.",
+    "Transport qui contient un objet par exécution sous checkpoints/, avec son checkpoint et son propriétaire."
   ],
   "recoverWorkflowCheckpoint.options": [
     "Run and observed revision to unlock after the caller has independently stopped the previous runner.",
@@ -3091,20 +3091,20 @@
     "Identité de l’exécution dont la propriété est explicitement libérée ; les valeurs du checkpoint restent intactes."
   ],
   "CheckpointRecoveryOptions.revision": [
-    "Revision observed after stopping the old runner; a changed revision refuses recovery.",
-    "Révision observée après arrêt de l’ancien exécuteur ; une révision modifiée fait refuser la récupération."
+    "Revision of the checkpoint object read after stopping the old runner; if the object changed since, recovery rejects with TransportConflict.",
+    "Révision de l’objet de checkpoint lue après l’arrêt de l’ancien exécuteur ; si l’objet a changé depuis, la récupération échoue avec TransportConflict."
   ],
   "readJournal.options": [
     "Transport, pinned journal index revision and traversal bound.",
     "Transport, révision exacte de l’index du journal et limite de parcours."
   ],
   "ReadJournalOptions.reference": [
-    "Journal index reference from DispatchResult.logReference or inspection; determines the committed event chain to read.",
-    "Référence de l’index issue de DispatchResult.logReference ou de l’inspection ; détermine la chaîne d’événements validés à lire."
+    "Journal index reference, usually DispatchResult.logReference; the index must still have this revision.",
+    "Référence de l’index du journal, en général DispatchResult.logReference ; l’index doit encore avoir cette révision."
   ],
   "ReadJournalOptions.maxEntries": [
-    "Positive maximum number of retained events to traverse, default 100,000; cycles and excess entries fail.",
-    "Nombre maximal positif d’événements à parcourir, 100 000 par défaut ; cycles et dépassements provoquent un échec."
+    "Most events to read, default 100000; a longer chain rejects.",
+    "Nombre maximal d’événements à lire, 100000 par défaut ; une chaîne plus longue est refusée."
   ],
   "createTransportConversations.format": [
     "Transcript format: claude or codex for native JSONL, copilot or kimi for native session bundles, or harness for custom harness transcripts. Antigravity has no portable conversation store.",
@@ -3115,8 +3115,8 @@
     "Transport et espace de noms stable du projet, partagé par les exécuteurs restaurant ces conversations."
   ],
   "TransportConversationOptions.namespace": [
-    "Stable logical project namespace, independent of checkout paths. Use distinct namespaces for unrelated projects.",
-    "Espace de noms logique stable du projet, indépendant des chemins des checkouts. Utiliser des espaces distincts pour des projets différents."
+    "Project name in the keys, conversations/<namespace>/<format>/<id>; must be a valid transport key. Use the same value on every machine that resumes these conversations, and a distinct one per project.",
+    "Nom du projet dans les clés, conversations/<namespace>/<format>/<id> ; doit être une clé de transport valide. Utilisez la même valeur sur chaque machine qui reprend ces conversations, et une valeur distincte par projet."
   ],
   "ConversationRecord.reference": [
     "Transport key and revision of the conversation index, set by createTransportConversations(). file still points to a readable local copy.",
@@ -3131,8 +3131,8 @@
     "Transfert existant contenant state.json, checksums.json et les patches, bundles et fichiers supplémentaires requis."
   ],
   "RecoveryArchiveOptions.maxBytes": [
-    "Positive total payload bound, default 1 GiB. Files are uploaded in bounded chunks after local snapshot verification.",
-    "Limite positive totale des contenus, 1 Gio par défaut. Les fichiers sont envoyés par blocs bornés après vérification du snapshot local."
+    "Total payload bound, default 1 GiB; applies to the local snapshot and to the upload.",
+    "Limite totale des contenus, 1 Gio par défaut ; s’applique au snapshot local et à l’envoi."
   ],
   "materializeRecoveryArchive.options": [
     "Pinned archive reference, transport, new local destination and verification bound.",
@@ -3159,8 +3159,8 @@
     "Transport de l’enregistrement d’activité de cette sandbox, par défaut le stockage local sous .outpost/storage. L’enregistrement est supprimé après une fermeture propre et conservé avec une phase d’échec quand le nettoyage échoue."
   ],
   "StorageReservationOptions.transporter": [
-    "Transport for the conditional reservation ledger. Defaults to createLocalTransport under the repository’s .outpost/storage with filesystem usage accounting. An explicit transport measures object payloads. Abandoned claims require explicit recovery in both cases.",
-    "Transport du registre conditionnel de réservations. Par défaut : createLocalTransport sous .outpost/storage avec mesure des fichiers du dépôt. Un transport explicite mesure les contenus objets. Les réservations abandonnées exigent une récupération explicite dans les deux cas."
+    "Transport that stores reservations/ledger; the sizes of all its other objects count as usage. Default: createLocalTransport under .outpost/storage, with usage measured from the files under .outpost/recovery, logs, locks, workspaces and storage.",
+    "Transport qui stocke reservations/ledger ; la taille de tous ses autres objets compte comme usage. Par défaut : createLocalTransport sous .outpost/storage, avec un usage mesuré sur les fichiers sous .outpost/recovery, logs, locks, workspaces et storage."
   ],
   "Logging.transporter": [
     "Persist immutable event segments and a versioned index through this transport. Defaults to createLocalTransport rooted at <repository>/.outpost/storage; read the returned logReference with readJournal.",
@@ -3223,16 +3223,16 @@
     "S3Client configuré par l’appelant avec région, identifiants et éventuel endpoint compatible. Outpost ne le détruit pas et ne transmet pas ses identifiants aux sandboxes."
   ],
   "S3TransportOptions.bucket": [
-    "Existing private bucket supporting conditional PUT and paginated listing, plus conditional DELETE in the default delete mode. The adapter does not create buckets.",
-    "Bucket privé existant prenant en charge PUT conditionnel et la pagination, ainsi que DELETE conditionnel dans le mode de suppression par défaut. L’adaptateur ne crée pas de bucket."
+    "Existing private bucket that supports conditional PUT and paginated listing, plus conditional DELETE in the default delete mode. The transport never creates it; an empty name rejects.",
+    "Bucket privé existant qui prend en charge PUT conditionnel et la pagination, ainsi que DELETE conditionnel dans le mode de suppression par défaut. Le transport ne le crée jamais ; un nom vide est refusé."
   ],
   "S3TransportOptions.prefix": [
-    "Optional private prefix for Outpost objects. Keep unrelated objects outside this prefix; defaults to the bucket root.",
-    "Préfixe privé optionnel des objets Outpost. Garder les objets sans rapport hors de ce préfixe ; racine du bucket par défaut."
+    "Key prefix for every Outpost object, default the bucket root; must be a valid transport key, trailing slash allowed. Keep unrelated objects outside it.",
+    "Préfixe des clés de tous les objets Outpost, racine du bucket par défaut ; doit être une clé de transport valide, slash final accepté. Gardez les objets sans rapport en dehors."
   ],
   "ReadJournalOptions.maxBytes": [
-    "Total byte limit for journal segment payloads read into memory, default 64 MiB.",
-    "Limite totale des contenus de segments lus en mémoire, 64 Mio par défaut."
+    "Total bytes of event segments to read, default 64 MiB; exceeding it rejects.",
+    "Total d’octets des segments d’événements à lire, 64 Mio par défaut ; un dépassement est refusé."
   ],
   "createBullMQTaskQueue.options": [
     "Redis connection settings and the stable namespace shared by producers and workers.",
@@ -4593,8 +4593,8 @@
     "Déploiement du compte Kimi : \"global\" pour kimi.ai (par défaut) ou \"mainland-cn\" pour kimi.com, qui sélectionne le fichier OAuth et les endpoints de connexion. Le définir avec l’authentification usage échoue dès la création du harness."
   ],
   "S3TransportOptions.deleteMode": [
-    "\"conditional\" (default) requires atomic conditional DELETE support. \"tombstone\" removes objects through conditional PUT markers for endpoints such as R2; reads and lists hide markers and conditional creation can replace them. All writers sharing a prefix must select the same mode. Markers retain a 1 KiB envelope and listing adds a HEAD per object; physically purge markers only after stopping every writer.",
-    "\"conditional\" (défaut) exige DELETE conditionnel atomique. \"tombstone\" supprime via des marqueurs PUT conditionnels pour les endpoints comme R2 ; lectures et listes masquent les marqueurs, remplaçables par création conditionnelle. Tous les écrivains d’un préfixe doivent choisir le même mode. Chaque marqueur conserve une enveloppe de 1 Kio et le listing ajoute un HEAD par objet ; purger physiquement seulement après arrêt de tous les écrivains."
+    "How remove() works: \"conditional\" (default) sends a conditional DELETE; \"tombstone\", for R2, overwrites the object with a hidden 1 KiB marker and makes list() send one HEAD per object. Every writer of a prefix must use the same mode; purge markers only after stopping them all.",
+    "Fonctionnement de remove() : \"conditional\" (défaut) envoie un DELETE conditionnel ; \"tombstone\", pour R2, remplace l’objet par un marqueur masqué de 1 Kio et fait envoyer à list() un HEAD par objet. Tous les écrivains d’un préfixe doivent utiliser le même mode ; ne purgez les marqueurs qu’après les avoir tous arrêtés."
   ],
   "FirecrackerOptions.jailer": [
     "Launch through the Firecracker jailer: root-owned binary and paths, a dedicated cgroup v2 parent with cpu, memory and pids controllers enabled, non-root uid and gid, cpuQuotaUs per 100000 microseconds (at least 1000), memoryMaxMb above guest memory and processes (at least 16). Outpost must already run as root and never calls sudo; without jailer, Firecracker runs as the calling user.",
@@ -4953,12 +4953,12 @@
     "Récepteur unifié du hub produisant des spans liés de workflow, tâche, dispatch et opération ainsi que les métriques existantes ; évite de brancher simultanément cette même instance par telemetry."
   ],
   "archiveRecovery.observation": [
-    "Optional hub receiving start and terminal events for archive creation; never persisted in the recovery plan or archive.",
-    "Hub facultatif recevant le début et la fin de création d’archive ; jamais persisté dans le plan ni l’archive."
+    "Hub that receives the start and end events of the archive upload.",
+    "Hub qui reçoit les événements de début et de fin de l’envoi de l’archive."
   ],
   "materializeRecoveryArchive.observation": [
-    "Optional hub receiving start and terminal events for archive materialization; never persisted in the recovery plan or archive.",
-    "Hub facultatif recevant le début et la fin de matérialisation d’archive ; jamais persisté dans le plan ni l’archive."
+    "Hub that receives the start and end events of the archive download.",
+    "Hub qui reçoit les événements de début et de fin du téléchargement de l’archive."
   ],
   "planRecoveryRetention.observation": [
     "Optional hub receiving start and terminal events for retention planning; never persisted in the recovery plan or archive.",
@@ -6956,8 +6956,8 @@
     "Serveur, nom et arguments texte du prompt à rendre."
   ],
   "createTransportConversations.base": [
-    "Store whose captures are archived, such as createKimiConversations() or createHarnessConversations(); it must declare a format, which names the transport keys.",
-    "Store dont les captures sont archivées, par exemple createKimiConversations() ou createHarnessConversations() ; il doit déclarer un format, qui nomme les clés de transport."
+    "Store whose captures are archived, such as createKimiConversations() or createHarnessConversations(). Without a format, creation rejects with code configuration.",
+    "Store dont les captures sont archivées, par exemple createKimiConversations() ou createHarnessConversations(). Sans format, la création échoue avec le code configuration."
   ],
   "NativeConversationStore.format": [
     "Persisted format name written in conversation records, transport keys and session bundles. Keep it stable once conversations have been captured.",

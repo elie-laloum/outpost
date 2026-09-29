@@ -15,9 +15,9 @@ import type { ReadJournalOptions } from "@elie-laloum/outpost";
 
 | Nom           | Type                  | Présence  | Rôle                                                                                                                                        |
 | ------------- | --------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `reference`   | `TransportReference`  | Requis    | Référence de l’index issue de DispatchResult.logReference ou de l’inspection ; détermine la chaîne d’événements validés à lire.             |
-| `maxEntries`  | `number \| undefined` | Optionnel | Nombre maximal positif d’événements à parcourir, 100 000 par défaut ; cycles et dépassements provoquent un échec.                           |
-| `maxBytes`    | `number \| undefined` | Optionnel | Limite totale des contenus de segments lus en mémoire, 64 Mio par défaut.                                                                   |
+| `reference`   | `TransportReference`  | Requis    | Référence de l’index du journal, en général DispatchResult.logReference ; l’index doit encore avoir cette révision.                         |
+| `maxEntries`  | `number \| undefined` | Optionnel | Nombre maximal d’événements à lire, 100000 par défaut ; une chaîne plus longue est refusée.                                                 |
+| `maxBytes`    | `number \| undefined` | Optionnel | Total d’octets des segments d’événements à lire, 64 Mio par défaut ; un dépassement est refusé.                                             |
 | `transporter` | `Transport`           | Requis    | Transport objet appartenant à l’appelant, utilisé par le store ou l’opération. Fermer un workflow ou une sandbox ne ferme pas ce transport. |
 
 ## Signature

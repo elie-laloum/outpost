@@ -13,12 +13,12 @@ import type { TransportEntry } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom          | Type     | Présence | Rôle                                                                                                                              |
-| ------------ | -------- | -------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `key`        | `string` | Requis   | Clé logique relative ; segments sûrs séparés par des slashs, jusqu’à 512 caractères. Ce n’est ni un chemin de fichier ni une URL. |
-| `revision`   | `string` | Requis   | Jeton de version opaque utilisé pour les écritures et suppressions conditionnelles ; ce n’est pas un digest du contenu.           |
-| `size`       | `number` | Requis   | Taille utile en octets, hors enveloppe du transport et surcoûts du backend.                                                       |
-| `modifiedAt` | `string` | Requis   | Horodatage ISO de la version stockée, utilisé comme observation pour la rétention.                                                |
+| Nom          | Type     | Présence | Rôle                                                                                                                                                                    |
+| ------------ | -------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `key`        | `string` | Requis   | Clé logique : segments séparés par / composés de lettres, chiffres, ., _ et -, sans point initial, jusqu’à 512 caractères. Ce n’est ni un chemin de fichier ni une URL. |
+| `revision`   | `string` | Requis   | Jeton opaque de cette version, passé comme ifRevision pour la remplacer ou la supprimer. Il change à chaque écriture et n’est pas un digest du contenu.                 |
+| `size`       | `number` | Requis   | Taille utile en octets, hors enveloppe du transport et surcoûts du backend.                                                                                             |
+| `modifiedAt` | `string` | Requis   | Horodatage ISO de la version stockée ; la rétention en déduit l’âge de l’objet.                                                                                         |
 
 ## Signature
 

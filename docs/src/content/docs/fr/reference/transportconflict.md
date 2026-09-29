@@ -13,7 +13,7 @@ import { TransportConflict } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Une mutation conditionnelle ou une lecture versionnée a trouvé une révision différente. Relire l’état avant de décider si une nouvelle tentative est valable ; ne jamais remplacer la condition par une écriture inconditionnelle.
+Levée quand une écriture ou une suppression conditionnelle, ou une lecture fixée sur une révision, trouve une autre révision ou aucun objet ; key nomme l’objet. Relisez l’objet avant de décider s’il faut réessayer.
 
 [Exemple complet et règles détaillées](../../guide/storage/).
 

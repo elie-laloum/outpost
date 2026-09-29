@@ -13,9 +13,9 @@ import type { LocalTransportOptions } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name        | Type     | Presence | Meaning                                                                                                                                                           |
-| ----------- | -------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `directory` | `string` | Required | Root of the objects and local mutation locks; resolved when the factory is called. Symlink directories are rejected. This layout differs from legacy file stores. |
+| Name        | Type     | Presence | Meaning                                                                                                                                                  |
+| ----------- | -------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `directory` | `string` | Required | Root directory, resolved when the factory is called; objects go under objects/ and locks under .outpost/locks. A symlinked root rejects the first write. |
 
 ## Signature
 

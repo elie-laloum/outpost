@@ -1,26 +1,47 @@
 ---
 title: "Réservations de stockage — Vue d’ensemble"
-description: "Une réservation de stockage coordonne l’admission avant que des opérations coopérantes écrivent leurs données de récupération."
+description: "Réservez des octets dans un registre partagé avant d’écrire, pour que des écrivains coopératifs respectent une même limite sous le .outpost d’un dépôt."
 sidebar:
   label: Vue d’ensemble
   order: 0
 ---
 
-Une réservation de stockage coordonne l’admission avant que des opérations coopérantes écrivent leurs données de récupération. Elle enregistre une demande de stockage prévue pour que plusieurs writers tiennent compte les uns des autres, au lieu de décider depuis le même inventaire obsolète.
+## Ce qui compte dans maxBytes
 
-## Fonctionnement et philosophie
+L’admission réussit quand l’usage observé, les réservations actives et `reserveBytes` restent ensemble inférieurs ou égaux à `maxBytes`. Le registre est l’objet `reservations/ledger` du transport choisi.
 
-`reserveRecoveryStorage` renvoie une réservation avec une durée de vie explicite. Ses options décrivent les limites d’admission et la propriété. Un workspace peut posséder la réservation dans son cycle de vie ; les autres appelants doivent libérer celles dont ils sont responsables.
+| Terme                | Transport par défaut (`.outpost/storage`)                                                    | `transporter` explicite                                 |
+| -------------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| Usage observé        | Octets des fichiers sous `.outpost/recovery`, `logs`, `locks`, `workspaces` et `storage`     | Tailles de tous les objets listés, sauf le registre     |
+| Réservations actives | Somme des `reserveBytes` de toutes les entrées du registre, abandonnées comprises            | Idem                                                    |
+| Limite d’inventaire  | `maxEntries` fichiers et répertoires, 100000 par défaut ; un inventaire incomplet est refusé | `maxEntries` objets, 100000 par défaut ; au-delà, refus |
 
-## Limites et responsabilités
+:::caution
+Une réservation n’engage que les écrivains qui réservent. Ce n’est pas un quota du système de fichiers : d’autres processus peuvent toujours écrire dans `.outpost` ou remplir le disque.
+:::
 
-Les réservations coordonnent les writers coopérants ; elles ne contraignent pas les processus arbitraires et ne garantissent pas l’espace disque libre. Distinguez-les de la rétention, qui supprime des données stockées, et de l’inspection des quotas, qui observe le stockage courant. Une réservation n’est pas un quota physique du système de fichiers.
+## Fin d’une réservation
+
+| Événement                                                                         | Résultat                                                                             |
+| --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| La demande tient dans la limite                                                   | Entrée ajoutée par écriture conditionnelle ; se résout avec une `StorageReservation` |
+| Au-delà de `maxBytes`, inventaire incomplet, options invalides, registre malformé | Rejette avec le code `configuration`                                                 |
+| 100 écritures du registre en conflit d’affilée                                    | Rejette avec `Storage reservation contention limit exceeded`                         |
+| `signal` annulé avant l’écriture de l’entrée                                      | Rejette avec la raison de l’annulation                                               |
+| `release()` ou fin d’un bloc `await using`                                        | Entrée supprimée ; les appels suivants sont sans effet                               |
+| Le propriétaire s’arrête sans libérer                                             | L’entrée reste et continue de compter ; elle n’expire jamais                         |
+
+:::caution
+Outpost ne fournit aucun appel pour effacer une réservation abandonnée. Après avoir vérifié que son propriétaire s’est arrêté, retirez son id de `reservations/ledger` par une écriture conditionnelle via le même transport.
+:::
 
 ## Points d’entrée
 
-- [reserveRecoveryStorage](../../reserverecoverystorage/)
-- [RecoveryStorageReservationOptions](../../recoverystoragereservationoptions/)
-- [StorageReservation](../../storagereservation/)
-- [StorageReservationOptions](../../storagereservationoptions/)
+Guide : [Rétention et nettoyage](../../../guide/retention/) · [Où vivent les données](../../../guide/storage/)
 
-[Passer à la pratique avec le Guide](../../../guide/retention/).
+- [reserveRecoveryStorage](../../reserverecoverystorage/)
+- [assertRecoveryQuota](../../assertrecoveryquota/)
+- [RecoveryStorageReservationOptions](../../recoverystoragereservationoptions/)
+- [StorageReservationOptions](../../storagereservationoptions/)
+- [StorageReservation](../../storagereservation/)
+- [WorkspaceOptions](../../workspaceoptions/)

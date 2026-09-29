@@ -13,13 +13,13 @@ import type { StorageReservation } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom                     | Type                  | Présence | Rôle                                                                                                              |
-| ----------------------- | --------------------- | -------- | ----------------------------------------------------------------------------------------------------------------- |
-| `id`                    | `string`              | Requis   | Identité unique de cette réservation coordonnée de stockage.                                                      |
-| `repository`            | `string`              | Requis   | Checkout Git hôte ciblé.                                                                                          |
-| `reserveBytes`          | `number`              | Requis   | Octets supplémentaires demandés à l’admission en plus du stockage déjà utilisé.                                   |
-| `release`               | `() => Promise<void>` | Requis   | Libère cette réservation coordonnée afin que les autres écrivains coopératifs retrouvent sa capacité d’admission. |
-| `[Symbol.asyncDispose]` | `() => Promise<void>` | Requis   | Ferme cette ressource via le mécanisme de libération asynchrone JavaScript.                                       |
+| Nom                     | Type                  | Présence | Rôle                                                                                                                                                       |
+| ----------------------- | --------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`                    | `string`              | Requis   | UUID aléatoire qui identifie cette réservation dans reservations/ledger.                                                                                   |
+| `repository`            | `string`              | Requis   | Répertoire racine du checkout Git résolu.                                                                                                                  |
+| `reserveBytes`          | `number`              | Requis   | Octets que cette réservation occupe dans le registre.                                                                                                      |
+| `release`               | `() => Promise<void>` | Requis   | Retire cette entrée du registre par une écriture conditionnelle. Les appels suivants se résolvent sans effet ; une libération en échec peut être relancée. |
+| `[Symbol.asyncDispose]` | `() => Promise<void>` | Requis   | Équivaut à release() : un bloc await using libère la réservation à sa sortie.                                                                              |
 
 ## Signature
 
