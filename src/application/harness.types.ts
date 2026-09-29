@@ -27,10 +27,19 @@ export interface HarnessRuntime {
   readonly modelProvider: ModelProvider;
   readonly sandbox: SandboxLease;
   readonly signal: AbortSignal;
-  /** Takes delivered steering texts; shared with subagents so the active loop receives them. */
-  readonly steer?: (() => readonly string[]) | undefined;
+  /** Run id of the built-in subagent this loop runs, absent for the main loop. */
+  readonly subagentId?: string | undefined;
+  /** Steering intake shared with subagents so the active loop receives instructions. */
+  readonly steering?: HarnessSteering | undefined;
   emit(event: AgentEvent): void;
   hold(): () => void;
+}
+
+export interface HarnessSteering {
+  /** Delivers and returns the instructions for the main loop or the given subagent. */
+  take(subagent: string | undefined): readonly string[];
+  /** Rejects instructions still addressed to a subagent run that ended. */
+  finish(subagent: string): void;
 }
 
 export interface ToolCallBatch {

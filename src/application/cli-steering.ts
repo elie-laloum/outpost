@@ -5,11 +5,11 @@ import type {
   AgentLiveSession,
 } from "../domain/agent.types.ts";
 import type { SandboxLease } from "../domain/sandbox.types.ts";
-import { steeringInbox } from "../domain/steering.ts";
+import { mainLoopSteering, steeringInbox } from "../domain/steering.ts";
 import type { SteeringInbox } from "../domain/steering.types.ts";
 import type { CliSteering, CliTurnState } from "./cli-steering.types.ts";
 import type { DispatchOptions } from "./execution.types.ts";
-import { deliverSteering } from "./steering-scope.ts";
+import { deliverSteering, rejectSubagentSteering } from "./steering-scope.ts";
 
 const inactive = Object.freeze<CliSteering>({
   liveInput: false,
@@ -56,8 +56,9 @@ function liveSteering(
     input.end();
   };
   const flush = () => {
+    rejectSubagentSteering(inbox);
     if (!open || !session) return;
-    const messages = inbox.take();
+    const messages = inbox.take(mainLoopSteering);
     for (const message of messages) write(session.encode(message.text));
     written += messages.length;
     deliverSteering(messages, "injected", pass, options.observe);
@@ -103,7 +104,8 @@ function interruptingSteering(
       state.interrupt();
   };
   const request = () => {
-    if (!inbox.size) return;
+    rejectSubagentSteering(inbox);
+    if (!inbox.count(mainLoopSteering)) return;
     requested = true;
     attempt();
   };

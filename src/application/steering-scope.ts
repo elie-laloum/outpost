@@ -1,7 +1,8 @@
 import { AsyncLocalStorage } from "node:async_hooks";
-import { steeringChannel } from "../domain/steering.ts";
+import { steeringChannel, subagentSteering } from "../domain/steering.ts";
 import type {
   Steering,
+  SteeringInbox,
   SteeringMessage,
   SteeringMode,
 } from "../domain/steering.types.ts";
@@ -40,4 +41,12 @@ export function deliverSteering(
     });
     message.deliver({ mode });
   }
+}
+
+/** Subagent targets exist only in the built-in harness; CLI agents cannot address them. */
+export function rejectSubagentSteering(inbox: SteeringInbox | undefined): void {
+  inbox?.reject(
+    subagentSteering,
+    "Subagent steering targets require the built-in harness",
+  );
 }

@@ -641,3 +641,156 @@ test("Codex steering after its turn completed resumes the app-server thread", as
   assert.equal(result.turns[1]!.conversation, "thread-1");
   assert.match(result.turns[1]!.text, /handled: Mention the tests\./);
 });
+
+function delegating(
+  child: Parameters<typeof defineHarnessSubagent>[0]["agent"],
+  requests: ModelRequest[],
+) {
+  return createAgent({
+    model: "parent",
+    harness: createHarness({
+      modelProvider: provider(
+        [
+          () => ({
+            text: "",
+            content: [
+              {
+                type: "tool-call",
+                id: "d1",
+                name: "inspect",
+                input: { prompt: "Inspect the repository" },
+              },
+            ],
+            stopReason: "tool-calls",
+          }),
+          answer(),
+        ],
+        requests,
+      ),
+      tools: [
+        defineHarnessSubagent({
+          name: "inspect",
+          description: "Inspect the repository.",
+          agent: child,
+        }),
+      ],
+    }),
+  });
+}
+
+test("steering targets a subagent run by id and the main loop with null", async (t) => {
+  const root = await repository(t);
+  const steering = createSteering();
+  const parentRequests: ModelRequest[] = [];
+  const childRequests: ModelRequest[] = [];
+  const events: AgentObservation[] = [];
+  const deliveries: Promise<SteeringDelivery>[] = [];
+  let child: string | undefined;
+  const result = await dispatch({
+    repository: root,
+    sandboxProvider: createLocalSandboxProvider(),
+    agent: delegating(
+      createAgent({
+        model: "child",
+        harness: createHarness({
+          modelProvider: provider([answer("Inspected.")], childRequests),
+        }),
+      }),
+      parentRequests,
+    ),
+    brief: { text: "Review" },
+    steering,
+    observe(event) {
+      events.push(event);
+      if (event.kind !== "subagent" || event.status !== "started") return;
+      child = event.id;
+      deliveries.push(
+        steering.send("For the main loop", { subagent: null }),
+        steering.send("For the child", { subagent: event.id }),
+      );
+    },
+  });
+  assert.equal(result.completed, true);
+  assert.deepEqual(await Promise.all(deliveries), [
+    { mode: "injected" },
+    { mode: "injected" },
+  ]);
+  assert.deepEqual(lastUser(childRequests[0]), [
+    "Inspect the repository",
+    "For the child",
+  ]);
+  assert.deepEqual(lastUser(parentRequests[1]), [
+    "tool-result",
+    "For the main loop",
+  ]);
+  assert.deepEqual(
+    events
+      .filter((event) => event.kind === "steer")
+      .map((event) => [event.kind === "steer" && event.text, event.subagentId]),
+    [
+      ["For the child", child],
+      ["For the main loop", undefined],
+    ],
+  );
+});
+
+test("steering rejects instructions for a subagent that ended and for CLI agents", async (t) => {
+  const root = await repository(t);
+  const steering = createSteering();
+  let child: string | undefined;
+  let late: Promise<SteeringDelivery> | undefined;
+  const result = await dispatch({
+    repository: root,
+    sandboxProvider: createLocalSandboxProvider(),
+    agent: delegating(
+      createAgent({
+        model: "child",
+        harness: createHarness({
+          modelProvider: provider(
+            [
+              () => {
+                late = steering.send("Too late", { subagent: child! });
+                late.catch(() => undefined);
+                throw new Error("child model failed");
+              },
+            ],
+            [],
+          ),
+        }),
+      }),
+      [],
+    ),
+    brief: { text: "Review" },
+    steering,
+    observe(event) {
+      if (event.kind === "subagent" && event.status === "started")
+        child = event.id;
+    },
+  });
+  assert.equal(result.completed, true);
+  await assert.rejects(
+    late!,
+    (error: unknown) =>
+      error instanceof OutpostError &&
+      error.code === "steering" &&
+      error.details.subagent === child &&
+      /subagent finished/.test(error.message),
+  );
+  const cli = createSteering();
+  let targeted: Promise<SteeringDelivery> | undefined;
+  await dispatch({
+    repository: root,
+    sandboxProvider: createLocalSandboxProvider(),
+    agent: scripted(
+      `setTimeout(()=>console.log(${JSON.stringify(JSON.stringify({ kind: "text", text: done }))}),200);`,
+    ),
+    brief: { text: "Work" },
+    steering: cli,
+    observe(event) {
+      if (event.kind !== "prompt") return;
+      targeted = cli.send("Child only", { subagent: "run-1" });
+      targeted.catch(() => undefined);
+    },
+  });
+  await assert.rejects(targeted!, /require the built-in harness/);
+});

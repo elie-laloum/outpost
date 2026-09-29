@@ -79,6 +79,7 @@ export async function runSubagent(
                   MAX_DELEGATION_DEPTH),
             ),
             conversation: transcript?.id,
+            subagentId: id,
             tools,
             permissions: [
               ...runtime.permissions,
@@ -106,6 +107,7 @@ export async function runSubagent(
   } catch (error) {
     failure = error;
   }
+  runtime.steering?.finish(id);
   try {
     if (transcript && store)
       await store.capture(transcript.id, {

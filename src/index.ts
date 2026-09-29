@@ -263,6 +263,7 @@ export type {
   Steering,
   SteeringDelivery,
   SteeringMode,
+  SteeringSendOptions,
   SteeringState,
 } from "./domain/steering.types.ts";
 

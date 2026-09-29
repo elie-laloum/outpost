@@ -165,7 +165,7 @@ async function instructions(runtime: HarnessRuntime): Promise<string> {
 }
 
 function steering(runtime: HarnessRuntime): ModelContentBlock[] {
-  const texts = runtime.steer?.() ?? [];
+  const texts = runtime.steering?.take(runtime.subagentId) ?? [];
   for (const text of texts)
     runtime.emit({ kind: "steer", text, mode: "injected" });
   return texts.map((text) => ({ type: "text", text }));

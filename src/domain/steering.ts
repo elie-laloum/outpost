@@ -4,7 +4,9 @@ import type {
   Steering,
   SteeringChannel,
   SteeringDelivery,
+  SteeringFilter,
   SteeringInbox,
+  SteeringSendOptions,
   SteeringState,
 } from "./steering.types.ts";
 
@@ -12,8 +14,17 @@ export type {
   Steering,
   SteeringDelivery,
   SteeringMode,
+  SteeringSendOptions,
   SteeringState,
 } from "./steering.types.ts";
+
+/** Messages any loop may take: untargeted or for the main loop. */
+export const mainLoopSteering: SteeringFilter = (message) =>
+  message.subagent === undefined || message.subagent === null;
+
+/** Messages targeting a built-in subagent run. */
+export const subagentSteering: SteeringFilter = (message) =>
+  typeof message.subagent === "string";
 
 const channels = new WeakMap<Steering, SteeringChannel>();
 
@@ -22,21 +33,25 @@ export function createSteering(): Steering {
   let state: SteeringState = "idle";
   let pending: PendingSteeringMessage[] = [];
   const listeners = new Set<() => void>();
-  const rejectPending = (message: string) => {
-    const undelivered = pending;
-    pending = [];
-    for (const entry of undelivered)
-      entry.reject(new OutpostError("steering", message, { text: entry.text }));
+  const all: SteeringFilter = () => true;
+  const take = (accept: SteeringFilter) => {
+    const taken = pending.filter(accept);
+    pending = pending.filter((entry) => !accept(entry));
+    return taken;
+  };
+  const rejectPending = (message: string, accept = all) => {
+    for (const entry of take(accept))
+      entry.reject(
+        new OutpostError("steering", message, {
+          text: entry.text,
+          ...(entry.subagent === undefined ? {} : { subagent: entry.subagent }),
+        }),
+      );
   };
   const inbox: SteeringInbox = {
-    get size() {
-      return pending.length;
-    },
-    take() {
-      const taken = pending;
-      pending = [];
-      return taken;
-    },
+    count: (accept = all) => pending.filter(accept).length,
+    take: (accept = all) => take(accept),
+    reject: (accept, reason) => rejectPending(reason, accept),
     subscribe(listener) {
       listeners.add(listener);
       return () => listeners.delete(listener);
@@ -46,12 +61,27 @@ export function createSteering(): Steering {
     get state() {
       return state;
     },
-    send(text: string): Promise<SteeringDelivery> {
+    send(
+      text: string,
+      options: SteeringSendOptions = {},
+    ): Promise<SteeringDelivery> {
       if (typeof text !== "string" || !text.trim())
         return Promise.reject(
           new OutpostError(
             "configuration",
             "Steering text must be a nonempty string",
+          ),
+        );
+      const subagent = options.subagent;
+      if (
+        subagent !== undefined &&
+        subagent !== null &&
+        (typeof subagent !== "string" || !subagent)
+      )
+        return Promise.reject(
+          new OutpostError(
+            "configuration",
+            "Steering subagent must be a subagent run id or null",
           ),
         );
       if (state === "closed")
@@ -61,6 +91,7 @@ export function createSteering(): Steering {
       return new Promise<SteeringDelivery>((resolve, reject) => {
         pending.push({
           text,
+          ...(subagent === undefined ? {} : { subagent }),
           deliver: (delivery) => resolve(Object.freeze({ ...delivery })),
           reject,
         });
