@@ -1,4 +1,8 @@
 import {
+  createCodexConversations,
+  codexConversationLayout,
+} from "./codex-conversations.ts";
+import {
   codexLabel,
   codexMcpSupport,
   codexModelSupport,
@@ -56,8 +60,7 @@ function bindCodex(settings: Bound<CodexSettings>): AgentAdapter {
     ...(credentials ? { credentials } : {}),
     ...(configuration ? { configuration } : {}),
     bootstrap: "codex",
-    conversations: "codex",
-    ...conversationStorage(settings),
+    ...conversationStorage(settings, createCodexConversations),
     resumable: true,
     capture: settings.saveConversations ?? true,
     variables: Object.freeze({ ...settings.variables }),
@@ -73,7 +76,7 @@ function bindCodex(settings: Bound<CodexSettings>): AgentAdapter {
 
 export function createCodexHarness(settings: CodexSettings = {}): CliHarness {
   harnessSettings(settings);
-  conversationSettings(codexLabel, "codex", settings);
+  conversationSettings(codexLabel, codexConversationLayout.format, settings);
   const configured = configuredSettings(settings);
   return Object.freeze({
     kind: "cli",

@@ -60,7 +60,7 @@ test("CLI adapters declare independent continuation and capture capabilities", (
     assert.equal(agent.forkable, name === "kimi");
     assert.equal(agent.capture, name === "antigravity" ? false : undefined);
     assert.equal(
-      agent.conversations,
+      agent.storage?.format,
       name === "antigravity" ? undefined : name,
     );
     assert.ok(Object.isFrozen(agent));

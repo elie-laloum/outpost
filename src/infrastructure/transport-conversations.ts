@@ -4,35 +4,26 @@ import { dirname, join, relative } from "node:path";
 import type { ConversationStore } from "../domain/conversation.types.ts";
 import { invariant } from "../domain/errors.ts";
 import { transportKey } from "../domain/transport.ts";
-import type { StoredConversationFormat } from "./conversations.types.ts";
-import { createHarnessConversations } from "./conversations/harness-store.ts";
 import type { TransportConversationOptions } from "./transport-conversations.types.ts";
-import { nativeConversations } from "./conversations/native-store.ts";
 import { files } from "./conversations/files.ts";
-import { validId } from "./conversations/paths.ts";
+import { validId } from "./conversations/identity.ts";
+import { isConversationStore } from "../domain/conversation.ts";
 import { jsonBytes, jsonObject, transportReference } from "./transport-json.ts";
 import { archiveFiles, restoreArchiveFiles } from "./transport-archive.ts";
 import { safeDestination } from "./files.ts";
 
-const baseStores: Readonly<
-  Record<StoredConversationFormat, () => ConversationStore>
-> = {
-  claude: () => nativeConversations("claude"),
-  codex: () => nativeConversations("codex"),
-  harness: createHarnessConversations,
-  copilot: () => nativeConversations("copilot"),
-  kimi: () => nativeConversations("kimi"),
-};
-
-export function createTransportConversations(
-  format: StoredConversationFormat,
+/** Archives the conversations a base store captures through a transport. */
+export function createTransportStore(
+  base: ConversationStore,
   options: TransportConversationOptions,
 ): ConversationStore {
   invariant(
-    Object.hasOwn(baseStores, format),
-    "Unsupported conversation format",
+    isConversationStore(base) &&
+      typeof base.format === "string" &&
+      base.format.length > 0,
+    "Transported conversations require a base store with a format",
   );
-  const native = baseStores[format]();
+  const { format } = base;
   const prefix = `conversations/${transportKey(options.namespace)}/${format}`;
   const key = (id: string) => {
     validId(id);
@@ -75,7 +66,7 @@ export function createTransportConversations(
       const previous = await options.transporter.read(target);
       await mkdir(context.staging, { recursive: true, mode: 0o700 });
       const home = await mkdtemp(join(context.staging, "captured-"));
-      const captured = await native.capture(id, { ...context, home });
+      const captured = await base.capture(id, { ...context, home });
       const root = dirname(captured.file);
       const selected = [
         captured.file,
@@ -101,7 +92,7 @@ export function createTransportConversations(
       };
     },
     restore(record, context) {
-      return native.restore(record, context);
+      return base.restore(record, context);
     },
   };
 }

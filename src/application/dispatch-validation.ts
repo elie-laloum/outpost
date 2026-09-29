@@ -55,7 +55,7 @@ export async function preflightDispatch(
   if (!options.response) return;
   if (options.response.repairs > 0)
     invariant(
-      agent?.resumable ?? !!(agent?.conversations || agent?.storage),
+      agent?.resumable ?? !!agent?.storage,
       "Response repair requires an adapter that supports continuation",
     );
   const brief = options.brief;

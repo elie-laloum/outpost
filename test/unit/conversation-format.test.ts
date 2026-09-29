@@ -3,6 +3,10 @@ import { test } from "node:test";
 import {
   createAgent,
   createAntigravityHarness,
+  createClaudeConversations,
+  createCodexConversations,
+  createCopilotConversations,
+  createKimiConversations,
   createClaudeHarness,
   createCodexHarness,
   createCopilotHarness,
@@ -14,7 +18,6 @@ import {
   type ConversationStore,
   type ModelProvider,
 } from "../../src/index.ts";
-import { nativeConversations } from "../../src/infrastructure/conversations/native-store.ts";
 import { isConversationStore } from "../../src/domain/conversation.ts";
 
 const modelProvider: ModelProvider = {
@@ -32,14 +35,42 @@ const custom = (format?: unknown): ConversationStore =>
 
 test("built-in conversation stores declare their format", () => {
   const transporter = createLocalTransport({ directory: "unused" });
-  for (const format of ["claude", "codex", "copilot", "kimi"] as const) {
-    assert.equal(nativeConversations(format).format, format);
+  const stores = {
+    claude: createClaudeConversations(),
+    codex: createCodexConversations(),
+    copilot: createCopilotConversations(),
+    kimi: createKimiConversations(),
+  };
+  for (const [format, store] of Object.entries(stores)) {
+    assert.equal(store.format, format);
+    assert.equal(store.name, format);
     assert.equal(
-      createTransportConversations(format, { transporter, namespace: "team" })
+      createTransportConversations(store, { transporter, namespace: "team" })
         .format,
       format,
     );
+    assert.equal(
+      createTransportConversations(format, { transporter, namespace: "team" })
+        .name,
+      `transport:team:${format}`,
+    );
   }
+  assert.throws(
+    () =>
+      createTransportConversations("gemini", {
+        transporter,
+        namespace: "team",
+      }),
+    /Unsupported conversation format/,
+  );
+  assert.throws(
+    () =>
+      createTransportConversations(custom(), {
+        transporter,
+        namespace: "team",
+      }),
+    /base store with a format/,
+  );
   assert.equal(createHarnessConversations().format, "harness");
   assert.equal(
     createTransportConversations("harness", { transporter, namespace: "team" })
@@ -109,7 +140,7 @@ for (const [format, [label, preset]] of Object.entries(presets)) {
       createAgent({ harness: preset({ conversations }) }).storage,
       conversations,
     );
-    assert.equal(createAgent({ harness: preset() }).storage, undefined);
+    assert.equal(createAgent({ harness: preset() }).storage?.format, format);
     const store = custom();
     assert.equal(
       createAgent({ harness: preset({ conversations: store }) }).storage,

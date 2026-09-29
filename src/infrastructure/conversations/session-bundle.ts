@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { access, mkdir, rename, rm } from "node:fs/promises";
 import { homedir } from "node:os";
 import { dirname, join, posix } from "node:path";
-import type { ConversationStore } from "../../domain/conversation.types.ts";
+import type { NativeConversationStore } from "../../domain/conversation.types.ts";
 import type { Command, CommandResult } from "../../domain/command.types.ts";
 import { invariant, OutpostError } from "../../domain/errors.ts";
 import { executeProcess, requireSuccess } from "../process.ts";
@@ -11,7 +11,80 @@ import {
   sessionBundleLimits,
   sessionBundleScript,
 } from "./session-bundle.constants.ts";
-import type { SessionBundleFormat } from "./session-bundle.types.ts";
+import type { SessionBundleProfile } from "./session-bundle.types.ts";
+
+function hookSource(
+  name: "validate" | "bucket" | "relocate",
+  hook: unknown,
+): string | undefined {
+  if (hook === undefined) return undefined;
+  invariant(
+    typeof hook === "function",
+    `Session bundle ${name} must be a function`,
+  );
+  const source = Function.prototype.toString.call(hook);
+  try {
+    // Compiles without running: hooks execute later in the sandbox from their source.
+    new Function(`return (${source})`);
+  } catch {
+    invariant(
+      false,
+      `Session bundle ${name} must be a self-contained function expression, not a method`,
+    );
+  }
+  return source;
+}
+
+function pattern(name: string, value: unknown) {
+  invariant(value instanceof RegExp, `Session bundle ${name} must be a RegExp`);
+  invariant(
+    !/[gy]/.test(value.flags),
+    `Session bundle ${name} cannot use the g or y flags`,
+  );
+  return { source: value.source, flags: value.flags };
+}
+
+/** Serializes a profile into the argument read by the in-sandbox bundle script. */
+export function sessionBundleProfile(profile: SessionBundleProfile): string {
+  const { format, root, sessions, required, relocated = [] } = profile;
+  for (const [name, value] of Object.entries({
+    format,
+    sessions,
+    "root.directory": root?.directory,
+  }))
+    invariant(
+      typeof value === "string" && value.length > 0,
+      `Session bundle ${name} must be a non-empty string`,
+    );
+  invariant(
+    root.variable === undefined ||
+      /^[A-Za-z_][A-Za-z0-9_]*$/.test(root.variable),
+    "Session bundle root.variable must be an environment variable name",
+  );
+  invariant(
+    Array.isArray(required) && required.length > 0,
+    "Session bundles require at least one required file",
+  );
+  invariant(
+    !profile.buckets || profile.bucket !== undefined,
+    "Bucketed session bundles require a bucket function",
+  );
+  return JSON.stringify({
+    format,
+    root,
+    sessions,
+    buckets: profile.buckets === true,
+    include: pattern("include", profile.include),
+    ...(profile.exclude === undefined
+      ? {}
+      : { exclude: pattern("exclude", profile.exclude) }),
+    required,
+    relocated,
+    validate: hookSource("validate", profile.validate),
+    bucket: hookSource("bucket", profile.bucket),
+    relocate: hookSource("relocate", profile.relocate),
+  });
+}
 
 async function sessionOperation(
   command: Command,
@@ -27,7 +100,7 @@ async function sessionOperation(
 
 export function sessionBundleCommand(
   mode: "capture" | "restore" | "validate",
-  format: SessionBundleFormat,
+  profile: string,
   id: string,
   home: string,
   cwd: string,
@@ -40,7 +113,7 @@ export function sessionBundleCommand(
       "-e",
       sessionBundleScript,
       mode,
-      format,
+      profile,
       id,
       home,
       cwd,
@@ -52,7 +125,7 @@ export function sessionBundleCommand(
 }
 
 export function sessionBundlePath(
-  format: SessionBundleFormat,
+  format: string,
   id: string,
   repository: string,
   home?: string,
@@ -67,12 +140,27 @@ export function sessionBundlePath(
   );
 }
 
-export function sessionConversations(
-  format: SessionBundleFormat,
-): ConversationStore {
+/** Creates a native store for CLIs that keep each session as a directory. */
+export function createSessionBundleConversations(
+  sessionProfile: SessionBundleProfile,
+): NativeConversationStore {
+  const profile = sessionBundleProfile(sessionProfile);
+  const { format } = sessionProfile;
   return {
     name: format,
     format,
+    directory: (repository, home) =>
+      join(home ?? repository, ".outpost", "conversations", format),
+    destination(id, sandbox) {
+      validId(id);
+      return posix.join(
+        sandbox.home,
+        ".outpost",
+        "conversations",
+        format,
+        `${id}.json`,
+      );
+    },
     async locate(id, repository, home) {
       const file = sessionBundlePath(format, id, repository, home);
       if (
@@ -84,7 +172,7 @@ export function sessionConversations(
         await sessionOperation(
           sessionBundleCommand(
             "validate",
-            format,
+            profile,
             id,
             home ?? homedir(),
             repository,
@@ -99,7 +187,7 @@ export function sessionConversations(
         await sessionOperation(
           sessionBundleCommand(
             "capture",
-            format,
+            profile,
             id,
             home ?? homedir(),
             repository,
@@ -131,7 +219,7 @@ export function sessionConversations(
         await sessionOperation(
           sessionBundleCommand(
             "capture",
-            format,
+            profile,
             id,
             context.sandbox.home,
             context.sandbox.root,
@@ -172,7 +260,7 @@ export function sessionConversations(
         await sessionOperation(
           sessionBundleCommand(
             "restore",
-            format,
+            profile,
             record.id,
             context.sandbox.home,
             context.sandbox.root,

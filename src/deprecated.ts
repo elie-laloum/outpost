@@ -31,7 +31,7 @@ import { createLocalTransport } from "./infrastructure/local-transport.ts";
 import { createReporter } from "./infrastructure/reporter.ts";
 import { createArtifactStore } from "./infrastructure/transport-artifact-store.ts";
 import { createWorkflowCheckpointStore } from "./infrastructure/transport-checkpoint.ts";
-import { createTransportConversations } from "./infrastructure/transport-conversations.ts";
+import { createTransportConversations } from "./application/conversation-stores.ts";
 import { createTaskCacheStore } from "./infrastructure/transport-task-cache.ts";
 import { createSqliteTaskQueue } from "./infrastructure/task-queue.ts";
 import { createHttpTaskQueue } from "./infrastructure/task-queue-http.ts";

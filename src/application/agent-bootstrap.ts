@@ -42,7 +42,7 @@ export async function prepareAdapter(
   signal: AbortSignal,
 ): Promise<Agent> {
   if (agent.kind !== "cli") return agent;
-  const name = agent.bootstrap ?? agent.conversations;
+  const name = agent.bootstrap;
   if (!name) return agent;
   const descriptor = builtInAgent(name);
   invariant(descriptor, `Unknown agent bootstrap: ${name}`);

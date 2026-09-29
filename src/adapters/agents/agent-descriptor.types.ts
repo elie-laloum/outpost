@@ -3,6 +3,7 @@ import type {
   CliHarness,
 } from "../../domain/agent.types.ts";
 import type { Variables } from "../../domain/command.types.ts";
+import type { NativeConversationStore } from "../../domain/conversation.types.ts";
 import type { AgentCliDiagnostic } from "./cli-diagnostics.types.ts";
 import type { AgentProtocolFixture } from "./protocol-fixtures.types.ts";
 
@@ -59,6 +60,8 @@ export interface AgentDescriptor {
   readonly doctor: AgentDoctor;
   readonly protocol: readonly AgentProtocolFixture[];
   readonly authentication: readonly AuthenticationChoice[];
+  /** Native store for portable conversations; absent when the CLI has none. */
+  conversations?(): NativeConversationStore;
   /** Accepts a custom Responses-compatible model provider during init. */
   readonly customModelProvider?: boolean;
 }

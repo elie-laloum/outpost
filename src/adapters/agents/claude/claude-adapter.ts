@@ -1,4 +1,8 @@
 import {
+  createClaudeConversations,
+  claudeConversationLayout,
+} from "./claude-conversations.ts";
+import {
   claudeLabel,
   claudeMcpSupport,
   claudeModelSupport,
@@ -66,8 +70,7 @@ function bindClaude(settings: Bound<ClaudeSettings>): AgentAdapter {
     ...(credentials ? { credentials } : {}),
     ...(configuration ? { configuration } : {}),
     bootstrap: "claude",
-    conversations: "claude",
-    ...conversationStorage(settings),
+    ...conversationStorage(settings, createClaudeConversations),
     resumable: true,
     capture: settings.saveConversations ?? true,
     variables: Object.freeze({
@@ -93,7 +96,7 @@ function bindClaude(settings: Bound<ClaudeSettings>): AgentAdapter {
 
 export function createClaudeHarness(settings: ClaudeSettings = {}): CliHarness {
   harnessSettings(settings);
-  conversationSettings(claudeLabel, "claude", settings);
+  conversationSettings(claudeLabel, claudeConversationLayout.format, settings);
   const configured = configuredSettings(settings);
   return Object.freeze({
     kind: "cli",

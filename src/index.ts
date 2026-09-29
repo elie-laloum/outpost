@@ -135,7 +135,10 @@ export type {
   ReplayTurn,
   WorkspaceCommitsEvent,
 } from "./domain/replay.types.ts";
-export { createTransportConversations } from "./infrastructure/transport-conversations.ts";
+export {
+  conversations,
+  createTransportConversations,
+} from "./application/conversation-stores.ts";
 export type { TransportConversationOptions } from "./infrastructure/transport-conversations.types.ts";
 export {
   archiveRecovery,
@@ -213,9 +216,21 @@ export {
 export { agentVersions } from "./providers/versions.ts";
 
 export {
-  conversations,
   createHarnessConversations,
+  createSessionBundleConversations,
+  createTranscriptConversations,
 } from "./infrastructure/conversations.ts";
+export { createClaudeConversations } from "./adapters/agents/claude/claude-conversations.ts";
+export { createCodexConversations } from "./adapters/agents/codex/codex-conversations.ts";
+export { createCopilotConversations } from "./adapters/agents/copilot/copilot-conversations.ts";
+export { createKimiConversations } from "./adapters/agents/kimi/kimi-conversations.ts";
+export type { TranscriptConversationLayout } from "./infrastructure/conversations/layout.types.ts";
+export type {
+  SessionBundleFiles,
+  SessionBundleHelpers,
+  SessionBundleProfile,
+  SessionBundleRelocation,
+} from "./infrastructure/conversations/session-bundle.types.ts";
 
 export type {
   ConversationFormat,
@@ -291,6 +306,7 @@ export type {
   ConversationContext,
   ConversationRecord,
   ConversationStore,
+  NativeConversationStore,
   Disposal,
   LifecycleHooks,
   FileManifestEntry,

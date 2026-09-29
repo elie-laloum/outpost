@@ -1,6 +1,8 @@
-export type ConversationFormat = "claude" | "codex" | "copilot" | "kimi";
+/** Persisted name of a conversation format, such as "claude" or "harness". */
+export type ConversationFormat = string;
 
-export type StoredConversationFormat = ConversationFormat | "harness";
+/** @deprecated Use {@link ConversationFormat}. */
+export type StoredConversationFormat = ConversationFormat;
 
 export interface ConversationLocation {
   readonly id: string;

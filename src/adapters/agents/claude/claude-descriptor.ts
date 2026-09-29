@@ -1,6 +1,7 @@
 import type { AgentDescriptor } from "../agent-descriptor.types.ts";
 import { createClaudeHarness } from "./claude-adapter.ts";
 import { claudeCredentialVariables, claudeLabel } from "./claude.constants.ts";
+import { createClaudeConversations } from "./claude-conversations.ts";
 import { claudeDiagnostics } from "./claude-diagnostics.ts";
 import { claudeProtocolFixtures } from "./claude-protocol.constants.ts";
 
@@ -18,6 +19,7 @@ export const claudeAgent = {
   },
   doctor: { diagnostics: claudeDiagnostics },
   protocol: claudeProtocolFixtures,
+  conversations: createClaudeConversations,
   authentication: [
     {
       value: "account",

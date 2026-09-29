@@ -1,4 +1,8 @@
 import {
+  createCopilotConversations,
+  copilotSessionProfile,
+} from "./copilot-conversations.ts";
+import {
   copilotLabel,
   copilotMcpSupport,
   copilotModelSupport,
@@ -51,8 +55,7 @@ function bindCopilot(settings: Bound<CopilotSettings>): AgentAdapter {
     bootstrap: "copilot",
     resumable: true,
     forkable: false,
-    conversations: "copilot",
-    ...conversationStorage(settings),
+    ...conversationStorage(settings, createCopilotConversations),
     requiresFinishedEvent: true,
     variables: Object.freeze({
       COPILOT_AUTO_UPDATE: "false",
@@ -76,7 +79,7 @@ export function createCopilotHarness(
   settings: CopilotSettings = {},
 ): CliHarness {
   harnessSettings(settings);
-  conversationSettings(copilotLabel, "copilot", settings);
+  conversationSettings(copilotLabel, copilotSessionProfile.format, settings);
   const configured = configuredSettings(settings);
   return Object.freeze({
     kind: "cli",

@@ -21,6 +21,7 @@ export type {
   ConversationContext,
   ConversationRecord,
   ConversationStore,
+  NativeConversationStore,
 } from "./conversation.types.ts";
 export type {
   FileManifestEntry,

@@ -34,3 +34,12 @@ export interface ConversationStore {
     context: ConversationContext,
   ): Promise<void>;
 }
+
+export interface NativeConversationStore extends ConversationStore {
+  /** Persisted format name, used in transport keys, bundles and records. */
+  readonly format: string;
+  /** Host directory that holds this format's captured conversations. */
+  directory(repository: string, home?: string): string;
+  /** Sandbox path that restoration writes for a captured conversation. */
+  destination(id: string, sandbox: SandboxLease, original: string): string;
+}

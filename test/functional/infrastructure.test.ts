@@ -9,12 +9,11 @@ import {
 } from "../../src/infrastructure/process.ts";
 import { resolveVariables } from "../../src/infrastructure/settings.ts";
 import {
-  captureConversation,
-  locateConversation,
   projectKey,
   relocateTranscript,
-  restoreConversation,
 } from "../../src/infrastructure/conversations.ts";
+import { createClaudeConversations } from "../../src/adapters/agents/claude/claude-conversations.ts";
+import { createCodexConversations } from "../../src/adapters/agents/codex/codex-conversations.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import {
   copySelected,
@@ -111,7 +110,9 @@ test("native conversation transfer rewrites cwd without changing message text", 
     JSON.stringify({ cwd: root, text: root, nested: { cwd: root } }) + "\n";
   await writeFile(join(folder, `${id}.jsonl`), native);
   await writeFile(join(folder, id, "subagents", "agent-child.jsonl"), native);
-  const found = await locateConversation("claude", id, root, home);
+  const claude = createClaudeConversations(),
+    codexStore = createCodexConversations();
+  const found = await claude.locate(id, root, home);
   const base = await createLocalSandboxProvider().acquire({
     repository: root,
     directory: remote,
@@ -120,11 +121,9 @@ test("native conversation transfer rewrites cwd without changing message text", 
   });
   const lease = { ...base, home: join(root, "remote-home") };
   const staging = join(root, "stage");
-  await restoreConversation(found, lease, staging);
-  const saved = await captureConversation("claude", id, root, lease, staging, {
-    home,
-    local: true,
-  });
+  const context = { repository: root, sandbox: lease, staging };
+  await claude.restore(found, context);
+  const saved = await claude.capture(id, { ...context, home, local: true });
   assert.equal(saved.file, found.file);
   assert.deepEqual(
     JSON.parse((await readFile(saved.file, "utf8")).trim()),
@@ -139,20 +138,12 @@ test("native conversation transfer rewrites cwd without changing message text", 
     join(codexPath, `rollout-2026-09-23T00-00-00-${id}.jsonl`),
     native,
   );
-  const codex = await locateConversation("codex", id, root, home);
-  await restoreConversation(codex, lease, staging);
+  const codex = await codexStore.locate(id, root, home);
+  await codexStore.restore(codex, context);
   assert.equal(
-    (
-      await captureConversation("codex", id, root, lease, staging, {
-        home,
-        local: true,
-      })
-    ).id,
+    (await codexStore.capture(id, { ...context, home, local: true })).id,
     id,
   );
-  await assert.rejects(
-    locateConversation("codex", "missing", root, home),
-    /not found/,
-  );
+  await assert.rejects(codexStore.locate("missing", root, home), /not found/);
   await base.release();
 });

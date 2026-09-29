@@ -21,6 +21,11 @@ test("built-in agents have unique names and bind adapters under the same name", 
     const adapter = descriptor.harness().bind();
     assert.equal(adapter.name, descriptor.name);
     assert.equal(adapter.bootstrap, descriptor.name);
+    assert.equal(adapter.storage?.format, descriptor.conversations?.().format);
+    assert.equal(
+      descriptor.conversations?.().format ?? descriptor.name,
+      descriptor.name,
+    );
     assert.ok(descriptor.label.length > 0);
   }
 });

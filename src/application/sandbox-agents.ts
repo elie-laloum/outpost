@@ -93,7 +93,7 @@ export function sandboxAgents(context: ProvisionedSandbox): SandboxAgents {
     };
   };
   const conversationKey = (agent: Agent, id: string) =>
-    `${agent.storage?.name ?? agent.conversations ?? agent.name}:${id}`;
+    `${agent.storage?.name ?? agent.name}:${id}`;
   const restore = async (
     id: string,
     agent: Agent,

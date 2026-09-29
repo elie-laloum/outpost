@@ -10,8 +10,18 @@ import {
 import { dirname, join } from "node:path";
 import { test } from "node:test";
 import type { SandboxLease } from "../../src/domain/sandbox.types.ts";
-import { nativeConversations } from "../../src/infrastructure/conversations/native-store.ts";
-import { sessionBundleCommand } from "../../src/infrastructure/conversations/session-bundle.ts";
+import {
+  createCopilotConversations,
+  copilotSessionProfile,
+} from "../../src/adapters/agents/copilot/copilot-conversations.ts";
+import {
+  createKimiConversations,
+  kimiSessionProfile,
+} from "../../src/adapters/agents/kimi/kimi-conversations.ts";
+import {
+  sessionBundleCommand,
+  sessionBundleProfile,
+} from "../../src/infrastructure/conversations/session-bundle.ts";
 import { executeProcess } from "../../src/infrastructure/process.ts";
 import {
   createTransportConversations,
@@ -19,6 +29,10 @@ import {
 } from "../../src/index.ts";
 import { seedSession, sessionDirectory } from "../fixtures/native-session.ts";
 import { repository } from "../helpers.ts";
+
+const nativeConversations = (format: "copilot" | "kimi") =>
+  format === "kimi" ? createKimiConversations() : createCopilotConversations();
+const profiles = { copilot: copilotSessionProfile, kimi: kimiSessionProfile };
 
 function lease(home: string, root: string): SandboxLease {
   const copy = async (from: string, to: string) => {
@@ -200,7 +214,7 @@ for (const format of ["copilot", "kimi"] as const) {
     }
     const command = sessionBundleCommand(
       "capture",
-      format,
+      sessionBundleProfile(profiles[format]),
       id,
       home,
       root,

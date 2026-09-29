@@ -18,6 +18,8 @@ import {
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { shell } from "../../src/infrastructure/process.ts";
 import { repository, scripted, emit } from "../helpers.ts";
+import { createClaudeConversations } from "../../src/adapters/agents/claude/claude-conversations.ts";
+import { createCodexConversations } from "../../src/adapters/agents/codex/codex-conversations.ts";
 
 test("multi-pass dispatch saves every native conversation before releasing its workspace", async (t) => {
   const root = await realpath(await repository(t)),
@@ -36,7 +38,7 @@ test("multi-pass dispatch saves every native conversation before releasing its w
       const id = `turn-${++turn}`;
       return `import fs from 'node:fs';import path from 'node:path';const folder=path.join(${JSON.stringify(home)},'.claude','projects',process.cwd().replace(/[^a-zA-Z0-9]/g,'-'));fs.mkdirSync(folder,{recursive:true});fs.writeFileSync(path.join(folder,${JSON.stringify(id + ".jsonl")}),JSON.stringify({cwd:process.cwd()})+'\\n');console.log(JSON.stringify({kind:'conversation',id:${JSON.stringify(id)}}));${emit("continue")}`;
     }),
-    conversations: "claude" as const,
+    storage: createClaudeConversations(),
   };
   const result = await dispatch({
     repository: root,
@@ -77,7 +79,7 @@ test("cold result resume and fork round-trip native transcripts while preserving
       const id = input.continuation?.fork ? "child-id" : "parent-id";
       return `import fs from 'node:fs'; import path from 'node:path'; const directory=path.join(${JSON.stringify(home)},'.claude','projects',process.cwd().replace(/[^a-zA-Z0-9]/g,'-')); fs.mkdirSync(directory,{recursive:true}); fs.writeFileSync(path.join(directory,${JSON.stringify(id + ".jsonl")}),JSON.stringify({cwd:process.cwd(),text:${JSON.stringify(input.text)}})+'\\n');console.log(JSON.stringify({kind:'conversation',id:${JSON.stringify(id)}})); ${emit("answer")}`;
     }),
-    conversations: "claude" as const,
+    storage: createClaudeConversations(),
   };
   const first = await dispatch({
     repository: root,
@@ -322,7 +324,7 @@ test("native cold continuation preflight happens before provisioning", async (t)
     dispatch({
       repository: root,
       sandboxProvider,
-      agent: { ...scripted(""), conversations: "codex" },
+      agent: { ...scripted(""), storage: createCodexConversations() },
       conversationHome: home,
       brief: { text: "hello" },
       continuation: { id: "missing" },

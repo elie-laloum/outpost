@@ -1,6 +1,7 @@
 import type { AgentDescriptor } from "../agent-descriptor.types.ts";
 import { createKimiHarness } from "./kimi-adapter.ts";
 import { kimiCredentialVariables, kimiLabel } from "./kimi.constants.ts";
+import { createKimiConversations } from "./kimi-conversations.ts";
 import { kimiDiagnostics } from "./kimi-diagnostics.ts";
 import { kimiProtocolFixtures } from "./kimi-protocol.constants.ts";
 
@@ -14,6 +15,7 @@ export const kimiAgent = {
   install: { kind: "npm", package: "@moonshot-ai/kimi-code" },
   doctor: { diagnostics: kimiDiagnostics },
   protocol: kimiProtocolFixtures,
+  conversations: createKimiConversations,
   authentication: [
     {
       value: "account",

@@ -4,6 +4,7 @@ import {
   copilotCredentialVariables,
   copilotLabel,
 } from "./copilot.constants.ts";
+import { createCopilotConversations } from "./copilot-conversations.ts";
 import { copilotDiagnostics } from "./copilot-diagnostics.ts";
 import { copilotProtocolFixtures } from "./copilot-protocol.constants.ts";
 
@@ -21,6 +22,7 @@ export const copilotAgent = {
   },
   doctor: { diagnostics: copilotDiagnostics },
   protocol: copilotProtocolFixtures,
+  conversations: createCopilotConversations,
   authentication: [
     {
       value: "account",

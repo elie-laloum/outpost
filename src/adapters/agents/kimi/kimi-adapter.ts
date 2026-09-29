@@ -1,4 +1,8 @@
 import {
+  createKimiConversations,
+  kimiSessionProfile,
+} from "./kimi-conversations.ts";
+import {
   mcpConfigurationPlanner,
   supportMcpServers,
 } from "../mcp-configuration.ts";
@@ -59,8 +63,7 @@ function bindKimi(settings: Bound<KimiSettings>): AgentAdapter {
     resumable: true,
     forkable: true,
     fork: forkKimi,
-    conversations: "kimi",
-    ...conversationStorage(settings),
+    ...conversationStorage(settings, createKimiConversations),
     variables: Object.freeze({
       KIMI_CODE_NO_AUTO_UPDATE: "1",
       ...settings.variables,
@@ -77,7 +80,7 @@ function bindKimi(settings: Bound<KimiSettings>): AgentAdapter {
 
 export function createKimiHarness(settings: KimiSettings = {}): CliHarness {
   harnessSettings(settings);
-  conversationSettings(kimiLabel, "kimi", settings);
+  conversationSettings(kimiLabel, kimiSessionProfile.format, settings);
   invariant(
     settings.region === undefined ||
       Object.hasOwn(kimiRegions, settings.region),

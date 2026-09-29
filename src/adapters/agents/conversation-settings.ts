@@ -3,6 +3,7 @@ import {
   isConversationStore,
 } from "../../domain/conversation.ts";
 import type { AgentAdapter } from "../../domain/agent.types.ts";
+import type { NativeConversationStore } from "../../domain/conversation.types.ts";
 import { invariant } from "../../domain/errors.ts";
 import type { ConversationSettings } from "./settings.types.ts";
 
@@ -25,5 +26,7 @@ export function conversationSettings(
 
 export const conversationStorage = (
   settings: ConversationSettings,
-): Pick<AgentAdapter, "storage"> =>
-  settings.conversations ? { storage: settings.conversations } : {};
+  native: () => NativeConversationStore,
+): Pick<AgentAdapter, "storage"> => ({
+  storage: settings.conversations ?? native(),
+});

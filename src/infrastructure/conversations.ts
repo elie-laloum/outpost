@@ -1,16 +1,3 @@
-import { createTransportConversations } from "./transport-conversations.ts";
-import { homedir } from "node:os";
-import { join, resolve } from "node:path";
-import type { ConversationFormat } from "./conversations.types.ts";
-import { captureConversation } from "./conversations/capture.ts";
-import { conversationLayout } from "./conversations/layout.ts";
-import { locateConversation } from "./conversations/locate.ts";
-import { createHarnessConversations } from "./conversations/harness-store.ts";
-import { nativeConversations } from "./conversations/native-store.ts";
-import { projectKey, remotePath, validId } from "./conversations/paths.ts";
-import { relocateTranscript } from "./conversations/relocate.ts";
-import { restoreConversation } from "./conversations/restore.ts";
-
 export type {
   ConversationFormat,
   ConversationLocation,
@@ -20,40 +7,8 @@ export {
   createHarnessConversations,
   harnessTranscriptPath,
 } from "./conversations/harness-store.ts";
-export { captureConversation } from "./conversations/capture.ts";
-export { locateConversation } from "./conversations/locate.ts";
-export { nativeConversations } from "./conversations/native-store.ts";
-export { projectKey } from "./conversations/paths.ts";
+export { projectKey } from "./conversations/identity.ts";
 export { relocateTranscript } from "./conversations/relocate.ts";
-export { restoreConversation } from "./conversations/restore.ts";
-
-export const conversations = {
-  transported: createTransportConversations,
-  native: nativeConversations,
-  harness: createHarnessConversations,
-  locate: locateConversation,
-  capture: captureConversation,
-  restore: restoreConversation,
-  rewrite: relocateTranscript,
-  projectKey,
-  claudePath(id: string, repository: string, home = homedir()): string {
-    validId(id);
-    return join(
-      home,
-      ".claude",
-      "projects",
-      projectKey(resolve(repository)),
-      `${id}.jsonl`,
-    );
-  },
-  directory(
-    format: ConversationFormat,
-    repository: string,
-    home?: string,
-  ): string {
-    if (format === "copilot" || format === "kimi")
-      return join(home ?? repository, ".outpost", "conversations", format);
-    return conversationLayout(format).directory(repository, home ?? homedir());
-  },
-  destination: remotePath,
-};
+export { createSessionBundleConversations } from "./conversations/session-bundle.ts";
+export { createTranscriptConversations } from "./conversations/transcript-store.ts";
+export { createTransportStore } from "./transport-conversations.ts";

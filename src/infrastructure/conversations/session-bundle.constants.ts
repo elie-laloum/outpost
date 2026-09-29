@@ -7,15 +7,21 @@ export const sessionBundleScript = String.raw`
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const { createHash, randomUUID } = require('node:crypto');
-const [mode, format, id, home, cwd, bundleFile, maxBytesText, maxFilesText] = process.argv.slice(1);
+const [mode, profileText, id, home, cwd, bundleFile, maxBytesText, maxFilesText] = process.argv.slice(1);
 const maxBytes = Number(maxBytesText), maxFiles = Number(maxFilesText);
 function check(ok, message) { if (!ok) throw new Error(message); }
-check(format === 'copilot' || format === 'kimi', 'Unsupported native session format');
+const profile = JSON.parse(profileText);
+const format = profile.format;
+function hook(source) { return source === undefined ? undefined : new Function('return (' + source + ')')(); }
+const hooks = { validate: hook(profile.validate), bucket: hook(profile.bucket), relocate: hook(profile.relocate) };
+const include = new RegExp(profile.include.source, profile.include.flags);
+const exclude = profile.exclude && new RegExp(profile.exclude.source, profile.exclude.flags);
+const helpers = { join: (...segments) => path.join(...segments), sha256: text => createHash('sha256').update(text).digest('hex') };
+check(typeof format === 'string' && format.length > 0, 'Unsupported native session format');
+check(!profile.buckets || hooks.bucket, 'Bucketed native sessions require a bucket function');
 check(/^[A-Za-z0-9_-]+$/.test(id), 'Invalid conversation identifier');
-const base = format === 'kimi'
-  ? (process.env.KIMI_CODE_HOME || path.join(home, '.kimi-code'))
-  : (process.env.COPILOT_HOME || path.join(home, '.copilot'));
-const sessions = path.join(base, format === 'kimi' ? 'sessions' : 'session-state');
+const base = (profile.root.variable && process.env[profile.root.variable]) || path.join(home, profile.root.directory);
+const sessions = path.join(base, profile.sessions);
 async function entries(dir) {
   try { return await fs.readdir(dir, { withFileTypes: true }); }
   catch (error) { if (error.code === 'ENOENT') return []; throw error; }
@@ -27,9 +33,7 @@ async function safe(file) {
     if (at === path.dirname(at)) break;
   }
 }
-async function locate() {
-  await safe(sessions);
-  if (format === 'copilot') return path.join(sessions, id);
+async function bucketed() {
   const found = [];
   for (const bucket of await entries(sessions)) {
     if (!bucket.isDirectory()) continue;
@@ -37,12 +41,17 @@ async function locate() {
     const info = await fs.lstat(candidate).catch(error => { if (error.code === 'ENOENT') return; throw error; });
     if (info) { check(info.isDirectory(), 'Invalid native session directory'); found.push(candidate); }
   }
-  check(found.length === 1, 'Kimi session is missing or ambiguous');
+  return found;
+}
+async function locate() {
+  await safe(sessions);
+  if (!profile.buckets) return path.join(sessions, id);
+  const found = await bucketed();
+  check(found.length === 1, 'Native ' + format + ' session is missing or ambiguous');
   return found[0];
 }
 function selected(name) {
-  if (format === 'copilot') return /^(?:(?:events\.jsonl|workspace\.yaml|plan\.md)$|(?:checkpoints|files)(?:\/|$))/.test(name);
-  return !/^(logs|tasks|cron|notify)(\/|$)/.test(name) && !/(^|\/)[^/]*\.lock$/.test(name);
+  return include.test(name) && !(exclude && exclude.test(name));
 }
 function validName(name) {
   return typeof name === 'string' && name.length > 0 && !name.includes('\\') && !name.includes('\0') &&
@@ -53,28 +62,19 @@ function validate(bundle) {
   check(bundle.files.length > 0, 'Native session is missing or incomplete');
   check(bundle.files.length <= maxFiles, 'Native session file limit exceeded');
   let bytes = 0;
-  const names = new Set();
+  const names = new Map();
   for (const file of bundle.files) {
     check(file && validName(file.path) && selected(file.path) && !names.has(file.path) && typeof file.data === 'string', 'Invalid native session entry');
     const data = Buffer.from(file.data, 'base64');
     check(data.toString('base64') === file.data, 'Invalid native session encoding');
     bytes += data.length;
     check(bytes <= maxBytes, 'Native session byte limit exceeded');
-    names.add(file.path);
+    names.set(file.path, file.data);
   }
-  const required = format === 'kimi' ? ['state.json', 'agents/main/wire.jsonl'] : ['events.jsonl', 'workspace.yaml'];
-  check(required.every(name => names.has(name)), 'Native session is incomplete or uses an unsupported format');
-  if (format === 'kimi') {
-    const meta = JSON.parse(Buffer.from(bundle.files.find(f => f.path === 'state.json').data, 'base64'));
-    check(meta.version === 2 && meta.id === id && typeof meta.cwd === 'string' && meta.agents && typeof meta.agents === 'object', 'Unsupported Kimi session metadata');
-  }
+  check(profile.required.every(name => names.has(name)), 'Native session is incomplete or uses an unsupported format');
+  const problem = hooks.validate?.({ text: name => names.has(name) ? Buffer.from(names.get(name), 'base64').toString('utf8') : undefined }, id);
+  check(!problem, problem);
   return bundle;
-}
-function workDirKey(dir) {
-  const normalized = dir.replace(/\\/g, '/').replace(/\/+$/, '');
-  let slug = normalized.split('/').pop().toLowerCase().replace(/[^a-z0-9._-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40).replace(/^-+|-+$/g, '');
-  if (!slug || slug === '.' || slug === '..') slug = 'workspace';
-  return 'wd_' + slug + '_' + createHash('sha256').update(normalized).digest('hex').slice(0, 12);
 }
 async function capture() {
   const source = await locate();
@@ -111,51 +111,25 @@ async function readBundle() {
 }
 async function restore() {
   const bundle = await readBundle();
-  const target = format === 'kimi' ? path.join(sessions, workDirKey(cwd), id) : path.join(sessions, id);
+  const target = profile.buckets ? path.join(sessions, hooks.bucket(cwd, helpers), id) : path.join(sessions, id);
   await safe(target);
-  if (format === 'kimi') {
-    for (const bucket of await entries(sessions)) {
-      if (!bucket.isDirectory()) continue;
-      const candidate = path.join(sessions, bucket.name, id);
-      if (candidate !== target && await fs.lstat(candidate).catch(error => { if (error.code === 'ENOENT') return; throw error; }))
-        throw new Error('Kimi session already exists under another workspace; restore in a private sandbox home');
-    }
-  }
+  if (profile.buckets)
+    for (const candidate of await bucketed())
+      if (candidate !== target)
+        throw new Error('Native ' + format + ' session already exists under another workspace; restore in a private sandbox home');
   await fs.mkdir(path.dirname(target), { recursive: true, mode: 0o700 });
   const temporary = await fs.mkdtemp(path.join(path.dirname(target), '.outpost-session-'));
-  function relocate(text, name) {
-    if (format === 'copilot' && name === 'workspace.yaml')
-      return text.replace(/^(cwd|git_root):.*$/gm, (_, key) => key + ': ' + JSON.stringify(cwd));
-    if (format === 'kimi' && name === 'state.json') {
-      const meta = JSON.parse(text);
-      meta.cwd = cwd;
-      for (const [agent, value] of Object.entries(meta.agents)) {
-        check(/^[A-Za-z0-9_-]+$/.test(agent) && value && typeof value === 'object', 'Invalid Kimi agent metadata');
-        value.homedir = path.join(target, 'agents', agent);
-      }
-      return JSON.stringify(meta);
-    }
-    if (format === 'copilot' && name === 'events.jsonl')
-      return text.split('\n').map(line => {
-        if (!line.trim()) return line;
-        const event = JSON.parse(line);
-        if (event.type === 'session.start' && event.data?.context) {
-          event.data.context.cwd = cwd;
-          if (event.data.context.gitRoot) event.data.context.gitRoot = cwd;
-        }
-        return JSON.stringify(event);
-      }).join('\n');
-    return undefined;
-  }
+  const relocated = new Set(profile.relocated ?? []);
   let backup;
   try {
     for (const entry of bundle.files) {
       const file = path.join(temporary, entry.path);
       await fs.mkdir(path.dirname(file), { recursive: true, mode: 0o700 });
       const data = Buffer.from(entry.data, 'base64');
-      const textFile = format === 'kimi' ? entry.path === 'state.json' : ['events.jsonl', 'workspace.yaml'].includes(entry.path);
-      const moved = textFile ? relocate(data.toString('utf8'), entry.path) : undefined;
-      await fs.writeFile(file, moved === undefined ? data : moved, { mode: 0o600, flag: 'wx' });
+      const moved = hooks.relocate && relocated.has(entry.path)
+        ? hooks.relocate(entry.path, data.toString('utf8'), { id, cwd, target, helpers })
+        : data;
+      await fs.writeFile(file, moved, { mode: 0o600, flag: 'wx' });
     }
     if (await fs.lstat(target).catch(error => { if (error.code === 'ENOENT') return; throw error; })) {
       backup = path.join(base, '.outpost-recovery', id + '-' + randomUUID());

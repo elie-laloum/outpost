@@ -186,7 +186,6 @@ export interface AgentFeatures {
   readonly requiresFinishedEvent?: boolean;
   readonly usage?: "events" | "session" | "unavailable";
   readonly variables?: Variables;
-  readonly conversations?: "claude" | "codex" | "copilot" | "kimi";
   readonly storage?: ConversationStore;
   readonly capture?: boolean;
   readonly resumable?: boolean;
