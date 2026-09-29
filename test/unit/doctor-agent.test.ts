@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { diagnoseAgentCli } from "../../src/application/doctor-agent.ts";
-import { claudeDiagnostics } from "../../src/adapters/agents/claude-diagnostics.ts";
-import { codexDiagnostics } from "../../src/adapters/agents/codex-diagnostics.ts";
+import { claudeDiagnostics } from "../../src/adapters/agents/claude/claude-diagnostics.ts";
+import { codexDiagnostics } from "../../src/adapters/agents/codex/codex-diagnostics.ts";
 import { OutpostError } from "../../src/domain/errors.ts";
 
 const claudeHelp = `Usage: claude [options] [prompt]

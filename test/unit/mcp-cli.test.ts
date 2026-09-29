@@ -10,7 +10,7 @@ import {
   createKimiHarness,
 } from "../../src/index.ts";
 import type { McpServers } from "../../src/index.ts";
-import { kimiMcpStoreKey } from "../../src/adapters/agents/kimi-mcp.ts";
+import { kimiMcpStoreKey } from "../../src/adapters/agents/kimi/kimi-mcp.ts";
 
 const servers: McpServers = {
   linear: {

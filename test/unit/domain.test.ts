@@ -287,7 +287,7 @@ test("agent models normalize names and reject unsupported CLI settings", () => {
     [
       createAntigravityHarness(),
       { name: "m", reasoning: "low" },
-      /Antigravity CLI.*"low"/,
+      /Antigravity does not support reasoning "low"/,
     ],
     [
       createAntigravityHarness(),

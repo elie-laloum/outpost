@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { antigravityRequest } from "../../src/adapters/agents/antigravity-request.ts";
-import { antigravityDiagnostics } from "../../src/adapters/agents/antigravity-diagnostics.ts";
+import { antigravityRequest } from "../../src/adapters/agents/antigravity/antigravity-request.ts";
+import { antigravityDiagnostics } from "../../src/adapters/agents/antigravity/antigravity-diagnostics.ts";
 import { agentVersionProbe } from "../../src/application/doctor-agent.ts";
 import { diagnosticProbe } from "../../src/application/diagnostic-probe.ts";
 import { agentVersions } from "../../src/providers/versions.constants.ts";

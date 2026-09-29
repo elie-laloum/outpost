@@ -2,8 +2,8 @@ import { CloudCheckError, cloudCommandFailure } from "./cloud-failure.ts";
 import { createAgent as composeAgent } from "../../src/domain/agent.ts";
 import assert from "node:assert/strict";
 import { posix } from "node:path";
-import { createClaudeHarness } from "../../src/adapters/agents/claude-adapter.ts";
-import { createCodexHarness } from "../../src/adapters/agents/codex-adapter.ts";
+import { createClaudeHarness } from "../../src/adapters/agents/claude/claude-adapter.ts";
+import { createCodexHarness } from "../../src/adapters/agents/codex/codex-adapter.ts";
 import type { SandboxLease } from "../../src/domain/sandbox.types.ts";
 import type { CompatibilityCheck } from "./cloud-compatibility.types.ts";
 

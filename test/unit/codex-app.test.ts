@@ -4,7 +4,7 @@ import { createAgent, createCodexHarness } from "../../src/index.ts";
 import {
   codexAppInitialize,
   codexAppSession,
-} from "../../src/adapters/agents/codex-app-session.ts";
+} from "../../src/adapters/agents/codex/codex-app-session.ts";
 
 const parse = (lines: readonly string[]) =>
   lines.map((line) => JSON.parse(line) as Record<string, unknown>);

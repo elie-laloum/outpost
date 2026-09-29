@@ -20,7 +20,7 @@ import {
   sessionUsageLimits,
   sessionUsageScript,
 } from "../../src/adapters/agents/session-usage.constants.ts";
-import { kimiUsage } from "../../src/adapters/agents/kimi-usage.ts";
+import { kimiUsage } from "../../src/adapters/agents/kimi/kimi-usage.ts";
 
 const copilotCounts = {
   inputTokens: 12,

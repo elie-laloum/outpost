@@ -22,7 +22,7 @@ import {
   createKimiHarness,
   createSandbox,
 } from "../../src/index.ts";
-import { kimiMcpStoreKey } from "../../src/adapters/agents/kimi-mcp.ts";
+import { kimiMcpStoreKey } from "../../src/adapters/agents/kimi/kimi-mcp.ts";
 import { executeProcess } from "../../src/infrastructure/process.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { emit, repository, scripted } from "../helpers.ts";
