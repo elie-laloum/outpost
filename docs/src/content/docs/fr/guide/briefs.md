@@ -1,30 +1,125 @@
 ---
 title: "Rédiger le brief"
-description: "Fournir du texte, des fichiers et des variables de prompt."
+description: "Donner ses instructions à l’agent sous forme de texte ou d’un modèle Markdown avec variables et sorties de commandes."
 ---
 
-Un brief est soit `{ text }`, soit `{ file, values }`. Utilisez le texte pour les requêtes construites par l’application et un fichier pour un modèle de tâche réutilisable.
+## Choisir un texte ou un fichier
+
+Le brief est l’instruction que reçoit l’agent. Passez une chaîne lorsque votre code construit la demande, ou un fichier lorsque vous conservez un modèle de tâche réutilisable.
+
+|                    | Brief texte `{ text }`               | Brief fichier `{ file, values }`                         |
+| ------------------ | ------------------------------------ | -------------------------------------------------------- |
+| Source             | Une chaîne construite par votre code | Un fichier Markdown rangé à côté de vos scripts          |
+| Variables          | Aucune : interpolez dans votre code  | `{{NAME}}` depuis `values`, `WORK_BRANCH`, `BASE_BRANCH` |
+| Sortie de commande | Aucune                               | `` !`command` `` remplacé par sa sortie                  |
+| Idéal pour         | Demandes générées ou ponctuelles     | Tâches réutilisées par plusieurs scripts                 |
+
+Un brief texte est envoyé tel quel. La suite de la page traite des briefs fichier.
+
+## Remplir un modèle
+
+Écrivez les emplacements sous la forme `{{NAME}}`, avec des lettres, des chiffres et des tirets bas. Outpost lit le fichier et les remplit avant le démarrage de l’agent.
+
+```md title="task.md"
+Add {{FEATURE}} to the signup form.
+
+You work on {{WORK_BRANCH}}, created from {{BASE_BRANCH}}.
+Run `npm test` and commit your change.
+```
+
+```ts title="feature.mts"
+import { fileURLToPath } from "node:url";
+import { dispatch } from "@elie-laloum/outpost";
+import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+
+const result = await dispatch({
+  repository,
+  sandboxProvider,
+  agent: coder,
+  branch: { mode: "named", name: "outpost/email-validation" },
+  brief: {
+    file: fileURLToPath(new URL("task.md", import.meta.url)),
+    values: { FEATURE: "email validation" },
+  },
+});
+console.log(result.text);
+```
+
+Un `file` relatif se résout depuis le répertoire de travail du processus. Construisez le chemin à partir de `import.meta.url` pour lancer le script depuis n’importe où.
+
+| Emplacement       | Rempli avec                                                                                     |
+| ----------------- | ----------------------------------------------------------------------------------------------- |
+| `{{FEATURE}}`     | `values.FEATURE` : une chaîne, un nombre fini ou un booléen.                                    |
+| `{{WORK_BRANCH}}` | La branche sur laquelle travaille l’agent (voir [Dépôt et branche](../repository-and-branch/)). |
+| `{{BASE_BRANCH}}` | La branche active dans votre dépôt au démarrage de la tâche.                                    |
+
+Un emplacement sans valeur fait échouer la tâche avec le code d’erreur `prompt` avant le lancement de l’agent. Les valeurs que le fichier n’utilise pas sont signalées à votre callback `warn`.
+
+## Insérer la sortie d’une commande
+
+Écrivez `` !`command` `` pour remplacer le fragment par ce qu’affiche la commande. Servez-vous-en pour transmettre à l’agent le journal d’un test en échec ou l’historique récent.
+
+```md title="fix-test.md"
+Fix the failing test in {{TEST_FILE}}. Its current output:
+
+!`npx vitest run {{TEST_FILE}} 2>&1 | tail -n 40`
+
+Recent commits:
+
+!`git log --oneline -5`
+```
+
+Les commandes s’exécutent dans la sandbox, dans la copie de travail de l’agent, avec `sh -c`. Avant chaque passe, toutes les commandes du brief tournent en parallèle.
+
+<!-- features -->
+
+- **Sortie** : Seule la sortie standard est insérée ; ajoutez `2>&1` pour inclure les erreurs.
+- **Échec** : Un code de sortie non nul fait échouer la tâche avec le code `prompt` et arrête les autres commandes.
+- **Délai** : `expansionMs` borne chaque commande ; la valeur par défaut est de 30 secondes.
 
 ```ts
 import { fileURLToPath } from "node:url";
-import type { Brief } from "@elie-laloum/outpost";
+import { dispatch } from "@elie-laloum/outpost";
+import { coder, repository, sandboxProvider } from "./outpost.config.mts";
 
-const brief: Brief = {
-  file: fileURLToPath(new URL("task.md", import.meta.url)),
-  values: { FEATURE: "email validation" },
-};
+await dispatch({
+  repository,
+  sandboxProvider,
+  agent: coder,
+  expansionMs: 60_000,
+  brief: {
+    file: fileURLToPath(new URL("fix-test.md", import.meta.url)),
+    values: { TEST_FILE: "test/signup.test.ts" },
+  },
+});
 ```
 
-## Modèles de fichier
+:::caution
+Les commandes exécutent du code. Gardez la maîtrise des fichiers de modèle et ne passez à une commande que des `values` de confiance : elles sont insérées sans échappement.
+:::
 
-Utilisez `{{FEATURE}}` dans le fichier pour insérer la valeur ci-dessus. `WORK_BRANCH` et `BASE_BRANCH` sont des variables intégrées décrivant le workspace Git sélectionné. Donnez des instructions concrètes : fichiers concernés, vérifications requises et création éventuelle d’un commit.
+Les valeurs ne peuvent pas ajouter de commandes : Outpost repère les fragments `` !` `` dans le fichier avant de remplir les emplacements.
 
-Les fichiers de prompt peuvent développer leurs fragments originaux de commandes shell. Ce développement exécute des commandes : le modèle et les valeurs insérées dans ces commandes doivent être fiables. Le texte substitué ne peut pas introduire de nouveaux fragments. `expansionMs` borne chaque développement.
+## Demander à l’agent, contrôler dans le code
 
-## Distinguer instructions et contrôles
+Un brief demande ; il ne garantit rien. Lorsqu’une condition compte, vérifiez-la dans votre workflow.
 
-Un brief peut demander à l’agent de lancer les tests ou d’éviter un fichier. Appliquez les conditions importantes dans votre application : exécutez une commande, inspectez son statut, validez une réponse ou attendez une revue. Une instruction seule n’est pas une dépendance imposée au workflow.
+| Condition            | Demander dans le brief      | Contrôler dans le code                                                                                                            |
+| -------------------- | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| Les tests passent    | « Run `npm test`. »         | Lancez-les vous-même dans une [session de sandbox](../sandbox-sessions/) ou une [boucle de vérification](../verification-loops/). |
+| Format de la réponse | « Reply with a JSON list. » | Validez une [réponse typée](../typed-responses/).                                                                                 |
+| Fichiers intacts     | « Do not edit `config/`. »  | Inspectez le diff, ou interdisez l’écriture avec les [permissions](../harness-permissions/) du harness intégré.                   |
+| Validation humaine   | « Do not merge yet. »       | Arrêtez-vous à une étape d’[approbation](../approvals/).                                                                          |
 
-Utilisez la [validation de sortie](../typed-responses/) lorsqu’une autre tâche consomme la réponse de l’agent.
+Une réponse typée exige aussi que le brief contienne sa balise ouvrante, par exemple `<result>`.
 
-API : [Brief](../../reference/brief/) · [DispatchOptions](../../reference/dispatchoptions/).
+## Limites
+
+- Les briefs texte n’acceptent pas `values` et n’exécutent jamais de commande.
+- `WORK_BRANCH` et `BASE_BRANCH` sont réservées : les passer dans `values` est une erreur de configuration.
+- `BASE_BRANCH` est vide lorsque votre dépôt a un `HEAD` détaché.
+- Une commande ne peut pas contenir d’accent grave (backtick).
+- Avec l’[exécution sur l’hôte](../host-process/), les commandes tournent sur votre machine : `sh -c`, ou PowerShell sous Windows.
+- Un `{{WORK_BRANCH}}` généré et la sortie des commandes changent d’une exécution à l’autre ; voir [Rejouer sans modèle](../record-replay/).
+
+API : [Brief](../../reference/brief/) · [PromptVariables](../../reference/promptvariables/) · [DispatchOptions](../../reference/dispatchoptions/) · [dispatch](../../reference/dispatch/).

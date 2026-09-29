@@ -1,57 +1,96 @@
 ---
 title: "Prepare the environment"
-description: "Install dependencies before agent work and reuse package downloads."
+description: "Install dependencies before the agent starts, and reuse package downloads across Docker and Podman sandboxes."
 ---
 
-Pass `hooks` to workspace or sandbox options to run setup commands. They run in declared order, and a failed command stops preparation.
+## Install dependencies before agent work
+
+Pass `hooks` to `dispatch()`. Each hook is a list of commands that Outpost runs while it prepares the sandbox, before the agent's first turn.
 
 ```ts
-import type { LifecycleHooks } from "@elie-laloum/outpost";
+import { dispatch } from "@elie-laloum/outpost";
+import { coder, repository, sandboxProvider } from "./outpost.config.mts";
 
-const hooks: LifecycleHooks = {
-  workspaceReady: [{ executable: "git", arguments: ["status", "--short"] }],
-  sandboxReady: [{ executable: "npm", arguments: ["ci"] }],
-};
+const result = await dispatch({
+  repository,
+  sandboxProvider,
+  agent: coder,
+  branch: { mode: "named", name: "outpost/fix-tests" },
+  hooks: {
+    sandboxReady: [{ executable: "npm", arguments: ["ci"] }],
+  },
+  brief: { text: "Run the tests and fix the first failure." },
+});
+console.log(result.text);
 ```
 
-## Choose the execution location
+`npm ci` runs inside the sandbox, in the repository root. The agent starts with `node_modules` installed. `createSandbox()` and `openWorkspace()` accept the same `hooks`; `speculate()` takes them under `sandbox`.
 
-| Hook             | Runs                                             |
-| ---------------- | ------------------------------------------------ |
-| `workspaceReady` | On the host after the Git workspace is prepared. |
-| `hostReady`      | On the host during sandbox preparation.          |
-| `sandboxReady`   | Inside the allocated sandbox before agent work.  |
+## Choose where each hook runs
 
-Install project dependencies in `sandboxReady` so they match the execution environment. Use `workspaceReady` for host-side preparation that belongs to the workspace’s lifetime.
+| Hook             | Runs where                        | When                                              | Commands          |
+| ---------------- | --------------------------------- | ------------------------------------------------- | ----------------- |
+| `workspaceReady` | On the host, in the worktree      | After the worktree is created, before any sandbox | One after another |
+| `hostReady`      | On the host, in the worktree      | After the sandbox is acquired                     | One after another |
+| `sandboxReady`   | In the sandbox, in the repository | After the repository is in place                  | All at once       |
 
-A warm sandbox does not rerun setup before every turn. Cold allocation runs its setup again. Cache package downloads with [dependency volumes](../environment-setup/) when repeated installation is expensive.
+`hostReady` and `sandboxReady` run at the same time. Install dependencies in `sandboxReady`: they then match the sandbox's operating system and architecture.
 
-These hooks execute commands. Model-loop hooks instead intercept tool calls and model events: see [Tool policies](../harness-permissions/).
+:::caution
+`sandboxReady` commands start together. Chain dependent steps in one command: `{ executable: "sh", arguments: ["-c", "npm ci && npm run build"] }`.
+:::
 
-API: [LifecycleHooks](../../reference/lifecyclehooks/).
+Each entry is a [command](../sandbox-sessions/): `executable`, `arguments`, and optionally `directory`, `variables` and `deadlineMs`. These hooks prepare the environment; to intercept the agent's tool calls, see [Permissions and hooks](../harness-permissions/).
 
-## Dependency volumes
+## Prepare once for several turns
 
-Container dependency caches reuse engine-managed volumes across sandbox allocations. They preserve package cache data independently of the agent’s private home.
+A sandbox runs its hooks once, when it is allocated. `sandbox.dispatch()`, `sandbox.resume()` and `sandbox.command()` reuse the prepared environment. Each top-level `dispatch()` allocates a fresh sandbox and runs them again.
+
+A workspace from `openWorkspace()` runs `workspaceReady` once when it opens. It runs `hostReady` and `sandboxReady` for each sandbox it creates, unless that sandbox passes its own `hooks`, which replace the workspace's.
+
+## Reuse downloads across containers
+
+Docker and Podman providers accept `caches`: named volumes that survive the container. Point your package manager at the mounted directory.
 
 ```ts
 import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
-const sandboxProvider = createDockerSandboxProvider({
+export const sandboxProvider = createDockerSandboxProvider({
   image: "outpost:dev",
-  caches: [{ name: "npm", key: "application-node24" }],
+  caches: [{ name: "npm", key: "node24" }],
   variables: { npm_config_cache: "/outpost/cache/npm" },
 });
 ```
 
-Choose a stable key for compatible projects and runtime versions. Change the key when cache compatibility changes. The name identifies `/outpost/cache/<name>`; `npm_config_cache` directs npm to the mounted cache. Volumes are scoped by repository, image, user and key.
+Each cache is mounted at `/outpost/cache/<name>`, owned by the container user. The next sandbox with the same key finds the downloads there. Change `key` when cached content stops being compatible, for example after a runtime upgrade.
 
-### Installation still runs
+| Package manager | Variable            |
+| --------------- | ------------------- |
+| npm             | `npm_config_cache`  |
+| Yarn            | `YARN_CACHE_FOLDER` |
+| pip             | `PIP_CACHE_DIR`     |
+| Go modules      | `GOMODCACHE`        |
 
-A download cache does not mean project dependencies are installed. Keep `npm ci` or your package manager’s install command in `sandboxReady`. The package manager validates the project lockfile and reuses compatible downloads.
+Keep the install command in `sandboxReady`. The cache saves downloads, not the installed project: the package manager still checks the lockfile and fills `node_modules`.
 
-### Ownership
+## Manage cache volumes
 
-Closing a sandbox does not remove the cache volume. Manage cache retention with the container engine. Keep credentials and native conversation files out of shared caches. A cache shared between projects also shares their ability to affect cached content.
+A volume is shared by sandboxes with the same repository, image, container user, cache name and key. Closing a sandbox and `outpost image remove` keep it. Outpost labels its volumes `io.outpost.cache=true`:
 
-API: [ContainerOptions](../../reference/containeroptions/) · [DependencyCache](../../reference/dependencycache/).
+```sh
+docker volume ls --filter label=io.outpost.cache=true
+docker volume rm $(docker volume ls -q --filter label=io.outpost.cache=true)
+```
+
+Podman accepts the same commands with `podman`.
+
+## Limits
+
+- Other providers have no `caches`: `sandboxReady` downloads everything on each allocation.
+- Each hook command stops after 10 minutes unless you set `deadlineMs`.
+- A command that exits with a nonzero status rejects with an `OutpostError` of code `process`, stops the other preparation commands and releases the sandbox. See [Errors](../error-handling/).
+- Commands run without a shell. Call `sh -c` for pipes and `&&`.
+- Cache names start with a lowercase letter and hold at most 48 lowercase letters, digits or hyphens. Explicit `volumes` cannot overlap `/outpost/cache`.
+- Every sandbox that mounts a cache can change its content, and later sandboxes read it. Keep credentials out of caches ([Security](../security/)).
+
+API: [dispatch](../../reference/dispatch/) · [createSandbox](../../reference/createsandbox/) · [openWorkspace](../../reference/openworkspace/) · [LifecycleHooks](../../reference/lifecyclehooks/) · [Command](../../reference/command/) · [ContainerOptions](../../reference/containeroptions/) · [DependencyCache](../../reference/dependencycache/).

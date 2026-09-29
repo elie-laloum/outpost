@@ -1,21 +1,22 @@
 ---
 title: "Steering a running agent"
-description: "Send an instruction to an agent that is already working."
+description: "Send an extra instruction to an agent while it works, without cancelling the task or losing its sandbox."
 ---
 
-`createSteering()` returns a controller that you pass to a dispatch as `steering`. While the dispatch runs, `send()` hands an instruction to its agent without cancelling the work.
+## Send an instruction
+
+`createSteering()` returns a controller. Pass it to a dispatch as `steering`, then call `send()` while the agent works.
 
 ```ts
-import { createSandbox, createSteering } from "@elie-laloum/outpost";
+import { createSteering, dispatch } from "@elie-laloum/outpost";
 import { coder, repository, sandboxProvider } from "./outpost.config.mts";
 
-await using sandbox = await createSandbox({
+const steering = createSteering();
+const running = dispatch({
   repository,
   sandboxProvider,
   agent: coder,
-});
-const steering = createSteering();
-const running = sandbox.dispatch({
+  branch: { mode: "named", name: "outpost/auth-refactor" },
   brief: { text: "Refactor the auth module." },
   steering,
 });
@@ -24,26 +25,33 @@ console.log(delivery.mode); // "injected" or "resumed"
 const result = await running;
 ```
 
-`send()` resolves when the agent receives the text, not when it has acted on it. The instruction does not replace the brief: the agent reads it as an additional user message.
+`send()` resolves when the agent receives the text, not when it has acted on it. The agent reads it as one more user message; the brief still applies.
 
-## How the instruction reaches the agent
+## How it reaches each agent
 
-| Agent                               | Delivery                                                                                                                                                                                                  |
-| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [Built-in harness](../harness/)     | `injected`: added before the next model request, after the current tool results. If the model was about to finish, it continues. While a built-in subagent works, that subagent receives the instruction. |
-| [Claude Code](../claude-code/)      | `injected`: written to Claude's stream-json input. Read during a tool call, it joins the running turn; read while Claude writes its final answer, it runs as a queued turn in the same process.           |
-| [Codex](../codex/)                  | `injected`: Codex runs as `codex app-server` for steered dispatches and receives the instruction with `turn/steer` in the active turn. When no turn is active, it starts the next turn of the thread.     |
-| Copilot CLI, Kimi Code, Antigravity | `resumed`: Outpost stops the running process once its conversation is known, keeps the sandbox, then resumes the same conversation with the instruction. The action in progress is cut short.             |
+| Agent                                                                                      | `mode`     | What happens                                                                                                                   |
+| ------------------------------------------------------------------------------------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| [Built-in harness](../harness/)                                                            | `injected` | Added to the next model request, after the current tool results. A model about to finish continues instead.                    |
+| [Claude Code](../claude-code/)                                                             | `injected` | Written to its stream-json input. It joins the running turn, or runs next in the same process if Claude was already answering. |
+| [Codex](../codex/)                                                                         | `injected` | A steered dispatch runs `codex app-server`. `turn/steer` adds the text to the active turn, or starts the next one.             |
+| [Copilot CLI](../copilot-cli/), [Kimi Code](../kimi-code/), [Antigravity](../antigravity/) | `resumed`  | Outpost stops the process once its conversation is known, then resumes it with the text in the same sandbox.                   |
 
-Every provider accepts live input: local, Docker and Podman pipe stdin, Firecracker forwards it through SSH, and Vercel and Daytona append framed chunks to a file that a small Node wrapper in the sandbox feeds to the agent. On Vercel and Daytona each instruction costs one provider command, so it arrives about one to two seconds later.
+With `resumed`, the action in progress is cut short, but files already changed stay in the workspace. Every sandbox provider carries live input; on Vercel and Daytona each instruction costs one provider command and arrives a moment later.
 
-Files the agent already changed stay in the workspace. With `resumed` delivery, the interrupted turn appears in `result.turns` with `interrupted: "steering"` and emits a `stopped` event with reason `steered`.
+## When you send it
 
-The agent CLIs decide this split: `copilot -p` and `kimi --prompt` take a single prompt, and Antigravity queues each stdin message as a separate turn.
+| You send it                           | What happens                                                               | `mode`                 |
+| ------------------------------------- | -------------------------------------------------------------------------- | ---------------------- |
+| Before the agent starts               | Appended to the prompt.                                                    | `injected`             |
+| During the turn                       | Delivered as in the table above.                                           | `injected` / `resumed` |
+| After the agent answered              | Outpost resumes the conversation in a new turn, so the result reflects it. | `resumed`              |
+| While no dispatch uses the controller | Waits for the next dispatch that receives the controller.                  | ―                      |
 
-## Target a subagent
+An instruction the dispatch cannot deliver, for example because the agent never reported a conversation, is rejected when the dispatch ends. The rejection is an [`OutpostError`](../error-handling/) with code `steering` and the text in `details.text`.
 
-Each [built-in subagent](../harness/) delegation has a run id, reported by its `subagent` event and carried as `subagentId` by its other events. Pass it to `send()` to address that run:
+## Target a built-in subagent
+
+Each [built-in subagent](../subagents/) run has an id, reported by its `subagent` event. Pass it as `subagent` to reach that run only.
 
 ```ts
 import { createSteering, type DispatchOptions } from "@elie-laloum/outpost";
@@ -60,41 +68,33 @@ const request: DispatchOptions = {
 };
 ```
 
-| `subagent` option | Receiver                                                                      |
-| ----------------- | ----------------------------------------------------------------------------- |
-| omitted           | The first active loop to reach a step boundary: the working subagent, if any. |
-| a run id          | Only that subagent run, at any depth.                                         |
-| `null`            | Only the main loop, after the current delegation returns.                     |
+| `subagent` | Receiver                                                                    |
+| ---------- | --------------------------------------------------------------------------- |
+| omitted    | The first active loop to reach its next step: the working subagent, if any. |
+| a run id   | That subagent run only, at any depth.                                       |
+| `null`     | The main loop only, once the current delegation returns.                    |
 
-An instruction still addressed to a run when it ends is rejected with code `steering` and the run id in `details.subagent`. CLI agents cannot address their own subagents: a targeted instruction is rejected as soon as a CLI turn sees it.
+An instruction still waiting when its run ends is rejected with code `steering` and the run id in `details.subagent`.
 
-## Timing
+## Reuse the controller
 
-- **Before the turn starts.** Messages sent before the dispatch reaches its agent are appended to the prompt.
-- **During the turn.** Delivered as described above.
-- **After the agent answered.** Outpost resumes the conversation in a new turn of the same pass, so the result always reflects the last instruction. This applies to every agent that can resume, including the built-in harness and Claude Code.
+A controller serves one dispatch at a time, across all its passes; attaching it to a second concurrent dispatch fails. Once a dispatch ends, the next one can use it. `close()` rejects pending instructions and every later `send()`.
 
-A message the dispatch cannot deliver is rejected when the dispatch ends: for example an agent that stopped without reporting a conversation. The rejection is an `OutpostError` with code `steering` and the text in `details.text`.
+`result.resume()` and `result.fork()` do not inherit it: pass `steering` again in their options.
 
-## Lifecycle
+In a workflow, return `steering` from the `request` of a [`defineAgentTask()` or `defineIsolatedTask()`](../task-dependencies/). With a [fallback agent](../fallback-agents/), steering follows the candidate that runs.
 
-A controller serves one dispatch at a time and can be reused for the next one. Attaching it to a second concurrent dispatch fails. Messages sent while no dispatch runs wait for the next dispatch that uses the controller; `close()` rejects them and every later `send()`.
+## Events and usage
 
-`dispatch()` shares one controller across its passes. `result.resume()` and `result.fork()` do not reuse it: pass `steering` again. In a workflow, return it from the `request` of an [`defineAgentTask` or `defineIsolatedTask`](../task-dependencies/).
+Each delivery emits a `steer` [agent event](../progress/) with `text`, `mode`, `pass`, and `subagentId` when a subagent received it. The terminal reporter prints it, and the conversation records it as a user message.
 
-Before running, a dispatch rejects agents that can neither receive live input nor resume a conversation: [replay agents](../record-replay/) and adapters with `resumable: false`. Candidates of a [fallback agent](../fallback-agents/) are validated the same way, and steering follows the candidate that is running.
-
-## Events, history and usage
-
-Each delivery emits a `steer` [agent event](../progress/) with `text`, `mode` and `pass`, and `subagentId` when a subagent received it; the terminal reporter prints it. Harness transcripts and native sessions record the instruction as a user message. A pass still emits one `summary`, and `result.usage` includes interrupted turns.
-
-A [replay](../record-replay/) of a steered run reproduces its turns: each `resumed` instruction starts the next recorded turn, and the interrupted turn keeps `interrupted: "steering"`, its own text and usage.
+A `resumed` delivery ends the interrupted turn with a `stopped` event of reason `steered`; that turn appears in `result.turns` with `interrupted: "steering"`. A pass still emits one `summary`, and `result.usage` includes interrupted turns. A [replay](../record-replay/) reproduces steered runs turn by turn.
 
 ## Limits
 
 - Instructions live in memory. For questions and answers that must survive a restart, use [interactive tasks](../interactive-tasks/).
-- When several subagents run at once, an instruction without a target goes to the first one that reaches a step boundary; pass a run id to choose.
-- Codex steering uses the `app-server` protocol, which Codex marks experimental. Its handshake and failure handling were checked against Codex 0.155; a live `turn/steer` run remains to be done.
-- Claude Code injection was checked live on the host, Daytona and Vercel. Interruption and resumption for Copilot, Kimi and Antigravity are covered by simulated CLIs and a real Docker sandbox, not by live runs.
+- A dispatch with `steering` rejects agents that can neither take live input nor resume a conversation, including [replay agents](../record-replay/).
+- Codex steering uses the `app-server` protocol, which Codex marks experimental.
+- Subagents of CLI agents cannot be addressed: an instruction with `subagent` is rejected as soon as a CLI turn sees it.
 
-API: [createSteering](../../reference/createsteering/) · [Steering](../../reference/steering/) · [SteeringDelivery](../../reference/steeringdelivery/) · [DispatchOptions](../../reference/dispatchoptions/).
+API: [createSteering](../../reference/createsteering/) · [Steering](../../reference/steering/) · [SteeringSendOptions](../../reference/steeringsendoptions/) · [SteeringDelivery](../../reference/steeringdelivery/) · [DispatchOptions](../../reference/dispatchoptions/).

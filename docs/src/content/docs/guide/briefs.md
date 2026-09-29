@@ -1,30 +1,125 @@
 ---
 title: "Write a brief"
-description: "Supply text, files and prompt variables."
+description: "Give the agent its instructions as text or as a Markdown template with variables and command output."
 ---
 
-A brief is either `{ text }` or `{ file, values }`. Use text for application-generated requests and a file for a reusable task template.
+## Choose text or a file
+
+The brief is the instruction the agent receives. Pass a string when your code builds the request, or a file when you keep a reusable task template.
+
+|                | Text brief `{ text }`          | File brief `{ file, values }`                          |
+| -------------- | ------------------------------ | ------------------------------------------------------ |
+| Source         | A string built by your code    | A Markdown file kept next to your scripts              |
+| Variables      | None: interpolate in your code | `{{NAME}}` from `values`, `WORK_BRANCH`, `BASE_BRANCH` |
+| Command output | None                           | `` !`command` `` replaced by its output                |
+| Best for       | Generated or one-off requests  | Reusable tasks shared by several scripts               |
+
+A text brief is sent as written. The rest of this page covers file briefs.
+
+## Fill a template
+
+Write placeholders as `{{NAME}}`, with letters, digits and underscores. Outpost reads the file and fills them before the agent starts.
+
+```md title="task.md"
+Add {{FEATURE}} to the signup form.
+
+You work on {{WORK_BRANCH}}, created from {{BASE_BRANCH}}.
+Run `npm test` and commit your change.
+```
+
+```ts title="feature.mts"
+import { fileURLToPath } from "node:url";
+import { dispatch } from "@elie-laloum/outpost";
+import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+
+const result = await dispatch({
+  repository,
+  sandboxProvider,
+  agent: coder,
+  branch: { mode: "named", name: "outpost/email-validation" },
+  brief: {
+    file: fileURLToPath(new URL("task.md", import.meta.url)),
+    values: { FEATURE: "email validation" },
+  },
+});
+console.log(result.text);
+```
+
+A relative `file` resolves from the process working directory. Build the path from `import.meta.url` so the script runs from anywhere.
+
+| Placeholder       | Filled with                                                                             |
+| ----------------- | --------------------------------------------------------------------------------------- |
+| `{{FEATURE}}`     | `values.FEATURE`: a string, a finite number or a boolean.                               |
+| `{{WORK_BRANCH}}` | The branch the agent works on (see [Repository and branch](../repository-and-branch/)). |
+| `{{BASE_BRANCH}}` | The branch checked out in your repository when the task started.                        |
+
+A placeholder without a value fails the task with error code `prompt` before the agent runs. Values the file never uses reach your `warn` callback.
+
+## Insert command output
+
+Write `` !`command` `` to replace the fragment with what the command prints. Use it to hand the agent a failing test log or recent history.
+
+```md title="fix-test.md"
+Fix the failing test in {{TEST_FILE}}. Its current output:
+
+!`npx vitest run {{TEST_FILE}} 2>&1 | tail -n 40`
+
+Recent commits:
+
+!`git log --oneline -5`
+```
+
+The commands run in the sandbox, in the checkout the agent works on, with `sh -c`. Before each pass, all commands of the brief run in parallel.
+
+<!-- features -->
+
+- **Output**: Only stdout is inserted; add `2>&1` to include errors.
+- **Failure**: A nonzero exit fails the task with code `prompt` and stops the other commands.
+- **Deadline**: `expansionMs` bounds each command; the default is 30 seconds.
 
 ```ts
 import { fileURLToPath } from "node:url";
-import type { Brief } from "@elie-laloum/outpost";
+import { dispatch } from "@elie-laloum/outpost";
+import { coder, repository, sandboxProvider } from "./outpost.config.mts";
 
-const brief: Brief = {
-  file: fileURLToPath(new URL("task.md", import.meta.url)),
-  values: { FEATURE: "email validation" },
-};
+await dispatch({
+  repository,
+  sandboxProvider,
+  agent: coder,
+  expansionMs: 60_000,
+  brief: {
+    file: fileURLToPath(new URL("fix-test.md", import.meta.url)),
+    values: { TEST_FILE: "test/signup.test.ts" },
+  },
+});
 ```
 
-## File templates
+:::caution
+Commands execute code. Keep template files under your control, and pass only trusted `values` into a command: they are inserted without quoting.
+:::
 
-Use `{{FEATURE}}` in the file to insert the value above. `WORK_BRANCH` and `BASE_BRANCH` are built-in variables describing the selected Git workspace. Keep instructions concrete: name the files, required checks and whether the agent should commit.
+Values cannot add commands: Outpost finds the `` !` `` fragments in the file before it fills placeholders.
 
-Prompt files can expand original shell command fragments. Expansion executes commands, so treat the template and values inserted into those commands as trusted input. Substituted text cannot introduce new expansion fragments. `expansionMs` bounds each expansion.
+## Instruct the agent, enforce in code
 
-## Separate instructions from enforcement
+A brief asks; it does not guarantee. When a condition matters, check it in your workflow.
 
-A brief can ask the agent to run tests or avoid a file. Enforce important conditions in your application: run a command, inspect its status, validate a response or wait at a review gate. An instruction alone is not an enforced workflow dependency.
+| Condition            | Ask in the brief          | Enforce in code                                                                                                  |
+| -------------------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Tests pass           | "Run `npm test`."         | Run them yourself in a [sandbox session](../sandbox-sessions/) or a [verification loop](../verification-loops/). |
+| Answer format        | "Reply with a JSON list." | Validate a [typed response](../typed-responses/).                                                                |
+| Files left untouched | "Do not edit `config/`."  | Inspect the diff, or deny writes with the built-in harness [permissions](../harness-permissions/).               |
+| Human sign-off       | "Do not merge yet."       | Stop at an [approval](../approvals/) gate.                                                                       |
 
-Use [Output validation](../typed-responses/) when another task consumes the agent’s answer.
+A typed response also requires the brief to contain its opening tag, such as `<result>`.
 
-API: [Brief](../../reference/brief/) · [DispatchOptions](../../reference/dispatchoptions/).
+## Limits
+
+- Text briefs do not accept `values` and never run commands.
+- `WORK_BRANCH` and `BASE_BRANCH` are reserved: passing them in `values` is a configuration error.
+- `BASE_BRANCH` is empty when your repository has a detached `HEAD`.
+- A command cannot contain a backtick.
+- With [host execution](../host-process/), commands run on your machine: `sh -c`, or PowerShell on Windows.
+- A generated `{{WORK_BRANCH}}` and command output change between runs; see [Replay without a model](../record-replay/).
+
+API: [Brief](../../reference/brief/) · [PromptVariables](../../reference/promptvariables/) · [DispatchOptions](../../reference/dispatchoptions/) · [dispatch](../../reference/dispatch/).

@@ -1,9 +1,11 @@
 ---
 title: "Conversations"
-description: "Continuer une conversation d’agent ou en dériver une autre."
+description: "Poursuivre la conversation d’un agent dans une tâche ultérieure, en dériver une autre et la retrouver sur une autre machine."
 ---
 
-Codex, Claude Code, Copilot et Kimi peuvent capturer leurs conversations natives. Le fork est pris en charge par Codex, Claude Code et Kimi. Continuez-en une avec `result.resume()` ou créez une conversation distincte avec `result.fork()`.
+## Poursuivre une conversation
+
+`result.resume()` envoie un brief de suite à la conversation produite par un dispatch. L’agent garde son contexte : les fichiers lus, ses décisions et ses réponses.
 
 ```ts
 import { dispatch } from "@elie-laloum/outpost";
@@ -16,51 +18,148 @@ const first = await dispatch({
   brief: { text: "Inspect the parser and explain its edge cases." },
 });
 const next = await first.resume({
-  sandboxProvider,
   brief: { text: "Which edge case deserves a regression test first?" },
 });
 console.log(next.text);
 ```
 
-## Choix de continuation
+`resume()` lance un nouveau dispatch dans une sandbox neuve, avec les réglages du premier : dépôt, provider de sandbox, branche. Outpost y restaure d’abord la conversation enregistrée. Passez un réglage pour le remplacer.
 
-Dans une sandbox ouverte, utilisez `sandbox.resume(id, options)` ou `sandbox.fork(id, options)`. Un résultat à froid restaure sa conversation capturée dans un environnement ultérieur. L’identifiant de conversation et sa transcription sont distincts de la branche et du workspace Git.
+## Reprendre plus tard à partir de l’identifiant
 
-Désactiver la capture empêche le résultat de fournir une conversation enregistrée pour restauration ultérieure. Antigravity reprend seulement une conversation émise dans la même sandbox ouverte ; il refuse la reprise à froid et le fork automatisé. Copilot refuse le fork automatisé.
+`result.conversation` contient l’identifiant de la conversation. Pour reprendre depuis un autre script, passez `continuation: { id }` à `dispatch()`. Outpost la retrouve dans le store de l’agent sur cet hôte ou, une fois archivée via un transport, sur n’importe quelle machine.
 
-## Stockage
+## Dériver une conversation
 
-Chaque preset CLI capture ses sessions dans son store natif : `createClaudeConversations()`, `createCodexConversations()`, `createCopilotConversations()` et `createKimiConversations()` créent directement ces stores. `createHarnessConversations()` stocke les transcriptions de la boucle intégrée. `createTransportConversations()` enveloppe n’importe lequel de ces stores pour archiver ses captures via un transport. La restauration réécrit les chemins de workspace pris en charge lorsque la transcription se déplace. Pour donner une capture native à un harness CLI externe, voir [les formats de conversation natifs](../conversation-formats/).
+`result.fork()` démarre une nouvelle conversation à partir d’une copie de la première. L’originale reste intacte : vous pouvez explorer deux pistes depuis le même contexte. Donnez au fork sa propre branche pour séparer ses commits.
 
-Passez `conversations` à `createClaudeHarness()`, `createCodexHarness()`, `createCopilotHarness()`, `createKimiHarness()` ou `createHarness()` pour capturer les sessions de cet agent dans n’importe quel `ConversationStore` au lieu du store natif par défaut :
+```ts
+import { dispatch } from "@elie-laloum/outpost";
+import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+
+const first = await dispatch({
+  repository,
+  sandboxProvider,
+  agent: coder,
+  brief: { text: "Inspect the parser and explain its edge cases." },
+});
+const alternative = await first.fork({
+  branch: { mode: "named", name: "outpost/parser-state-machine" },
+  brief: { text: "Rewrite the parser as a state machine and commit it." },
+});
+console.log(alternative.conversation, alternative.branch);
+```
+
+À partir d’un identifiant, `continuation: { id, fork: true }` produit le même effet.
+
+## Poursuivre dans une sandbox ouverte
+
+Dans une [session de sandbox](../sandbox-sessions/), `result.resume()` et `result.fork()` continuent dans la même sandbox, sans restauration. Ils n’acceptent que les options du brief et du tour : les réglages de la sandbox sont figés.
+
+```ts
+import { createSandbox } from "@elie-laloum/outpost";
+import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+
+await using sandbox = await createSandbox({
+  repository,
+  sandboxProvider,
+  agent: coder,
+});
+const plan = await sandbox.dispatch({
+  brief: { text: "Propose a fix for the flaky login test. Do not edit files." },
+});
+const tests = await sandbox.command({ executable: "npm", arguments: ["test"] });
+await plan.resume({
+  brief: { text: `Apply your fix. Current test output:\n${tests.stdout}` },
+});
+```
+
+`sandbox.resume(id, options)` et `sandbox.fork(id, options)` prennent un identifiant, y compris celui d’une conversation capturée par un dispatch antérieur.
+
+## Ce que chaque agent prend en charge
+
+À froid signifie dans une nouvelle sandbox (`dispatch()`, `result.resume()` sur un résultat de `dispatch()`) ; à chaud, dans la même sandbox ouverte. [Choisir un agent](../choose-an-agent/) compare les autres capacités.
+
+| Agent                          | Reprise à froid | Reprise à chaud         | Fork |
+| ------------------------------ | --------------- | ----------------------- | ---- |
+| Claude Code, Codex, Kimi       | Oui             | Oui                     | Oui  |
+| GitHub Copilot CLI             | Oui             | Oui                     | Non  |
+| [Harness intégré](../harness/) | Oui             | Oui                     | Oui  |
+| Antigravity                    | Non             | Même sandbox uniquement | Non  |
+
+## Où les conversations sont stockées
+
+Après chaque tour, Outpost copie la conversation de la sandbox vers l’hôte. `result.transcript` contient le chemin de cette copie.
+
+| Agent           | Store par défaut               | Emplacement sur l’hôte                      |
+| --------------- | ------------------------------ | ------------------------------------------- |
+| Claude Code     | `createClaudeConversations()`  | `~/.claude/projects/<project>/<id>.jsonl`   |
+| Codex           | `createCodexConversations()`   | `~/.codex/sessions/<yyyy>/<mm>/<dd>/`       |
+| Copilot CLI     | `createCopilotConversations()` | `.outpost/conversations/copilot/<id>.json`  |
+| Kimi Code       | `createKimiConversations()`    | `.outpost/conversations/kimi/<id>.json`     |
+| Harness intégré | `createHarnessConversations()` | `.outpost/conversations/harness/<id>.jsonl` |
+
+Copilot et Kimi conservent une session sous forme de dossier : Outpost la regroupe en un bundle JSON. L’option `conversationHome` de `dispatch()` ou de `createSandbox()` remplace `~`, ou le dépôt pour les bundles, comme racine de ces chemins.
+
+La restauration réécrit les chemins du dépôt enregistrés dans la conversation vers ceux de la nouvelle sandbox. Pour doter une CLI que vous ajoutez de son propre store, voir [Formats de conversation natifs](../conversation-formats/).
+
+## Archiver et partager via un transport
+
+`createTransportConversations()` enveloppe le store d’un agent et archive en plus chaque capture via un [transport](../storage/). Une conversation reprend alors sur une autre machine, ou après suppression du dossier `.outpost` du dépôt.
 
 ```ts
 import {
   createAgent,
-  createKimiConversations,
-  createKimiHarness,
+  createCodexConversations,
+  createCodexHarness,
   createLocalTransport,
   createTransportConversations,
 } from "@elie-laloum/outpost";
 
-const conversations = createTransportConversations(createKimiConversations(), {
+const conversations = createTransportConversations(createCodexConversations(), {
   transporter: createLocalTransport({ directory: "/mnt/shared/outpost" }),
   namespace: "my-project",
 });
 
 export const coder = createAgent({
-  harness: createKimiHarness({ authentication: "account", conversations }),
+  harness: createCodexHarness({ authentication: "account", conversations }),
 });
 ```
 
-Une session capturée par un dispatch peut alors être reprise, ou forkée avec Kimi, depuis une autre machine ou après suppression du dossier `.outpost` local du dépôt. Utilisez un `createS3Transport()` pour la partager entre hôtes. Le `format` du store doit correspondre à l’agent : envelopper `createKimiConversations()` pour Kimi et `createHarnessConversations()` pour `createHarness()`. Un format incompatible, une valeur qui n’est pas un store, ou `saveConversations: false` combiné à `conversations` échoue dès la création du harness, avant toute allocation de sandbox. Un store personnalisé sans `format` est accepté tel quel. Sans l’option, chaque agent conserve son store natif. `createAntigravityHarness()` refuse `conversations`, car Antigravity n’a pas de capture portable.
+<!-- features -->
 
-Les conversations archivées contiennent prompts, contenu du dépôt et sorties d’outils. Outpost ne les chiffre ni ne les authentifie ; restreignez l’accès au transport comme celui du dépôt.
+- **Format identique**: Enveloppez le store du même agent, par exemple `createHarnessConversations()` pour `createHarness()`. Un format différent échoue dès la création du harness.
+  - `conversations`
+- **Namespace stable**: Utilisez le même nom de projet sur toutes les machines qui partagent ces conversations.
+  - `namespace`
+- **Transport partagé**: Utilisez [S3 ou R2](../object-storage/) entre plusieurs hôtes ; un transport local sur un montage partagé fonctionne aussi.
+  - `createS3Transport()`
 
-Séparez l’accès aux transcriptions de l’authentification. Une conversation enregistrée ne fournit pas d’identifiants de compte, et supprimer les identifiants ne supprime pas le contenu des conversations.
+`result.transcriptReference` identifie la copie archivée. Les presets Claude Code, Codex, Copilot et Kimi, ainsi que `createHarness()`, acceptent `conversations`.
 
-Copilot et Kimi capturent un bundle JSON par session sous `.outpost/conversations/<format>/` dans le dépôt (ou sous `conversationHome` si fourni). `createCopilotConversations()`, `createKimiConversations()` et `createTransportConversations()` prennent ces bundles en charge. `transcript` désigne le bundle, pas un historique JSONL unique. La capture est limitée à 64 Mio de données et 4 096 fichiers ; fichiers obligatoires absents, liens symboliques et métadonnées non prises en charge sont explicitement refusés. La restauration prépare et valide tous les fichiers avant de remplacer une session existante, en conservant son ancien dossier sous `.outpost-recovery/` dans le home de la CLI.
+## Désactiver la capture
 
-La capture Kimi exclut logs de diagnostic, tâches de fond, tâches cron, notifications et fichiers de verrou. Elle restaure la conversation, pas les processus ou planifications. Une session Kimi déjà présente sous un autre workspace dans le home cible est refusée ; utilisez un home de sandbox privé pour une continuation portable. Fournissez séparément les identifiants et la configuration personnalisée des outils/modèles. L’exécution locale partage le stockage natif de l’hôte ; une restauration peut y relocaliser les métadonnées de session.
+`saveConversations: false` sur Claude Code ou Codex laisse les conversations dans la sandbox : seule une reprise à chaud peut les poursuivre. `conversations: false` sur `createHarness()` n’enregistre aucune transcription et refuse reprise, fork et réparations de réponse. Copilot et Kimi capturent toujours.
 
-API : [DispatchResult](../../reference/dispatchresult/) · [ConversationStore](../../reference/conversationstore/) · [NativeConversationStore](../../reference/nativeconversationstore/) · [createKimiConversations](../../reference/createkimiconversations/) · [createTransportConversations](../../reference/createtransportconversations/).
+```ts
+import { createAgent, createClaudeHarness } from "@elie-laloum/outpost";
+
+export const reviewer = createAgent({
+  harness: createClaudeHarness({
+    authentication: "account",
+    saveConversations: false,
+  }),
+});
+```
+
+## Limites
+
+- **Taille des bundles** : une session Copilot ou Kimi est limitée à 64 Mio et 4 096 fichiers. Liens symboliques, fichiers obligatoires absents et fichiers modifiés pendant la capture échouent avec le code `session`.
+- **État Kimi** : la capture exclut logs, tâches de fond, tâches cron, notifications et fichiers de verrou. Une session reprise restaure la conversation, pas les processus en cours ni les planifications.
+- **Antigravity** : rien n’est capturé, l’option `conversations` est donc refusée.
+- **Pas de chiffrement** : les conversations contiennent prompts, contenu du dépôt et sorties d’outils, stockés et archivés sans chiffrement ni authentification. Restreignez leur accès comme celui du dépôt.
+- **Identifiants à part** : une conversation ne transporte aucun identifiant. L’agent qui reprend a besoin de sa propre [authentification](../authentication/), et supprimer les identifiants laisse les conversations en place.
+- **Exécution sur l’hôte** : avec l’[exécution sur l’hôte](../host-process/), les agents utilisent vos propres stores de sessions. Kimi refuse de restaurer une session déjà présente sous un autre workspace.
+- **Agents de repli** : un [agent de repli](../fallback-agents/) n’accepte pas `continuation`. `result.resume()` poursuit avec le candidat qui a répondu.
+
+API : [DispatchResult](../../reference/dispatchresult/) · [WarmDispatchResult](../../reference/warmdispatchresult/) · [Sandbox](../../reference/sandbox/) · [ConversationStore](../../reference/conversationstore/) · [createTransportConversations](../../reference/createtransportconversations/) · [createKimiConversations](../../reference/createkimiconversations/) · [createHarnessConversations](../../reference/createharnessconversations/).

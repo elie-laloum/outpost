@@ -1,57 +1,96 @@
 ---
 title: "Préparer l’environnement"
-description: "Installer les dépendances avant le travail de l’agent et réutiliser les téléchargements de paquets."
+description: "Installer les dépendances avant le démarrage de l’agent et réutiliser les téléchargements de paquets entre sandboxes Docker et Podman."
 ---
 
-Passez `hooks` dans les options du workspace ou de la sandbox pour lancer des commandes de préparation. Elles s’exécutent dans l’ordre déclaré ; une commande échouée arrête la préparation.
+## Installer les dépendances avant le travail de l’agent
+
+Passez `hooks` à `dispatch()`. Chaque hook est une liste de commandes qu’Outpost exécute pendant la préparation de la sandbox, avant le premier tour de l’agent.
 
 ```ts
-import type { LifecycleHooks } from "@elie-laloum/outpost";
+import { dispatch } from "@elie-laloum/outpost";
+import { coder, repository, sandboxProvider } from "./outpost.config.mts";
 
-const hooks: LifecycleHooks = {
-  workspaceReady: [{ executable: "git", arguments: ["status", "--short"] }],
-  sandboxReady: [{ executable: "npm", arguments: ["ci"] }],
-};
+const result = await dispatch({
+  repository,
+  sandboxProvider,
+  agent: coder,
+  branch: { mode: "named", name: "outpost/fix-tests" },
+  hooks: {
+    sandboxReady: [{ executable: "npm", arguments: ["ci"] }],
+  },
+  brief: { text: "Run the tests and fix the first failure." },
+});
+console.log(result.text);
 ```
 
-## Choisir le lieu d’exécution
+`npm ci` s’exécute dans la sandbox, à la racine du dépôt. L’agent démarre avec `node_modules` déjà installé. `createSandbox()` et `openWorkspace()` acceptent les mêmes `hooks` ; `speculate()` les reçoit sous `sandbox`.
 
-| Hook             | Exécution                                            |
-| ---------------- | ---------------------------------------------------- |
-| `workspaceReady` | Sur l’hôte après préparation du workspace Git.       |
-| `hostReady`      | Sur l’hôte pendant la préparation de la sandbox.     |
-| `sandboxReady`   | Dans la sandbox allouée avant le travail de l’agent. |
+## Choisir où s’exécute chaque hook
 
-Installez les dépendances du projet dans `sandboxReady` pour correspondre à l’environnement d’exécution. Utilisez `workspaceReady` pour une préparation sur l’hôte liée à la durée de vie du workspace.
+| Hook             | Exécution                      | Moment                                             | Commandes           |
+| ---------------- | ------------------------------ | -------------------------------------------------- | ------------------- |
+| `workspaceReady` | Sur l’hôte, dans le worktree   | Après la création du worktree, avant toute sandbox | L’une après l’autre |
+| `hostReady`      | Sur l’hôte, dans le worktree   | Après l’acquisition de la sandbox                  | L’une après l’autre |
+| `sandboxReady`   | Dans la sandbox, dans le dépôt | Une fois le dépôt en place                         | Toutes ensemble     |
 
-Une sandbox chaude ne rejoue pas la préparation avant chaque tour. Une allocation à froid la rejoue. Mettez en cache les téléchargements de paquets avec les [volumes de dépendances](../environment-setup/) lorsque les installations répétées coûtent cher.
+`hostReady` et `sandboxReady` s’exécutent en même temps. Installez les dépendances dans `sandboxReady` : elles correspondent alors au système et à l’architecture de la sandbox.
 
-Ces hooks exécutent des commandes. Ceux de la boucle de modèle interceptent les appels d’outils et les événements du modèle : voir [Politiques des outils](../harness-permissions/).
+:::caution
+Les commandes de `sandboxReady` démarrent ensemble. Enchaînez les étapes dépendantes dans une seule commande : `{ executable: "sh", arguments: ["-c", "npm ci && npm run build"] }`.
+:::
 
-API : [LifecycleHooks](../../reference/lifecyclehooks/).
+Chaque entrée est une [commande](../sandbox-sessions/) : `executable`, `arguments` et, au besoin, `directory`, `variables` et `deadlineMs`. Ces hooks préparent l’environnement ; pour intercepter les appels d’outils de l’agent, voir [Permissions et hooks](../harness-permissions/).
 
-## Volumes de dépendances
+## Préparer une fois pour plusieurs tours
 
-Les caches de dépendances des conteneurs réutilisent des volumes gérés par le moteur entre allocations de sandboxes. Ils conservent les données des caches de paquets indépendamment du home privé de l’agent.
+Une sandbox exécute ses hooks une seule fois, à son allocation. `sandbox.dispatch()`, `sandbox.resume()` et `sandbox.command()` réutilisent l’environnement préparé. Chaque `dispatch()` de premier niveau alloue une sandbox neuve et les rejoue.
+
+Un workspace ouvert par `openWorkspace()` exécute `workspaceReady` une fois, à l’ouverture. Il exécute `hostReady` et `sandboxReady` pour chaque sandbox qu’il crée, sauf si cette sandbox passe ses propres `hooks`, qui remplacent ceux du workspace.
+
+## Réutiliser les téléchargements entre conteneurs
+
+Les providers Docker et Podman acceptent `caches` : des volumes nommés qui survivent au conteneur. Dirigez votre gestionnaire de paquets vers le répertoire monté.
 
 ```ts
 import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
-const sandboxProvider = createDockerSandboxProvider({
+export const sandboxProvider = createDockerSandboxProvider({
   image: "outpost:dev",
-  caches: [{ name: "npm", key: "application-node24" }],
+  caches: [{ name: "npm", key: "node24" }],
   variables: { npm_config_cache: "/outpost/cache/npm" },
 });
 ```
 
-Choisissez une clé stable pour les projets et versions de runtime compatibles. Changez-la lorsque la compatibilité du cache évolue. Le nom identifie `/outpost/cache/<name>` ; `npm_config_cache` dirige npm vers ce cache monté. Les volumes dépendent du dépôt, de l’image, de l’utilisateur et de la clé.
+Chaque cache est monté sur `/outpost/cache/<name>` et appartient à l’utilisateur du conteneur. La sandbox suivante qui utilise la même clé y retrouve les téléchargements. Changez `key` quand le contenu en cache n’est plus compatible, par exemple après une mise à jour du runtime.
 
-### L’installation reste nécessaire
+| Gestionnaire de paquets | Variable            |
+| ----------------------- | ------------------- |
+| npm                     | `npm_config_cache`  |
+| Yarn                    | `YARN_CACHE_FOLDER` |
+| pip                     | `PIP_CACHE_DIR`     |
+| Modules Go              | `GOMODCACHE`        |
 
-Un cache de téléchargement ne signifie pas que les dépendances du projet sont installées. Gardez `npm ci` ou la commande d’installation du gestionnaire dans `sandboxReady`. Le gestionnaire valide le lockfile et réutilise les téléchargements compatibles.
+Gardez la commande d’installation dans `sandboxReady`. Le cache conserve les téléchargements, pas le projet installé : le gestionnaire vérifie toujours le lockfile et remplit `node_modules`.
 
-### Propriété
+## Gérer les volumes de cache
 
-Fermer une sandbox ne supprime pas le volume de cache. Gérez sa rétention avec le moteur de conteneurs. Gardez les identifiants et conversations natives hors des caches partagés. Un cache commun à plusieurs projets partage aussi leur capacité à en affecter le contenu.
+Un volume est partagé par les sandboxes qui ont le même dépôt, la même image, le même utilisateur de conteneur, le même nom de cache et la même clé. La fermeture d’une sandbox et `outpost image remove` le conservent. Outpost pose le label `io.outpost.cache=true` sur ses volumes :
 
-API : [ContainerOptions](../../reference/containeroptions/) · [DependencyCache](../../reference/dependencycache/).
+```sh
+docker volume ls --filter label=io.outpost.cache=true
+docker volume rm $(docker volume ls -q --filter label=io.outpost.cache=true)
+```
+
+Podman accepte les mêmes commandes avec `podman`.
+
+## Limites
+
+- Les autres providers n’ont pas de `caches` : `sandboxReady` retélécharge tout à chaque allocation.
+- Chaque commande de hook s’arrête après 10 minutes, sauf si vous fixez `deadlineMs`.
+- Une commande qui se termine avec un statut non nul rejette avec une `OutpostError` de code `process`, arrête les autres commandes de préparation et libère la sandbox. Voir [Erreurs](../error-handling/).
+- Les commandes s’exécutent sans shell. Appelez `sh -c` pour les pipes et `&&`.
+- Un nom de cache commence par une lettre minuscule et compte au plus 48 lettres minuscules, chiffres ou tirets. Les `volumes` explicites ne peuvent pas chevaucher `/outpost/cache`.
+- Toute sandbox qui monte un cache peut en modifier le contenu, et les sandboxes suivantes le lisent. Gardez les identifiants hors des caches ([Sécurité](../security/)).
+
+API : [dispatch](../../reference/dispatch/) · [createSandbox](../../reference/createsandbox/) · [openWorkspace](../../reference/openworkspace/) · [LifecycleHooks](../../reference/lifecyclehooks/) · [Command](../../reference/command/) · [ContainerOptions](../../reference/containeroptions/) · [DependencyCache](../../reference/dependencycache/).

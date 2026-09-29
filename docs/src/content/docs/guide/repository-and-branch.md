@@ -1,68 +1,59 @@
 ---
 title: "Repository and branch"
-description: "Select the checkout an agent works on and where its changes land."
+description: "Choose the checkout an agent edits, the branch its commits land on, and when they merge into your branch."
 ---
 
-`repository` is the path to a local Git checkout with an existing commit. It is independent of the directory containing your workflow. Omitting it uses the process working directory.
+## Point at a checkout
 
-## Resolve a stable path
+`repository` is any path inside a local Git checkout with at least one commit. Outpost works from its top-level directory. Without `repository`, it uses the process working directory.
 
 ```ts
 import { resolve } from "node:path";
-import { openWorkspace } from "@elie-laloum/outpost";
+import { dispatch } from "@elie-laloum/outpost";
+import { coder, sandboxProvider } from "./outpost.config.mts";
 
-const workspace = await openWorkspace({
+const result = await dispatch({
   repository: resolve(import.meta.dirname, "../application"),
-  branch: { mode: "named", name: "automation/update" },
+  sandboxProvider,
+  agent: coder,
+  branch: { mode: "named", name: "outpost/update-deps" },
+  brief: { text: "Update the outdated dependencies and commit the change." },
 });
-try {
-  console.log(workspace.directory, workspace.branch);
-} finally {
-  await workspace.close();
-}
+console.log(result.branch, result.commits.length);
 ```
 
-Resolving from `import.meta.dirname` makes the script independent of where it is launched. Replace `../application` with your checkout path.
+It prints `outpost/update-deps` and the number of commits. A relative path resolves from the working directory: resolving it from `import.meta.dirname` lets the script run from anywhere.
 
-## Share a workspace
+## Choose where commits land
 
-Pass an open `workspace` to `createSandbox()` or `dispatch()` when several environments should use the same Git workspace. Do not also supply repository or branch choices: the workspace already owns them. Close borrowed sandboxes first, then the workspace.
+`branch` sets the policy. Without it, local providers use `current` and [cloud sandboxes](../cloud-sandboxes/) use `integrate`.
 
-## Include extra inputs
+| Mode        | The agent works on             | Worktree                                      | After a successful task               | Use it for                   |
+| ----------- | ------------------------------ | --------------------------------------------- | ------------------------------------- | ---------------------------- |
+| `current`   | Your checked-out branch        | None: your checkout, as it is                 | Commits are already on your branch    | Quick local tasks you watch  |
+| `named`     | The branch `name`              | `.outpost/workspaces/`, then removed if clean | The branch stays for review           | Review before merging        |
+| `integrate` | A temporary `outpost/…` branch | `.outpost/workspaces/`, then removed if clean | Merged into your branch, then deleted | Changes that land unattended |
 
-`copies` lists repository-relative inputs to copy into a managed workspace, such as an ignored configuration file. For remote snapshots, `includeUncommitted` includes uncommitted host changes. Declare sensitive inputs deliberately; remote providers upload these inputs to the selected cloud environment.
+`from` sets the revision a new `named` or `integrate` branch starts from; the default is `HEAD`. An existing `named` branch continues from its own tip. `result.branch` holds the branch name.
 
-Runtime worktrees and ownership locks live under the target repository’s `.outpost`. Each sandbox owns one repository. Use [parallel repositories](../multiple-repositories/) to compose work across several checkouts.
+## Gate integration on a check
 
-API: [openWorkspace](../../reference/openworkspace/) · [WorkspaceOptions](../../reference/workspaceoptions/).
-
-## Branch strategy
-
-Set `branch` explicitly when your application needs a predictable delivery policy.
-
-| Mode        | Effect                                                  |
-| ----------- | ------------------------------------------------------- |
-| `current`   | Work directly in the selected checkout.                 |
-| `named`     | Use a managed work branch identified by `name`.         |
-| `integrate` | Prepare a managed branch for integration into its base. |
-
-`from` selects the starting revision for `named` and `integrate`. A named branch is useful for review without immediate integration.
-
-### Gate integration on a command
-
-Own the workspace when integration must happen after checks. Insert agent work before the test command in this example.
+`dispatch()` and `workspace.dispatch()` merge an `integrate` branch as soon as the agent succeeds. To run your own check first, open the workspace yourself and work in a [sandbox session](../sandbox-sessions/).
 
 ```ts
 import { openWorkspace } from "@elie-laloum/outpost";
-import { repository, sandboxProvider } from "./outpost.config.mts";
+import { coder, repository, sandboxProvider } from "./outpost.config.mts";
 
 const workspace = await openWorkspace({
   repository,
   branch: { mode: "integrate" },
 });
 try {
-  const sandbox = await workspace.sandbox({ sandboxProvider });
+  const sandbox = await workspace.sandbox({ sandboxProvider, agent: coder });
   try {
+    await sandbox.dispatch({
+      brief: { text: "Fix the failing tests and commit the fix." },
+    });
     const check = await sandbox.command({
       executable: "npm",
       arguments: ["test"],
@@ -77,12 +68,49 @@ try {
 }
 ```
 
-Close the sandbox before integrating so its final synchronization has completed. A cold `dispatch()` with integration policy manages integration itself; use the explicit workspace form when the application needs an extra gate.
+`sandbox.dispatch()` never merges, so the merge happens only when `npm test` passes. Otherwise the unmerged branch stays in your repository under `workspace.branch`. `integrate()` does nothing in the other modes.
 
-### Retained work
+## Reuse one workspace across sandboxes
 
-A failed integration or dirty workspace can leave a `retainedDirectory`. Inspect it before cleanup. Uncommitted or detached work is not disposable just because the sandbox finished. [Failure recovery](../recovery/) describes how to recover it.
+An open workspace owns the repository, the branch and the copied files. `workspace.dispatch()` and `workspace.sandbox()` start a fresh sandbox on it each time, so two agents can work in turn on the same branch. Passing `workspace` to [`createSandbox()`](../../reference/createsandbox/) or `dispatch()` does the same.
 
-Integration does not push to a remote repository. Keep publication in your own delivery process.
+A workspace serves one sandbox at a time. Close the sandbox before the workspace: [How Outpost works](../how-it-works/) shows who closes what.
 
-API: [BranchPolicy](../../reference/branchpolicy/) · [Workspace](../../reference/workspace/).
+## Copy ignored files into the worktree
+
+A new worktree holds only committed files. `copies` lists repository-relative files or directories to copy from your checkout, such as an ignored test configuration.
+
+```ts
+import { dispatch } from "@elie-laloum/outpost";
+import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+
+const result = await dispatch({
+  repository,
+  sandboxProvider,
+  agent: coder,
+  branch: { mode: "named", name: "outpost/e2e" },
+  copies: [".env.test"],
+  brief: { text: "Run the end-to-end tests and fix what fails." },
+});
+console.log(result.retainedDirectory);
+```
+
+Missing entries are skipped. Cloud sandboxes receive the commits and `copies`; `includeUncommitted: true` also sends the worktree’s uncommitted files ([Cloud sandboxes](../cloud-sandboxes/)).
+
+## Recover retained work
+
+Closing keeps the worktree when it holds uncommitted, untracked or ignored files, or a detached `HEAD`. Its path comes back as `retainedDirectory`. Here, the copied `.env.test` keeps it.
+
+`close({ preserve: true })` keeps it on purpose. Inspect retained work with [Recover work](../recovery/) and prune it with [Retention and cleanup](../retention/).
+
+## Limits
+
+- Integration is a local `git merge` into your checkout. Outpost never pushes: publish from your own delivery process.
+- `integrate` needs a checked-out branch, not a detached `HEAD`, and fails with `conflict` if you switch branches before the merge.
+- A merge that stops on a conflict fails with `conflict`; resolve or abort it in your checkout. The work branch stays.
+- A second task on the same checkout (`current`) or branch fails with `conflict` instead of waiting. Give parallel tasks their own branches.
+- A `named` branch checked out in your own checkout fails with `conflict`.
+- `copies` requires `named` or `integrate`, and cloud sandboxes reject `current`.
+- A sandbox works on one repository: see [Multiple repositories](../multiple-repositories/).
+
+API: [dispatch](../../reference/dispatch/) · [openWorkspace](../../reference/openworkspace/) · [BranchPolicy](../../reference/branchpolicy/) · [WorkspaceOptions](../../reference/workspaceoptions/) · [Workspace](../../reference/workspace/).

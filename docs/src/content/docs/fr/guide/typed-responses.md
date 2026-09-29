@@ -1,11 +1,47 @@
 ---
 title: "Réponses typées"
-description: "Transformer une réponse d’agent en données validées."
+description: "Demander à l’agent une réponse balisée et la recevoir sous forme de données validées et typées dans result.value."
 ---
 
-Passez une spécification de réponse à `dispatch({ response })`. La valeur analysée est renvoyée dans `result.value` ; la réponse complète reste dans `result.text`.
+## Demander une réponse JSON
 
-## Définir une réponse JSON
+Déclarez la réponse avec `defineJsonResponse()` : une balise de style XML et un schéma. Passez-la dans `response` et demandez la balise dans le brief.
+
+```ts
+import { dispatch, defineJsonResponse } from "@elie-laloum/outpost";
+import { z } from "zod";
+import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+
+const verdict = defineJsonResponse({
+  tag: "verdict",
+  schema: z.object({ approved: z.boolean(), reasons: z.array(z.string()) }),
+});
+
+const result = await dispatch({
+  repository,
+  sandboxProvider,
+  agent: coder,
+  response: verdict,
+  brief: {
+    text: 'Review the last commit. End with <verdict>{"approved": true, "reasons": []}</verdict>.',
+  },
+});
+if (!result.value.approved) console.log(result.value.reasons);
+```
+
+`result.value` contient l’objet analysé, typé d’après le schéma. `result.text` conserve la réponse complète de l’agent, balises comprises.
+
+`schema` accepte tout validateur [Standard Schema](https://standardschema.dev/), comme Zod ou Valibot, ou une fonction d’analyse. Les types TypeScript seuls ne vérifient pas ce que renvoie le modèle ; le schéma, si.
+
+## Rédiger le brief pour la balise
+
+Outpost envoie votre brief tel quel : il n’ajoute aucune consigne de format. Indiquez la balise attendue et montrez un exemple de son contenu, comme ci-dessus.
+
+`dispatch()` vérifie que le brief contient la balise ouvrante (`<verdict>`) avant de démarrer une sandbox. Sans elle, l’appel échoue avec une erreur `configuration`.
+
+## Valider avec une fonction d’analyse
+
+La fonction reçoit le JSON analysé comme `unknown` et renvoie la valeur typée. Levez une exception pour le rejeter. `read()` applique les mêmes règles que `dispatch()` : vous pouvez tester une réponse hors ligne.
 
 ```ts
 import { defineJsonResponse } from "@elie-laloum/outpost";
@@ -23,21 +59,81 @@ const verdict = defineJsonResponse({
     return { approved: input.approved };
   },
 });
-console.log(await verdict.read('<verdict>{"approved":true}</verdict>'));
+
+const answer =
+  'Draft: <verdict>{"approved":false}</verdict>\n' +
+  'Final: <verdict>{"approved":true}</verdict>';
+console.log(await verdict.read(answer)); // { approved: true }
 ```
 
 <!-- check:run -->
 
-Demandez `<verdict>{"approved":true}</verdict>` dans le brief. Le validateur lit la dernière balise correspondante complète, analyse son JSON et applique votre schéma. Une balise absente, un JSON invalide ou un échec du schéma déclenche `ResponseError`.
+La dernière paire `<verdict>…</verdict>` complète l’emporte : un brouillon placé plus tôt dans la réponse est ignoré. Son contenu est nettoyé des espaces et peut être entouré d’un bloc de code `json`.
 
-## Utiliser une bibliothèque de schémas
+## Renvoyer du texte brut
 
-`schema` accepte une fonction d’analyse ou un validateur Standard Schema, notamment les schémas Zod et Valibot compatibles. Le schéma valide les données renvoyées ; les types TypeScript seuls ne valident pas la sortie du modèle.
+`defineTextResponse()` renvoie le texte nettoyé contenu dans la balise, sans analyse JSON.
 
-Utilisez `defineTextResponse({ tag: "summary" })` pour obtenir uniquement le texte nettoyé d’une balise.
+```ts
+import { defineTextResponse } from "@elie-laloum/outpost";
 
-## Réparer une réponse
+const summary = defineTextResponse({ tag: "summary" });
+console.log(await summary.read("<summary>\n  Fixed the README.\n</summary>")); // "Fixed the README."
+```
 
-`repairs` vaut zéro par défaut. Augmentez-le pour autoriser des tours supplémentaires de réparation sur un harness reprenable. Les réparations consomment du temps et des tokens ; elles ne sont pas disponibles avec les adaptateurs limités aux sessions neuves. Elles ne remplacent pas la vérification d’une affirmation comme « tests réussis » par une commande réelle.
+<!-- check:run -->
 
-API : [defineTextResponse](../../reference/definetextresponse/) · [defineJsonResponse](../../reference/definejsonresponse/) · [ResponseError](../../reference/responseerror/).
+## Traiter une réponse invalide
+
+Une balise absente, un JSON invalide ou un rejet du schéma fait lever à `dispatch()` une `ResponseError` de code `response`, une fois les tours de réparation épuisés.
+
+```ts
+import {
+  dispatch,
+  defineTextResponse,
+  ResponseError,
+} from "@elie-laloum/outpost";
+import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+
+try {
+  await dispatch({
+    repository,
+    sandboxProvider,
+    agent: coder,
+    response: defineTextResponse({ tag: "summary" }),
+    brief: { text: "Summarize the README inside <summary></summary>." },
+  });
+} catch (error) {
+  if (!(error instanceof ResponseError)) throw error;
+  console.error(error.message, error.raw, error.recovery);
+}
+```
+
+`raw` contient le contenu balisé lorsqu’une balise a été trouvée. `recovery` indique la conversation et la branche : vous pouvez [reprendre la conversation](../conversations/) ou inspecter le travail. Les autres codes sont décrits dans [Erreurs](../error-handling/).
+
+## Laisser l’agent réparer sa réponse
+
+Définissez `repairs` pour accorder à l’agent des tours supplémentaires après une réponse invalide.
+
+```ts
+import { defineJsonResponse } from "@elie-laloum/outpost";
+import { z } from "zod";
+
+const verdict = defineJsonResponse({
+  tag: "verdict",
+  schema: z.object({ approved: z.boolean() }),
+  repairs: 2,
+});
+```
+
+Chaque réparation reprend la même conversation avec l’erreur de validation et le contenu précédent. Elle demande uniquement la balise corrigée, sans modifier de fichiers ni lancer de commandes. Les tours de réparation s’ajoutent à `result.usage` et à `result.text`.
+
+Les réparations exigent un agent capable de reprendre sa conversation ; sinon, `dispatch()` refuse `repairs`. [Choisir un agent](../choose-an-agent/) indique quels harness le permettent.
+
+## Limites
+
+- Un dispatch avec `response` s’exécute en une seule passe : `passes` doit valoir 1 ou être omis.
+- Une balise commence par une lettre, suivie de lettres, de chiffres, de `_` ou de `-`.
+- Une réponse valide prouve sa forme, pas ses affirmations. Vérifiez « tests réussis » en lançant les tests dans une [session de sandbox](../sandbox-sessions/) ou une [boucle de vérification](../verification-loops/).
+
+API : [defineJsonResponse](../../reference/definejsonresponse/) · [defineTextResponse](../../reference/definetextresponse/) · [ResponseError](../../reference/responseerror/) · [ResponseSpec](../../reference/responsespec/) · [DispatchResult](../../reference/dispatchresult/).

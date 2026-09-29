@@ -198,11 +198,11 @@ for (const locale of ["", "fr/"]) {
 test("retired guide URLs resolve directly to new topics", async ({ page }) => {
   await page.goto("agents/dispatch/");
   await expect(page).toHaveURL(/\/guide\/first-request\/$/);
-  await page.goto("agents/conversations/#continuation-choices");
+  await page.goto("agents/conversations/#continue-a-conversation");
   await expect(page).toHaveURL(
-    /\/guide\/conversations\/#continuation-choices$/,
+    /\/guide\/conversations\/#continue-a-conversation$/,
   );
-  await expect(page.locator("#continuation-choices")).toBeVisible();
+  await expect(page.locator("#continue-a-conversation")).toBeVisible();
   for (const locale of ["", "fr/"]) {
     await page.goto(`${locale}guide/`);
     await expect(page).toHaveURL(new RegExp(`/${locale}guide/introduction/$`));

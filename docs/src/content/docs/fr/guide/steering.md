@@ -1,100 +1,100 @@
 ---
-title: "Piloter un agent en cours"
-description: "Envoyer une consigne à un agent qui travaille déjà."
+title: "Réorienter un agent en cours"
+description: "Envoyer une consigne supplémentaire à un agent pendant qu’il travaille, sans annuler la tâche ni perdre sa sandbox."
 ---
 
-`createSteering()` renvoie un contrôleur que vous passez à un dispatch avec `steering`. Pendant le dispatch, `send()` transmet une consigne à son agent sans annuler le travail.
+## Envoyer une consigne
+
+`createSteering()` renvoie un contrôleur. Passez-le à un dispatch dans `steering`, puis appelez `send()` pendant que l’agent travaille.
 
 ```ts
-import { createSandbox, createSteering } from "@elie-laloum/outpost";
+import { createSteering, dispatch } from "@elie-laloum/outpost";
 import { coder, repository, sandboxProvider } from "./outpost.config.mts";
 
-await using sandbox = await createSandbox({
+const steering = createSteering();
+const running = dispatch({
   repository,
   sandboxProvider,
   agent: coder,
-});
-const steering = createSteering();
-const running = sandbox.dispatch({
-  brief: { text: "Refactorise le module d’authentification." },
+  branch: { mode: "named", name: "outpost/auth-refactor" },
+  brief: { text: "Refactor the auth module." },
   steering,
 });
-const delivery = await steering.send("Ne touche pas au dossier legacy/.");
+const delivery = await steering.send("Leave the legacy/ folder untouched.");
 console.log(delivery.mode); // "injected" ou "resumed"
 const result = await running;
 ```
 
-`send()` se résout quand l’agent reçoit le texte, pas quand il l’a appliqué. La consigne ne remplace pas le brief : l’agent la lit comme un message utilisateur supplémentaire.
+`send()` se résout quand l’agent reçoit le texte, pas quand il l’a appliqué. L’agent le lit comme un message utilisateur de plus ; le brief reste valable.
 
-## Comment la consigne arrive à l’agent
+## Comment la consigne arrive à chaque agent
 
-| Agent                               | Remise                                                                                                                                                                                                                      |
-| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [Harness intégré](../harness/)      | `injected` : ajoutée avant la requête suivante au modèle, après les résultats d’outils en cours. Si le modèle allait terminer, il continue. Pendant qu’un sous-agent intégré travaille, c’est lui qui reçoit la consigne.   |
-| [Claude Code](../claude-code/)      | `injected` : écrite sur l’entrée stream-json de Claude. Lue pendant un appel d’outil, elle rejoint le tour en cours ; lue pendant que Claude rédige sa réponse finale, elle devient un tour en file dans le même processus. |
-| [Codex](../codex/)                  | `injected` : Codex s’exécute en `codex app-server` pour les dispatchs pilotés et reçoit la consigne avec `turn/steer` dans le tour actif. Sans tour actif, elle démarre le tour suivant du fil.                             |
-| Copilot CLI, Kimi Code, Antigravity | `resumed` : Outpost arrête le processus dès que sa conversation est connue, garde le sandbox, puis reprend la même conversation avec la consigne. L’action en cours est interrompue.                                        |
+| Agent                                                                                      | `mode`     | Ce qui se passe                                                                                                                     |
+| ------------------------------------------------------------------------------------------ | ---------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| [Harness intégré](../harness/)                                                             | `injected` | Ajoutée à la requête suivante au modèle, après les résultats d’outils en cours. Un modèle qui allait terminer continue.             |
+| [Claude Code](../claude-code/)                                                             | `injected` | Écrite sur son entrée stream-json. Elle rejoint le tour en cours, ou passe ensuite dans le même processus si Claude répondait déjà. |
+| [Codex](../codex/)                                                                         | `injected` | Un dispatch avec `steering` lance `codex app-server`. `turn/steer` ajoute le texte au tour actif, ou démarre le suivant.            |
+| [Copilot CLI](../copilot-cli/), [Kimi Code](../kimi-code/), [Antigravity](../antigravity/) | `resumed`  | Outpost arrête le processus dès que sa conversation est connue, puis la reprend avec le texte dans la même sandbox.                 |
 
-Tous les fournisseurs acceptent l’entrée en direct : local, Docker et Podman transmettent stdin, Firecracker le fait passer par SSH, et Vercel et Daytona ajoutent des morceaux encadrés à un fichier qu’un petit wrapper Node du sandbox transmet à l’agent. Sur Vercel et Daytona, chaque consigne coûte une commande du fournisseur et arrive environ une à deux secondes plus tard.
+Avec `resumed`, l’action en cours est interrompue, mais les fichiers déjà modifiés restent dans le workspace. Tous les providers de sandbox transmettent l’entrée en direct ; sur Vercel et Daytona, chaque consigne coûte une commande du provider et arrive avec un léger délai.
 
-Les fichiers déjà modifiés par l’agent restent dans le workspace. Avec une remise `resumed`, le tour interrompu figure dans `result.turns` avec `interrupted: "steering"` et émet un événement `stopped` de raison `steered`.
+## Selon le moment de l’envoi
 
-Ce partage vient des CLI des agents : `copilot -p` et `kimi --prompt` prennent un seul prompt, et Antigravity met chaque message stdin en file comme un tour séparé.
+| Vous l’envoyez                               | Ce qui se passe                                                                     | `mode`                 |
+| -------------------------------------------- | ----------------------------------------------------------------------------------- | ---------------------- |
+| Avant le démarrage de l’agent                | Ajoutée au prompt.                                                                  | `injected`             |
+| Pendant le tour                              | Remise comme dans le tableau ci-dessus.                                             | `injected` / `resumed` |
+| Après la réponse de l’agent                  | Outpost reprend la conversation dans un nouveau tour : le résultat en tient compte. | `resumed`              |
+| Quand aucun dispatch n’utilise le contrôleur | Attend le prochain dispatch qui reçoit le contrôleur.                               | ―                      |
 
-## Cibler un sous-agent
+Une consigne que le dispatch ne peut pas remettre, par exemple parce que l’agent n’a jamais signalé de conversation, est rejetée à la fin du dispatch. Le rejet est une [`OutpostError`](../error-handling/) de code `steering`, avec le texte dans `details.text`.
 
-Chaque délégation à un [sous-agent intégré](../harness/) a un identifiant d’exécution, fourni par son événement `subagent` et porté comme `subagentId` par ses autres événements. Passez-le à `send()` pour viser cette exécution :
+## Viser un sous-agent intégré
+
+Chaque exécution d’un [sous-agent intégré](../subagents/) a un identifiant, fourni par son événement `subagent`. Passez-le dans `subagent` pour ne viser que cette exécution.
 
 ```ts
 import { createSteering, type DispatchOptions } from "@elie-laloum/outpost";
 
 const steering = createSteering();
 const request: DispatchOptions = {
-  brief: { text: "Passe en revue le dépôt." },
+  brief: { text: "Review the repository." },
   steering,
   observe(event) {
     if (event.kind !== "subagent" || event.status !== "started") return;
     if (event.name === "inspect")
-      void steering.send("N’inspecte que src/.", { subagent: event.id });
+      void steering.send("Only inspect src/.", { subagent: event.id });
   },
 };
 ```
 
-| Option `subagent` | Destinataire                                                                                         |
-| ----------------- | ---------------------------------------------------------------------------------------------------- |
-| absente           | La première boucle active qui atteint une limite d’étape : le sous-agent au travail, s’il y en a un. |
-| un identifiant    | Seulement cette exécution de sous-agent, à toute profondeur.                                         |
-| `null`            | Seulement la boucle principale, après le retour de la délégation en cours.                           |
+| `subagent`     | Destinataire                                                                                         |
+| -------------- | ---------------------------------------------------------------------------------------------------- |
+| absent         | La première boucle active qui atteint son étape suivante : le sous-agent au travail, s’il y en a un. |
+| un identifiant | Cette exécution de sous-agent seulement, à toute profondeur.                                         |
+| `null`         | La boucle principale seulement, une fois la délégation en cours terminée.                            |
 
-Une consigne encore adressée à une exécution quand celle-ci se termine est rejetée avec le code `steering` et l’identifiant dans `details.subagent`. Les agents CLI ne peuvent pas viser leurs propres sous-agents : une consigne ciblée est rejetée dès qu’un tour CLI la voit.
+Une consigne encore en attente quand son exécution se termine est rejetée avec le code `steering` et l’identifiant dans `details.subagent`.
 
-## Moment de l’envoi
+## Réutiliser le contrôleur
 
-- **Avant le début du tour.** Les messages envoyés avant que le dispatch atteigne son agent sont ajoutés au prompt.
-- **Pendant le tour.** Remise décrite ci-dessus.
-- **Après la réponse de l’agent.** Outpost reprend la conversation dans un nouveau tour de la même passe : le résultat reflète toujours la dernière consigne. Cela vaut pour tout agent capable de reprendre, harness intégré et Claude Code compris.
+Un contrôleur sert un dispatch à la fois, sur toutes ses passes ; l’attacher à un second dispatch concurrent échoue. Une fois un dispatch terminé, le suivant peut l’utiliser. `close()` rejette les consignes en attente et tout `send()` ultérieur.
 
-Un message que le dispatch ne peut pas remettre est rejeté à la fin du dispatch, par exemple si l’agent s’est arrêté sans signaler de conversation. Le rejet est une `OutpostError` de code `steering`, avec le texte dans `details.text`.
+`result.resume()` et `result.fork()` n’en héritent pas : repassez `steering` dans leurs options.
 
-## Cycle de vie
+Dans un workflow, renvoyez `steering` depuis la `request` d’un [`defineAgentTask()` ou d’un `defineIsolatedTask()`](../task-dependencies/). Avec un [agent de secours](../fallback-agents/), la réorientation suit le candidat en cours d’exécution.
 
-Un contrôleur sert un dispatch à la fois et peut être réutilisé pour le suivant. L’attacher à un second dispatch concurrent échoue. Les messages envoyés quand aucun dispatch ne tourne attendent le prochain dispatch qui utilise le contrôleur ; `close()` les rejette, ainsi que tout `send()` ultérieur.
+## Événements et usage
 
-`dispatch()` partage un même contrôleur entre ses passes. `result.resume()` et `result.fork()` ne le réutilisent pas : repassez `steering`. Dans un workflow, renvoyez-le depuis la `request` d’un [`defineAgentTask` ou d’un `defineIsolatedTask`](../task-dependencies/).
+Chaque remise émet un [événement d’agent](../progress/) `steer` avec `text`, `mode`, `pass`, et `subagentId` quand un sous-agent l’a reçue. Le reporter de terminal l’affiche, et la conversation l’enregistre comme message utilisateur.
 
-Avant de s’exécuter, un dispatch refuse les agents qui ne peuvent ni recevoir d’entrée en direct ni reprendre une conversation : les [agents de rejeu](../record-replay/) et les adapters avec `resumable: false`. Les candidats d’un [agent de secours](../fallback-agents/) sont validés de la même façon, et le pilotage suit le candidat en cours d’exécution.
-
-## Événements, historique et usage
-
-Chaque remise émet un [événement d’agent](../progress/) `steer` avec `text`, `mode` et `pass`, ainsi que `subagentId` quand un sous-agent l’a reçue ; le reporter de terminal l’affiche. Les transcripts du harness et les sessions natives enregistrent la consigne comme message utilisateur. Une passe émet toujours un seul `summary`, et `result.usage` inclut les tours interrompus.
-
-Le [rejeu](../record-replay/) d’un run piloté reproduit ses tours : chaque consigne `resumed` ouvre le tour enregistré suivant, et le tour interrompu garde `interrupted: "steering"`, son propre texte et son usage.
+Une remise `resumed` termine le tour interrompu par un événement `stopped` de raison `steered` ; ce tour figure dans `result.turns` avec `interrupted: "steering"`. Une passe émet toujours un seul `summary`, et `result.usage` inclut les tours interrompus. Un [rejeu](../record-replay/) reproduit les exécutions réorientées tour par tour.
 
 ## Limites
 
 - Les consignes vivent en mémoire. Pour des questions et réponses qui doivent survivre à un redémarrage, utilisez les [tâches interactives](../interactive-tasks/).
-- Quand plusieurs sous-agents tournent en même temps, une consigne sans cible va au premier qui atteint une limite d’étape ; passez un identifiant d’exécution pour choisir.
-- Le pilotage de Codex utilise le protocole `app-server`, que Codex marque comme expérimental. Son ouverture de session et sa gestion des échecs ont été vérifiées avec Codex 0.155 ; une exécution réelle de `turn/steer` reste à faire.
-- L’injection Claude Code a été vérifiée en réel sur l’hôte, Daytona et Vercel. L’interruption et la reprise pour Copilot, Kimi et Antigravity sont couvertes par des CLI simulées et un sandbox Docker réel, pas par des exécutions réelles.
+- Un dispatch avec `steering` refuse les agents qui ne peuvent ni recevoir d’entrée en direct ni reprendre une conversation, dont les [agents de rejeu](../record-replay/).
+- La réorientation de Codex utilise le protocole `app-server`, que Codex marque comme expérimental.
+- Les sous-agents des agents CLI ne sont pas adressables : une consigne avec `subagent` est rejetée dès qu’un tour CLI la voit.
 
-API : [createSteering](../../reference/createsteering/) · [Steering](../../reference/steering/) · [SteeringDelivery](../../reference/steeringdelivery/) · [DispatchOptions](../../reference/dispatchoptions/).
+API : [createSteering](../../reference/createsteering/) · [Steering](../../reference/steering/) · [SteeringSendOptions](../../reference/steeringsendoptions/) · [SteeringDelivery](../../reference/steeringdelivery/) · [DispatchOptions](../../reference/dispatchoptions/).

@@ -1,11 +1,47 @@
 ---
 title: "Typed responses"
-description: "Turn an agent answer into validated application data."
+description: "Ask the agent for a tagged answer and receive it as validated, typed data in result.value."
 ---
 
-Pass a response specification to `dispatch({ response })`. The parsed value is returned as `result.value`; the complete answer remains in `result.text`.
+## Ask for a JSON answer
 
-## Define a JSON response
+Declare the answer with `defineJsonResponse()`: an XML-style tag and a schema. Pass it as `response`, and ask for the tag in the brief.
+
+```ts
+import { dispatch, defineJsonResponse } from "@elie-laloum/outpost";
+import { z } from "zod";
+import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+
+const verdict = defineJsonResponse({
+  tag: "verdict",
+  schema: z.object({ approved: z.boolean(), reasons: z.array(z.string()) }),
+});
+
+const result = await dispatch({
+  repository,
+  sandboxProvider,
+  agent: coder,
+  response: verdict,
+  brief: {
+    text: 'Review the last commit. End with <verdict>{"approved": true, "reasons": []}</verdict>.',
+  },
+});
+if (!result.value.approved) console.log(result.value.reasons);
+```
+
+`result.value` holds the parsed object, typed from the schema. `result.text` keeps the agent’s full answer, tags included.
+
+`schema` accepts any [Standard Schema](https://standardschema.dev/) validator, such as Zod or Valibot, or a parsing function. TypeScript types alone do not check what the model returns; the schema does.
+
+## Write the brief for the tag
+
+Outpost sends your brief unchanged: it adds no format instructions. Say which tag to use and show an example of its content, as above.
+
+`dispatch()` checks that the brief contains the opening tag (`<verdict>`) before a sandbox starts. A missing tag fails with a `configuration` error.
+
+## Validate with a parsing function
+
+A function receives the parsed JSON as `unknown` and returns the typed value. Throw to reject it. `read()` applies the same rules as `dispatch()`, so you can test a response offline.
 
 ```ts
 import { defineJsonResponse } from "@elie-laloum/outpost";
@@ -23,21 +59,81 @@ const verdict = defineJsonResponse({
     return { approved: input.approved };
   },
 });
-console.log(await verdict.read('<verdict>{"approved":true}</verdict>'));
+
+const answer =
+  'Draft: <verdict>{"approved":false}</verdict>\n' +
+  'Final: <verdict>{"approved":true}</verdict>';
+console.log(await verdict.read(answer)); // { approved: true }
 ```
 
 <!-- check:run -->
 
-Ask for `<verdict>{"approved":true}</verdict>` in the brief. The validator reads the last complete matching tag, parses its JSON and applies your schema. Missing tags, invalid JSON and schema failures raise `ResponseError`.
+The last complete `<verdict>…</verdict>` pair wins, so a draft earlier in the answer is ignored. Its content is trimmed and may be wrapped in a `json` code fence.
 
-## Use a schema library
+## Return plain text
 
-`schema` accepts a parsing function or a Standard Schema validator, including compatible Zod and Valibot schemas. The schema validates the returned data; TypeScript types alone do not validate model output.
+`defineTextResponse()` returns the trimmed text inside the tag, without JSON parsing.
 
-Use `defineTextResponse({ tag: "summary" })` when you only need trimmed text inside a tag.
+```ts
+import { defineTextResponse } from "@elie-laloum/outpost";
 
-## Repair a response
+const summary = defineTextResponse({ tag: "summary" });
+console.log(await summary.read("<summary>\n  Fixed the README.\n</summary>")); // "Fixed the README."
+```
 
-`repairs` defaults to zero. Increase it to allow additional repair turns on a resumable harness. Repairs consume time and usage; they are unavailable with fresh-session-only adapters. They do not replace checking a claim such as “tests passed” with a real command.
+<!-- check:run -->
 
-API: [defineTextResponse](../../reference/definetextresponse/) · [defineJsonResponse](../../reference/definejsonresponse/) · [ResponseError](../../reference/responseerror/).
+## Handle an invalid answer
+
+A missing tag, invalid JSON or a schema rejection makes `dispatch()` throw a `ResponseError` with code `response`, once no repair turn is left.
+
+```ts
+import {
+  dispatch,
+  defineTextResponse,
+  ResponseError,
+} from "@elie-laloum/outpost";
+import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+
+try {
+  await dispatch({
+    repository,
+    sandboxProvider,
+    agent: coder,
+    response: defineTextResponse({ tag: "summary" }),
+    brief: { text: "Summarize the README inside <summary></summary>." },
+  });
+} catch (error) {
+  if (!(error instanceof ResponseError)) throw error;
+  console.error(error.message, error.raw, error.recovery);
+}
+```
+
+`raw` holds the tagged content when a tag was found. `recovery` names the conversation and branch, so you can [continue the conversation](../conversations/) or inspect the work. See [Errors](../error-handling/) for the other codes.
+
+## Let the agent repair its answer
+
+Set `repairs` to give the agent more turns after an invalid answer.
+
+```ts
+import { defineJsonResponse } from "@elie-laloum/outpost";
+import { z } from "zod";
+
+const verdict = defineJsonResponse({
+  tag: "verdict",
+  schema: z.object({ approved: z.boolean() }),
+  repairs: 2,
+});
+```
+
+Each repair resumes the same conversation with the validation error and the previous content. It asks for the corrected tag only, without editing files or running commands. Repair turns add to `result.usage` and `result.text`.
+
+Repairs need an agent that can continue its conversation; `dispatch()` refuses `repairs` otherwise. [Choose an agent](../choose-an-agent/) shows which harnesses can.
+
+## Limits
+
+- A dispatch with `response` runs one pass: `passes` must be 1 or omitted.
+- A tag starts with a letter, followed by letters, digits, `_` or `-`.
+- A valid response proves its shape, not its claims. Check “tests passed” by running the tests in a [sandbox session](../sandbox-sessions/) or a [verification loop](../verification-loops/).
+
+API: [defineJsonResponse](../../reference/definejsonresponse/) · [defineTextResponse](../../reference/definetextresponse/) · [ResponseError](../../reference/responseerror/) · [ResponseSpec](../../reference/responsespec/) · [DispatchResult](../../reference/dispatchresult/).
