@@ -1,9 +1,11 @@
 ---
 title: "Pauses sur quota"
-description: "Mettre un workflow en pause quand un abonnement ou une API atteint sa limite, puis le reprendre après la réinitialisation."
+description: "Mettre un workflow en pause quand un abonnement ou une API atteint sa limite, puis le reprendre après la réinitialisation sans consommer de retry ni perdre la conversation."
 ---
 
-Disponible depuis la 8.0.0. Avec `onQuota`, une tâche qui atteint une limite d’usage ou reçoit un HTTP 429 se met en pause au lieu d’échouer. Le workflow la reprend après la réinitialisation, dans le même appel à `start()` ou dans un appel ultérieur avec le même checkpoint.
+## Mettre en pause au lieu d’échouer
+
+Passez `onQuota` à `start()`. Une tâche qui atteint une limite d’usage ou reçoit un HTTP 429 se met alors en pause au lieu d’échouer.
 
 ```ts
 import {
@@ -41,55 +43,63 @@ console.log(result.value(review));
 
 <!-- check:run -->
 
-Ici, la limite simulée se réinitialise après une seconde, dans la fenêtre `maxWaitMs` : le workflow attend puis relance la tâche. En usage réel, ce sont les tâches d’agent et de modèle qui lèvent elles-mêmes les erreurs de quota.
+Le script affiche `reviewed` : la limite simulée se réinitialise après une seconde, dans la fenêtre `maxWaitMs`, donc le workflow attend puis relance la tâche.
+
+`onQuota` exige un [checkpoint](../durable-runs/) pour conserver la pause. Avec la valeur par défaut de `maxWaitMs`, `0`, rien n’attend dans le processus : chaque pause est durable.
 
 ## Ce qui compte comme quota
 
-Outpost rejette avec une `OutpostError` de code `quota` dans les cas suivants :
+Les agents et les fournisseurs de modèles rejettent avec une `OutpostError` de code `quota` :
 
-| Source                      | Signal                                                                                    | Heure de réinitialisation            |
-| --------------------------- | ----------------------------------------------------------------------------------------- | ------------------------------------ |
-| Claude Code                 | `rate_limit_event` refusé, erreur assistant `rate_limit`/`billing_error`, texte de limite | Depuis `resetsAt` lorsqu’il existe   |
-| Codex                       | texte d’échec de limite d’usage, de quota dépassé ou de 429 épuisé                        | Inconnue                             |
-| GitHub Copilot CLI          | `session.error` de type `quota` ou `rate_limit`, texte de limite                          | Inconnue                             |
-| Kimi Code                   | texte d’épuisement de quota dans sa sortie d’échec ou sur stderr                          | Inconnue                             |
-| Antigravity                 | texte d’échec de quota épuisé ou `RESOURCE_EXHAUSTED`                                     | Inconnue                             |
-| Modèles OpenAI et Anthropic | HTTP 429, ou erreur de flux de type limite de débit ou quota insuffisant                  | Depuis `Retry-After` s’il est valide |
+| Source                                         | Signal                                                                      | Réinitialisation     |
+| ---------------------------------------------- | --------------------------------------------------------------------------- | -------------------- |
+| [Claude Code](../claude-code/)                 | `rate_limit_event` refusé, `rate_limit` ou `billing_error`, texte de limite | Depuis `resetsAt`    |
+| [Codex](../codex/)                             | `usageLimitExceeded` ou `rateLimitExceeded`, texte de limite d’usage        | Inconnue             |
+| [Copilot CLI](../copilot-cli/)                 | `session.error` de type `quota` ou `rate_limit`, texte de limite            | Inconnue             |
+| [Kimi Code](../kimi-code/)                     | Texte de quota, de solde ou de limite de débit                              | Inconnue             |
+| [Antigravity](../antigravity/)                 | `RESOURCE_EXHAUSTED` ou texte de quota                                      | Inconnue             |
+| [Fournisseurs de modèles](../model-providers/) | HTTP 429, erreur de flux de limite de débit ou `insufficient_quota`         | Depuis `Retry-After` |
 
-Pour les agents CLI, un signal ne reclasse qu’un tour dont le processus d’agent échoue. Les avis de reprise transitoires, comme `api_retry` de Claude ou `turn.step.retrying` de Kimi, ne sont pas des quotas. Les heures de réinitialisation rédigées en texte ne sont pas analysées ; elles restent dans le message.
+Un signal d’agent CLI ne compte que si le processus de l’agent échoue. Les avis de nouvelle tentative ne sont pas des quotas. `quotaFault(error)` lit le message et le `resetAt` d’une erreur de quota interceptée, même imbriquée.
 
-Utilisez `quotaFault(error)` pour lire le message et l’heure de réinitialisation d’une erreur interceptée, y compris imbriquée.
+Un [agent de secours](../fallback-agents/) change d’agent au lieu d’attendre : la tâche ne se met en pause que lorsque tous les candidats ont atteint une limite.
 
-Pour continuer avec un autre agent ou modèle au lieu d’attendre, utilisez un [agent de secours](../fallback-agents/) : la tâche ne se met en pause que lorsque tous les candidats ont atteint une limite, jusqu’à la réinitialisation la plus proche.
+## Ce qui se passe après une erreur de quota
 
-## Pause et reprise
+<!-- flow -->
 
-Une erreur de quota termine la tentative en cours sans consommer les tentatives de `retry`. La tâche passe en `paused` avec un enregistrement `quota`, puis le checkpoint est sauvegardé. Ensuite :
+1. **Pause**: La tentative qui a atteint la limite s’arrête.
+   - **Garder les retries**: L’erreur ne consomme pas les tentatives de `retry`.
+   - **Enregistrer la pause**: La tâche passe en `paused` avec un enregistrement `quota`, puis le checkpoint est sauvegardé.
+2. **Attente**: Seulement si l’heure de réinitialisation est connue.
+   - **Attendre dans le processus**: Une réinitialisation comprise dans `maxWaitMs` émet un événement `quota` de `status: "waiting"`, puis relance la tâche.
+   - **Pause durable**: Sinon, la tâche reste en pause. Les tâches indépendantes continuent, les tâches dépendantes attendent et `start()` renvoie `paused`.
+3. **Reprise**: Un `start()` ultérieur avec le même checkpoint.
+   - **Relancer**: Une réinitialisation inconnue ou passée relance la tâche aussitôt.
+   - **Attendre d’abord**: Une réinitialisation comprise dans `maxWaitMs` est attendue, puis la tâche s’exécute.
+   - **Rester en pause**: Une réinitialisation plus lointaine laisse la tâche en pause sans appeler l’agent.
 
-- Si la réinitialisation est connue, future et comprise dans `maxWaitMs`, la tâche attend dans le processus puis est relancée. Un événement `quota` indique `status: "waiting"` et `delayMs`.
-- Sinon, la tâche reste en pause. Les tâches indépendantes continuent ; les tâches dépendantes attendent. Le workflow renvoie `paused` lorsque plus rien ne peut s’exécuter.
-- Un `start()` ultérieur avec le même checkpoint relance une tâche en pause sur quota si sa réinitialisation est inconnue ou passée, ou attend d’abord si elle tient dans son `maxWaitMs`. Une réinitialisation plus lointaine la laisse en pause sans appeler l’agent.
-
-`maxWaitMs` vaut `0` par défaut : sans lui, les pauses sont toujours durables, ce qui évite de bloquer sandboxes et processus pendant des heures. Dimensionnez-le avec le `timeoutMs` du workflow, qui borne aussi les attentes.
-
-Activer `onQuota` autorise la relance de la tentative interrompue, comme un retry ; `resume: "retry-incomplete"` n’est pas nécessaire. Une annulation pendant l’attente laisse la tâche en pause. Chaque relance compte comme une tentative dans `budget.attempts`. Une [boucle de vérification](../verification-loops/) reprend la phase qui a atteint la limite.
+L’enregistrement en pause dans `result.tasks` contient `quota.resetAt` : planifiez le `start()` suivant à partir de cette heure. `onQuota` autorise la relance, sans `resume: "retry-incomplete"`. Une [tâche en boucle](../verification-loops/) reprend la phase du tour qui a atteint la limite.
 
 ## Poursuivre la conversation interrompue
 
-La première tentative après une pause reçoit `context.quota`. Il porte la conversation lorsqu’elle a été capturée, ainsi que la branche de travail conservée.
+La première tentative après une pause reçoit `context.quota` : la conversation capturée et la branche de travail conservée.
 
-- `defineAgentTask` et `defineIsolatedTask` poursuivent cette conversation. Le nouveau tour envoie une courte consigne de reprise au lieu du brief d’origine, et conserve la balise de réponse lorsqu’une réponse structurée est attendue. Utilisez `quotaResume: "restart"` pour renvoyer la requête d’origine.
-- `defineAgentTask` conserve le sandbox et le workspace fournis par l’appelant. `defineIsolatedTask` alloue un nouveau sandbox : une branche `current` ou `named` réutilise le même checkout, et un workspace intégré automatiquement part de la branche interrompue. Les changements non commités d’une tentative intégrée restent dans son [worktree conservé](../recovery/).
-- `defineInteractiveAgentTask` poursuit la conversation du tour interrompu.
-- La poursuite exige un agent capable de reprendre avec capture des conversations : Claude Code, Codex, Copilot ou Kimi. Antigravity et la capture désactivée démarrent une nouvelle conversation, tout comme une requête qui fournit sa propre `continuation` ou plusieurs `passes`.
+| Tâche ou appel                                                                | Tentative suivante                                                                                                |
+| ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| [`defineAgentTask()`](../../reference/defineagenttask/)                       | Poursuit la conversation dans votre sandbox et votre workspace.                                                   |
+| [`defineIsolatedTask()`](../../reference/defineisolatedtask/)                 | La poursuit dans une nouvelle sandbox, sur la même branche ; un workspace intégré part de la branche interrompue. |
+| [`defineInteractiveAgentTask()`](../../reference/defineinteractiveagenttask/) | Poursuit la conversation du tour interrompu.                                                                      |
+| [`defineQueuedTask()`](../../reference/definequeuedtask/)                     | Publie un nouveau job, `<key>:quota:<attempt>`, avec l’`idempotencyKey` d’origine.                                |
+| [`speculate()`](../../reference/speculate/)                                   | Dans une course durable, relance les candidats arrêtés par une limite, dans de nouvelles conversations.           |
 
-Les tâches personnalisées peuvent lire `context.quota` pour décider comment reprendre.
+Un tour poursuivi envoie une courte consigne de reprise au lieu du brief. Passez `quotaResume: "restart"` à une tâche d’agent ou isolée pour renvoyer la requête d’origine.
 
-## Tâches en file
+Claude Code, Codex, Copilot CLI et Kimi Code peuvent poursuivre. Un [agent de secours](../fallback-agents/) repart de son premier candidat avec le brief d’origine.
 
-Un worker dont le handler échoue sur une erreur de quota l’enregistre dans `QueueResult.quota`, et `defineQueuedTask` rejette avec le code `quota`. La première tentative après la pause publie un nouveau job, `<clé>:quota:<tentative>`, car le job échoué ne peut pas être relancé. Le handler reçoit toujours l’`idempotencyKey` d’origine : la déduplication des effets reste valable.
+## Transmettre la conversation à un handler en file
 
-Transmettez la conversation au handler via l’entrée :
+Un worker enregistre l’erreur de quota d’un handler dans `QueueResult.quota`, et `defineQueuedTask()` rejette avec le code `quota`. Transmettez la conversation par l’entrée de la tâche :
 
 ```ts
 import { defineQueuedTask } from "@elie-laloum/outpost";
@@ -106,11 +116,11 @@ function implement(queue: TaskQueue) {
 }
 ```
 
-Le handler peut alors lancer un dispatch avec `continuation: { id: input.continueFrom }`. Les workers ne transmettent que les conversations capturées par le dispatch du handler.
+Le handler lance ensuite son dispatch avec `continuation: { id: input.continueFrom }`. [Files de jobs](../job-queues/) présente les workers et les clés d’idempotence.
 
-## Spéculation
+## Mettre en pause sur un quota de spéculation
 
-Un candidat arrêté par une limite se termine avec le statut `quota`. Sans gagnant, `speculate()` renvoie le statut `quota`, et `result.quota` contient la réinitialisation connue la plus proche. Levez-la depuis une tâche de workflow pour mettre le workflow en pause :
+Quand des limites arrêtent des candidats et qu’aucun ne gagne, `speculate()` renvoie le statut `quota` avec la réinitialisation connue la plus proche. Levez-la depuis une tâche pour mettre le workflow en pause :
 
 ```ts
 import { OutpostError, speculate, defineTask } from "@elie-laloum/outpost";
@@ -131,6 +141,15 @@ function race(options: SpeculationOptions) {
 }
 ```
 
-Avec la [durabilité](../speculation/#courses-durables-et-récupération), l’appel suivant à `speculate()` relance seulement les candidats arrêtés par une limite, en nouvelles tentatives depuis la baseline ; les budgets restent cumulés. Les candidats ne poursuivent pas leur conversation précédente. Sans durabilité, tous les candidats sont relancés.
+Une [course durable](../speculation/) relance ensuite seulement ces candidats, avec des budgets cumulés. Sans durabilité, tous les candidats sont relancés.
 
-API : [WorkflowQuotaPolicy](../../reference/workflowquotapolicy/) · [WorkflowQuotaPause](../../reference/workflowquotapause/) · [quotaFault](../../reference/quotafault/) · [WorkflowOptions](../../reference/workflowoptions/).
+## Limites
+
+- `start()` refuse `onQuota` sans checkpoint.
+- Chaque relance compte dans `budget.attempts`. Le `timeoutMs` du workflow interrompt aussi les attentes, et une attente annulée laisse la tâche en pause.
+- Les heures de réinitialisation écrites dans le texte de l’agent ne sont pas analysées ; elles restent dans le message.
+- Les autres agents, la capture désactivée, une requête avec sa propre `continuation` ou plusieurs `passes` repartent du brief.
+- Les changements non commités d’une tentative intégrée interrompue restent dans son [worktree conservé](../recovery/).
+- Les workers ne transmettent que les conversations capturées par le dispatch du handler.
+
+API : [WorkflowQuotaPolicy](../../reference/workflowquotapolicy/) · [WorkflowQuotaPause](../../reference/workflowquotapause/) · [QuotaResumePolicy](../../reference/quotaresumepolicy/) · [quotaFault](../../reference/quotafault/) · [TaskContext](../../reference/taskcontext/) · [QueueResult](../../reference/queueresult/) · [WorkflowOptions](../../reference/workflowoptions/)

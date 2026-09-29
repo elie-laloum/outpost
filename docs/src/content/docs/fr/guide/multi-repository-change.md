@@ -19,7 +19,7 @@ description: "Un agent renomme un champ dans une API et décrit la modification 
   - `stopOnError`
 - [Approbations](../approvals/): Un mainteneur décide avant toute fusion.
   - `defineApprovalTask()`
-- [Exécutions persistantes](../durable-runs/): Le checkpoint conserve le travail terminé d’une exécution à l’autre.
+- [Exécutions durables](../durable-runs/): Le checkpoint conserve le travail terminé d’une exécution à l’autre.
   - `createWorkflowCheckpointStore()`
 
 ## Le code
@@ -221,7 +221,7 @@ Chaque dépôt a sa branche et son historique : rien ne les relie. Par défaut, 
 | `merge` `failed` après la fusion des premiers checkouts | Mettez à jour la branche bloquée, puis `retry` : les branches déjà fusionnées ne changent rien.       |
 
 :::caution
-Rien n’annule la branche de l’API quand un client échoue. Une tâche en échec conserve son worktree : voir [Récupérer du travail](../recovery/). `retry` autorise à rejouer les tâches inachevées et leurs effets de bord : voir [Exécutions persistantes](../durable-runs/).
+Rien n’annule la branche de l’API quand un client échoue. Une tâche en échec conserve son worktree : voir [Récupérer du travail](../recovery/). `retry` autorise à rejouer les tâches inachevées et leurs effets de bord : voir [Exécutions durables](../durable-runs/).
 :::
 
 ## L’adapter

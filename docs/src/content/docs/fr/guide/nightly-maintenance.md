@@ -13,7 +13,7 @@ description: "Chaque nuit de semaine, un agent met à jour les dépendances sur 
 - [Files de jobs et workers](../job-queues/): Exécute chaque job dans un processus worker séparé.
   - `runQueueWorker()`
   - `defineWorkflowJob()`
-- [Exécutions persistantes](../durable-runs/): Enregistre chaque tâche terminée dans un checkpoint.
+- [Exécutions durables](../durable-runs/): Enregistre chaque tâche terminée dans un checkpoint.
   - `createWorkflowCheckpointStore()`
 - [Pauses sur quota](../quota-pauses/): Met en pause sur une limite d’usage au lieu d’échouer.
   - `onQuota`
@@ -242,7 +242,7 @@ Sans planificateur permanent, un job de CI planifié peut appeler `nightly(runId
 
 ## Limites
 
-- Un worker tué sans arrêt propre ne libère pas la propriété du checkpoint. Le job suivant de cette exécution échoue tant que vous ne l’avez pas libérée avec `recoverWorkflowCheckpoint()` ([Exécutions persistantes](../durable-runs/)).
+- Un worker tué sans arrêt propre ne libère pas la propriété du checkpoint. Le job suivant de cette exécution échoue tant que vous ne l’avez pas libérée avec `recoverWorkflowCheckpoint()` ([Exécutions durables](../durable-runs/)).
 - Une tâche reprise continue la conversation capturée d’un agent unique. Avec un agent de secours, elle repart du premier candidat et du brief d’origine, sur la même branche.
 - Un worker exécute les jobs un par un : le job de 07:00 attend donc derrière une exécution encore en cours. Avec plusieurs workers, ce job échoue tant que l’exécution tourne encore.
 

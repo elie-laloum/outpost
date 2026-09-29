@@ -159,7 +159,7 @@ landing:
           text: "Les tâches terminées sont conservées dans le store de checkpoints. Relancer avec la décision reprend l’exécution.",
           lines: "41-53",
         }
-    link: { label: "Exécutions persistantes", href: "guide/durable-runs/" }
+    link: { label: "Exécutions durables", href: "guide/durable-runs/" }
   footer:
     documentation:
       title: "Documentation"

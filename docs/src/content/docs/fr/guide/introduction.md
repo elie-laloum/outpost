@@ -59,7 +59,7 @@ console.log(result.usage); // input, cached and output token counts
 - [Workflows typés](../task-dependencies/): Les tâches se transmettent des résultats typés, réessaient et bouclent jusqu’à ce que les vérifications passent.
   - `defineWorkflow()`
   - `defineLoopTask()`
-- [Exécutions persistantes](../durable-runs/): Enregistrez la progression, faites une pause sur quota, reprenez sans refaire le travail.
+- [Exécutions durables](../durable-runs/): Enregistrez la progression, faites une pause sur quota, reprenez sans refaire le travail.
   - checkpoints
   - pauses sur quota
   - cache

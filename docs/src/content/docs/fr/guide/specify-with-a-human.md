@@ -13,7 +13,7 @@ La demande est floue : « ajouter un export CSV ». L’agent pose à son respon
   - `defineInteractiveAgentTask()`
 - [Approbations](../approvals/): Le responsable approuve la spécification avant que le code soit écrit.
   - `defineApprovalTask()`
-- [Exécutions persistantes](../durable-runs/): Un checkpoint conserve questions et réponses d’un processus à l’autre.
+- [Exécutions durables](../durable-runs/): Un checkpoint conserve questions et réponses d’un processus à l’autre.
   - `createWorkflowCheckpointStore()`
 - [Tâches et dépendances](../task-dependencies/): L’implémentation démarre après l’approbation et lit la spécification.
   - `after`

@@ -1,143 +1,173 @@
 ---
 title: "Approbations"
-description: "Suspendre un workflow pour une décision explicite et fiable."
+description: "Arrêter un workflow à une gate jusqu’à ce qu’une personne approuve ou rejette, puis le reprendre depuis son checkpoint, même dans un autre processus."
 ---
 
-Utilisez `defineApprovalTask()` pour arrêter un workflow jusqu’à l’approbation ou au rejet d’un acteur autorisé. Les étapes de validation exigent un checkpoint pour conserver la demande au-delà du processus courant.
+## Ajouter une gate
+
+Une gate est une tâche qui attend la décision d’une personne. Les tâches placées après elle s’exécutent dès qu’un acteur autorisé approuve.
 
 ```ts
 import {
-  defineApprovalTask,
   createLocalTransport,
-  defineWorkflow,
   createWorkflowCheckpointStore,
+  defineApprovalTask,
+  defineTask,
+  defineWorkflow,
 } from "@elie-laloum/outpost";
 
 const approve = defineApprovalTask({
   key: "approve",
-  prompt: "Approve the reviewed change?",
+  prompt: "Deploy release 1.4 to production?",
   actors: ["maintainer"],
 });
-const pipeline = defineWorkflow("delivery", [approve]);
-const store = createWorkflowCheckpointStore({
-  transporter: createLocalTransport({ directory: ".outpost/storage" }),
+const deploy = defineTask({
+  key: "deploy",
+  after: [approve],
+  perform: (context) => `Deployed, approved by ${context.value(approve).actor}`,
 });
-const result = await pipeline.start({
-  checkpoint: { store, runId: "delivery-42", version: "1" },
+const workflow = defineWorkflow("release", [approve, deploy]);
+const checkpoint = {
+  store: createWorkflowCheckpointStore({
+    transporter: createLocalTransport({ directory: ".outpost/storage" }),
+  }),
+  runId: "release-1.4",
+  version: "1",
+};
+
+const paused = await workflow.start({ checkpoint });
+const request = paused.tasks.find((task) => task.key === "approve")?.pause;
+console.log(paused.status, request?.prompt);
+
+// Later, once your application has authenticated the maintainer:
+const result = await workflow.start({
+  checkpoint,
+  decisions: [
+    {
+      executionId: paused.executionId,
+      key: "approve",
+      requestId: request!.id,
+      actor: "maintainer",
+      reason: "Release notes and staging checks reviewed",
+      action: "approve",
+    },
+  ],
 });
-console.log(result.status, result.tasks[0]?.pause);
+console.log(result.status, result.value(deploy));
 ```
 
 <!-- check:run -->
 
+Le script affiche `paused Deploy release 1.4 to production?`, puis `done Deployed, approved by maintainer`.
+
+Une gate exige un checkpoint, l’état sauvegardé de l’exécution, ici sous `.outpost/storage`. Le second `start()` peut tourner dans un autre processus, des jours plus tard.
+
 ## Soumettre une décision
 
-Lisez l’enregistrement suspendu et redémarrez le même workflow avec `decisions`. Chaque décision fournit `executionId`, la `key` de tâche, le `requestId` en attente, `actor`, `reason` et `action: "approve"` ou `"reject"`. Elle doit correspondre à la demande réellement en attente ; ne la construisez pas depuis un état d’interface périmé.
+<!-- flow -->
 
-```ts
-import type {
-  Workflow,
-  WorkflowCheckpointOptions,
-  WorkflowResult,
-} from "@elie-laloum/outpost";
+1. **Pause**: L’exécution s’arrête à la gate.
+   - **Enregistrer la demande**: L’enregistrement de la gate la conserve dans `pause` : `id`, `prompt`, `actors`.
+   - **Rendre la main**: Statut `paused`, une fois les tâches indépendantes terminées.
+2. **Décider**: Dans votre application.
+   - **Présenter la demande**: À une personne listée dans `actors`.
+   - **Soumettre**: `start()` avec le même checkpoint et `decisions`.
+3. **Poursuivre**: Selon `action`.
+   - **Approuver**: Les tâches dépendantes s’exécutent et lisent la décision comme valeur de la gate.
+   - **Rejeter**: Les tâches dépendantes sont ignorées et l’exécution se termine en `failed`.
 
-async function approveReview(
-  pipeline: Workflow,
-  paused: WorkflowResult,
-  checkpoint: WorkflowCheckpointOptions,
-) {
-  const pending = paused.tasks.find(
-    (record) => record.key === "approve",
-  )?.pause;
-  if (!pending) throw new Error("No pending approval");
-  return pipeline.start({
-    checkpoint,
-    decisions: [
-      {
-        executionId: paused.executionId,
-        key: "approve",
-        requestId: pending.id,
-        actor: "maintainer",
-        reason: "Reviewed the patch and test results",
-        action: "approve",
-      },
-    ],
-  });
-}
-```
+| Champ de la décision | Valeur                                                   |
+| -------------------- | -------------------------------------------------------- |
+| `executionId`        | `executionId` du résultat en pause                       |
+| `key`                | La `key` de la gate                                      |
+| `requestId`          | `pause.id` de l’enregistrement de la gate                |
+| `actor`              | L’un des `actors` de la gate                             |
+| `reason`             | Une explication non vide, conservée dans le checkpoint   |
+| `action`             | `"approve"` (ou `"resume"` pour une pause) ou `"reject"` |
 
-Placez les tâches de livraison après cette étape. Un rejet empêche leur exécution normale. `definePauseTask()` suit le même mécanisme persistant mais attend `action: "resume"` pour continuer.
+`start()` lève une erreur, sans appliquer aucune décision, si l’une d’elles ne correspond pas à la demande en attente.
+
+## Suspendre sans approbation
+
+`definePauseTask()` prend les mêmes options et retient l’exécution jusqu’à ce que quelqu’un la laisse continuer, par exemple après une fenêtre de maintenance. Poursuivez avec `action: "resume"` ou arrêtez avec `"reject"`.
 
 ## Authentifier l’acteur
 
-Les noms d’acteurs sont des métadonnées fiables fournies par votre application. Outpost ne connecte pas un utilisateur et ne prouve pas qui a cliqué. Authentifiez les utilisateurs et autorisez leurs décisions avant de les transmettre à `start()`.
+Outpost vérifie que `actor` figure dans `actors`, pas l’identité de la personne. Connectez la personne et vérifiez son droit de décider avant d’appeler `start()`.
 
-Une phrase demandant à l’agent d’attendre n’est pas une validation imposée. Le graphe de dépendances doit imposer l’attente.
-
-API : [defineApprovalTask](../../reference/defineapprovaltask/) · [definePauseTask](../../reference/definepausetask/) · [WorkflowDecision](../../reference/workflowdecision/).
+Demander à un agent, dans son brief, d’attendre une approbation n’est pas une gate : seule une tâche de gate arrête l’exécution.
 
 ## Exiger une décision signée
 
-Disponible en 7.0.0 : définissez `authentication: "signed"` sur `defineApprovalTask()` ou `definePauseTask()`. Cette exigence participe à l’identité du checkpoint : la retirer à la reprise est refusé. Fournissez `decisionVerifier` lors de la soumission des preuves. Sans cette option, le gate conserve la confiance dans l’acteur fourni par l’application décrite plus haut.
-
-```ts
-import { defineApprovalTask } from "@elie-laloum/outpost";
-
-const review = defineApprovalTask({
-  key: "review",
-  prompt: "Approve deployment?",
-  actors: ["maintainer"],
-  authentication: "signed",
-});
-```
-
-Signez la demande exacte après authentification de l’utilisateur et confirmation de son intention. La signature couvre l’exécution, la tâche, la demande, l’acteur, l’action, le motif, l’identifiant de clé et l’expiration. Le service de signature possède la clé privée ; les workers n’ont besoin que des clés publiques de confiance associées aux approbateurs.
+Avec `authentication: "signed"` sur la gate, une décision doit porter une signature Ed25519 d’une clé liée à son acteur. Seul votre service de signature détient les clés privées.
 
 ```ts
 import {
-  signWorkflowDecision,
   createEd25519DecisionVerifier,
+  signWorkflowDecision,
 } from "@elie-laloum/outpost";
 import type {
   Workflow,
+  WorkflowApproverKey,
   WorkflowCheckpointOptions,
   WorkflowDecision,
-  WorkflowApproverKey,
 } from "@elie-laloum/outpost";
 import type { KeyObject } from "node:crypto";
 
-async function submitSignedReview(
-  pipeline: Workflow,
-  checkpoint: WorkflowCheckpointOptions,
-  decision: WorkflowDecision,
-  privateKey: KeyObject,
-  keyId: string,
-  loadKeys: () => Promise<readonly WorkflowApproverKey[]>,
-) {
-  const signed = signWorkflowDecision({
+// Signing service, after authenticating the approver.
+export function sign(decision: WorkflowDecision, privateKey: KeyObject) {
+  return signWorkflowDecision({
     decision,
     privateKey,
-    keyId,
+    keyId: "maintainer-2026",
     expiresAt: new Date(Date.now() + 60_000).toISOString(),
   });
-  return pipeline.start({
+}
+
+// Workflow side: public keys only.
+export function submit(
+  workflow: Workflow,
+  checkpoint: WorkflowCheckpointOptions,
+  signed: WorkflowDecision,
+  keys: () => Promise<readonly WorkflowApproverKey[]>,
+) {
+  return workflow.start({
     checkpoint,
     decisions: [signed],
-    decisionVerifier: createEd25519DecisionVerifier({ keys: loadKeys }),
+    decisionVerifier: createEd25519DecisionVerifier({ keys }),
   });
 }
 ```
 
-La vérification refuse les acteurs non autorisés, décisions altérées, preuves expirées, identifiants de clé inconnus ou dupliqués et demandes réutilisées. Toutes les décisions soumises sont validées avant toute application. L’audit conserve l’identifiant de clé vérifiée et la date de vérification ; aucune clé privée ni aucun jeton bearer n’est stocké.
+La signature couvre tous les champs de la décision, plus `keyId` et `expiresAt`. Chaque `WorkflowApproverKey` lie un `keyId` à un seul `actor` et à sa `publicKey`.
 
-Les callbacks de vérification doivent répondre rapidement. Si le délai global expire pendant la vérification, le runtime attend la fin du callback mais n’applique pas son approbation tardive.
+Les décisions altérées ou expirées, et les clés inconnues, dupliquées ou liées à un autre acteur, sont refusées. Le checkpoint conserve le `keyId` vérifié, et une reprise qui retire `authentication` est refusée.
 
 ## Faire tourner les clés des approbateurs
 
-Publiez une nouvelle clé publique avec un `keyId` unique et le même acteur, basculez le service de signature vers sa clé privée, puis retirez l’ancienne clé publique après la période de chevauchement. Le vérificateur recharge les clés à chaque décision. Retirer une clé refuse immédiatement les nouvelles preuves correspondantes ; les approbations déjà persistées restent acceptées, même après expiration. Le stockage des checkpoints reste une frontière de confiance : ces signatures n’authentifient pas le checkpoint lui-même.
+<!-- flow -->
 
-Séparez au besoin les contrôles d’accès applicatifs aux clés de signature et à la soumission des décisions. Un `WorkflowDecisionVerifier` personnalisé est du code de confiance et doit vérifier lui-même signature, acteur et expiration. Consultez [l’exploitation des workers](../job-queues/#exploiter-les-workers) pour les identifiants des files et la reprise.
+1. **Ajouter**: Publiez la nouvelle clé publique.
+   - **La lier**: Un nouveau `keyId` pour le même acteur, à côté de l’ancienne clé.
+2. **Basculer**: Signez avec la nouvelle clé privée.
+   - **Chevauchement**: Les deux clés vérifient les décisions encore en transit.
+3. **Retirer**: Supprimez l’ancienne clé publique.
+   - **Révoquer**: Ses nouvelles preuves échouent ; les approbations enregistrées restent valides.
 
-Pour des questions adaptatives générées par un agent, utilisez les [tâches interactives](../interactive-tasks/). Leurs réponses reprennent la conversation au lieu de terminer une gate prédéfinie.
+`keys` s’exécute pour chaque décision signée : les changements s’appliquent sans redémarrage.
 
-Une exécution lancée par un [déclencheur](../job-queues/#exécuter-un-workflow-par-job) indique la `version` de checkpoint à utiliser pour soumettre ses décisions.
+## Décider d’une exécution lancée par un job
+
+Une [planification cron](../cron-schedules/) ou un [webhook](../webhooks/) exécute son workflow dans un worker de file. La valeur du job indique le `runId`, les `pauses` en attente et la `version` effective du checkpoint, qui ajoute un condensé de l’entrée du job.
+
+Soumettez les décisions avec `checkpoint: { store, runId, version }` issus de cette valeur : voir [Files de jobs et workers](../job-queues/).
+
+## Limites
+
+- Une gate ne prend ni condition, ni retry, ni timeout, ni cache.
+- Un job de workflow en file ne reçoit pas de décisions : appelez `start()` hors du worker.
+- Les signatures ne protègent pas le checkpoint : quiconque peut écrire dans son store est de confiance.
+- Un `decisionVerifier` personnalisé doit vérifier lui-même la signature, l’acteur et l’expiration.
+- Pour les questions que l’agent pose en travaillant, utilisez les [tâches interactives](../interactive-tasks/).
+
+API : [defineApprovalTask](../../reference/defineapprovaltask/) · [definePauseTask](../../reference/definepausetask/) · [WorkflowDecision](../../reference/workflowdecision/) · [signWorkflowDecision](../../reference/signworkflowdecision/) · [createEd25519DecisionVerifier](../../reference/createed25519decisionverifier/) · [WorkflowApproverKey](../../reference/workflowapproverkey/).

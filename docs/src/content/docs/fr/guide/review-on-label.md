@@ -17,7 +17,7 @@ Un mainteneur ajoute le label `outpost:review` à une pull request GitHub. Un se
   - `createSqliteTaskQueue()`
   - `runQueueWorker()`
   - `defineWorkflowJob()`
-- [Exécutions persistantes](../durable-runs/): Enregistrer la sortie de chaque tâche sous le `runId` du job.
+- [Exécutions durables](../durable-runs/): Enregistrer la sortie de chaque tâche sous le `runId` du job.
   - `createWorkflowCheckpointStore()`
 - [Tâches et dépendances](../task-dependencies/): Récupérer, relire, puis publier.
   - `defineTask()`

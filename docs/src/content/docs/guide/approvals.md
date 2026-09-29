@@ -1,143 +1,173 @@
 ---
 title: "Approvals"
-description: "Pause a workflow for an explicit trusted decision."
+description: "Stop a workflow at a gate until a person approves or rejects, then resume it from its checkpoint, even in another process."
 ---
 
-Use `defineApprovalTask()` to stop a workflow until a permitted actor approves or rejects. Gates require a checkpoint so the request survives the current process.
+## Add a gate
+
+A gate is a task that waits for a person’s decision. Tasks after it run once an allowed actor approves.
 
 ```ts
 import {
-  defineApprovalTask,
   createLocalTransport,
-  defineWorkflow,
   createWorkflowCheckpointStore,
+  defineApprovalTask,
+  defineTask,
+  defineWorkflow,
 } from "@elie-laloum/outpost";
 
 const approve = defineApprovalTask({
   key: "approve",
-  prompt: "Approve the reviewed change?",
+  prompt: "Deploy release 1.4 to production?",
   actors: ["maintainer"],
 });
-const pipeline = defineWorkflow("delivery", [approve]);
-const store = createWorkflowCheckpointStore({
-  transporter: createLocalTransport({ directory: ".outpost/storage" }),
+const deploy = defineTask({
+  key: "deploy",
+  after: [approve],
+  perform: (context) => `Deployed, approved by ${context.value(approve).actor}`,
 });
-const result = await pipeline.start({
-  checkpoint: { store, runId: "delivery-42", version: "1" },
+const workflow = defineWorkflow("release", [approve, deploy]);
+const checkpoint = {
+  store: createWorkflowCheckpointStore({
+    transporter: createLocalTransport({ directory: ".outpost/storage" }),
+  }),
+  runId: "release-1.4",
+  version: "1",
+};
+
+const paused = await workflow.start({ checkpoint });
+const request = paused.tasks.find((task) => task.key === "approve")?.pause;
+console.log(paused.status, request?.prompt);
+
+// Later, once your application has authenticated the maintainer:
+const result = await workflow.start({
+  checkpoint,
+  decisions: [
+    {
+      executionId: paused.executionId,
+      key: "approve",
+      requestId: request!.id,
+      actor: "maintainer",
+      reason: "Release notes and staging checks reviewed",
+      action: "approve",
+    },
+  ],
 });
-console.log(result.status, result.tasks[0]?.pause);
+console.log(result.status, result.value(deploy));
 ```
 
 <!-- check:run -->
 
+It prints `paused Deploy release 1.4 to production?`, then `done Deployed, approved by maintainer`.
+
+A gate needs a checkpoint, the saved state of the run under `.outpost/storage`. The second `start()` can run in another process, days later.
+
 ## Submit a decision
 
-Read the paused record and restart the same workflow with `decisions`. Each decision supplies `executionId`, task `key`, pending `requestId`, `actor`, `reason` and `action: "approve"` or `"reject"`. A decision must match the actual pending request; do not construct it from a stale UI record.
+<!-- flow -->
 
-```ts
-import type {
-  Workflow,
-  WorkflowCheckpointOptions,
-  WorkflowResult,
-} from "@elie-laloum/outpost";
+1. **Pause**: The run stops at the gate.
+   - **Save the request**: The gate’s record holds it in `pause`: `id`, `prompt`, `actors`.
+   - **Return**: Status `paused`, once independent tasks have finished.
+2. **Decide**: In your application.
+   - **Show the request**: To a person listed in `actors`.
+   - **Submit**: `start()` with the same checkpoint and `decisions`.
+3. **Continue**: According to `action`.
+   - **Approve**: Dependent tasks run and read the decision as the gate’s value.
+   - **Reject**: Dependent tasks are skipped and the run ends `failed`.
 
-async function approveReview(
-  pipeline: Workflow,
-  paused: WorkflowResult,
-  checkpoint: WorkflowCheckpointOptions,
-) {
-  const pending = paused.tasks.find(
-    (record) => record.key === "approve",
-  )?.pause;
-  if (!pending) throw new Error("No pending approval");
-  return pipeline.start({
-    checkpoint,
-    decisions: [
-      {
-        executionId: paused.executionId,
-        key: "approve",
-        requestId: pending.id,
-        actor: "maintainer",
-        reason: "Reviewed the patch and test results",
-        action: "approve",
-      },
-    ],
-  });
-}
-```
+| Decision field | Value                                                 |
+| -------------- | ----------------------------------------------------- |
+| `executionId`  | `executionId` of the paused result                    |
+| `key`          | The gate’s `key`                                      |
+| `requestId`    | `pause.id` of the gate’s record                       |
+| `actor`        | One of the gate’s `actors`                            |
+| `reason`       | A nonempty explanation, kept in the checkpoint        |
+| `action`       | `"approve"` (or `"resume"` for a pause) or `"reject"` |
 
-Place delivery tasks after the gate. Rejection prevents their normal execution. `definePauseTask()` follows the same persisted pattern but expects `action: "resume"` to continue.
+`start()` throws, applying no decision, when one does not match the pending request.
+
+## Pause without approving
+
+`definePauseTask()` takes the same options and holds the run until someone lets it go on, for example after a maintenance window. Continue with `action: "resume"` or stop with `"reject"`.
 
 ## Authenticate the actor
 
-Actor names are trusted metadata supplied by your application. Outpost does not log a user in or prove who clicked a button. Authenticate users and authorize their decisions before passing them into `start()`.
+Outpost checks that `actor` is listed in `actors`, not who the person is. Log the person in and check their right to decide before you call `start()`.
 
-A sentence asking the agent to wait is not a gate. The dependency graph must enforce the wait.
-
-API: [defineApprovalTask](../../reference/defineapprovaltask/) · [definePauseTask](../../reference/definepausetask/) · [WorkflowDecision](../../reference/workflowdecision/).
+Asking an agent in its brief to wait for approval is not a gate: only a gate task stops the run.
 
 ## Require a signed decision
 
-Available in 7.0.0: set `authentication: "signed"` on `defineApprovalTask()` or `definePauseTask()`. This requirement participates in checkpoint identity: removing it on restart is rejected. Supply `decisionVerifier` when submitting proofs. Gates without this option retain the application-trusted actor contract above.
-
-```ts
-import { defineApprovalTask } from "@elie-laloum/outpost";
-
-const review = defineApprovalTask({
-  key: "review",
-  prompt: "Approve deployment?",
-  actors: ["maintainer"],
-  authentication: "signed",
-});
-```
-
-Sign the exact pending request after authenticating the user and confirming their intent. The signature covers the execution, task, request, actor, action, reason, key identifier and expiry. The signing service owns the private key; workers only need trusted public keys bound to approvers.
+With `authentication: "signed"` on the gate, a decision needs an Ed25519 signature from a key bound to its actor. Only your signing service holds private keys.
 
 ```ts
 import {
-  signWorkflowDecision,
   createEd25519DecisionVerifier,
+  signWorkflowDecision,
 } from "@elie-laloum/outpost";
 import type {
   Workflow,
+  WorkflowApproverKey,
   WorkflowCheckpointOptions,
   WorkflowDecision,
-  WorkflowApproverKey,
 } from "@elie-laloum/outpost";
 import type { KeyObject } from "node:crypto";
 
-async function submitSignedReview(
-  pipeline: Workflow,
-  checkpoint: WorkflowCheckpointOptions,
-  decision: WorkflowDecision,
-  privateKey: KeyObject,
-  keyId: string,
-  loadKeys: () => Promise<readonly WorkflowApproverKey[]>,
-) {
-  const signed = signWorkflowDecision({
+// Signing service, after authenticating the approver.
+export function sign(decision: WorkflowDecision, privateKey: KeyObject) {
+  return signWorkflowDecision({
     decision,
     privateKey,
-    keyId,
+    keyId: "maintainer-2026",
     expiresAt: new Date(Date.now() + 60_000).toISOString(),
   });
-  return pipeline.start({
+}
+
+// Workflow side: public keys only.
+export function submit(
+  workflow: Workflow,
+  checkpoint: WorkflowCheckpointOptions,
+  signed: WorkflowDecision,
+  keys: () => Promise<readonly WorkflowApproverKey[]>,
+) {
+  return workflow.start({
     checkpoint,
     decisions: [signed],
-    decisionVerifier: createEd25519DecisionVerifier({ keys: loadKeys }),
+    decisionVerifier: createEd25519DecisionVerifier({ keys }),
   });
 }
 ```
 
-Verification rejects unauthorized actors, altered decisions, expired proofs, unknown or duplicated key identifiers and reused requests. All submitted decisions are validated before any is applied. Audit records retain the verified key identifier and verification time; no private key or bearer token is stored.
+The signature covers every decision field plus `keyId` and `expiresAt`. Each `WorkflowApproverKey` binds a `keyId` to one `actor` and its `publicKey`.
 
-Verifier callbacks must return promptly. If the workflow deadline expires while verification is pending, the runtime waits for the callback to settle but does not apply its late approval.
+Altered or expired decisions, and keys that are unknown, duplicated or bound to another actor, are rejected. The checkpoint keeps the verified `keyId`, and a restart that drops `authentication` is rejected.
 
 ## Rotate approver keys
 
-Publish a new public key with a unique `keyId` and the same actor binding, switch the signing service to its private key, then remove the old public key after the overlap period. The verifier reloads keys on each decision. Removing a key immediately rejects new proofs using it; already persisted approvals remain accepted, including after expiry. Checkpoint storage remains a trusted boundary: these signatures do not authenticate the checkpoint itself.
+<!-- flow -->
 
-Keep signing keys and workflow decision submission under separate application access controls where needed. A custom `WorkflowDecisionVerifier` is trusted code and must enforce signature, actor and expiration checks itself. See [worker operations](../job-queues/#operate-workers) for queue credentials and recovery.
+1. **Add**: Publish the new public key.
+   - **Bind it**: A new `keyId` for the same actor, next to the old key.
+2. **Switch**: Sign with the new private key.
+   - **Overlap**: Both keys verify decisions still in flight.
+3. **Remove**: Drop the old public key.
+   - **Revoke**: Its new proofs fail; recorded approvals stay valid.
 
-For adaptive questions generated by an agent, use [interactive tasks](../interactive-tasks/). Their answers resume the conversation instead of completing a predefined gate.
+`keys` runs for every signed decision, so changes apply without a restart.
 
-A run started by a [trigger](../job-queues/#run-a-workflow-for-each-job) reports the checkpoint `version` to use when submitting its decisions.
+## Decide a run started by a job
+
+A [cron schedule](../cron-schedules/) or a [webhook](../webhooks/) runs its workflow in a queue worker. The job value reports the `runId`, pending `pauses` and effective checkpoint `version`, which adds a digest of the job input.
+
+Submit decisions with `checkpoint: { store, runId, version }` from that value: see [Job queues and workers](../job-queues/).
+
+## Limits
+
+- A gate takes no condition, retry, timeout or cache.
+- A queued workflow job takes no decisions: call `start()` outside the worker.
+- Signatures do not protect the checkpoint: anyone who can write its store is trusted.
+- A custom `decisionVerifier` must check the signature, actor and expiry itself.
+- For questions the agent asks while working, use [interactive tasks](../interactive-tasks/).
+
+API: [defineApprovalTask](../../reference/defineapprovaltask/) · [definePauseTask](../../reference/definepausetask/) · [WorkflowDecision](../../reference/workflowdecision/) · [signWorkflowDecision](../../reference/signworkflowdecision/) · [createEd25519DecisionVerifier](../../reference/createed25519decisionverifier/) · [WorkflowApproverKey](../../reference/workflowapproverkey/).

@@ -1,62 +1,110 @@
 ---
 title: "Interactive tasks"
-description: "Persist a question, release the sandbox and continue the conversation after a human answer."
+description: "Let an agent ask a person questions between its turns, wait durably for each answer, then continue the same conversation."
 ---
 
-Available since 8.0.0. `defineInteractiveAgentTask()` keeps one workflow task unfinished across several question/answer turns. A question ends the agent turn, captures its conversation and returns `waiting-input`; dependent tasks remain blocked. A later `start({ answers })` resumes the conversation, and the next question can depend on previous answers.
+## Interactive task or approval gate?
 
-Unlike [review gates](../approvals/), questions are generated during execution. This is a dialogue between completed agent turns, not suspension inside a running tool or an interactive terminal.
+An interactive task lets the agent decide what to ask. An [approval gate](../approvals/) asks a question you wrote in advance.
+
+|                   | Interactive task                                 | Approval gate                               |
+| ----------------- | ------------------------------------------------ | ------------------------------------------- |
+| Question          | Written by the agent, adapted to earlier answers | The fixed `prompt` of the gate              |
+| Answer            | Free text, or one of the agent’s `choices`       | `approve` or `reject`                       |
+| What it continues | The agent’s conversation, in a new turn          | The tasks that depend on the gate           |
+| Submitted with    | `start({ answers })`                             | `start({ decisions })`                      |
+| Signed proofs     | No                                               | Optional, with `authentication: "signed"`   |
+| Definition        | `defineInteractiveAgentTask()`                   | `defineApprovalTask()`, `definePauseTask()` |
 
 ## Define the dialogue
 
-Use an agent and provider from [Setup](../setup/). Both the Outpost `createHarness()` and CLI presets with portable conversation capture and resume use the same structured-response protocol. Codex, Claude Code, Copilot and Kimi are admitted with capture enabled. Antigravity and disabled conversation storage/capture are rejected before allocation. Synthetic adapter tests establish the protocol, not live compatibility with every CLI/model combination.
+The task needs a checkpoint: it stores the questions and answers between processes.
 
 ```ts
 import {
-  defineInteractiveAgentTask,
   createLocalTransport,
-  defineWorkflow,
   createWorkflowCheckpointStore,
+  defineInteractiveAgentTask,
+  defineWorkflow,
 } from "@elie-laloum/outpost";
-import type { Agent, SandboxProvider } from "@elie-laloum/outpost";
+import { coder, repository, sandboxProvider } from "./outpost.config.mts";
 
-function discovery(
-  repository: string,
-  assistant: Agent,
-  sandboxProvider: SandboxProvider,
-) {
-  const clarify = defineInteractiveAgentTask({
-    key: "clarify",
-    repository,
-    agent: assistant,
-    sandboxProvider,
-    brief:
-      "Define the application with the user, then return its specification.",
-    actors: ["owner"],
-    maxTurns: 12,
-    timeoutMs: 120_000,
-  });
-  const pipeline = defineWorkflow("discovery", [clarify]);
-  const checkpoint = {
-    store: createWorkflowCheckpointStore({
-      transporter: createLocalTransport({
-        directory: `${repository}/.outpost/storage`,
-      }),
-    }),
-    runId: "discovery-42",
-    version: "1",
-  };
-  return { clarify, pipeline, checkpoint };
-}
+const clarify = defineInteractiveAgentTask({
+  key: "clarify",
+  repository,
+  agent: coder,
+  sandboxProvider,
+  brief:
+    'Define the application with its owner, then complete with {"summary": string, "features": string[]}.',
+  actors: ["owner"],
+});
+const workflow = defineWorkflow("discovery", [clarify]);
+const store = createWorkflowCheckpointStore({
+  transporter: createLocalTransport({ directory: ".outpost/storage" }),
+});
+const checkpoint = { store, runId: "discovery-42", version: "1" };
+
+const result = await workflow.start({ checkpoint });
+console.log(result.status, result.inputRequests[0]?.question);
 ```
 
-Call `pipeline.start({ checkpoint })`. Render `result.inputRequests` in your application; every request contains `id`, `executionId`, task `key`, `question` and optional `choices`/`allowFreeText`. Free text is allowed by default. When it is false, the answer must exactly match one of the choices. There can be several pending questions from independent tasks.
+It prints `waiting-input` and the agent’s first question. Outpost adds the question protocol to your brief, so the brief only describes the goal and the shape of the final JSON.
 
-Outpost supplies the agent with a response protocol: `<interaction>{"kind":"question","question":"…"}</interaction>` or `<interaction>{"kind":"completed","output":…}</interaction>`. The final output must be lossless JSON. Invalid responses get at most one repair request within that turn. No extra `ask_user` tool is required.
+| Option             | Use                                                                             |
+| ------------------ | ------------------------------------------------------------------------------- |
+| `repository`       | The checkout that holds the task’s worktree.                                    |
+| `agent`            | An agent with portable conversation capture and resume.                         |
+| `sandboxProvider`  | Where each turn runs. Omitting it uses Docker.                                  |
+| `brief`            | The goal of the dialogue and the expected output.                               |
+| `actors`           | The identifiers allowed to answer.                                              |
+| `maxTurns`         | Agent turns allowed, final answer included. Default: 12.                        |
+| `timeoutMs`        | Deadline of each executing turn. Time spent waiting for an answer is not timed. |
+| `bootstrap`        | Whether the sandbox may install a missing CLI agent.                            |
+| `conversationHome` | Host home where the agent’s native conversations are found.                     |
+| `after`            | Tasks that must succeed before the first turn.                                  |
+
+Codex, Claude Code, Copilot CLI, Kimi Code and the [built-in harness](../harness/) are accepted. Antigravity, and a harness created with `conversations: false`, are rejected when the task is defined: see [Conversations](../conversations/).
+
+## How the dialogue runs
+
+<!-- flow -->
+
+1. **Turn**: The agent works in a fresh sandbox.
+   - **Run**: It continues its conversation with the brief or the latest answer.
+     - sandbox
+   - **Close**: Outpost saves the conversation and closes the sandbox.
+     - host
+2. **Question**: The run stops with `waiting-input`.
+   - **Save**: The checkpoint stores the question; dependent tasks wait.
+     - `inputRequests`
+3. **Answer**: Your application submits it.
+   - **Validate**: Outpost checks and saves the answer, then starts the next turn.
+     - `start({ answers })`
+4. **Output**: The agent completes with JSON instead of asking.
+   - **Keep**: The checkpoint stores the output.
+     - `result.value()`
+
+## Show the questions
+
+`result.inputRequests` lists every pending question. Independent interactive tasks can wait at the same time.
+
+| Field           | Content                                                                 |
+| --------------- | ----------------------------------------------------------------------- |
+| `question`      | The text to display.                                                    |
+| `choices`       | Suggested answers, when the agent gave some.                            |
+| `allowFreeText` | `false` when the answer must be one of `choices`; omitted means `true`. |
+| `id`            | The request to answer, as `requestId`.                                  |
+| `executionId`   | The workflow execution, copied into the answer.                         |
+| `key`           | The task that asked.                                                    |
+| `requestedAt`   | When the agent asked, as an ISO date.                                   |
+
+:::caution
+Notify people from `result.inputRequests` once `start()` returns. The `input-request` [workflow event](../progress/) fires before the checkpoint write and carries only the task key.
+:::
 
 ## Accept an answer
 
-Authenticate the respondent in your application, then supply its authorized actor identifier. Actor names are trusted application metadata; answers do not have signed-gate verification. Keep the workflow definition, checkpoint run ID and version stable when reconstructing them in another process.
+Restart the same workflow with the same checkpoint and an `answers` entry per request.
 
 ```ts
 import type {
@@ -65,42 +113,97 @@ import type {
   WorkflowInputRequest,
 } from "@elie-laloum/outpost";
 
-async function answerQuestion(
-  pipeline: Workflow,
+async function answer(
+  workflow: Workflow,
   checkpoint: WorkflowCheckpointOptions,
-  pending: WorkflowInputRequest,
-  authenticatedActor: string,
-  answer: string,
+  request: WorkflowInputRequest,
+  actor: string,
+  value: string,
 ) {
-  return pipeline.start({
+  return workflow.start({
     checkpoint,
     answers: [
       {
-        executionId: pending.executionId,
-        key: pending.key,
-        requestId: pending.id,
-        actor: authenticatedActor,
-        value: answer,
+        executionId: request.executionId,
+        key: request.key,
+        requestId: request.id,
+        actor,
+        value,
       },
     ],
   });
 }
 ```
 
-All answers are validated before any are applied. Accepted answers are persisted before starting another agent turn. Stale IDs, unauthorized actors, wrong executions, duplicate submissions and invalid choices are rejected. A retry after a lost HTTP response must inspect the latest checkpoint/result before submitting again; answer submission is not an idempotent HTTP endpoint. Checkpoint ownership fences concurrent coordinators and requires [explicit recovery](../durable-runs/) after a crash.
+`start()` runs the next turn and returns at the next question or once the task ends. Called without `answers`, it returns the pending questions without calling the model.
 
-Calling `start()` without answers leaves pending questions intact and does not call the model again. After answering, render any new `inputRequests`. Once the task succeeds, `result.value(clarify)` contains `output`, `conversation`, `branch`, `directory` and `turns`; it contains no live sandbox or continuation methods. `unwrap()` still throws while a workflow is waiting. In a mixed workflow, `waiting-input` takes precedence over approval `paused`; inspect task records for both kinds of pending work. Failures and cancellation take precedence over waits.
+Outpost checks every answer before applying any. It rejects a stale `requestId`, an actor outside `actors`, another execution, a second answer for the same task and, when `allowFreeText` is `false`, a value outside `choices`.
 
-## Ownership, limits and recovery
+:::caution
+Submitting is not idempotent. After a lost HTTP response, call `start({ checkpoint })` to read the current request before sending again. Actors are trusted metadata: authenticate the person first, as for [approvals](../approvals/).
+:::
 
-Each executing turn allocates a sandbox and closes it before publishing its question. The named Git worktree is preserved, including uncommitted files. Outpost does not integrate, push or delete this workspace after completion; review and integrate it explicitly, then clean up retained resources when they are no longer needed. Sandbox home files and running processes are not preserved between turns; keep required project files in the worktree.
+## Read the result
 
-The repository, retained worktree and captured conversation store must remain accessible to the next runner. A remote checkpoint does not make local Git or transcripts portable. Missing or detached worktrees are rejected rather than silently restarting the dialogue. Remote providers use the existing upload and synchronization contracts, including protection against concurrent host edits; provider-specific live validation is still required.
+Once the task succeeds, `result.value(clarify)` holds plain data:
 
-`maxTurns` defaults to 12 and includes the final result. A question on the last allowed turn fails rather than creating an unanswerable wait. Workflow attempts and token usage remain cumulative across calls; response repairs also count toward usage. Task and workflow deadlines apply to executing calls, not time between them. An abort stops an executing turn; it does not delete an already persisted pending request. There is no pending-question expiration or answer-signing API in this first implementation.
+<!-- features -->
 
-A crash during a turn may leave effects in the workspace or an external service. Recovery requires `checkpoint.resume: "retry-incomplete"` to authorize replay of that unfinished turn; completed dependencies are retained. Already checkpointed completed dialogue output is reused without another model call. This does not guarantee exactly-once tool effects or restore an interrupted JavaScript stack. Change the checkpoint version/run ID when implementations or provider configuration change; agent name/model, brief, repository, actor list and turn limit already participate in compatibility checks.
+- `output`: The JSON the agent completed with.
+- `conversation`: The captured conversation id.
+- `branch`: The work branch, `outpost/interactive-…`.
+- `directory`: The retained worktree.
+- `turns`: The agent turns used.
 
-For custom workflow operations, `defineTask({ interaction: { identity, actors }, perform })` exposes `context.interaction.state`, `.answer`, `.save(state)` and `.suspend(question, state)`. Save only lossless JSON. The callback starts again on each answer and must use its state to avoid repeating completed work. Do not swallow the suspension signal or issue multiple concurrent suspension operations. `defineInteractiveAgentTask()` implements this continuation discipline for agent conversations.
+`result.usage` adds up the attempts and tokens of every turn, repairs included. `unwrap()` throws while the run waits. In a workflow that also has gates, `waiting-input` wins over `paused`, and a failure or cancellation wins over both.
 
-API: [defineInteractiveAgentTask](../../reference/defineinteractiveagenttask/) · [InteractiveAgentTaskOptions](../../reference/interactiveagenttaskoptions/) · [WorkflowInputRequest](../../reference/workflowinputrequest/) · [WorkflowAnswer](../../reference/workflowanswer/).
+## Keep the workspace
+
+Each turn opens a sandbox and closes it before the question is published. Files in the worktree carry over between turns, committed or not; the sandbox home and running processes do not.
+
+Outpost never integrates, pushes or deletes the worktree. Review `branch` and merge it yourself ([Repository and branch](../repository-and-branch/)), then prune it with [Retention and cleanup](../retention/).
+
+The repository, the worktree and the conversation store must stay at the same paths for the next process. A moved worktree fails with `Interactive workspace moved; recover it explicitly`, and a switched branch with `Interactive workspace branch changed; recover it explicitly`.
+
+## Recover after a crash
+
+A crash during a turn leaves the task incomplete, and the next `start()` refuses to replay it. Authorize the replay with `checkpoint: { ...checkpoint, resume: "retry-incomplete" }`.
+
+The turn restarts from the last saved conversation and answer; a completed output is reused without calling the model. Partial effects of the interrupted turn may repeat. [Durable runs](../durable-runs/) covers replay and recovering the checkpoint’s ownership.
+
+## Write a custom interactive task
+
+`defineTask()` with `interaction` suspends any task on a question. `defineInteractiveAgentTask()` is built on it.
+
+```ts
+import { defineTask } from "@elie-laloum/outpost";
+
+const region = defineTask({
+  key: "region",
+  interaction: { identity: "region-v1", actors: ["owner"] },
+  perform: (context) => {
+    const interaction = context.interaction;
+    if (!interaction) throw new Error("Run with a checkpoint");
+    const answer = interaction.answer;
+    if (!answer)
+      return interaction.suspend(
+        { question: "Deploy to which region?", choices: ["eu", "us"] },
+        { step: "region" },
+      );
+    return { region: answer.value };
+  },
+});
+```
+
+`perform` runs again from the start after each answer. Read `interaction.state` to skip finished work, and `save(state)` to record progress; both hold JSON only.
+
+## Limits
+
+- A question on the last of `maxTurns` fails the task instead of waiting.
+- Questions do not expire, and answers are not signed.
+- Cancelling stops a running turn; a question already saved stays pending.
+- Changing the agent, model, brief, repository, provider, actors or `maxTurns` makes the saved checkpoint incompatible: start a new `runId`.
+
+A complete scenario with an approval and an implementation step: [Write a specification with a human](../specify-with-a-human/).
+
+API: [defineInteractiveAgentTask](../../reference/defineinteractiveagenttask/) · [InteractiveAgentTaskOptions](../../reference/interactiveagenttaskoptions/) · [InteractiveAgentResult](../../reference/interactiveagentresult/) · [WorkflowInputRequest](../../reference/workflowinputrequest/) · [WorkflowAnswer](../../reference/workflowanswer/) · [TaskInteractionContext](../../reference/taskinteractioncontext/)

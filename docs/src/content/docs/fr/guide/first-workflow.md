@@ -188,7 +188,7 @@ Le script affiche `done` puis `maintainer approved outpost/fix-tests`. `fix` et 
 | `action`             | `"approve"` ou `"reject"`      |
 
 :::caution
-Authentifiez la personne avant de soumettre son `actor` : voir [Approbations](../approvals/). Une tâche interrompue en cours d’exécution n’est rejouée qu’avec votre autorisation : voir [Exécutions persistantes](../durable-runs/).
+Authentifiez la personne avant de soumettre son `actor` : voir [Approbations](../approvals/). Une tâche interrompue en cours d’exécution n’est rejouée qu’avec votre autorisation : voir [Exécutions durables](../durable-runs/).
 :::
 
 ## Étapes suivantes
@@ -198,6 +198,6 @@ Authentifiez la personne avant de soumettre son `actor` : voir [Approbations](..
 - [Tâches et dépendances](../task-dependencies/): Organiser le graphe et paralléliser les tâches.
 - [Boucles de vérification](../verification-loops/): Relancer avec la sortie des tests en retour.
 - [Approbations](../approvals/): Authentifier les approbateurs et signer les décisions.
-- [Exécutions persistantes](../durable-runs/): Autoriser les rejeux et récupérer les exécutions plantées.
+- [Exécutions durables](../durable-runs/): Autoriser les rejeux et récupérer les exécutions plantées.
 - [Pauses sur quota](../quota-pauses/): Mettre en pause quand l’agent atteint une limite d’usage.
 - [Files de jobs et workers](../job-queues/): Exécuter les workflows sans surveillance.
