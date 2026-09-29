@@ -24,7 +24,7 @@ function serve() {
 }
 
 function bridge() {
-  const token = config.bearerTokenVariable ? process.env[config.bearerTokenVariable] : undefined;
+  const authorization = authorizer();
   let session;
   let version;
   let ordered = Promise.resolve();
@@ -40,7 +40,6 @@ function bridge() {
   };
   const headers = () => ({
     ...config.headers,
-    ...(token ? { authorization: "Bearer " + token } : {}),
     ...(session ? { "mcp-session-id": session } : {}),
     ...(version ? { "mcp-protocol-version": version } : {}),
   });
@@ -69,11 +68,17 @@ function bridge() {
       return;
     }
     try {
-      const response = await fetch(config.url, {
-        method: "POST",
-        headers: { ...headers(), "content-type": "application/json", accept: "application/json, text/event-stream" },
-        body: line,
-      });
+      const send = async () =>
+        fetch(config.url, {
+          method: "POST",
+          headers: { ...(await authorization.headers()), ...headers(), "content-type": "application/json", accept: "application/json, text/event-stream" },
+          body: line,
+        });
+      let response = await send();
+      if (await authorization.retry(response)) {
+        await response.arrayBuffer();
+        response = await send();
+      }
       session = response.headers.get("mcp-session-id") ?? session;
       if (!response.ok) {
         fail(message, "HTTP " + response.status + ": " + (await response.text()).slice(0, 500));
@@ -107,8 +112,98 @@ function bridge() {
   input.on("close", async () => {
     await Promise.allSettled([...pending]);
     if (session)
-      await fetch(config.url, { method: "DELETE", headers: headers() }).catch(() => undefined);
+      await authorization
+        .headers()
+        .then((credentials) => fetch(config.url, { method: "DELETE", headers: { ...credentials, ...headers() } }))
+        .catch(() => undefined);
     process.exit(0);
   });
+}
+
+function authorizer() {
+  const bearer = config.bearerTokenVariable ? process.env[config.bearerTokenVariable] : undefined;
+  const auth = config.oauth;
+  if (!auth)
+    return {
+      headers: async () => (bearer ? { authorization: "Bearer " + bearer } : {}),
+      retry: async () => false,
+    };
+  const id = process.env[auth.clientIdVariable];
+  const secret = process.env[auth.clientSecretVariable];
+  const target = new URL(config.url);
+  target.hash = "";
+  const resource = target.toString();
+  let token;
+  let expiresAt = 0;
+  let pending;
+  let endpoint;
+  let methods;
+  let challengeScope;
+  const read = async (url) => {
+    const response = await fetch(url, { headers: { accept: "application/json" } });
+    if (!response.ok) throw new Error("HTTP " + response.status + " from " + url);
+    return response.json();
+  };
+  const first = async (urls) => {
+    for (const url of urls) {
+      try {
+        return await read(url);
+      } catch {}
+    }
+    throw new Error("OAuth metadata was not found at " + urls.join(", "));
+  };
+  const wellKnown = (base, names) => {
+    const url = new URL(base);
+    const path = url.pathname.replace(/\\/$/, "");
+    return names.flatMap((name) => (path ? [url.origin + "/.well-known/" + name + path] : [])).concat(
+      path ? [url.origin + path + "/.well-known/openid-configuration"] : names.map((name) => url.origin + "/.well-known/" + name),
+    );
+  };
+  async function discover(challenge) {
+    const metadata = /resource_metadata="([^"]+)"/.exec(challenge ?? "")?.[1];
+    challengeScope = /scope="([^"]+)"/.exec(challenge ?? "")?.[1] ?? challengeScope;
+    const protectedResource = await first(
+      metadata ? [metadata] : wellKnown(config.url, ["oauth-protected-resource"]).filter((url) => !url.endsWith("openid-configuration")).concat(new URL(config.url).origin + "/.well-known/oauth-protected-resource"),
+    );
+    const issuer = protectedResource.authorization_servers?.[0];
+    if (typeof issuer !== "string") throw new Error("Protected resource metadata names no authorization server");
+    const server = await first(wellKnown(issuer, ["oauth-authorization-server", "openid-configuration"]));
+    if (typeof server.token_endpoint !== "string") throw new Error("Authorization server metadata has no token_endpoint");
+    endpoint = server.token_endpoint;
+    methods = server.token_endpoint_auth_methods_supported ?? ["client_secret_basic"];
+  }
+  async function request(challenge) {
+    if (!endpoint || challenge) await discover(challenge);
+    const scope = auth.scopes?.join(" ") ?? challengeScope;
+    const body = new URLSearchParams({ grant_type: "client_credentials", resource, ...(scope ? { scope } : {}) });
+    const headers = { "content-type": "application/x-www-form-urlencoded", accept: "application/json" };
+    if (methods.includes("client_secret_basic"))
+      headers.authorization = "Basic " + Buffer.from(encodeURIComponent(id) + ":" + encodeURIComponent(secret)).toString("base64");
+    else if (methods.includes("client_secret_post")) {
+      body.set("client_id", id);
+      body.set("client_secret", secret);
+    } else throw new Error("The authorization server supports neither client_secret_basic nor client_secret_post");
+    const response = await fetch(endpoint, { method: "POST", headers, body });
+    const text = await response.text();
+    if (!response.ok) throw new Error("OAuth token request failed with HTTP " + response.status + ": " + text.slice(0, 300));
+    const result = JSON.parse(text);
+    if (typeof result.access_token !== "string") throw new Error("OAuth token response has no access_token");
+    const lifetime = Number(result.expires_in);
+    token = result.access_token;
+    expiresAt = Number.isFinite(lifetime) && lifetime > 0 ? Date.now() + lifetime * 1000 - Math.min(30000, lifetime * 500) : Infinity;
+  }
+  const refresh = (challenge) => (pending ??= request(challenge).finally(() => { pending = undefined; }));
+  return {
+    async headers() {
+      if (!token || Date.now() >= expiresAt) await refresh();
+      return { authorization: "Bearer " + token };
+    },
+    async retry(response) {
+      if (response.status !== 401) return false;
+      token = undefined;
+      await refresh(response.headers.get("www-authenticate") ?? undefined);
+      return true;
+    },
+  };
 }
 `;

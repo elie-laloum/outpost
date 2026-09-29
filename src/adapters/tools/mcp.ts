@@ -1,5 +1,5 @@
 import { invariant, OutpostError } from "../../domain/errors.ts";
-import { isMcpStdioServer } from "../../domain/mcp-server.ts";
+import { httpVariables, isMcpStdioServer } from "../../domain/mcp-server.ts";
 import type { McpServer, McpServers } from "../../domain/mcp-server.types.ts";
 import type { SandboxLease } from "../../domain/sandbox.types.ts";
 import type { Command } from "../../domain/command.types.ts";
@@ -7,6 +7,7 @@ import { mcpLauncher } from "./mcp-launcher.constants.ts";
 import { openMcpProcess } from "./mcp-process.ts";
 import { mcpTools } from "./mcp-tools.ts";
 import {
+  MCP_CLIENT_CREDENTIALS_EXTENSION,
   MCP_CLIENT_INFO,
   MCP_PROTOCOL_VERSION,
   mcpDefaults,
@@ -42,6 +43,7 @@ export async function openMcpServers(
         const capabilities = await initialize(
           name,
           session,
+          clientCapabilities(server),
           server.startupTimeoutMs ?? mcpDefaults.startupTimeoutMs,
           signal,
         );
@@ -80,12 +82,11 @@ function launch(
         server: name,
         url: server.url,
         headers: server.headers ?? {},
-        variables: server.bearerTokenVariable
-          ? [server.bearerTokenVariable]
-          : [],
+        variables: httpVariables(server),
         ...(server.bearerTokenVariable
           ? { bearerTokenVariable: server.bearerTokenVariable }
           : {}),
+        ...(typeof server.oauth === "object" ? { oauth: server.oauth } : {}),
       };
   return {
     executable: "node",
@@ -99,6 +100,7 @@ function launch(
 async function initialize(
   name: string,
   session: McpProcess,
+  capabilities: Readonly<Record<string, unknown>>,
   timeoutMs: number,
   signal: AbortSignal,
 ): Promise<Readonly<Record<string, unknown>>> {
@@ -109,7 +111,7 @@ async function initialize(
       "initialize",
       {
         protocolVersion: MCP_PROTOCOL_VERSION,
-        capabilities: {},
+        capabilities,
         clientInfo: MCP_CLIENT_INFO,
       },
       AbortSignal.any([signal, timeout]),
@@ -124,4 +126,12 @@ async function initialize(
   }
   session.connection.notify("notifications/initialized");
   return mcpRecord(mcpRecord(result)?.capabilities) ?? {};
+}
+
+function clientCapabilities(
+  server: McpServer,
+): Readonly<Record<string, unknown>> {
+  return !isMcpStdioServer(server) && typeof server.oauth === "object"
+    ? { extensions: { [MCP_CLIENT_CREDENTIALS_EXTENSION]: {} } }
+    : {};
 }

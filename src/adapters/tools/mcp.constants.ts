@@ -1,5 +1,8 @@
 export const MCP_PROTOCOL_VERSION = "2025-06-18";
 
+export const MCP_CLIENT_CREDENTIALS_EXTENSION =
+  "io.modelcontextprotocol/oauth-client-credentials";
+
 export const MCP_CLIENT_INFO = Object.freeze({
   name: "outpost",
   version: "1",

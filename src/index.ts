@@ -77,6 +77,7 @@ export type {
   HarnessToolExecution,
 } from "./domain/harness.types.ts";
 export type {
+  McpClientCredentials,
   McpHttpServer,
   McpServer,
   McpServers,

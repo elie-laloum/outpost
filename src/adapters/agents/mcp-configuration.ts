@@ -27,6 +27,10 @@ export function supportMcpServers(
       `${support.agent} cannot exclude tools of MCP server ${name}`,
     );
     invariant(
+      !("oauth" in server) || typeof server.oauth !== "object",
+      `${support.agent} cannot use OAuth client credentials for MCP server ${name}; they are supported by the built-in harness`,
+    );
+    invariant(
       support.oauthLogin || !("oauth" in server),
       `${support.agent} cannot reuse a host OAuth login for MCP server ${name}; use bearerTokenVariable`,
     );

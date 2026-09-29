@@ -164,3 +164,28 @@ test("OAuth logins exclude static bearer credentials", () => {
   ])
     assert.throws(() => mcpServers({ a: server }), { code: "configuration" });
 });
+
+test("OAuth client credentials name declared variables and valid scopes", () => {
+  const oauth = {
+    clientIdVariable: "MCP_CLIENT_ID",
+    clientSecretVariable: "MCP_CLIENT_SECRET",
+    scopes: ["mcp:read", "offline_access"],
+  };
+  const servers = mcpServers({ a: { url: "https://example.com/mcp", oauth } });
+  assert.deepEqual(servers.a, { url: "https://example.com/mcp", oauth });
+  assert.deepEqual(mcpServerVariables(servers), [
+    "MCP_CLIENT_ID",
+    "MCP_CLIENT_SECRET",
+  ]);
+  for (const value of [
+    { ...oauth, clientIdVariable: "bad-name" },
+    { ...oauth, scopes: [] },
+    { ...oauth, scopes: ["two words"] },
+    { ...oauth, audience: "x" },
+    [],
+  ])
+    assert.throws(
+      () => mcpServers({ a: { url: "https://example.com/mcp", oauth: value } }),
+      { code: "configuration" },
+    );
+});

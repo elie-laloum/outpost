@@ -3,6 +3,12 @@ export interface McpToolFilter {
   readonly exclude?: readonly string[];
 }
 
+export interface McpClientCredentials {
+  readonly clientIdVariable: string;
+  readonly clientSecretVariable: string;
+  readonly scopes?: readonly string[];
+}
+
 export interface McpStdioServer {
   readonly command: string;
   readonly arguments?: readonly string[];
@@ -16,7 +22,7 @@ export interface McpHttpServer {
   readonly url: string;
   readonly headers?: Readonly<Record<string, string>>;
   readonly bearerTokenVariable?: string;
-  readonly oauth?: "login";
+  readonly oauth?: "login" | McpClientCredentials;
   readonly tools?: McpToolFilter;
   readonly startupTimeoutMs?: number;
 }

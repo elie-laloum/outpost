@@ -36,3 +36,11 @@ export const MCP_URL_PROTOCOLS: ReadonlySet<string> = new Set([
   "http:",
   "https:",
 ]);
+
+export const MCP_CLIENT_CREDENTIAL_FIELDS: ReadonlySet<string> = new Set([
+  "clientIdVariable",
+  "clientSecretVariable",
+  "scopes",
+]);
+
+export const MCP_SCOPE_PATTERN = /^[\x21\x23-\x5B\x5D-\x7E]+$/;

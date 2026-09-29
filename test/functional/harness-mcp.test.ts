@@ -626,3 +626,159 @@ test("MCP prompt instructions need a running server that offers prompts", async 
     { mcpServers: fixture(log) },
   );
 });
+
+async function oauthMcpServer(
+  t: import("node:test").TestContext,
+  method: "client_secret_basic" | "client_secret_post",
+) {
+  const tokens: URLSearchParams[] = [];
+  const clients: string[] = [];
+  const valid = new Set<string>();
+  let initialize: Record<string, unknown> | undefined;
+  let revoked = false;
+  const server = createServer(async (request, response) => {
+    let text = "";
+    for await (const chunk of request) text += chunk;
+    const url = new URL(request.url!, base);
+    const json = (status: number, value: unknown, headers = {}) =>
+      response
+        .writeHead(status, { "content-type": "application/json", ...headers })
+        .end(JSON.stringify(value));
+    if (url.pathname === "/.well-known/oauth-protected-resource/mcp")
+      return json(200, {
+        resource: `${base}/mcp`,
+        authorization_servers: [`${base}/tenant`],
+      });
+    if (url.pathname === "/.well-known/oauth-authorization-server/tenant")
+      return json(200, {
+        issuer: `${base}/tenant`,
+        token_endpoint: `${base}/token`,
+        token_endpoint_auth_methods_supported: [method],
+      });
+    if (url.pathname === "/token") {
+      const body = new URLSearchParams(text);
+      tokens.push(body);
+      const basic = request.headers.authorization?.replace(/^Basic /, "");
+      const client = basic
+        ? Buffer.from(basic, "base64").toString()
+        : `${body.get("client_id")}:${body.get("client_secret")}`;
+      clients.push(client);
+      if (client !== "outpost-client:outpost-secret")
+        return json(401, { error: "invalid_client" });
+      const token = `token-${tokens.length}`;
+      valid.add(token);
+      return json(200, {
+        access_token: token,
+        token_type: "Bearer",
+        expires_in: 3600,
+      });
+    }
+    const token = request.headers.authorization?.replace(/^Bearer /, "");
+    if (!token || !valid.has(token))
+      return response
+        .writeHead(401, {
+          "www-authenticate": `Bearer resource_metadata="${base}/.well-known/oauth-protected-resource/mcp", scope="mcp:read"`,
+        })
+        .end();
+    const body = JSON.parse(text);
+    if (body.id === undefined) return response.writeHead(202).end();
+    const result = (value: unknown) =>
+      json(200, { jsonrpc: "2.0", id: body.id, result: value });
+    if (body.method === "initialize") {
+      initialize = body.params;
+      return result({
+        protocolVersion: body.params.protocolVersion,
+        capabilities: { tools: {} },
+        serverInfo: { name: "oauth-fixture", version: "1" },
+      });
+    }
+    if (body.method === "tools/list")
+      return result({
+        tools: [{ name: "whoami", inputSchema: { type: "object" } }],
+      });
+    if (!revoked) {
+      revoked = true;
+      valid.clear();
+    }
+    return result({ content: [{ type: "text", text: token }] });
+  });
+  server.listen(0, "127.0.0.1");
+  await once(server, "listening");
+  t.after(() => server.close());
+  const base = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+  return {
+    url: `${base}/mcp`,
+    tokens,
+    clients,
+    initialize: () => initialize,
+  };
+}
+
+test("HTTP MCP servers obtain OAuth client credentials tokens inside the sandbox", async (t) => {
+  const root = await repository(t);
+  const variables = {
+    MCP_CLIENT_ID: "outpost-client",
+    MCP_CLIENT_SECRET: "outpost-secret",
+  };
+  const oauth = {
+    clientIdVariable: "MCP_CLIENT_ID",
+    clientSecretVariable: "MCP_CLIENT_SECRET",
+  };
+  for (const method of ["client_secret_basic", "client_secret_post"] as const) {
+    const http = await oauthMcpServer(t, method);
+    const requests: ModelRequest[] = [];
+    await run(
+      root,
+      [
+        call(["mcp__docs__whoami", {}]),
+        call(["mcp__docs__whoami", {}]),
+        () => done,
+      ],
+      { mcpServers: { docs: { url: http.url, oauth } } },
+      requests,
+      createLocalSandboxProvider({ variables }),
+    );
+    assert.deepEqual(results(requests[1]), ["token-1"]);
+    assert.deepEqual(results(requests[2]), ["token-2"]);
+    assert.deepEqual(
+      http.tokens.map((body) => [
+        body.get("grant_type"),
+        body.get("resource"),
+        body.get("scope"),
+      ]),
+      [
+        ["client_credentials", http.url, null],
+        ["client_credentials", http.url, "mcp:read"],
+      ],
+    );
+    assert.deepEqual(http.clients, [
+      "outpost-client:outpost-secret",
+      "outpost-client:outpost-secret",
+    ]);
+    assert.deepEqual(http.initialize()?.capabilities, {
+      extensions: { "io.modelcontextprotocol/oauth-client-credentials": {} },
+    });
+  }
+  const http = await oauthMcpServer(t, "client_secret_basic");
+  await assert.rejects(
+    run(
+      root,
+      [],
+      {
+        mcpServers: {
+          docs: { url: http.url, oauth: { ...oauth, scopes: ["mcp:write"] } },
+        },
+      },
+      [],
+      createLocalSandboxProvider({
+        variables: { ...variables, MCP_CLIENT_SECRET: "wrong" },
+      }),
+    ),
+    { code: "response", message: /OAuth token request failed with HTTP 401/ },
+  );
+  assert.equal(http.tokens.at(-1)?.get("scope"), "mcp:write");
+  await assert.rejects(
+    run(root, [], { mcpServers: { docs: { url: http.url, oauth } } }),
+    { code: "configuration", message: /Missing MCP_CLIENT_ID/ },
+  );
+});

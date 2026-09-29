@@ -1,8 +1,10 @@
 import { invariant } from "./errors.ts";
 import {
   MCP_HEADER_PATTERN,
+  MCP_CLIENT_CREDENTIAL_FIELDS,
   MCP_HTTP_FIELDS,
   MCP_MAX_TIMEOUT_MS,
+  MCP_SCOPE_PATTERN,
   MCP_SERVER_NAME_PATTERN,
   MCP_STDIO_FIELDS,
   MCP_TOOL_FILTER_FIELDS,
@@ -11,6 +13,7 @@ import {
   MCP_VARIABLE_PATTERN,
 } from "./mcp-server.constants.ts";
 import type {
+  McpClientCredentials,
   McpHttpServer,
   McpServer,
   McpServers,
@@ -66,9 +69,7 @@ export function mcpServerVariables(servers: McpServers): readonly string[] {
       Object.values(servers).flatMap((server) =>
         isMcpStdioServer(server)
           ? (server.variables ?? [])
-          : server.bearerTokenVariable
-            ? [server.bearerTokenVariable]
-            : [],
+          : httpVariables(server),
       ),
     ),
   ];
@@ -145,8 +146,8 @@ function httpServer(name: string, server: object): McpHttpServer {
   }
   if (value.oauth !== undefined) {
     invariant(
-      value.oauth === "login",
-      `MCP server ${name} oauth must be "login"`,
+      value.oauth === "login" || clientCredentials(name, value.oauth),
+      `MCP server ${name} oauth must be "login" or client credentials`,
     );
     invariant(
       value.bearerTokenVariable === undefined &&
@@ -159,7 +160,19 @@ function httpServer(name: string, server: object): McpHttpServer {
   return Object.freeze({
     url: value.url,
     ...(value.headers ? { headers } : {}),
-    ...(value.oauth ? { oauth: value.oauth } : {}),
+    ...(value.oauth === undefined
+      ? {}
+      : {
+          oauth:
+            value.oauth === "login"
+              ? value.oauth
+              : Object.freeze({
+                  ...value.oauth,
+                  ...(value.oauth.scopes
+                    ? { scopes: Object.freeze([...value.oauth.scopes]) }
+                    : {}),
+                }),
+        }),
     ...(value.bearerTokenVariable
       ? { bearerTokenVariable: value.bearerTokenVariable }
       : {}),
@@ -280,4 +293,34 @@ function literal(name: string, value: string): void {
     !value.includes("${") && !value.includes("\0"),
     `MCP server ${name} literal values cannot contain \${ or NUL; reference secrets with variables or bearerTokenVariable`,
   );
+}
+
+function clientCredentials(name: string, value: unknown): boolean {
+  if (value === null || typeof value !== "object" || Array.isArray(value))
+    return false;
+  fields(name, value, MCP_CLIENT_CREDENTIAL_FIELDS);
+  const credentials = value as McpClientCredentials;
+  variableNames(name, [
+    credentials.clientIdVariable,
+    credentials.clientSecretVariable,
+  ]);
+  invariant(
+    credentials.scopes === undefined ||
+      (Array.isArray(credentials.scopes) &&
+        credentials.scopes.length > 0 &&
+        credentials.scopes.every(
+          (scope) => typeof scope === "string" && MCP_SCOPE_PATTERN.test(scope),
+        )),
+    `MCP server ${name} oauth scopes must be nonempty OAuth scope tokens`,
+  );
+  return true;
+}
+
+export function httpVariables(server: McpHttpServer): readonly string[] {
+  return [
+    ...(server.bearerTokenVariable ? [server.bearerTokenVariable] : []),
+    ...(typeof server.oauth === "object"
+      ? [server.oauth.clientIdVariable, server.oauth.clientSecretVariable]
+      : []),
+  ];
 }

@@ -442,3 +442,23 @@ test("OAuth logins are copied from the host for Claude, Codex and Kimi only", ()
       },
     );
 });
+
+test("CLI harnesses refuse OAuth client credentials", () => {
+  const credentials: McpServers = {
+    docs: {
+      url: "https://mcp.example.com/mcp",
+      oauth: { clientIdVariable: "ID", clientSecretVariable: "SECRET" },
+    },
+  };
+  for (const harness of [
+    createClaudeHarness,
+    createCodexHarness,
+    createCopilotHarness,
+    createKimiHarness,
+    createAntigravityHarness,
+  ])
+    assert.throws(
+      () => createAgent({ harness: harness({ mcpServers: credentials }) }),
+      { code: "configuration", message: /cannot use OAuth client credentials/ },
+    );
+});
