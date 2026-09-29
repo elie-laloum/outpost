@@ -3,7 +3,6 @@ import type { ModelResult } from "../domain/model.types.ts";
 import type { SandboxLease } from "../domain/sandbox.types.ts";
 import { invariant, OutpostError } from "../domain/errors.ts";
 import { steeringInbox } from "../domain/steering.ts";
-import { deliverSteering } from "./steering-scope.ts";
 import { harnessBudget } from "./harness-budget.ts";
 import { harnessModelProvider } from "./harness-model-provider.ts";
 import { MAX_DELEGATION_DEPTH } from "../domain/subagent.constants.ts";
@@ -168,7 +167,8 @@ export async function customTurn(
           ? {
               steer: () => {
                 const messages = inbox.take();
-                deliverSteering(messages, "injected", pass, options.observe);
+                for (const message of messages)
+                  message.deliver({ mode: "injected" });
                 return messages.map((message) => message.text);
               },
             }

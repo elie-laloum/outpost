@@ -27,7 +27,7 @@ export interface HarnessRuntime {
   readonly modelProvider: ModelProvider;
   readonly sandbox: SandboxLease;
   readonly signal: AbortSignal;
-  /** Takes steering messages for the top-level loop; subagents receive none. */
+  /** Takes delivered steering texts; shared with subagents so the active loop receives them. */
   readonly steer?: (() => readonly string[]) | undefined;
   emit(event: AgentEvent): void;
   hold(): () => void;

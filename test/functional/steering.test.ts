@@ -7,6 +7,7 @@ import {
   claudeHarness,
   createSandbox,
   createSteering,
+  defineHarnessSubagent,
   defineHarnessTool,
   dispatch,
   harness,
@@ -396,4 +397,92 @@ test("Claude steering after stdin closed resumes the native session", async (t) 
   );
   assert.equal(result.turns.length, 2);
   assert.match(result.turns[1]!.text, /handled: Mention the tests\./);
+});
+
+test("steering reaches the built-in subagent that is working", async (t) => {
+  const root = await repository(t);
+  const steering = createSteering();
+  const parentRequests: ModelRequest[] = [];
+  const childRequests: ModelRequest[] = [];
+  const events: AgentObservation[] = [];
+  let delivery: Promise<SteeringDelivery> | undefined;
+  const probe = defineHarnessTool({
+    name: "probe",
+    description: "Probe the fixture.",
+    input: { type: "object", properties: {} },
+    execute: () => {
+      delivery = steering.send("Only inspect src/.");
+      return "probed";
+    },
+  });
+  const child = agent({
+    model: "child",
+    harness: harness({
+      modelProvider: provider(
+        [
+          () => ({
+            text: "",
+            content: [
+              { type: "tool-call", id: "p1", name: "probe", input: {} },
+            ],
+            stopReason: "tool-calls",
+          }),
+          answer("Inspected src/."),
+        ],
+        childRequests,
+      ),
+      tools: [probe],
+    }),
+  });
+  const result = await dispatch({
+    repository: root,
+    sandboxProvider: localSandboxProvider(),
+    agent: agent({
+      model: "parent",
+      harness: harness({
+        modelProvider: provider(
+          [
+            () => ({
+              text: "",
+              content: [
+                {
+                  type: "tool-call",
+                  id: "d1",
+                  name: "inspect",
+                  input: { prompt: "Inspect the repository" },
+                },
+              ],
+              stopReason: "tool-calls",
+            }),
+            answer(),
+          ],
+          parentRequests,
+        ),
+        tools: [
+          defineHarnessSubagent({
+            name: "inspect",
+            description: "Inspect the repository.",
+            agent: child,
+          }),
+        ],
+      }),
+    }),
+    brief: { text: "Review" },
+    steering,
+    observe: (event) => events.push(event),
+  });
+  assert.equal(result.completed, true);
+  assert.deepEqual(await delivery, { mode: "injected" });
+  assert.deepEqual(lastUser(childRequests[1]), [
+    "tool-result",
+    "Only inspect src/.",
+  ]);
+  assert.ok(
+    parentRequests.every(
+      (request) => !JSON.stringify(request.messages).includes("Only inspect"),
+    ),
+  );
+  const steer = events.find((event) => event.kind === "steer");
+  assert.equal(steer?.kind === "steer" && steer.mode, "injected");
+  assert.ok(steer?.subagentId);
 });

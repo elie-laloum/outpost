@@ -165,7 +165,10 @@ async function instructions(runtime: HarnessRuntime): Promise<string> {
 }
 
 function steering(runtime: HarnessRuntime): ModelContentBlock[] {
-  return (runtime.steer?.() ?? []).map((text) => ({ type: "text", text }));
+  const texts = runtime.steer?.() ?? [];
+  for (const text of texts)
+    runtime.emit({ kind: "steer", text, mode: "injected" });
+  return texts.map((text) => ({ type: "text", text }));
 }
 
 function inferredStop(content: readonly ModelContentBlock[]): ModelStopReason {
