@@ -1,16 +1,22 @@
 ---
 title: "Cron schedules"
-description: "Publish a workflow job on a cron schedule, safely across restarts and replicas."
+description: "Publish a workflow job at each cron slot, in your time zone, without duplicates across restarts and replicas."
 ---
 
-`createCronSchedule()` parses a five-field cron expression evaluated in an IANA time zone (UTC by default). `runSchedules()` publishes one job per slot until its signal aborts.
+## Publish a job on a schedule
 
-```ts
+`createCronSchedule()` reads a cron expression in an IANA time zone. `runSchedules()` publishes one queue job per slot until its signal aborts.
+
+```ts title="scheduler.mts"
 import {
   createCronSchedule,
-  runSchedules,
   createSqliteTaskQueue,
+  runSchedules,
 } from "@elie-laloum/outpost";
+
+const timeZone = "Europe/Paris";
+// en-CA formats the local date as YYYY-MM-DD.
+const day = (slot: Date) => slot.toLocaleDateString("en-CA", { timeZone });
 
 const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
 const stop = new AbortController();
@@ -22,10 +28,10 @@ try {
     schedules: [
       {
         name: "nightly-audit",
-        cron: createCronSchedule("0 2 * * 1-5", { timeZone: "Europe/Paris" }),
+        cron: createCronSchedule("0 2 * * 1-5", { timeZone }),
         handler: "audit",
-        runId: (slot) => `audit-${slot.toISOString().slice(0, 10)}`,
-        input: (slot) => ({ day: slot.toISOString().slice(0, 10) }),
+        runId: (slot) => `audit-${day(slot)}`,
+        input: (slot) => ({ day: day(slot) }),
       },
     ],
   });
@@ -34,13 +40,93 @@ try {
 }
 ```
 
-- **Syntax.** Minute, hour, day of month, month and day of week, with lists (`1,15`), ranges (`1-5`), steps (`*/10`, `8-18/2`), month and weekday names (`JAN`, `MON-FRI`), `7` for Sunday and the macros `@hourly`, `@daily`, `@weekly`, `@monthly` and `@yearly`. As in Vixie cron, when both day fields are restricted a day matching either one fires. There is no seconds field.
-- **Daylight saving time.** Slots are wall-clock times. A time skipped by a spring-forward change does not fire; a time repeated in autumn fires once, at its first occurrence.
-- **Job identity.** Each slot publishes the job `schedule:<name>:<slot ISO time>`. Two schedulers sharing a queue, or a restarted one, publish the same job and the queue keeps a single copy. `runId` defaults to `<name>:<slot ISO time>` and `input` to `null`.
-- **Late slots.** A slot is published only if at most `maxLateMs` (60 seconds by default) has passed. After a restart or a suspended process, only the latest missed slot within that window is published; older slots are skipped rather than replayed in a burst.
-- **Failures.** Without `onError`, the first publication failure rejects `runSchedules()`. With it, the failure is reported with the schedule and slot, and scheduling continues.
+```sh
+node scheduler.mts
+```
 
-`createCronSchedule()` rejects an expression that has no occurrence, such as `0 0 30 2 *`. Its `next()` and `previous()` methods compute slots without publishing anything:
+At 02:00 Paris time, Monday to Friday, the scheduler publishes a job for the `audit` handler with a `runId` such as `audit-2026-09-30`. Ctrl+C aborts the signal and `runSchedules()` resolves.
+
+Without `timeZone`, the expression is evaluated in UTC. `runId` defaults to `<name>:<slot ISO time>` and `input` to `null`.
+
+## Run the published jobs
+
+A worker opens the same queue and registers `audit` with `defineWorkflowJob()`, which runs one checkpointed workflow per `runId`: see [Job queues and workers](../job-queues/). The [Nightly maintenance](../nightly-maintenance/) recipe shows the scheduler and the worker together.
+
+## Write the cron expression
+
+An expression has five fields separated by spaces: minute, hour, day of month, month, day of week.
+
+| Syntax     | Example           | Fires                                                                                                    |
+| ---------- | ----------------- | -------------------------------------------------------------------------------------------------------- |
+| Value, `*` | `30 2 * * *`      | At 02:30 every day; `*` matches any value.                                                               |
+| List       | `0 9,18 * * *`    | At 09:00 and 18:00.                                                                                      |
+| Range      | `0 9 * * 1-5`     | At 09:00, Monday to Friday.                                                                              |
+| Step       | `0 8-18/2 * * *`  | At 08:00, 10:00, …, 18:00. `*/15` in the minute field means every 15 minutes.                            |
+| Names      | `0 9 1 JAN,JUL *` | At 09:00 on 1 January and 1 July. Names `JAN`–`DEC` and `SUN`–`SAT` ignore case; `0` and `7` are Sunday. |
+| Macro      | `@daily`          | At 00:00 every day. Also `@hourly`, `@midnight`, `@weekly`, `@monthly`, `@yearly` and `@annually`.       |
+| Both days  | `0 9 1 * MON`     | At 09:00 on the 1st of the month and on every Monday, as in Vixie cron.                                  |
+
+This union applies only when neither day field starts with `*`; otherwise a day must match both fields. There is no seconds field.
+
+## Name each run after its local date
+
+`slot.toISOString().slice(0, 10)` gives the UTC date. At 01:00 in Paris, that is still the previous day.
+
+Use `slot.toLocaleDateString("en-CA", { timeZone })` with the schedule's time zone, as in the first snippet, to get the local date as `YYYY-MM-DD`.
+
+## Daylight saving time
+
+Slots are wall-clock times in the schedule's time zone.
+
+- **Skipped time**: A time that does not exist on the spring-forward day does not fire that day.
+- **Repeated time**: A time that occurs twice on the fall-back day fires once, at its first occurrence.
+
+:::caution
+Choose a time outside the local transition hour (02:00–03:00 in Europe) when a job must run every day.
+:::
+
+## Run several schedulers
+
+Each slot publishes the job `schedule:<name>:<slot ISO time>`. A restarted scheduler, or several replicas sharing one queue, publish the same job ID, and the queue keeps a single job.
+
+`runId` and `input` must depend only on the slot. The queue rejects a second publication of the same ID with a different request.
+
+Two schedules can return the same `runId` for one day: the second job then reuses the same checkpointed run, like the 07:00 resume in [Nightly maintenance](../nightly-maintenance/).
+
+## Catch up after a restart
+
+A slot is published only if at most `maxLateMs` has passed since it (60 000 ms by default). After a restart or a suspended process, only the latest missed slot within that window is published; older ones are skipped.
+
+Raise `maxLateMs` to catch up a slot missed during a longer outage, for example `maxLateMs: 6 * 60 * 60_000` for six hours.
+
+## Handle publication failures
+
+Without `onError`, the first failed publication stops every schedule and rejects `runSchedules()`. With it, you receive the error with the schedule name and slot, and scheduling continues with the next slot.
+
+```ts
+import { runSchedules } from "@elie-laloum/outpost";
+import type { TaskQueue, TriggerSchedule } from "@elie-laloum/outpost";
+
+function schedule(
+  queue: TaskQueue,
+  schedules: TriggerSchedule[],
+  signal: AbortSignal,
+) {
+  return runSchedules({
+    queue,
+    schedules,
+    signal,
+    onError: (error, { schedule, slot }) =>
+      console.error(`${schedule} ${slot.toISOString()}`, error),
+  });
+}
+```
+
+A failed slot is not published again. Errors thrown by `onError` are ignored.
+
+## Compute slots without publishing
+
+`next(after)` returns the first slot strictly after a date, `previous(at)` the latest slot at or before it. Neither publishes anything.
 
 ```ts
 import { createCronSchedule } from "@elie-laloum/outpost";
@@ -53,4 +139,16 @@ console.log(nightly.next(new Date("2026-03-28T12:00:00Z")).toISOString());
 
 This prints `2026-03-30T00:30:00.000Z`: 02:30 does not exist in Paris on 29 March 2026.
 
-A CI schedule, such as a GitHub Actions `schedule` workflow running a script, is an alternative when no long-running process is available.
+`createCronSchedule()` throws on an invalid field, an unknown time zone or an expression with no occurrence, such as `0 0 30 2 *`.
+
+## Schedule from CI instead
+
+Without a long-running process, a scheduled CI job, such as a GitHub Actions `schedule` workflow, can start the workflow directly with a checkpoint. See [Run in CI](../ci-automation/).
+
+## Limits
+
+- The finest resolution is one minute.
+- After downtime, only the latest missed slot within `maxLateMs` is published.
+- A schedule `name` is unique and uses letters, digits, `.`, `_` and `-` (128 characters at most). A `runId` has at most 256 characters.
+
+API: [createCronSchedule](../../reference/createcronschedule/) · [runSchedules](../../reference/runschedules/) · [TriggerSchedule](../../reference/triggerschedule/) · [CronSchedule](../../reference/cronschedule/) · [defineWorkflowJob](../../reference/defineworkflowjob/).

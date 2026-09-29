@@ -1,21 +1,24 @@
 ---
 title: "Webhooks"
-description: "Start workflows from verified GitHub, GitLab, Slack and Standard Webhooks events."
+description: "Receive verified GitHub, GitLab, Slack and Standard Webhooks events and turn the ones you want into queue jobs."
 ---
 
-`serveTriggers()` starts an HTTP server. Each route verifies requests with a source, then `on()` maps the event to a job or ignores it by returning `undefined`.
+## Receive a webhook and publish a job
 
-```ts
+`serveTriggers()` starts an HTTP server with one route per sender. Each route verifies the request with a **source**, then its `on(event)` returns a job to publish, or `undefined` to ignore the event.
+
+```ts title="server.mts"
 import {
   createGithubWebhook,
+  createSqliteTaskQueue,
   labelAdded,
   serveTriggers,
-  createSqliteTaskQueue,
 } from "@elie-laloum/outpost";
 
-const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
 const secret = process.env.GITHUB_WEBHOOK_SECRET;
 if (!secret) throw new Error("Set GITHUB_WEBHOOK_SECRET");
+
+const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
 const server = await serveTriggers({
   queue,
   port: 8787,
@@ -39,37 +42,62 @@ const server = await serveTriggers({
 console.log(`Listening on ${server.url}`);
 ```
 
-The job identifier is `trigger:<path>:<delivery>`. A sender retry or a manual redelivery keeps its delivery identifier, so it does not publish a second job. A different delivery for the same `runId`, such as the label being added again, runs the job again: `defineWorkflowJob()` restores the tasks already completed in that run's checkpoint.
+Adding the `outpost:fix` label to an issue or a pull request publishes a `fix` job to the queue. A worker runs it with `defineWorkflowJob()`: see [Job queues and workers](../job-queues/).
 
-| Response  | Meaning                                                                               |
-| --------- | ------------------------------------------------------------------------------------- |
-| `202`     | Job published, or already present for this delivery. The body is `{"job": "<id>"}`.   |
-| `204`     | Verified event ignored by `on()`.                                                     |
-| `401`     | Verification failed: signature, secret source, timestamp window or a required header. |
-| `404/405` | Unknown path, or a method other than `POST`.                                          |
-| `413`     | Body larger than `maxBytes` (1 MiB by default, up to 25 MiB).                         |
-| `500`     | `on()` threw or returned an invalid job.                                              |
-| `503`     | The queue rejected the job; the sender may retry the same delivery.                   |
+<!-- flow -->
 
-Slack routes answer `200` with an empty body instead of `202` and `204`, because Slack expects `200`. `onError` receives failures at the `verify`, `route` and `enqueue` stages, never the secrets. Keep `on()` fast: GitHub waits 10 seconds for a response and Slack 3 seconds.
+1. **Server**: Answers the sender within seconds.
+   - **Verify**: The source checks the signature, otherwise the answer is `401`.
+     - `createGithubWebhook()`
+   - **Route**: `on(event)` returns a job, or `undefined` to ignore the event.
+     - `labelAdded()`
+     - `commandIssued()`
+   - **Publish**: The job enters the queue as `trigger:<path>:<delivery>`.
+     - `serveTriggers()`
+2. **Worker**: Runs the job in its own process.
+   - **Run**: A checkpointed workflow under the job’s `runId`.
+     - `defineWorkflowJob()`
 
-## Sources
+A job names a registered worker `handler`, a `runId` of at most 256 characters and an optional JSON `input`. Keep `on()` fast: GitHub waits 10 seconds for an answer, Slack 3 seconds.
 
-| Source                                  | Verification                                                                             | Delivery identifier                           | Actor               |
+## Pick a source
+
+| Source                                  | Verification                                                                             | Delivery identifier                           | `event.actor`       |
 | --------------------------------------- | ---------------------------------------------------------------------------------------- | --------------------------------------------- | ------------------- |
-| `createGithubWebhook({ secret })`       | `X-Hub-Signature-256` (HMAC-SHA256 of the body); JSON or form payloads.                  | `X-GitHub-Delivery`                           | `github:<login>`    |
+| `createGithubWebhook({ secret })`       | `X-Hub-Signature-256`, an HMAC of the body. JSON or form payloads.                       | `X-GitHub-Delivery`                           | `github:<login>`    |
 | `createGitlabWebhook({ signingToken })` | `webhook-signature` with a `whsec_` signing token (GitLab 19.0+), 5-minute window.       | `webhook-id`                                  | `gitlab:<username>` |
-| `createGitlabWebhook({ token })`        | `X-Gitlab-Token` compared in constant time.                                              | `Idempotency-Key`, else `X-Gitlab-Event-UUID` | `gitlab:<username>` |
-| `createSlackSource({ signingSecret })`  | `X-Slack-Signature` over `v0:timestamp:body`, 5-minute window.                           | `trigger_id`                                  | `slack:<user id>`   |
+| `createGitlabWebhook({ token })`        | `X-Gitlab-Token` equals the token. The body is not signed.                               | `Idempotency-Key`, else `X-Gitlab-Event-UUID` | `gitlab:<username>` |
+| `createSlackSource({ signingSecret })`  | `X-Slack-Signature` over the timestamp and body, 5-minute window.                        | `trigger_id`                                  | `slack:<user id>`   |
 | `createStandardWebhook({ secret })`     | [Standard Webhooks](https://www.standardwebhooks.com/) `whsec_` secret, 5-minute window. | `webhook-id`                                  | none                |
 
-Prefer a GitLab signing token: a plain `X-Gitlab-Token` is sent as is and does not sign the body. Slack sources accept slash commands and interactive payloads; the Events API and its URL verification challenge are not supported. Every secret can be a callback returning the currently accepted values; during a rotation, return both the old and the new secret. An empty or failing source denies every request.
+Prefer a GitLab signing token: a plain token travels as is in a header and does not sign the body. `toleranceMs` changes the 5-minute window. Slack sources accept slash commands and interactive payloads.
 
-`TriggerEvent` exposes `source`, `delivery`, `kind` (GitHub event, GitLab `object_kind`, `command` or the Slack interaction type), `action`, `actor` and the parsed `payload`. `labelAdded(event, label)` recognizes a label just added to a GitHub issue or pull request, or to a GitLab issue or merge request. `commandIssued(event, "/outpost")` returns the text after the command in a new GitHub or GitLab comment, or in a Slack slash command.
+## Read the event
+
+Two helpers recognize the common events and return `undefined` for everything else.
+
+| Helper                             | Recognizes                                                                                    | Returns                                                    |
+| ---------------------------------- | --------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| `labelAdded(event, "outpost:fix")` | The label, just added to a GitHub issue or pull request, or a GitLab issue or merge request.  | `repository`, `number`, `target`, `label`                  |
+| `commandIssued(event, "/outpost")` | A line starting with the command in a new GitHub or GitLab comment, or a Slack slash command. | `text` after the command, `repository`, `number`, `target` |
+
+`target` is `"issue"` or `"pull-request"`; for a GitLab merge request, `number` is its IID. A Slack command carries only `text`.
+
+For other events, read the `TriggerEvent` fields:
+
+| Field        | Holds                                                                                                                         |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+| `source`     | `github`, `gitlab`, `slack`, or the Standard Webhooks `source` option (`standard` by default).                                |
+| `delivery`   | The sender’s delivery identifier.                                                                                             |
+| `kind`       | The GitHub event, the GitLab `object_kind`, `command` or the Slack interaction type, or the Standard Webhooks payload `type`. |
+| `action`     | The sub-action, such as `labeled`, or the Slack command name.                                                                 |
+| `actor`      | The sender’s identity, as in the sources table.                                                                               |
+| `payload`    | The parsed body, as JSON; check its shape before use.                                                                         |
+| `receivedAt` | The ISO time of verification.                                                                                                 |
 
 ## Authorize senders
 
-A verified signature proves that the request comes from the configured GitHub, GitLab or Slack integration. It does not prove that the person behind the event may start a workflow. Anyone who can comment on a public repository can write `/outpost`; check `event.actor` against an explicit list:
+A verified signature proves the request comes from your GitHub, GitLab or Slack integration, not that its author may start a workflow. Anyone who can comment on a public repository can write `/outpost`: check `event.actor` against an explicit list.
 
 ```ts
 import { commandIssued } from "@elie-laloum/outpost";
@@ -79,7 +107,8 @@ const maintainers = new Set(["github:octocat", "slack:U012AB3CD"]);
 
 function fromCommand(event: TriggerEvent): TriggerJob | undefined {
   const command = commandIssued(event, "/outpost");
-  if (!command || !event.actor || !maintainers.has(event.actor)) return;
+  if (!command) return undefined;
+  if (!event.actor || !maintainers.has(event.actor)) return undefined;
   return {
     handler: "fix",
     runId: `${command.repository ?? "slack"}#${command.number ?? event.delivery}`,
@@ -88,16 +117,76 @@ function fromCommand(event: TriggerEvent): TriggerJob | undefined {
 }
 ```
 
-The actor is the sender's identity, not an Outpost gate actor. [Review gates](../approvals/) keep their own authorization.
+Pass `fromCommand` as a route’s `on`. `event.actor` is not an Outpost gate actor: [approvals](../approvals/) authenticate their deciders separately.
+
+## Read the HTTP response
+
+| Status | Meaning                                                                               |
+| ------ | ------------------------------------------------------------------------------------- |
+| `202`  | Job published, or already published for this delivery. The body is `{"job": "<id>"}`. |
+| `204`  | Verified event ignored: `on()` returned `undefined`.                                  |
+| `400`  | The request body could not be read.                                                   |
+| `401`  | Verification failed: signature, secret, timestamp window or a missing header.         |
+| `404`  | No route for this path.                                                               |
+| `405`  | A method other than `POST`.                                                           |
+| `413`  | Body over `maxBytes`: 1 MiB by default, 25 MiB at most.                               |
+| `500`  | `on()` threw or returned an invalid job.                                              |
+| `503`  | The queue rejected the job. The sender can retry the same delivery.                   |
+
+Slack routes answer `200` with an empty body instead of `202` and `204`. `onError` receives the failure’s `path`, `stage` (`verify`, `route` or `enqueue`) and `delivery`, never a secret.
+
+## Deduplicate redeliveries
+
+The job identifier contains the delivery identifier. A sender retry or a manual redelivery reuses it, so the queue keeps a single job for as long as it retains that job.
+
+A new delivery publishes a new job, even for the same event, such as a label added again. The `runId` decides whether it does work twice. Handlers that post results still need their own [idempotency keys](../job-queues/).
+
+## Derive the run from the payload
+
+Build `runId` from what identifies the work in the payload: `owner/name#12`, or a head commit. Jobs with the same `runId` share one [checkpoint](../durable-runs/): `defineWorkflowJob()` restores the tasks already done instead of running them again.
+
+GitHub signatures carry no timestamp, so a captured request can be replayed under a new delivery identifier. A payload-derived `runId` makes that replay converge on the same run. The [Review a pull request on demand](../review-on-label/) recipe keys each run on the head commit.
+
+## Rotate a secret
+
+Every secret option also accepts a callback that returns the secrets accepted right now. The source calls it on each request.
+
+```ts
+import { createGithubWebhook } from "@elie-laloum/outpost";
+
+const source = createGithubWebhook({
+  secret: () =>
+    [
+      process.env.GITHUB_WEBHOOK_SECRET,
+      process.env.GITHUB_WEBHOOK_SECRET_PREVIOUS,
+    ].filter((value) => value !== undefined),
+});
+```
+
+Accept both secrets, change the secret at the sender, then drop the old one. A callback that throws or returns no secret rejects every request with `401`.
 
 ## Operate the server
 
-`serveTriggers()` listens on `127.0.0.1` by default. Expose it through a reverse proxy that terminates TLS; senders only need that single path. Close the returned server, then its queue, during shutdown.
+`serveTriggers()` listens on `127.0.0.1` by default; `host` and `port` change it. Put a reverse proxy that terminates TLS in front of it, and expose only the route paths.
 
-Deduplication lasts as long as the queue retains the job. GitHub signatures have no timestamp, so a captured request could be sent again under a new delivery identifier: deliver over TLS and derive `runId` from the payload, as above, so that a replayed event converges on the same checkpoint. Trigger jobs do not make external effects exactly-once; follow [idempotency keys](../job-queues/#deduplicate-effects) in handlers that publish results.
+```ts
+import type { DurableTaskQueue, TriggerServer } from "@elie-laloum/outpost";
+
+declare const server: TriggerServer;
+declare const queue: DurableTaskQueue;
+
+process.once("SIGTERM", async () => {
+  await server.close();
+  queue.close();
+});
+```
+
+Close the server first, so no request reaches a closed queue.
 
 ## Limits
 
-Outpost does not call GitHub, GitLab or Slack APIs: posting a comment or a message about the result belongs to your workflow. Approving a gate from a comment or a Slack button, a CLI command to run the server and the Slack Events API are not provided. Tests use locally computed signatures and simulated senders, not live integrations.
+- Outpost does not call the GitHub, GitLab or Slack APIs: your workflow posts comments or messages about the result.
+- The Slack Events API and its URL verification challenge are not supported.
+- No `outpost` CLI command runs the server: start it from your own script.
 
-API: [createCronSchedule](../../reference/createcronschedule/) · [runSchedules](../../reference/runschedules/) · [serveTriggers](../../reference/servetriggers/) · [createGithubWebhook](../../reference/creategithubwebhook/) · [createGitlabWebhook](../../reference/creategitlabwebhook/) · [createSlackSource](../../reference/createslacksource/) · [createStandardWebhook](../../reference/createstandardwebhook/) · [defineWorkflowJob](../../reference/defineworkflowjob/).
+API: [serveTriggers](../../reference/servetriggers/) · [createGithubWebhook](../../reference/creategithubwebhook/) · [createGitlabWebhook](../../reference/creategitlabwebhook/) · [createSlackSource](../../reference/createslacksource/) · [createStandardWebhook](../../reference/createstandardwebhook/) · [labelAdded](../../reference/labeladded/) · [commandIssued](../../reference/commandissued/) · [TriggerEvent](../../reference/triggerevent/) · [TriggerJob](../../reference/triggerjob/) · [defineWorkflowJob](../../reference/defineworkflowjob/).

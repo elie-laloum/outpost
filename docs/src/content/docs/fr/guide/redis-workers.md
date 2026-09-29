@@ -1,17 +1,73 @@
 ---
 title: "Redis et BullMQ"
-description: "Distribuer les travaux avec BullMQ et Redis standalone."
+description: "Partager une même file de jobs entre producteurs et workers sur plusieurs machines, avec BullMQ et un serveur Redis standalone."
 ---
 
-Installez `bullmq` et démarrez un serveur Redis standalone. L’adaptateur se charge uniquement via son sous-chemin de paquet optionnel.
+## Prérequis
 
-Réglez `maxmemory-policy` sur `noeviction` avant d’ouvrir une file. Outpost vérifie Redis INFO et refuse toute autre politique ou une valeur indisponible ; il ne modifie jamais la configuration du serveur. L’éviction des clés expirables peut supprimer les verrous des workers. Sur Redis Cloud, modifiez **Data eviction policy** en **no eviction** dans la console, enregistrez puis vérifiez qu’INFO indique `maxmemory_policy:noeviction`. Lorsque la mémoire est pleine, les écritures échouent au lieu d’évincer l’état de la file ; surveillez la capacité et gérez ces erreurs.
+<!-- features -->
+
+- `bullmq` : Un paquet optionnel, installé à côté d’Outpost.
+- **Un serveur Redis standalone** : Auto-hébergé ou managé, joignable par chaque producteur et chaque worker.
+- **La politique `noeviction`** : Exigée par la file, qui la vérifie à l’ouverture.
 
 ```sh
 npm install bullmq
 ```
 
-```ts
+La file conserve ses jobs dans Redis. Activez la persistance Redis (AOF ou instantanés RDB) si les jobs doivent survivre à un redémarrage de Redis.
+
+## Régler la politique d’éviction
+
+Sur votre propre serveur, réglez la politique et conservez-la après redémarrage :
+
+```sh
+redis-cli CONFIG SET maxmemory-policy noeviction
+redis-cli CONFIG REWRITE
+```
+
+Sur un service managé, modifiez-la dans la console : sur Redis Cloud, réglez **Data eviction policy** de la base sur **No eviction** ; sur Amazon ElastiCache, associez un groupe de paramètres personnalisé où `maxmemory-policy` vaut `noeviction`. Vérifiez ensuite ce que Redis indique :
+
+```sh
+redis-cli INFO memory | grep maxmemory_policy
+# maxmemory_policy:noeviction
+```
+
+`createBullMQTaskQueue()` lit la même ligne `INFO` et refuse toute autre politique, ou un serveur qui la masque. Il ne modifie jamais la configuration du serveur.
+
+:::caution
+Les autres politiques peuvent évincer les clés expirables qui portent les baux des workers. Avec `noeviction`, Redis refuse les écritures quand sa mémoire est pleine : surveillez la mémoire et gérez les échecs d’`enqueue()`.
+:::
+
+## Configurer la file
+
+Importez l’adaptateur depuis son propre sous-chemin. La file respecte le même contrat que la file SQLite : un worker s’y exécute sans changement ([Files de jobs et workers](../job-queues/)).
+
+```ts title="worker.mts"
+import { runQueueWorker } from "@elie-laloum/outpost";
+import { createBullMQTaskQueue } from "@elie-laloum/outpost/queues/bullmq";
+
+const queue = await createBullMQTaskQueue({
+  name: "code-reviews",
+  connection: { host: "127.0.0.1", port: 6379 },
+});
+const stop = new AbortController();
+process.once("SIGINT", () => stop.abort());
+try {
+  await runQueueWorker({
+    queue,
+    worker: `reviewer-${process.pid}`,
+    signal: stop.signal,
+    handlers: { review: (input) => ({ value: input }) },
+  });
+} finally {
+  await queue.close();
+}
+```
+
+Un producteur ouvre la même file et publie un job pour le handler `review` :
+
+```ts title="submit.mts"
 import { createBullMQTaskQueue } from "@elie-laloum/outpost/queues/bullmq";
 
 const queue = await createBullMQTaskQueue({
@@ -29,22 +85,84 @@ try {
 }
 ```
 
-## Connecter les workers
+| Option              | Effet                                                                                                           |
+| ------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `name`              | Nom de la file, partagé par producteurs et workers. Deux noms différents ne partagent aucun job.                |
+| `connection`        | Réglages de connexion BullMQ : `host`, `port`, `db`, `username`, `password`, `tls`…                             |
+| `prefix`            | Préfixe des clés Redis. Par défaut : `outpost`.                                                                 |
+| `stalledIntervalMs` | Intervalle entre deux recherches de baux expirés. Par défaut : 1 000. La reprise peut demander deux recherches. |
+| `onError`           | Reçoit les erreurs de connexion et les échecs en arrière-plan qu’aucun appel ne signale.                        |
 
-Utilisez les mêmes `name`, `prefix`, base Redis et destination de connexion pour les producteurs et consommateurs `runQueueWorker()`. `connection` reçoit des réglages, pas un client Redis déjà possédé. L’adaptateur possède ses connexions et les libère à `close()`.
+`connection` fixe des délais de connexion et de commande de 10 secondes et trois tentatives de reconnexion ; vos valeurs les remplacent.
 
-Ne fournissez pas `keyPrefix` ; utilisez l’option `prefix` d’Outpost. Réservez cet espace de noms à l’adaptateur, sans consommateurs BullMQ natifs ni nettoyages externes sans rapport.
+## Connecter producteurs et workers
+
+Chaque producteur et chaque worker doit utiliser les mêmes `name`, `prefix`, base Redis et serveur. Une seule différence lui donne, sans erreur, une file séparée et vide.
+
+```ts
+import { createBullMQTaskQueue } from "@elie-laloum/outpost/queues/bullmq";
+
+const queue = await createBullMQTaskQueue({
+  name: "code-reviews",
+  prefix: "outpost",
+  connection: {
+    host: process.env.REDIS_HOST,
+    port: 6379,
+    db: 0,
+    username: process.env.REDIS_USERNAME,
+    password: process.env.REDIS_PASSWORD,
+    tls: {},
+  },
+});
+await queue.close();
+```
+
+Passez des réglages de connexion, pas un client Redis. Utilisez `prefix` plutôt que `connection.keyPrefix`, que l’adaptateur refuse. Réservez ce préfixe à Outpost : aucun autre consommateur BullMQ ni job de nettoyage ne doit toucher à ses clés.
+
+## Ce que l’adaptateur possède
+
+<!-- features -->
+
+- **Connexions** : Une pour ouvrir la file, puis une file et un worker BullMQ par handler, ouverts au premier usage.
+- **Recherche de baux expirés** : Un minuteur qui remet dans la file les jobs dont le bail a expiré.
+- **Fermeture** : `close()` refuse les nouveaux appels, attend ceux en cours, puis ferme chaque connexion.
+
+Les jobs, baux et résultats restent dans Redis après `close()`, pour le processus suivant. Arrêtez le worker avant de fermer : annulez son signal et attendez `runQueueWorker()`, comme dans `worker.mts`.
 
 ## Finalisation interrompue
 
-Les résultats Outpost conservés restent autoritatifs si la finalisation native BullMQ est interrompue. La récupération des jobs bloqués et l’expiration des baux ont des temporalités différentes. La file bloque les écritures périmées mais ne garantit pas des effets externes exactement une fois.
+La file enregistre chaque résultat dans son propre état Redis, puis marque le job BullMQ comme terminé. Ce résultat enregistré fait foi :
 
-Observez les erreurs de connexion et de finalisation avec `onError`. Les opérations directes rejettent toujours en cas d’échec ; un observateur ne remplace pas la gestion de ces rejets.
+<!-- features -->
 
-API : [createBullMQTaskQueue](../../reference/createbullmqtaskqueue/).
+- **La finalisation échoue** : `complete()` réussit quand même, `get()` renvoie le résultat et le job ne s’exécute plus jamais. L’erreur part vers `onError`.
+- **`enqueue()` échoue en cours de route** : Renvoyez la même requête avec le même `id` ; la file l’accepte et la publie.
+- **Un worker plante** : Son bail expire et un autre worker reprend le job avec la même `idempotencyKey`.
 
 ## Faire tourner les identifiants Redis
 
-Les paramètres de connexion sont fixés lorsque `createBullMQTaskQueue()` ouvre ses clients. Introduisez un identifiant ACL Redis de remplacement avec les mêmes permissions requises, déployez les workers/producteurs qui l’utilisent, puis arrêtez les anciens processus et fermez leurs files avant de révoquer l’ancien identifiant. Ne modifiez pas l’objet de connexion d’un adapter actif pour le faire tourner. Les opérateurs Redis gèrent les ACL et la fermeture des connexions authentifiées restantes.
+Les réglages de connexion sont lus une seule fois, à l’ouverture de la file. Faites-les tourner en remplaçant les processus :
 
-Conservez le même espace de noms lors du remplacement. Une connexion révoquée trop tôt peut perdre son bail ; le successeur reçoit la même `idempotencyKey`, le service d’effets doit donc conserver les reçus de déduplication. Consultez [l’exploitation des workers](../job-queues/#exploiter-les-workers) pour l’arrêt et la reprise après crash. Les tests de crash avec Redis standalone ne prouvent pas la bascule d’un primaire managé.
+<!-- flow -->
+
+1. **Préparer** : Avant tout redémarrage.
+   - **Ajouter un second utilisateur ACL** : Avec les mêmes permissions que l’actuel.
+     - Redis
+2. **Déployer** : Anciens et nouveaux processus partagent la file.
+   - **Démarrer les nouveaux processus** : Workers et producteurs avec le nouvel identifiant, les mêmes `name` et `prefix`.
+     - `createBullMQTaskQueue()`
+3. **Retirer** : Une fois les nouveaux processus démarrés.
+   - **Arrêter les anciens workers** : Annuler leur signal, attendre `runQueueWorker()`, puis `close()`.
+     - `runQueueWorker()`
+   - **Révoquer** : Supprimer l’ancien utilisateur ACL et déconnecter ses clients restants.
+     - Redis
+
+Un identifiant révoqué pendant qu’un worker tourne encore lui fait perdre son bail. Un autre worker exécute alors le job de nouveau avec la même `idempotencyKey` : votre service d’effets doit dédupliquer ([Files de jobs et workers](../job-queues/)).
+
+## Limites
+
+- **Redis standalone uniquement** : Redis Cluster n’est pas pris en charge. Le comportement lors d’une bascule de primaire, avec Sentinel ou un service managé, n’est pas garanti ; testez-le avant de vous y fier.
+- **Effets au moins une fois** : Les baux empêchent un worker périmé d’écrire un résultat, pas de répéter un effet externe. Dédupliquez avec `idempotencyKey`.
+- **La durabilité est celle de Redis** : Sans persistance, un redémarrage de Redis perd la file.
+
+API : [createBullMQTaskQueue](../../reference/createbullmqtaskqueue/) · [BullMQTaskQueueOptions](../../reference/bullmqtaskqueueoptions/) · [runQueueWorker](../../reference/runqueueworker/).

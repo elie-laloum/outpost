@@ -1,17 +1,73 @@
 ---
 title: "Redis and BullMQ"
-description: "Distribute jobs using BullMQ and standalone Redis."
+description: "Share one job queue between producers and workers on several machines, backed by BullMQ and a standalone Redis server."
 ---
 
-Install `bullmq` and run a standalone Redis server. The adapter loads only through its optional package subpath.
+## Prerequisites
 
-Set `maxmemory-policy` to `noeviction` before opening a queue. Outpost checks Redis INFO and rejects other policies or an unavailable policy value; it never changes server configuration. Evicting expiring keys can discard worker locks. On Redis Cloud, edit the database **Data eviction policy** to **no eviction** in the provider console, save, and verify INFO reports `maxmemory_policy:noeviction`. When memory is full, writes fail instead of evicting queue state; monitor capacity and handle those errors.
+<!-- features -->
+
+- `bullmq`: An optional package, installed next to Outpost.
+- **A standalone Redis server**: Self-hosted or managed, reachable by every producer and worker.
+- **The `noeviction` policy**: Required by the queue, which checks it at open.
 
 ```sh
 npm install bullmq
 ```
 
-```ts
+The queue keeps its jobs in Redis. Enable Redis persistence (AOF or RDB snapshots) if jobs must survive a Redis restart.
+
+## Set the eviction policy
+
+On your own server, set the policy and keep it across restarts:
+
+```sh
+redis-cli CONFIG SET maxmemory-policy noeviction
+redis-cli CONFIG REWRITE
+```
+
+On a managed service, change it in the console: on Redis Cloud, set the database **Data eviction policy** to **No eviction**; on Amazon ElastiCache, attach a custom parameter group with `maxmemory-policy` set to `noeviction`. Then check what Redis reports:
+
+```sh
+redis-cli INFO memory | grep maxmemory_policy
+# maxmemory_policy:noeviction
+```
+
+`createBullMQTaskQueue()` reads the same `INFO` line and rejects any other policy, or a server that hides it. It never changes the server configuration.
+
+:::caution
+Other policies can evict the expiring keys that hold worker leases. With `noeviction`, Redis rejects writes when its memory is full: monitor memory and handle failed `enqueue()` calls.
+:::
+
+## Configure the queue
+
+Import the adapter from its own subpath. The queue implements the same contract as the SQLite queue, so a worker runs on it unchanged ([Job queues and workers](../job-queues/)).
+
+```ts title="worker.mts"
+import { runQueueWorker } from "@elie-laloum/outpost";
+import { createBullMQTaskQueue } from "@elie-laloum/outpost/queues/bullmq";
+
+const queue = await createBullMQTaskQueue({
+  name: "code-reviews",
+  connection: { host: "127.0.0.1", port: 6379 },
+});
+const stop = new AbortController();
+process.once("SIGINT", () => stop.abort());
+try {
+  await runQueueWorker({
+    queue,
+    worker: `reviewer-${process.pid}`,
+    signal: stop.signal,
+    handlers: { review: (input) => ({ value: input }) },
+  });
+} finally {
+  await queue.close();
+}
+```
+
+A producer opens the same queue and enqueues a job for the `review` handler:
+
+```ts title="submit.mts"
 import { createBullMQTaskQueue } from "@elie-laloum/outpost/queues/bullmq";
 
 const queue = await createBullMQTaskQueue({
@@ -29,22 +85,84 @@ try {
 }
 ```
 
-## Connect workers
+| Option              | Effect                                                                                      |
+| ------------------- | ------------------------------------------------------------------------------------------- |
+| `name`              | Queue name shared by producers and workers. Different names never share jobs.               |
+| `connection`        | BullMQ connection settings: `host`, `port`, `db`, `username`, `password`, `tls`…            |
+| `prefix`            | Redis key prefix. Default: `outpost`.                                                       |
+| `stalledIntervalMs` | Interval between checks for expired leases. Default: 1,000. Reclaiming can take two checks. |
+| `onError`           | Receives connection errors and background failures that no call reports.                    |
 
-Use the same `name`, `prefix`, Redis database and connection destination for producers and `runQueueWorker()` consumers. `connection` takes settings, not an already-owned Redis client. The adapter owns its connections and releases them on `close()`.
+`connection` sets 10-second connect and command timeouts and three reconnection attempts; your values override them.
 
-Do not supply `keyPrefix`; use Outpost’s `prefix` option. Keep the namespace dedicated to this adapter and do not attach unrelated native BullMQ consumers or cleanup jobs.
+## Connect producers and workers
+
+Every producer and worker must use the same `name`, `prefix`, Redis database and server. A difference in any of them silently gives it a separate, empty queue.
+
+```ts
+import { createBullMQTaskQueue } from "@elie-laloum/outpost/queues/bullmq";
+
+const queue = await createBullMQTaskQueue({
+  name: "code-reviews",
+  prefix: "outpost",
+  connection: {
+    host: process.env.REDIS_HOST,
+    port: 6379,
+    db: 0,
+    username: process.env.REDIS_USERNAME,
+    password: process.env.REDIS_PASSWORD,
+    tls: {},
+  },
+});
+await queue.close();
+```
+
+Pass connection settings, not a Redis client. Use `prefix` rather than `connection.keyPrefix`, which the adapter rejects. Keep the prefix for Outpost alone: no other BullMQ consumer or cleanup job should touch its keys.
+
+## What the adapter owns
+
+<!-- features -->
+
+- **Connections**: One to open the queue, then a BullMQ queue and worker for each handler, opened on first use.
+- **Lease checks**: A timer that returns jobs with expired leases to the queue.
+- **Closing**: `close()` rejects new calls, waits for calls in progress, then closes every connection.
+
+Jobs, leases and results stay in Redis after `close()`, for the next process. Stop the worker before closing: abort its signal and await `runQueueWorker()`, as in `worker.mts`.
 
 ## Interrupted completion
 
-Retained Outpost results remain authoritative if native BullMQ finalization is interrupted. Stalled-job recovery and lease expiry have different timing. The queue fences stale writes but cannot guarantee exactly-once external side effects.
+The queue records each result in its own Redis state first, then marks the BullMQ job done. That recorded result is authoritative:
 
-Observe connection and finalization errors with `onError`. Foreground operations still reject on failure; an observer does not replace handling those rejections.
+<!-- features -->
 
-API: [createBullMQTaskQueue](../../reference/createbullmqtaskqueue/).
+- **Finalization fails**: `complete()` still succeeds, `get()` returns the result, and the job never runs again. The error goes to `onError`.
+- **Enqueue fails midway**: Send the same request with the same `id` again; the queue accepts it and publishes it.
+- **A worker crashes**: Its lease expires and another worker claims the job with the same `idempotencyKey`.
 
 ## Rotate Redis credentials
 
-Connection settings are fixed when `createBullMQTaskQueue()` opens its owned clients. Introduce a replacement Redis ACL credential with the same required permissions, deploy workers/producers using it, then stop old processes and close their queues before revoking the old credential. Do not mutate an active adapter's connection object to rotate it. Redis operators own ACL changes and termination of any remaining authenticated connections.
+Connection settings are read once, when the queue opens. Rotate them by replacing processes:
 
-Keep the same queue namespace during replacement. A prematurely revoked connection can lose its lease; the successor receives the same `idempotencyKey`, so the effect service must retain deduplication receipts. See [worker operations](../job-queues/#operate-workers) for shutdown and crash recovery. Standalone Redis process-crash tests do not establish managed-primary failover behavior.
+<!-- flow -->
+
+1. **Prepare**: Before any restart.
+   - **Add a second ACL user**: With the same permissions as the current one.
+     - Redis
+2. **Deploy**: Old and new processes share the queue.
+   - **Start new processes**: Workers and producers with the new credential, the same `name` and `prefix`.
+     - `createBullMQTaskQueue()`
+3. **Retire**: Once the new processes run.
+   - **Stop old workers**: Abort their signal, await `runQueueWorker()`, then `close()`.
+     - `runQueueWorker()`
+   - **Revoke**: Delete the old ACL user and disconnect its remaining clients.
+     - Redis
+
+A credential revoked while a worker still runs makes it lose its lease. Another worker then runs the job again with the same `idempotencyKey`: your effect service must deduplicate ([Job queues and workers](../job-queues/)).
+
+## Limits
+
+- **Standalone Redis only**: Redis Cluster is not supported. Behavior across a Sentinel or managed primary failover is not guaranteed; test it before relying on it.
+- **At-least-once effects**: Leases stop stale workers from writing results, not from repeating external side effects. Deduplicate with `idempotencyKey`.
+- **Durability is Redis durability**: Without persistence, a Redis restart loses the queue.
+
+API: [createBullMQTaskQueue](../../reference/createbullmqtaskqueue/) · [BullMQTaskQueueOptions](../../reference/bullmqtaskqueueoptions/) · [runQueueWorker](../../reference/runqueueworker/).
