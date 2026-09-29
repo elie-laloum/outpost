@@ -27,7 +27,7 @@ function completedItem(event: ProtocolRecord): AgentEvent[] {
     mcp_tool_call: (item) =>
       toolResult(
         item.id,
-        item.tool,
+        mcpToolName(item),
         item.result ?? item.error,
         item.error !== undefined && item.error !== null,
       ),
@@ -56,7 +56,7 @@ function startedItem(event: ProtocolRecord): AgentEvent[] {
     mcp_tool_call: (item) => [
       {
         kind: "tool",
-        name: String(item.tool),
+        name: mcpToolName(item),
         input: item.arguments,
         ...(typeof item.id === "string" ? { callId: item.id } : {}),
       },
@@ -110,4 +110,11 @@ export function codexEvents(line: string): AgentEvent[] {
     error: failure,
     "turn.failed": failure,
   });
+}
+
+function mcpToolName(item: ProtocolRecord): string {
+  const tool = String(item.tool);
+  return typeof item.server === "string" && item.server
+    ? `mcp__${item.server}__${tool}`
+    : tool;
 }

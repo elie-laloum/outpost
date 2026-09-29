@@ -5,6 +5,7 @@ import type { Command } from "../domain/command.types.ts";
 import { invariant } from "../domain/errors.ts";
 import { resolveVariables } from "../infrastructure/settings.ts";
 import { authenticateAgent } from "./agent-authentication.ts";
+import { configureAgent } from "./agent-configuration.ts";
 import { prepareAdapter } from "./agent-bootstrap.ts";
 import { storageFor } from "./agent-storage.ts";
 import type {
@@ -45,23 +46,29 @@ export function sandboxAgents(context: ProvisionedSandbox): SandboxAgents {
     if (
       adapter.kind === "cli" &&
       authenticated.get(adapter.name)?.adapter !== adapter
-    )
-      authenticated.set(adapter.name, {
-        adapter,
-        variables: await observedOperation(
+    ) {
+      const credentials = await observedOperation(
+        observation,
+        "sandbox",
+        "agent.authenticate",
+        async () =>
+          authenticateAgent(
+            adapter,
+            variables,
+            runtime,
+            sandboxProvider.placement,
+            signal,
+          ),
+      );
+      if (adapter.configuration)
+        await observedOperation(
           observation,
           "sandbox",
-          "agent.authenticate",
-          async () =>
-            authenticateAgent(
-              adapter,
-              variables,
-              runtime,
-              sandboxProvider.placement,
-              signal,
-            ),
-        ),
-      });
+          "agent.configure",
+          async () => configureAgent(adapter, variables, runtime, signal),
+        );
+      authenticated.set(adapter.name, { adapter, variables: credentials });
+    }
     const credentials =
       adapter.kind === "cli" ? authenticated.get(adapter.name)?.variables : {};
     return {

@@ -1,3 +1,5 @@
+import { mcpConfigurationPlanner } from "./mcp-configuration.ts";
+import { kimiMcpFile } from "./kimi-mcp.ts";
 import { textMatcher } from "./text-matcher.ts";
 import {
   conversationSettings,
@@ -22,7 +24,11 @@ import { kimiEvents } from "./kimi-events.ts";
 import { kimiRequest } from "./kimi-request.ts";
 import type { KimiSettings } from "./kimi.types.ts";
 import { kimiModelSupport } from "./model-support.constants.ts";
-import { harnessSettings, supportModel } from "./model-support.ts";
+import {
+  configuredSettings,
+  harnessSettings,
+  supportModel,
+} from "./model-support.ts";
 import type { Bound } from "./settings.types.ts";
 
 function bindKimi(settings: Bound<KimiSettings>): AgentAdapter {
@@ -33,9 +39,15 @@ function bindKimi(settings: Bound<KimiSettings>): AgentAdapter {
     settings.authentication,
     settings.model,
   );
+  const configuration = mcpConfigurationPlanner(
+    "Kimi Code",
+    settings.mcpServers,
+    kimiMcpFile,
+  );
   return Object.freeze({
     name: "kimi",
     ...(credentials ? { credentials } : {}),
+    ...(configuration ? { configuration } : {}),
     bootstrap: "kimi",
     resumable: true,
     forkable: true,
@@ -70,10 +82,7 @@ export function kimiHarness(settings: KimiSettings = {}): CliHarness {
       !authenticationForm(settings.authentication).form.startsWith("usage"),
     "Kimi region selects account authentication; configure the API endpoint through variables for usage authentication",
   );
-  const configured = Object.freeze({
-    ...settings,
-    variables: Object.freeze({ ...settings.variables }),
-  });
+  const configured = configuredSettings(settings);
   return Object.freeze({
     kind: "cli",
     bind: (model?: AgentModel) =>

@@ -1,7 +1,11 @@
 import { invariant } from "../../domain/errors.ts";
+import { mcpServers } from "../../domain/mcp-server.ts";
 import type { AgentModel } from "../../domain/model.types.ts";
 import { HARNESS_MODEL_KEYS } from "./model-support.constants.ts";
-import type { CliModelSupport } from "./settings.types.ts";
+import type {
+  CliModelSupport,
+  ConfigurableSettings,
+} from "./settings.types.ts";
 
 export function supportModel(
   support: CliModelSupport,
@@ -26,4 +30,17 @@ export function harnessSettings(settings: object): void {
     HARNESS_MODEL_KEYS.every((key) => !(key in settings)),
     "Set the model, reasoning and maxOutputTokens on agent(), not on its harness",
   );
+}
+
+export function configuredSettings<Settings extends ConfigurableSettings>(
+  settings: Settings,
+): Settings {
+  harnessSettings(settings);
+  return Object.freeze({
+    ...settings,
+    variables: Object.freeze({ ...settings.variables }),
+    ...(settings.mcpServers === undefined
+      ? {}
+      : { mcpServers: mcpServers(settings.mcpServers) }),
+  });
 }

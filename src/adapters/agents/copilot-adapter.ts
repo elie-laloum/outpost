@@ -1,3 +1,4 @@
+import { mcpConfigurationPlanner } from "./mcp-configuration.ts";
 import { textMatcher } from "./text-matcher.ts";
 import {
   conversationSettings,
@@ -18,7 +19,11 @@ import { copilotEvents } from "./copilot-events.ts";
 import { copilotRequest } from "./copilot-request.ts";
 import type { CopilotSettings } from "./copilot.types.ts";
 import { copilotModelSupport } from "./model-support.constants.ts";
-import { harnessSettings, supportModel } from "./model-support.ts";
+import {
+  configuredSettings,
+  harnessSettings,
+  supportModel,
+} from "./model-support.ts";
 import type { Bound } from "./settings.types.ts";
 
 function bindCopilot(settings: Bound<CopilotSettings>): AgentAdapter {
@@ -29,9 +34,14 @@ function bindCopilot(settings: Bound<CopilotSettings>): AgentAdapter {
     settings.authentication,
     settings.model,
   );
+  const configuration = mcpConfigurationPlanner(
+    "GitHub Copilot CLI",
+    settings.mcpServers,
+  );
   return Object.freeze({
     name: "copilot",
     ...(credentials ? { credentials } : {}),
+    ...(configuration ? { configuration } : {}),
     bootstrap: "copilot",
     resumable: true,
     forkable: false,
@@ -59,10 +69,7 @@ function bindCopilot(settings: Bound<CopilotSettings>): AgentAdapter {
 export function copilotHarness(settings: CopilotSettings = {}): CliHarness {
   harnessSettings(settings);
   conversationSettings("GitHub Copilot CLI", "copilot", settings);
-  const configured = Object.freeze({
-    ...settings,
-    variables: Object.freeze({ ...settings.variables }),
-  });
+  const configured = configuredSettings(settings);
   return Object.freeze({
     kind: "cli",
     bind: (model?: AgentModel) =>

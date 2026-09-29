@@ -260,6 +260,8 @@ export type {
 
 export type {
   AgentAdapter,
+  AgentConfiguration,
+  ConfigurationFile,
   AgentEvent,
   AgentInput,
   AgentLiveInput,

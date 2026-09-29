@@ -1,3 +1,5 @@
+import { mcpConfigurationPlanner } from "./mcp-configuration.ts";
+import { antigravityMcpFile } from "./antigravity-mcp.ts";
 import { textMatcher } from "./text-matcher.ts";
 import { antigravityQuotaPatterns } from "./quota.constants.ts";
 import {
@@ -14,7 +16,11 @@ import { antigravityRequest } from "./antigravity-request.ts";
 import type { AntigravitySettings } from "./antigravity.types.ts";
 import { credentialPlanner } from "./authentication.ts";
 import { antigravityModelSupport } from "./model-support.constants.ts";
-import { harnessSettings, supportModel } from "./model-support.ts";
+import {
+  configuredSettings,
+  harnessSettings,
+  supportModel,
+} from "./model-support.ts";
 import type { Bound } from "./settings.types.ts";
 
 function bindAntigravity(settings: Bound<AntigravitySettings>): AgentAdapter {
@@ -25,9 +31,15 @@ function bindAntigravity(settings: Bound<AntigravitySettings>): AgentAdapter {
     settings.authentication,
     settings.model,
   );
+  const configuration = mcpConfigurationPlanner(
+    "Antigravity",
+    settings.mcpServers,
+    antigravityMcpFile,
+  );
   return Object.freeze({
     name: "antigravity",
     ...(credentials ? { credentials } : {}),
+    ...(configuration ? { configuration } : {}),
     bootstrap: "antigravity",
     resumable: true,
     forkable: false,
@@ -55,10 +67,7 @@ export function antigravityHarness(
     !("conversations" in settings) || settings.conversations === undefined,
     "Antigravity has no portable conversation capture; conversations cannot be stored",
   );
-  const configured = Object.freeze({
-    ...settings,
-    variables: Object.freeze({ ...settings.variables }),
-  });
+  const configured = configuredSettings(settings);
   return Object.freeze({
     kind: "cli",
     bind: (model?: AgentModel) =>

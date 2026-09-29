@@ -1,3 +1,4 @@
+import { mcpConfigurationPlanner } from "./mcp-configuration.ts";
 import { textMatcher } from "./text-matcher.ts";
 import {
   conversationSettings,
@@ -21,7 +22,11 @@ import { codexProvider } from "./codex-provider.ts";
 import { codexEvents } from "./codex-events.ts";
 import { codexRequest } from "./codex-request.ts";
 import { codexModelSupport } from "./model-support.constants.ts";
-import { harnessSettings, supportModel } from "./model-support.ts";
+import {
+  configuredSettings,
+  harnessSettings,
+  supportModel,
+} from "./model-support.ts";
 import type { Bound, CodexSettings } from "./settings.types.ts";
 
 function bindCodex(settings: Bound<CodexSettings>): AgentAdapter {
@@ -33,9 +38,11 @@ function bindCodex(settings: Bound<CodexSettings>): AgentAdapter {
     settings.authentication,
     settings.model,
   );
+  const configuration = mcpConfigurationPlanner("Codex", settings.mcpServers);
   return Object.freeze({
     name: "codex",
     ...(credentials ? { credentials } : {}),
+    ...(configuration ? { configuration } : {}),
     conversations: "codex",
     ...conversationStorage(settings),
     resumable: true,
@@ -54,10 +61,7 @@ function bindCodex(settings: Bound<CodexSettings>): AgentAdapter {
 export function codexHarness(settings: CodexSettings = {}): CliHarness {
   harnessSettings(settings);
   conversationSettings("Codex", "codex", settings);
-  const configured = Object.freeze({
-    ...settings,
-    variables: Object.freeze({ ...settings.variables }),
-  });
+  const configured = configuredSettings(settings);
   return Object.freeze({
     kind: "cli",
     bind: (model?: AgentModel) =>

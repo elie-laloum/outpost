@@ -1,6 +1,7 @@
 import type { AgentAuthentication } from "../../domain/agent.types.ts";
 import type { Variables } from "../../domain/command.types.ts";
 import type { ConversationStore } from "../../domain/conversation.types.ts";
+import type { McpServers } from "../../domain/mcp-server.types.ts";
 import type { AgentModel, ModelReasoning } from "../../domain/model.types.ts";
 
 export interface CommonAgentSettings {
@@ -8,6 +9,7 @@ export interface CommonAgentSettings {
   readonly variables?: Variables;
   readonly saveConversations?: boolean;
   readonly conversations?: ConversationStore;
+  readonly mcpServers?: McpServers;
 }
 
 export interface ConversationSettings {
@@ -34,6 +36,11 @@ export interface CodexModelProvider {
 export interface CodexSettings extends CommonAgentSettings {
   readonly modelProvider?: CodexModelProvider;
   readonly approvalReviewer?: "user" | "auto_review";
+}
+
+export interface ConfigurableSettings {
+  readonly variables?: Variables;
+  readonly mcpServers?: McpServers;
 }
 
 export type Bound<Settings> = Settings & { readonly model?: AgentModel };

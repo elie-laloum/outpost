@@ -2,6 +2,7 @@ import { validId } from "../../infrastructure/conversations/identity.ts";
 import type { AgentInput } from "../../domain/agent.types.ts";
 import type { Command } from "../../domain/command.types.ts";
 import { invariant } from "../../domain/errors.ts";
+import { copilotMcpArguments } from "./copilot-mcp.ts";
 import type { CopilotSettings } from "./copilot.types.ts";
 import type { Bound } from "./settings.types.ts";
 
@@ -13,7 +14,7 @@ export function copilotRequest(
     !input.continuation?.fork,
     "GitHub Copilot CLI does not support automated fork in Outpost",
   );
-  const args: string[] = [];
+  const args: string[] = [...copilotMcpArguments(settings.mcpServers)];
   if (input.continuation) {
     validId(input.continuation.id);
     args.push("--resume", input.continuation.id);

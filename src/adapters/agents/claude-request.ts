@@ -1,6 +1,7 @@
 import type { AgentInput } from "../../domain/agent.types.ts";
 import type { Command } from "../../domain/command.types.ts";
 import { claudeUserMessage } from "./claude-input.ts";
+import { claudeMcpArguments } from "./claude-mcp.ts";
 import { validateContinuation } from "./continuation.ts";
 import type { Bound, ClaudeSettings } from "./settings.types.ts";
 
@@ -9,7 +10,7 @@ export function claudeRequest(
   input: AgentInput,
 ): Command {
   validateContinuation(input);
-  const args: string[] = [];
+  const args: string[] = [...claudeMcpArguments(settings.mcpServers)];
   if (!input.interactive)
     args.push("--print", "--verbose", "--output-format", "stream-json");
   if (!input.interactive && input.liveInput)

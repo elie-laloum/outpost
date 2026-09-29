@@ -1,6 +1,7 @@
 import type { AgentInput } from "../../domain/agent.types.ts";
 import type { Command } from "../../domain/command.types.ts";
 import { codexAppInitialize } from "./codex-app-session.ts";
+import { codexMcpArguments } from "./codex-mcp.ts";
 import { codexProvider } from "./codex-provider.ts";
 import { validateContinuation } from "./continuation.ts";
 import type { Bound, CodexSettings } from "./settings.types.ts";
@@ -10,13 +11,14 @@ export function codexRequest(
   input: AgentInput,
 ): Command {
   validateContinuation(input);
+  const mcp = codexMcpArguments(settings.mcpServers);
   if (input.liveInput && !input.interactive)
     return {
       executable: "codex",
-      arguments: [...codexProvider(settings), "app-server"],
+      arguments: [...codexProvider(settings), ...mcp, "app-server"],
       stdin: codexAppInitialize(),
     };
-  const args: string[] = [...codexProvider(settings)];
+  const args: string[] = [...codexProvider(settings), ...mcp];
   if (settings.approvalReviewer === "auto_review")
     args.push(
       "-a",

@@ -1,3 +1,4 @@
+import { mcpConfigurationPlanner } from "./mcp-configuration.ts";
 import { textMatcher } from "./text-matcher.ts";
 import {
   conversationSettings,
@@ -20,7 +21,11 @@ import {
   CLAUDE_MAX_OUTPUT_VARIABLE,
   claudeModelSupport,
 } from "./model-support.constants.ts";
-import { harnessSettings, supportModel } from "./model-support.ts";
+import {
+  configuredSettings,
+  harnessSettings,
+  supportModel,
+} from "./model-support.ts";
 import type { Bound, ClaudeSettings } from "./settings.types.ts";
 
 function bindClaude(settings: Bound<ClaudeSettings>): AgentAdapter {
@@ -37,9 +42,14 @@ function bindClaude(settings: Bound<ClaudeSettings>): AgentAdapter {
     settings.authentication,
     settings.model,
   );
+  const configuration = mcpConfigurationPlanner(
+    "Claude Code",
+    settings.mcpServers,
+  );
   return Object.freeze({
     name: "claude",
     ...(credentials ? { credentials } : {}),
+    ...(configuration ? { configuration } : {}),
     conversations: "claude",
     ...conversationStorage(settings),
     resumable: true,
@@ -65,10 +75,7 @@ function bindClaude(settings: Bound<ClaudeSettings>): AgentAdapter {
 export function claudeHarness(settings: ClaudeSettings = {}): CliHarness {
   harnessSettings(settings);
   conversationSettings("Claude Code", "claude", settings);
-  const configured = Object.freeze({
-    ...settings,
-    variables: Object.freeze({ ...settings.variables }),
-  });
+  const configured = configuredSettings(settings);
   return Object.freeze({
     kind: "cli",
     bind: (model?: AgentModel) =>

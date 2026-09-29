@@ -200,6 +200,8 @@ export interface AgentAdapter extends AgentFeatures {
     invoke: (command: Command) => Promise<CommandResult>,
   ): Promise<string>;
   credentials?(variables: Variables): CredentialPlan;
+  /** Plans CLI configuration merged into the agent home; throws when a referenced variable is missing. */
+  configuration?(variables: Variables): AgentConfiguration;
   request(input: AgentInput): Command;
   events(line: string): readonly AgentEvent[];
   /** Recognizes a usage-limit or rate-limit message in failure or stderr text. */
@@ -297,6 +299,16 @@ export interface HostCredential {
 export interface GeneratedCredential {
   readonly path: string;
   readonly content: string;
+}
+
+export interface ConfigurationFile {
+  readonly path: string;
+  readonly section: string;
+  readonly entries: Readonly<Record<string, unknown>>;
+}
+
+export interface AgentConfiguration {
+  readonly files: readonly ConfigurationFile[];
 }
 
 export interface CredentialPlan {
