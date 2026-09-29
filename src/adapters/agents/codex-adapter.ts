@@ -1,4 +1,8 @@
-import { mcpConfigurationPlanner } from "./mcp-configuration.ts";
+import {
+  mcpConfigurationPlanner,
+  supportMcpServers,
+} from "./mcp-configuration.ts";
+import { mcpSupport } from "./mcp-support.constants.ts";
 import { textMatcher } from "./text-matcher.ts";
 import {
   conversationSettings,
@@ -31,6 +35,7 @@ import type { Bound, CodexSettings } from "./settings.types.ts";
 
 function bindCodex(settings: Bound<CodexSettings>): AgentAdapter {
   supportModel(codexModelSupport, settings.model);
+  supportMcpServers(mcpSupport.codex, settings.mcpServers);
   codexProvider(settings);
   const credentials = credentialPlanner(
     "Codex",

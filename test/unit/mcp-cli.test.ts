@@ -255,3 +255,72 @@ test("Codex reports MCP tool calls with server-qualified names", () => {
     "mcp__linear__search",
   );
 });
+
+test("tool filters use each CLI's native form and unsupported allowlists are refused", () => {
+  const filtered: McpServers = {
+    linear: {
+      command: "npx",
+      tools: { include: ["search", "read"], exclude: ["read"] },
+    },
+    docs: { url: "https://mcp.example.com/mcp", tools: { exclude: ["drop"] } },
+  };
+  const excludeOnly: McpServers = {
+    linear: { command: "npx", tools: { exclude: ["delete"] } },
+  };
+  const codex = createAgent({
+    harness: createCodexHarness({ mcpServers: filtered }),
+  })
+    .request({ text: "go" })
+    .arguments!.filter((_entry, index, all) => all[index - 1] === "-c");
+  assert.ok(
+    codex.includes('mcp_servers.linear.enabled_tools=["search","read"]'),
+  );
+  assert.ok(codex.includes('mcp_servers.linear.disabled_tools=["read"]'));
+  assert.ok(codex.includes('mcp_servers.docs.disabled_tools=["drop"]'));
+  const copilot = createAgent({
+    harness: createCopilotHarness({ mcpServers: filtered }),
+  }).request({ text: "go" }).arguments!;
+  const copilotConfig = JSON.parse(
+    copilot[copilot.indexOf("--additional-mcp-config") + 1]!,
+  );
+  assert.deepEqual(copilotConfig.mcpServers.linear.tools, ["search", "read"]);
+  assert.deepEqual(copilotConfig.mcpServers.docs.tools, ["*"]);
+  assert.deepEqual(
+    copilot.filter((entry) => entry.startsWith("--deny-tool=")),
+    ["--deny-tool=linear(read)", "--deny-tool=docs(drop)"],
+  );
+  const kimi = createAgent({
+    harness: createKimiHarness({ mcpServers: filtered }),
+  }).configuration!({}).files[0]!.entries as Record<
+    string,
+    Record<string, unknown>
+  >;
+  assert.deepEqual(kimi.linear?.enabledTools, ["search", "read"]);
+  assert.deepEqual(kimi.linear?.disabledTools, ["read"]);
+  assert.deepEqual(kimi.docs?.disabledTools, ["drop"]);
+  const claude = createAgent({
+    harness: createClaudeHarness({ mcpServers: excludeOnly }),
+  }).request({ text: "go" }).arguments!;
+  assert.ok(claude.includes("--disallowedTools=mcp__linear__delete"));
+  const antigravity = createAgent({
+    harness: createAntigravityHarness({ mcpServers: excludeOnly }),
+  }).configuration!({}).files[0]!.entries as Record<
+    string,
+    Record<string, unknown>
+  >;
+  assert.deepEqual(antigravity.linear?.disabledTools, ["delete"]);
+  assert.equal(antigravity.linear?.enabledTools, undefined);
+  for (const harness of [createClaudeHarness, createAntigravityHarness])
+    assert.throws(
+      () => createAgent({ harness: harness({ mcpServers: filtered }) }),
+      {
+        code: "configuration",
+        message: /cannot restrict MCP server linear to listed tools/,
+      },
+    );
+  assert.ok(
+    !createAgent({ harness: createClaudeHarness({ mcpServers: servers }) })
+      .request({ text: "go" })
+      .arguments!.some((entry) => entry.startsWith("--disallowedTools")),
+  );
+});

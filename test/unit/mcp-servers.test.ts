@@ -4,6 +4,7 @@ import {
   isMcpStdioServer,
   mcpServers,
   mcpServerVariables,
+  mcpToolFilter,
 } from "../../src/domain/mcp-server.ts";
 
 test("MCP server declarations normalize stdio and HTTP servers", () => {
@@ -90,4 +91,41 @@ test("MCP server declarations reject ambiguous, unsafe and secret-bearing values
     { docs: { url: "https://example.com", variables: ["TOKEN"] } },
   ])
     assert.throws(() => mcpServers(value), { code: "configuration" });
+});
+
+test("MCP tool filters list distinct names and select tools by include then exclude", () => {
+  const servers = mcpServers({
+    linear: {
+      command: "npx",
+      tools: { include: ["search", "read.doc"], exclude: ["read.doc"] },
+    },
+    docs: { url: "https://mcp.example.com/mcp", tools: { exclude: ["drop"] } },
+  });
+  assert.deepEqual(servers.linear?.tools, {
+    include: ["search", "read.doc"],
+    exclude: ["read.doc"],
+  });
+  assert.ok(Object.isFrozen(servers.linear?.tools?.include));
+  const linear = mcpToolFilter(servers.linear?.tools);
+  assert.deepEqual(["search", "read.doc", "other"].filter(linear), ["search"]);
+  assert.deepEqual(
+    ["drop", "keep"].filter(mcpToolFilter(servers.docs?.tools)),
+    ["keep"],
+  );
+  assert.deepEqual(["any"].filter(mcpToolFilter(undefined)), ["any"]);
+  for (const tools of [
+    null,
+    [],
+    {},
+    { only: ["a"] },
+    { include: [] },
+    { exclude: "a" },
+    { include: ["a", "a"] },
+    { include: ["bad name"] },
+    { exclude: ["x".repeat(129)] },
+    { include: [1] },
+  ])
+    assert.throws(() => mcpServers({ linear: { command: "x", tools } }), {
+      code: "configuration",
+    });
 });

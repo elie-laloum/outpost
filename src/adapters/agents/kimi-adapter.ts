@@ -1,4 +1,8 @@
-import { mcpConfigurationPlanner } from "./mcp-configuration.ts";
+import {
+  mcpConfigurationPlanner,
+  supportMcpServers,
+} from "./mcp-configuration.ts";
+import { mcpSupport } from "./mcp-support.constants.ts";
 import { kimiMcpFile } from "./kimi-mcp.ts";
 import { textMatcher } from "./text-matcher.ts";
 import {
@@ -33,6 +37,7 @@ import type { Bound } from "./settings.types.ts";
 
 function bindKimi(settings: Bound<KimiSettings>): AgentAdapter {
   supportModel(kimiModelSupport, settings.model);
+  supportMcpServers(mcpSupport.kimi, settings.mcpServers);
   const credentials = credentialPlanner(
     "Kimi Code",
     kimiCredentials(settings.region),

@@ -2,11 +2,12 @@ import { isMcpStdioServer } from "../../domain/mcp-server.ts";
 import type { McpServers } from "../../domain/mcp-server.types.ts";
 import {
   bearerHeaders,
+  excludedTools,
   mapServers,
   variableReferences,
 } from "./mcp-configuration.ts";
 
-// The inline form keeps the variadic --mcp-config from consuming later arguments.
+// Inline forms keep the variadic --mcp-config and --disallowedTools from consuming later arguments.
 export function claudeMcpArguments(
   servers: McpServers | undefined,
 ): readonly string[] {
@@ -28,5 +29,11 @@ export function claudeMcpArguments(
           headers: bearerHeaders(server.headers, server.bearerTokenVariable),
         },
   );
-  return [`--mcp-config=${JSON.stringify({ mcpServers })}`];
+  const excluded = excludedTools(servers).map(
+    ([server, tool]) => `mcp__${server}__${tool}`,
+  );
+  return [
+    `--mcp-config=${JSON.stringify({ mcpServers })}`,
+    ...(excluded.length ? [`--disallowedTools=${excluded.join(",")}`] : []),
+  ];
 }

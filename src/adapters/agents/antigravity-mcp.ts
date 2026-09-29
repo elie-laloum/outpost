@@ -11,8 +11,8 @@ export function antigravityMcpFile(servers: McpServers): ConfigurationFile {
   return {
     path: ".gemini/config/mcp_config.json",
     section: "mcpServers",
-    entries: mapServers(servers, (server) =>
-      isMcpStdioServer(server)
+    entries: mapServers(servers, (server) => ({
+      ...(isMcpStdioServer(server)
         ? {
             command: server.command,
             args: server.arguments ?? [],
@@ -26,7 +26,8 @@ export function antigravityMcpFile(servers: McpServers): ConfigurationFile {
             serverUrl: server.url,
             headers: bearerHeaders(server.headers, server.bearerTokenVariable),
             disabled: false,
-          },
-    ),
+          }),
+      ...(server.tools?.exclude ? { disabledTools: server.tools.exclude } : {}),
+    })),
   };
 }

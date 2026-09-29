@@ -1,5 +1,7 @@
 import { createHash } from "node:crypto";
 import { OutpostError } from "../../domain/errors.ts";
+import { mcpToolFilter } from "../../domain/mcp-server.ts";
+import type { McpToolFilter } from "../../domain/mcp-server.types.ts";
 import { defineHarnessTool } from "../../domain/tool.ts";
 import type {
   HarnessTool,
@@ -33,6 +35,7 @@ export async function mcpTools(
   server: string,
   connection: McpConnection,
   signal: AbortSignal,
+  filter: McpToolFilter = {},
 ): Promise<readonly HarnessTool[]> {
   const descriptions: McpToolDescription[] = [];
   let cursor: string | undefined;
@@ -51,17 +54,28 @@ export async function mcpTools(
         ? page.nextCursor
         : undefined;
   } while (cursor);
+  const available = new Set(descriptions.map((tool) => tool.name));
+  const missing = (filter.include ?? []).filter((tool) => !available.has(tool));
+  if (missing.length)
+    throw new OutpostError(
+      "configuration",
+      `MCP server ${server} has no tool named ${missing.join(", ")}`,
+      { server, missing },
+    );
+  const selected = mcpToolFilter(filter);
   const names = new Set<string>();
-  return descriptions.map((tool) => {
-    const name = toolName(server, tool.name);
-    if (names.has(name))
-      throw new OutpostError(
-        "configuration",
-        `MCP server ${server} exposes tools that share the name ${name}`,
-      );
-    names.add(name);
-    return harnessTool(server, name, tool, connection);
-  });
+  return descriptions
+    .filter((tool) => selected(tool.name))
+    .map((tool) => {
+      const name = toolName(server, tool.name);
+      if (names.has(name))
+        throw new OutpostError(
+          "configuration",
+          `MCP server ${server} exposes tools that share the name ${name}`,
+        );
+      names.add(name);
+      return harnessTool(server, name, tool, connection);
+    });
 }
 
 export function toolName(server: string, tool: string): string {

@@ -478,3 +478,31 @@ test("HTTP MCP servers are bridged from inside the sandbox with session headers"
     { code: "response", message: /MCP HTTP request failed/ },
   );
 });
+
+test("MCP tool filters limit the tools offered to the model and catch unknown names", async (t) => {
+  const root = await repository(t);
+  const log = join(root, "mcp.log");
+  await run(
+    root,
+    [
+      (request) => {
+        assert.deepEqual(
+          (request.tools ?? []).map((tool) => tool.name),
+          ["mcp__fixture__echo", "mcp__fixture__env"],
+        );
+        return done;
+      },
+    ],
+    {
+      mcpServers: fixture(log, {
+        tools: { include: ["echo", "env", "fail"], exclude: ["fail"] },
+      }),
+    },
+  );
+  await assert.rejects(
+    run(root, [], {
+      mcpServers: fixture(log, { tools: { include: ["echo", "missing"] } }),
+    }),
+    { code: "configuration", message: /has no tool named missing/ },
+  );
+});

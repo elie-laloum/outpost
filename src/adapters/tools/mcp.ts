@@ -37,7 +37,7 @@ export async function openMcpServers(
         );
         opened.push(session);
         await initialize(name, session, signal);
-        return mcpTools(name, session.connection, signal);
+        return mcpTools(name, session.connection, signal, server.tools);
       }),
     );
     return { tools: tools.flat(), close };

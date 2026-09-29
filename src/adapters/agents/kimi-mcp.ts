@@ -8,8 +8,8 @@ export function kimiMcpFile(servers: McpServers): ConfigurationFile {
   return {
     path: ".kimi-code/mcp.json",
     section: "mcpServers",
-    entries: mapServers(servers, (server) =>
-      isMcpStdioServer(server)
+    entries: mapServers(servers, (server) => ({
+      ...(isMcpStdioServer(server)
         ? {
             command: server.command,
             args: server.arguments ?? [],
@@ -21,7 +21,9 @@ export function kimiMcpFile(servers: McpServers): ConfigurationFile {
             ...(server.bearerTokenVariable
               ? { bearerTokenEnvVar: server.bearerTokenVariable }
               : {}),
-          },
-    ),
+          }),
+      ...(server.tools?.include ? { enabledTools: server.tools.include } : {}),
+      ...(server.tools?.exclude ? { disabledTools: server.tools.exclude } : {}),
+    })),
   };
 }

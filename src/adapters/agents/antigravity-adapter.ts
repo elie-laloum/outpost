@@ -1,4 +1,8 @@
-import { mcpConfigurationPlanner } from "./mcp-configuration.ts";
+import {
+  mcpConfigurationPlanner,
+  supportMcpServers,
+} from "./mcp-configuration.ts";
+import { mcpSupport } from "./mcp-support.constants.ts";
 import { antigravityMcpFile } from "./antigravity-mcp.ts";
 import { textMatcher } from "./text-matcher.ts";
 import { antigravityQuotaPatterns } from "./quota.constants.ts";
@@ -25,6 +29,7 @@ import type { Bound } from "./settings.types.ts";
 
 function bindAntigravity(settings: Bound<AntigravitySettings>): AgentAdapter {
   supportModel(antigravityModelSupport, settings.model);
+  supportMcpServers(mcpSupport.antigravity, settings.mcpServers);
   const credentials = credentialPlanner(
     "Antigravity",
     antigravityCredentials,

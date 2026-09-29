@@ -1,4 +1,8 @@
-import { mcpConfigurationPlanner } from "./mcp-configuration.ts";
+import {
+  mcpConfigurationPlanner,
+  supportMcpServers,
+} from "./mcp-configuration.ts";
+import { mcpSupport } from "./mcp-support.constants.ts";
 import { textMatcher } from "./text-matcher.ts";
 import {
   conversationSettings,
@@ -28,6 +32,7 @@ import type { Bound } from "./settings.types.ts";
 
 function bindCopilot(settings: Bound<CopilotSettings>): AgentAdapter {
   supportModel(copilotModelSupport, settings.model);
+  supportMcpServers(mcpSupport.copilot, settings.mcpServers);
   const credentials = credentialPlanner(
     "GitHub Copilot CLI",
     copilotCredentials,

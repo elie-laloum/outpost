@@ -4,6 +4,8 @@ import {
   MCP_HTTP_FIELDS,
   MCP_SERVER_NAME_PATTERN,
   MCP_STDIO_FIELDS,
+  MCP_TOOL_FILTER_FIELDS,
+  MCP_TOOL_NAME_PATTERN,
   MCP_URL_PROTOCOLS,
   MCP_VARIABLE_PATTERN,
 } from "./mcp-server.constants.ts";
@@ -12,6 +14,7 @@ import type {
   McpServer,
   McpServers,
   McpStdioServer,
+  McpToolFilter,
 } from "./mcp-server.types.ts";
 
 export function mcpServers(value: unknown): McpServers {
@@ -93,6 +96,7 @@ function stdioServer(name: string, server: object): McpStdioServer {
       : {}),
     ...(value.environment ? { environment } : {}),
     ...(value.variables ? { variables: Object.freeze(variables) } : {}),
+    ...common(name, value),
   });
 }
 
@@ -134,7 +138,62 @@ function httpServer(name: string, server: object): McpHttpServer {
     ...(value.bearerTokenVariable
       ? { bearerTokenVariable: value.bearerTokenVariable }
       : {}),
+    ...common(name, value),
   });
+}
+
+export function mcpToolFilter(
+  filter: McpToolFilter | undefined,
+): (tool: string) => boolean {
+  const { include, exclude = [] } = filter ?? {};
+  return (tool) =>
+    (include === undefined || include.includes(tool)) &&
+    !exclude.includes(tool);
+}
+
+function common(name: string, value: McpServer): Pick<McpServer, "tools"> {
+  return value.tools === undefined
+    ? {}
+    : { tools: toolFilter(name, value.tools) };
+}
+
+function toolFilter(name: string, value: unknown): McpToolFilter {
+  invariant(
+    value !== null && typeof value === "object" && !Array.isArray(value),
+    `MCP server ${name} tools must be an object with include or exclude`,
+  );
+  fields(name, value, MCP_TOOL_FILTER_FIELDS);
+  const filter = value as McpToolFilter;
+  invariant(
+    filter.include !== undefined || filter.exclude !== undefined,
+    `MCP server ${name} tools requires include or exclude`,
+  );
+  return Object.freeze({
+    ...(filter.include === undefined
+      ? {}
+      : { include: toolNames(name, "include", filter.include) }),
+    ...(filter.exclude === undefined
+      ? {}
+      : { exclude: toolNames(name, "exclude", filter.exclude) }),
+  });
+}
+
+function toolNames(
+  name: string,
+  label: string,
+  value: unknown,
+): readonly string[] {
+  invariant(
+    Array.isArray(value) &&
+      value.length > 0 &&
+      value.every(
+        (entry) =>
+          typeof entry === "string" && MCP_TOOL_NAME_PATTERN.test(entry),
+      ) &&
+      new Set(value).size === value.length,
+    `MCP server ${name} tools.${label} must list distinct tool names of letters, digits, _, . or -`,
+  );
+  return Object.freeze([...(value as string[])]);
 }
 
 function fields(name: string, server: object, allowed: ReadonlySet<string>) {

@@ -1,4 +1,8 @@
-import { mcpConfigurationPlanner } from "./mcp-configuration.ts";
+import {
+  mcpConfigurationPlanner,
+  supportMcpServers,
+} from "./mcp-configuration.ts";
+import { mcpSupport } from "./mcp-support.constants.ts";
 import { textMatcher } from "./text-matcher.ts";
 import {
   conversationSettings,
@@ -30,6 +34,7 @@ import type { Bound, ClaudeSettings } from "./settings.types.ts";
 
 function bindClaude(settings: Bound<ClaudeSettings>): AgentAdapter {
   supportModel(claudeModelSupport, settings.model);
+  supportMcpServers(mcpSupport.claude, settings.mcpServers);
   const maxOutputTokens = settings.model?.maxOutputTokens;
   invariant(
     maxOutputTokens === undefined ||

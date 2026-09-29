@@ -9,13 +9,22 @@ export const MCP_STDIO_FIELDS: ReadonlySet<string> = new Set([
   "arguments",
   "environment",
   "variables",
+  "tools",
 ]);
 
 export const MCP_HTTP_FIELDS: ReadonlySet<string> = new Set([
   "url",
   "headers",
   "bearerTokenVariable",
+  "tools",
 ]);
+
+export const MCP_TOOL_FILTER_FIELDS: ReadonlySet<string> = new Set([
+  "include",
+  "exclude",
+]);
+
+export const MCP_TOOL_NAME_PATTERN = /^[A-Za-z0-9_.-]{1,128}$/;
 
 export const MCP_URL_PROTOCOLS: ReadonlySet<string> = new Set([
   "http:",
