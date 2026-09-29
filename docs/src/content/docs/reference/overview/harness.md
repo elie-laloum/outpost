@@ -6,13 +6,13 @@ sidebar:
   order: 0
 ---
 
-A harness defines how an agent executes a task and accesses its model. CLI presets and the Outpost engine are composed with a model using `agent({ harness, model })`. This family groups their factories, tool and instruction definitions, execution contracts, settings and CLI protocol adapters.
+A harness defines how an agent executes a task and accesses its model. CLI presets and the Outpost engine are composed with a model using `createAgent({ harness, model })`. This family groups their factories, tool and instruction definitions, execution contracts, settings and CLI protocol adapters.
 
 ## How it works
 
-Choose `claudeHarness()`, `codexHarness()`, `antigravityHarness()`, `copilotHarness()` or `kimiHarness()` to delegate execution to the corresponding CLI. Their settings configure execution, explicit authentication and supported conversation behavior. `authentication` takes an [`AgentAuthentication`](../../agentauthentication/): `"account"` reuses the CLI's own login, optionally through an [`AccountCredential`](../../accountcredential/) (`file`, `key` or `variable`), while `"usage"` bills an API key, optionally through a [`UsageCredential`](../../usagecredential/) (`key` or `variable`). Each preset accepts only the forms its CLI supports and rejects the others when the agent is composed. Without `authentication`, Outpost prepares no credential.
+Choose `createClaudeHarness()`, `createCodexHarness()`, `createAntigravityHarness()`, `createCopilotHarness()` or `createKimiHarness()` to delegate execution to the corresponding CLI. Their settings configure execution, explicit authentication and supported conversation behavior. `authentication` takes an [`AgentAuthentication`](../../agentauthentication/): `"account"` reuses the CLI's own login, optionally through an [`AccountCredential`](../../accountcredential/) (`file`, `key` or `variable`), while `"usage"` bills an API key, optionally through a [`UsageCredential`](../../usagecredential/) (`key` or `variable`). Each preset accepts only the forms its CLI supports and rejects the others when the agent is composed. Without `authentication`, Outpost prepares no credential.
 
-Use `harness()` to let Outpost drive the model itself. It combines a [model provider](../model-providers/), tools from `defineHarnessTool()` and `defineHarnessToolset()`, instructions from text or `defineHarnessInstructions()`, hooks, permissions, loop limits and tool execution settings. Select the model on the [agent](../agents/); a custom harness requires an explicit model, while a CLI preset can keep its native default.
+Use `createHarness()` to let Outpost drive the model itself. It combines a [model provider](../model-providers/), tools from `defineHarnessTool()` and `defineHarnessToolset()`, instructions from text or `defineHarnessInstructions()`, hooks, permissions, loop limits and tool execution settings. Select the model on the [agent](../agents/); a custom harness requires an explicit model, while a CLI preset can keep its native default.
 
 Both variants accept `mcpServers`, a [`McpServers`](../../mcpservers/) map of stdio ([`McpStdioServer`](../../mcpstdioserver/)) or HTTP ([`McpHttpServer`](../../mcphttpserver/)) servers. CLI presets translate it into their native configuration, planned by `AgentAdapter.configuration` as [`AgentConfiguration`](../../agentconfiguration/) files when a CLI reads it from its home; the Outpost engine starts the servers inside the sandbox for each turn and exposes their tools as `mcp__<server>__<tool>`.
 
@@ -28,13 +28,13 @@ CLI presets are stable since 5.0.0. The built-in engine and its definitions are 
 
 ## Entry points
 
-- [harness](../../function-harness/) composes the Outpost engine.
+- [createHarness](../../createharness/) composes the Outpost engine.
 - [defineHarnessTool](../../defineharnesstool/), [defineHarnessToolset](../../defineharnesstoolset/) and [defineHarnessInstructions](../../defineharnessinstructions/) declare what the engine can use.
-- [harnessFileTools](../../harnessfiletools/), [harnessEditTools](../../harnessedittools/), [harnessSearchTools](../../harnesssearchtools/), [harnessGitTools](../../harnessgittools/) and [harnessShellTools](../../harnessshelltools/) provide repository tools.
+- [createHarnessFileTools](../../createharnessfiletools/), [createHarnessEditTools](../../createharnessedittools/), [createHarnessSearchTools](../../createharnesssearchtools/), [createHarnessGitTools](../../createharnessgittools/) and [createHarnessShellTools](../../createharnessshelltools/) provide repository tools.
 - [defineHarnessContextStrategy](../../defineharnesscontextstrategy/), [truncateToolResults](../../truncatetoolresults/) and [summarizeHistory](../../summarizehistory/) keep long histories within the model context.
 - [defineHarnessSkill](../../defineharnessskill/) packages instructions and tools that the model loads on demand.
 - [defineHarnessHook](../../defineharnesshook/) and [defineHarnessPermissions](../../defineharnesspermissions/) control tool calls and the end of the loop.
-- [claudeHarness](../../claudeharness/), [codexHarness](../../codexharness/), [antigravityHarness](../../antigravityharness/), [copilotHarness](../../copilotharness/) and [kimiHarness](../../kimiharness/) configure the CLI presets with [ClaudeSettings](../../claudesettings/), [CodexSettings](../../codexsettings/), [AntigravitySettings](../../antigravitysettings/), [CopilotSettings](../../copilotsettings/) and [KimiSettings](../../kimisettings/).
+- [createClaudeHarness](../../createclaudeharness/), [createCodexHarness](../../createcodexharness/), [createAntigravityHarness](../../createantigravityharness/), [createCopilotHarness](../../createcopilotharness/) and [createKimiHarness](../../createkimiharness/) configure the CLI presets with [ClaudeSettings](../../claudesettings/), [CodexSettings](../../codexsettings/), [AntigravitySettings](../../antigravitysettings/), [CopilotSettings](../../copilotsettings/) and [KimiSettings](../../kimisettings/).
 - [AgentAuthentication](../../agentauthentication/), [AccountCredential](../../accountcredential/) and [UsageCredential](../../usagecredential/) select how a CLI preset authenticates.
 - [McpServers](../../mcpservers/), [McpServer](../../mcpserver/), [McpStdioServer](../../mcpstdioserver/) and [McpHttpServer](../../mcphttpserver/) declare MCP servers for either variant; see [MCP servers](../../../guide/mcp-servers/).
 - [agentVersions](../../agentversions/) lists the CLI versions pinned for generated images and remote bootstrap, including Antigravity archives verified against pinned SHA-512 digests.

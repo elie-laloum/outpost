@@ -10,17 +10,19 @@ import { mkdtemp } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
-  localTransport,
-  task,
-  taskCacheStore,
-  workflow,
+  createLocalTransport,
+  defineTask,
+  createTaskCacheStore,
+  defineWorkflow,
 } from "@elie-laloum/outpost";
 
 const directory = await mkdtemp(join(tmpdir(), "outpost-cache-"));
-const store = taskCacheStore({ transporter: localTransport({ directory }) });
+const store = createTaskCacheStore({
+  transporter: createLocalTransport({ directory }),
+});
 let executions = 0;
 const summarize = () =>
-  task({
+  defineTask({
     key: "summary",
     cache: { store, version: "summary-v1", key: () => ["notes", "v7.1"] },
     perform: () => ({ summary: "3 fixes", execution: ++executions }),
@@ -28,7 +30,7 @@ const summarize = () =>
 
 for (let run = 1; run <= 2; run++) {
   const summary = summarize();
-  const result = await workflow("release-notes", [summary]).start();
+  const result = await defineWorkflow("release-notes", [summary]).start();
   result.unwrap();
   console.log(result.value(summary), result.tasks[0]?.cacheHit ?? false);
 }
@@ -46,26 +48,28 @@ Include everything that can change the answer: the repository state, the brief, 
 
 ```ts
 import {
-  agentTask,
-  localTransport,
+  defineAgentTask,
+  createLocalTransport,
   repositoryFingerprint,
-  task,
-  taskCacheStore,
+  defineTask,
+  createTaskCacheStore,
 } from "@elie-laloum/outpost";
 import type { Sandbox } from "@elie-laloum/outpost";
 
 declare const session: Sandbox;
 const repository = "/projects/app";
 const brief = "Review the parser for unsafe input handling.";
-const store = taskCacheStore({
-  transporter: localTransport({ directory: `${repository}/.outpost/storage` }),
+const store = createTaskCacheStore({
+  transporter: createLocalTransport({
+    directory: `${repository}/.outpost/storage`,
+  }),
 });
-const reviewer = agentTask({
+const reviewer = defineAgentTask({
   key: "reviewer",
   sandbox: session,
   request: () => ({ brief: { text: brief } }),
 });
-const review = task({
+const review = defineTask({
   key: "review",
   cache: {
     store,
@@ -91,7 +95,7 @@ A hit restores only the stored value. It records no attempt and no usage, consum
 
 Nothing else is replayed: no files, commits, branches, sandbox state, artifacts or external calls. Cache only tasks whose value is the product, such as reviews, classifications, summaries or analyses. A cached value naming a commit does not put that commit on your current branch.
 
-Results must be lossless JSON or `undefined`. Otherwise the task fails after it executes, without retrying. `agentTask` and `isolatedTask` reject `cache` because their dispatch result is not JSON; cache a task that returns a projection, as above. Gates and interactive tasks also reject it. `loopTask` accepts `cache`: a hit skips every round.
+Results must be lossless JSON or `undefined`. Otherwise the task fails after it executes, without retrying. `defineAgentTask` and `defineIsolatedTask` reject `cache` because their dispatch result is not JSON; cache a task that returns a projection, as above. Gates and interactive tasks also reject it. `defineLoopTask` accepts `cache`: a hit skips every round.
 
 ## Expiry and refresh
 
@@ -109,6 +113,6 @@ There is no single-flight coordination: concurrent executions with the same fing
 
 Entries are neither signed nor authenticated. Anyone who can write the transport controls the values tasks restore. Use a transport at least as trusted as the repository, and do not share it across trust boundaries. Entries contain task outputs, which may be sensitive.
 
-`taskCacheStore` stores entries under `task-cache/<fingerprint>.json`. They are kept until you remove them: add the `task-cache` scope to a [retention policy](../retention-rules/) to prune entries older than `minAgeMs`.
+`createTaskCacheStore` stores entries under `task-cache/<fingerprint>.json`. They are kept until you remove them: add the `task-cache` scope to a [retention policy](../retention-rules/) to prune entries older than `minAgeMs`.
 
-API: [TaskCacheOptions](../../reference/taskcacheoptions/) · [taskCacheStore](../../reference/taskcachestore/) · [repositoryFingerprint](../../reference/repositoryfingerprint/) · [TaskCacheEntry](../../reference/taskcacheentry/).
+API: [TaskCacheOptions](../../reference/taskcacheoptions/) · [createTaskCacheStore](../../reference/createtaskcachestore/) · [repositoryFingerprint](../../reference/repositoryfingerprint/) · [TaskCacheEntry](../../reference/taskcacheentry/).

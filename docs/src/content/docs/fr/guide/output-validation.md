@@ -8,9 +8,9 @@ Passez une spécification de réponse à `dispatch({ response })`. La valeur ana
 ## Définir une réponse JSON
 
 ```ts
-import { response } from "@elie-laloum/outpost";
+import { defineJsonResponse } from "@elie-laloum/outpost";
 
-const verdict = response.json({
+const verdict = defineJsonResponse({
   tag: "verdict",
   schema(input) {
     if (
@@ -34,10 +34,10 @@ Demandez `<verdict>{"approved":true}</verdict>` dans le brief. Le validateur lit
 
 `schema` accepte une fonction d’analyse ou un validateur Standard Schema, notamment les schémas Zod et Valibot compatibles. Le schéma valide les données renvoyées ; les types TypeScript seuls ne valident pas la sortie du modèle.
 
-Utilisez `response.text({ tag: "summary" })` pour obtenir uniquement le texte nettoyé d’une balise.
+Utilisez `defineTextResponse({ tag: "summary" })` pour obtenir uniquement le texte nettoyé d’une balise.
 
 ## Réparer une réponse
 
 `repairs` vaut zéro par défaut. Augmentez-le pour autoriser des tours supplémentaires de réparation sur un harness reprenable. Les réparations consomment du temps et des tokens ; elles ne sont pas disponibles avec les adaptateurs limités aux sessions neuves. Elles ne remplacent pas la vérification d’une affirmation comme « tests réussis » par une commande réelle.
 
-API : [response](../../reference/response/) · [ResponseError](../../reference/responseerror/).
+API : [defineTextResponse](../../reference/definetextresponse/) · [defineJsonResponse](../../reference/definejsonresponse/) · [ResponseError](../../reference/responseerror/).

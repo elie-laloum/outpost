@@ -33,3 +33,7 @@ An **agent** selects a harness and optionally a model. A **sandbox provider** se
 CLI harnesses support Codex, Claude Code, Antigravity, GitHub Copilot CLI and Kimi Code. You can also [configure Outpost’s own model loop](../model-loop/).
 
 Outpost manages execution and state. Your tests establish whether a change works, and your code decides whether to integrate it. See [branch strategy](../branch-strategy/) before automating delivery.
+
+## Read the API names
+
+Function names tell you when work happens. `create*` builds an object you pass around, such as `createAgent()`, `createCodexHarness()` or `createLocalTransport()`; creating it starts no process. `define*` declares something an engine runs later, such as `defineWorkflow()`, `defineAgentTask()`, `defineJsonResponse()` or `defineHarnessTool()`. Verbs act immediately: `dispatch()`, `attach()`, `speculate()`, `readJournal()`.

@@ -23,9 +23,9 @@ Container allowlists and runtime policy changes are separate future work. Firecr
 ## Allow model APIs and package registries
 
 ```ts
-import { vercelSandboxProvider } from "@elie-laloum/outpost/providers/vercel";
+import { createVercelSandboxProvider } from "@elie-laloum/outpost/providers/vercel";
 
-const sandboxProvider = vercelSandboxProvider({
+const sandboxProvider = createVercelSandboxProvider({
   egress: {
     mode: "allowlist",
     domains: ["api.openai.com", "registry.npmjs.org"],
@@ -46,9 +46,9 @@ Choose either `egress` or native `create.networkPolicy`. Outpost snapshots both 
 ## Daytona confirmation
 
 ```ts
-import { daytonaSandboxProvider } from "@elie-laloum/outpost/providers/daytona";
+import { createDaytonaSandboxProvider } from "@elie-laloum/outpost/providers/daytona";
 
-const sandboxProvider = daytonaSandboxProvider({
+const sandboxProvider = createDaytonaSandboxProvider({
   egress: {
     mode: "allowlist",
     domains: ["api.openai.com", "registry.npmjs.org"],
@@ -63,9 +63,9 @@ Daytona accepts up to 100 domains or 10 IPv4 CIDRs. It cannot represent `denyCid
 ## Offline execution and scope
 
 ```ts
-import { dockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
+import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
-const sandboxProvider = dockerSandboxProvider({
+const sandboxProvider = createDockerSandboxProvider({
   image: "outpost:dev",
   egress: { mode: "deny-all" },
 });

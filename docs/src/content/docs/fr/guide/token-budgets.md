@@ -6,16 +6,16 @@ description: "Borner les tentatives partagées et les tokens observés."
 Un budget de workflow s’applique à l’ensemble des tâches, reprises et restaurations de checkpoint. Définissez une limite de tentatives, de tokens, ou les deux.
 
 ```ts
-import { task, workflow } from "@elie-laloum/outpost";
+import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
 
-const meter = task({
+const meter = defineTask({
   key: "meter",
   perform(context) {
     context.reportUsage({ input: 10, cached: 0, output: 5 });
     return "recorded";
   },
 });
-const result = await workflow("bounded", [meter]).start({
+const result = await defineWorkflow("bounded", [meter]).start({
   budget: { attempts: 5, usage: { input: 50_000, output: 10_000 } },
 });
 console.log(result.usage);

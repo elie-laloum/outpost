@@ -10,7 +10,7 @@ Prompts describe the work an agent should perform; response contracts describe t
 
 ## How it works
 
-A brief can provide literal text or a file with declared substitutions. `response.text` extracts tagged text; `response.json` parses and validates tagged JSON. Validation narrows unknown model output before your program relies on it. Supported adapters can request a bounded number of repair attempts.
+A brief can provide literal text or a file with declared substitutions. `defineTextResponse` extracts tagged text; `defineJsonResponse` parses and validates tagged JSON. Validation narrows unknown model output before your program relies on it. Supported adapters can request a bounded number of repair attempts.
 
 ## Boundaries and responsibilities
 
@@ -20,7 +20,7 @@ A valid answer is not evidence that its claims are true or its proposed code pas
 
 - [Brief](../../brief/)
 - [PromptVariables](../../promptvariables/)
-- [response](../../response/)
+- [defineTextResponse](../../definetextresponse/) · [defineJsonResponse](../../definejsonresponse/)
 - [ResponseSpec](../../responsespec/)
 - [StandardValidator](../../standardvalidator/)
 - [ResponseError](../../responseerror/)

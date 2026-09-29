@@ -5,26 +5,26 @@ description: "Let Outpost drive model requests and tools."
 
 The built-in engine and its public contracts are stable in 7.0.0.
 
-`harness()` configures Outpost’s own loop: request a model response, validate tool calls, execute tools in the borrowed sandbox, then request the next step.
+`createHarness()` configures Outpost’s own loop: request a model response, validate tool calls, execute tools in the borrowed sandbox, then request the next step.
 
 ```ts
 import {
-  agent,
-  harness,
-  harnessFileTools,
-  openaiModelProvider,
+  createAgent,
+  createHarness,
+  createHarnessFileTools,
+  createOpenAIModelProvider,
 } from "@elie-laloum/outpost";
 
-const coder = agent({
+const coder = createAgent({
   model: process.env.MODEL_NAME ?? "",
-  harness: harness({
-    modelProvider: openaiModelProvider({
+  harness: createHarness({
+    modelProvider: createOpenAIModelProvider({
       baseUrl: "https://api.openai.com/v1",
       api: "responses",
       apiKey: process.env.OPENAI_API_KEY ?? "",
     }),
     instructions: "Inspect the repository and answer with evidence.",
-    tools: [harnessFileTools()],
+    tools: [createHarnessFileTools()],
     limits: { maxSteps: 12, maxToolCalls: 30 },
   }),
 });
@@ -38,7 +38,7 @@ Set `MODEL_NAME` to a model available on your service, then pass this agent to a
 
 The loop supports [tool policies](../tool-policies/), [context management](../history-management/), [loadable skills](../loadable-skills/) and [MCP servers](../mcp-servers/). These settings configure the built-in loop, not Codex or Claude CLI internals.
 
-API: [harness](../../reference/function-harness/) · [HarnessOptions](../../reference/customharnessoptions/).
+API: [createHarness](../../reference/createharness/) · [HarnessOptions](../../reference/customharnessoptions/).
 
 ## Observe the loop
 
@@ -52,32 +52,32 @@ Full `model-request` and `model-response` events require an explicitly verbose h
 
 ```ts
 import {
-  agent,
+  createAgent,
   defineHarnessSubagent,
-  harness,
-  harnessFileTools,
-  openaiModelProvider,
+  createHarness,
+  createHarnessFileTools,
+  createOpenAIModelProvider,
 } from "@elie-laloum/outpost";
 
-const modelProvider = openaiModelProvider({
+const modelProvider = createOpenAIModelProvider({
   baseUrl: "https://api.openai.com/v1",
   api: "responses",
   apiKey: process.env.OPENAI_API_KEY ?? "",
 });
 const model = process.env.MODEL_NAME ?? "";
-const reviewer = agent({
+const reviewer = createAgent({
   model,
-  harness: harness({
+  harness: createHarness({
     modelProvider,
     instructions:
       "Inspect files and report findings. Do not modify the repository.",
-    tools: [harnessFileTools()],
+    tools: [createHarnessFileTools()],
     limits: { maxSteps: 6, usage: { output: 2_000 } },
   }),
 });
-const coordinator = agent({
+const coordinator = createAgent({
   model,
-  harness: harness({
+  harness: createHarness({
     modelProvider,
     tools: [
       defineHarnessSubagent({

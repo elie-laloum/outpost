@@ -5,26 +5,26 @@ description: "Laisser Outpost piloter les requêtes de modèle et les outils."
 
 Le moteur intégré et ses contrats publics sont stables en 7.0.0.
 
-`harness()` configure la boucle d’Outpost : demander une réponse au modèle, valider les appels d’outils, les exécuter dans la sandbox empruntée, puis demander l’étape suivante.
+`createHarness()` configure la boucle d’Outpost : demander une réponse au modèle, valider les appels d’outils, les exécuter dans la sandbox empruntée, puis demander l’étape suivante.
 
 ```ts
 import {
-  agent,
-  harness,
-  harnessFileTools,
-  openaiModelProvider,
+  createAgent,
+  createHarness,
+  createHarnessFileTools,
+  createOpenAIModelProvider,
 } from "@elie-laloum/outpost";
 
-const coder = agent({
+const coder = createAgent({
   model: process.env.MODEL_NAME ?? "",
-  harness: harness({
-    modelProvider: openaiModelProvider({
+  harness: createHarness({
+    modelProvider: createOpenAIModelProvider({
       baseUrl: "https://api.openai.com/v1",
       api: "responses",
       apiKey: process.env.OPENAI_API_KEY ?? "",
     }),
     instructions: "Inspect the repository and answer with evidence.",
-    tools: [harnessFileTools()],
+    tools: [createHarnessFileTools()],
     limits: { maxSteps: 12, maxToolCalls: 30 },
   }),
 });
@@ -38,7 +38,7 @@ Définissez `MODEL_NAME` avec un modèle disponible sur votre service, puis pass
 
 La boucle prend en charge les [politiques d’outils](../tool-policies/), la [gestion du contexte](../history-management/), les [skills à la demande](../loadable-skills/) et les [serveurs MCP](../mcp-servers/). Ces réglages configurent la boucle intégrée, pas les mécanismes internes des CLI Codex ou Claude.
 
-API : [harness](../../reference/function-harness/) · [HarnessOptions](../../reference/customharnessoptions/).
+API : [createHarness](../../reference/createharness/) · [HarnessOptions](../../reference/customharnessoptions/).
 
 ## Observer la boucle
 
@@ -52,32 +52,32 @@ Les événements complets `model-request` et `model-response` nécessitent un hu
 
 ```ts
 import {
-  agent,
+  createAgent,
   defineHarnessSubagent,
-  harness,
-  harnessFileTools,
-  openaiModelProvider,
+  createHarness,
+  createHarnessFileTools,
+  createOpenAIModelProvider,
 } from "@elie-laloum/outpost";
 
-const modelProvider = openaiModelProvider({
+const modelProvider = createOpenAIModelProvider({
   baseUrl: "https://api.openai.com/v1",
   api: "responses",
   apiKey: process.env.OPENAI_API_KEY ?? "",
 });
 const model = process.env.MODEL_NAME ?? "";
-const reviewer = agent({
+const reviewer = createAgent({
   model,
-  harness: harness({
+  harness: createHarness({
     modelProvider,
     instructions:
       "Inspect files and report findings. Do not modify the repository.",
-    tools: [harnessFileTools()],
+    tools: [createHarnessFileTools()],
     limits: { maxSteps: 6, usage: { output: 2_000 } },
   }),
 });
-const coordinator = agent({
+const coordinator = createAgent({
   model,
-  harness: harness({
+  harness: createHarness({
     modelProvider,
     tools: [
       defineHarnessSubagent({

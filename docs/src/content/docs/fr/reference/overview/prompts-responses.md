@@ -10,7 +10,7 @@ Les prompts décrivent le travail demandé à l’agent ; les contrats de répon
 
 ## Fonctionnement et philosophie
 
-Un brief peut fournir un texte littéral ou un fichier avec des substitutions déclarées. `response.text` extrait un texte balisé ; `response.json` analyse et valide du JSON balisé. La validation précise la sortie inconnue du modèle avant son utilisation par le programme. Les adapters compatibles peuvent demander un nombre borné de réparations.
+Un brief peut fournir un texte littéral ou un fichier avec des substitutions déclarées. `defineTextResponse` extrait un texte balisé ; `defineJsonResponse` analyse et valide du JSON balisé. La validation précise la sortie inconnue du modèle avant son utilisation par le programme. Les adapters compatibles peuvent demander un nombre borné de réparations.
 
 ## Limites et responsabilités
 
@@ -20,7 +20,7 @@ Une réponse valide ne prouve pas que ses affirmations sont vraies ni que le cod
 
 - [Brief](../../brief/)
 - [PromptVariables](../../promptvariables/)
-- [response](../../response/)
+- [defineTextResponse](../../definetextresponse/) · [defineJsonResponse](../../definejsonresponse/)
 - [ResponseSpec](../../responsespec/)
 - [StandardValidator](../../standardvalidator/)
 - [ResponseError](../../responseerror/)

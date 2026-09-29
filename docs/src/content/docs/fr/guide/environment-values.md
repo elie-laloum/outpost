@@ -6,9 +6,9 @@ description: "Transmettre uniquement les variables nécessaires."
 Passez `variables` sur le fournisseur pour les valeurs communes à la sandbox, sur le harness pour celles propres à l’agent ou sur une commande pour cette invocation.
 
 ```ts
-import { dockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
+import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
-const sandboxProvider = dockerSandboxProvider({
+const sandboxProvider = createDockerSandboxProvider({
   image: "outpost:dev",
   variables: { NODE_ENV: "test", CI: "true" },
 });

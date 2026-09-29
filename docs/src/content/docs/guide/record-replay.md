@@ -3,18 +3,18 @@ title: "Record and replay"
 description: "Keep a real dispatch and replay it without calling a model."
 ---
 
-`replayAgent()` replays a recorded dispatch journal. It is available since 8.0.0. The replay re-emits the recorded events, returns the recorded text and usage, and rebuilds the recorded commits. It never calls a model. Use it to reproduce a bug or to turn a real run into a deterministic test.
+`createReplayAgent()` replays a recorded dispatch journal. It is available since 8.0.0. The replay re-emits the recorded events, returns the recorded text and usage, and rebuilds the recorded commits. It never calls a model. Use it to reproduce a bug or to turn a real run into a deterministic test.
 
 ```ts
 import {
   dispatch,
-  localTransport,
+  createLocalTransport,
   readJournal,
-  replayAgent,
+  createReplayAgent,
 } from "@elie-laloum/outpost";
 import { coder, repository, sandboxProvider } from "./outpost.config.mts";
 
-const transporter = localTransport({ directory: ".outpost/storage" });
+const transporter = createLocalTransport({ directory: ".outpost/storage" });
 const brief = { text: "Fix the failing parser test." };
 const recorded = await dispatch({
   repository,
@@ -29,7 +29,7 @@ const journal = await readJournal({
   transporter,
   reference: recorded.logReference!,
 });
-const replaying = replayAgent({ journal });
+const replaying = createReplayAgent({ journal });
 const replayed = await dispatch({
   repository,
   sandboxProvider,
@@ -87,7 +87,11 @@ When the replay differs from its journal, it throws `ReplayDivergence`, an `Outp
 `turn`, `expected`, `actual` and `commit` locate the difference. `divergence: "warn"` turns `prompt`, `baseline`, `tree` and `unrecorded` differences into warnings and keeps going. A patch that does not apply and an exhausted journal still fail. With `warn`, a journal recorded without `replayable` replays its events without commits.
 
 ```ts
-import { dispatch, replayAgent, ReplayDivergence } from "@elie-laloum/outpost";
+import {
+  dispatch,
+  createReplayAgent,
+  ReplayDivergence,
+} from "@elie-laloum/outpost";
 import { repository, sandboxProvider } from "./outpost.config.mts";
 
 declare const journal: readonly unknown[];
@@ -95,7 +99,7 @@ try {
   await dispatch({
     repository,
     sandboxProvider,
-    agent: replayAgent({ journal }),
+    agent: createReplayAgent({ journal }),
     brief: { text: "Fix the failing parser test." },
   });
 } catch (error) {
@@ -112,4 +116,4 @@ A brief that uses `{{WORK_BRANCH}}` renders a different prompt on each run. Repl
 - Only commits are replayed. Changes left uncommitted in the worktree are not recorded.
 - A replay cannot be resumed or forked, and it has no conversation to capture.
 
-API: [replayAgent](../../reference/replayagent/) · [ReplayAgent](../../reference/type-replayagent/) · [ReplayDivergence](../../reference/replaydivergence/) · [WorkspaceCommitsEvent](../../reference/workspacecommitsevent/) · [Logging](../../reference/logging/).
+API: [createReplayAgent](../../reference/createreplayagent/) · [ReplayAgent](../../reference/type-replayagent/) · [ReplayDivergence](../../reference/replaydivergence/) · [WorkspaceCommitsEvent](../../reference/workspacecommitsevent/) · [Logging](../../reference/logging/).

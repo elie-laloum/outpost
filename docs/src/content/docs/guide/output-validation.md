@@ -8,9 +8,9 @@ Pass a response specification to `dispatch({ response })`. The parsed value is r
 ## Define a JSON response
 
 ```ts
-import { response } from "@elie-laloum/outpost";
+import { defineJsonResponse } from "@elie-laloum/outpost";
 
-const verdict = response.json({
+const verdict = defineJsonResponse({
   tag: "verdict",
   schema(input) {
     if (
@@ -34,10 +34,10 @@ Ask for `<verdict>{"approved":true}</verdict>` in the brief. The validator reads
 
 `schema` accepts a parsing function or a Standard Schema validator, including compatible Zod and Valibot schemas. The schema validates the returned data; TypeScript types alone do not validate model output.
 
-Use `response.text({ tag: "summary" })` when you only need trimmed text inside a tag.
+Use `defineTextResponse({ tag: "summary" })` when you only need trimmed text inside a tag.
 
 ## Repair a response
 
 `repairs` defaults to zero. Increase it to allow additional repair turns on a resumable harness. Repairs consume time and usage; they are unavailable with fresh-session-only adapters. They do not replace checking a claim such as “tests passed” with a real command.
 
-API: [response](../../reference/response/) · [ResponseError](../../reference/responseerror/).
+API: [defineTextResponse](../../reference/definetextresponse/) · [defineJsonResponse](../../reference/definejsonresponse/) · [ResponseError](../../reference/responseerror/).

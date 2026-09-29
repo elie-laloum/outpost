@@ -11,16 +11,16 @@ npm install @aws-sdk/client-s3
 
 ```ts
 import { S3Client } from "@aws-sdk/client-s3";
-import { s3Transport } from "@elie-laloum/outpost/transports/s3";
-import { artifactStore } from "@elie-laloum/outpost";
+import { createS3Transport } from "@elie-laloum/outpost/transports/s3";
+import { createArtifactStore } from "@elie-laloum/outpost";
 
 const client = new S3Client({ region: "eu-west-1" });
-const transporter = s3Transport({
+const transporter = createS3Transport({
   client,
   bucket: "my-private-outpost",
   prefix: "reviews/",
 });
-const store = artifactStore({ transporter });
+const store = createArtifactStore({ transporter });
 ```
 
 Replace the bucket and region with your deployment. Configure credentials on the host-side S3 client; they are not forwarded to agents. Destroy the client only after all stores and operations using it have finished.
@@ -39,13 +39,13 @@ R2 supports conditional PUT, but the live validation found that DELETE accepts s
 
 ```ts
 import { S3Client } from "@aws-sdk/client-s3";
-import { s3Transport } from "@elie-laloum/outpost/transports/s3";
+import { createS3Transport } from "@elie-laloum/outpost/transports/s3";
 
 const client = new S3Client({
   region: "auto",
   endpoint: "https://<account-id>.r2.cloudflarestorage.com",
 });
-const transporter = s3Transport({
+const transporter = createS3Transport({
   client,
   bucket: "my-private-outpost",
   prefix: "reviews/",
@@ -59,4 +59,4 @@ All writers sharing a prefix must use `deleteMode: "tombstone"`. Stop existing w
 
 Logical deletion retains a 1 KiB marker per deleted key and adds HEAD requests when creating and listing objects. Listing observes current objects, not a transactionally consistent snapshot. Markers remain billable physical objects despite disappearing from transport inventories and logical storage usage. Do not automatically expire or purge them while writers can still run: physical deletion could erase a concurrent recreation. Only an explicit maintenance operation after stopping all writers may remove them from the bucket.
 
-API: [s3Transport](../../reference/s3transport/).
+API: [createS3Transport](../../reference/creates3transport/).

@@ -7,19 +7,19 @@ Outpost persiste artefacts, checkpoints, journaux, réservations et activité de
 
 ```ts
 import {
-  localTransport,
-  artifactStore,
-  workflowCheckpointStore,
+  createLocalTransport,
+  createArtifactStore,
+  createWorkflowCheckpointStore,
 } from "@elie-laloum/outpost";
 
-const transporter = localTransport({ directory: ".outpost/storage" });
-const artifacts = artifactStore({ transporter });
-const checkpoints = workflowCheckpointStore({ transporter });
+const transporter = createLocalTransport({ directory: ".outpost/storage" });
+const artifacts = createArtifactStore({ transporter });
+const checkpoints = createWorkflowCheckpointStore({ transporter });
 ```
 
 ## Stockage local
 
-`localTransport({ directory })` crée un format versionné dans un dossier local privé. Le stockage d’exécution par défaut vit sous `.outpost/storage` dans le dépôt. Les verrous locaux coordonnent les processus de cette machine ; ce n’est pas une propriété distribuée sur NFS.
+`createLocalTransport({ directory })` crée un format versionné dans un dossier local privé. Le stockage d’exécution par défaut vit sous `.outpost/storage` dans le dépôt. Les verrous locaux coordonnent les processus de cette machine ; ce n’est pas une propriété distribuée sur NFS.
 
 ## Stockage distant
 
@@ -31,4 +31,4 @@ Une écriture fournit `ifRevision: null` pour créer, ou la révision observée 
 
 Les workspaces Git natifs, le staging d’exécution et la restauration des transcriptions nécessitent toujours un système de fichiers. Un transport distant ne déplace pas tout le runtime hors du disque.
 
-API : [Transport](../../reference/transport/) · [localTransport](../../reference/localtransport/) · [TransportConflict](../../reference/transportconflict/).
+API : [Transport](../../reference/transport/) · [createLocalTransport](../../reference/createlocaltransport/) · [TransportConflict](../../reference/transportconflict/).

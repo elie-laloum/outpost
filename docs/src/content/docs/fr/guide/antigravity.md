@@ -3,7 +3,7 @@ title: "Antigravity"
 description: "Connecter Antigravity à une sandbox Outpost."
 ---
 
-Utilisez `antigravityHarness()` avec un [environnement d’exécution](../execution-backends/) pris en charge. Installez la CLI dans votre image ou autorisez le bootstrap chez les fournisseurs distants.
+Utilisez `createAntigravityHarness()` avec un [environnement d’exécution](../execution-backends/) pris en charge. Installez la CLI dans votre image ou autorisez le bootstrap chez les fournisseurs distants.
 
 ## Accès par compte
 
@@ -14,10 +14,10 @@ Lancez `agy` sur l’hôte et connectez-vous. Outpost copie `~/.gemini/antigravi
 Fournissez explicitement `GEMINI_API_KEY`. L’usage API suit la facturation API du fournisseur.
 
 ```ts
-import { agent, antigravityHarness } from "@elie-laloum/outpost";
+import { createAgent, createAntigravityHarness } from "@elie-laloum/outpost";
 
-const coder = agent({
-  harness: antigravityHarness({
+const coder = createAgent({
+  harness: createAntigravityHarness({
     authentication: "usage",
     variables: { GEMINI_API_KEY: process.env.GEMINI_API_KEY ?? "" },
   }),
@@ -26,7 +26,7 @@ const coder = agent({
 
 ## Comportement
 
-Reprenez une conversation émise dans la même sandbox ouverte avec `sandbox.resume(id, options)` ou `resume()` sur un résultat à chaud. Les réparations automatiques de réponse réutilisent cette conversation. Outpost ne dispose pas de format de capture portable vérifié pour Antigravity : la reprise à froid après fermeture de la sandbox et le fork automatisé sont refusés, et `antigravityHarness()` refuse un store `conversations`. Un dispatch sans continuation démarre toujours une session neuve. Voir [l’historique](../chat-history/) et [la commande de reprise Google](https://www.antigravity.google/docs/cli/commands/resume/).
+Reprenez une conversation émise dans la même sandbox ouverte avec `sandbox.resume(id, options)` ou `resume()` sur un résultat à chaud. Les réparations automatiques de réponse réutilisent cette conversation. Outpost ne dispose pas de format de capture portable vérifié pour Antigravity : la reprise à froid après fermeture de la sandbox et le fork automatisé sont refusés, et `createAntigravityHarness()` refuse un store `conversations`. Un dispatch sans continuation démarre toujours une session neuve. Voir [l’historique](../chat-history/) et [la commande de reprise Google](https://www.antigravity.google/docs/cli/commands/resume/).
 
 ## Installation épinglée
 
@@ -38,4 +38,4 @@ Le bootstrap réutilise un exécutable existant sans le remplacer ni vérifier s
 
 `mcpServers` fusionne des [serveurs MCP](../mcp-servers/) dans `~/.gemini/config/mcp_config.json` du home de l’agent, qui est votre propre home avec le fournisseur local.
 
-API : [antigravityHarness](../../reference/antigravityharness/).
+API : [createAntigravityHarness](../../reference/createantigravityharness/).

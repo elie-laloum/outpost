@@ -10,18 +10,18 @@ A transport stores versioned binary objects under logical keys. Stores retain th
 
 ## How it works
 
-Use `localTransport` for a private directory or `s3Transport` from the optional `transports/s3` entry point with a caller-owned S3 client. Compose stores over the transport and persist their references independently of sandbox lifetimes. Inspection observes object metadata; retention revalidates closed journals before deletion.
+Use `createLocalTransport` for a private directory or `createS3Transport` from the optional `transports/s3` entry point with a caller-owned S3 client. Compose stores over the transport and persist their references independently of sandbox lifetimes. Inspection observes object metadata; retention revalidates closed journals before deletion.
 
 ## Boundaries and responsibilities
 
-Checkpoints retain explicit ownership until release or authorized recovery. Archives and native conversations materialize files when Git or an agent needs them. Workspaces, SQLite and sandbox mounts still require filesystems. Remote activity is an observation with unverified ownership, not proof that another machine has stopped. Compose stores with localTransport for disk persistence; the file-store factories have been removed.
+Checkpoints retain explicit ownership until release or authorized recovery. Archives and native conversations materialize files when Git or an agent needs them. Workspaces, SQLite and sandbox mounts still require filesystems. Remote activity is an observation with unverified ownership, not proof that another machine has stopped. Compose stores with createLocalTransport for disk persistence; the file-store factories have been removed.
 
 ## Entry points
 
-- [localTransport](../../localtransport/)
-- [s3Transport](../../s3transport/)
-- [artifactStore](../../function-artifactstore/)
-- [workflowCheckpointStore](../../function-workflowcheckpointstore/)
+- [createLocalTransport](../../createlocaltransport/)
+- [createS3Transport](../../creates3transport/)
+- [createArtifactStore](../../createartifactstore/)
+- [createWorkflowCheckpointStore](../../createworkflowcheckpointstore/)
 - [Transport](../../transport/)
 - [inspectRecovery](../../inspectrecovery/)
 

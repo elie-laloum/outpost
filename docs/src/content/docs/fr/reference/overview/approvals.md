@@ -10,7 +10,7 @@ Une approbation ou une pause est un point de décision durable du workflow. Elle
 
 ## Fonctionnement et philosophie
 
-`approvalTask` et `pauseTask` créent des tâches de décision. Le workflow persiste la demande en attente et peut rendre le contrôle à l’appelant. Un démarrage ultérieur soumet des décisions contre cet état sauvegardé ; les dépendances imposent l’ordre autour de cette étape.
+`defineApprovalTask` et `definePauseTask` créent des tâches de décision. Le workflow persiste la demande en attente et peut rendre le contrôle à l’appelant. Un démarrage ultérieur soumet des décisions contre cet état sauvegardé ; les dépendances imposent l’ordre autour de cette étape.
 
 ## Limites et responsabilités
 
@@ -18,8 +18,8 @@ Les identifiants d’acteurs sont des métadonnées de confiance, pas une authen
 
 ## Points d’entrée
 
-- [approvalTask](../../approvaltask/)
-- [pauseTask](../../pausetask/)
+- [defineApprovalTask](../../defineapprovaltask/)
+- [definePauseTask](../../definepausetask/)
 - [WorkflowGate](../../workflowgate/)
 - [WorkflowGateOptions](../../workflowgateoptions/)
 - [WorkflowDecision](../../workflowdecision/)

@@ -12,9 +12,9 @@ npm install bullmq
 ```
 
 ```ts
-import { bullmqTaskQueue } from "@elie-laloum/outpost/queues/bullmq";
+import { createBullMQTaskQueue } from "@elie-laloum/outpost/queues/bullmq";
 
-const queue = await bullmqTaskQueue({
+const queue = await createBullMQTaskQueue({
   name: "code-reviews",
   connection: { host: "127.0.0.1", port: 6379 },
 });
@@ -41,10 +41,10 @@ Retained Outpost results remain authoritative if native BullMQ finalization is i
 
 Observe connection and finalization errors with `onError`. Foreground operations still reject on failure; an observer does not replace handling those rejections.
 
-API: [bullmqTaskQueue](../../reference/bullmqtaskqueue/).
+API: [createBullMQTaskQueue](../../reference/createbullmqtaskqueue/).
 
 ## Rotate Redis credentials
 
-Connection settings are fixed when `bullmqTaskQueue()` opens its owned clients. Introduce a replacement Redis ACL credential with the same required permissions, deploy workers/producers using it, then stop old processes and close their queues before revoking the old credential. Do not mutate an active adapter's connection object to rotate it. Redis operators own ACL changes and termination of any remaining authenticated connections.
+Connection settings are fixed when `createBullMQTaskQueue()` opens its owned clients. Introduce a replacement Redis ACL credential with the same required permissions, deploy workers/producers using it, then stop old processes and close their queues before revoking the old credential. Do not mutate an active adapter's connection object to rotate it. Redis operators own ACL changes and termination of any remaining authenticated connections.
 
 Keep the same queue namespace during replacement. A prematurely revoked connection can lose its lease; the successor receives the same `idempotencyKey`, so the effect service must retain deduplication receipts. See [worker operations](../background-jobs/#operate-workers) for shutdown and crash recovery. Standalone Redis process-crash tests do not establish managed-primary failover behavior.

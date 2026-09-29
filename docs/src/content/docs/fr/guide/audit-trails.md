@@ -6,10 +6,14 @@ description: "Lire les événements persistés et instrumenter le runtime."
 Utilisez les journaux de requête pour conserver les traces d’exécution, les observateurs pour l’affichage en direct et la télémétrie pour l’instrumentation.
 
 ```ts
-import { dispatch, localTransport, readJournal } from "@elie-laloum/outpost";
+import {
+  dispatch,
+  createLocalTransport,
+  readJournal,
+} from "@elie-laloum/outpost";
 import { coder, repository, sandboxProvider } from "./outpost.config.mts";
 
-const transporter = localTransport({ directory: ".outpost/storage" });
+const transporter = createLocalTransport({ directory: ".outpost/storage" });
 const result = await dispatch({
   repository,
   sandboxProvider,
@@ -36,9 +40,9 @@ Installez `@opentelemetry/api` et importez l’adaptateur via `@elie-laloum/outp
 
 ```ts
 import { trace, metrics } from "@opentelemetry/api";
-import { openTelemetry } from "@elie-laloum/outpost/opentelemetry";
+import { createOpenTelemetryObserver } from "@elie-laloum/outpost/opentelemetry";
 
-const telemetry = openTelemetry({
+const telemetry = createOpenTelemetryObserver({
   tracer: trace.getTracer("outpost"),
   meter: metrics.getMeter("outpost"),
 });
@@ -46,9 +50,9 @@ const telemetry = openTelemetry({
 
 Enregistrez votre SDK OpenTelemetry et ses exportateurs avant de créer ces objets, puis passez `telemetry` aux options du workflow ou du dispatch. Sans SDK enregistré, ces objets API n’exportent pas de données.
 
-L’application possède l’arrêt des fournisseurs de traces et métriques. Les erreurs d’instrumentation sont isolées des résultats d’exécution. `createReporter()` permet un reporting personnalisé.
+L’application possède l’arrêt des fournisseurs de traces et métriques. Les erreurs d’instrumentation sont isolées des résultats d’exécution. `createCustomReporter()` permet un reporting personnalisé.
 
-API : [Logging](../../reference/logging/) · [readJournal](../../reference/readjournal/) · [replayAgent](../../reference/replayagent/) · [DispatchTelemetry](../../reference/dispatchtelemetry/) · [createReporter](../../reference/createreporter/).
+API : [Logging](../../reference/logging/) · [readJournal](../../reference/readjournal/) · [createReplayAgent](../../reference/createreplayagent/) · [DispatchTelemetry](../../reference/dispatchtelemetry/) · [createCustomReporter](../../reference/createcustomreporter/).
 
 ## Corréler les traces par le hub
 

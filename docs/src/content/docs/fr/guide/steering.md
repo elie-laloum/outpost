@@ -53,7 +53,7 @@ Un message que le dispatch ne peut pas remettre est rejeté à la fin du dispatc
 
 Un contrôleur sert un dispatch à la fois et peut être réutilisé pour le suivant. L’attacher à un second dispatch concurrent échoue. Les messages envoyés quand aucun dispatch ne tourne attendent le prochain dispatch qui utilise le contrôleur ; `close()` les rejette, ainsi que tout `send()` ultérieur.
 
-`dispatch()` partage un même contrôleur entre ses passes. `result.resume()` et `result.fork()` ne le réutilisent pas : repassez `steering`. Dans un workflow, renvoyez-le depuis la `request` d’un [`agentTask` ou d’un `isolatedTask`](../task-dependencies/).
+`dispatch()` partage un même contrôleur entre ses passes. `result.resume()` et `result.fork()` ne le réutilisent pas : repassez `steering`. Dans un workflow, renvoyez-le depuis la `request` d’un [`defineAgentTask` ou d’un `defineIsolatedTask`](../task-dependencies/).
 
 Avant de s’exécuter, un dispatch refuse les agents qui ne peuvent ni recevoir d’entrée en direct ni reprendre une conversation : les [agents de rejeu](../record-replay/) et les adapters avec `resumable: false`. Les candidats d’un [agent de secours](../agent-fallback/) sont validés de la même façon, et le pilotage suit le candidat en cours d’exécution.
 

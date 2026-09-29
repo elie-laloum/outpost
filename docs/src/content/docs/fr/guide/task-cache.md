@@ -10,17 +10,19 @@ import { mkdtemp } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
-  localTransport,
-  task,
-  taskCacheStore,
-  workflow,
+  createLocalTransport,
+  defineTask,
+  createTaskCacheStore,
+  defineWorkflow,
 } from "@elie-laloum/outpost";
 
 const directory = await mkdtemp(join(tmpdir(), "outpost-cache-"));
-const store = taskCacheStore({ transporter: localTransport({ directory }) });
+const store = createTaskCacheStore({
+  transporter: createLocalTransport({ directory }),
+});
 let executions = 0;
 const summarize = () =>
-  task({
+  defineTask({
     key: "summary",
     cache: { store, version: "summary-v1", key: () => ["notes", "v7.1"] },
     perform: () => ({ summary: "3 fixes", execution: ++executions }),
@@ -28,7 +30,7 @@ const summarize = () =>
 
 for (let run = 1; run <= 2; run++) {
   const summary = summarize();
-  const result = await workflow("release-notes", [summary]).start();
+  const result = await defineWorkflow("release-notes", [summary]).start();
   result.unwrap();
   console.log(result.value(summary), result.tasks[0]?.cacheHit ?? false);
 }
@@ -46,26 +48,28 @@ Incluez tout ce qui peut changer la réponse : l’état du dépôt, le brief, l
 
 ```ts
 import {
-  agentTask,
-  localTransport,
+  defineAgentTask,
+  createLocalTransport,
   repositoryFingerprint,
-  task,
-  taskCacheStore,
+  defineTask,
+  createTaskCacheStore,
 } from "@elie-laloum/outpost";
 import type { Sandbox } from "@elie-laloum/outpost";
 
 declare const session: Sandbox;
 const repository = "/projects/app";
 const brief = "Review the parser for unsafe input handling.";
-const store = taskCacheStore({
-  transporter: localTransport({ directory: `${repository}/.outpost/storage` }),
+const store = createTaskCacheStore({
+  transporter: createLocalTransport({
+    directory: `${repository}/.outpost/storage`,
+  }),
 });
-const reviewer = agentTask({
+const reviewer = defineAgentTask({
   key: "reviewer",
   sandbox: session,
   request: () => ({ brief: { text: brief } }),
 });
-const review = task({
+const review = defineTask({
   key: "review",
   cache: {
     store,
@@ -91,7 +95,7 @@ Une correspondance restaure uniquement la valeur enregistrée. Elle n’enregist
 
 Rien d’autre n’est rejoué : ni fichiers, ni commits, ni branches, ni état de sandbox, ni artefacts, ni appels externes. Ne mettez en cache que les tâches dont la valeur est le produit : relectures, classifications, résumés ou analyses. Une valeur en cache qui cite un commit ne place pas ce commit sur votre branche courante.
 
-Les résultats doivent être du JSON sans perte ou `undefined`. Sinon, la tâche échoue après son exécution, sans nouvelle tentative. `agentTask` et `isolatedTask` refusent `cache`, car leur résultat de dispatch n’est pas du JSON ; mettez en cache une tâche qui renvoie une projection, comme ci-dessus. Les gates et les tâches interactives le refusent aussi. `loopTask` accepte `cache` : une correspondance saute tous les tours.
+Les résultats doivent être du JSON sans perte ou `undefined`. Sinon, la tâche échoue après son exécution, sans nouvelle tentative. `defineAgentTask` et `defineIsolatedTask` refusent `cache`, car leur résultat de dispatch n’est pas du JSON ; mettez en cache une tâche qui renvoie une projection, comme ci-dessus. Les gates et les tâches interactives le refusent aussi. `defineLoopTask` accepte `cache` : une correspondance saute tous les tours.
 
 ## Expiration et rafraîchissement
 
@@ -109,6 +113,6 @@ Il n’y a pas de coordination entre exécutions concurrentes : celles qui parta
 
 Les entrées ne sont ni signées ni authentifiées. Quiconque peut écrire dans le transport contrôle les valeurs que les tâches restaurent. Utilisez un transport au moins aussi fiable que le dépôt et ne le partagez pas au-delà d’une frontière de confiance. Les entrées contiennent des sorties de tâches, qui peuvent être sensibles.
 
-`taskCacheStore` stocke les entrées sous `task-cache/<empreinte>.json`. Elles sont conservées jusqu’à leur suppression : ajoutez le périmètre `task-cache` à une [politique de rétention](../retention-rules/) pour supprimer les entrées plus anciennes que `minAgeMs`.
+`createTaskCacheStore` stocke les entrées sous `task-cache/<empreinte>.json`. Elles sont conservées jusqu’à leur suppression : ajoutez le périmètre `task-cache` à une [politique de rétention](../retention-rules/) pour supprimer les entrées plus anciennes que `minAgeMs`.
 
-API : [TaskCacheOptions](../../reference/taskcacheoptions/) · [taskCacheStore](../../reference/taskcachestore/) · [repositoryFingerprint](../../reference/repositoryfingerprint/) · [TaskCacheEntry](../../reference/taskcacheentry/).
+API : [TaskCacheOptions](../../reference/taskcacheoptions/) · [createTaskCacheStore](../../reference/createtaskcachestore/) · [repositoryFingerprint](../../reference/repositoryfingerprint/) · [TaskCacheEntry](../../reference/taskcacheentry/).

@@ -10,9 +10,9 @@ npm install @vercel/sandbox
 ```
 
 ```ts
-import { vercelSandboxProvider } from "@elie-laloum/outpost/providers/vercel";
+import { createVercelSandboxProvider } from "@elie-laloum/outpost/providers/vercel";
 
-const sandboxProvider = vercelSandboxProvider({
+const sandboxProvider = createVercelSandboxProvider({
   create: { runtime: "node24" },
 });
 ```
@@ -31,4 +31,4 @@ A missing supported CLI can be bootstrapped remotely. Set `bootstrap: false` on 
 
 Close owned sandboxes in `finally`; cloud allocation can incur charges until resources are released. See [File exchange](../file-exchange/) and [Failure recovery](../failure-recovery/).
 
-API: [vercelSandboxProvider](../../reference/vercelsandboxprovider/).
+API: [createVercelSandboxProvider](../../reference/createvercelsandboxprovider/).

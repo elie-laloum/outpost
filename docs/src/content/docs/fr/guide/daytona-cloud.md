@@ -10,9 +10,9 @@ npm install @daytona/sdk
 ```
 
 ```ts
-import { daytonaSandboxProvider } from "@elie-laloum/outpost/providers/daytona";
+import { createDaytonaSandboxProvider } from "@elie-laloum/outpost/providers/daytona";
 
-const sandboxProvider = daytonaSandboxProvider({
+const sandboxProvider = createDaytonaSandboxProvider({
   connection: { apiKey: process.env.DAYTONA_API_KEY ?? "" },
 });
 ```
@@ -31,4 +31,4 @@ Une CLI prise en charge absente peut être installée à distance. Définissez `
 
 Fermez les sandboxes possédées dans `finally` ; l’allocation cloud peut être facturée jusqu’à leur libération. Voir [Échange de fichiers](../file-exchange/) et [Récupération après échec](../failure-recovery/).
 
-API : [daytonaSandboxProvider](../../reference/daytonasandboxprovider/).
+API : [createDaytonaSandboxProvider](../../reference/createdaytonasandboxprovider/).

@@ -21,6 +21,8 @@ Implemented, unreleased: [steering](../../guide/steering/) sends instructions to
 
 Implemented, unreleased: [MCP servers](../../guide/mcp-servers/) are declared once with `mcpServers` for every CLI harness and the built-in harness, which runs stdio servers and an HTTP bridge inside the sandbox. Deterministic tests cover configuration rendering, home-file merging, missing variables, a real stdio server, an HTTP server with sessions and SSE, cancellation and a Docker container. Only Copilot stdio servers have been checked live; live runs for the other CLIs, for HTTP servers and for built-in harness servers on Vercel, Daytona and Firecracker remain required. Per-server tool filters, startup timeouts, OAuth servers, MCP resources and prompts remain planned.
 
+Implemented, unreleased: public factories follow one naming rule. Functions that build runtime objects start with `create` (`createAgent()`, `createCodexHarness()`, `createLocalTransport()`), workflow and contract declarations start with `define` (`defineWorkflow()`, `defineAgentTask()`, `defineJsonResponse()`), and actions keep their verbs (`dispatch()`, `speculate()`). `createReporter()` now builds the terminal reporter and `createCustomReporter()` the handler-based one. Planned for the next major version: remove the previous names, which remain deprecated aliases until then.
+
 Available in 8.0.0: [record and replay](../../guide/record-replay/) replays a dispatch journal without calling a model, rebuilding its commits inside the sandbox and reporting divergences. Deterministic tests cover CLI and harness recordings, failures, repairs, passes and a real Docker sandbox. Replaying a whole workflow, uncommitted changes and a CLI command remain planned.
 
 Available in 8.0.0: the [task result cache](../../guide/task-cache/) reuses a task's JSON result when the workflow, task, version and key match, with `repositoryFingerprint()` for repository-state keys, expiry, refresh and a `task-cache` retention scope. Deterministic tests cover hits, invalid and concurrent entries, checkpoints and retention. Single-flight coordination between concurrent executions and authenticated entries remain future work.
@@ -33,7 +35,7 @@ Available since 4.2.0: [local/S3 storage transports](../../guide/persistence/) c
 
 The [BullMQ/Redis adapter](../../guide/redis-workers/) is available since 4.2.0: tests exercise real Redis leases, concurrent claims and interrupted publication/finalization. Production Redis failover campaigns remain outstanding. RabbitMQ remains planned for a later step.
 
-Available since 5.0.0: agents compose a harness with a model through `agent({ harness, model })`, and the [built-in harness engine](../../guide/model-loop/) drives a model provider with tools, hooks, permissions, conversations, context strategies, skills and streaming. Its validation status is described [below](#direct-model-harness).
+Available since 5.0.0: agents compose a harness with a model through `createAgent({ harness, model })`, and the [built-in harness engine](../../guide/model-loop/) drives a model provider with tools, hooks, permissions, conversations, context strategies, skills and streaming. Its validation status is described [below](#direct-model-harness).
 
 Included in the 6.0 series: all runtime persistence goes through storage transports, and every CLI harness authenticates explicitly with `account` (the CLI's own host session, copied into the private sandbox home) or `usage` (an API key), as described in [authentication](../../guide/access-credentials/). Gemini CLI is removed; [Antigravity](../../guide/antigravity/), [GitHub Copilot CLI](../../guide/copilot-cli/) and [Kimi Code](../../guide/kimi-code/) harnesses run fresh sessions. Their protocols are covered by synthetic fixtures and installed-CLI help checks; live model runs remain a near-term priority below.
 
@@ -41,7 +43,7 @@ Available in 6.0.1: the [Guide](../../guide/introduction/) has been rewritten in
 
 The September 28, 2026 signed-image campaign validated public publication, attestation and five CLIs on Docker Linux amd64, with independent verification reported from a second machine. The [successful workflow](https://github.com/elie-laloum/outpost/actions/runs/36353567785) covers 6.0.1 commit `36339c3`, not a 7.0.0 image. Repeat verification for new digests; bit-for-bit reproducibility, Podman and multiarchitecture publication remain outside the validated scope.
 
-Available in 7.0.0: `s3Transport({ deleteMode: "tombstone" })` supports conditional removal on R2 without atomic DELETE; markers remain stored. BullMQ queues require `maxmemory-policy=noeviction`. Managed-service failover remains unvalidated.
+Available in 7.0.0: `createS3Transport({ deleteMode: "tombstone" })` supports conditional removal on R2 without atomic DELETE; markers remain stored. BullMQ queues require `maxmemory-policy=noeviction`. Managed-service failover remains unvalidated.
 
 **Available in 7.0.0:** Antigravity installation now pins versioned archives and SHA-512 digests for images and remote bootstrap; doctor compares the installed version with `agentVersions.antigravity`. See [pinned installation](../../guide/antigravity/#pinned-installation). Authenticated model runs and platform-specific live validation remain separate requirements.
 

@@ -37,9 +37,9 @@ Group native transcript operations: locate on the host, capture from a sandbox, 
 
 ```ts
 export declare const conversations: {
-  transported: typeof transportConversations;
+  transported: typeof createTransportConversations;
   native: typeof nativeConversations;
-  harness: typeof harnessConversations;
+  harness: typeof createHarnessConversations;
   locate: typeof locateConversation;
   capture: typeof captureConversation;
   restore: typeof restoreConversation;
@@ -59,11 +59,11 @@ export declare const conversations: {
 
 - [captureConversation](../support-captureconversation/)
 - [ConversationFormat](../conversationformat/)
-- [harnessConversations](../harnessconversations/)
+- [createHarnessConversations](../createharnessconversations/)
+- [createTransportConversations](../createtransportconversations/)
 - [locateConversation](../support-locateconversation/)
 - [nativeConversations](../support-nativeconversations/)
 - [projectKey](../support-projectkey/)
 - [relocateTranscript](../support-relocatetranscript/)
 - [remotePath](../support-remotepath/)
 - [restoreConversation](../support-restoreconversation/)
-- [transportConversations](../transportconversations/)

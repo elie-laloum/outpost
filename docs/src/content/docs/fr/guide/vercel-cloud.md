@@ -10,9 +10,9 @@ npm install @vercel/sandbox
 ```
 
 ```ts
-import { vercelSandboxProvider } from "@elie-laloum/outpost/providers/vercel";
+import { createVercelSandboxProvider } from "@elie-laloum/outpost/providers/vercel";
 
-const sandboxProvider = vercelSandboxProvider({
+const sandboxProvider = createVercelSandboxProvider({
   create: { runtime: "node24" },
 });
 ```
@@ -31,4 +31,4 @@ Une CLI prise en charge absente peut être installée à distance. Définissez `
 
 Fermez les sandboxes possédées dans `finally` ; l’allocation cloud peut être facturée jusqu’à leur libération. Voir [Échange de fichiers](../file-exchange/) et [Récupération après échec](../failure-recovery/).
 
-API : [vercelSandboxProvider](../../reference/vercelsandboxprovider/).
+API : [createVercelSandboxProvider](../../reference/createvercelsandboxprovider/).

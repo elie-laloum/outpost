@@ -3,14 +3,14 @@ title: "Multiple repositories"
 description: "Give each repository its own sandbox and connect results."
 ---
 
-Use one `isolatedTask` per repository. Each task owns its dispatch lifecycle, while the workflow controls dependencies and concurrency.
+Use one `defineIsolatedTask` per repository. Each task owns its dispatch lifecycle, while the workflow controls dependencies and concurrency.
 
 ```ts
-import { isolatedTask, workflow } from "@elie-laloum/outpost";
+import { defineIsolatedTask, defineWorkflow } from "@elie-laloum/outpost";
 import { coder, sandboxProvider } from "./outpost.config.mts";
 
 const review = (key: string, repository: string) =>
-  isolatedTask({
+  defineIsolatedTask({
     key,
     request: ({ signal }) => ({
       repository,
@@ -23,7 +23,7 @@ const review = (key: string, repository: string) =>
   });
 const api = review("api", "/projects/api");
 const web = review("web", "/projects/web");
-const result = await workflow("repositories", [api, web]).start({
+const result = await defineWorkflow("repositories", [api, web]).start({
   concurrency: 2,
 });
 result.unwrap();
@@ -40,4 +40,4 @@ Add `after: [api]` to the web task when it needs the API result, then read it th
 
 One repository can succeed while another fails. Review each task’s result and retained workspace before rerunning. There is no multi-repository rollback or automatic push. Put final publication behind a separate application-controlled gate.
 
-API: [isolatedTask](../../reference/isolatedtask/).
+API: [defineIsolatedTask](../../reference/defineisolatedtask/).

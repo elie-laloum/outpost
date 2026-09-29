@@ -3,29 +3,29 @@ title: "Agents de secours"
 description: "Confier un dispatch à un autre agent ou modèle quand le premier atteint une limite ou que son service est indisponible."
 ---
 
-Implémenté, pas encore publié. `fallbackAgent()` prend une liste ordonnée d’agents. Quand un candidat échoue pour une raison listée dans `on`, le suivant prend le relais dans le même sandbox et le même workspace.
+Implémenté, pas encore publié. `createFallbackAgent()` prend une liste ordonnée d’agents. Quand un candidat échoue pour une raison listée dans `on`, le suivant prend le relais dans le même sandbox et le même workspace.
 
 ```ts
 import {
-  agent,
-  claudeHarness,
-  codexHarness,
+  createAgent,
+  createClaudeHarness,
+  createCodexHarness,
   createSandbox,
-  fallbackAgent,
+  createFallbackAgent,
 } from "@elie-laloum/outpost";
 import { repository, sandboxProvider } from "./outpost.config.mts";
 
-const coder = fallbackAgent(
+const coder = createFallbackAgent(
   [
-    agent({
-      harness: claudeHarness({ authentication: "account" }),
+    createAgent({
+      harness: createClaudeHarness({ authentication: "account" }),
       model: "opus",
     }),
-    agent({
-      harness: claudeHarness({ authentication: "account" }),
+    createAgent({
+      harness: createClaudeHarness({ authentication: "account" }),
       model: "sonnet",
     }),
-    agent({ harness: codexHarness({ authentication: "usage" }) }),
+    createAgent({ harness: createCodexHarness({ authentication: "usage" }) }),
   ],
   { on: ["quota", "unavailable"] },
 );
@@ -85,10 +85,10 @@ Chaque passage de relais émet un [événement d’agent](../live-events/) `fall
 
 La dernière erreur est relancée, avec les candidats arrêtés dans `recoveryDetails(error).fallback`. Quand tous les candidats ont atteint une limite, l’erreur a le code `quota` et sa réinitialisation est la plus proche, fournie seulement si chaque candidat en a indiqué une.
 
-Avec [`onQuota`](../quota-pauses/), le workflow se met alors en pause jusqu’à cette réinitialisation. La tentative reprise repart du premier candidat, avec le brief d’origine au lieu d’une continuation de conversation : `agentTask` réutilise son sandbox, et un `isolatedTask` intégré automatiquement repart de la branche interrompue. `quotaResume: "restart"` repart de zéro. Dans une [course spéculative](../candidate-selection/), un candidat ne prend le statut `quota` que lorsque tous ses secours ont atteint une limite.
+Avec [`onQuota`](../quota-pauses/), le workflow se met alors en pause jusqu’à cette réinitialisation. La tentative reprise repart du premier candidat, avec le brief d’origine au lieu d’une continuation de conversation : `defineAgentTask` réutilise son sandbox, et un `defineIsolatedTask` intégré automatiquement repart de la branche interrompue. `quotaResume: "restart"` repart de zéro. Dans une [course spéculative](../candidate-selection/), un candidat ne prend le statut `quota` que lorsque tous ses secours ont atteint une limite.
 
 ## Limites
 
 Les motifs de panne et de limite proviennent de formats CLI et fournisseurs enregistrés ; un message non reconnu ne déclenche pas de repli. Un [rejeu](../record-replay/) reproduit un passage de relais enregistré, sans `result.fallback`. Le comportement est couvert par des tests déterministes avec des agents simulés, pas par des campagnes réelles sur des comptes épuisés.
 
-API : [fallbackAgent](../../reference/fallbackagent/) · [FallbackAgentOptions](../../reference/fallbackagentoptions/) · [FallbackRecord](../../reference/fallbackrecord/) · [unavailableFault](../../reference/unavailablefault/).
+API : [createFallbackAgent](../../reference/createfallbackagent/) · [FallbackAgentOptions](../../reference/fallbackagentoptions/) · [FallbackRecord](../../reference/fallbackrecord/) · [unavailableFault](../../reference/unavailablefault/).

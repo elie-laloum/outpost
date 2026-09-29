@@ -16,19 +16,19 @@ Attach an observer to the operation you want to inspect. A reporter formats even
 
 Reported usage is not a monetary invoice, and local activity is not an inventory of a cloud account. Avoid putting prompts, credentials or unbounded identifiers in metric labels. Use operation results and enforced validation to make control-flow decisions.
 
-A replayable dispatch journal can also be replayed: `replayAgent` re-emits its events and rebuilds its commits without calling a model, and `ReplayDivergence` reports where a replay differs. See [record and replay](../../../guide/record-replay/).
+A replayable dispatch journal can also be replayed: `createReplayAgent` re-emits its events and rebuilds its commits without calling a model, and `ReplayDivergence` reports where a replay differs. See [record and replay](../../../guide/record-replay/).
 
 ## Entry points
 
-- [reporter](../../reporter/)
 - [createReporter](../../createreporter/)
+- [createCustomReporter](../../createcustomreporter/)
 - [DispatchTelemetry](../../dispatchtelemetry/)
 - [AgentEvent](../../agentevent/)
 - [AgentObservation](../../agentobservation/)
 - [Usage](../../usage/)
-- [replayAgent](../../replayagent/)
+- [createReplayAgent](../../createreplayagent/)
 - [ReplayDivergence](../../replaydivergence/)
-- [openTelemetry](../../opentelemetry/)
+- [createOpenTelemetryObserver](../../createopentelemetryobserver/)
 - [OpenTelemetryOptions](../../opentelemetryoptions/)
 
 [Learn with the practical guide](../../../guide/agents/observability/).

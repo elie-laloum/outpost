@@ -16,11 +16,11 @@ Implement the contract that owns the behavior you need. Keep CLI protocols, exec
 
 ## Add a CLI harness
 
-A `CliHarness` exposes `kind: "cli"` and `bind(model)`, returning an `AgentAdapter`. Compose it with `agent({ harness })`. Keep request construction and event decoding separate, declare continuation capabilities honestly and supply a conversation store only if restoration works.
+A `CliHarness` exposes `kind: "cli"` and `bind(model)`, returning an `AgentAdapter`. Compose it with `createAgent({ harness })`. Keep request construction and event decoding separate, declare continuation capabilities honestly and supply a conversation store only if restoration works.
 
 ## Add a sandbox provider
 
-Return a lease with `root`, `home`, invocation, upload/download and idempotent release. Preserve exit status after output streams close, process cancellation and binary transfer semantics. `mountedSandboxProvider()` and `remoteSandboxProvider()` help compose the corresponding strategies.
+Return a lease with `root`, `home`, invocation, upload/download and idempotent release. Preserve exit status after output streams close, process cancellation and binary transfer semantics. `createMountedSandboxProvider()` and `createRemoteSandboxProvider()` help compose the corresponding strategies.
 
 ## Validate the integration
 

@@ -10,9 +10,9 @@ Une file déplace des requêtes JSON entre producteurs et workers. Les workers e
 Créez d’abord `.outpost`, puis lancez le worker dans son propre processus.
 
 ```ts
-import { sqliteTaskQueue, runQueueWorker } from "@elie-laloum/outpost";
+import { createSqliteTaskQueue, runQueueWorker } from "@elie-laloum/outpost";
 
-const queue = await sqliteTaskQueue(".outpost/jobs.sqlite");
+const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
 const stop = new AbortController();
 process.once("SIGINT", () => stop.abort());
 try {
@@ -31,12 +31,12 @@ try {
 
 ## Soumettre du travail
 
-Un producteur ouvre la même file et appelle `enqueue({ id, handler: "count", input: [1, 2, 3] })`. Utilisez des identifiants stables pour la déduplication et lisez les résultats conservés via le contrat de file. `queuedTask()` enveloppe soumission et attente dans un nœud de workflow et valide la valeur renvoyée avec `decode`. Les [déclencheurs](../triggers/) publient des jobs à partir de planifications cron et de webhooks vérifiés, et `workflowJob()` exécute un workflow avec checkpoint pour chacun.
+Un producteur ouvre la même file et appelle `enqueue({ id, handler: "count", input: [1, 2, 3] })`. Utilisez des identifiants stables pour la déduplication et lisez les résultats conservés via le contrat de file. `defineQueuedTask()` enveloppe soumission et attente dans un nœud de workflow et valide la valeur renvoyée avec `decode`. Les [déclencheurs](../triggers/) publient des jobs à partir de planifications cron et de webhooks vérifiés, et `workflowJob()` exécute un workflow avec checkpoint pour chacun.
 
 ```ts title="submit.mts"
-import { sqliteTaskQueue } from "@elie-laloum/outpost";
+import { createSqliteTaskQueue } from "@elie-laloum/outpost";
 
-const queue = await sqliteTaskQueue(".outpost/jobs.sqlite");
+const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
 try {
   await queue.enqueue({ id: "count-42", handler: "count", input: [1, 2, 3] });
   console.log(await queue.get("count-42"));
@@ -51,13 +51,13 @@ Les workers acquièrent des baux protégés contre les anciens propriétaires, l
 
 Un handler qui échoue sur une limite d’usage ou de débit la signale dans `QueueResult.quota` ; avec les [pauses sur quota](../quota-pauses/#tâches-en-file), le workflow se met en pause puis publie un nouveau job qui conserve l’`idempotencyKey` d’origine.
 
-Utilisez `serveTaskQueue()` et `httpTaskQueue()` pour exposer une file entre processus via HTTP, avec le jeton configuré et une frontière de transport fiable. Utilisez les [workers Redis](../redis-workers/) pour BullMQ. Transmettez annulation et délais aux opérations des handlers.
+Utilisez `serveTaskQueue()` et `createHttpTaskQueue()` pour exposer une file entre processus via HTTP, avec le jeton configuré et une frontière de transport fiable. Utilisez les [workers Redis](../redis-workers/) pour BullMQ. Transmettez annulation et délais aux opérations des handlers.
 
-API : [sqliteTaskQueue](../../reference/sqlitetaskqueue/) · [runQueueWorker](../../reference/runqueueworker/) · [queuedTask](../../reference/queuedtask/) · [TaskQueue](../../reference/taskqueue/).
+API : [createSqliteTaskQueue](../../reference/createsqlitetaskqueue/) · [runQueueWorker](../../reference/runqueueworker/) · [defineQueuedTask](../../reference/definequeuedtask/) · [TaskQueue](../../reference/taskqueue/).
 
 ## Dédupliquer les effets
 
-Disponible en 7.0.0 : chaque `TaskContext` expose `idempotencyKey`, dérivée de l’exécution du workflow et de la clé de tâche. Elle reste stable lors des retries et reprises de checkpoint ; une nouvelle exécution reçoit une nouvelle clé. Chaque `QueueHandlerContext` distant expose l’identifiant du job sous cette même propriété. `queuedTask()` conserve son calcul d’identifiant existant. Les producteurs directs doivent choisir des identifiants uniques pour les opérations distinctes et éviter les collisions entre files partageant un service d’effets.
+Disponible en 7.0.0 : chaque `TaskContext` expose `idempotencyKey`, dérivée de l’exécution du workflow et de la clé de tâche. Elle reste stable lors des retries et reprises de checkpoint ; une nouvelle exécution reçoit une nouvelle clé. Chaque `QueueHandlerContext` distant expose l’identifiant du job sous cette même propriété. `defineQueuedTask()` conserve son calcul d’identifiant existant. Les producteurs directs doivent choisir des identifiants uniques pour les opérations distinctes et éviter les collisions entre files partageant un service d’effets.
 
 Transmettez cette clé au service réalisant l’effet. En base de données, enregistrez le reçu et la modification métier dans la même transaction avec une contrainte d’unicité. Pour une API distante, utilisez son mécanisme d’idempotence persistante. Un ensemble en mémoire ou un reçu écrit séparément de l’effet laisse une fenêtre de crash.
 
@@ -84,7 +84,7 @@ function deliveryHandler(
 Les endpoints HTTP conservent les jetons fixes existants. Un callback serveur fournit les jetons acceptés à chaque requête ; un callback client fournit son jeton courant, y compris pour les heartbeats et finalisations.
 
 ```ts
-import { serveTaskQueue, httpTaskQueue } from "@elie-laloum/outpost";
+import { serveTaskQueue, createHttpTaskQueue } from "@elie-laloum/outpost";
 import type { TaskQueue } from "@elie-laloum/outpost";
 
 async function connectRotatingQueue(
@@ -93,7 +93,7 @@ async function connectRotatingQueue(
   currentToken: () => Promise<string>,
 ) {
   const server = await serveTaskQueue({ queue, token: acceptedTokens });
-  const client = httpTaskQueue({ url: server.url, token: currentToken });
+  const client = createHttpTaskQueue({ url: server.url, token: currentToken });
   return { server, client };
 }
 ```

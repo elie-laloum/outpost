@@ -37,13 +37,15 @@ Outpost copies the login into the sandbox’s private home. It never reads a sys
 Save this file next to your workflow script. Set `OUTPOST_REPOSITORY` to an absolute checkout path when running outside the target repository.
 
 ```ts title="outpost.config.mts"
-import { agent, codexHarness } from "@elie-laloum/outpost";
-import { dockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
+import { createAgent, createCodexHarness } from "@elie-laloum/outpost";
+import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
-export const coder = agent({
-  harness: codexHarness({ authentication: "account" }),
+export const coder = createAgent({
+  harness: createCodexHarness({ authentication: "account" }),
 });
-export const sandboxProvider = dockerSandboxProvider({ image: "outpost:dev" });
+export const sandboxProvider = createDockerSandboxProvider({
+  image: "outpost:dev",
+});
 export const repository = process.env.OUTPOST_REPOSITORY ?? process.cwd();
 ```
 
@@ -53,4 +55,4 @@ This file is ordinary application code. Outpost does not discover it automatical
 
 Continue with [First request](../first-request/). To use the generated CLI project immediately, run `node run.ts "Describe this repository"` (`run.mts` in an explicit CommonJS project).
 
-API: [agent](../../reference/agent/) · [dockerSandboxProvider](../../reference/dockersandboxprovider/).
+API: [createAgent](../../reference/createagent/) · [createDockerSandboxProvider](../../reference/createdockersandboxprovider/).

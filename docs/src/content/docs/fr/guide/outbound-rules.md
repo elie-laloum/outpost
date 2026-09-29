@@ -23,9 +23,9 @@ Les listes d’autorisation des conteneurs et les changements de politique en co
 ## Autoriser les API de modèles et les registres
 
 ```ts
-import { vercelSandboxProvider } from "@elie-laloum/outpost/providers/vercel";
+import { createVercelSandboxProvider } from "@elie-laloum/outpost/providers/vercel";
 
-const sandboxProvider = vercelSandboxProvider({
+const sandboxProvider = createVercelSandboxProvider({
   egress: {
     mode: "allowlist",
     domains: ["api.openai.com", "registry.npmjs.org"],
@@ -46,9 +46,9 @@ Choisissez `egress` ou `create.networkPolicy`. Outpost copie les deux formes pou
 ## Confirmation Daytona
 
 ```ts
-import { daytonaSandboxProvider } from "@elie-laloum/outpost/providers/daytona";
+import { createDaytonaSandboxProvider } from "@elie-laloum/outpost/providers/daytona";
 
-const sandboxProvider = daytonaSandboxProvider({
+const sandboxProvider = createDaytonaSandboxProvider({
   egress: {
     mode: "allowlist",
     domains: ["api.openai.com", "registry.npmjs.org"],
@@ -63,9 +63,9 @@ Daytona accepte au plus 100 domaines ou 10 CIDR IPv4. Il ne représente ni `deny
 ## Exécution hors ligne et périmètre
 
 ```ts
-import { dockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
+import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
-const sandboxProvider = dockerSandboxProvider({
+const sandboxProvider = createDockerSandboxProvider({
   image: "outpost:dev",
   egress: { mode: "deny-all" },
 });

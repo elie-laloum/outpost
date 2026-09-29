@@ -10,18 +10,18 @@ Un transport conserve des objets binaires versionnés sous des clés logiques. L
 
 ## Fonctionnement
 
-Utilisez `localTransport` pour un dossier privé ou `s3Transport`, depuis le point d’entrée optionnel `transports/s3`, avec un client S3 appartenant à l’appelant. Composez les stores sur le transport et conservez leurs références indépendamment des sandboxes. L’inspection observe les métadonnées ; la rétention revalide les journaux fermés avant suppression.
+Utilisez `createLocalTransport` pour un dossier privé ou `createS3Transport`, depuis le point d’entrée optionnel `transports/s3`, avec un client S3 appartenant à l’appelant. Composez les stores sur le transport et conservez leurs références indépendamment des sandboxes. L’inspection observe les métadonnées ; la rétention revalide les journaux fermés avant suppression.
 
 ## Limites et responsabilités
 
-Les checkpoints gardent une propriété explicite jusqu’à libération ou récupération autorisée. Archives et conversations natives matérialisent les fichiers nécessaires à Git ou à l’agent. Workspaces, SQLite et montages exigent toujours un système de fichiers. L’activité distante reste une observation dont la propriété n’est pas vérifiée ; elle ne prouve pas l’arrêt d’une autre machine. Composez les stores avec localTransport pour le disque ; les factories de stores par dossier sont supprimées.
+Les checkpoints gardent une propriété explicite jusqu’à libération ou récupération autorisée. Archives et conversations natives matérialisent les fichiers nécessaires à Git ou à l’agent. Workspaces, SQLite et montages exigent toujours un système de fichiers. L’activité distante reste une observation dont la propriété n’est pas vérifiée ; elle ne prouve pas l’arrêt d’une autre machine. Composez les stores avec createLocalTransport pour le disque ; les factories de stores par dossier sont supprimées.
 
 ## Points d’entrée
 
-- [localTransport](../../localtransport/)
-- [s3Transport](../../s3transport/)
-- [artifactStore](../../function-artifactstore/)
-- [workflowCheckpointStore](../../function-workflowcheckpointstore/)
+- [createLocalTransport](../../createlocaltransport/)
+- [createS3Transport](../../creates3transport/)
+- [createArtifactStore](../../createartifactstore/)
+- [createWorkflowCheckpointStore](../../createworkflowcheckpointstore/)
 - [Transport](../../transport/)
 - [inspectRecovery](../../inspectrecovery/)
 

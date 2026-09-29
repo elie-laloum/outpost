@@ -6,18 +6,21 @@ description: "Charger des instructions et outils ciblés à la demande."
 Le harness intégré liste les descriptions de skills dans ses instructions système. Le modèle appelle `load_skill` pour obtenir les instructions et activer les outils du skill.
 
 ```ts
-import { defineHarnessSkill, harnessGitTools } from "@elie-laloum/outpost";
+import {
+  defineHarnessSkill,
+  createHarnessGitTools,
+} from "@elie-laloum/outpost";
 
 const reviewSkill = defineHarnessSkill({
   name: "review",
   description: "Inspect a patch and report concrete regressions.",
   instructions:
     "Read the diff. Check changed behavior against callers and tests. Cite file paths.",
-  tools: [harnessGitTools()],
+  tools: [createHarnessGitTools()],
 });
 ```
 
-Passez le résultat dans `harness({ skills: [reviewSkill] })`. Les noms doivent être uniques, et ceux des outils ne doivent pas entrer en conflit avec les autres outils du harness ou des skills.
+Passez le résultat dans `createHarness({ skills: [reviewSkill] })`. Les noms doivent être uniques, et ceux des outils ne doivent pas entrer en conflit avec les autres outils du harness ou des skills.
 
 ## Instructions dynamiques
 

@@ -6,9 +6,9 @@ description: "Run agents in Podman containers."
 Start Podman and build the image with `outpost init --yes --sandbox-provider podman --image outpost:dev`. Pass the provider to `dispatch()` or `createSandbox()`.
 
 ```ts
-import { podmanSandboxProvider } from "@elie-laloum/outpost/providers/podman";
+import { createPodmanSandboxProvider } from "@elie-laloum/outpost/providers/podman";
 
-const sandboxProvider = podmanSandboxProvider({
+const sandboxProvider = createPodmanSandboxProvider({
   image: "outpost:dev",
   cpus: 2,
   memoryMb: 4096,
@@ -29,4 +29,4 @@ Use [dependency volumes](../persistent-caches/) for package caches and [private 
 
 The provider never falls back to host execution if the engine or image is unavailable. Run [preflight checks](../preflight-checks/) to diagnose setup.
 
-API: [podmanSandboxProvider](../../reference/podmansandboxprovider/) · [ContainerOptions](../../reference/containeroptions/).
+API: [createPodmanSandboxProvider](../../reference/createpodmansandboxprovider/) · [ContainerOptions](../../reference/containeroptions/).

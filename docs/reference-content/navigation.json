@@ -7,23 +7,23 @@
         "attrs": { "data-reference-overview": "" }
       },
       {
-        "slug": "reference/localtransport",
+        "slug": "reference/createlocaltransport",
         "attrs": { "data-api-kind": "function" }
       },
       {
-        "slug": "reference/s3transport",
+        "slug": "reference/creates3transport",
         "attrs": { "data-api-kind": "function" }
       },
       {
-        "slug": "reference/function-artifactstore",
+        "slug": "reference/createartifactstore",
         "attrs": { "data-api-kind": "function" }
       },
       {
-        "slug": "reference/function-workflowcheckpointstore",
+        "slug": "reference/createworkflowcheckpointstore",
         "attrs": { "data-api-kind": "function" }
       },
       {
-        "slug": "reference/taskcachestore",
+        "slug": "reference/createtaskcachestore",
         "attrs": { "data-api-kind": "function" }
       },
       {
@@ -35,7 +35,7 @@
         "attrs": { "data-api-kind": "function" }
       },
       {
-        "slug": "reference/transportconversations",
+        "slug": "reference/createtransportconversations",
         "attrs": { "data-api-kind": "function" }
       },
       {
@@ -313,9 +313,12 @@
         "slug": "reference/overview/agents",
         "attrs": { "data-reference-overview": "" }
       },
-      { "slug": "reference/agent", "attrs": { "data-api-kind": "function" } },
       {
-        "slug": "reference/fallbackagent",
+        "slug": "reference/createagent",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/createfallbackagent",
         "attrs": { "data-api-kind": "function" }
       },
       { "slug": "reference/type-agent", "attrs": { "data-api-kind": "type" } },
@@ -378,7 +381,7 @@
         "attrs": { "data-reference-overview": "" }
       },
       {
-        "slug": "reference/function-harness",
+        "slug": "reference/createharness",
         "attrs": { "data-api-kind": "function" }
       },
       {
@@ -398,23 +401,23 @@
         "attrs": { "data-api-kind": "function" }
       },
       {
-        "slug": "reference/antigravityharness",
+        "slug": "reference/createantigravityharness",
         "attrs": { "data-api-kind": "function" }
       },
       {
-        "slug": "reference/claudeharness",
+        "slug": "reference/createclaudeharness",
         "attrs": { "data-api-kind": "function" }
       },
       {
-        "slug": "reference/codexharness",
+        "slug": "reference/createcodexharness",
         "attrs": { "data-api-kind": "function" }
       },
       {
-        "slug": "reference/copilotharness",
+        "slug": "reference/createcopilotharness",
         "attrs": { "data-api-kind": "function" }
       },
       {
-        "slug": "reference/kimiharness",
+        "slug": "reference/createkimiharness",
         "attrs": { "data-api-kind": "function" }
       },
       {
@@ -426,23 +429,23 @@
         "attrs": { "data-api-kind": "function" }
       },
       {
-        "slug": "reference/harnessfiletools",
+        "slug": "reference/createharnessfiletools",
         "attrs": { "data-api-kind": "function" }
       },
       {
-        "slug": "reference/harnessedittools",
+        "slug": "reference/createharnessedittools",
         "attrs": { "data-api-kind": "function" }
       },
       {
-        "slug": "reference/harnesssearchtools",
+        "slug": "reference/createharnesssearchtools",
         "attrs": { "data-api-kind": "function" }
       },
       {
-        "slug": "reference/harnessgittools",
+        "slug": "reference/createharnessgittools",
         "attrs": { "data-api-kind": "function" }
       },
       {
-        "slug": "reference/harnessshelltools",
+        "slug": "reference/createharnessshelltools",
         "attrs": { "data-api-kind": "function" }
       },
       {
@@ -727,14 +730,18 @@
         "slug": "reference/overview/prompts-responses",
         "attrs": { "data-reference-overview": "" }
       },
+      {
+        "slug": "reference/definetextresponse",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/definejsonresponse",
+        "attrs": { "data-api-kind": "function" }
+      },
       { "slug": "reference/brief", "attrs": { "data-api-kind": "type" } },
       {
         "slug": "reference/promptvariables",
         "attrs": { "data-api-kind": "type" }
-      },
-      {
-        "slug": "reference/response",
-        "attrs": { "data-api-kind": "constant" }
       },
       {
         "slug": "reference/responseerror",
@@ -758,7 +765,7 @@
         "attrs": { "data-reference-overview": "" }
       },
       {
-        "slug": "reference/harnessconversations",
+        "slug": "reference/createharnessconversations",
         "attrs": { "data-api-kind": "function" }
       },
       {
@@ -803,19 +810,19 @@
         "attrs": { "data-api-kind": "function" }
       },
       {
-        "slug": "reference/reporter",
-        "attrs": { "data-api-kind": "function" }
-      },
-      {
         "slug": "reference/createreporter",
         "attrs": { "data-api-kind": "function" }
       },
       {
-        "slug": "reference/replayagent",
+        "slug": "reference/createcustomreporter",
         "attrs": { "data-api-kind": "function" }
       },
       {
-        "slug": "reference/opentelemetry",
+        "slug": "reference/createreplayagent",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/createopentelemetryobserver",
         "attrs": { "data-api-kind": "function" }
       },
       {
@@ -951,28 +958,31 @@
         "attrs": { "data-reference-overview": "" }
       },
       {
-        "slug": "reference/looptask",
-        "attrs": { "data-api-kind": "function" }
-      },
-      { "slug": "reference/task", "attrs": { "data-api-kind": "function" } },
-      {
-        "slug": "reference/workflow",
+        "slug": "reference/definelooptask",
         "attrs": { "data-api-kind": "function" }
       },
       {
-        "slug": "reference/agenttask",
+        "slug": "reference/definetask",
         "attrs": { "data-api-kind": "function" }
       },
       {
-        "slug": "reference/commandtask",
+        "slug": "reference/defineworkflow",
         "attrs": { "data-api-kind": "function" }
       },
       {
-        "slug": "reference/isolatedtask",
+        "slug": "reference/defineagenttask",
         "attrs": { "data-api-kind": "function" }
       },
       {
-        "slug": "reference/interactiveagenttask",
+        "slug": "reference/definecommandtask",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/defineisolatedtask",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/defineinteractiveagenttask",
         "attrs": { "data-api-kind": "function" }
       },
       {
@@ -1136,27 +1146,27 @@
         "attrs": { "data-reference-overview": "" }
       },
       {
-        "slug": "reference/dockersandboxprovider",
+        "slug": "reference/createdockersandboxprovider",
         "attrs": { "data-api-kind": "function" }
       },
       {
-        "slug": "reference/podmansandboxprovider",
+        "slug": "reference/createpodmansandboxprovider",
         "attrs": { "data-api-kind": "function" }
       },
       {
-        "slug": "reference/localsandboxprovider",
+        "slug": "reference/createlocalsandboxprovider",
         "attrs": { "data-api-kind": "function" }
       },
       {
-        "slug": "reference/vercelsandboxprovider",
+        "slug": "reference/createvercelsandboxprovider",
         "attrs": { "data-api-kind": "function" }
       },
       {
-        "slug": "reference/daytonasandboxprovider",
+        "slug": "reference/createdaytonasandboxprovider",
         "attrs": { "data-api-kind": "function" }
       },
       {
-        "slug": "reference/firecrackersandboxprovider",
+        "slug": "reference/createfirecrackersandboxprovider",
         "attrs": {
           "data-api-kind": "function",
           "data-api-status": "experimental",
@@ -1164,11 +1174,11 @@
         }
       },
       {
-        "slug": "reference/mountedsandboxprovider",
+        "slug": "reference/createmountedsandboxprovider",
         "attrs": { "data-api-kind": "function" }
       },
       {
-        "slug": "reference/remotesandboxprovider",
+        "slug": "reference/createremotesandboxprovider",
         "attrs": { "data-api-kind": "function" }
       },
       {
@@ -1235,11 +1245,11 @@
         "attrs": { "data-reference-overview": "" }
       },
       {
-        "slug": "reference/openaimodelprovider",
+        "slug": "reference/createopenaimodelprovider",
         "attrs": { "data-api-kind": "function" }
       },
       {
-        "slug": "reference/anthropicmodelprovider",
+        "slug": "reference/createanthropicmodelprovider",
         "attrs": { "data-api-kind": "function" }
       },
       {
@@ -1535,11 +1545,11 @@
         "attrs": { "data-reference-overview": "" }
       },
       {
-        "slug": "reference/approvaltask",
+        "slug": "reference/defineapprovaltask",
         "attrs": { "data-api-kind": "function" }
       },
       {
-        "slug": "reference/pausetask",
+        "slug": "reference/definepausetask",
         "attrs": { "data-api-kind": "function" }
       },
       {
@@ -1547,7 +1557,7 @@
         "attrs": { "data-api-kind": "function" }
       },
       {
-        "slug": "reference/ed25519decisionverifier",
+        "slug": "reference/createed25519decisionverifier",
         "attrs": { "data-api-kind": "function" }
       },
       {
@@ -1604,6 +1614,14 @@
         "attrs": { "data-reference-overview": "" }
       },
       {
+        "slug": "reference/definejsonartifact",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/definebinaryartifact",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
         "slug": "reference/publishartifact",
         "attrs": { "data-api-kind": "function" }
       },
@@ -1612,16 +1630,12 @@
         "attrs": { "data-api-kind": "function" }
       },
       {
-        "slug": "reference/artifacttask",
+        "slug": "reference/defineartifacttask",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/readartifact",
         "attrs": { "data-api-kind": "function" }
-      },
-      {
-        "slug": "reference/artifact",
-        "attrs": { "data-api-kind": "constant" }
       },
       {
         "slug": "reference/artifactcontractoptions",
@@ -1673,11 +1687,11 @@
         "attrs": { "data-reference-overview": "" }
       },
       {
-        "slug": "reference/sqlitetaskqueue",
+        "slug": "reference/createsqlitetaskqueue",
         "attrs": { "data-api-kind": "function" }
       },
       {
-        "slug": "reference/bullmqtaskqueue",
+        "slug": "reference/createbullmqtaskqueue",
         "attrs": { "data-api-kind": "function" }
       },
       {
@@ -1685,7 +1699,7 @@
         "attrs": { "data-api-kind": "function" }
       },
       {
-        "slug": "reference/httptaskqueue",
+        "slug": "reference/createhttptaskqueue",
         "attrs": { "data-api-kind": "function" }
       },
       {
@@ -1693,7 +1707,7 @@
         "attrs": { "data-api-kind": "function" }
       },
       {
-        "slug": "reference/queuedtask",
+        "slug": "reference/definequeuedtask",
         "attrs": { "data-api-kind": "function" }
       },
       {

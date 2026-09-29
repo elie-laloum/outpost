@@ -29,10 +29,10 @@ Les noms de serveur utilisent des lettres, des chiffres, `_` et `-`, jusqu’à 
 Chaque nom de `variables` et de `bearerTokenVariable` doit être une variable déclarée : dans les `variables` du harness, sur le fournisseur de sandbox ou dans `.outpost/.env`. Une valeur manquante échoue avant le démarrage de l’agent avec `Missing NAME`. Voir [Valeurs d’environnement](../environment-values/).
 
 ```ts
-import { agent, claudeHarness } from "@elie-laloum/outpost";
+import { createAgent, createClaudeHarness } from "@elie-laloum/outpost";
 
-const coder = agent({
-  harness: claudeHarness({
+const coder = createAgent({
+  harness: createClaudeHarness({
     authentication: "account",
     mcpServers: {
       linear: {
@@ -69,29 +69,29 @@ Chaque preset CLI accepte `mcpServers`. Outpost les traduit dans la configuratio
 
 Les serveurs déclarés s’ajoutent à ceux que la CLI connaît déjà. L’approbation des outils suit les réglages de permissions de chaque CLI : les presets headless qui ignorent les permissions autorisent aussi les outils MCP.
 
-Kimi et Antigravity n’ont pas d’option par exécution : Outpost fusionne donc les entrées déclarées dans leur fichier du home, une fois par sandbox. Les autres serveurs et réglages du fichier sont conservés ; un fichier illisible fait échouer l’opération au lieu d’être remplacé. Dans un conteneur ou une sandbox cloud, le home est privé et disparaît avec la sandbox. Avec [`localSandboxProvider()`](../host-process/), c’est votre propre home, et les entrées fusionnées restent après l’exécution.
+Kimi et Antigravity n’ont pas d’option par exécution : Outpost fusionne donc les entrées déclarées dans leur fichier du home, une fois par sandbox. Les autres serveurs et réglages du fichier sont conservés ; un fichier illisible fait échouer l’opération au lieu d’être remplacé. Dans un conteneur ou une sandbox cloud, le home est privé et disparaît avec la sandbox. Avec [`createLocalSandboxProvider()`](../host-process/), c’est votre propre home, et les entrées fusionnées restent après l’exécution.
 
 ## Boucle de modèle intégrée
 
-Transmettez les mêmes serveurs à `harness({ mcpServers })`. Chaque tour démarre les serveurs dans la sandbox empruntée, liste leurs outils et les arrête à la fin du tour.
+Transmettez les mêmes serveurs à `createHarness({ mcpServers })`. Chaque tour démarre les serveurs dans la sandbox empruntée, liste leurs outils et les arrête à la fin du tour.
 
 ```ts
 import {
-  agent,
-  harness,
-  harnessFileTools,
-  openaiModelProvider,
+  createAgent,
+  createHarness,
+  createHarnessFileTools,
+  createOpenAIModelProvider,
 } from "@elie-laloum/outpost";
 
-const reviewer = agent({
+const reviewer = createAgent({
   model: process.env.MODEL_NAME ?? "",
-  harness: harness({
-    modelProvider: openaiModelProvider({
+  harness: createHarness({
+    modelProvider: createOpenAIModelProvider({
       baseUrl: "https://api.openai.com/v1",
       api: "responses",
       apiKey: process.env.OPENAI_API_KEY ?? "",
     }),
-    tools: [harnessFileTools()],
+    tools: [createHarnessFileTools()],
     mcpServers: {
       linear: {
         command: "npx",

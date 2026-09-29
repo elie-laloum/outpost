@@ -3,24 +3,24 @@ title: "Étapes de validation"
 description: "Suspendre un workflow pour une décision explicite et fiable."
 ---
 
-Utilisez `approvalTask()` pour arrêter un workflow jusqu’à l’approbation ou au rejet d’un acteur autorisé. Les étapes de validation exigent un checkpoint pour conserver la demande au-delà du processus courant.
+Utilisez `defineApprovalTask()` pour arrêter un workflow jusqu’à l’approbation ou au rejet d’un acteur autorisé. Les étapes de validation exigent un checkpoint pour conserver la demande au-delà du processus courant.
 
 ```ts
 import {
-  approvalTask,
-  localTransport,
-  workflow,
-  workflowCheckpointStore,
+  defineApprovalTask,
+  createLocalTransport,
+  defineWorkflow,
+  createWorkflowCheckpointStore,
 } from "@elie-laloum/outpost";
 
-const approve = approvalTask({
+const approve = defineApprovalTask({
   key: "approve",
   prompt: "Approve the reviewed change?",
   actors: ["maintainer"],
 });
-const pipeline = workflow("delivery", [approve]);
-const store = workflowCheckpointStore({
-  transporter: localTransport({ directory: ".outpost/storage" }),
+const pipeline = defineWorkflow("delivery", [approve]);
+const store = createWorkflowCheckpointStore({
+  transporter: createLocalTransport({ directory: ".outpost/storage" }),
 });
 const result = await pipeline.start({
   checkpoint: { store, runId: "delivery-42", version: "1" },
@@ -66,7 +66,7 @@ async function approveReview(
 }
 ```
 
-Placez les tâches de livraison après cette étape. Un rejet empêche leur exécution normale. `pauseTask()` suit le même mécanisme persistant mais attend `action: "resume"` pour continuer.
+Placez les tâches de livraison après cette étape. Un rejet empêche leur exécution normale. `definePauseTask()` suit le même mécanisme persistant mais attend `action: "resume"` pour continuer.
 
 ## Authentifier l’acteur
 
@@ -74,16 +74,16 @@ Les noms d’acteurs sont des métadonnées fiables fournies par votre applicati
 
 Une phrase demandant à l’agent d’attendre n’est pas une validation imposée. Le graphe de dépendances doit imposer l’attente.
 
-API : [approvalTask](../../reference/approvaltask/) · [pauseTask](../../reference/pausetask/) · [WorkflowDecision](../../reference/workflowdecision/).
+API : [defineApprovalTask](../../reference/defineapprovaltask/) · [definePauseTask](../../reference/definepausetask/) · [WorkflowDecision](../../reference/workflowdecision/).
 
 ## Exiger une décision signée
 
-Disponible en 7.0.0 : définissez `authentication: "signed"` sur `approvalTask()` ou `pauseTask()`. Cette exigence participe à l’identité du checkpoint : la retirer à la reprise est refusé. Fournissez `decisionVerifier` lors de la soumission des preuves. Sans cette option, le gate conserve la confiance dans l’acteur fourni par l’application décrite plus haut.
+Disponible en 7.0.0 : définissez `authentication: "signed"` sur `defineApprovalTask()` ou `definePauseTask()`. Cette exigence participe à l’identité du checkpoint : la retirer à la reprise est refusé. Fournissez `decisionVerifier` lors de la soumission des preuves. Sans cette option, le gate conserve la confiance dans l’acteur fourni par l’application décrite plus haut.
 
 ```ts
-import { approvalTask } from "@elie-laloum/outpost";
+import { defineApprovalTask } from "@elie-laloum/outpost";
 
-const review = approvalTask({
+const review = defineApprovalTask({
   key: "review",
   prompt: "Approve deployment?",
   actors: ["maintainer"],
@@ -96,7 +96,7 @@ Signez la demande exacte après authentification de l’utilisateur et confirmat
 ```ts
 import {
   signWorkflowDecision,
-  ed25519DecisionVerifier,
+  createEd25519DecisionVerifier,
 } from "@elie-laloum/outpost";
 import type {
   Workflow,
@@ -123,7 +123,7 @@ async function submitSignedReview(
   return pipeline.start({
     checkpoint,
     decisions: [signed],
-    decisionVerifier: ed25519DecisionVerifier({ keys: loadKeys }),
+    decisionVerifier: createEd25519DecisionVerifier({ keys: loadKeys }),
   });
 }
 ```

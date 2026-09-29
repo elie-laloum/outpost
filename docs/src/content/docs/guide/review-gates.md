@@ -3,24 +3,24 @@ title: "Review gates"
 description: "Pause a workflow for an explicit trusted decision."
 ---
 
-Use `approvalTask()` to stop a workflow until a permitted actor approves or rejects. Gates require a checkpoint so the request survives the current process.
+Use `defineApprovalTask()` to stop a workflow until a permitted actor approves or rejects. Gates require a checkpoint so the request survives the current process.
 
 ```ts
 import {
-  approvalTask,
-  localTransport,
-  workflow,
-  workflowCheckpointStore,
+  defineApprovalTask,
+  createLocalTransport,
+  defineWorkflow,
+  createWorkflowCheckpointStore,
 } from "@elie-laloum/outpost";
 
-const approve = approvalTask({
+const approve = defineApprovalTask({
   key: "approve",
   prompt: "Approve the reviewed change?",
   actors: ["maintainer"],
 });
-const pipeline = workflow("delivery", [approve]);
-const store = workflowCheckpointStore({
-  transporter: localTransport({ directory: ".outpost/storage" }),
+const pipeline = defineWorkflow("delivery", [approve]);
+const store = createWorkflowCheckpointStore({
+  transporter: createLocalTransport({ directory: ".outpost/storage" }),
 });
 const result = await pipeline.start({
   checkpoint: { store, runId: "delivery-42", version: "1" },
@@ -66,7 +66,7 @@ async function approveReview(
 }
 ```
 
-Place delivery tasks after the gate. Rejection prevents their normal execution. `pauseTask()` follows the same persisted pattern but expects `action: "resume"` to continue.
+Place delivery tasks after the gate. Rejection prevents their normal execution. `definePauseTask()` follows the same persisted pattern but expects `action: "resume"` to continue.
 
 ## Authenticate the actor
 
@@ -74,16 +74,16 @@ Actor names are trusted metadata supplied by your application. Outpost does not 
 
 A sentence asking the agent to wait is not a gate. The dependency graph must enforce the wait.
 
-API: [approvalTask](../../reference/approvaltask/) · [pauseTask](../../reference/pausetask/) · [WorkflowDecision](../../reference/workflowdecision/).
+API: [defineApprovalTask](../../reference/defineapprovaltask/) · [definePauseTask](../../reference/definepausetask/) · [WorkflowDecision](../../reference/workflowdecision/).
 
 ## Require a signed decision
 
-Available in 7.0.0: set `authentication: "signed"` on `approvalTask()` or `pauseTask()`. This requirement participates in checkpoint identity: removing it on restart is rejected. Supply `decisionVerifier` when submitting proofs. Gates without this option retain the application-trusted actor contract above.
+Available in 7.0.0: set `authentication: "signed"` on `defineApprovalTask()` or `definePauseTask()`. This requirement participates in checkpoint identity: removing it on restart is rejected. Supply `decisionVerifier` when submitting proofs. Gates without this option retain the application-trusted actor contract above.
 
 ```ts
-import { approvalTask } from "@elie-laloum/outpost";
+import { defineApprovalTask } from "@elie-laloum/outpost";
 
-const review = approvalTask({
+const review = defineApprovalTask({
   key: "review",
   prompt: "Approve deployment?",
   actors: ["maintainer"],
@@ -96,7 +96,7 @@ Sign the exact pending request after authenticating the user and confirming thei
 ```ts
 import {
   signWorkflowDecision,
-  ed25519DecisionVerifier,
+  createEd25519DecisionVerifier,
 } from "@elie-laloum/outpost";
 import type {
   Workflow,
@@ -123,7 +123,7 @@ async function submitSignedReview(
   return pipeline.start({
     checkpoint,
     decisions: [signed],
-    decisionVerifier: ed25519DecisionVerifier({ keys: loadKeys }),
+    decisionVerifier: createEd25519DecisionVerifier({ keys: loadKeys }),
   });
 }
 ```

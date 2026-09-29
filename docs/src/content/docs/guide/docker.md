@@ -6,9 +6,9 @@ description: "Run agents in Docker containers."
 Start Docker and build an [agent image](../image-recipes/). Pass the provider to `dispatch()` or `createSandbox()`.
 
 ```ts
-import { dockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
+import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
-const sandboxProvider = dockerSandboxProvider({
+const sandboxProvider = createDockerSandboxProvider({
   image: "outpost:dev",
   cpus: 2,
   memoryMb: 4096,
@@ -29,4 +29,4 @@ Use [dependency volumes](../persistent-caches/) for package caches and [private 
 
 The provider never falls back to host execution if the engine or image is unavailable. Run [preflight checks](../preflight-checks/) to diagnose setup.
 
-API: [dockerSandboxProvider](../../reference/dockersandboxprovider/) · [ContainerOptions](../../reference/containeroptions/).
+API: [createDockerSandboxProvider](../../reference/createdockersandboxprovider/) · [ContainerOptions](../../reference/containeroptions/).

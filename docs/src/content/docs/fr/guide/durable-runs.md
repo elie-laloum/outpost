@@ -7,17 +7,17 @@ Un checkpoint stocke les états des tâches, sorties et consommations cumulées 
 
 ```ts
 import {
-  localTransport,
-  task,
-  workflow,
-  workflowCheckpointStore,
+  createLocalTransport,
+  defineTask,
+  defineWorkflow,
+  createWorkflowCheckpointStore,
 } from "@elie-laloum/outpost";
 
-const store = workflowCheckpointStore({
-  transporter: localTransport({ directory: ".outpost/storage" }),
+const store = createWorkflowCheckpointStore({
+  transporter: createLocalTransport({ directory: ".outpost/storage" }),
 });
-const scan = task({ key: "scan", perform: () => ({ files: 12 }) });
-const result = await workflow("scan", [scan]).start({
+const scan = defineTask({ key: "scan", perform: () => ({ files: 12 }) });
+const result = await defineWorkflow("scan", [scan]).start({
   checkpoint: { store, runId: "scan-2026-09", version: "1" },
 });
 result.unwrap();
@@ -38,4 +38,4 @@ Les sorties doivent être du JSON sans perte ou `undefined`. Dates, fonctions, o
 
 La propriété du checkpoint n’expire pas automatiquement. Après un crash, arrêtez indépendamment l’ancien runner, inspectez la révision stockée, puis appelez `recoverWorkflowCheckpoint({ transporter, runId, revision })`. Une révision modifiée refuse la récupération. Libérer la propriété préserve la progression et n’autorise pas à lui seul le rejeu.
 
-API : [workflowCheckpointStore](../../reference/function-workflowcheckpointstore/) · [WorkflowCheckpointOptions](../../reference/workflowcheckpointoptions/) · [recoverWorkflowCheckpoint](../../reference/recoverworkflowcheckpoint/).
+API : [createWorkflowCheckpointStore](../../reference/createworkflowcheckpointstore/) · [WorkflowCheckpointOptions](../../reference/workflowcheckpointoptions/) · [recoverWorkflowCheckpoint](../../reference/recoverworkflowcheckpoint/).

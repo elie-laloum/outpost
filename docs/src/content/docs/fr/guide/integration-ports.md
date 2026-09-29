@@ -16,11 +16,11 @@ Implémentez le contrat responsable du comportement voulu. Gardez indépendants 
 
 ## Ajouter un harness CLI
 
-Un `CliHarness` expose `kind: "cli"` et `bind(model)`, qui renvoie un `AgentAdapter`. Composez-le avec `agent({ harness })`. Séparez construction des requêtes et décodage des événements, déclarez honnêtement les capacités de continuation et fournissez un store uniquement si la restauration fonctionne.
+Un `CliHarness` expose `kind: "cli"` et `bind(model)`, qui renvoie un `AgentAdapter`. Composez-le avec `createAgent({ harness })`. Séparez construction des requêtes et décodage des événements, déclarez honnêtement les capacités de continuation et fournissez un store uniquement si la restauration fonctionne.
 
 ## Ajouter un fournisseur de sandbox
 
-Renvoyez un bail avec `root`, `home`, invocation, upload/download et libération idempotente. Préservez le statut de sortie après fermeture des flux, l’annulation des processus et les transferts binaires. `mountedSandboxProvider()` et `remoteSandboxProvider()` aident à composer les stratégies correspondantes.
+Renvoyez un bail avec `root`, `home`, invocation, upload/download et libération idempotente. Préservez le statut de sortie après fermeture des flux, l’annulation des processus et les transferts binaires. `createMountedSandboxProvider()` et `createRemoteSandboxProvider()` aident à composer les stratégies correspondantes.
 
 ## Valider l’intégration
 

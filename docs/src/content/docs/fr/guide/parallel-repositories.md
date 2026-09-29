@@ -3,14 +3,14 @@ title: "Plusieurs dépôts"
 description: "Donner une sandbox à chaque dépôt et relier les résultats."
 ---
 
-Utilisez un `isolatedTask` par dépôt. Chaque tâche possède le cycle de vie de sa requête, tandis que le workflow contrôle les dépendances et la concurrence.
+Utilisez un `defineIsolatedTask` par dépôt. Chaque tâche possède le cycle de vie de sa requête, tandis que le workflow contrôle les dépendances et la concurrence.
 
 ```ts
-import { isolatedTask, workflow } from "@elie-laloum/outpost";
+import { defineIsolatedTask, defineWorkflow } from "@elie-laloum/outpost";
 import { coder, sandboxProvider } from "./outpost.config.mts";
 
 const review = (key: string, repository: string) =>
-  isolatedTask({
+  defineIsolatedTask({
     key,
     request: ({ signal }) => ({
       repository,
@@ -23,7 +23,7 @@ const review = (key: string, repository: string) =>
   });
 const api = review("api", "/projects/api");
 const web = review("web", "/projects/web");
-const result = await workflow("repositories", [api, web]).start({
+const result = await defineWorkflow("repositories", [api, web]).start({
   concurrency: 2,
 });
 result.unwrap();
@@ -40,4 +40,4 @@ Ajoutez `after: [api]` à la tâche web si elle a besoin du résultat API, puis 
 
 Un dépôt peut réussir tandis qu’un autre échoue. Examinez le résultat de chaque tâche et le workspace conservé avant de relancer. Il n’existe ni rollback entre dépôts ni push automatique. Placez la publication finale derrière une étape contrôlée par l’application.
 
-API : [isolatedTask](../../reference/isolatedtask/).
+API : [defineIsolatedTask](../../reference/defineisolatedtask/).

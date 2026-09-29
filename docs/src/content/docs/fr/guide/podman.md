@@ -6,9 +6,9 @@ description: "Exécuter des agents dans des conteneurs Podman."
 Démarrez Podman et construisez l’image avec `outpost init --yes --sandbox-provider podman --image outpost:dev`. Passez le fournisseur à `dispatch()` ou `createSandbox()`.
 
 ```ts
-import { podmanSandboxProvider } from "@elie-laloum/outpost/providers/podman";
+import { createPodmanSandboxProvider } from "@elie-laloum/outpost/providers/podman";
 
-const sandboxProvider = podmanSandboxProvider({
+const sandboxProvider = createPodmanSandboxProvider({
   image: "outpost:dev",
   cpus: 2,
   memoryMb: 4096,
@@ -29,4 +29,4 @@ Utilisez les [volumes de dépendances](../persistent-caches/) pour les caches de
 
 Le fournisseur ne bascule jamais vers une exécution hôte si le moteur ou l’image manque. Lancez les [contrôles préalables](../preflight-checks/) pour diagnostiquer la configuration.
 
-API : [podmanSandboxProvider](../../reference/podmansandboxprovider/) · [ContainerOptions](../../reference/containeroptions/).
+API : [createPodmanSandboxProvider](../../reference/createpodmansandboxprovider/) · [ContainerOptions](../../reference/containeroptions/).

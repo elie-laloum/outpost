@@ -6,9 +6,9 @@ description: "Contrôler concurrence, propagation des échecs et tentatives."
 Définissez `concurrency` sur `start()` et la politique de reprise sur chaque tâche. Les reprises sont explicites car une nouvelle tentative peut répéter des effets.
 
 ```ts
-import { task, workflow } from "@elie-laloum/outpost";
+import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
 
-const check = task({
+const check = defineTask({
   key: "check",
   retry: { attempts: 2, delayMs: 100 },
   timeoutMs: 5_000,
@@ -17,7 +17,9 @@ const check = task({
     return { attempt, ok: true };
   },
 });
-const result = await workflow("checks", [check]).start({ concurrency: 2 });
+const result = await defineWorkflow("checks", [check]).start({
+  concurrency: 2,
+});
 result.unwrap();
 console.log(result.status);
 ```
@@ -29,9 +31,9 @@ console.log(result.status);
 Le délai fixe existant reste le comportement par défaut. `backoff: "exponential"` double `delayMs` après chaque échec ; `maxDelayMs` plafonne le délai local (30 secondes par défaut en mode exponentiel) ; `jitter: "full"` répartit uniformément les reprises entre zéro et ce délai plafonné. L’aléa vaut `"none"` par défaut. Configurez un `delayMs` positif pour obtenir une attente progressive utile.
 
 ```ts
-import { OutpostError, task, workflow } from "@elie-laloum/outpost";
+import { OutpostError, defineTask, defineWorkflow } from "@elie-laloum/outpost";
 
-const request = task({
+const request = defineTask({
   key: "request",
   retry: {
     attempts: 4,
@@ -48,7 +50,7 @@ const request = task({
     return "Remplacez par votre requête annulable";
   },
 });
-const result = await workflow("requests", [request]).start({
+const result = await defineWorkflow("requests", [request]).start({
   timeoutMs: 60_000,
 });
 result.unwrap();
@@ -76,6 +78,6 @@ Chaque appel de reprise à `start()` reçoit un nouveau délai ; le temps entre 
 
 Transmettez `context.signal` aux commandes, requêtes réseau et requêtes d’agent. `timeoutMs` signale l’annulation d’une tentative ; il ne peut pas terminer de force du code applicatif arbitraire. `retry.accepts(error, attempt)` limite les erreurs autorisant une reprise.
 
-N’exécutez pas d’opérations concurrentes dans une même sandbox empruntée. Ajoutez des dépendances ou allouez des environnements distincts avec `isolatedTask`.
+N’exécutez pas d’opérations concurrentes dans une même sandbox empruntée. Ajoutez des dépendances ou allouez des environnements distincts avec `defineIsolatedTask`.
 
 API : [TaskOptions](../../reference/taskoptions/) · [WorkflowOptions](../../reference/workflowoptions/) · [Retry](../../reference/retry/).

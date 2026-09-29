@@ -29,10 +29,10 @@ Server names use letters, digits, `_` and `-`, up to 32 characters. `command`, `
 Each name in `variables` and `bearerTokenVariable` must be a declared variable: on the harness `variables`, on the sandbox provider, or in `.outpost/.env`. A missing value fails before the agent starts with `Missing NAME`. See [Environment values](../environment-values/).
 
 ```ts
-import { agent, claudeHarness } from "@elie-laloum/outpost";
+import { createAgent, createClaudeHarness } from "@elie-laloum/outpost";
 
-const coder = agent({
-  harness: claudeHarness({
+const coder = createAgent({
+  harness: createClaudeHarness({
     authentication: "account",
     mcpServers: {
       linear: {
@@ -69,29 +69,29 @@ Every CLI preset accepts `mcpServers`. Outpost translates them into the native c
 
 Declared servers add to those the CLI already knows. Tool approval follows each CLI’s own permission settings: headless presets that skip permissions also allow MCP tools.
 
-Kimi and Antigravity have no per-run option, so Outpost merges the declared entries into their home file once per sandbox. Other servers and settings in that file are kept; an unreadable file fails instead of being replaced. In a container or cloud sandbox the home is private and disappears with the sandbox. With [`localSandboxProvider()`](../host-process/) it is your own home, and the merged entries stay after the run.
+Kimi and Antigravity have no per-run option, so Outpost merges the declared entries into their home file once per sandbox. Other servers and settings in that file are kept; an unreadable file fails instead of being replaced. In a container or cloud sandbox the home is private and disappears with the sandbox. With [`createLocalSandboxProvider()`](../host-process/) it is your own home, and the merged entries stay after the run.
 
 ## Built-in model loop
 
-Pass the same servers to `harness({ mcpServers })`. Each turn starts the servers inside the borrowed sandbox, lists their tools and stops them when the turn ends.
+Pass the same servers to `createHarness({ mcpServers })`. Each turn starts the servers inside the borrowed sandbox, lists their tools and stops them when the turn ends.
 
 ```ts
 import {
-  agent,
-  harness,
-  harnessFileTools,
-  openaiModelProvider,
+  createAgent,
+  createHarness,
+  createHarnessFileTools,
+  createOpenAIModelProvider,
 } from "@elie-laloum/outpost";
 
-const reviewer = agent({
+const reviewer = createAgent({
   model: process.env.MODEL_NAME ?? "",
-  harness: harness({
-    modelProvider: openaiModelProvider({
+  harness: createHarness({
+    modelProvider: createOpenAIModelProvider({
       baseUrl: "https://api.openai.com/v1",
       api: "responses",
       apiKey: process.env.OPENAI_API_KEY ?? "",
     }),
-    tools: [harnessFileTools()],
+    tools: [createHarnessFileTools()],
     mcpServers: {
       linear: {
         command: "npx",

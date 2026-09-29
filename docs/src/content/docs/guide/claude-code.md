@@ -3,7 +3,7 @@ title: "Claude Code"
 description: "Connect Claude Code to an Outpost sandbox."
 ---
 
-Use `claudeHarness()` with any supported [execution backend](../execution-backends/). Install the CLI in your image or allow bootstrap on remote providers.
+Use `createClaudeHarness()` with any supported [execution backend](../execution-backends/). Install the CLI in your image or allow bootstrap on remote providers.
 
 ## Account access
 
@@ -14,10 +14,10 @@ Run `claude` and `/login` on the host. Outpost reads the subscription entry in `
 Supply `ANTHROPIC_API_KEY` explicitly. API usage follows the provider’s API billing.
 
 ```ts
-import { agent, claudeHarness } from "@elie-laloum/outpost";
+import { createAgent, createClaudeHarness } from "@elie-laloum/outpost";
 
-const coder = agent({
-  harness: claudeHarness({
+const coder = createAgent({
+  harness: createClaudeHarness({
     authentication: "usage",
     variables: { ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY ?? "" },
   }),
@@ -26,10 +26,10 @@ const coder = agent({
 
 ## Behavior
 
-Claude supports native conversations, resume, fork and response repair. `conversations` stores captured sessions in a `"claude"` [conversation store](../chat-history/#storage), such as `transportConversations("claude", …)`. With [steering](../steering/), Claude receives instructions on its stream-json input during the turn, on every sandbox provider. `permissions` configures the CLI permission mode; it does not replace sandbox isolation. Do not supply `ANTHROPIC_API_KEY` alongside account credentials or `CLAUDE_CODE_OAUTH_TOKEN` alongside API authentication: Outpost rejects these conflicts.
+Claude supports native conversations, resume, fork and response repair. `conversations` stores captured sessions in a `"claude"` [conversation store](../chat-history/#storage), such as `createTransportConversations("claude", …)`. With [steering](../steering/), Claude receives instructions on its stream-json input during the turn, on every sandbox provider. `permissions` configures the CLI permission mode; it does not replace sandbox isolation. Do not supply `ANTHROPIC_API_KEY` alongside account credentials or `CLAUDE_CODE_OAUTH_TOKEN` alongside API authentication: Outpost rejects these conflicts.
 
 See [Claude Code authentication](https://code.claude.com/docs/en/authentication) for the vendor’s account requirements.
 
 `mcpServers` passes [MCP servers](../mcp-servers/) with `--mcp-config` for each run.
 
-API: [claudeHarness](../../reference/claudeharness/).
+API: [createClaudeHarness](../../reference/createclaudeharness/).

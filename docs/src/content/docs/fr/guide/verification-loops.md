@@ -3,12 +3,12 @@ title: "Boucles de vérification"
 description: "Répéter le travail avec un feedback jusqu’à validation ou atteinte d’une limite."
 ---
 
-`loopTask()` alterne `attempt` et `check` dans un seul nœud de workflow. Cette fonctionnalité est disponible depuis la 8.0.0. Une vérification refusée fournit un feedback textuel au tour suivant ; une vérification réussie expose le résultat accepté aux tâches dépendantes.
+`defineLoopTask()` alterne `attempt` et `check` dans un seul nœud de workflow. Cette fonctionnalité est disponible depuis la 8.0.0. Une vérification refusée fournit un feedback textuel au tour suivant ; une vérification réussie expose le résultat accepté aux tâches dépendantes.
 
 ```ts
-import { loopTask, workflow } from "@elie-laloum/outpost";
+import { defineLoopTask, defineWorkflow } from "@elie-laloum/outpost";
 
-const fix = loopTask({
+const fix = defineLoopTask({
   key: "fix",
   maxRounds: 3,
   attempt: (ctx, feedback) => ({ round: ctx.round, feedback: feedback ?? "" }),
@@ -17,7 +17,7 @@ const fix = loopTask({
       ? { done: true }
       : { done: false, feedback: "Cover the missing edge case." },
 });
-const result = await workflow("verified", [fix]).start({
+const result = await defineWorkflow("verified", [fix]).start({
   budget: { attempts: 3 },
 });
 result.unwrap();
@@ -28,19 +28,19 @@ console.log(result.value(fix).round); // 2
 
 ## Coder, puis lancer une commande
 
-Réutilisez une sandbox appartenant à l’appelant, préparée comme dans les [sessions de sandbox](../sandbox-sessions/). Appeler `perform(ctx)` sur un `agentTask` relie l’usage en streaming, l’annulation et l’observation au contexte de boucle. Avec les checkpoints, renvoyez une projection JSON du résultat : le résultat complet possède des méthodes de continuation non sérialisables en JSON.
+Réutilisez une sandbox appartenant à l’appelant, préparée comme dans les [sessions de sandbox](../sandbox-sessions/). Appeler `perform(ctx)` sur un `defineAgentTask` relie l’usage en streaming, l’annulation et l’observation au contexte de boucle. Avec les checkpoints, renvoyez une projection JSON du résultat : le résultat complet possède des méthodes de continuation non sérialisables en JSON.
 
 ```ts
-import { agentTask, loopTask } from "@elie-laloum/outpost";
+import { defineAgentTask, defineLoopTask } from "@elie-laloum/outpost";
 import type { Sandbox } from "@elie-laloum/outpost";
 
 declare const session: Sandbox;
-const fix = loopTask({
+const fix = defineLoopTask({
   key: "fix-tests",
   maxRounds: 4,
   timeoutMs: 300_000,
   async attempt(ctx, feedback) {
-    const run = agentTask({
+    const run = defineAgentTask({
       key: "coder",
       sandbox: session,
       request: () => ({
@@ -67,7 +67,7 @@ Seul `fix` appartient au graphe ; `coder` sert à exécuter l’appel. L’appel
 
 ## Utiliser un second agent pour relire
 
-`check` peut appeler un autre `agentTask.perform(ctx)` dans une sandbox de relecture et transformer sa réponse structurée en `{ done: true }` ou `{ done: false, feedback }`. L’usage déclaré des deux agents compte dans le même budget de workflow. Utilisez les [réponses structurées](../output-validation/) pour valider la décision.
+`check` peut appeler un autre `defineAgentTask.perform(ctx)` dans une sandbox de relecture et transformer sa réponse structurée en `{ done: true }` ou `{ done: false, feedback }`. L’usage déclaré des deux agents compte dans le même budget de workflow. Utilisez les [réponses structurées](../output-validation/) pour valider la décision.
 
 Un `session.dispatch()` direct dans un callback ne relie pas automatiquement son usage ni son signal au workflow. Préférez le helper ci-dessus ; une intégration personnalisée doit transmettre `ctx.signal`, propager l’observation et déclarer l’usage synchroniquement via `ctx.reportUsage`, y compris les requêtes échouées. Ne déclarez pas en plus les totaux finaux du helper : il réconcilie déjà les compteurs en streaming.
 
@@ -91,4 +91,4 @@ Tous les candidats persistés doivent être du JSON sans perte ou `undefined` au
 
 `ctx.idempotencyKey` est stable pour une exécution, une tâche, un tour logique et une phase ; essai et vérification ont des clés distinctes. Les services effectuant les effets doivent persister leurs propres reçus de déduplication. Un appel modèle payant rejoué reste une nouvelle consommation ; ne réutilisez pas un ancien reçu d’usage pour masquer son coût.
 
-API : [loopTask](../../reference/looptask/) · [LoopTaskOptions](../../reference/looptaskoptions/) · [LoopTaskContext](../../reference/looptaskcontext/) · [LoopTaskExhausted](../../reference/looptaskexhausted/).
+API : [defineLoopTask](../../reference/definelooptask/) · [LoopTaskOptions](../../reference/looptaskoptions/) · [LoopTaskContext](../../reference/looptaskcontext/) · [LoopTaskExhausted](../../reference/looptaskexhausted/).

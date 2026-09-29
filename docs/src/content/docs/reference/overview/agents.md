@@ -10,11 +10,11 @@ An agent composes an execution harness with a model. A harness defines how the t
 
 ## How it works
 
-Use `agent({ harness: codexHarness(), model: "..." })`, or the corresponding `claudeHarness()`, `antigravityHarness()`, `copilotHarness()` and `kimiHarness()` presets. `harness({ modelProvider, tools, instructions })` lets Outpost drive a model service itself. `sandboxProvider` independently selects where repository commands execute.
+Use `createAgent({ harness: createCodexHarness(), model: "..." })`, or the corresponding `createClaudeHarness()`, `createAntigravityHarness()`, `createCopilotHarness()` and `createKimiHarness()` presets. `createHarness({ modelProvider, tools, instructions })` lets Outpost drive a model service itself. `sandboxProvider` independently selects where repository commands execute.
 
-`agent()` normalizes the model into a frozen `AgentModel` and asks the harness or its model provider to validate it. A reasoning level or output limit that the selected CLI or service cannot express is rejected immediately, before any sandbox exists. Antigravity, Copilot and Kimi accept only a model name; Kimi with `usage` authentication requires one.
+`createAgent()` normalizes the model into a frozen `AgentModel` and asks the harness or its model provider to validate it. A reasoning level or output limit that the selected CLI or service cannot express is rejected immediately, before any sandbox exists. Antigravity, Copilot and Kimi accept only a model name; Kimi with `usage` authentication requires one.
 
-`fallbackAgent([...agents], { on })` groups composed agents into an ordered `FallbackAgent`. Dispatch accepts it wherever it accepts an agent (`DispatchAgent`) and hands the work to the next candidate only when the current one fails with a listed `FallbackTrigger`: `quota` or `unavailable`. The result's `FallbackRecord` names the selected candidate and the `FallbackAttempt` of each one that stopped. Attachment and explicit continuations require a single agent.
+`createFallbackAgent([...agents], { on })` groups composed agents into an ordered `FallbackAgent`. Dispatch accepts it wherever it accepts an agent (`DispatchAgent`) and hands the work to the next candidate only when the current one fails with a listed `FallbackTrigger`: `quota` or `unavailable`. The result's `FallbackRecord` names the selected candidate and the `FallbackAttempt` of each one that stopped. Attachment and explicit continuations require a single agent.
 
 ## Boundaries and responsibilities
 
@@ -24,7 +24,7 @@ These composition APIs are available since 5.0.0. Use the agent with dispatch, a
 
 ## Entry points
 
-- [agent](../../agent/)
+- [createAgent](../../createagent/)
 - [Agent](../../type-agent/)
 - [AgentOptions](../../agentoptions/)
 - [CliAgent](../../cliagent/)
@@ -32,7 +32,7 @@ These composition APIs are available since 5.0.0. Use the agent with dispatch, a
 - [AgentModel](../../agentmodel/)
 - [ModelSpec](../../modelspec/)
 - [ModelReasoning](../../modelreasoning/)
-- [fallbackAgent](../../fallbackagent/)
+- [createFallbackAgent](../../createfallbackagent/)
 - [FallbackAgent](../../type-fallbackagent/)
 
 [Learn with the practical guide](../../../guide/agents/adapters/).

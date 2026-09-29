@@ -19,12 +19,12 @@ Définit un outil sérialisé exécutant un agent enfant intégré avec un histo
 
 ## Paramètres et propriétés
 
-| Nom                   | Type                     | Présence | Rôle                                                                                                                                                    |
-| --------------------- | ------------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `options`             | `HarnessSubagentOptions` | Requis   | Nom, description visible du modèle et agent enfant intégré composé explicitement. Définir l’outil ne l’exécute pas.                                     |
-| `options.name`        | `string`                 | Requis   | Nom d’outil unique présenté au modèle parent, composé de 1 à 64 lettres, chiffres, tirets ou underscores.                                               |
-| `options.description` | `string`                 | Requis   | Explique quand le parent doit déléguer à cet enfant ; transmis avec le schéma de l’outil.                                                               |
-| `options.agent`       | `CustomAgent`            | Requis   | Agent intégré créé avec agent({ harness: harness(...), model }) ; définit les instructions, outils et limites de l’enfant. Les agents CLI sont refusés. |
+| Nom                   | Type                     | Présence | Rôle                                                                                                                                                                |
+| --------------------- | ------------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `options`             | `HarnessSubagentOptions` | Requis   | Nom, description visible du modèle et agent enfant intégré composé explicitement. Définir l’outil ne l’exécute pas.                                                 |
+| `options.name`        | `string`                 | Requis   | Nom d’outil unique présenté au modèle parent, composé de 1 à 64 lettres, chiffres, tirets ou underscores.                                                           |
+| `options.description` | `string`                 | Requis   | Explique quand le parent doit déléguer à cet enfant ; transmis avec le schéma de l’outil.                                                                           |
+| `options.agent`       | `CustomAgent`            | Requis   | Agent intégré créé avec createAgent({ harness: createHarness(...), model }) ; définit les instructions, outils et limites de l’enfant. Les agents CLI sont refusés. |
 
 ## Retour
 

@@ -6,9 +6,9 @@ description: "Reuse package downloads between containers."
 Container dependency caches reuse engine-managed volumes across sandbox allocations. They preserve package cache data independently of the agent’s private home.
 
 ```ts
-import { dockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
+import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
-const sandboxProvider = dockerSandboxProvider({
+const sandboxProvider = createDockerSandboxProvider({
   image: "outpost:dev",
   caches: [{ name: "npm", key: "application-node24" }],
   variables: { npm_config_cache: "/outpost/cache/npm" },

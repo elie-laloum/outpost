@@ -3,18 +3,18 @@ title: "Enregistrer et rejouer"
 description: "Conserver un dispatch réel et le rejouer sans appeler de modèle."
 ---
 
-`replayAgent()` rejoue le journal enregistré d’un dispatch. Il est disponible depuis la 8.0.0. Le rejeu réémet les événements enregistrés, renvoie le texte et l’usage enregistrés et reconstruit les commits enregistrés. Il n’appelle jamais de modèle. Utilisez-le pour reproduire un bug ou pour transformer une exécution réelle en test déterministe.
+`createReplayAgent()` rejoue le journal enregistré d’un dispatch. Il est disponible depuis la 8.0.0. Le rejeu réémet les événements enregistrés, renvoie le texte et l’usage enregistrés et reconstruit les commits enregistrés. Il n’appelle jamais de modèle. Utilisez-le pour reproduire un bug ou pour transformer une exécution réelle en test déterministe.
 
 ```ts
 import {
   dispatch,
-  localTransport,
+  createLocalTransport,
   readJournal,
-  replayAgent,
+  createReplayAgent,
 } from "@elie-laloum/outpost";
 import { coder, repository, sandboxProvider } from "./outpost.config.mts";
 
-const transporter = localTransport({ directory: ".outpost/storage" });
+const transporter = createLocalTransport({ directory: ".outpost/storage" });
 const brief = { text: "Fix the failing parser test." };
 const recorded = await dispatch({
   repository,
@@ -29,7 +29,7 @@ const journal = await readJournal({
   transporter,
   reference: recorded.logReference!,
 });
-const replaying = replayAgent({ journal });
+const replaying = createReplayAgent({ journal });
 const replayed = await dispatch({
   repository,
   sandboxProvider,
@@ -87,7 +87,11 @@ Quand le rejeu diffère de son journal, il lève `ReplayDivergence`, une `Outpos
 `turn`, `expected`, `actual` et `commit` situent l’écart. `divergence: "warn"` transforme les écarts `prompt`, `baseline`, `tree` et `unrecorded` en avertissements et continue. Un patch qui ne s’applique pas et un journal épuisé échouent toujours. Avec `warn`, un journal enregistré sans `replayable` rejoue ses événements sans commits.
 
 ```ts
-import { dispatch, replayAgent, ReplayDivergence } from "@elie-laloum/outpost";
+import {
+  dispatch,
+  createReplayAgent,
+  ReplayDivergence,
+} from "@elie-laloum/outpost";
 import { repository, sandboxProvider } from "./outpost.config.mts";
 
 declare const journal: readonly unknown[];
@@ -95,7 +99,7 @@ try {
   await dispatch({
     repository,
     sandboxProvider,
-    agent: replayAgent({ journal }),
+    agent: createReplayAgent({ journal }),
     brief: { text: "Fix the failing parser test." },
   });
 } catch (error) {
@@ -112,4 +116,4 @@ Un brief qui utilise `{{WORK_BRANCH}}` rend un prompt différent à chaque run. 
 - Seuls les commits sont rejoués. Les modifications laissées non commitées dans le worktree ne sont pas enregistrées.
 - Un rejeu ne peut être ni repris ni forké, et il n’a pas de conversation à capturer.
 
-API : [replayAgent](../../reference/replayagent/) · [ReplayAgent](../../reference/type-replayagent/) · [ReplayDivergence](../../reference/replaydivergence/) · [WorkspaceCommitsEvent](../../reference/workspacecommitsevent/) · [Logging](../../reference/logging/).
+API : [createReplayAgent](../../reference/createreplayagent/) · [ReplayAgent](../../reference/type-replayagent/) · [ReplayDivergence](../../reference/replaydivergence/) · [WorkspaceCommitsEvent](../../reference/workspacecommitsevent/) · [Logging](../../reference/logging/).

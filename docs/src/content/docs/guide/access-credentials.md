@@ -8,10 +8,10 @@ Set `authentication` on the CLI harness. `account` uses a CLI login or subscript
 ## Use an API key
 
 ```ts
-import { agent, codexHarness } from "@elie-laloum/outpost";
+import { createAgent, createCodexHarness } from "@elie-laloum/outpost";
 
-const coder = agent({
-  harness: codexHarness({
+const coder = createAgent({
+  harness: createCodexHarness({
     authentication: "usage",
     variables: { OPENAI_API_KEY: process.env.OPENAI_API_KEY ?? "" },
   }),

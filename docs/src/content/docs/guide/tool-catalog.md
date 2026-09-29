@@ -3,7 +3,7 @@ title: "Tools and toolsets"
 description: "Expose a bounded set of sandbox operations to a model."
 ---
 
-For the built-in model loop, pass tools to `harness({ tools })`. Built-in toolsets cover files, search, edits, Git and shell commands.
+For the built-in model loop, pass tools to `createHarness({ tools })`. Built-in toolsets cover files, search, edits, Git and shell commands.
 
 ## Define a tool
 
@@ -33,10 +33,10 @@ const gitStatus = defineHarnessTool({
 
 ## Compose tools
 
-`defineHarnessToolset({ name, tools })` groups reusable tools. `harnessFileTools()`, `harnessSearchTools()`, `harnessEditTools()`, `harnessGitTools()` and `harnessShellTools()` provide ready-made sets. Supply only the capabilities the task needs.
+`defineHarnessToolset({ name, tools })` groups reusable tools. `createHarnessFileTools()`, `createHarnessSearchTools()`, `createHarnessEditTools()`, `createHarnessGitTools()` and `createHarnessShellTools()` provide ready-made sets. Supply only the capabilities the task needs.
 
 `readOnly` is scheduling metadata, not isolation. Declare `resources(input)` when permission rules need to inspect paths or commands. Use `context.sandbox` for execution and honor `context.signal`; host filesystem calls would bypass the borrowed sandbox.
 
-To use tools from an existing server, declare [MCP servers](../mcp-servers/) with `harness({ mcpServers })`.
+To use tools from an existing server, declare [MCP servers](../mcp-servers/) with `createHarness({ mcpServers })`.
 
 API: [defineHarnessTool](../../reference/defineharnesstool/) · [defineHarnessToolset](../../reference/defineharnesstoolset/) · [HarnessToolContext](../../reference/harnesstoolcontext/).

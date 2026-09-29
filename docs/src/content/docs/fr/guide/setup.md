@@ -37,13 +37,15 @@ Outpost copie la connexion dans le home privé de la sandbox. Il ne lit jamais u
 Enregistrez ce fichier à côté du script de workflow. Définissez `OUTPOST_REPOSITORY` avec le chemin absolu du checkout si vous travaillez en dehors du dépôt cible.
 
 ```ts title="outpost.config.mts"
-import { agent, codexHarness } from "@elie-laloum/outpost";
-import { dockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
+import { createAgent, createCodexHarness } from "@elie-laloum/outpost";
+import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
-export const coder = agent({
-  harness: codexHarness({ authentication: "account" }),
+export const coder = createAgent({
+  harness: createCodexHarness({ authentication: "account" }),
 });
-export const sandboxProvider = dockerSandboxProvider({ image: "outpost:dev" });
+export const sandboxProvider = createDockerSandboxProvider({
+  image: "outpost:dev",
+});
 export const repository = process.env.OUTPOST_REPOSITORY ?? process.cwd();
 ```
 
@@ -53,4 +55,4 @@ Ce fichier est du code applicatif ordinaire. Outpost ne le découvre pas automat
 
 Poursuivez avec [Première requête](../first-request/). Pour utiliser immédiatement le projet généré par la CLI, lancez `node run.ts "Décris ce dépôt"` (`run.mts` dans un projet explicitement CommonJS).
 
-API : [agent](../../reference/agent/) · [dockerSandboxProvider](../../reference/dockersandboxprovider/).
+API : [createAgent](../../reference/createagent/) · [createDockerSandboxProvider](../../reference/createdockersandboxprovider/).

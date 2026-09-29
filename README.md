@@ -35,11 +35,17 @@ Outpost never reads a system keychain. See [authentication](https://elie-laloum.
 After preparing the selected agent credentials and provider, library calls follow this shape. For configuration and a first call, see [First request](https://elie-laloum.github.io/outpost/guide/first-request/).
 
 ```ts
-import { agent, dispatch, codexHarness } from "@elie-laloum/outpost";
+import {
+  createAgent,
+  dispatch,
+  createCodexHarness,
+} from "@elie-laloum/outpost";
 
 const result = await dispatch({
   repository: "/path1/repository",
-  agent: agent({ harness: codexHarness({ authentication: "account" }) }),
+  agent: createAgent({
+    harness: createCodexHarness({ authentication: "account" }),
+  }),
   branch: { mode: "integrate" },
   brief: { text: "Fix the failing tests, verify and commit." },
 });
@@ -48,7 +54,7 @@ console.log(result.branch, result.commits);
 
 `repository` selects a local Git checkout; without it, library calls use the current working directory. See [repository paths](https://elie-laloum.github.io/outpost/guide/repository-context/) for external checkouts and paths relative to the workflow script.
 
-Let Outpost drive a model itself with `harness({ modelProvider, tools, instructions, limits })` and tools from `defineHarnessTool()`, then compose it with `agent({ harness, model })`. Use `defineHarnessSubagent()` to expose a built-in child as a tool with its own history and limits; its token usage also counts toward the parent budget. The built-in contracts and OpenAI and Anthropic integrations are stable in 7.0.0. See [build a custom harness](https://elie-laloum.github.io/outpost/guide/model-loop/) for configuration.
+Let Outpost drive a model itself with `createHarness({ modelProvider, tools, instructions, limits })` and tools from `defineHarnessTool()`, then compose it with `createAgent({ harness, model })`. Use `defineHarnessSubagent()` to expose a built-in child as a tool with its own history and limits; its token usage also counts toward the parent budget. The built-in contracts and OpenAI and Anthropic integrations are stable in 7.0.0. See [build a custom harness](https://elie-laloum.github.io/outpost/guide/model-loop/) for configuration.
 
 Learn about [sandboxes](https://elie-laloum.github.io/outpost/guide/sandbox-sessions/), [workflows](https://elie-laloum.github.io/outpost/guide/task-dependencies/), [providers](https://elie-laloum.github.io/outpost/guide/execution-backends/) and [recovery](https://elie-laloum.github.io/outpost/guide/failure-recovery/) in the English/French documentation. The [roadmap](https://elie-laloum.github.io/outpost/project/roadmap/) describes future work.
 

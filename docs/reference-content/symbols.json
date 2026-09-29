@@ -15,23 +15,23 @@
     "Acquire a repository lock and prepare the checkout selected by the branch policy. The returned workspace can own several successive sandboxes and remains open until explicitly closed. integrate applies its branch changes; close preserves work that cannot safely be removed.",
     "Prend le verrou du dépôt et prépare le checkout choisi par la politique de branche. Le workspace renvoyé peut posséder plusieurs sandboxes successives et reste ouvert jusqu’à sa fermeture explicite. integrate applique ses changements de branche ; close préserve le travail dont la suppression serait risquée."
   ],
-  "task": [
-    "Define and freeze a workflow node whose perform callback runs when its dependencies succeed. Creating the node does not execute it or allocate a sandbox. Use context.value to read declared dependencies; isolatedTask supplies sandbox allocation around an agent dispatch instead of a custom perform callback.",
-    "Définit et fige un nœud de workflow dont le callback perform s’exécute après la réussite de ses dépendances. Créer le nœud ne l’exécute pas et n’alloue aucune sandbox. context.value lit les dépendances déclarées ; isolatedTask prend en charge l’allocation d’une sandbox autour d’un dispatch d’agent à la place d’un callback perform personnalisé."
+  "defineTask": [
+    "Define and freeze a workflow node whose perform callback runs when its dependencies succeed. Creating the node does not execute it or allocate a sandbox. Use context.value to read declared dependencies; defineIsolatedTask supplies sandbox allocation around an agent dispatch instead of a custom perform callback.",
+    "Définit et fige un nœud de workflow dont le callback perform s’exécute après la réussite de ses dépendances. Créer le nœud ne l’exécute pas et n’alloue aucune sandbox. context.value lit les dépendances déclarées ; defineIsolatedTask prend en charge l’allocation d’une sandbox autour d’un dispatch d’agent à la place d’un callback perform personnalisé."
   ],
-  "workflow": [
+  "defineWorkflow": [
     "Validate a named task graph for duplicate keys, missing dependencies and cycles, then return a reusable workflow definition. start schedules the tasks with concurrency, cancellation and optional checkpoints; diagram renders the dependency graph as Mermaid.",
     "Valide les clés, dépendances et cycles d’un graphe nommé, puis renvoie une définition de workflow réutilisable. start ordonnance les tâches avec concurrence, annulation et checkpoints optionnels ; diagram produit le graphe de dépendances en Mermaid."
   ],
-  "agentTask": [
+  "defineAgentTask": [
     "Define a workflow node that dispatches an agent through an existing caller-owned sandbox. request builds the brief and dispatch options from task dependencies. Cancellation and observed usage join the workflow accounting; the node does not close the shared sandbox.",
     "Définit un nœud de workflow qui lance un agent dans une sandbox existante appartenant à l’appelant. request construit le brief et les options depuis les dépendances. L’annulation et l’usage observé sont reliés au workflow ; le nœud ne ferme pas la sandbox partagée."
   ],
-  "commandTask": [
+  "defineCommandTask": [
     "Define a workflow node that runs a command in an existing caller-owned sandbox. A command factory can read dependency values. A nonzero process status fails the task, allowing the workflow retry policy to apply; the sandbox remains caller-owned.",
     "Définit un nœud qui exécute une commande dans une sandbox existante appartenant à l’appelant. Une fabrique de commande peut lire les dépendances. Un statut de processus non nul met la tâche en échec et permet d’appliquer sa politique de reprise ; la sandbox reste à la charge de l’appelant."
   ],
-  "isolatedTask": [
+  "defineIsolatedTask": [
     "Define an agent workflow node whose request callback selects a repository, provider, agent and dispatch options for each attempt. It calls dispatch to allocate and close its own sandbox and returns DispatchResult. Use separate nodes to work on separate repositories; there is no shared Git transaction or automatic push.",
     "Définit un nœud d’agent dont le callback request choisit le dépôt, le provider, l’agent et les options de dispatch à chaque tentative. Il appelle dispatch pour allouer et fermer sa propre sandbox et renvoie DispatchResult. Des nœuds distincts peuvent traiter des dépôts distincts ; aucune transaction Git commune ni aucun push automatique ne les relie."
   ],
@@ -71,15 +71,11 @@
     "Compute the native transcript path inside a sandbox lease from the format and conversation ID, using the lease’s home and workspace path.",
     "Calcule le chemin du transcript natif à l’intérieur d’un bail de sandbox à partir du format et de l’identifiant de conversation, en utilisant son home et son chemin de workspace."
   ],
-  "response": [
-    "Construct tagged response validators with text or json. Both read the last complete matching tag; json parses its contents and applies the supplied schema. Invalid or missing content raises ResponseError, and repairs defaults to zero.",
-    "Construit des validateurs de réponse balisée avec text ou json. Tous deux lisent la dernière balise complète correspondante ; json analyse son contenu et applique le schéma fourni. Un contenu absent ou invalide lève ResponseError, et repairs vaut zéro par défaut."
-  ],
   "recoveryDetails": [
     "Extract recovery metadata from an unknown error when Outpost attached it. The result identifies retained work and recovery locations; absent metadata returns undefined and does not trigger cleanup or restoration.",
     "Extrait les métadonnées de récupération d’une erreur inconnue lorsqu’Outpost les a attachées. Le résultat identifie le travail et les emplacements conservés ; sans métadonnées, renvoie undefined sans déclencher de nettoyage ni de restauration."
   ],
-  "reporter": [
+  "createReporter": [
     "Create an agent observation callback that formats progress, warnings and pass summaries for a terminal or custom writer. quiet suppresses all output and verbose includes additional events; reporting does not control execution.",
     "Crée un callback d’observation qui formate progression, avertissements et bilans de passe pour un terminal ou une fonction d’écriture. quiet masque toutes les sorties et verbose inclut des événements supplémentaires ; le rapporteur ne pilote pas l’exécution."
   ],
@@ -108,8 +104,8 @@
     "Rejoue les fixtures d’événements intégrées dans l’adapter choisi et rapporte la compatibilité de décodage avec la version CLI enregistrée. Ne lance pas le CLI installé, ne valide pas les identifiants et ne teste pas de modèle réel."
   ],
   "reserveRecoveryStorage": [
-    "Reserve cooperative headroom in a conditional transport ledger. By default localTransport stores the ledger under .outpost/storage and admission measures local runtime files; an explicit transport measures its payloads. Release is idempotent. Abandoned reservations require explicit conditional recovery after confirming the owner stopped.",
-    "Réserve une capacité coopérative dans un registre conditionnel via Transport. Par défaut, localTransport conserve le registre sous .outpost/storage et l’admission mesure les fichiers locaux ; un transport explicite mesure ses contenus. La libération est idempotente. Une réservation abandonnée exige une récupération conditionnelle explicite après confirmation de l’arrêt du propriétaire."
+    "Reserve cooperative headroom in a conditional transport ledger. By default createLocalTransport stores the ledger under .outpost/storage and admission measures local runtime files; an explicit transport measures its payloads. Release is idempotent. Abandoned reservations require explicit conditional recovery after confirming the owner stopped.",
+    "Réserve une capacité coopérative dans un registre conditionnel via Transport. Par défaut, createLocalTransport conserve le registre sous .outpost/storage et l’admission mesure les fichiers locaux ; un transport explicite mesure ses contenus. La libération est idempotente. Une réservation abandonnée exige une récupération conditionnelle explicite après confirmation de l’arrêt du propriétaire."
   ],
   "planRecoveryRestore": [
     "Validate a retained transfer and prepare restoration of its previous or incoming side into a new destination. The plan records payloads, commit and fingerprints for later revalidation; it does not populate the destination.",
@@ -119,21 +115,17 @@
     "Revalidate a restoration plan and materialize the selected retained state into its new destination. Source recovery artifacts remain available, and the result reports whether staging could be preserved. Review the destination before integrating it.",
     "Revalide un plan de restauration et matérialise l’état conservé choisi dans sa nouvelle destination. Les artefacts sources restent disponibles et le résultat indique si l’index Git a pu être préservé. Examinez la destination avant intégration."
   ],
-  "approvalTask": [
+  "defineApprovalTask": [
     "Define a checkpoint-backed approval gate that pauses once its dependencies finish. A trusted listed actor must submit approve or reject with a reason. Approval yields the persisted decision to dependent tasks; rejection is final for that run.",
     "Définit une gate d’approbation persistée par checkpoint qui suspend l’exécution après ses dépendances. Un acteur de confiance autorisé doit soumettre approve ou reject avec un motif. L’approbation transmet la décision persistée aux tâches dépendantes ; le rejet est définitif pour cette exécution."
   ],
-  "pauseTask": [
-    "Define a checkpoint-backed pause that waits for an explicit resume or reject decision from a listed trusted actor. It uses no waiting timer and can survive process restarts; unlike approvalTask, its successful decision action is resume.",
-    "Définit une pause persistée par checkpoint qui attend une décision explicite resume ou reject d’un acteur de confiance autorisé. Elle n’utilise aucun timer d’attente et survit au redémarrage du processus ; contrairement à approvalTask, son action de succès est resume."
+  "definePauseTask": [
+    "Define a checkpoint-backed pause that waits for an explicit resume or reject decision from a listed trusted actor. It uses no waiting timer and can survive process restarts; unlike defineApprovalTask, its successful decision action is resume.",
+    "Définit une pause persistée par checkpoint qui attend une décision explicite resume ou reject d’un acteur de confiance autorisé. Elle n’utilise aucun timer d’attente et survit au redémarrage du processus ; contrairement à defineApprovalTask, son action de succès est resume."
   ],
   "inspectRecovery": [
     "Inspect local runtime files or objects in an explicit transport without deleting them. Local mode can inspect Git, process locks and resources; transport mode lists payload sizes, revisions and optionally resource records whose remote ownership remains unverified. Incomplete inventories are reported and cannot authorize pruning.",
     "Inspecte les fichiers locaux ou objets d’un transport explicite sans les supprimer. Le mode local peut inspecter Git, verrous de processus et ressources ; le mode transport liste tailles, révisions et éventuellement activités dont la propriété distante reste non vérifiée. Les inventaires incomplets sont signalés et n’autorisent pas le nettoyage."
-  ],
-  "artifact": [
-    "Create named, versioned payload contracts with json or binary. JSON contracts validate both encoding and decoding and require lossless JSON; binary contracts copy Uint8Array bytes. Constructing a contract does not publish an artifact.",
-    "Crée des contrats de données nommés et versionnés avec json ou binary. Les contrats JSON valident encodage et décodage et exigent du JSON sans perte ; les contrats binaires copient les octets Uint8Array. Créer un contrat ne publie pas d’artefact."
   ],
   "publishArtifact": [
     "Encode a value with its contract, compute its digest and immutable identity, then atomically put its bytes in the store. Return a small reference containing producer and ordered parent lineage; producer metadata is not authentication.",
@@ -143,7 +135,7 @@
     "Validate an artifact reference, load its bytes and verify contract identity, size and digest before decoding. Optional producer and parent expectations add lineage checks. Use this outside a task context or when the reference is already available.",
     "Valide une référence d’artefact, charge ses octets et vérifie contrat, taille et empreinte avant décodage. Les attentes optionnelles de producteur et parents ajoutent des contrôles de filiation. S’utilise hors contexte de tâche ou lorsque la référence est déjà disponible."
   ],
-  "artifactTask": [
+  "defineArtifactTask": [
     "Define a workflow task that produces a value and publishes it as an artifact. Derive producer identity from the workflow execution, task key and attempt, and record the declared parent references. Dependents receive an ArtifactReference rather than the full payload.",
     "Définit une tâche qui produit une valeur et la publie comme artefact. Déduit le producteur de l’exécution, de la clé de tâche et de la tentative, et enregistre les références parentes déclarées. Les dépendants reçoivent une ArtifactReference au lieu des données complètes."
   ],
@@ -151,7 +143,7 @@
     "Read an artifact reference from a declared task dependency through context.value, then load and validate its stored payload. It applies the task cancellation signal and checks the producer against the current execution and dependency key.",
     "Lit une référence d’artefact depuis une dépendance déclarée via context.value, puis charge et valide ses données stockées. Applique le signal d’annulation de la tâche et vérifie le producteur par rapport à l’exécution courante et à la clé de dépendance."
   ],
-  "sqliteTaskQueue": [
+  "createSqliteTaskQueue": [
     "Open a durable SQLite task queue at path. Enqueue deduplicates job identities, claims create fenced leases and stale workers cannot complete queue state. Close the returned database when finished; external effects remain at least once.",
     "Ouvre une file de tâches SQLite durable à path. L’envoi déduplique les identités, les prises en charge créent des baux avec jeton de génération et les workers périmés ne peuvent valider l’état de file. Fermez la base renvoyée après usage ; les effets externes restent au moins une fois."
   ],
@@ -159,7 +151,7 @@
     "Expose a caller-owned task queue over HTTP with explicit bearer-token authentication. The server binds loopback by default and supplies no TLS. Closing the returned server stops listening without taking ownership of queue storage.",
     "Expose une file appartenant à l’appelant via HTTP avec authentification explicite par jeton bearer. Le serveur écoute loopback par défaut et ne fournit pas TLS. Fermer le serveur arrête l’écoute sans prendre possession du stockage de la file."
   ],
-  "httpTaskQueue": [
+  "createHttpTaskQueue": [
     "Create a TaskQueue client with a fixed bearer token or a token source resolved per request. timeoutMs bounds HTTP exchange after token resolution; credential callbacks must return promptly. The client never executes handlers locally.",
     "Crée un client TaskQueue avec jeton bearer fixe ou source résolue à chaque requête. timeoutMs borne l’échange HTTP après résolution du jeton ; les callbacks doivent répondre rapidement. Le client n’exécute jamais les handlers localement."
   ],
@@ -167,7 +159,7 @@
     "Poll for jobs whose handler is registered, run one job at a time and renew its fenced lease while executing. Record JSON results and observed usage, honor cancellation and deadlines, and reject stale completions; external effects may repeat after lease loss.",
     "Interroge la file pour les gestionnaires enregistrés, traite une tâche à la fois et renouvelle son bail pendant l’exécution. Enregistre résultats JSON et usage observé, respecte annulation et échéances et rejette les validations périmées ; des effets externes peuvent se répéter après perte du bail."
   ],
-  "queuedTask": [
+  "defineQueuedTask": [
     "Define a workflow node that enqueues a durable job and polls its completion. Derive the job identity from execution and task identity, decode the JSON result and account for returned usage. A registered worker performs the remote handler.",
     "Définit un nœud qui envoie un travail durable dans la file et interroge sa progression. Déduit son identité de l’exécution et de la tâche, décode le résultat JSON et comptabilise l’usage renvoyé. Un worker enregistré exécute le gestionnaire distant."
   ],
@@ -175,7 +167,7 @@
     "Run bounded candidates from a pinned repository baseline, validate them in their live sandboxes and select one winner after its cleanup. Durable mode persists ownership, attempts, usage and outputs through Transport and requires explicit recovery/replay after a crash. Return preserved recovery locations and a Git merge preflight without integrating the branch.",
     "Exécute des candidats bornés depuis un commit initial figé, les valide dans leurs sandboxes actives et sélectionne un gagnant après son nettoyage. Le mode durable persiste propriété, tentatives, usage et résultats via Transport et exige récupération/rejeu explicites après un crash. Renvoie les emplacements préservés et une vérification de fusion Git sans intégrer la branche."
   ],
-  "openTelemetry": [
+  "createOpenTelemetryObserver": [
     "Create workflow and complete dispatch instrumentation from an injected tracer and meter. Pass the result as telemetry to workflow.start or dispatch, keeping observe for custom handlers. The previous workflow observe wiring remains supported. Errors are isolated through onError; close finishes outstanding spans without flushing or shutting down the SDK. Only this optional entry point loads OpenTelemetry.",
     "Crée une instrumentation de workflow et de dispatch complet à partir d’un tracer et d’un meter injectés. Passez le résultat dans telemetry à workflow.start ou dispatch, en gardant observe pour les handlers personnalisés. Le branchement observe existant du workflow reste pris en charge. Les erreurs sont isolées via onError ; close termine les spans ouverts sans vider ni fermer le SDK. Seul ce point d’entrée optionnel charge OpenTelemetry."
   ],
@@ -207,19 +199,19 @@
     "A conditional object mutation or pinned read found a different revision. Re-read state before deciding whether a retry is valid; never replace the condition with an unconditional write.",
     "Une mutation conditionnelle ou une lecture versionnée a trouvé une révision différente. Relire l’état avant de décider si une nouvelle tentative est valable ; ne jamais remplacer la condition par une écriture inconditionnelle."
   ],
-  "localTransport": [
-    "Create a versioned object transport in a private directory. Local process locks serialize conditional mutations. Use it with artifactStore and workflowCheckpointStore for disk persistence; this adapter does not establish distributed NFS ownership.",
-    "Crée un transport d’objets versionnés dans un dossier privé. Les verrous locaux sérialisent les mutations conditionnelles. Utilisez-le avec artifactStore et workflowCheckpointStore pour persister sur disque ; cet adaptateur n’établit pas de propriété NFS distribuée."
+  "createLocalTransport": [
+    "Create a versioned object transport in a private directory. Local process locks serialize conditional mutations. Use it with createArtifactStore and createWorkflowCheckpointStore for disk persistence; this adapter does not establish distributed NFS ownership.",
+    "Crée un transport d’objets versionnés dans un dossier privé. Les verrous locaux sérialisent les mutations conditionnelles. Utilisez-le avec createArtifactStore et createWorkflowCheckpointStore pour persister sur disque ; cet adaptateur n’établit pas de propriété NFS distribuée."
   ],
-  "s3Transport": [
+  "createS3Transport": [
     "Create an object transport using the caller’s S3Client. GET reads are bounded and PUT writes are conditional. Default removal requires atomic conditional DELETE. Set deleteMode to \"tombstone\" for R2: conditional PUT markers fence stale removal and recreation, remain physically stored, and are hidden from reads and paginated lists using additional HEAD requests. Use the same mode for every writer in a prefix and stop all writers before physically purging markers. Every envelope has a fresh identity, including identical payloads and markers. The caller retains ownership of the optional AWS SDK client.",
     "Crée un transport objet avec le S3Client de l’appelant. Les lectures GET sont bornées et les écritures PUT conditionnelles. La suppression par défaut exige DELETE conditionnel atomique. Utilisez deleteMode \"tombstone\" pour R2 : des marqueurs PUT conditionnels bloquent suppressions et recréations périmées, restent physiquement stockés et sont masqués des lectures et listes paginées avec des requêtes HEAD supplémentaires. Choisissez le même mode pour tous les écrivains du préfixe et arrêtez-les avant de purger les marqueurs. Chaque enveloppe porte une nouvelle identité, y compris pour des contenus identiques et les marqueurs. Le client SDK AWS optionnel reste la propriété de l’appelant."
   ],
-  "artifactStore": [
+  "createArtifactStore": [
     "Build an ArtifactStore over a transport. Publication creates immutable blobs or accepts identical existing bytes; conflicts with different bytes fail. Existing artifact contracts and portable references remain unchanged.",
     "Construit un ArtifactStore sur un transport. La publication crée des blobs immuables ou accepte des octets existants identiques ; un contenu différent provoque un échec. Les contrats et références portables d’artefacts restent inchangés."
   ],
-  "workflowCheckpointStore": [
+  "createWorkflowCheckpointStore": [
     "Build a checkpoint store whose ownership token and checkpoint share one conditional object. Acquisition rejects an existing owner. Release preserves values and usage. Ownership does not expire automatically; after a crash, stop the old runner and explicitly recover its observed revision before resuming.",
     "Construit un store dont le jeton de propriété et le checkpoint partagent un objet conditionnel. L’acquisition refuse un propriétaire existant. La libération préserve valeurs et usage. La propriété n’expire pas automatiquement ; après un crash, arrêter l’ancien exécuteur et récupérer explicitement sa révision observée avant reprise."
   ],
@@ -231,9 +223,9 @@
     "Read committed journal events in chronological order from a pinned index revision. Every linked segment revision is checked; cycles, missing segments and entry-limit overruns fail. An open journal exposes only its committed prefix.",
     "Lit les événements validés d’un journal dans l’ordre chronologique depuis une révision exacte de l’index. Chaque révision de segment est vérifiée ; cycles, segments absents et dépassements de limite provoquent un échec. Un journal ouvert expose uniquement son préfixe validé."
   ],
-  "transportConversations": [
-    "Build a ConversationStore for the claude, codex, copilot, kimi or harness format using transport snapshots and a stable project namespace. Pass it as the conversations option of the matching harness preset or harness(); the store declares its format so a mismatched harness fails when it is created. Capture preserves native relocation, child transcripts and session bundles; locate materializes an immutable snapshot below the target repository’s recovery directory. Returned file paths remain readable and reference identifies the remote index. Native files and credentials are separate; archives are neither encrypted nor authenticated.",
-    "Construit un ConversationStore au format claude, codex, copilot, kimi ou harness avec snapshots de transport et espace de noms stable du projet. Le passer à l’option conversations du preset correspondant ou de harness() ; le store déclare son format, donc un harness incompatible échoue dès sa création. La capture préserve la relocalisation native, les transcripts enfants et les bundles de session ; locate matérialise un snapshot immuable sous le dossier de récupération du dépôt cible. Les chemins file restent lisibles et reference identifie l’index distant. Fichiers natifs et identifiants restent distincts ; les archives ne sont ni chiffrées ni authentifiées."
+  "createTransportConversations": [
+    "Build a ConversationStore for the claude, codex, copilot, kimi or harness format using transport snapshots and a stable project namespace. Pass it as the conversations option of the matching harness preset or createHarness(); the store declares its format so a mismatched harness fails when it is created. Capture preserves native relocation, child transcripts and session bundles; locate materializes an immutable snapshot below the target repository’s recovery directory. Returned file paths remain readable and reference identifies the remote index. Native files and credentials are separate; archives are neither encrypted nor authenticated.",
+    "Construit un ConversationStore au format claude, codex, copilot, kimi ou harness avec snapshots de transport et espace de noms stable du projet. Le passer à l’option conversations du preset correspondant ou de createHarness() ; le store déclare son format, donc un harness incompatible échoue dès sa création. La capture préserve la relocalisation native, les transcripts enfants et les bundles de session ; locate matérialise un snapshot immuable sous le dossier de récupération du dépôt cible. Les chemins file restent lisibles et reference identifie l’index distant. Fichiers natifs et identifiants restent distincts ; les archives ne sont ni chiffrées ni authentifiées."
   ],
   "archiveRecovery": [
     "Snapshot and verify an existing recovery transfer, upload binary chunks with hashes, and publish its manifest last. The source is retained. An interrupted upload may retain unreferenced chunks; no incomplete manifest is published. The archive contains recovery payloads, not an independent replacement for the source Git repository.",
@@ -243,69 +235,69 @@
     "Download a pinned recovery archive into a new local directory, preserving supported modes and symlinks. Check chunk revisions, SHA-256 and recovery checksums. Keep the source and any partial destination on failure. Use the existing recovery planning and restoration APIs with the source repository to produce a checkout.",
     "Télécharge une archive versionnée dans un nouveau dossier local en conservant les modes et liens symboliques pris en charge. Vérifie révisions, SHA-256 et sommes de contrôle de récupération. Conserve la source et toute destination partielle en cas d’échec. Utiliser ensuite les API de planification et restauration avec le dépôt source pour produire un checkout."
   ],
-  "bullmqTaskQueue": [
-    "Opens an optional BullMQ 5 adapter backed by standalone Redis. Implements TaskQueue for queuedTask and runQueueWorker, retaining request identity, lossless JSON results and atomic fenced leases. Owns its connections and stalled-job checks; await close() after stopping workers. Redis persistence and no-eviction settings determine durability. Import from @elie-laloum/outpost/queues/bullmq and install bullmq separately. Rejects a Redis server whose INFO does not report maxmemory_policy=noeviction; configure the server before opening the queue. Does not change server configuration.",
-    "Ouvre un adaptateur optionnel BullMQ 5 sur Redis standalone. Implémente TaskQueue pour queuedTask et runQueueWorker, avec identité des requêtes, résultats JSON sans perte et baux atomiques protégés par génération. Possède ses connexions et contrôles de jobs bloqués ; attendre close() après avoir arrêté les workers. La persistance Redis et l’absence d’éviction déterminent la durabilité. Importer depuis @elie-laloum/outpost/queues/bullmq et installer bullmq séparément. Refuse un serveur Redis dont INFO ne confirme pas maxmemory_policy=noeviction ; configurez le serveur avant d’ouvrir la file. Ne modifie pas la configuration du serveur."
+  "createBullMQTaskQueue": [
+    "Opens an optional BullMQ 5 adapter backed by standalone Redis. Implements TaskQueue for defineQueuedTask and runQueueWorker, retaining request identity, lossless JSON results and atomic fenced leases. Owns its connections and stalled-job checks; await close() after stopping workers. Redis persistence and no-eviction settings determine durability. Import from @elie-laloum/outpost/queues/bullmq and install bullmq separately. Rejects a Redis server whose INFO does not report maxmemory_policy=noeviction; configure the server before opening the queue. Does not change server configuration.",
+    "Ouvre un adaptateur optionnel BullMQ 5 sur Redis standalone. Implémente TaskQueue pour defineQueuedTask et runQueueWorker, avec identité des requêtes, résultats JSON sans perte et baux atomiques protégés par génération. Possède ses connexions et contrôles de jobs bloqués ; attendre close() après avoir arrêté les workers. La persistance Redis et l’absence d’éviction déterminent la durabilité. Importer depuis @elie-laloum/outpost/queues/bullmq et installer bullmq séparément. Refuse un serveur Redis dont INFO ne confirme pas maxmemory_policy=noeviction ; configurez le serveur avant d’ouvrir la file. Ne modifie pas la configuration du serveur."
   ],
-  "createReporter": [
+  "createCustomReporter": [
     "Create a callable observer with typed event handlers and an explicit flush barrier. Handlers run serially without blocking dispatch; failures are reported through onError and the first remains observable through every flush. The caller owns files, loggers and their shutdown.",
     "Crée un observateur appelable avec des handlers typés et une barrière flush explicite. Les handlers s’exécutent séquentiellement sans bloquer le dispatch ; onError signale les erreurs et la première reste accessible à chaque flush. Les fichiers, loggers et leur fermeture appartiennent à l’appelant."
   ],
-  "mountedSandboxProvider": [
+  "createMountedSandboxProvider": [
     "Wrap a provider definition with mounted placement. The provider exposes the host workspace through a mount and supplies its own allocation and release implementation.",
     "Enveloppe une définition de provider avec le placement mounted. Le provider expose le workspace hôte par montage et fournit sa propre implémentation d’allocation et de libération."
   ],
-  "remoteSandboxProvider": [
+  "createRemoteSandboxProvider": [
     "Wrap a provider definition with remote placement, enabling application-managed repository upload and synchronization around the lease supplied by acquire.",
     "Enveloppe une définition de provider avec le placement remote, pour activer l’envoi du dépôt et sa synchronisation par l’application autour du bail fourni par acquire."
   ],
-  "dockerSandboxProvider": [
+  "createDockerSandboxProvider": [
     "Create a Docker sandbox provider. Mounted repository mode shares the workspace and Git metadata; opt-in isolated mode transfers a private checkout. Allocation is deferred until a sandbox acquires the provider; its lease owns container disposal.",
     "Crée un provider de sandbox Docker. Le mode mounted partage workspace et métadonnées Git ; le mode isolated opt-in transfère un checkout privé. L’allocation attend l’acquisition du provider par une sandbox ; le bail possède la fermeture du conteneur."
   ],
-  "podmanSandboxProvider": [
+  "createPodmanSandboxProvider": [
     "Create a Podman sandbox provider using the container execution and streamed-transfer contracts. userns can preserve host UID mapping, and label controls SELinux mount relabeling. The provider is allocated only when acquired by a sandbox.",
     "Crée un provider Podman avec les contrats d’exécution en conteneur et de transfert par flux. userns peut conserver la correspondance d’UID hôte et label contrôle le réétiquetage SELinux des montages. Le provider n’est alloué que lors de son acquisition par une sandbox."
   ],
-  "localSandboxProvider": [
+  "createLocalSandboxProvider": [
     "Create an explicitly unisolated provider that executes commands on the host in the selected workspace. No container or VM is allocated; host filesystem access and credentials remain those of the calling process.",
     "Crée un provider explicitement sans isolation qui exécute les commandes sur l’hôte dans le workspace choisi. Aucun conteneur ni VM n’est alloué ; l’accès aux fichiers et aux identifiants reste celui du processus appelant."
   ],
-  "vercelSandboxProvider": [
+  "createVercelSandboxProvider": [
     "Create a remote Vercel Sandbox provider, loading the optional SDK on acquisition. Repository state is uploaded and synchronized back with host-change protection. A supplied connect function can replace SDK sandbox creation for an integration.",
     "Crée un provider distant Vercel Sandbox, avec chargement du SDK optionnel à l’acquisition. L’état du dépôt est envoyé puis resynchronisé avec protection des modifications hôtes concurrentes. Une fonction connect fournie peut remplacer la création de sandbox du SDK pour une intégration."
   ],
-  "daytonaSandboxProvider": [
+  "createDaytonaSandboxProvider": [
     "Create a remote Daytona provider with separate SDK connection and sandbox creation settings. Repository transfers use the acquired remote environment, and synchronization validates concurrent host edits before applying changes. Optional egress is validated before allocation and confirmed through the server network-update API before workspace setup; failure triggers deletion. Native image startup precedes that confirmation. See [outbound rules](../../guide/outbound-rules/).",
     "Crée un provider distant Daytona avec réglages distincts de connexion SDK et de création de sandbox. Les transferts utilisent l’environnement distant acquis et la synchronisation valide les modifications hôtes concurrentes avant application. La politique egress optionnelle est validée avant allocation et confirmée par l’API réseau du serveur avant préparation du workspace ; un échec déclenche la suppression. Le démarrage natif de l’image précède cette confirmation. Consultez les [règles sortantes](../../guide/outbound-rules/)."
   ],
-  "firecrackerSandboxProvider": [
+  "createFirecrackerSandboxProvider": [
     "Create an opt-in Firecracker microVM provider from explicit kernel, rootfs, TAP and SSH settings. The host must provide KVM and a prepared guest; allocation does not fall back to host execution. The acquired lease owns VM shutdown.",
     "Crée un provider microVM Firecracker opt-in à partir de réglages explicites de noyau, rootfs, TAP et SSH. L’hôte doit fournir KVM et un invité préparé ; l’allocation ne se replie pas sur l’exécution hôte. Le bail acquis possède l’arrêt de la VM."
   ],
-  "openaiModelProvider": [
+  "createOpenAIModelProvider": [
     "Configure a reusable request transport using Chat Completions or Responses, with messages, tool calls, reasoning effort and optional streaming. The harness supplies the model on each request. Construction performs local validation only; requests enforce cancellation, response size and deadlines without retries or protocol fallback.",
     "Configure un transport de requêtes réutilisable utilisant Chat Completions ou Responses, avec messages, appels d’outils, effort de raisonnement et streaming optionnel. Le harness fournit le modèle à chaque requête. La construction valide localement ; les requêtes appliquent annulation, taille et délais sans retry ni changement de protocole."
   ],
-  "agent": [
+  "createAgent": [
     "Compose a harness and a model without starting a process or making a network request. The model is a name or an AgentModel object; the harness or its model provider rejects unsupported reasoning levels and output limits immediately. CLI harnesses may keep their native default model; a custom harness requires one.",
     "Compose un harness et un modèle sans lancer de processus ni requête réseau. Le modèle est un nom ou un objet AgentModel ; le harness ou son fournisseur refuse immédiatement un niveau de raisonnement ou une limite de sortie non pris en charge. Un harness CLI peut conserver son modèle par défaut ; un harness personnalisé en exige un."
   ],
-  "harness": [
+  "createHarness": [
     "Compose the built-in Outpost engine from a model provider, tools, instructions, limits and tool execution settings. Validation happens immediately; nothing runs until the agent is dispatched. The engine calls the model, validates and runs tools in the borrowed sandbox and fails with code limit when a bound is reached. run callbacks are rejected.",
     "Compose le moteur intégré d’Outpost à partir d’un fournisseur de modèles, d’outils, d’instructions, de limites et de réglages d’exécution des outils. La validation est immédiate ; rien ne s’exécute avant le dispatch de l’agent. Le moteur appelle le modèle, valide et exécute les outils dans le sandbox emprunté et échoue avec le code limit quand une borne est atteinte. Les callbacks run sont refusés."
   ],
-  "anthropicModelProvider": [
+  "createAnthropicModelProvider": [
     "Configure an Anthropic Messages transport with messages, tool calls, thinking replay, optional streaming and optional system-prefix and history caching. The harness supplies the model per request; the agent model must set maxOutputTokens, and reasoning maps to adaptive or disabled thinking. Cache reads and writes are normalized into usage; server tools are rejected.",
     "Configure un transport Anthropic Messages avec messages, appels d’outils, rejeu de la réflexion, streaming optionnel et cache optionnel du préfixe système et de l’historique. Le harness fournit le modèle par requête ; le modèle de l’agent doit fixer maxOutputTokens, et le raisonnement se traduit en réflexion adaptative ou désactivée. Les lectures et écritures de cache sont normalisées dans l’usage ; les outils serveur sont refusés."
   ],
-  "claudeHarness": [
-    "Create a Claude Code harness from execution, authentication and conversation settings without starting the CLI. Compose it with agent({ harness, model }) to select a model independently. The CLI owns its internal model/tool loop.",
-    "Crée un harness Claude Code à partir des réglages d’exécution, d’authentification et de conversation, sans lancer la CLI. Composez-le avec agent({ harness, model }) pour sélectionner séparément le modèle. La CLI possède sa boucle interne modèle/outils."
+  "createClaudeHarness": [
+    "Create a Claude Code harness from execution, authentication and conversation settings without starting the CLI. Compose it with createAgent({ harness, model }) to select a model independently. The CLI owns its internal model/tool loop.",
+    "Crée un harness Claude Code à partir des réglages d’exécution, d’authentification et de conversation, sans lancer la CLI. Composez-le avec createAgent({ harness, model }) pour sélectionner séparément le modèle. La CLI possède sa boucle interne modèle/outils."
   ],
-  "codexHarness": [
-    "Create a Codex harness from execution, authentication and conversation settings without starting the CLI. Compose it with agent({ harness, model }) to select a model independently. The CLI owns its internal model/tool loop.",
-    "Crée un harness Codex à partir des réglages d’exécution, d’authentification et de conversation, sans lancer la CLI. Composez-le avec agent({ harness, model }) pour sélectionner séparément le modèle. La CLI possède sa boucle interne modèle/outils."
+  "createCodexHarness": [
+    "Create a Codex harness from execution, authentication and conversation settings without starting the CLI. Compose it with createAgent({ harness, model }) to select a model independently. The CLI owns its internal model/tool loop.",
+    "Crée un harness Codex à partir des réglages d’exécution, d’authentification et de conversation, sans lancer la CLI. Composez-le avec createAgent({ harness, model }) pour sélectionner séparément le modèle. La CLI possède sa boucle interne modèle/outils."
   ],
   "defineHarnessTool": [
     "Define a tool the engine can offer to the model. Validates the name, description and input schema immediately and returns a frozen definition whose validate() checks model arguments before execute() runs.",
@@ -327,23 +319,23 @@
     "Define ordered allow and deny rules over tool names, command patterns and repository paths. The engine evaluates them before before-tool hooks, and again after a hook rewrites the input; the first matching rule wins. Permissions are not a security boundary: the sandbox isolates.",
     "Définit des règles ordonnées d’autorisation et de refus sur les noms d’outils, les motifs de commande et les chemins du dépôt. Le moteur les évalue avant les hooks before-tool, et de nouveau après la réécriture de l’entrée par un hook ; la première règle applicable l’emporte. Les permissions ne sont pas une frontière de sécurité : c’est le sandbox qui isole."
   ],
-  "harnessFileTools": [
+  "createHarnessFileTools": [
     "Create the files toolset: read_file returns numbered lines of a UTF-8 file downloaded from the sandbox, and list_files lists files Git tracks or does not ignore. Both are read-only and declare their paths for permission rules.",
     "Crée le jeu d’outils files : read_file renvoie les lignes numérotées d’un fichier UTF-8 téléchargé depuis le sandbox, et list_files liste les fichiers que Git suit ou n’ignore pas. Les deux sont en lecture seule et déclarent leurs chemins pour les règles de permission."
   ],
-  "harnessEditTools": [
+  "createHarnessEditTools": [
     "Create the edit toolset: write_file creates or replaces a file, and edit_file replaces exact text, keeps line endings and permissions and refuses to overwrite a file that changed during the edit.",
     "Crée le jeu d’outils edit : write_file crée ou remplace un fichier, et edit_file remplace un texte exact, conserve fins de ligne et permissions et refuse d’écraser un fichier modifié pendant l’opération."
   ],
-  "harnessSearchTools": [
+  "createHarnessSearchTools": [
     "Create the search toolset: search runs git grep with an extended regular expression over tracked and non-ignored files and returns bounded path:line:text matches.",
     "Crée le jeu d’outils search : search exécute git grep avec une expression régulière étendue sur les fichiers suivis et non ignorés, et renvoie des correspondances chemin:ligne:texte bornées."
   ],
-  "harnessGitTools": [
+  "createHarnessGitTools": [
     "Create the git toolset: git runs read-only status, diff, log or show commands and refuses options that write files or run external programs.",
     "Crée le jeu d’outils git : git exécute les commandes en lecture seule status, diff, log ou show et refuse les options qui écrivent des fichiers ou lancent des programmes externes."
   ],
-  "harnessShellTools": [
+  "createHarnessShellTools": [
     "Create the shell toolset: shell runs sh -c in the repository root with a deadline and no input, and reports the exit status, stdout and stderr. Requires a POSIX shell in the sandbox.",
     "Crée le jeu d’outils shell : shell exécute sh -c à la racine du dépôt avec un délai et sans entrée, et renvoie statut de sortie, stdout et stderr. Exige un shell POSIX dans le sandbox."
   ],
@@ -359,7 +351,7 @@
     "Create a context strategy that, once the history exceeds a size, asks the model to summarize the older part and keeps the first prompt and the recent messages. Each summary costs one extra request.",
     "Crée une stratégie de contexte qui, quand l’historique dépasse une taille, demande au modèle de résumer la partie ancienne et conserve le premier prompt et les messages récents. Chaque résumé coûte une requête de plus."
   ],
-  "harnessConversations": [
+  "createHarnessConversations": [
     "Create the default conversation store of custom harnesses. Transcripts live in .outpost/conversations/harness under the target repository; locating a missing conversation fails with code session, and restore is a no-op because the loop runs on the host.",
     "Crée le store de conversations par défaut des harness personnalisés. Les transcriptions se trouvent dans .outpost/conversations/harness du dépôt cible ; localiser une conversation absente échoue avec le code session, et restore ne fait rien car la boucle tourne sur l’hôte."
   ],
@@ -367,17 +359,17 @@
     "Define a skill: instructions, and optionally tools, that a custom harness lists in its system instructions and the model loads with load_skill when needed. Skill tools are refused until their skill is loaded.",
     "Définit une skill : des instructions, et éventuellement des outils, qu’un harness personnalisé liste dans ses instructions système et que le modèle charge avec load_skill au besoin. Les outils d’une skill sont refusés tant qu’elle n’est pas chargée."
   ],
-  "antigravityHarness": [
-    "Create an Antigravity CLI (agy) harness from execution, authentication and permission settings without starting the CLI. Compose it with agent({ harness, model }) to select a model name independently; reasoning and maxOutputTokens are rejected. Warm resume and automatic response repairs reuse a conversation in the same open sandbox. Portable capture, cold resume and automated fork are rejected. The CLI owns its internal model/tool loop.",
-    "Crée un harness Antigravity CLI (agy) à partir des réglages d’exécution, d’authentification et de permissions, sans lancer la CLI. Composez-le avec agent({ harness, model }) pour sélectionner séparément un nom de modèle ; reasoning et maxOutputTokens sont refusés. La reprise à chaud et les réparations réutilisent une conversation dans la même sandbox ouverte. Capture portable, reprise à froid et fork automatisé sont refusés. La CLI possède sa boucle interne modèle/outils."
+  "createAntigravityHarness": [
+    "Create an Antigravity CLI (agy) harness from execution, authentication and permission settings without starting the CLI. Compose it with createAgent({ harness, model }) to select a model name independently; reasoning and maxOutputTokens are rejected. Warm resume and automatic response repairs reuse a conversation in the same open sandbox. Portable capture, cold resume and automated fork are rejected. The CLI owns its internal model/tool loop.",
+    "Crée un harness Antigravity CLI (agy) à partir des réglages d’exécution, d’authentification et de permissions, sans lancer la CLI. Composez-le avec createAgent({ harness, model }) pour sélectionner séparément un nom de modèle ; reasoning et maxOutputTokens sont refusés. La reprise à chaud et les réparations réutilisent une conversation dans la même sandbox ouverte. Capture portable, reprise à froid et fork automatisé sont refusés. La CLI possède sa boucle interne modèle/outils."
   ],
-  "copilotHarness": [
-    "Create a GitHub Copilot CLI harness from execution, authentication and permission settings without starting the CLI. Compose it with agent({ harness, model }) to select a model name independently; reasoning and maxOutputTokens are rejected. Native session bundles support capture, warm/cold resume and response repairs. Automated fork is rejected. The CLI owns its internal model/tool loop.",
-    "Crée un harness GitHub Copilot CLI à partir des réglages d’exécution, d’authentification et de permissions, sans lancer la CLI. Composez-le avec agent({ harness, model }) pour sélectionner séparément un nom de modèle ; reasoning et maxOutputTokens sont refusés. Les bundles natifs permettent capture, reprise à chaud/à froid et réparations. Le fork automatisé est refusé. La CLI possède sa boucle interne modèle/outils."
+  "createCopilotHarness": [
+    "Create a GitHub Copilot CLI harness from execution, authentication and permission settings without starting the CLI. Compose it with createAgent({ harness, model }) to select a model name independently; reasoning and maxOutputTokens are rejected. Native session bundles support capture, warm/cold resume and response repairs. Automated fork is rejected. The CLI owns its internal model/tool loop.",
+    "Crée un harness GitHub Copilot CLI à partir des réglages d’exécution, d’authentification et de permissions, sans lancer la CLI. Composez-le avec createAgent({ harness, model }) pour sélectionner séparément un nom de modèle ; reasoning et maxOutputTokens sont refusés. Les bundles natifs permettent capture, reprise à chaud/à froid et réparations. Le fork automatisé est refusé. La CLI possède sa boucle interne modèle/outils."
   ],
-  "kimiHarness": [
-    "Create a Kimi Code harness from execution, authentication and permission settings without starting the CLI. Compose it with agent({ harness, model }) to select a model name independently; reasoning and maxOutputTokens are rejected. Native session bundles support capture, warm/cold resume and response repairs. Fork runs the native kimi fork command and continues a distinct child ID. The CLI owns its internal model/tool loop. Account profiles default to region: \"global\" for kimi.ai; set mainland-cn explicitly for kimi.com. The region determines the credential slot and sandbox login endpoints.",
-    "Crée un harness Kimi Code à partir des réglages d’exécution, d’authentification et de permissions, sans lancer la CLI. Composez-le avec agent({ harness, model }) pour sélectionner séparément un nom de modèle ; reasoning et maxOutputTokens sont refusés. Les bundles natifs permettent capture, reprise à chaud/à froid et réparations. Le fork exécute la commande native kimi fork et continue un identifiant enfant distinct. La CLI possède sa boucle interne modèle/outils. Les profils de compte utilisent region: \"global\" par défaut pour kimi.ai ; définissez explicitement mainland-cn pour kimi.com. La région détermine le fichier d’identifiants et les endpoints de connexion de la sandbox."
+  "createKimiHarness": [
+    "Create a Kimi Code harness from execution, authentication and permission settings without starting the CLI. Compose it with createAgent({ harness, model }) to select a model name independently; reasoning and maxOutputTokens are rejected. Native session bundles support capture, warm/cold resume and response repairs. Fork runs the native kimi fork command and continues a distinct child ID. The CLI owns its internal model/tool loop. Account profiles default to region: \"global\" for kimi.ai; set mainland-cn explicitly for kimi.com. The region determines the credential slot and sandbox login endpoints.",
+    "Crée un harness Kimi Code à partir des réglages d’exécution, d’authentification et de permissions, sans lancer la CLI. Composez-le avec createAgent({ harness, model }) pour sélectionner séparément un nom de modèle ; reasoning et maxOutputTokens sont refusés. Les bundles natifs permettent capture, reprise à chaud/à froid et réparations. Le fork exécute la commande native kimi fork et continue un identifiant enfant distinct. La CLI possède sa boucle interne modèle/outils. Les profils de compte utilisent region: \"global\" par défaut pour kimi.ai ; définissez explicitement mainland-cn pour kimi.com. La région détermine le fichier d’identifiants et les endpoints de connexion de la sandbox."
   ],
   "createObservationHub": [
     "Create an explicitly scoped event distributor with one sequence across children, bounded independent sink queues, snapshot flushing and isolated delivery failures. Supply it through observation on a workflow or dispatch; the caller owns the parent hub. This is live observation, not a durable state registry or remote worker relay.",
@@ -419,7 +411,7 @@
     "Sign one exact workflow decision with an application-owned Ed25519 private key. Returns an immutable decision with an expiring proof; it neither submits the decision nor stores the key.",
     "Signe une décision exacte avec une clé privée Ed25519 appartenant à l’application. Renvoie une décision immuable avec une preuve expirante ; ne soumet pas la décision et ne stocke pas la clé."
   ],
-  "ed25519DecisionVerifier": [
+  "createEd25519DecisionVerifier": [
     "Create a verifier that resolves trusted approver keys on every decision, checks the Ed25519 signature, actor binding and expiry, and returns audit metadata. Missing, duplicate or revoked key identifiers are rejected.",
     "Crée un vérificateur qui résout les clés de confiance à chaque décision, vérifie la signature Ed25519, l’acteur associé et l’expiration, puis renvoie les métadonnées d’audit. Les identifiants de clé absents, dupliqués ou révoqués sont refusés."
   ],
@@ -447,11 +439,11 @@
     "Live trusted-key source used by the Ed25519 verifier for rotation and revocation.",
     "Source actualisable des clés de confiance utilisée par le vérificateur Ed25519 pour rotation et révocation."
   ],
-  "interactiveAgentTask": [
+  "defineInteractiveAgentTask": [
     "Define a checkpointed agent dialogue with durable human-input waits between turns. The task allocates and closes a sandbox per turn, captures its conversation and retains a named worktree without integrating it. Both the Outpost harness and CLI adapters require portable capture and resume. The result is lossless JSON plus conversation and workspace references; interrupted turns require explicit replay authorization.",
     "Définit un dialogue d’agent avec checkpoint et attentes humaines durables entre les tours. La tâche alloue et ferme un sandbox par tour, capture sa conversation et conserve un worktree nommé sans l’intégrer. Le harness Outpost comme les adaptateurs CLI exigent capture portable et reprise. Le résultat contient du JSON sans perte et les références de conversation et de workspace ; les tours interrompus exigent une autorisation explicite de rejeu."
   ],
-  "loopTask": [
+  "defineLoopTask": [
     "Define a bounded attempt/check workflow node. Failed checks supply feedback to the next round; callback exceptions fail the task. The workflow persists phase progress, admits every round execution against its cumulative budget and returns the accepted attempt output. It owns neither the sandbox nor agent conversations.",
     "Définit un nœud de workflow borné alternant essai et vérification. Les vérifications négatives fournissent le feedback du tour suivant ; une exception fait échouer la tâche. Le workflow persiste les phases, impute chaque exécution de tour au budget cumulé et renvoie le résultat accepté. Il ne possède ni sandbox ni conversations."
   ],
@@ -463,7 +455,7 @@
     "Return the message and reset time of an OutpostError with code quota, following up to eight wrapped causes. Returns undefined for any other value. Use it in retry.accepts or error handling to separate usage and rate limits from other failures; it does not wait or retry.",
     "Renvoie le message et l’heure de réinitialisation d’une OutpostError de code quota, en suivant jusqu’à huit causes imbriquées. Renvoie undefined pour toute autre valeur. Utilisez-la dans retry.accepts ou la gestion d’erreurs pour distinguer les limites d’usage et de débit des autres échecs ; elle n’attend ni ne relance."
   ],
-  "replayAgent": [
+  "createReplayAgent": [
     "Create a single-use agent that replays one dispatch journal without calling a model. Each turn checks the rendered prompt, re-emits the recorded events and usage, and the last turn of each sandbox dispatch rebuilds the recorded commits inside the sandbox with their original identities, so an identical baseline yields identical commit IDs. Divergences raise ReplayDivergence or, with divergence: \"warn\", warnings. Replays cannot be resumed or forked.",
     "Crée un agent à usage unique qui rejoue le journal d’un dispatch sans appeler de modèle. Chaque tour vérifie le prompt rendu et réémet les événements et l’usage enregistrés ; le dernier tour de chaque dispatch en sandbox reconstruit les commits enregistrés dans la sandbox avec leurs identités d’origine, si bien qu’une baseline identique donne des identifiants de commit identiques. Les divergences lèvent ReplayDivergence ou, avec divergence: \"warn\", des avertissements. Un rejeu ne peut être ni repris ni forké."
   ],
@@ -471,7 +463,7 @@
     "OutpostError with code replay, thrown when a replay differs from its journal. kind, turn, expected, actual and commit locate the difference; details holds the same fields.",
     "OutpostError de code replay, levée quand un rejeu diffère de son journal. kind, turn, expected, actual et commit situent l’écart ; details contient les mêmes champs."
   ],
-  "taskCacheStore": [
+  "createTaskCacheStore": [
     "Create a task cache store over a caller-owned Transport. Entries live under task-cache/<fingerprint>.json; writes replace older entries conditionally and keep a concurrent writer’s entry. Reads validate the entry and its size. Entries are not authenticated: anyone who can write the transport controls restored results.",
     "Crée un store de cache de tâches sur un Transport appartenant à l’appelant. Les entrées sont stockées sous task-cache/<empreinte>.json ; les écritures remplacent conditionnellement les anciennes entrées et conservent celle d’un écrivain concurrent. Les lectures valident l’entrée et sa taille. Les entrées ne sont pas authentifiées : quiconque peut écrire dans le transport contrôle les résultats restaurés."
   ],
@@ -483,7 +475,7 @@
     "Return the outage signal of an Outpost error marked unavailable by a CLI adapter or model provider, following up to eight wrapped causes. Quota errors and every other value return undefined. Outages keep their process or provider code, so use this function rather than the code to recognize them; it does not wait or retry.",
     "Renvoie le signal de panne d’une erreur Outpost marquée indisponible par un adapter CLI ou un fournisseur de modèle, en suivant jusqu’à huit causes imbriquées. Les erreurs de quota et toute autre valeur renvoient undefined. Les pannes conservent leur code process ou provider : utilisez cette fonction plutôt que le code pour les reconnaître ; elle n’attend ni ne relance."
   ],
-  "fallbackAgent": [
+  "createFallbackAgent": [
     "Compose an ordered FallbackAgent from at least two agents and an explicit on list. Dispatch runs the candidates in order in the same sandbox and workspace, preparing each only when it is tried, and moves on only after a quota or unavailable failure listed in on; other failures are rethrown. Construction validates and freezes the list without starting anything.",
     "Compose un FallbackAgent ordonné à partir d’au moins deux agents et d’une liste on explicite. Le dispatch exécute les candidats dans l’ordre dans le même sandbox et le même workspace, en préparant chacun seulement lorsqu’il est essayé, et ne passe au suivant qu’après un échec quota ou unavailable listé dans on ; les autres échecs sont relancés. La construction valide et fige la liste sans rien démarrer."
   ],
@@ -530,5 +522,21 @@
   "workflowJob": [
     "Return a queue handler that builds a workflow from each trigger job input and starts it with the job runId as checkpoint run, the job signal and a version combining checkpoint.version with an input digest. The job value summarizes the run, including that version and pending gates; failed or cancelled workflows complete the job with an error.",
     "Renvoie un handler de file qui construit un workflow à partir de l’entrée de chaque job de déclencheur et le démarre avec le runId du job comme exécution de checkpoint, le signal du job et une version combinant checkpoint.version et une empreinte de l’entrée. La valeur du job résume l’exécution, y compris cette version et les gates en attente ; les workflows failed ou cancelled terminent le job avec une erreur."
+  ],
+  "defineTextResponse": [
+    "Declare a tagged text response. The validator reads the last complete matching tag and returns its trimmed contents as a string. Missing or invalid content raises ResponseError; repairs defaults to zero.",
+    "Déclare une réponse texte balisée. Le validateur lit la dernière balise complète correspondante et renvoie son contenu nettoyé sous forme de chaîne. Un contenu absent ou invalide lève ResponseError ; repairs vaut zéro par défaut."
+  ],
+  "defineJsonResponse": [
+    "Declare a tagged JSON response. The validator reads the last complete matching tag, accepts an optional json code fence, parses the contents and applies the Standard Schema validator or parsing function. Missing or invalid content raises ResponseError; repairs defaults to zero.",
+    "Déclare une réponse JSON balisée. Le validateur lit la dernière balise complète correspondante, accepte un bloc de code json optionnel, analyse le contenu et applique le validateur Standard Schema ou la fonction d’analyse. Un contenu absent ou invalide lève ResponseError ; repairs vaut zéro par défaut."
+  ],
+  "defineJsonArtifact": [
+    "Declare a named, versioned JSON artifact contract. The schema validates values during both encoding and decoding, and payloads must be lossless JSON. Declaring a contract does not publish an artifact.",
+    "Déclare un contrat d’artefact JSON nommé et versionné. Le schéma valide les valeurs à l’encodage comme au décodage, et les données doivent être du JSON sans perte. Déclarer un contrat ne publie pas d’artefact."
+  ],
+  "defineBinaryArtifact": [
+    "Declare a named, versioned binary artifact contract that copies Uint8Array payloads on encoding and decoding. Declaring a contract does not publish an artifact.",
+    "Déclare un contrat d’artefact binaire nommé et versionné qui copie les données Uint8Array à l’encodage et au décodage. Déclarer un contrat ne publie pas d’artefact."
   ]
 }

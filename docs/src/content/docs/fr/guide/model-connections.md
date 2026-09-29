@@ -3,20 +3,20 @@ title: "Connexions aux modèles"
 description: "Choisir un protocole HTTP pour la boucle intégrée."
 ---
 
-Le contrat `ModelProvider`, `openaiModelProvider()` et `anthropicModelProvider()` sont stables en 7.0.0. Les requêtes modèles sont exécutées dans le processus Outpost.
+Le contrat `ModelProvider`, `createOpenAIModelProvider()` et `createAnthropicModelProvider()` sont stables en 7.0.0. Les requêtes modèles sont exécutées dans le processus Outpost.
 
-Choisissez le fournisseur selon le protocole, puis passez-le à `harness({ modelProvider })`. Les identifiants sont explicites et restent dans le client côté hôte.
+Choisissez le fournisseur selon le protocole, puis passez-le à `createHarness({ modelProvider })`. Les identifiants sont explicites et restent dans le client côté hôte.
 
 ```ts
 import {
-  anthropicModelProvider,
-  openaiModelProvider,
+  createAnthropicModelProvider,
+  createOpenAIModelProvider,
 } from "@elie-laloum/outpost";
 
-const messages = anthropicModelProvider({
+const messages = createAnthropicModelProvider({
   apiKey: process.env.ANTHROPIC_API_KEY ?? "",
 });
-const compatible = openaiModelProvider({
+const compatible = createOpenAIModelProvider({
   baseUrl: "http://127.0.0.1:8080/v1",
   api: "chat-completions",
   apiKey: false,
@@ -25,9 +25,9 @@ const compatible = openaiModelProvider({
 
 ## Sélection du protocole
 
-`openaiModelProvider()` accepte `chat-completions` (par défaut) ou `responses`. Il ajoute l’endpoint choisi à `baseUrl` ; aucun repli ne change de protocole après une erreur. `anthropicModelProvider()` utilise l’API Messages.
+`createOpenAIModelProvider()` accepte `chat-completions` (par défaut) ou `responses`. Il ajoute l’endpoint choisi à `baseUrl` ; aucun repli ne change de protocole après une erreur. `createAnthropicModelProvider()` utilise l’API Messages.
 
-Ce réglage est distinct de `codexHarness({ modelProvider })`, qui configure la CLI Codex et exige la compatibilité Responses.
+Ce réglage est distinct de `createCodexHarness({ modelProvider })`, qui configure la CLI Codex et exige la compatibilité Responses.
 
 ## Bornes et streaming
 
@@ -37,7 +37,7 @@ Les modèles sont des noms ou des objets avec les réglages de raisonnement et d
 
 Le `cache` du harness demande la mise en cache du préfixe. `cacheSystem` d’Anthropic ajoute explicitement un point de cache système ; les succès du cache ne sont pas garantis.
 
-API : [openaiModelProvider](../../reference/openaimodelprovider/) · [anthropicModelProvider](../../reference/anthropicmodelprovider/) · [ModelProvider](../../reference/modelprovider/).
+API : [createOpenAIModelProvider](../../reference/createopenaimodelprovider/) · [createAnthropicModelProvider](../../reference/createanthropicmodelprovider/) · [ModelProvider](../../reference/modelprovider/).
 
 ## Validation
 

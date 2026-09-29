@@ -3,18 +3,18 @@ title: "Task dependencies"
 description: "Connect typed outputs into an executable graph."
 ---
 
-`task()` defines a node. `workflow()` validates the graph. Nothing runs until `start()`.
+`defineTask()` defines a node. `defineWorkflow()` validates the graph. Nothing runs until `start()`.
 
 ```ts
-import { task, workflow } from "@elie-laloum/outpost";
+import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
 
-const files = task({ key: "files", perform: () => ["src/parser.ts"] });
-const report = task({
+const files = defineTask({ key: "files", perform: () => ["src/parser.ts"] });
+const report = defineTask({
   key: "report",
   after: [files],
   perform: (context) => ({ reviewed: context.value(files).length }),
 });
-const result = await workflow("review", [files, report]).start();
+const result = await defineWorkflow("review", [files, report]).start();
 result.unwrap();
 console.log(result.value(report));
 ```
@@ -29,17 +29,17 @@ Independent tasks can run concurrently. Dependent tasks start after their depend
 
 ## Choose a task type
 
-| Factory        | Use                                                |
-| -------------- | -------------------------------------------------- |
-| `loopTask`     | Bounded attempts with feedback from verification.  |
-| `task`         | Application code returning a value.                |
-| `agentTask`    | An agent request on an existing sandbox.           |
-| `commandTask`  | A command on an existing sandbox.                  |
-| `isolatedTask` | An agent request with its own sandbox lifecycle.   |
-| `queuedTask`   | Work delegated to a registered background handler. |
+| Declaration          | Use                                                |
+| -------------------- | -------------------------------------------------- |
+| `defineLoopTask`     | Bounded attempts with feedback from verification.  |
+| `defineTask`         | Application code returning a value.                |
+| `defineAgentTask`    | An agent request on an existing sandbox.           |
+| `defineCommandTask`  | A command on an existing sandbox.                  |
+| `defineIsolatedTask` | An agent request with its own sandbox lifecycle.   |
+| `defineQueuedTask`   | Work delegated to a registered background handler. |
 
 A workflow does not create a shared Git transaction. Each task must honor resource ownership and cancellation. Use [scheduling](../task-scheduling/) to control concurrency and retry behavior.
 
-API: [task](../../reference/task/) · [workflow](../../reference/workflow/) · [TaskContext](../../reference/taskcontext/).
+API: [defineTask](../../reference/definetask/) · [defineWorkflow](../../reference/defineworkflow/) · [TaskContext](../../reference/taskcontext/).
 
 Use [verification loops](../verification-loops/) when a failed check should guide another attempt. Add a [task cache](../task-cache/) to reuse a JSON result when the task’s inputs have not changed.

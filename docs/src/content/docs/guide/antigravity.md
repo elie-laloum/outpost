@@ -3,7 +3,7 @@ title: "Antigravity"
 description: "Connect Antigravity to an Outpost sandbox."
 ---
 
-Use `antigravityHarness()` with any supported [execution backend](../execution-backends/). Install the CLI in your image or allow bootstrap on remote providers.
+Use `createAntigravityHarness()` with any supported [execution backend](../execution-backends/). Install the CLI in your image or allow bootstrap on remote providers.
 
 ## Account access
 
@@ -14,10 +14,10 @@ Run `agy` on the host and sign in. Outpost copies `~/.gemini/antigravity-cli/ant
 Supply `GEMINI_API_KEY` explicitly. API usage follows the provider’s API billing.
 
 ```ts
-import { agent, antigravityHarness } from "@elie-laloum/outpost";
+import { createAgent, createAntigravityHarness } from "@elie-laloum/outpost";
 
-const coder = agent({
-  harness: antigravityHarness({
+const coder = createAgent({
+  harness: createAntigravityHarness({
     authentication: "usage",
     variables: { GEMINI_API_KEY: process.env.GEMINI_API_KEY ?? "" },
   }),
@@ -26,7 +26,7 @@ const coder = agent({
 
 ## Behavior
 
-Resume a conversation emitted in the same open sandbox with `sandbox.resume(id, options)` or a warm result’s `resume()`. Automatic response repairs use that same conversation. Antigravity has no verified portable capture format in Outpost: cold resume after sandbox disposal and automated fork are rejected, and `antigravityHarness()` refuses a `conversations` store. A new dispatch without continuation still starts a fresh session. See [chat history](../chat-history/) and [Google’s resume command](https://www.antigravity.google/docs/cli/commands/resume/).
+Resume a conversation emitted in the same open sandbox with `sandbox.resume(id, options)` or a warm result’s `resume()`. Automatic response repairs use that same conversation. Antigravity has no verified portable capture format in Outpost: cold resume after sandbox disposal and automated fork are rejected, and `createAntigravityHarness()` refuses a `conversations` store. A new dispatch without continuation still starts a fresh session. See [chat history](../chat-history/) and [Google’s resume command](https://www.antigravity.google/docs/cli/commands/resume/).
 
 ## Pinned installation
 
@@ -38,4 +38,4 @@ Bootstrap reuses an existing executable without replacing or verifying its bytes
 
 `mcpServers` merges [MCP servers](../mcp-servers/) into `~/.gemini/config/mcp_config.json` in the agent home, which is your own home with the local provider.
 
-API: [antigravityHarness](../../reference/antigravityharness/).
+API: [createAntigravityHarness](../../reference/createantigravityharness/).

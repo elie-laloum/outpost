@@ -3,7 +3,7 @@ title: "Outils et ensembles d’outils"
 description: "Exposer au modèle un ensemble borné d’opérations de sandbox."
 ---
 
-Pour la boucle de modèle intégrée, passez les outils à `harness({ tools })`. Les ensembles intégrés couvrent fichiers, recherche, édition, Git et commandes shell.
+Pour la boucle de modèle intégrée, passez les outils à `createHarness({ tools })`. Les ensembles intégrés couvrent fichiers, recherche, édition, Git et commandes shell.
 
 ## Définir un outil
 
@@ -33,10 +33,10 @@ const gitStatus = defineHarnessTool({
 
 ## Composer les outils
 
-`defineHarnessToolset({ name, tools })` regroupe des outils réutilisables. `harnessFileTools()`, `harnessSearchTools()`, `harnessEditTools()`, `harnessGitTools()` et `harnessShellTools()` proposent des ensembles prêts à l’emploi. Fournissez uniquement les capacités nécessaires à la tâche.
+`defineHarnessToolset({ name, tools })` regroupe des outils réutilisables. `createHarnessFileTools()`, `createHarnessSearchTools()`, `createHarnessEditTools()`, `createHarnessGitTools()` et `createHarnessShellTools()` proposent des ensembles prêts à l’emploi. Fournissez uniquement les capacités nécessaires à la tâche.
 
 `readOnly` est une métadonnée d’ordonnancement, pas une isolation. Déclarez `resources(input)` si les règles de permissions doivent inspecter les chemins ou commandes. Utilisez `context.sandbox` pour l’exécution et respectez `context.signal` ; des appels au système de fichiers hôte contourneraient la sandbox empruntée.
 
-Pour utiliser les outils d’un serveur existant, déclarez des [serveurs MCP](../mcp-servers/) avec `harness({ mcpServers })`.
+Pour utiliser les outils d’un serveur existant, déclarez des [serveurs MCP](../mcp-servers/) avec `createHarness({ mcpServers })`.
 
 API : [defineHarnessTool](../../reference/defineharnesstool/) · [defineHarnessToolset](../../reference/defineharnesstoolset/) · [HarnessToolContext](../../reference/harnesstoolcontext/).

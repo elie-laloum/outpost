@@ -6,9 +6,9 @@ description: "Réutiliser les téléchargements de paquets entre conteneurs."
 Les caches de dépendances des conteneurs réutilisent des volumes gérés par le moteur entre allocations de sandboxes. Ils conservent les données des caches de paquets indépendamment du home privé de l’agent.
 
 ```ts
-import { dockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
+import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
-const sandboxProvider = dockerSandboxProvider({
+const sandboxProvider = createDockerSandboxProvider({
   image: "outpost:dev",
   caches: [{ name: "npm", key: "application-node24" }],
   variables: { npm_config_cache: "/outpost/cache/npm" },

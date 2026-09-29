@@ -7,19 +7,19 @@ Outpost persists artifacts, checkpoints, journals, reservations and resource act
 
 ```ts
 import {
-  localTransport,
-  artifactStore,
-  workflowCheckpointStore,
+  createLocalTransport,
+  createArtifactStore,
+  createWorkflowCheckpointStore,
 } from "@elie-laloum/outpost";
 
-const transporter = localTransport({ directory: ".outpost/storage" });
-const artifacts = artifactStore({ transporter });
-const checkpoints = workflowCheckpointStore({ transporter });
+const transporter = createLocalTransport({ directory: ".outpost/storage" });
+const artifacts = createArtifactStore({ transporter });
+const checkpoints = createWorkflowCheckpointStore({ transporter });
 ```
 
 ## Local storage
 
-`localTransport({ directory })` creates a versioned layout in a private local directory. The default runtime storage lives under the repository’s `.outpost/storage`. Local locks coordinate processes on that machine; this is not distributed NFS ownership.
+`createLocalTransport({ directory })` creates a versioned layout in a private local directory. The default runtime storage lives under the repository’s `.outpost/storage`. Local locks coordinate processes on that machine; this is not distributed NFS ownership.
 
 ## Remote storage
 
@@ -31,4 +31,4 @@ A transport write provides `ifRevision: null` to create, or the observed revisio
 
 Native Git workspaces, execution staging and transcript restoration still need filesystems. Selecting a remote transport does not move the entire runtime off disk.
 
-API: [Transport](../../reference/transport/) · [localTransport](../../reference/localtransport/) · [TransportConflict](../../reference/transportconflict/).
+API: [Transport](../../reference/transport/) · [createLocalTransport](../../reference/createlocaltransport/) · [TransportConflict](../../reference/transportconflict/).

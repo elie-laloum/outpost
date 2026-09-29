@@ -6,9 +6,9 @@ description: "Pass only the variables each execution needs."
 Pass `variables` on the provider for sandbox-wide values, on the harness for agent-specific values, or on a command for that invocation.
 
 ```ts
-import { dockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
+import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
-const sandboxProvider = dockerSandboxProvider({
+const sandboxProvider = createDockerSandboxProvider({
   image: "outpost:dev",
   variables: { NODE_ENV: "test", CI: "true" },
 });

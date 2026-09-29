@@ -33,3 +33,7 @@ Un **agent** sélectionne un harness et éventuellement un modèle. Un **fournis
 Les harness CLI prennent en charge Codex, Claude Code, Antigravity, GitHub Copilot CLI et Kimi Code. Vous pouvez aussi [configurer la boucle de modèle d’Outpost](../model-loop/).
 
 Outpost gère l’exécution et l’état. Vos tests établissent si le changement fonctionne, et votre code décide de son intégration. Consultez la [stratégie de branches](../branch-strategy/) avant d’automatiser la livraison.
+
+## Lire les noms de l’API
+
+Le nom d’une fonction indique quand le travail a lieu. `create*` construit un objet que vous transmettez, comme `createAgent()`, `createCodexHarness()` ou `createLocalTransport()` ; sa création ne lance aucun processus. `define*` déclare ce qu’un moteur exécutera plus tard, comme `defineWorkflow()`, `defineAgentTask()`, `defineJsonResponse()` ou `defineHarnessTool()`. Les verbes agissent immédiatement : `dispatch()`, `attach()`, `speculate()`, `readJournal()`.

@@ -7,18 +7,18 @@ Implémenté, pas encore publié. Un déclencheur n’exécute jamais un workflo
 
 ```ts
 import {
-  localTransport,
+  createLocalTransport,
   runQueueWorker,
-  sqliteTaskQueue,
-  task,
-  workflow,
-  workflowCheckpointStore,
+  createSqliteTaskQueue,
+  defineTask,
+  defineWorkflow,
+  createWorkflowCheckpointStore,
   workflowJob,
 } from "@elie-laloum/outpost";
 
-const queue = await sqliteTaskQueue(".outpost/jobs.sqlite");
-const store = workflowCheckpointStore({
-  transporter: localTransport({ directory: ".outpost/storage" }),
+const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
+const store = createWorkflowCheckpointStore({
+  transporter: createLocalTransport({ directory: ".outpost/storage" }),
 });
 const stop = new AbortController();
 process.once("SIGINT", () => stop.abort());
@@ -31,8 +31,8 @@ try {
       fix: workflowJob({
         checkpoint: { store, version: "1" },
         workflow: (input, { runId }) =>
-          workflow(runId, [
-            task({ key: "report", perform: () => ({ received: input }) }),
+          defineWorkflow(runId, [
+            defineTask({ key: "report", perform: () => ({ received: input }) }),
           ]),
       }),
     },
@@ -42,7 +42,7 @@ try {
 }
 ```
 
-Remplacez la tâche par votre propre graphe, par exemple un `agentTask` qui corrige l’issue indiquée dans `input`. Les producteurs ci-dessous publient dans la même file : un planificateur, un serveur de webhooks, ou les deux.
+Remplacez la tâche par votre propre graphe, par exemple un `defineAgentTask` qui corrige l’issue indiquée dans `input`. Les producteurs ci-dessous publient dans la même file : un planificateur, un serveur de webhooks, ou les deux.
 
 ## Planifier des exécutions
 
@@ -52,10 +52,10 @@ Remplacez la tâche par votre propre graphe, par exemple un `agentTask` qui corr
 import {
   cronSchedule,
   runSchedules,
-  sqliteTaskQueue,
+  createSqliteTaskQueue,
 } from "@elie-laloum/outpost";
 
-const queue = await sqliteTaskQueue(".outpost/jobs.sqlite");
+const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
 const stop = new AbortController();
 process.once("SIGINT", () => stop.abort());
 try {
@@ -107,10 +107,10 @@ import {
   githubWebhook,
   labelAdded,
   serveTriggers,
-  sqliteTaskQueue,
+  createSqliteTaskQueue,
 } from "@elie-laloum/outpost";
 
-const queue = await sqliteTaskQueue(".outpost/jobs.sqlite");
+const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
 const secret = process.env.GITHUB_WEBHOOK_SECRET;
 if (!secret) throw new Error("Set GITHUB_WEBHOOK_SECRET");
 const server = await serveTriggers({

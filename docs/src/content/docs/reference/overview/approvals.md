@@ -10,7 +10,7 @@ An approval or pause gate is a durable decision point in a workflow. It represen
 
 ## How it works
 
-`approvalTask` and `pauseTask` create gate tasks. The workflow persists the pending request and can return control to the caller. A later start submits decision records against that saved state; dependencies enforce the ordering around the gate.
+`defineApprovalTask` and `definePauseTask` create gate tasks. The workflow persists the pending request and can return control to the caller. A later start submits decision records against that saved state; dependencies enforce the ordering around the gate.
 
 ## Boundaries and responsibilities
 
@@ -18,8 +18,8 @@ Actor identifiers are trusted metadata, not authentication. The application must
 
 ## Entry points
 
-- [approvalTask](../../approvaltask/)
-- [pauseTask](../../pausetask/)
+- [defineApprovalTask](../../defineapprovaltask/)
+- [definePauseTask](../../definepausetask/)
 - [WorkflowGate](../../workflowgate/)
 - [WorkflowGateOptions](../../workflowgateoptions/)
 - [WorkflowDecision](../../workflowdecision/)

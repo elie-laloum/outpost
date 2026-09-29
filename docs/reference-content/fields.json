@@ -8,8 +8,8 @@
     "Inclut les modifications hôtes non commitées dans le snapshot du dépôt distant."
   ],
   "SandboxOptions.agent": [
-    "Default agent for dispatches on this sandbox: a single agent or a fallbackAgent(). Only the first candidate is bootstrapped during allocation; attach() requires a single CLI agent.",
-    "Agent par défaut des dispatchs sur ce sandbox : un agent unique ou un fallbackAgent(). Seul le premier candidat est bootstrappé à l’allocation ; attach() exige un agent CLI unique."
+    "Default agent for dispatches on this sandbox: a single agent or a createFallbackAgent(). Only the first candidate is bootstrapped during allocation; attach() requires a single CLI agent.",
+    "Agent par défaut des dispatchs sur ce sandbox : un agent unique ou un createFallbackAgent(). Seul le premier candidat est bootstrappé à l’allocation ; attach() exige un agent CLI unique."
   ],
   "SandboxOptions.workspace": [
     "Caller-owned Git workspace; excludes new repository/branch choices.",
@@ -536,8 +536,8 @@
     "Politique de branche choisie à l’ouverture du workspace."
   ],
   "DispatchOptions.agent": [
-    "Agent that runs the dispatch: a single agent composed with agent() or replayAgent(), or a fallbackAgent() whose candidates are tried in order on listed quota or outage failures. A fallback agent cannot be combined with continuation.",
-    "Agent qui exécute le dispatch : un agent unique composé avec agent() ou replayAgent(), ou un fallbackAgent() dont les candidats sont essayés dans l’ordre sur les échecs de quota ou de panne listés. Un agent de secours ne peut pas être combiné avec continuation."
+    "Agent that runs the dispatch: a single agent composed with createAgent() or createReplayAgent(), or a createFallbackAgent() whose candidates are tried in order on listed quota or outage failures. A fallback agent cannot be combined with continuation.",
+    "Agent qui exécute le dispatch : un agent unique composé avec createAgent() ou createReplayAgent(), ou un createFallbackAgent() dont les candidats sont essayés dans l’ordre sur les échecs de quota ou de panne listés. Un agent de secours ne peut pas être combiné avec continuation."
   ],
   "DispatchOptions.logging": [
     "Configure the dispatch journal transport, verbose event retention and replayable commit recording.",
@@ -1120,7 +1120,7 @@
     "Current cumulative amount observed for the exceeded budget dimension.",
     "Quantité cumulée courante observée pour la dimension de budget dépassée."
   ],
-  "task.options": [
+  "defineTask.options": [
     "Task identity, dependency edges, perform callback and attempt policy.",
     "Identité de tâche, dépendances, callback perform et politique de tentatives."
   ],
@@ -1128,11 +1128,11 @@
     "Declared task dependencies whose values may be read.",
     "Dépendances déclarées dont les valeurs peuvent être lues."
   ],
-  "workflow.name": [
+  "defineWorkflow.name": [
     "Name of the workflow definition, included in its execution reports.",
     "Nom de la définition de workflow, inclus dans ses rapports d’exécution."
   ],
-  "workflow.tasks": [
+  "defineWorkflow.tasks": [
     "Task definitions making up the graph, including every declared dependency.",
     "Définitions de tâches composant le graphe, comprenant toutes les dépendances déclarées."
   ],
@@ -1288,7 +1288,7 @@
     "Elapsed execution time in milliseconds.",
     "Durée d’exécution écoulée en millisecondes."
   ],
-  "agentTask.options": [
+  "defineAgentTask.options": [
     "Task scheduling settings, existing sandbox and dispatch-request factory.",
     "Réglages d’ordonnancement, sandbox existante et fabrique de requêtes de dispatch."
   ],
@@ -1300,7 +1300,7 @@
     "Build dispatch options from task dependencies for the existing sandbox.",
     "Construit les options de dispatch depuis les dépendances pour la sandbox existante."
   ],
-  "commandTask.options": [
+  "defineCommandTask.options": [
     "Task scheduling settings, existing sandbox and command or command factory.",
     "Réglages d’ordonnancement, sandbox existante et commande ou fabrique de commande."
   ],
@@ -1312,7 +1312,7 @@
     "Command to run, or factory that builds it from task dependency values.",
     "Commande à exécuter, ou fabrique la construisant depuis les valeurs des dépendances."
   ],
-  "isolatedTask.options": [
+  "defineIsolatedTask.options": [
     "Task scheduling settings and request factory selecting a separate repository and sandbox for each attempt.",
     "Réglages d’ordonnancement et fabrique de requêtes choisissant un dépôt et une sandbox distincts à chaque tentative."
   ],
@@ -1333,8 +1333,8 @@
     "Activer la capture native si l’adapter la prend en charge."
   ],
   "CommonAgentSettings.conversations": [
-    "Store that captures, locates and restores this agent’s sessions instead of the default native store, such as transportConversations() with the agent’s format. The format must match the agent, and saveConversations must not be false.",
-    "Store qui capture, localise et restaure les sessions de cet agent au lieu du store natif par défaut, par exemple transportConversations() au format de l’agent. Le format doit correspondre à l’agent et saveConversations ne doit pas valoir false."
+    "Store that captures, locates and restores this agent’s sessions instead of the default native store, such as createTransportConversations() with the agent’s format. The format must match the agent, and saveConversations must not be false.",
+    "Store qui capture, localise et restaure les sessions de cet agent au lieu du store natif par défaut, par exemple createTransportConversations() au format de l’agent. Le format doit correspondre à l’agent et saveConversations ne doit pas valoir false."
   ],
   "CodexSettings.modelProvider": [
     "Custom Codex model endpoint configuration; requires Responses API compatibility.",
@@ -1540,14 +1540,6 @@
     "Structured diagnostics attached to the fault code. HTTP model errors include status and, when valid, retryAfterMs: the minimum wait in milliseconds for an explicitly configured task retry. Quota errors include resetAt when the reset time is known, and agent for CLI turns. Agent and model outages add unavailable, the signal read by unavailableFault(); a quota error summarizing an exhausted fallback agent adds fallback.",
     "Diagnostics structurés attachés au code d’erreur. Les erreurs HTTP de modèles incluent status et, si valide, retryAfterMs : l’attente minimale en millisecondes d’une reprise de tâche explicitement configurée. Les erreurs de quota incluent resetAt lorsque l’heure de réinitialisation est connue, et agent pour les tours de CLI. Les pannes d’agent et de modèle ajoutent unavailable, le signal lu par unavailableFault() ; une erreur de quota résumant un agent de secours épuisé ajoute fallback."
   ],
-  "response.text": [
-    "Build a validator that returns trimmed content of the last complete tag as a string.",
-    "Construit un validateur renvoyant le contenu nettoyé de la dernière balise complète sous forme de chaîne."
-  ],
-  "response.json": [
-    "Build a validator that parses tagged JSON and applies a Standard Schema validator or parsing function.",
-    "Construit un validateur analysant le JSON balisé et appliquant un validateur Standard Schema ou une fonction d’analyse."
-  ],
   "TextResponseOptions.tag": [
     "XML-style delimiter identifier.",
     "Identifiant de balise de type XML."
@@ -1588,7 +1580,7 @@
     "Mount the volume without write access from the sandbox.",
     "Monte le volume sans accès en écriture depuis la sandbox."
   ],
-  "reporter.options": [
+  "createReporter.options": [
     "Output label, verbosity, silence mode and optional custom writer.",
     "Libellé de sortie, verbosité, mode silencieux et fonction d’écriture personnalisée optionnelle."
   ],
@@ -2268,7 +2260,7 @@
     "Always true: restoration preserves the original recovery artifacts.",
     "Toujours true : la restauration conserve les artefacts de récupération d’origine."
   ],
-  "approvalTask.options": [
+  "defineApprovalTask.options": [
     "Gate key, dependencies, approval prompt and trusted actors allowed to approve or reject.",
     "Clé de gate, dépendances, demande d’approbation et acteurs de confiance autorisés à approuver ou rejeter."
   ],
@@ -2288,7 +2280,7 @@
     "Nonempty, unique actor names permitted to decide the gate being created; signed authentication binds the selected actor to a trusted key.",
     "Noms d’acteurs non vides et uniques autorisés à décider le gate créé ; l’authentification signée lie l’acteur choisi à une clé de confiance."
   ],
-  "pauseTask.options": [
+  "definePauseTask.options": [
     "Gate key, dependencies, pause prompt and trusted actors allowed to resume or reject.",
     "Clé de gate, dépendances, demande de pause et acteurs de confiance autorisés à reprendre ou rejeter."
   ],
@@ -2315,14 +2307,6 @@
   "RecoveryInspectionOptions.resources": [
     "Include locally recorded sandbox leases and active operations.",
     "Inclut les baux de sandbox et opérations actives enregistrés localement."
-  ],
-  "artifact.json": [
-    "Create a named JSON artifact contract that validates values during encoding and decoding.",
-    "Crée un contrat d’artefact JSON nommé qui valide les valeurs lors de l’encodage et du décodage."
-  ],
-  "artifact.binary": [
-    "Create a named binary artifact contract that copies Uint8Array payloads.",
-    "Crée un contrat d’artefact binaire nommé qui copie les données Uint8Array."
   ],
   "ArtifactIdentity.name": [
     "Nonempty artifact contract name, at most 1024 characters.",
@@ -2452,7 +2436,7 @@
     "Cooperative cancellation for this operation.",
     "Annulation coopérative de cette opération."
   ],
-  "artifactTask.options": [
+  "defineArtifactTask.options": [
     "Task scheduling, artifact contract/store, value producer and parent-reference factory.",
     "Ordonnancement de tâche, contrat/store d’artefact, production de valeur et fabrique de références parentes."
   ],
@@ -2488,7 +2472,7 @@
     "Artifact byte store used for immutable publication or bounded payload retrieval.",
     "Store d’octets d’artefacts utilisé pour la publication immuable ou la lecture bornée des données."
   ],
-  "sqliteTaskQueue.path": [
+  "createSqliteTaskQueue.path": [
     "Host path to the SQLite queue database.",
     "Chemin hôte de la base SQLite de la file."
   ],
@@ -2620,7 +2604,7 @@
     "Stop the HTTP listener without closing the caller-owned queue.",
     "Arrête l’écoute HTTP sans fermer la file appartenant à l’appelant."
   ],
-  "httpTaskQueue.options": [
+  "createHttpTaskQueue.options": [
     "Queue endpoint URL, bearer token and request timeout.",
     "URL d’endpoint de file, jeton bearer et délai des requêtes."
   ],
@@ -2680,7 +2664,7 @@
     "Claimed persisted job, including its input and lease generation.",
     "Travail persisté pris en charge, comprenant son entrée et sa génération de bail."
   ],
-  "queuedTask.options": [
+  "defineQueuedTask.options": [
     "Task scheduling, queue handler, input factory, result decoder and polling settings.",
     "Ordonnancement de tâche, gestionnaire de file, fabrique d’entrée, décodeur de résultat et interrogation."
   ],
@@ -2761,8 +2745,8 @@
     "Clé unique du candidat reliant sa branche, sa validation et son résultat final."
   ],
   "SpeculativeCandidate.agent": [
-    "Agent that runs the dispatch: a single agent composed with agent() or replayAgent(), or a fallbackAgent() whose candidates are tried in order on listed quota or outage failures. The candidate settles with status quota only when every fallback hit a limit.",
-    "Agent qui exécute le dispatch : un agent unique composé avec agent() ou replayAgent(), ou un fallbackAgent() dont les candidats sont essayés dans l’ordre sur les échecs de quota ou de panne listés. Le candidat ne prend le statut quota que lorsque tous ses secours ont atteint une limite."
+    "Agent that runs the dispatch: a single agent composed with createAgent() or createReplayAgent(), or a createFallbackAgent() whose candidates are tried in order on listed quota or outage failures. The candidate settles with status quota only when every fallback hit a limit.",
+    "Agent qui exécute le dispatch : un agent unique composé avec createAgent() ou createReplayAgent(), ou un createFallbackAgent() dont les candidats sont essayés dans l’ordre sur les échecs de quota ou de panne listés. Le candidat ne prend le statut quota que lorsque tous ses secours ont atteint une limite."
   ],
   "SpeculativeCandidate.request": [
     "Candidate-specific brief and response settings; the race controls agent, cancellation and fresh-session behavior.",
@@ -2972,7 +2956,7 @@
     "Maximum retained tail per output stream, in bytes.",
     "Taille maximale de la fin conservée par flux, en octets."
   ],
-  "openTelemetry.options": [
+  "createOpenTelemetryObserver.options": [
     "Injected tracer, meter and isolated error callback for workflow and dispatch telemetry.",
     "Tracer, meter et callback d’erreur isolée injectés pour la télémétrie des workflows et dispatchs."
   ],
@@ -3120,7 +3104,7 @@
     "Caller-owned object transport used by the store or operation. Closing a workflow or sandbox does not close this transport.",
     "Transport objet appartenant à l’appelant, utilisé par le store ou l’opération. Fermer un workflow ou une sandbox ne ferme pas ce transport."
   ],
-  "localTransport.options": [
+  "createLocalTransport.options": [
     "Private root directory for the versioned local object layout.",
     "Dossier racine privé pour le format local d’objets versionnés."
   ],
@@ -3128,7 +3112,7 @@
     "Root of the objects and local mutation locks; resolved when the factory is called. Symlink directories are rejected. This layout differs from legacy file stores.",
     "Racine des objets et verrous de mutation locaux ; résolue à l’appel de la fabrique. Les dossiers symboliques sont refusés. Ce format diffère des anciens stores de fichiers."
   ],
-  "artifactStore.options": [
+  "createArtifactStore.options": [
     "Transport and per-artifact payload bound for immutable publication and verified reads.",
     "Transport et limite de contenu par artefact pour la publication immuable et les lectures vérifiées."
   ],
@@ -3136,7 +3120,7 @@
     "Positive maximum artifact size in bytes, default 16 MiB; enforced before publication and while reading.",
     "Taille maximale positive d’un artefact en octets, 16 Mio par défaut ; vérifiée avant publication et pendant la lecture."
   ],
-  "workflowCheckpointStore.options": [
+  "createWorkflowCheckpointStore.options": [
     "Transport that owns checkpoint envelopes and their exclusive run ownership records.",
     "Transport conservant les enveloppes de checkpoint et leur propriété exclusive par exécution."
   ],
@@ -3164,11 +3148,11 @@
     "Positive maximum number of retained events to traverse, default 100,000; cycles and excess entries fail.",
     "Nombre maximal positif d’événements à parcourir, 100 000 par défaut ; cycles et dépassements provoquent un échec."
   ],
-  "transportConversations.format": [
+  "createTransportConversations.format": [
     "Transcript format: claude or codex for native JSONL, copilot or kimi for native session bundles, or harness for custom harness transcripts. Antigravity has no portable conversation store.",
     "Format : claude ou codex pour le JSONL natif, copilot ou kimi pour les bundles de session, ou harness pour les transcriptions des harness personnalisés. Antigravity n’a pas de store portable."
   ],
-  "transportConversations.options": [
+  "createTransportConversations.options": [
     "Transport and stable project namespace shared by all runners restoring these conversations.",
     "Transport et espace de noms stable du projet, partagé par les exécuteurs restaurant ces conversations."
   ],
@@ -3217,12 +3201,12 @@
     "Conserve les activités de la sandbox dans ce transport. La propriété distante reste non vérifiée ; les observations de PID ne récupèrent pas l’état d’une autre machine."
   ],
   "StorageReservationOptions.transporter": [
-    "Transport for the conditional reservation ledger. Defaults to localTransport under the repository’s .outpost/storage with filesystem usage accounting. An explicit transport measures object payloads. Abandoned claims require explicit recovery in both cases.",
-    "Transport du registre conditionnel de réservations. Par défaut : localTransport sous .outpost/storage avec mesure des fichiers du dépôt. Un transport explicite mesure les contenus objets. Les réservations abandonnées exigent une récupération explicite dans les deux cas."
+    "Transport for the conditional reservation ledger. Defaults to createLocalTransport under the repository’s .outpost/storage with filesystem usage accounting. An explicit transport measures object payloads. Abandoned claims require explicit recovery in both cases.",
+    "Transport du registre conditionnel de réservations. Par défaut : createLocalTransport sous .outpost/storage avec mesure des fichiers du dépôt. Un transport explicite mesure les contenus objets. Les réservations abandonnées exigent une récupération explicite dans les deux cas."
   ],
   "Logging.transporter": [
-    "Persist immutable event segments and a versioned index through this transport. Defaults to localTransport rooted at <repository>/.outpost/storage; read the returned logReference with readJournal.",
-    "Conserve des segments immuables et un index versionné via ce transport. Par défaut : localTransport dans <repository>/.outpost/storage ; lire logReference avec readJournal."
+    "Persist immutable event segments and a versioned index through this transport. Defaults to createLocalTransport rooted at <repository>/.outpost/storage; read the returned logReference with readJournal.",
+    "Conserve des segments immuables et un index versionné via ce transport. Par défaut : createLocalTransport dans <repository>/.outpost/storage ; lire logReference avec readJournal."
   ],
   "DispatchResult.transcriptReference": [
     "Pinned remote index for the final captured conversation, when using transported conversation storage.",
@@ -3272,7 +3256,7 @@
     "Inventory object keys and optionally resource records in this transport; host Git and lock inspection are unsupported.",
     "Inventorie les clés d’objets et éventuellement les activités dans ce transport ; l’inspection de Git et des verrous hôtes est incompatible."
   ],
-  "s3Transport.options": [
+  "createS3Transport.options": [
     "Caller-owned S3 client, bucket and isolated object prefix.",
     "Client S3 appartenant à l’appelant, bucket et préfixe objet isolé."
   ],
@@ -3292,7 +3276,7 @@
     "Total byte limit for journal segment payloads read into memory, default 64 MiB.",
     "Limite totale des contenus de segments lus en mémoire, 64 Mio par défaut."
   ],
-  "bullmqTaskQueue.options": [
+  "createBullMQTaskQueue.options": [
     "Redis connection settings and the stable namespace shared by producers and workers.",
     "Connexion Redis et espace de noms stable partagé par les producteurs et workers."
   ],
@@ -3372,11 +3356,11 @@
     "Whether the successful dispatch satisfied its completion condition; absent when the operation rejected.",
     "Indique si le dispatch réussi a satisfait sa condition de complétion ; absent en cas de rejet."
   ],
-  "createReporter.handlers": [
+  "createCustomReporter.handlers": [
     "Optional handlers keyed by agent event kind, executed serially in arrival order; omitted kinds are ignored.",
     "Handlers optionnels par type d’événement agent, exécutés séquentiellement dans l’ordre d’arrivée ; les types absents sont ignorés."
   ],
-  "createReporter.options": [
+  "createCustomReporter.options": [
     "Error diagnostics for the custom reporter; no terminal output or resource ownership is added.",
     "Diagnostic des erreurs du reporter personnalisé ; aucun affichage terminal ni prise de propriété des ressources."
   ],
@@ -3452,11 +3436,11 @@
     "Provider name and placement metadata used to interpret the diagnostic report.",
     "Nom et placement du provider utilisés pour interpréter le rapport de diagnostic."
   ],
-  "mountedSandboxProvider.definition": [
+  "createMountedSandboxProvider.definition": [
     "Provider name, environment variables and acquire implementation to wrap with a placement contract.",
     "Nom de provider, variables d’environnement et implémentation acquire à envelopper dans un contrat de placement."
   ],
-  "remoteSandboxProvider.definition": [
+  "createRemoteSandboxProvider.definition": [
     "Provider name, environment variables and acquire implementation to wrap with a placement contract.",
     "Nom de provider, variables d’environnement et implémentation acquire à envelopper dans un contrat de placement."
   ],
@@ -3468,39 +3452,39 @@
     "Execution environment backend.",
     "Backend de l’environnement d’exécution."
   ],
-  "dockerSandboxProvider.options": [
+  "createDockerSandboxProvider.options": [
     "Container image, repository mode, mounts, environment, network and resource limits.",
     "Image de conteneur, mode de dépôt, montages, environnement, réseau et limites de ressources."
   ],
-  "podmanSandboxProvider.options": [
+  "createPodmanSandboxProvider.options": [
     "Container image, repository mode, mounts, environment, network and resource limits.",
     "Image de conteneur, mode de dépôt, montages, environnement, réseau et limites de ressources."
   ],
-  "localSandboxProvider.options": [
+  "createLocalSandboxProvider.options": [
     "Explicit environment variables for unisolated host execution.",
     "Variables d’environnement explicites pour l’exécution hôte sans isolation."
   ],
-  "vercelSandboxProvider.options": [
+  "createVercelSandboxProvider.options": [
     "Vercel sandbox creation, workspace root, egress, environment and output retention settings.",
     "Réglages de création Vercel, racine du workspace, réseau sortant, environnement et conservation des sorties."
   ],
-  "vercelSandboxProvider.connect": [
+  "createVercelSandboxProvider.connect": [
     "Injected SDK sandbox-creation function used instead of the default remote connection.",
     "Fonction injectée de création de sandbox SDK remplaçant la connexion distante par défaut."
   ],
-  "daytonaSandboxProvider.options": [
+  "createDaytonaSandboxProvider.options": [
     "Daytona client connection, sandbox creation, workspace root, environment and output retention settings.",
     "Réglages de connexion Daytona, création de sandbox, racine du workspace, environnement et conservation des sorties."
   ],
-  "daytonaSandboxProvider.connect": [
+  "createDaytonaSandboxProvider.connect": [
     "Injected factory returning a Daytona client with create/delete methods for sandbox lifecycle.",
     "Fabrique injectée renvoyant un client Daytona avec méthodes create/delete pour le cycle de vie des sandboxes."
   ],
-  "firecrackerSandboxProvider.options": [
+  "createFirecrackerSandboxProvider.options": [
     "Prepared host/guest boot assets, network, SSH connection and VM resource settings.",
     "Ressources de démarrage hôte/invité préparées, réseau, connexion SSH et ressources de VM."
   ],
-  "openaiModelProvider.options": [
+  "createOpenAIModelProvider.options": [
     "HTTP service, protocol, explicit credentials and bounds; the harness supplies the model per request.",
     "Service HTTP, protocole, credentials explicites et limites ; le harness fournit le modèle à chaque requête."
   ],
@@ -3524,11 +3508,11 @@
     "Positive maximum response body size in bytes after HTTP decompression; defaults to 8388608 (8 MiB). Oversized responses fail.",
     "Taille maximale positive du corps après décompression HTTP, en octets ; 8388608 (8 Mio) par défaut. Les réponses dépassant cette limite échouent."
   ],
-  "agent.options": [
+  "createAgent.options": [
     "Harness and model selection to bind into one executable agent.",
     "Harness et sélection de modèle à composer en un agent exécutable."
   ],
-  "harness.options": [
+  "createHarness.options": [
     "Model provider, instructions, tools, loop limits, tool execution settings and history caching for the built-in Outpost engine.",
     "Fournisseur de modèles, instructions, outils, limites de boucle, exécution des outils et cache d’historique du moteur intégré d’Outpost."
   ],
@@ -3680,7 +3664,7 @@
     "Positive maximum response body size in bytes after HTTP decompression; defaults to 8388608 (8 MiB). Oversized responses fail.",
     "Taille maximale positive du corps après décompression HTTP, en octets ; 8388608 (8 Mio) par défaut. Les réponses dépassant cette limite échouent."
   ],
-  "anthropicModelProvider.options": [
+  "createAnthropicModelProvider.options": [
     "Anthropic endpoint, explicit API key, bounds and optional system-prefix cache; output limits belong to the agent model.",
     "Endpoint Anthropic, clé API explicite, limites de transport et cache optionnel du préfixe système ; la limite de sortie appartient au modèle de l’agent."
   ],
@@ -3713,20 +3697,20 @@
     "Toujours faux : le runner personnalisé ne capture pas de transcripts natifs."
   ],
   "WorkflowOptions.telemetry": [
-    "Workflow telemetry adapter, such as openTelemetry({ tracer, meter }); receives events before observe, with isolated exceptions collected in observerErrors. Caller owns its lifecycle; dispatch instrumentation is configured separately.",
-    "Adaptateur de télémétrie du workflow, par exemple openTelemetry({ tracer, meter }) ; reçoit les événements avant observe, avec exceptions isolées collectées dans observerErrors. Son cycle de vie appartient à l’appelant ; l’instrumentation des dispatchs se configure séparément."
+    "Workflow telemetry adapter, such as createOpenTelemetryObserver({ tracer, meter }); receives events before observe, with isolated exceptions collected in observerErrors. Caller owns its lifecycle; dispatch instrumentation is configured separately.",
+    "Adaptateur de télémétrie du workflow, par exemple createOpenTelemetryObserver({ tracer, meter }) ; reçoit les événements avant observe, avec exceptions isolées collectées dans observerErrors. Son cycle de vie appartient à l’appelant ; l’instrumentation des dispatchs se configure séparément."
   ],
   "WorkflowTelemetry.observe": [
     "Synchronously receive each workflow lifecycle and usage event with the adapter as receiver. Thrown errors are collected in WorkflowResult.observerErrors without affecting tasks or the separate observe callback.",
     "Reçoit de manière synchrone chaque événement de cycle de vie et d’usage du workflow, avec l’adaptateur comme receveur. Les erreurs levées sont collectées dans WorkflowResult.observerErrors sans affecter les tâches ni le callback observe séparé."
   ],
-  "claudeHarness.settings": [
-    "Configuration for the Claude Code harness; pass the selected model to agent() instead.",
-    "Configuration du harness Claude Code ; transmettez le modèle choisi à agent()."
+  "createClaudeHarness.settings": [
+    "Configuration for the Claude Code harness; pass the selected model to createAgent() instead.",
+    "Configuration du harness Claude Code ; transmettez le modèle choisi à createAgent()."
   ],
-  "codexHarness.settings": [
-    "Configuration for the Codex harness; pass the selected model to agent() instead.",
-    "Configuration du harness Codex ; transmettez le modèle choisi à agent()."
+  "createCodexHarness.settings": [
+    "Configuration for the Codex harness; pass the selected model to createAgent() instead.",
+    "Configuration du harness Codex ; transmettez le modèle choisi à createAgent()."
   ],
   "AgentModel.name": [
     "Nonempty model identifier passed unchanged to the CLI or model service; no local catalog is consulted.",
@@ -3741,8 +3725,8 @@
     "Limite positive optionnelle de tokens de sortie pour chaque réponse du modèle. Claude Code la reçoit via CLAUDE_CODE_MAX_OUTPUT_TOKENS ; Codex, Antigravity, Copilot et Kimi la refusent ; le fournisseur Anthropic l’exige."
   ],
   "ModelProvider.validate": [
-    "Optional check called by agent() with the normalized AgentModel; throw to reject unsupported reasoning levels or missing output limits before any request.",
-    "Contrôle optionnel appelé par agent() avec l’AgentModel normalisé ; lever une erreur pour refuser un niveau de raisonnement non pris en charge ou une limite de sortie absente avant toute requête."
+    "Optional check called by createAgent() with the normalized AgentModel; throw to reject unsupported reasoning levels or missing output limits before any request.",
+    "Contrôle optionnel appelé par createAgent() avec l’AgentModel normalisé ; lever une erreur pour refuser un niveau de raisonnement non pris en charge ou une limite de sortie absente avant toute requête."
   ],
   "ModelRequest.reasoning": [
     "Optional reasoning effort for this request. OpenAI sends it as reasoning_effort or reasoning.effort; Anthropic maps none to disabled thinking and low to max to adaptive thinking with that effort, and rejects minimal.",
@@ -4333,7 +4317,7 @@
     "Ordered rules and the default effect when none applies.",
     "Règles ordonnées et effet par défaut quand aucune ne s’applique."
   ],
-  "harnessShellTools.options": [
+  "createHarnessShellTools.options": [
     "Optional shell settings such as the command deadline.",
     "Réglages optionnels du shell, comme le délai des commandes."
   ],
@@ -4418,8 +4402,8 @@
     "Stratégie de contexte du harness, si elle est définie."
   ],
   "HarnessOptions.conversations": [
-    "Store for turn transcripts; defaults to harnessConversations(). Use transportConversations(\"harness\", …) for remote storage or false to disable continuation and repairs.",
-    "Store des transcriptions de passes ; harnessConversations() par défaut. Utilisez transportConversations(\"harness\", …) pour un stockage distant, ou false pour désactiver continuation et réparations."
+    "Store for turn transcripts; defaults to createHarnessConversations(). Use createTransportConversations(\"harness\", …) for remote storage or false to disable continuation and repairs.",
+    "Store des transcriptions de passes ; createHarnessConversations() par défaut. Utilisez createTransportConversations(\"harness\", …) pour un stockage distant, ou false pour désactiver continuation et réparations."
   ],
   "Harness.conversations": [
     "Configured conversation store, or false when recording is disabled; absent means the default store.",
@@ -4559,32 +4543,32 @@
     "Déclarations d’environnement explicites ; les valeurs sont des chaînes."
   ],
   "CopilotSettings.conversations": [
-    "Store that captures, locates and restores Copilot session bundles instead of the default native store, such as transportConversations(\"copilot\", …). A store that declares another format is rejected when the harness is created.",
-    "Store qui capture, localise et restaure les bundles de session Copilot au lieu du store natif par défaut, par exemple transportConversations(\"copilot\", …). Un store qui déclare un autre format est refusé dès la création du harness."
+    "Store that captures, locates and restores Copilot session bundles instead of the default native store, such as createTransportConversations(\"copilot\", …). A store that declares another format is rejected when the harness is created.",
+    "Store qui capture, localise et restaure les bundles de session Copilot au lieu du store natif par défaut, par exemple createTransportConversations(\"copilot\", …). Un store qui déclare un autre format est refusé dès la création du harness."
   ],
   "KimiSettings.authentication": [
-    "Account authentication reads the OAuth file for the selected region and device_id from ~/.kimi-code or KIMI_CODE_HOME; account.file selects a dedicated profile directory. Usage forms accept KIMI_API_KEY or an explicit key/variable and require a model on agent(). Account key/variable forms are unsupported. Omission prepares no credentials.",
-    "Le mode account lit le fichier OAuth de la région choisie et device_id sous ~/.kimi-code ou KIMI_CODE_HOME ; account.file sélectionne un dossier de profil dédié. Les formes usage acceptent KIMI_API_KEY ou une clé/variable explicite et exigent un modèle sur agent(). Les formes account.key/variable ne sont pas prises en charge. Son absence ne prépare aucun identifiant."
+    "Account authentication reads the OAuth file for the selected region and device_id from ~/.kimi-code or KIMI_CODE_HOME; account.file selects a dedicated profile directory. Usage forms accept KIMI_API_KEY or an explicit key/variable and require a model on createAgent(). Account key/variable forms are unsupported. Omission prepares no credentials.",
+    "Le mode account lit le fichier OAuth de la région choisie et device_id sous ~/.kimi-code ou KIMI_CODE_HOME ; account.file sélectionne un dossier de profil dédié. Les formes usage acceptent KIMI_API_KEY ou une clé/variable explicite et exigent un modèle sur createAgent(). Les formes account.key/variable ne sont pas prises en charge. Son absence ne prépare aucun identifiant."
   ],
   "KimiSettings.variables": [
     "Explicit environment declarations; values are strings.",
     "Déclarations d’environnement explicites ; les valeurs sont des chaînes."
   ],
   "KimiSettings.conversations": [
-    "Store that captures, locates and restores Kimi session bundles instead of the default native store, such as transportConversations(\"kimi\", …). A store that declares another format is rejected when the harness is created.",
-    "Store qui capture, localise et restaure les bundles de session Kimi au lieu du store natif par défaut, par exemple transportConversations(\"kimi\", …). Un store qui déclare un autre format est refusé dès la création du harness."
+    "Store that captures, locates and restores Kimi session bundles instead of the default native store, such as createTransportConversations(\"kimi\", …). A store that declares another format is rejected when the harness is created.",
+    "Store qui capture, localise et restaure les bundles de session Kimi au lieu du store natif par défaut, par exemple createTransportConversations(\"kimi\", …). Un store qui déclare un autre format est refusé dès la création du harness."
   ],
-  "antigravityHarness.settings": [
-    "Configuration for the Antigravity CLI harness; pass the selected model to agent() instead.",
-    "Configuration du harness Antigravity CLI ; transmettez le modèle choisi à agent()."
+  "createAntigravityHarness.settings": [
+    "Configuration for the Antigravity CLI harness; pass the selected model to createAgent() instead.",
+    "Configuration du harness Antigravity CLI ; transmettez le modèle choisi à createAgent()."
   ],
-  "copilotHarness.settings": [
-    "Configuration for the GitHub Copilot CLI harness; pass the selected model to agent() instead.",
-    "Configuration du harness GitHub Copilot CLI ; transmettez le modèle choisi à agent()."
+  "createCopilotHarness.settings": [
+    "Configuration for the GitHub Copilot CLI harness; pass the selected model to createAgent() instead.",
+    "Configuration du harness GitHub Copilot CLI ; transmettez le modèle choisi à createAgent()."
   ],
-  "kimiHarness.settings": [
-    "Configuration for the Kimi Code harness; pass the selected model to agent() instead.",
-    "Configuration du harness Kimi Code ; transmettez le modèle choisi à agent()."
+  "createKimiHarness.settings": [
+    "Configuration for the Kimi Code harness; pass the selected model to createAgent() instead.",
+    "Configuration du harness Kimi Code ; transmettez le modèle choisi à createAgent()."
   ],
   "agentVersions.copilot": [
     "GitHub Copilot CLI version installed by generated images and remote bootstrap.",
@@ -5099,8 +5083,8 @@
     "Explique quand le parent doit déléguer à cet enfant ; transmis avec le schéma de l’outil."
   ],
   "HarnessSubagentOptions.agent": [
-    "Built-in agent created with agent({ harness: harness(...), model }); owns child instructions, tools and limits. CLI agents are rejected.",
-    "Agent intégré créé avec agent({ harness: harness(...), model }) ; définit les instructions, outils et limites de l’enfant. Les agents CLI sont refusés."
+    "Built-in agent created with createAgent({ harness: createHarness(...), model }); owns child instructions, tools and limits. CLI agents are rejected.",
+    "Agent intégré créé avec createAgent({ harness: createHarness(...), model }) ; définit les instructions, outils et limites de l’enfant. Les agents CLI sont refusés."
   ],
   "HarnessSubagentInput.prompt": [
     "Nonempty task text supplied by the parent model. Parent message history is not copied into the child conversation.",
@@ -5319,8 +5303,8 @@
     "Attente maximale en millisecondes par fermeture/récupération et pour les workers après annulation ; 30000 par défaut. Les ressources non terminées restent en attente."
   ],
   "SpeculationDurability.transporter": [
-    "Caller-owned transport storing conditional speculation checkpoints; choose localTransport under the repository .outpost/storage or an explicit remote transport.",
-    "Transport de l’appelant stockant les checkpoints conditionnels ; choisir localTransport sous .outpost/storage du dépôt ou un transport distant explicite."
+    "Caller-owned transport storing conditional speculation checkpoints; choose createLocalTransport under the repository .outpost/storage or an explicit remote transport.",
+    "Transport de l’appelant stockant les checkpoints conditionnels ; choisir createLocalTransport sous .outpost/storage du dépôt ou un transport distant explicite."
   ],
   "SpeculationDurability.runId": [
     "Stable nonempty identifier used to locate and exclusively own this race across calls.",
@@ -5470,7 +5454,7 @@
     "Exact decision, Ed25519 private key, key identifier and future expiration to sign.",
     "Décision exacte, clé privée Ed25519, identifiant de clé et expiration future à signer."
   ],
-  "ed25519DecisionVerifier.options": [
+  "createEd25519DecisionVerifier.options": [
     "Live trusted public-key source owned by the application.",
     "Source actualisable des clés publiques de confiance appartenant à l’application."
   ],
@@ -5530,7 +5514,7 @@
     "Resolve trusted actor/public-key bindings on every verification. Remove a key to revoke new proofs; source errors reject the decision.",
     "Résout les associations acteur/clé publique à chaque vérification. Retirer une clé révoque les nouvelles preuves ; une erreur de source refuse la décision."
   ],
-  "interactiveAgentTask.options": [
+  "defineInteractiveAgentTask.options": [
     "Agent, repository, authorized respondents and bounded dialogue settings.",
     "Agent, dépôt, répondants autorisés et paramètres du dialogue borné."
   ],
@@ -5706,7 +5690,7 @@
     "Immutable pending questions from tasks in waiting-input; empty when no human input is pending.",
     "Questions immuables des tâches en waiting-input ; vide lorsqu’aucune réponse humaine n’est attendue."
   ],
-  "loopTask.options": [
+  "defineLoopTask.options": [
     "Task identity, dependencies, bounded attempt callback and acceptance check.",
     "Identité de tâche, dépendances, callback d’essai borné et vérification d’acceptation."
   ],
@@ -5939,8 +5923,8 @@
     "Discriminant d’exécution des agents de rejeu."
   ],
   "Logging.replayable": [
-    "Also record each sandbox dispatch’s commits as verified binary patches so replayAgent can rebuild them. Opt-in because the journal then contains repository content; failures to record become warnings.",
-    "Enregistre aussi les commits de chaque dispatch sous forme de patchs binaires vérifiés pour que replayAgent puisse les reconstruire. Optionnel car le journal contient alors du contenu du dépôt ; un échec d’enregistrement devient un avertissement."
+    "Also record each sandbox dispatch’s commits as verified binary patches so createReplayAgent can rebuild them. Opt-in because the journal then contains repository content; failures to record become warnings.",
+    "Enregistre aussi les commits de chaque dispatch sous forme de patchs binaires vérifiés pour que createReplayAgent puisse les reconstruire. Optionnel car le journal contient alors du contenu du dépôt ; un échec d’enregistrement devient un avertissement."
   ],
   "ObservationEvent.baseline": [
     "Commit and tree the sandbox dispatch started from, for workspace-commits.",
@@ -6003,15 +5987,15 @@
     "Divergence policy; defaults to fail. warn continues after prompt, baseline and tree differences but still fails when a patch cannot be applied or the journal is exhausted.",
     "Politique de divergence ; fail par défaut. warn continue après un écart de prompt, de baseline ou d’arbre mais échoue toujours si un patch ne s’applique pas ou si le journal est épuisé."
   ],
-  "replayAgent.options": [
+  "createReplayAgent.options": [
     "Journal to replay and divergence policy.",
     "Journal à rejouer et politique de divergence."
   ],
-  "replayAgent.options.journal": [
+  "createReplayAgent.options.journal": [
     "Entries returned by readJournal for one dispatch. Record with logging.replayable to include workspace commits.",
     "Entrées renvoyées par readJournal pour un dispatch. Enregistrez avec logging.replayable pour inclure les commits du workspace."
   ],
-  "replayAgent.options.divergence": [
+  "createReplayAgent.options.divergence": [
     "Divergence policy; defaults to fail. warn continues after prompt, baseline and tree differences but still fails when a patch cannot be applied or the journal is exhausted.",
     "Politique de divergence ; fail par défaut. warn continue après un écart de prompt, de baseline ou d’arbre mais échoue toujours si un patch ne s’applique pas ou si le journal est épuisé."
   ],
@@ -6128,8 +6112,8 @@
     "Message d’erreur du store ou de l’entrée sur les événements cache failed ; la tâche continue sans cache."
   ],
   "TaskCacheOptions.store": [
-    "Caller-owned store that reads and writes cache entries, such as taskCacheStore over a Transport.",
-    "Store appartenant à l’appelant qui lit et écrit les entrées de cache, par exemple taskCacheStore sur un Transport."
+    "Caller-owned store that reads and writes cache entries, such as createTaskCacheStore over a Transport.",
+    "Store appartenant à l’appelant qui lit et écrit les entrées de cache, par exemple createTaskCacheStore sur un Transport."
   ],
   "TaskCacheOptions.version": [
     "Non-empty version included in the fingerprint; change it when the task implementation, agent, prompt or output contract changes.",
@@ -6191,7 +6175,7 @@
     "Positive maximum serialized entry size in bytes, default 16 MiB; enforced when writing and reading.",
     "Taille maximale positive d’une entrée sérialisée en octets, 16 Mio par défaut ; appliquée à l’écriture et à la lecture."
   ],
-  "taskCacheStore.options": [
+  "createTaskCacheStore.options": [
     "Transport that stores entries under task-cache/ and an optional entry size bound.",
     "Transport qui stocke les entrées sous task-cache/ et limite optionnelle de taille des entrées."
   ],
@@ -6224,8 +6208,8 @@
     "Après une pause sur quota, poursuit la conversation capturée dans le nouveau dispatch (continue, par défaut) ou en démarre une nouvelle (restart). Les workspaces intégrés automatiquement partent alors de la branche interrompue ; les changements non commités restent dans son worktree conservé."
   ],
   "QueueRequest.idempotencyKey": [
-    "Effect key passed to the handler instead of the job ID; queuedTask sets it to the original key when a quota pause republishes the task under a new job ID.",
-    "Clé d’effet transmise au handler à la place de l’identifiant du job ; queuedTask y place la clé d’origine lorsqu’une pause sur quota republie la tâche sous un nouvel identifiant."
+    "Effect key passed to the handler instead of the job ID; defineQueuedTask sets it to the original key when a quota pause republishes the task under a new job ID.",
+    "Clé d’effet transmise au handler à la place de l’identifiant du job ; defineQueuedTask y place la clé d’origine lorsqu’une pause sur quota republie la tâche sous un nouvel identifiant."
   ],
   "QueueResult.quota": [
     "Usage or rate limit that failed the handler, with its reset time and captured conversation when known; requires error.",
@@ -6339,15 +6323,15 @@
     "Signal that identified the outage, such as HTTP 503, an overloaded stream error or the recognized agent failure text; a timeout diagnosed as a connection failure reports connection failure.",
     "Signal qui a identifié la panne, par exemple HTTP 503, une erreur de flux overloaded ou le texte d’échec reconnu de l’agent ; un délai diagnostiqué comme échec de connexion indique connection failure."
   ],
-  "fallbackAgent.agents": [
-    "Ordered candidates, at least two, each composed with agent() or replayAgent(); the first is tried first.",
-    "Candidats ordonnés, au moins deux, chacun composé avec agent() ou replayAgent() ; le premier est essayé en premier."
+  "createFallbackAgent.agents": [
+    "Ordered candidates, at least two, each composed with createAgent() or createReplayAgent(); the first is tried first.",
+    "Candidats ordonnés, au moins deux, chacun composé avec createAgent() ou createReplayAgent() ; le premier est essayé en premier."
   ],
-  "fallbackAgent.options": [
+  "createFallbackAgent.options": [
     "Fallback policy; on is required.",
     "Politique de repli ; on est obligatoire."
   ],
-  "fallbackAgent.options.on": [
+  "createFallbackAgent.options.on": [
     "Failure categories that move to the next candidate: quota, unavailable or both, without repetition.",
     "Catégories d’échec qui font passer au candidat suivant : quota, unavailable ou les deux, sans répétition."
   ],
@@ -6887,5 +6871,21 @@
   "McpHttpServer.bearerTokenVariable": [
     "Name of a declared variable whose value is sent as Authorization: Bearer. It cannot be combined with an Authorization header.",
     "Nom d’une variable déclarée dont la valeur est envoyée en Authorization: Bearer. Incompatible avec un en-tête Authorization."
+  ],
+  "defineTextResponse.options": [
+    "Response tag, written as an XML-style identifier, and the number of repair turns allowed after an invalid answer.",
+    "Balise de réponse, un identifiant de style XML, et nombre de tours de réparation autorisés après une réponse invalide."
+  ],
+  "defineJsonResponse.options": [
+    "Response tag, JSON schema or parsing function, and the number of repair turns allowed after an invalid answer.",
+    "Balise de réponse, schéma JSON ou fonction d’analyse, et nombre de tours de réparation autorisés après une réponse invalide."
+  ],
+  "defineJsonArtifact.options": [
+    "Contract name, version and the schema or parsing function applied when encoding and decoding.",
+    "Nom et version du contrat, et schéma ou fonction d’analyse appliqué à l’encodage et au décodage."
+  ],
+  "defineBinaryArtifact.options": [
+    "Contract name and version identifying the binary payload.",
+    "Nom et version du contrat identifiant les données binaires."
   ]
 }

@@ -6,9 +6,9 @@ description: "Exécuter des agents dans des conteneurs Docker."
 Démarrez Docker et construisez une [image d’agent](../image-recipes/). Passez le fournisseur à `dispatch()` ou `createSandbox()`.
 
 ```ts
-import { dockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
+import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
-const sandboxProvider = dockerSandboxProvider({
+const sandboxProvider = createDockerSandboxProvider({
   image: "outpost:dev",
   cpus: 2,
   memoryMb: 4096,
@@ -29,4 +29,4 @@ Utilisez les [volumes de dépendances](../persistent-caches/) pour les caches de
 
 Le fournisseur ne bascule jamais vers une exécution hôte si le moteur ou l’image manque. Lancez les [contrôles préalables](../preflight-checks/) pour diagnostiquer la configuration.
 
-API : [dockerSandboxProvider](../../reference/dockersandboxprovider/) · [ContainerOptions](../../reference/containeroptions/).
+API : [createDockerSandboxProvider](../../reference/createdockersandboxprovider/) · [ContainerOptions](../../reference/containeroptions/).

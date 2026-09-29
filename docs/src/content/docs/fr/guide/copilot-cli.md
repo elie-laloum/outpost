@@ -3,17 +3,17 @@ title: "GitHub Copilot CLI"
 description: "Utiliser un compte ou un jeton Copilot."
 ---
 
-Utilisez `copilotHarness()` pour exécuter la CLI `copilot`. Cet adaptateur utilise l’accès au compte Copilot ; `authentication: "usage"` n’est pas pris en charge.
+Utilisez `createCopilotHarness()` pour exécuter la CLI `copilot`. Cet adaptateur utilise l’accès au compte Copilot ; `authentication: "usage"` n’est pas pris en charge.
 
 ## Fournir un jeton
 
 Utilisez un jeton à permissions fines avec la permission Copilot Requests. Les jetons classiques `ghp_` sont rejetés.
 
 ```ts
-import { agent, copilotHarness } from "@elie-laloum/outpost";
+import { createAgent, createCopilotHarness } from "@elie-laloum/outpost";
 
-const coder = agent({
-  harness: copilotHarness({
+const coder = createAgent({
+  harness: createCopilotHarness({
     authentication: { account: { variable: "COPILOT_GITHUB_TOKEN" } },
     variables: { COPILOT_GITHUB_TOKEN: process.env.COPILOT_GITHUB_TOKEN ?? "" },
   }),
@@ -26,7 +26,7 @@ Lancez `copilot login` sur l’hôte et sélectionnez `authentication: "account"
 
 ## Gestion des sessions
 
-La capture native, la reprise à chaud et à froid et les réparations automatiques sont prises en charge. Outpost reprend l’identifiant exact avec `--resume` et conserve historique, métadonnées, plans, checkpoints et fichiers persistants dans un bundle borné. Le fork automatisé est explicitement refusé : la commande interactive `/fork` ne constitue pas un contrat de fork headless pris en charge. `conversations` stocke les sessions capturées dans un [store de conversations](../chat-history/#stockage) au format `"copilot"`, par exemple `transportConversations("copilot", …)`. Voir [l’historique](../chat-history/) et [le stockage des sessions GitHub](https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-best-practices).
+La capture native, la reprise à chaud et à froid et les réparations automatiques sont prises en charge. Outpost reprend l’identifiant exact avec `--resume` et conserve historique, métadonnées, plans, checkpoints et fichiers persistants dans un bundle borné. Le fork automatisé est explicitement refusé : la commande interactive `/fork` ne constitue pas un contrat de fork headless pris en charge. `conversations` stocke les sessions capturées dans un [store de conversations](../chat-history/#stockage) au format `"copilot"`, par exemple `createTransportConversations("copilot", …)`. Voir [l’historique](../chat-history/) et [le stockage des sessions GitHub](https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-best-practices).
 
 Voir le [démarrage CLI GitHub](https://docs.github.com/en/copilot/get-started/cli-quickstart) pour les conditions d’accès et de connexion Copilot.
 
@@ -40,4 +40,4 @@ La collecte est bornée et peut se terminer après la consommation des tokens. C
 
 `mcpServers` transmet des [serveurs MCP](../mcp-servers/) avec `--additional-mcp-config` à chaque exécution.
 
-API : [copilotHarness](../../reference/copilotharness/).
+API : [createCopilotHarness](../../reference/createcopilotharness/).

@@ -10,9 +10,9 @@ Le mode Git privé est un prototype d’isolation de conteneur activé explicite
 Définissez `repositoryMode: "isolated"` sur Docker ou Podman pour éviter le montage du checkout et des métadonnées Git hôte.
 
 ```ts
-import { dockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
+import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
-const sandboxProvider = dockerSandboxProvider({
+const sandboxProvider = createDockerSandboxProvider({
   image: "outpost:dev",
   repositoryMode: "isolated",
 });

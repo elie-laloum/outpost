@@ -7,7 +7,7 @@ description: "Configurer le fournisseur Firecracker expérimental."
 Firecracker exige un hôte Linux/KVM et un invité préparés. Ce n’est ni un constructeur automatique d’images VM ni une certification d’isolation de production.
 :::
 
-Importez `firecrackerSandboxProvider` depuis `@elie-laloum/outpost/providers/firecracker` et fournissez les fichiers de démarrage et la configuration SSH décrits par `FirecrackerOptions`.
+Importez `createFirecrackerSandboxProvider` depuis `@elie-laloum/outpost/providers/firecracker` et fournissez les fichiers de démarrage et la configuration SSH décrits par `FirecrackerOptions`.
 
 | Entrée requise                               | Rôle                                                              |
 | -------------------------------------------- | ----------------------------------------------------------------- |
@@ -22,7 +22,7 @@ L’utilisateur SSH doit posséder la `root` invitée (`/workspace` par défaut)
 
 La propriété du fournisseur couvre le runtime alloué ; elle ne provisionne pas le réseau hôte et ne prépare pas le système de fichiers racine. Validez réellement démarrage, annulation des commandes, transferts et nettoyage sur l’hôte visé avant adoption. La [roadmap](../../project/roadmap/) indique la validation opérationnelle restante.
 
-API : [firecrackerSandboxProvider](../../reference/firecrackersandboxprovider/) · [FirecrackerOptions](../../reference/firecrackeroptions/).
+API : [createFirecrackerSandboxProvider](../../reference/createfirecrackersandboxprovider/) · [FirecrackerOptions](../../reference/firecrackeroptions/).
 
 ## Lancer avec le jailer
 

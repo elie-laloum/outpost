@@ -10,11 +10,11 @@ Un workflow est un graphe de tâches typées et de dépendances déclarées. Il 
 
 ## Fonctionnement et philosophie
 
-`task` définit une opération ; `workflow` valide et regroupe le graphe ; `start` l’exécute. Les tâches indépendantes peuvent être concurrentes dans la limite configurée. `agentTask` et `commandTask` utilisent une sandbox existante ; `isolatedTask` possède l’allocation de sa tentative d’agent.
+`defineTask` déclare une opération ; `defineWorkflow` valide et regroupe le graphe ; `start` l’exécute. Les tâches indépendantes peuvent être concurrentes dans la limite configurée. `defineAgentTask` et `defineCommandTask` utilisent une sandbox existante ; `defineIsolatedTask` possède l’allocation de sa tentative d’agent.
 
 `start({ onQuota })` met une tâche en pause sur une erreur de quota Outpost et la reprend après la réinitialisation, dans le processus ou lors d’un démarrage ultérieur avec le même checkpoint. Voir les [pauses sur quota](../../../guide/quota-pauses/).
 
-`loopTask` ajoute des tours essai/vérification bornés avec feedback et progression durable par phase. Consultez les [boucles de vérification](../../../guide/verification-loops/) pour les budgets, le rejeu et les sessions appartenant à l’appelant.
+`defineLoopTask` ajoute des tours essai/vérification bornés avec feedback et progression durable par phase. Consultez les [boucles de vérification](../../../guide/verification-loops/) pour les budgets, le rejeu et les sessions appartenant à l’appelant.
 
 Un `cache` de tâche restaure un résultat JSON enregistré lorsque workflow, tâche, version et clé correspondent, sans exécuter la tâche ni rejouer ses effets de bord. Consultez le [cache de tâches](../../../guide/task-cache/) pour les clés, `repositoryFingerprint`, les échecs et la confiance.
 
@@ -24,15 +24,15 @@ Les retries peuvent répéter des effets externes. Les budgets contrôlent l’a
 
 ## Points d’entrée
 
-- [loopTask](../../looptask/)
-- [task](../../task/)
-- [workflow](../../workflow/)
+- [defineLoopTask](../../definelooptask/)
+- [defineTask](../../definetask/)
+- [defineWorkflow](../../defineworkflow/)
 - [TaskContext](../../taskcontext/)
 - [WorkflowResult](../../workflowresult/)
-- [agentTask](../../agenttask/)
-- [commandTask](../../commandtask/)
-- [isolatedTask](../../isolatedtask/)
+- [defineAgentTask](../../defineagenttask/)
+- [defineCommandTask](../../definecommandtask/)
+- [defineIsolatedTask](../../defineisolatedtask/)
 
 [Passer à la pratique avec le Guide](../../../guide/workflows/graph/).
 
-`interactiveAgentTask` possède un sandbox neuf par tour de dialogue et conserve son worktree et sa conversation pendant l’attente humaine. Voir les [tâches interactives](../../../guide/interactive-tasks/) pour la saisie durable, les harnesses compatibles et la récupération.
+`defineInteractiveAgentTask` possède un sandbox neuf par tour de dialogue et conserve son worktree et sa conversation pendant l’attente humaine. Voir les [tâches interactives](../../../guide/interactive-tasks/) pour la saisie durable, les harnesses compatibles et la récupération.

@@ -7,15 +7,15 @@ Disponible depuis la 8.0.0. Avec `onQuota`, une tâche qui atteint une limite d�
 
 ```ts
 import {
-  localTransport,
+  createLocalTransport,
   OutpostError,
-  task,
-  workflow,
-  workflowCheckpointStore,
+  defineTask,
+  defineWorkflow,
+  createWorkflowCheckpointStore,
 } from "@elie-laloum/outpost";
 
 let calls = 0;
-const review = task({
+const review = defineTask({
   key: "review",
   perform: () => {
     if (++calls === 1)
@@ -25,10 +25,10 @@ const review = task({
     return "reviewed";
   },
 });
-const result = await workflow("nightly", [review]).start({
+const result = await defineWorkflow("nightly", [review]).start({
   checkpoint: {
-    store: workflowCheckpointStore({
-      transporter: localTransport({ directory: ".outpost/storage" }),
+    store: createWorkflowCheckpointStore({
+      transporter: createLocalTransport({ directory: ".outpost/storage" }),
     }),
     runId: "nightly-2026-09-28",
     version: "1",
@@ -78,25 +78,25 @@ Activer `onQuota` autorise la relance de la tentative interrompue, comme un retr
 
 La première tentative après une pause reçoit `context.quota`. Il porte la conversation lorsqu’elle a été capturée, ainsi que la branche de travail conservée.
 
-- `agentTask` et `isolatedTask` poursuivent cette conversation. Le nouveau tour envoie une courte consigne de reprise au lieu du brief d’origine, et conserve la balise de réponse lorsqu’une réponse structurée est attendue. Utilisez `quotaResume: "restart"` pour renvoyer la requête d’origine.
-- `agentTask` conserve le sandbox et le workspace fournis par l’appelant. `isolatedTask` alloue un nouveau sandbox : une branche `current` ou `named` réutilise le même checkout, et un workspace intégré automatiquement part de la branche interrompue. Les changements non commités d’une tentative intégrée restent dans son [worktree conservé](../failure-recovery/).
-- `interactiveAgentTask` poursuit la conversation du tour interrompu.
+- `defineAgentTask` et `defineIsolatedTask` poursuivent cette conversation. Le nouveau tour envoie une courte consigne de reprise au lieu du brief d’origine, et conserve la balise de réponse lorsqu’une réponse structurée est attendue. Utilisez `quotaResume: "restart"` pour renvoyer la requête d’origine.
+- `defineAgentTask` conserve le sandbox et le workspace fournis par l’appelant. `defineIsolatedTask` alloue un nouveau sandbox : une branche `current` ou `named` réutilise le même checkout, et un workspace intégré automatiquement part de la branche interrompue. Les changements non commités d’une tentative intégrée restent dans son [worktree conservé](../failure-recovery/).
+- `defineInteractiveAgentTask` poursuit la conversation du tour interrompu.
 - La poursuite exige un agent capable de reprendre avec capture des conversations : Claude Code, Codex, Copilot ou Kimi. Antigravity et la capture désactivée démarrent une nouvelle conversation, tout comme une requête qui fournit sa propre `continuation` ou plusieurs `passes`.
 
 Les tâches personnalisées peuvent lire `context.quota` pour décider comment reprendre.
 
 ## Tâches en file
 
-Un worker dont le handler échoue sur une erreur de quota l’enregistre dans `QueueResult.quota`, et `queuedTask` rejette avec le code `quota`. La première tentative après la pause publie un nouveau job, `<clé>:quota:<tentative>`, car le job échoué ne peut pas être relancé. Le handler reçoit toujours l’`idempotencyKey` d’origine : la déduplication des effets reste valable.
+Un worker dont le handler échoue sur une erreur de quota l’enregistre dans `QueueResult.quota`, et `defineQueuedTask` rejette avec le code `quota`. La première tentative après la pause publie un nouveau job, `<clé>:quota:<tentative>`, car le job échoué ne peut pas être relancé. Le handler reçoit toujours l’`idempotencyKey` d’origine : la déduplication des effets reste valable.
 
 Transmettez la conversation au handler via l’entrée :
 
 ```ts
-import { queuedTask } from "@elie-laloum/outpost";
+import { defineQueuedTask } from "@elie-laloum/outpost";
 import type { TaskQueue } from "@elie-laloum/outpost";
 
 function implement(queue: TaskQueue) {
-  return queuedTask({
+  return defineQueuedTask({
     key: "implement",
     queue,
     handler: "implement",
@@ -113,11 +113,11 @@ Le handler peut alors lancer un dispatch avec `continuation: { id: input.continu
 Un candidat arrêté par une limite se termine avec le statut `quota`. Sans gagnant, `speculate()` renvoie le statut `quota`, et `result.quota` contient la réinitialisation connue la plus proche. Levez-la depuis une tâche de workflow pour mettre le workflow en pause :
 
 ```ts
-import { OutpostError, speculate, task } from "@elie-laloum/outpost";
+import { OutpostError, speculate, defineTask } from "@elie-laloum/outpost";
 import type { SpeculationOptions } from "@elie-laloum/outpost";
 
 function race(options: SpeculationOptions) {
-  return task({
+  return defineTask({
     key: "race",
     async perform() {
       const result = await speculate(options);

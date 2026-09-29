@@ -3,20 +3,20 @@ title: "Tâches interactives"
 description: "Persister une question, libérer le sandbox et reprendre la conversation après une réponse humaine."
 ---
 
-Disponible depuis la 8.0.0. `interactiveAgentTask()` maintient une tâche de workflow inachevée sur plusieurs tours question/réponse. Une question termine le tour de l’agent, capture sa conversation et renvoie `waiting-input` ; les tâches dépendantes restent bloquées. Un appel ultérieur à `start({ answers })` reprend la conversation, et la prochaine question peut dépendre des réponses précédentes.
+Disponible depuis la 8.0.0. `defineInteractiveAgentTask()` maintient une tâche de workflow inachevée sur plusieurs tours question/réponse. Une question termine le tour de l’agent, capture sa conversation et renvoie `waiting-input` ; les tâches dépendantes restent bloquées. Un appel ultérieur à `start({ answers })` reprend la conversation, et la prochaine question peut dépendre des réponses précédentes.
 
 Contrairement aux [gates de validation](../review-gates/), les questions sont générées durant l’exécution. Il s’agit d’un dialogue entre tours terminés, pas d’une suspension dans un outil en cours ni d’un terminal interactif.
 
 ## Définir le dialogue
 
-Utilisez un agent et un provider configurés selon [Installation](../setup/). Le `harness()` Outpost et les presets CLI avec capture portable et reprise utilisent le même protocole de réponse structurée. Codex, Claude Code, Copilot et Kimi sont admis avec capture activée. Antigravity et le stockage ou la capture désactivés sont refusés avant allocation. Les tests d’adaptateurs simulés établissent le protocole, pas la compatibilité réelle de toutes les combinaisons CLI/modèle.
+Utilisez un agent et un provider configurés selon [Installation](../setup/). Le `createHarness()` Outpost et les presets CLI avec capture portable et reprise utilisent le même protocole de réponse structurée. Codex, Claude Code, Copilot et Kimi sont admis avec capture activée. Antigravity et le stockage ou la capture désactivés sont refusés avant allocation. Les tests d’adaptateurs simulés établissent le protocole, pas la compatibilité réelle de toutes les combinaisons CLI/modèle.
 
 ```ts
 import {
-  interactiveAgentTask,
-  localTransport,
-  workflow,
-  workflowCheckpointStore,
+  defineInteractiveAgentTask,
+  createLocalTransport,
+  defineWorkflow,
+  createWorkflowCheckpointStore,
 } from "@elie-laloum/outpost";
 import type { Agent, SandboxProvider } from "@elie-laloum/outpost";
 
@@ -25,7 +25,7 @@ function discovery(
   assistant: Agent,
   sandboxProvider: SandboxProvider,
 ) {
-  const clarify = interactiveAgentTask({
+  const clarify = defineInteractiveAgentTask({
     key: "clarify",
     repository,
     agent: assistant,
@@ -36,10 +36,10 @@ function discovery(
     maxTurns: 12,
     timeoutMs: 120_000,
   });
-  const pipeline = workflow("discovery", [clarify]);
+  const pipeline = defineWorkflow("discovery", [clarify]);
   const checkpoint = {
-    store: workflowCheckpointStore({
-      transporter: localTransport({
+    store: createWorkflowCheckpointStore({
+      transporter: createLocalTransport({
         directory: `${repository}/.outpost/storage`,
       }),
     }),
@@ -101,6 +101,6 @@ Le dépôt, le worktree conservé et le stockage des conversations capturées do
 
 Un crash durant un tour peut laisser des effets dans le workspace ou un service externe. La récupération exige `checkpoint.resume: "retry-incomplete"` pour autoriser le rejeu de ce tour inachevé ; les dépendances terminées sont conservées. Une sortie finale de dialogue déjà enregistrée dans le checkpoint est réutilisée sans nouvel appel au modèle. Cela ne garantit ni des effets d’outils exactement une fois ni la restauration d’une pile JavaScript interrompue. Changez version/identifiant du run lorsque les implémentations ou la configuration des providers changent ; nom/modèle d’agent, brief, dépôt, acteurs et limite de tours participent déjà à la compatibilité.
 
-Pour des opérations personnalisées, `task({ interaction: { identity, actors }, perform })` expose `context.interaction.state`, `.answer`, `.save(state)` et `.suspend(question, state)`. Enregistrez uniquement du JSON sans perte. Le callback recommence à chaque réponse et doit utiliser son état pour éviter de répéter du travail terminé. N’interceptez pas le signal de suspension et ne lancez pas plusieurs suspensions concurrentes. `interactiveAgentTask()` applique cette discipline aux conversations d’agents.
+Pour des opérations personnalisées, `defineTask({ interaction: { identity, actors }, perform })` expose `context.interaction.state`, `.answer`, `.save(state)` et `.suspend(question, state)`. Enregistrez uniquement du JSON sans perte. Le callback recommence à chaque réponse et doit utiliser son état pour éviter de répéter du travail terminé. N’interceptez pas le signal de suspension et ne lancez pas plusieurs suspensions concurrentes. `defineInteractiveAgentTask()` applique cette discipline aux conversations d’agents.
 
-API : [interactiveAgentTask](../../reference/interactiveagenttask/) · [InteractiveAgentTaskOptions](../../reference/interactiveagenttaskoptions/) · [WorkflowInputRequest](../../reference/workflowinputrequest/) · [WorkflowAnswer](../../reference/workflowanswer/).
+API : [defineInteractiveAgentTask](../../reference/defineinteractiveagenttask/) · [InteractiveAgentTaskOptions](../../reference/interactiveagenttaskoptions/) · [WorkflowInputRequest](../../reference/workflowinputrequest/) · [WorkflowAnswer](../../reference/workflowanswer/).

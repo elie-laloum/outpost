@@ -177,19 +177,48 @@ test("every navigable reference is unique, ordered and free of generic boilerpla
   }
 });
 
-test("task and workflow functions keep separate pages from their interfaces", async () => {
-  for (const name of ["task", "workflow"]) {
-    const callable = await page(`reference/${name}.md`);
+test("task and workflow declarations keep separate pages from their interfaces", async () => {
+  for (const [name, declaration] of [
+    ["task", "defineTask"],
+    ["workflow", "defineWorkflow"],
+  ]) {
+    const callable = await page(`reference/${declaration.toLowerCase()}.md`);
     const contract = await page(`reference/type-${name}.md`);
-    assert.match(callable, new RegExp(`export declare function ${name}`));
+    assert.match(
+      callable,
+      new RegExp(`export declare function ${declaration}`),
+    );
     assert.match(contract, /export interface/);
     assert.ok(callable.includes(`../type-${name}/`));
   }
   assert.match(
-    await page("fr/reference/isolatedtask.md"),
+    await page("fr/reference/defineisolatedtask.md"),
     /allouer et fermer sa propre sandbox/,
   );
-  assert.match(await page("fr/reference/task.md"), /n’alloue aucune sandbox/);
+  assert.match(
+    await page("fr/reference/definetask.md"),
+    /n’alloue aucune sandbox/,
+  );
+});
+
+test("deprecated aliases stay undocumented and renamed contracts keep their routes", async () => {
+  const routes = navigation.flatMap((group) =>
+    group.items.map((item) => item.slug),
+  );
+  for (const name of ["agent", "task", "workflow", "reporter", "response"])
+    assert.ok(!routes.includes(`reference/${name}`), name);
+  for (const name of [
+    "agent",
+    "task",
+    "workflow",
+    "fallbackagent",
+    "replayagent",
+    "taskcachestore",
+    "bullmqtaskqueue",
+  ])
+    assert.ok(routes.includes(`reference/type-${name}`), name);
+  assert.ok(routes.includes("reference/createreporter"));
+  assert.ok(routes.includes("reference/createcustomreporter"));
 });
 
 test("identical field names describe the actual contract", async () => {
@@ -254,7 +283,10 @@ test("Firecracker is classified only under Providers and marked experimental", (
   assert.ok(providers);
   assert.ok(!navigation.some((group) => /Firecracker/.test(group.title[0])));
   const all = navigation.flatMap((group) => group.items);
-  for (const name of ["firecrackersandboxprovider", "firecrackeroptions"]) {
+  for (const name of [
+    "createfirecrackersandboxprovider",
+    "firecrackeroptions",
+  ]) {
     const route = `reference/${name}`;
     const entries = all.filter((item) => item.slug === route);
     assert.equal(entries.length, 1);
@@ -281,16 +313,16 @@ test("experimental references explain their status before the API content in bot
       assert.ok(end < body.indexOf("## Import"), item.slug);
     }
   }
-  const stable = await page("reference/codexharness.md");
+  const stable = await page("reference/createcodexharness.md");
   assert.ok(!stable.includes(":::caution[Experimental]"));
 });
 
 test("CLI harness factories expose settings without nested methods", () => {
   const get = model(`
     interface Settings { reasoning?: "high"; }
-    declare function codexHarness(settings?: Settings): string;
+    declare function createCodexHarness(settings?: Settings): string;
   `);
-  const entry = get("codexHarness");
+  const entry = get("createCodexHarness");
   assert.deepEqual(
     entry.entries.map((item) => item.name),
     ["settings", "settings.reasoning"],
@@ -311,10 +343,10 @@ test("callable contracts document their properties alongside their arguments", (
 
 test("harness factory and contracts preserve distinct reference routes", async () => {
   for (const locale of ["", "fr/"]) {
-    const factory = await page(`${locale}reference/function-harness.md`);
-    assert.match(factory, /export declare function harness/);
+    const factory = await page(`${locale}reference/createharness.md`);
+    assert.match(factory, /export declare function createHarness/);
     assert.ok(factory.includes("../type-customharness/"));
-    assert.match(factory, /harness\(options: HarnessOptions\): Harness/);
+    assert.match(factory, /createHarness\(options: HarnessOptions\): Harness/);
     assert.match(
       await page(`${locale}reference/customharnessoptions.md`),
       /export interface HarnessOptions/,

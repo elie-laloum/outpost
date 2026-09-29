@@ -4,7 +4,7 @@ export const groups = [
     title: ["Storage transports", "Transports de stockage"],
     guide: "guide/operations/storage-transports",
     names:
-      "localTransport s3Transport artifactStore workflowCheckpointStore taskCacheStore recoverWorkflowCheckpoint readJournal transportConversations archiveRecovery materializeRecoveryArchive TransportConflict Transport TransportEntry TransportObject TransportReadOptions TransportWriteOptions TransportReference TransportStoreOptions LocalTransportOptions S3TransportOptions ArtifactStoreOptions CheckpointRecoveryOptions ReadJournalOptions TransportConversationOptions RecoveryArchiveOptions RecoveryArchiveRestoreOptions TaskCacheStoreOptions",
+      "createLocalTransport createS3Transport createArtifactStore createWorkflowCheckpointStore createTaskCacheStore recoverWorkflowCheckpoint readJournal createTransportConversations archiveRecovery materializeRecoveryArchive TransportConflict Transport TransportEntry TransportObject TransportReadOptions TransportWriteOptions TransportReference TransportStoreOptions LocalTransportOptions S3TransportOptions ArtifactStoreOptions CheckpointRecoveryOptions ReadJournalOptions TransportConversationOptions RecoveryArchiveOptions RecoveryArchiveRestoreOptions TaskCacheStoreOptions",
   },
   {
     id: "diagnostics",
@@ -45,57 +45,57 @@ export const groups = [
     title: ["Agents", "Agents"],
     guide: "guide/agents/adapters",
     names:
-      "agent fallbackAgent Agent AgentOptions CliAgent CustomAgent AgentModel ModelSpec ModelReasoning DispatchAgent FallbackTrigger FallbackAgent FallbackAgentOptions FallbackCandidate FallbackAttempt FallbackRecord",
+      "createAgent createFallbackAgent Agent AgentOptions CliAgent CustomAgent AgentModel ModelSpec ModelReasoning DispatchAgent FallbackTrigger FallbackAgent FallbackAgentOptions FallbackCandidate FallbackAttempt FallbackRecord",
   },
   {
     id: "harness",
     title: ["Harness", "Harness"],
     guide: "guide/agents/harness",
     names:
-      "harness defineHarnessSubagent HarnessSubagent HarnessSubagentInput HarnessSubagentOptions defineHarnessTool defineHarnessToolset defineHarnessInstructions antigravityHarness claudeHarness codexHarness copilotHarness kimiHarness AgentHarness CliHarness Harness HarnessOptions HarnessLimits HarnessToolExecution HarnessInstructions HarnessInstructionContext HarnessInstructionSource HarnessInstructionsOption HarnessTool HarnessToolOptions HarnessToolContext HarnessToolEvent HarnessToolset HarnessToolsetOptions JsonSchema StandardJsonSchema ToolOutput ToolValidation defineHarnessHook defineHarnessPermissions HarnessHook HarnessHookContext HarnessHookDecisions HarnessHookEvents HarnessHookInput HarnessHookOptions HarnessHookPhase HarnessHookResult HarnessToolResultView HarnessPermissionRule HarnessPermissions HarnessPermissionsOptions PermissionDecision PermissionEffect ToolResources harnessFileTools harnessEditTools harnessSearchTools harnessGitTools harnessShellTools ShellToolsOptions defineHarnessContextStrategy truncateToolResults summarizeHistory HarnessContextInput HarnessContextResult HarnessContextStrategy HarnessContextStrategyOptions SummarizeHistoryOptions TruncateToolResultsOptions defineHarnessSkill HarnessSkill HarnessSkillOptions AgentAuthentication AccountCredential UsageCredential AntigravitySettings ClaudeSettings CodexSettings CodexModelProvider CopilotSettings KimiSettings McpServer McpServers McpStdioServer McpHttpServer agentVersions AgentAdapter AgentInput AgentLiveInput AgentLiveSession AgentLiveRead AgentConfiguration ConfigurationFile",
+      "createHarness defineHarnessSubagent HarnessSubagent HarnessSubagentInput HarnessSubagentOptions defineHarnessTool defineHarnessToolset defineHarnessInstructions createAntigravityHarness createClaudeHarness createCodexHarness createCopilotHarness createKimiHarness AgentHarness CliHarness Harness HarnessOptions HarnessLimits HarnessToolExecution HarnessInstructions HarnessInstructionContext HarnessInstructionSource HarnessInstructionsOption HarnessTool HarnessToolOptions HarnessToolContext HarnessToolEvent HarnessToolset HarnessToolsetOptions JsonSchema StandardJsonSchema ToolOutput ToolValidation defineHarnessHook defineHarnessPermissions HarnessHook HarnessHookContext HarnessHookDecisions HarnessHookEvents HarnessHookInput HarnessHookOptions HarnessHookPhase HarnessHookResult HarnessToolResultView HarnessPermissionRule HarnessPermissions HarnessPermissionsOptions PermissionDecision PermissionEffect ToolResources createHarnessFileTools createHarnessEditTools createHarnessSearchTools createHarnessGitTools createHarnessShellTools ShellToolsOptions defineHarnessContextStrategy truncateToolResults summarizeHistory HarnessContextInput HarnessContextResult HarnessContextStrategy HarnessContextStrategyOptions SummarizeHistoryOptions TruncateToolResultsOptions defineHarnessSkill HarnessSkill HarnessSkillOptions AgentAuthentication AccountCredential UsageCredential AntigravitySettings ClaudeSettings CodexSettings CodexModelProvider CopilotSettings KimiSettings McpServer McpServers McpStdioServer McpHttpServer agentVersions AgentAdapter AgentInput AgentLiveInput AgentLiveSession AgentLiveRead AgentConfiguration ConfigurationFile",
   },
   {
     id: "prompts-responses",
     title: ["Prompts and responses", "Prompts et réponses"],
     guide: "guide/agents/responses",
     names:
-      "Brief PromptVariables response ResponseSpec StandardValidator ResponseError",
+      "Brief PromptVariables defineTextResponse defineJsonResponse ResponseSpec StandardValidator ResponseError",
   },
   {
     id: "conversations",
     title: ["Conversations", "Conversations"],
     guide: "guide/agents/conversations",
     names:
-      "conversations harnessConversations ConversationFormat StoredConversationFormat ConversationLocation ConversationContext ConversationRecord ConversationStore",
+      "conversations createHarnessConversations ConversationFormat StoredConversationFormat ConversationLocation ConversationContext ConversationRecord ConversationStore",
   },
   {
     id: "observability",
     title: ["Observability", "Observabilité"],
     guide: "guide/agents/observability",
     names:
-      "createObservationHub Observation ObservationScope ObservationSource ObservationEvent OperationEvent ObservationHub ObservationHubOptions ObservationSink reporter ReporterOptions createReporter CustomReporter CustomReporterOptions ReporterHandlers DispatchTelemetry DispatchTelemetrySession DispatchTelemetryOutcome Logging replayAgent ReplayDivergence ReplayAgent ReplayAgentOptions ReplayTurn ReplayFailure ReplayDivergenceDetails ReplayDivergenceKind ReplayDivergencePolicy WorkspaceCommitsEvent RecordedCommit RecordedIdentity RecordedRevision AgentEvent AgentObservation Usage openTelemetry OpenTelemetryOptions OpenTelemetryObserver",
+      "createObservationHub Observation ObservationScope ObservationSource ObservationEvent OperationEvent ObservationHub ObservationHubOptions ObservationSink createReporter ReporterOptions createCustomReporter CustomReporter CustomReporterOptions ReporterHandlers DispatchTelemetry DispatchTelemetrySession DispatchTelemetryOutcome Logging createReplayAgent ReplayDivergence ReplayAgent ReplayAgentOptions ReplayTurn ReplayFailure ReplayDivergenceDetails ReplayDivergenceKind ReplayDivergencePolicy WorkspaceCommitsEvent RecordedCommit RecordedIdentity RecordedRevision AgentEvent AgentObservation Usage createOpenTelemetryObserver OpenTelemetryOptions OpenTelemetryObserver",
   },
   {
     id: "workflows",
     title: ["Workflows", "Workflows"],
     guide: "guide/workflows/graph",
     names:
-      "loopTask LoopTaskExhausted LoopCheckResult LoopTaskContext LoopTaskOptions LoopRoundRecord task workflow WorkflowFailure Retry Task TaskContext TaskOptions TaskRecord TaskStatus Workflow WorkflowEvent WorkflowTelemetry WorkflowOptions WorkflowBudget WorkflowUsage WorkflowBudgetExceeded WorkflowUsageUnavailable WorkflowResult agentTask commandTask isolatedTask interactiveAgentTask InteractiveAgentTaskOptions InteractiveAgentResult WorkflowInputQuestion WorkflowInputRequest WorkflowAnswer WorkflowAnswerRecord TaskInteraction TaskInteractionRecord TaskInteractionContext WorkflowQuotaPolicy WorkflowQuotaPause QuotaResumePolicy repositoryFingerprint TaskCacheOptions TaskCacheStore TaskCacheEntry TaskCacheAccessOptions TaskCacheMode TaskCacheOutcome",
+      "defineLoopTask LoopTaskExhausted LoopCheckResult LoopTaskContext LoopTaskOptions LoopRoundRecord defineTask defineWorkflow WorkflowFailure Retry Task TaskContext TaskOptions TaskRecord TaskStatus Workflow WorkflowEvent WorkflowTelemetry WorkflowOptions WorkflowBudget WorkflowUsage WorkflowBudgetExceeded WorkflowUsageUnavailable WorkflowResult defineAgentTask defineCommandTask defineIsolatedTask defineInteractiveAgentTask InteractiveAgentTaskOptions InteractiveAgentResult WorkflowInputQuestion WorkflowInputRequest WorkflowAnswer WorkflowAnswerRecord TaskInteraction TaskInteractionRecord TaskInteractionContext WorkflowQuotaPolicy WorkflowQuotaPause QuotaResumePolicy repositoryFingerprint TaskCacheOptions TaskCacheStore TaskCacheEntry TaskCacheAccessOptions TaskCacheMode TaskCacheOutcome",
   },
   {
     id: "providers",
     title: ["Providers", "Providers"],
-    experimental: ["firecrackerSandboxProvider", "FirecrackerOptions"],
+    experimental: ["createFirecrackerSandboxProvider", "FirecrackerOptions"],
     guide: "guide/environment/providers/overview",
     names:
-      "dockerSandboxProvider podmanSandboxProvider localSandboxProvider vercelSandboxProvider daytonaSandboxProvider firecrackerSandboxProvider FirecrackerOptions ContainerOptions DependencyCache EgressPolicy VercelOptions DaytonaOptions mountedSandboxProvider remoteSandboxProvider SandboxContext SandboxLease SandboxProvider TransferOptions FileTransfers FileManifestEntry Variables Volume",
+      "createDockerSandboxProvider createPodmanSandboxProvider createLocalSandboxProvider createVercelSandboxProvider createDaytonaSandboxProvider createFirecrackerSandboxProvider FirecrackerOptions ContainerOptions DependencyCache EgressPolicy VercelOptions DaytonaOptions createMountedSandboxProvider createRemoteSandboxProvider SandboxContext SandboxLease SandboxProvider TransferOptions FileTransfers FileManifestEntry Variables Volume",
   },
   {
     id: "model-providers",
     title: ["Model providers", "Fournisseurs de modèles"],
     guide: "guide/advanced/model-providers",
     names:
-      "openaiModelProvider anthropicModelProvider AnthropicModelProviderOptions OpenAIModelProviderOptions ModelProvider ModelRequest ModelResult ModelMessage ModelContentBlock ModelTextBlock ModelToolCallBlock ModelToolResultBlock ModelReasoningBlock ModelToolSpec ModelStopReason ModelStreamEvent",
+      "createOpenAIModelProvider createAnthropicModelProvider AnthropicModelProviderOptions OpenAIModelProviderOptions ModelProvider ModelRequest ModelResult ModelMessage ModelContentBlock ModelTextBlock ModelToolCallBlock ModelToolResultBlock ModelReasoningBlock ModelToolSpec ModelStopReason ModelStreamEvent",
   },
   {
     id: "recovery-retention",
@@ -144,21 +144,21 @@ export const groups = [
     title: ["Approval and pause gates", "Approbations et pauses"],
     guide: "guide/advanced/approvals",
     names:
-      "approvalTask pauseTask signWorkflowDecision ed25519DecisionVerifier WorkflowDecisionProof WorkflowDecisionVerification WorkflowDecisionVerifier WorkflowDecisionSigningOptions WorkflowApproverKey WorkflowDecisionVerifierOptions WorkflowGate WorkflowGateOptions WorkflowPauseRequest WorkflowDecision WorkflowDecisionRecord",
+      "defineApprovalTask definePauseTask signWorkflowDecision createEd25519DecisionVerifier WorkflowDecisionProof WorkflowDecisionVerification WorkflowDecisionVerifier WorkflowDecisionSigningOptions WorkflowApproverKey WorkflowDecisionVerifierOptions WorkflowGate WorkflowGateOptions WorkflowPauseRequest WorkflowDecision WorkflowDecisionRecord",
   },
   {
     id: "artifacts",
     title: ["Typed artifacts", "Artefacts typés"],
     guide: "guide/advanced/artifacts",
     names:
-      "artifact publishArtifact readStoredArtifact artifactTask readArtifact ArtifactContract ArtifactContractOptions ArtifactIdentity ArtifactProducer ArtifactReference ArtifactStore JsonArtifactOptions PublishArtifactOptions ReadArtifactOptions ArtifactTaskOptions",
+      "defineJsonArtifact defineBinaryArtifact publishArtifact readStoredArtifact defineArtifactTask readArtifact ArtifactContract ArtifactContractOptions ArtifactIdentity ArtifactProducer ArtifactReference ArtifactStore JsonArtifactOptions PublishArtifactOptions ReadArtifactOptions ArtifactTaskOptions",
   },
   {
     id: "distributed-execution",
     title: ["Distributed execution", "Exécution distribuée"],
     guide: "guide/advanced/distributed",
     names:
-      "sqliteTaskQueue bullmqTaskQueue BullMQTaskQueue BullMQTaskQueueOptions serveTaskQueue httpTaskQueue runQueueWorker queuedTask QueueRequest QueueResult QueueQuota QueueJob QueueClaim QueueLease TaskQueue DurableTaskQueue QueueServerOptions QueueServer QueueClientOptions QueueHandlerContext QueueHandler QueueWorkerOptions QueuedTaskOptions",
+      "createSqliteTaskQueue createBullMQTaskQueue BullMQTaskQueue BullMQTaskQueueOptions serveTaskQueue createHttpTaskQueue runQueueWorker defineQueuedTask QueueRequest QueueResult QueueQuota QueueJob QueueClaim QueueLease TaskQueue DurableTaskQueue QueueServerOptions QueueServer QueueClientOptions QueueHandlerContext QueueHandler QueueWorkerOptions QueuedTaskOptions",
   },
   {
     id: "triggers",

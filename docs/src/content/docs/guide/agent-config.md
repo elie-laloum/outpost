@@ -3,13 +3,13 @@ title: "Agent configuration"
 description: "Choose the CLI protocol and model independently of the sandbox."
 ---
 
-Compose an agent with `agent({ harness, model })`. The harness drives the CLI protocol; `sandboxProvider` chooses where commands execute.
+Compose an agent with `createAgent({ harness, model })`. The harness drives the CLI protocol; `sandboxProvider` chooses where commands execute.
 
 ```ts
-import { agent, claudeHarness } from "@elie-laloum/outpost";
+import { createAgent, createClaudeHarness } from "@elie-laloum/outpost";
 
-const reviewer = agent({
-  harness: claudeHarness({ authentication: "account" }),
+const reviewer = createAgent({
+  harness: createClaudeHarness({ authentication: "account" }),
 });
 ```
 
@@ -37,6 +37,6 @@ Every harness accepts `mcpServers`. See [MCP servers](../mcp-servers/).
 
 ## Fall back to another agent or model
 
-Wrap several agents in `fallbackAgent([...], { on })` to hand a dispatch to the next one when a limit or an outage stops the current one. See [Fallback agents](../agent-fallback/).
+Wrap several agents in `createFallbackAgent([...], { on })` to hand a dispatch to the next one when a limit or an outage stops the current one. See [Fallback agents](../agent-fallback/).
 
-API: [agent](../../reference/agent/) · [AgentOptions](../../reference/agentoptions/).
+API: [createAgent](../../reference/createagent/) · [AgentOptions](../../reference/agentoptions/).

@@ -53,7 +53,7 @@ A message the dispatch cannot deliver is rejected when the dispatch ends: for ex
 
 A controller serves one dispatch at a time and can be reused for the next one. Attaching it to a second concurrent dispatch fails. Messages sent while no dispatch runs wait for the next dispatch that uses the controller; `close()` rejects them and every later `send()`.
 
-`dispatch()` shares one controller across its passes. `result.resume()` and `result.fork()` do not reuse it: pass `steering` again. In a workflow, return it from the `request` of an [`agentTask` or `isolatedTask`](../task-dependencies/).
+`dispatch()` shares one controller across its passes. `result.resume()` and `result.fork()` do not reuse it: pass `steering` again. In a workflow, return it from the `request` of an [`defineAgentTask` or `defineIsolatedTask`](../task-dependencies/).
 
 Before running, a dispatch rejects agents that can neither receive live input nor resume a conversation: [replay agents](../record-replay/) and adapters with `resumable: false`. Candidates of a [fallback agent](../agent-fallback/) are validated the same way, and steering follows the candidate that is running.
 

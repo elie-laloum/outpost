@@ -6,10 +6,14 @@ description: "Read committed execution events and instrument the runtime."
 Use dispatch journals for durable execution records, progress observers for live display, and telemetry for instrumentation.
 
 ```ts
-import { dispatch, localTransport, readJournal } from "@elie-laloum/outpost";
+import {
+  dispatch,
+  createLocalTransport,
+  readJournal,
+} from "@elie-laloum/outpost";
 import { coder, repository, sandboxProvider } from "./outpost.config.mts";
 
-const transporter = localTransport({ directory: ".outpost/storage" });
+const transporter = createLocalTransport({ directory: ".outpost/storage" });
 const result = await dispatch({
   repository,
   sandboxProvider,
@@ -36,9 +40,9 @@ Install `@opentelemetry/api` and import the adapter through `@elie-laloum/outpos
 
 ```ts
 import { trace, metrics } from "@opentelemetry/api";
-import { openTelemetry } from "@elie-laloum/outpost/opentelemetry";
+import { createOpenTelemetryObserver } from "@elie-laloum/outpost/opentelemetry";
 
-const telemetry = openTelemetry({
+const telemetry = createOpenTelemetryObserver({
   tracer: trace.getTracer("outpost"),
   meter: metrics.getMeter("outpost"),
 });
@@ -46,9 +50,9 @@ const telemetry = openTelemetry({
 
 Register your OpenTelemetry SDK and exporters before creating these handles, then pass `telemetry` to the workflow or dispatch options. Without a registered SDK, these API handles do not export data.
 
-The application owns tracer/meter provider shutdown. Instrumentation failures are isolated from execution outcomes. Custom reporting is available through `createReporter()`.
+The application owns tracer/meter provider shutdown. Instrumentation failures are isolated from execution outcomes. Custom reporting is available through `createCustomReporter()`.
 
-API: [Logging](../../reference/logging/) · [readJournal](../../reference/readjournal/) · [replayAgent](../../reference/replayagent/) · [DispatchTelemetry](../../reference/dispatchtelemetry/) · [createReporter](../../reference/createreporter/).
+API: [Logging](../../reference/logging/) · [readJournal](../../reference/readjournal/) · [createReplayAgent](../../reference/createreplayagent/) · [DispatchTelemetry](../../reference/dispatchtelemetry/) · [createCustomReporter](../../reference/createcustomreporter/).
 
 ## Correlate traces through the hub
 

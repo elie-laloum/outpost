@@ -34,6 +34,8 @@ const program = ts.createProgram(
 const checker = program.getTypeChecker();
 const symbols = new Map();
 const publicNames = new Map();
+const deprecated = (symbol) =>
+  symbol.getJsDocTags(checker).some((tag) => tag.name === "deprecated");
 const unalias = (symbol) =>
   symbol?.flags & ts.SymbolFlags.Alias
     ? checker.getAliasedSymbol(symbol)
@@ -45,6 +47,7 @@ for (const { entry, file } of entries) {
     checker.getSymbolAtLocation(source),
   )) {
     const symbol = unalias(exported);
+    if (deprecated(symbol)) continue;
     const imports = publicNames.get(symbol) ?? [];
     imports.push(
       entry === "." ? manifest.name : `${manifest.name}${entry.slice(1)}`,
@@ -98,13 +101,17 @@ const exportedByName = new Map(
 );
 function slug(symbol) {
   const preserved = {
-    harness: "function-harness",
+    Agent: "type-agent",
     AgentHarness: "harness",
+    BullMQTaskQueue: "type-bullmqtaskqueue",
+    FallbackAgent: "type-fallbackagent",
+    ReplayAgent: "type-replayagent",
+    Task: "type-task",
+    TaskCacheStore: "type-taskcachestore",
+    Workflow: "type-workflow",
     Harness: "type-customharness",
     HarnessOptions: "customharnessoptions",
-    artifactStore: "function-artifactstore",
     ArtifactStore: "artifactstore",
-    workflowCheckpointStore: "function-workflowcheckpointstore",
     WorkflowCheckpointStore: "workflowcheckpointstore",
   };
   if (Object.hasOwn(preserved, symbol.name)) return preserved[symbol.name];

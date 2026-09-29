@@ -7,15 +7,15 @@ Available since 8.0.0. With `onQuota`, a task that hits a usage limit or an HTTP
 
 ```ts
 import {
-  localTransport,
+  createLocalTransport,
   OutpostError,
-  task,
-  workflow,
-  workflowCheckpointStore,
+  defineTask,
+  defineWorkflow,
+  createWorkflowCheckpointStore,
 } from "@elie-laloum/outpost";
 
 let calls = 0;
-const review = task({
+const review = defineTask({
   key: "review",
   perform: () => {
     if (++calls === 1)
@@ -25,10 +25,10 @@ const review = task({
     return "reviewed";
   },
 });
-const result = await workflow("nightly", [review]).start({
+const result = await defineWorkflow("nightly", [review]).start({
   checkpoint: {
-    store: workflowCheckpointStore({
-      transporter: localTransport({ directory: ".outpost/storage" }),
+    store: createWorkflowCheckpointStore({
+      transporter: createLocalTransport({ directory: ".outpost/storage" }),
     }),
     runId: "nightly-2026-09-28",
     version: "1",
@@ -78,25 +78,25 @@ Enabling `onQuota` authorizes the interrupted attempt to run again, like a retry
 
 The first attempt after a pause receives `context.quota`. It carries the conversation when it was captured, and the retained work branch.
 
-- `agentTask` and `isolatedTask` continue that conversation. The new turn sends a short resume instruction instead of the original brief, and keeps the response tag when a structured response is expected. Set `quotaResume: "restart"` to send the original request again.
-- `agentTask` keeps its caller-owned sandbox and workspace. `isolatedTask` allocates a new sandbox: a `current` or `named` branch reuses the same checkout, and an automatically integrated workspace starts from the interrupted branch. Uncommitted changes of an integrated attempt stay in its [retained worktree](../failure-recovery/).
-- `interactiveAgentTask` continues the conversation of the interrupted turn.
+- `defineAgentTask` and `defineIsolatedTask` continue that conversation. The new turn sends a short resume instruction instead of the original brief, and keeps the response tag when a structured response is expected. Set `quotaResume: "restart"` to send the original request again.
+- `defineAgentTask` keeps its caller-owned sandbox and workspace. `defineIsolatedTask` allocates a new sandbox: a `current` or `named` branch reuses the same checkout, and an automatically integrated workspace starts from the interrupted branch. Uncommitted changes of an integrated attempt stay in its [retained worktree](../failure-recovery/).
+- `defineInteractiveAgentTask` continues the conversation of the interrupted turn.
 - Continuation needs a resumable agent with conversation capture: Claude Code, Codex, Copilot or Kimi. Antigravity and disabled capture start a new conversation. So does a request with its own `continuation` or several `passes`.
 
 Custom tasks can read `context.quota` to decide how to resume.
 
 ## Queued tasks
 
-A worker whose handler fails with a quota error stores it in `QueueResult.quota`, and `queuedTask` rejects with code `quota`. The first attempt after the pause publishes a new job, `<key>:quota:<attempt>`, because the failed job cannot run again. The handler still receives the original `idempotencyKey`, so effect deduplication keeps working.
+A worker whose handler fails with a quota error stores it in `QueueResult.quota`, and `defineQueuedTask` rejects with code `quota`. The first attempt after the pause publishes a new job, `<key>:quota:<attempt>`, because the failed job cannot run again. The handler still receives the original `idempotencyKey`, so effect deduplication keeps working.
 
 Pass the conversation to the handler through the input:
 
 ```ts
-import { queuedTask } from "@elie-laloum/outpost";
+import { defineQueuedTask } from "@elie-laloum/outpost";
 import type { TaskQueue } from "@elie-laloum/outpost";
 
 function implement(queue: TaskQueue) {
-  return queuedTask({
+  return defineQueuedTask({
     key: "implement",
     queue,
     handler: "implement",
@@ -113,11 +113,11 @@ The handler can then dispatch with `continuation: { id: input.continueFrom }`. W
 A candidate stopped by a limit settles with status `quota`. When nothing wins, `speculate()` returns status `quota` and `result.quota` holds the earliest known reset. Throw it from a workflow task to pause the workflow:
 
 ```ts
-import { OutpostError, speculate, task } from "@elie-laloum/outpost";
+import { OutpostError, speculate, defineTask } from "@elie-laloum/outpost";
 import type { SpeculationOptions } from "@elie-laloum/outpost";
 
 function race(options: SpeculationOptions) {
-  return task({
+  return defineTask({
     key: "race",
     async perform() {
       const result = await speculate(options);

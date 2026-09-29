@@ -6,9 +6,9 @@ description: "Control concurrency, failure propagation and attempts."
 Set `concurrency` on `start()` and retry policy on individual tasks. Retries are explicit because a second attempt can repeat side effects.
 
 ```ts
-import { task, workflow } from "@elie-laloum/outpost";
+import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
 
-const check = task({
+const check = defineTask({
   key: "check",
   retry: { attempts: 2, delayMs: 100 },
   timeoutMs: 5_000,
@@ -17,7 +17,9 @@ const check = task({
     return { attempt, ok: true };
   },
 });
-const result = await workflow("checks", [check]).start({ concurrency: 2 });
+const result = await defineWorkflow("checks", [check]).start({
+  concurrency: 2,
+});
 result.unwrap();
 console.log(result.status);
 ```
@@ -29,9 +31,9 @@ console.log(result.status);
 The existing fixed delay remains the default. Set `backoff: "exponential"` to double `delayMs` after each failure, `maxDelayMs` to cap the local delay (30 seconds by default in exponential mode), and `jitter: "full"` to spread retries uniformly between zero and that cap-adjusted delay. Jitter defaults to `"none"`. Configure a positive `delayMs` for a useful progressive wait.
 
 ```ts
-import { OutpostError, task, workflow } from "@elie-laloum/outpost";
+import { OutpostError, defineTask, defineWorkflow } from "@elie-laloum/outpost";
 
-const request = task({
+const request = defineTask({
   key: "request",
   retry: {
     attempts: 4,
@@ -48,7 +50,7 @@ const request = task({
     return "Replace with your cancellable request";
   },
 });
-const result = await workflow("requests", [request]).start({
+const result = await defineWorkflow("requests", [request]).start({
   timeoutMs: 60_000,
 });
 result.unwrap();
@@ -76,6 +78,6 @@ Each resumed `start()` call receives a fresh deadline; time between calls and ap
 
 Pass `context.signal` to commands, fetches and agent requests. `timeoutMs` signals cancellation for an attempt; it cannot forcibly terminate arbitrary application code. `retry.accepts(error, attempt)` narrows which failures may be retried.
 
-Do not run concurrent operations against one borrowed sandbox. Add dependency edges or allocate separate environments with `isolatedTask`.
+Do not run concurrent operations against one borrowed sandbox. Add dependency edges or allocate separate environments with `defineIsolatedTask`.
 
 API: [TaskOptions](../../reference/taskoptions/) · [WorkflowOptions](../../reference/workflowoptions/) · [Retry](../../reference/retry/).

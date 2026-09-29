@@ -10,7 +10,7 @@ Un artefact est une valeur stockée publiée sous un contrat typé explicite. Sa
 
 ## Fonctionnement et philosophie
 
-`artifact` définit le contrat. La publication valide et stocke une valeur ; la lecture vérifie le contrat attendu et l’intégrité du contenu. `artifactTask` et `readArtifact` relient ces opérations aux dépendances déclarées des tâches. Les références du producteur et des parents enregistrent la filiation.
+`defineJsonArtifact` et `defineBinaryArtifact` déclarent le contrat. La publication valide et stocke une valeur ; la lecture vérifie le contrat attendu et l’intégrité du contenu. `defineArtifactTask` et `readArtifact` relient ces opérations aux dépendances déclarées des tâches. Les références du producteur et des parents enregistrent la filiation.
 
 ## Limites et responsabilités
 
@@ -18,10 +18,10 @@ Digests et filiation apportent intégrité et traçabilité, pas authentificatio
 
 ## Points d’entrée
 
-- [artifact](../../artifact/)
+- [defineJsonArtifact](../../definejsonartifact/) · [defineBinaryArtifact](../../definebinaryartifact/)
 - [publishArtifact](../../publishartifact/)
 - [readStoredArtifact](../../readstoredartifact/)
-- [artifactTask](../../artifacttask/)
+- [defineArtifactTask](../../defineartifacttask/)
 - [readArtifact](../../readartifact/)
 - [ArtifactStore](../../artifactstore/)
 

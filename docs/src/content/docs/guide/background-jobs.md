@@ -10,9 +10,9 @@ A queue moves JSON requests between producers and workers. Workers execute regis
 Create `.outpost` first, then run the worker in its own process.
 
 ```ts
-import { sqliteTaskQueue, runQueueWorker } from "@elie-laloum/outpost";
+import { createSqliteTaskQueue, runQueueWorker } from "@elie-laloum/outpost";
 
-const queue = await sqliteTaskQueue(".outpost/jobs.sqlite");
+const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
 const stop = new AbortController();
 process.once("SIGINT", () => stop.abort());
 try {
@@ -31,12 +31,12 @@ try {
 
 ## Submit work
 
-A producer opens the same queue and calls `enqueue({ id, handler: "count", input: [1, 2, 3] })`. Use stable IDs for deduplication and read retained job results through the queue contract. `queuedTask()` wraps submission and polling as a workflow node and validates the returned value with `decode`. [Triggers](../triggers/) publish jobs from cron schedules and verified webhooks, and `workflowJob()` runs a checkpointed workflow for each one.
+A producer opens the same queue and calls `enqueue({ id, handler: "count", input: [1, 2, 3] })`. Use stable IDs for deduplication and read retained job results through the queue contract. `defineQueuedTask()` wraps submission and polling as a workflow node and validates the returned value with `decode`. [Triggers](../triggers/) publish jobs from cron schedules and verified webhooks, and `workflowJob()` runs a checkpointed workflow for each one.
 
 ```ts title="submit.mts"
-import { sqliteTaskQueue } from "@elie-laloum/outpost";
+import { createSqliteTaskQueue } from "@elie-laloum/outpost";
 
-const queue = await sqliteTaskQueue(".outpost/jobs.sqlite");
+const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
 try {
   await queue.enqueue({ id: "count-42", handler: "count", input: [1, 2, 3] });
   console.log(await queue.get("count-42"));
@@ -51,13 +51,13 @@ Workers claim fenced leases, renew them and report results. A stale lease cannot
 
 A handler that fails on a usage or rate limit reports it in `QueueResult.quota`; with [quota pauses](../quota-pauses/#queued-tasks), the workflow pauses and later publishes a new job that keeps the original `idempotencyKey`.
 
-Use `serveTaskQueue()` and `httpTaskQueue()` to expose a queue across processes over HTTP, with the configured token and a trusted transport boundary. Use [Redis workers](../redis-workers/) for the BullMQ backend. Cancellation and deadlines must be passed into handler operations.
+Use `serveTaskQueue()` and `createHttpTaskQueue()` to expose a queue across processes over HTTP, with the configured token and a trusted transport boundary. Use [Redis workers](../redis-workers/) for the BullMQ backend. Cancellation and deadlines must be passed into handler operations.
 
-API: [sqliteTaskQueue](../../reference/sqlitetaskqueue/) · [runQueueWorker](../../reference/runqueueworker/) · [queuedTask](../../reference/queuedtask/) · [TaskQueue](../../reference/taskqueue/).
+API: [createSqliteTaskQueue](../../reference/createsqlitetaskqueue/) · [runQueueWorker](../../reference/runqueueworker/) · [defineQueuedTask](../../reference/definequeuedtask/) · [TaskQueue](../../reference/taskqueue/).
 
 ## Deduplicate effects
 
-Available in 7.0.0: every `TaskContext` exposes `idempotencyKey`, derived from the workflow execution and task key. It remains stable across retries and checkpoint replay; a new execution gets a new key. Each remote `QueueHandlerContext` exposes the job ID as the same property. `queuedTask()` preserves its existing job ID calculation. Direct producers must supply unique IDs for distinct logical operations and avoid collisions when sharing an effect service across queues.
+Available in 7.0.0: every `TaskContext` exposes `idempotencyKey`, derived from the workflow execution and task key. It remains stable across retries and checkpoint replay; a new execution gets a new key. Each remote `QueueHandlerContext` exposes the job ID as the same property. `defineQueuedTask()` preserves its existing job ID calculation. Direct producers must supply unique IDs for distinct logical operations and avoid collisions when sharing an effect service across queues.
 
 Pass this key to the service performing the effect. For a database operation, store the receipt and business change in the same transaction with a unique constraint. For a remote API, use its persistent idempotency support. An in-memory set or a receipt written separately from the effect leaves a crash window.
 
@@ -84,7 +84,7 @@ function deliveryHandler(
 Both queue HTTP endpoints accept fixed tokens as before. A server callback supplies accepted tokens for each request; a client callback supplies its current token, including heartbeats and completion calls.
 
 ```ts
-import { serveTaskQueue, httpTaskQueue } from "@elie-laloum/outpost";
+import { serveTaskQueue, createHttpTaskQueue } from "@elie-laloum/outpost";
 import type { TaskQueue } from "@elie-laloum/outpost";
 
 async function connectRotatingQueue(
@@ -93,7 +93,7 @@ async function connectRotatingQueue(
   currentToken: () => Promise<string>,
 ) {
   const server = await serveTaskQueue({ queue, token: acceptedTokens });
-  const client = httpTaskQueue({ url: server.url, token: currentToken });
+  const client = createHttpTaskQueue({ url: server.url, token: currentToken });
   return { server, client };
 }
 ```

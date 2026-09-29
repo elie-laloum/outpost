@@ -3,20 +3,20 @@ title: "Model connections"
 description: "Choose an HTTP protocol for the built-in loop."
 ---
 
-The `ModelProvider` contract, `openaiModelProvider()` and `anthropicModelProvider()` are stable in 7.0.0. Model requests run in the Outpost process.
+The `ModelProvider` contract, `createOpenAIModelProvider()` and `createAnthropicModelProvider()` are stable in 7.0.0. Model requests run in the Outpost process.
 
-Choose a model provider by protocol, then pass it to `harness({ modelProvider })`. Credentials are explicit and remain with the host-side client.
+Choose a model provider by protocol, then pass it to `createHarness({ modelProvider })`. Credentials are explicit and remain with the host-side client.
 
 ```ts
 import {
-  anthropicModelProvider,
-  openaiModelProvider,
+  createAnthropicModelProvider,
+  createOpenAIModelProvider,
 } from "@elie-laloum/outpost";
 
-const messages = anthropicModelProvider({
+const messages = createAnthropicModelProvider({
   apiKey: process.env.ANTHROPIC_API_KEY ?? "",
 });
-const compatible = openaiModelProvider({
+const compatible = createOpenAIModelProvider({
   baseUrl: "http://127.0.0.1:8080/v1",
   api: "chat-completions",
   apiKey: false,
@@ -25,9 +25,9 @@ const compatible = openaiModelProvider({
 
 ## Protocol selection
 
-`openaiModelProvider()` accepts `chat-completions` (default) or `responses`. It appends the selected endpoint to `baseUrl`; no fallback changes protocols after an error. `anthropicModelProvider()` uses the Messages API.
+`createOpenAIModelProvider()` accepts `chat-completions` (default) or `responses`. It appends the selected endpoint to `baseUrl`; no fallback changes protocols after an error. `createAnthropicModelProvider()` uses the Messages API.
 
-This is separate from `codexHarness({ modelProvider })`, which configures Codex CLI and requires Responses compatibility.
+This is separate from `createCodexHarness({ modelProvider })`, which configures Codex CLI and requires Responses compatibility.
 
 ## Bounds and streaming
 
@@ -37,7 +37,7 @@ Models are names or objects with supported reasoning and output limits. A servic
 
 The harness’s `cache` requests prefix caching. Anthropic’s `cacheSystem` explicitly adds a system cache breakpoint; cache hits are not guaranteed.
 
-API: [openaiModelProvider](../../reference/openaimodelprovider/) · [anthropicModelProvider](../../reference/anthropicmodelprovider/) · [ModelProvider](../../reference/modelprovider/).
+API: [createOpenAIModelProvider](../../reference/createopenaimodelprovider/) · [createAnthropicModelProvider](../../reference/createanthropicmodelprovider/) · [ModelProvider](../../reference/modelprovider/).
 
 ## Validation
 

@@ -3,12 +3,12 @@ title: "Verification loops"
 description: "Repeat work with feedback until a check accepts it or a limit is reached."
 ---
 
-`loopTask()` alternates `attempt` and `check` inside one workflow node. It is available since 8.0.0. A rejected check supplies text feedback to the next round; a successful check exposes the accepted attempt result to dependent tasks.
+`defineLoopTask()` alternates `attempt` and `check` inside one workflow node. It is available since 8.0.0. A rejected check supplies text feedback to the next round; a successful check exposes the accepted attempt result to dependent tasks.
 
 ```ts
-import { loopTask, workflow } from "@elie-laloum/outpost";
+import { defineLoopTask, defineWorkflow } from "@elie-laloum/outpost";
 
-const fix = loopTask({
+const fix = defineLoopTask({
   key: "fix",
   maxRounds: 3,
   attempt: (ctx, feedback) => ({ round: ctx.round, feedback: feedback ?? "" }),
@@ -17,7 +17,7 @@ const fix = loopTask({
       ? { done: true }
       : { done: false, feedback: "Cover the missing edge case." },
 });
-const result = await workflow("verified", [fix]).start({
+const result = await defineWorkflow("verified", [fix]).start({
   budget: { attempts: 3 },
 });
 result.unwrap();
@@ -28,19 +28,19 @@ console.log(result.value(fix).round); // 2
 
 ## Code, then run a command
 
-Reuse a caller-owned sandbox prepared as in [sandbox sessions](../sandbox-sessions/). Calling an `agentTask`'s `perform(ctx)` connects streaming usage, cancellation and observation to the loop context. Return a JSON projection of its result when using checkpoints: the full dispatch result has continuation methods and cannot be persisted as JSON.
+Reuse a caller-owned sandbox prepared as in [sandbox sessions](../sandbox-sessions/). Calling a `defineAgentTask`'s `perform(ctx)` connects streaming usage, cancellation and observation to the loop context. Return a JSON projection of its result when using checkpoints: the full dispatch result has continuation methods and cannot be persisted as JSON.
 
 ```ts
-import { agentTask, loopTask } from "@elie-laloum/outpost";
+import { defineAgentTask, defineLoopTask } from "@elie-laloum/outpost";
 import type { Sandbox } from "@elie-laloum/outpost";
 
 declare const session: Sandbox;
-const fix = loopTask({
+const fix = defineLoopTask({
   key: "fix-tests",
   maxRounds: 4,
   timeoutMs: 300_000,
   async attempt(ctx, feedback) {
-    const run = agentTask({
+    const run = defineAgentTask({
       key: "coder",
       sandbox: session,
       request: () => ({
@@ -67,7 +67,7 @@ Only `fix` belongs in the workflow graph; `coder` is an execution helper. The ca
 
 ## Use a second agent to review
 
-`check` may call another `agentTask.perform(ctx)` on a reviewer sandbox and turn its structured response into `{ done: true }` or `{ done: false, feedback }`. Both agents' reported usage counts against the same workflow budget. Use [structured responses](../output-validation/) to validate the review decision.
+`check` may call another `defineAgentTask.perform(ctx)` on a reviewer sandbox and turn its structured response into `{ done: true }` or `{ done: false, feedback }`. Both agents' reported usage counts against the same workflow budget. Use [structured responses](../output-validation/) to validate the review decision.
 
 A direct `session.dispatch()` inside a callback does not automatically connect its usage or signal to the workflow. Prefer the helper above; custom integrations must forward `ctx.signal`, propagate observation and report usage synchronously through `ctx.reportUsage`, including failed requests. Do not also report a helper's final totals: it already reconciles streamed counters.
 
@@ -91,4 +91,4 @@ All persisted candidates must be lossless JSON or top-level `undefined`, even th
 
 `ctx.idempotencyKey` is stable for one execution, task, logical round and callback phase; attempt and check have distinct keys. Effect services must persist their own deduplication receipts. Re-executed paid model calls are still new consumption; do not reuse an old usage receipt to hide their cost.
 
-API: [loopTask](../../reference/looptask/) · [LoopTaskOptions](../../reference/looptaskoptions/) · [LoopTaskContext](../../reference/looptaskcontext/) · [LoopTaskExhausted](../../reference/looptaskexhausted/).
+API: [defineLoopTask](../../reference/definelooptask/) · [LoopTaskOptions](../../reference/looptaskoptions/) · [LoopTaskContext](../../reference/looptaskcontext/) · [LoopTaskExhausted](../../reference/looptaskexhausted/).

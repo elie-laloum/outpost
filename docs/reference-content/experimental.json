@@ -1,5 +1,5 @@
 {
-  "firecrackerSandboxProvider": [
+  "createFirecrackerSandboxProvider": [
     "This provider requires a prepared Linux/KVM host and guest. Optional jailer launch adds cgroup v2 limits and a private jail under a trusted root supervisor. Direct execution remains available. Supported-host and adversarial validation are still incomplete; this is not a production isolation certification. See the [prerequisites and limits](../../guide/microvms/).",
     "Ce provider exige un hôte Linux/KVM et un invité préparés. Le lancement optionnel par jailer ajoute des limites cgroup v2 et une prison privée sous un superviseur root de confiance. Le lancement direct reste disponible. Les validations des hôtes pris en charge et de résistance aux attaques restent incomplètes ; ce n’est pas une certification d’isolation en production. Consultez les [prérequis et limites](../../guide/microvms/)."
   ],

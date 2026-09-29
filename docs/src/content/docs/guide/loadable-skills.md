@@ -6,18 +6,21 @@ description: "Load focused instructions and tools only when needed."
 The built-in harness lists skill descriptions in its system instructions. The model calls `load_skill` to obtain the instructions and enable the skill’s tools.
 
 ```ts
-import { defineHarnessSkill, harnessGitTools } from "@elie-laloum/outpost";
+import {
+  defineHarnessSkill,
+  createHarnessGitTools,
+} from "@elie-laloum/outpost";
 
 const reviewSkill = defineHarnessSkill({
   name: "review",
   description: "Inspect a patch and report concrete regressions.",
   instructions:
     "Read the diff. Check changed behavior against callers and tests. Cite file paths.",
-  tools: [harnessGitTools()],
+  tools: [createHarnessGitTools()],
 });
 ```
 
-Pass the result in `harness({ skills: [reviewSkill] })`. Names must be unique, and tool names must not collide with other harness or skill tools.
+Pass the result in `createHarness({ skills: [reviewSkill] })`. Names must be unique, and tool names must not collide with other harness or skill tools.
 
 ## Dynamic instructions
 

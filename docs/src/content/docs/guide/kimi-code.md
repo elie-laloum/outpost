@@ -3,17 +3,17 @@ title: "Kimi Code"
 description: "Connect Kimi Code to an Outpost sandbox."
 ---
 
-Use `kimiHarness()` with any supported [execution backend](../execution-backends/). Install the CLI in your image or allow bootstrap on remote providers.
+Use `createKimiHarness()` with any supported [execution backend](../execution-backends/). Install the CLI in your image or allow bootstrap on remote providers.
 
 ## Account access
 
 Sign in with `kimi login --region global` for a `kimi.ai` account, or `kimi login --region mainland-cn` for a `kimi.com` account. Outpost defaults to `global`; set `region: "mainland-cn"` explicitly for a Chinese account:
 
 ```ts
-import { agent, kimiHarness } from "@elie-laloum/outpost";
+import { createAgent, createKimiHarness } from "@elie-laloum/outpost";
 
-const coder = agent({
-  harness: kimiHarness({ authentication: "account" }),
+const coder = createAgent({
+  harness: createKimiHarness({ authentication: "account" }),
 });
 ```
 
@@ -28,10 +28,10 @@ See [Kimi's login command](https://www.kimi.com/code/docs/en/kimi-code-cli/refer
 Supply `KIMI_API_KEY` explicitly. API usage follows the provider’s API billing.
 
 ```ts
-import { agent, kimiHarness } from "@elie-laloum/outpost";
+import { createAgent, createKimiHarness } from "@elie-laloum/outpost";
 
-const coder = agent({
-  harness: kimiHarness({
+const coder = createAgent({
+  harness: createKimiHarness({
     authentication: "usage",
     variables: { KIMI_API_KEY: process.env.KIMI_API_KEY ?? "" },
   }),
@@ -41,9 +41,9 @@ const coder = agent({
 
 ## Behavior
 
-API authentication requires an explicit model on `agent()`. The `region` option is reserved for account authentication; configure API endpoints through the CLI model variables when needed. Set `KIMI_MODEL` in your application environment for the snippet above; this is an example variable, not an Outpost setting. Account authentication can use the CLI’s default model.
+API authentication requires an explicit model on `createAgent()`. The `region` option is reserved for account authentication; configure API endpoints through the CLI model variables when needed. Set `KIMI_MODEL` in your application environment for the snippet above; this is an example variable, not an Outpost setting. Account authentication can use the CLI’s default model.
 
-Native capture, warm and cold resume, fork and automatic response repairs are supported for Kimi Code 2.1.1. Outpost resumes with `--session` and forks with `kimi fork <id> --yes` before continuing the new ID. The parent remains independent. Capture preserves session metadata and agent files, including native history and plans. `conversations` stores captured sessions in a `"kimi"` [conversation store](../chat-history/#storage), such as `transportConversations("kimi", …)`. See [chat history](../chat-history/) and [Kimi’s session documentation](https://www.kimi.com/code/docs/en/kimi-code-cli/guides/sessions.html).
+Native capture, warm and cold resume, fork and automatic response repairs are supported for Kimi Code 2.1.1. Outpost resumes with `--session` and forks with `kimi fork <id> --yes` before continuing the new ID. The parent remains independent. Capture preserves session metadata and agent files, including native history and plans. `conversations` stores captured sessions in a `"kimi"` [conversation store](../chat-history/#storage), such as `createTransportConversations("kimi", …)`. See [chat history](../chat-history/) and [Kimi’s session documentation](https://www.kimi.com/code/docs/en/kimi-code-cli/guides/sessions.html).
 
 ## Token accounting
 
@@ -55,4 +55,4 @@ A missing session ID, absent or malformed records, interrupted execution or exce
 
 `mcpServers` merges [MCP servers](../mcp-servers/) into `~/.kimi-code/mcp.json` in the agent home, which is your own home with the local provider.
 
-API: [kimiHarness](../../reference/kimiharness/).
+API: [createKimiHarness](../../reference/createkimiharness/).

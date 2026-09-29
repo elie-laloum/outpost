@@ -19,12 +19,12 @@ Define a serialized tool that runs a built-in child agent with a fresh history i
 
 ## Parameters and properties
 
-| Name                  | Type                     | Presence | Meaning                                                                                                                                  |
-| --------------------- | ------------------------ | -------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `options`             | `HarnessSubagentOptions` | Required | Name, model-visible description and explicitly composed built-in child agent. Defining the tool does not run it.                         |
-| `options.name`        | `string`                 | Required | Unique tool name exposed to the parent model, using 1–64 letters, digits, underscores or hyphens.                                        |
-| `options.description` | `string`                 | Required | Explain when the parent should delegate to this child; sent with the tool schema.                                                        |
-| `options.agent`       | `CustomAgent`            | Required | Built-in agent created with agent({ harness: harness(...), model }); owns child instructions, tools and limits. CLI agents are rejected. |
+| Name                  | Type                     | Presence | Meaning                                                                                                                                              |
+| --------------------- | ------------------------ | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `options`             | `HarnessSubagentOptions` | Required | Name, model-visible description and explicitly composed built-in child agent. Defining the tool does not run it.                                     |
+| `options.name`        | `string`                 | Required | Unique tool name exposed to the parent model, using 1–64 letters, digits, underscores or hyphens.                                                    |
+| `options.description` | `string`                 | Required | Explain when the parent should delegate to this child; sent with the tool schema.                                                                    |
+| `options.agent`       | `CustomAgent`            | Required | Built-in agent created with createAgent({ harness: createHarness(...), model }); owns child instructions, tools and limits. CLI agents are rejected. |
 
 ## Returns
 

@@ -10,9 +10,9 @@ L’exécution distribuée sépare l’admission des tâches du processus qui ef
 
 ## Fonctionnement et philosophie
 
-`sqliteTaskQueue` fournit le stockage durable de la file. `serveTaskQueue` et `httpTaskQueue` l’exposent via HTTP ; `runQueueWorker` exécute les handlers. `queuedTask` relie les résultats de la file à un workflow typé. Baux et générations de propriété déterminent quelle prise en charge peut encore rapporter un résultat.
+`createSqliteTaskQueue` fournit le stockage durable de la file. `serveTaskQueue` et `createHttpTaskQueue` l’exposent via HTTP ; `runQueueWorker` exécute les handlers. `defineQueuedTask` relie les résultats de la file à un workflow typé. Baux et générations de propriété déterminent quelle prise en charge peut encore rapporter un résultat.
 
-`bullmqTaskQueue` fournit une alternative Redis via l’entrée optionnelle `queues/bullmq`, sans coordinateur HTTP. Choisir SQLite/HTTP pour un coordinateur sur disque local ; choisir BullMQ lorsque Redis est déjà exploité par votre équipe. Les deux utilisent les mêmes handlers et workflows. Voir le [guide BullMQ/Redis](../../../guide/advanced/bullmq/).
+`createBullMQTaskQueue` fournit une alternative Redis via l’entrée optionnelle `queues/bullmq`, sans coordinateur HTTP. Choisir SQLite/HTTP pour un coordinateur sur disque local ; choisir BullMQ lorsque Redis est déjà exploité par votre équipe. Les deux utilisent les mêmes handlers et workflows. Voir le [guide BullMQ/Redis](../../../guide/advanced/bullmq/).
 
 ## Limites et responsabilités
 
@@ -20,12 +20,12 @@ Le contrôle des générations refuse les résultats périmés mais ne peut pas 
 
 ## Points d’entrée
 
-- [sqliteTaskQueue](../../sqlitetaskqueue/)
-- [bullmqTaskQueue](../../bullmqtaskqueue/)
+- [createSqliteTaskQueue](../../createsqlitetaskqueue/)
+- [createBullMQTaskQueue](../../createbullmqtaskqueue/)
 - [serveTaskQueue](../../servetaskqueue/)
-- [httpTaskQueue](../../httptaskqueue/)
+- [createHttpTaskQueue](../../createhttptaskqueue/)
 - [runQueueWorker](../../runqueueworker/)
-- [queuedTask](../../queuedtask/)
+- [defineQueuedTask](../../definequeuedtask/)
 - [QueueLease](../../queuelease/)
 
 [Passer à la pratique avec le Guide](../../../guide/advanced/distributed/).

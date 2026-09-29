@@ -12,9 +12,9 @@ npm install bullmq
 ```
 
 ```ts
-import { bullmqTaskQueue } from "@elie-laloum/outpost/queues/bullmq";
+import { createBullMQTaskQueue } from "@elie-laloum/outpost/queues/bullmq";
 
-const queue = await bullmqTaskQueue({
+const queue = await createBullMQTaskQueue({
   name: "code-reviews",
   connection: { host: "127.0.0.1", port: 6379 },
 });
@@ -41,10 +41,10 @@ Les résultats Outpost conservés restent autoritatifs si la finalisation native
 
 Observez les erreurs de connexion et de finalisation avec `onError`. Les opérations directes rejettent toujours en cas d’échec ; un observateur ne remplace pas la gestion de ces rejets.
 
-API : [bullmqTaskQueue](../../reference/bullmqtaskqueue/).
+API : [createBullMQTaskQueue](../../reference/createbullmqtaskqueue/).
 
 ## Faire tourner les identifiants Redis
 
-Les paramètres de connexion sont fixés lorsque `bullmqTaskQueue()` ouvre ses clients. Introduisez un identifiant ACL Redis de remplacement avec les mêmes permissions requises, déployez les workers/producteurs qui l’utilisent, puis arrêtez les anciens processus et fermez leurs files avant de révoquer l’ancien identifiant. Ne modifiez pas l’objet de connexion d’un adapter actif pour le faire tourner. Les opérateurs Redis gèrent les ACL et la fermeture des connexions authentifiées restantes.
+Les paramètres de connexion sont fixés lorsque `createBullMQTaskQueue()` ouvre ses clients. Introduisez un identifiant ACL Redis de remplacement avec les mêmes permissions requises, déployez les workers/producteurs qui l’utilisent, puis arrêtez les anciens processus et fermez leurs files avant de révoquer l’ancien identifiant. Ne modifiez pas l’objet de connexion d’un adapter actif pour le faire tourner. Les opérateurs Redis gèrent les ACL et la fermeture des connexions authentifiées restantes.
 
 Conservez le même espace de noms lors du remplacement. Une connexion révoquée trop tôt peut perdre son bail ; le successeur reçoit la même `idempotencyKey`, le service d’effets doit donc conserver les reçus de déduplication. Consultez [l’exploitation des workers](../background-jobs/#exploiter-les-workers) pour l’arrêt et la reprise après crash. Les tests de crash avec Redis standalone ne prouvent pas la bascule d’un primaire managé.

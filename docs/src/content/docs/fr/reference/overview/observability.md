@@ -16,19 +16,19 @@ Attachez un observateur à l’opération à examiner. Un reporter met les évé
 
 L’usage rapporté n’est pas une facture, et l’activité locale n’est pas l’inventaire d’un compte cloud. Évitez de placer prompts, identifiants secrets ou valeurs sans borne dans les labels de métriques. Utilisez les résultats d’opérations et les validations imposées pour décider de la suite du programme.
 
-Un journal de dispatch rejouable peut aussi être rejoué : `replayAgent` réémet ses événements et reconstruit ses commits sans appeler de modèle, et `ReplayDivergence` signale où un rejeu diffère. Consultez [Enregistrer et rejouer](../../../guide/record-replay/).
+Un journal de dispatch rejouable peut aussi être rejoué : `createReplayAgent` réémet ses événements et reconstruit ses commits sans appeler de modèle, et `ReplayDivergence` signale où un rejeu diffère. Consultez [Enregistrer et rejouer](../../../guide/record-replay/).
 
 ## Points d’entrée
 
-- [reporter](../../reporter/)
 - [createReporter](../../createreporter/)
+- [createCustomReporter](../../createcustomreporter/)
 - [DispatchTelemetry](../../dispatchtelemetry/)
 - [AgentEvent](../../agentevent/)
 - [AgentObservation](../../agentobservation/)
 - [Usage](../../usage/)
-- [replayAgent](../../replayagent/)
+- [createReplayAgent](../../createreplayagent/)
 - [ReplayDivergence](../../replaydivergence/)
-- [openTelemetry](../../opentelemetry/)
+- [createOpenTelemetryObserver](../../createopentelemetryobserver/)
 - [OpenTelemetryOptions](../../opentelemetryoptions/)
 
 [Passer à la pratique avec le Guide](../../../guide/agents/observability/).

@@ -43,8 +43,8 @@ for (const locale of ["", "fr/"]) {
     );
     if (engine === "podman")
       config = config.replace(
-        'import { dockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";',
-        'import { podmanSandboxProvider as dockerSandboxProvider } from "@elie-laloum/outpost/providers/podman";',
+        'import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";',
+        'import { createPodmanSandboxProvider as createDockerSandboxProvider } from "@elie-laloum/outpost/providers/podman";',
       );
     await writeFile(resolve(workspace, "outpost.config.mts"), config);
     await writeFile(

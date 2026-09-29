@@ -10,7 +10,7 @@ An artifact is a stored value published under an explicit typed contract. A refe
 
 ## How it works
 
-`artifact` defines the contract. Publishing validates and stores a value; reading checks the expected contract and content integrity. `artifactTask` and `readArtifact` connect those operations to declared task dependencies. Producer and parent references record lineage.
+`defineJsonArtifact` and `defineBinaryArtifact` declare the contract. Publishing validates and stores a value; reading checks the expected contract and content integrity. `defineArtifactTask` and `readArtifact` connect those operations to declared task dependencies. Producer and parent references record lineage.
 
 ## Boundaries and responsibilities
 
@@ -18,10 +18,10 @@ Digests and lineage provide integrity and traceability, not producer authenticat
 
 ## Entry points
 
-- [artifact](../../artifact/)
+- [defineJsonArtifact](../../definejsonartifact/) · [defineBinaryArtifact](../../definebinaryartifact/)
 - [publishArtifact](../../publishartifact/)
 - [readStoredArtifact](../../readstoredartifact/)
-- [artifactTask](../../artifacttask/)
+- [defineArtifactTask](../../defineartifacttask/)
 - [readArtifact](../../readartifact/)
 - [ArtifactStore](../../artifactstore/)
 

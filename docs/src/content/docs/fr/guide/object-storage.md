@@ -11,16 +11,16 @@ npm install @aws-sdk/client-s3
 
 ```ts
 import { S3Client } from "@aws-sdk/client-s3";
-import { s3Transport } from "@elie-laloum/outpost/transports/s3";
-import { artifactStore } from "@elie-laloum/outpost";
+import { createS3Transport } from "@elie-laloum/outpost/transports/s3";
+import { createArtifactStore } from "@elie-laloum/outpost";
 
 const client = new S3Client({ region: "eu-west-1" });
-const transporter = s3Transport({
+const transporter = createS3Transport({
   client,
   bucket: "my-private-outpost",
   prefix: "reviews/",
 });
-const store = artifactStore({ transporter });
+const store = createArtifactStore({ transporter });
 ```
 
 Remplacez bucket et région par ceux de votre déploiement. Configurez les identifiants dans le client S3 côté hôte ; ils ne sont pas transmis aux agents. Détruisez le client seulement après la fin de tous les stores et opérations qui l’utilisent.
@@ -39,13 +39,13 @@ R2 prend en charge PUT conditionnel, mais la validation réelle a constaté que 
 
 ```ts
 import { S3Client } from "@aws-sdk/client-s3";
-import { s3Transport } from "@elie-laloum/outpost/transports/s3";
+import { createS3Transport } from "@elie-laloum/outpost/transports/s3";
 
 const client = new S3Client({
   region: "auto",
   endpoint: "https://<account-id>.r2.cloudflarestorage.com",
 });
-const transporter = s3Transport({
+const transporter = createS3Transport({
   client,
   bucket: "my-private-outpost",
   prefix: "reviews/",
@@ -59,4 +59,4 @@ Tous les écrivains partageant un préfixe doivent utiliser `deleteMode: "tombst
 
 La suppression logique conserve un marqueur de 1 Kio par clé supprimée et ajoute des requêtes HEAD à la création et au listing. La liste observe les objets courants, sans instantané transactionnel. Les marqueurs restent des objets physiques facturables, bien que masqués des inventaires du transport et de son usage logique. Ne les expirez ou purgez pas automatiquement tant que des écrivains peuvent tourner : une suppression physique pourrait effacer une recréation concurrente. Seule une maintenance explicite après arrêt de tous les écrivains peut les retirer du bucket.
 
-API : [s3Transport](../../reference/s3transport/).
+API : [createS3Transport](../../reference/creates3transport/).

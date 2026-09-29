@@ -3,18 +3,18 @@ title: "Dépendances des tâches"
 description: "Relier des sorties typées dans un graphe exécutable."
 ---
 
-`task()` définit un nœud. `workflow()` valide le graphe. Rien ne s’exécute avant `start()`.
+`defineTask()` définit un nœud. `defineWorkflow()` valide le graphe. Rien ne s’exécute avant `start()`.
 
 ```ts
-import { task, workflow } from "@elie-laloum/outpost";
+import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
 
-const files = task({ key: "files", perform: () => ["src/parser.ts"] });
-const report = task({
+const files = defineTask({ key: "files", perform: () => ["src/parser.ts"] });
+const report = defineTask({
   key: "report",
   after: [files],
   perform: (context) => ({ reviewed: context.value(files).length }),
 });
-const result = await workflow("review", [files, report]).start();
+const result = await defineWorkflow("review", [files, report]).start();
 result.unwrap();
 console.log(result.value(report));
 ```
@@ -29,17 +29,17 @@ Les tâches indépendantes peuvent tourner en parallèle. Les tâches dépendant
 
 ## Choisir un type de tâche
 
-| Fabrique       | Usage                                                    |
-| -------------- | -------------------------------------------------------- |
-| `loopTask`     | Essais bornés avec feedback de vérification.             |
-| `task`         | Code applicatif renvoyant une valeur.                    |
-| `agentTask`    | Requête d’agent dans une sandbox existante.              |
-| `commandTask`  | Commande dans une sandbox existante.                     |
-| `isolatedTask` | Requête d’agent avec son propre cycle de vie de sandbox. |
-| `queuedTask`   | Travail délégué à un handler enregistré en arrière-plan. |
+| Fabrique             | Usage                                                    |
+| -------------------- | -------------------------------------------------------- |
+| `defineLoopTask`     | Essais bornés avec feedback de vérification.             |
+| `defineTask`         | Code applicatif renvoyant une valeur.                    |
+| `defineAgentTask`    | Requête d’agent dans une sandbox existante.              |
+| `defineCommandTask`  | Commande dans une sandbox existante.                     |
+| `defineIsolatedTask` | Requête d’agent avec son propre cycle de vie de sandbox. |
+| `defineQueuedTask`   | Travail délégué à un handler enregistré en arrière-plan. |
 
 Un workflow ne crée pas de transaction Git commune. Chaque tâche doit respecter la propriété des ressources et l’annulation. Utilisez l’[ordonnancement](../task-scheduling/) pour contrôler concurrence et reprises.
 
-API : [task](../../reference/task/) · [workflow](../../reference/workflow/) · [TaskContext](../../reference/taskcontext/).
+API : [defineTask](../../reference/definetask/) · [defineWorkflow](../../reference/defineworkflow/) · [TaskContext](../../reference/taskcontext/).
 
 Utilisez les [boucles de vérification](../verification-loops/) lorsqu’un contrôle échoué doit guider un nouvel essai. Ajoutez un [cache de tâches](../task-cache/) pour réutiliser un résultat JSON lorsque les entrées de la tâche n’ont pas changé.

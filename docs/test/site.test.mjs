@@ -121,9 +121,11 @@ test("retired guide URLs resolve directly to new topics", async ({ page }) => {
     await expect(page).toHaveURL(new RegExp(`/${locale}guide/introduction/$`));
     await page.goto(`${locale}reference/customharness/`);
     await expect(page).toHaveURL(
-      new RegExp(`/${locale}reference/function-harness/$`),
+      new RegExp(`/${locale}reference/createharness/$`),
     );
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("harness");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+      "createHarness",
+    );
   }
 });
 
@@ -187,16 +189,16 @@ test("reference symbol icons retain accessible names in both languages", async (
   for (const locale of ["", "fr/"]) {
     const masks = new Map();
     for (const [name, kind, route] of [
-      ["task", "function", "task"],
+      ["defineTask", "function", "task"],
       ["Task", "interface", "type-task"],
       ["TaskOptions", "type", "taskoptions"],
       ["WorkflowFailure", "class", "workflowfailure"],
       ["agentVersions", "constant", "agentversions"],
-      ["dockerSandboxProvider", "function", "docker"],
-      ["claudeHarness", "function", "claude"],
-      ["codexHarness", "function", "codex"],
-      ["antigravityHarness", "function", "gemini"],
-      ["copilotHarness", "function", "copilotharness"],
+      ["createDockerSandboxProvider", "function", "docker"],
+      ["createClaudeHarness", "function", "claude"],
+      ["createCodexHarness", "function", "codex"],
+      ["createAntigravityHarness", "function", "gemini"],
+      ["createCopilotHarness", "function", "copilotharness"],
       ["QueueHandler", "type", "queuehandler"],
     ]) {
       await page.goto(`${locale}reference/${route}/`);
@@ -233,7 +235,7 @@ for (const [locale, label, overview] of [
     await page.goto(`${locale}reference/firecracker/`);
     const firecracker = page
       .getByRole("link", {
-        name: `firecrackerSandboxProvider — ${label}`,
+        name: `createFirecrackerSandboxProvider — ${label}`,
         exact: true,
       })
       .filter({ visible: true });
@@ -249,7 +251,10 @@ for (const [locale, label, overview] of [
     expect(overviewIcon.mask).toMatch(/^url\(/);
     expect(overviewIcon.width).toBeGreaterThan(0);
     await expect(page.locator("a[data-reference-overview]")).toHaveCount(25);
-    for (const name of ["firecrackerSandboxProvider", "FirecrackerOptions"]) {
+    for (const name of [
+      "createFirecrackerSandboxProvider",
+      "FirecrackerOptions",
+    ]) {
       const link = family.getByRole("link", {
         name: `${name} — ${label}`,
         exact: true,
@@ -327,19 +332,19 @@ for (const locale of ["", "fr/"]) {
     await page.goto(`${locale}reference/openaicompatible/`);
     const factory = page
       .getByRole("link", {
-        name: "openaiModelProvider",
+        name: "createOpenAIModelProvider",
         exact: true,
       })
       .filter({ visible: true });
     const family = factory.locator("xpath=ancestor::details[1]");
     await expect(family.locator("summary").first()).toContainText("Models");
     for (const name of [
-      "openaiModelProvider",
+      "createOpenAIModelProvider",
       "OpenAIModelProviderOptions",
       "ModelProvider",
       "ModelRequest",
       "ModelResult",
-      "anthropicModelProvider",
+      "createAnthropicModelProvider",
       "AnthropicModelProviderOptions",
     ]) {
       const link = family.getByRole("link", { name, exact: true });
@@ -453,7 +458,7 @@ for (const [locale, overview] of [
   }) => {
     await page.goto(`${locale}reference/codexharness/`);
     const preset = page
-      .getByRole("link", { name: "codexHarness", exact: true })
+      .getByRole("link", { name: "createCodexHarness", exact: true })
       .filter({ visible: true });
     const family = preset.locator("xpath=ancestor::details[1]");
     await expect(family.locator("summary").first()).toHaveText("Harness");
@@ -463,11 +468,11 @@ for (const [locale, overview] of [
     );
     await expect(section.locator("h2")).toHaveText("Agents & models");
     for (const name of [
-      "claudeHarness",
-      "codexHarness",
-      "antigravityHarness",
-      "copilotHarness",
-      "kimiHarness",
+      "createClaudeHarness",
+      "createCodexHarness",
+      "createAntigravityHarness",
+      "createCopilotHarness",
+      "createKimiHarness",
       "AgentAuthentication",
       "AccountCredential",
       "UsageCredential",
@@ -477,7 +482,7 @@ for (const [locale, overview] of [
       );
     }
     for (const name of [
-      "harness",
+      "createHarness",
       "defineHarnessTool",
       "HarnessToolContext",
       "defineHarnessSubagent",

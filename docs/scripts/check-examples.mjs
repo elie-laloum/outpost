@@ -91,6 +91,37 @@ try {
       getNewLine: () => "\n",
     }),
   );
+  const checker = program.getTypeChecker();
+  const deprecatedImports = [];
+  for (const file of roots)
+    for (const statement of program.getSourceFile(file).statements) {
+      const bindings = statement.importClause?.namedBindings;
+      if (
+        !ts.isImportDeclaration(statement) ||
+        !statement.moduleSpecifier.text.startsWith("@elie-laloum/outpost") ||
+        !bindings ||
+        !ts.isNamedImports(bindings)
+      )
+        continue;
+      for (const element of bindings.elements) {
+        const symbol = checker.getSymbolAtLocation(element.name);
+        const target =
+          symbol && symbol.flags & ts.SymbolFlags.Alias
+            ? checker.getAliasedSymbol(symbol)
+            : symbol;
+        if (
+          target?.getJsDocTags(checker).some((tag) => tag.name === "deprecated")
+        )
+          deprecatedImports.push(
+            `${file}: ${(element.propertyName ?? element.name).text}`,
+          );
+      }
+    }
+  assert.deepEqual(
+    deprecatedImports,
+    [],
+    "Guide snippets must use current names, not deprecated aliases",
+  );
   assert.ok(runnable.length > 0, "No offline snippets selected");
   for (const { file, name } of runnable) {
     const cwd = await mkdtemp(resolve(workspace, "run-"));
