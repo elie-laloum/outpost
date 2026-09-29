@@ -96,7 +96,7 @@ Ces orientations s’appuient sur les [workflows durables](../../guide/job-queue
 
 La campagne de septembre 2026 a réussi 14 scénarios réels OpenAI sur Responses et Chat Completions, dont édition par un enfant, tests, commits et continuation dans Docker, cache hits, annulation, limites et flux incomplets. Sept scénarios Anthropic ont également réussi le 28 septembre avec `claude-haiku-4-5-20251001`, sans raisonnement activé, sur les mêmes contrats dont la délégation dans Docker. Les scénarios à modèle simulé ont aussi réussi sur les vrais backends Docker, Vercel et Daytona. Ces résultats établissent les contrats testés, pas la qualité du code sur tout dépôt ou service.
 
-Podman est absent localement ; son scénario déterministe de délégation fait désormais partie de la matrice CI conteneurs. Le terminal interactif et la reprise automatique d’un enfant en cours restent indisponibles. Voir la [boucle de modèle](../../guide/harness/) et le [bilan de validation](../../guide/model-providers/#validation).
+Podman est absent localement ; son scénario déterministe de délégation fait désormais partie de la matrice CI conteneurs. Le terminal interactif et la reprise automatique d’un enfant en cours restent indisponibles. Voir la [boucle de modèle](../../guide/harness/) et le [bilan de validation](../../guide/model-providers/).
 
 ## Évolution des priorités
 

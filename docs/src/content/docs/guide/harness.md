@@ -1,47 +1,187 @@
 ---
 title: "Built-in harness"
-description: "Let Outpost drive model requests and tools."
+description: "Let Outpost run the agent loop itself: it calls a model API, checks every tool call and runs your tools in the sandbox."
 ---
 
-The built-in engine and its public contracts are stable in 7.0.0.
+## When to choose it
 
-`createHarness()` configures Outpost’s own loop: request a model response, validate tool calls, execute tools in the borrowed sandbox, then request the next step.
+A CLI agent brings its own loop and tools. The built-in harness is Outpost’s loop: you choose the model API, the tools and the rules every call must pass.
+
+|                 | CLI agent                                   | Built-in harness                                      |
+| --------------- | ------------------------------------------- | ----------------------------------------------------- |
+| Loop runs       | In the sandbox, as the CLI process          | In your Node.js process                               |
+| Tools           | The CLI’s own                               | Only those you pass to `tools`                        |
+| Model access    | Account login or API key                    | An API key on a [model provider](../model-providers/) |
+| Sandbox image   | Contains the CLI, or installs it at startup | No agent CLI to install                               |
+| Control         | CLI settings                                | Permissions, hooks and limits per call, and subagents |
+| Usage reporting | Depends on the CLI                          | After each model response                             |
+
+[Choose an agent](../choose-an-agent/) compares every capability.
+
+## Run a task
+
+`createHarness()` configures the loop; `createAgent()` pairs it with a model. The agent then goes to `dispatch()` like any other.
+
+```ts title="harness-review.mts"
+import {
+  createAgent,
+  createAnthropicModelProvider,
+  createHarness,
+  createHarnessFileTools,
+  createHarnessSearchTools,
+  dispatch,
+} from "@elie-laloum/outpost";
+import { repository, sandboxProvider } from "./outpost.config.mts";
+
+const reviewer = createAgent({
+  model: { name: "claude-sonnet-5-5", maxOutputTokens: 16_000 },
+  harness: createHarness({
+    modelProvider: createAnthropicModelProvider({
+      apiKey: process.env.ANTHROPIC_API_KEY ?? "",
+    }),
+    instructions: "Inspect the repository and answer with evidence.",
+    tools: [createHarnessFileTools(), createHarnessSearchTools()],
+  }),
+});
+
+const result = await dispatch({
+  repository,
+  sandboxProvider,
+  agent: reviewer,
+  brief: { text: "List the exported functions that no test calls." },
+});
+console.log(result.text);
+console.log(result.usage);
+```
+
+Set `ANTHROPIC_API_KEY`, then run `node harness-review.mts`. `result.text` holds the model’s final answer. These tools only read files, so the agent cannot edit the repository.
+
+## The loop at a glance
+
+<!-- flow -->
+
+1. **Start the turn**: Once per brief, pass or repair.
+   - **Build the system prompt**: Resolve `instructions` and the skill catalog.
+     - host
+   - **Start MCP servers**: Declared `mcpServers` start and add their tools.
+     - sandbox
+2. **Run a step**: Repeated until the model answers without tool calls.
+   - **Request the model**: Send the history, the system prompt and the tool list.
+     - host
+   - **Check the calls**: Validate each input against its schema, then apply permissions and `before-tool` hooks.
+     - host
+   - **Run the tools**: Consecutive read-only calls run in parallel, the others one at a time.
+     - sandbox
+   - **Return the results**: Results and tool errors join the history for the next step.
+     - host
+3. **Finish**: The model answers.
+   - **Return the answer**: The final text becomes `result.text`, unless a `stop` hook or a steering message sends the model back to work.
+     - host
+
+Outpost checks the limits before every step and after each model response. The first one reached ends the turn with an [`OutpostError`](../error-handling/).
+
+## Bound a turn
+
+`limits` bounds the loop; `toolExecution` sets how tool calls run.
+
+```ts
+import {
+  createAnthropicModelProvider,
+  createHarness,
+  createHarnessShellTools,
+} from "@elie-laloum/outpost";
+
+const harness = createHarness({
+  modelProvider: createAnthropicModelProvider({
+    apiKey: process.env.ANTHROPIC_API_KEY ?? "",
+  }),
+  tools: [createHarnessShellTools()],
+  limits: { maxSteps: 30, maxToolCalls: 60, usage: { output: 20_000 } },
+  toolExecution: { deadlineMs: 60_000, onError: "fail" },
+});
+```
+
+| Option                      | Bounds                                                           | Default             | When reached                                 |
+| --------------------------- | ---------------------------------------------------------------- | ------------------- | -------------------------------------------- |
+| `limits.maxSteps`           | Model requests in one turn                                       | 100                 | Fails with code `limit`                      |
+| `limits.maxToolCalls`       | Tool calls in one turn                                           | None                | Fails with code `limit`                      |
+| `limits.usage`              | Tokens in one turn (`input`, `cached`, `cacheCreated`, `output`) | None                | Fails with code `limit`                      |
+| `limits.maxDelegationDepth` | Nested [subagent](../subagents/) levels                          | 3                   | The delegating call fails like a tool error  |
+| `toolExecution.concurrency` | Read-only tool calls running at once                             | 4                   | Further calls wait                           |
+| `toolExecution.deadlineMs`  | One tool call                                                    | 5 minutes           | The call fails with code `timeout`           |
+| `toolExecution.onError`     | What a failed tool call does                                     | `"return-to-model"` | `"fail"` ends the turn with the tool’s error |
+
+With the default `onError`, a failed or expired call goes back to the model as an error result, and the loop continues. `usage` counts subagents and context summaries, and requires a model provider that reports usage completely.
+
+### Dispatch deadlines
+
+`deadlineMs` and `idleMs` on `dispatch()` also bound each harness turn: its total duration, and the silence between loop events. A running tool call pauses the idle timer; `toolExecution.deadlineMs` bounds it instead. See [Limits and cancellation](../limits-and-cancellation/).
+
+## Observe the loop
+
+`observe` receives the loop’s events: `step`, `tool`, `tool-result`, `tool-output`, `tool-denied`, `hook`, `subagent` and `model-*`. [Follow progress](../progress/) lists each kind.
 
 ```ts
 import {
   createAgent,
+  createAnthropicModelProvider,
   createHarness,
   createHarnessFileTools,
-  createOpenAIModelProvider,
+  createObservationHub,
+  dispatch,
 } from "@elie-laloum/outpost";
+import { repository, sandboxProvider } from "./outpost.config.mts";
 
-const coder = createAgent({
-  model: process.env.MODEL_NAME ?? "",
+const agent = createAgent({
+  model: { name: "claude-sonnet-5-5", maxOutputTokens: 16_000 },
   harness: createHarness({
-    modelProvider: createOpenAIModelProvider({
-      baseUrl: "https://api.openai.com/v1",
-      api: "responses",
-      apiKey: process.env.OPENAI_API_KEY ?? "",
+    modelProvider: createAnthropicModelProvider({
+      apiKey: process.env.ANTHROPIC_API_KEY ?? "",
     }),
-    instructions: "Inspect the repository and answer with evidence.",
     tools: [createHarnessFileTools()],
-    limits: { maxSteps: 12, maxToolCalls: 30 },
   }),
+});
+
+await dispatch({
+  repository,
+  sandboxProvider,
+  agent,
+  brief: { text: "Explain how the build is configured." },
+  observation: createObservationHub({ verbose: true }),
+  observe(event) {
+    if (event.kind === "tool") console.log(event.name, event.input);
+    if (event.kind === "model-request") console.dir(event.request);
+  },
 });
 ```
 
-Set `MODEL_NAME` to a model available on your service, then pass this agent to a dispatch with your repository and sandbox provider. The model provider does not allocate a sandbox or inherit a CLI account login.
+`tool-output` streams command output, correlated with its call by `callId`. Full `model-request` and `model-response` payloads exist only with a verbose [observation hub](../observability/). They hold the whole conversation, and the normal journal leaves them out.
 
-## Limits and errors
+## Go further
 
-`limits` bounds steps, tool calls and observed usage. Hitting a bound fails with code `limit`. `toolExecution` controls concurrency, per-call deadlines and whether tool errors return to the model or fail the turn. Tool callbacks execute in the Outpost process and must use the supplied sandbox for repository operations.
+<!-- features -->
 
-The loop supports [tool policies](../harness-permissions/), [context management](../harness-context/), [loadable skills](../harness-context/) and [MCP servers](../mcp-servers/). These settings configure the built-in loop, not Codex or Claude CLI internals.
+- [Model providers](../model-providers/): Connect an OpenAI-compatible or Anthropic API.
+  - `createOpenAIModelProvider()`
+  - `createAnthropicModelProvider()`
+- [Tools](../harness-tools/): Give the model files, search, edits, Git, a shell or your own tools.
+  - `defineHarnessTool()`
+  - `createHarnessShellTools()`
+- [Permissions and hooks](../harness-permissions/): Allow, deny or rewrite tool calls before they run.
+  - `defineHarnessPermissions()`
+  - `defineHarnessHook()`
+- [Subagents](../subagents/): Delegate part of a turn to a child agent in the same sandbox.
+  - `defineHarnessSubagent()`
+- [Context and skills](../harness-context/): Keep the history in bounds and load instructions on demand.
+  - `defineHarnessContextStrategy()`
+  - `defineHarnessSkill()`
+- [MCP servers](../mcp-servers/): Add the tools of Model Context Protocol servers.
+  - `mcpServers`
 
-API: [createHarness](../../reference/createharness/) · [HarnessOptions](../../reference/customharnessoptions/).
+## Limits
 
-## Observe the loop
+- Model access needs an API key, or a keyless local server. CLI account logins do not apply.
+- Tool code runs in your process with your permissions. Only what it does through `context.sandbox` runs in the sandbox.
+- Model requests leave from your process, so the sandbox’s [network restrictions](../network-restrictions/) do not apply to them.
 
-The [observation hub](../progress/) receives instruction/skill loading, hook decisions, tool output correlated by `callId`, readable reasoning and model errors. Providers may report reasoning and retry stream events; Outpost does not infer retries hidden inside an HTTP client or add retry behavior. Replay blocks can remain opaque even when no readable reasoning is available.
-
-Full `model-request` and `model-response` events require an explicitly verbose hub. Their payloads may contain private conversation content; they are excluded from the normal journal. `tool-result` keeps its bounded preview while `tool-output` exposes command output as it arrives.
+API: [createHarness](../../reference/createharness/) · [HarnessOptions](../../reference/customharnessoptions/) · [HarnessLimits](../../reference/harnesslimits/) · [HarnessToolExecution](../../reference/harnesstoolexecution/) · [createAgent](../../reference/createagent/) · [createObservationHub](../../reference/createobservationhub/).

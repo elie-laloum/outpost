@@ -6,7 +6,7 @@ sidebar:
   order: 0
 ---
 
-The `ModelProvider` contract and OpenAI and Anthropic adapters are stable in 7.0.0. See the [validation record](../../../guide/model-providers/#validation) for the tested models and configurations.
+The `ModelProvider` contract and OpenAI and Anthropic adapters are stable in 7.0.0. See the [validation record](../../../guide/model-providers/) for the tested models and configurations.
 
 A model provider supplies the request transport used by a custom harness. `createOpenAIModelProvider()` supports Chat Completions and Responses services; `createAnthropicModelProvider()` supports Anthropic Messages and optional system-prefix caching. Sandbox allocation is independent.
 

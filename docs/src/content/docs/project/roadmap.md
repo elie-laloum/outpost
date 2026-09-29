@@ -96,7 +96,7 @@ These directions build on [durable workflows](../../guide/job-queues/), [the new
 
 The September 2026 campaign passed 14 real OpenAI scenarios across Responses and Chat Completions, including child editing, tests, commits and continuation in Docker, cache hits, cancellation, limits and incomplete streams. Seven Anthropic scenarios also passed on September 28 with `claude-haiku-4-5-20251001`, thinking disabled, covering the same contracts including Docker delegation. Scripted model scenarios also passed on real Docker, Vercel and Daytona sandboxes. These results establish the tested contracts, not coding quality across arbitrary repositories or services.
 
-Podman is absent locally; its deterministic delegation scenario is now part of the container CI matrix. Interactive attachment and automatic in-flight child resume remain unsupported. See the [model loop](../../guide/harness/) and [validation record](../../guide/model-providers/#validation).
+Podman is absent locally; its deterministic delegation scenario is now part of the container CI matrix. Interactive attachment and automatic in-flight child resume remain unsupported. See the [model loop](../../guide/harness/) and [validation record](../../guide/model-providers/).
 
 ## How priorities change
 

@@ -1,48 +1,120 @@
 ---
 title: "Fournisseurs de modèles"
-description: "Choisir un protocole HTTP pour la boucle intégrée."
+description: "Connecter le harness intégré à une API compatible OpenAI ou Anthropic. Les requêtes partent de votre processus, avec votre clé."
 ---
 
-Le contrat `ModelProvider`, `createOpenAIModelProvider()` et `createAnthropicModelProvider()` sont stables en 7.0.0. Les requêtes modèles sont exécutées dans le processus Outpost.
+## Connecter un modèle
 
-Choisissez le fournisseur selon le protocole, puis passez-le à `createHarness({ modelProvider })`. Les identifiants sont explicites et restent dans le client côté hôte.
+Un fournisseur de modèles envoie les requêtes du [harness intégré](../harness/) à une API de modèle. Passez-le à `createHarness()`, puis utilisez l’agent comme n’importe quel autre.
 
 ```ts
 import {
+  createAgent,
   createAnthropicModelProvider,
-  createOpenAIModelProvider,
+  createHarness,
 } from "@elie-laloum/outpost";
 
-const messages = createAnthropicModelProvider({
-  apiKey: process.env.ANTHROPIC_API_KEY ?? "",
+export const agent = createAgent({
+  model: { name: "claude-sonnet-5-5", maxOutputTokens: 16_000 },
+  harness: createHarness({
+    modelProvider: createAnthropicModelProvider({
+      apiKey: process.env.ANTHROPIC_API_KEY ?? "",
+    }),
+  }),
 });
-const compatible = createOpenAIModelProvider({
+```
+
+Anthropic exige `maxOutputTokens`, d’où la forme objet de `model`. Chaque requête au modèle est un appel HTTP émis par votre processus Node.js ; les outils s’exécutent toujours dans la sandbox allouée par le dispatch.
+
+## Choisir un protocole
+
+| Factory                        | `api`                         | Chemin ajouté à `baseUrl` | Pour                                                                                   |
+| ------------------------------ | ----------------------------- | ------------------------- | -------------------------------------------------------------------------------------- |
+| `createOpenAIModelProvider`    | `"chat-completions"` (défaut) | `/chat/completions`       | OpenAI et les serveurs qui exposent Chat Completions.                                  |
+| `createOpenAIModelProvider`    | `"responses"`                 | `/responses`              | L’API Responses d’OpenAI.                                                              |
+| `createAnthropicModelProvider` | aucun                         | `/messages`               | L’API Messages d’Anthropic ; `baseUrl` vaut `https://api.anthropic.com/v1` par défaut. |
+
+`baseUrl` est obligatoire pour OpenAI et inclut le préfixe de version. Le protocole choisi est le seul utilisé : une erreur ne bascule jamais vers un autre.
+
+```ts
+import { createOpenAIModelProvider } from "@elie-laloum/outpost";
+
+const openai = createOpenAIModelProvider({
+  baseUrl: "https://api.openai.com/v1",
+  api: "responses",
+  apiKey: process.env.OPENAI_API_KEY ?? "",
+});
+```
+
+`createCodexHarness({ modelProvider })` est un réglage distinct : il dirige la CLI Codex, dans la sandbox, vers un service compatible Responses ([Codex](../codex/)).
+
+## Utiliser un endpoint local
+
+Indiquez `apiKey: false` pour un serveur sans authentification. L’adresse est résolue depuis votre hôte, pas depuis la sandbox.
+
+```ts
+import { createOpenAIModelProvider } from "@elie-laloum/outpost";
+
+const local = createOpenAIModelProvider({
   baseUrl: "http://127.0.0.1:8080/v1",
-  api: "chat-completions",
   apiKey: false,
 });
 ```
 
-## Sélection du protocole
+## Garder la clé sur l’hôte
 
-`createOpenAIModelProvider()` accepte `chat-completions` (par défaut) ou `responses`. Il ajoute l’endpoint choisi à `baseUrl` ; aucun repli ne change de protocole après une erreur. `createAnthropicModelProvider()` utilise l’API Messages.
+Vous passez la clé vous-même : Outpost ne lit ni variable d’environnement ni session de compte pour les fournisseurs de modèles. La clé reste dans votre processus et n’atteint jamais la sandbox. [Authentification](../authentication/) compare ce fonctionnement avec celui des agents CLI.
 
-Ce réglage est distinct de `createCodexHarness({ modelProvider })`, qui configure la CLI Codex et exige la compatibilité Responses.
+## Régler le modèle et son raisonnement
 
-## Bornes et streaming
+Le `model` de l’agent est un nom ou `{ name, reasoning, maxOutputTokens }`. `createAgent()` rejette les réglages que le fournisseur ne prend pas en charge.
 
-`timeoutMs` vaut 120 000 ms par défaut. En streaming, il borne le silence entre fragments. `maxResponseBytes` vaut 8 Mio après décompression. Les réponses trop grandes ou mal formées échouent à la frontière du protocole.
+| Réglage           | Protocoles OpenAI                                                          | Anthropic                                                                                                            |
+| ----------------- | -------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `maxOutputTokens` | Facultatif.                                                                | Obligatoire.                                                                                                         |
+| `reasoning`       | Envoyé comme effort de raisonnement ; le service décide des niveaux admis. | `"none"` désactive la réflexion ; de `"low"` à `"max"`, la réflexion adaptative suit cet effort. `"minimal"` échoue. |
 
-Les modèles sont des noms ou des objets avec les réglages de raisonnement et de sortie pris en charge. Un service peut rejeter un nom même si le contrat local accepte sa forme. Raisonnement rejouable et messages d’appels d’outils restent des données de protocole gérées par le fournisseur.
+Le service vérifie tout de même le nom du modèle et les niveaux à chaque requête.
 
-Le `cache` du harness demande la mise en cache du préfixe. `cacheSystem` d’Anthropic ajoute explicitement un point de cache système ; les succès du cache ne sont pas garantis.
+## Diffuser le texte au fil de l’eau
 
-API : [createOpenAIModelProvider](../../reference/createopenaimodelprovider/) · [createAnthropicModelProvider](../../reference/createanthropicmodelprovider/) · [ModelProvider](../../reference/modelprovider/).
+Les deux fournisseurs diffusent en streaming. Le harness émet des événements `text-delta` pendant que le modèle écrit, et un événement `reasoning` quand une réponse contient un raisonnement lisible. Affichez-les depuis `observe` avec `if (event.kind === "text-delta") process.stdout.write(event.text)` ([Suivre la progression](../progress/)).
 
-## Validation
+## Borner chaque requête
 
-La validation locale de septembre 2026 couvre OpenAI Responses et Chat Completions avec `gpt-5.6-luna`, la délégation et l’édition dans Docker, puis cache, limites, interruption et flux incomplet. Responses utilise le raisonnement `low` ; Chat Completions utilise `none`, car le service a refusé les outils avec `low`. Le 28 septembre, sept scénarios Anthropic authentifiés ont réussi avec `claude-haiku-4-5-20251001`, sans raisonnement activé : édition/tests/commit par un enfant et continuation du parent dans Docker, cache réel, annulation, limites de sortie et d’étapes, budgets de tokens et rejet d’un flux réel interrompu artificiellement. Cela satisfait le prérequis de validation de la délégation pour l’adaptateur ; les autres modèles et configurations de raisonnement nécessitent leurs propres preuves réelles.
+| Option             | Défaut     | Ce qu’elle borne                                                                     |
+| ------------------ | ---------- | ------------------------------------------------------------------------------------ |
+| `timeoutMs`        | 120 000 ms | L’attente de la réponse. En streaming, le silence entre deux fragments.              |
+| `maxResponseBytes` | 8 Mio      | Le corps de la réponse après décompression. Au-delà, l’appel échoue avec `response`. |
 
-Dans le dépôt source, `node scripts/harness-live.mjs offline docker coding` exécute une fixture déterministe dans un vrai conteneur. Remplacez `docker` par `podman`, `vercel` ou `daytona` avec les prérequis correspondants. Pour une campagne payante, chargez vos identifiants puis utilisez `node scripts/harness-live.mjs responses docker coding --live`. Les protocoles `chat-completions` et `anthropic` acceptent les mêmes scénarios : `coding`, `cache`, `cancel`, `truncation`, `steps`, `usage`, `network`.
+Un dépassement échoue avec le code `timeout`. Le harness diffuse en streaming avec les deux fournisseurs : une longue réponse qui continue d’arriver n’expire donc jamais. Bornez le tour entier avec les [limites](../limits-and-cancellation/).
 
-Les rapports et le registre budgétaire sont écrits dans `temp/harness-stable-live`, ou dans `OUTPOST_HARNESS_REPORT_DIRECTORY`. Le plafond commun de réservations est de 5 $ ; chaque appel réserve une estimation conservatrice avant envoi. Les appels interrompus ne sont pas remboursés dans ce registre et l’estimation ne remplace pas la facture. Conservez ce dossier sur un stockage persistant et ne réinitialisez pas le budget pour contourner le plafond. Les frais de sandbox sont distincts. Cette campagne synthétique ne constitue pas un benchmark face aux CLI.
+## Mettre en cache le préfixe du prompt
+
+L’option `cache` du harness, active par défaut, demande au fournisseur de réutiliser le préfixe de la conversation d’une étape à l’autre.
+
+<!-- features -->
+
+- **Anthropic** : `cache` marque la requête pour la mise en cache ; `cacheSystem: true` ajoute un point de cache sur les instructions du harness, qui doivent alors exister.
+- **OpenAI** : Outpost n’envoie aucun champ de cache ; OpenAI met en cache les préfixes stables de son côté.
+- **Usage** : Les lectures du cache apparaissent dans `usage.cached`, et les écritures du cache Anthropic dans `usage.cacheCreated`.
+
+Un succès du cache n’est jamais garanti.
+
+## Réessayer après une limite de débit ou une panne
+
+Un fournisseur envoie chaque requête une seule fois. Quand le service répond HTTP 429 avec `Retry-After`, l’erreur conserve ce délai : une [nouvelle tentative de tâche](../concurrency-and-retries/) attend au moins cette durée, et une [pause de quota](../quota-pauses/) reprend à cette échéance.
+
+Les limites de débit échouent avec le code `quota` ; surcharges, erreurs 5xx et échecs de connexion sont marqués indisponibles pour les [agents de repli](../fallback-agents/). [Pauses de quota](../quota-pauses/) détaille ce qui compte comme un quota.
+
+## Connecter une autre API
+
+Implémentez [`ModelProvider`](../../reference/modelprovider/) : `request()` renvoie un résultat, `stream()` et `validate()` sont facultatifs.
+
+## Limites
+
+- Le raisonnement n’est rejoué qu’au même fournisseur, au même endpoint et au même modèle. En changer le retire de l’historique.
+- `baseUrl` ne peut contenir ni identifiants, ni requête, ni fragment. Les redirections sont refusées.
+- Les réponses Anthropic contenant autre chose que du texte, des appels d’outils et de la réflexion échouent avec `response`.
+
+API : [createOpenAIModelProvider](../../reference/createopenaimodelprovider/) · [createAnthropicModelProvider](../../reference/createanthropicmodelprovider/) · [OpenAIModelProviderOptions](../../reference/openaimodelprovideroptions/) · [AnthropicModelProviderOptions](../../reference/anthropicmodelprovideroptions/) · [ModelProvider](../../reference/modelprovider/) · [AgentModel](../../reference/agentmodel/).
