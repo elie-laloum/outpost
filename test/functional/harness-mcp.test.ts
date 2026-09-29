@@ -1,5 +1,8 @@
 import assert from "node:assert/strict";
+import { once } from "node:events";
 import { readFile } from "node:fs/promises";
+import { createServer } from "node:http";
+import type { AddressInfo } from "node:net";
 import { join } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
@@ -328,4 +331,150 @@ test("subagents start their own MCP servers on the borrowed sandbox", async (t) 
   );
   assert.deepEqual(results(childRequests[1]), ["fixture-secret"]);
   assert.deepEqual((await entries(log)).at(-1), { closed: true });
+});
+
+interface HttpRecord {
+  readonly method: string;
+  readonly headers: Record<string, string | string[] | undefined>;
+  readonly body?: { readonly method?: string; readonly id?: unknown };
+}
+
+async function mcpHttpServer(t: import("node:test").TestContext) {
+  const records: HttpRecord[] = [];
+  const server = createServer(async (request, response) => {
+    let text = "";
+    for await (const chunk of request) text += chunk;
+    const body = text ? JSON.parse(text) : undefined;
+    records.push({ method: request.method!, headers: request.headers, body });
+    if (request.headers.authorization !== "Bearer http-secret") {
+      response.writeHead(401).end("denied");
+      return;
+    }
+    if (request.method === "DELETE" || body.id === undefined) {
+      response.writeHead(request.method === "DELETE" ? 200 : 202).end();
+      return;
+    }
+    const result = (value: unknown) => ({
+      jsonrpc: "2.0",
+      id: body.id,
+      result: value,
+    });
+    const sse = (...messages: unknown[]) => {
+      response.writeHead(200, { "content-type": "text/event-stream" });
+      for (const message of messages) {
+        const [head, ...rest] = JSON.stringify(message).split(',"');
+        response.write(
+          `event: message\r\ndata: ${head}${rest.map((part) => `\r\ndata: ,"${part}`).join("")}\r\n\r\n`,
+        );
+      }
+      response.end();
+    };
+    if (body.method === "initialize") {
+      response.writeHead(200, {
+        "content-type": "application/json",
+        "mcp-session-id": "session-1",
+      });
+      response.end(
+        JSON.stringify(
+          result({
+            protocolVersion: body.params.protocolVersion,
+            capabilities: { tools: {} },
+            serverInfo: { name: "http-fixture", version: "1" },
+          }),
+        ),
+      );
+    } else if (body.method === "tools/list")
+      sse(
+        result({
+          tools: [
+            {
+              name: "greet",
+              description: "Greet",
+              inputSchema: { type: "object" },
+            },
+            {
+              name: "down",
+              description: "Fails",
+              inputSchema: { type: "object" },
+            },
+          ],
+        }),
+      );
+    else if (body.params.name === "greet")
+      sse(
+        {
+          jsonrpc: "2.0",
+          method: "notifications/progress",
+          params: { progress: 1 },
+        },
+        result({
+          content: [
+            { type: "text", text: `hello ${body.params.arguments.who}` },
+          ],
+        }),
+      );
+    else response.writeHead(500).end("server exploded");
+  });
+  server.listen(0, "127.0.0.1");
+  await once(server, "listening");
+  t.after(() => server.close());
+  const { port } = server.address() as AddressInfo;
+  return { url: `http://127.0.0.1:${port}/mcp`, records };
+}
+
+test("HTTP MCP servers are bridged from inside the sandbox with session headers", async (t) => {
+  const root = await repository(t);
+  const http = await mcpHttpServer(t);
+  const requests: ModelRequest[] = [];
+  const docs: McpServers = {
+    docs: {
+      url: http.url,
+      headers: { "X-Team": "core" },
+      bearerTokenVariable: "DOCS_TOKEN",
+    },
+  };
+  await run(
+    root,
+    [
+      call(["mcp__docs__greet", { who: "outpost" }], ["mcp__docs__down", {}]),
+      () => done,
+    ],
+    { mcpServers: docs },
+    requests,
+    localSandboxProvider({ variables: { DOCS_TOKEN: "http-secret" } }),
+  );
+  assert.deepEqual(results(requests[1]), [
+    "hello outpost",
+    "error:MCP server docs returned error -32000: HTTP 500: server exploded",
+  ]);
+  const [initialize, ...later] = http.records;
+  assert.equal(initialize?.body?.method, "initialize");
+  assert.equal(initialize?.headers["mcp-session-id"], undefined);
+  assert.equal(initialize?.headers["x-team"], "core");
+  for (const record of later) {
+    assert.equal(record.headers["mcp-session-id"], "session-1");
+    assert.equal(record.headers["mcp-protocol-version"], "2025-06-18");
+  }
+  assert.equal(later[0]?.body?.method, "notifications/initialized");
+  assert.equal(later.at(-1)?.method, "DELETE");
+  await assert.rejects(
+    run(
+      root,
+      [],
+      { mcpServers: docs },
+      [],
+      localSandboxProvider({
+        variables: { DOCS_TOKEN: "wrong" },
+      }),
+    ),
+    { code: "response", message: /HTTP 401: denied/ },
+  );
+  await assert.rejects(
+    run(root, [], { mcpServers: docs }, [], localSandboxProvider()),
+    { code: "configuration", message: /Missing DOCS_TOKEN/ },
+  );
+  await assert.rejects(
+    run(root, [], { mcpServers: { docs: { url: "http://127.0.0.1:9/mcp" } } }),
+    { code: "response", message: /MCP HTTP request failed/ },
+  );
 });

@@ -51,23 +51,30 @@ function launch(
   name: string,
   server: McpServer,
 ): Pick<Command, "executable" | "arguments" | "variables"> {
-  invariant(
-    isMcpStdioServer(server),
-    `MCP server ${name} uses HTTP, which the built-in harness does not support yet`,
-  );
-  return {
-    executable: "node",
-    arguments: [
-      "-e",
-      mcpLauncher,
-      JSON.stringify({
+  const config = isMcpStdioServer(server)
+    ? {
         server: name,
         command: server.command,
         arguments: server.arguments ?? [],
         variables: server.variables ?? [],
-      }),
-    ],
-    ...(server.environment ? { variables: server.environment } : {}),
+      }
+    : {
+        server: name,
+        url: server.url,
+        headers: server.headers ?? {},
+        variables: server.bearerTokenVariable
+          ? [server.bearerTokenVariable]
+          : [],
+        ...(server.bearerTokenVariable
+          ? { bearerTokenVariable: server.bearerTokenVariable }
+          : {}),
+      };
+  return {
+    executable: "node",
+    arguments: ["-e", mcpLauncher, JSON.stringify(config)],
+    ...(isMcpStdioServer(server) && server.environment
+      ? { variables: server.environment }
+      : {}),
   };
 }
 
