@@ -175,7 +175,7 @@ export type AgentEventHandlers = {
 export interface AgentInput {
   readonly text?: string;
   readonly interactive?: boolean;
-  /** Keeps stdin open so the adapter's liveInput protocol can add user messages. */
+  /** Requests the liveInput protocol: stdin carries the encoded prompt and stays open. */
   readonly liveInput?: boolean;
   readonly continuation?: { readonly id: string; readonly fork?: boolean };
 }

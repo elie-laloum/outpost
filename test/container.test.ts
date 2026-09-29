@@ -16,12 +16,18 @@ import {
   codexHarness,
   claudeHarness,
   copilotHarness,
+  createSteering,
   kimiHarness,
 } from "../src/index.ts";
 import { dockerSandboxProvider } from "../src/providers/docker.ts";
 import { podmanSandboxProvider } from "../src/providers/podman.ts";
 import { repository } from "./helpers.ts";
-import type { AgentEvent } from "../src/index.ts";
+import type {
+  AgentEvent,
+  AgentInput,
+  AgentLiveInput,
+  SteeringDelivery,
+} from "../src/index.ts";
 import { conversations } from "../src/index.ts";
 import { executeProcess } from "../src/infrastructure/process.ts";
 import { repositoryTransport } from "../src/infrastructure/repository-transport.ts";
@@ -155,6 +161,96 @@ test(
         brief: { text: "Verify dispatch in a real container" },
       });
       assert.equal(output.completed, true);
+    } finally {
+      await box.close();
+    }
+  },
+);
+
+test(
+  "real container steers agents through live stdin and interrupted resumption",
+  { skip: !process.env.OUTPOST_CONTAINER_ENGINE },
+  async (t) => {
+    const root = await repository(t);
+    const sandboxProvider =
+      process.env.OUTPOST_CONTAINER_ENGINE === "podman"
+        ? podmanSandboxProvider
+        : dockerSandboxProvider;
+    const fixture = (
+      name: string,
+      script: (input: AgentInput) => string,
+      liveInput?: AgentLiveInput,
+    ) => ({
+      kind: "cli" as const,
+      harness: {
+        kind: "cli" as const,
+        bind() {
+          throw new Error("Already bound fixture");
+        },
+      },
+      name,
+      resumable: true,
+      ...(liveInput ? { liveInput } : {}),
+      request: (input: AgentInput) => ({
+        executable: "node",
+        arguments: ["-e", script(input)],
+        stdin: input.liveInput
+          ? (liveInput?.encode(input.text ?? "") ?? "")
+          : (input.text ?? ""),
+      }),
+      events: (line: string) => [JSON.parse(line) as AgentEvent],
+    });
+    const live = fixture(
+      "live-fixture",
+      () =>
+        "const rl=require('readline').createInterface({input:process.stdin});const seen=[];rl.on('line',l=>{seen.push(l);console.log(JSON.stringify({kind:'text',text:'ack:'+l}));if(seen.length===2){console.log(JSON.stringify({kind:'result',text:seen.join('|')+' <outpost>done</outpost>'}));console.log(JSON.stringify({kind:'finished'}))}});rl.on('close',()=>process.exit(0));",
+      {
+        encode: (text) => `${text}\n`,
+        consumed: (line) => line.includes("ack:"),
+      },
+    );
+    const interrupted = fixture("interrupt-fixture", (input) =>
+      input.continuation
+        ? `console.log(JSON.stringify({kind:'text',text:'resumed:'+${JSON.stringify(input.text ?? "")}+' <outpost>done</outpost>'}))`
+        : "console.log(JSON.stringify({kind:'conversation',id:'container-conv'}));setInterval(()=>{},1000);",
+    );
+    const box = await createSandbox({
+      repository: root,
+      sandboxProvider: sandboxProvider({
+        image: containerImage,
+        networks: "none",
+      }),
+      agent: live,
+      logging: false,
+    });
+    try {
+      const steering = createSteering();
+      let injected: Promise<SteeringDelivery> | undefined;
+      const first = await box.dispatch({
+        brief: { text: "first" },
+        steering,
+        observe(event) {
+          if (event.kind === "text" && !injected)
+            injected = steering.send("second");
+        },
+      });
+      assert.deepEqual(await injected, { mode: "injected" });
+      assert.equal(first.completed, true);
+      assert.match(first.text, /first\|second/);
+      let resumed: Promise<SteeringDelivery> | undefined;
+      const second = await box.dispatch({
+        agent: interrupted,
+        brief: { text: "work" },
+        steering,
+        observe(event) {
+          if (event.kind === "conversation" && !resumed)
+            resumed = steering.send("new direction");
+        },
+      });
+      assert.deepEqual(await resumed, { mode: "resumed" });
+      assert.equal(second.turns[0]!.interrupted, "steering");
+      assert.match(second.text, /resumed:new direction/);
+      assert.equal((await box.command({ executable: "true" })).status, 0);
     } finally {
       await box.close();
     }

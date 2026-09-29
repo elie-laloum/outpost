@@ -124,7 +124,7 @@ export function claudeEvents(line: string): AgentEvent[] {
   return decodeLine(line, {
     system,
     assistant,
-    user: assistant,
+    user: (event) => (event.isReplay === true ? [] : assistant(event)),
     stream_event: (event) => {
       const delta = asRecord(asRecord(event.event).delta);
       if (delta.type === "text_delta" && typeof delta.text === "string")

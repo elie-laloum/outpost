@@ -4,6 +4,7 @@ import { test } from "node:test";
 import { agent as composeAgent } from "../../src/domain/agent.ts";
 import {
   antigravityHarness,
+  claudeHarness,
   copilotHarness,
   kimiHarness,
 } from "../../src/index.ts";
@@ -467,4 +468,41 @@ test("native Kimi fork uses the borrowed executor and rejects failed or ambiguou
     }),
     /Invalid conversation/,
   );
+});
+
+test("Claude live input keeps stream-json stdin open and ignores replayed user messages", () => {
+  const agent = composeAgent({ harness: claudeHarness() });
+  assert.ok(agent.kind === "cli" && agent.liveInput);
+  const live = agent.request({ text: "Refactor", liveInput: true });
+  assert.deepEqual(live.arguments?.slice(0, 8), [
+    "--print",
+    "--verbose",
+    "--output-format",
+    "stream-json",
+    "--input-format",
+    "stream-json",
+    "--replay-user-messages",
+    "--dangerously-skip-permissions",
+  ]);
+  const message = {
+    type: "user",
+    message: { role: "user", content: [{ type: "text", text: "Refactor" }] },
+    parent_tool_use_id: null,
+  };
+  assert.equal(live.stdin, `${JSON.stringify(message)}\n`);
+  assert.equal(agent.liveInput.encode("Refactor"), live.stdin);
+  assert.equal(agent.request({ text: "Refactor" }).stdin, "Refactor");
+  assert.ok(
+    !agent.request({ text: "Refactor" }).arguments?.includes("--input-format"),
+  );
+  const replay = JSON.stringify({ ...message, isReplay: true });
+  assert.equal(agent.liveInput.consumed(replay), true);
+  assert.equal(agent.liveInput.consumed(JSON.stringify(message)), false);
+  assert.equal(agent.liveInput.consumed("not json"), false);
+  assert.deepEqual(agent.events(replay), [
+    { kind: "raw", value: JSON.parse(replay) },
+  ]);
+  assert.deepEqual(agent.events(JSON.stringify(message)), [
+    { kind: "text", text: "Refactor" },
+  ]);
 });

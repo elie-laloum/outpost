@@ -1,5 +1,6 @@
 import type { AgentInput } from "../../domain/agent.types.ts";
 import type { Command } from "../../domain/command.types.ts";
+import { claudeLiveInput } from "./claude-input.ts";
 import { validateContinuation } from "./continuation.ts";
 import type { Bound, ClaudeSettings } from "./settings.types.ts";
 
@@ -11,6 +12,8 @@ export function claudeRequest(
   const args: string[] = [];
   if (!input.interactive)
     args.push("--print", "--verbose", "--output-format", "stream-json");
+  if (!input.interactive && input.liveInput)
+    args.push("--input-format", "stream-json", "--replay-user-messages");
   if (!input.interactive && settings.partialMessages)
     args.push("--include-partial-messages");
   if (settings.model) args.push("--model", settings.model.name);
@@ -31,6 +34,10 @@ export function claudeRequest(
     arguments: args,
     ...(input.interactive
       ? { interactive: true }
-      : { stdin: input.text ?? "" }),
+      : {
+          stdin: input.liveInput
+            ? claudeLiveInput.encode(input.text ?? "")
+            : (input.text ?? ""),
+        }),
   };
 }

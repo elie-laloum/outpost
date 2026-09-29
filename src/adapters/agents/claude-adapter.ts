@@ -10,6 +10,7 @@ import { credentialPlanner } from "./authentication.ts";
 import { claudeCredentials } from "./claude-authentication.ts";
 import type { AgentAdapter, CliHarness } from "../../domain/agent.types.ts";
 import { claudeEvents, claudeTranscriptUsage } from "./claude-events.ts";
+import { claudeLiveInput } from "./claude-input.ts";
 import { claudeRequest } from "./claude-request.ts";
 import {
   CLAUDE_MAX_OUTPUT_VARIABLE,
@@ -46,6 +47,7 @@ function bindClaude(settings: Bound<ClaudeSettings>): AgentAdapter {
     }),
     request: (input) => claudeRequest(settings, input),
     events: claudeEvents,
+    liveInput: claudeLiveInput,
     quota: textMatcher(claudeQuotaPatterns),
     unavailable: textMatcher(
       claudeUnavailablePatterns,

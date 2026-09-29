@@ -1,14 +1,17 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { test } from "node:test";
+import { fileURLToPath } from "node:url";
 import {
   agent,
+  claudeHarness,
   createSandbox,
   createSteering,
   defineHarnessTool,
   dispatch,
   harness,
   OutpostError,
+  type AgentInput,
   type AgentObservation,
   type ModelProvider,
   type ModelRequest,
@@ -277,4 +280,120 @@ test("steering rejects messages that no turn could deliver and agents that canno
   } finally {
     await box.close();
   }
+});
+
+const claudeFixture = fileURLToPath(
+  new URL("../fixtures/claude-stream-input.ts", import.meta.url),
+);
+
+function streamingClaude(calls: (readonly string[])[]) {
+  const native = agent({
+    harness: claudeHarness({ saveConversations: false }),
+  });
+  assert.equal(native.kind, "cli");
+  return {
+    ...native,
+    request(input: AgentInput) {
+      const command = native.request(input);
+      calls.push(command.arguments ?? []);
+      return {
+        ...command,
+        executable: process.execPath,
+        arguments: [claudeFixture, ...(command.arguments ?? [])],
+      };
+    },
+  };
+}
+
+test("Claude receives steering on live stdin during a tool call and exits after its result", async (t) => {
+  const root = await repository(t);
+  const steering = createSteering();
+  const calls: (readonly string[])[] = [];
+  const events: AgentObservation[] = [];
+  let delivery: Promise<SteeringDelivery> | undefined;
+  const started = Date.now();
+  const result = await dispatch({
+    repository: root,
+    sandboxProvider: localSandboxProvider(),
+    agent: streamingClaude(calls),
+    brief: { text: "Please use a tool" },
+    steering,
+    settleMs: 30_000,
+    observe(event) {
+      events.push(event);
+      if (event.kind === "tool" && !delivery)
+        delivery = steering.send("Leave legacy/ untouched.");
+    },
+  });
+  assert.deepEqual(await delivery, { mode: "injected" });
+  assert.ok(Date.now() - started < 20_000, "stdin was closed after the result");
+  assert.equal(result.turns.length, 1);
+  assert.equal(result.completed, true);
+  assert.match(result.text, /injected: Leave legacy\/ untouched\./);
+  assert.equal(calls.length, 1);
+  assert.ok(calls[0]!.includes("--replay-user-messages"));
+  assert.equal(
+    calls[0]![calls[0]!.indexOf("--input-format") + 1],
+    "stream-json",
+  );
+  assert.ok(
+    !events.some(
+      (event) => event.kind === "text" && event.text === "Please use a tool",
+    ),
+    "replayed user messages are not agent text",
+  );
+});
+
+test("Claude processes steering queued during its final answer before stdin closes", async (t) => {
+  const root = await repository(t);
+  const steering = createSteering();
+  const calls: (readonly string[])[] = [];
+  let delivery: Promise<SteeringDelivery> | undefined;
+  const result = await dispatch({
+    repository: root,
+    sandboxProvider: localSandboxProvider(),
+    agent: streamingClaude(calls),
+    brief: { text: "Answer directly" },
+    steering,
+    settleMs: 30_000,
+    observe(event) {
+      if (event.kind === "text" && !delivery)
+        delivery = steering.send("Also update the changelog.");
+    },
+  });
+  assert.deepEqual(await delivery, { mode: "injected" });
+  assert.equal(calls.length, 1);
+  assert.equal(result.turns.length, 1);
+  assert.match(result.text, /handled: Answer directly/);
+  assert.match(result.text, /handled: Also update the changelog\./);
+});
+
+test("Claude steering after stdin closed resumes the native session", async (t) => {
+  const root = await repository(t);
+  const steering = createSteering();
+  const calls: (readonly string[])[] = [];
+  let delivery: Promise<SteeringDelivery> | undefined;
+  const result = await dispatch({
+    repository: root,
+    sandboxProvider: localSandboxProvider(),
+    agent: streamingClaude(calls),
+    brief: { text: "Answer directly" },
+    steering,
+    settleMs: 30_000,
+    observe(event) {
+      if (event.kind === "finished" && !delivery)
+        delivery = steering.send("Mention the tests.");
+    },
+  });
+  assert.deepEqual(await delivery, { mode: "resumed" });
+  assert.equal(calls.length, 2);
+  assert.deepEqual(
+    calls[1]!.slice(
+      calls[1]!.indexOf("--resume"),
+      calls[1]!.indexOf("--resume") + 2,
+    ),
+    ["--resume", "steer-session"],
+  );
+  assert.equal(result.turns.length, 2);
+  assert.match(result.turns[1]!.text, /handled: Mention the tests\./);
 });
