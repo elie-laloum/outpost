@@ -1,7 +1,6 @@
 export type {
   ConversationFormat,
   ConversationLocation,
-  StoredConversationFormat,
 } from "./conversations.types.ts";
 export {
   createHarnessConversations,

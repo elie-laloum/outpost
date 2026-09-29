@@ -11,7 +11,7 @@ import * as openTelemetry from "../../src/infrastructure/opentelemetry.ts";
 import * as s3 from "../../src/infrastructure/s3-transport.ts";
 import * as bullmq from "../../src/infrastructure/task-queue-bullmq.ts";
 
-const renamed = {
+const retired = {
   agent: "createAgent",
   fallbackAgent: "createFallbackAgent",
   replayAgent: "createReplayAgent",
@@ -53,15 +53,16 @@ const renamed = {
   loopTask: "defineLoopTask",
 } as const;
 
-test("deprecated facade names are the create* and define* functions", () => {
-  for (const [previous, current] of Object.entries(renamed)) {
+test("retired facade names are no longer exported", () => {
+  for (const [previous, current] of Object.entries(retired)) {
     assert.equal(typeof api[current], "function", current);
-    assert.equal(api[previous as keyof typeof api], api[current], previous);
+    assert.equal(previous in api, false, previous);
   }
-  assert.equal(api.response.text, api.defineTextResponse);
-  assert.equal(api.response.json, api.defineJsonResponse);
-  assert.equal(api.artifact.json, api.defineJsonArtifact);
-  assert.equal(api.artifact.binary, api.defineBinaryArtifact);
+  assert.equal("response" in api, false);
+  assert.equal("artifact" in api, false);
+  assert.equal("StoredConversationFormat" in api, false);
+  for (const name of ["native", "locate", "capture", "restore", "claudePath"])
+    assert.equal(name in api.conversations, false, name);
 });
 
 test("createReporter builds the console reporter and custom handlers moved", () => {
@@ -74,32 +75,24 @@ test("createReporter builds the console reporter and custom handlers moved", () 
   assert.equal(typeof api.createCustomReporter({}).flush, "function");
 });
 
-test("deprecated subpath names are the create* functions", () => {
-  assert.equal(
-    docker.dockerSandboxProvider,
-    docker.createDockerSandboxProvider,
-  );
-  assert.equal(
-    podman.podmanSandboxProvider,
-    podman.createPodmanSandboxProvider,
-  );
-  assert.equal(local.localSandboxProvider, local.createLocalSandboxProvider);
-  assert.equal(
-    vercel.vercelSandboxProvider,
-    vercel.createVercelSandboxProvider,
-  );
-  assert.equal(
-    daytona.daytonaSandboxProvider,
-    daytona.createDaytonaSandboxProvider,
-  );
-  assert.equal(
-    firecracker.firecrackerSandboxProvider,
-    firecracker.createFirecrackerSandboxProvider,
-  );
-  assert.equal(
-    openTelemetry.openTelemetry,
-    openTelemetry.createOpenTelemetryObserver,
-  );
-  assert.equal(s3.s3Transport, s3.createS3Transport);
-  assert.equal(bullmq.bullmqTaskQueue, bullmq.createBullMQTaskQueue);
+test("retired subpath names are no longer exported", () => {
+  const modules = [
+    [docker, "dockerSandboxProvider", "createDockerSandboxProvider"],
+    [podman, "podmanSandboxProvider", "createPodmanSandboxProvider"],
+    [local, "localSandboxProvider", "createLocalSandboxProvider"],
+    [vercel, "vercelSandboxProvider", "createVercelSandboxProvider"],
+    [daytona, "daytonaSandboxProvider", "createDaytonaSandboxProvider"],
+    [
+      firecracker,
+      "firecrackerSandboxProvider",
+      "createFirecrackerSandboxProvider",
+    ],
+    [openTelemetry, "openTelemetry", "createOpenTelemetryObserver"],
+    [s3, "s3Transport", "createS3Transport"],
+    [bullmq, "bullmqTaskQueue", "createBullMQTaskQueue"],
+  ] as const;
+  for (const [exports, previous, current] of modules) {
+    assert.equal(typeof exports[current as keyof typeof exports], "function");
+    assert.equal(previous in exports, false, previous);
+  }
 });

@@ -9,6 +9,3 @@ export const createDockerSandboxProvider = (options: ContainerOptions = {}) =>
 export type { DependencyCache } from "./container-cache.types.ts";
 
 export type { EgressPolicy } from "../domain/egress.types.ts";
-
-/** @deprecated Use {@link createDockerSandboxProvider}. */
-export const dockerSandboxProvider = createDockerSandboxProvider;

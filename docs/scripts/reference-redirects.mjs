@@ -194,4 +194,8 @@ export const referenceRedirects = {
   "/fr/reference/support-remotepath/": "/fr/reference/nativeconversationstore/",
   "/reference/support-captureoptions/": "/reference/conversationcontext/",
   "/fr/reference/support-captureoptions/": "/fr/reference/conversationcontext/",
+  "/reference/support-nativeconversations/":
+    "/reference/nativeconversationstore/",
+  "/fr/reference/support-nativeconversations/":
+    "/fr/reference/nativeconversationstore/",
 };

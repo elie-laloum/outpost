@@ -216,6 +216,3 @@ export function createOpenTelemetryObserver(
   };
   return observer;
 }
-
-/** @deprecated Use {@link createOpenTelemetryObserver}. */
-export const openTelemetry = createOpenTelemetryObserver;

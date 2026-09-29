@@ -220,6 +220,3 @@ export function createS3Transport(options: S3TransportOptions): Transport {
     },
   };
 }
-
-/** @deprecated Use {@link createS3Transport}. */
-export const s3Transport = createS3Transport;

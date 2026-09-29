@@ -2,10 +2,10 @@ import assert from "node:assert/strict";
 import { mkdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { test } from "node:test";
-import { createKimiHarness, conversations } from "../src/index.ts";
+import { createKimiHarness } from "../src/index.ts";
 import { createLocalSandboxProvider } from "../src/providers/local.ts";
 import { seedSession, sessionDirectory } from "./fixtures/native-session.ts";
-import { repository } from "./helpers.ts";
+import { conversationStore, repository } from "./helpers.ts";
 
 test(
   "installed Kimi forks a restored synthetic session without model access",
@@ -41,7 +41,7 @@ test(
     const source = withHome(sourceHome),
       target = withHome(targetHome);
     await seedSession("kimi", sourceHome, "/original/workspace", id);
-    const store = conversations.native("kimi");
+    const store = conversationStore("kimi");
     const record = await store.capture(id, {
       repository: root,
       sandbox: source,

@@ -8,6 +8,22 @@ import type {
   AgentInput,
 } from "../src/domain/agent.types.ts";
 import { git } from "../src/infrastructure/git.ts";
+import { createClaudeConversations } from "../src/adapters/agents/claude/claude-conversations.ts";
+import { createCodexConversations } from "../src/adapters/agents/codex/codex-conversations.ts";
+import { createCopilotConversations } from "../src/adapters/agents/copilot/copilot-conversations.ts";
+import { createKimiConversations } from "../src/adapters/agents/kimi/kimi-conversations.ts";
+
+const conversationStores = {
+  claude: createClaudeConversations,
+  codex: createCodexConversations,
+  copilot: createCopilotConversations,
+  kimi: createKimiConversations,
+} as const;
+
+/** Creates the built-in native conversation store for a CLI format name. */
+export function conversationStore(format: keyof typeof conversationStores) {
+  return conversationStores[format]();
+}
 
 export async function repository(t: TestContext): Promise<string> {
   const path = await mkdtemp(join(tmpdir(), "outpost-test-"));

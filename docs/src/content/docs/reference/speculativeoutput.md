@@ -15,7 +15,6 @@ import type { SpeculativeOutput } from "@elie-laloum/outpost";
 
 | Name                  | Type                              | Presence | Meaning                                                                                                                                  |
 | --------------------- | --------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `directory`           | `string`                          | Required | Host workspace directory used for this execution.                                                                                        |
 | `completion`          | `string \| undefined`             | Optional | Completion marker that matched the agent’s output, when one was found.                                                                   |
 | `text`                | `string`                          | Required | Final text reported by the agent execution.                                                                                              |
 | `conversation`        | `string \| undefined`             | Optional | Available native conversation identity.                                                                                                  |
@@ -24,6 +23,7 @@ import type { SpeculativeOutput } from "@elie-laloum/outpost";
 | `completed`           | `boolean`                         | Required | Whether the configured completion marker matched.                                                                                        |
 | `branch`              | `string`                          | Required | Name of the work branch used or observed during execution.                                                                               |
 | `observerErrors`      | `readonly unknown[] \| undefined` | Optional | Collected sink and journal failures, separate from execution success; a supplied shared hub also exposes its accumulated diagnostics.    |
+| `directory`           | `string`                          | Required | Host workspace directory used for this execution.                                                                                        |
 | `commits`             | `readonly Commit[]`               | Required | Collected Git commit identities and subjects.                                                                                            |
 | `transcript`          | `string \| undefined`             | Optional | Available host path to the captured transcript.                                                                                          |
 | `transcriptReference` | `TransportReference \| undefined` | Optional | Pinned remote index for the final captured conversation, when using transported conversation storage.                                    |

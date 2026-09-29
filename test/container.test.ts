@@ -24,14 +24,13 @@ import {
 import type { ModelRequest } from "../src/index.ts";
 import { createDockerSandboxProvider } from "../src/providers/docker.ts";
 import { createPodmanSandboxProvider } from "../src/providers/podman.ts";
-import { repository } from "./helpers.ts";
+import { conversationStore, repository } from "./helpers.ts";
 import type {
   AgentEvent,
   AgentInput,
   AgentLiveInput,
   SteeringDelivery,
 } from "../src/index.ts";
-import { conversations } from "../src/index.ts";
 import { executeProcess } from "../src/infrastructure/process.ts";
 import { repositoryTransport } from "../src/infrastructure/repository-transport.ts";
 import { git } from "../src/infrastructure/git.ts";
@@ -503,23 +502,21 @@ test(
           ).status,
           0,
         );
-        const captured = await conversations.capture(
-          format,
-          id,
-          root,
-          lease,
-          join(root, "staging"),
-          { home: join(root, "auth-home") },
-        );
+        const store = conversationStore(format);
+        const captured = await store.capture(id, {
+          repository: root,
+          sandbox: lease,
+          staging: join(root, "staging"),
+          home: join(root, "auth-home"),
+        });
         assert.match(await readFile(captured.file, "utf8"), /fixture/);
         await lease.invoke({ executable: "rm", arguments: [remote] });
-        await conversations.restore(captured, lease, join(root, "staging"));
-        const restored = conversations.destination(
-          format,
-          id,
-          lease,
-          captured.file,
-        );
+        await store.restore(captured, {
+          repository: lease.root,
+          sandbox: lease,
+          staging: join(root, "staging"),
+        });
+        const restored = store.destination(id, lease, captured.file);
         assert.match(
           (await lease.invoke({ executable: "cat", arguments: [restored] }))
             .stdout,

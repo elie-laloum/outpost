@@ -1356,22 +1356,6 @@
     "Claude Code version used by the bundled compatibility fixtures.",
     "Version de Claude Code utilisée par les fixtures de compatibilité intégrées."
   ],
-  "conversations.native": [
-    "Deprecated: return the built-in native store of a format name; use the agent’s create*Conversations() function.",
-    "Déprécié : renvoie le store natif intégré d’un nom de format ; utilisez la fonction create*Conversations() de l’agent."
-  ],
-  "conversations.locate": [
-    "Deprecated: locate a native transcript on the host by format, ID, repository and optional home. Use the native store’s locate() instead.",
-    "Déprécié : localise un transcript natif sur l’hôte par format, identifiant, dépôt et home optionnel. Utilisez plutôt la méthode locate() du store natif."
-  ],
-  "conversations.capture": [
-    "Deprecated: capture the selected conversation from a sandbox lease into host staging. Use the native store’s capture() instead.",
-    "Déprécié : capture la conversation choisie depuis un bail de sandbox vers le dossier de capture hôte. Utilisez plutôt la méthode capture() du store natif."
-  ],
-  "conversations.restore": [
-    "Deprecated: restore a located transcript into a sandbox and relocate its repository paths. Use the native store’s restore() instead.",
-    "Déprécié : restaure un transcript localisé dans une sandbox et adapte ses chemins de dépôt. Utilisez plutôt la méthode restore() du store natif."
-  ],
   "conversations.rewrite": [
     "Rewrite native transcript repository paths from source to destination without file I/O.",
     "Réécrit les chemins de dépôt d’un transcript natif de source vers destination sans entrée/sortie fichier."
@@ -1379,22 +1363,6 @@
   "conversations.projectKey": [
     "Encode a repository path as the Claude native project directory key.",
     "Encode un chemin de dépôt en clé de dossier de projet natif Claude."
-  ],
-  "conversations.claudePath": [
-    "Deprecated: compute the host Claude transcript file path for an ID and repository. Use createClaudeConversations().directory() instead.",
-    "Déprécié : calcule le chemin du transcript Claude hôte pour un identifiant et un dépôt. Utilisez plutôt createClaudeConversations().directory()."
-  ],
-  "conversations.directory": [
-    "Deprecated: compute the host transcript directory for the selected format and repository. Use the native store’s directory() instead.",
-    "Déprécié : calcule le dossier hôte des transcripts pour le format et le dépôt choisis. Utilisez plutôt la méthode directory() du store natif."
-  ],
-  "conversations.destination": [
-    "Deprecated: compute the transcript destination within the sandbox home; Copilot/Kimi return a bundle staging path, which requires restore to materialize native files. Use the native store’s destination() instead.",
-    "Déprécié : calcule la destination dans le home de sandbox ; Copilot/Kimi renvoient un chemin de staging du bundle, que restore doit matérialiser en fichiers natifs. Utilisez plutôt la méthode destination() du store natif."
-  ],
-  "nativeConversations.format": [
-    "Built-in native format name: claude, codex, copilot or kimi.",
-    "Nom de format natif intégré : claude, codex, copilot ou kimi."
   ],
   "locateConversation.format": [
     "Native transcript layout: claude, codex, copilot or kimi.",
@@ -4398,8 +4366,8 @@
     "Stratégie de contexte du harness, si elle est définie."
   ],
   "HarnessOptions.conversations": [
-    "Store for turn transcripts; defaults to createHarnessConversations(). Use createTransportConversations(\"harness\", …) for remote storage or false to disable continuation and repairs.",
-    "Store des transcriptions de passes ; createHarnessConversations() par défaut. Utilisez createTransportConversations(\"harness\", …) pour un stockage distant, ou false pour désactiver continuation et réparations."
+    "Store for turn transcripts; defaults to createHarnessConversations(). Use createTransportConversations(createHarnessConversations(), …) for remote storage or false to disable continuation and repairs.",
+    "Store des transcriptions de passes ; createHarnessConversations() par défaut. Utilisez createTransportConversations(createHarnessConversations(), …) pour un stockage distant, ou false pour désactiver continuation et réparations."
   ],
   "Harness.conversations": [
     "Configured conversation store, or false when recording is disabled; absent means the default store.",
@@ -4539,8 +4507,8 @@
     "Déclarations d’environnement explicites ; les valeurs sont des chaînes."
   ],
   "CopilotSettings.conversations": [
-    "Store that captures, locates and restores Copilot session bundles instead of the default native store, such as createTransportConversations(\"copilot\", …). A store that declares another format is rejected when the harness is created.",
-    "Store qui capture, localise et restaure les bundles de session Copilot au lieu du store natif par défaut, par exemple createTransportConversations(\"copilot\", …). Un store qui déclare un autre format est refusé dès la création du harness."
+    "Store that captures, locates and restores Copilot session bundles instead of the default native store, such as createTransportConversations(createCopilotConversations(), …). A store that declares another format is rejected when the harness is created.",
+    "Store qui capture, localise et restaure les bundles de session Copilot au lieu du store natif par défaut, par exemple createTransportConversations(createCopilotConversations(), …). Un store qui déclare un autre format est refusé dès la création du harness."
   ],
   "KimiSettings.authentication": [
     "Account authentication reads the OAuth file for the selected region and device_id from ~/.kimi-code or KIMI_CODE_HOME; account.file selects a dedicated profile directory. Usage forms accept KIMI_API_KEY or an explicit key/variable and require a model on createAgent(). Account key/variable forms are unsupported. Omission prepares no credentials.",
@@ -4551,8 +4519,8 @@
     "Déclarations d’environnement explicites ; les valeurs sont des chaînes."
   ],
   "KimiSettings.conversations": [
-    "Store that captures, locates and restores Kimi session bundles instead of the default native store, such as createTransportConversations(\"kimi\", …). A store that declares another format is rejected when the harness is created.",
-    "Store qui capture, localise et restaure les bundles de session Kimi au lieu du store natif par défaut, par exemple createTransportConversations(\"kimi\", …). Un store qui déclare un autre format est refusé dès la création du harness."
+    "Store that captures, locates and restores Kimi session bundles instead of the default native store, such as createTransportConversations(createKimiConversations(), …). A store that declares another format is rejected when the harness is created.",
+    "Store qui capture, localise et restaure les bundles de session Kimi au lieu du store natif par défaut, par exemple createTransportConversations(createKimiConversations(), …). Un store qui déclare un autre format est refusé dès la création du harness."
   ],
   "createAntigravityHarness.settings": [
     "Configuration for the Antigravity CLI harness; pass the selected model to createAgent() instead.",
@@ -6994,8 +6962,8 @@
     "Serveur, nom et arguments texte du prompt à rendre."
   ],
   "createTransportConversations.base": [
-    "Store whose captures are archived, such as createKimiConversations() or createHarnessConversations(); it must declare a format, which names the transport keys. A format name (claude, codex, copilot, kimi or harness) is deprecated and selects the matching built-in store.",
-    "Store dont les captures sont archivées, par exemple createKimiConversations() ou createHarnessConversations() ; il doit déclarer un format, qui nomme les clés de transport. Un nom de format (claude, codex, copilot, kimi ou harness) est déprécié et sélectionne le store intégré correspondant."
+    "Store whose captures are archived, such as createKimiConversations() or createHarnessConversations(); it must declare a format, which names the transport keys.",
+    "Store dont les captures sont archivées, par exemple createKimiConversations() ou createHarnessConversations() ; il doit déclarer un format, qui nomme les clés de transport."
   ],
   "NativeConversationStore.format": [
     "Persisted format name written in conversation records, transport keys and session bundles. Keep it stable once conversations have been captured.",

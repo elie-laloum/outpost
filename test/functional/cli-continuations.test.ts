@@ -22,7 +22,7 @@ import type { CliAgent, ConversationStore } from "../../src/index.ts";
 import type { SandboxProvider } from "../../src/domain/sandbox.types.ts";
 import type { Command } from "../../src/domain/command.types.ts";
 import { executeProcess } from "../../src/infrastructure/process.ts";
-import { repository, scripted } from "../helpers.ts";
+import { conversationStore, repository, scripted } from "../helpers.ts";
 
 const stored = {
   claude: createClaudeHarness,
@@ -196,10 +196,13 @@ for (const name of ["claude", "codex", "copilot", "kimi"] as const) {
     const transporter = createLocalTransport({
       directory: join(await repository(t), "objects"),
     });
-    const conversations = createTransportConversations(name, {
-      transporter,
-      namespace: "team",
-    });
+    const conversations = createTransportConversations(
+      conversationStore(name),
+      {
+        transporter,
+        namespace: "team",
+      },
+    );
     const forget = async (transcript: string | undefined) => {
       await rm(transcript!, { force: true });
       await rm(join(root, ".outpost", "conversations"), {
@@ -261,7 +264,7 @@ test("fallback candidates capture into their own conversation store", async (t) 
         limited,
         fixture(
           "kimi",
-          createTransportConversations("kimi", {
+          createTransportConversations(conversationStore("kimi"), {
             transporter,
             namespace: "team",
           }),

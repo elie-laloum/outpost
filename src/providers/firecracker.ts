@@ -154,6 +154,3 @@ export function createFirecrackerSandboxProvider(
     },
   };
 }
-
-/** @deprecated Use {@link createFirecrackerSandboxProvider}. */
-export const firecrackerSandboxProvider = createFirecrackerSandboxProvider;

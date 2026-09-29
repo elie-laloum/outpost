@@ -178,6 +178,3 @@ export async function createBullMQTaskQueue(
     close: resources.close,
   };
 }
-
-/** @deprecated Use {@link createBullMQTaskQueue}. */
-export const bullmqTaskQueue = createBullMQTaskQueue;

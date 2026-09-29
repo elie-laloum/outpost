@@ -28,7 +28,7 @@ import {
   createLocalTransport,
 } from "../../src/index.ts";
 import { seedSession, sessionDirectory } from "../fixtures/native-session.ts";
-import { repository } from "../helpers.ts";
+import { conversationStore, repository } from "../helpers.ts";
 
 const nativeConversations = (format: "copilot" | "kimi") =>
   format === "kimi" ? createKimiConversations() : createCopilotConversations();
@@ -138,7 +138,7 @@ for (const format of ["copilot", "kimi"] as const) {
       destination = join(root, "target"),
       id = "session_transport";
     await seedSession(format, home, "/source", id);
-    const store = createTransportConversations(format, {
+    const store = createTransportConversations(conversationStore(format), {
       namespace: "test",
       transporter: createLocalTransport({ directory: join(root, "objects") }),
     });

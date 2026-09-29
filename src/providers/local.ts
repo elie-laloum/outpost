@@ -82,6 +82,3 @@ export function createLocalSandboxProvider(
     },
   };
 }
-
-/** @deprecated Use {@link createLocalSandboxProvider}. */
-export const localSandboxProvider = createLocalSandboxProvider;

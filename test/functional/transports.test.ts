@@ -34,7 +34,7 @@ import {
   archiveRecovery,
   materializeRecoveryArchive,
   createTransportConversations,
-  conversations,
+  createClaudeConversations,
   dispatch,
   createSandbox,
 } from "../../src/index.ts";
@@ -443,7 +443,10 @@ for (const [name, factory] of Object.entries(adapters)) {
       repo = join(root, "repository"),
       stage = join(root, "staging");
     await mkdir(repo);
-    const native = conversations.claudePath("conversation-id", repo, home);
+    const native = join(
+      createClaudeConversations().directory(repo, home),
+      "conversation-id.jsonl",
+    );
     await mkdir(join(native.slice(0, -".jsonl".length), "subagents"), {
       recursive: true,
     });
@@ -456,7 +459,7 @@ for (const [name, factory] of Object.entries(adapters)) {
       JSON.stringify({ cwd: repo, text: "child" }) + "\n",
     );
     const transporter = await factory(t);
-    const store = createTransportConversations("claude", {
+    const store = createTransportConversations(createClaudeConversations(), {
       transporter,
       namespace: "shared-project",
     });
@@ -496,10 +499,9 @@ for (const [name, factory] of Object.entries(adapters)) {
       sandbox: { ...sandbox, root: elsewhere },
       staging: stage,
     });
-    const restored = conversations.claudePath(
-      "conversation-id",
-      elsewhere,
-      home,
+    const restored = join(
+      createClaudeConversations().directory(elsewhere, home),
+      "conversation-id.jsonl",
     );
     assert.deepEqual(JSON.parse(await readFile(restored, "utf8")), {
       cwd: elsewhere,

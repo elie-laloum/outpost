@@ -327,10 +327,15 @@ test("transport-backed stores persist harness transcripts beyond the host file",
   const root = await repository(t);
   const storage = await repository(t);
   const requests: ModelRequest[] = [];
-  const conversations = createTransportConversations("harness", {
-    transporter: createLocalTransport({ directory: join(storage, "objects") }),
-    namespace: "team",
-  });
+  const conversations = createTransportConversations(
+    createHarnessConversations(),
+    {
+      transporter: createLocalTransport({
+        directory: join(storage, "objects"),
+      }),
+      namespace: "team",
+    },
+  );
   const first = await run(
     t,
     root,

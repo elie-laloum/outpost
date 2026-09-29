@@ -24,6 +24,12 @@ const modelProvider: ModelProvider = {
   name: "p",
   request: async () => ({ text: "" }),
 };
+const nativeStores = {
+  claude: createClaudeConversations,
+  codex: createCodexConversations,
+  copilot: createCopilotConversations,
+  kimi: createKimiConversations,
+} as const;
 const custom = (format?: unknown): ConversationStore =>
   ({
     name: "custom",
@@ -50,19 +56,11 @@ test("built-in conversation stores declare their format", () => {
       format,
     );
     assert.equal(
-      createTransportConversations(format, { transporter, namespace: "team" })
+      createTransportConversations(store, { transporter, namespace: "team" })
         .name,
       `transport:team:${format}`,
     );
   }
-  assert.throws(
-    () =>
-      createTransportConversations("gemini", {
-        transporter,
-        namespace: "team",
-      }),
-    /Unsupported conversation format/,
-  );
   assert.throws(
     () =>
       createTransportConversations(custom(), {
@@ -73,8 +71,10 @@ test("built-in conversation stores declare their format", () => {
   );
   assert.equal(createHarnessConversations().format, "harness");
   assert.equal(
-    createTransportConversations("harness", { transporter, namespace: "team" })
-      .format,
+    createTransportConversations(createHarnessConversations(), {
+      transporter,
+      namespace: "team",
+    }).format,
     "harness",
   );
 });
@@ -94,10 +94,13 @@ test("harness conversations must use the harness format when declared", () => {
     () =>
       createHarness({
         modelProvider,
-        conversations: createTransportConversations("claude", {
-          transporter,
-          namespace: "team",
-        }),
+        conversations: createTransportConversations(
+          createClaudeConversations(),
+          {
+            transporter,
+            namespace: "team",
+          },
+        ),
       }),
     /Harness conversations must use the "harness" format, not "claude"/,
   );
@@ -132,10 +135,13 @@ const presets = {
 for (const [format, [label, preset]] of Object.entries(presets)) {
   test(`${label} stores conversations only in a compatible store`, () => {
     const transporter = createLocalTransport({ directory: "unused" });
-    const conversations = createTransportConversations(format as "kimi", {
-      transporter,
-      namespace: "team",
-    });
+    const conversations = createTransportConversations(
+      nativeStores[format as keyof typeof nativeStores](),
+      {
+        transporter,
+        namespace: "team",
+      },
+    );
     assert.equal(
       createAgent({ harness: preset({ conversations }) }).storage,
       conversations,
@@ -150,7 +156,7 @@ for (const [format, [label, preset]] of Object.entries(presets)) {
     assert.throws(
       () =>
         preset({
-          conversations: createTransportConversations(other, {
+          conversations: createTransportConversations(nativeStores[other](), {
             transporter,
             namespace: "team",
           }),

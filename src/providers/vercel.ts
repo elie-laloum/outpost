@@ -83,6 +83,3 @@ export function createVercelSandboxProvider(
 }
 
 export type { EgressPolicy } from "../domain/egress.types.ts";
-
-/** @deprecated Use {@link createVercelSandboxProvider}. */
-export const vercelSandboxProvider = createVercelSandboxProvider;

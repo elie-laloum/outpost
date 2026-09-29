@@ -53,7 +53,7 @@ try {
     [
       "--input-type=module",
       "-e",
-      "import {signWorkflowDecision, createEd25519DecisionVerifier, createOpenAIModelProvider, createAntigravityHarness, createCopilotHarness, createKimiHarness, defineTextResponse, defineWorkflow, conversations, createReporter, recoveryDetails, diagnoseAgentProtocol, diagnoseSandbox, planRecoveryRetention, pruneRecoveryRetention, assertRecoveryQuota, verifyRecoveryTransfer} from '@elie-laloum/outpost'; import {createDockerSandboxProvider} from '@elie-laloum/outpost/providers/docker'; import {createFirecrackerSandboxProvider} from '@elie-laloum/outpost/providers/firecracker'; if(typeof createFirecrackerSandboxProvider!=='function')throw Error('Missing Firecracker provider'); if((await defineTextResponse({tag:'ok'}).read('<ok>yes</ok>'))!=='yes'||createDockerSandboxProvider().name!=='docker')throw Error('Package import failed'); for(const item of [signWorkflowDecision,createEd25519DecisionVerifier,createOpenAIModelProvider,createAntigravityHarness,createCopilotHarness,createKimiHarness,conversations.capture,createReporter,recoveryDetails,diagnoseSandbox,planRecoveryRetention,pruneRecoveryRetention,assertRecoveryQuota,verifyRecoveryTransfer])if(typeof item!=='function')throw Error('Missing public extension'); for(const name of ['codex','claude','antigravity','copilot','kimi'])if(diagnoseAgentProtocol(name).hasFailures)throw Error('Protocol fixtures failed'); (await defineWorkflow('empty',[]).start()).unwrap()",
+      "import {signWorkflowDecision, createEd25519DecisionVerifier, createOpenAIModelProvider, createAntigravityHarness, createCopilotHarness, createKimiHarness, defineTextResponse, defineWorkflow, conversations, createReporter, recoveryDetails, diagnoseAgentProtocol, diagnoseSandbox, planRecoveryRetention, pruneRecoveryRetention, assertRecoveryQuota, verifyRecoveryTransfer} from '@elie-laloum/outpost'; import {createDockerSandboxProvider} from '@elie-laloum/outpost/providers/docker'; import {createFirecrackerSandboxProvider} from '@elie-laloum/outpost/providers/firecracker'; if(typeof createFirecrackerSandboxProvider!=='function')throw Error('Missing Firecracker provider'); if((await defineTextResponse({tag:'ok'}).read('<ok>yes</ok>'))!=='yes'||createDockerSandboxProvider().name!=='docker')throw Error('Package import failed'); for(const item of [signWorkflowDecision,createEd25519DecisionVerifier,createOpenAIModelProvider,createAntigravityHarness,createCopilotHarness,createKimiHarness,conversations.transported,createReporter,recoveryDetails,diagnoseSandbox,planRecoveryRetention,pruneRecoveryRetention,assertRecoveryQuota,verifyRecoveryTransfer])if(typeof item!=='function')throw Error('Missing public extension'); for(const name of ['codex','claude','antigravity','copilot','kimi'])if(diagnoseAgentProtocol(name).hasFailures)throw Error('Protocol fixtures failed'); (await defineWorkflow('empty',[]).start()).unwrap()",
     ],
     { cwd: temporary, stdio: "inherit" },
   );
@@ -84,21 +84,18 @@ try {
     for (const name of ['claude','codex','antigravity','copilot','kimi']) {
       const create=api['create'+capitalized(name)+'Harness'];
       assert.equal(typeof create, 'function');
-      assert.equal(api[name+'Harness'], create, name);
+      assert.equal(name+'Harness' in api, false, name);
       assert.equal(api.createAgent({harness:create(),model:'arbitrary-model'}).model.name,'arbitrary-model');
     }
     for (const name of ['local','docker','podman','firecracker']) {
       const exports = await import('@elie-laloum/outpost/providers/'+name);
       assert.equal(name in exports,false,name);
       assert.equal(typeof exports['create'+capitalized(name)+'SandboxProvider'],'function');
-      assert.equal(exports[name+'SandboxProvider'],exports['create'+capitalized(name)+'SandboxProvider'],name);
+      assert.equal(name+'SandboxProvider' in exports,false,name);
     }
-    const deprecated={agent:'createAgent',fallbackAgent:'createFallbackAgent',replayAgent:'createReplayAgent',harness:'createHarness',harnessEditTools:'createHarnessEditTools',harnessFileTools:'createHarnessFileTools',harnessGitTools:'createHarnessGitTools',harnessSearchTools:'createHarnessSearchTools',harnessShellTools:'createHarnessShellTools',openaiModelProvider:'createOpenAIModelProvider',anthropicModelProvider:'createAnthropicModelProvider',localTransport:'createLocalTransport',artifactStore:'createArtifactStore',workflowCheckpointStore:'createWorkflowCheckpointStore',taskCacheStore:'createTaskCacheStore',transportConversations:'createTransportConversations',harnessConversations:'createHarnessConversations',mountedSandboxProvider:'createMountedSandboxProvider',remoteSandboxProvider:'createRemoteSandboxProvider',sqliteTaskQueue:'createSqliteTaskQueue',httpTaskQueue:'createHttpTaskQueue',ed25519DecisionVerifier:'createEd25519DecisionVerifier',reporter:'createReporter',workflow:'defineWorkflow',task:'defineTask',agentTask:'defineAgentTask',isolatedTask:'defineIsolatedTask',commandTask:'defineCommandTask',approvalTask:'defineApprovalTask',pauseTask:'definePauseTask',artifactTask:'defineArtifactTask',queuedTask:'defineQueuedTask',interactiveAgentTask:'defineInteractiveAgentTask',loopTask:'defineLoopTask'};
-    for (const [previous,current] of Object.entries(deprecated)) assert.equal(api[previous],api[current],previous);
-    assert.equal(api.response.json,api.defineJsonResponse);
-    assert.equal(api.response.text,api.defineTextResponse);
-    assert.equal(api.artifact.json,api.defineJsonArtifact);
-    assert.equal(api.artifact.binary,api.defineBinaryArtifact);
+    const retired={agent:'createAgent',fallbackAgent:'createFallbackAgent',replayAgent:'createReplayAgent',harness:'createHarness',harnessEditTools:'createHarnessEditTools',harnessFileTools:'createHarnessFileTools',harnessGitTools:'createHarnessGitTools',harnessSearchTools:'createHarnessSearchTools',harnessShellTools:'createHarnessShellTools',openaiModelProvider:'createOpenAIModelProvider',anthropicModelProvider:'createAnthropicModelProvider',localTransport:'createLocalTransport',artifactStore:'createArtifactStore',workflowCheckpointStore:'createWorkflowCheckpointStore',taskCacheStore:'createTaskCacheStore',transportConversations:'createTransportConversations',harnessConversations:'createHarnessConversations',mountedSandboxProvider:'createMountedSandboxProvider',remoteSandboxProvider:'createRemoteSandboxProvider',sqliteTaskQueue:'createSqliteTaskQueue',httpTaskQueue:'createHttpTaskQueue',ed25519DecisionVerifier:'createEd25519DecisionVerifier',reporter:'createReporter',workflow:'defineWorkflow',task:'defineTask',agentTask:'defineAgentTask',isolatedTask:'defineIsolatedTask',commandTask:'defineCommandTask',approvalTask:'defineApprovalTask',pauseTask:'definePauseTask',artifactTask:'defineArtifactTask',queuedTask:'defineQueuedTask',interactiveAgentTask:'defineInteractiveAgentTask',loopTask:'defineLoopTask'};
+    for (const [previous,current] of Object.entries(retired)) {assert.equal(typeof api[current],'function',current); assert.equal(previous in api,false,previous);}
+    for (const name of ['response','artifact','StoredConversationFormat']) assert.equal(name in api,false,name);
     assert.equal(typeof api.createCustomReporter,'function');
     assert.notEqual(api.createReporter,api.createCustomReporter);
     const loop=api.defineLoopTask({key:'loop',maxRounds:2,attempt:(ctx)=>ctx.round,check:(_,value)=>value===2?{done:true}:{done:false,feedback:'again'}});
@@ -154,7 +151,7 @@ try {
     assert.equal('model' in modelProvider,false);
     const echo=api.defineHarnessTool({name:'echo',description:'Echo.',readOnly:true,input:{type:'object',properties:{text:{type:'string'}}},execute:input=>input.text});
     const toolset=api.defineHarnessToolset({name:'basic',tools:[echo]});
-    for (const name of ['File','Edit','Search','Git','Shell']) assert.equal(api['harness'+name+'Tools']().kind,'toolset',name);
+    for (const name of ['File','Edit','Search','Git','Shell']) assert.equal(api['createHarness'+name+'Tools']().kind,'toolset',name);
     assert.deepEqual(api.createHarnessFileTools().tools.map(tool=>tool.name),['read_file','list_files']);
     assert.equal(api.createHarnessConversations().name,'harness');
     const skill=api.defineHarnessSkill({name:'style',description:'House style.',instructions:'Be brief.'});
@@ -439,8 +436,7 @@ console.log(n,once.commits);
   writeFileSync(
     telemetryConsumer,
     `import { metrics, trace } from '@opentelemetry/api';
-import { createOpenTelemetryObserver, openTelemetry, type OpenTelemetryObserver } from '@elie-laloum/outpost/opentelemetry';
-if (openTelemetry !== createOpenTelemetryObserver) throw new Error('Missing deprecated OpenTelemetry alias');
+import { createOpenTelemetryObserver, type OpenTelemetryObserver } from '@elie-laloum/outpost/opentelemetry';
 import { defineTask, defineWorkflow, dispatch, createAgent as composeAgent, createCodexHarness, createCustomReporter, type DispatchTelemetry, type WorkflowTelemetry } from '@elie-laloum/outpost';
 const telemetry: OpenTelemetryObserver = createOpenTelemetryObserver({tracer:trace.getTracer('consumer'),meter:metrics.getMeter('consumer')});
 const step = defineTask({key:'sample',perform(context){context.reportUsage({input:1,cached:0,output:1});return 1;}});
@@ -470,7 +466,7 @@ telemetry.close();
     [
       "--input-type=module",
       "-e",
-      "import {createBullMQTaskQueue, bullmqTaskQueue} from '@elie-laloum/outpost/queues/bullmq'; if(typeof createBullMQTaskQueue !== 'function' || bullmqTaskQueue !== createBullMQTaskQueue) throw Error('Missing BullMQ adapter')",
+      "import * as bullmq from '@elie-laloum/outpost/queues/bullmq'; if(typeof bullmq.createBullMQTaskQueue !== 'function' || 'bullmqTaskQueue' in bullmq) throw Error('Missing BullMQ adapter')",
     ],
     { cwd: temporary, stdio: "inherit" },
   );

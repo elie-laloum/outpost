@@ -87,6 +87,3 @@ export function createDaytonaSandboxProvider(
 }
 
 export type { EgressPolicy } from "../domain/egress.types.ts";
-
-/** @deprecated Use {@link createDaytonaSandboxProvider}. */
-export const daytonaSandboxProvider = createDaytonaSandboxProvider;

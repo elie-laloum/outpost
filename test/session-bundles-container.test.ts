@@ -2,12 +2,11 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { test } from "node:test";
-import { conversations } from "../src/index.ts";
 import { createLocalSandboxProvider } from "../src/providers/local.ts";
 import { createDockerSandboxProvider } from "../src/providers/docker.ts";
 import { createPodmanSandboxProvider } from "../src/providers/podman.ts";
 import { seedSession } from "./fixtures/native-session.ts";
-import { repository } from "./helpers.ts";
+import { conversationStore, repository } from "./helpers.ts";
 
 for (const format of ["copilot", "kimi"] as const) {
   test(
@@ -37,7 +36,7 @@ for (const format of ["copilot", "kimi"] as const) {
           }),
       };
       await seedSession(format, home, "/original", id);
-      const store = conversations.native(format);
+      const store = conversationStore(format);
       const record = await store.capture(id, {
         repository: root,
         sandbox: source,
