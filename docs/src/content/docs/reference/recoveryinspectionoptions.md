@@ -13,14 +13,14 @@ import type { RecoveryInspectionOptions } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name          | Type                     | Presence | Meaning                                                                                                                |
-| ------------- | ------------------------ | -------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `transporter` | `Transport \| undefined` | Optional | Inventory object keys and optionally resource records in this transport; host Git and lock inspection are unsupported. |
-| `repository`  | `string \| undefined`    | Optional | Target host Git checkout.                                                                                              |
-| `maxEntries`  | `number \| undefined`    | Optional | Maximum filesystem entries inspected before marking the inventory incomplete.                                          |
-| `git`         | `boolean \| undefined`   | Optional | Include Git worktree state and dirty/locked checks in the inventory.                                                   |
-| `locks`       | `boolean \| undefined`   | Optional | Include local lock-file and process-ownership inspection.                                                              |
-| `resources`   | `boolean \| undefined`   | Optional | Include locally recorded sandbox leases and active operations.                                                         |
+| Name          | Type                     | Presence | Meaning                                                                                                                                                                                         |
+| ------------- | ------------------------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `transporter` | `Transport \| undefined` | Optional | Inventory this transport's objects instead of a local repository. Pass the transport given as activityTransport to read its activity records; git or locks then reject with code configuration. |
+| `repository`  | `string \| undefined`    | Optional | Git checkout to inspect, default the current directory, resolved to its top-level root. In transport mode, only echoed back as a label.                                                         |
+| `maxEntries`  | `number \| undefined`    | Optional | Maximum entries scanned before the inventory is marked incomplete, default 100000. Local resource inspection also stops at 10000 records; a non-positive value rejects with code configuration. |
+| `git`         | `boolean \| undefined`   | Optional | Adds the Git state of each workspace under .outpost: registration, HEAD, branch, dirty and locked flags. Local mode only.                                                                       |
+| `locks`       | `boolean \| undefined`   | Optional | Adds operation lock files with their owner's status. Local mode only.                                                                                                                           |
+| `resources`   | `boolean \| undefined`   | Optional | Adds sandbox activity records with their ownership verdicts, read from .outpost/storage or, with transporter, from that transport.                                                              |
 
 ## Signature
 

@@ -13,7 +13,7 @@ import { createCustomReporter } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Create a callable observer with typed event handlers and an explicit flush barrier. Handlers run serially without blocking dispatch; failures are reported through onError and the first remains observable through every flush. The caller owns files, loggers and their shutdown.
+Create an observe callback that routes each agent observation to the handler for its kind. Handlers run one at a time on a bounded queue without blocking the dispatch; flush() waits for them and rejects with the first handler failure. The caller owns any files or loggers the handlers use.
 
 [Complete example and detailed rules](../../guide/observability/).
 

@@ -13,15 +13,15 @@ import type { SandboxDiagnosticReport } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom                  | Type                                                        | Présence  | Rôle                                                                                                         |
-| -------------------- | ----------------------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------ |
-| `scope`              | `"owned-sandbox"`                                           | Requis    | Toujours owned-sandbox : les contrôles concernent la ressource d’exécution fournie.                          |
-| `ownership`          | `"caller"`                                                  | Requis    | Toujours caller : le diagnostic ne devient pas propriétaire de la fermeture de la ressource.                 |
-| `sandboxProvider`    | `Pick<SandboxProvider, "name" \| "placement"> \| undefined` | Optionnel | Nom et placement du provider utilisés pour interpréter le rapport de diagnostic.                             |
-| `capabilities`       | `readonly DiagnosticCapability[]`                           | Requis    | Prise en charge annoncée et observée des commandes, transferts, transferts par lot et terminaux interactifs. |
-| `checks`             | `readonly DiagnosticCheck[]`                                | Requis    | Contrôles individuels avec statut, message et informations de version disponibles.                           |
-| `modelCompatibility` | `"unverified"`                                              | Requis    | Toujours unverified : ces diagnostics n’appellent pas de modèle réel.                                        |
-| `hasFailures`        | `boolean`                                                   | Requis    | Indique si au moins un contrôle de diagnostic a échoué.                                                      |
+| Nom                  | Type                                                        | Présence  | Rôle                                                                                                                                 |
+| -------------------- | ----------------------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `scope`              | `"owned-sandbox"`                                           | Requis    | Toujours owned-sandbox : les contrôles concernent la ressource d’exécution fournie.                                                  |
+| `ownership`          | `"caller"`                                                  | Requis    | Toujours caller : le diagnostic ne devient pas propriétaire de la fermeture de la ressource.                                         |
+| `sandboxProvider`    | `Pick<SandboxProvider, "name" \| "placement"> \| undefined` | Optionnel | Nom et placement du provider repris des options ; absent si aucun n’a été fourni.                                                    |
+| `capabilities`       | `readonly DiagnosticCapability[]`                           | Requis    | Prise en charge annoncée et observée des commandes, transferts, transferts par lot et terminaux interactifs.                         |
+| `checks`             | `readonly DiagnosticCheck[]`                                | Requis    | Contrôles dans l’ordre d’exécution. Les messages d’échec donnent la raison, souvent avec un remède, jamais la sortie de la commande. |
+| `modelCompatibility` | `"unverified"`                                              | Requis    | Toujours unverified : ces diagnostics n’appellent pas de modèle réel.                                                                |
+| `hasFailures`        | `boolean`                                                   | Requis    | true dès qu’un contrôle a le statut fail ; les contrôles warn et skipped le laissent à false.                                        |
 
 ## Signature
 

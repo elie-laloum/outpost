@@ -7,9 +7,9 @@ sidebar:
 
 ## Parameters and properties
 
-| Name   | Type                  | Presence | Meaning                                                                   |
-| ------ | --------------------- | -------- | ------------------------------------------------------------------------- |
-| `pass` | `number \| undefined` | Optional | One-based agent pass number attached to an observation or reporter state. |
+| Name   | Type                  | Presence | Meaning                                                                  |
+| ------ | --------------------- | -------- | ------------------------------------------------------------------------ |
+| `pass` | `number \| undefined` | Optional | Pass number shown in the line prefix; omitted for events outside a pass. |
 
 ## Signature
 

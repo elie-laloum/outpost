@@ -16,7 +16,7 @@ import type { DispatchTelemetryOutcome } from "@elie-laloum/outpost";
 | Nom         | Type                                | Présence  | Rôle                                                                                                                               |
 | ----------- | ----------------------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------- |
 | `status`    | `"failed" \| "done" \| "cancelled"` | Requis    | done quand le dispatch se résout, cancelled pour une annulation explicite, failed pour les autres rejets dont les délais dépassés. |
-| `usage`     | `Usage`                             | Requis    | Totaux du résultat en cas de succès, consommation connue réconciliée en cas d’échec.                                               |
+| `usage`     | `Usage`                             | Requis    | Totaux de tokens : result.usage en cas de succès ; en cas d’échec, les passes terminées plus ce que la passe en cours a rapporté.  |
 | `completed` | `boolean \| undefined`              | Optionnel | Indique si le dispatch réussi a satisfait sa condition de complétion ; absent en cas de rejet.                                     |
 
 ## Signature

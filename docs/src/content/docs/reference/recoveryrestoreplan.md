@@ -13,18 +13,18 @@ import type { RecoveryRestorePlan } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name             | Type                           | Presence | Meaning                                                                                                    |
-| ---------------- | ------------------------------ | -------- | ---------------------------------------------------------------------------------------------------------- |
-| `fingerprint`    | `string`                       | Required | Fingerprint binding the plan to the inspected retained source for revalidation before restoration.         |
-| `manifestSha256` | `string`                       | Required | SHA-256 of the retained transfer manifest captured during restoration planning.                            |
-| `commit`         | `string`                       | Required | Git commit used to reconstruct the selected retained state.                                                |
-| `payloads`       | `readonly string[]`            | Required | Retained bundle and patch paths required to restore the selected side.                                     |
-| `staging`        | `"unavailable" \| "preserved"` | Required | Whether the original Git index is preserved; incoming remote state has no recoverable staging information. |
-| `directory`      | `string`                       | Required | Host directory containing the retained transfer artifacts to verify or restore.                            |
-| `repository`     | `string`                       | Required | Target host Git checkout.                                                                                  |
-| `destination`    | `string`                       | Required | New, absent destination directory outside the source repository, Git metadata and retained transfer.       |
-| `side`           | `"previous" \| "incoming"`     | Required | Retained state to restore: previous host state or incoming remote state.                                   |
-| `maxBytes`       | `number \| undefined`          | Optional | Maximum retained payload bytes allowed when snapshotting and verifying restoration sources.                |
+| Name             | Type                           | Presence | Meaning                                                                                                                                                                        |
+| ---------------- | ------------------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `fingerprint`    | `string`                       | Required | SHA-256 of every other plan field. restoreRecoveryTransfer() rejects a plan that no longer matches it.                                                                         |
+| `manifestSha256` | `string`                       | Required | SHA-256 of the transfer's checksums.json at planning. Restoration rejects with code configuration when the manifest has changed.                                               |
+| `commit`         | `string`                       | Required | Commit the destination will be detached at: the last synchronized commit for previous, the sandbox HEAD for incoming.                                                          |
+| `payloads`       | `readonly string[]`            | Required | Untracked file paths, relative to the checkout, copied from previous-files/ or incoming/ into the destination after the patches.                                               |
+| `staging`        | `"unavailable" \| "preserved"` | Required | preserved for previous: the staged changes are restored to the index. unavailable for incoming: the sandbox's staging is not captured.                                         |
+| `directory`      | `string`                       | Required | Retained transfer directory, as named by details.recovery of the synchronization error. It must contain state.json and checksums.json.                                         |
+| `repository`     | `string`                       | Required | Host Git repository cloned into the destination; it is only read. Partial, shallow or alternates-based repositories fail the Git check.                                        |
+| `destination`    | `string`                       | Required | New directory to create. Its parent must exist; the path must not exist and must lie outside the repository, its Git metadata and the transfer.                                |
+| `side`           | `"previous" \| "incoming"`     | Required | previous restores the host worktree as backed up before the transfer, staged index included; incoming restores the sandbox's commits, uncommitted changes and untracked files. |
+| `maxBytes`       | `number \| undefined`          | Optional | Maximum transfer bytes copied and hashed, default 1073741824 (1 GiB). Exceeding it rejects with code configuration.                                                            |
 
 ## Signature
 

@@ -13,21 +13,21 @@ import { planRecoveryRestore } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Valide un transfert conservé et prépare la restauration de son état previous ou incoming dans une nouvelle destination. Le plan enregistre données, commit et empreintes pour une revalidation ultérieure ; il ne remplit pas la destination.
+Vérifie un transfert conservé par rapport à son dépôt et renvoie un plan pour restaurer un côté dans un nouveau dossier. Les contrôles portent sur une copie temporaire vérifiée par empreintes, et rien n’est créé. Les options invalides et les contrôles en échec rejettent avec le code configuration ; un transfert, un dépôt ou un parent de destination introuvable rejette avec le code workspace.
 
 [Exemple complet et règles détaillées](../../guide/recovery/).
 
 ## Paramètres et propriétés
 
-| Nom                   | Type                          | Présence  | Rôle                                                                                                                     |
-| --------------------- | ----------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `options`             | `RecoveryRestoreOptions`      | Requis    | Source du transfert conservé, dépôt, nouvelle destination, côté choisi et limite d’octets de vérification.               |
-| `options.directory`   | `string`                      | Requis    | Dossier hôte contenant les artefacts de transfert conservés à vérifier ou restaurer.                                     |
-| `options.repository`  | `string`                      | Requis    | Checkout Git hôte ciblé.                                                                                                 |
-| `options.destination` | `string`                      | Requis    | Nouveau dossier de destination absent, hors du dépôt source, de ses métadonnées Git et du transfert conservé.            |
-| `options.side`        | `"previous" \| "incoming"`    | Requis    | État conservé à restaurer : previous pour l’état hôte antérieur ou incoming pour l’état distant entrant.                 |
-| `options.maxBytes`    | `number \| undefined`         | Optionnel | Nombre maximal d’octets de données conservées autorisé pour copier et vérifier les sources de restauration.              |
-| `observation`         | `ObservationHub \| undefined` | Optionnel | Hub facultatif recevant le début et la fin de planification de restauration ; jamais persisté dans le plan ni l’archive. |
+| Nom                   | Type                          | Présence  | Rôle                                                                                                                                                                                                |
+| --------------------- | ----------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `options`             | `RecoveryRestoreOptions`      | Requis    | Source du transfert conservé, dépôt, nouvelle destination, côté choisi et limite d’octets de vérification.                                                                                          |
+| `options.directory`   | `string`                      | Requis    | Dossier du transfert conservé, tel que l’indique details.recovery de l’erreur de synchronisation. Il doit contenir state.json et checksums.json.                                                    |
+| `options.repository`  | `string`                      | Requis    | Dépôt Git hôte cloné dans la destination ; il est seulement lu. Un dépôt partiel, superficiel (shallow) ou à objets alternates échoue au contrôle Git.                                              |
+| `options.destination` | `string`                      | Requis    | Nouveau dossier à créer. Son parent doit exister ; le chemin ne doit pas exister et doit se trouver hors du dépôt, de ses métadonnées Git et du transfert.                                          |
+| `options.side`        | `"previous" \| "incoming"`    | Requis    | previous restaure le worktree hôte tel qu’il était sauvegardé avant le transfert, index Git compris ; incoming restaure les commits, changements non commités et fichiers non suivis de la sandbox. |
+| `options.maxBytes`    | `number \| undefined`         | Optionnel | Nombre maximal d’octets du transfert copiés et hachés, 1073741824 (1 Gio) par défaut. Un dépassement rejette avec le code configuration.                                                            |
+| `observation`         | `ObservationHub \| undefined` | Optionnel | Hub qui reçoit l’opération recovery restore.plan à son début, à sa fin ou en cas d’échec.                                                                                                           |
 
 ## Retour
 

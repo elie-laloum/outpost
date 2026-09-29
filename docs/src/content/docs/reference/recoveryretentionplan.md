@@ -13,18 +13,18 @@ import type { RecoveryRetentionPlan } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name             | Type                                  | Presence | Meaning                                                                                                            |
-| ---------------- | ------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------ |
-| `source`         | `"transport" \| undefined`            | Optional | Present as transport for an object-storage plan; pruning then requires the same configured transporter separately. |
-| `repository`     | `string`                              | Required | Target host Git checkout.                                                                                          |
-| `policy`         | `RecoveryRetentionPolicy`             | Required | Explicit storage scopes, minimum age and capacity targets used to decide retention eligibility.                    |
-| `inspectedAt`    | `string`                              | Required | ISO timestamp when the retention inventory was taken.                                                              |
-| `inspection`     | `RecoveryInspection`                  | Required | Full recovery inventory on which the retention decisions are based.                                                |
-| `entries`        | `readonly RecoveryRetentionEntry[]`   | Required | Retention candidates with eligibility, safety reason and observed size.                                            |
-| `complete`       | `boolean`                             | Required | Whether all requested inspection work completed without hitting scan limits or inaccessible entries.               |
-| `usageBytes`     | `number`                              | Required | Total storage bytes observed before applying the retention plan.                                                   |
-| `projectedBytes` | `number`                              | Required | Estimated retained bytes after removing all eligible candidates.                                                   |
-| `quota`          | `"unknown" \| "within" \| "exceeded"` | Required | Whether projected usage is within the policy limit, exceeded or unknown due to incomplete inspection.              |
+| Name             | Type                                  | Presence | Meaning                                                                                                                                                                                                |
+| ---------------- | ------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `source`         | `"transport" \| undefined`            | Optional | transport for a plan built with a transporter; absent for a local plan. pruneRecoveryRetention() then requires the same transporter.                                                                   |
+| `repository`     | `string`                              | Required | Top-level path of the inspected checkout; for a transport plan, the repository option as given, or an empty string.                                                                                    |
+| `policy`         | `RecoveryRetentionPolicy`             | Required | Copy of the validated policy; pruning and its after plan reuse it.                                                                                                                                     |
+| `inspectedAt`    | `string`                              | Required | ISO timestamp taken after the inventory; entry ages are measured from it.                                                                                                                              |
+| `inspection`     | `RecoveryInspection`                  | Required | Inventory the plan is based on, with Git worktree, lock and resource activity reports for a local plan.                                                                                                |
+| `entries`        | `readonly RecoveryRetentionEntry[]`   | Required | One entry per inventoried item, each with eligibility, reason code and bytes.                                                                                                                          |
+| `complete`       | `boolean`                             | Required | Whether the inventory, Git worktree checks and journal object sizes were all read within maxEntries. When false, no entry is eligible, quota is unknown and pruneRecoveryRetention() rejects the plan. |
+| `usageBytes`     | `number`                              | Required | Bytes observed at inspection: file sizes under .outpost, or object sizes in the transport.                                                                                                             |
+| `projectedBytes` | `number`                              | Required | usageBytes minus the bytes of eligible entries: the usage left if every candidate is removed.                                                                                                          |
+| `quota`          | `"unknown" \| "within" \| "exceeded"` | Required | exceeded when projectedBytes is above maxBytes or the remaining worktrees are above maxWorkspaces, unknown when the inventory is incomplete, otherwise within.                                         |
 
 ## Signature
 

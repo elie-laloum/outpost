@@ -13,19 +13,19 @@ import { createReporter } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Create an agent observation callback that formats progress, warnings and pass summaries for a terminal or custom writer. quiet suppresses all output and verbose includes additional events; reporting does not control execution.
+Create an observe callback that prints one line per event: phases, tool calls, warnings, failures and each pass summary with its token counts. It writes to process.stdout unless write is given and never changes execution.
 
-[Complete example and detailed rules](../../guide/progress/).
+[Complete example and detailed rules](../../guide/observability/).
 
 ## Parameters and properties
 
-| Name              | Type                                    | Presence | Meaning                                                           |
-| ----------------- | --------------------------------------- | -------- | ----------------------------------------------------------------- |
-| `options`         | `ReporterOptions \| undefined`          | Optional | Output label, verbosity, silence mode and optional custom writer. |
-| `options.label`   | `string \| undefined`                   | Optional | Human-readable label used in execution reporting.                 |
-| `options.verbose` | `boolean \| undefined`                  | Optional | Include detailed agent and tool events in terminal output.        |
-| `options.quiet`   | `boolean \| undefined`                  | Optional | Suppress all reporter output, including warnings and failures.    |
-| `options.write`   | `((text: string) => void) \| undefined` | Optional | Custom sink for formatted reporter output.                        |
+| Name              | Type                                    | Presence | Meaning                                                                                                                                                                      |
+| ----------------- | --------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `options`         | `ReporterOptions \| undefined`          | Optional | Output label, verbosity, silence mode and optional custom writer.                                                                                                            |
+| `options.label`   | `string \| undefined`                   | Optional | Prefix printed in brackets on every line, default outpost; the pass number follows it.                                                                                       |
+| `options.verbose` | `boolean \| undefined`                  | Optional | Also print tool inputs and result previews, prompts, raw protocol lines, conversation IDs, harness steps and compactions, the workspace directory and successful operations. |
+| `options.quiet`   | `boolean \| undefined`                  | Optional | Suppress all reporter output, including warnings and failures.                                                                                                               |
+| `options.write`   | `((text: string) => void) \| undefined` | Optional | Receives each formatted chunk of output instead of process.stdout.                                                                                                           |
 
 ## Returns
 

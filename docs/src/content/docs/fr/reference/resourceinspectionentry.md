@@ -13,11 +13,11 @@ import type { ResourceInspectionEntry } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom         | Type                                  | Présence  | Rôle                                                                                    |
-| ----------- | ------------------------------------- | --------- | --------------------------------------------------------------------------------------- |
-| `path`      | `string`                              | Requis    | Chemin hôte du fichier local d’activité de sandbox.                                     |
-| `record`    | `ResourceActivityRecord \| undefined` | Optionnel | Enregistrement local d’activité de sandbox analysé, lorsqu’il est lisible et valide.    |
-| `ownership` | `LockOwnership`                       | Requis    | Évaluation de la possession actuelle de la ressource par le processus local enregistré. |
+| Nom         | Type                                  | Présence  | Rôle                                                                                                                                                      |
+| ----------- | ------------------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `path`      | `string`                              | Requis    | Chemin hôte du fichier objet de l’enregistrement en mode local ; sa clé de transport, resources/&lt;id>.json, en mode transport.                          |
+| `record`    | `ResourceActivityRecord \| undefined` | Optionnel | Enregistrement analysé ; absent s’il était illisible, invalide ou modifié pendant l’inspection.                                                           |
+| `ownership` | `LockOwnership`                       | Requis    | Verdict de possession : statut active, inactive ou unknown, avec un code de raison comme LOCAL_IDENTITY_MATCH, PROCESS_EXITED ou REMOTE_OWNER_UNVERIFIED. |
 
 ## Signature
 

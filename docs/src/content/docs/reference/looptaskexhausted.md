@@ -19,15 +19,15 @@ Error recorded when the last permitted round fails verification. Inspect key, ma
 
 ## Parameters and properties
 
-| Name        | Type                  | Presence | Meaning                                                                         |
-| ----------- | --------------------- | -------- | ------------------------------------------------------------------------------- |
-| `key`       | `string`              | Required | Key of the loop task whose verification never succeeded.                        |
-| `maxRounds` | `number`              | Required | Configured logical round limit reached by this loop.                            |
-| `feedback`  | `string`              | Required | Text returned by the last rejected verification.                                |
-| `name`      | `string`              | Required | Error class name used to distinguish this failure from other JavaScript errors. |
-| `message`   | `string`              | Required | Human-readable explanation of the failure.                                      |
-| `stack`     | `string \| undefined` | Optional | JavaScript stack trace for the error, when available.                           |
-| `cause`     | `unknown`             | Optional | Original failure attached to this error.                                        |
+| Name        | Type                  | Presence | Meaning                                                                                     |
+| ----------- | --------------------- | -------- | ------------------------------------------------------------------------------------------- |
+| `key`       | `string`              | Required | Key of the loop task whose verification never succeeded.                                    |
+| `maxRounds` | `number`              | Required | Configured logical round limit reached by this loop.                                        |
+| `feedback`  | `string`              | Required | Text returned by the last rejected verification.                                            |
+| `name`      | `string`              | Required | Error class name used to distinguish this failure from other JavaScript errors.             |
+| `message`   | `string`              | Required | Human-readable explanation of the failure.                                                  |
+| `stack`     | `string \| undefined` | Optional | JavaScript stack trace for the error, when available.                                       |
+| `cause`     | `unknown`             | Optional | Underlying failure this error wraps; quotaFault() and unavailableFault() follow this chain. |
 
 ## Signature
 

@@ -13,19 +13,19 @@ import { createReporter } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Crée un callback d’observation qui formate progression, avertissements et bilans de passe pour un terminal ou une fonction d’écriture. quiet masque toutes les sorties et verbose inclut des événements supplémentaires ; le rapporteur ne pilote pas l’exécution.
+Crée un callback observe qui affiche une ligne par événement : phases, appels d’outils, avertissements, échecs et le résumé de chaque passe avec ses compteurs de tokens. Il écrit sur process.stdout sauf si write est fourni, et ne modifie jamais l’exécution.
 
-[Exemple complet et règles détaillées](../../guide/progress/).
+[Exemple complet et règles détaillées](../../guide/observability/).
 
 ## Paramètres et propriétés
 
-| Nom               | Type                                    | Présence  | Rôle                                                                                            |
-| ----------------- | --------------------------------------- | --------- | ----------------------------------------------------------------------------------------------- |
-| `options`         | `ReporterOptions \| undefined`          | Optionnel | Libellé de sortie, verbosité, mode silencieux et fonction d’écriture personnalisée optionnelle. |
-| `options.label`   | `string \| undefined`                   | Optionnel | Libellé lisible utilisé dans les rapports d’exécution.                                          |
-| `options.verbose` | `boolean \| undefined`                  | Optionnel | Inclut les événements détaillés d’agent et d’outils dans la sortie terminal.                    |
-| `options.quiet`   | `boolean \| undefined`                  | Optionnel | Masque toutes les sorties du rapporteur, y compris avertissements et échecs.                    |
-| `options.write`   | `((text: string) => void) \| undefined` | Optionnel | Fonction de destination personnalisée pour la sortie formatée du rapporteur.                    |
+| Nom               | Type                                    | Présence  | Rôle                                                                                                                                                                                                                                    |
+| ----------------- | --------------------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `options`         | `ReporterOptions \| undefined`          | Optionnel | Libellé de sortie, verbosité, mode silencieux et fonction d’écriture personnalisée optionnelle.                                                                                                                                         |
+| `options.label`   | `string \| undefined`                   | Optionnel | Préfixe affiché entre crochets sur chaque ligne, outpost par défaut ; le numéro de passe le suit.                                                                                                                                       |
+| `options.verbose` | `boolean \| undefined`                  | Optionnel | Affiche aussi les entrées d’outils et aperçus de résultats, les prompts, les lignes brutes du protocole, les identifiants de conversation, les étapes et compactions du harness, le répertoire du workspace et les opérations réussies. |
+| `options.quiet`   | `boolean \| undefined`                  | Optionnel | Masque toutes les sorties du rapporteur, y compris avertissements et échecs.                                                                                                                                                            |
+| `options.write`   | `((text: string) => void) \| undefined` | Optionnel | Reçoit chaque morceau de sortie formaté à la place de process.stdout.                                                                                                                                                                   |
 
 ## Retour
 

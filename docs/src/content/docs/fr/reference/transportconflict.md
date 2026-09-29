@@ -19,13 +19,13 @@ Levée quand une écriture ou une suppression conditionnelle, ou une lecture fix
 
 ## Paramètres et propriétés
 
-| Nom       | Type                  | Présence  | Rôle                                                                                     |
-| --------- | --------------------- | --------- | ---------------------------------------------------------------------------------------- |
-| `key`     | `string`              | Requis    | Clé logique dont la révision attendue ne correspondait pas à l’objet stocké.             |
-| `name`    | `string`              | Requis    | Nom de classe d’erreur permettant de distinguer cet échec des autres erreurs JavaScript. |
-| `message` | `string`              | Requis    | Explication lisible de l’échec.                                                          |
-| `stack`   | `string \| undefined` | Optionnel | Trace de pile JavaScript de l’erreur lorsqu’elle est disponible.                         |
-| `cause`   | `unknown`             | Optionnel | Échec d’origine attaché à cette erreur.                                                  |
+| Nom       | Type                  | Présence  | Rôle                                                                                                    |
+| --------- | --------------------- | --------- | ------------------------------------------------------------------------------------------------------- |
+| `key`     | `string`              | Requis    | Clé logique dont la révision attendue ne correspondait pas à l’objet stocké.                            |
+| `name`    | `string`              | Requis    | Nom de classe d’erreur permettant de distinguer cet échec des autres erreurs JavaScript.                |
+| `message` | `string`              | Requis    | Explication lisible de l’échec.                                                                         |
+| `stack`   | `string \| undefined` | Optionnel | Trace de pile JavaScript de l’erreur lorsqu’elle est disponible.                                        |
+| `cause`   | `unknown`             | Optionnel | Échec sous-jacent que cette erreur enveloppe ; quotaFault() et unavailableFault() suivent cette chaîne. |
 
 ## Signature
 

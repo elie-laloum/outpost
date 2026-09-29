@@ -13,20 +13,20 @@ import { assertRecoveryQuota } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Inspecte le stockage de récupération et échoue si les octets observés plus la réservation demandée dépassent maxBytes, ou si l’inspection ne permet pas de décider. Ce contrôle ne réserve pas d’espace et n’impose pas de quota physique ; reserveRecoveryStorage coordonne les écrivains coopératifs.
+Se résout quand le stockage observé plus reserveBytes reste inférieur ou égal à maxBytes. Sinon, ou si l’inventaire est incomplet, rejette avec le code workspace et usageBytes, reserveBytes, maxBytes et complete dans details. Rien n’est réservé et les réservations actives ne sont pas comptées ; reserveRecoveryStorage() coordonne les écrivains.
 
 [Exemple complet et règles détaillées](../../guide/retention/).
 
 ## Paramètres et propriétés
 
-| Nom                    | Type                     | Présence  | Rôle                                                                                                                             |
-| ---------------------- | ------------------------ | --------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `options`              | `RecoveryQuotaOptions`   | Requis    | Dépôt, octets admis maximaux, octets supplémentaires demandés et limite d’inspection.                                            |
-| `options.transporter`  | `Transport \| undefined` | Optionnel | Mesure les octets utiles de ce transport objet au lieu des fichiers locaux du dépôt. C’est une observation, pas une réservation. |
-| `options.repository`   | `string \| undefined`    | Optionnel | Checkout Git hôte ciblé.                                                                                                         |
-| `options.maxBytes`     | `number`                 | Requis    | Total maximal admis du stockage observé et des réservations actives, en octets.                                                  |
-| `options.reserveBytes` | `number \| undefined`    | Optionnel | Octets supplémentaires demandés à l’admission en plus du stockage déjà utilisé.                                                  |
-| `options.maxEntries`   | `number \| undefined`    | Optionnel | Nombre maximal d’entrées de fichiers inspectées avant de déclarer l’inventaire incomplet.                                        |
+| Nom                    | Type                     | Présence  | Rôle                                                                                                                                                                                                         |
+| ---------------------- | ------------------------ | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `options`              | `RecoveryQuotaOptions`   | Requis    | Dépôt ou transporter à mesurer, limite en octets, octets supplémentaires et limite de parcours.                                                                                                              |
+| `options.transporter`  | `Transport \| undefined` | Optionnel | Mesure la taille des objets de ce transport au lieu des fichiers du .outpost du dépôt. Un objet hors des catégories connues rend l’inventaire incomplet.                                                     |
+| `options.repository`   | `string \| undefined`    | Optionnel | Checkout Git dont le .outpost est mesuré, process.cwd() par défaut, résolu vers son répertoire racine ; un dossier absent rejette avec le code workspace. Ignoré avec transporter.                           |
+| `options.maxBytes`     | `number`                 | Requis    | Limite de l’usage observé plus reserveBytes, en octets ; au-delà, l’appel rejette avec le code workspace. Les réservations actives ne sont pas comptées. Doit être un entier sûr positif ou nul.             |
+| `options.reserveBytes` | `number \| undefined`    | Optionnel | Octets ajoutés à l’usage observé pour ce contrôle, 0 par défaut. Rien n’est réservé.                                                                                                                         |
+| `options.maxEntries`   | `number \| undefined`    | Optionnel | Nombre maximal de fichiers et répertoires parcourus sous .outpost, ou d’objets listés depuis transporter, 100000 par défaut. Le dépasser rend l’inventaire incomplet, ce qui rejette avec le code workspace. |
 
 ## Retour
 

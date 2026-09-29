@@ -13,13 +13,13 @@ import type { RecoveryQuotaOptions } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom            | Type                     | Présence  | Rôle                                                                                                                             |
-| -------------- | ------------------------ | --------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `transporter`  | `Transport \| undefined` | Optionnel | Mesure les octets utiles de ce transport objet au lieu des fichiers locaux du dépôt. C’est une observation, pas une réservation. |
-| `repository`   | `string \| undefined`    | Optionnel | Checkout Git hôte ciblé.                                                                                                         |
-| `maxBytes`     | `number`                 | Requis    | Total maximal admis du stockage observé et des réservations actives, en octets.                                                  |
-| `reserveBytes` | `number \| undefined`    | Optionnel | Octets supplémentaires demandés à l’admission en plus du stockage déjà utilisé.                                                  |
-| `maxEntries`   | `number \| undefined`    | Optionnel | Nombre maximal d’entrées de fichiers inspectées avant de déclarer l’inventaire incomplet.                                        |
+| Nom            | Type                     | Présence  | Rôle                                                                                                                                                                                                         |
+| -------------- | ------------------------ | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `transporter`  | `Transport \| undefined` | Optionnel | Mesure la taille des objets de ce transport au lieu des fichiers du .outpost du dépôt. Un objet hors des catégories connues rend l’inventaire incomplet.                                                     |
+| `repository`   | `string \| undefined`    | Optionnel | Checkout Git dont le .outpost est mesuré, process.cwd() par défaut, résolu vers son répertoire racine ; un dossier absent rejette avec le code workspace. Ignoré avec transporter.                           |
+| `maxBytes`     | `number`                 | Requis    | Limite de l’usage observé plus reserveBytes, en octets ; au-delà, l’appel rejette avec le code workspace. Les réservations actives ne sont pas comptées. Doit être un entier sûr positif ou nul.             |
+| `reserveBytes` | `number \| undefined`    | Optionnel | Octets ajoutés à l’usage observé pour ce contrôle, 0 par défaut. Rien n’est réservé.                                                                                                                         |
+| `maxEntries`   | `number \| undefined`    | Optionnel | Nombre maximal de fichiers et répertoires parcourus sous .outpost, ou d’objets listés depuis transporter, 100000 par défaut. Le dépasser rend l’inventaire incomplet, ce qui rejette avec le code workspace. |
 
 ## Signature
 

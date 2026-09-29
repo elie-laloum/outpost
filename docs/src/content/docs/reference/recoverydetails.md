@@ -13,9 +13,9 @@ import { recoveryDetails } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Extract recovery metadata from an unknown error when Outpost attached it. The result identifies retained work and recovery locations; absent metadata returns undefined and does not trigger cleanup or restoration.
+Return the recovery record Outpost attached to a thrown value: where work survived, such as branch, directory, commits, transcript, logReference or conversation. Works on any thrown object, including a plain Error or an abort reason. Returns an empty object for an OutpostError without a record and undefined for any other value without one.
 
-[Complete example and detailed rules](../../guide/recovery/).
+[Complete example and detailed rules](../../guide/error-handling/).
 
 ## Parameters and properties
 

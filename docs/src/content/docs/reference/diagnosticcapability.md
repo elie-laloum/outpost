@@ -13,11 +13,11 @@ import type { DiagnosticCapability } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name         | Type                                                                    | Presence | Meaning                                                                                       |
-| ------------ | ----------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------- |
-| `id`         | `"command" \| "transfers" \| "batchTransfers" \| "interactiveTerminal"` | Required | Capability being assessed: command, transfers, batch transfers or interactive terminal.       |
-| `advertised` | `boolean \| "unknown"`                                                  | Required | Whether the inspected adapter advertises this capability; unknown if it cannot be determined. |
-| `observed`   | `"fail" \| "unverified" \| "pass"`                                      | Required | Probe outcome, or unverified when no probe established support.                               |
+| Name         | Type                                                                    | Presence | Meaning                                                                                                                                                                                        |
+| ------------ | ----------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`         | `"command" \| "transfers" \| "batchTransfers" \| "interactiveTerminal"` | Required | Capability assessed: command, transfers, batchTransfers or interactiveTerminal.                                                                                                                |
+| `advertised` | `boolean \| "unknown"`                                                  | Required | Whether the resource’s contract provides the capability: always true for command and transfers, true for batchTransfers when the lease has fileTransfers, and unknown for interactiveTerminal. |
+| `observed`   | `"fail" \| "unverified" \| "pass"`                                      | Required | pass or fail from the sandbox.command or sandbox.transfers check, unverified when that probe did not run. batchTransfers and interactiveTerminal are always unverified.                        |
 
 ## Signature
 

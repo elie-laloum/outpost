@@ -13,14 +13,14 @@ import type { RecoveryVerification } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name        | Type                                               | Presence | Meaning                                                                                              |
-| ----------- | -------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------- |
-| `directory` | `string`                                           | Required | Host directory containing the retained transfer artifacts to verify or restore.                      |
-| `scope`     | `"transfer-structure" \| "transfer-restorability"` | Required | Whether verification covered only transfer structure or also Git restorability.                      |
-| `complete`  | `boolean`                                          | Required | Whether all requested inspection work completed without hitting scan limits or inaccessible entries. |
-| `integrity` | `RecoveryIntegrity`                                | Required | Integrity conclusion from the recorded manifest and available checksum verification.                 |
-| `checksums` | `RecoveryChecksumResult \| undefined`              | Optional | Detailed checksum results, byte count and integrity status when hashing was requested.               |
-| `checks`    | `readonly RecoveryStructureCheck[]`                | Required | Per-path verification results with pass/fail status and diagnostic code.                             |
+| Name        | Type                                               | Presence | Meaning                                                                                                                                      |
+| ----------- | -------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `directory` | `string`                                           | Required | Resolved real path of the verified transfer directory.                                                                                       |
+| `scope`     | `"transfer-structure" \| "transfer-restorability"` | Required | transfer-restorability when restorability was requested, otherwise transfer-structure.                                                       |
+| `complete`  | `boolean`                                          | Required | Whether every check passed.                                                                                                                  |
+| `integrity` | `RecoveryIntegrity`                                | Required | checksums-match or checksums-mismatch after checksum verification; unverified when checksums were not requested or could not run to the end. |
+| `checksums` | `RecoveryChecksumResult \| undefined`              | Optional | Checksum integrity, bytesChecked, maxBytes and per-file checks; present when checksums was requested and the earlier checks passed.          |
+| `checks`    | `readonly RecoveryStructureCheck[]`                | Required | Every check run, in order, with path, pass or fail status and a code such as FILE_PRESENT, CHECKSUM_MISMATCH or PATCH_APPLIES.               |
 
 ## Signature
 

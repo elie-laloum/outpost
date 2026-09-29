@@ -71,7 +71,7 @@ export const groups = [
   {
     id: "observability",
     title: ["Observability", "Observabilité"],
-    guide: "guide/progress",
+    guide: "guide/observability",
     names:
       "createObservationHub Observation ObservationScope ObservationSource ObservationEvent OperationEvent ObservationHub ObservationHubOptions ObservationSink createReporter ReporterOptions createCustomReporter CustomReporter CustomReporterOptions ReporterHandlers DispatchTelemetry DispatchTelemetrySession DispatchTelemetryOutcome Logging createReplayAgent ReplayDivergence ReplayAgent ReplayAgentOptions ReplayTurn ReplayFailure ReplayDivergenceDetails ReplayDivergenceKind ReplayDivergencePolicy WorkspaceCommitsEvent RecordedCommit RecordedIdentity RecordedRevision AgentEvent AgentObservation Usage createOpenTelemetryObserver OpenTelemetryOptions OpenTelemetryObserver",
   },
@@ -99,14 +99,14 @@ export const groups = [
   {
     id: "recovery-retention",
     title: ["Recovery and retention", "Récupération et rétention"],
-    guide: "guide/recovery",
+    guide: "guide/retention",
     names:
       "planRecoveryRetention pruneRecoveryRetention assertRecoveryQuota RecoveryRetentionPolicy RecoveryRetentionOptions RecoveryRetentionPlan RecoveryRetentionEntry RecoveryPruneResult RecoveryQuotaOptions verifyRecoveryTransfer RecoveryVerification RecoveryVerificationOptions",
   },
   {
     id: "errors",
     title: ["Errors", "Erreurs"],
-    guide: "guide/recovery",
+    guide: "guide/error-handling",
     names:
       "OutpostError recoveryDetails quotaFault unavailableFault FaultCode QuotaFault UnavailableFault",
   },

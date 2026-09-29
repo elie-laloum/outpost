@@ -7,11 +7,11 @@ sidebar:
 
 ## Parameters and properties
 
-| Name         | Type                           | Presence | Meaning                                                                                              |
-| ------------ | ------------------------------ | -------- | ---------------------------------------------------------------------------------------------------- |
-| `complete`   | `boolean`                      | Required | Whether all requested inspection work completed without hitting scan limits or inaccessible entries. |
-| `workspaces` | `readonly WorkspaceGitEntry[]` | Required | Git state observations for the repository’s managed worktrees.                                       |
-| `issues`     | `readonly StorageIssue[]`      | Required | Filesystem, Git or ownership problems that prevented complete inspection.                            |
+| Name         | Type                           | Presence | Meaning                                                                                                                                    |
+| ------------ | ------------------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `complete`   | `boolean`                      | Required | true when no workspace state is unavailable.                                                                                               |
+| `workspaces` | `readonly WorkspaceGitEntry[]` | Required | Git state of each entry in .outpost/workspaces.                                                                                            |
+| `issues`     | `readonly StorageIssue[]`      | Required | One issue per unavailable workspace, with its reason as code, or one GIT_LIST_FAILED issue on the repository when git worktree list fails. |
 
 ## Signature
 

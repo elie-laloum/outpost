@@ -13,13 +13,13 @@ import type { SandboxDiagnosticOptions } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom               | Type                                                        | Présence  | Rôle                                                                                                                    |
-| ----------------- | ----------------------------------------------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `agent`           | `BuiltInAgentName \| undefined`                             | Optionnel | Identifiant du CLI d’agent à rapporter ou diagnostiquer : claude, codex, antigravity (exécutable agy), copilot ou kimi. |
-| `deadlineMs`      | `number \| undefined`                                       | Optionnel | Durée maximale de chaque sonde de diagnostic en millisecondes.                                                          |
-| `signal`          | `AbortSignal \| undefined`                                  | Optionnel | Annulation coopérative de cette opération.                                                                              |
-| `transfers`       | `boolean \| undefined`                                      | Optionnel | Active des sondes temporaires d’envoi et téléchargement pendant le diagnostic de sandbox.                               |
-| `sandboxProvider` | `Pick<SandboxProvider, "name" \| "placement"> \| undefined` | Optionnel | Nom et placement du provider utilisés pour interpréter le rapport de diagnostic.                                        |
+| Nom               | Type                                                        | Présence  | Rôle                                                                                                                                                                                                                                                 |
+| ----------------- | ----------------------------------------------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `agent`           | `BuiltInAgentName \| undefined`                             | Optionnel | Agent intégré dont la CLI est vérifiée dans la sandbox : sa version (agent.sandbox), puis son aide pour chaque mode utilisé par Outpost (agent.cli.&lt;mode>). Sans lui, aucun contrôle d’agent ne s’exécute.                                        |
+| `deadlineMs`      | `number \| undefined`                                       | Optionnel | Délai de chaque commande de sonde et de chaque transfert en millisecondes, 5000 par défaut. Doit être un entier de 1 à 60000, sinon l’appel rejette avec le code configuration.                                                                      |
+| `signal`          | `AbortSignal \| undefined`                                  | Optionnel | Annule le diagnostic. Déjà annulé, l’appel rejette avec la raison de l’annulation ; annulé pendant l’exécution, les sondes restantes sont rapportées en fail.                                                                                        |
+| `transfers`       | `boolean \| undefined`                                      | Optionnel | true envoie un petit fichier binaire sous la racine de la sandbox, le vérifie avec un processus de la sandbox, le télécharge, puis supprime le répertoire de sonde (contrôles sandbox.transfers et sandbox.transfers.cleanup). Désactivé par défaut. |
+| `sandboxProvider` | `Pick<SandboxProvider, "name" \| "placement"> \| undefined` | Optionnel | Nom et placement du provider recopiés dans le rapport. sandbox.diagnose() le remplace par le provider de la sandbox.                                                                                                                                 |
 
 ## Signature
 

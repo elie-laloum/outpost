@@ -13,9 +13,9 @@ import type { UnavailableFault } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name      | Type     | Presence | Meaning                                                                                                                                                                                       |
-| --------- | -------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `message` | `string` | Required | Signal that identified the outage, such as HTTP 503, an overloaded stream error or the recognized agent failure text; a timeout diagnosed as a connection failure reports connection failure. |
+| Name      | Type     | Presence | Meaning                                                                                                                                                                                                                 |
+| --------- | -------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `message` | `string` | Required | The details.unavailable signal: HTTP &lt;status>, HTTP transport failure, a model stream error type, the agent failure text its adapter matched, or connection failure for a timeout after an agent connection failure. |
 
 ## Signature
 

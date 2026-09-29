@@ -13,20 +13,20 @@ import { planRecoveryRetention } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Inspect local recovery storage and compute which clean workspaces or closed logs satisfy the supplied age and capacity policy. Planning reports eligibility and projected usage without removing files.
+Inventory the repository's .outpost, or a transport's objects, and mark each entry eligible or kept with a reason code under the policy. Removes nothing; an incomplete inventory makes every entry ineligible and quota unknown. An invalid policy, or clean-workspaces or maxWorkspaces with a transporter, rejects with code configuration.
 
 [Complete example and detailed rules](../../guide/retention/).
 
 ## Parameters and properties
 
-| Name                  | Type                          | Presence | Meaning                                                                                                                   |
-| --------------------- | ----------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `options`             | `RecoveryRetentionOptions`    | Required | Repository to inspect, explicit retention policy and scan bound.                                                          |
-| `options.transporter` | `Transport \| undefined`      | Optional | Inspect remote objects and plan retention of closed journals. Local workspace cleanup is unsupported in transport mode.   |
-| `options.repository`  | `string \| undefined`         | Optional | Target host Git checkout.                                                                                                 |
-| `options.policy`      | `RecoveryRetentionPolicy`     | Required | Explicit storage scopes, minimum age and capacity targets used to decide retention eligibility.                           |
-| `options.maxEntries`  | `number \| undefined`         | Optional | Maximum filesystem entries inspected before marking the inventory incomplete.                                             |
-| `observation`         | `ObservationHub \| undefined` | Optional | Optional hub receiving start and terminal events for retention planning; never persisted in the recovery plan or archive. |
+| Name                  | Type                          | Presence | Meaning                                                                                                                                                                                             |
+| --------------------- | ----------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `options`             | `RecoveryRetentionOptions`    | Required | Repository or transporter to inspect, retention policy and scan limit.                                                                                                                              |
+| `options.transporter` | `Transport \| undefined`      | Optional | Plan over this transport's objects instead of the repository's .outpost. Only closed-logs and task-cache apply; clean-workspaces or maxWorkspaces reject with code configuration.                   |
+| `options.repository`  | `string \| undefined`         | Optional | Git checkout whose .outpost is inspected, default process.cwd(), resolved to its top-level directory; a missing directory rejects with code workspace. With transporter, only recorded in the plan. |
+| `options.policy`      | `RecoveryRetentionPolicy`     | Required | Scopes, minimum age and limits deciding which entries are eligible. Validated before inspection; an invalid or unknown field rejects with code configuration.                                       |
+| `options.maxEntries`  | `number \| undefined`         | Optional | Maximum files and directories scanned under .outpost, or objects listed from transporter, default 100000. Exceeding it marks the plan incomplete, so no entry is eligible.                          |
+| `observation`         | `ObservationHub \| undefined` | Optional | Hub receiving the started, then finished or failed, operation event retention.plan with its duration.                                                                                               |
 
 ## Returns
 

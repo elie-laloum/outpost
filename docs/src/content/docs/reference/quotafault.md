@@ -13,7 +13,7 @@ import { quotaFault } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Return the message and reset time of an OutpostError with code quota, following up to eight wrapped causes. Returns undefined for any other value. Use it in retry.accepts or error handling to separate usage and rate limits from other failures; it does not wait or retry.
+Return the message, resetAt and conversation of the first OutpostError with code quota in the error and up to seven wrapped causes, or undefined. Fallback agents and onQuota pauses use the same test. It does not wait or retry.
 
 [Complete example and detailed rules](../../guide/quota-pauses/).
 

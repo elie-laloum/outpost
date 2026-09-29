@@ -7,19 +7,19 @@ sidebar:
 
 ## Paramètres et propriétés
 
-| Nom           | Type                  | Présence  | Rôle                                                                                                                 |
-| ------------- | --------------------- | --------- | -------------------------------------------------------------------------------------------------------------------- |
-| `revision`    | `string \| undefined` | Optionnel | Révision d’objet pour une entrée d’inventaire de transport ; absente dans l’inventaire du système de fichiers local. |
-| `name`        | `string`              | Requis    | Nom de fichier de l’entrée de stockage inspectée.                                                                    |
-| `path`        | `string`              | Requis    | Chemin hôte de l’entrée de stockage inspectée.                                                                       |
-| `kind`        | `StorageEntryKind`    | Requis    | Type d’entrée de fichiers observé sans suivre les liens symboliques.                                                 |
-| `modifiedAt`  | `string \| undefined` | Optionnel | Horodatage ISO de la dernière modification de l’entrée inspectée.                                                    |
-| `complete`    | `boolean`             | Requis    | Indique si toute l’inspection demandée s’est terminée sans limite de parcours ni entrée inaccessible.                |
-| `bytes`       | `number`              | Requis    | Taille observée en octets de cette entrée, y compris ses enfants parcourus.                                          |
-| `files`       | `number`              | Requis    | Nombre de fichiers ordinaires comptés dans le stockage parcouru.                                                     |
-| `directories` | `number`              | Requis    | Nombre de dossiers comptés dans le stockage parcouru.                                                                |
-| `symlinks`    | `number`              | Requis    | Nombre de liens symboliques comptés sans parcourir leurs cibles.                                                     |
-| `other`       | `number`              | Requis    | Nombre d’entrées qui ne sont ni fichiers ordinaires, ni dossiers, ni liens symboliques.                              |
+| Nom           | Type                  | Présence  | Rôle                                                                                                                                                                                                        |
+| ------------- | --------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `revision`    | `string \| undefined` | Optionnel | Révision d’objet pour une entrée d’inventaire de transport ; absente dans l’inventaire du système de fichiers local.                                                                                        |
+| `name`        | `string`              | Requis    | Nom de base de l’entrée, ou la clé complète de l’objet pour un inventaire de transport.                                                                                                                     |
+| `path`        | `string`              | Requis    | Chemin hôte de l’entrée, ou la clé de l’objet pour un inventaire de transport.                                                                                                                              |
+| `kind`        | `StorageEntryKind`    | Requis    | file, directory, symlink, other ou unknown, lu sans suivre les liens symboliques. unknown signifie que l’entrée n’a pas pu être lue ou dépassait la limite d’entrées ; les objets d’un transport sont file. |
+| `modifiedAt`  | `string \| undefined` | Optionnel | Date de dernière modification au format ISO, enfants parcourus d’un dossier compris.                                                                                                                        |
+| `complete`    | `boolean`             | Requis    | false lorsque cette entrée ou l’un de ses enfants a atteint une limite de parcours ou n’a pas pu être lu.                                                                                                   |
+| `bytes`       | `number`              | Requis    | Somme des tailles des fichiers ordinaires de cette entrée et de ses enfants parcourus ; les liens symboliques et les dossiers comptent 0. La taille de l’objet pour un transport.                           |
+| `files`       | `number`              | Requis    | Nombre de fichiers ordinaires comptés dans le stockage parcouru.                                                                                                                                            |
+| `directories` | `number`              | Requis    | Nombre de dossiers comptés dans le stockage parcouru.                                                                                                                                                       |
+| `symlinks`    | `number`              | Requis    | Nombre de liens symboliques comptés sans parcourir leurs cibles.                                                                                                                                            |
+| `other`       | `number`              | Requis    | Nombre d’entrées qui ne sont ni fichiers ordinaires, ni dossiers, ni liens symboliques.                                                                                                                     |
 
 ## Signature
 

@@ -13,13 +13,13 @@ import type { ObservationHubOptions } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom                 | Type                                      | Présence  | Rôle                                                                                                                                                |
-| ------------------- | ----------------------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `sinks`             | `readonly ObservationSink[] \| undefined` | Optionnel | Récepteurs rattachés à cette racine et hérités par chaque enfant.                                                                                   |
-| `scope`             | `ObservationScope \| undefined`           | Optionnel | Champs de corrélation initiaux ; les enfants ne remplacent que les champs explicitement fournis.                                                    |
-| `capacity`          | `number \| undefined`                     | Optionnel | Maximum d’enveloppes en attente par récepteur asynchrone, 1024 par défaut ; les nouvelles livraisons sont perdues et comptées en cas de saturation. |
-| `deliveryTimeoutMs` | `number \| undefined`                     | Optionnel | Attente maximale d’une livraison asynchrone ou du vidage d’un récepteur, 5000 ms par défaut ; un récepteur hors délai est désactivé.                |
-| `verbose`           | `boolean \| undefined`                    | Optionnel | Autorise explicitement les événements de requête/réponse modèle complets. N’active pas à lui seul leur conservation dans le journal.                |
+| Nom                 | Type                                      | Présence  | Rôle                                                                                                                                                                                                              |
+| ------------------- | ----------------------------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `sinks`             | `readonly ObservationSink[] \| undefined` | Optionnel | Récepteurs rattachés à cette racine et hérités par chaque enfant.                                                                                                                                                 |
+| `scope`             | `ObservationScope \| undefined`           | Optionnel | Champs de corrélation initiaux ; les enfants ne remplacent que les champs explicitement fournis.                                                                                                                  |
+| `capacity`          | `number \| undefined`                     | Optionnel | Nombre maximal d’événements en attente par sink asynchrone, 1024 par défaut ; en cas de débordement, les plus récents sont abandonnés et comptés. Une valeur qui n’est pas un entier positif lève une erreur.     |
+| `deliveryTimeoutMs` | `number \| undefined`                     | Optionnel | Attente maximale d’une livraison asynchrone ou du flush d’un sink, 5000 par défaut ; un sink qui la dépasse est désactivé pour toute la durée du hub. Une valeur qui n’est pas un entier positif lève une erreur. |
+| `verbose`           | `boolean \| undefined`                    | Optionnel | Autorise explicitement les événements de requête/réponse modèle complets. N’active pas à lui seul leur conservation dans le journal.                                                                              |
 
 ## Signature
 

@@ -13,9 +13,9 @@ import type { UnavailableFault } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom       | Type     | Présence | Rôle                                                                                                                                                                                                     |
-| --------- | -------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `message` | `string` | Requis   | Signal qui a identifié la panne, par exemple HTTP 503, une erreur de flux overloaded ou le texte d’échec reconnu de l’agent ; un délai diagnostiqué comme échec de connexion indique connection failure. |
+| Nom       | Type     | Présence | Rôle                                                                                                                                                                                                                                                 |
+| --------- | -------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `message` | `string` | Requis   | Le signal details.unavailable : HTTP &lt;status>, HTTP transport failure, un type d’erreur de flux de modèle, le texte d’échec reconnu par l’adapter de l’agent, ou connection failure pour un délai dépassé après un échec de connexion de l’agent. |
 
 ## Signature
 

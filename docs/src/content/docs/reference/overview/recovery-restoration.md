@@ -1,27 +1,49 @@
 ---
 title: "Recovery restoration — Overview"
-description: "Restoration applies retained transfer data to an explicit repository after normal synchronization could not complete."
+description: "Rebuild one side of a retained remote transfer in a new directory, after checking its files, checksums and Git history."
 sidebar:
   label: Overview
   order: 0
 ---
 
-Restoration applies retained transfer data to an explicit repository after normal synchronization could not complete. Its purpose is to recover work deliberately, with a reviewable plan, instead of treating a failed transfer as permission to overwrite the host checkout.
+## Choose a side
 
-## How it works
+A transfer stays under `.outpost/recovery` when a cloud sandbox’s changes could not be applied to the host worktree; the `workspace` error names it in `details.recovery`. It holds both sides of that synchronization.
 
-`planRecoveryRestore` describes the proposed restoration and its prerequisites. `restoreRecoveryTransfer` performs the application step under its ownership and validation rules. Transfer verification is a separate prerequisite; the plan and result expose what is being applied and what happened.
+| `side`     | Commit                                | Uncommitted changes                           | Staged index                                         | Untracked files   |
+| ---------- | ------------------------------------- | --------------------------------------------- | ---------------------------------------------------- | ----------------- |
+| `previous` | Last synchronized commit              | `previous.patch`: the host worktree’s changes | Restored from `previous-index.patch` (`"preserved"`) | `previous-files/` |
+| `incoming` | Sandbox `HEAD`, from `commits.bundle` | `remote.patch`: the sandbox’s changes         | Not captured (`"unavailable"`)                       | `incoming/`       |
 
-## Boundaries and responsibilities
+## How a restore ends
 
-A retained directory is evidence to inspect, not proof that all required data exists. Verify the transfer and target repository first. Concurrent host changes must remain protected, and recoverable artifacts must survive failures that prevent safe completion.
+Neither call writes to the host repository or the transfer. Each copies the transfer to a temporary directory and checks the copy like `verifyRecoveryTransfer()` with checksums and restorability.
+
+| Event                                                                              | Outcome                                                            | Destination                                    |
+| ---------------------------------------------------------------------------------- | ------------------------------------------------------------------ | ---------------------------------------------- |
+| `planRecoveryRestore()` passes every check                                         | Resolves with a `RecoveryRestorePlan`                              | Not created                                    |
+| Destination exists or lies inside the repository, its Git metadata or the transfer | Rejects with code `configuration`                                  | Not created                                    |
+| Byte limit reached, checksum mismatch or failed Git check                          | Rejects with code `configuration`                                  | Not created                                    |
+| Transfer, repository or destination parent missing                                 | Rejects with code `workspace`                                      | Not created                                    |
+| Transfer has no `state.json`: synchronization failed before the host backup        | Rejects with a filesystem error                                    | Not created                                    |
+| Plan edited, or transfer changed since planning                                    | `restoreRecoveryTransfer()` rejects with code `configuration`      | Not created                                    |
+| Clone, bundle, patch or file copy fails                                            | Rejects with code `workspace`, naming `destination` and `transfer` | Partial, kept                                  |
+| `restoreRecoveryTransfer()` completes                                              | Resolves with a `RecoveryRestoreResult`, `sourceRetained: true`    | Clone detached at `commit`, no `origin` remote |
+
+:::caution
+A failed restore keeps its partial destination, and a retry into the same path is refused. Remove it or choose a new destination.
+:::
 
 ## Entry points
+
+Guide: [Recover work](../../../guide/recovery/) · [Cloud sandboxes](../../../guide/cloud-sandboxes/)
 
 - [planRecoveryRestore](../../planrecoveryrestore/)
 - [restoreRecoveryTransfer](../../restorerecoverytransfer/)
 - [RecoveryRestoreOptions](../../recoveryrestoreoptions/)
 - [RecoveryRestorePlan](../../recoveryrestoreplan/)
 - [RecoveryRestoreResult](../../recoveryrestoreresult/)
-
-[Learn with the practical guide](../../../guide/recovery/).
+- [RecoveryChecksumResult](../../support-recoverychecksumresult/)
+- [StorageInventory](../../support-storageinventory/)
+- [WorkspaceGitInspection](../../support-workspacegitinspection/)
+- [LockInspection](../../support-lockinspection/)

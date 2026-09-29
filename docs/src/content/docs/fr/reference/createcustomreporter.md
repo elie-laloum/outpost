@@ -13,7 +13,7 @@ import { createCustomReporter } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Crée un observateur appelable avec des handlers typés et une barrière flush explicite. Les handlers s’exécutent séquentiellement sans bloquer le dispatch ; onError signale les erreurs et la première reste accessible à chaque flush. Les fichiers, loggers et leur fermeture appartiennent à l’appelant.
+Crée un callback observe qui transmet chaque observation d’agent au handler de son kind. Les handlers s’exécutent un par un sur une file bornée sans bloquer le dispatch ; flush() les attend et rejette avec le premier échec d’un handler. L’appelant possède les fichiers ou loggers qu’utilisent les handlers.
 
 [Exemple complet et règles détaillées](../../guide/observability/).
 

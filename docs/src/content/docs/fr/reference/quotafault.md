@@ -13,7 +13,7 @@ import { quotaFault } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Renvoie le message et l’heure de réinitialisation d’une OutpostError de code quota, en suivant jusqu’à huit causes imbriquées. Renvoie undefined pour toute autre valeur. Utilisez-la dans retry.accepts ou la gestion d’erreurs pour distinguer les limites d’usage et de débit des autres échecs ; elle n’attend ni ne relance.
+Renvoie message, resetAt et conversation de la première OutpostError de code quota trouvée dans l’erreur et jusqu’à sept causes imbriquées, sinon undefined. Les agents de secours et les pauses onQuota appliquent le même test. Elle n’attend ni ne relance.
 
 [Exemple complet et règles détaillées](../../guide/quota-pauses/).
 

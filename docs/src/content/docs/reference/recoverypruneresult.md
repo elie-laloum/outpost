@@ -13,11 +13,11 @@ import type { RecoveryPruneResult } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name       | Type                                                             | Presence | Meaning                                                                    |
-| ---------- | ---------------------------------------------------------------- | -------- | -------------------------------------------------------------------------- |
-| `removed`  | `readonly string[]`                                              | Required | Paths actually removed after ownership and safety revalidation.            |
-| `retained` | `readonly { readonly path: string; readonly reason: string; }[]` | Required | Candidates left in place with the reason each could not be removed.        |
-| `after`    | `RecoveryRetentionPlan`                                          | Required | Fresh retention plan computed after pruning, reflecting remaining storage. |
+| Name       | Type                                                             | Presence | Meaning                                                                                        |
+| ---------- | ---------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------- |
+| `removed`  | `readonly string[]`                                              | Required | Paths or object keys removed.                                                                  |
+| `retained` | `readonly { readonly path: string; readonly reason: string; }[]` | Required | Eligible candidates left in place, with reason PLAN_CHANGED or REVALIDATION_OR_REMOVAL_FAILED. |
+| `after`    | `RecoveryRetentionPlan`                                          | Required | Fresh plan with the same policy, computed after pruning.                                       |
 
 ## Signature
 

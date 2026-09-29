@@ -7,10 +7,10 @@ sidebar:
 
 ## Parameters and properties
 
-| Name     | Type                                  | Presence | Meaning                                                                               |
-| -------- | ------------------------------------- | -------- | ------------------------------------------------------------------------------------- |
-| `status` | `"active" \| "unknown" \| "inactive"` | Required | Whether the recorded process is active, inactive or cannot be identified confidently. |
-| `reason` | `string`                              | Required | Reason the local lock was classified with this ownership state.                       |
+| Name     | Type                                  | Presence | Meaning                                                                                                                                                          |
+| -------- | ------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `status` | `"active" \| "unknown" \| "inactive"` | Required | active: the PID runs with the recorded identity; inactive: the process exited; unknown: another host, boot or PID namespace, a reused PID or a missing identity. |
+| `reason` | `string`                              | Required | Code behind the status, such as LOCAL_IDENTITY_MATCH, PROCESS_EXITED, OTHER_HOST, PID_REUSED or REMOTE_OWNER_UNVERIFIED.                                         |
 
 ## Signature
 

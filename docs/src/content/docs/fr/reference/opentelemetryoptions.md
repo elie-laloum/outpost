@@ -13,11 +13,11 @@ import type { OpenTelemetryOptions } from "@elie-laloum/outpost/opentelemetry";
 
 ## Paramètres et propriétés
 
-| Nom       | Type                                      | Présence  | Rôle                                                                                 |
-| --------- | ----------------------------------------- | --------- | ------------------------------------------------------------------------------------ |
-| `tracer`  | `Tracer`                                  | Requis    | Tracer OpenTelemetry utilisé pour créer les spans d’exécution.                       |
-| `meter`   | `Meter`                                   | Requis    | Meter OpenTelemetry utilisé pour enregistrer les métriques d’exécution et de tokens. |
-| `onError` | `((error: unknown) => void) \| undefined` | Optionnel | Callback recevant les erreurs isolées de télémétrie ou d’observation.                |
+| Nom       | Type                                      | Présence  | Rôle                                                                                                                                                                                                              |
+| --------- | ----------------------------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `tracer`  | `Tracer`                                  | Requis    | Tracer OpenTelemetry utilisé pour créer les spans d’exécution.                                                                                                                                                    |
+| `meter`   | `Meter`                                   | Requis    | Meter OpenTelemetry pour les compteurs d’exécutions, histogrammes de durée et compteurs de tokens d’Outpost (outpost.workflow._, outpost.task._, outpost.dispatch.*, outpost.agent.tokens).                       |
+| `onError` | `((error: unknown) => void) \| undefined` | Optionnel | Reçoit les erreurs levées par le tracer ou le meter pendant l’enregistrement des workflows et des dispatchs ; elles ne changent jamais le résultat d’une exécution. Les erreurs levées par onError sont ignorées. |
 
 ## Signature
 

@@ -7,11 +7,11 @@ sidebar:
 
 ## Parameters and properties
 
-| Name     | Type               | Presence | Meaning                                                                         |
-| -------- | ------------------ | -------- | ------------------------------------------------------------------------------- |
-| `path`   | `string`           | Required | Retained transfer entry examined by this verification check.                    |
-| `status` | `"fail" \| "pass"` | Required | pass when the checked invariant holds, fail when it does not.                   |
-| `code`   | `string`           | Required | Diagnostic code identifying the verified invariant or detected transfer defect. |
+| Name     | Type               | Presence | Meaning                                                                                                  |
+| -------- | ------------------ | -------- | -------------------------------------------------------------------------------------------------------- |
+| `path`   | `string`           | Required | Retained transfer entry examined by this verification check.                                             |
+| `status` | `"fail" \| "pass"` | Required | pass when the checked invariant holds, fail when it does not.                                            |
+| `code`   | `string`           | Required | Check code, such as FILE_PRESENT, INVALID_STATE, PATCH_APPLIES, CHECKSUM_MISMATCH or SOURCE_UNSUPPORTED. |
 
 ## Signature
 

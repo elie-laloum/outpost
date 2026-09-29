@@ -13,12 +13,12 @@ import type { ReporterOptions } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom       | Type                                    | Présence  | Rôle                                                                         |
-| --------- | --------------------------------------- | --------- | ---------------------------------------------------------------------------- |
-| `label`   | `string \| undefined`                   | Optionnel | Libellé lisible utilisé dans les rapports d’exécution.                       |
-| `verbose` | `boolean \| undefined`                  | Optionnel | Inclut les événements détaillés d’agent et d’outils dans la sortie terminal. |
-| `quiet`   | `boolean \| undefined`                  | Optionnel | Masque toutes les sorties du rapporteur, y compris avertissements et échecs. |
-| `write`   | `((text: string) => void) \| undefined` | Optionnel | Fonction de destination personnalisée pour la sortie formatée du rapporteur. |
+| Nom       | Type                                    | Présence  | Rôle                                                                                                                                                                                                                                    |
+| --------- | --------------------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `label`   | `string \| undefined`                   | Optionnel | Préfixe affiché entre crochets sur chaque ligne, outpost par défaut ; le numéro de passe le suit.                                                                                                                                       |
+| `verbose` | `boolean \| undefined`                  | Optionnel | Affiche aussi les entrées d’outils et aperçus de résultats, les prompts, les lignes brutes du protocole, les identifiants de conversation, les étapes et compactions du harness, le répertoire du workspace et les opérations réussies. |
+| `quiet`   | `boolean \| undefined`                  | Optionnel | Masque toutes les sorties du rapporteur, y compris avertissements et échecs.                                                                                                                                                            |
+| `write`   | `((text: string) => void) \| undefined` | Optionnel | Reçoit chaque morceau de sortie formaté à la place de process.stdout.                                                                                                                                                                   |
 
 ## Signature
 

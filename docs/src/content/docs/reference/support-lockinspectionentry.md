@@ -9,14 +9,14 @@ sidebar:
 
 The fields below cover all variants; the signature specifies their allowed combinations.
 
-| Name        | Type                                              | Presence          | Meaning                                                                    |
-| ----------- | ------------------------------------------------- | ----------------- | -------------------------------------------------------------------------- |
-| `name`      | `string`                                          | Required          | Filesystem basename of the inspected storage entry.                        |
-| `path`      | `string`                                          | Required          | Host path of the inspected storage entry.                                  |
-| `ownership` | `LockOwnership \| undefined`                      | Optional          | Assessment of whether the recorded local process still owns the resource.  |
-| `state`     | `"present" \| "absent" \| "unknown" \| "skipped"` | Required          | Whether the lock file is present, absent, unknown or deliberately skipped. |
-| `pid`       | `number \| number \| undefined`                   | Variant-dependent | Process ID parsed from the local lock file when available.                 |
-| `reason`    | `string \| "NOT_FILE"`                            | Variant-dependent | Reason the local lock was classified with this ownership state.            |
+| Name        | Type                                              | Presence          | Meaning                                                                                                                                                       |
+| ----------- | ------------------------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`      | `string`                                          | Required          | Basename of the entry, or the full object key for a transport inventory.                                                                                      |
+| `path`      | `string`                                          | Required          | Host path of the entry, or the object key for a transport inventory.                                                                                          |
+| `ownership` | `LockOwnership \| undefined`                      | Optional          | Whether the recorded process still holds the lock, judged by host, boot, PID namespace and process start time. Rely on it rather than on state.               |
+| `state`     | `"present" \| "absent" \| "unknown" \| "skipped"` | Required          | present: a process with the recorded PID exists; absent: none exists; unknown: the file or PID could not be read or probed; skipped: the entry is not a file. |
+| `pid`       | `number \| number \| undefined`                   | Variant-dependent | PID read from the lock file, absent when the file or its PID is unreadable.                                                                                   |
+| `reason`    | `string \| "NOT_FILE"`                            | Variant-dependent | Why the state is unknown (LOCK_READ_FAILED, INVALID_PID, PID_PROBE_FAILED) or skipped (NOT_FILE).                                                             |
 
 ## Signature
 

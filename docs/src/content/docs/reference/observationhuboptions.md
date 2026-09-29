@@ -13,13 +13,13 @@ import type { ObservationHubOptions } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name                | Type                                      | Presence | Meaning                                                                                                               |
-| ------------------- | ----------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------- |
-| `sinks`             | `readonly ObservationSink[] \| undefined` | Optional | Receivers attached to this root and inherited by every child.                                                         |
-| `scope`             | `ObservationScope \| undefined`           | Optional | Initial correlation fields; child scopes override only explicitly supplied fields.                                    |
-| `capacity`          | `number \| undefined`                     | Optional | Maximum waiting envelopes per asynchronous sink, default 1024; newest deliveries are dropped on overflow and counted. |
-| `deliveryTimeoutMs` | `number \| undefined`                     | Optional | Maximum asynchronous delivery or receiver-flush wait, default 5000 ms; an expired receiver is disabled.               |
-| `verbose`           | `boolean \| undefined`                    | Optional | Explicitly allow full model request/response events. Does not enable verbose journal retention by itself.             |
+| Name                | Type                                      | Presence | Meaning                                                                                                                                                                           |
+| ------------------- | ----------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `sinks`             | `readonly ObservationSink[] \| undefined` | Optional | Receivers attached to this root and inherited by every child.                                                                                                                     |
+| `scope`             | `ObservationScope \| undefined`           | Optional | Initial correlation fields; child scopes override only explicitly supplied fields.                                                                                                |
+| `capacity`          | `number \| undefined`                     | Optional | Maximum events waiting per asynchronous sink, default 1024; on overflow the newest are dropped and counted. A value that is not a positive integer throws.                        |
+| `deliveryTimeoutMs` | `number \| undefined`                     | Optional | Maximum wait for one asynchronous delivery or sink flush, default 5000; a sink that exceeds it is disabled for the hub’s lifetime. A value that is not a positive integer throws. |
+| `verbose`           | `boolean \| undefined`                    | Optional | Explicitly allow full model request/response events. Does not enable verbose journal retention by itself.                                                                         |
 
 ## Signature
 

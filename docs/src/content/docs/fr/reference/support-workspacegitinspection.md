@@ -7,11 +7,11 @@ sidebar:
 
 ## Paramètres et propriétés
 
-| Nom          | Type                           | Présence | Rôle                                                                                                  |
-| ------------ | ------------------------------ | -------- | ----------------------------------------------------------------------------------------------------- |
-| `complete`   | `boolean`                      | Requis   | Indique si toute l’inspection demandée s’est terminée sans limite de parcours ni entrée inaccessible. |
-| `workspaces` | `readonly WorkspaceGitEntry[]` | Requis   | Observations d’état Git des worktrees gérés du dépôt.                                                 |
-| `issues`     | `readonly StorageIssue[]`      | Requis   | Problèmes de fichiers, Git ou possession ayant empêché une inspection complète.                       |
+| Nom          | Type                           | Présence | Rôle                                                                                                                                          |
+| ------------ | ------------------------------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `complete`   | `boolean`                      | Requis   | true lorsqu’aucun état de workspace n’est unavailable.                                                                                        |
+| `workspaces` | `readonly WorkspaceGitEntry[]` | Requis   | État Git de chaque entrée de .outpost/workspaces.                                                                                             |
+| `issues`     | `readonly StorageIssue[]`      | Requis   | Un problème par workspace unavailable, avec son motif comme code, ou un problème GIT_LIST_FAILED sur le dépôt quand git worktree list échoue. |
 
 ## Signature
 

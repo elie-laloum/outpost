@@ -72,48 +72,48 @@
     "Calcule le chemin du transcript natif à l’intérieur d’un bail de sandbox à partir du format et de l’identifiant de conversation, en utilisant son home et son chemin de workspace."
   ],
   "recoveryDetails": [
-    "Extract recovery metadata from an unknown error when Outpost attached it. The result identifies retained work and recovery locations; absent metadata returns undefined and does not trigger cleanup or restoration.",
-    "Extrait les métadonnées de récupération d’une erreur inconnue lorsqu’Outpost les a attachées. Le résultat identifie le travail et les emplacements conservés ; sans métadonnées, renvoie undefined sans déclencher de nettoyage ni de restauration."
+    "Return the recovery record Outpost attached to a thrown value: where work survived, such as branch, directory, commits, transcript, logReference or conversation. Works on any thrown object, including a plain Error or an abort reason. Returns an empty object for an OutpostError without a record and undefined for any other value without one.",
+    "Renvoie l’enregistrement de récupération qu’Outpost a attaché à une valeur levée : l’emplacement du travail conservé, par exemple branch, directory, commits, transcript, logReference ou conversation. Fonctionne sur tout objet levé, y compris une Error simple ou une raison d’annulation. Renvoie un objet vide pour une OutpostError sans enregistrement et undefined pour toute autre valeur sans enregistrement."
   ],
   "createReporter": [
-    "Create an agent observation callback that formats progress, warnings and pass summaries for a terminal or custom writer. quiet suppresses all output and verbose includes additional events; reporting does not control execution.",
-    "Crée un callback d’observation qui formate progression, avertissements et bilans de passe pour un terminal ou une fonction d’écriture. quiet masque toutes les sorties et verbose inclut des événements supplémentaires ; le rapporteur ne pilote pas l’exécution."
+    "Create an observe callback that prints one line per event: phases, tool calls, warnings, failures and each pass summary with its token counts. It writes to process.stdout unless write is given and never changes execution.",
+    "Crée un callback observe qui affiche une ligne par événement : phases, appels d’outils, avertissements, échecs et le résumé de chaque passe avec ses compteurs de tokens. Il écrit sur process.stdout sauf si write est fourni, et ne modifie jamais l’exécution."
   ],
   "planRecoveryRetention": [
-    "Inspect local recovery storage and compute which clean workspaces or closed logs satisfy the supplied age and capacity policy. Planning reports eligibility and projected usage without removing files.",
-    "Inspecte le stockage local de récupération et détermine quels workspaces propres ou journaux fermés satisfont la politique d’âge et de capacité. Le plan expose éligibilité et usage projeté sans supprimer de fichier."
+    "Inventory the repository's .outpost, or a transport's objects, and mark each entry eligible or kept with a reason code under the policy. Removes nothing; an incomplete inventory makes every entry ineligible and quota unknown. An invalid policy, or clean-workspaces or maxWorkspaces with a transporter, rejects with code configuration.",
+    "Inventorie le .outpost du dépôt, ou les objets d’un transport, et marque chaque entrée éligible ou conservée avec un code de motif selon la politique. Ne supprime rien ; un inventaire incomplet rend toutes les entrées inéligibles et quota inconnu. Une politique invalide, ou clean-workspaces ou maxWorkspaces avec un transporter, rejette avec le code configuration."
   ],
   "pruneRecoveryRetention": [
-    "Apply a retention plan after fresh validation. Worktree removal reacquires the Git branch lock. Local and remote journal groups use conditional object deletion; explicit transport plans require the same transporter in the second argument. Changed or partially removed candidates are retained; recovery data remains protected.",
-    "Applique un plan après revalidation. La suppression d’un worktree reprend le verrou de branche Git. Les journaux locaux et distants utilisent des suppressions conditionnelles d’objets ; un plan de transport explicite exige le même transport en second argument. Les candidats modifiés ou partiellement supprimés sont conservés ; les données de récupération restent protégées."
+    "Remove the eligible entries of a complete plan, checking each against a fresh plan first; a changed or failed candidate is retained with its reason. Worktrees are removed under their branch lock and keep their branch; journal and cache objects are deleted with conditional writes. An incomplete plan or a transporter that does not match the plan's source rejects with code configuration.",
+    "Supprime les entrées éligibles d’un plan complet, en revérifiant chacune contre un nouveau plan ; un candidat modifié ou en échec est conservé avec son motif. Les worktrees sont supprimés sous le verrou de leur branche, qui est conservée ; les objets de journal et de cache sont effacés par écritures conditionnelles. Un plan incomplet ou un transporter qui ne correspond pas au source du plan rejette avec le code configuration."
   ],
   "assertRecoveryQuota": [
-    "Inspect recovery storage and reject if observed bytes plus the requested reservation exceed maxBytes, or if inspection cannot establish admission. This check does not reserve space or impose a filesystem quota; reserveRecoveryStorage coordinates cooperating writers.",
-    "Inspecte le stockage de récupération et échoue si les octets observés plus la réservation demandée dépassent maxBytes, ou si l’inspection ne permet pas de décider. Ce contrôle ne réserve pas d’espace et n’impose pas de quota physique ; reserveRecoveryStorage coordonne les écrivains coopératifs."
+    "Resolve when observed storage plus reserveBytes stays at or below maxBytes. Otherwise, or when the inventory is incomplete, reject with code workspace and usageBytes, reserveBytes, maxBytes and complete in details. Nothing is reserved and active reservations are not counted; reserveRecoveryStorage() coordinates writers.",
+    "Se résout quand le stockage observé plus reserveBytes reste inférieur ou égal à maxBytes. Sinon, ou si l’inventaire est incomplet, rejette avec le code workspace et usageBytes, reserveBytes, maxBytes et complete dans details. Rien n’est réservé et les réservations actives ne sont pas comptées ; reserveRecoveryStorage() coordonne les écrivains."
   ],
   "verifyRecoveryTransfer": [
-    "Verify a retained transfer’s directory structure, optionally hashing payloads and checking Git restorability within maxBytes. Returns detailed checks and integrity status without applying incoming changes or authenticating their author.",
-    "Vérifie la structure d’un transfert conservé, avec calcul optionnel des empreintes et contrôle de restauration Git dans la limite maxBytes. Renvoie contrôles détaillés et état d’intégrité sans appliquer les changements entrants ni authentifier leur auteur."
+    "Check a retained transfer directory: state.json, the three patches, commits.bundle when commits changed and every listed file, then optionally Git restorability and checksums. Failed checks are reported in the result, not thrown; nothing is applied and the author is not authenticated. restorability without repository or an invalid maxBytes rejects with code configuration.",
+    "Contrôle un dossier de transfert conservé : state.json, les trois patches, commits.bundle quand les commits ont changé et chaque fichier listé, puis en option la restauration Git et les empreintes. Les contrôles échoués figurent dans le résultat au lieu d’être levés ; rien n’est appliqué et l’auteur n’est pas authentifié. restorability sans repository ou un maxBytes invalide rejette avec le code configuration."
   ],
   "diagnoseSandbox": [
-    "Probe a caller-owned Sandbox or SandboxLease for command execution, agent CLI and optional transfer capabilities. An owned Sandbox uses its operation gate; the function reports failures without closing the caller’s resource or making live model calls.",
-    "Sonde un Sandbox ou SandboxLease appartenant à l’appelant pour vérifier commandes, CLI d’agent et transferts optionnels. Un Sandbox utilise son verrou d’opération ; la fonction rapporte les échecs sans fermer la ressource ni appeler de modèle réel."
+    "Probe a Sandbox or SandboxLease you own: Node.js, Git, output streams and exit status, the home directory, plus the agent CLI and a binary transfer when requested. A failed probe becomes a fail check in the resolved report and the resource stays open. Rejects with code configuration for an invalid deadlineMs or, on a Sandbox, while another operation runs.",
+    "Sonde un Sandbox ou un SandboxLease qui vous appartient : Node.js, Git, flux de sortie et statut de sortie, répertoire home, ainsi que la CLI de l’agent et un transfert binaire sur demande. Une sonde en échec devient un contrôle fail dans le rapport résolu, et la ressource reste ouverte. Rejette avec le code configuration pour un deadlineMs invalide ou, sur un Sandbox, pendant qu’une autre opération s’exécute."
   ],
   "diagnoseAgentProtocol": [
-    "Replay bundled event fixtures through the selected agent adapter and report decoding compatibility with the recorded CLI version. It does not launch the installed CLI, validate credentials or test a live model.",
-    "Rejoue les fixtures d’événements intégrées dans l’adapter choisi et rapporte la compatibilité de décodage avec la version CLI enregistrée. Ne lance pas le CLI installé, ne valide pas les identifiants et ne teste pas de modèle réel."
+    "Decode the synthetic event fixtures bundled for an agent with its adapter and return the report synchronously, one check per fixture. Runs no process: the installed CLI, credentials and model stay unverified.",
+    "Décode dans l’adapter de l’agent les fixtures d’événements synthétiques intégrées et renvoie le rapport de façon synchrone, un contrôle par fixture. Aucun processus n’est lancé : la CLI installée, les identifiants et le modèle restent non vérifiés."
   ],
   "reserveRecoveryStorage": [
     "Record reserveBytes in the repository's reservation ledger when observed usage, active reservations and the request fit within maxBytes, and return the reservation. Refusal, an incomplete inventory, invalid options or a malformed ledger reject with code configuration. The entry counts until release() and never expires; Outpost has no call to clear an abandoned one.",
     "Inscrit reserveBytes dans le registre de réservations du dépôt quand l’usage observé, les réservations actives et la demande tiennent dans maxBytes, puis renvoie la réservation. Un refus, un inventaire incomplet, des options invalides ou un registre malformé rejettent avec le code configuration. L’entrée compte jusqu’à release() et n’expire jamais ; Outpost ne fournit aucun appel pour effacer une réservation abandonnée."
   ],
   "planRecoveryRestore": [
-    "Validate a retained transfer and prepare restoration of its previous or incoming side into a new destination. The plan records payloads, commit and fingerprints for later revalidation; it does not populate the destination.",
-    "Valide un transfert conservé et prépare la restauration de son état previous ou incoming dans une nouvelle destination. Le plan enregistre données, commit et empreintes pour une revalidation ultérieure ; il ne remplit pas la destination."
+    "Check a retained transfer against its repository and return a plan to restore one side into a new directory. It checks a checksum-verified temporary copy of the transfer and creates nothing. Invalid options and failed checks reject with code configuration; a missing transfer, repository or destination parent rejects with code workspace.",
+    "Vérifie un transfert conservé par rapport à son dépôt et renvoie un plan pour restaurer un côté dans un nouveau dossier. Les contrôles portent sur une copie temporaire vérifiée par empreintes, et rien n’est créé. Les options invalides et les contrôles en échec rejettent avec le code configuration ; un transfert, un dépôt ou un parent de destination introuvable rejette avec le code workspace."
   ],
   "restoreRecoveryTransfer": [
-    "Revalidate a restoration plan and materialize the selected retained state into its new destination. Source recovery artifacts remain available, and the result reports whether staging could be preserved. Review the destination before integrating it.",
-    "Revalide un plan de restauration et matérialise l’état conservé choisi dans sa nouvelle destination. Les artefacts sources restent disponibles et le résultat indique si l’index Git a pu être préservé. Examinez la destination avant intégration."
+    "Recheck a plan, then clone the repository into its destination, detach at the plan's commit and apply the side's patches and untracked files. The repository and the transfer stay unchanged. A plan or transfer changed since planning rejects with code configuration; a failure after the destination is created rejects with code workspace and keeps the partial destination.",
+    "Revérifie un plan, puis clone le dépôt dans sa destination, se détache sur le commit du plan et applique les patches et fichiers non suivis du côté choisi. Le dépôt et le transfert restent inchangés. Un plan ou un transfert modifié depuis la planification rejette avec le code configuration ; un échec après la création de la destination rejette avec le code workspace et conserve la destination partielle."
   ],
   "defineApprovalTask": [
     "Define a gate task that pauses the run once its dependencies are done and waits for approve or reject from a listed actor. Approve makes the WorkflowDecisionRecord the gate's value; reject skips dependent tasks and fails the run. Throws on a blank prompt or on empty, blank or duplicate actors; scheduling it without a checkpoint throws.",
@@ -124,8 +124,8 @@
     "Définit une tâche gate qui retient l’exécution une fois ses dépendances terminées jusqu’à ce qu’un acteur autorisé soumette resume ou reject. Elle prend les mêmes options et validations que defineApprovalTask() ; resume fait du WorkflowDecisionRecord la valeur de la gate."
   ],
   "inspectRecovery": [
-    "Inspect local runtime files or objects in an explicit transport without deleting them. Local mode can inspect Git, process locks and resources; transport mode lists payload sizes, revisions and optionally resource records whose remote ownership remains unverified. Incomplete inventories are reported and cannot authorize pruning.",
-    "Inspecte les fichiers locaux ou objets d’un transport explicite sans les supprimer. Le mode local peut inspecter Git, verrous de processus et ressources ; le mode transport liste tailles, révisions et éventuellement activités dont la propriété distante reste non vérifiée. Les inventaires incomplets sont signalés et n’autorisent pas le nettoyage."
+    "Inventory recovery state without deleting anything. Local mode scans the .outpost directory of the Git checkout, and optionally worktrees, locks and sandbox activity records; with transporter it lists that transport's objects and can read activity records, whose ownership stays unknown. git or locks with a transporter, or an invalid maxEntries, reject with code configuration.",
+    "Dresse l’inventaire de l’état de récupération sans rien supprimer. Le mode local parcourt le répertoire .outpost du checkout Git et, sur demande, les worktrees, les verrous et les enregistrements d’activité des sandboxes ; avec transporter, elle liste les objets de ce transport et peut lire les enregistrements d’activité, dont la possession reste inconnue. git ou locks avec un transporter, ou un maxEntries invalide, rejettent avec le code configuration."
   ],
   "publishArtifact": [
     "Encode a value with its contract, compute its SHA-256 digest and content-addressed id, then store the bytes with store.put(). Returns the ArtifactReference; producer and parents are recorded as given, not authenticated. Rejects when encoding fails, a parent reference is invalid or the store refuses the bytes.",
@@ -168,8 +168,8 @@
     "Met en concurrence 1 à 8 candidats depuis le HEAD du checkout, chacun sur sa branche et dans sa sandbox, et sélectionne le premier que validate accepte une fois sa sandbox fermée. Renvoie le résultat de chaque candidat, l’usage partagé et une vérification de fusion du gagnant ; ne fusionne jamais. Des options invalides rejettent avec le code configuration."
   ],
   "createOpenTelemetryObserver": [
-    "Create workflow and complete dispatch instrumentation from an injected tracer and meter. Pass the result as telemetry to workflow.start or dispatch, keeping observe for custom handlers. The previous workflow observe wiring remains supported. Errors are isolated through onError; close finishes outstanding spans without flushing or shutting down the SDK. Only this optional entry point loads OpenTelemetry.",
-    "Crée une instrumentation de workflow et de dispatch complet à partir d’un tracer et d’un meter injectés. Passez le résultat dans telemetry à workflow.start ou dispatch, en gardant observe pour les handlers personnalisés. Le branchement observe existant du workflow reste pris en charge. Les erreurs sont isolées via onError ; close termine les spans ouverts sans vider ni fermer le SDK. Seul ce point d’entrée optionnel charge OpenTelemetry."
+    "Create OpenTelemetry instrumentation from your tracer and meter. Attach its sink to the hub you pass as observation for parented workflow, task, dispatch and operation spans, or pass the observer as telemetry to workflow.start() or dispatch(). Instrumentation errors go to onError; close() ends open spans without flushing or shutting down the SDK.",
+    "Crée une instrumentation OpenTelemetry à partir de votre tracer et de votre meter. Attachez son sink au hub passé dans observation pour obtenir des spans de workflow, de tâche, de dispatch et d’opération reliés entre eux, ou passez l’observateur comme telemetry à workflow.start() ou dispatch(). Les erreurs d’instrumentation vont à onError ; close() termine les spans ouverts sans vider ni arrêter le SDK."
   ],
   "WorkflowFailure": [
     "Error thrown by WorkflowResult.unwrap() when status is not done. result holds the whole WorkflowResult and cause is its first error.",
@@ -184,8 +184,8 @@
     "OutpostError de code response, levée quand une réponse typée n’a pas de balise complète ou que son contenu échoue à l’analyse ou à la validation. Un dispatch la lève une fois les tours de réparation épuisés ; son recovery indique alors la conversation, la branche, le répertoire et les tours."
   ],
   "OutpostError": [
-    "Error with a stable fault code and structured details for execution, configuration and recovery failures. cause preserves the original failure and recovery may identify retained work; branch cleanup must respect those recovery locations.",
-    "Erreur munie d’un code stable et de détails structurés pour les échecs d’exécution, configuration et récupération. cause conserve l’échec initial et recovery peut identifier du travail conservé ; le nettoyage doit respecter ces emplacements."
+    "Error that Outpost throws with a stable code, frozen details and a recovery record. cause holds the failure it reclassified or wrapped. You can throw it yourself with new OutpostError(code, message, details?, cause?).",
+    "Erreur levée par Outpost avec un code stable, des details figés et un enregistrement recovery. cause contient l’échec reclassé ou enveloppé. Vous pouvez la lever vous-même avec new OutpostError(code, message, details?, cause?)."
   ],
   "resourcePhases": [
     "List the lifecycle phases recorded in local sandbox activity files; ResourcePhase derives its allowed values from this constant.",
@@ -240,8 +240,8 @@
     "Ouvre une TaskQueue sur Redis standalone via BullMQ 5 ; importez-la depuis @elie-laloum/outpost/queues/bullmq et installez bullmq séparément. Refuse un serveur dont maxmemory-policy n’est pas noeviction, sans modifier sa configuration. La file possède ses connexions Redis : arrêtez les workers, puis attendez close()."
   ],
   "createCustomReporter": [
-    "Create a callable observer with typed event handlers and an explicit flush barrier. Handlers run serially without blocking dispatch; failures are reported through onError and the first remains observable through every flush. The caller owns files, loggers and their shutdown.",
-    "Crée un observateur appelable avec des handlers typés et une barrière flush explicite. Les handlers s’exécutent séquentiellement sans bloquer le dispatch ; onError signale les erreurs et la première reste accessible à chaque flush. Les fichiers, loggers et leur fermeture appartiennent à l’appelant."
+    "Create an observe callback that routes each agent observation to the handler for its kind. Handlers run one at a time on a bounded queue without blocking the dispatch; flush() waits for them and rejects with the first handler failure. The caller owns any files or loggers the handlers use.",
+    "Crée un callback observe qui transmet chaque observation d’agent au handler de son kind. Les handlers s’exécutent un par un sur une file bornée sans bloquer le dispatch ; flush() les attend et rejette avec le premier échec d’un handler. L’appelant possède les fichiers ou loggers qu’utilisent les handlers."
   ],
   "createMountedSandboxProvider": [
     "Build a SandboxProvider with placement mounted from a name, variables and acquire(). Your acquire() exposes context.directory and context.gitDirectories in the environment, so the agent edits the host worktree directly. A blank name fails with code configuration.",
@@ -372,8 +372,8 @@
     "Crée le preset CLI Kimi Code sans lancer la CLI ; createAgent({ harness, model }) le lie et refuse reasoning et maxOutputTokens. Il capture et reprend des bundles de session, forke avec kimi fork et se pilote en arrêtant puis en reprenant le tour. L’usage de jetons est lu dans la session après la sortie."
   ],
   "createObservationHub": [
-    "Create an explicitly scoped event distributor with one sequence across children, bounded independent sink queues, snapshot flushing and isolated delivery failures. Supply it through observation on a workflow or dispatch; the caller owns the parent hub. This is live observation, not a durable state registry or remote worker relay.",
-    "Crée un distributeur d’événements à contexte explicite, avec une séquence partagée entre enfants, des files bornées indépendantes, un vidage par instantané et des erreurs de livraison isolées. Le transmettre par observation à un workflow ou dispatch ; le hub parent appartient à l’appelant. Il s’agit d’observation en direct, pas d’un registre d’état durable ni d’un relais de workers distants."
+    "Create a root hub that stamps every event with one shared sequence and delivers a copy to each sink through its own bounded queue. Pass it as observation to a workflow or dispatch: runs emit through scoped children, and you own and close the root. Sink failures and losses are collected, never thrown; the hub stores nothing.",
+    "Crée un hub racine qui numérote chaque événement dans une séquence partagée et en remet une copie à chaque sink via sa propre file bornée. Passez-le dans observation d’un workflow ou d’un dispatch : les exécutions émettent via des enfants scopés, et la racine vous appartient, à vous de la fermer. Les échecs et pertes des sinks sont collectés, jamais levés ; le hub ne stocke rien."
   ],
   "WorkflowUsageUnavailable": [
     "Error recorded when reported usage is marked incomplete while the budget sets token limits without attempts. It fails the run and cancels running and pending tasks; set budget.attempts to keep a bounded fallback.",
@@ -452,12 +452,12 @@
     "Erreur enregistrée lorsque la vérification du dernier tour autorisé échoue. Consultez key, maxRounds et feedback via WorkflowResult.errors ; reprendre le même checkpoint ne réinitialise pas la limite."
   ],
   "quotaFault": [
-    "Return the message and reset time of an OutpostError with code quota, following up to eight wrapped causes. Returns undefined for any other value. Use it in retry.accepts or error handling to separate usage and rate limits from other failures; it does not wait or retry.",
-    "Renvoie le message et l’heure de réinitialisation d’une OutpostError de code quota, en suivant jusqu’à huit causes imbriquées. Renvoie undefined pour toute autre valeur. Utilisez-la dans retry.accepts ou la gestion d’erreurs pour distinguer les limites d’usage et de débit des autres échecs ; elle n’attend ni ne relance."
+    "Return the message, resetAt and conversation of the first OutpostError with code quota in the error and up to seven wrapped causes, or undefined. Fallback agents and onQuota pauses use the same test. It does not wait or retry.",
+    "Renvoie message, resetAt et conversation de la première OutpostError de code quota trouvée dans l’erreur et jusqu’à sept causes imbriquées, sinon undefined. Les agents de secours et les pauses onQuota appliquent le même test. Elle n’attend ni ne relance."
   ],
   "createReplayAgent": [
-    "Create a single-use agent that replays one dispatch journal without calling a model. Each turn checks the rendered prompt, re-emits the recorded events and usage, and the last turn of each sandbox dispatch rebuilds the recorded commits inside the sandbox with their original identities, so an identical baseline yields identical commit IDs. Divergences raise ReplayDivergence or, with divergence: \"warn\", warnings. Replays cannot be resumed or forked.",
-    "Crée un agent à usage unique qui rejoue le journal d’un dispatch sans appeler de modèle. Chaque tour vérifie le prompt rendu et réémet les événements et l’usage enregistrés ; le dernier tour de chaque dispatch en sandbox reconstruit les commits enregistrés dans la sandbox avec leurs identités d’origine, si bien qu’une baseline identique donne des identifiants de commit identiques. Les divergences lèvent ReplayDivergence ou, avec divergence: \"warn\", des avertissements. Un rejeu ne peut être ni repris ni forké."
+    "Create a single-use agent that replays one dispatch journal without calling a model. Each turn compares the rendered prompt, re-emits the recorded events and usage, and the last turn of each sandbox dispatch rebuilds the recorded commits with their original identities. A divergence throws ReplayDivergence (a warning for some kinds with divergence: \"warn\"); a malformed journal throws code configuration, and a replay agent cannot be steered.",
+    "Crée un agent à usage unique qui rejoue le journal d’un dispatch sans appeler de modèle. Chaque tour compare le prompt rendu, réémet les événements et l’usage enregistrés, et le dernier tour de chaque dispatch en sandbox reconstruit les commits enregistrés avec leurs identités d’origine. Une divergence lève ReplayDivergence (un avertissement pour certains types avec divergence: \"warn\") ; un journal mal formé lève le code configuration, et un agent de rejeu n’accepte pas le steering."
   ],
   "ReplayDivergence": [
     "OutpostError with code replay, thrown when a replay differs from its journal. kind, turn, expected, actual and commit locate the difference; details holds the same fields.",
@@ -472,8 +472,8 @@
     "Renvoie un condensat SHA-256 hexadécimal du commit HEAD d’un dépôt, de ses modifications indexées ou non et de ses fichiers non suivis et non ignorés, hors .outpost/. Utilisez-le dans une clé de cache de tâche pour que les modifications non commitées changent la clé. Lit sans modifier ; rejette hors d’un dépôt Git."
   ],
   "unavailableFault": [
-    "Return the outage signal of an Outpost error marked unavailable by a CLI adapter or model provider, following up to eight wrapped causes. Quota errors and every other value return undefined. Outages keep their process or provider code, so use this function rather than the code to recognize them; it does not wait or retry.",
-    "Renvoie le signal de panne d’une erreur Outpost marquée indisponible par un adapter CLI ou un fournisseur de modèle, en suivant jusqu’à huit causes imbriquées. Les erreurs de quota et toute autre valeur renvoient undefined. Les pannes conservent leur code process ou provider : utilisez cette fonction plutôt que le code pour les reconnaître ; elle n’attend ni ne relance."
+    "Return { message } from details.unavailable of the first non-quota OutpostError that sets it, searching the error and up to seven wrapped causes, or undefined. Outages keep their process, provider or timeout code, so test with this function rather than the code. Fallback agents covering unavailable use the same test.",
+    "Renvoie { message } depuis details.unavailable de la première OutpostError hors quota qui le renseigne, en examinant l’erreur et jusqu’à sept causes imbriquées, sinon undefined. Les pannes conservent leur code process, provider ou timeout : testez avec cette fonction plutôt qu’avec le code. Les agents de secours qui couvrent unavailable appliquent le même test."
   ],
   "createFallbackAgent": [
     "Order at least two agents into a frozen FallbackAgent that dispatch runs in one sandbox and workspace, without reset. A candidate hands over only on a quota or outage fault listed in on, and the next one restarts from the original brief; every other failure is rethrown. Fewer than two candidates, a nested fallback agent or an invalid on list throws code configuration.",

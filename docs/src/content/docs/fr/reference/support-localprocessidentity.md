@@ -7,12 +7,12 @@ sidebar:
 
 ## Paramètres et propriétés
 
-| Nom         | Type     | Présence | Rôle                                                                                                         |
-| ----------- | -------- | -------- | ------------------------------------------------------------------------------------------------------------ |
-| `host`      | `string` | Requis   | Identité d’hôte utilisée pour distinguer les processus de machines différentes.                              |
-| `boot`      | `string` | Requis   | Identité de démarrage système utilisée pour détecter les identifiants de processus d’un démarrage précédent. |
-| `namespace` | `string` | Requis   | Identité d’espace de noms de processus utilisée pour évaluer la possession locale du verrou.                 |
-| `started`   | `string` | Requis   | Identité système de début de processus utilisée pour détecter la réutilisation d’un PID.                     |
+| Nom         | Type     | Présence | Rôle                                                                                                                                        |
+| ----------- | -------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `host`      | `string` | Requis   | SHA-256 de l’identifiant de machine (/etc/machine-id) ; une autre valeur signifie que le propriétaire tournait sur un autre hôte.           |
+| `boot`      | `string` | Requis   | Identifiant de démarrage du noyau ; une autre valeur signifie que le PID date d’un démarrage précédent.                                     |
+| `namespace` | `string` | Requis   | Espace de noms PID du processus, comme pid:[4026531836] ; un autre espace de noms rend inconnue la possession des verrous et des activités. |
+| `started`   | `string` | Requis   | Heure de début du processus en ticks d’horloge depuis le démarrage, lue dans /proc ; une différence signifie que le PID a été réutilisé.    |
 
 ## Signature
 

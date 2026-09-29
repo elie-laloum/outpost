@@ -7,11 +7,11 @@ sidebar:
 
 ## Parameters and properties
 
-| Name      | Type                      | Presence | Meaning                                                       |
-| --------- | ------------------------- | -------- | ------------------------------------------------------------- |
-| `name`    | `StorageCategoryName`     | Required | Managed storage category represented by this inventory group. |
-| `path`    | `string`                  | Required | Host directory containing this managed storage category.      |
-| `entries` | `readonly StorageEntry[]` | Required | Inspected filesystem entries within this storage category.    |
+| Name      | Type                      | Presence | Meaning                                                                                                                    |
+| --------- | ------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `name`    | `StorageCategoryName`     | Required | Category, also its directory name under .outpost or its key prefix in the transport.                                       |
+| `path`    | `string`                  | Required | Host directory of the category, or its key prefix for a transport inventory.                                               |
+| `entries` | `readonly StorageEntry[]` | Required | Direct children of the category directory, sorted by name, each with its own totals; one entry per object for a transport. |
 
 ## Signature
 

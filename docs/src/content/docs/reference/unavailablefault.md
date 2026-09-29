@@ -13,7 +13,7 @@ import { unavailableFault } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Return the outage signal of an Outpost error marked unavailable by a CLI adapter or model provider, following up to eight wrapped causes. Quota errors and every other value return undefined. Outages keep their process or provider code, so use this function rather than the code to recognize them; it does not wait or retry.
+Return { message } from details.unavailable of the first non-quota OutpostError that sets it, searching the error and up to seven wrapped causes, or undefined. Outages keep their process, provider or timeout code, so test with this function rather than the code. Fallback agents covering unavailable use the same test.
 
 [Complete example and detailed rules](../../guide/fallback-agents/).
 

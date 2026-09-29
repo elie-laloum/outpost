@@ -13,15 +13,15 @@ import { diagnoseAgentProtocol } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Rejoue les fixtures d’événements intégrées dans l’adapter choisi et rapporte la compatibilité de décodage avec la version CLI enregistrée. Ne lance pas le CLI installé, ne valide pas les identifiants et ne teste pas de modèle réel.
+Décode dans l’adapter de l’agent les fixtures d’événements synthétiques intégrées et renvoie le rapport de façon synchrone, un contrôle par fixture. Aucun processus n’est lancé : la CLI installée, les identifiants et le modèle restent non vérifiés.
 
 [Exemple complet et règles détaillées](../../guide/diagnostics/).
 
 ## Paramètres et propriétés
 
-| Nom     | Type               | Présence | Rôle                                                                                                                    |
-| ------- | ------------------ | -------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `agent` | `BuiltInAgentName` | Requis   | Identifiant du CLI d’agent à rapporter ou diagnostiquer : claude, codex, antigravity (exécutable agy), copilot ou kimi. |
+| Nom     | Type               | Présence | Rôle                                                                                            |
+| ------- | ------------------ | -------- | ----------------------------------------------------------------------------------------------- |
+| `agent` | `BuiltInAgentName` | Requis   | Agent intégré dont l’adapter décode les fixtures : claude, codex, antigravity, copilot ou kimi. |
 
 ## Retour
 

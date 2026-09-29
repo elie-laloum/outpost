@@ -13,21 +13,21 @@ import { planRecoveryRestore } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Validate a retained transfer and prepare restoration of its previous or incoming side into a new destination. The plan records payloads, commit and fingerprints for later revalidation; it does not populate the destination.
+Check a retained transfer against its repository and return a plan to restore one side into a new directory. It checks a checksum-verified temporary copy of the transfer and creates nothing. Invalid options and failed checks reject with code configuration; a missing transfer, repository or destination parent rejects with code workspace.
 
 [Complete example and detailed rules](../../guide/recovery/).
 
 ## Parameters and properties
 
-| Name                  | Type                          | Presence | Meaning                                                                                                                 |
-| --------------------- | ----------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `options`             | `RecoveryRestoreOptions`      | Required | Retained transfer source, repository, new destination, selected side and verification byte bound.                       |
-| `options.directory`   | `string`                      | Required | Host directory containing the retained transfer artifacts to verify or restore.                                         |
-| `options.repository`  | `string`                      | Required | Target host Git checkout.                                                                                               |
-| `options.destination` | `string`                      | Required | New, absent destination directory outside the source repository, Git metadata and retained transfer.                    |
-| `options.side`        | `"previous" \| "incoming"`    | Required | Retained state to restore: previous host state or incoming remote state.                                                |
-| `options.maxBytes`    | `number \| undefined`         | Optional | Maximum retained payload bytes allowed when snapshotting and verifying restoration sources.                             |
-| `observation`         | `ObservationHub \| undefined` | Optional | Optional hub receiving start and terminal events for restore planning; never persisted in the recovery plan or archive. |
+| Name                  | Type                          | Presence | Meaning                                                                                                                                                                        |
+| --------------------- | ----------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `options`             | `RecoveryRestoreOptions`      | Required | Retained transfer source, repository, new destination, selected side and verification byte bound.                                                                              |
+| `options.directory`   | `string`                      | Required | Retained transfer directory, as named by details.recovery of the synchronization error. It must contain state.json and checksums.json.                                         |
+| `options.repository`  | `string`                      | Required | Host Git repository cloned into the destination; it is only read. Partial, shallow or alternates-based repositories fail the Git check.                                        |
+| `options.destination` | `string`                      | Required | New directory to create. Its parent must exist; the path must not exist and must lie outside the repository, its Git metadata and the transfer.                                |
+| `options.side`        | `"previous" \| "incoming"`    | Required | previous restores the host worktree as backed up before the transfer, staged index included; incoming restores the sandbox's commits, uncommitted changes and untracked files. |
+| `options.maxBytes`    | `number \| undefined`         | Optional | Maximum transfer bytes copied and hashed, default 1073741824 (1 GiB). Exceeding it rejects with code configuration.                                                            |
+| `observation`         | `ObservationHub \| undefined` | Optional | Hub that receives the recovery operation restore.plan when it starts, finishes or fails.                                                                                       |
 
 ## Returns
 

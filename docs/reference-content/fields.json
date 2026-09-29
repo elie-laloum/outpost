@@ -364,8 +364,8 @@
     "Derniers caractères de la sortie d’erreur, dans la limite de retain. Vide dans le même cas de terminal hôte, et pour un terminal Daytona, dont toute la sortie est dans stdout."
   ],
   "Usage.input": [
-    "Reported input tokens for the agent execution.",
-    "Tokens d’entrée rapportés pour l’exécution de l’agent."
+    "Input tokens as the agent or model provider reports them. The built-in model providers and Codex count cached tokens inside input; Claude Code and Kimi Code report them only in cached and cacheCreated.",
+    "Tokens d’entrée tels que l’agent ou le provider de modèle les rapporte. Les providers de modèle intégrés et Codex comptent les tokens en cache dans input ; Claude Code et Kimi Code les rapportent seulement dans cached et cacheCreated."
   ],
   "Usage.cached": [
     "Reported input tokens served from the model’s cache.",
@@ -392,16 +392,16 @@
     "Identifiant de conversation native à poursuivre ; fork demande une conversation distincte dérivée de celle-ci."
   ],
   "AgentEvent.kind": [
-    "Discriminator selecting the event payload: phase, summary, warning, text, text-delta, result, prompt, tool, tool-result, tool-denied, step, stop-prevented, steer, compaction, conversation, usage, quota, fallback, failure, finished or raw.",
-    "Discriminant sélectionnant les données de l’événement : phase, summary, warning, text, text-delta, result, prompt, tool, tool-result, tool-denied, step, stop-prevented, steer, compaction, conversation, usage, quota, fallback, failure, finished ou raw."
+    "Event type selecting the payload: phase, summary, warning, text, text-delta, result, prompt, tool, tool-result, tool-output, tool-denied, file-change, reasoning, step, hook, instructions-loaded, skills-loaded, model-request, model-response, model-retry, model-error, stop-prevented, steer, compaction, subagent, conversation, usage, message-usage, quota, fallback, stderr, stopped, failure, finished or raw.",
+    "Type d’événement qui sélectionne la charge utile : phase, summary, warning, text, text-delta, result, prompt, tool, tool-result, tool-output, tool-denied, file-change, reasoning, step, hook, instructions-loaded, skills-loaded, model-request, model-response, model-retry, model-error, stop-prevented, steer, compaction, subagent, conversation, usage, message-usage, quota, fallback, stderr, stopped, failure, finished or raw."
   ],
   "AgentEvent.name": [
-    "Phase name for phase events, or tool name for tool and tool-result events.",
-    "Nom de la phase pour les événements phase, ou nom de l’outil pour les événements tool et tool-result."
+    "Phase name on phase events; tool name on tool, tool-result and tool-denied events; delegating tool name on subagent events.",
+    "Nom de la phase pour phase ; nom de l’outil pour tool, tool-result et tool-denied ; nom de l’outil de délégation pour subagent."
   ],
   "AgentEvent.agent": [
-    "Agent CLI identifier to report or diagnose: claude, codex, antigravity (executable agy), copilot or kimi.",
-    "Identifiant du CLI d’agent à rapporter ou diagnostiquer : claude, codex, antigravity (exécutable agy), copilot ou kimi."
+    "Name of the agent running the pass, on phase events: claude, codex, antigravity, copilot or kimi, custom for a built-in harness agent, replay for a replay agent.",
+    "Nom de l’agent qui exécute la passe, sur les événements phase : claude, codex, antigravity, copilot ou kimi, custom pour un agent du harness intégré, replay pour un agent de rejeu."
   ],
   "AgentEvent.branch": [
     "Name of the work branch used or observed during execution.",
@@ -412,24 +412,24 @@
     "Dossier hôte du workspace utilisé pour cette exécution."
   ],
   "AgentEvent.durationMs": [
-    "Elapsed execution time in milliseconds.",
-    "Durée d’exécution écoulée en millisecondes."
+    "Duration of the pass in milliseconds, summed over its turns, on summary events.",
+    "Durée de la passe en millisecondes, cumulée sur ses tours, sur les événements summary."
   ],
   "AgentEvent.status": [
-    "Process exit status for summaries, or started, finished or failed for a child lifecycle event.",
-    "Statut de sortie du processus pour les résumés, ou started, finished ou failed pour le cycle de vie d’un enfant."
+    "On summary, the exit status of the pass’s last turn, always 0 because a nonzero exit rejects the dispatch. On subagent, started, finished or failed.",
+    "Sur summary, le statut de sortie du dernier tour de la passe, toujours 0 car une sortie non nulle rejette le dispatch. Sur subagent, started, finished ou failed."
   ],
   "AgentEvent.tokens": [
-    "Token usage counters carried by a usage or summary event.",
-    "Compteurs d’usage de tokens portés par un événement usage ou summary."
+    "Token counts: an increment on usage, the pass total on summary, one message’s usage on message-usage.",
+    "Compteurs de tokens : un incrément sur usage, le total de la passe sur summary, l’usage d’un message sur message-usage."
   ],
   "AgentEvent.message": [
-    "Warning, failure or quota message, the failure that triggered a fallback, or the message a stop hook sent back to the model.",
-    "Message d’avertissement, d’échec ou de quota, échec ayant déclenché un repli, ou message qu’un hook stop a renvoyé au modèle."
+    "Message of a warning, failure, quota, fallback, model-retry or model-error event, or the message a stop hook sent back to the model on stop-prevented.",
+    "Message d’un événement warning, failure, quota, fallback, model-retry ou model-error, ou message renvoyé au modèle par un hook d’arrêt sur stop-prevented."
   ],
   "AgentEvent.text": [
-    "Text carried by the event: a streamed fragment, streamed text, final answer, submitted prompt or delivered steering instruction according to kind.",
-    "Texte porté par l’événement : fragment diffusé, texte diffusé, réponse finale, prompt soumis ou consigne de pilotage remise selon la variante."
+    "Text of the event according to kind: agent text, streamed fragment, final answer, rendered prompt, steering instruction, reasoning, stderr line or tool output chunk.",
+    "Texte de l’événement selon kind : texte de l’agent, fragment diffusé, réponse finale, prompt rendu, consigne de steering, raisonnement, ligne de stderr ou morceau de sortie d’outil."
   ],
   "AgentEvent.input": [
     "Raw arguments supplied to the tool named by this tool event.",
@@ -440,8 +440,8 @@
     "Identifiant de conversation pour les événements conversation, ou identifiant unique d’exécution enfant pour les événements de cycle de vie subagent."
   ],
   "AgentEvent.value": [
-    "Unrecognized raw protocol value preserved for observation.",
-    "Valeur brute de protocole non reconnue conservée pour observation."
+    "Raw protocol line as the agent printed it; for an oversized line, only its first 2000 characters.",
+    "Ligne brute du protocole telle que l’agent l’a écrite ; pour une ligne trop grande, seulement ses 2000 premiers caractères."
   ],
   "SandboxProvider.name": [
     "Identifier recorded in diagnostics and resource activity: docker, podman, local, vercel, daytona or firecracker for the built-in providers.",
@@ -600,8 +600,8 @@
     "Reçoit les messages de diagnostic, par exemple la taille estimée en tokens de chaque commande développée du brief."
   ],
   "Logging.verbose": [
-    "Include raw protocol observations in the dispatch journal.",
-    "Inclut les observations brutes du protocole dans le journal du dispatch."
+    "Also keep high-volume and sensitive events in the journal: raw protocol lines, text deltas, stderr, reasoning, model requests and responses, tool and command output. Off by default.",
+    "Conserve aussi dans le journal les événements volumineux et sensibles : lignes brutes du protocole, fragments de texte, stderr, raisonnement, requêtes et réponses du modèle, sorties d’outils et de commandes. Désactivé par défaut."
   ],
   "Brief.text": [
     "Literal brief sent to the agent unchanged: no placeholders or commands are expanded.",
@@ -628,8 +628,8 @@
     "Extrait la dernière paire <tag>…</tag> complète d’un texte, la nettoie de ses espaces aux bords et l’analyse. Rejette avec ResponseError si aucune paire complète n’existe ou si son contenu est refusé."
   ],
   "AgentObservation.pass": [
-    "One-based agent pass number attached to an observation or reporter state.",
-    "Numéro de passe d’agent commençant à un, attaché à une observation ou à l’état du rapporteur."
+    "One-based pass number within the dispatch; 1 when the scope carries none.",
+    "Numéro de passe, à partir de 1, dans le dispatch ; 1 quand le scope n’en porte pas."
   ],
   "AgentObservation.at": [
     "ISO timestamp assigned to the agent observation.",
@@ -758,20 +758,20 @@
     "Appelle close() sans options, pour que await using ferme la sandbox à la fin de son bloc."
   ],
   "SandboxDiagnosticOptions.agent": [
-    "Agent CLI identifier to report or diagnose: claude, codex, antigravity (executable agy), copilot or kimi.",
-    "Identifiant du CLI d’agent à rapporter ou diagnostiquer : claude, codex, antigravity (exécutable agy), copilot ou kimi."
+    "Built-in agent whose CLI is checked in the sandbox: its version (agent.sandbox), then its help for each mode Outpost uses (agent.cli.<mode>). Without it, no agent check runs.",
+    "Agent intégré dont la CLI est vérifiée dans la sandbox : sa version (agent.sandbox), puis son aide pour chaque mode utilisé par Outpost (agent.cli.<mode>). Sans lui, aucun contrôle d’agent ne s’exécute."
   ],
   "SandboxDiagnosticOptions.deadlineMs": [
-    "Maximum duration of each diagnostic probe in milliseconds.",
-    "Durée maximale de chaque sonde de diagnostic en millisecondes."
+    "Deadline of each probe command and transfer in milliseconds, default 5000. Must be an integer from 1 to 60000, otherwise the call rejects with code configuration.",
+    "Délai de chaque commande de sonde et de chaque transfert en millisecondes, 5000 par défaut. Doit être un entier de 1 à 60000, sinon l’appel rejette avec le code configuration."
   ],
   "SandboxDiagnosticOptions.signal": [
-    "Cooperative cancellation for this operation.",
-    "Annulation coopérative de cette opération."
+    "Cancels the diagnosis. Already aborted, the call rejects with the abort reason; aborted during the run, the remaining probes are reported as fail.",
+    "Annule le diagnostic. Déjà annulé, l’appel rejette avec la raison de l’annulation ; annulé pendant l’exécution, les sondes restantes sont rapportées en fail."
   ],
   "SandboxDiagnosticOptions.transfers": [
-    "Enable temporary upload/download probes during sandbox diagnosis.",
-    "Active des sondes temporaires d’envoi et téléchargement pendant le diagnostic de sandbox."
+    "true uploads a small binary file under the sandbox root, verifies it with a sandbox process, downloads it back, then removes the probe directory (checks sandbox.transfers and sandbox.transfers.cleanup). Off by default.",
+    "true envoie un petit fichier binaire sous la racine de la sandbox, le vérifie avec un processus de la sandbox, le télécharge, puis supprime le répertoire de sonde (contrôles sandbox.transfers et sandbox.transfers.cleanup). Désactivé par défaut."
   ],
   "SandboxDiagnosticReport.scope": [
     "Always owned-sandbox: checks concern the supplied execution resource.",
@@ -786,48 +786,48 @@
     "Prise en charge annoncée et observée des commandes, transferts, transferts par lot et terminaux interactifs."
   ],
   "SandboxDiagnosticReport.checks": [
-    "Individual diagnostic checks with status, message and available version information.",
-    "Contrôles individuels avec statut, message et informations de version disponibles."
+    "Checks in the order they ran. Failure messages state the reason, often with a remedy, never the command output.",
+    "Contrôles dans l’ordre d’exécution. Les messages d’échec donnent la raison, souvent avec un remède, jamais la sortie de la commande."
   ],
   "SandboxDiagnosticReport.modelCompatibility": [
     "Always unverified: these diagnostics do not call a live model.",
     "Toujours unverified : ces diagnostics n’appellent pas de modèle réel."
   ],
   "SandboxDiagnosticReport.hasFailures": [
-    "Whether at least one diagnostic check failed.",
-    "Indique si au moins un contrôle de diagnostic a échoué."
+    "true when at least one check has status fail; warn and skipped checks leave it false.",
+    "true dès qu’un contrôle a le statut fail ; les contrôles warn et skipped le laissent à false."
   ],
   "DiagnosticCapability.id": [
-    "Capability being assessed: command, transfers, batch transfers or interactive terminal.",
-    "Capacité évaluée : commande, transferts, transferts par lot ou terminal interactif."
+    "Capability assessed: command, transfers, batchTransfers or interactiveTerminal.",
+    "Capacité évaluée : command, transfers, batchTransfers ou interactiveTerminal."
   ],
   "DiagnosticCapability.advertised": [
-    "Whether the inspected adapter advertises this capability; unknown if it cannot be determined.",
-    "Indique si l’adapter inspecté annonce cette capacité ; unknown si cela ne peut être déterminé."
+    "Whether the resource’s contract provides the capability: always true for command and transfers, true for batchTransfers when the lease has fileTransfers, and unknown for interactiveTerminal.",
+    "Indique si le contrat de la ressource fournit la capacité : toujours true pour command et transfers, true pour batchTransfers quand le lease a fileTransfers, et unknown pour interactiveTerminal."
   ],
   "DiagnosticCapability.observed": [
-    "Probe outcome, or unverified when no probe established support.",
-    "Résultat de la sonde, ou unverified si aucune sonde n’a établi la prise en charge."
+    "pass or fail from the sandbox.command or sandbox.transfers check, unverified when that probe did not run. batchTransfers and interactiveTerminal are always unverified.",
+    "pass ou fail d’après le contrôle sandbox.command ou sandbox.transfers, unverified si cette sonde ne s’est pas exécutée. batchTransfers et interactiveTerminal restent toujours unverified."
   ],
   "DiagnosticCheck.id": [
-    "Stable identifier of the diagnostic check in the report.",
-    "Identifiant stable du contrôle de diagnostic dans le rapport."
+    "Stable dotted identifier, such as sandbox.node, agent.cli.resume or model.",
+    "Identifiant stable à points, par exemple sandbox.node, agent.cli.resume ou model."
   ],
   "DiagnosticCheck.status": [
-    "Diagnostic outcome: pass, warn, fail or skipped.",
-    "Résultat du diagnostic : pass, warn, fail ou skipped."
+    "pass, warn, fail or skipped. Only fail sets hasFailures; warn marks a differing or unconfirmed result, such as an agent version other than the pinned one.",
+    "pass, warn, fail ou skipped. Seul fail active hasFailures ; warn signale un résultat différent ou non confirmé, par exemple une version d’agent autre que celle épinglée."
   ],
   "DiagnosticCheck.message": [
-    "Human-readable explanation of the diagnostic observation.",
-    "Explication lisible de l’observation de diagnostic."
+    "Explanation of the result; most failures end with a remedy.",
+    "Explication du résultat ; la plupart des échecs se terminent par un remède."
   ],
   "DiagnosticCheck.version": [
-    "Version detected by the diagnostic probe, when available.",
-    "Version détectée par la sonde de diagnostic lorsqu’elle est disponible."
+    "Version read from the output of a --version probe; present on version checks only.",
+    "Version lue dans la sortie d’une sonde --version ; présente sur les contrôles de version uniquement."
   ],
   "DiagnosticCheck.referenceVersion": [
-    "Pinned CLI version the bundled protocol fixtures target; absent for Antigravity, which has no pinned version.",
-    "Version épinglée du CLI visée par les fixtures de protocole intégrées ; absente pour Antigravity, qui n’a pas de version épinglée."
+    "Agent CLI version pinned by Outpost that the detected version was compared with; present on agent version checks only. A different version gives status warn.",
+    "Version de la CLI d’agent épinglée par Outpost et comparée à la version détectée ; présente sur les contrôles de version d’agent uniquement. Une autre version donne le statut warn."
   ],
   "WarmDispatchResult.resume": [
     "Continue this conversation on the same open sandbox with new dispatch options.",
@@ -902,8 +902,8 @@
     "Trace de pile JavaScript de l’erreur lorsqu’elle est disponible."
   ],
   "Error.cause": [
-    "Original failure attached to this error.",
-    "Échec d’origine attaché à cette erreur."
+    "Underlying failure this error wraps; quotaFault() and unavailableFault() follow this chain.",
+    "Échec sous-jacent que cette erreur enveloppe ; quotaFault() et unavailableFault() suivent cette chaîne."
   ],
   "WorkflowResult.executionId": [
     "Identity of the workflow execution, preserved across checkpoint resumption.",
@@ -1490,16 +1490,16 @@
     "Contenu, sans espaces aux bords, de la dernière balise complète refusée à l’analyse ou à la validation ; undefined si aucune balise complète n’a été trouvée."
   ],
   "OutpostError.recovery": [
-    "Metadata describing retained workspace and transfer artifacts after failure.",
-    "Métadonnées décrivant le workspace et les artefacts de transfert conservés après échec."
+    "Locations of work retained after the failure, such as branch, directory, commits, transcript, logReference or conversation; empty when nothing was retained. A remote synchronization failure puts its transfer directory in details.recovery instead.",
+    "Emplacements du travail conservé après l’échec, par exemple branch, directory, commits, transcript, logReference ou conversation ; vide si rien n’a été conservé. Un échec de synchronisation distante place plutôt son répertoire de transfert dans details.recovery."
   ],
   "OutpostError.code": [
     "Stable Outpost fault category used for programmatic failure handling.",
     "Catégorie stable d’erreur Outpost utilisée pour le traitement programmatique des échecs."
   ],
   "OutpostError.details": [
-    "Structured diagnostics attached to the fault code. HTTP model errors include status and, when valid, retryAfterMs: the minimum wait in milliseconds for an explicitly configured task retry. Quota errors include resetAt when the reset time is known, and agent for CLI turns. Agent and model outages add unavailable, the signal read by unavailableFault(); a quota error summarizing an exhausted fallback agent adds fallback.",
-    "Diagnostics structurés attachés au code d’erreur. Les erreurs HTTP de modèles incluent status et, si valide, retryAfterMs : l’attente minimale en millisecondes d’une reprise de tâche explicitement configurée. Les erreurs de quota incluent resetAt lorsque l’heure de réinitialisation est connue, et agent pour les tours de CLI. Les pannes d’agent et de modèle ajoutent unavailable, le signal lu par unavailableFault() ; une erreur de quota résumant un agent de secours épuisé ajoute fallback."
+    "Frozen diagnostics for the code: status, stdout, stderr and conversation for a failed agent process; status and retryAfterMs (the minimum wait of a task retry) for an HTTP model error; resetAt for a quota, and fallback when every fallback candidate hit one. unavailable marks an outage for unavailableFault(), including a timeout after an agent reported a connection failure.",
+    "Diagnostics figés propres au code : status, stdout, stderr et conversation pour un processus d’agent en échec ; status et retryAfterMs (l’attente minimale d’une reprise de tâche) pour une erreur HTTP de modèle ; resetAt pour un quota, et fallback quand chaque candidat d’un agent de secours en a atteint un. unavailable signale une panne à unavailableFault(), y compris un délai dépassé après un échec de connexion signalé par l’agent."
   ],
   "TextResponseOptions.tag": [
     "Tag name without angle brackets: a letter followed by letters, digits, _ or -. Another form fails with code configuration.",
@@ -1546,104 +1546,104 @@
     "Libellé de sortie, verbosité, mode silencieux et fonction d’écriture personnalisée optionnelle."
   ],
   "ReporterOptions.label": [
-    "Human-readable label used in execution reporting.",
-    "Libellé lisible utilisé dans les rapports d’exécution."
+    "Prefix printed in brackets on every line, default outpost; the pass number follows it.",
+    "Préfixe affiché entre crochets sur chaque ligne, outpost par défaut ; le numéro de passe le suit."
   ],
   "ReporterOptions.verbose": [
-    "Include detailed agent and tool events in terminal output.",
-    "Inclut les événements détaillés d’agent et d’outils dans la sortie terminal."
+    "Also print tool inputs and result previews, prompts, raw protocol lines, conversation IDs, harness steps and compactions, the workspace directory and successful operations.",
+    "Affiche aussi les entrées d’outils et aperçus de résultats, les prompts, les lignes brutes du protocole, les identifiants de conversation, les étapes et compactions du harness, le répertoire du workspace et les opérations réussies."
   ],
   "ReporterOptions.quiet": [
     "Suppress all reporter output, including warnings and failures.",
     "Masque toutes les sorties du rapporteur, y compris avertissements et échecs."
   ],
   "ReporterOptions.write": [
-    "Custom sink for formatted reporter output.",
-    "Fonction de destination personnalisée pour la sortie formatée du rapporteur."
+    "Receives each formatted chunk of output instead of process.stdout.",
+    "Reçoit chaque morceau de sortie formaté à la place de process.stdout."
   ],
   "ReportPass.pass": [
-    "One-based agent pass number attached to an observation or reporter state.",
-    "Numéro de passe d’agent commençant à un, attaché à une observation ou à l’état du rapporteur."
+    "Pass number shown in the line prefix; omitted for events outside a pass.",
+    "Numéro de passe affiché dans le préfixe de ligne ; absent pour les événements hors passe."
   ],
   "planRecoveryRetention.options": [
-    "Repository to inspect, explicit retention policy and scan bound.",
-    "Dépôt à inspecter, politique de rétention explicite et limite de parcours."
+    "Repository or transporter to inspect, retention policy and scan limit.",
+    "Dépôt ou transporter à inspecter, politique de rétention et limite de parcours."
   ],
   "RecoveryRetentionOptions.repository": [
-    "Target host Git checkout.",
-    "Checkout Git hôte ciblé."
+    "Git checkout whose .outpost is inspected, default process.cwd(), resolved to its top-level directory; a missing directory rejects with code workspace. With transporter, only recorded in the plan.",
+    "Checkout Git dont le .outpost est inspecté, process.cwd() par défaut, résolu vers son répertoire racine ; un dossier absent rejette avec le code workspace. Avec transporter, seulement enregistré dans le plan."
   ],
   "RecoveryRetentionOptions.policy": [
-    "Explicit storage scopes, minimum age and capacity targets used to decide retention eligibility.",
-    "Périmètres de stockage, âge minimal et cibles de capacité explicites utilisés pour déterminer l’éligibilité au nettoyage."
+    "Scopes, minimum age and limits deciding which entries are eligible. Validated before inspection; an invalid or unknown field rejects with code configuration.",
+    "Périmètres, âge minimal et limites qui décident des entrées éligibles. Validée avant l’inspection ; un champ invalide ou inconnu rejette avec le code configuration."
   ],
   "RecoveryRetentionOptions.maxEntries": [
-    "Maximum filesystem entries inspected before marking the inventory incomplete.",
-    "Nombre maximal d’entrées de fichiers inspectées avant de déclarer l’inventaire incomplet."
+    "Maximum files and directories scanned under .outpost, or objects listed from transporter, default 100000. Exceeding it marks the plan incomplete, so no entry is eligible.",
+    "Nombre maximal de fichiers et répertoires parcourus sous .outpost, ou d’objets listés depuis transporter, 100000 par défaut. Le dépasser rend le plan incomplet : aucune entrée n’est éligible."
   ],
   "RecoveryRetentionPolicy.version": [
-    "Version of this serialized record format; currently 1.",
-    "Version de ce format d’enregistrement sérialisé ; actuellement 1."
+    "Policy format version; must be 1.",
+    "Version du format de politique ; doit valoir 1."
   ],
   "RecoveryRetentionPolicy.scopes": [
-    "Storage classes eligible for pruning: clean workspaces, closed logs and/or task cache entries.",
-    "Classes de stockage éligibles au nettoyage : workspaces propres, journaux fermés et/ou entrées du cache de tâches."
+    "Data that may become eligible: clean-workspaces (clean worktrees on a branch, local only), closed-logs (closed journals) and task-cache (task cache entries). At least one; nothing outside them is ever eligible.",
+    "Données pouvant devenir éligibles : clean-workspaces (worktrees propres sur une branche, en local seulement), closed-logs (journaux fermés) et task-cache (entrées du cache de tâches). Au moins un ; rien en dehors n’est jamais éligible."
   ],
   "RecoveryRetentionPolicy.minAgeMs": [
-    "Minimum age in milliseconds before a retention candidate is eligible.",
-    "Âge minimal en millisecondes pour qu’un candidat à la rétention soit éligible."
+    "Minimum time since the entry's last modification, in milliseconds; 0 accepts any age. For a journal, the index and every segment must be old enough.",
+    "Délai minimal depuis la dernière modification de l’entrée, en millisecondes ; 0 accepte tout âge. Pour un journal, l’index et chaque segment doivent être assez anciens."
   ],
   "RecoveryRetentionPolicy.maxBytes": [
-    "Target maximum retained storage in bytes; only eligible entries may be removed.",
-    "Taille maximale cible du stockage conservé en octets ; seules les entrées éligibles peuvent être supprimées."
+    "Limit on projectedBytes; above it the plan's quota is exceeded. It never makes more entries eligible.",
+    "Limite de projectedBytes ; au-delà, le quota du plan vaut exceeded. Elle ne rend jamais d’autres entrées éligibles."
   ],
   "RecoveryRetentionPolicy.maxWorkspaces": [
-    "Target maximum number of retained workspaces; unsafe entries remain protected.",
-    "Nombre maximal cible de workspaces conservés ; les entrées risquées restent protégées."
+    "Limit on the worktrees left after pruning; above it the plan's quota is exceeded. It never makes more worktrees eligible, and a transporter rejects it with code configuration.",
+    "Limite des worktrees restants après nettoyage ; au-delà, le quota du plan vaut exceeded. Elle ne rend jamais d’autres worktrees éligibles, et un transporter la rejette avec le code configuration."
   ],
   "RecoveryRetentionPlan.repository": [
-    "Target host Git checkout.",
-    "Checkout Git hôte ciblé."
+    "Top-level path of the inspected checkout; for a transport plan, the repository option as given, or an empty string.",
+    "Chemin racine du checkout inspecté ; pour un plan de transport, l’option repository telle quelle, ou une chaîne vide."
   ],
   "RecoveryRetentionPlan.policy": [
-    "Explicit storage scopes, minimum age and capacity targets used to decide retention eligibility.",
-    "Périmètres de stockage, âge minimal et cibles de capacité explicites utilisés pour déterminer l’éligibilité au nettoyage."
+    "Copy of the validated policy; pruning and its after plan reuse it.",
+    "Copie de la politique validée ; le nettoyage et son plan after la réutilisent."
   ],
   "RecoveryRetentionPlan.inspectedAt": [
-    "ISO timestamp when the retention inventory was taken.",
-    "Horodatage ISO de l’inventaire de rétention."
+    "ISO timestamp taken after the inventory; entry ages are measured from it.",
+    "Horodatage ISO pris après l’inventaire ; l’âge des entrées est mesuré à partir de lui."
   ],
   "RecoveryRetentionPlan.inspection": [
-    "Full recovery inventory on which the retention decisions are based.",
-    "Inventaire complet de récupération sur lequel reposent les décisions de rétention."
+    "Inventory the plan is based on, with Git worktree, lock and resource activity reports for a local plan.",
+    "Inventaire sur lequel repose le plan, avec les rapports de worktrees Git, de verrous et d’activité des ressources pour un plan local."
   ],
   "RecoveryRetentionPlan.entries": [
-    "Retention candidates with eligibility, safety reason and observed size.",
-    "Candidats au nettoyage avec éligibilité, motif de sûreté et taille observée."
+    "One entry per inventoried item, each with eligibility, reason code and bytes.",
+    "Une entrée par élément inventorié, avec éligibilité, code de motif et octets."
   ],
   "RecoveryRetentionPlan.complete": [
-    "Whether all requested inspection work completed without hitting scan limits or inaccessible entries.",
-    "Indique si toute l’inspection demandée s’est terminée sans limite de parcours ni entrée inaccessible."
+    "Whether the inventory, Git worktree checks and journal object sizes were all read within maxEntries. When false, no entry is eligible, quota is unknown and pruneRecoveryRetention() rejects the plan.",
+    "Indique si l’inventaire, les contrôles des worktrees Git et la taille des objets de journal ont tous été lus dans la limite maxEntries. À false, aucune entrée n’est éligible, quota vaut unknown et pruneRecoveryRetention() rejette le plan."
   ],
   "RecoveryRetentionPlan.usageBytes": [
-    "Total storage bytes observed before applying the retention plan.",
-    "Nombre total d’octets observés avant application du plan de rétention."
+    "Bytes observed at inspection: file sizes under .outpost, or object sizes in the transport.",
+    "Octets observés à l’inspection : taille des fichiers sous .outpost, ou des objets du transport."
   ],
   "RecoveryRetentionPlan.projectedBytes": [
-    "Estimated retained bytes after removing all eligible candidates.",
-    "Estimation des octets conservés après suppression de tous les candidats éligibles."
+    "usageBytes minus the bytes of eligible entries: the usage left if every candidate is removed.",
+    "usageBytes moins les octets des entrées éligibles : l’usage restant si chaque candidat est supprimé."
   ],
   "RecoveryRetentionPlan.quota": [
-    "Whether projected usage is within the policy limit, exceeded or unknown due to incomplete inspection.",
-    "Indique si l’usage projeté respecte la limite, la dépasse ou reste inconnu faute d’inspection complète."
+    "exceeded when projectedBytes is above maxBytes or the remaining worktrees are above maxWorkspaces, unknown when the inventory is incomplete, otherwise within.",
+    "exceeded quand projectedBytes dépasse maxBytes ou que les worktrees restants dépassent maxWorkspaces, unknown si l’inventaire est incomplet, sinon within."
   ],
   "RecoveryInspection.repository": [
-    "Canonical local repository when inspecting the filesystem; optional caller label or an empty string in transport mode.",
-    "Dépôt local canonique pour l’inspection du système de fichiers ; libellé optionnel de l’appelant ou chaîne vide en mode transport."
+    "Top-level root of the inspected Git checkout in local mode. In transport mode, the repository option echoed back, or an empty string.",
+    "Racine du checkout Git inspecté en mode local. En mode transport, l’option repository renvoyée telle quelle, ou une chaîne vide."
   ],
   "RecoveryInspection.activity": [
-    "Always unverified: filesystem inventory alone cannot prove that retained resources are inactive.",
-    "Toujours unverified : l’inventaire de fichiers seul ne prouve pas l’inactivité des ressources conservées."
+    "Always unverified: neither files nor transport objects prove that retained resources are inactive.",
+    "Toujours unverified : ni les fichiers ni les objets d’un transport ne prouvent que les ressources conservées sont inactives."
   ],
   "RecoveryInspection.git": [
     "Git worktree state report, present when Git inspection was requested.",
@@ -1654,72 +1654,72 @@
     "Rapport de possession locale des verrous, présent lorsque leur inspection a été demandée."
   ],
   "RecoveryInspection.resources": [
-    "Sandbox activity report when requested; remote record ownership is always unverified.",
-    "Rapport d’activité des sandboxes sur demande ; la propriété des enregistrements distants reste toujours non vérifiée."
+    "Recorded sandbox activity, present when resources was true. Ownership is judged against the current process in local mode and always unknown in transport mode.",
+    "Activité des sandboxes enregistrée, présente quand resources vaut true. La possession est jugée par rapport au processus courant en mode local et reste toujours unknown en mode transport."
   ],
   "StorageInventory.root": [
-    "Inspected local runtime root, or the logical marker transport for an object inventory.",
-    "Racine locale inspectée, ou marqueur logique transport pour un inventaire objet."
+    "Inspected directory, the repository's .outpost, or transport for a transport inventory.",
+    "Dossier inspecté, le .outpost du dépôt, ou transport pour un inventaire de transport."
   ],
   "StorageInventory.categories": [
-    "Local recovery, logs, locks and workspaces, or transport artifacts, checkpoints, conversations, recovery, logs, reservations and resources.",
-    "Récupération, journaux, verrous et workspaces locaux, ou artefacts, checkpoints, conversations, récupération, journaux, réservations et ressources du transport."
+    "One group per category, listed even when empty: recovery, logs, locks, workspaces and storage locally; artifacts, checkpoints, conversations, recovery, logs, reservations, resources and task-cache for a transport.",
+    "Un groupe par catégorie, présent même vide : recovery, logs, locks, workspaces et storage en local ; artifacts, checkpoints, conversations, recovery, logs, reservations, resources et task-cache pour un transport."
   ],
   "StorageInventory.usage": [
     "Observed storage bytes and counts of files, directories, symbolic links and other entries.",
     "Octets de stockage observés et nombres de fichiers, dossiers, liens symboliques et autres entrées."
   ],
   "StorageInventory.issues": [
-    "Filesystem, Git or ownership problems that prevented complete inspection.",
-    "Problèmes de fichiers, Git ou possession ayant empêché une inspection complète."
+    "Entries that could not be fully inspected, each with a code such as ENTRY_LIMIT, DEPTH_LIMIT, UNSUPPORTED_TYPE or a filesystem error code.",
+    "Entrées qui n’ont pas pu être entièrement inspectées, chacune avec un code tel que ENTRY_LIMIT, DEPTH_LIMIT, UNSUPPORTED_TYPE ou un code d’erreur du système de fichiers."
   ],
   "StorageInventory.complete": [
-    "Whether all requested inspection work completed without hitting scan limits or inaccessible entries.",
-    "Indique si toute l’inspection demandée s’est terminée sans limite de parcours ni entrée inaccessible."
+    "true when the scan recorded no issue.",
+    "true lorsque le parcours n’a relevé aucun problème."
   ],
   "StorageInventory.scannedEntries": [
-    "Number of filesystem entries visited within the inspection bound.",
-    "Nombre d’entrées de fichiers visitées dans la limite d’inspection."
+    "Entries visited, at most maxEntries: filesystem entries locally, listed objects for a transport.",
+    "Entrées visitées, au plus maxEntries : entrées du système de fichiers en local, objets listés pour un transport."
   ],
   "StorageInventory.maxEntries": [
-    "Maximum filesystem entries inspected before marking the inventory incomplete.",
-    "Nombre maximal d’entrées de fichiers inspectées avant de déclarer l’inventaire incomplet."
+    "Scan bound, default 100000. Reaching it records an ENTRY_LIMIT issue and makes the inventory incomplete.",
+    "Limite du parcours, 100000 par défaut. L’atteindre ajoute un problème ENTRY_LIMIT et rend l’inventaire incomplet."
   ],
   "StorageCategory.name": [
-    "Managed storage category represented by this inventory group.",
-    "Catégorie de stockage géré représentée par ce groupe d’inventaire."
+    "Category, also its directory name under .outpost or its key prefix in the transport.",
+    "Catégorie, qui est aussi son nom de dossier sous .outpost ou son préfixe de clé dans le transport."
   ],
   "StorageCategory.path": [
-    "Host directory containing this managed storage category.",
-    "Dossier hôte contenant cette catégorie de stockage géré."
+    "Host directory of the category, or its key prefix for a transport inventory.",
+    "Dossier hôte de la catégorie, ou son préfixe de clé pour un inventaire de transport."
   ],
   "StorageCategory.entries": [
-    "Inspected filesystem entries within this storage category.",
-    "Entrées de fichiers inspectées dans cette catégorie de stockage."
+    "Direct children of the category directory, sorted by name, each with its own totals; one entry per object for a transport.",
+    "Enfants directs du dossier de la catégorie, triés par nom, chacun avec ses propres totaux ; une entrée par objet pour un transport."
   ],
   "StorageEntry.name": [
-    "Filesystem basename of the inspected storage entry.",
-    "Nom de fichier de l’entrée de stockage inspectée."
+    "Basename of the entry, or the full object key for a transport inventory.",
+    "Nom de base de l’entrée, ou la clé complète de l’objet pour un inventaire de transport."
   ],
   "StorageEntry.path": [
-    "Host path of the inspected storage entry.",
-    "Chemin hôte de l’entrée de stockage inspectée."
+    "Host path of the entry, or the object key for a transport inventory.",
+    "Chemin hôte de l’entrée, ou la clé de l’objet pour un inventaire de transport."
   ],
   "StorageEntry.kind": [
-    "Filesystem entry type observed without following symbolic links.",
-    "Type d’entrée de fichiers observé sans suivre les liens symboliques."
+    "file, directory, symlink, other or unknown, read without following symbolic links. unknown means the entry could not be read or lay past the entry limit; transport objects are file.",
+    "file, directory, symlink, other ou unknown, lu sans suivre les liens symboliques. unknown signifie que l’entrée n’a pas pu être lue ou dépassait la limite d’entrées ; les objets d’un transport sont file."
   ],
   "StorageEntry.modifiedAt": [
-    "ISO timestamp of the inspected entry’s last filesystem modification.",
-    "Horodatage ISO de la dernière modification de l’entrée inspectée."
+    "Latest modification time as an ISO timestamp, including the scanned children of a directory.",
+    "Date de dernière modification au format ISO, enfants parcourus d’un dossier compris."
   ],
   "StorageEntry.complete": [
-    "Whether all requested inspection work completed without hitting scan limits or inaccessible entries.",
-    "Indique si toute l’inspection demandée s’est terminée sans limite de parcours ni entrée inaccessible."
+    "false when this entry or one of its children hit a scan limit or could not be read.",
+    "false lorsque cette entrée ou l’un de ses enfants a atteint une limite de parcours ou n’a pas pu être lu."
   ],
   "StorageEntry.bytes": [
-    "Observed byte size of this storage entry, including scanned children.",
-    "Taille observée en octets de cette entrée, y compris ses enfants parcourus."
+    "Sum of regular file sizes in this entry and its scanned children; symbolic links and directories count 0. The object size for a transport.",
+    "Somme des tailles des fichiers ordinaires de cette entrée et de ses enfants parcourus ; les liens symboliques et les dossiers comptent 0. La taille de l’objet pour un transport."
   ],
   "StorageUsage.files": [
     "Number of regular files counted in the scanned storage.",
@@ -1742,336 +1742,336 @@
     "Total des octets observés dans les entrées parcourues."
   ],
   "StorageIssue.path": [
-    "Filesystem path at which inspection encountered a problem.",
-    "Chemin de fichiers où l’inspection a rencontré un problème."
+    "Path or object key that could not be fully inspected; empty for the ENTRY_LIMIT issue of a transport inventory.",
+    "Chemin ou clé d’objet qui n’a pas pu être entièrement inspecté ; vide pour le problème ENTRY_LIMIT d’un inventaire de transport."
   ],
   "StorageIssue.code": [
-    "Filesystem or inspection error code for the inaccessible entry.",
-    "Code d’erreur de fichiers ou d’inspection de l’entrée inaccessible."
+    "Reason code: a filesystem error code such as EACCES, or an Outpost code such as ENTRY_LIMIT, DEPTH_LIMIT, GIT_LIST_FAILED or INVALID_PID.",
+    "Code du motif : un code d’erreur du système de fichiers tel que EACCES, ou un code Outpost tel que ENTRY_LIMIT, DEPTH_LIMIT, GIT_LIST_FAILED ou INVALID_PID."
   ],
   "WorkspaceGitInspection.complete": [
-    "Whether all requested inspection work completed without hitting scan limits or inaccessible entries.",
-    "Indique si toute l’inspection demandée s’est terminée sans limite de parcours ni entrée inaccessible."
+    "true when no workspace state is unavailable.",
+    "true lorsqu’aucun état de workspace n’est unavailable."
   ],
   "WorkspaceGitInspection.workspaces": [
-    "Git state observations for the repository’s managed worktrees.",
-    "Observations d’état Git des worktrees gérés du dépôt."
+    "Git state of each entry in .outpost/workspaces.",
+    "État Git de chaque entrée de .outpost/workspaces."
   ],
   "WorkspaceGitInspection.issues": [
-    "Filesystem, Git or ownership problems that prevented complete inspection.",
-    "Problèmes de fichiers, Git ou possession ayant empêché une inspection complète."
+    "One issue per unavailable workspace, with its reason as code, or one GIT_LIST_FAILED issue on the repository when git worktree list fails.",
+    "Un problème par workspace unavailable, avec son motif comme code, ou un problème GIT_LIST_FAILED sur le dépôt quand git worktree list échoue."
   ],
   "WorkspaceGitState.state": [
-    "Classification of the worktree’s Git state used to decide whether cleanup is safe.",
-    "Classification de l’état Git du worktree utilisée pour décider si le nettoyage est sûr."
+    "registered: a Git worktree of this repository; unregistered: not listed by git worktree list; skipped: not a directory; unavailable: inspection failed, see reason.",
+    "registered : un worktree Git de ce dépôt ; unregistered : absent de git worktree list ; skipped : pas un dossier ; unavailable : l’inspection a échoué, voir reason."
   ],
   "WorkspaceGitState.head": [
-    "Git HEAD commit recorded by the inspection or snapshot.",
-    "Commit Git HEAD enregistré par l’inspection ou le snapshot."
+    "HEAD commit listed by git worktree list.",
+    "Commit HEAD indiqué par git worktree list."
   ],
   "WorkspaceGitState.branch": [
     "Worktree branch name, or null when HEAD is detached.",
     "Nom de branche du worktree, ou null lorsque HEAD est détaché."
   ],
   "WorkspaceGitState.dirty": [
-    "Whether tracked or untracked changes make the checkout dirty.",
-    "Indique si des changements suivis ou non suivis rendent le checkout sale."
+    "true when git status reports tracked or untracked changes. Ignored files do not count.",
+    "true lorsque git status signale des changements suivis ou non suivis. Les fichiers ignorés ne comptent pas."
   ],
   "WorkspaceGitState.locked": [
     "Whether Git marks the worktree as locked.",
     "Indique si Git marque le worktree comme verrouillé."
   ],
   "WorkspaceGitState.reason": [
-    "Reason Git state could not be inspected or was deliberately skipped.",
-    "Motif pour lequel l’état Git n’a pu être inspecté ou a été délibérément ignoré."
+    "Why the state is skipped (NOT_DIRECTORY) or unavailable, such as WORKSPACE_CHANGED, REGISTRATION_MISMATCH or GIT_INSPECTION_FAILED.",
+    "Motif de l’état skipped (NOT_DIRECTORY) ou unavailable, tel que WORKSPACE_CHANGED, REGISTRATION_MISMATCH ou GIT_INSPECTION_FAILED."
   ],
   "LockInspection.complete": [
-    "Whether all requested inspection work completed without hitting scan limits or inaccessible entries.",
-    "Indique si toute l’inspection demandée s’est terminée sans limite de parcours ni entrée inaccessible."
+    "true when no lock state is unknown.",
+    "true lorsqu’aucun état de verrou n’est unknown."
   ],
   "LockInspection.scope": [
     "Always local-pid: ownership checks use local process identity.",
     "Toujours local-pid : les contrôles de possession utilisent l’identité de processus locale."
   ],
   "LockInspection.entries": [
-    "Inspected lock files and their local ownership assessments.",
-    "Fichiers de verrou inspectés et évaluations de possession locale."
+    "State of each entry in .outpost/locks.",
+    "État de chaque entrée de .outpost/locks."
   ],
   "LockInspection.issues": [
-    "Filesystem, Git or ownership problems that prevented complete inspection.",
-    "Problèmes de fichiers, Git ou possession ayant empêché une inspection complète."
+    "One issue per lock whose state is unknown, with its reason as code.",
+    "Un problème par verrou dont l’état est unknown, avec son motif comme code."
   ],
   "LockInspectionState.ownership": [
-    "Assessment of whether the recorded local process still owns the resource.",
-    "Évaluation de la possession actuelle de la ressource par le processus local enregistré."
+    "Whether the recorded process still holds the lock, judged by host, boot, PID namespace and process start time. Rely on it rather than on state.",
+    "Indique si le processus enregistré détient encore le verrou, d’après l’hôte, le démarrage, l’espace de noms de PID et l’heure de lancement du processus. Fiez-vous à ce champ plutôt qu’à state."
   ],
   "LockInspectionState.state": [
-    "Whether the lock file is present, absent, unknown or deliberately skipped.",
-    "Indique si le fichier de verrou est présent, absent, inconnu ou délibérément ignoré."
+    "present: a process with the recorded PID exists; absent: none exists; unknown: the file or PID could not be read or probed; skipped: the entry is not a file.",
+    "present : un processus porte le PID enregistré ; absent : aucun ; unknown : le fichier ou le PID n’a pas pu être lu ou sondé ; skipped : l’entrée n’est pas un fichier."
   ],
   "LockInspectionState.pid": [
-    "Process ID parsed from the local lock file when available.",
-    "Identifiant du processus extrait du fichier de verrou local lorsqu’il est disponible."
+    "PID read from the lock file, absent when the file or its PID is unreadable.",
+    "PID lu dans le fichier de verrou, absent lorsque le fichier ou son PID est illisible."
   ],
   "LockInspectionState.reason": [
-    "Reason the local lock was classified with this ownership state.",
-    "Motif du classement du verrou local dans cet état de possession."
+    "Why the state is unknown (LOCK_READ_FAILED, INVALID_PID, PID_PROBE_FAILED) or skipped (NOT_FILE).",
+    "Motif de l’état unknown (LOCK_READ_FAILED, INVALID_PID, PID_PROBE_FAILED) ou skipped (NOT_FILE)."
   ],
   "LockOwnership.status": [
-    "Whether the recorded process is active, inactive or cannot be identified confidently.",
-    "Indique si le processus enregistré est actif, inactif ou ne peut être identifié avec certitude."
+    "active: the PID runs with the recorded identity; inactive: the process exited; unknown: another host, boot or PID namespace, a reused PID or a missing identity.",
+    "active : le PID tourne avec l’identité enregistrée ; inactive : le processus s’est terminé ; unknown : autre hôte, démarrage ou espace de noms de PID, PID réutilisé ou identité manquante."
   ],
   "LockOwnership.reason": [
-    "Reason the local lock was classified with this ownership state.",
-    "Motif du classement du verrou local dans cet état de possession."
+    "Code behind the status, such as LOCAL_IDENTITY_MATCH, PROCESS_EXITED, OTHER_HOST, PID_REUSED or REMOTE_OWNER_UNVERIFIED.",
+    "Code à l’origine du statut, tel que LOCAL_IDENTITY_MATCH, PROCESS_EXITED, OTHER_HOST, PID_REUSED ou REMOTE_OWNER_UNVERIFIED."
   ],
   "ResourceInspection.scope": [
-    "Always recorded-sandboxes: inventory covers local activity records, not remote accounts.",
-    "Toujours recorded-sandboxes : l’inventaire couvre les enregistrements locaux, pas les comptes distants."
+    "Always recorded-sandboxes: only records written by Outpost are listed, never the sandbox provider's account.",
+    "Toujours recorded-sandboxes : seuls les enregistrements écrits par Outpost sont listés, jamais le compte du provider de sandbox."
   ],
   "ResourceInspection.complete": [
-    "Whether all requested inspection work completed without hitting scan limits or inaccessible entries.",
-    "Indique si toute l’inspection demandée s’est terminée sans limite de parcours ni entrée inaccessible."
+    "False when a record was unreadable, an entry limit was reached or the records could not be listed. Recovery retention then keeps every workspace.",
+    "Faux quand un enregistrement était illisible, qu’une limite d’entrées a été atteinte ou que les enregistrements n’ont pas pu être listés. La rétention de récupération conserve alors tous les workspaces."
   ],
   "ResourceInspection.entries": [
-    "Local sandbox activity files and their ownership assessments.",
-    "Fichiers locaux d’activité de sandbox et évaluations de leur possession."
+    "One entry per record found, with its ownership verdict.",
+    "Une entrée par enregistrement trouvé, avec son verdict de possession."
   ],
   "ResourceInspection.issues": [
-    "Filesystem, Git or ownership problems that prevented complete inspection.",
-    "Problèmes de fichiers, Git ou possession ayant empêché une inspection complète."
+    "Problems that made the inspection partial, such as RESOURCE_RECORD_UNREADABLE, RESOURCE_ENTRY_LIMIT or RESOURCE_DIRECTORY_UNAVAILABLE. In transport mode, the whole inventory's issue list.",
+    "Problèmes qui ont rendu l’inspection partielle, comme RESOURCE_RECORD_UNREADABLE, RESOURCE_ENTRY_LIMIT ou RESOURCE_DIRECTORY_UNAVAILABLE. En mode transport, la liste des problèmes de tout l’inventaire."
   ],
   "ResourceInspectionEntry.path": [
-    "Host path of the locally recorded sandbox activity file.",
-    "Chemin hôte du fichier local d’activité de sandbox."
+    "Host path of the record's object file in local mode; its transport key, resources/<id>.json, in transport mode.",
+    "Chemin hôte du fichier objet de l’enregistrement en mode local ; sa clé de transport, resources/<id>.json, en mode transport."
   ],
   "ResourceInspectionEntry.record": [
-    "Parsed local sandbox activity record, when readable and valid.",
-    "Enregistrement local d’activité de sandbox analysé, lorsqu’il est lisible et valide."
+    "Parsed record; absent when it was unreadable, invalid or changed during inspection.",
+    "Enregistrement analysé ; absent s’il était illisible, invalide ou modifié pendant l’inspection."
   ],
   "ResourceInspectionEntry.ownership": [
-    "Assessment of whether the recorded local process still owns the resource.",
-    "Évaluation de la possession actuelle de la ressource par le processus local enregistré."
+    "Ownership verdict: status active, inactive or unknown, with a reason code such as LOCAL_IDENTITY_MATCH, PROCESS_EXITED or REMOTE_OWNER_UNVERIFIED.",
+    "Verdict de possession : statut active, inactive ou unknown, avec un code de raison comme LOCAL_IDENTITY_MATCH, PROCESS_EXITED ou REMOTE_OWNER_UNVERIFIED."
   ],
   "ResourceActivityRecord.version": [
     "Version of this serialized record format; currently 1.",
     "Version de ce format d’enregistrement sérialisé ; actuellement 1."
   ],
   "ResourceActivityRecord.id": [
-    "Local identity of the sandbox activity record.",
-    "Identité locale de l’enregistrement d’activité de sandbox."
+    "Random UUID of the record, stored at resources/<id>.json.",
+    "UUID aléatoire de l’enregistrement, stocké sous resources/<id>.json."
   ],
   "ResourceActivityRecord.pid": [
-    "Host process ID that owns the recorded sandbox activity.",
-    "Identifiant du processus hôte possédant l’activité de sandbox enregistrée."
+    "PID of the Outpost process that provisioned the sandbox, not of a process inside it.",
+    "PID du processus Outpost qui a provisionné la sandbox, et non d’un processus qu’elle exécute."
   ],
   "ResourceActivityRecord.identity": [
-    "Host, boot and process-start identity used to assess ownership beyond a PID alone.",
-    "Identité d’hôte, démarrage et début de processus utilisée pour évaluer la possession au-delà du seul PID."
+    "Host, boot, PID namespace and start time of the writing process, used to tell a live owner from a reused PID. Absent when written outside Linux; ownership is then unknown.",
+    "Hôte, démarrage, espace de noms PID et heure de début du processus auteur, pour distinguer un propriétaire vivant d’un PID réutilisé. Absente hors Linux ; la possession est alors unknown."
   ],
   "ResourceActivityRecord.placement": [
-    "Workspace access model: mounted host checkout, synchronized remote checkout or direct host execution.",
-    "Mode d’accès au workspace : checkout hôte monté, checkout distant synchronisé ou exécution directe sur l’hôte."
+    "How the sandbox reaches the workspace: mounted (host worktree mounted, Docker or Podman), remote (copy synchronized with the host: Vercel, Daytona, Firecracker, isolated containers) or host (local provider).",
+    "Accès de la sandbox au workspace : mounted (worktree hôte monté, Docker ou Podman), remote (copie synchronisée avec l’hôte : Vercel, Daytona, Firecracker, conteneurs isolés) ou host (provider local)."
   ],
   "ResourceActivityRecord.workspace": [
-    "Host path of the workspace associated with the recorded sandbox.",
-    "Chemin hôte du workspace associé à la sandbox enregistrée."
+    "Host path of the worktree the sandbox works on. Recovery retention never prunes a workspace named by a record.",
+    "Chemin hôte du worktree sur lequel travaille la sandbox. La rétention de récupération ne supprime jamais un workspace nommé par un enregistrement."
   ],
   "ResourceActivityRecord.createdAt": [
-    "ISO timestamp when the local resource activity record was created.",
-    "Horodatage ISO de création de l’enregistrement local d’activité."
+    "ISO time the sandbox was registered, before the provider acquired it.",
+    "Horodatage ISO de l’enregistrement de la sandbox, avant son acquisition par le provider."
   ],
   "ResourceActivityRecord.updatedAt": [
-    "ISO timestamp when the local resource activity record was last updated.",
-    "Horodatage ISO de dernière mise à jour de l’enregistrement local d’activité."
+    "ISO time of the last phase or operation change.",
+    "Horodatage ISO du dernier changement de phase ou d’opération."
   ],
   "ResourceActivityRecord.phase": [
-    "Last locally recorded sandbox lifecycle phase.",
-    "Dernière phase de cycle de vie de sandbox enregistrée localement."
+    "Last recorded lifecycle phase: allocating, ready, closing, cleanup-failed or allocation-uncertain.",
+    "Dernière phase de cycle de vie enregistrée : allocating, ready, closing, cleanup-failed ou allocation-uncertain."
   ],
   "ResourceActivityRecord.operations": [
-    "Operations currently recorded as active for this sandbox.",
-    "Opérations actuellement enregistrées comme actives pour cette sandbox."
+    "Operations running when the record was written, one entry per kind with its concurrent count. Empty when the sandbox is idle.",
+    "Opérations en cours lors de l’écriture de l’enregistrement, une entrée par type avec son nombre d’exécutions simultanées. Vide quand la sandbox est inactive."
   ],
   "ResourceActivityRecord.lastOperation": [
-    "Most recently completed local operation with its outcome and timestamps.",
-    "Dernière opération locale terminée, avec son résultat et ses horodatages."
+    "Most recently finished operation, completed or failed.",
+    "Dernière opération terminée, réussie ou en échec."
   ],
   "ResourceActivityRecord.lastFailure": [
     "Most recent operation recorded as failed, retained after subsequent successes.",
     "Dernière opération enregistrée en échec, conservée après les succès ultérieurs."
   ],
   "LocalProcessIdentity.host": [
-    "Host identity used to distinguish processes on different machines.",
-    "Identité d’hôte utilisée pour distinguer les processus de machines différentes."
+    "SHA-256 of the machine ID (/etc/machine-id); a different value means the owner ran on another host.",
+    "SHA-256 de l’identifiant de machine (/etc/machine-id) ; une autre valeur signifie que le propriétaire tournait sur un autre hôte."
   ],
   "LocalProcessIdentity.boot": [
-    "Operating-system boot identity used to detect process IDs from an earlier boot.",
-    "Identité de démarrage système utilisée pour détecter les identifiants de processus d’un démarrage précédent."
+    "Kernel boot ID; a different value means the PID comes from an earlier boot.",
+    "Identifiant de démarrage du noyau ; une autre valeur signifie que le PID date d’un démarrage précédent."
   ],
   "LocalProcessIdentity.namespace": [
-    "Process namespace identity used when assessing local lock ownership.",
-    "Identité d’espace de noms de processus utilisée pour évaluer la possession locale du verrou."
+    "PID namespace of the process, such as pid:[4026531836]; a different namespace makes lock and activity ownership unknown.",
+    "Espace de noms PID du processus, comme pid:[4026531836] ; un autre espace de noms rend inconnue la possession des verrous et des activités."
   ],
   "LocalProcessIdentity.started": [
-    "Operating-system process start identity used to detect PID reuse.",
-    "Identité système de début de processus utilisée pour détecter la réutilisation d’un PID."
+    "Process start time in clock ticks since boot, read from /proc; a mismatch means the PID was reused.",
+    "Heure de début du processus en ticks d’horloge depuis le démarrage, lue dans /proc ; une différence signifie que le PID a été réutilisé."
   ],
   "ResourceOperation.count": [
-    "Monotonically increasing local operation sequence number.",
-    "Numéro de séquence local d’opération croissant."
+    "Number of operations of this kind running concurrently. Always 1 in lastOperation and lastFailure.",
+    "Nombre d’opérations de ce type en cours simultanément. Toujours 1 dans lastOperation et lastFailure."
   ],
   "ResourceOperation.kind": [
-    "Operation category recorded for sandbox activity tracking.",
-    "Catégorie d’opération enregistrée pour le suivi d’activité de sandbox."
+    "Operation category, such as dispatch, command, upload or download.",
+    "Catégorie d’opération, comme dispatch, command, upload ou download."
   ],
   "ResourceOperation.startedAt": [
-    "ISO timestamp when execution of this task or operation started.",
-    "Horodatage ISO du début d’exécution de cette tâche ou opération."
+    "ISO start time. In a result, when this operation started; in operations, when the first operation of this kind started since the kind was last idle.",
+    "Horodatage ISO de début. Dans un résultat, début de cette opération ; dans operations, début de la première opération de ce type depuis la dernière période sans opération de ce type."
   ],
   "ResourceOperationResult.id": [
-    "Recorded identifier of the completed resource operation.",
-    "Identifiant enregistré de l’opération de ressource terminée."
+    "Random UUID of this operation.",
+    "UUID aléatoire de cette opération."
   ],
   "ResourceOperationResult.finishedAt": [
-    "ISO timestamp when execution of this task or operation finished.",
-    "Horodatage ISO de fin d’exécution de cette tâche ou opération."
+    "ISO time the operation settled.",
+    "Horodatage ISO de la fin de l’opération."
   ],
   "ResourceOperationResult.outcome": [
-    "Whether the recorded operation completed or failed.",
-    "Indique si l’opération enregistrée a réussi ou échoué."
+    "completed when the action resolved, failed when it threw.",
+    "completed si l’action s’est résolue, failed si elle a levé une erreur."
   ],
   "RecoveryRetentionEntry.path": [
-    "Host path of the inspected storage entry.",
-    "Chemin hôte de l’entrée de stockage inspectée."
+    "Host path of a .outpost entry, or an object key for journals, cache entries and every entry of a transport plan.",
+    "Chemin hôte d’une entrée de .outpost, ou clé d’objet pour les journaux, les entrées de cache et toute entrée d’un plan de transport."
   ],
   "RecoveryRetentionEntry.category": [
-    "Storage category of the retention candidate.",
-    "Catégorie de stockage du candidat à la rétention."
+    "Storage category, such as workspaces, logs, task-cache, recovery, locks or checkpoints.",
+    "Catégorie de stockage, par exemple workspaces, logs, task-cache, recovery, locks ou checkpoints."
   ],
   "RecoveryRetentionEntry.bytes": [
-    "Observed bytes attributable to this retention candidate.",
-    "Octets observés attribuables à ce candidat à la rétention."
+    "Bytes of the entry: file sizes of a directory, or the index and segments of a journal.",
+    "Octets de l’entrée : taille des fichiers d’un dossier, ou de l’index et des segments d’un journal."
   ],
   "RecoveryRetentionEntry.eligible": [
-    "Whether the candidate passed retention safety, scope and age checks for removal.",
-    "Indique si le candidat a passé les contrôles de sûreté, périmètre et âge autorisant sa suppression."
+    "Whether pruneRecoveryRetention() will try to remove the entry; true only when reason is ELIGIBLE.",
+    "Indique si pruneRecoveryRetention() tentera de supprimer l’entrée ; true seulement quand reason vaut ELIGIBLE."
   ],
   "RecoveryRetentionEntry.reason": [
-    "Explanation of why this retention candidate is eligible or must remain protected.",
-    "Explication de l’éligibilité du candidat au nettoyage ou de la nécessité de le protéger."
+    "ELIGIBLE or the code that keeps the entry, such as SCOPE_NOT_SELECTED, RETENTION_AGE, DIRTY_WORKSPACE, INCOMPLETE_INVENTORY or RECOVERY_DATA_PROTECTED.",
+    "ELIGIBLE ou le code qui conserve l’entrée, par exemple SCOPE_NOT_SELECTED, RETENTION_AGE, DIRTY_WORKSPACE, INCOMPLETE_INVENTORY ou RECOVERY_DATA_PROTECTED."
   ],
   "RecoveryRetentionEntry.branch": [
-    "Name of the work branch used or observed during execution.",
-    "Nom de la branche de travail utilisée ou observée pendant l’exécution."
+    "Branch checked out in a registered worktree; pruning requires it unchanged and keeps it.",
+    "Branche extraite dans un worktree enregistré ; le nettoyage l’exige inchangée et la conserve."
   ],
   "RecoveryRetentionEntry.head": [
-    "Git HEAD commit recorded by the inspection or snapshot.",
-    "Commit Git HEAD enregistré par l’inspection ou le snapshot."
+    "HEAD commit of a registered worktree; pruning requires it unchanged.",
+    "Commit HEAD d’un worktree enregistré ; le nettoyage l’exige inchangé."
   ],
   "RecoveryRetentionEntry.modifiedAt": [
-    "ISO timestamp of the inspected entry’s last filesystem modification.",
-    "Horodatage ISO de la dernière modification de l’entrée inspectée."
+    "ISO timestamp of the latest modification inside the entry, compared with minAgeMs.",
+    "Horodatage ISO de la dernière modification dans l’entrée, comparé à minAgeMs."
   ],
   "pruneRecoveryRetention.plan": [
-    "Previously computed retention plan whose eligible entries must be revalidated before deletion.",
-    "Plan de rétention préalablement calculé dont les entrées éligibles doivent être revalidées avant suppression."
+    "Complete plan from planRecoveryRetention(); only its eligible entries are candidates.",
+    "Plan complet issu de planRecoveryRetention() ; seules ses entrées éligibles sont candidates."
   ],
   "RecoveryPruneResult.removed": [
-    "Paths actually removed after ownership and safety revalidation.",
-    "Chemins réellement supprimés après revalidation de la possession et de la sûreté."
+    "Paths or object keys removed.",
+    "Chemins ou clés d’objets supprimés."
   ],
   "RecoveryPruneResult.retained": [
-    "Candidates left in place with the reason each could not be removed.",
-    "Candidats laissés en place avec le motif empêchant leur suppression."
+    "Eligible candidates left in place, with reason PLAN_CHANGED or REVALIDATION_OR_REMOVAL_FAILED.",
+    "Candidats éligibles laissés en place, avec le motif PLAN_CHANGED ou REVALIDATION_OR_REMOVAL_FAILED."
   ],
   "RecoveryPruneResult.after": [
-    "Fresh retention plan computed after pruning, reflecting remaining storage.",
-    "Nouveau plan de rétention calculé après nettoyage, reflétant le stockage restant."
+    "Fresh plan with the same policy, computed after pruning.",
+    "Nouveau plan avec la même politique, calculé après le nettoyage."
   ],
   "assertRecoveryQuota.options": [
-    "Repository, maximum admitted bytes, additional requested bytes and inspection bound.",
-    "Dépôt, octets admis maximaux, octets supplémentaires demandés et limite d’inspection."
+    "Repository or transporter to measure, byte limit, extra bytes and scan limit.",
+    "Dépôt ou transporter à mesurer, limite en octets, octets supplémentaires et limite de parcours."
   ],
   "RecoveryQuotaOptions.repository": [
-    "Target host Git checkout.",
-    "Checkout Git hôte ciblé."
+    "Git checkout whose .outpost is measured, default process.cwd(), resolved to its top-level directory; a missing directory rejects with code workspace. Ignored with transporter.",
+    "Checkout Git dont le .outpost est mesuré, process.cwd() par défaut, résolu vers son répertoire racine ; un dossier absent rejette avec le code workspace. Ignoré avec transporter."
   ],
   "RecoveryQuotaOptions.maxBytes": [
-    "Maximum admitted total of observed storage and active reservations, in bytes.",
-    "Total maximal admis du stockage observé et des réservations actives, en octets."
+    "Limit for observed usage plus reserveBytes, in bytes; above it the call rejects with code workspace. Active reservations are not counted. Must be a non-negative safe integer.",
+    "Limite de l’usage observé plus reserveBytes, en octets ; au-delà, l’appel rejette avec le code workspace. Les réservations actives ne sont pas comptées. Doit être un entier sûr positif ou nul."
   ],
   "RecoveryQuotaOptions.reserveBytes": [
-    "Additional bytes requested for admission alongside existing storage usage.",
-    "Octets supplémentaires demandés à l’admission en plus du stockage déjà utilisé."
+    "Bytes added to observed usage for this check, default 0. Nothing is reserved.",
+    "Octets ajoutés à l’usage observé pour ce contrôle, 0 par défaut. Rien n’est réservé."
   ],
   "RecoveryQuotaOptions.maxEntries": [
-    "Maximum filesystem entries inspected before marking the inventory incomplete.",
-    "Nombre maximal d’entrées de fichiers inspectées avant de déclarer l’inventaire incomplet."
+    "Maximum files and directories scanned under .outpost, or objects listed from transporter, default 100000. Exceeding it makes the inventory incomplete, which rejects with code workspace.",
+    "Nombre maximal de fichiers et répertoires parcourus sous .outpost, ou d’objets listés depuis transporter, 100000 par défaut. Le dépasser rend l’inventaire incomplet, ce qui rejette avec le code workspace."
   ],
   "verifyRecoveryTransfer.path": [
-    "Retained transfer directory to verify.",
-    "Dossier de transfert conservé à vérifier."
+    "Retained transfer directory to verify; a missing directory rejects with code workspace.",
+    "Dossier de transfert conservé à vérifier ; un dossier absent rejette avec le code workspace."
   ],
   "verifyRecoveryTransfer.options": [
-    "Enable checksum and Git restorability checks and set their repository and byte bound.",
-    "Active les contrôles d’empreintes et de restauration Git et définit leur dépôt et limite d’octets."
+    "Restorability and checksum checks, the repository they use and the hashing limit.",
+    "Contrôles de restauration et d’empreintes, le dépôt qu’ils utilisent et la limite de hachage."
   ],
   "RecoveryVerificationOptions.restorability": [
-    "Also verify that retained Git bundles and patches can reconstruct the recorded state.",
-    "Vérifie aussi que les bundles et patches Git conservés peuvent reconstruire l’état enregistré."
+    "Clone repository into a temporary directory and check that the commits exist, the bundle unpacks and the three patches apply. Runs only when the structure checks pass; requires repository.",
+    "Clone repository dans un dossier temporaire et vérifie que les commits existent, que le bundle se décompresse et que les trois patches s’appliquent. S’exécute seulement si les contrôles de structure réussissent ; exige repository."
   ],
   "RecoveryVerificationOptions.repository": [
-    "Target host Git checkout.",
-    "Checkout Git hôte ciblé."
+    "Git checkout cloned for the restorability check; a shallow or partial clone, or one with alternates, fails that check.",
+    "Checkout Git cloné pour le contrôle de restauration ; un clone superficiel ou partiel, ou avec des alternates, fait échouer ce contrôle."
   ],
   "RecoveryVerificationOptions.checksums": [
-    "Compute and compare recorded payload digests during transfer verification.",
-    "Calcule et compare les empreintes enregistrées des données pendant la vérification du transfert."
+    "Hash every file listed in checksums.json with SHA-256 and compare kind, size and digest. Runs only when the earlier checks pass.",
+    "Calcule le SHA-256 de chaque fichier listé dans checksums.json et compare type, taille et empreinte. S’exécute seulement si les contrôles précédents réussissent."
   ],
   "RecoveryVerificationOptions.maxBytes": [
-    "Maximum payload bytes allowed for checksum verification.",
-    "Nombre maximal d’octets de données autorisé pour la vérification des empreintes."
+    "Maximum bytes hashed for checksums, default 1073741824 (1 GiB). Exceeding it fails with CHECKSUM_LIMIT and leaves integrity unverified.",
+    "Nombre maximal d’octets hachés pour les empreintes, 1073741824 (1 Gio) par défaut. Le dépasser échoue avec CHECKSUM_LIMIT et laisse integrity à unverified."
   ],
   "RecoveryVerification.directory": [
-    "Host directory containing the retained transfer artifacts to verify or restore.",
-    "Dossier hôte contenant les artefacts de transfert conservés à vérifier ou restaurer."
+    "Resolved real path of the verified transfer directory.",
+    "Chemin réel résolu du dossier de transfert vérifié."
   ],
   "RecoveryVerification.scope": [
-    "Whether verification covered only transfer structure or also Git restorability.",
-    "Indique si la vérification couvre seulement la structure du transfert ou aussi sa restauration Git."
+    "transfer-restorability when restorability was requested, otherwise transfer-structure.",
+    "transfer-restorability quand restorability a été demandé, sinon transfer-structure."
   ],
   "RecoveryVerification.complete": [
-    "Whether all requested inspection work completed without hitting scan limits or inaccessible entries.",
-    "Indique si toute l’inspection demandée s’est terminée sans limite de parcours ni entrée inaccessible."
+    "Whether every check passed.",
+    "Indique si tous les contrôles ont réussi."
   ],
   "RecoveryVerification.integrity": [
-    "Integrity conclusion from the recorded manifest and available checksum verification.",
-    "Conclusion d’intégrité issue du manifeste enregistré et de la vérification d’empreintes disponible."
+    "checksums-match or checksums-mismatch after checksum verification; unverified when checksums were not requested or could not run to the end.",
+    "checksums-match ou checksums-mismatch après vérification des empreintes ; unverified quand elles n’ont pas été demandées ou n’ont pas pu aller au bout."
   ],
   "RecoveryVerification.checksums": [
-    "Detailed checksum results, byte count and integrity status when hashing was requested.",
-    "Résultats détaillés des empreintes, nombre d’octets et état d’intégrité lorsque le calcul a été demandé."
+    "Checksum integrity, bytesChecked, maxBytes and per-file checks; present when checksums was requested and the earlier checks passed.",
+    "Intégrité des empreintes, bytesChecked, maxBytes et contrôles par fichier ; présent quand checksums a été demandé et que les contrôles précédents ont réussi."
   ],
   "RecoveryVerification.checks": [
-    "Per-path verification results with pass/fail status and diagnostic code.",
-    "Résultats de vérification par chemin avec statut pass/fail et code de diagnostic."
+    "Every check run, in order, with path, pass or fail status and a code such as FILE_PRESENT, CHECKSUM_MISMATCH or PATCH_APPLIES.",
+    "Chaque contrôle exécuté, dans l’ordre, avec chemin, statut pass ou fail et un code comme FILE_PRESENT, CHECKSUM_MISMATCH ou PATCH_APPLIES."
   ],
   "RecoveryChecksumResult.integrity": [
-    "Integrity conclusion from the recorded manifest and available checksum verification.",
-    "Conclusion d’intégrité issue du manifeste enregistré et de la vérification d’empreintes disponible."
+    "checksums-match when every manifest entry matches, checksums-mismatch when one differs, unverified when the manifest is missing or invalid or a file could not be hashed within maxBytes.",
+    "checksums-match lorsque chaque entrée du manifeste correspond, checksums-mismatch lorsqu’une entrée diffère, unverified lorsque le manifeste est absent ou invalide ou qu’un fichier n’a pas pu être haché dans la limite maxBytes."
   ],
   "RecoveryChecksumResult.bytesChecked": [
     "Number of payload bytes actually hashed during verification.",
     "Nombre d’octets de données réellement hachés pendant la vérification."
   ],
   "RecoveryChecksumResult.maxBytes": [
-    "Maximum payload bytes allowed for checksum verification.",
-    "Nombre maximal d’octets de données autorisé pour la vérification des empreintes."
+    "Hashing bound, default 1073741824 (1 GiB). Reaching it stops verification with a CHECKSUM_LIMIT check and leaves integrity unverified.",
+    "Limite de hachage, 1073741824 (1 Gio) par défaut. L’atteindre arrête la vérification avec un contrôle CHECKSUM_LIMIT et laisse integrity à unverified."
   ],
   "RecoveryChecksumResult.checks": [
-    "Per-path verification results with pass/fail status and diagnostic code.",
-    "Résultats de vérification par chemin avec statut pass/fail et code de diagnostic."
+    "One check per manifest entry, CHECKSUM_MATCH or CHECKSUM_MISMATCH, ending early with CHECKSUM_LIMIT or CHECKSUM_UNAVAILABLE; or a single failed check on the manifest: CHECKSUMS_UNAVAILABLE or INVALID_CHECKSUM_MANIFEST.",
+    "Un contrôle par entrée du manifeste, CHECKSUM_MATCH ou CHECKSUM_MISMATCH, arrêté plus tôt par CHECKSUM_LIMIT ou CHECKSUM_UNAVAILABLE ; ou un seul contrôle en échec sur le manifeste : CHECKSUMS_UNAVAILABLE ou INVALID_CHECKSUM_MANIFEST."
   ],
   "RecoveryStructureCheck.path": [
     "Retained transfer entry examined by this verification check.",
@@ -2082,32 +2082,32 @@
     "pass lorsque l’invariant contrôlé est respecté, fail sinon."
   ],
   "RecoveryStructureCheck.code": [
-    "Diagnostic code identifying the verified invariant or detected transfer defect.",
-    "Code de diagnostic identifiant l’invariant vérifié ou le défaut de transfert détecté."
+    "Check code, such as FILE_PRESENT, INVALID_STATE, PATCH_APPLIES, CHECKSUM_MISMATCH or SOURCE_UNSUPPORTED.",
+    "Code du contrôle, tel que FILE_PRESENT, INVALID_STATE, PATCH_APPLIES, CHECKSUM_MISMATCH ou SOURCE_UNSUPPORTED."
   ],
   "diagnoseSandbox.target": [
-    "Caller-owned Sandbox or SandboxLease to probe without taking disposal ownership.",
-    "Sandbox ou SandboxLease appartenant à l’appelant à sonder sans devenir propriétaire de sa fermeture."
+    "Sandbox or SandboxLease to probe. A Sandbox runs the diagnosis as its own exclusive operation; a lease is probed directly. Neither is closed or released.",
+    "Sandbox ou SandboxLease à sonder. Un Sandbox exécute le diagnostic comme sa propre opération exclusive ; un lease est sondé directement. Aucun des deux n’est fermé ni libéré."
   ],
   "diagnoseSandbox.options": [
     "Agent and provider metadata, transfer probes, cancellation and per-probe deadline.",
     "Métadonnées d’agent et provider, sondes de transfert, annulation et délai par sonde."
   ],
   "diagnoseAgentProtocol.agent": [
-    "Agent CLI identifier to report or diagnose: claude, codex, antigravity (executable agy), copilot or kimi.",
-    "Identifiant du CLI d’agent à rapporter ou diagnostiquer : claude, codex, antigravity (exécutable agy), copilot ou kimi."
+    "Built-in agent whose adapter decodes the fixtures: claude, codex, antigravity, copilot or kimi.",
+    "Agent intégré dont l’adapter décode les fixtures : claude, codex, antigravity, copilot ou kimi."
   ],
   "AgentProtocolReport.scope": [
     "Always bundled-protocol-fixtures: checks replay recorded adapter fixtures.",
     "Toujours bundled-protocol-fixtures : les contrôles rejouent les fixtures enregistrées d’adapter."
   ],
   "AgentProtocolReport.agent": [
-    "Agent CLI identifier to report or diagnose: claude, codex, antigravity (executable agy), copilot or kimi.",
-    "Identifiant du CLI d’agent à rapporter ou diagnostiquer : claude, codex, antigravity (exécutable agy), copilot ou kimi."
+    "Agent whose adapter was checked.",
+    "Agent dont l’adapter a été vérifié."
   ],
   "AgentProtocolReport.referenceVersion": [
-    "Pinned CLI version the bundled protocol fixtures target; absent for Antigravity, which has no pinned version.",
-    "Version épinglée du CLI visée par les fixtures de protocole intégrées ; absente pour Antigravity, qui n’a pas de version épinglée."
+    "CLI version Outpost pins for this agent, to compare with the CLI you installed.",
+    "Version de la CLI qu’Outpost épingle pour cet agent, à comparer avec la CLI que vous avez installée."
   ],
   "AgentProtocolReport.installedCli": [
     "Always unverified: bundled fixture checks do not invoke the installed CLI.",
@@ -2118,12 +2118,12 @@
     "Toujours unverified : ces diagnostics n’appellent pas de modèle réel."
   ],
   "AgentProtocolReport.checks": [
-    "Individual diagnostic checks with status, message and available version information.",
-    "Contrôles individuels avec statut, message et informations de version disponibles."
+    "One check per fixture, with id protocol.fixture.<name>: pass when the decoded events equal the expected ones, fail otherwise.",
+    "Un contrôle par fixture, d’identifiant protocol.fixture.<name> : pass si les événements décodés sont identiques à ceux attendus, fail sinon."
   ],
   "AgentProtocolReport.hasFailures": [
-    "Whether at least one diagnostic check failed.",
-    "Indique si au moins un contrôle de diagnostic a échoué."
+    "true when at least one fixture did not decode to the expected events.",
+    "true dès qu’une fixture ne se décode pas en les événements attendus."
   ],
   "reserveRecoveryStorage.options": [
     "Repository, byte limit, bytes to reserve, ledger transport, scan limit and cancellation.",
@@ -2158,68 +2158,68 @@
     "Source du transfert conservé, dépôt, nouvelle destination, côté choisi et limite d’octets de vérification."
   ],
   "RecoveryRestoreOptions.directory": [
-    "Host directory containing the retained transfer artifacts to verify or restore.",
-    "Dossier hôte contenant les artefacts de transfert conservés à vérifier ou restaurer."
+    "Retained transfer directory, as named by details.recovery of the synchronization error. It must contain state.json and checksums.json.",
+    "Dossier du transfert conservé, tel que l’indique details.recovery de l’erreur de synchronisation. Il doit contenir state.json et checksums.json."
   ],
   "RecoveryRestoreOptions.repository": [
-    "Target host Git checkout.",
-    "Checkout Git hôte ciblé."
+    "Host Git repository cloned into the destination; it is only read. Partial, shallow or alternates-based repositories fail the Git check.",
+    "Dépôt Git hôte cloné dans la destination ; il est seulement lu. Un dépôt partiel, superficiel (shallow) ou à objets alternates échoue au contrôle Git."
   ],
   "RecoveryRestoreOptions.destination": [
-    "New, absent destination directory outside the source repository, Git metadata and retained transfer.",
-    "Nouveau dossier de destination absent, hors du dépôt source, de ses métadonnées Git et du transfert conservé."
+    "New directory to create. Its parent must exist; the path must not exist and must lie outside the repository, its Git metadata and the transfer.",
+    "Nouveau dossier à créer. Son parent doit exister ; le chemin ne doit pas exister et doit se trouver hors du dépôt, de ses métadonnées Git et du transfert."
   ],
   "RecoveryRestoreOptions.side": [
-    "Retained state to restore: previous host state or incoming remote state.",
-    "État conservé à restaurer : previous pour l’état hôte antérieur ou incoming pour l’état distant entrant."
+    "previous restores the host worktree as backed up before the transfer, staged index included; incoming restores the sandbox's commits, uncommitted changes and untracked files.",
+    "previous restaure le worktree hôte tel qu’il était sauvegardé avant le transfert, index Git compris ; incoming restaure les commits, changements non commités et fichiers non suivis de la sandbox."
   ],
   "RecoveryRestoreOptions.maxBytes": [
-    "Maximum retained payload bytes allowed when snapshotting and verifying restoration sources.",
-    "Nombre maximal d’octets de données conservées autorisé pour copier et vérifier les sources de restauration."
+    "Maximum transfer bytes copied and hashed, default 1073741824 (1 GiB). Exceeding it rejects with code configuration.",
+    "Nombre maximal d’octets du transfert copiés et hachés, 1073741824 (1 Gio) par défaut. Un dépassement rejette avec le code configuration."
   ],
   "RecoveryRestorePlan.fingerprint": [
-    "Fingerprint binding the plan to the inspected retained source for revalidation before restoration.",
-    "Empreinte liant le plan à la source conservée inspectée pour revalidation avant restauration."
+    "SHA-256 of every other plan field. restoreRecoveryTransfer() rejects a plan that no longer matches it.",
+    "SHA-256 de tous les autres champs du plan. restoreRecoveryTransfer() rejette un plan qui ne lui correspond plus."
   ],
   "RecoveryRestorePlan.manifestSha256": [
-    "SHA-256 of the retained transfer manifest captured during restoration planning.",
-    "SHA-256 du manifeste de transfert conservé, capturé lors de la planification de restauration."
+    "SHA-256 of the transfer's checksums.json at planning. Restoration rejects with code configuration when the manifest has changed.",
+    "SHA-256 du checksums.json du transfert lors de la planification. La restauration rejette avec le code configuration si le manifeste a changé."
   ],
   "RecoveryRestorePlan.commit": [
-    "Git commit used to reconstruct the selected retained state.",
-    "Commit Git utilisé pour reconstruire l’état conservé choisi."
+    "Commit the destination will be detached at: the last synchronized commit for previous, the sandbox HEAD for incoming.",
+    "Commit sur lequel la destination sera détachée : le dernier commit synchronisé pour previous, le HEAD de la sandbox pour incoming."
   ],
   "RecoveryRestorePlan.payloads": [
-    "Retained bundle and patch paths required to restore the selected side.",
-    "Chemins des bundles et patches conservés nécessaires pour restaurer le côté choisi."
+    "Untracked file paths, relative to the checkout, copied from previous-files/ or incoming/ into the destination after the patches.",
+    "Chemins des fichiers non suivis, relatifs au checkout, copiés depuis previous-files/ ou incoming/ dans la destination après les patches."
   ],
   "RecoveryRestorePlan.staging": [
-    "Whether the original Git index is preserved; incoming remote state has no recoverable staging information.",
-    "Indique si l’index Git d’origine est préservé ; l’état distant entrant ne fournit pas d’information d’index récupérable."
+    "preserved for previous: the staged changes are restored to the index. unavailable for incoming: the sandbox's staging is not captured.",
+    "preserved pour previous : les changements indexés sont restaurés dans l’index Git. unavailable pour incoming : l’index de la sandbox n’est pas capturé."
   ],
   "restoreRecoveryTransfer.plan": [
-    "Restoration plan binding source, destination, selected state and integrity fingerprints.",
-    "Plan de restauration liant source, destination, état choisi et empreintes d’intégrité."
+    "Plan returned by planRecoveryRestore(). Any edited field fails its fingerprint check with code configuration.",
+    "Plan renvoyé par planRecoveryRestore(). Tout champ modifié fait échouer le contrôle d’empreinte avec le code configuration."
   ],
   "RecoveryRestoreResult.directory": [
-    "New checkout directory populated with the restored state.",
-    "Nouveau dossier de checkout rempli avec l’état restauré."
+    "Created destination: a clone of the repository detached at commit, without an origin remote, with the side's changes applied.",
+    "Destination créée : un clone du dépôt détaché sur commit, sans remote origin, avec les changements du côté choisi appliqués."
   ],
   "RecoveryRestoreResult.commit": [
-    "Git commit used to reconstruct the selected retained state.",
-    "Commit Git utilisé pour reconstruire l’état conservé choisi."
+    "Commit the destination is detached at.",
+    "Commit sur lequel la destination est détachée."
   ],
   "RecoveryRestoreResult.side": [
-    "Retained state to restore: previous host state or incoming remote state.",
-    "État conservé à restaurer : previous pour l’état hôte antérieur ou incoming pour l’état distant entrant."
+    "Side that was restored, copied from the plan.",
+    "Côté restauré, repris du plan."
   ],
   "RecoveryRestoreResult.staging": [
-    "Whether the original Git index is preserved; incoming remote state has no recoverable staging information.",
-    "Indique si l’index Git d’origine est préservé ; l’état distant entrant ne fournit pas d’information d’index récupérable."
+    "preserved when the previous side's staged changes were restored to the index; unavailable for incoming.",
+    "preserved lorsque les changements indexés du côté previous ont été restaurés dans l’index Git ; unavailable pour incoming."
   ],
   "RecoveryRestoreResult.sourceRetained": [
-    "Always true: restoration preserves the original recovery artifacts.",
-    "Toujours true : la restauration conserve les artefacts de récupération d’origine."
+    "Always true: the transfer directory stays in place after restoration.",
+    "Toujours true : le dossier du transfert reste en place après la restauration."
   ],
   "defineApprovalTask.options": [
     "Gate key, dependencies, prompt, actors allowed to approve or reject, and the optional signed authentication.",
@@ -2250,24 +2250,24 @@
     "Choix d’inventaire du dépôt local ou d’un transport, limite d’entrées et inspection optionnelle des ressources. Git et les verrous de processus exigent le mode local."
   ],
   "RecoveryInspectionOptions.repository": [
-    "Target host Git checkout.",
-    "Checkout Git hôte ciblé."
+    "Git checkout to inspect, default the current directory, resolved to its top-level root. In transport mode, only echoed back as a label.",
+    "Checkout Git à inspecter, par défaut le répertoire courant, résolu à sa racine. En mode transport, seulement renvoyé comme libellé."
   ],
   "RecoveryInspectionOptions.maxEntries": [
-    "Maximum filesystem entries inspected before marking the inventory incomplete.",
-    "Nombre maximal d’entrées de fichiers inspectées avant de déclarer l’inventaire incomplet."
+    "Maximum entries scanned before the inventory is marked incomplete, default 100000. Local resource inspection also stops at 10000 records; a non-positive value rejects with code configuration.",
+    "Nombre maximal d’entrées parcourues avant de déclarer l’inventaire incomplet, 100000 par défaut. L’inspection locale des ressources s’arrête aussi à 10000 enregistrements ; une valeur non positive rejette avec le code configuration."
   ],
   "RecoveryInspectionOptions.git": [
-    "Include Git worktree state and dirty/locked checks in the inventory.",
-    "Inclut l’état Git des worktrees et les contrôles de modifications et verrouillage dans l’inventaire."
+    "Adds the Git state of each workspace under .outpost: registration, HEAD, branch, dirty and locked flags. Local mode only.",
+    "Ajoute l’état Git de chaque workspace sous .outpost : enregistrement, HEAD, branche, modifications et verrouillage. Mode local uniquement."
   ],
   "RecoveryInspectionOptions.locks": [
-    "Include local lock-file and process-ownership inspection.",
-    "Inclut l’inspection des fichiers de verrou locaux et de leur possession par les processus."
+    "Adds operation lock files with their owner's status. Local mode only.",
+    "Ajoute les fichiers de verrou d’opération avec le statut de leur propriétaire. Mode local uniquement."
   ],
   "RecoveryInspectionOptions.resources": [
-    "Include locally recorded sandbox leases and active operations.",
-    "Inclut les baux de sandbox et opérations actives enregistrés localement."
+    "Adds sandbox activity records with their ownership verdicts, read from .outpost/storage or, with transporter, from that transport.",
+    "Ajoute les enregistrements d’activité des sandboxes avec leur verdict de possession, lus dans .outpost/storage ou, avec transporter, dans ce transport."
   ],
   "ArtifactIdentity.name": [
     "Contract name, nonempty and at most 1024 characters. A read requires the same name.",
@@ -2923,20 +2923,20 @@
     "Tracer OpenTelemetry utilisé pour créer les spans d’exécution."
   ],
   "OpenTelemetryOptions.meter": [
-    "OpenTelemetry meter used to record execution and token metrics.",
-    "Meter OpenTelemetry utilisé pour enregistrer les métriques d’exécution et de tokens."
+    "OpenTelemetry meter for Outpost execution counters, duration histograms and token counters (outpost.workflow.*, outpost.task.*, outpost.dispatch.*, outpost.agent.tokens).",
+    "Meter OpenTelemetry pour les compteurs d’exécutions, histogrammes de durée et compteurs de tokens d’Outpost (outpost.workflow.*, outpost.task.*, outpost.dispatch.*, outpost.agent.tokens)."
   ],
   "OpenTelemetryOptions.onError": [
-    "Callback receiving isolated telemetry-export or observer errors.",
-    "Callback recevant les erreurs isolées de télémétrie ou d’observation."
+    "Receives errors thrown by the tracer or meter while recording workflows and dispatches; they never change a run’s outcome. Errors thrown by onError are ignored.",
+    "Reçoit les erreurs levées par le tracer ou le meter pendant l’enregistrement des workflows et des dispatchs ; elles ne changent jamais le résultat d’une exécution. Les erreurs levées par onError sont ignorées."
   ],
   "OpenTelemetryObserver.observe": [
-    "Convert a workflow event into telemetry spans and metrics.",
-    "Convertit un événement de workflow en spans et métriques de télémétrie."
+    "Records a workflow event as spans and metrics; workflow.start() calls it when the observer is passed as telemetry.",
+    "Enregistre un événement de workflow sous forme de spans et de métriques ; workflow.start() l’appelle quand l’observateur est passé comme telemetry."
   ],
   "OpenTelemetryObserver.close": [
-    "Finish any outstanding execution spans owned by this observer.",
-    "Termine les spans d’exécution encore ouverts appartenant à cet observateur."
+    "Ends every open workflow, task, attempt, dispatch and operation span as cancelled or failed. It does not flush or shut down the SDK.",
+    "Termine tous les spans de workflow, de tâche, de tentative, de dispatch et d’opération encore ouverts comme annulés ou en échec. Il ne vide ni n’arrête le SDK."
   ],
   "FirecrackerOptions.binary": [
     "Absolute host path of the firecracker executable.",
@@ -3183,36 +3183,36 @@
     "createTransportConversations() : enveloppe un store de base pour archiver aussi chaque capture via un transport."
   ],
   "RecoveryRetentionOptions.transporter": [
-    "Inspect remote objects and plan retention of closed journals. Local workspace cleanup is unsupported in transport mode.",
-    "Inspecte les objets distants et prépare la rétention des journaux fermés. Le nettoyage des workspaces locaux est incompatible avec le mode transport."
+    "Plan over this transport's objects instead of the repository's .outpost. Only closed-logs and task-cache apply; clean-workspaces or maxWorkspaces reject with code configuration.",
+    "Planifie sur les objets de ce transport au lieu du .outpost du dépôt. Seuls closed-logs et task-cache s’appliquent ; clean-workspaces ou maxWorkspaces rejettent avec le code configuration."
   ],
   "RecoveryRetentionPlan.source": [
-    "Present as transport for an object-storage plan; pruning then requires the same configured transporter separately.",
-    "Vaut transport pour un plan de stockage objet ; son application exige alors le même transport configuré, fourni séparément."
+    "transport for a plan built with a transporter; absent for a local plan. pruneRecoveryRetention() then requires the same transporter.",
+    "transport pour un plan construit avec un transporter ; absent pour un plan local. pruneRecoveryRetention() exige alors le même transporter."
   ],
   "StorageEntry.revision": [
     "Object revision for a transport inventory entry; absent for local filesystem inventory.",
     "Révision d’objet pour une entrée d’inventaire de transport ; absente dans l’inventaire du système de fichiers local."
   ],
   "RecoveryRetentionEntry.revision": [
-    "Expected journal index revision checked again before deletion in transport mode.",
-    "Révision attendue de l’index du journal, vérifiée de nouveau avant suppression en mode transport."
+    "Transport revision of the object, or of a journal's index; deletion is conditional on it.",
+    "Révision de transport de l’objet, ou de l’index d’un journal ; la suppression en dépend."
   ],
   "RecoveryRetentionEntry.objects": [
-    "Versioned index and segments belonging to one remote journal; deletion revalidates the group and each object revision.",
-    "Index et segments versionnés d’un journal distant ; la suppression revalide le groupe et la révision de chaque objet."
+    "Versioned objects removed with the entry: a journal's index and segments, or one cache object. Each is deleted only at its recorded revision.",
+    "Objets versionnés supprimés avec l’entrée : l’index et les segments d’un journal, ou un objet de cache. Chacun n’est effacé qu’à sa révision enregistrée."
   ],
   "pruneRecoveryRetention.options": [
-    "Required transport binding for a plan with source transport; omitted for a local retention plan.",
-    "Transport requis pour un plan dont source vaut transport ; omis pour un plan de rétention locale."
+    "{ transporter } used to build a plan whose source is transport; must be omitted for a local plan.",
+    "{ transporter } ayant servi à construire un plan dont source vaut transport ; à omettre pour un plan local."
   ],
   "RecoveryQuotaOptions.transporter": [
-    "Measure logical payload bytes in this object transport instead of the repository’s local runtime files. This is an observation, not a reservation.",
-    "Mesure les octets utiles de ce transport objet au lieu des fichiers locaux du dépôt. C’est une observation, pas une réservation."
+    "Measure the sizes of this transport's objects instead of the repository's .outpost files. An object outside the known categories makes the inventory incomplete.",
+    "Mesure la taille des objets de ce transport au lieu des fichiers du .outpost du dépôt. Un objet hors des catégories connues rend l’inventaire incomplet."
   ],
   "RecoveryInspectionOptions.transporter": [
-    "Inventory object keys and optionally resource records in this transport; host Git and lock inspection are unsupported.",
-    "Inventorie les clés d’objets et éventuellement les activités dans ce transport ; l’inspection de Git et des verrous hôtes est incompatible."
+    "Inventory this transport's objects instead of a local repository. Pass the transport given as activityTransport to read its activity records; git or locks then reject with code configuration.",
+    "Inventorie les objets de ce transport au lieu d’un dépôt local. Passez le transport donné comme activityTransport pour lire ses enregistrements d’activité ; git ou locks rejettent alors avec le code configuration."
   ],
   "createS3Transport.options": [
     "Caller-owned S3 client, bucket and isolated object prefix.",
@@ -3307,8 +3307,8 @@
     "done quand le dispatch se résout, cancelled pour une annulation explicite, failed pour les autres rejets dont les délais dépassés."
   ],
   "DispatchTelemetryOutcome.usage": [
-    "Authoritative result totals on success, or known reconciled consumption on failure.",
-    "Totaux du résultat en cas de succès, consommation connue réconciliée en cas d’échec."
+    "Token totals: result.usage on success; on failure, the completed passes plus what the current pass reported.",
+    "Totaux de tokens : result.usage en cas de succès ; en cas d’échec, les passes terminées plus ce que la passe en cours a rapporté."
   ],
   "DispatchTelemetryOutcome.completed": [
     "Whether the successful dispatch satisfied its completion condition; absent when the operation rejected.",
@@ -3335,64 +3335,64 @@
     "Attend les événements reçus avant cet appel ; rejette la première erreur de handler, y compris aux appels suivants, sans fermer les ressources externes."
   ],
   "ReporterHandlers.phase": [
-    "Handle the execution phase and available agent/workspace metadata; receives pass and at metadata and may return a promise.",
-    "Traite : phase d’exécution et métadonnées disponibles de l’agent et du workspace ; reçoit pass et at et peut retourner une promesse."
+    "Receives a dispatch phase (preparing prompt, running, preparation failed) with the agent name, branch and workspace directory when known.",
+    "Reçoit une phase du dispatch (preparing prompt, running, preparation failed) avec le nom de l’agent, la branche et le répertoire du workspace quand ils sont connus."
   ],
   "ReporterHandlers.summary": [
-    "Handle the completed pass duration, exit status and authoritative token totals; receives pass and at metadata and may return a promise.",
-    "Traite : durée, statut de sortie et totaux de tokens de la passe terminée ; reçoit pass et at et peut retourner une promesse."
+    "Receives the end of a pass: its duration, exit status and total token usage.",
+    "Reçoit la fin d’une passe : sa durée, son statut de sortie et son usage total de tokens."
   ],
   "ReporterHandlers.warning": [
-    "Handle the non-fatal warning message; receives pass and at metadata and may return a promise.",
-    "Traite : message d’avertissement non fatal ; reçoit pass et at et peut retourner une promesse."
+    "Receives a nonfatal warning, such as incomplete usage or a replay divergence in warn mode.",
+    "Reçoit un avertissement non bloquant, comme un usage incomplet ou une divergence de rejeu en mode warn."
   ],
   "ReporterHandlers.text": [
-    "Handle the agent text fragment; receives pass and at metadata and may return a promise.",
-    "Traite : fragment de texte de l’agent ; reçoit pass et at et peut retourner une promesse."
+    "Receives a block of agent text.",
+    "Reçoit un bloc de texte de l’agent."
   ],
   "ReporterHandlers.result": [
-    "Handle the final agent response text; receives pass and at metadata and may return a promise.",
-    "Traite : texte de réponse finale de l’agent ; reçoit pass et at et peut retourner une promesse."
+    "Receives the agent’s final answer text for the turn.",
+    "Reçoit le texte de la réponse finale de l’agent pour le tour."
   ],
   "ReporterHandlers.prompt": [
-    "Handle the rendered prompt sent to the agent; receives pass and at metadata and may return a promise.",
-    "Traite : prompt rendu envoyé à l’agent ; reçoit pass et at et peut retourner une promesse."
+    "Receives the rendered prompt sent at the start of each pass.",
+    "Reçoit le prompt rendu envoyé au début de chaque passe."
   ],
   "ReporterHandlers.tool": [
-    "Handle the tool name and input reported by the agent; receives pass and at metadata and may return a promise.",
-    "Traite : nom et entrée d’outil signalés par l’agent ; reçoit pass et at et peut retourner une promesse."
+    "Receives a tool call with its name, raw input and, when the protocol supplies them, its call and parent call identifiers.",
+    "Reçoit un appel d’outil avec son nom, son entrée brute et, quand le protocole les fournit, ses identifiants d’appel et d’appel parent."
   ],
   "ReporterHandlers.conversation": [
-    "Handle the native conversation identifier; receives pass and at metadata and may return a promise.",
-    "Traite : identifiant de conversation native ; reçoit pass et at et peut retourner une promesse."
+    "Receives the native conversation identifier once the agent reports it.",
+    "Reçoit l’identifiant de conversation natif dès que l’agent le rapporte."
   ],
   "ReporterHandlers.usage": [
-    "Handle the reported incremental token consumption; receives pass and at metadata and may return a promise.",
-    "Traite : consommation incrémentale de tokens déclarée ; reçoit pass et at et peut retourner une promesse."
+    "Receives each token increment counted toward the dispatch usage; session totals arrive already converted to increments.",
+    "Reçoit chaque incrément de tokens compté dans l’usage du dispatch ; les totaux de session arrivent déjà convertis en incréments."
   ],
   "ReporterHandlers.failure": [
-    "Handle the failure message emitted by the agent protocol, not every dispatch rejection; receives pass and at metadata and may return a promise.",
-    "Traite : message d’échec émis par le protocole agent, et non tous les rejets du dispatch ; reçoit pass et at et peut retourner une promesse."
+    "Receives a failure reported by the agent protocol. Rejections without one, such as timeouts, produce no failure event.",
+    "Reçoit un échec rapporté par le protocole de l’agent. Les rejets sans échec protocolaire, comme les timeouts, ne produisent pas d’événement failure."
   ],
   "ReporterHandlers.finished": [
-    "Handle the agent protocol completion, before dispatch synchronization and cleanup; receives pass and at metadata and may return a promise.",
-    "Traite : fin du protocole agent, avant synchronisation et nettoyage du dispatch ; reçoit pass et at et peut retourner une promesse."
+    "Receives the agent’s successful end of turn, before Outpost collects commits and cleans up.",
+    "Reçoit la fin réussie du tour de l’agent, avant qu’Outpost ne collecte les commits et ne fasse le ménage."
   ],
   "ReporterHandlers.raw": [
-    "Handle the raw protocol data, which may contain sensitive content; receives pass and at metadata and may return a promise.",
-    "Traite : données brutes du protocole, pouvant contenir des informations sensibles ; reçoit pass et at et peut retourner une promesse."
+    "Receives each raw protocol line, which may contain prompts, file contents or secrets.",
+    "Reçoit chaque ligne brute du protocole, qui peut contenir des prompts, des contenus de fichiers ou des secrets."
   ],
   "SandboxOptions.sandboxProvider": [
     "Provider that allocates the environment, default createDockerSandboxProvider(). A remote provider requires a named or integrate branch and defaults branch to integrate.",
     "Provider qui alloue l’environnement, createDockerSandboxProvider() par défaut. Un provider distant exige une branche named ou integrate et prend integrate par défaut."
   ],
   "SandboxDiagnosticOptions.sandboxProvider": [
-    "Provider name and placement metadata used to interpret the diagnostic report.",
-    "Nom et placement du provider utilisés pour interpréter le rapport de diagnostic."
+    "Provider name and placement copied into the report. sandbox.diagnose() replaces it with the sandbox’s own provider.",
+    "Nom et placement du provider recopiés dans le rapport. sandbox.diagnose() le remplace par le provider de la sandbox."
   ],
   "SandboxDiagnosticReport.sandboxProvider": [
-    "Provider name and placement metadata used to interpret the diagnostic report.",
-    "Nom et placement du provider utilisés pour interpréter le rapport de diagnostic."
+    "Provider name and placement taken from the options; absent when none was given.",
+    "Nom et placement du provider repris des options ; absent si aucun n’a été fourni."
   ],
   "createMountedSandboxProvider.definition": [
     "Name, optional variables and acquire() of your provider; the factory adds placement mounted.",
@@ -3403,8 +3403,8 @@
     "Nom, variables optionnelles et acquire() de votre provider ; la fabrique ajoute le placement remote."
   ],
   "ResourceActivityRecord.sandboxProvider": [
-    "Name of the provider owning the recorded sandbox.",
-    "Nom du provider possédant la sandbox enregistrée."
+    "Name of the sandbox provider that allocated the sandbox, such as docker or vercel.",
+    "Nom du provider qui a alloué la sandbox, comme docker ou vercel."
   ],
   "SpeculationOptions.sandboxProvider": [
     "Provider that allocates each candidate's sandbox. Durable mode requires one with recover: Docker or Podman in mounted mode.",
@@ -3995,24 +3995,24 @@
     "Problèmes de validation lisibles renvoyés au modèle comme résultat en erreur."
   ],
   "AgentEvent.callId": [
-    "Identifier linking a tool event to its tool-result event; set by custom harnesses.",
-    "Identifiant qui relie un événement tool à son événement tool-result ; fourni par les harness personnalisés."
+    "Tool call identifier linking the tool, tool-result, tool-output, tool-denied, file-change and subagent events of one call. CLI adapters copy the native identifier when the protocol has one.",
+    "Identifiant d’appel d’outil qui relie les événements tool, tool-result, tool-output, tool-denied, file-change et subagent d’un même appel. Les adapters CLI reprennent l’identifiant natif quand le protocole en fournit un."
   ],
   "AgentEvent.isError": [
     "Whether the tool call failed or reported an error.",
     "Indique si l’appel d’outil a échoué ou signalé une erreur."
   ],
   "AgentEvent.preview": [
-    "Beginning of the tool result, bounded for logs and reporters.",
-    "Début du résultat de l’outil, borné pour les journaux et les rapporteurs."
+    "First 2000 characters of the tool result.",
+    "Les 2000 premiers caractères du résultat de l’outil."
   ],
   "AgentEvent.characters": [
     "Full length of the tool result before any truncation.",
     "Longueur complète du résultat de l’outil avant toute troncature."
   ],
   "AgentEvent.index": [
-    "One-based step number of a custom harness turn.",
-    "Numéro d’étape, à partir de 1, d’une passe de harness personnalisé."
+    "One-based step number within a built-in harness turn.",
+    "Numéro d’étape, à partir de 1, dans un tour du harness intégré."
   ],
   "ResolvedHarnessLimits.maxSteps": [
     "Effective maximum number of model requests per turn after defaults.",
@@ -4027,12 +4027,12 @@
     "Budget de tokens configuré par compteur d’usage, s’il est défini."
   ],
   "ReporterHandlers.tool-result": [
-    "Handle the custom harness tool result, with its call identifier, error flag and bounded preview; receives pass and at metadata and may return a promise.",
-    "Traite : résultat d’outil d’un harness personnalisé, avec identifiant d’appel, indicateur d’erreur et aperçu borné ; reçoit pass et at et peut retourner une promesse."
+    "Receives a tool result with its call identifier, error flag, first 2000 characters and full length.",
+    "Reçoit un résultat d’outil avec son identifiant d’appel, son indicateur d’erreur, ses 2000 premiers caractères et sa longueur totale."
   ],
   "ReporterHandlers.step": [
-    "Handle the start of a custom harness step before its model request; receives pass and at metadata and may return a promise.",
-    "Traite : début d’une étape de harness personnalisé avant sa requête au modèle ; reçoit pass et at et peut retourner une promesse."
+    "Receives the start of a built-in harness step, before its model request.",
+    "Reçoit le début d’une étape du harness intégré, avant sa requête au modèle."
   ],
   "HarnessHookContext.sandbox": [
     "Borrowed sandbox of the turn; hooks may inspect the repository through it.",
@@ -4256,16 +4256,16 @@
     "Règles de permission évaluées avant les hooks before-tool, si elles sont définies."
   ],
   "AgentEvent.reason": [
-    "Reason for tool denial or forced termination; stopped distinguishes completion, idle timeout, deadline, cancellation, oversized protocol output and steered, when steering stopped the process to resume its conversation.",
-    "Motif de refus d’outil ou d’arrêt forcé ; stopped distingue complétion, inactivité, deadline, annulation, sortie de protocole trop volumineuse et steered, lorsque le pilotage a arrêté le processus pour reprendre sa conversation."
+    "On tool-denied, why the call was refused. On stopped, why Outpost ended the agent process: completion, idle-timeout, deadline, aborted, oversized-event or steered.",
+    "Sur tool-denied, la raison du refus de l’appel. Sur stopped, la raison pour laquelle Outpost a arrêté le processus de l’agent : completion, idle-timeout, deadline, aborted, oversized-event ou steered."
   ],
   "ReporterHandlers.tool-denied": [
-    "Handle a tool call denied by permissions or a hook, with its reason; receives pass and at metadata and may return a promise.",
-    "Traite : appel d’outil refusé par les permissions ou un hook, avec sa raison ; reçoit pass et at et peut retourner une promesse."
+    "Receives a built-in harness tool call refused by permissions or a hook, with the reason.",
+    "Reçoit un appel d’outil du harness intégré refusé par les permissions ou un hook, avec la raison."
   ],
   "ReporterHandlers.stop-prevented": [
-    "Handle a final answer refused by a stop hook, with the message sent back; receives pass and at metadata and may return a promise.",
-    "Traite : réponse finale refusée par un hook stop, avec le message renvoyé ; reçoit pass et at et peut retourner une promesse."
+    "Receives a final answer refused by a built-in harness stop hook, with the message sent back to the model.",
+    "Reçoit une réponse finale refusée par un hook d’arrêt du harness intégré, avec le message renvoyé au modèle."
   ],
   "defineHarnessHook.options": [
     "Loop phase, optional name and control function of the hook.",
@@ -4376,8 +4376,8 @@
     "Nombre de messages de l’historique après compaction."
   ],
   "ReporterHandlers.compaction": [
-    "Handle a custom harness history compaction, with the strategy name and message count; receives pass and at metadata and may return a promise.",
-    "Traite : compaction de l’historique d’un harness personnalisé, avec le nom de la stratégie et le nombre de messages ; reçoit pass et at et peut retourner une promesse."
+    "Receives a built-in harness history compaction, with the strategy name and resulting message count.",
+    "Reçoit une compaction de l’historique du harness intégré, avec le nom de la stratégie et le nombre de messages obtenu."
   ],
   "conversations.harness": [
     "Create the default custom harness conversation store, whose transcripts live in .outpost/conversations/harness of the target repository.",
@@ -4445,8 +4445,8 @@
     "Résultat final normalisé, identique à celui d’une requête sans streaming. Le harness en exige exactement un par stream."
   ],
   "ReporterHandlers.text-delta": [
-    "Handle a streamed fragment of model text from a custom harness; receives pass and at metadata and may return a promise.",
-    "Traite : fragment de texte du modèle diffusé en streaming par un harness personnalisé ; reçoit pass et at et peut retourner une promesse."
+    "Receives a streamed text fragment from Claude Code with partialMessages or from the built-in harness.",
+    "Reçoit un fragment de texte diffusé par Claude Code avec partialMessages ou par le harness intégré."
   ],
   "AgentAdapter.credentials": [
     "Plan the credentials of this CLI from the resolved workflow variables, without disk access: variables to forward, host files to copy into the private sandbox home, generated files and login commands. Called once per adapter and sandbox; the local provider receives only the variables.",
@@ -4605,8 +4605,8 @@
     "Version de la CLI Antigravity installée depuis des archives vérifiées par SHA-512 dans les images générées et le bootstrap distant, et utilisée comme référence de compatibilité par doctor."
   ],
   "Usage.complete": [
-    "False when some token usage could not be measured; counters then represent a lower bound. Omitted or true preserves reported-usage semantics without certifying external billing. False survives aggregation and checkpoint replay.",
-    "False lorsqu’une partie de l’usage n’a pas pu être mesurée ; les compteurs représentent alors une borne inférieure. L’absence ou true conserve la sémantique de l’usage rapporté sans certifier la facturation externe. False persiste dans les agrégations et reprises de checkpoint."
+    "False when some usage could not be measured, so the counters are a lower bound; aggregation and checkpoint replay keep it. Omitted means the counters are complete as reported, not a billing guarantee.",
+    "false quand une partie de l’usage n’a pas pu être mesurée : les compteurs sont alors une borne inférieure ; l’agrégation et la reprise d’un checkpoint le conservent. Absent, les compteurs sont complets tels que rapportés, sans garantie de facturation."
   ],
   "AgentFeatures.usage": [
     "How token usage is measured: events reads it from the output stream, session reads the session after the process exits, unavailable records none. Missing counters then mark usage incomplete; omitted, reported events are counted without that check.",
@@ -4621,8 +4621,8 @@
     "Décode stdout de la commande d’usage réussie en totaux de session. Renvoie undefined si illisible, ou complete: false pour des totaux partiels ; ne renvoie pas le contenu du transcript."
   ],
   "AgentEvent.cumulative": [
-    "On CLI usage events, true identifies a total for the current command. The runtime converts it to nonnegative deltas before notifying observers; omission means an incremental usage event.",
-    "Sur les événements d’usage CLI, true indique un total pour la commande courante. Le runtime le convertit en deltas positifs ou nuls avant de notifier les observateurs ; l’absence indique un événement incrémental."
+    "True when an adapter reports a running total for the native session instead of an increment. Outpost subtracts the session baseline and the usage already counted, so observers always receive usage events with increments and no cumulative flag.",
+    "true quand un adapter rapporte un total courant de la session native au lieu d’un incrément. Outpost soustrait la base de la session et l’usage déjà compté : les observateurs reçoivent toujours des événements usage incrémentaux, sans indicateur cumulative."
   ],
   "WorkflowUsageUnavailable.dimension": [
     "Always usage: token accounting is incomplete and the budget has no attempt fallback.",
@@ -4677,8 +4677,8 @@
     "Exécute une commande CLI dans la sandbox empruntée avec les identifiants, l’annulation et le délai de l’opération."
   ],
   "AgentEvent.messageId": [
-    "CLI identifier of the message whose usage is reported.",
-    "Identifiant CLI du message dont l’usage est rapporté."
+    "Claude Code identifier of the message whose usage a message-usage event reports.",
+    "Identifiant Claude Code du message dont un événement message-usage rapporte l’usage."
   ],
   "AgentEvent.parentCallId": [
     "Parent tool call supplied by a CLI for a nested agent message or tool event.",
@@ -4689,8 +4689,8 @@
     "Indique si le fragment stderr ou l’aperçu brut trop volumineux a été borné avant livraison."
   ],
   "AgentEvent.changes": [
-    "Structured file changes exposed by the CLI; the adapter preserves the supplied protocol data.",
-    "Modifications de fichiers structurées exposées par la CLI ; l’adapter conserve les données fournies."
+    "File changes as Codex reports them, passed through unmodified.",
+    "Modifications de fichiers telles que Codex les rapporte, transmises sans modification."
   ],
   "AgentEvent.request": [
     "Model request observed only when the hub explicitly enables verbose payloads; may contain private instructions and messages.",
@@ -4757,8 +4757,8 @@
     "Autorise les producteurs à émettre les requêtes et réponses modèle complètes ; la conservation dans le journal se configure séparément."
   ],
   "ObservationHub.emit": [
-    "Stamp and deliver a typed event to inherited and local sinks; failures are collected instead of thrown.",
-    "Horodate et livre un événement typé aux récepteurs hérités et locaux ; les erreurs sont collectées sans être levées."
+    "Stamps an event with seq, timestamp, source and this hub’s scope, then delivers a copy to inherited and local sinks. Does nothing after close(); sink failures go to errors, never thrown.",
+    "Attribue à un événement un seq, un horodatage, sa source et le scope de ce hub, puis en remet une copie aux sinks hérités et locaux. Sans effet après close() ; les échecs des sinks vont dans errors et ne sont jamais levés."
   ],
   "ObservationHub.child": [
     "Create a scoped child sharing sequence and delivery diagnostics, optionally adding sinks only for that child and its descendants.",
@@ -4805,8 +4805,8 @@
     "Indique si le dispatch a satisfait son marqueur de complétion ou son contrat de réponse structurée."
   ],
   "ObservationEvent.commits": [
-    "Commits collected for a completed dispatch when available.",
-    "Commits collectés pour un dispatch terminé lorsqu’ils sont disponibles."
+    "Commits of the dispatch on dispatch-finished: from the result on success, from the error’s recovery on failure.",
+    "Commits du dispatch sur dispatch-finished : issus du résultat en cas de succès, du recovery de l’erreur en cas d’échec."
   ],
   "ObservationEvent.usage": [
     "Accumulated dispatch usage, including usage observed before failure.",
@@ -4817,12 +4817,12 @@
     "État d’opération, résultat de dispatch, sélection du candidat ou transition de queue selon kind ; les résumés d’agent conservent le statut de sortie numérique."
   ],
   "ObservationEvent.id": [
-    "Correlation identifier for an operation, conversation or queued job according to kind.",
-    "Identifiant de corrélation d’une opération, conversation ou tâche en queue selon kind."
+    "Operation, conversation, subagent or queued job identifier, according to kind.",
+    "Identifiant d’opération, de conversation, de sous-agent ou de job en file, selon kind."
   ],
   "ObservationEvent.name": [
-    "Operation, phase or tool name according to the event variant.",
-    "Nom d’opération, de phase ou d’outil selon la variante de l’événement."
+    "Operation, phase, tool or delegating tool name, according to kind.",
+    "Nom d’opération, de phase, d’outil ou d’outil de délégation, selon kind."
   ],
   "ObservationEvent.channel": [
     "stdout or stderr stream for command-task and tool output events.",
@@ -4885,16 +4885,16 @@
     "Hub d’observation parent. Le dispatch ouvre un hub enfant avec son propre dispatchId et le vide avant de retourner ou de lever une erreur."
   ],
   "AgentObservation.seq": [
-    "Hub sequence when delivered through a dispatch; optional for manually constructed legacy observations.",
-    "Séquence du hub lors d’une livraison par dispatch ; facultative pour les observations historiques construites manuellement."
+    "Hub sequence number, set when the observation passed through a hub; absent on observations you build yourself.",
+    "Numéro de séquence du hub, présent quand l’observation est passée par un hub ; absent sur les observations que vous construisez vous-même."
   ],
   "AgentObservation.source": [
     "Producing subsystem when the observation passed through a hub.",
     "Sous-système producteur lorsque l’observation est passée par un hub."
   ],
   "AgentObservation.scope": [
-    "Additional correlation context without changing the legacy kind, pass and at fields.",
-    "Contexte de corrélation supplémentaire conservant les champs historiques kind, pass et at."
+    "Hub scope of the observation: workflow execution, task, attempt, dispatch, pass, subagent and candidate identifiers known at emission.",
+    "Scope de l’observation dans le hub : identifiants d’exécution de workflow, de tâche, de tentative, de dispatch, de passe, de sous-agent et de candidat connus à l’émission."
   ],
   "DispatchResult.observerErrors": [
     "Sink and journal failures collected during the dispatch; they do not affect success. With a shared hub, also includes its earlier failures.",
@@ -4937,20 +4937,20 @@
     "Champs de corrélation initiaux ; les enfants ne remplacent que les champs explicitement fournis."
   ],
   "ObservationHubOptions.capacity": [
-    "Maximum waiting envelopes per asynchronous sink, default 1024; newest deliveries are dropped on overflow and counted.",
-    "Maximum d’enveloppes en attente par récepteur asynchrone, 1024 par défaut ; les nouvelles livraisons sont perdues et comptées en cas de saturation."
+    "Maximum events waiting per asynchronous sink, default 1024; on overflow the newest are dropped and counted. A value that is not a positive integer throws.",
+    "Nombre maximal d’événements en attente par sink asynchrone, 1024 par défaut ; en cas de débordement, les plus récents sont abandonnés et comptés. Une valeur qui n’est pas un entier positif lève une erreur."
   ],
   "ObservationHubOptions.deliveryTimeoutMs": [
-    "Maximum asynchronous delivery or receiver-flush wait, default 5000 ms; an expired receiver is disabled.",
-    "Attente maximale d’une livraison asynchrone ou du vidage d’un récepteur, 5000 ms par défaut ; un récepteur hors délai est désactivé."
+    "Maximum wait for one asynchronous delivery or sink flush, default 5000; a sink that exceeds it is disabled for the hub’s lifetime. A value that is not a positive integer throws.",
+    "Attente maximale d’une livraison asynchrone ou du flush d’un sink, 5000 par défaut ; un sink qui la dépasse est désactivé pour toute la durée du hub. Une valeur qui n’est pas un entier positif lève une erreur."
   ],
   "ObservationHubOptions.verbose": [
     "Explicitly allow full model request/response events. Does not enable verbose journal retention by itself.",
     "Autorise explicitement les événements de requête/réponse modèle complets. N’active pas à lui seul leur conservation dans le journal."
   ],
   "OpenTelemetryObserver.sink": [
-    "Unified hub receiver producing parented workflow, task, dispatch and operation spans and existing metrics; use instead of wiring the same instance through legacy telemetry too.",
-    "Récepteur unifié du hub produisant des spans liés de workflow, tâche, dispatch et opération ainsi que les métriques existantes ; évite de brancher simultanément cette même instance par telemetry."
+    "Hub sink that turns observations into parented workflow, task, attempt, dispatch and operation spans plus the same metrics. Do not also pass this observer as telemetry to the same run: spans and metrics would be duplicated.",
+    "Sink de hub qui transforme les observations en spans de workflow, de tâche, de tentative, de dispatch et d’opération reliés entre eux, avec les mêmes métriques. Ne passez pas aussi cet observateur comme telemetry à la même exécution : spans et métriques seraient dupliqués."
   ],
   "archiveRecovery.observation": [
     "Hub that receives the start and end events of the archive upload.",
@@ -4961,72 +4961,72 @@
     "Hub qui reçoit les événements de début et de fin du téléchargement de l’archive."
   ],
   "planRecoveryRetention.observation": [
-    "Optional hub receiving start and terminal events for retention planning; never persisted in the recovery plan or archive.",
-    "Hub facultatif recevant le début et la fin de planification de rétention ; jamais persisté dans le plan ni l’archive."
+    "Hub receiving the started, then finished or failed, operation event retention.plan with its duration.",
+    "Hub recevant l’événement d’opération retention.plan au démarrage, puis à la fin ou en échec avec sa durée."
   ],
   "pruneRecoveryRetention.observation": [
-    "Optional hub receiving start and terminal events for retention pruning; never persisted in the recovery plan or archive.",
-    "Hub facultatif recevant le début et la fin de suppression selon la rétention ; jamais persisté dans le plan ni l’archive."
+    "Hub receiving the started, then finished or failed, operation event retention.prune with its duration.",
+    "Hub recevant l’événement d’opération retention.prune au démarrage, puis à la fin ou en échec avec sa durée."
   ],
   "planRecoveryRestore.observation": [
-    "Optional hub receiving start and terminal events for restore planning; never persisted in the recovery plan or archive.",
-    "Hub facultatif recevant le début et la fin de planification de restauration ; jamais persisté dans le plan ni l’archive."
+    "Hub that receives the recovery operation restore.plan when it starts, finishes or fails.",
+    "Hub qui reçoit l’opération recovery restore.plan à son début, à sa fin ou en cas d’échec."
   ],
   "restoreRecoveryTransfer.observation": [
-    "Optional hub receiving start and terminal events for recovery restoration; never persisted in the recovery plan or archive.",
-    "Hub facultatif recevant le début et la fin de restauration de récupération ; jamais persisté dans le plan ni l’archive."
+    "Hub that receives the recovery operation restore.apply when it starts, finishes or fails.",
+    "Hub qui reçoit l’opération recovery restore.apply à son début, à sa fin ou en cas d’échec."
   ],
   "ReporterHandlers.stderr": [
-    "Handle bounded stderr fragments; asynchronous handlers are serialized and their failures remain observer errors.",
-    "Traite les événements de fragments stderr bornés ; les gestionnaires asynchrones sont sérialisés et leurs échecs restent des erreurs d’observation."
+    "Receives agent stderr line by line, each at most 8192 characters; truncated marks a cut line.",
+    "Reçoit la stderr de l’agent ligne par ligne, chacune d’au plus 8192 caractères ; truncated signale une ligne coupée."
   ],
   "ReporterHandlers.message-usage": [
-    "Handle per-message CLI usage without counting final totals twice; asynchronous handlers are serialized and their failures remain observer errors.",
-    "Traite les événements de usage CLI par message sans compter deux fois les totaux finaux ; les gestionnaires asynchrones sont sérialisés et leurs échecs restent des erreurs d’observation."
+    "Receives the usage Claude Code reports for each message, with its message and parent call identifiers. It is informational: dispatch usage counts turn totals instead.",
+    "Reçoit l’usage que Claude Code rapporte pour chaque message, avec ses identifiants de message et d’appel parent. Il est informatif : l’usage du dispatch compte les totaux des tours."
   ],
   "ReporterHandlers.stopped": [
-    "Handle the reason for forced agent termination; asynchronous handlers are serialized and their failures remain observer errors.",
-    "Traite les événements de motif d’arrêt forcé de l’agent ; les gestionnaires asynchrones sont sérialisés et leurs échecs restent des erreurs d’observation."
+    "Receives why Outpost stopped the agent process: completion, idle-timeout, deadline, aborted, oversized-event or steered.",
+    "Reçoit la raison pour laquelle Outpost a arrêté le processus de l’agent : completion, idle-timeout, deadline, aborted, oversized-event ou steered."
   ],
   "ReporterHandlers.reasoning": [
-    "Handle readable reasoning exposed by the agent or model; asynchronous handlers are serialized and their failures remain observer errors.",
-    "Traite les événements de raisonnement lisible exposé par l’agent ou le modèle ; les gestionnaires asynchrones sont sérialisés et leurs échecs restent des erreurs d’observation."
+    "Receives readable reasoning text exposed by the agent or model.",
+    "Reçoit le texte de raisonnement lisible exposé par l’agent ou le modèle."
   ],
   "ReporterHandlers.file-change": [
-    "Handle structured CLI file changes; asynchronous handlers are serialized and their failures remain observer errors.",
-    "Traite les événements de modifications structurées de fichiers de la CLI ; les gestionnaires asynchrones sont sérialisés et leurs échecs restent des erreurs d’observation."
+    "Receives file changes reported by Codex, unmodified.",
+    "Reçoit les modifications de fichiers rapportées par Codex, sans modification."
   ],
   "ReporterHandlers.model-request": [
-    "Handle opt-in full model requests; asynchronous handlers are serialized and their failures remain observer errors.",
-    "Traite les événements de requêtes modèle complètes activées explicitement ; les gestionnaires asynchrones sont sérialisés et leurs échecs restent des erreurs d’observation."
+    "Receives each built-in harness model request when the hub is verbose; it may contain private instructions.",
+    "Reçoit chaque requête du harness intégré au modèle quand le hub est verbose ; elle peut contenir des instructions privées."
   ],
   "ReporterHandlers.model-response": [
-    "Handle opt-in full model responses; asynchronous handlers are serialized and their failures remain observer errors.",
-    "Traite les événements de réponses modèle complètes activées explicitement ; les gestionnaires asynchrones sont sérialisés et leurs échecs restent des erreurs d’observation."
+    "Receives each built-in harness model response when the hub is verbose.",
+    "Reçoit chaque réponse du modèle au harness intégré quand le hub est verbose."
   ],
   "ReporterHandlers.model-retry": [
-    "Handle provider-reported retries; asynchronous handlers are serialized and their failures remain observer errors.",
-    "Traite les événements de reprises signalées par le fournisseur ; les gestionnaires asynchrones sont sérialisés et leurs échecs restent des erreurs d’observation."
+    "Receives a retry reported by the model provider, with its attempt number and message.",
+    "Reçoit une nouvelle tentative rapportée par le provider de modèle, avec son numéro et son message."
   ],
   "ReporterHandlers.model-error": [
-    "Handle model request failures; asynchronous handlers are serialized and their failures remain observer errors.",
-    "Traite les événements de échecs de requête modèle ; les gestionnaires asynchrones sont sérialisés et leurs échecs restent des erreurs d’observation."
+    "Receives the message of a failed built-in harness model request.",
+    "Reçoit le message d’une requête au modèle du harness intégré qui a échoué."
   ],
   "ReporterHandlers.hook": [
-    "Handle completed hook decisions and changes; asynchronous handlers are serialized and their failures remain observer errors.",
-    "Traite les événements de décisions et modifications des hooks terminés ; les gestionnaires asynchrones sont sérialisés et leurs échecs restent des erreurs d’observation."
+    "Receives a completed built-in harness hook with its phase and whether it changed anything.",
+    "Reçoit un hook du harness intégré terminé, avec sa phase et s’il a changé quelque chose."
   ],
   "ReporterHandlers.instructions-loaded": [
-    "Handle the resolved instruction count; asynchronous handlers are serialized and their failures remain observer errors.",
-    "Traite les événements de nombre d’instructions résolues ; les gestionnaires asynchrones sont sérialisés et leurs échecs restent des erreurs d’observation."
+    "Receives the number of nonempty instruction sources resolved for a built-in harness turn.",
+    "Reçoit le nombre de sources d’instructions non vides résolues pour un tour du harness intégré."
   ],
   "ReporterHandlers.skills-loaded": [
-    "Handle newly loaded skill names; asynchronous handlers are serialized and their failures remain observer errors.",
-    "Traite les événements de noms des skills nouvellement chargés ; les gestionnaires asynchrones sont sérialisés et leurs échecs restent des erreurs d’observation."
+    "Receives the skills newly loaded into a built-in harness conversation.",
+    "Reçoit les skills nouvellement chargés dans une conversation du harness intégré."
   ],
   "ReporterHandlers.tool-output": [
-    "Handle tool command output correlated by callId; asynchronous handlers are serialized and their failures remain observer errors.",
-    "Traite les événements de sorties de commandes d’outil corrélées par callId ; les gestionnaires asynchrones sont sérialisés et leurs échecs restent des erreurs d’observation."
+    "Receives built-in harness tool command output in chunks of at most 8192 characters, correlated by callId.",
+    "Reçoit la sortie des commandes d’outils du harness intégré par morceaux d’au plus 8192 caractères, reliés par callId."
   ],
   "defineHarnessSubagent.options": [
     "Tool name, description shown to the parent model and built-in child agent. Unknown keys are rejected.",
@@ -5065,16 +5065,16 @@
     "Identifiant de l’enfant intégré dans le dispatch, propagé depuis ses événements sans remplacer le contexte de workflow, tâche ou passe."
   ],
   "AgentEventDetails.kind": [
-    "Discriminator selecting the event payload: phase, summary, warning, text, text-delta, result, prompt, tool, tool-result, tool-denied, step, stop-prevented, steer, compaction, conversation, usage, quota, fallback, failure, finished or raw.",
-    "Discriminant sélectionnant les données de l’événement : phase, summary, warning, text, text-delta, result, prompt, tool, tool-result, tool-denied, step, stop-prevented, steer, compaction, conversation, usage, quota, fallback, failure, finished ou raw."
+    "Event type selecting the payload: phase, summary, warning, text, text-delta, result, prompt, tool, tool-result, tool-output, tool-denied, file-change, reasoning, step, hook, instructions-loaded, skills-loaded, model-request, model-response, model-retry, model-error, stop-prevented, steer, compaction, subagent, conversation, usage, message-usage, quota, fallback, stderr, stopped, failure, finished or raw.",
+    "Type d’événement qui sélectionne la charge utile : phase, summary, warning, text, text-delta, result, prompt, tool, tool-result, tool-output, tool-denied, file-change, reasoning, step, hook, instructions-loaded, skills-loaded, model-request, model-response, model-retry, model-error, stop-prevented, steer, compaction, subagent, conversation, usage, message-usage, quota, fallback, stderr, stopped, failure, finished or raw."
   ],
   "AgentEventDetails.name": [
-    "Phase name for phase events, or tool name for tool and tool-result events.",
-    "Nom de la phase pour les événements phase, ou nom de l’outil pour les événements tool et tool-result."
+    "Phase name on phase events; tool name on tool, tool-result and tool-denied events; delegating tool name on subagent events.",
+    "Nom de la phase pour phase ; nom de l’outil pour tool, tool-result et tool-denied ; nom de l’outil de délégation pour subagent."
   ],
   "AgentEventDetails.agent": [
-    "Agent CLI identifier to report or diagnose: claude, codex, antigravity (executable agy), copilot or kimi.",
-    "Identifiant du CLI d’agent à rapporter ou diagnostiquer : claude, codex, antigravity (exécutable agy), copilot ou kimi."
+    "Name of the agent running the pass, on phase events: claude, codex, antigravity, copilot or kimi, custom for a built-in harness agent, replay for a replay agent.",
+    "Nom de l’agent qui exécute la passe, sur les événements phase : claude, codex, antigravity, copilot ou kimi, custom pour un agent du harness intégré, replay pour un agent de rejeu."
   ],
   "AgentEventDetails.branch": [
     "Name of the work branch used or observed during execution.",
@@ -5085,24 +5085,24 @@
     "Dossier hôte du workspace utilisé pour cette exécution."
   ],
   "AgentEventDetails.durationMs": [
-    "Elapsed execution time in milliseconds.",
-    "Durée d’exécution écoulée en millisecondes."
+    "Duration of the pass in milliseconds, summed over its turns, on summary events.",
+    "Durée de la passe en millisecondes, cumulée sur ses tours, sur les événements summary."
   ],
   "AgentEventDetails.status": [
-    "Process exit status for summaries, or started, finished or failed for a child lifecycle event.",
-    "Statut de sortie du processus pour les résumés, ou started, finished ou failed pour le cycle de vie d’un enfant."
+    "On summary, the exit status of the pass’s last turn, always 0 because a nonzero exit rejects the dispatch. On subagent, started, finished or failed.",
+    "Sur summary, le statut de sortie du dernier tour de la passe, toujours 0 car une sortie non nulle rejette le dispatch. Sur subagent, started, finished ou failed."
   ],
   "AgentEventDetails.tokens": [
-    "Token usage counters carried by a usage or summary event.",
-    "Compteurs d’usage de tokens portés par un événement usage ou summary."
+    "Token counts: an increment on usage, the pass total on summary, one message’s usage on message-usage.",
+    "Compteurs de tokens : un incrément sur usage, le total de la passe sur summary, l’usage d’un message sur message-usage."
   ],
   "AgentEventDetails.message": [
-    "Warning, failure or quota message, the failure that triggered a fallback, or the message a stop hook sent back to the model.",
-    "Message d’avertissement, d’échec ou de quota, échec ayant déclenché un repli, ou message qu’un hook stop a renvoyé au modèle."
+    "Message of a warning, failure, quota, fallback, model-retry or model-error event, or the message a stop hook sent back to the model on stop-prevented.",
+    "Message d’un événement warning, failure, quota, fallback, model-retry ou model-error, ou message renvoyé au modèle par un hook d’arrêt sur stop-prevented."
   ],
   "AgentEventDetails.text": [
-    "Text carried by the event: a streamed fragment, streamed text, final answer, submitted prompt or delivered steering instruction according to kind.",
-    "Texte porté par l’événement : fragment diffusé, texte diffusé, réponse finale, prompt soumis ou consigne de pilotage remise selon la variante."
+    "Text of the event according to kind: agent text, streamed fragment, final answer, rendered prompt, steering instruction, reasoning, stderr line or tool output chunk.",
+    "Texte de l’événement selon kind : texte de l’agent, fragment diffusé, réponse finale, prompt rendu, consigne de steering, raisonnement, ligne de stderr ou morceau de sortie d’outil."
   ],
   "AgentEventDetails.input": [
     "Raw arguments supplied to the tool named by this tool event.",
@@ -5113,32 +5113,32 @@
     "Identifiant de conversation pour les événements conversation, ou identifiant unique d’exécution enfant pour les événements de cycle de vie subagent."
   ],
   "AgentEventDetails.value": [
-    "Unrecognized raw protocol value preserved for observation.",
-    "Valeur brute de protocole non reconnue conservée pour observation."
+    "Raw protocol line as the agent printed it; for an oversized line, only its first 2000 characters.",
+    "Ligne brute du protocole telle que l’agent l’a écrite ; pour une ligne trop grande, seulement ses 2000 premiers caractères."
   ],
   "AgentEventDetails.callId": [
-    "Identifier linking a tool event to its tool-result event; set by custom harnesses.",
-    "Identifiant qui relie un événement tool à son événement tool-result ; fourni par les harness personnalisés."
+    "Tool call identifier linking the tool, tool-result, tool-output, tool-denied, file-change and subagent events of one call. CLI adapters copy the native identifier when the protocol has one.",
+    "Identifiant d’appel d’outil qui relie les événements tool, tool-result, tool-output, tool-denied, file-change et subagent d’un même appel. Les adapters CLI reprennent l’identifiant natif quand le protocole en fournit un."
   ],
   "AgentEventDetails.isError": [
     "Whether the tool call failed or reported an error.",
     "Indique si l’appel d’outil a échoué ou signalé une erreur."
   ],
   "AgentEventDetails.preview": [
-    "Beginning of the tool result, bounded for logs and reporters.",
-    "Début du résultat de l’outil, borné pour les journaux et les rapporteurs."
+    "First 2000 characters of the tool result.",
+    "Les 2000 premiers caractères du résultat de l’outil."
   ],
   "AgentEventDetails.characters": [
     "Full length of the tool result before any truncation.",
     "Longueur complète du résultat de l’outil avant toute troncature."
   ],
   "AgentEventDetails.index": [
-    "One-based step number of a custom harness turn.",
-    "Numéro d’étape, à partir de 1, d’une passe de harness personnalisé."
+    "One-based step number within a built-in harness turn.",
+    "Numéro d’étape, à partir de 1, dans un tour du harness intégré."
   ],
   "AgentEventDetails.reason": [
-    "Reason for tool denial or forced termination; stopped distinguishes completion, idle timeout, deadline, cancellation, oversized protocol output and steered, when steering stopped the process to resume its conversation.",
-    "Motif de refus d’outil ou d’arrêt forcé ; stopped distingue complétion, inactivité, deadline, annulation, sortie de protocole trop volumineuse et steered, lorsque le pilotage a arrêté le processus pour reprendre sa conversation."
+    "On tool-denied, why the call was refused. On stopped, why Outpost ended the agent process: completion, idle-timeout, deadline, aborted, oversized-event or steered.",
+    "Sur tool-denied, la raison du refus de l’appel. Sur stopped, la raison pour laquelle Outpost a arrêté le processus de l’agent : completion, idle-timeout, deadline, aborted, oversized-event ou steered."
   ],
   "AgentEventDetails.strategy": [
     "Name of the context strategy that rewrote the history.",
@@ -5149,12 +5149,12 @@
     "Nombre de messages de l’historique après compaction."
   ],
   "AgentEventDetails.cumulative": [
-    "On CLI usage events, true identifies a total for the current command. The runtime converts it to nonnegative deltas before notifying observers; omission means an incremental usage event.",
-    "Sur les événements d’usage CLI, true indique un total pour la commande courante. Le runtime le convertit en deltas positifs ou nuls avant de notifier les observateurs ; l’absence indique un événement incrémental."
+    "True when an adapter reports a running total for the native session instead of an increment. Outpost subtracts the session baseline and the usage already counted, so observers always receive usage events with increments and no cumulative flag.",
+    "true quand un adapter rapporte un total courant de la session native au lieu d’un incrément. Outpost soustrait la base de la session et l’usage déjà compté : les observateurs reçoivent toujours des événements usage incrémentaux, sans indicateur cumulative."
   ],
   "AgentEventDetails.messageId": [
-    "CLI identifier of the message whose usage is reported.",
-    "Identifiant CLI du message dont l’usage est rapporté."
+    "Claude Code identifier of the message whose usage a message-usage event reports.",
+    "Identifiant Claude Code du message dont un événement message-usage rapporte l’usage."
   ],
   "AgentEventDetails.parentCallId": [
     "Parent tool call supplied by a CLI for a nested agent message or tool event.",
@@ -5165,8 +5165,8 @@
     "Indique si le fragment stderr ou l’aperçu brut trop volumineux a été borné avant livraison."
   ],
   "AgentEventDetails.changes": [
-    "Structured file changes exposed by the CLI; the adapter preserves the supplied protocol data.",
-    "Modifications de fichiers structurées exposées par la CLI ; l’adapter conserve les données fournies."
+    "File changes as Codex reports them, passed through unmodified.",
+    "Modifications de fichiers telles que Codex les rapporte, transmises sans modification."
   ],
   "AgentEventDetails.request": [
     "Model request observed only when the hub explicitly enables verbose payloads; may contain private instructions and messages.",
@@ -5217,8 +5217,8 @@
     "Identifiant de conversation enfant persistée lorsque l’enfant active le stockage des transcripts."
   ],
   "ReporterHandlers.subagent": [
-    "Handle a built-in child start, completion or failure, with the delegation call and optional transcript identifier.",
-    "Traite le démarrage, la fin ou l’échec d’un enfant intégré, avec l’appel de délégation et l’identifiant de transcript optionnel."
+    "Receives a built-in harness subagent start, finish or failure, with the delegating call and the transcript identifier when stored.",
+    "Reçoit le démarrage, la fin ou l’échec d’un sous-agent du harness intégré, avec l’appel de délégation et l’identifiant de transcript quand il est stocké."
   ],
   "AgentEventHandlers.subagent": [
     "Handle a built-in child start, completion or failure, with the delegation call and optional transcript identifier.",
@@ -5833,8 +5833,8 @@
     "Toute valeur interceptée, généralement un rejet de dispatch, d’une tâche ou d’un fournisseur de modèle."
   ],
   "ReporterHandlers.quota": [
-    "Handle a usage-limit or rate-limit signal decoded from the agent protocol, with its reset time when reported; receives pass and at metadata and may return a promise. The signal alone does not fail the turn.",
-    "Traite : signal de limite d’usage ou de débit décodé du protocole agent, avec son heure de réinitialisation si elle est fournie ; reçoit pass et at et peut retourner une promesse. Le signal seul ne fait pas échouer le tour."
+    "Receives a usage-limit or rate-limit signal, with its reset time when reported. The signal alone does not fail the turn.",
+    "Reçoit un signal de limite d’usage ou de débit, avec son heure de réinitialisation quand elle est rapportée. Le signal seul ne fait pas échouer le tour."
   ],
   "Agent.source": [
     "Observation source used for replayed events: harness when the journal came from the Outpost harness, otherwise agent.",
@@ -5861,8 +5861,8 @@
     "Source d’observation des événements rejoués : harness si le journal provient du harness Outpost, sinon agent."
   ],
   "ReplayAgent.divergence": [
-    "Divergence policy: fail throws ReplayDivergence; warn reports prompt, baseline and tree differences as warnings and continues.",
-    "Politique de divergence : fail lève ReplayDivergence ; warn signale les écarts de prompt, de baseline et d’arbre en avertissement puis continue."
+    "Divergence policy: fail throws ReplayDivergence; warn reports prompt, baseline, tree and unrecorded divergences as warnings and continues.",
+    "Politique de divergence : fail lève ReplayDivergence ; warn signale les divergences prompt, baseline, tree et unrecorded par des avertissements et continue."
   ],
   "ReplayAgent.turns": [
     "Recorded turns parsed from the journal, in execution order.",
@@ -5877,8 +5877,8 @@
     "Consomme et renvoie le tour enregistré suivant, ou undefined quand le journal est épuisé. Le dispatch l’appelle une fois par tour ; un agent de rejeu ne sert qu’une fois."
   ],
   "ReplayAgent.kind": [
-    "Execution discriminator for replay agents.",
-    "Discriminant d’exécution des agents de rejeu."
+    "Always replay. It distinguishes a replay agent, which has no harness or model, from cli and custom agents in the Agent union.",
+    "Toujours replay. Distingue un agent de rejeu, qui n’a ni harness ni modèle, des agents cli et custom dans l’union Agent."
   ],
   "Logging.replayable": [
     "Also record each sandbox dispatch’s commits as verified binary patches so createReplayAgent can rebuild them. Opt-in because the journal then contains repository content; failures to record become warnings.",
@@ -5942,8 +5942,8 @@
     "Entrées renvoyées par readJournal pour un dispatch. Enregistrez avec logging.replayable pour inclure les commits du workspace."
   ],
   "ReplayAgentOptions.divergence": [
-    "Divergence policy; defaults to fail. warn continues after prompt, baseline and tree differences but still fails when a patch cannot be applied or the journal is exhausted.",
-    "Politique de divergence ; fail par défaut. warn continue après un écart de prompt, de baseline ou d’arbre mais échoue toujours si un patch ne s’applique pas ou si le journal est épuisé."
+    "Divergence policy, default fail. warn continues after prompt, baseline, tree and unrecorded divergences, but still throws when a patch cannot be applied or the journal is exhausted.",
+    "Politique de divergence, fail par défaut. warn continue après les divergences prompt, baseline, tree et unrecorded, mais lève toujours une erreur quand un patch ne s’applique pas ou que le journal est épuisé."
   ],
   "createReplayAgent.options": [
     "Journal to replay and divergence policy.",
@@ -5954,8 +5954,8 @@
     "Entrées renvoyées par readJournal pour un dispatch. Enregistrez avec logging.replayable pour inclure les commits du workspace."
   ],
   "createReplayAgent.options.divergence": [
-    "Divergence policy; defaults to fail. warn continues after prompt, baseline and tree differences but still fails when a patch cannot be applied or the journal is exhausted.",
-    "Politique de divergence ; fail par défaut. warn continue après un écart de prompt, de baseline ou d’arbre mais échoue toujours si un patch ne s’applique pas ou si le journal est épuisé."
+    "Divergence policy, default fail. warn continues after prompt, baseline, tree and unrecorded divergences, but still throws when a patch cannot be applied or the journal is exhausted.",
+    "Politique de divergence, fail par défaut. warn continue après les divergences prompt, baseline, tree et unrecorded, mais lève toujours une erreur quand un patch ne s’applique pas ou que le journal est épuisé."
   ],
   "ReplayDivergence.kind": [
     "Divergence category: prompt, baseline, tree, exhausted or unrecorded.",
@@ -6150,8 +6150,8 @@
     "Branche de travail conservée par la tentative interrompue, utilisée pour démarrer un dispatch isolé intégré depuis son travail commité."
   ],
   "QuotaFault.conversation": [
-    "Agent conversation reported with the quota error; availability for continuation depends on capture.",
-    "Conversation d’agent signalée avec l’erreur de quota ; sa reprise dépend de sa capture."
+    "Conversation id of the agent turn the limit interrupted, when the error details carry one. Resuming it requires a captured conversation.",
+    "Identifiant de conversation du tour d’agent interrompu par la limite, lorsque les détails de l’erreur en portent un. Sa reprise exige une conversation capturée."
   ],
   "TaskContext.quota": [
     "Quota pause resumed by this attempt, with the captured conversation and retained branch when known; present only on the first attempt after the pause and never persisted separately.",
@@ -6278,8 +6278,8 @@
     "Toute valeur interceptée ; les causes imbriquées sont suivies."
   ],
   "UnavailableFault.message": [
-    "Signal that identified the outage, such as HTTP 503, an overloaded stream error or the recognized agent failure text; a timeout diagnosed as a connection failure reports connection failure.",
-    "Signal qui a identifié la panne, par exemple HTTP 503, une erreur de flux overloaded ou le texte d’échec reconnu de l’agent ; un délai diagnostiqué comme échec de connexion indique connection failure."
+    "The details.unavailable signal: HTTP <status>, HTTP transport failure, a model stream error type, the agent failure text its adapter matched, or connection failure for a timeout after an agent connection failure.",
+    "Le signal details.unavailable : HTTP <status>, HTTP transport failure, un type d’erreur de flux de modèle, le texte d’échec reconnu par l’adapter de l’agent, ou connection failure pour un délai dépassé après un échec de connexion de l’agent."
   ],
   "createFallbackAgent.agents": [
     "Ordered candidates, at least two, each composed with createAgent() or createReplayAgent(); the first is tried first.",
@@ -6298,8 +6298,8 @@
     "Catégories d’échec qui font passer au candidat suivant : quota, unavailable ou les deux, sans valeur par défaut. Une liste vide, une répétition ou une valeur inconnue lève le code configuration."
   ],
   "ReporterHandlers.fallback": [
-    "Handle a fallback agent handing the dispatch to its next candidate, with both candidates, the failure category and its message; receives pass and at metadata and may return a promise.",
-    "Traite : passage de relais d’un agent de secours à son candidat suivant, avec les deux candidats, la catégorie d’échec et son message ; reçoit pass et at et peut retourner une promesse."
+    "Receives a fallback agent handing the dispatch to its next candidate, with both candidates, the failure category and its message.",
+    "Reçoit le passage d’un agent de secours à son candidat suivant, avec les deux candidats, la catégorie d’échec et son message."
   ],
   "ReplayTurn.handover": [
     "Recorded fallback event that followed this turn; the turn is then treated as handed over rather than failed, its usage is the sum of its recorded usage events, and replay continues with the next turn.",
@@ -6354,8 +6354,8 @@
     "injected lorsque la consigne a rejoint le tour en cours ou son prompt ; resumed lorsqu’Outpost a poursuivi la conversation dans un nouveau tour avec elle."
   ],
   "ReporterHandlers.steer": [
-    "Handle a steering instruction delivered to the agent, with its text and whether it was injected or resumed; receives pass and at metadata and may return a promise.",
-    "Traite une consigne de pilotage remise à l’agent, avec son texte et le fait qu’elle ait été injectée ou reprise ; reçoit les métadonnées pass et at et peut renvoyer une promesse."
+    "Receives a delivered steering instruction and whether it was injected or resumed.",
+    "Reçoit une consigne de steering remise à l’agent et indique si elle a été injectée ou reprise."
   ],
   "createCronSchedule.expression": [
     "Five fields (minute, hour, day of month, month, day of week) with lists, ranges, steps and three-letter month or weekday names, or a macro such as @hourly or @daily; at most 256 characters. Weekday 0 and 7 are Sunday, and when both day fields are restricted, a day matching either one matches.",

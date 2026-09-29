@@ -7,11 +7,11 @@ sidebar:
 
 ## Paramètres et propriétés
 
-| Nom       | Type                      | Présence | Rôle                                                               |
-| --------- | ------------------------- | -------- | ------------------------------------------------------------------ |
-| `name`    | `StorageCategoryName`     | Requis   | Catégorie de stockage géré représentée par ce groupe d’inventaire. |
-| `path`    | `string`                  | Requis   | Dossier hôte contenant cette catégorie de stockage géré.           |
-| `entries` | `readonly StorageEntry[]` | Requis   | Entrées de fichiers inspectées dans cette catégorie de stockage.   |
+| Nom       | Type                      | Présence | Rôle                                                                                                                                |
+| --------- | ------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `name`    | `StorageCategoryName`     | Requis   | Catégorie, qui est aussi son nom de dossier sous .outpost ou son préfixe de clé dans le transport.                                  |
+| `path`    | `string`                  | Requis   | Dossier hôte de la catégorie, ou son préfixe de clé pour un inventaire de transport.                                                |
+| `entries` | `readonly StorageEntry[]` | Requis   | Enfants directs du dossier de la catégorie, triés par nom, chacun avec ses propres totaux ; une entrée par objet pour un transport. |
 
 ## Signature
 

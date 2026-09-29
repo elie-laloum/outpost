@@ -13,13 +13,13 @@ import type { DiagnosticCheck } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name               | Type                  | Presence | Meaning                                                                                                       |
-| ------------------ | --------------------- | -------- | ------------------------------------------------------------------------------------------------------------- |
-| `id`               | `string`              | Required | Stable identifier of the diagnostic check in the report.                                                      |
-| `status`           | `DiagnosticStatus`    | Required | Diagnostic outcome: pass, warn, fail or skipped.                                                              |
-| `message`          | `string`              | Required | Human-readable explanation of the diagnostic observation.                                                     |
-| `version`          | `string \| undefined` | Optional | Version detected by the diagnostic probe, when available.                                                     |
-| `referenceVersion` | `string \| undefined` | Optional | Pinned CLI version the bundled protocol fixtures target; absent for Antigravity, which has no pinned version. |
+| Name               | Type                  | Presence | Meaning                                                                                                                                                       |
+| ------------------ | --------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`               | `string`              | Required | Stable dotted identifier, such as sandbox.node, agent.cli.resume or model.                                                                                    |
+| `status`           | `DiagnosticStatus`    | Required | pass, warn, fail or skipped. Only fail sets hasFailures; warn marks a differing or unconfirmed result, such as an agent version other than the pinned one.    |
+| `message`          | `string`              | Required | Explanation of the result; most failures end with a remedy.                                                                                                   |
+| `version`          | `string \| undefined` | Optional | Version read from the output of a --version probe; present on version checks only.                                                                            |
+| `referenceVersion` | `string \| undefined` | Optional | Agent CLI version pinned by Outpost that the detected version was compared with; present on agent version checks only. A different version gives status warn. |
 
 ## Signature
 

@@ -13,20 +13,20 @@ import { verifyRecoveryTransfer } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Verify a retained transfer’s directory structure, optionally hashing payloads and checking Git restorability within maxBytes. Returns detailed checks and integrity status without applying incoming changes or authenticating their author.
+Check a retained transfer directory: state.json, the three patches, commits.bundle when commits changed and every listed file, then optionally Git restorability and checksums. Failed checks are reported in the result, not thrown; nothing is applied and the author is not authenticated. restorability without repository or an invalid maxBytes rejects with code configuration.
 
-[Complete example and detailed rules](../../guide/recovery/).
+[Complete example and detailed rules](../../guide/retention/).
 
 ## Parameters and properties
 
-| Name                    | Type                                       | Presence | Meaning                                                                               |
-| ----------------------- | ------------------------------------------ | -------- | ------------------------------------------------------------------------------------- |
-| `path`                  | `string`                                   | Required | Retained transfer directory to verify.                                                |
-| `options`               | `RecoveryVerificationOptions \| undefined` | Optional | Enable checksum and Git restorability checks and set their repository and byte bound. |
-| `options.restorability` | `boolean \| undefined`                     | Optional | Also verify that retained Git bundles and patches can reconstruct the recorded state. |
-| `options.repository`    | `string \| undefined`                      | Optional | Target host Git checkout.                                                             |
-| `options.checksums`     | `boolean \| undefined`                     | Optional | Compute and compare recorded payload digests during transfer verification.            |
-| `options.maxBytes`      | `number \| undefined`                      | Optional | Maximum payload bytes allowed for checksum verification.                              |
+| Name                    | Type                                       | Presence | Meaning                                                                                                                                                                                      |
+| ----------------------- | ------------------------------------------ | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `path`                  | `string`                                   | Required | Retained transfer directory to verify; a missing directory rejects with code workspace.                                                                                                      |
+| `options`               | `RecoveryVerificationOptions \| undefined` | Optional | Restorability and checksum checks, the repository they use and the hashing limit.                                                                                                            |
+| `options.restorability` | `boolean \| undefined`                     | Optional | Clone repository into a temporary directory and check that the commits exist, the bundle unpacks and the three patches apply. Runs only when the structure checks pass; requires repository. |
+| `options.repository`    | `string \| undefined`                      | Optional | Git checkout cloned for the restorability check; a shallow or partial clone, or one with alternates, fails that check.                                                                       |
+| `options.checksums`     | `boolean \| undefined`                     | Optional | Hash every file listed in checksums.json with SHA-256 and compare kind, size and digest. Runs only when the earlier checks pass.                                                             |
+| `options.maxBytes`      | `number \| undefined`                      | Optional | Maximum bytes hashed for checksums, default 1073741824 (1 GiB). Exceeding it fails with CHECKSUM_LIMIT and leaves integrity unverified.                                                      |
 
 ## Returns
 

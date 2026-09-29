@@ -13,18 +13,18 @@ import type { RecoveryRetentionEntry } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom          | Type                                     | Présence  | Rôle                                                                                                                  |
-| ------------ | ---------------------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------- |
-| `revision`   | `string \| undefined`                    | Optionnel | Révision attendue de l’index du journal, vérifiée de nouveau avant suppression en mode transport.                     |
-| `objects`    | `readonly TransportEntry[] \| undefined` | Optionnel | Index et segments versionnés d’un journal distant ; la suppression revalide le groupe et la révision de chaque objet. |
-| `path`       | `string`                                 | Requis    | Chemin hôte de l’entrée de stockage inspectée.                                                                        |
-| `category`   | `string`                                 | Requis    | Catégorie de stockage du candidat à la rétention.                                                                     |
-| `bytes`      | `number`                                 | Requis    | Octets observés attribuables à ce candidat à la rétention.                                                            |
-| `eligible`   | `boolean`                                | Requis    | Indique si le candidat a passé les contrôles de sûreté, périmètre et âge autorisant sa suppression.                   |
-| `reason`     | `string`                                 | Requis    | Explication de l’éligibilité du candidat au nettoyage ou de la nécessité de le protéger.                              |
-| `branch`     | `string \| undefined`                    | Optionnel | Nom de la branche de travail utilisée ou observée pendant l’exécution.                                                |
-| `head`       | `string \| undefined`                    | Optionnel | Commit Git HEAD enregistré par l’inspection ou le snapshot.                                                           |
-| `modifiedAt` | `string \| undefined`                    | Optionnel | Horodatage ISO de la dernière modification de l’entrée inspectée.                                                     |
+| Nom          | Type                                     | Présence  | Rôle                                                                                                                                                        |
+| ------------ | ---------------------------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `revision`   | `string \| undefined`                    | Optionnel | Révision de transport de l’objet, ou de l’index d’un journal ; la suppression en dépend.                                                                    |
+| `objects`    | `readonly TransportEntry[] \| undefined` | Optionnel | Objets versionnés supprimés avec l’entrée : l’index et les segments d’un journal, ou un objet de cache. Chacun n’est effacé qu’à sa révision enregistrée.   |
+| `path`       | `string`                                 | Requis    | Chemin hôte d’une entrée de .outpost, ou clé d’objet pour les journaux, les entrées de cache et toute entrée d’un plan de transport.                        |
+| `category`   | `string`                                 | Requis    | Catégorie de stockage, par exemple workspaces, logs, task-cache, recovery, locks ou checkpoints.                                                            |
+| `bytes`      | `number`                                 | Requis    | Octets de l’entrée : taille des fichiers d’un dossier, ou de l’index et des segments d’un journal.                                                          |
+| `eligible`   | `boolean`                                | Requis    | Indique si pruneRecoveryRetention() tentera de supprimer l’entrée ; true seulement quand reason vaut ELIGIBLE.                                              |
+| `reason`     | `string`                                 | Requis    | ELIGIBLE ou le code qui conserve l’entrée, par exemple SCOPE_NOT_SELECTED, RETENTION_AGE, DIRTY_WORKSPACE, INCOMPLETE_INVENTORY ou RECOVERY_DATA_PROTECTED. |
+| `branch`     | `string \| undefined`                    | Optionnel | Branche extraite dans un worktree enregistré ; le nettoyage l’exige inchangée et la conserve.                                                               |
+| `head`       | `string \| undefined`                    | Optionnel | Commit HEAD d’un worktree enregistré ; le nettoyage l’exige inchangé.                                                                                       |
+| `modifiedAt` | `string \| undefined`                    | Optionnel | Horodatage ISO de la dernière modification dans l’entrée, comparé à minAgeMs.                                                                               |
 
 ## Signature
 

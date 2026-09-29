@@ -13,9 +13,9 @@ import { recoveryDetails } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Extrait les métadonnées de récupération d’une erreur inconnue lorsqu’Outpost les a attachées. Le résultat identifie le travail et les emplacements conservés ; sans métadonnées, renvoie undefined sans déclencher de nettoyage ni de restauration.
+Renvoie l’enregistrement de récupération qu’Outpost a attaché à une valeur levée : l’emplacement du travail conservé, par exemple branch, directory, commits, transcript, logReference ou conversation. Fonctionne sur tout objet levé, y compris une Error simple ou une raison d’annulation. Renvoie un objet vide pour une OutpostError sans enregistrement et undefined pour toute autre valeur sans enregistrement.
 
-[Exemple complet et règles détaillées](../../guide/recovery/).
+[Exemple complet et règles détaillées](../../guide/error-handling/).
 
 ## Paramètres et propriétés
 

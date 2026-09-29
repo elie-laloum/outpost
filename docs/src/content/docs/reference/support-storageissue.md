@@ -7,10 +7,10 @@ sidebar:
 
 ## Parameters and properties
 
-| Name   | Type     | Presence | Meaning                                                         |
-| ------ | -------- | -------- | --------------------------------------------------------------- |
-| `path` | `string` | Required | Filesystem path at which inspection encountered a problem.      |
-| `code` | `string` | Required | Filesystem or inspection error code for the inaccessible entry. |
+| Name   | Type     | Presence | Meaning                                                                                                                                   |
+| ------ | -------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `path` | `string` | Required | Path or object key that could not be fully inspected; empty for the ENTRY_LIMIT issue of a transport inventory.                           |
+| `code` | `string` | Required | Reason code: a filesystem error code such as EACCES, or an Outpost code such as ENTRY_LIMIT, DEPTH_LIMIT, GIT_LIST_FAILED or INVALID_PID. |
 
 ## Signature
 

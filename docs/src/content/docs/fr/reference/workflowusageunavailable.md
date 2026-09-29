@@ -25,7 +25,7 @@ Erreur enregistrée quand un usage signalé est marqué incomplet alors que le b
 | `name`      | `string`              | Requis    | Nom d’erreur stable WorkflowUsageUnavailable.                                                           |
 | `message`   | `string`              | Requis    | Explication lisible de l’échec.                                                                         |
 | `stack`     | `string \| undefined` | Optionnel | Trace de pile JavaScript de l’erreur lorsqu’elle est disponible.                                        |
-| `cause`     | `unknown`             | Optionnel | Échec d’origine attaché à cette erreur.                                                                 |
+| `cause`     | `unknown`             | Optionnel | Échec sous-jacent que cette erreur enveloppe ; quotaFault() et unavailableFault() suivent cette chaîne. |
 
 ## Signature
 

@@ -13,12 +13,12 @@ import type { OpenTelemetryObserver } from "@elie-laloum/outpost/opentelemetry";
 
 ## Paramètres et propriétés
 
-| Nom             | Type                             | Présence | Rôle                                                                                                                                                                                                |
-| --------------- | -------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `sink`          | `ObservationSink`                | Requis   | Récepteur unifié du hub produisant des spans liés de workflow, tâche, dispatch et opération ainsi que les métriques existantes ; évite de brancher simultanément cette même instance par telemetry. |
-| `close`         | `() => void`                     | Requis   | Termine les spans d’exécution encore ouverts appartenant à cet observateur.                                                                                                                         |
-| `startDispatch` | `() => DispatchTelemetrySession` | Requis   | Ouvre une session indépendante pour un appel public de dispatch, avant validation.                                                                                                                  |
-| `observe`       | `(event: WorkflowEvent) => void` | Requis   | Convertit un événement de workflow en spans et métriques de télémétrie.                                                                                                                             |
+| Nom             | Type                             | Présence | Rôle                                                                                                                                                                                                                                                                              |
+| --------------- | -------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `sink`          | `ObservationSink`                | Requis   | Sink de hub qui transforme les observations en spans de workflow, de tâche, de tentative, de dispatch et d’opération reliés entre eux, avec les mêmes métriques. Ne passez pas aussi cet observateur comme telemetry à la même exécution : spans et métriques seraient dupliqués. |
+| `close`         | `() => void`                     | Requis   | Termine tous les spans de workflow, de tâche, de tentative, de dispatch et d’opération encore ouverts comme annulés ou en échec. Il ne vide ni n’arrête le SDK.                                                                                                                   |
+| `startDispatch` | `() => DispatchTelemetrySession` | Requis   | Ouvre une session indépendante pour un appel public de dispatch, avant validation.                                                                                                                                                                                                |
+| `observe`       | `(event: WorkflowEvent) => void` | Requis   | Enregistre un événement de workflow sous forme de spans et de métriques ; workflow.start() l’appelle quand l’observateur est passé comme telemetry.                                                                                                                               |
 
 ## Signature
 

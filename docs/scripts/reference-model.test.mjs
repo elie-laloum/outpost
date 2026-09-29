@@ -232,7 +232,7 @@ test("identical field names describe the actual contract", async () => {
   );
   assert.match(
     await page("fr/reference/recoverypruneresult.md"),
-    /Nouveau plan de rétention calculé après nettoyage/,
+    /Nouveau plan avec la même politique, calculé après le nettoyage/,
   );
   assert.match(await page("fr/reference/branchpolicy.md"), /\| `name`/);
   assert.match(await page("fr/reference/agentevent.md"), /\| `tokens`/);

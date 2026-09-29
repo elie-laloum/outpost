@@ -13,7 +13,7 @@ import { unavailableFault } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Renvoie le signal de panne d’une erreur Outpost marquée indisponible par un adapter CLI ou un fournisseur de modèle, en suivant jusqu’à huit causes imbriquées. Les erreurs de quota et toute autre valeur renvoient undefined. Les pannes conservent leur code process ou provider : utilisez cette fonction plutôt que le code pour les reconnaître ; elle n’attend ni ne relance.
+Renvoie { message } depuis details.unavailable de la première OutpostError hors quota qui le renseigne, en examinant l’erreur et jusqu’à sept causes imbriquées, sinon undefined. Les pannes conservent leur code process, provider ou timeout : testez avec cette fonction plutôt qu’avec le code. Les agents de secours qui couvrent unavailable appliquent le même test.
 
 [Exemple complet et règles détaillées](../../guide/fallback-agents/).
 

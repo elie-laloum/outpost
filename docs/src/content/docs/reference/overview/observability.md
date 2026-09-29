@@ -1,34 +1,56 @@
 ---
 title: "Observability — Overview"
-description: "Observability makes execution understandable without deciding its outcome."
+description: "Follow what a dispatch or workflow does through agent events, hub sinks, reporters, telemetry, journals and token usage."
 sidebar:
   label: Overview
   order: 0
 ---
 
-Observability makes execution understandable without deciding its outcome. Agent events describe progress and native activity; usage records expose reported token counts; reporters and telemetry adapters turn observations into logs, spans or metrics.
+## Choose an observer
 
-## How it works
+Every observer receives copies of events. Observer failures are collected, in `observerErrors` or `onError`, and never change a run’s outcome.
 
-Attach an observer to the operation you want to inspect. A reporter formats events for a person; the optional OpenTelemetry integration connects them to instrumentation. Observation is deliberately isolated: a failing observer must not change whether the underlying operation succeeds.
+| Observer                          | Pass it as                              | Receives                                          | Use it for                                     |
+| --------------------------------- | --------------------------------------- | ------------------------------------------------- | ---------------------------------------------- |
+| `createReporter()`                | `observe` on a dispatch                 | Agent events of one dispatch                      | Terminal progress lines                        |
+| `createCustomReporter(handlers)`  | `observe` on a dispatch                 | Agent events, routed by `kind`                    | Your logger, with a `flush()` barrier          |
+| `createObservationHub({ sinks })` | `observation` on a workflow or dispatch | Every event of the run, with `seq` and `scope`    | One ordered stream across tasks and operations |
+| `createOpenTelemetryObserver()`   | Its `sink` on a hub, or `telemetry`     | Workflow, task, dispatch and operation lifecycles | Spans and metrics                              |
+| `logging` settings                | `logging` on a dispatch                 | The dispatch’s events, stored through a transport | A journal to read with `readJournal()`         |
+| `createReplayAgent({ journal })`  | `agent` on a dispatch                   | A recorded journal                                | Rerunning a dispatch without a model           |
 
-## Boundaries and responsibilities
+:::caution
+Delivery is live and bounded, the journal included: a receiver that falls behind loses events. The loss shows in `observerErrors` and the hub’s `dropped` count.
+:::
 
-Reported usage is not a monetary invoice, and local activity is not an inventory of a cloud account. Avoid putting prompts, credentials or unbounded identifiers in metric labels. Use operation results and enforced validation to make control-flow decisions.
+## When token usage arrives
 
-A replayable dispatch journal can also be replayed: `createReplayAgent` re-emits its events and rebuilds its commits without calling a model, and `ReplayDivergence` reports where a replay differs. See [record and replay](../../../guide/record-replay/).
+A `usage` event carries an increment; a pass’s `summary` and the dispatch result hold totals. `Usage.complete: false` marks counters as a lower bound.
+
+| Agent            | Usage reported                                                                 |
+| ---------------- | ------------------------------------------------------------------------------ |
+| Claude Code      | At the end of each turn; `message-usage` per message is not counted            |
+| Codex            | At the end of each turn; after each model response when steering injects input |
+| Copilot CLI      | After each model response, then reconciled with the session total at exit      |
+| Kimi Code        | Once, read from the session after the CLI exits                                |
+| Antigravity      | At the end of each turn                                                        |
+| Built-in harness | After each model response, subagents included                                  |
+
+Workflow totals and budgets build on these counters: see [WorkflowUsage](../../workflowusage/).
 
 ## Entry points
 
+Guide: [Observation hub and OpenTelemetry](../../../guide/observability/) · [Follow progress](../../../guide/progress/) · [Journals](../../../guide/journals/)
+
+- [createObservationHub](../../createobservationhub/)
 - [createReporter](../../createreporter/)
 - [createCustomReporter](../../createcustomreporter/)
-- [DispatchTelemetry](../../dispatchtelemetry/)
+- [createOpenTelemetryObserver](../../createopentelemetryobserver/)
+- [createReplayAgent](../../createreplayagent/)
+- [ObservationHub](../../observationhub/)
+- [Observation](../../observation/)
 - [AgentEvent](../../agentevent/)
 - [AgentObservation](../../agentobservation/)
 - [Usage](../../usage/)
-- [createReplayAgent](../../createreplayagent/)
-- [ReplayDivergence](../../replaydivergence/)
-- [createOpenTelemetryObserver](../../createopentelemetryobserver/)
-- [OpenTelemetryOptions](../../opentelemetryoptions/)
-
-[Learn with the practical guide](../../../guide/progress/).
+- [Logging](../../logging/)
+- [DispatchTelemetry](../../dispatchtelemetry/)

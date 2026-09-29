@@ -13,12 +13,12 @@ import type { RecoveryRetentionOptions } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name          | Type                      | Presence | Meaning                                                                                                                 |
-| ------------- | ------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `transporter` | `Transport \| undefined`  | Optional | Inspect remote objects and plan retention of closed journals. Local workspace cleanup is unsupported in transport mode. |
-| `repository`  | `string \| undefined`     | Optional | Target host Git checkout.                                                                                               |
-| `policy`      | `RecoveryRetentionPolicy` | Required | Explicit storage scopes, minimum age and capacity targets used to decide retention eligibility.                         |
-| `maxEntries`  | `number \| undefined`     | Optional | Maximum filesystem entries inspected before marking the inventory incomplete.                                           |
+| Name          | Type                      | Presence | Meaning                                                                                                                                                                                             |
+| ------------- | ------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `transporter` | `Transport \| undefined`  | Optional | Plan over this transport's objects instead of the repository's .outpost. Only closed-logs and task-cache apply; clean-workspaces or maxWorkspaces reject with code configuration.                   |
+| `repository`  | `string \| undefined`     | Optional | Git checkout whose .outpost is inspected, default process.cwd(), resolved to its top-level directory; a missing directory rejects with code workspace. With transporter, only recorded in the plan. |
+| `policy`      | `RecoveryRetentionPolicy` | Required | Scopes, minimum age and limits deciding which entries are eligible. Validated before inspection; an invalid or unknown field rejects with code configuration.                                       |
+| `maxEntries`  | `number \| undefined`     | Optional | Maximum files and directories scanned under .outpost, or objects listed from transporter, default 100000. Exceeding it marks the plan incomplete, so no entry is eligible.                          |
 
 ## Signature
 

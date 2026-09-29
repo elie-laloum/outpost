@@ -19,15 +19,15 @@ Erreur enregistrée lorsque la vérification du dernier tour autorisé échoue. 
 
 ## Paramètres et propriétés
 
-| Nom         | Type                  | Présence  | Rôle                                                                                     |
-| ----------- | --------------------- | --------- | ---------------------------------------------------------------------------------------- |
-| `key`       | `string`              | Requis    | Clé de la tâche dont la vérification n’a jamais réussi.                                  |
-| `maxRounds` | `number`              | Requis    | Limite de tours logiques configurée et atteinte par cette boucle.                        |
-| `feedback`  | `string`              | Requis    | Texte renvoyé par la dernière vérification refusée.                                      |
-| `name`      | `string`              | Requis    | Nom de classe d’erreur permettant de distinguer cet échec des autres erreurs JavaScript. |
-| `message`   | `string`              | Requis    | Explication lisible de l’échec.                                                          |
-| `stack`     | `string \| undefined` | Optionnel | Trace de pile JavaScript de l’erreur lorsqu’elle est disponible.                         |
-| `cause`     | `unknown`             | Optionnel | Échec d’origine attaché à cette erreur.                                                  |
+| Nom         | Type                  | Présence  | Rôle                                                                                                    |
+| ----------- | --------------------- | --------- | ------------------------------------------------------------------------------------------------------- |
+| `key`       | `string`              | Requis    | Clé de la tâche dont la vérification n’a jamais réussi.                                                 |
+| `maxRounds` | `number`              | Requis    | Limite de tours logiques configurée et atteinte par cette boucle.                                       |
+| `feedback`  | `string`              | Requis    | Texte renvoyé par la dernière vérification refusée.                                                     |
+| `name`      | `string`              | Requis    | Nom de classe d’erreur permettant de distinguer cet échec des autres erreurs JavaScript.                |
+| `message`   | `string`              | Requis    | Explication lisible de l’échec.                                                                         |
+| `stack`     | `string \| undefined` | Optionnel | Trace de pile JavaScript de l’erreur lorsqu’elle est disponible.                                        |
+| `cause`     | `unknown`             | Optionnel | Échec sous-jacent que cette erreur enveloppe ; quotaFault() et unavailableFault() suivent cette chaîne. |
 
 ## Signature
 

@@ -7,12 +7,12 @@ sidebar:
 
 ## Paramètres et propriétés
 
-| Nom        | Type                             | Présence | Rôle                                                                                                  |
-| ---------- | -------------------------------- | -------- | ----------------------------------------------------------------------------------------------------- |
-| `complete` | `boolean`                        | Requis   | Indique si toute l’inspection demandée s’est terminée sans limite de parcours ni entrée inaccessible. |
-| `scope`    | `"local-pid"`                    | Requis   | Toujours local-pid : les contrôles de possession utilisent l’identité de processus locale.            |
-| `entries`  | `readonly LockInspectionEntry[]` | Requis   | Fichiers de verrou inspectés et évaluations de possession locale.                                     |
-| `issues`   | `readonly StorageIssue[]`        | Requis   | Problèmes de fichiers, Git ou possession ayant empêché une inspection complète.                       |
+| Nom        | Type                             | Présence | Rôle                                                                                       |
+| ---------- | -------------------------------- | -------- | ------------------------------------------------------------------------------------------ |
+| `complete` | `boolean`                        | Requis   | true lorsqu’aucun état de verrou n’est unknown.                                            |
+| `scope`    | `"local-pid"`                    | Requis   | Toujours local-pid : les contrôles de possession utilisent l’identité de processus locale. |
+| `entries`  | `readonly LockInspectionEntry[]` | Requis   | État de chaque entrée de .outpost/locks.                                                   |
+| `issues`   | `readonly StorageIssue[]`        | Requis   | Un problème par verrou dont l’état est unknown, avec son motif comme code.                 |
 
 ## Signature
 

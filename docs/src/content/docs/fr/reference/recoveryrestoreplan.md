@@ -13,18 +13,18 @@ import type { RecoveryRestorePlan } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom              | Type                           | Présence  | Rôle                                                                                                                     |
-| ---------------- | ------------------------------ | --------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `fingerprint`    | `string`                       | Requis    | Empreinte liant le plan à la source conservée inspectée pour revalidation avant restauration.                            |
-| `manifestSha256` | `string`                       | Requis    | SHA-256 du manifeste de transfert conservé, capturé lors de la planification de restauration.                            |
-| `commit`         | `string`                       | Requis    | Commit Git utilisé pour reconstruire l’état conservé choisi.                                                             |
-| `payloads`       | `readonly string[]`            | Requis    | Chemins des bundles et patches conservés nécessaires pour restaurer le côté choisi.                                      |
-| `staging`        | `"unavailable" \| "preserved"` | Requis    | Indique si l’index Git d’origine est préservé ; l’état distant entrant ne fournit pas d’information d’index récupérable. |
-| `directory`      | `string`                       | Requis    | Dossier hôte contenant les artefacts de transfert conservés à vérifier ou restaurer.                                     |
-| `repository`     | `string`                       | Requis    | Checkout Git hôte ciblé.                                                                                                 |
-| `destination`    | `string`                       | Requis    | Nouveau dossier de destination absent, hors du dépôt source, de ses métadonnées Git et du transfert conservé.            |
-| `side`           | `"previous" \| "incoming"`     | Requis    | État conservé à restaurer : previous pour l’état hôte antérieur ou incoming pour l’état distant entrant.                 |
-| `maxBytes`       | `number \| undefined`          | Optionnel | Nombre maximal d’octets de données conservées autorisé pour copier et vérifier les sources de restauration.              |
+| Nom              | Type                           | Présence  | Rôle                                                                                                                                                                                                |
+| ---------------- | ------------------------------ | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `fingerprint`    | `string`                       | Requis    | SHA-256 de tous les autres champs du plan. restoreRecoveryTransfer() rejette un plan qui ne lui correspond plus.                                                                                    |
+| `manifestSha256` | `string`                       | Requis    | SHA-256 du checksums.json du transfert lors de la planification. La restauration rejette avec le code configuration si le manifeste a changé.                                                       |
+| `commit`         | `string`                       | Requis    | Commit sur lequel la destination sera détachée : le dernier commit synchronisé pour previous, le HEAD de la sandbox pour incoming.                                                                  |
+| `payloads`       | `readonly string[]`            | Requis    | Chemins des fichiers non suivis, relatifs au checkout, copiés depuis previous-files/ ou incoming/ dans la destination après les patches.                                                            |
+| `staging`        | `"unavailable" \| "preserved"` | Requis    | preserved pour previous : les changements indexés sont restaurés dans l’index Git. unavailable pour incoming : l’index de la sandbox n’est pas capturé.                                             |
+| `directory`      | `string`                       | Requis    | Dossier du transfert conservé, tel que l’indique details.recovery de l’erreur de synchronisation. Il doit contenir state.json et checksums.json.                                                    |
+| `repository`     | `string`                       | Requis    | Dépôt Git hôte cloné dans la destination ; il est seulement lu. Un dépôt partiel, superficiel (shallow) ou à objets alternates échoue au contrôle Git.                                              |
+| `destination`    | `string`                       | Requis    | Nouveau dossier à créer. Son parent doit exister ; le chemin ne doit pas exister et doit se trouver hors du dépôt, de ses métadonnées Git et du transfert.                                          |
+| `side`           | `"previous" \| "incoming"`     | Requis    | previous restaure le worktree hôte tel qu’il était sauvegardé avant le transfert, index Git compris ; incoming restaure les commits, changements non commités et fichiers non suivis de la sandbox. |
+| `maxBytes`       | `number \| undefined`          | Optionnel | Nombre maximal d’octets du transfert copiés et hachés, 1073741824 (1 Gio) par défaut. Un dépassement rejette avec le code configuration.                                                            |
 
 ## Signature
 

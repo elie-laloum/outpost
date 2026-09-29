@@ -9,16 +9,16 @@ sidebar:
 
 Les champs ci-dessous couvrent toutes les variantes ; la signature précise leurs combinaisons autorisées.
 
-| Nom      | Type                                                           | Présence          | Rôle                                                                                    |
-| -------- | -------------------------------------------------------------- | ----------------- | --------------------------------------------------------------------------------------- |
-| `name`   | `string`                                                       | Requis            | Nom de fichier de l’entrée de stockage inspectée.                                       |
-| `path`   | `string`                                                       | Requis            | Chemin hôte de l’entrée de stockage inspectée.                                          |
-| `state`  | `"registered" \| "unregistered" \| "unavailable" \| "skipped"` | Requis            | Classification de l’état Git du worktree utilisée pour décider si le nettoyage est sûr. |
-| `head`   | `string`                                                       | Selon la variante | Commit Git HEAD enregistré par l’inspection ou le snapshot.                             |
-| `branch` | `string \| null`                                               | Selon la variante | Nom de branche du worktree, ou null lorsque HEAD est détaché.                           |
-| `dirty`  | `boolean`                                                      | Selon la variante | Indique si des changements suivis ou non suivis rendent le checkout sale.               |
-| `locked` | `boolean`                                                      | Selon la variante | Indique si Git marque le worktree comme verrouillé.                                     |
-| `reason` | `string`                                                       | Selon la variante | Motif pour lequel l’état Git n’a pu être inspecté ou a été délibérément ignoré.         |
+| Nom      | Type                                                           | Présence          | Rôle                                                                                                                                                                 |
+| -------- | -------------------------------------------------------------- | ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`   | `string`                                                       | Requis            | Nom de base de l’entrée, ou la clé complète de l’objet pour un inventaire de transport.                                                                              |
+| `path`   | `string`                                                       | Requis            | Chemin hôte de l’entrée, ou la clé de l’objet pour un inventaire de transport.                                                                                       |
+| `state`  | `"registered" \| "unregistered" \| "unavailable" \| "skipped"` | Requis            | registered : un worktree Git de ce dépôt ; unregistered : absent de git worktree list ; skipped : pas un dossier ; unavailable : l’inspection a échoué, voir reason. |
+| `head`   | `string`                                                       | Selon la variante | Commit HEAD indiqué par git worktree list.                                                                                                                           |
+| `branch` | `string \| null`                                               | Selon la variante | Nom de branche du worktree, ou null lorsque HEAD est détaché.                                                                                                        |
+| `dirty`  | `boolean`                                                      | Selon la variante | true lorsque git status signale des changements suivis ou non suivis. Les fichiers ignorés ne comptent pas.                                                          |
+| `locked` | `boolean`                                                      | Selon la variante | Indique si Git marque le worktree comme verrouillé.                                                                                                                  |
+| `reason` | `string`                                                       | Selon la variante | Motif de l’état skipped (NOT_DIRECTORY) ou unavailable, tel que WORKSPACE_CHANGED, REGISTRATION_MISMATCH ou GIT_INSPECTION_FAILED.                                   |
 
 ## Signature
 

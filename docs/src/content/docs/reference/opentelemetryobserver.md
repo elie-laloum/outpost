@@ -13,12 +13,12 @@ import type { OpenTelemetryObserver } from "@elie-laloum/outpost/opentelemetry";
 
 ## Parameters and properties
 
-| Name            | Type                             | Presence | Meaning                                                                                                                                                                          |
-| --------------- | -------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `sink`          | `ObservationSink`                | Required | Unified hub receiver producing parented workflow, task, dispatch and operation spans and existing metrics; use instead of wiring the same instance through legacy telemetry too. |
-| `close`         | `() => void`                     | Required | Finish any outstanding execution spans owned by this observer.                                                                                                                   |
-| `startDispatch` | `() => DispatchTelemetrySession` | Required | Start an independent session for one public dispatch invocation; called before validation.                                                                                       |
-| `observe`       | `(event: WorkflowEvent) => void` | Required | Convert a workflow event into telemetry spans and metrics.                                                                                                                       |
+| Name            | Type                             | Presence | Meaning                                                                                                                                                                                                                         |
+| --------------- | -------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `sink`          | `ObservationSink`                | Required | Hub sink that turns observations into parented workflow, task, attempt, dispatch and operation spans plus the same metrics. Do not also pass this observer as telemetry to the same run: spans and metrics would be duplicated. |
+| `close`         | `() => void`                     | Required | Ends every open workflow, task, attempt, dispatch and operation span as cancelled or failed. It does not flush or shut down the SDK.                                                                                            |
+| `startDispatch` | `() => DispatchTelemetrySession` | Required | Start an independent session for one public dispatch invocation; called before validation.                                                                                                                                      |
+| `observe`       | `(event: WorkflowEvent) => void` | Required | Records a workflow event as spans and metrics; workflow.start() calls it when the observer is passed as telemetry.                                                                                                              |
 
 ## Signature
 

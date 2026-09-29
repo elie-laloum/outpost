@@ -7,10 +7,10 @@ sidebar:
 
 ## Paramètres et propriétés
 
-| Nom    | Type     | Présence | Rôle                                                                |
-| ------ | -------- | -------- | ------------------------------------------------------------------- |
-| `path` | `string` | Requis   | Chemin de fichiers où l’inspection a rencontré un problème.         |
-| `code` | `string` | Requis   | Code d’erreur de fichiers ou d’inspection de l’entrée inaccessible. |
+| Nom    | Type     | Présence | Rôle                                                                                                                                                         |
+| ------ | -------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `path` | `string` | Requis   | Chemin ou clé d’objet qui n’a pas pu être entièrement inspecté ; vide pour le problème ENTRY_LIMIT d’un inventaire de transport.                             |
+| `code` | `string` | Requis   | Code du motif : un code d’erreur du système de fichiers tel que EACCES, ou un code Outpost tel que ENTRY_LIMIT, DEPTH_LIMIT, GIT_LIST_FAILED ou INVALID_PID. |
 
 ## Signature
 

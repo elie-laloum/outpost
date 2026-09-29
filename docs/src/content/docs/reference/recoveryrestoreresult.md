@@ -13,13 +13,13 @@ import type { RecoveryRestoreResult } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name             | Type                           | Presence | Meaning                                                                                                    |
-| ---------------- | ------------------------------ | -------- | ---------------------------------------------------------------------------------------------------------- |
-| `directory`      | `string`                       | Required | New checkout directory populated with the restored state.                                                  |
-| `commit`         | `string`                       | Required | Git commit used to reconstruct the selected retained state.                                                |
-| `side`           | `"previous" \| "incoming"`     | Required | Retained state to restore: previous host state or incoming remote state.                                   |
-| `staging`        | `"unavailable" \| "preserved"` | Required | Whether the original Git index is preserved; incoming remote state has no recoverable staging information. |
-| `sourceRetained` | `true`                         | Required | Always true: restoration preserves the original recovery artifacts.                                        |
+| Name             | Type                           | Presence | Meaning                                                                                                                       |
+| ---------------- | ------------------------------ | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `directory`      | `string`                       | Required | Created destination: a clone of the repository detached at commit, without an origin remote, with the side's changes applied. |
+| `commit`         | `string`                       | Required | Commit the destination is detached at.                                                                                        |
+| `side`           | `"previous" \| "incoming"`     | Required | Side that was restored, copied from the plan.                                                                                 |
+| `staging`        | `"unavailable" \| "preserved"` | Required | preserved when the previous side's staged changes were restored to the index; unavailable for incoming.                       |
+| `sourceRetained` | `true`                         | Required | Always true: the transfer directory stays in place after restoration.                                                         |
 
 ## Signature
 

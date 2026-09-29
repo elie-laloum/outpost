@@ -7,9 +7,9 @@ sidebar:
 
 ## Paramètres et propriétés
 
-| Nom    | Type                  | Présence  | Rôle                                                                                          |
-| ------ | --------------------- | --------- | --------------------------------------------------------------------------------------------- |
-| `pass` | `number \| undefined` | Optionnel | Numéro de passe d’agent commençant à un, attaché à une observation ou à l’état du rapporteur. |
+| Nom    | Type                  | Présence  | Rôle                                                                                      |
+| ------ | --------------------- | --------- | ----------------------------------------------------------------------------------------- |
+| `pass` | `number \| undefined` | Optionnel | Numéro de passe affiché dans le préfixe de ligne ; absent pour les événements hors passe. |
 
 ## Signature
 

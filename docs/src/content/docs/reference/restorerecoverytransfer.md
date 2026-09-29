@@ -13,16 +13,16 @@ import { restoreRecoveryTransfer } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Revalidate a restoration plan and materialize the selected retained state into its new destination. Source recovery artifacts remain available, and the result reports whether staging could be preserved. Review the destination before integrating it.
+Recheck a plan, then clone the repository into its destination, detach at the plan's commit and apply the side's patches and untracked files. The repository and the transfer stay unchanged. A plan or transfer changed since planning rejects with code configuration; a failure after the destination is created rejects with code workspace and keeps the partial destination.
 
 [Complete example and detailed rules](../../guide/recovery/).
 
 ## Parameters and properties
 
-| Name          | Type                          | Presence | Meaning                                                                                                                     |
-| ------------- | ----------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `plan`        | `RecoveryRestorePlan`         | Required | Restoration plan binding source, destination, selected state and integrity fingerprints.                                    |
-| `observation` | `ObservationHub \| undefined` | Optional | Optional hub receiving start and terminal events for recovery restoration; never persisted in the recovery plan or archive. |
+| Name          | Type                          | Presence | Meaning                                                                                                       |
+| ------------- | ----------------------------- | -------- | ------------------------------------------------------------------------------------------------------------- |
+| `plan`        | `RecoveryRestorePlan`         | Required | Plan returned by planRecoveryRestore(). Any edited field fails its fingerprint check with code configuration. |
+| `observation` | `ObservationHub \| undefined` | Optional | Hub that receives the recovery operation restore.apply when it starts, finishes or fails.                     |
 
 ## Returns
 

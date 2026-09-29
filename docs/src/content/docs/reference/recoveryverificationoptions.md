@@ -13,12 +13,12 @@ import type { RecoveryVerificationOptions } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name            | Type                   | Presence | Meaning                                                                               |
-| --------------- | ---------------------- | -------- | ------------------------------------------------------------------------------------- |
-| `restorability` | `boolean \| undefined` | Optional | Also verify that retained Git bundles and patches can reconstruct the recorded state. |
-| `repository`    | `string \| undefined`  | Optional | Target host Git checkout.                                                             |
-| `checksums`     | `boolean \| undefined` | Optional | Compute and compare recorded payload digests during transfer verification.            |
-| `maxBytes`      | `number \| undefined`  | Optional | Maximum payload bytes allowed for checksum verification.                              |
+| Name            | Type                   | Presence | Meaning                                                                                                                                                                                      |
+| --------------- | ---------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `restorability` | `boolean \| undefined` | Optional | Clone repository into a temporary directory and check that the commits exist, the bundle unpacks and the three patches apply. Runs only when the structure checks pass; requires repository. |
+| `repository`    | `string \| undefined`  | Optional | Git checkout cloned for the restorability check; a shallow or partial clone, or one with alternates, fails that check.                                                                       |
+| `checksums`     | `boolean \| undefined` | Optional | Hash every file listed in checksums.json with SHA-256 and compare kind, size and digest. Runs only when the earlier checks pass.                                                             |
+| `maxBytes`      | `number \| undefined`  | Optional | Maximum bytes hashed for checksums, default 1073741824 (1 GiB). Exceeding it fails with CHECKSUM_LIMIT and leaves integrity unverified.                                                      |
 
 ## Signature
 

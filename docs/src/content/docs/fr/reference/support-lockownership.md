@@ -7,10 +7,10 @@ sidebar:
 
 ## Paramètres et propriétés
 
-| Nom      | Type                                  | Présence | Rôle                                                                                            |
-| -------- | ------------------------------------- | -------- | ----------------------------------------------------------------------------------------------- |
-| `status` | `"active" \| "unknown" \| "inactive"` | Requis   | Indique si le processus enregistré est actif, inactif ou ne peut être identifié avec certitude. |
-| `reason` | `string`                              | Requis   | Motif du classement du verrou local dans cet état de possession.                                |
+| Nom      | Type                                  | Présence | Rôle                                                                                                                                                                                        |
+| -------- | ------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `status` | `"active" \| "unknown" \| "inactive"` | Requis   | active : le PID tourne avec l’identité enregistrée ; inactive : le processus s’est terminé ; unknown : autre hôte, démarrage ou espace de noms de PID, PID réutilisé ou identité manquante. |
+| `reason` | `string`                              | Requis   | Code à l’origine du statut, tel que LOCAL_IDENTITY_MATCH, PROCESS_EXITED, OTHER_HOST, PID_REUSED ou REMOTE_OWNER_UNVERIFIED.                                                                |
 
 ## Signature
 
