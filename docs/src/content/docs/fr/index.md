@@ -27,8 +27,7 @@ landing:
     title: "Exécutez un agent"
     text: "Claude Code, Codex, Copilot CLI, Kimi Code, Antigravity ou le harness intégré d’Outpost, sur Docker, Podman, Vercel, Daytona ou votre machine. Changer l’un ou l’autre tient en une ligne ; le dispatch reste identique."
     caption: "Changer d’agent et de sandbox"
-    link:
-      { label: "Choisir un environnement", href: "guide/execution-backends/" }
+    link: { label: "Choisir un environnement", href: "guide/choose-a-sandbox/" }
   own:
     title: "Maîtrisez son environnement"
     text: "Rien n’est implicite. Vous choisissez comment chaque agent s’authentifie, où il s’exécute et comment sa branche est intégrée."
@@ -49,8 +48,7 @@ landing:
           term: "Récupération",
           detail: "Conservée dès qu’un nettoyage perdrait du travail.",
         }
-    link:
-      { label: "Identifiants et limites", href: "guide/access-credentials/" }
+    link: { label: "Identifiants et limites", href: "guide/authentication/" }
   compose:
     title: "Composez un workflow"
     text: "Les tâches se transmettent des résultats typés. Les exécutions posent des checkpoints, attendent des validations, se mettent en pause sur quota et reprennent la conversation là où elle s’était arrêtée."
@@ -110,20 +108,32 @@ landing:
         }
       - {
           name: "Harness Outpost",
-          href: "guide/model-loop/",
+          href: "guide/harness/",
           note: "modèles OpenAI et Anthropic",
         }
     sandboxes:
-      - { name: "Docker", href: "guide/docker/", note: "conteneur local" }
-      - { name: "Podman", href: "guide/podman/", note: "conteneur local" }
-      - { name: "Vercel", href: "guide/vercel-cloud/", note: "sandbox cloud" }
-      - { name: "Daytona", href: "guide/daytona-cloud/", note: "sandbox cloud" }
+      - { name: "Docker", href: "guide/containers/", note: "conteneur local" }
+      - {
+          name: "Podman",
+          href: "guide/containers/#podman",
+          note: "conteneur local",
+        }
+      - {
+          name: "Vercel",
+          href: "guide/cloud-sandboxes/#vercel-sandbox",
+          note: "sandbox cloud",
+        }
+      - {
+          name: "Daytona",
+          href: "guide/cloud-sandboxes/#daytona-sandbox",
+          note: "sandbox cloud",
+        }
       - {
           name: "Processus hôte",
           href: "guide/host-process/",
           note: "explicite, sans isolation",
         }
-      - { name: "Firecracker", href: "guide/microvms/", note: "microVM" }
+      - { name: "Firecracker", href: "guide/firecracker/", note: "microVM" }
   workflow:
     title: "D’une tâche à un workflow persistant"
     text: "Une correction, un résumé typé et une validation humaine, avec des checkpoints pour que l’exécution puisse s’arrêter et reprendre sans refaire le travail terminé."

@@ -15,7 +15,7 @@ import { createHarness } from "@elie-laloum/outpost";
 
 Compose the built-in Outpost engine from a model provider, tools, instructions, limits and tool execution settings. Validation happens immediately; nothing runs until the agent is dispatched. The engine calls the model, validates and runs tools in the borrowed sandbox and fails with code limit when a bound is reached. run callbacks are rejected.
 
-[Complete example and detailed rules](../../guide/agents/harness/).
+[Complete example and detailed rules](../../guide/harness/).
 
 ## Parameters and properties
 

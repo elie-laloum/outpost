@@ -15,7 +15,7 @@ import { diagnoseSandbox } from "@elie-laloum/outpost";
 
 Sonde un Sandbox ou SandboxLease appartenant à l’appelant pour vérifier commandes, CLI d’agent et transferts optionnels. Un Sandbox utilise son verrou d’opération ; la fonction rapporte les échecs sans fermer la ressource ni appeler de modèle réel.
 
-[Exemple complet et règles détaillées](../../guide/operations/doctor/).
+[Exemple complet et règles détaillées](../../guide/diagnostics/).
 
 ## Paramètres et propriétés
 

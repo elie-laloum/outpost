@@ -15,7 +15,7 @@ import { createOpenAIModelProvider } from "@elie-laloum/outpost";
 
 Configure a reusable request transport using Chat Completions or Responses, with messages, tool calls, reasoning effort and optional streaming. The harness supplies the model on each request. Construction performs local validation only; requests enforce cancellation, response size and deadlines without retries or protocol fallback.
 
-[Complete example and detailed rules](../../guide/advanced/model-providers/).
+[Complete example and detailed rules](../../guide/model-providers/).
 
 ## Parameters and properties
 

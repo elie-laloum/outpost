@@ -15,7 +15,7 @@ import { diagnoseAgentProtocol } from "@elie-laloum/outpost";
 
 Replay bundled event fixtures through the selected agent adapter and report decoding compatibility with the recorded CLI version. It does not launch the installed CLI, validate credentials or test a live model.
 
-[Complete example and detailed rules](../../guide/operations/doctor/).
+[Complete example and detailed rules](../../guide/diagnostics/).
 
 ## Parameters and properties
 

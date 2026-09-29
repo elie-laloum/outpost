@@ -15,7 +15,7 @@ import { defineBinaryArtifact } from "@elie-laloum/outpost";
 
 Déclare un contrat d’artefact binaire nommé et versionné qui copie les données Uint8Array à l’encodage et au décodage. Déclarer un contrat ne publie pas d’artefact.
 
-[Exemple complet et règles détaillées](../../guide/advanced/artifacts/).
+[Exemple complet et règles détaillées](../../guide/artifacts/).
 
 ## Paramètres et propriétés
 

@@ -15,7 +15,7 @@ import { createCodexConversations } from "@elie-laloum/outpost";
 
 Create the native ConversationStore of Codex. Rollouts are JSONL files named *-<id>.jsonl under ~/.codex/sessions; capture writes them under today’s date folder and rewrites recorded cwd values. This is the default store of createCodexHarness().
 
-[Complete example and detailed rules](../../guide/agents/conversations/).
+[Complete example and detailed rules](../../guide/conversations/).
 
 ## Returns
 

@@ -26,7 +26,7 @@ Server names use letters, digits, `_` and `-`, up to 32 characters. `command`, `
 
 ## Declare the secrets
 
-Each name in `variables` and `bearerTokenVariable` must be a declared variable: on the harness `variables`, on the sandbox provider, or in `.outpost/.env`. A missing value fails before the agent starts with `Missing NAME`. See [Environment values](../environment-values/).
+Each name in `variables` and `bearerTokenVariable` must be a declared variable: on the harness `variables`, on the sandbox provider, or in `.outpost/.env`. A missing value fails before the agent starts with `Missing NAME`. See [Environment values](../environment-variables/).
 
 ```ts
 import { createAgent, createClaudeHarness } from "@elie-laloum/outpost";
@@ -133,9 +133,9 @@ const reviewer = createAgent({
 });
 ```
 
-Tools are named `mcp__<server>__<tool>`; characters outside letters, digits, `_` and `-` become `_`, and long names end with a short hash. [Permission rules](../tool-policies/) match these names, for example `tools: ["mcp__linear__*"]`. Tool deadlines send an MCP cancellation. Server errors reach the model as tool errors; text, structured content and resource text are returned, while images and audio are replaced by a marker.
+Tools are named `mcp__<server>__<tool>`; characters outside letters, digits, `_` and `-` become `_`, and long names end with a short hash. [Permission rules](../harness-permissions/) match these names, for example `tools: ["mcp__linear__*"]`. Tool deadlines send an MCP cancellation. Server errors reach the model as tool errors; text, structured content and resource text are returned, while images and audio are replaced by a marker.
 
-A stdio server runs through a small Node.js launcher in the sandbox. An HTTP server is reached through a bridge that also runs in the sandbox, so the bearer token stays there and [outbound rules](../outbound-rules/) apply to it. The sandbox therefore needs `node`, and its lease must accept live process input, as every built-in provider does. On Vercel and Daytona each message to a stdio server goes through a polled file in the sandbox, which adds about a second per request. A server that exits or does not initialize within its startup timeout fails the turn. Subagents start the servers of their own harness.
+A stdio server runs through a small Node.js launcher in the sandbox. An HTTP server is reached through a bridge that also runs in the sandbox, so the bearer token stays there and [outbound rules](../network-restrictions/) apply to it. The sandbox therefore needs `node`, and its lease must accept live process input, as every built-in provider does. On Vercel and Daytona each message to a stdio server goes through a polled file in the sandbox, which adds about a second per request. A server that exits or does not initialize within its startup timeout fails the turn. Subagents start the servers of their own harness.
 
 For the built-in loop, declare secrets on the sandbox provider or in `.outpost/.env`: a custom harness has no `variables` of its own.
 

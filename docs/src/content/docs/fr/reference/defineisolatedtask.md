@@ -15,7 +15,7 @@ import { defineIsolatedTask } from "@elie-laloum/outpost";
 
 Définit un nœud d’agent dont le callback request choisit le dépôt, le provider, l’agent et les options de dispatch à chaque tentative. Il appelle dispatch pour allouer et fermer sa propre sandbox et renvoie DispatchResult. Des nœuds distincts peuvent traiter des dépôts distincts ; aucune transaction Git commune ni aucun push automatique ne les relie.
 
-[Exemple complet et règles détaillées](../../guide/workflows/graph/).
+[Exemple complet et règles détaillées](../../guide/task-dependencies/).
 
 ## Paramètres et propriétés
 

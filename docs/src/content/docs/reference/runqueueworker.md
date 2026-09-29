@@ -15,7 +15,7 @@ import { runQueueWorker } from "@elie-laloum/outpost";
 
 Poll for jobs whose handler is registered, run one job at a time and renew its fenced lease while executing. Record JSON results and observed usage, honor cancellation and deadlines, and reject stale completions; external effects may repeat after lease loss.
 
-[Complete example and detailed rules](../../guide/advanced/distributed/).
+[Complete example and detailed rules](../../guide/job-queues/).
 
 ## Parameters and properties
 

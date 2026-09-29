@@ -1,5 +1,5 @@
 ---
-title: "Dépendances des tâches"
+title: "Tâches et dépendances"
 description: "Relier des sorties typées dans un graphe exécutable."
 ---
 
@@ -38,7 +38,7 @@ Les tâches indépendantes peuvent tourner en parallèle. Les tâches dépendant
 | `defineIsolatedTask` | Requête d’agent avec son propre cycle de vie de sandbox. |
 | `defineQueuedTask`   | Travail délégué à un handler enregistré en arrière-plan. |
 
-Un workflow ne crée pas de transaction Git commune. Chaque tâche doit respecter la propriété des ressources et l’annulation. Utilisez l’[ordonnancement](../task-scheduling/) pour contrôler concurrence et reprises.
+Un workflow ne crée pas de transaction Git commune. Chaque tâche doit respecter la propriété des ressources et l’annulation. Utilisez l’[ordonnancement](../concurrency-and-retries/) pour contrôler concurrence et reprises.
 
 API : [defineTask](../../reference/definetask/) · [defineWorkflow](../../reference/defineworkflow/) · [TaskContext](../../reference/taskcontext/).
 

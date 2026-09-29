@@ -15,7 +15,7 @@ import { readStoredArtifact } from "@elie-laloum/outpost";
 
 Validate an artifact reference, load its bytes and verify contract identity, size and digest before decoding. Optional producer and parent expectations add lineage checks. Use this outside a task context or when the reference is already available.
 
-[Complete example and detailed rules](../../guide/advanced/artifacts/).
+[Complete example and detailed rules](../../guide/artifacts/).
 
 ## Parameters and properties
 

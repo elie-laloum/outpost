@@ -15,7 +15,7 @@ import { createHarnessShellTools } from "@elie-laloum/outpost";
 
 Crée le jeu d’outils shell : shell exécute sh -c à la racine du dépôt avec un délai et sans entrée, et renvoie statut de sortie, stdout et stderr. Exige un shell POSIX dans le sandbox.
 
-[Exemple complet et règles détaillées](../../guide/agents/harness/).
+[Exemple complet et règles détaillées](../../guide/harness/).
 
 ## Paramètres et propriétés
 

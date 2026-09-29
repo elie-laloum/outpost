@@ -15,7 +15,7 @@ import { defineAgentTask } from "@elie-laloum/outpost";
 
 Define a workflow node that dispatches an agent through an existing caller-owned sandbox. request builds the brief and dispatch options from task dependencies. Cancellation and observed usage join the workflow accounting; the node does not close the shared sandbox.
 
-[Complete example and detailed rules](../../guide/workflows/graph/).
+[Complete example and detailed rules](../../guide/task-dependencies/).
 
 ## Parameters and properties
 

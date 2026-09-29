@@ -24,4 +24,4 @@ A retained directory is evidence to inspect, not proof that all required data ex
 - [RecoveryRestorePlan](../../recoveryrestoreplan/)
 - [RecoveryRestoreResult](../../recoveryrestoreresult/)
 
-[Learn with the practical guide](../../../guide/operations/recovery-restoration/).
+[Learn with the practical guide](../../../guide/recovery/).

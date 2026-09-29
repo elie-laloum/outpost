@@ -58,7 +58,7 @@ const mcpServers: McpServers = {
 };
 ```
 
-The HTTP bridge in the sandbox reads the protected resource metadata, then the authorization server metadata, and requests a `client_credentials` token with the server URL as `resource`. It authenticates with `client_secret_basic`, or `client_secret_post` when the server only advertises that. The token is reused until it expires; after a 401 the bridge rediscovers, requests a new token with the challenged scope when `scopes` is omitted, and retries once. The client declares the `io.modelcontextprotocol/oauth-client-credentials` extension. The secret stays in the sandbox environment and [outbound rules](../outbound-rules/) apply to the token requests.
+The HTTP bridge in the sandbox reads the protected resource metadata, then the authorization server metadata, and requests a `client_credentials` token with the server URL as `resource`. It authenticates with `client_secret_basic`, or `client_secret_post` when the server only advertises that. The token is reused until it expires; after a 401 the bridge rediscovers, requests a new token with the challenged scope when `scopes` is omitted, and retries once. The client declares the `io.modelcontextprotocol/oauth-client-credentials` extension. The secret stays in the sandbox environment and [outbound rules](../network-restrictions/) apply to the token requests.
 
 `private_key_jwt`, refresh tokens and interactive authorization are not supported. CLI harnesses refuse client credentials.
 

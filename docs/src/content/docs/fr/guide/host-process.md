@@ -1,5 +1,5 @@
 ---
-title: "Processus hôte"
+title: "Exécution sur l’hôte"
 description: "Exécuter volontairement sans isolation de sandbox."
 ---
 
@@ -15,6 +15,6 @@ Installez vous-même la CLI de l’agent et les dépendances du projet. Ce fourn
 
 L’authentification par compte utilise la session hôte existante de la CLI. Outpost transmet les variables d’identification mais n’installe pas de fichiers d’identifiants sur l’hôte.
 
-Les politiques de branches et l’orchestration des workflows restent applicables. Choisissez [Docker](../docker/) ou [Podman](../podman/) pour exécuter dans un conteneur.
+Les politiques de branches et l’orchestration des workflows restent applicables. Choisissez [Docker](../containers/) ou [Podman](../containers/) pour exécuter dans un conteneur.
 
 API : [createLocalSandboxProvider](../../reference/createlocalsandboxprovider/).

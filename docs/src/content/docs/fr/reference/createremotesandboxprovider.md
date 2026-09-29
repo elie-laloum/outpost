@@ -15,7 +15,7 @@ import { createRemoteSandboxProvider } from "@elie-laloum/outpost";
 
 Enveloppe une définition de provider avec le placement remote, pour activer l’envoi du dépôt et sa synchronisation par l’application autour du bail fourni par acquire.
 
-[Exemple complet et règles détaillées](../../guide/environment/providers/overview/).
+[Exemple complet et règles détaillées](../../guide/choose-a-sandbox/).
 
 ## Paramètres et propriétés
 

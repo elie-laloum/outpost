@@ -1,5 +1,5 @@
 ---
-title: "Error handling"
+title: "Errors"
 description: "Distinguish execution failures, command results and workflow status."
 ---
 
@@ -26,12 +26,12 @@ function reportFailure(error: unknown) {
 | Synchronization refuses host state | Concurrent edits and retained recovery data.                                       |
 | Checkpoint owned                   | Stop the old runner, inspect revision and recover ownership explicitly.            |
 | Usage limit or HTTP 429            | Code `quota` and `quotaFault`; pause workflows with [`onQuota`](../quota-pauses/). |
-| Agent or model service down        | `unavailableFault`; hand over with a [fallback agent](../agent-fallback/).         |
+| Agent or model service down        | `unavailableFault`; hand over with a [fallback agent](../fallback-agents/).        |
 
 ## Retry deliberately
 
 Retry transient failures only when their effects can safely repeat. Preserve recovery paths before reporting an error to another process. A timeout is not evidence that every external effect was rolled back.
 
-Log failure codes and relevant context without dumping credentials or private transcripts. See [Recovering changes](../failure-recovery/) for retained work.
+Log failure codes and relevant context without dumping credentials or private transcripts. See [Recovering changes](../recovery/) for retained work.
 
 API: [OutpostError](../../reference/outposterror/) · [recoveryDetails](../../reference/recoverydetails/) · [WorkflowResult](../../reference/workflowresult/).

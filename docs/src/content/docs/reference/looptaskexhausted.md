@@ -15,7 +15,7 @@ import { LoopTaskExhausted } from "@elie-laloum/outpost";
 
 Error recorded when the last permitted round fails verification. Inspect key, maxRounds and feedback through WorkflowResult.errors; resuming the same checkpoint does not reset the limit.
 
-[Complete example and detailed rules](../../guide/workflows/graph/).
+[Complete example and detailed rules](../../guide/task-dependencies/).
 
 ## Parameters and properties
 

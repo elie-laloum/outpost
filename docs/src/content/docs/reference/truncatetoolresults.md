@@ -15,7 +15,7 @@ import { truncateToolResults } from "@elie-laloum/outpost";
 
 Create a context strategy that shortens the results of older tool calls and keeps the most recent ones intact. It changes nothing until an older result exceeds the limit.
 
-[Complete example and detailed rules](../../guide/agents/harness/).
+[Complete example and detailed rules](../../guide/harness/).
 
 ## Parameters and properties
 

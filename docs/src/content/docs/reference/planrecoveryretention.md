@@ -15,7 +15,7 @@ import { planRecoveryRetention } from "@elie-laloum/outpost";
 
 Inspect local recovery storage and compute which clean workspaces or closed logs satisfy the supplied age and capacity policy. Planning reports eligibility and projected usage without removing files.
 
-[Complete example and detailed rules](../../guide/operations/recovery/).
+[Complete example and detailed rules](../../guide/recovery/).
 
 ## Parameters and properties
 

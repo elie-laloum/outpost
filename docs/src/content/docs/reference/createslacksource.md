@@ -15,7 +15,7 @@ import { createSlackSource } from "@elie-laloum/outpost";
 
 Create a Slack trigger source for slash commands and interactive payloads. It verifies X-Slack-Signature over v0:timestamp:body within a timestamp window, uses trigger_id as delivery, reports command or the interaction type with the user as slack:<user id>, and replies 200 with an empty body. The Events API is not supported.
 
-[Complete example and detailed rules](../../guide/triggers/).
+[Complete example and detailed rules](../../guide/webhooks/).
 
 ## Parameters and properties
 

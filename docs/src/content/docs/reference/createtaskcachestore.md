@@ -15,7 +15,7 @@ import { createTaskCacheStore } from "@elie-laloum/outpost";
 
 Create a task cache store over a caller-owned Transport. Entries live under task-cache/<fingerprint>.json; writes replace older entries conditionally and keep a concurrent writer’s entry. Reads validate the entry and its size. Entries are not authenticated: anyone who can write the transport controls restored results.
 
-[Complete example and detailed rules](../../guide/operations/storage-transports/).
+[Complete example and detailed rules](../../guide/storage/).
 
 ## Parameters and properties
 

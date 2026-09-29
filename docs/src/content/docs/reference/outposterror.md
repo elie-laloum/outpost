@@ -15,7 +15,7 @@ import { OutpostError } from "@elie-laloum/outpost";
 
 Error with a stable fault code and structured details for execution, configuration and recovery failures. cause preserves the original failure and recovery may identify retained work; branch cleanup must respect those recovery locations.
 
-[Complete example and detailed rules](../../guide/operations/recovery/).
+[Complete example and detailed rules](../../guide/recovery/).
 
 ## Parameters and properties
 

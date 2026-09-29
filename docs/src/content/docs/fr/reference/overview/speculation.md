@@ -24,4 +24,4 @@ Cet assistant est une capacité de recherche activée explicitement. La sélecti
 - [SpeculativeCandidate](../../speculativecandidate/)
 - [SpeculativeValidation](../../speculativevalidation/)
 
-[Passer à la pratique avec le Guide](../../../guide/advanced/speculation/).
+[Passer à la pratique avec le Guide](../../../guide/speculation/).

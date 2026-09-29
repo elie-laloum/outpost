@@ -15,7 +15,7 @@ import { restoreRecoveryTransfer } from "@elie-laloum/outpost";
 
 Revalide un plan de restauration et matérialise l’état conservé choisi dans sa nouvelle destination. Les artefacts sources restent disponibles et le résultat indique si l’index Git a pu être préservé. Examinez la destination avant intégration.
 
-[Exemple complet et règles détaillées](../../guide/operations/recovery-restoration/).
+[Exemple complet et règles détaillées](../../guide/recovery/).
 
 ## Paramètres et propriétés
 

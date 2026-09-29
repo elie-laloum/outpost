@@ -24,4 +24,4 @@ Fermez la sandbox avant son workspace. Un workspace fourni par l’appelant rest
 - [BranchPolicy](../../branchpolicy/)
 - [Disposal](../../disposal/)
 
-[Passer à la pratique avec le Guide](../../../guide/environment/workspaces/).
+[Passer à la pratique avec le Guide](../../../guide/repository-and-branch/).

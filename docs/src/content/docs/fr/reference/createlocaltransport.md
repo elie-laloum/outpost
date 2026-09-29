@@ -15,7 +15,7 @@ import { createLocalTransport } from "@elie-laloum/outpost";
 
 Crée un transport d’objets versionnés dans un dossier privé. Les verrous locaux sérialisent les mutations conditionnelles. Utilisez-le avec createArtifactStore et createWorkflowCheckpointStore pour persister sur disque ; cet adaptateur n’établit pas de propriété NFS distribuée.
 
-[Exemple complet et règles détaillées](../../guide/operations/storage-transports/).
+[Exemple complet et règles détaillées](../../guide/storage/).
 
 ## Paramètres et propriétés
 

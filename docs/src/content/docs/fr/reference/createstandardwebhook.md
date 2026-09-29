@@ -15,7 +15,7 @@ import { createStandardWebhook } from "@elie-laloum/outpost";
 
 Crée une source de déclencheur pour les émetteurs qui suivent le schéma Standard Webhooks. Elle vérifie chaque signature v1 de webhook-signature sur id.timestamp.body avec des secrets whsec_ dans une fenêtre d’horodatage, utilise webhook-id comme livraison et le champ type de la charge, ou webhook, comme kind. Elle ne renvoie pas d’acteur.
 
-[Exemple complet et règles détaillées](../../guide/triggers/).
+[Exemple complet et règles détaillées](../../guide/webhooks/).
 
 ## Paramètres et propriétés
 

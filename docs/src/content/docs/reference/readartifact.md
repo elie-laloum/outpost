@@ -15,7 +15,7 @@ import { readArtifact } from "@elie-laloum/outpost";
 
 Read an artifact reference from a declared task dependency through context.value, then load and validate its stored payload. It applies the task cancellation signal and checks the producer against the current execution and dependency key.
 
-[Complete example and detailed rules](../../guide/advanced/artifacts/).
+[Complete example and detailed rules](../../guide/artifacts/).
 
 ## Parameters and properties
 

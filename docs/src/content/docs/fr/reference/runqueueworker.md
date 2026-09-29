@@ -15,7 +15,7 @@ import { runQueueWorker } from "@elie-laloum/outpost";
 
 Interroge la file pour les gestionnaires enregistrés, traite une tâche à la fois et renouvelle son bail pendant l’exécution. Enregistre résultats JSON et usage observé, respecte annulation et échéances et rejette les validations périmées ; des effets externes peuvent se répéter après perte du bail.
 
-[Exemple complet et règles détaillées](../../guide/advanced/distributed/).
+[Exemple complet et règles détaillées](../../guide/job-queues/).
 
 ## Paramètres et propriétés
 

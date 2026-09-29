@@ -15,7 +15,7 @@ import { TransportConflict } from "@elie-laloum/outpost";
 
 A conditional object mutation or pinned read found a different revision. Re-read state before deciding whether a retry is valid; never replace the condition with an unconditional write.
 
-[Complete example and detailed rules](../../guide/operations/storage-transports/).
+[Complete example and detailed rules](../../guide/storage/).
 
 ## Parameters and properties
 

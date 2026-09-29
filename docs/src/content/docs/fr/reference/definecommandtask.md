@@ -15,7 +15,7 @@ import { defineCommandTask } from "@elie-laloum/outpost";
 
 Définit un nœud qui exécute une commande dans une sandbox existante appartenant à l’appelant. Une fabrique de commande peut lire les dépendances. Un statut de processus non nul met la tâche en échec et permet d’appliquer sa politique de reprise ; la sandbox reste à la charge de l’appelant.
 
-[Exemple complet et règles détaillées](../../guide/workflows/graph/).
+[Exemple complet et règles détaillées](../../guide/task-dependencies/).
 
 ## Paramètres et propriétés
 

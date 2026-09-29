@@ -15,7 +15,7 @@ import { speculate } from "@elie-laloum/outpost";
 
 Exécute des candidats bornés depuis un commit initial figé, les valide dans leurs sandboxes actives et sélectionne un gagnant après son nettoyage. Le mode durable persiste propriété, tentatives, usage et résultats via Transport et exige récupération/rejeu explicites après un crash. Renvoie les emplacements préservés et une vérification de fusion Git sans intégrer la branche.
 
-[Exemple complet et règles détaillées](../../guide/advanced/speculation/).
+[Exemple complet et règles détaillées](../../guide/speculation/).
 
 ## Paramètres et propriétés
 

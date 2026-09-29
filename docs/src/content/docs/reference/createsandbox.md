@@ -15,7 +15,7 @@ import { createSandbox } from "@elie-laloum/outpost";
 
 Allocate an environment around a new or caller-owned workspace. The returned sandbox supports sequential commands and agent turns on the same lease; the caller must close it. A supplied workspace keeps its independent lifetime.
 
-[Complete example and detailed rules](../../guide/environment/lifecycle/).
+[Complete example and detailed rules](../../guide/sandbox-sessions/).
 
 ## Parameters and properties
 

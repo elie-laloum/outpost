@@ -15,7 +15,7 @@ import { defineTextResponse } from "@elie-laloum/outpost";
 
 Declare a tagged text response. The validator reads the last complete matching tag and returns its trimmed contents as a string. Missing or invalid content raises ResponseError; repairs defaults to zero.
 
-[Complete example and detailed rules](../../guide/agents/responses/).
+[Complete example and detailed rules](../../guide/typed-responses/).
 
 ## Parameters and properties
 

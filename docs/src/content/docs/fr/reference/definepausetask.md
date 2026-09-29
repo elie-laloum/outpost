@@ -15,7 +15,7 @@ import { definePauseTask } from "@elie-laloum/outpost";
 
 Définit une pause persistée par checkpoint qui attend une décision explicite resume ou reject d’un acteur de confiance autorisé. Elle n’utilise aucun timer d’attente et survit au redémarrage du processus ; contrairement à defineApprovalTask, son action de succès est resume.
 
-[Exemple complet et règles détaillées](../../guide/advanced/approvals/).
+[Exemple complet et règles détaillées](../../guide/approvals/).
 
 ## Paramètres et propriétés
 

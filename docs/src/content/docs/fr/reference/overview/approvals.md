@@ -25,4 +25,4 @@ Les identifiants d’acteurs sont des métadonnées de confiance, pas une authen
 - [WorkflowDecision](../../workflowdecision/)
 - [WorkflowDecisionRecord](../../workflowdecisionrecord/)
 
-[Passer à la pratique avec le Guide](../../../guide/advanced/approvals/).
+[Passer à la pratique avec le Guide](../../../guide/approvals/).

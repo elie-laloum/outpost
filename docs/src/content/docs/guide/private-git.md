@@ -26,6 +26,6 @@ Explicit mounts overlapping the canonical repository, worktree, Git directories 
 
 This mode does not certify hostile-agent isolation or protection from container escapes. Trust the image, engine, kernel and explicit external mounts. It also does not make project code safe to run later on the host.
 
-See [Recovering changes](../failure-recovery/) for interrupted synchronization and the [roadmap](../../project/roadmap/) for remaining live-validation prerequisites.
+See [Recovering changes](../recovery/) for interrupted synchronization and the [roadmap](../../project/roadmap/) for remaining live-validation prerequisites.
 
 API: [ContainerOptions](../../reference/containeroptions/).

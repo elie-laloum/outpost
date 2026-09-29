@@ -15,7 +15,7 @@ import { defineHarnessInstructions } from "@elie-laloum/outpost";
 
 Define system instructions from text or from a resolver called at the start of each turn with the sandbox, signal and model. The resolved text is not stored in the conversation.
 
-[Complete example and detailed rules](../../guide/agents/harness/).
+[Complete example and detailed rules](../../guide/harness/).
 
 ## Parameters and properties
 

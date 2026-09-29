@@ -15,7 +15,7 @@ import { createGitlabWebhook } from "@elie-laloum/outpost";
 
 Crée une source de déclencheur GitLab. Avec signingToken, elle vérifie l’en-tête webhook-signature d’un jeton de signature whsec_ (GitLab 19.0+) dans une fenêtre d’horodatage et utilise webhook-id ; avec token, elle compare X-Gitlab-Token et utilise Idempotency-Key ou X-Gitlab-Event-UUID. Elle renvoie object_kind, l’action de l’objet et l’utilisateur sous la forme gitlab:<username>.
 
-[Exemple complet et règles détaillées](../../guide/triggers/).
+[Exemple complet et règles détaillées](../../guide/webhooks/).
 
 ## Paramètres et propriétés
 

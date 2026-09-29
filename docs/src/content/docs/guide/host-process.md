@@ -1,5 +1,5 @@
 ---
-title: "Host process"
+title: "Host execution"
 description: "Run deliberately without sandbox isolation."
 ---
 
@@ -15,6 +15,6 @@ Install the selected agent CLI and project dependencies yourself. The provider d
 
 Account authentication uses the CLI’s existing host session. Outpost supplies credential variables but does not install credential files onto the host.
 
-Workspace branch policies and workflow orchestration still apply. Choose [Docker](../docker/) or [Podman](../podman/) when execution should occur inside a container.
+Workspace branch policies and workflow orchestration still apply. Choose [Docker](../containers/) or [Podman](../containers/) when execution should occur inside a container.
 
 API: [createLocalSandboxProvider](../../reference/createlocalsandboxprovider/).

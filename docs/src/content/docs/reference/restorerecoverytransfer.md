@@ -15,7 +15,7 @@ import { restoreRecoveryTransfer } from "@elie-laloum/outpost";
 
 Revalidate a restoration plan and materialize the selected retained state into its new destination. Source recovery artifacts remain available, and the result reports whether staging could be preserved. Review the destination before integrating it.
 
-[Complete example and detailed rules](../../guide/operations/recovery-restoration/).
+[Complete example and detailed rules](../../guide/recovery/).
 
 ## Parameters and properties
 

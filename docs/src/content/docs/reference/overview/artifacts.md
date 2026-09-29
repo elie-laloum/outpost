@@ -25,4 +25,4 @@ Digests and lineage provide integrity and traceability, not producer authenticat
 - [readArtifact](../../readartifact/)
 - [ArtifactStore](../../artifactstore/)
 
-[Learn with the practical guide](../../../guide/advanced/artifacts/).
+[Learn with the practical guide](../../../guide/artifacts/).

@@ -24,4 +24,4 @@ Ne relancez pas aveuglément après un échec ayant des effets externes. Examine
 - [quotaFault](../../quotafault/)
 - [unavailableFault](../../unavailablefault/)
 
-[Passer à la pratique avec le Guide](../../../guide/operations/recovery/).
+[Passer à la pratique avec le Guide](../../../guide/recovery/).

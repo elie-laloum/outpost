@@ -25,4 +25,4 @@ Process completion and closed output streams are different events. Inspect exit 
 - [AttachResult](../../attachresult/)
 - [Channel](../../channel/)
 
-[Learn with the practical guide](../../../guide/environment/commands/).
+[Learn with the practical guide](../../../guide/sandbox-sessions/).

@@ -15,7 +15,7 @@ import { verifyRecoveryTransfer } from "@elie-laloum/outpost";
 
 Vérifie la structure d’un transfert conservé, avec calcul optionnel des empreintes et contrôle de restauration Git dans la limite maxBytes. Renvoie contrôles détaillés et état d’intégrité sans appliquer les changements entrants ni authentifier leur auteur.
 
-[Exemple complet et règles détaillées](../../guide/operations/recovery/).
+[Exemple complet et règles détaillées](../../guide/recovery/).
 
 ## Paramètres et propriétés
 

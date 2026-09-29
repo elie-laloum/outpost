@@ -33,6 +33,6 @@ Les retries peuvent répéter des effets externes. Les budgets contrôlent l’a
 - [defineCommandTask](../../definecommandtask/)
 - [defineIsolatedTask](../../defineisolatedtask/)
 
-[Passer à la pratique avec le Guide](../../../guide/workflows/graph/).
+[Passer à la pratique avec le Guide](../../../guide/task-dependencies/).
 
 `defineInteractiveAgentTask` possède un sandbox neuf par tour de dialogue et conserve son worktree et sa conversation pendant l’attente humaine. Voir les [tâches interactives](../../../guide/interactive-tasks/) pour la saisie durable, les harnesses compatibles et la récupération.

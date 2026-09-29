@@ -15,7 +15,7 @@ import { createSandbox } from "@elie-laloum/outpost";
 
 Alloue un environnement autour d’un workspace nouveau ou fourni par l’appelant. La sandbox renvoyée permet d’enchaîner commandes et tours d’agent sur le même bail ; l’appelant doit la fermer. Un workspace fourni conserve sa durée de vie indépendante.
 
-[Exemple complet et règles détaillées](../../guide/environment/lifecycle/).
+[Exemple complet et règles détaillées](../../guide/sandbox-sessions/).
 
 ## Paramètres et propriétés
 

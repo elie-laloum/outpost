@@ -1,5 +1,5 @@
 ---
-title: "Cache de tâches"
+title: "Cache de résultats"
 description: "Réutiliser le résultat JSON d’une tâche au lieu de la réexécuter avec les mêmes entrées."
 ---
 
@@ -113,6 +113,6 @@ Il n’y a pas de coordination entre exécutions concurrentes : celles qui parta
 
 Les entrées ne sont ni signées ni authentifiées. Quiconque peut écrire dans le transport contrôle les valeurs que les tâches restaurent. Utilisez un transport au moins aussi fiable que le dépôt et ne le partagez pas au-delà d’une frontière de confiance. Les entrées contiennent des sorties de tâches, qui peuvent être sensibles.
 
-`createTaskCacheStore` stocke les entrées sous `task-cache/<empreinte>.json`. Elles sont conservées jusqu’à leur suppression : ajoutez le périmètre `task-cache` à une [politique de rétention](../retention-rules/) pour supprimer les entrées plus anciennes que `minAgeMs`.
+`createTaskCacheStore` stocke les entrées sous `task-cache/<empreinte>.json`. Elles sont conservées jusqu’à leur suppression : ajoutez le périmètre `task-cache` à une [politique de rétention](../retention/) pour supprimer les entrées plus anciennes que `minAgeMs`.
 
 API : [TaskCacheOptions](../../reference/taskcacheoptions/) · [createTaskCacheStore](../../reference/createtaskcachestore/) · [repositoryFingerprint](../../reference/repositoryfingerprint/) · [TaskCacheEntry](../../reference/taskcacheentry/).

@@ -15,7 +15,7 @@ import { createHarness } from "@elie-laloum/outpost";
 
 Compose le moteur intégré d’Outpost à partir d’un fournisseur de modèles, d’outils, d’instructions, de limites et de réglages d’exécution des outils. La validation est immédiate ; rien ne s’exécute avant le dispatch de l’agent. Le moteur appelle le modèle, valide et exécute les outils dans le sandbox emprunté et échoue avec le code limit quand une borne est atteinte. Les callbacks run sont refusés.
 
-[Exemple complet et règles détaillées](../../guide/agents/harness/).
+[Exemple complet et règles détaillées](../../guide/harness/).
 
 ## Paramètres et propriétés
 

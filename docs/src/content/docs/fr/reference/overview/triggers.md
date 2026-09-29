@@ -29,4 +29,4 @@ Une signature vérifiée authentifie l’intégration émettrice, pas la personn
 - [createStandardWebhook](../../createstandardwebhook/)
 - [defineWorkflowJob](../../defineworkflowjob/)
 
-[Passer à la pratique avec le Guide](../../../guide/triggers/).
+[Passer à la pratique avec le Guide](../../../guide/webhooks/).

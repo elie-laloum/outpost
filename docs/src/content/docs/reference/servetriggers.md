@@ -15,7 +15,7 @@ import { serveTriggers } from "@elie-laloum/outpost";
 
 Start an HTTP server that verifies each request with its route source and publishes the job selected by on() as trigger:<path>:<delivery>. Redeliveries of one delivery publish nothing new. It answers 202, 204, 401, 404, 405, 413, 500 or 503, unless the source overrides the success replies, and resolves once listening. The caller closes the server and then its queue.
 
-[Complete example and detailed rules](../../guide/triggers/).
+[Complete example and detailed rules](../../guide/webhooks/).
 
 ## Parameters and properties
 

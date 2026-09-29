@@ -24,4 +24,4 @@ Do not retry blindly after a failure with side effects. Inspect retained state a
 - [quotaFault](../../quotafault/)
 - [unavailableFault](../../unavailablefault/)
 
-[Learn with the practical guide](../../../guide/operations/recovery/).
+[Learn with the practical guide](../../../guide/recovery/).

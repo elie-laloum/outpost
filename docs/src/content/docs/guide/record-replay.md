@@ -1,5 +1,5 @@
 ---
-title: "Record and replay"
+title: "Replay without a model"
 description: "Keep a real dispatch and replay it without calling a model."
 ---
 
@@ -66,7 +66,7 @@ The replay agent works turn by turn, in the order they were recorded:
 3. On the last turn of a sandbox dispatch, it rebuilds the commits inside the sandbox. It checks the baseline tree, applies each patch with `git apply --index` and compares the resulting tree. Then it recreates the commit with the recorded identities and message. This goes through the sandbox, so it also works with remote providers.
 4. When the recorded turn failed, it rethrows the recorded error code and message after replaying its events and commits.
 
-A [fallback agent](../agent-fallback/) handover is replayed in the same turn: after the stopped candidate's events, the replay re-emits the `fallback` event and continues with the next candidate's recorded turn. Its prompt is not compared, because that candidate restarted from the original brief. The replayed result has the selected candidate's text, every candidate's commits and their combined usage, but no `result.fallback`: the dispatch only sees the replay agent.
+A [fallback agent](../fallback-agents/) handover is replayed in the same turn: after the stopped candidate's events, the replay re-emits the `fallback` event and continues with the next candidate's recorded turn. Its prompt is not compared, because that candidate restarted from the original brief. The replayed result has the selected candidate's text, every candidate's commits and their combined usage, but no `result.fallback`: the dispatch only sees the replay agent.
 
 Structured-response repairs and multiple passes are replayed turn by turn. The usage reported is the recorded usage; no tokens are consumed. A replay agent is single-use: `remainingTurns` counts the turns still to replay. Build a new one for each replay.
 

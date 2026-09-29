@@ -1,5 +1,5 @@
 ---
-title: "CI automation"
+title: "Run in CI"
 description: "Run unattended work with explicit access and delivery checks."
 ---
 
@@ -23,6 +23,6 @@ Throw on failed validation commands and call `result.unwrap()` for workflows. Co
 
 Use a named branch for review. Integrate only after required checks and approvals, then let your existing CI delivery process push or publish. Outpost does not automatically push all repositories in a workflow.
 
-To start runs from a schedule or a repository event without a CI job, use [triggers](../triggers/).
+To start runs from a schedule or a repository event without a CI job, use [triggers](../webhooks/).
 
 Preserve recovery paths, checkpoints and artifact references when a job fails. Do not upload raw credential files or private transcripts as public CI artifacts.

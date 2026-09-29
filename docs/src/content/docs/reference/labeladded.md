@@ -15,7 +15,7 @@ import { labelAdded } from "@elie-laloum/outpost";
 
 Return the repository, number and target when the event adds this label to a GitHub issue or pull request, or to a GitLab issue or merge request; otherwise undefined. It reads only the verified payload and does not check who added the label.
 
-[Complete example and detailed rules](../../guide/triggers/).
+[Complete example and detailed rules](../../guide/webhooks/).
 
 ## Parameters and properties
 

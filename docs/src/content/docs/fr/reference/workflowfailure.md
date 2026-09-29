@@ -15,7 +15,7 @@ import { WorkflowFailure } from "@elie-laloum/outpost";
 
 Erreur levée par WorkflowResult.unwrap quand l’exécution n’a pas réussi. result conserve les états des tâches, erreurs et usage pour permettre leur inspection.
 
-[Exemple complet et règles détaillées](../../guide/workflows/graph/).
+[Exemple complet et règles détaillées](../../guide/task-dependencies/).
 
 ## Paramètres et propriétés
 

@@ -15,7 +15,7 @@ import { defineCommandTask } from "@elie-laloum/outpost";
 
 Define a workflow node that runs a command in an existing caller-owned sandbox. A command factory can read dependency values. A nonzero process status fails the task, allowing the workflow retry policy to apply; the sandbox remains caller-owned.
 
-[Complete example and detailed rules](../../guide/workflows/graph/).
+[Complete example and detailed rules](../../guide/task-dependencies/).
 
 ## Parameters and properties
 

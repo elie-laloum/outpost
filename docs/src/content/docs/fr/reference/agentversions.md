@@ -15,7 +15,7 @@ import { agentVersions } from "@elie-laloum/outpost";
 
 Expose les versions des CLI Claude Code, Codex, Antigravity, Copilot et Kimi épinglées pour les images générées et le bootstrap distant, qui servent de références à doctor et aux fixtures de protocole intégrées. Les archives Antigravity sont vérifiées avec les empreintes SHA-512 enregistrées dans Outpost. Ces valeurs n’interrogent pas les binaires installés et ne prouvent pas l’accès à un compte.
 
-[Exemple complet et règles détaillées](../../guide/agents/harness/).
+[Exemple complet et règles détaillées](../../guide/harness/).
 
 ## Paramètres et propriétés
 

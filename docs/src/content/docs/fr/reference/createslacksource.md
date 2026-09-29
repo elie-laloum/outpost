@@ -15,7 +15,7 @@ import { createSlackSource } from "@elie-laloum/outpost";
 
 Crée une source de déclencheur Slack pour les commandes slash et les charges interactives. Elle vérifie X-Slack-Signature sur v0:timestamp:body dans une fenêtre d’horodatage, utilise trigger_id comme livraison, renvoie command ou le type d’interaction avec l’utilisateur sous la forme slack:<user id>, et répond 200 avec un corps vide. L’Events API n’est pas prise en charge.
 
-[Exemple complet et règles détaillées](../../guide/triggers/).
+[Exemple complet et règles détaillées](../../guide/webhooks/).
 
 ## Paramètres et propriétés
 

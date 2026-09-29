@@ -15,7 +15,7 @@ import { publishArtifact } from "@elie-laloum/outpost";
 
 Encode une valeur selon son contrat, calcule son empreinte et son identité immuable, puis publie atomiquement ses octets dans le store. Renvoie une petite référence contenant producteur et filiation parentale ordonnée ; ces métadonnées n’authentifient pas le producteur.
 
-[Exemple complet et règles détaillées](../../guide/advanced/artifacts/).
+[Exemple complet et règles détaillées](../../guide/artifacts/).
 
 ## Paramètres et propriétés
 

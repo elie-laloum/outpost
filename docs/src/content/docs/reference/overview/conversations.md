@@ -24,4 +24,4 @@ Forking a conversation does not fork its files. Choose a separate workspace when
 - [ConversationRecord](../../conversationrecord/)
 - [ConversationFormat](../../conversationformat/)
 
-[Learn with the practical guide](../../../guide/agents/conversations/).
+[Learn with the practical guide](../../../guide/conversations/).

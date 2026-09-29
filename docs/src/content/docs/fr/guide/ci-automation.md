@@ -1,5 +1,5 @@
 ---
-title: "Automatisation CI"
+title: "Exécuter en CI"
 description: "Exécuter sans interaction avec accès et contrôles de livraison explicites."
 ---
 
@@ -23,6 +23,6 @@ Levez une exception sur les commandes de validation échouées et appelez `resul
 
 Utilisez une branche nommée pour la revue. Intégrez après les contrôles et validations requis, puis laissez votre processus CI existant pousser ou publier. Outpost ne pousse pas automatiquement tous les dépôts d’un workflow.
 
-Pour lancer des exécutions depuis une planification ou un événement de dépôt sans job CI, utilisez les [déclencheurs](../triggers/).
+Pour lancer des exécutions depuis une planification ou un événement de dépôt sans job CI, utilisez les [déclencheurs](../webhooks/).
 
 Préservez chemins de récupération, checkpoints et références d’artefacts en cas d’échec. Ne publiez pas de fichiers d’identifiants bruts ou de transcriptions privées comme artefacts CI publics.

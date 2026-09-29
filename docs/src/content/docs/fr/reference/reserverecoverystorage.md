@@ -15,7 +15,7 @@ import { reserveRecoveryStorage } from "@elie-laloum/outpost";
 
 Réserve une capacité coopérative dans un registre conditionnel via Transport. Par défaut, createLocalTransport conserve le registre sous .outpost/storage et l’admission mesure les fichiers locaux ; un transport explicite mesure ses contenus. La libération est idempotente. Une réservation abandonnée exige une récupération conditionnelle explicite après confirmation de l’arrêt du propriétaire.
 
-[Exemple complet et règles détaillées](../../guide/operations/storage-retention/).
+[Exemple complet et règles détaillées](../../guide/retention/).
 
 ## Paramètres et propriétés
 

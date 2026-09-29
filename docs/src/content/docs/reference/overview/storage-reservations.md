@@ -23,4 +23,4 @@ Reservations coordinate cooperating writers; they cannot constrain arbitrary pro
 - [StorageReservation](../../storagereservation/)
 - [StorageReservationOptions](../../storagereservationoptions/)
 
-[Learn with the practical guide](../../../guide/operations/storage-retention/).
+[Learn with the practical guide](../../../guide/retention/).

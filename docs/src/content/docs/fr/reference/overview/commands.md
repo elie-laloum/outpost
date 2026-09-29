@@ -25,4 +25,4 @@ La fin du processus et la fermeture des flux de sortie sont deux événements di
 - [AttachResult](../../attachresult/)
 - [Channel](../../channel/)
 
-[Passer à la pratique avec le Guide](../../../guide/environment/commands/).
+[Passer à la pratique avec le Guide](../../../guide/sandbox-sessions/).

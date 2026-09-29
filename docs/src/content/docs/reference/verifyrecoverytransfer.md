@@ -15,7 +15,7 @@ import { verifyRecoveryTransfer } from "@elie-laloum/outpost";
 
 Verify a retained transfer’s directory structure, optionally hashing payloads and checking Git restorability within maxBytes. Returns detailed checks and integrity status without applying incoming changes or authenticating their author.
 
-[Complete example and detailed rules](../../guide/operations/recovery/).
+[Complete example and detailed rules](../../guide/recovery/).
 
 ## Parameters and properties
 

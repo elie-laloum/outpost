@@ -15,7 +15,7 @@ import { recoverSpeculation } from "@elie-laloum/outpost";
 
 Libère la propriété abandonnée d’une course avec une révision du transport inspectée, après arrêt du coordinateur précédent. Bloque les écritures périmées ; le prochain appel à speculate réconcilie les ressources enregistrées et exige une autorisation explicite avant de rejouer les candidats incomplets.
 
-[Exemple complet et règles détaillées](../../guide/advanced/speculation/).
+[Exemple complet et règles détaillées](../../guide/speculation/).
 
 ## Paramètres et propriétés
 

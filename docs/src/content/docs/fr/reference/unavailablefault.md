@@ -15,7 +15,7 @@ import { unavailableFault } from "@elie-laloum/outpost";
 
 Renvoie le signal de panne d’une erreur Outpost marquée indisponible par un adapter CLI ou un fournisseur de modèle, en suivant jusqu’à huit causes imbriquées. Les erreurs de quota et toute autre valeur renvoient undefined. Les pannes conservent leur code process ou provider : utilisez cette fonction plutôt que le code pour les reconnaître ; elle n’attend ni ne relance.
 
-[Exemple complet et règles détaillées](../../guide/operations/recovery/).
+[Exemple complet et règles détaillées](../../guide/recovery/).
 
 ## Paramètres et propriétés
 

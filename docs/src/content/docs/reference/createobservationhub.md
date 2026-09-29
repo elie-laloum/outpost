@@ -15,7 +15,7 @@ import { createObservationHub } from "@elie-laloum/outpost";
 
 Create an explicitly scoped event distributor with one sequence across children, bounded independent sink queues, snapshot flushing and isolated delivery failures. Supply it through observation on a workflow or dispatch; the caller owns the parent hub. This is live observation, not a durable state registry or remote worker relay.
 
-[Complete example and detailed rules](../../guide/agents/observability/).
+[Complete example and detailed rules](../../guide/progress/).
 
 ## Parameters and properties
 

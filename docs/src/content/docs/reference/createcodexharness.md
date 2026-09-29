@@ -15,7 +15,7 @@ import { createCodexHarness } from "@elie-laloum/outpost";
 
 Create a Codex harness from execution, authentication and conversation settings without starting the CLI. Compose it with createAgent({ harness, model }) to select a model independently. The CLI owns its internal model/tool loop.
 
-[Complete example and detailed rules](../../guide/agents/harness/).
+[Complete example and detailed rules](../../guide/harness/).
 
 ## Parameters and properties
 

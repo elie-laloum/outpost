@@ -67,15 +67,15 @@ Only `fix` belongs in the workflow graph; `coder` is an execution helper. The ca
 
 ## Use a second agent to review
 
-`check` may call another `defineAgentTask.perform(ctx)` on a reviewer sandbox and turn its structured response into `{ done: true }` or `{ done: false, feedback }`. Both agents' reported usage counts against the same workflow budget. Use [structured responses](../output-validation/) to validate the review decision.
+`check` may call another `defineAgentTask.perform(ctx)` on a reviewer sandbox and turn its structured response into `{ done: true }` or `{ done: false, feedback }`. Both agents' reported usage counts against the same workflow budget. Use [structured responses](../typed-responses/) to validate the review decision.
 
 A direct `session.dispatch()` inside a callback does not automatically connect its usage or signal to the workflow. Prefer the helper above; custom integrations must forward `ctx.signal`, propagate observation and report usage synchronously through `ctx.reportUsage`, including failed requests. Do not also report a helper's final totals: it already reconciles streamed counters.
 
-Feedback is passed unchanged to `attempt`; the callback chooses its prompt. To continue an existing conversation, explicitly set the dispatch request's `continuation` to a supported conversation ID and use the feedback in the next brief. See [conversation history](../chat-history/) for capture and restoration. The loop never silently selects a continuation strategy or restores a sandbox.
+Feedback is passed unchanged to `attempt`; the callback chooses its prompt. To continue an existing conversation, explicitly set the dispatch request's `continuation` to a supported conversation ID and use the feedback in the next brief. See [conversation history](../conversations/) for capture and restoration. The loop never silently selects a continuation strategy or restores a sandbox.
 
 ## Limits and failures
 
-`maxRounds` is a positive safe integer and bounds logical rounds. `ctx.round` starts at one. Each new round consumes one workflow attempt; replaying an interrupted phase consumes another, even when only the check runs. Tokens are counted as callbacks report them. Set [workflow budgets](../token-budgets/) and pass cancellation to every operation.
+`maxRounds` is a positive safe integer and bounds logical rounds. `ctx.round` starts at one. Each new round consumes one workflow attempt; replaying an interrupted phase consumes another, even when only the check runs. Tokens are counted as callbacks report them. Set [workflow budgets](../budgets/) and pass cancellation to every operation.
 
 `timeoutMs` covers both callbacks in one round execution and renews on phase replay. Cancellation and deadlines are cooperative: callbacks must honor `ctx.signal`. An exception from either callback fails the task without automatically consuming the remaining rounds. A rejected check is not a technical retry. There is no loop-level `retry` option.
 

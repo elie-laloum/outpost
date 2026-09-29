@@ -24,4 +24,4 @@ Un diagnostic ne prend pas la responsabilité de fermer une sandbox fournie. Un 
 - [diagnoseAgentProtocol](../../diagnoseagentprotocol/)
 - [AgentProtocolReport](../../agentprotocolreport/)
 
-[Passer à la pratique avec le Guide](../../../guide/operations/doctor/).
+[Passer à la pratique avec le Guide](../../../guide/diagnostics/).

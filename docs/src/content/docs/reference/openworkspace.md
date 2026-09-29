@@ -15,7 +15,7 @@ import { openWorkspace } from "@elie-laloum/outpost";
 
 Acquire a repository lock and prepare the checkout selected by the branch policy. The returned workspace can own several successive sandboxes and remains open until explicitly closed. integrate applies its branch changes; close preserves work that cannot safely be removed.
 
-[Complete example and detailed rules](../../guide/environment/workspaces/).
+[Complete example and detailed rules](../../guide/repository-and-branch/).
 
 ## Parameters and properties
 

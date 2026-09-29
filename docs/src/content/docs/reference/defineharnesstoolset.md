@@ -15,7 +15,7 @@ import { defineHarnessToolset } from "@elie-laloum/outpost";
 
 Group tools and nested toolsets under a name so they can be reused across harnesses. Flattens nested sets and rejects duplicate tool names.
 
-[Complete example and detailed rules](../../guide/agents/harness/).
+[Complete example and detailed rules](../../guide/harness/).
 
 ## Parameters and properties
 

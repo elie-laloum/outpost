@@ -5,7 +5,7 @@ description: "Persist a question, release the sandbox and continue the conversat
 
 Available since 8.0.0. `defineInteractiveAgentTask()` keeps one workflow task unfinished across several question/answer turns. A question ends the agent turn, captures its conversation and returns `waiting-input`; dependent tasks remain blocked. A later `start({ answers })` resumes the conversation, and the next question can depend on previous answers.
 
-Unlike [review gates](../review-gates/), questions are generated during execution. This is a dialogue between completed agent turns, not suspension inside a running tool or an interactive terminal.
+Unlike [review gates](../approvals/), questions are generated during execution. This is a dialogue between completed agent turns, not suspension inside a running tool or an interactive terminal.
 
 ## Define the dialogue
 

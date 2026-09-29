@@ -15,7 +15,7 @@ import { defineJsonArtifact } from "@elie-laloum/outpost";
 
 Déclare un contrat d’artefact JSON nommé et versionné. Le schéma valide les valeurs à l’encodage comme au décodage, et les données doivent être du JSON sans perte. Déclarer un contrat ne publie pas d’artefact.
 
-[Exemple complet et règles détaillées](../../guide/advanced/artifacts/).
+[Exemple complet et règles détaillées](../../guide/artifacts/).
 
 ## Paramètres et propriétés
 

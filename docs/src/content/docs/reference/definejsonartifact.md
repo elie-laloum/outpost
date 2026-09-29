@@ -15,7 +15,7 @@ import { defineJsonArtifact } from "@elie-laloum/outpost";
 
 Declare a named, versioned JSON artifact contract. The schema validates values during both encoding and decoding, and payloads must be lossless JSON. Declaring a contract does not publish an artifact.
 
-[Complete example and detailed rules](../../guide/advanced/artifacts/).
+[Complete example and detailed rules](../../guide/artifacts/).
 
 ## Parameters and properties
 

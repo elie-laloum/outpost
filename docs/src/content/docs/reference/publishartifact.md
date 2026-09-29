@@ -15,7 +15,7 @@ import { publishArtifact } from "@elie-laloum/outpost";
 
 Encode a value with its contract, compute its digest and immutable identity, then atomically put its bytes in the store. Return a small reference containing producer and ordered parent lineage; producer metadata is not authentication.
 
-[Complete example and detailed rules](../../guide/advanced/artifacts/).
+[Complete example and detailed rules](../../guide/artifacts/).
 
 ## Parameters and properties
 

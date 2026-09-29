@@ -24,4 +24,4 @@ Stored outputs must be lossless JSON. Replaying work with external effects requi
 - [WorkflowCheckpoint](../../workflowcheckpoint/)
 - [WorkflowJson](../../workflowjson/)
 
-[Learn with the practical guide](../../../guide/advanced/checkpoints/).
+[Learn with the practical guide](../../../guide/durable-runs/).

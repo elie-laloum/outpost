@@ -15,7 +15,7 @@ import { serveTaskQueue } from "@elie-laloum/outpost";
 
 Expose une file appartenant à l’appelant via HTTP avec authentification explicite par jeton bearer. Le serveur écoute loopback par défaut et ne fournit pas TLS. Fermer le serveur arrête l’écoute sans prendre possession du stockage de la file.
 
-[Exemple complet et règles détaillées](../../guide/advanced/distributed/).
+[Exemple complet et règles détaillées](../../guide/job-queues/).
 
 ## Paramètres et propriétés
 

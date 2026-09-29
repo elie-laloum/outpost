@@ -15,7 +15,7 @@ import { definePauseTask } from "@elie-laloum/outpost";
 
 Define a checkpoint-backed pause that waits for an explicit resume or reject decision from a listed trusted actor. It uses no waiting timer and can survive process restarts; unlike defineApprovalTask, its successful decision action is resume.
 
-[Complete example and detailed rules](../../guide/advanced/approvals/).
+[Complete example and detailed rules](../../guide/approvals/).
 
 ## Parameters and properties
 

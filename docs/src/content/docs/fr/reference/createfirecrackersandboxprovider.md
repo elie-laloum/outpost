@@ -15,7 +15,7 @@ import { createFirecrackerSandboxProvider } from "@elie-laloum/outpost/providers
 
 Crée un provider microVM Firecracker opt-in à partir de réglages explicites de noyau, rootfs, TAP et SSH. L’hôte doit fournir KVM et un invité préparé ; l’allocation ne se replie pas sur l’exécution hôte. Le bail acquis possède l’arrêt de la VM.
 
-[Exemple complet et règles détaillées](../../guide/environment/providers/overview/).
+[Exemple complet et règles détaillées](../../guide/choose-a-sandbox/).
 
 ## Paramètres et propriétés
 

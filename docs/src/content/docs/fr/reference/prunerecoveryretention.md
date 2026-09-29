@@ -15,7 +15,7 @@ import { pruneRecoveryRetention } from "@elie-laloum/outpost";
 
 Applique un plan après revalidation. La suppression d’un worktree reprend le verrou de branche Git. Les journaux locaux et distants utilisent des suppressions conditionnelles d’objets ; un plan de transport explicite exige le même transport en second argument. Les candidats modifiés ou partiellement supprimés sont conservés ; les données de récupération restent protégées.
 
-[Exemple complet et règles détaillées](../../guide/operations/recovery/).
+[Exemple complet et règles détaillées](../../guide/recovery/).
 
 ## Paramètres et propriétés
 

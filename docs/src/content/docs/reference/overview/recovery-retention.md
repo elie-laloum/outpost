@@ -24,4 +24,4 @@ A plan can become stale as other operations run. Retention is not a backup polic
 - [assertRecoveryQuota](../../assertrecoveryquota/)
 - [RecoveryRetentionPlan](../../recoveryretentionplan/)
 
-[Learn with the practical guide](../../../guide/operations/recovery/).
+[Learn with the practical guide](../../../guide/recovery/).

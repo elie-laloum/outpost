@@ -15,7 +15,7 @@ import { defineBinaryArtifact } from "@elie-laloum/outpost";
 
 Declare a named, versioned binary artifact contract that copies Uint8Array payloads on encoding and decoding. Declaring a contract does not publish an artifact.
 
-[Complete example and detailed rules](../../guide/advanced/artifacts/).
+[Complete example and detailed rules](../../guide/artifacts/).
 
 ## Parameters and properties
 

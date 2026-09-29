@@ -15,7 +15,7 @@ import { createCodexHarness } from "@elie-laloum/outpost";
 
 Crée un harness Codex à partir des réglages d’exécution, d’authentification et de conversation, sans lancer la CLI. Composez-le avec createAgent({ harness, model }) pour sélectionner séparément le modèle. La CLI possède sa boucle interne modèle/outils.
 
-[Exemple complet et règles détaillées](../../guide/agents/harness/).
+[Exemple complet et règles détaillées](../../guide/harness/).
 
 ## Paramètres et propriétés
 

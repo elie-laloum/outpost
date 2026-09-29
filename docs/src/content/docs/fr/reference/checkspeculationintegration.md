@@ -15,7 +15,7 @@ import { checkSpeculationIntegration } from "@elie-laloum/outpost";
 
 Résout une référence candidate et utilise Git merge-tree pour la vérifier contre le commit hôte courant sans modifier l’index ni le worktree. Renvoie les chemins en conflit ou une raison de blocage et identifie les commits inspectés. Relancer avant une intégration explicite si une référence ou les fichiers hôtes changent.
 
-[Exemple complet et règles détaillées](../../guide/advanced/speculation/).
+[Exemple complet et règles détaillées](../../guide/speculation/).
 
 ## Paramètres et propriétés
 

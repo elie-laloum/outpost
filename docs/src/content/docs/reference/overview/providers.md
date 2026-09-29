@@ -40,4 +40,4 @@ Transfers must preserve binary contents and supported file properties. A digest 
 - [FileTransfers](../../filetransfers/)
 - [FileManifestEntry](../../filemanifestentry/)
 
-[Learn with the practical guide](../../../guide/environment/providers/overview/).
+[Learn with the practical guide](../../../guide/choose-a-sandbox/).

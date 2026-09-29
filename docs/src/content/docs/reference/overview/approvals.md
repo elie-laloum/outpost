@@ -25,4 +25,4 @@ Actor identifiers are trusted metadata, not authentication. The application must
 - [WorkflowDecision](../../workflowdecision/)
 - [WorkflowDecisionRecord](../../workflowdecisionrecord/)
 
-[Learn with the practical guide](../../../guide/advanced/approvals/).
+[Learn with the practical guide](../../../guide/approvals/).

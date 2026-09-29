@@ -15,7 +15,7 @@ import { defineHarnessTool } from "@elie-laloum/outpost";
 
 Define a tool the engine can offer to the model. Validates the name, description and input schema immediately and returns a frozen definition whose validate() checks model arguments before execute() runs.
 
-[Complete example and detailed rules](../../guide/agents/harness/).
+[Complete example and detailed rules](../../guide/harness/).
 
 ## Parameters and properties
 

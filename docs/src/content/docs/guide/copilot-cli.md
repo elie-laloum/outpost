@@ -26,7 +26,7 @@ Run `copilot login` on the host and select `authentication: "account"`. Outpost 
 
 ## Session support
 
-Native capture, warm and cold resume, and automatic response repairs are supported. Outpost resumes the exact session ID with `--resume`; it preserves history, metadata, plans, checkpoints and persistent files in a bounded session bundle. Automated fork is explicitly rejected: the interactive `/fork` command does not establish a supported headless fork contract. `conversations` stores captured sessions in a `"copilot"` [conversation store](../chat-history/#storage), such as `createTransportConversations(createCopilotConversations(), …)`. See [chat history](../chat-history/) and [GitHub’s session storage](https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-best-practices).
+Native capture, warm and cold resume, and automatic response repairs are supported. Outpost resumes the exact session ID with `--resume`; it preserves history, metadata, plans, checkpoints and persistent files in a bounded session bundle. Automated fork is explicitly rejected: the interactive `/fork` command does not establish a supported headless fork contract. `conversations` stores captured sessions in a `"copilot"` [conversation store](../conversations/#storage), such as `createTransportConversations(createCopilotConversations(), …)`. See [chat history](../conversations/) and [GitHub’s session storage](https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-best-practices).
 
 See [GitHub’s CLI quickstart](https://docs.github.com/en/copilot/get-started/cli-quickstart) for Copilot access and login requirements.
 
@@ -36,7 +36,7 @@ Outpost reads the session’s `session.shutdown.modelMetrics` from `COPILOT_HOME
 
 The pinned Copilot CLI is 1.0.88. Input, output, cache reads and cache writes retain the CLI’s reported counters; do not add cache counters to input to estimate a bill. Missing fields, unreadable files or interrupted collection produce `usage.complete === false` and an explicit warning.
 
-Collection is bounded and may only finish after the model has spent tokens. Combine an attempt budget with a task timeout or dispatch deadline; see [Usage budgets](../token-budgets/).
+Collection is bounded and may only finish after the model has spent tokens. Combine an attempt budget with a task timeout or dispatch deadline; see [Usage budgets](../budgets/).
 
 `mcpServers` passes [MCP servers](../mcp-servers/) with `--additional-mcp-config` for each run.
 

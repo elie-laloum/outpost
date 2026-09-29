@@ -15,7 +15,7 @@ import { defineWorkflowJob } from "@elie-laloum/outpost";
 
 Return a queue handler that builds a workflow from each trigger job input and starts it with the job runId as checkpoint run, the job signal and a version combining checkpoint.version with an input digest. The job value summarizes the run, including that version and pending gates; failed or cancelled workflows complete the job with an error.
 
-[Complete example and detailed rules](../../guide/triggers/).
+[Complete example and detailed rules](../../guide/webhooks/).
 
 ## Parameters and properties
 

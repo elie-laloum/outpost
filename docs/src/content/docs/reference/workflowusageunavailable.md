@@ -15,7 +15,7 @@ import { WorkflowUsageUnavailable } from "@elie-laloum/outpost";
 
 Error reported when incomplete token accounting makes a token-only workflow or speculation budget unenforceable. Configure budget.attempts and execution time limits to allow bounded fallback. Its usage dimension cancels admitted work and prevents retries.
 
-[Complete example and detailed rules](../../guide/workflows/graph/).
+[Complete example and detailed rules](../../guide/task-dependencies/).
 
 ## Parameters and properties
 

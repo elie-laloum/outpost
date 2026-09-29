@@ -15,7 +15,7 @@ import { signWorkflowDecision } from "@elie-laloum/outpost";
 
 Sign one exact workflow decision with an application-owned Ed25519 private key. Returns an immutable decision with an expiring proof; it neither submits the decision nor stores the key.
 
-[Complete example and detailed rules](../../guide/advanced/approvals/).
+[Complete example and detailed rules](../../guide/approvals/).
 
 ## Parameters and properties
 

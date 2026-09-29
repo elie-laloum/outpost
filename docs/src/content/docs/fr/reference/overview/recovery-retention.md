@@ -24,4 +24,4 @@ Un plan peut devenir obsolète pendant d’autres opérations. La rétention n�
 - [assertRecoveryQuota](../../assertrecoveryquota/)
 - [RecoveryRetentionPlan](../../recoveryretentionplan/)
 
-[Passer à la pratique avec le Guide](../../../guide/operations/recovery/).
+[Passer à la pratique avec le Guide](../../../guide/recovery/).

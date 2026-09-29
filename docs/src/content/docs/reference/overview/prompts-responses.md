@@ -25,4 +25,4 @@ A valid answer is not evidence that its claims are true or its proposed code pas
 - [StandardValidator](../../standardvalidator/)
 - [ResponseError](../../responseerror/)
 
-[Learn with the practical guide](../../../guide/agents/responses/).
+[Learn with the practical guide](../../../guide/typed-responses/).

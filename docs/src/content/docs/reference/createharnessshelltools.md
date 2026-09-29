@@ -15,7 +15,7 @@ import { createHarnessShellTools } from "@elie-laloum/outpost";
 
 Create the shell toolset: shell runs sh -c in the repository root with a deadline and no input, and reports the exit status, stdout and stderr. Requires a POSIX shell in the sandbox.
 
-[Complete example and detailed rules](../../guide/agents/harness/).
+[Complete example and detailed rules](../../guide/harness/).
 
 ## Parameters and properties
 

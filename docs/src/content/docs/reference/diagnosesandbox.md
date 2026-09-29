@@ -15,7 +15,7 @@ import { diagnoseSandbox } from "@elie-laloum/outpost";
 
 Probe a caller-owned Sandbox or SandboxLease for command execution, agent CLI and optional transfer capabilities. An owned Sandbox uses its operation gate; the function reports failures without closing the caller’s resource or making live model calls.
 
-[Complete example and detailed rules](../../guide/operations/doctor/).
+[Complete example and detailed rules](../../guide/diagnostics/).
 
 ## Parameters and properties
 

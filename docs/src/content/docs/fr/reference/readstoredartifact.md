@@ -15,7 +15,7 @@ import { readStoredArtifact } from "@elie-laloum/outpost";
 
 Valide une référence d’artefact, charge ses octets et vérifie contrat, taille et empreinte avant décodage. Les attentes optionnelles de producteur et parents ajoutent des contrôles de filiation. S’utilise hors contexte de tâche ou lorsque la référence est déjà disponible.
 
-[Exemple complet et règles détaillées](../../guide/advanced/artifacts/).
+[Exemple complet et règles détaillées](../../guide/artifacts/).
 
 ## Paramètres et propriétés
 

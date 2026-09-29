@@ -15,7 +15,7 @@ import { createLocalSandboxProvider } from "@elie-laloum/outpost/providers/local
 
 Crée un provider explicitement sans isolation qui exécute les commandes sur l’hôte dans le workspace choisi. Aucun conteneur ni VM n’est alloué ; l’accès aux fichiers et aux identifiants reste celui du processus appelant.
 
-[Exemple complet et règles détaillées](../../guide/environment/providers/overview/).
+[Exemple complet et règles détaillées](../../guide/choose-a-sandbox/).
 
 ## Paramètres et propriétés
 

@@ -15,7 +15,7 @@ import { defineTextResponse } from "@elie-laloum/outpost";
 
 Déclare une réponse texte balisée. Le validateur lit la dernière balise complète correspondante et renvoie son contenu nettoyé sous forme de chaîne. Un contenu absent ou invalide lève ResponseError ; repairs vaut zéro par défaut.
 
-[Exemple complet et règles détaillées](../../guide/agents/responses/).
+[Exemple complet et règles détaillées](../../guide/typed-responses/).
 
 ## Paramètres et propriétés
 

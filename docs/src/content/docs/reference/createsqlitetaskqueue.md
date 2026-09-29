@@ -15,7 +15,7 @@ import { createSqliteTaskQueue } from "@elie-laloum/outpost";
 
 Open a durable SQLite task queue at path. Enqueue deduplicates job identities, claims create fenced leases and stale workers cannot complete queue state. Close the returned database when finished; external effects remain at least once.
 
-[Complete example and detailed rules](../../guide/advanced/distributed/).
+[Complete example and detailed rules](../../guide/job-queues/).
 
 ## Parameters and properties
 

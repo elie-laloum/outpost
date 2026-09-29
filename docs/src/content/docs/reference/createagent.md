@@ -15,7 +15,7 @@ import { createAgent } from "@elie-laloum/outpost";
 
 Compose a harness and a model without starting a process or making a network request. The model is a name or an AgentModel object; the harness or its model provider rejects unsupported reasoning levels and output limits immediately. CLI harnesses may keep their native default model; a custom harness requires one.
 
-[Complete example and detailed rules](../../guide/agents/adapters/).
+[Complete example and detailed rules](../../guide/choose-an-agent/).
 
 ## Parameters and properties
 

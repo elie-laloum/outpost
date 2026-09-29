@@ -34,7 +34,7 @@ Outpost is a TypeScript library and CLI for running coding agents in sandboxes a
 
 ## Quickstart
 
-You need **Node.js 24+**, **Git**, a repository with at least one commit, and **Docker** running. This example uses Codex with account authentication: prepare its host login using the [setup guide](https://elie-laloum.github.io/outpost/guide/setup/) before running a task. [Authentication](https://elie-laloum.github.io/outpost/guide/access-credentials/) covers other agents and API-key billing.
+You need **Node.js 24+**, **Git**, a repository with at least one commit, and **Docker** running. This example uses Codex with account authentication: prepare its host login using the [setup guide](https://elie-laloum.github.io/outpost/guide/setup/) before running a task. [Authentication](https://elie-laloum.github.io/outpost/guide/authentication/) covers other agents and API-key billing.
 
 Create a workflow directory and point it at your checkout:
 
@@ -52,7 +52,7 @@ Run your first task:
 node run.ts "Describe this repository and suggest one small improvement. Do not edit files."
 ```
 
-The generated script prints the branch, collected commits and conversation reference. It uses **local branch integration**: when you later ask the agent to change and commit code, those commits are integrated into the target checkout. Use a named branch, as below, to keep changes separate for review. See [branch strategies](https://elie-laloum.github.io/outpost/guide/branch-strategy/).
+The generated script prints the branch, collected commits and conversation reference. It uses **local branch integration**: when you later ask the agent to change and commit code, those commits are integrated into the target checkout. Use a named branch, as below, to keep changes separate for review. See [branch strategies](https://elie-laloum.github.io/outpost/guide/repository-and-branch/).
 
 ## Use the library
 
@@ -89,14 +89,14 @@ console.log(result.usage);
 
 | You want to…                                        | Start here                                                                                       |
 | --------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| Choose an agent, model and credentials              | [Agent configuration](https://elie-laloum.github.io/outpost/guide/agent-config/)                 |
-| Run locally in containers or in the cloud           | [Execution backends](https://elie-laloum.github.io/outpost/guide/execution-backends/)            |
+| Choose an agent, model and credentials              | [Agent configuration](https://elie-laloum.github.io/outpost/guide/choose-an-agent/)              |
+| Run locally in containers or in the cloud           | [Execution backends](https://elie-laloum.github.io/outpost/guide/choose-a-sandbox/)              |
 | Reuse a sandbox across commands and agent turns     | [Sandbox sessions](https://elie-laloum.github.io/outpost/guide/sandbox-sessions/)                |
 | Connect tasks and run independent work in parallel  | [Task dependencies](https://elie-laloum.github.io/outpost/guide/task-dependencies/)              |
-| Coordinate changes across repositories              | [Multi-repository workflows](https://elie-laloum.github.io/outpost/guide/parallel-repositories/) |
-| Return data your application can validate           | [Validated output](https://elie-laloum.github.io/outpost/guide/output-validation/)               |
-| Build an agent with your own tools and instructions | [Custom harness](https://elie-laloum.github.io/outpost/guide/model-loop/)                        |
-| Resume or recover interrupted work                  | [Failure recovery](https://elie-laloum.github.io/outpost/guide/failure-recovery/)                |
+| Coordinate changes across repositories              | [Multi-repository workflows](https://elie-laloum.github.io/outpost/guide/multiple-repositories/) |
+| Return data your application can validate           | [Validated output](https://elie-laloum.github.io/outpost/guide/typed-responses/)                 |
+| Build an agent with your own tools and instructions | [Custom harness](https://elie-laloum.github.io/outpost/guide/harness/)                           |
+| Resume or recover interrupted work                  | [Failure recovery](https://elie-laloum.github.io/outpost/guide/recovery/)                        |
 
 The [Guide](https://elie-laloum.github.io/outpost/guide/introduction/) explains behavior with focused examples. The [Reference](https://elie-laloum.github.io/outpost/reference/) documents exact contracts. Both are available in English and French.
 

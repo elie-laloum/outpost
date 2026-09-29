@@ -15,7 +15,7 @@ import { ResponseError } from "@elie-laloum/outpost";
 
 OutpostError spécialisée pour balise absente, JSON invalide ou rejet par schéma des réponses structurées. Conserve la balise attendue, le contenu brut disponible et la cause, et peut porter les métadonnées de récupération du dispatch.
 
-[Exemple complet et règles détaillées](../../guide/agents/responses/).
+[Exemple complet et règles détaillées](../../guide/typed-responses/).
 
 ## Paramètres et propriétés
 

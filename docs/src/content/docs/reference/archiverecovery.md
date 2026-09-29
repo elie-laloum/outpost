@@ -15,7 +15,7 @@ import { archiveRecovery } from "@elie-laloum/outpost";
 
 Snapshot and verify an existing recovery transfer, upload binary chunks with hashes, and publish its manifest last. The source is retained. An interrupted upload may retain unreferenced chunks; no incomplete manifest is published. The archive contains recovery payloads, not an independent replacement for the source Git repository.
 
-[Complete example and detailed rules](../../guide/operations/storage-transports/).
+[Complete example and detailed rules](../../guide/storage/).
 
 ## Parameters and properties
 

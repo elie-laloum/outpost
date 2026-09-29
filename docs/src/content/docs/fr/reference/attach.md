@@ -15,7 +15,7 @@ import { attach } from "@elie-laloum/outpost";
 
 Ouvre le terminal interactif réel d’un agent dans une nouvelle sandbox, puis collecte son statut de sortie et ses commits et ferme les ressources possédées. ask permet de fournir les réponses aux variables du brief ; le terminal ne produit pas de réponse typée.
 
-[Exemple complet et règles détaillées](../../guide/environment/commands/).
+[Exemple complet et règles détaillées](../../guide/sandbox-sessions/).
 
 ## Paramètres et propriétés
 

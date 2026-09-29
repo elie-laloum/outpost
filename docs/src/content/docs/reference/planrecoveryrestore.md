@@ -15,7 +15,7 @@ import { planRecoveryRestore } from "@elie-laloum/outpost";
 
 Validate a retained transfer and prepare restoration of its previous or incoming side into a new destination. The plan records payloads, commit and fingerprints for later revalidation; it does not populate the destination.
 
-[Complete example and detailed rules](../../guide/operations/recovery-restoration/).
+[Complete example and detailed rules](../../guide/recovery/).
 
 ## Parameters and properties
 

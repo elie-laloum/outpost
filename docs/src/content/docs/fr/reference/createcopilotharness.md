@@ -15,7 +15,7 @@ import { createCopilotHarness } from "@elie-laloum/outpost";
 
 Crée un harness GitHub Copilot CLI à partir des réglages d’exécution, d’authentification et de permissions, sans lancer la CLI. Composez-le avec createAgent({ harness, model }) pour sélectionner séparément un nom de modèle ; reasoning et maxOutputTokens sont refusés. Les bundles natifs permettent capture, reprise à chaud/à froid et réparations. Le fork automatisé est refusé. La CLI possède sa boucle interne modèle/outils.
 
-[Exemple complet et règles détaillées](../../guide/agents/harness/).
+[Exemple complet et règles détaillées](../../guide/harness/).
 
 ## Paramètres et propriétés
 

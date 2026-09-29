@@ -15,7 +15,7 @@ import { defineLoopTask } from "@elie-laloum/outpost";
 
 Define a bounded attempt/check workflow node. Failed checks supply feedback to the next round; callback exceptions fail the task. The workflow persists phase progress, admits every round execution against its cumulative budget and returns the accepted attempt output. It owns neither the sandbox nor agent conversations.
 
-[Complete example and detailed rules](../../guide/workflows/graph/).
+[Complete example and detailed rules](../../guide/task-dependencies/).
 
 ## Parameters and properties
 

@@ -15,7 +15,7 @@ import { defineJsonResponse } from "@elie-laloum/outpost";
 
 Déclare une réponse JSON balisée. Le validateur lit la dernière balise complète correspondante, accepte un bloc de code json optionnel, analyse le contenu et applique le validateur Standard Schema ou la fonction d’analyse. Un contenu absent ou invalide lève ResponseError ; repairs vaut zéro par défaut.
 
-[Exemple complet et règles détaillées](../../guide/agents/responses/).
+[Exemple complet et règles détaillées](../../guide/typed-responses/).
 
 ## Paramètres et propriétés
 

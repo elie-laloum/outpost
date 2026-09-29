@@ -15,7 +15,7 @@ import { createHarnessEditTools } from "@elie-laloum/outpost";
 
 Create the edit toolset: write_file creates or replaces a file, and edit_file replaces exact text, keeps line endings and permissions and refuses to overwrite a file that changed during the edit.
 
-[Complete example and detailed rules](../../guide/agents/harness/).
+[Complete example and detailed rules](../../guide/harness/).
 
 ## Returns
 

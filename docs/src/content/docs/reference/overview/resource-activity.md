@@ -24,4 +24,4 @@ Observation is not remote account enumeration, proof of liveness or automatic ga
 - [ResourceInspection](../../resourceinspection/)
 - [ResourceOperation](../../resourceoperation/)
 
-[Learn with the practical guide](../../../guide/operations/recovery/).
+[Learn with the practical guide](../../../guide/recovery/).

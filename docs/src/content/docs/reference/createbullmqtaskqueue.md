@@ -15,7 +15,7 @@ import { createBullMQTaskQueue } from "@elie-laloum/outpost/queues/bullmq";
 
 Opens an optional BullMQ 5 adapter backed by standalone Redis. Implements TaskQueue for defineQueuedTask and runQueueWorker, retaining request identity, lossless JSON results and atomic fenced leases. Owns its connections and stalled-job checks; await close() after stopping workers. Redis persistence and no-eviction settings determine durability. Import from @elie-laloum/outpost/queues/bullmq and install bullmq separately. Rejects a Redis server whose INFO does not report maxmemory_policy=noeviction; configure the server before opening the queue. Does not change server configuration.
 
-[Complete example and detailed rules](../../guide/advanced/distributed/).
+[Complete example and detailed rules](../../guide/job-queues/).
 
 ## Parameters and properties
 

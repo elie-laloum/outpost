@@ -6,7 +6,7 @@ sidebar:
   order: 0
 ---
 
-Le contrat `ModelProvider` et les adaptateurs OpenAI et Anthropic sont stables en 7.0.0. Le [bilan de validation](../../../guide/model-connections/#validation) précise les modèles et configurations testés.
+Le contrat `ModelProvider` et les adaptateurs OpenAI et Anthropic sont stables en 7.0.0. Le [bilan de validation](../../../guide/model-providers/#validation) précise les modèles et configurations testés.
 
 Un fournisseur de modèles porte le transport de requêtes utilisé par un harness personnalisé. `createOpenAIModelProvider()` prend en charge les services Chat Completions et Responses ; `createAnthropicModelProvider()` utilise Anthropic Messages avec cache optionnel du préfixe système. L’allocation du sandbox est indépendante.
 
@@ -26,4 +26,4 @@ Le modèle de l’agent est un nom non vide, éventuellement accompagné de `rea
 - [ModelRequest](../../modelrequest/)
 - [ModelResult](../../modelresult/)
 
-[Apprendre avec le guide pratique](../../../guide/advanced/model-providers/).
+[Apprendre avec le guide pratique](../../../guide/model-providers/).

@@ -15,7 +15,7 @@ import { defineArtifactTask } from "@elie-laloum/outpost";
 
 Define a workflow task that produces a value and publishes it as an artifact. Derive producer identity from the workflow execution, task key and attempt, and record the declared parent references. Dependents receive an ArtifactReference rather than the full payload.
 
-[Complete example and detailed rules](../../guide/advanced/artifacts/).
+[Complete example and detailed rules](../../guide/artifacts/).
 
 ## Parameters and properties
 

@@ -22,4 +22,4 @@ Workspace ownership and environment ownership are distinct. A sandbox closes the
 - [Sandbox](../../sandbox/)
 - [SandboxOptions](../../sandboxoptions/)
 
-[Learn with the practical guide](../../../guide/environment/lifecycle/).
+[Learn with the practical guide](../../../guide/sandbox-sessions/).

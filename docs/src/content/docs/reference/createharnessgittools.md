@@ -15,7 +15,7 @@ import { createHarnessGitTools } from "@elie-laloum/outpost";
 
 Create the git toolset: git runs read-only status, diff, log or show commands and refuses options that write files or run external programs.
 
-[Complete example and detailed rules](../../guide/agents/harness/).
+[Complete example and detailed rules](../../guide/harness/).
 
 ## Returns
 

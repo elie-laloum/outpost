@@ -15,7 +15,7 @@ import { ReplayDivergence } from "@elie-laloum/outpost";
 
 OutpostError with code replay, thrown when a replay differs from its journal. kind, turn, expected, actual and commit locate the difference; details holds the same fields.
 
-[Complete example and detailed rules](../../guide/agents/observability/).
+[Complete example and detailed rules](../../guide/progress/).
 
 ## Parameters and properties
 

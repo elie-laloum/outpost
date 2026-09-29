@@ -24,4 +24,4 @@ Bifurquer une conversation ne bifurque pas ses fichiers. Choisissez un workspace
 - [ConversationRecord](../../conversationrecord/)
 - [ConversationFormat](../../conversationformat/)
 
-[Passer à la pratique avec le Guide](../../../guide/agents/conversations/).
+[Passer à la pratique avec le Guide](../../../guide/conversations/).

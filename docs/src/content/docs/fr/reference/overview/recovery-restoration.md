@@ -24,4 +24,4 @@ Un dossier conservé est un élément à examiner, pas la preuve que toutes les 
 - [RecoveryRestorePlan](../../recoveryrestoreplan/)
 - [RecoveryRestoreResult](../../recoveryrestoreresult/)
 
-[Passer à la pratique avec le Guide](../../../guide/operations/recovery-restoration/).
+[Passer à la pratique avec le Guide](../../../guide/recovery/).

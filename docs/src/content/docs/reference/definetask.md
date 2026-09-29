@@ -15,7 +15,7 @@ import { defineTask } from "@elie-laloum/outpost";
 
 Define and freeze a workflow node whose perform callback runs when its dependencies succeed. Creating the node does not execute it or allocate a sandbox. Use context.value to read declared dependencies; defineIsolatedTask supplies sandbox allocation around an agent dispatch instead of a custom perform callback.
 
-[Complete example and detailed rules](../../guide/workflows/graph/).
+[Complete example and detailed rules](../../guide/task-dependencies/).
 
 ## Parameters and properties
 

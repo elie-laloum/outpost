@@ -15,7 +15,7 @@ import { createSqliteTaskQueue } from "@elie-laloum/outpost";
 
 Ouvre une file de tâches SQLite durable à path. L’envoi déduplique les identités, les prises en charge créent des baux avec jeton de génération et les workers périmés ne peuvent valider l’état de file. Fermez la base renvoyée après usage ; les effets externes restent au moins une fois.
 
-[Exemple complet et règles détaillées](../../guide/advanced/distributed/).
+[Exemple complet et règles détaillées](../../guide/job-queues/).
 
 ## Paramètres et propriétés
 

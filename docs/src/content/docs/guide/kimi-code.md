@@ -3,7 +3,7 @@ title: "Kimi Code"
 description: "Connect Kimi Code to an Outpost sandbox."
 ---
 
-Use `createKimiHarness()` with any supported [execution backend](../execution-backends/). Install the CLI in your image or allow bootstrap on remote providers.
+Use `createKimiHarness()` with any supported [execution backend](../choose-a-sandbox/). Install the CLI in your image or allow bootstrap on remote providers.
 
 ## Account access
 
@@ -43,7 +43,7 @@ const coder = createAgent({
 
 API authentication requires an explicit model on `createAgent()`. The `region` option is reserved for account authentication; configure API endpoints through the CLI model variables when needed. Set `KIMI_MODEL` in your application environment for the snippet above; this is an example variable, not an Outpost setting. Account authentication can use the CLI’s default model.
 
-Native capture, warm and cold resume, fork and automatic response repairs are supported for Kimi Code 2.1.1. Outpost resumes with `--session` and forks with `kimi fork <id> --yes` before continuing the new ID. The parent remains independent. Capture preserves session metadata and agent files, including native history and plans. `conversations` stores captured sessions in a `"kimi"` [conversation store](../chat-history/#storage), such as `createTransportConversations(createKimiConversations(), …)`. See [chat history](../chat-history/) and [Kimi’s session documentation](https://www.kimi.com/code/docs/en/kimi-code-cli/guides/sessions.html).
+Native capture, warm and cold resume, fork and automatic response repairs are supported for Kimi Code 2.1.1. Outpost resumes with `--session` and forks with `kimi fork <id> --yes` before continuing the new ID. The parent remains independent. Capture preserves session metadata and agent files, including native history and plans. `conversations` stores captured sessions in a `"kimi"` [conversation store](../conversations/#storage), such as `createTransportConversations(createKimiConversations(), …)`. See [chat history](../conversations/) and [Kimi’s session documentation](https://www.kimi.com/code/docs/en/kimi-code-cli/guides/sessions.html).
 
 ## Token accounting
 
@@ -51,7 +51,7 @@ The pinned `@moonshot-ai/kimi-code` 2.1.1 CLI omits usage from `stream-json`. Af
 
 `inputOther` maps to `usage.input`, `output` to `usage.output`, `inputCacheRead` to `usage.cached`, and `inputCacheCreation` to `usage.cacheCreated`. Input excludes cache reads and writes. Only reported usage is available; an upstream zero cannot establish that an unreported model call was free.
 
-A missing session ID, absent or malformed records, interrupted execution or exceeded reader limits produces `usage.complete === false`; measured counters are retained as a lower bound. Collection warns at startup because it happens after execution. Combine `budget.attempts` with a task timeout or dispatch deadline; see [Usage budgets](../token-budgets/).
+A missing session ID, absent or malformed records, interrupted execution or exceeded reader limits produces `usage.complete === false`; measured counters are retained as a lower bound. Collection warns at startup because it happens after execution. Combine `budget.attempts` with a task timeout or dispatch deadline; see [Usage budgets](../budgets/).
 
 `mcpServers` merges [MCP servers](../mcp-servers/) into `~/.kimi-code/mcp.json` in the agent home, which is your own home with the local provider.
 

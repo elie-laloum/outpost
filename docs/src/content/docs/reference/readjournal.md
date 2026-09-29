@@ -15,7 +15,7 @@ import { readJournal } from "@elie-laloum/outpost";
 
 Read committed journal events in chronological order from a pinned index revision. Every linked segment revision is checked; cycles, missing segments and entry-limit overruns fail. An open journal exposes only its committed prefix.
 
-[Complete example and detailed rules](../../guide/operations/storage-transports/).
+[Complete example and detailed rules](../../guide/storage/).
 
 ## Parameters and properties
 

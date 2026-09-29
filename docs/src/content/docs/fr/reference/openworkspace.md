@@ -15,7 +15,7 @@ import { openWorkspace } from "@elie-laloum/outpost";
 
 Prend le verrou du dépôt et prépare le checkout choisi par la politique de branche. Le workspace renvoyé peut posséder plusieurs sandboxes successives et reste ouvert jusqu’à sa fermeture explicite. integrate applique ses changements de branche ; close préserve le travail dont la suppression serait risquée.
 
-[Exemple complet et règles détaillées](../../guide/environment/workspaces/).
+[Exemple complet et règles détaillées](../../guide/repository-and-branch/).
 
 ## Paramètres et propriétés
 

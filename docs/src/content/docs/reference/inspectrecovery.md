@@ -15,7 +15,7 @@ import { inspectRecovery } from "@elie-laloum/outpost";
 
 Inspect local runtime files or objects in an explicit transport without deleting them. Local mode can inspect Git, process locks and resources; transport mode lists payload sizes, revisions and optionally resource records whose remote ownership remains unverified. Incomplete inventories are reported and cannot authorize pruning.
 
-[Complete example and detailed rules](../../guide/operations/recovery/).
+[Complete example and detailed rules](../../guide/recovery/).
 
 ## Parameters and properties
 

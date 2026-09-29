@@ -67,15 +67,15 @@ Seul `fix` appartient au graphe ; `coder` sert à exécuter l’appel. L’appel
 
 ## Utiliser un second agent pour relire
 
-`check` peut appeler un autre `defineAgentTask.perform(ctx)` dans une sandbox de relecture et transformer sa réponse structurée en `{ done: true }` ou `{ done: false, feedback }`. L’usage déclaré des deux agents compte dans le même budget de workflow. Utilisez les [réponses structurées](../output-validation/) pour valider la décision.
+`check` peut appeler un autre `defineAgentTask.perform(ctx)` dans une sandbox de relecture et transformer sa réponse structurée en `{ done: true }` ou `{ done: false, feedback }`. L’usage déclaré des deux agents compte dans le même budget de workflow. Utilisez les [réponses structurées](../typed-responses/) pour valider la décision.
 
 Un `session.dispatch()` direct dans un callback ne relie pas automatiquement son usage ni son signal au workflow. Préférez le helper ci-dessus ; une intégration personnalisée doit transmettre `ctx.signal`, propager l’observation et déclarer l’usage synchroniquement via `ctx.reportUsage`, y compris les requêtes échouées. Ne déclarez pas en plus les totaux finaux du helper : il réconcilie déjà les compteurs en streaming.
 
-Le feedback est transmis tel quel à `attempt` ; le callback choisit son prompt. Pour poursuivre une conversation existante, renseignez explicitement `continuation` dans la requête avec un identifiant pris en charge et utilisez le feedback dans le brief suivant. Consultez [l’historique des conversations](../chat-history/) pour capture et restauration. La boucle ne choisit pas implicitement de stratégie de continuation et ne restaure pas de sandbox.
+Le feedback est transmis tel quel à `attempt` ; le callback choisit son prompt. Pour poursuivre une conversation existante, renseignez explicitement `continuation` dans la requête avec un identifiant pris en charge et utilisez le feedback dans le brief suivant. Consultez [l’historique des conversations](../conversations/) pour capture et restauration. La boucle ne choisit pas implicitement de stratégie de continuation et ne restaure pas de sandbox.
 
 ## Limites et échecs
 
-`maxRounds` est un entier sûr strictement positif qui borne les tours logiques. `ctx.round` commence à un. Chaque nouveau tour consomme une tentative du workflow ; rejouer une phase interrompue en consomme une autre, même si seule la vérification s’exécute. Les tokens sont comptés à leur déclaration par les callbacks. Configurez les [budgets de workflow](../token-budgets/) et transmettez l’annulation à chaque opération.
+`maxRounds` est un entier sûr strictement positif qui borne les tours logiques. `ctx.round` commence à un. Chaque nouveau tour consomme une tentative du workflow ; rejouer une phase interrompue en consomme une autre, même si seule la vérification s’exécute. Les tokens sont comptés à leur déclaration par les callbacks. Configurez les [budgets de workflow](../budgets/) et transmettez l’annulation à chaque opération.
 
 `timeoutMs` couvre les deux callbacks d’une exécution de tour et se renouvelle au rejeu d’une phase. Annulation et délais sont coopératifs : les callbacks doivent respecter `ctx.signal`. Une exception de l’un des callbacks fait échouer la tâche sans consommer automatiquement les tours restants. Un refus de vérification n’est pas un retry technique. Il n’existe pas d’option `retry` au niveau de la boucle.
 

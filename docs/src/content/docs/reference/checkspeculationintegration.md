@@ -15,7 +15,7 @@ import { checkSpeculationIntegration } from "@elie-laloum/outpost";
 
 Resolve a candidate ref and use Git merge-tree to check it against the current host commit without modifying the index or worktree. Return conflict paths or a blocking reason, and pin both inspected commits. Rerun immediately before an explicit integration if either ref or host files change.
 
-[Complete example and detailed rules](../../guide/advanced/speculation/).
+[Complete example and detailed rules](../../guide/speculation/).
 
 ## Parameters and properties
 

@@ -15,7 +15,7 @@ import { defineWorkflow } from "@elie-laloum/outpost";
 
 Valide les clés, dépendances et cycles d’un graphe nommé, puis renvoie une définition de workflow réutilisable. start ordonnance les tâches avec concurrence, annulation et checkpoints optionnels ; diagram produit le graphe de dépendances en Mermaid.
 
-[Exemple complet et règles détaillées](../../guide/workflows/graph/).
+[Exemple complet et règles détaillées](../../guide/task-dependencies/).
 
 ## Paramètres et propriétés
 

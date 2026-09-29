@@ -15,7 +15,7 @@ import { planRecoveryRestore } from "@elie-laloum/outpost";
 
 Valide un transfert conservé et prépare la restauration de son état previous ou incoming dans une nouvelle destination. Le plan enregistre données, commit et empreintes pour une revalidation ultérieure ; il ne remplit pas la destination.
 
-[Exemple complet et règles détaillées](../../guide/operations/recovery-restoration/).
+[Exemple complet et règles détaillées](../../guide/recovery/).
 
 ## Paramètres et propriétés
 

@@ -15,7 +15,7 @@ import { defineApprovalTask } from "@elie-laloum/outpost";
 
 Define a checkpoint-backed approval gate that pauses once its dependencies finish. A trusted listed actor must submit approve or reject with a reason. Approval yields the persisted decision to dependent tasks; rejection is final for that run.
 
-[Complete example and detailed rules](../../guide/advanced/approvals/).
+[Complete example and detailed rules](../../guide/approvals/).
 
 ## Parameters and properties
 

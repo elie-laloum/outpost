@@ -60,7 +60,7 @@ For CLI agents, a signal only reclassifies a turn whose agent process fails. Tra
 
 Use `quotaFault(error)` to read the message and reset time of a caught error, including a wrapped one.
 
-To keep working with another agent or model instead of waiting, use a [fallback agent](../agent-fallback/): the task pauses only when every candidate hits a limit, until the earliest reset.
+To keep working with another agent or model instead of waiting, use a [fallback agent](../fallback-agents/): the task pauses only when every candidate hits a limit, until the earliest reset.
 
 ## Pause and resume
 
@@ -79,7 +79,7 @@ Enabling `onQuota` authorizes the interrupted attempt to run again, like a retry
 The first attempt after a pause receives `context.quota`. It carries the conversation when it was captured, and the retained work branch.
 
 - `defineAgentTask` and `defineIsolatedTask` continue that conversation. The new turn sends a short resume instruction instead of the original brief, and keeps the response tag when a structured response is expected. Set `quotaResume: "restart"` to send the original request again.
-- `defineAgentTask` keeps its caller-owned sandbox and workspace. `defineIsolatedTask` allocates a new sandbox: a `current` or `named` branch reuses the same checkout, and an automatically integrated workspace starts from the interrupted branch. Uncommitted changes of an integrated attempt stay in its [retained worktree](../failure-recovery/).
+- `defineAgentTask` keeps its caller-owned sandbox and workspace. `defineIsolatedTask` allocates a new sandbox: a `current` or `named` branch reuses the same checkout, and an automatically integrated workspace starts from the interrupted branch. Uncommitted changes of an integrated attempt stay in its [retained worktree](../recovery/).
 - `defineInteractiveAgentTask` continues the conversation of the interrupted turn.
 - Continuation needs a resumable agent with conversation capture: Claude Code, Codex, Copilot or Kimi. Antigravity and disabled capture start a new conversation. So does a request with its own `continuation` or several `passes`.
 
@@ -131,6 +131,6 @@ function race(options: SpeculationOptions) {
 }
 ```
 
-With [durability](../candidate-selection/#durable-races-and-recovery), the next `speculate()` call reruns only the candidates stopped by a limit, as new attempts from the baseline; budgets stay cumulative. Candidates do not continue their previous conversation. Without durability, every candidate runs again.
+With [durability](../speculation/#durable-races-and-recovery), the next `speculate()` call reruns only the candidates stopped by a limit, as new attempts from the baseline; budgets stay cumulative. Candidates do not continue their previous conversation. Without durability, every candidate runs again.
 
 API: [WorkflowQuotaPolicy](../../reference/workflowquotapolicy/) · [WorkflowQuotaPause](../../reference/workflowquotapause/) · [quotaFault](../../reference/quotafault/) · [WorkflowOptions](../../reference/workflowoptions/).

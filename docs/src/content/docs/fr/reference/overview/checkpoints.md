@@ -24,4 +24,4 @@ Les sorties stockées doivent être du JSON sans perte. Rejouer un travail ayant
 - [WorkflowCheckpoint](../../workflowcheckpoint/)
 - [WorkflowJson](../../workflowjson/)
 
-[Passer à la pratique avec le Guide](../../../guide/advanced/checkpoints/).
+[Passer à la pratique avec le Guide](../../../guide/durable-runs/).

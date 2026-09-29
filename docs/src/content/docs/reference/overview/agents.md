@@ -35,4 +35,4 @@ These composition APIs are available since 5.0.0. Use the agent with dispatch, a
 - [createFallbackAgent](../../createfallbackagent/)
 - [FallbackAgent](../../type-fallbackagent/)
 
-[Learn with the practical guide](../../../guide/agents/adapters/).
+[Learn with the practical guide](../../../guide/choose-an-agent/).

@@ -2,7 +2,7 @@
 
 The Guide is authored from the public Reference contracts. Its editorial and visual model is [Better Auth](https://better-auth.com/docs): a direct introduction, compact setup, short snippets beside their explanation, then focused concept and integration pages. The former workshop content and organization have been replaced, not retained as a second reading path.
 
-English and French have matching routes. `docs/scripts/navigation.mjs` defines the Guide groups. GuideFrame, GuideHeader, GuideTitle and GuideSidebar implement its scoped presentation; Reference retains its existing components, navigation, icons, generated pages and explanatory sources.
+English and French have matching routes. `docs/scripts/navigation.mjs` defines the Guide chapters in reading order, and [guide-style.md](guide-style.md) is the editorial contract for Guide pages: reader, page types, templates, writing rules and what stays out of the Guide. GuideFrame, GuideHeader, GuideTitle and GuideSidebar implement its scoped presentation; Reference retains its existing components, navigation, icons, generated pages and explanatory sources.
 
 ## Compatibility
 

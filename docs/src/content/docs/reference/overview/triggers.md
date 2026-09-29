@@ -29,4 +29,4 @@ A verified signature authenticates the sending integration, not the person behin
 - [createStandardWebhook](../../createstandardwebhook/)
 - [defineWorkflowJob](../../defineworkflowjob/)
 
-[Learn with the practical guide](../../../guide/triggers/).
+[Learn with the practical guide](../../../guide/webhooks/).

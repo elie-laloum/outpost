@@ -15,7 +15,7 @@ import { createReporter } from "@elie-laloum/outpost";
 
 Create an agent observation callback that formats progress, warnings and pass summaries for a terminal or custom writer. quiet suppresses all output and verbose includes additional events; reporting does not control execution.
 
-[Complete example and detailed rules](../../guide/agents/observability/).
+[Complete example and detailed rules](../../guide/progress/).
 
 ## Parameters and properties
 

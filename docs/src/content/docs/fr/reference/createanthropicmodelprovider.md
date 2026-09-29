@@ -15,7 +15,7 @@ import { createAnthropicModelProvider } from "@elie-laloum/outpost";
 
 Configure un transport Anthropic Messages avec messages, appels d’outils, rejeu de la réflexion, streaming optionnel et cache optionnel du préfixe système et de l’historique. Le harness fournit le modèle par requête ; le modèle de l’agent doit fixer maxOutputTokens, et le raisonnement se traduit en réflexion adaptative ou désactivée. Les lectures et écritures de cache sont normalisées dans l’usage ; les outils serveur sont refusés.
 
-[Exemple complet et règles détaillées](../../guide/advanced/model-providers/).
+[Exemple complet et règles détaillées](../../guide/model-providers/).
 
 ## Paramètres et propriétés
 

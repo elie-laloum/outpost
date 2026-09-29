@@ -15,7 +15,7 @@ import { dispatch } from "@elie-laloum/outpost";
 
 Run an agent brief with a sandbox allocated for this call, collect turns, validated output, usage and commits, then close owned resources. Each cold pass receives a fresh environment. The result can resume or fork a captured conversation in a later environment.
 
-[Complete example and detailed rules](../../guide/agents/dispatch/).
+[Complete example and detailed rules](../../guide/first-request/).
 
 ## Parameters and properties
 

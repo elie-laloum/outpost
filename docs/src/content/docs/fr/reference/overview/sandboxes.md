@@ -22,4 +22,4 @@ La propriété du workspace et celle de l’environnement sont distinctes. Une s
 - [Sandbox](../../sandbox/)
 - [SandboxOptions](../../sandboxoptions/)
 
-[Passer à la pratique avec le Guide](../../../guide/environment/lifecycle/).
+[Passer à la pratique avec le Guide](../../../guide/sandbox-sessions/).

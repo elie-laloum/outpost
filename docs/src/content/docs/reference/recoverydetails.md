@@ -15,7 +15,7 @@ import { recoveryDetails } from "@elie-laloum/outpost";
 
 Extract recovery metadata from an unknown error when Outpost attached it. The result identifies retained work and recovery locations; absent metadata returns undefined and does not trigger cleanup or restoration.
 
-[Complete example and detailed rules](../../guide/operations/recovery/).
+[Complete example and detailed rules](../../guide/recovery/).
 
 ## Parameters and properties
 

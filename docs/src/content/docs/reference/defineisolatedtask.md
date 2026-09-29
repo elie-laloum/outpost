@@ -15,7 +15,7 @@ import { defineIsolatedTask } from "@elie-laloum/outpost";
 
 Define an agent workflow node whose request callback selects a repository, provider, agent and dispatch options for each attempt. It calls dispatch to allocate and close its own sandbox and returns DispatchResult. Use separate nodes to work on separate repositories; there is no shared Git transaction or automatic push.
 
-[Complete example and detailed rules](../../guide/workflows/graph/).
+[Complete example and detailed rules](../../guide/task-dependencies/).
 
 ## Parameters and properties
 

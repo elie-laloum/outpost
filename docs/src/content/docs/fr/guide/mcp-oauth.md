@@ -58,7 +58,7 @@ const mcpServers: McpServers = {
 };
 ```
 
-Le pont HTTP de la sandbox lit les métadonnées de la ressource protégée, puis celles du serveur d’autorisation, et demande un jeton `client_credentials` avec l’URL du serveur comme `resource`. Il s’authentifie en `client_secret_basic`, ou en `client_secret_post` si le serveur n’annonce que celui-ci. Le jeton est réutilisé jusqu’à son expiration ; après un 401, le pont refait la découverte, demande un nouveau jeton avec le scope annoncé si `scopes` est omis, puis réessaie une fois. Le client déclare l’extension `io.modelcontextprotocol/oauth-client-credentials`. Le secret reste dans l’environnement de la sandbox et les [règles sortantes](../outbound-rules/) s’appliquent aux demandes de jeton.
+Le pont HTTP de la sandbox lit les métadonnées de la ressource protégée, puis celles du serveur d’autorisation, et demande un jeton `client_credentials` avec l’URL du serveur comme `resource`. Il s’authentifie en `client_secret_basic`, ou en `client_secret_post` si le serveur n’annonce que celui-ci. Le jeton est réutilisé jusqu’à son expiration ; après un 401, le pont refait la découverte, demande un nouveau jeton avec le scope annoncé si `scopes` est omis, puis réessaie une fois. Le client déclare l’extension `io.modelcontextprotocol/oauth-client-credentials`. Le secret reste dans l’environnement de la sandbox et les [règles sortantes](../network-restrictions/) s’appliquent aux demandes de jeton.
 
 `private_key_jwt`, les refresh tokens et l’autorisation interactive ne sont pas pris en charge. Les harness CLI refusent les identifiants client.
 

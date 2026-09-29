@@ -25,4 +25,4 @@ Checkpoints retain explicit ownership until release or authorized recovery. Arch
 - [Transport](../../transport/)
 - [inspectRecovery](../../inspectrecovery/)
 
-[Read the practical guide](../../../guide/operations/storage-transports/).
+[Read the practical guide](../../../guide/storage/).

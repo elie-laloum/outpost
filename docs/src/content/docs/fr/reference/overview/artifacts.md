@@ -25,4 +25,4 @@ Digests et filiation apportent intégrité et traçabilité, pas authentificatio
 - [readArtifact](../../readartifact/)
 - [ArtifactStore](../../artifactstore/)
 
-[Passer à la pratique avec le Guide](../../../guide/advanced/artifacts/).
+[Passer à la pratique avec le Guide](../../../guide/artifacts/).

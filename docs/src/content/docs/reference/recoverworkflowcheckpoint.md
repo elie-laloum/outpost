@@ -15,7 +15,7 @@ import { recoverWorkflowCheckpoint } from "@elie-laloum/outpost";
 
 Explicitly clear checkpoint ownership without deleting its saved progress. The caller must first ensure the old runner has stopped. The expected revision fences concurrent changes; incomplete-task replay still requires resume: retry-incomplete.
 
-[Complete example and detailed rules](../../guide/operations/storage-transports/).
+[Complete example and detailed rules](../../guide/storage/).
 
 ## Parameters and properties
 

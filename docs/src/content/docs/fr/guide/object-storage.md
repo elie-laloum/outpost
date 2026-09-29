@@ -1,5 +1,5 @@
 ---
-title: "Stockage objet"
+title: "S3 et R2"
 description: "Utiliser un transport S3 pour les objets persistants Outpost."
 ---
 

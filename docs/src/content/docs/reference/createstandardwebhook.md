@@ -15,7 +15,7 @@ import { createStandardWebhook } from "@elie-laloum/outpost";
 
 Create a trigger source for senders that follow the Standard Webhooks scheme. It verifies every v1 signature of webhook-signature over id.timestamp.body with whsec_ secrets within a timestamp window, uses webhook-id as delivery and the payload type field, or webhook, as kind. It reports no actor.
 
-[Complete example and detailed rules](../../guide/triggers/).
+[Complete example and detailed rules](../../guide/webhooks/).
 
 ## Parameters and properties
 

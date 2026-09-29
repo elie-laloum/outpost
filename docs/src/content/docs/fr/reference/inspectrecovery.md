@@ -15,7 +15,7 @@ import { inspectRecovery } from "@elie-laloum/outpost";
 
 Inspecte les fichiers locaux ou objets d’un transport explicite sans les supprimer. Le mode local peut inspecter Git, verrous de processus et ressources ; le mode transport liste tailles, révisions et éventuellement activités dont la propriété distante reste non vérifiée. Les inventaires incomplets sont signalés et n’autorisent pas le nettoyage.
 
-[Exemple complet et règles détaillées](../../guide/operations/recovery/).
+[Exemple complet et règles détaillées](../../guide/recovery/).
 
 ## Paramètres et propriétés
 

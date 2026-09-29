@@ -26,7 +26,7 @@ Les noms de serveur utilisent des lettres, des chiffres, `_` et `-`, jusqu’à 
 
 ## Déclarer les secrets
 
-Chaque nom de `variables` et de `bearerTokenVariable` doit être une variable déclarée : dans les `variables` du harness, sur le fournisseur de sandbox ou dans `.outpost/.env`. Une valeur manquante échoue avant le démarrage de l’agent avec `Missing NAME`. Voir [Valeurs d’environnement](../environment-values/).
+Chaque nom de `variables` et de `bearerTokenVariable` doit être une variable déclarée : dans les `variables` du harness, sur le fournisseur de sandbox ou dans `.outpost/.env`. Une valeur manquante échoue avant le démarrage de l’agent avec `Missing NAME`. Voir [Valeurs d’environnement](../environment-variables/).
 
 ```ts
 import { createAgent, createClaudeHarness } from "@elie-laloum/outpost";
@@ -133,9 +133,9 @@ const reviewer = createAgent({
 });
 ```
 
-Les outils s’appellent `mcp__<serveur>__<outil>` ; les caractères autres que lettres, chiffres, `_` et `-` deviennent `_`, et les noms trop longs se terminent par un court hachage. Les [règles de permissions](../tool-policies/) portent sur ces noms, par exemple `tools: ["mcp__linear__*"]`. Les délais des outils envoient une annulation MCP. Les erreurs du serveur parviennent au modèle comme erreurs d’outil ; le texte, le contenu structuré et le texte des ressources sont renvoyés, tandis que les images et l’audio sont remplacés par un marqueur.
+Les outils s’appellent `mcp__<serveur>__<outil>` ; les caractères autres que lettres, chiffres, `_` et `-` deviennent `_`, et les noms trop longs se terminent par un court hachage. Les [règles de permissions](../harness-permissions/) portent sur ces noms, par exemple `tools: ["mcp__linear__*"]`. Les délais des outils envoient une annulation MCP. Les erreurs du serveur parviennent au modèle comme erreurs d’outil ; le texte, le contenu structuré et le texte des ressources sont renvoyés, tandis que les images et l’audio sont remplacés par un marqueur.
 
-Un serveur stdio passe par un petit lanceur Node.js dans la sandbox. Un serveur HTTP est joint par un pont qui s’exécute lui aussi dans la sandbox : le jeton bearer y reste et les [règles sortantes](../outbound-rules/) s’y appliquent. La sandbox a donc besoin de `node`, et son bail doit accepter l’entrée en direct des processus, comme tous les fournisseurs intégrés. Sur Vercel et Daytona, chaque message vers un serveur stdio passe par un fichier interrogé dans la sandbox, ce qui ajoute environ une seconde par requête. Un serveur qui s’arrête ou ne s’initialise pas dans son délai de démarrage fait échouer le tour. Les sous-agents démarrent les serveurs de leur propre harness.
+Un serveur stdio passe par un petit lanceur Node.js dans la sandbox. Un serveur HTTP est joint par un pont qui s’exécute lui aussi dans la sandbox : le jeton bearer y reste et les [règles sortantes](../network-restrictions/) s’y appliquent. La sandbox a donc besoin de `node`, et son bail doit accepter l’entrée en direct des processus, comme tous les fournisseurs intégrés. Sur Vercel et Daytona, chaque message vers un serveur stdio passe par un fichier interrogé dans la sandbox, ce qui ajoute environ une seconde par requête. Un serveur qui s’arrête ou ne s’initialise pas dans son délai de démarrage fait échouer le tour. Les sous-agents démarrent les serveurs de leur propre harness.
 
 Pour la boucle intégrée, déclarez les secrets sur le fournisseur de sandbox ou dans `.outpost/.env` : un harness personnalisé n’a pas de `variables` propres.
 

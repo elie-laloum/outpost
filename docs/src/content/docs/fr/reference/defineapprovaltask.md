@@ -15,7 +15,7 @@ import { defineApprovalTask } from "@elie-laloum/outpost";
 
 Définit une gate d’approbation persistée par checkpoint qui suspend l’exécution après ses dépendances. Un acteur de confiance autorisé doit soumettre approve ou reject avec un motif. L’approbation transmet la décision persistée aux tâches dépendantes ; le rejet est définitif pour cette exécution.
 
-[Exemple complet et règles détaillées](../../guide/advanced/approvals/).
+[Exemple complet et règles détaillées](../../guide/approvals/).
 
 ## Paramètres et propriétés
 

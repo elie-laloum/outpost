@@ -15,7 +15,7 @@ import { createHarnessEditTools } from "@elie-laloum/outpost";
 
 Crée le jeu d’outils edit : write_file crée ou remplace un fichier, et edit_file remplace un texte exact, conserve fins de ligne et permissions et refuse d’écraser un fichier modifié pendant l’opération.
 
-[Exemple complet et règles détaillées](../../guide/agents/harness/).
+[Exemple complet et règles détaillées](../../guide/harness/).
 
 ## Retour
 

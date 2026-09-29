@@ -15,7 +15,7 @@ import { defineJsonResponse } from "@elie-laloum/outpost";
 
 Declare a tagged JSON response. The validator reads the last complete matching tag, accepts an optional json code fence, parses the contents and applies the Standard Schema validator or parsing function. Missing or invalid content raises ResponseError; repairs defaults to zero.
 
-[Complete example and detailed rules](../../guide/agents/responses/).
+[Complete example and detailed rules](../../guide/typed-responses/).
 
 ## Parameters and properties
 

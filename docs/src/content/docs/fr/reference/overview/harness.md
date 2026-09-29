@@ -43,4 +43,4 @@ Les presets CLI sont stables depuis la version 5.0.0. Le moteur intégré et ses
 - [AgentAdapter](../../agentadapter/) décrit l’adaptateur de protocole CLI.
 - [AgentConfiguration](../../agentconfiguration/) et [ConfigurationFile](../../configurationfile/) décrivent la configuration CLI fusionnée dans le home de l’agent.
 
-[Apprendre avec le guide pratique](../../../guide/agents/harness/). Pour les presets CLI, consultez [le guide des adapters](../../../guide/agents/adapters/) et [l’authentification](../../../guide/manual/authentication/).
+[Apprendre avec le guide pratique](../../../guide/harness/). Pour les presets CLI, consultez [le guide des adapters](../../../guide/choose-an-agent/) et [l’authentification](../../../guide/manual/authentication/).

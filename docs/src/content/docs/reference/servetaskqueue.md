@@ -15,7 +15,7 @@ import { serveTaskQueue } from "@elie-laloum/outpost";
 
 Expose a caller-owned task queue over HTTP with explicit bearer-token authentication. The server binds loopback by default and supplies no TLS. Closing the returned server stops listening without taking ownership of queue storage.
 
-[Complete example and detailed rules](../../guide/advanced/distributed/).
+[Complete example and detailed rules](../../guide/job-queues/).
 
 ## Parameters and properties
 

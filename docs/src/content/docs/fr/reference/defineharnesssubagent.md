@@ -15,7 +15,7 @@ import { defineHarnessSubagent } from "@elie-laloum/outpost";
 
 Définit un outil sérialisé exécutant un agent enfant intégré avec un historique neuf dans la sandbox empruntée du parent. Le parent fournit { prompt } ; le résultat est un texte JSON contenant text et un identifiant conversation optionnel. Les tokens enfants comptent une seule fois dans le dispatch et dans chaque budget ancêtre ; annulation et permissions déclaratives se propagent. L’outil ne peut pas être exécuté hors du runtime du harness.
 
-[Exemple complet et règles détaillées](../../guide/agents/harness/).
+[Exemple complet et règles détaillées](../../guide/harness/).
 
 ## Paramètres et propriétés
 

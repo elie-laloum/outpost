@@ -15,7 +15,7 @@ import { TransportConflict } from "@elie-laloum/outpost";
 
 Une mutation conditionnelle ou une lecture versionnée a trouvé une révision différente. Relire l’état avant de décider si une nouvelle tentative est valable ; ne jamais remplacer la condition par une écriture inconditionnelle.
 
-[Exemple complet et règles détaillées](../../guide/operations/storage-transports/).
+[Exemple complet et règles détaillées](../../guide/storage/).
 
 ## Paramètres et propriétés
 

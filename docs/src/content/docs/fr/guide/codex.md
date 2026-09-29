@@ -3,7 +3,7 @@ title: "Codex"
 description: "Connecter Codex à une sandbox Outpost."
 ---
 
-Utilisez `createCodexHarness()` avec un [environnement d’exécution](../execution-backends/) pris en charge. Installez la CLI dans votre image ou autorisez le bootstrap chez les fournisseurs distants.
+Utilisez `createCodexHarness()` avec un [environnement d’exécution](../choose-a-sandbox/) pris en charge. Installez la CLI dans votre image ou autorisez le bootstrap chez les fournisseurs distants.
 
 ## Accès par compte
 
@@ -26,7 +26,7 @@ const coder = createAgent({
 
 ## Comportement
 
-Codex prend en charge la capture des conversations, la reprise, le fork et la réparation des réponses. `saveConversations: false` désactive la capture. `conversations` stocke les sessions capturées dans un [store de conversations](../chat-history/#stockage) au format `"codex"`, par exemple `createTransportConversations(createCodexConversations(), …)`. `approvalReviewer` sélectionne `user` ou `auto_review` lorsque la CLI le prend en charge. Un dispatch avec [pilotage](../steering/) exécute `codex app-server` au lieu de `codex exec`, avec les mêmes réglages de modèle, de raisonnement, de fournisseur et d’approbation, pour que les consignes atteignent le tour en cours.
+Codex prend en charge la capture des conversations, la reprise, le fork et la réparation des réponses. `saveConversations: false` désactive la capture. `conversations` stocke les sessions capturées dans un [store de conversations](../conversations/#stockage) au format `"codex"`, par exemple `createTransportConversations(createCodexConversations(), …)`. `approvalReviewer` sélectionne `user` ou `auto_review` lorsque la CLI le prend en charge. Un dispatch avec [pilotage](../steering/) exécute `codex app-server` au lieu de `codex exec`, avec les mêmes réglages de modèle, de raisonnement, de fournisseur et d’approbation, pour que les consignes atteignent le tour en cours.
 
 ## Endpoint personnalisé
 

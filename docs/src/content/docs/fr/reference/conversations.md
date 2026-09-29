@@ -15,7 +15,7 @@ import { conversations } from "@elie-laloum/outpost";
 
 Regroupe les utilitaires de conversations : transported construit un store adossé à un transport, harness le store des harness personnalisés, rewrite relocalise les cwd enregistrés et projectKey calcule le nom de dossier de projet Claude. Le store natif de chaque agent vient de sa propre fonction : createClaudeConversations(), createCodexConversations(), createCopilotConversations() ou createKimiConversations(). Ces utilitaires ne gèrent pas l’authentification des agents.
 
-[Exemple complet et règles détaillées](../../guide/agents/conversations/).
+[Exemple complet et règles détaillées](../../guide/conversations/).
 
 ## Paramètres et propriétés
 

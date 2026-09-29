@@ -26,6 +26,6 @@ Les montages explicites chevauchant dépôt canonique, worktree, dossiers Git ou
 
 Ce mode ne certifie pas une isolation face à un agent hostile ni une protection contre les évasions de conteneur. Faites confiance à l’image, au moteur, au noyau et aux montages externes explicites. Il ne rend pas non plus le code du projet sûr à exécuter ensuite sur l’hôte.
 
-Voir [Récupérer les changements](../failure-recovery/) pour une synchronisation interrompue et la [roadmap](../../project/roadmap/) pour les prérequis de validation réelle restants.
+Voir [Récupérer les changements](../recovery/) pour une synchronisation interrompue et la [roadmap](../../project/roadmap/) pour les prérequis de validation réelle restants.
 
 API : [ContainerOptions](../../reference/containeroptions/).

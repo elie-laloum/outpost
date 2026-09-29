@@ -34,11 +34,11 @@ La réponse se trouve dans `result.text`. `result.usage` contient les compteurs 
 
 Remplacez `brief.text` par une demande précise, par exemple : `Corrige la commande d’installation du README, vérifie-la et crée un commit.` La branche nommée conserve le changement séparément pour sa revue. Outpost collecte les commits ; demander un commit fait toujours partie de la tâche de l’agent.
 
-Choisissez un nouveau nom de branche pour chaque travail indépendant. La [stratégie de branches](../branch-strategy/) explique comment travailler dans le checkout courant ou intégrer une branche terminée.
+Choisissez un nouveau nom de branche pour chaque travail indépendant. La [stratégie de branches](../repository-and-branch/) explique comment travailler dans le checkout courant ou intégrer une branche terminée.
 
 ## Exploiter le résultat
 
-`text` est la réponse de l’agent, pas un rapport de tests imposé par Outpost. Utilisez une [sortie validée](../output-validation/) pour les données consommées par votre application, et exécutez les vérifications dans une [session de sandbox](../sandbox-sessions/) pour conditionner l’intégration à leur résultat.
+`text` est la réponse de l’agent, pas un rapport de tests imposé par Outpost. Utilisez une [sortie validée](../typed-responses/) pour les données consommées par votre application, et exécutez les vérifications dans une [session de sandbox](../sandbox-sessions/) pour conditionner l’intégration à leur résultat.
 
 Une opération échouée rejette sa promesse. Le `start()` d’un workflow renvoie un résultat avec un statut : voir [Gestion des erreurs](../error-handling/).
 

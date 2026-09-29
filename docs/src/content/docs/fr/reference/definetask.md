@@ -15,7 +15,7 @@ import { defineTask } from "@elie-laloum/outpost";
 
 Définit et fige un nœud de workflow dont le callback perform s’exécute après la réussite de ses dépendances. Créer le nœud ne l’exécute pas et n’alloue aucune sandbox. context.value lit les dépendances déclarées ; defineIsolatedTask prend en charge l’allocation d’une sandbox autour d’un dispatch d’agent à la place d’un callback perform personnalisé.
 
-[Exemple complet et règles détaillées](../../guide/workflows/graph/).
+[Exemple complet et règles détaillées](../../guide/task-dependencies/).
 
 ## Paramètres et propriétés
 

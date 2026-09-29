@@ -15,7 +15,7 @@ import { createHttpTaskQueue } from "@elie-laloum/outpost";
 
 Create a TaskQueue client with a fixed bearer token or a token source resolved per request. timeoutMs bounds HTTP exchange after token resolution; credential callbacks must return promptly. The client never executes handlers locally.
 
-[Complete example and detailed rules](../../guide/advanced/distributed/).
+[Complete example and detailed rules](../../guide/job-queues/).
 
 ## Parameters and properties
 

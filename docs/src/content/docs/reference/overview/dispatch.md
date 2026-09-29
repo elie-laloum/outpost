@@ -26,4 +26,4 @@ Read the result according to its contract. A completion marker, generated answer
 - [createSteering](../../createsteering/)
 - [Steering](../../steering/)
 
-[Learn with the practical guide](../../../guide/agents/dispatch/).
+[Learn with the practical guide](../../../guide/first-request/).

@@ -22,17 +22,17 @@ npm install @elie-laloum/outpost
 | Exécuter une tâche de code                                  | [Requêtes](../first-request/)                   |
 | Tester ou inspecter le code entre deux tours                | [Sessions de sandbox](../sandbox-sessions/)     |
 | Relier les résultats et paralléliser le travail indépendant | [Dépendances des tâches](../task-dependencies/) |
-| Attendre une décision humaine                               | [Étapes de validation](../review-gates/)        |
+| Attendre une décision humaine                               | [Étapes de validation](../approvals/)           |
 | Redémarrer un workflow interrompu                           | [Exécutions persistantes](../durable-runs/)     |
-| Conserver des rapports entre processus                      | [Artefacts partagés](../shared-artifacts/)      |
+| Conserver des rapports entre processus                      | [Artefacts partagés](../artifacts/)             |
 
 ## Choisir chaque composant indépendamment
 
 Un **agent** sélectionne un harness et éventuellement un modèle. Un **fournisseur de sandbox** sélectionne Docker, Podman, un environnement cloud ou l’hôte. Un **workspace** sélectionne le checkout Git. Changer l’un n’impose pas de remplacer les deux autres.
 
-Les harness CLI prennent en charge Codex, Claude Code, Antigravity, GitHub Copilot CLI et Kimi Code. Vous pouvez aussi [configurer la boucle de modèle d’Outpost](../model-loop/).
+Les harness CLI prennent en charge Codex, Claude Code, Antigravity, GitHub Copilot CLI et Kimi Code. Vous pouvez aussi [configurer la boucle de modèle d’Outpost](../harness/).
 
-Outpost gère l’exécution et l’état. Vos tests établissent si le changement fonctionne, et votre code décide de son intégration. Consultez la [stratégie de branches](../branch-strategy/) avant d’automatiser la livraison.
+Outpost gère l’exécution et l’état. Vos tests établissent si le changement fonctionne, et votre code décide de son intégration. Consultez la [stratégie de branches](../repository-and-branch/) avant d’automatiser la livraison.
 
 ## Lire les noms de l’API
 

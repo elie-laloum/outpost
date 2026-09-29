@@ -15,7 +15,7 @@ import { createHttpTaskQueue } from "@elie-laloum/outpost";
 
 Crée un client TaskQueue avec jeton bearer fixe ou source résolue à chaque requête. timeoutMs borne l’échange HTTP après résolution du jeton ; les callbacks doivent répondre rapidement. Le client n’exécute jamais les handlers localement.
 
-[Exemple complet et règles détaillées](../../guide/advanced/distributed/).
+[Exemple complet et règles détaillées](../../guide/job-queues/).
 
 ## Paramètres et propriétés
 

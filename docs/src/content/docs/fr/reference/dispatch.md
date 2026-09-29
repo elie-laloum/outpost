@@ -15,7 +15,7 @@ import { dispatch } from "@elie-laloum/outpost";
 
 Exécute le brief d’un agent avec une sandbox allouée pour cet appel, collecte les tours, la sortie validée, l’usage et les commits, puis ferme les ressources possédées. Chaque passe froide reçoit un environnement neuf. Le résultat permet de reprendre ou de bifurquer une conversation capturée dans un environnement ultérieur.
 
-[Exemple complet et règles détaillées](../../guide/agents/dispatch/).
+[Exemple complet et règles détaillées](../../guide/first-request/).
 
 ## Paramètres et propriétés
 

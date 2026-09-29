@@ -1,5 +1,5 @@
 ---
-title: "Task dependencies"
+title: "Tasks and dependencies"
 description: "Connect typed outputs into an executable graph."
 ---
 
@@ -38,7 +38,7 @@ Independent tasks can run concurrently. Dependent tasks start after their depend
 | `defineIsolatedTask` | An agent request with its own sandbox lifecycle.   |
 | `defineQueuedTask`   | Work delegated to a registered background handler. |
 
-A workflow does not create a shared Git transaction. Each task must honor resource ownership and cancellation. Use [scheduling](../task-scheduling/) to control concurrency and retry behavior.
+A workflow does not create a shared Git transaction. Each task must honor resource ownership and cancellation. Use [scheduling](../concurrency-and-retries/) to control concurrency and retry behavior.
 
 API: [defineTask](../../reference/definetask/) · [defineWorkflow](../../reference/defineworkflow/) · [TaskContext](../../reference/taskcontext/).
 

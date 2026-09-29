@@ -34,11 +34,11 @@ The answer is in `result.text`. `result.usage` contains token counts, and `resul
 
 Replace `brief.text` with a concrete change request, for example: `Fix the README setup command, verify it and commit the correction.` The named branch keeps the change separate for review. Outpost collects commits; asking for a commit is still part of the agent’s task.
 
-Use a fresh branch name for independent jobs. [Branch strategy](../branch-strategy/) explains how to work in the current checkout or integrate a completed branch.
+Use a fresh branch name for independent jobs. [Branch strategy](../repository-and-branch/) explains how to work in the current checkout or integrate a completed branch.
 
 ## Use the result
 
-`text` is the agent’s answer, not a test report enforced by Outpost. Use [validated output](../output-validation/) for data your application consumes, and execute checks in a [sandbox session](../sandbox-sessions/) when the outcome must gate integration.
+`text` is the agent’s answer, not a test report enforced by Outpost. Use [validated output](../typed-responses/) for data your application consumes, and execute checks in a [sandbox session](../sandbox-sessions/) when the outcome must gate integration.
 
 A failed operation rejects. A workflow’s `start()` instead returns a result with a status: see [error handling](../error-handling/).
 

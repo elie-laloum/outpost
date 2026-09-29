@@ -15,7 +15,7 @@ import { attach } from "@elie-laloum/outpost";
 
 Open a real interactive agent terminal in a newly allocated sandbox, then collect its exit status and commits and close owned resources. Prompt questions can be supplied through ask; terminal attachment does not produce a typed response.
 
-[Complete example and detailed rules](../../guide/environment/commands/).
+[Complete example and detailed rules](../../guide/sandbox-sessions/).
 
 ## Parameters and properties
 

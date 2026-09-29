@@ -15,7 +15,7 @@ import { createLocalTransport } from "@elie-laloum/outpost";
 
 Create a versioned object transport in a private directory. Local process locks serialize conditional mutations. Use it with createArtifactStore and createWorkflowCheckpointStore for disk persistence; this adapter does not establish distributed NFS ownership.
 
-[Complete example and detailed rules](../../guide/operations/storage-transports/).
+[Complete example and detailed rules](../../guide/storage/).
 
 ## Parameters and properties
 

@@ -15,7 +15,7 @@ import { defineHarnessPermissions } from "@elie-laloum/outpost";
 
 Define ordered allow and deny rules over tool names, command patterns and repository paths. The engine evaluates them before before-tool hooks, and again after a hook rewrites the input; the first matching rule wins. Permissions are not a security boundary: the sandbox isolates.
 
-[Complete example and detailed rules](../../guide/agents/harness/).
+[Complete example and detailed rules](../../guide/harness/).
 
 ## Parameters and properties
 

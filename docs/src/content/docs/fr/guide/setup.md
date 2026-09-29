@@ -3,7 +3,7 @@ title: "Mise en place"
 description: "Installer Outpost et configurer votre premier agent."
 ---
 
-Utilisez Node.js 24 ou ultérieur et un dépôt Git possédant au moins un commit. Cette configuration utilise Docker et un compte Codex. Choisissez un autre [harness CLI](../agent-config/) ou [environnement d’exécution](../execution-backends/) si nécessaire.
+Utilisez Node.js 24 ou ultérieur et un dépôt Git possédant au moins un commit. Cette configuration utilise Docker et un compte Codex. Choisissez un autre [harness CLI](../choose-an-agent/) ou [environnement d’exécution](../choose-a-sandbox/) si nécessaire.
 
 ## Installer
 
@@ -30,7 +30,7 @@ npm install -g @openai/codex
 codex -c cli_auth_credentials_store='"file"' login
 ```
 
-Outpost copie la connexion dans le home privé de la sandbox. Il ne lit jamais un trousseau système. Pour une clé API, utilisez la [configuration d’authentification API](../access-credentials/).
+Outpost copie la connexion dans le home privé de la sandbox. Il ne lit jamais un trousseau système. Pour une clé API, utilisez la [configuration d’authentification API](../authentication/).
 
 ## Créer la configuration
 

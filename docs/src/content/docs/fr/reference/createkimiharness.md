@@ -15,7 +15,7 @@ import { createKimiHarness } from "@elie-laloum/outpost";
 
 Crée un harness Kimi Code à partir des réglages d’exécution, d’authentification et de permissions, sans lancer la CLI. Composez-le avec createAgent({ harness, model }) pour sélectionner séparément un nom de modèle ; reasoning et maxOutputTokens sont refusés. Les bundles natifs permettent capture, reprise à chaud/à froid et réparations. Le fork exécute la commande native kimi fork et continue un identifiant enfant distinct. La CLI possède sa boucle interne modèle/outils. Les profils de compte utilisent region: "global" par défaut pour kimi.ai ; définissez explicitement mainland-cn pour kimi.com. La région détermine le fichier d’identifiants et les endpoints de connexion de la sandbox.
 
-[Exemple complet et règles détaillées](../../guide/agents/harness/).
+[Exemple complet et règles détaillées](../../guide/harness/).
 
 ## Paramètres et propriétés
 

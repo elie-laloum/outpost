@@ -15,7 +15,7 @@ import { defineQueuedTask } from "@elie-laloum/outpost";
 
 Define a workflow node that enqueues a durable job and polls its completion. Derive the job identity from execution and task identity, decode the JSON result and account for returned usage. A registered worker performs the remote handler.
 
-[Complete example and detailed rules](../../guide/advanced/distributed/).
+[Complete example and detailed rules](../../guide/job-queues/).
 
 ## Parameters and properties
 

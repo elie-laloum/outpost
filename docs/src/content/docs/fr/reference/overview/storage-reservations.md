@@ -23,4 +23,4 @@ Les réservations coordonnent les writers coopérants ; elles ne contraignent pa
 - [StorageReservation](../../storagereservation/)
 - [StorageReservationOptions](../../storagereservationoptions/)
 
-[Passer à la pratique avec le Guide](../../../guide/operations/storage-retention/).
+[Passer à la pratique avec le Guide](../../../guide/retention/).

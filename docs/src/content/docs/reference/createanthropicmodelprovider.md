@@ -15,7 +15,7 @@ import { createAnthropicModelProvider } from "@elie-laloum/outpost";
 
 Configure an Anthropic Messages transport with messages, tool calls, thinking replay, optional streaming and optional system-prefix and history caching. The harness supplies the model per request; the agent model must set maxOutputTokens, and reasoning maps to adaptive or disabled thinking. Cache reads and writes are normalized into usage; server tools are rejected.
 
-[Complete example and detailed rules](../../guide/advanced/model-providers/).
+[Complete example and detailed rules](../../guide/model-providers/).
 
 ## Parameters and properties
 

@@ -24,4 +24,4 @@ Close the sandbox before its workspace. A caller-supplied workspace remains the 
 - [BranchPolicy](../../branchpolicy/)
 - [Disposal](../../disposal/)
 
-[Learn with the practical guide](../../../guide/environment/workspaces/).
+[Learn with the practical guide](../../../guide/repository-and-branch/).

@@ -26,4 +26,4 @@ Lisez le résultat selon son contrat. Un marqueur de fin, une réponse produite 
 - [createSteering](../../createsteering/)
 - [Steering](../../steering/)
 
-[Passer à la pratique avec le Guide](../../../guide/agents/dispatch/).
+[Passer à la pratique avec le Guide](../../../guide/first-request/).

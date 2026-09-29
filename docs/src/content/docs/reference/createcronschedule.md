@@ -15,7 +15,7 @@ import { createCronSchedule } from "@elie-laloum/outpost";
 
 Parse a five-field cron expression, or a macro such as @daily, evaluated in an IANA time zone (UTC by default). The frozen result computes slots with next() and previous() and publishes nothing. Construction rejects invalid fields, unknown time zones and expressions without any occurrence.
 
-[Complete example and detailed rules](../../guide/triggers/).
+[Complete example and detailed rules](../../guide/webhooks/).
 
 ## Parameters and properties
 

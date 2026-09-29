@@ -15,7 +15,7 @@ import { defineWorkflow } from "@elie-laloum/outpost";
 
 Validate a named task graph for duplicate keys, missing dependencies and cycles, then return a reusable workflow definition. start schedules the tasks with concurrency, cancellation and optional checkpoints; diagram renders the dependency graph as Mermaid.
 
-[Complete example and detailed rules](../../guide/workflows/graph/).
+[Complete example and detailed rules](../../guide/task-dependencies/).
 
 ## Parameters and properties
 

@@ -15,7 +15,7 @@ import { createCopilotConversations } from "@elie-laloum/outpost";
 
 Create the native ConversationStore of GitHub Copilot CLI. Each session directory under $COPILOT_HOME or ~/.copilot/session-state is captured as one bounded JSON bundle; restoration rewrites workspace.yaml and session.start paths. This is the default store of createCopilotHarness().
 
-[Complete example and detailed rules](../../guide/agents/conversations/).
+[Complete example and detailed rules](../../guide/conversations/).
 
 ## Returns
 

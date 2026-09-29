@@ -3,7 +3,7 @@ title: "Antigravity"
 description: "Connecter Antigravity à une sandbox Outpost."
 ---
 
-Utilisez `createAntigravityHarness()` avec un [environnement d’exécution](../execution-backends/) pris en charge. Installez la CLI dans votre image ou autorisez le bootstrap chez les fournisseurs distants.
+Utilisez `createAntigravityHarness()` avec un [environnement d’exécution](../choose-a-sandbox/) pris en charge. Installez la CLI dans votre image ou autorisez le bootstrap chez les fournisseurs distants.
 
 ## Accès par compte
 
@@ -26,7 +26,7 @@ const coder = createAgent({
 
 ## Comportement
 
-Reprenez une conversation émise dans la même sandbox ouverte avec `sandbox.resume(id, options)` ou `resume()` sur un résultat à chaud. Les réparations automatiques de réponse réutilisent cette conversation. Outpost ne dispose pas de format de capture portable vérifié pour Antigravity : la reprise à froid après fermeture de la sandbox et le fork automatisé sont refusés, et `createAntigravityHarness()` refuse un store `conversations`. Un dispatch sans continuation démarre toujours une session neuve. Voir [l’historique](../chat-history/) et [la commande de reprise Google](https://www.antigravity.google/docs/cli/commands/resume/).
+Reprenez une conversation émise dans la même sandbox ouverte avec `sandbox.resume(id, options)` ou `resume()` sur un résultat à chaud. Les réparations automatiques de réponse réutilisent cette conversation. Outpost ne dispose pas de format de capture portable vérifié pour Antigravity : la reprise à froid après fermeture de la sandbox et le fork automatisé sont refusés, et `createAntigravityHarness()` refuse un store `conversations`. Un dispatch sans continuation démarre toujours une session neuve. Voir [l’historique](../conversations/) et [la commande de reprise Google](https://www.antigravity.google/docs/cli/commands/resume/).
 
 ## Installation épinglée
 

@@ -15,7 +15,7 @@ import { recoverSpeculation } from "@elie-laloum/outpost";
 
 Release abandoned speculation ownership using an inspected transport revision after the previous coordinator has stopped. This fences stale writes; the next speculate call reconciles registered resources and requires explicit authorization before replaying incomplete candidates.
 
-[Complete example and detailed rules](../../guide/advanced/speculation/).
+[Complete example and detailed rules](../../guide/speculation/).
 
 ## Parameters and properties
 

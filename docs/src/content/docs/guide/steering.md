@@ -30,7 +30,7 @@ const result = await running;
 
 | Agent                               | Delivery                                                                                                                                                                                                  |
 | ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [Built-in harness](../model-loop/)  | `injected`: added before the next model request, after the current tool results. If the model was about to finish, it continues. While a built-in subagent works, that subagent receives the instruction. |
+| [Built-in harness](../harness/)     | `injected`: added before the next model request, after the current tool results. If the model was about to finish, it continues. While a built-in subagent works, that subagent receives the instruction. |
 | [Claude Code](../claude-code/)      | `injected`: written to Claude's stream-json input. Read during a tool call, it joins the running turn; read while Claude writes its final answer, it runs as a queued turn in the same process.           |
 | [Codex](../codex/)                  | `injected`: Codex runs as `codex app-server` for steered dispatches and receives the instruction with `turn/steer` in the active turn. When no turn is active, it starts the next turn of the thread.     |
 | Copilot CLI, Kimi Code, Antigravity | `resumed`: Outpost stops the running process once its conversation is known, keeps the sandbox, then resumes the same conversation with the instruction. The action in progress is cut short.             |
@@ -43,7 +43,7 @@ The agent CLIs decide this split: `copilot -p` and `kimi --prompt` take a single
 
 ## Target a subagent
 
-Each [built-in subagent](../model-loop/) delegation has a run id, reported by its `subagent` event and carried as `subagentId` by its other events. Pass it to `send()` to address that run:
+Each [built-in subagent](../harness/) delegation has a run id, reported by its `subagent` event and carried as `subagentId` by its other events. Pass it to `send()` to address that run:
 
 ```ts
 import { createSteering, type DispatchOptions } from "@elie-laloum/outpost";
@@ -82,11 +82,11 @@ A controller serves one dispatch at a time and can be reused for the next one. A
 
 `dispatch()` shares one controller across its passes. `result.resume()` and `result.fork()` do not reuse it: pass `steering` again. In a workflow, return it from the `request` of an [`defineAgentTask` or `defineIsolatedTask`](../task-dependencies/).
 
-Before running, a dispatch rejects agents that can neither receive live input nor resume a conversation: [replay agents](../record-replay/) and adapters with `resumable: false`. Candidates of a [fallback agent](../agent-fallback/) are validated the same way, and steering follows the candidate that is running.
+Before running, a dispatch rejects agents that can neither receive live input nor resume a conversation: [replay agents](../record-replay/) and adapters with `resumable: false`. Candidates of a [fallback agent](../fallback-agents/) are validated the same way, and steering follows the candidate that is running.
 
 ## Events, history and usage
 
-Each delivery emits a `steer` [agent event](../live-events/) with `text`, `mode` and `pass`, and `subagentId` when a subagent received it; the terminal reporter prints it. Harness transcripts and native sessions record the instruction as a user message. A pass still emits one `summary`, and `result.usage` includes interrupted turns.
+Each delivery emits a `steer` [agent event](../progress/) with `text`, `mode` and `pass`, and `subagentId` when a subagent received it; the terminal reporter prints it. Harness transcripts and native sessions record the instruction as a user message. A pass still emits one `summary`, and `result.usage` includes interrupted turns.
 
 A [replay](../record-replay/) of a steered run reproduces its turns: each `resumed` instruction starts the next recorded turn, and the interrupted turn keeps `interrupted: "steering"`, its own text and usage.
 

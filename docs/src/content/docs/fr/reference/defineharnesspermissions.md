@@ -15,7 +15,7 @@ import { defineHarnessPermissions } from "@elie-laloum/outpost";
 
 Définit des règles ordonnées d’autorisation et de refus sur les noms d’outils, les motifs de commande et les chemins du dépôt. Le moteur les évalue avant les hooks before-tool, et de nouveau après la réécriture de l’entrée par un hook ; la première règle applicable l’emporte. Les permissions ne sont pas une frontière de sécurité : c’est le sandbox qui isole.
 
-[Exemple complet et règles détaillées](../../guide/agents/harness/).
+[Exemple complet et règles détaillées](../../guide/harness/).
 
 ## Paramètres et propriétés
 

@@ -15,7 +15,7 @@ import { WorkflowBudgetExceeded } from "@elie-laloum/outpost";
 
 Erreur identifiant la dimension de tentatives ou de tokens dont la limite d’admission a été atteinte. limit et observed exposent seuil et comptabilité courante ; l’usage observé ne constitue pas un plafond de facturation.
 
-[Exemple complet et règles détaillées](../../guide/workflows/graph/).
+[Exemple complet et règles détaillées](../../guide/task-dependencies/).
 
 ## Paramètres et propriétés
 

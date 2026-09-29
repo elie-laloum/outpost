@@ -1,5 +1,5 @@
 ---
-title: "Redis workers"
+title: "Redis and BullMQ"
 description: "Distribute jobs using BullMQ and standalone Redis."
 ---
 
@@ -47,4 +47,4 @@ API: [createBullMQTaskQueue](../../reference/createbullmqtaskqueue/).
 
 Connection settings are fixed when `createBullMQTaskQueue()` opens its owned clients. Introduce a replacement Redis ACL credential with the same required permissions, deploy workers/producers using it, then stop old processes and close their queues before revoking the old credential. Do not mutate an active adapter's connection object to rotate it. Redis operators own ACL changes and termination of any remaining authenticated connections.
 
-Keep the same queue namespace during replacement. A prematurely revoked connection can lose its lease; the successor receives the same `idempotencyKey`, so the effect service must retain deduplication receipts. See [worker operations](../background-jobs/#operate-workers) for shutdown and crash recovery. Standalone Redis process-crash tests do not establish managed-primary failover behavior.
+Keep the same queue namespace during replacement. A prematurely revoked connection can lose its lease; the successor receives the same `idempotencyKey`, so the effect service must retain deduplication receipts. See [worker operations](../job-queues/#operate-workers) for shutdown and crash recovery. Standalone Redis process-crash tests do not establish managed-primary failover behavior.

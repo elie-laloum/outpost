@@ -25,4 +25,4 @@ Une réponse valide ne prouve pas que ses affirmations sont vraies ni que le cod
 - [StandardValidator](../../standardvalidator/)
 - [ResponseError](../../responseerror/)
 
-[Passer à la pratique avec le Guide](../../../guide/agents/responses/).
+[Passer à la pratique avec le Guide](../../../guide/typed-responses/).

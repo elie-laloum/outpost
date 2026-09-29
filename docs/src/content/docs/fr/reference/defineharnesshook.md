@@ -15,7 +15,7 @@ import { defineHarnessHook } from "@elie-laloum/outpost";
 
 Définit du code de contrôle exécuté à un point de la boucle du moteur : session-start, before-model, after-model, before-tool, after-tool ou stop. Contrairement aux observateurs, un hook peut ajouter des instructions, refuser ou réécrire un appel d’outil, remplacer son résultat ou refuser l’arrêt ; une exception d’un hook fait échouer la passe.
 
-[Exemple complet et règles détaillées](../../guide/agents/harness/).
+[Exemple complet et règles détaillées](../../guide/harness/).
 
 ## Paramètres et propriétés
 

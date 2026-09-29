@@ -15,7 +15,7 @@ import { defineArtifactTask } from "@elie-laloum/outpost";
 
 Définit une tâche qui produit une valeur et la publie comme artefact. Déduit le producteur de l’exécution, de la clé de tâche et de la tentative, et enregistre les références parentes déclarées. Les dépendants reçoivent une ArtifactReference au lieu des données complètes.
 
-[Exemple complet et règles détaillées](../../guide/advanced/artifacts/).
+[Exemple complet et règles détaillées](../../guide/artifacts/).
 
 ## Paramètres et propriétés
 

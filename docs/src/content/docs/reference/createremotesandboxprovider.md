@@ -15,7 +15,7 @@ import { createRemoteSandboxProvider } from "@elie-laloum/outpost";
 
 Wrap a provider definition with remote placement, enabling application-managed repository upload and synchronization around the lease supplied by acquire.
 
-[Complete example and detailed rules](../../guide/environment/providers/overview/).
+[Complete example and detailed rules](../../guide/choose-a-sandbox/).
 
 ## Parameters and properties
 

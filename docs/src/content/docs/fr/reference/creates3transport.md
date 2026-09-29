@@ -15,7 +15,7 @@ import { createS3Transport } from "@elie-laloum/outpost/transports/s3";
 
 Crée un transport objet avec le S3Client de l’appelant. Les lectures GET sont bornées et les écritures PUT conditionnelles. La suppression par défaut exige DELETE conditionnel atomique. Utilisez deleteMode "tombstone" pour R2 : des marqueurs PUT conditionnels bloquent suppressions et recréations périmées, restent physiquement stockés et sont masqués des lectures et listes paginées avec des requêtes HEAD supplémentaires. Choisissez le même mode pour tous les écrivains du préfixe et arrêtez-les avant de purger les marqueurs. Chaque enveloppe porte une nouvelle identité, y compris pour des contenus identiques et les marqueurs. Le client SDK AWS optionnel reste la propriété de l’appelant.
 
-[Exemple complet et règles détaillées](../../guide/operations/storage-transports/).
+[Exemple complet et règles détaillées](../../guide/storage/).
 
 ## Paramètres et propriétés
 

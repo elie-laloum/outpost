@@ -30,7 +30,7 @@ const result = await running;
 
 | Agent                               | Remise                                                                                                                                                                                                                      |
 | ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [Harness intégré](../model-loop/)   | `injected` : ajoutée avant la requête suivante au modèle, après les résultats d’outils en cours. Si le modèle allait terminer, il continue. Pendant qu’un sous-agent intégré travaille, c’est lui qui reçoit la consigne.   |
+| [Harness intégré](../harness/)      | `injected` : ajoutée avant la requête suivante au modèle, après les résultats d’outils en cours. Si le modèle allait terminer, il continue. Pendant qu’un sous-agent intégré travaille, c’est lui qui reçoit la consigne.   |
 | [Claude Code](../claude-code/)      | `injected` : écrite sur l’entrée stream-json de Claude. Lue pendant un appel d’outil, elle rejoint le tour en cours ; lue pendant que Claude rédige sa réponse finale, elle devient un tour en file dans le même processus. |
 | [Codex](../codex/)                  | `injected` : Codex s’exécute en `codex app-server` pour les dispatchs pilotés et reçoit la consigne avec `turn/steer` dans le tour actif. Sans tour actif, elle démarre le tour suivant du fil.                             |
 | Copilot CLI, Kimi Code, Antigravity | `resumed` : Outpost arrête le processus dès que sa conversation est connue, garde le sandbox, puis reprend la même conversation avec la consigne. L’action en cours est interrompue.                                        |
@@ -43,7 +43,7 @@ Ce partage vient des CLI des agents : `copilot -p` et `kimi --prompt` prennent u
 
 ## Cibler un sous-agent
 
-Chaque délégation à un [sous-agent intégré](../model-loop/) a un identifiant d’exécution, fourni par son événement `subagent` et porté comme `subagentId` par ses autres événements. Passez-le à `send()` pour viser cette exécution :
+Chaque délégation à un [sous-agent intégré](../harness/) a un identifiant d’exécution, fourni par son événement `subagent` et porté comme `subagentId` par ses autres événements. Passez-le à `send()` pour viser cette exécution :
 
 ```ts
 import { createSteering, type DispatchOptions } from "@elie-laloum/outpost";
@@ -82,11 +82,11 @@ Un contrôleur sert un dispatch à la fois et peut être réutilisé pour le sui
 
 `dispatch()` partage un même contrôleur entre ses passes. `result.resume()` et `result.fork()` ne le réutilisent pas : repassez `steering`. Dans un workflow, renvoyez-le depuis la `request` d’un [`defineAgentTask` ou d’un `defineIsolatedTask`](../task-dependencies/).
 
-Avant de s’exécuter, un dispatch refuse les agents qui ne peuvent ni recevoir d’entrée en direct ni reprendre une conversation : les [agents de rejeu](../record-replay/) et les adapters avec `resumable: false`. Les candidats d’un [agent de secours](../agent-fallback/) sont validés de la même façon, et le pilotage suit le candidat en cours d’exécution.
+Avant de s’exécuter, un dispatch refuse les agents qui ne peuvent ni recevoir d’entrée en direct ni reprendre une conversation : les [agents de rejeu](../record-replay/) et les adapters avec `resumable: false`. Les candidats d’un [agent de secours](../fallback-agents/) sont validés de la même façon, et le pilotage suit le candidat en cours d’exécution.
 
 ## Événements, historique et usage
 
-Chaque remise émet un [événement d’agent](../live-events/) `steer` avec `text`, `mode` et `pass`, ainsi que `subagentId` quand un sous-agent l’a reçue ; le reporter de terminal l’affiche. Les transcripts du harness et les sessions natives enregistrent la consigne comme message utilisateur. Une passe émet toujours un seul `summary`, et `result.usage` inclut les tours interrompus.
+Chaque remise émet un [événement d’agent](../progress/) `steer` avec `text`, `mode` et `pass`, ainsi que `subagentId` quand un sous-agent l’a reçue ; le reporter de terminal l’affiche. Les transcripts du harness et les sessions natives enregistrent la consigne comme message utilisateur. Une passe émet toujours un seul `summary`, et `result.usage` inclut les tours interrompus.
 
 Le [rejeu](../record-replay/) d’un run piloté reproduit ses tours : chaque consigne `resumed` ouvre le tour enregistré suivant, et le tour interrompu garde `interrupted: "steering"`, son propre texte et son usage.
 

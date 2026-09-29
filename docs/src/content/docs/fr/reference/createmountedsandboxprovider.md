@@ -15,7 +15,7 @@ import { createMountedSandboxProvider } from "@elie-laloum/outpost";
 
 Enveloppe une définition de provider avec le placement mounted. Le provider expose le workspace hôte par montage et fournit sa propre implémentation d’allocation et de libération.
 
-[Exemple complet et règles détaillées](../../guide/environment/providers/overview/).
+[Exemple complet et règles détaillées](../../guide/choose-a-sandbox/).
 
 ## Paramètres et propriétés
 

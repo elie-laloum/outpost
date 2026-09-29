@@ -15,7 +15,7 @@ import { diagnoseAgentProtocol } from "@elie-laloum/outpost";
 
 Rejoue les fixtures d’événements intégrées dans l’adapter choisi et rapporte la compatibilité de décodage avec la version CLI enregistrée. Ne lance pas le CLI installé, ne valide pas les identifiants et ne teste pas de modèle réel.
 
-[Exemple complet et règles détaillées](../../guide/operations/doctor/).
+[Exemple complet et règles détaillées](../../guide/diagnostics/).
 
 ## Paramètres et propriétés
 

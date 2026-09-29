@@ -24,4 +24,4 @@ This helper is an opt-in research capability. Selection is not evidence of corre
 - [SpeculativeCandidate](../../speculativecandidate/)
 - [SpeculativeValidation](../../speculativevalidation/)
 
-[Learn with the practical guide](../../../guide/advanced/speculation/).
+[Learn with the practical guide](../../../guide/speculation/).

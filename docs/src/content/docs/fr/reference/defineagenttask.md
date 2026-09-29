@@ -15,7 +15,7 @@ import { defineAgentTask } from "@elie-laloum/outpost";
 
 Définit un nœud de workflow qui lance un agent dans une sandbox existante appartenant à l’appelant. request construit le brief et les options depuis les dépendances. L’annulation et l’usage observé sont reliés au workflow ; le nœud ne ferme pas la sandbox partagée.
 
-[Exemple complet et règles détaillées](../../guide/workflows/graph/).
+[Exemple complet et règles détaillées](../../guide/task-dependencies/).
 
 ## Paramètres et propriétés
 

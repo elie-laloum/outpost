@@ -15,7 +15,7 @@ import { signWorkflowDecision } from "@elie-laloum/outpost";
 
 Signe une décision exacte avec une clé privée Ed25519 appartenant à l’application. Renvoie une décision immuable avec une preuve expirante ; ne soumet pas la décision et ne stocke pas la clé.
 
-[Exemple complet et règles détaillées](../../guide/advanced/approvals/).
+[Exemple complet et règles détaillées](../../guide/approvals/).
 
 ## Paramètres et propriétés
 

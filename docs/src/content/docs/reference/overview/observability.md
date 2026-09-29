@@ -31,4 +31,4 @@ A replayable dispatch journal can also be replayed: `createReplayAgent` re-emits
 - [createOpenTelemetryObserver](../../createopentelemetryobserver/)
 - [OpenTelemetryOptions](../../opentelemetryoptions/)
 
-[Learn with the practical guide](../../../guide/agents/observability/).
+[Learn with the practical guide](../../../guide/progress/).

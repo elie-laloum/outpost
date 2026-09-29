@@ -15,7 +15,7 @@ import { reserveRecoveryStorage } from "@elie-laloum/outpost";
 
 Reserve cooperative headroom in a conditional transport ledger. By default createLocalTransport stores the ledger under .outpost/storage and admission measures local runtime files; an explicit transport measures its payloads. Release is idempotent. Abandoned reservations require explicit conditional recovery after confirming the owner stopped.
 
-[Complete example and detailed rules](../../guide/operations/storage-retention/).
+[Complete example and detailed rules](../../guide/retention/).
 
 ## Parameters and properties
 

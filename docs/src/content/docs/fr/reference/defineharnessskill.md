@@ -15,7 +15,7 @@ import { defineHarnessSkill } from "@elie-laloum/outpost";
 
 Définit une skill : des instructions, et éventuellement des outils, qu’un harness personnalisé liste dans ses instructions système et que le modèle charge avec load_skill au besoin. Les outils d’une skill sont refusés tant qu’elle n’est pas chargée.
 
-[Exemple complet et règles détaillées](../../guide/agents/harness/).
+[Exemple complet et règles détaillées](../../guide/harness/).
 
 ## Paramètres et propriétés
 

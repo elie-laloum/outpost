@@ -15,7 +15,7 @@ import { createEd25519DecisionVerifier } from "@elie-laloum/outpost";
 
 Create a verifier that resolves trusted approver keys on every decision, checks the Ed25519 signature, actor binding and expiry, and returns audit metadata. Missing, duplicate or revoked key identifiers are rejected.
 
-[Complete example and detailed rules](../../guide/advanced/approvals/).
+[Complete example and detailed rules](../../guide/approvals/).
 
 ## Parameters and properties
 

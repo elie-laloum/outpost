@@ -15,7 +15,7 @@ import { createReporter } from "@elie-laloum/outpost";
 
 Crée un callback d’observation qui formate progression, avertissements et bilans de passe pour un terminal ou une fonction d’écriture. quiet masque toutes les sorties et verbose inclut des événements supplémentaires ; le rapporteur ne pilote pas l’exécution.
 
-[Exemple complet et règles détaillées](../../guide/agents/observability/).
+[Exemple complet et règles détaillées](../../guide/progress/).
 
 ## Paramètres et propriétés
 

@@ -15,7 +15,7 @@ import { createLocalSandboxProvider } from "@elie-laloum/outpost/providers/local
 
 Create an explicitly unisolated provider that executes commands on the host in the selected workspace. No container or VM is allocated; host filesystem access and credentials remain those of the calling process.
 
-[Complete example and detailed rules](../../guide/environment/providers/overview/).
+[Complete example and detailed rules](../../guide/choose-a-sandbox/).
 
 ## Parameters and properties
 

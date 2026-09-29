@@ -60,7 +60,7 @@ Pour les agents CLI, un signal ne reclasse qu’un tour dont le processus d’ag
 
 Utilisez `quotaFault(error)` pour lire le message et l’heure de réinitialisation d’une erreur interceptée, y compris imbriquée.
 
-Pour continuer avec un autre agent ou modèle au lieu d’attendre, utilisez un [agent de secours](../agent-fallback/) : la tâche ne se met en pause que lorsque tous les candidats ont atteint une limite, jusqu’à la réinitialisation la plus proche.
+Pour continuer avec un autre agent ou modèle au lieu d’attendre, utilisez un [agent de secours](../fallback-agents/) : la tâche ne se met en pause que lorsque tous les candidats ont atteint une limite, jusqu’à la réinitialisation la plus proche.
 
 ## Pause et reprise
 
@@ -79,7 +79,7 @@ Activer `onQuota` autorise la relance de la tentative interrompue, comme un retr
 La première tentative après une pause reçoit `context.quota`. Il porte la conversation lorsqu’elle a été capturée, ainsi que la branche de travail conservée.
 
 - `defineAgentTask` et `defineIsolatedTask` poursuivent cette conversation. Le nouveau tour envoie une courte consigne de reprise au lieu du brief d’origine, et conserve la balise de réponse lorsqu’une réponse structurée est attendue. Utilisez `quotaResume: "restart"` pour renvoyer la requête d’origine.
-- `defineAgentTask` conserve le sandbox et le workspace fournis par l’appelant. `defineIsolatedTask` alloue un nouveau sandbox : une branche `current` ou `named` réutilise le même checkout, et un workspace intégré automatiquement part de la branche interrompue. Les changements non commités d’une tentative intégrée restent dans son [worktree conservé](../failure-recovery/).
+- `defineAgentTask` conserve le sandbox et le workspace fournis par l’appelant. `defineIsolatedTask` alloue un nouveau sandbox : une branche `current` ou `named` réutilise le même checkout, et un workspace intégré automatiquement part de la branche interrompue. Les changements non commités d’une tentative intégrée restent dans son [worktree conservé](../recovery/).
 - `defineInteractiveAgentTask` poursuit la conversation du tour interrompu.
 - La poursuite exige un agent capable de reprendre avec capture des conversations : Claude Code, Codex, Copilot ou Kimi. Antigravity et la capture désactivée démarrent une nouvelle conversation, tout comme une requête qui fournit sa propre `continuation` ou plusieurs `passes`.
 
@@ -131,6 +131,6 @@ function race(options: SpeculationOptions) {
 }
 ```
 
-Avec la [durabilité](../candidate-selection/#courses-durables-et-récupération), l’appel suivant à `speculate()` relance seulement les candidats arrêtés par une limite, en nouvelles tentatives depuis la baseline ; les budgets restent cumulés. Les candidats ne poursuivent pas leur conversation précédente. Sans durabilité, tous les candidats sont relancés.
+Avec la [durabilité](../speculation/#courses-durables-et-récupération), l’appel suivant à `speculate()` relance seulement les candidats arrêtés par une limite, en nouvelles tentatives depuis la baseline ; les budgets restent cumulés. Les candidats ne poursuivent pas leur conversation précédente. Sans durabilité, tous les candidats sont relancés.
 
 API : [WorkflowQuotaPolicy](../../reference/workflowquotapolicy/) · [WorkflowQuotaPause](../../reference/workflowquotapause/) · [quotaFault](../../reference/quotafault/) · [WorkflowOptions](../../reference/workflowoptions/).

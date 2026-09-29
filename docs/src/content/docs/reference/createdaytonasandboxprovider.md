@@ -13,9 +13,9 @@ import { createDaytonaSandboxProvider } from "@elie-laloum/outpost/providers/day
 
 ## Purpose and behavior
 
-Create a remote Daytona provider with separate SDK connection and sandbox creation settings. Repository transfers use the acquired remote environment, and synchronization validates concurrent host edits before applying changes. Optional egress is validated before allocation and confirmed through the server network-update API before workspace setup; failure triggers deletion. Native image startup precedes that confirmation. See [outbound rules](../../guide/outbound-rules/).
+Create a remote Daytona provider with separate SDK connection and sandbox creation settings. Repository transfers use the acquired remote environment, and synchronization validates concurrent host edits before applying changes. Optional egress is validated before allocation and confirmed through the server network-update API before workspace setup; failure triggers deletion. Native image startup precedes that confirmation. See [outbound rules](../../guide/network-restrictions/).
 
-[Complete example and detailed rules](../../guide/environment/providers/overview/).
+[Complete example and detailed rules](../../guide/choose-a-sandbox/).
 
 ## Parameters and properties
 

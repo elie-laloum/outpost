@@ -15,7 +15,7 @@ import { createVercelSandboxProvider } from "@elie-laloum/outpost/providers/verc
 
 Create a remote Vercel Sandbox provider, loading the optional SDK on acquisition. Repository state is uploaded and synchronized back with host-change protection. A supplied connect function can replace SDK sandbox creation for an integration.
 
-[Complete example and detailed rules](../../guide/environment/providers/overview/).
+[Complete example and detailed rules](../../guide/choose-a-sandbox/).
 
 ## Parameters and properties
 

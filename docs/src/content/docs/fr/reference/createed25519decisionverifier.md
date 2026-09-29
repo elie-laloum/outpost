@@ -15,7 +15,7 @@ import { createEd25519DecisionVerifier } from "@elie-laloum/outpost";
 
 Crée un vérificateur qui résout les clés de confiance à chaque décision, vérifie la signature Ed25519, l’acteur associé et l’expiration, puis renvoie les métadonnées d’audit. Les identifiants de clé absents, dupliqués ou révoqués sont refusés.
 
-[Exemple complet et règles détaillées](../../guide/advanced/approvals/).
+[Exemple complet et règles détaillées](../../guide/approvals/).
 
 ## Paramètres et propriétés
 

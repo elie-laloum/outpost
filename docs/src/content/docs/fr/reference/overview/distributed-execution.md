@@ -28,4 +28,4 @@ Le contrôle des générations refuse les résultats périmés mais ne peut pas 
 - [defineQueuedTask](../../definequeuedtask/)
 - [QueueLease](../../queuelease/)
 
-[Passer à la pratique avec le Guide](../../../guide/advanced/distributed/).
+[Passer à la pratique avec le Guide](../../../guide/job-queues/).

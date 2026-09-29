@@ -25,4 +25,4 @@ Les checkpoints gardent une propriété explicite jusqu’à libération ou réc
 - [Transport](../../transport/)
 - [inspectRecovery](../../inspectrecovery/)
 
-[Lire le guide pratique](../../../guide/operations/storage-transports/).
+[Lire le guide pratique](../../../guide/storage/).

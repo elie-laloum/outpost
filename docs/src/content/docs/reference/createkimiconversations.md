@@ -15,7 +15,7 @@ import { createKimiConversations } from "@elie-laloum/outpost";
 
 Create the native ConversationStore of Kimi Code. Session directories under $KIMI_CODE_HOME or ~/.kimi-code/sessions/<workspace bucket> are captured as bounded JSON bundles without logs, tasks, cron, notifications or locks; restoration picks the destination bucket and rewrites state.json. This is the default store of createKimiHarness().
 
-[Complete example and detailed rules](../../guide/agents/conversations/).
+[Complete example and detailed rules](../../guide/conversations/).
 
 ## Returns
 

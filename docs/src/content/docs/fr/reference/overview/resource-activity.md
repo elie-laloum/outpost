@@ -24,4 +24,4 @@ L’observation n’est ni l’inventaire d’un compte distant, ni une preuve d
 - [ResourceInspection](../../resourceinspection/)
 - [ResourceOperation](../../resourceoperation/)
 
-[Passer à la pratique avec le Guide](../../../guide/operations/recovery/).
+[Passer à la pratique avec le Guide](../../../guide/recovery/).

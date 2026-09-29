@@ -40,4 +40,4 @@ Les transferts doivent préserver les contenus binaires et les propriétés de f
 - [FileTransfers](../../filetransfers/)
 - [FileManifestEntry](../../filemanifestentry/)
 
-[Passer à la pratique avec le Guide](../../../guide/environment/providers/overview/).
+[Passer à la pratique avec le Guide](../../../guide/choose-a-sandbox/).

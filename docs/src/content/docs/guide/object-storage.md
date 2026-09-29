@@ -1,5 +1,5 @@
 ---
-title: "Object storage"
+title: "S3 and R2"
 description: "Use an S3 transport for durable Outpost objects."
 ---
 

@@ -15,7 +15,7 @@ import { readArtifact } from "@elie-laloum/outpost";
 
 Lit une référence d’artefact depuis une dépendance déclarée via context.value, puis charge et valide ses données stockées. Applique le signal d’annulation de la tâche et vérifie le producteur par rapport à l’exécution courante et à la clé de dépendance.
 
-[Exemple complet et règles détaillées](../../guide/advanced/artifacts/).
+[Exemple complet et règles détaillées](../../guide/artifacts/).
 
 ## Paramètres et propriétés
 

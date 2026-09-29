@@ -15,7 +15,7 @@ import { createPodmanSandboxProvider } from "@elie-laloum/outpost/providers/podm
 
 Crée un provider Podman avec les contrats d’exécution en conteneur et de transfert par flux. userns peut conserver la correspondance d’UID hôte et label contrôle le réétiquetage SELinux des montages. Le provider n’est alloué que lors de son acquisition par une sandbox.
 
-[Exemple complet et règles détaillées](../../guide/environment/providers/overview/).
+[Exemple complet et règles détaillées](../../guide/choose-a-sandbox/).
 
 ## Paramètres et propriétés
 

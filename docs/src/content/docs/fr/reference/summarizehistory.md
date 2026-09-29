@@ -15,7 +15,7 @@ import { summarizeHistory } from "@elie-laloum/outpost";
 
 Crée une stratégie de contexte qui, quand l’historique dépasse une taille, demande au modèle de résumer la partie ancienne et conserve le premier prompt et les messages récents. Chaque résumé coûte une requête de plus.
 
-[Exemple complet et règles détaillées](../../guide/agents/harness/).
+[Exemple complet et règles détaillées](../../guide/harness/).
 
 ## Paramètres et propriétés
 

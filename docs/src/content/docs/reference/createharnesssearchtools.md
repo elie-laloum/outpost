@@ -15,7 +15,7 @@ import { createHarnessSearchTools } from "@elie-laloum/outpost";
 
 Create the search toolset: search runs git grep with an extended regular expression over tracked and non-ignored files and returns bounded path:line:text matches.
 
-[Complete example and detailed rules](../../guide/agents/harness/).
+[Complete example and detailed rules](../../guide/harness/).
 
 ## Returns
 

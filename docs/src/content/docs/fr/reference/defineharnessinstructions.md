@@ -15,7 +15,7 @@ import { defineHarnessInstructions } from "@elie-laloum/outpost";
 
 Définit des instructions système à partir d’un texte ou d’un résolveur appelé au début de chaque passe avec le sandbox, le signal et le modèle. Le texte résolu n’est pas stocké dans la conversation.
 
-[Exemple complet et règles détaillées](../../guide/agents/harness/).
+[Exemple complet et règles détaillées](../../guide/harness/).
 
 ## Paramètres et propriétés
 

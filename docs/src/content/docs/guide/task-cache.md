@@ -1,5 +1,5 @@
 ---
-title: "Task result cache"
+title: "Result cache"
 description: "Reuse a task's JSON result instead of executing it again with the same inputs."
 ---
 
@@ -113,6 +113,6 @@ There is no single-flight coordination: concurrent executions with the same fing
 
 Entries are neither signed nor authenticated. Anyone who can write the transport controls the values tasks restore. Use a transport at least as trusted as the repository, and do not share it across trust boundaries. Entries contain task outputs, which may be sensitive.
 
-`createTaskCacheStore` stores entries under `task-cache/<fingerprint>.json`. They are kept until you remove them: add the `task-cache` scope to a [retention policy](../retention-rules/) to prune entries older than `minAgeMs`.
+`createTaskCacheStore` stores entries under `task-cache/<fingerprint>.json`. They are kept until you remove them: add the `task-cache` scope to a [retention policy](../retention/) to prune entries older than `minAgeMs`.
 
 API: [TaskCacheOptions](../../reference/taskcacheoptions/) · [createTaskCacheStore](../../reference/createtaskcachestore/) · [repositoryFingerprint](../../reference/repositoryfingerprint/) · [TaskCacheEntry](../../reference/taskcacheentry/).

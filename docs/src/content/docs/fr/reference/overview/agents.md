@@ -35,4 +35,4 @@ Ces API de composition sont disponibles depuis la version 5.0.0. Utilisez l’ag
 - [createFallbackAgent](../../createfallbackagent/)
 - [FallbackAgent](../../type-fallbackagent/)
 
-[Apprendre avec le guide pratique](../../../guide/agents/adapters/).
+[Apprendre avec le guide pratique](../../../guide/choose-an-agent/).

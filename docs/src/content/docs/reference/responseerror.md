@@ -15,7 +15,7 @@ import { ResponseError } from "@elie-laloum/outpost";
 
 Specialized OutpostError for missing tags, invalid JSON or schema rejection in structured answers. It preserves the expected tag, available raw content and underlying cause, and may carry dispatch recovery metadata.
 
-[Complete example and detailed rules](../../guide/agents/responses/).
+[Complete example and detailed rules](../../guide/typed-responses/).
 
 ## Parameters and properties
 

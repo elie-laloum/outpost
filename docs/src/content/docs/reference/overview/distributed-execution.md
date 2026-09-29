@@ -28,4 +28,4 @@ Fencing rejects stale completions but cannot undo an external effect already per
 - [defineQueuedTask](../../definequeuedtask/)
 - [QueueLease](../../queuelease/)
 
-[Learn with the practical guide](../../../guide/advanced/distributed/).
+[Learn with the practical guide](../../../guide/job-queues/).

@@ -15,7 +15,7 @@ import { defineQueuedTask } from "@elie-laloum/outpost";
 
 Définit un nœud qui envoie un travail durable dans la file et interroge sa progression. Déduit son identité de l’exécution et de la tâche, décode le résultat JSON et comptabilise l’usage renvoyé. Un worker enregistré exécute le gestionnaire distant.
 
-[Exemple complet et règles détaillées](../../guide/advanced/distributed/).
+[Exemple complet et règles détaillées](../../guide/job-queues/).
 
 ## Paramètres et propriétés
 

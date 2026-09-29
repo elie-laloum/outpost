@@ -15,7 +15,7 @@ import { speculate } from "@elie-laloum/outpost";
 
 Run bounded candidates from a pinned repository baseline, validate them in their live sandboxes and select one winner after its cleanup. Durable mode persists ownership, attempts, usage and outputs through Transport and requires explicit recovery/replay after a crash. Return preserved recovery locations and a Git merge preflight without integrating the branch.
 
-[Complete example and detailed rules](../../guide/advanced/speculation/).
+[Complete example and detailed rules](../../guide/speculation/).
 
 ## Parameters and properties
 

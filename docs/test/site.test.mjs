@@ -10,7 +10,7 @@ for (const [locale, title, reference] of [
   }) => {
     await page.goto(`${locale}guide/first-request/`);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(title);
-    await expect(page.locator(".docs-navigation section > h2")).toHaveCount(9);
+    await expect(page.locator(".docs-navigation section > h2")).toHaveCount(12);
     await expect(page.locator(".docs-navigation details")).toHaveCount(0);
     await expect(page.locator(".sl-markdown-content details")).toHaveCount(0);
     const spaces = page.locator(".docs-header nav");
@@ -199,7 +199,9 @@ test("retired guide URLs resolve directly to new topics", async ({ page }) => {
   await page.goto("agents/dispatch/");
   await expect(page).toHaveURL(/\/guide\/first-request\/$/);
   await page.goto("agents/conversations/#continuation-choices");
-  await expect(page).toHaveURL(/\/guide\/chat-history\/#continuation-choices$/);
+  await expect(page).toHaveURL(
+    /\/guide\/conversations\/#continuation-choices$/,
+  );
   await expect(page.locator("#continuation-choices")).toBeVisible();
   for (const locale of ["", "fr/"]) {
     await page.goto(`${locale}guide/`);
@@ -242,8 +244,8 @@ for (const locale of ["", "fr/"]) {
     page,
   }) => {
     for (const [route, target] of [
-      ["manual/cli", "command-line"],
-      ["behavior/agents/conversations", "chat-history"],
+      ["manual/cli", "cli"],
+      ["behavior/agents/conversations", "conversations"],
     ]) {
       await page.goto(`${locale}reference/${route}/`);
       await expect(page).toHaveURL(new RegExp(`/${locale}guide/${target}/$`));

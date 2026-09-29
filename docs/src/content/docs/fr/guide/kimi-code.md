@@ -3,7 +3,7 @@ title: "Kimi Code"
 description: "Connecter Kimi Code à une sandbox Outpost."
 ---
 
-Utilisez `createKimiHarness()` avec un [environnement d’exécution](../execution-backends/) pris en charge. Installez la CLI dans votre image ou autorisez le bootstrap chez les fournisseurs distants.
+Utilisez `createKimiHarness()` avec un [environnement d’exécution](../choose-a-sandbox/) pris en charge. Installez la CLI dans votre image ou autorisez le bootstrap chez les fournisseurs distants.
 
 ## Accès par compte
 
@@ -43,7 +43,7 @@ const coder = createAgent({
 
 L’authentification API exige un modèle explicite sur `createAgent()`. L’option `region` est réservée à l’authentification par compte ; configurez les endpoints API via les variables de modèle de la CLI si nécessaire. Définissez `KIMI_MODEL` dans l’environnement de votre application pour le snippet ci-dessus ; cette variable appartient à l’exemple, pas aux réglages d’Outpost. L’authentification par compte peut utiliser le modèle par défaut de la CLI.
 
-La capture native, la reprise à chaud et à froid, le fork et les réparations automatiques sont pris en charge pour Kimi Code 2.1.1. Outpost reprend avec `--session` et exécute `kimi fork <id> --yes` avant de continuer le nouvel identifiant. Le parent reste indépendant. La capture conserve les métadonnées et fichiers des agents, dont l’historique natif et les plans. `conversations` stocke les sessions capturées dans un [store de conversations](../chat-history/#stockage) au format `"kimi"`, par exemple `createTransportConversations(createKimiConversations(), …)`. Voir [l’historique](../chat-history/) et [la documentation des sessions Kimi](https://www.kimi.com/code/docs/en/kimi-code-cli/guides/sessions.html).
+La capture native, la reprise à chaud et à froid, le fork et les réparations automatiques sont pris en charge pour Kimi Code 2.1.1. Outpost reprend avec `--session` et exécute `kimi fork <id> --yes` avant de continuer le nouvel identifiant. Le parent reste indépendant. La capture conserve les métadonnées et fichiers des agents, dont l’historique natif et les plans. `conversations` stocke les sessions capturées dans un [store de conversations](../conversations/#stockage) au format `"kimi"`, par exemple `createTransportConversations(createKimiConversations(), …)`. Voir [l’historique](../conversations/) et [la documentation des sessions Kimi](https://www.kimi.com/code/docs/en/kimi-code-cli/guides/sessions.html).
 
 ## Comptabilité des tokens
 
@@ -51,7 +51,7 @@ La CLI épinglée `@moonshot-ai/kimi-code` 2.1.1 omet l’usage dans `stream-jso
 
 `inputOther` devient `usage.input`, `output` devient `usage.output`, `inputCacheRead` devient `usage.cached` et `inputCacheCreation` devient `usage.cacheCreated`. L’entrée exclut les lectures et écritures de cache. Seul l’usage rapporté est disponible ; un zéro fourni par la CLI ne prouve pas qu’un appel modèle non rapporté était gratuit.
 
-Un identifiant absent, des entrées manquantes ou malformées, une interruption ou le dépassement des limites de lecture produisent `usage.complete === false` ; les compteurs mesurés restent une borne inférieure. Un avertissement au démarrage précise que la collecte intervient après l’exécution. Combinez `budget.attempts` avec un timeout de tâche ou un délai de dispatch ; voir [Budgets de consommation](../token-budgets/).
+Un identifiant absent, des entrées manquantes ou malformées, une interruption ou le dépassement des limites de lecture produisent `usage.complete === false` ; les compteurs mesurés restent une borne inférieure. Un avertissement au démarrage précise que la collecte intervient après l’exécution. Combinez `budget.attempts` avec un timeout de tâche ou un délai de dispatch ; voir [Budgets de consommation](../budgets/).
 
 `mcpServers` fusionne des [serveurs MCP](../mcp-servers/) dans `~/.kimi-code/mcp.json` du home de l’agent, qui est votre propre home avec le fournisseur local.
 

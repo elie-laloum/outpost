@@ -24,4 +24,4 @@ A diagnostic does not take ownership of closing a supplied sandbox. A binary/ver
 - [diagnoseAgentProtocol](../../diagnoseagentprotocol/)
 - [AgentProtocolReport](../../agentprotocolreport/)
 
-[Learn with the practical guide](../../../guide/operations/doctor/).
+[Learn with the practical guide](../../../guide/diagnostics/).

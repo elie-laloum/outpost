@@ -15,7 +15,7 @@ import { recoveryDetails } from "@elie-laloum/outpost";
 
 Extrait les métadonnées de récupération d’une erreur inconnue lorsqu’Outpost les a attachées. Le résultat identifie le travail et les emplacements conservés ; sans métadonnées, renvoie undefined sans déclencher de nettoyage ni de restauration.
 
-[Exemple complet et règles détaillées](../../guide/operations/recovery/).
+[Exemple complet et règles détaillées](../../guide/recovery/).
 
 ## Paramètres et propriétés
 

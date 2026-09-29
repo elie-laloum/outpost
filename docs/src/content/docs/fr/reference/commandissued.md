@@ -15,7 +15,7 @@ import { commandIssued } from "@elie-laloum/outpost";
 
 Renvoie le texte qui suit une commande dans un commentaire GitHub ou GitLab nouvellement créé, sur la première ligne qui commence par elle, ou dans une commande slash Slack correspondante ; sinon undefined. Les commentaires modifiés sont ignorés. Elle n’autorise pas l’acteur ; comparez event.actor à une liste autorisée.
 
-[Exemple complet et règles détaillées](../../guide/triggers/).
+[Exemple complet et règles détaillées](../../guide/webhooks/).
 
 ## Paramètres et propriétés
 
