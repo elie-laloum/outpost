@@ -18,6 +18,7 @@ export const HARNESS_FIELDS: ReadonlySet<string> = new Set([
   "conversations",
   "skills",
   "cache",
+  "mcpServers",
 ]);
 
 export const TOOL_RESULT_CHARACTERS = 100_000;

@@ -2,6 +2,7 @@ import type { Usage } from "./agent.types.ts";
 import type { HarnessContextStrategy } from "./context.types.ts";
 import type { ConversationStore } from "./conversation.types.ts";
 import type { HarnessHook } from "./hook.types.ts";
+import type { McpServers } from "./mcp-server.types.ts";
 import type { AgentModel, ModelProvider } from "./model.types.ts";
 import type { HarnessPermissions } from "./permissions.types.ts";
 import type { HarnessSkill } from "./skill.types.ts";
@@ -54,6 +55,7 @@ export interface HarnessOptions {
   readonly conversations?: ConversationStore | false;
   readonly skills?: readonly HarnessSkill[];
   readonly cache?: boolean;
+  readonly mcpServers?: McpServers;
 }
 
 export interface Harness {
@@ -69,4 +71,5 @@ export interface Harness {
   readonly conversations?: ConversationStore | false;
   readonly skills: readonly HarnessSkill[];
   readonly cache: boolean;
+  readonly mcpServers?: McpServers;
 }

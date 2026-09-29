@@ -15,6 +15,8 @@ import type { TranscriptHandle } from "../infrastructure/conversations/harness-t
 import { storageFor } from "./agent-storage.ts";
 import { harnessHistory } from "./harness-history.ts";
 import { harnessLoop } from "./harness-loop.ts";
+import { withMcpTools } from "./harness-mcp.ts";
+import type { HarnessTool } from "../domain/tool.types.ts";
 import type { CustomTurnContext } from "./harness.types.ts";
 import { stopReason } from "./stop-reason.ts";
 import { notify } from "./observation.ts";
@@ -144,42 +146,50 @@ export async function customTurn(
         })
       : undefined;
     if (transcript) emit({ kind: "conversation", id: transcript.id });
-    const text = await harnessLoop(
-      {
-        agent,
-        repository: context.repository,
-        ...(transcript ? { conversation: transcript.id } : {}),
-        budget,
-        modelScope,
-        permissions: agent.harness.permissions
-          ? [agent.harness.permissions]
-          : [],
-        depth: 0,
-        maxDepth:
-          agent.harness.limits.maxDelegationDepth ?? MAX_DELEGATION_DEPTH,
-        verbose: options.observation?.verbose ?? false,
-        tools: context.repair
-          ? agent.harness.tools.filter((tool) => tool.readOnly)
-          : agent.harness.tools,
-        modelProvider,
-        sandbox,
-        signal,
-        ...(inbox
-          ? {
-              steer: () => {
-                const messages = inbox.take();
-                for (const message of messages)
-                  message.deliver({ mode: "injected" });
-                return messages.map((message) => message.text);
-              },
-            }
-          : {}),
-        emit,
-        hold: () => watchdog.hold(),
-      },
-      prompt,
-      harnessHistory(transcript),
-    );
+    const run = (tools: readonly HarnessTool[]) =>
+      harnessLoop(
+        {
+          agent,
+          repository: context.repository,
+          ...(transcript ? { conversation: transcript.id } : {}),
+          budget,
+          modelScope,
+          permissions: agent.harness.permissions
+            ? [agent.harness.permissions]
+            : [],
+          depth: 0,
+          maxDepth:
+            agent.harness.limits.maxDelegationDepth ?? MAX_DELEGATION_DEPTH,
+          verbose: options.observation?.verbose ?? false,
+          tools,
+          modelProvider,
+          sandbox,
+          signal,
+          ...(inbox
+            ? {
+                steer: () => {
+                  const messages = inbox.take();
+                  for (const message of messages)
+                    message.deliver({ mode: "injected" });
+                  return messages.map((message) => message.text);
+                },
+              }
+            : {}),
+          emit,
+          hold: () => watchdog.hold(),
+        },
+        prompt,
+        harnessHistory(transcript),
+      );
+    const text = context.repair
+      ? await run(agent.harness.tools.filter((tool) => tool.readOnly))
+      : await withMcpTools(
+          agent.harness,
+          sandbox,
+          signal,
+          agent.harness.tools,
+          run,
+        );
     signal.throwIfAborted();
     for (const value of [
       usage.input,

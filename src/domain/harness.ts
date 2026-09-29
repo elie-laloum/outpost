@@ -13,6 +13,7 @@ import type {
   ResolvedHarnessLimits,
 } from "./harness.types.ts";
 import { harnessHooks } from "./hook.ts";
+import { mcpServers } from "./mcp-server.ts";
 import {
   defineHarnessInstructions,
   harnessInstructions,
@@ -91,6 +92,9 @@ export function harness(options: HarnessOptions): Harness {
       ? {}
       : { conversations: options.conversations }),
     cache: options.cache ?? HARNESS_DEFAULTS.cache,
+    ...(options.mcpServers === undefined
+      ? {}
+      : { mcpServers: mcpServers(options.mcpServers) }),
   });
 }
 

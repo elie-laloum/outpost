@@ -18,7 +18,9 @@ import {
   copilotHarness,
   createSteering,
   kimiHarness,
+  harness,
 } from "../src/index.ts";
+import type { ModelRequest } from "../src/index.ts";
 import { dockerSandboxProvider } from "../src/providers/docker.ts";
 import { podmanSandboxProvider } from "../src/providers/podman.ts";
 import { repository } from "./helpers.ts";
@@ -1274,5 +1276,86 @@ test(
       await git(root, ["rev-parse", "replayed^{tree}"]),
       await git(root, ["rev-parse", "recorded^{tree}"]),
     );
+  },
+);
+
+test(
+  "real container runs built-in harness MCP servers over streamed stdio",
+  { skip: !process.env.OUTPOST_CONTAINER_ENGINE },
+  async (t) => {
+    const root = await repository(t);
+    await writeFile(
+      join(root, "mcp-server.mjs"),
+      await readFile(new URL("./fixtures/mcp-server.mjs", import.meta.url)),
+    );
+    const sandboxProvider =
+      process.env.OUTPOST_CONTAINER_ENGINE === "podman"
+        ? podmanSandboxProvider
+        : dockerSandboxProvider;
+    const replies = [
+      () => ({
+        text: "",
+        stopReason: "tool-calls" as const,
+        usage: { input: 1, cached: 0, output: 1 },
+        content: [
+          {
+            type: "tool-call" as const,
+            id: "call-1",
+            name: "mcp__fixture__env",
+            input: { name: "HOME" },
+          },
+        ],
+      }),
+      (request: ModelRequest) => {
+        const block = request.messages?.at(-1)?.content[0];
+        assert.equal(
+          block?.type === "tool-result" && block.content,
+          "/home/agent",
+        );
+        return {
+          text: "<outpost>done</outpost>",
+          usage: { input: 1, cached: 0, output: 1 },
+        };
+      },
+    ];
+    const box = await createSandbox({
+      repository: root,
+      sandboxProvider: sandboxProvider({
+        image: containerImage,
+        networks: "none",
+      }),
+      logging: false,
+    });
+    try {
+      const result = await box.dispatch({
+        agent: composeAgent({
+          model: "fixture",
+          harness: harness({
+            modelProvider: {
+              name: "fixture",
+              async request(request) {
+                return replies.shift()!(request);
+              },
+            },
+            mcpServers: {
+              fixture: {
+                command: "node",
+                arguments: ["mcp-server.mjs"],
+                environment: { MCP_LOG: "mcp.log" },
+              },
+            },
+          }),
+        }),
+        brief: { text: "Use MCP inside the container" },
+      });
+      assert.equal(result.completed, true);
+      const log = await readFile(
+        join(box.workspace.directory, "mcp.log"),
+        "utf8",
+      );
+      assert.match(log, /"closed":true/);
+    } finally {
+      await box.close();
+    }
   },
 );

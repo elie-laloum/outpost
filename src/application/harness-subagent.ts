@@ -10,6 +10,7 @@ import { storageFor } from "./agent-storage.ts";
 import { harnessBudget } from "./harness-budget.ts";
 import { harnessHistory } from "./harness-history.ts";
 import { harnessLoop } from "./harness-loop.ts";
+import { withMcpTools } from "./harness-mcp.ts";
 import { harnessModelProvider } from "./harness-model-provider.ts";
 import type { HarnessRuntime } from "./harness.types.ts";
 
@@ -59,39 +60,47 @@ export async function runSubagent(
         })
       : undefined;
     lifecycle("started");
-    text = await harnessLoop(
-      {
-        ...runtime,
-        agent,
-        budget,
-        depth,
-        maxDepth: Math.min(
-          runtime.maxDepth,
-          depth +
-            (agent.harness.limits.maxDelegationDepth ?? MAX_DELEGATION_DEPTH),
+    text = await withMcpTools(
+      agent.harness,
+      context.sandbox,
+      context.signal,
+      agent.harness.tools,
+      (tools) =>
+        harnessLoop(
+          {
+            ...runtime,
+            agent,
+            budget,
+            depth,
+            maxDepth: Math.min(
+              runtime.maxDepth,
+              depth +
+                (agent.harness.limits.maxDelegationDepth ??
+                  MAX_DELEGATION_DEPTH),
+            ),
+            conversation: transcript?.id,
+            tools,
+            permissions: [
+              ...runtime.permissions,
+              ...(agent.harness.permissions ? [agent.harness.permissions] : []),
+            ],
+            sandbox: context.sandbox,
+            signal: context.signal,
+            modelProvider: harnessModelProvider({
+              agent,
+              signal: context.signal,
+              budget,
+              ...runtime.modelScope,
+              account: (result) => runtime.modelScope.account(result, id),
+            }),
+            emit: (event) => {
+              context.signal.throwIfAborted();
+              runtime.emit({ ...event, subagentId: event.subagentId ?? id });
+            },
+          },
+          validated.value.prompt,
+          harnessHistory(transcript),
         ),
-        conversation: transcript?.id,
-        tools: agent.harness.tools,
-        permissions: [
-          ...runtime.permissions,
-          ...(agent.harness.permissions ? [agent.harness.permissions] : []),
-        ],
-        sandbox: context.sandbox,
-        signal: context.signal,
-        modelProvider: harnessModelProvider({
-          agent,
-          signal: context.signal,
-          budget,
-          ...runtime.modelScope,
-          account: (result) => runtime.modelScope.account(result, id),
-        }),
-        emit: (event) => {
-          context.signal.throwIfAborted();
-          runtime.emit({ ...event, subagentId: event.subagentId ?? id });
-        },
-      },
-      validated.value.prompt,
-      harnessHistory(transcript),
     );
     context.signal.throwIfAborted();
   } catch (error) {
