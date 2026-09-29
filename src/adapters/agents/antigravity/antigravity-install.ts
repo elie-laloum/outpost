@@ -1,5 +1,5 @@
 import { posix } from "node:path";
-import { quote } from "../infrastructure/process.ts";
+import { quote } from "../../../infrastructure/process.ts";
 import { antigravityReleases } from "./antigravity-install.constants.ts";
 import type { AntigravityRelease } from "./antigravity-install.types.ts";
 

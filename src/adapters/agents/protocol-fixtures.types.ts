@@ -5,6 +5,3 @@ export interface AgentProtocolFixture {
   readonly lines: readonly string[];
   readonly expected: readonly AgentEvent[];
 }
-
-export type ProtocolAgent =
-  "claude" | "codex" | "antigravity" | "copilot" | "kimi";

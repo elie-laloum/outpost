@@ -1,7 +1,3 @@
-export const agentVersions = Object.freeze({
-  codex: "0.156.1",
-  claude: "2.1.280",
-  copilot: "1.0.88",
-  kimi: "2.1.1",
-  antigravity: "1.2.12",
-});
+import { builtInAgentRecord } from "../adapters/agents/catalog.ts";
+
+export const agentVersions = builtInAgentRecord((agent) => agent.version);

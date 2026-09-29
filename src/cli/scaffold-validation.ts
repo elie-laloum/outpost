@@ -1,35 +1,18 @@
 import { createAgent as composeAgent } from "../domain/agent.ts";
 import { invariant } from "../domain/errors.ts";
-import {
-  createAntigravityHarness,
-  createClaudeHarness,
-  createCodexHarness,
-  createCopilotHarness,
-  createKimiHarness,
-} from "../providers/agents.ts";
+import { builtInAgent, builtInAgentList } from "../adapters/agents/catalog.ts";
 import {
   authenticationChoice,
   authenticationSetting,
 } from "./init-authentication.ts";
-import { authenticationChoices } from "./main.constants.ts";
 import { supportedProviders } from "./scaffold.constants.ts";
 import type { InitOptions } from "./scaffold.types.ts";
-
-const harnesses = {
-  codex: createCodexHarness,
-  claude: createClaudeHarness,
-  antigravity: createAntigravityHarness,
-  copilot: createCopilotHarness,
-  kimi: createKimiHarness,
-} as const;
 
 export function validateInitialization(options: InitOptions): void {
   const agent = options.agent ?? "codex",
     sandboxProvider = options.sandboxProvider ?? "docker";
-  invariant(
-    Object.hasOwn(authenticationChoices, agent),
-    "Choose codex, claude, antigravity, copilot or kimi",
-  );
+  const descriptor = builtInAgent(agent);
+  invariant(descriptor, `Choose ${builtInAgentList()}`);
   invariant(
     supportedProviders.includes(sandboxProvider),
     "Unknown sandbox provider",
@@ -40,7 +23,8 @@ export function validateInitialization(options: InitOptions): void {
   );
   invariant(
     !options.baseUrl ||
-      (agent === "codex" && authenticationChoice(options).value === "usage"),
+      (descriptor.customModelProvider === true &&
+        authenticationChoice(options).value === "usage"),
     "Custom Responses providers require Codex and usage authentication",
   );
   const authentication = authenticationSetting(options);
@@ -55,7 +39,7 @@ export function validateInitialization(options: InitOptions): void {
       }
     : {};
   composeAgent({
-    harness: harnesses[agent]({ authentication, ...modelProvider }),
+    harness: descriptor.harness({ authentication, ...modelProvider }),
     ...(options.model ? { model: options.model } : {}),
   });
 }

@@ -3,38 +3,37 @@ import type { Agent } from "../domain/agent.types.ts";
 import { invariant } from "../domain/errors.ts";
 import type { SandboxLease } from "../domain/sandbox.types.ts";
 import { quote, requireSuccess } from "../infrastructure/process.ts";
-import { antigravityInstall } from "../providers/antigravity-install.ts";
-import { agentInstallers } from "./agent-bootstrap.constants.ts";
+import type { AgentDescriptor } from "../adapters/agents/agent-descriptor.types.ts";
+import { builtInAgent } from "../adapters/agents/catalog.ts";
 import type {
   AgentInstallation,
   AgentInstallations,
-  AgentInstaller,
 } from "./agent-bootstrap.types.ts";
 
 const installations: AgentInstallations = {
-  npm: (installer, home) => {
+  npm: (installer, executable, version, home) => {
     const prefix = posix.join(home, ".outpost-tools");
     const scripts = installer.allowScripts
-      ? ` --allow-scripts=${installer.package.replace(/@[^@/]+$/, "")}`
+      ? ` --allow-scripts=${installer.package}`
       : "";
     return {
-      target: posix.join(prefix, "bin", installer.binary),
-      install: `npm install --global${scripts} --prefix ${quote(prefix)} ${installer.package}`,
+      target: posix.join(prefix, "bin", executable),
+      install: `npm install --global${scripts} --prefix ${quote(prefix)} ${installer.package}@${version}`,
     };
   },
-  antigravity: (installer, home) => ({
+  script: (installer, _executable, _version, home) => ({
     target: posix.join(home, installer.installed),
-    install: antigravityInstall(posix.join(home, installer.installed)),
+    install: installer.script(posix.join(home, installer.installed)),
   }),
 };
 
 function installation(
-  installer: AgentInstaller,
+  { install, executable, version }: AgentDescriptor,
   home: string,
 ): AgentInstallation {
-  return installer.kind === "npm"
-    ? installations.npm(installer, home)
-    : installations.antigravity(installer, home);
+  return install.kind === "npm"
+    ? installations.npm(install, executable, version, home)
+    : installations.script(install, executable, version, home);
 }
 
 export async function prepareAdapter(
@@ -45,12 +44,10 @@ export async function prepareAdapter(
   if (agent.kind !== "cli") return agent;
   const name = agent.bootstrap ?? agent.conversations;
   if (!name) return agent;
-  const installer = Object.hasOwn(agentInstallers, name)
-    ? agentInstallers[name]
-    : undefined;
-  invariant(installer, `Unknown agent bootstrap: ${name}`);
-  const { binary } = installer;
-  const { target, install } = installation(installer, runtime.home);
+  const descriptor = builtInAgent(name);
+  invariant(descriptor, `Unknown agent bootstrap: ${name}`);
+  const binary = descriptor.executable;
+  const { target, install } = installation(descriptor, runtime.home);
   const installed = await requireSuccess(
     {
       executable: "sh",

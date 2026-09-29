@@ -13,8 +13,8 @@ import {
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { executeProcess } from "../../src/infrastructure/process.ts";
-import { antigravityInstall } from "../../src/providers/antigravity-install.ts";
-import { antigravityReleases } from "../../src/providers/antigravity-install.constants.ts";
+import { antigravityInstall } from "../../src/adapters/agents/antigravity/antigravity-install.ts";
+import { antigravityReleases } from "../../src/adapters/agents/antigravity/antigravity-install.constants.ts";
 import { agentVersions } from "../../src/providers/versions.constants.ts";
 
 const unix = process.platform !== "win32";

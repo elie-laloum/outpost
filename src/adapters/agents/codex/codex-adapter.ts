@@ -55,6 +55,7 @@ function bindCodex(settings: Bound<CodexSettings>): AgentAdapter {
     name: "codex",
     ...(credentials ? { credentials } : {}),
     ...(configuration ? { configuration } : {}),
+    bootstrap: "codex",
     conversations: "codex",
     ...conversationStorage(settings),
     resumable: true,

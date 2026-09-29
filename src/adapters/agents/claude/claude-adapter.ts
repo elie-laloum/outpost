@@ -65,6 +65,7 @@ function bindClaude(settings: Bound<ClaudeSettings>): AgentAdapter {
     name: "claude",
     ...(credentials ? { credentials } : {}),
     ...(configuration ? { configuration } : {}),
+    bootstrap: "claude",
     conversations: "claude",
     ...conversationStorage(settings),
     resumable: true,

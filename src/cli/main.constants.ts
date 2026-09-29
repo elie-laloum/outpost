@@ -1,3 +1,4 @@
+import { builtInAgentList, builtInAgents } from "../adapters/agents/catalog.ts";
 export const cliOptions = {
   "base-url": {
     type: "string",
@@ -41,7 +42,7 @@ export const cliOptions = {
   "max-entries": { type: "string", description: "Maximum inventory entries" },
   agent: {
     type: "string",
-    description: "Agent: codex, claude, antigravity, copilot or kimi",
+    description: `Agent: ${builtInAgentList()}`,
   },
   sandboxProvider: {
     type: "string",
@@ -134,7 +135,7 @@ export const initializationQuestions = [
   {
     key: "agent",
     message: "Coding agent",
-    choices: ["codex", "claude", "antigravity", "copilot", "kimi"],
+    choices: builtInAgents.map((agent) => agent.name),
   },
   {
     key: "sandboxProvider",
@@ -142,88 +143,3 @@ export const initializationQuestions = [
     choices: ["docker", "podman", "vercel", "daytona", "local"],
   },
 ] as const;
-
-export const authenticationChoices = {
-  codex: [
-    {
-      value: "account",
-      label: "ChatGPT account (codex login, file storage)",
-      instructions:
-        'Run codex login on the host with cli_auth_credentials_store = "file". Isolated sandboxes receive a private copy of auth.json; the local provider uses the host login. This uses your ChatGPT plan.',
-    },
-    {
-      value: "usage",
-      label: "OpenAI API key (API billing)",
-      variable: "OPENAI_API_KEY",
-      instructions:
-        "Set OPENAI_API_KEY in the workflow .env or parent environment. API usage is billed separately from subscriptions.",
-    },
-  ],
-  claude: [
-    {
-      value: "account",
-      label: "Claude subscription login (claude /login)",
-      instructions:
-        "Run claude and /login on the host. Isolated sandboxes receive only the subscription entry of .credentials.json. Logins stored in the macOS keychain are never read: choose account-token there.",
-    },
-    {
-      value: "account-token",
-      label: "Claude subscription token (claude setup-token)",
-      variable: "CLAUDE_CODE_OAUTH_TOKEN",
-      instructions:
-        "Run claude setup-token on the host, then set CLAUDE_CODE_OAUTH_TOKEN in the workflow .env or parent environment. This uses your Claude subscription.",
-    },
-    {
-      value: "usage",
-      label: "Anthropic API key (API billing)",
-      variable: "ANTHROPIC_API_KEY",
-      instructions:
-        "Set ANTHROPIC_API_KEY in the workflow .env or parent environment. API usage is billed separately from subscriptions.",
-    },
-  ],
-  antigravity: [
-    {
-      value: "account",
-      label: "Google account login (agy)",
-      instructions:
-        "Run agy on the host and sign in with your Google account. Isolated sandboxes receive a private copy of the Antigravity OAuth token.",
-    },
-    {
-      value: "usage",
-      label: "Gemini API key (API billing)",
-      variable: "GEMINI_API_KEY",
-      instructions:
-        "Set GEMINI_API_KEY in the workflow .env or parent environment. Gemini API usage is billed separately from Google AI plans.",
-    },
-  ],
-  copilot: [
-    {
-      value: "account",
-      label: "GitHub Copilot login (copilot login)",
-      instructions:
-        "Run copilot login on the host. Outpost passes the token stored in ~/.copilot/config.json as COPILOT_GITHUB_TOKEN; tokens kept in the system keychain are never read: choose account-token there.",
-    },
-    {
-      value: "account-token",
-      label: "GitHub token with Copilot access (COPILOT_GITHUB_TOKEN)",
-      variable: "COPILOT_GITHUB_TOKEN",
-      instructions:
-        "Set COPILOT_GITHUB_TOKEN to a fine-grained token with the Copilot Requests permission in the workflow .env or parent environment. Classic ghp_ tokens are rejected. Requests count against your Copilot plan.",
-    },
-  ],
-  kimi: [
-    {
-      value: "account",
-      label: "Kimi Code account login",
-      instructions:
-        "Sign in with the kimi CLI on the host. Isolated sandboxes receive a private copy of the ~/.kimi-code credentials and device identifier.",
-    },
-    {
-      value: "usage",
-      label: "Kimi API key (API billing, requires --model)",
-      variable: "KIMI_API_KEY",
-      instructions:
-        "Set KIMI_API_KEY in the workflow .env or parent environment. API usage is billed separately from Kimi Code plans.",
-    },
-  ],
-} as const;

@@ -2,6 +2,8 @@ import {
   authenticationEnvironment,
   authenticationSource,
 } from "./init-authentication.ts";
+import { builtInAgent } from "../adapters/agents/catalog.ts";
+import { invariant } from "../domain/errors.ts";
 import type { InitOptions } from "./scaffold.types.ts";
 
 function capitalize(value: string): string {
@@ -11,7 +13,9 @@ function capitalize(value: string): string {
 export function starter(options: InitOptions): string {
   const agent = options.agent ?? "codex",
     sandboxProvider = options.sandboxProvider ?? "docker";
-  const harness = `create${capitalize(agent)}Harness`,
+  const descriptor = builtInAgent(agent);
+  invariant(descriptor, `Unknown agent: ${agent}`);
+  const harness = descriptor.harnessExport,
     provider = `create${capitalize(sandboxProvider)}SandboxProvider`;
   const model = options.model ? `model: ${JSON.stringify(options.model)}` : "";
   const modelProvider = options.baseUrl

@@ -1,7 +1,8 @@
 import type { AgentAuthentication } from "../domain/agent.types.ts";
 import { invariant } from "../domain/errors.ts";
-import { authenticationChoices } from "./main.constants.ts";
-import type { AuthenticationChoice, InitOptions } from "./scaffold.types.ts";
+import type { AuthenticationChoice } from "../adapters/agents/agent-descriptor.types.ts";
+import { builtInAgent } from "../adapters/agents/catalog.ts";
+import type { InitOptions } from "./scaffold.types.ts";
 
 export function authenticationChoice(
   options: InitOptions,
@@ -9,12 +10,7 @@ export function authenticationChoice(
   const agent = options.agent ?? "codex";
   const value =
     options.authentication ?? (options.baseUrl ? "usage" : "account");
-  const choices: readonly AuthenticationChoice[] = Object.hasOwn(
-    authenticationChoices,
-    agent,
-  )
-    ? authenticationChoices[agent]
-    : [];
+  const choices = builtInAgent(agent)?.authentication ?? [];
   const choice = choices.find((candidate) => candidate.value === value);
   invariant(
     choice,

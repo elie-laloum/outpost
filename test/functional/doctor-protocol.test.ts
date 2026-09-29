@@ -9,8 +9,10 @@ import {
   createKimiHarness,
   diagnoseAgentProtocol,
 } from "../../src/index.ts";
-import { protocolFixtures } from "../../src/adapters/agents/protocol-fixtures.constants.ts";
+import { builtInAgentRecord } from "../../src/adapters/agents/catalog.ts";
 import { executeProcess } from "../../src/infrastructure/process.ts";
+
+const protocolFixtures = builtInAgentRecord((agent) => agent.protocol);
 
 const harnesses = {
   claude: createClaudeHarness,

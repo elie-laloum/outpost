@@ -1,10 +1,6 @@
 import assert from "node:assert/strict";
 import { cloudCommandFailure } from "./cloud-failure.ts";
 import { posix } from "node:path";
-import { codexDiagnostics } from "../../src/adapters/agents/codex/codex-diagnostics.ts";
-import { claudeDiagnostics } from "../../src/adapters/agents/claude/claude-diagnostics.ts";
-import { copilotDiagnostics } from "../../src/adapters/agents/copilot/copilot-diagnostics.ts";
-import { kimiDiagnostics } from "../../src/adapters/agents/kimi/kimi-diagnostics.ts";
 import type { SandboxLease } from "../../src/domain/sandbox.types.ts";
 import type { CompatibilityCheck } from "./cloud-compatibility.types.ts";
 import {
@@ -34,14 +30,8 @@ export async function verifyCloudAgents(
   });
   if (installed.status !== 0)
     throw cloudCommandFailure("agent-cli-installation", "agent-cli", installed);
-  const diagnostics = {
-    codex: codexDiagnostics,
-    claude: claudeDiagnostics,
-    copilot: copilotDiagnostics,
-    kimi: kimiDiagnostics,
-  };
   for (const agent of agentPackages) {
-    const scenarios = diagnostics[agent.executable]();
+    const scenarios = agent.diagnostics();
     const executable = posix.join(
       prefix,
       "node_modules",

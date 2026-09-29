@@ -1,15 +1,17 @@
+import type { BuiltInAgentName } from "../adapters/agents/catalog.types.ts";
 import type { AgentCliDiagnostic } from "../adapters/agents/cli-diagnostics.types.ts";
+import type { AgentProtocolFixture } from "../adapters/agents/protocol-fixtures.types.ts";
 import type { CliHarness } from "../domain/agent.types.ts";
 import type { Command } from "../domain/command.types.ts";
 export type DoctorProvider =
   "docker" | "podman" | "local" | "vercel" | "daytona";
-export type DoctorAgent =
-  "codex" | "claude" | "antigravity" | "copilot" | "kimi";
+export type DoctorAgent = BuiltInAgentName;
 export interface DoctorAgentProfile {
   readonly executable: string;
   readonly referenceVersion?: string;
   readonly variables?: Command["variables"];
   diagnostics(): readonly AgentCliDiagnostic[];
+  readonly protocol: readonly AgentProtocolFixture[];
   harness(): CliHarness;
 }
 export type DiagnosticStatus = "pass" | "warn" | "fail" | "skipped";

@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
-import { protocolFixtures } from "../../src/adapters/agents/protocol-fixtures.constants.ts";
+import { builtInAgentRecord } from "../../src/adapters/agents/catalog.ts";
+
+const protocolFixtures = builtInAgentRecord((agent) => agent.protocol);
 
 const [agent, mode, ...args] = process.argv.slice(2);
 assert.ok(

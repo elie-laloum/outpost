@@ -1,15 +1,4 @@
-export type AgentInstaller =
-  | {
-      readonly kind: "npm";
-      readonly binary: string;
-      readonly package: string;
-      readonly allowScripts?: boolean;
-    }
-  | {
-      readonly kind: "antigravity";
-      readonly binary: string;
-      readonly installed: string;
-    };
+import type { AgentInstaller } from "../adapters/agents/agent-descriptor.types.ts";
 
 export interface AgentInstallation {
   readonly target: string;
@@ -19,6 +8,8 @@ export interface AgentInstallation {
 export type AgentInstallations = {
   readonly [Kind in AgentInstaller["kind"]]: (
     installer: Extract<AgentInstaller, { kind: Kind }>,
+    executable: string,
+    version: string,
     home: string,
   ) => AgentInstallation;
 };

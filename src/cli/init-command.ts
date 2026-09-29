@@ -1,3 +1,4 @@
+import { builtInAgent, builtInAgentList } from "../adapters/agents/catalog.ts";
 import { invariant } from "../domain/errors.ts";
 import { resolve } from "node:path";
 import {
@@ -11,10 +12,7 @@ import {
 import { projectSettings } from "./project-settings.ts";
 import { authenticationInstructions } from "./init-authentication.ts";
 import { supportedManagers } from "./scaffold.constants.ts";
-import {
-  initializationQuestions,
-  authenticationChoices,
-} from "./main.constants.ts";
+import { initializationQuestions } from "./main.constants.ts";
 import type { CliInvocation } from "./main.types.ts";
 import { initialize } from "./scaffold.ts";
 import type { InitOptions } from "./scaffold.types.ts";
@@ -57,10 +55,8 @@ export async function initializeCommand({
       resolve(values.directory ?? process.cwd()),
       options as InitOptions,
     );
-    const choices = Object.entries(authenticationChoices).find(
-      ([name]) => name === options.agent,
-    )?.[1];
-    invariant(choices, "Choose codex, claude, antigravity, copilot or kimi");
+    const choices = builtInAgent(String(options.agent))?.authentication;
+    invariant(choices, `Choose ${builtInAgentList()}`);
     const questions = [
       {
         key: "manager",

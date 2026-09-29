@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { test } from "node:test";
-import { protocolFixtures } from "../../src/adapters/agents/protocol-fixtures.constants.ts";
+import { builtInAgentRecord } from "../../src/adapters/agents/catalog.ts";
 import { initialize } from "../../src/cli/scaffold.ts";
 import { createAgent as composeAgent } from "../../src/domain/agent.ts";
 import {
@@ -15,6 +15,8 @@ import {
 } from "../../src/index.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { repository } from "../helpers.ts";
+
+const protocolFixtures = builtInAgentRecord((agent) => agent.protocol);
 
 const harnesses = {
   antigravity: createAntigravityHarness,

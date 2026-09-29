@@ -1,3 +1,4 @@
+import { builtInAgents } from "../../src/adapters/agents/catalog.ts";
 import { agentVersions } from "../../src/providers/versions.constants.ts";
 import assert from "node:assert/strict";
 import { test } from "node:test";
@@ -397,22 +398,34 @@ test("remote bootstrap installs npm CLIs, allows scripts only for Claude and ver
     async release() {},
   };
   const signal = new AbortController().signal;
-  for (const harness of [createCopilotHarness, createKimiHarness]) {
-    const agent = composeAgent({ harness: harness() });
+  let npmAgents = 0;
+  for (const descriptor of builtInAgents) {
+    const { install } = descriptor;
+    if (install.kind !== "npm") continue;
+    npmAgents += 1;
+    const agent = composeAgent({ harness: descriptor.harness() });
     const prepared = await prepareAdapter(agent, lease, signal);
     assert.equal(prepared.kind, "cli");
     if (prepared.kind !== "cli") throw new Error("Expected CLI harness");
     assert.equal(
       prepared.request({ text: "hello" }).executable,
-      `/home/agent/.outpost-tools/bin/${agent.name}`,
+      `/home/agent/.outpost-tools/bin/${descriptor.executable}`,
+    );
+    const script = scripts.at(-1)!;
+    assert.ok(script.includes(`${install.package}@${descriptor.version}`));
+    assert.equal(
+      script.includes(`--allow-scripts=${install.package} `),
+      "allowScripts" in install,
     );
   }
   assert.match(
-    scripts[0]!,
+    scripts.find((script) => script.includes("@github/copilot"))!,
     /npm install --global --prefix .* @github\/copilot@1\.0\.88/,
   );
-  assert.match(scripts[1]!, /@moonshot-ai\/kimi-code@2\.1\.1/);
-  assert.ok(scripts.every((script) => !script.includes("--allow-scripts")));
+  assert.equal(
+    scripts.filter((script) => script.includes("--allow-scripts")).length,
+    1,
+  );
   const antigravity = composeAgent({ harness: createAntigravityHarness() });
   const prepared = await prepareAdapter(antigravity, lease, signal);
   if (prepared.kind !== "cli") throw new Error("Expected CLI harness");
@@ -420,10 +433,10 @@ test("remote bootstrap installs npm CLIs, allows scripts only for Claude and ver
     prepared.request({ text: "hello" }).executable,
     "/home/agent/.outpost-tools/bin/agy",
   );
-  assert.equal(scripts.length, 3);
-  assert.match(scripts[2]!, /antigravity-cli\/1\.2\.12-/);
-  assert.match(scripts[2]!, /sha512sum/);
-  assert.ok(!scripts[2]!.includes("install.sh"));
+  assert.equal(scripts.length, npmAgents + 1);
+  assert.match(scripts.at(-1)!, /antigravity-cli\/1\.2\.12-/);
+  assert.match(scripts.at(-1)!, /sha512sum/);
+  assert.ok(!scripts.at(-1)!.includes("install.sh"));
   assert.equal(
     prepared.request({ text: "hello" }).variables?.AGY_CLI_DISABLE_AUTO_UPDATE,
     "true",

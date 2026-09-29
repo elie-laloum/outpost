@@ -1,3 +1,5 @@
+import { builtInAgents } from "../../src/adapters/agents/catalog.ts";
+
 export const cloudNames = ["vercel", "daytona"] as const;
 export const compatibilityLimits = {
   deadlineMs: 240_000,
@@ -10,9 +12,15 @@ export const requiredCredentials = {
   vercel: ["VERCEL_TOKEN", "VERCEL_TEAM_ID", "VERCEL_PROJECT_ID"],
   daytona: ["DAYTONA_API_KEY"],
 } as const;
-export const agentPackages = [
-  { executable: "codex", package: "@openai/codex" },
-  { executable: "claude", package: "@anthropic-ai/claude-code" },
-  { executable: "copilot", package: "@github/copilot" },
-  { executable: "kimi", package: "@moonshot-ai/kimi-code" },
-] as const;
+export const agentPackages = builtInAgents.flatMap(
+  ({ executable, install, doctor }) =>
+    install.kind === "npm"
+      ? [
+          {
+            executable,
+            package: install.package,
+            diagnostics: doctor.diagnostics,
+          },
+        ]
+      : [],
+);

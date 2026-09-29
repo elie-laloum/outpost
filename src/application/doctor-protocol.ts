@@ -1,5 +1,4 @@
 import { isDeepStrictEqual } from "node:util";
-import { protocolFixtures } from "../adapters/agents/protocol-fixtures.constants.ts";
 import { doctorAgents } from "./doctor-agent.constants.ts";
 import type { AgentProtocolReport } from "./doctor-protocol.types.ts";
 import type { DiagnosticCheck, DoctorAgent } from "./doctor.types.ts";
@@ -7,7 +6,7 @@ import type { DiagnosticCheck, DoctorAgent } from "./doctor.types.ts";
 export function diagnoseAgentProtocol(agent: DoctorAgent): AgentProtocolReport {
   const profile = doctorAgents[agent];
   const adapter = profile.harness().bind();
-  const checks: DiagnosticCheck[] = protocolFixtures[agent].map((fixture) => {
+  const checks: DiagnosticCheck[] = profile.protocol.map((fixture) => {
     const events = fixture.lines.flatMap((line) => adapter.events(line));
     const passed = isDeepStrictEqual(events, fixture.expected);
     return {

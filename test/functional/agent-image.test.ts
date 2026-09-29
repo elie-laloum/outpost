@@ -4,7 +4,7 @@ import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { executeProcess } from "../../src/infrastructure/process.ts";
-import { agentVersions } from "../../src/providers/versions.constants.ts";
+import { builtInAgents } from "../../src/adapters/agents/catalog.ts";
 
 test("prebuilt image context pins inputs, locks supported agents and preserves UID/home recipes", async (t) => {
   const directory = await mkdtemp(join(tmpdir(), "outpost-image-inputs-"));
@@ -50,12 +50,9 @@ test("prebuilt image context pins inputs, locks supported agents and preserves U
   const lock = JSON.parse(
     await readFile(join(directory, "package-lock.json"), "utf8"),
   );
-  for (const [name, version] of Object.entries({
-    "@openai/codex": agentVersions.codex,
-    "@anthropic-ai/claude-code": agentVersions.claude,
-    "@github/copilot": agentVersions.copilot,
-    "@moonshot-ai/kimi-code": agentVersions.kimi,
-  })) {
+  for (const { install, version } of builtInAgents) {
+    if (install.kind !== "npm") continue;
+    const name = install.package;
     assert.equal(lock.packages[""].dependencies[name], version);
     assert.equal(lock.packages[`node_modules/${name}`].version, version);
     assert.match(lock.packages[`node_modules/${name}`].integrity, /^sha512-/);

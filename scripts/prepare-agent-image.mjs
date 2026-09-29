@@ -2,7 +2,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { imageRecipe } from "../src/cli/scaffold.constants.ts";
-import { agentVersions } from "../src/providers/versions.constants.ts";
+import { builtInAgents } from "../src/adapters/agents/catalog.ts";
 
 const [directory, base, snapshot] = process.argv.slice(2);
 if (
@@ -18,12 +18,9 @@ const source = fileURLToPath(new URL("../images/agents/", import.meta.url));
 const manifest = JSON.parse(
   await readFile(resolve(source, "package.json"), "utf8"),
 );
-for (const [name, version] of Object.entries({
-  "@openai/codex": agentVersions.codex,
-  "@anthropic-ai/claude-code": agentVersions.claude,
-  "@github/copilot": agentVersions.copilot,
-  "@moonshot-ai/kimi-code": agentVersions.kimi,
-})) {
+for (const { install, version } of builtInAgents) {
+  if (install.kind !== "npm") continue;
+  const name = install.package;
   if (manifest.dependencies[name] !== version)
     throw new Error(
       `Agent image lock is stale for ${name}; update images/agents/package.json and its lockfile`,
