@@ -1,4 +1,7 @@
 import assert from "node:assert/strict";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { test } from "node:test";
 import type { TestContext } from "node:test";
 import {
@@ -8,20 +11,24 @@ import {
   fallbackAgent,
   OutpostError,
   quotaFault,
+  speculate,
+  task,
   unavailableFault,
   workflow,
 } from "../../src/index.ts";
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
 import type {
   AgentInput,
   AgentObservation,
   CliAgent,
   ConversationStore,
   FallbackTrigger,
+  TaskContext,
+  WorkflowCheckpoint,
+  WorkflowCheckpointStore,
+  WorkflowEvent,
 } from "../../src/index.ts";
 import { recoveryDetails } from "../../src/domain/errors.ts";
+import { quotaWorkspace } from "../../src/application/quota-resume.ts";
 import { localSandboxProvider } from "../../src/providers/local.ts";
 import { emit, repository, scripted } from "../helpers.ts";
 
@@ -349,4 +356,114 @@ test("conversations of failed candidates are captured for recovery", async (t) =
   const result = await sandbox.dispatch({ brief: { text: "go" } });
   assert.equal(result.text, "ok");
   assert.deepEqual(captured, ["primary-1"]);
+});
+
+test("a workflow pauses when every candidate hits a limit and reruns the brief from the first candidate", async (t) => {
+  const primaryInputs: AgentInput[] = [];
+  const backupInputs: AgentInput[] = [];
+  let earliest = "";
+  const primary = candidate(
+    "primary",
+    () => {
+      if (primaryInputs.length > 1) return emit("done");
+      earliest = new Date(Date.now() + 1_000).toISOString();
+      return `${line({ kind: "conversation", id: "primary-1" })}${limited(earliest)}`;
+    },
+    primaryInputs,
+  );
+  const backup = candidate(
+    "backup",
+    () => limited(new Date(Date.now() + 3_600_000).toISOString()),
+    backupInputs,
+  );
+  const sandbox = await session(t, pair(primary, backup, ["quota"]));
+  const coder = agentTask({
+    key: "coder",
+    sandbox,
+    request: () => ({ brief: { text: "implement" } }),
+  });
+  const events: WorkflowEvent[] = [];
+  let saved: WorkflowCheckpoint | undefined;
+  const store: WorkflowCheckpointStore = {
+    async acquire() {
+      return {
+        read: async () => saved && structuredClone(saved),
+        write: async (checkpoint) => {
+          saved = structuredClone(checkpoint);
+        },
+        release: async () => {},
+      };
+    },
+  };
+  const run = task({
+    key: "run",
+    perform: async (context) => {
+      const output = await coder.perform(context);
+      return { text: output.text, selected: output.fallback?.selected.name };
+    },
+  });
+  const result = await workflow("nightly", [run]).start({
+    checkpoint: { store, runId: "nightly", version: "1" },
+    onQuota: { action: "pause", maxWaitMs: 5_000 },
+    observe: (event) => events.push(event),
+  });
+  result.unwrap();
+  assert.deepEqual(result.value(run), { text: "done", selected: "primary" });
+  assert.equal(backupInputs.length, 1);
+  assert.equal(primaryInputs[1]!.text, "implement");
+  assert.equal(primaryInputs[1]!.continuation, undefined);
+  const waiting = events.find((event) => event.type === "quota");
+  assert.equal(waiting?.resetAt, earliest);
+});
+
+test("fallback agents resume integrated work from the interrupted branch unless restarting", () => {
+  const context = {
+    quota: {
+      requestedAt: new Date().toISOString(),
+      message: "limit",
+      branch: "outpost/job-1",
+    },
+  } as TaskContext;
+  const request = {
+    brief: { text: "x" },
+    agent: pair(candidate("primary", ""), candidate("backup", "")),
+    branch: { mode: "integrate" as const },
+  };
+  assert.deepEqual(quotaWorkspace(context, request).branch, {
+    mode: "integrate",
+    from: "outpost/job-1",
+  });
+  assert.deepEqual(quotaWorkspace(context, request, "restart"), request);
+  const single = { ...request, agent: candidate("primary", "") };
+  assert.deepEqual(quotaWorkspace(context, single), single);
+});
+
+test("speculation candidates fall back and report quota only once every fallback is exhausted", async (t) => {
+  const result = await speculate({
+    repository: await repository(t),
+    sandboxProvider: localSandboxProvider(),
+    concurrency: 1,
+    candidates: [
+      {
+        key: "exhausted",
+        agent: pair(
+          candidate("primary", limited()),
+          candidate("backup", limited()),
+        ),
+      },
+      {
+        key: "recovered",
+        agent: pair(
+          candidate("primary", limited()),
+          candidate("backup", emit("ok")),
+        ),
+      },
+    ].map((entry) => ({ ...entry, request: { brief: { text: "go" } } })),
+    budget: {},
+    validate: () => false,
+  });
+  assert.deepEqual(
+    result.candidates.map((entry) => entry.status),
+    ["quota", "rejected"],
+  );
 });

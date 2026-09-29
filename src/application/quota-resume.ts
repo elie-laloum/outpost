@@ -37,9 +37,13 @@ export function quotaContinuation<O extends DispatchOptions<unknown>>(
 /** Starts an automatically integrated workspace from the interrupted branch. */
 export function quotaWorkspace<
   T extends SandboxOptions & DispatchOptions<unknown>,
->(context: TaskContext, options: T): T {
+>(context: TaskContext, options: T, policy: QuotaResumePolicy = "continue"): T {
   const branch = context.quota?.branch;
-  if (!branch || !options.continuation || options.workspace) return options;
+  // Fallback agents rerun the brief on the interrupted work instead of continuing a conversation.
+  const resumed =
+    !!options.continuation ||
+    (options.agent?.kind === "fallback" && policy === "continue");
+  if (!branch || !resumed || options.workspace) return options;
   const integrated =
     options.branch?.mode === "integrate" ||
     (!options.branch && options.sandboxProvider?.placement === "remote");

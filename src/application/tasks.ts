@@ -63,6 +63,7 @@ export function isolatedTask<T>(
       const options = quotaWorkspace(
         context,
         quotaContinuation(context, await request(context), quotaResume),
+        quotaResume,
       );
       const usage = taskUsage(context, undefined);
       const observation = taskObservation(
