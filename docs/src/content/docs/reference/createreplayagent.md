@@ -15,7 +15,7 @@ import { createReplayAgent } from "@elie-laloum/outpost";
 
 Create a single-use agent that replays one dispatch journal without calling a model. Each turn checks the rendered prompt, re-emits the recorded events and usage, and the last turn of each sandbox dispatch rebuilds the recorded commits inside the sandbox with their original identities, so an identical baseline yields identical commit IDs. Divergences raise ReplayDivergence or, with divergence: "warn", warnings. Replays cannot be resumed or forked.
 
-[Complete example and detailed rules](../../guide/progress/).
+[Complete example and detailed rules](../../guide/record-replay/).
 
 ## Parameters and properties
 

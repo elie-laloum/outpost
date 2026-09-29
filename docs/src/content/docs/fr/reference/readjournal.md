@@ -15,7 +15,7 @@ import { readJournal } from "@elie-laloum/outpost";
 
 Lit les événements validés d’un journal dans l’ordre chronologique depuis une révision exacte de l’index. Chaque révision de segment est vérifiée ; cycles, segments absents et dépassements de limite provoquent un échec. Un journal ouvert expose uniquement son préfixe validé.
 
-[Exemple complet et règles détaillées](../../guide/storage/).
+[Exemple complet et règles détaillées](../../guide/journals/).
 
 ## Paramètres et propriétés
 

@@ -15,7 +15,7 @@ import { createWorkflowCheckpointStore } from "@elie-laloum/outpost";
 
 Build a checkpoint store whose ownership token and checkpoint share one conditional object. Acquisition rejects an existing owner. Release preserves values and usage. Ownership does not expire automatically; after a crash, stop the old runner and explicitly recover its observed revision before resuming.
 
-[Complete example and detailed rules](../../guide/storage/).
+[Complete example and detailed rules](../../guide/durable-runs/).
 
 ## Parameters and properties
 

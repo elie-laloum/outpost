@@ -15,7 +15,7 @@ import { runSchedules } from "@elie-laloum/outpost";
 
 Publish one trigger job per cron slot of each schedule until the signal aborts, then resolve. Each slot enqueues schedule:<name>:<slot ISO time>, so replicas and restarts sharing a queue converge on one job; a slot later than maxLateMs is skipped and only the latest missed slot is caught up. Without onError, the first publication failure rejects.
 
-[Complete example and detailed rules](../../guide/webhooks/).
+[Complete example and detailed rules](../../guide/cron-schedules/).
 
 ## Parameters and properties
 

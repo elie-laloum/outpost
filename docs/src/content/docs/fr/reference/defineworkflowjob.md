@@ -15,7 +15,7 @@ import { defineWorkflowJob } from "@elie-laloum/outpost";
 
 Renvoie un handler de file qui construit un workflow à partir de l’entrée de chaque job de déclencheur et le démarre avec le runId du job comme exécution de checkpoint, le signal du job et une version combinant checkpoint.version et une empreinte de l’entrée. La valeur du job résume l’exécution, y compris cette version et les gates en attente ; les workflows failed ou cancelled terminent le job avec une erreur.
 
-[Exemple complet et règles détaillées](../../guide/webhooks/).
+[Exemple complet et règles détaillées](../../guide/job-queues/).
 
 ## Paramètres et propriétés
 

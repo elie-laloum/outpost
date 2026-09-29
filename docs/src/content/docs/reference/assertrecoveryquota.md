@@ -15,7 +15,7 @@ import { assertRecoveryQuota } from "@elie-laloum/outpost";
 
 Inspect recovery storage and reject if observed bytes plus the requested reservation exceed maxBytes, or if inspection cannot establish admission. This check does not reserve space or impose a filesystem quota; reserveRecoveryStorage coordinates cooperating writers.
 
-[Complete example and detailed rules](../../guide/recovery/).
+[Complete example and detailed rules](../../guide/retention/).
 
 ## Parameters and properties
 

@@ -15,7 +15,7 @@ import { defineMcpPrompt } from "@elie-laloum/outpost";
 
 Declare harness instructions rendered from a prompt of a declared MCP server at the start of each turn. Construction validates the server name, prompt name and string arguments without contacting the server; resolution fails when the harness has no running server of that name or the server offers no prompts.
 
-[Complete example and detailed rules](../../guide/harness/).
+[Complete example and detailed rules](../../guide/mcp-servers/).
 
 ## Parameters and properties
 

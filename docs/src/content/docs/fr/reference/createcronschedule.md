@@ -15,7 +15,7 @@ import { createCronSchedule } from "@elie-laloum/outpost";
 
 Analyse une expression cron à cinq champs, ou une macro comme @daily, évaluée dans un fuseau horaire IANA (UTC par défaut). Le résultat figé calcule les créneaux avec next() et previous() et ne publie rien. La construction refuse les champs invalides, les fuseaux inconnus et les expressions sans aucune occurrence.
 
-[Exemple complet et règles détaillées](../../guide/webhooks/).
+[Exemple complet et règles détaillées](../../guide/cron-schedules/).
 
 ## Paramètres et propriétés
 

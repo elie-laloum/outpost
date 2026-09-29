@@ -15,7 +15,7 @@ import { defineMcpPrompt } from "@elie-laloum/outpost";
 
 Déclare des instructions de harness rendues à partir d’un prompt d’un serveur MCP déclaré, au début de chaque tour. La construction valide le nom du serveur, le nom du prompt et les arguments texte sans contacter le serveur ; la résolution échoue si le harness n’a pas de serveur démarré de ce nom ou si le serveur ne propose pas de prompts.
 
-[Exemple complet et règles détaillées](../../guide/harness/).
+[Exemple complet et règles détaillées](../../guide/mcp-servers/).
 
 ## Paramètres et propriétés
 

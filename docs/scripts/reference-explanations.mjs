@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import ts from "typescript";
 import { referenceModel } from "./reference-model.mjs";
+import { symbolGuides } from "./api-groups.mjs";
 
 const readContent = async (name) =>
   JSON.parse(
@@ -47,7 +48,7 @@ export function explain(symbol, declaration, group, language, checker) {
     output += `\n\n## ${fr ? "Rôle et comportement" : "Purpose and behavior"}\n\n`;
     output += bilingual(symbols[symbol.name], symbol.name)[language];
     if (group)
-      output += `\n\n[${fr ? "Exemple complet et règles détaillées" : "Complete example and detailed rules"}](../../${group.guide}/).`;
+      output += `\n\n[${fr ? "Exemple complet et règles détaillées" : "Complete example and detailed rules"}](../../${symbolGuides[symbol.name] ?? group.guide}/).`;
   }
   if (entries.length) {
     output += `\n\n## ${fr ? "Paramètres et propriétés" : "Parameters and properties"}\n\n`;

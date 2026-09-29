@@ -15,7 +15,7 @@ import { defineHarnessTool } from "@elie-laloum/outpost";
 
 Définit un outil que le moteur peut proposer au modèle. Valide immédiatement le nom, la description et le schéma d’entrée, et renvoie une définition figée dont validate() contrôle les arguments du modèle avant l’exécution de execute().
 
-[Exemple complet et règles détaillées](../../guide/harness/).
+[Exemple complet et règles détaillées](../../guide/harness-tools/).
 
 ## Paramètres et propriétés
 

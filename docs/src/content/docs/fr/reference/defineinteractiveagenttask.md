@@ -15,7 +15,7 @@ import { defineInteractiveAgentTask } from "@elie-laloum/outpost";
 
 Définit un dialogue d’agent avec checkpoint et attentes humaines durables entre les tours. La tâche alloue et ferme un sandbox par tour, capture sa conversation et conserve un worktree nommé sans l’intégrer. Le harness Outpost comme les adaptateurs CLI exigent capture portable et reprise. Le résultat contient du JSON sans perte et les références de conversation et de workspace ; les tours interrompus exigent une autorisation explicite de rejeu.
 
-[Exemple complet et règles détaillées](../../guide/task-dependencies/).
+[Exemple complet et règles détaillées](../../guide/interactive-tasks/).
 
 ## Paramètres et propriétés
 

@@ -15,7 +15,7 @@ import { createCustomReporter } from "@elie-laloum/outpost";
 
 Create a callable observer with typed event handlers and an explicit flush barrier. Handlers run serially without blocking dispatch; failures are reported through onError and the first remains observable through every flush. The caller owns files, loggers and their shutdown.
 
-[Complete example and detailed rules](../../guide/progress/).
+[Complete example and detailed rules](../../guide/observability/).
 
 ## Parameters and properties
 

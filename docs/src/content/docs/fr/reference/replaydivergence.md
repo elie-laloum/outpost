@@ -15,7 +15,7 @@ import { ReplayDivergence } from "@elie-laloum/outpost";
 
 OutpostError de code replay, levée quand un rejeu diffère de son journal. kind, turn, expected, actual et commit situent l’écart ; details contient les mêmes champs.
 
-[Exemple complet et règles détaillées](../../guide/progress/).
+[Exemple complet et règles détaillées](../../guide/record-replay/).
 
 ## Paramètres et propriétés
 

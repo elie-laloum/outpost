@@ -15,7 +15,7 @@ import { createHarnessSearchTools } from "@elie-laloum/outpost";
 
 Crée le jeu d’outils search : search exécute git grep avec une expression régulière étendue sur les fichiers suivis et non ignorés, et renvoie des correspondances chemin:ligne:texte bornées.
 
-[Exemple complet et règles détaillées](../../guide/harness/).
+[Exemple complet et règles détaillées](../../guide/harness-tools/).
 
 ## Retour
 

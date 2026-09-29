@@ -15,7 +15,7 @@ import { defineLoopTask } from "@elie-laloum/outpost";
 
 Définit un nœud de workflow borné alternant essai et vérification. Les vérifications négatives fournissent le feedback du tour suivant ; une exception fait échouer la tâche. Le workflow persiste les phases, impute chaque exécution de tour au budget cumulé et renvoie le résultat accepté. Il ne possède ni sandbox ni conversations.
 
-[Exemple complet et règles détaillées](../../guide/task-dependencies/).
+[Exemple complet et règles détaillées](../../guide/verification-loops/).
 
 ## Paramètres et propriétés
 

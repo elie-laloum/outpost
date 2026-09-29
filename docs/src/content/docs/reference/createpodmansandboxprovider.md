@@ -15,7 +15,7 @@ import { createPodmanSandboxProvider } from "@elie-laloum/outpost/providers/podm
 
 Create a Podman sandbox provider using the container execution and streamed-transfer contracts. userns can preserve host UID mapping, and label controls SELinux mount relabeling. The provider is allocated only when acquired by a sandbox.
 
-[Complete example and detailed rules](../../guide/choose-a-sandbox/).
+[Complete example and detailed rules](../../guide/containers/).
 
 ## Parameters and properties
 

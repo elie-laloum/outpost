@@ -15,7 +15,7 @@ import { materializeRecoveryArchive } from "@elie-laloum/outpost";
 
 Télécharge une archive versionnée dans un nouveau dossier local en conservant les modes et liens symboliques pris en charge. Vérifie révisions, SHA-256 et sommes de contrôle de récupération. Conserve la source et toute destination partielle en cas d’échec. Utiliser ensuite les API de planification et restauration avec le dépôt source pour produire un checkout.
 
-[Exemple complet et règles détaillées](../../guide/storage/).
+[Exemple complet et règles détaillées](../../guide/recovery/).
 
 ## Paramètres et propriétés
 

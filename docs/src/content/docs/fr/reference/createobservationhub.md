@@ -15,7 +15,7 @@ import { createObservationHub } from "@elie-laloum/outpost";
 
 Crée un distributeur d’événements à contexte explicite, avec une séquence partagée entre enfants, des files bornées indépendantes, un vidage par instantané et des erreurs de livraison isolées. Le transmettre par observation à un workflow ou dispatch ; le hub parent appartient à l’appelant. Il s’agit d’observation en direct, pas d’un registre d’état durable ni d’un relais de workers distants.
 
-[Exemple complet et règles détaillées](../../guide/progress/).
+[Exemple complet et règles détaillées](../../guide/observability/).
 
 ## Paramètres et propriétés
 

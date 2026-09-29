@@ -15,7 +15,7 @@ import { planRecoveryRetention } from "@elie-laloum/outpost";
 
 Inspecte le stockage local de récupération et détermine quels workspaces propres ou journaux fermés satisfont la politique d’âge et de capacité. Le plan expose éligibilité et usage projeté sans supprimer de fichier.
 
-[Exemple complet et règles détaillées](../../guide/recovery/).
+[Exemple complet et règles détaillées](../../guide/retention/).
 
 ## Paramètres et propriétés
 

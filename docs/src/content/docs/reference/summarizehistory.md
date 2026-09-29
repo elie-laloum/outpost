@@ -15,7 +15,7 @@ import { summarizeHistory } from "@elie-laloum/outpost";
 
 Create a context strategy that, once the history exceeds a size, asks the model to summarize the older part and keeps the first prompt and the recent messages. Each summary costs one extra request.
 
-[Complete example and detailed rules](../../guide/harness/).
+[Complete example and detailed rules](../../guide/harness-context/).
 
 ## Parameters and properties
 

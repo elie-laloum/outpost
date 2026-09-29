@@ -15,7 +15,7 @@ import { WorkflowUsageUnavailable } from "@elie-laloum/outpost";
 
 Erreur signalant qu’une comptabilité incomplète empêche de contrôler un budget de workflow ou de spéculation exclusivement en tokens. Configurez budget.attempts et des délais d’exécution pour autoriser un repli borné. Sa dimension usage annule le travail admis et empêche les retries.
 
-[Exemple complet et règles détaillées](../../guide/task-dependencies/).
+[Exemple complet et règles détaillées](../../guide/budgets/).
 
 ## Paramètres et propriétés
 

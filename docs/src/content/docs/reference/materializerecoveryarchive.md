@@ -15,7 +15,7 @@ import { materializeRecoveryArchive } from "@elie-laloum/outpost";
 
 Download a pinned recovery archive into a new local directory, preserving supported modes and symlinks. Check chunk revisions, SHA-256 and recovery checksums. Keep the source and any partial destination on failure. Use the existing recovery planning and restoration APIs with the source repository to produce a checkout.
 
-[Complete example and detailed rules](../../guide/storage/).
+[Complete example and detailed rules](../../guide/recovery/).
 
 ## Parameters and properties
 

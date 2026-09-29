@@ -15,7 +15,7 @@ import { createOpenTelemetryObserver } from "@elie-laloum/outpost/opentelemetry"
 
 Crée une instrumentation de workflow et de dispatch complet à partir d’un tracer et d’un meter injectés. Passez le résultat dans telemetry à workflow.start ou dispatch, en gardant observe pour les handlers personnalisés. Le branchement observe existant du workflow reste pris en charge. Les erreurs sont isolées via onError ; close termine les spans ouverts sans vider ni fermer le SDK. Seul ce point d’entrée optionnel charge OpenTelemetry.
 
-[Exemple complet et règles détaillées](../../guide/progress/).
+[Exemple complet et règles détaillées](../../guide/observability/).
 
 ## Paramètres et propriétés
 

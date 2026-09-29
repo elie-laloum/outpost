@@ -15,7 +15,7 @@ import { WorkflowBudgetExceeded } from "@elie-laloum/outpost";
 
 Error identifying the attempt or token dimension whose admission limit was reached. limit and observed report the configured threshold and current accounting; observed model usage is not a billing cap.
 
-[Complete example and detailed rules](../../guide/task-dependencies/).
+[Complete example and detailed rules](../../guide/budgets/).
 
 ## Parameters and properties
 

@@ -15,7 +15,7 @@ import { createS3Transport } from "@elie-laloum/outpost/transports/s3";
 
 Create an object transport using the caller’s S3Client. GET reads are bounded and PUT writes are conditional. Default removal requires atomic conditional DELETE. Set deleteMode to "tombstone" for R2: conditional PUT markers fence stale removal and recreation, remain physically stored, and are hidden from reads and paginated lists using additional HEAD requests. Use the same mode for every writer in a prefix and stop all writers before physically purging markers. Every envelope has a fresh identity, including identical payloads and markers. The caller retains ownership of the optional AWS SDK client.
 
-[Complete example and detailed rules](../../guide/storage/).
+[Complete example and detailed rules](../../guide/object-storage/).
 
 ## Parameters and properties
 

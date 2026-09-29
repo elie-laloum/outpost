@@ -16,7 +16,7 @@ import type { SpeculativeOutput } from "@elie-laloum/outpost";
 | Name                  | Type                              | Presence | Meaning                                                                                                                                  |
 | --------------------- | --------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | `completion`          | `string \| undefined`             | Optional | Completion marker that matched the agent’s output, when one was found.                                                                   |
-| `text`                | `string`                          | Required | Final text reported by the agent execution.                                                                                              |
+| `text`                | `string`                          | Required | Text of every turn of the execution, joined with newlines, including response repair turns.                                              |
 | `conversation`        | `string \| undefined`             | Optional | Available native conversation identity.                                                                                                  |
 | `usage`               | `Usage`                           | Required | Reported usage counters; not a currency estimate.                                                                                        |
 | `fallback`            | `FallbackRecord \| undefined`     | Optional | Present only when the dispatch used a fallback agent: the candidate that produced this result and the candidates that stopped before it. |

@@ -174,3 +174,85 @@ export const groups = [
       "speculate recoverSpeculation checkSpeculationIntegration SpeculationDurability SpeculationRecoveryOptions SpeculationIntegration SpeculationOptions SpeculationResult SpeculativeCandidate SpeculativeCandidateResult SpeculativeOutput SpeculativeHostSnapshot SpeculativeValidation",
   },
 ];
+
+// Guide page with the complete example for a symbol when it differs from its family's page.
+const guidePages = {
+  "durable-runs":
+    "createWorkflowCheckpointStore recoverWorkflowCheckpoint CheckpointRecoveryOptions",
+  "object-storage": "createS3Transport S3TransportOptions",
+  artifacts: "createArtifactStore ArtifactStoreOptions",
+  "task-cache":
+    "createTaskCacheStore TaskCacheStoreOptions repositoryFingerprint TaskCacheOptions TaskCacheStore TaskCacheEntry TaskCacheAccessOptions TaskCacheMode TaskCacheOutcome",
+  journals: "readJournal ReadJournalOptions Logging",
+  conversations:
+    "createTransportConversations TransportConversationOptions ContinuationOptions WarmDispatchResult",
+  recovery:
+    "archiveRecovery materializeRecoveryArchive RecoveryArchiveOptions RecoveryArchiveRestoreOptions",
+  "environment-setup": "LifecycleHooks DependencyCache",
+  "limits-and-cancellation": "StageLimits",
+  steering:
+    "createSteering SteeringMode SteeringState Steering SteeringDelivery SteeringSendOptions",
+  "fallback-agents":
+    "createFallbackAgent FallbackTrigger FallbackAgent FallbackAgentOptions FallbackCandidate FallbackAttempt FallbackRecord unavailableFault UnavailableFault",
+  subagents:
+    "defineHarnessSubagent HarnessSubagent HarnessSubagentInput HarnessSubagentOptions",
+  "harness-tools":
+    "defineHarnessTool defineHarnessToolset HarnessTool HarnessToolOptions HarnessToolContext HarnessToolEvent HarnessToolset HarnessToolsetOptions JsonSchema StandardJsonSchema ToolOutput ToolValidation createHarnessFileTools createHarnessEditTools createHarnessSearchTools createHarnessGitTools createHarnessShellTools ShellToolsOptions",
+  "harness-context":
+    "defineHarnessInstructions HarnessInstructions HarnessInstructionContext HarnessInstructionSource HarnessInstructionsOption defineHarnessContextStrategy truncateToolResults summarizeHistory HarnessContextInput HarnessContextResult HarnessContextStrategy HarnessContextStrategyOptions SummarizeHistoryOptions TruncateToolResultsOptions defineHarnessSkill HarnessSkill HarnessSkillOptions",
+  "mcp-servers":
+    "defineMcpPrompt McpPromptOptions HarnessMcpContext McpServer McpServers McpStdioServer McpHttpServer McpToolFilter",
+  "mcp-oauth": "McpClientCredentials",
+  "harness-permissions":
+    "defineHarnessHook defineHarnessPermissions HarnessHook HarnessHookContext HarnessHookDecisions HarnessHookEvents HarnessHookInput HarnessHookOptions HarnessHookPhase HarnessHookResult HarnessToolResultView HarnessPermissionRule HarnessPermissions HarnessPermissionsOptions PermissionDecision PermissionEffect ToolResources",
+  antigravity: "createAntigravityHarness AntigravitySettings",
+  "claude-code": "createClaudeHarness ClaudeSettings",
+  codex: "createCodexHarness CodexSettings CodexModelProvider",
+  "copilot-cli": "createCopilotHarness CopilotSettings",
+  "kimi-code": "createKimiHarness KimiSettings",
+  authentication: "AgentAuthentication AccountCredential UsageCredential",
+  "agent-images": "agentVersions",
+  "custom-agents":
+    "CliHarness AgentAdapter AgentInput AgentLiveInput AgentLiveSession AgentLiveRead AgentConfiguration ConfigurationFile HostConfiguration",
+  briefs: "Brief PromptVariables",
+  "conversation-formats":
+    "createTranscriptConversations createSessionBundleConversations TranscriptConversationLayout SessionBundleProfile SessionBundleFiles SessionBundleHelpers SessionBundleRelocation",
+  observability:
+    "createObservationHub Observation ObservationScope ObservationSource ObservationEvent OperationEvent ObservationHub ObservationHubOptions ObservationSink createCustomReporter CustomReporter CustomReporterOptions ReporterHandlers DispatchTelemetry DispatchTelemetrySession DispatchTelemetryOutcome createOpenTelemetryObserver OpenTelemetryOptions OpenTelemetryObserver WorkflowTelemetry",
+  "record-replay":
+    "createReplayAgent ReplayDivergence ReplayAgent ReplayAgentOptions ReplayTurn ReplayFailure ReplayDivergenceDetails ReplayDivergenceKind ReplayDivergencePolicy WorkspaceCommitsEvent RecordedCommit RecordedIdentity RecordedRevision",
+  budgets:
+    "Usage WorkflowBudget WorkflowUsage WorkflowBudgetExceeded WorkflowUsageUnavailable",
+  "verification-loops":
+    "defineLoopTask LoopTaskExhausted LoopCheckResult LoopTaskContext LoopTaskOptions LoopRoundRecord",
+  "concurrency-and-retries": "Retry",
+  "interactive-tasks":
+    "defineInteractiveAgentTask InteractiveAgentTaskOptions InteractiveAgentResult WorkflowInputQuestion WorkflowInputRequest WorkflowAnswer WorkflowAnswerRecord TaskInteraction TaskInteractionRecord TaskInteractionContext",
+  "quota-pauses":
+    "WorkflowQuotaPolicy WorkflowQuotaPause QuotaResumePolicy quotaFault QuotaFault",
+  containers:
+    "createDockerSandboxProvider createPodmanSandboxProvider ContainerOptions Volume",
+  "host-process": "createLocalSandboxProvider",
+  "cloud-sandboxes":
+    "createVercelSandboxProvider createDaytonaSandboxProvider VercelOptions DaytonaOptions",
+  firecracker: "createFirecrackerSandboxProvider FirecrackerOptions",
+  "network-restrictions": "EgressPolicy",
+  "custom-sandbox-providers":
+    "createMountedSandboxProvider createRemoteSandboxProvider SandboxContext SandboxLease SandboxProvider TransferOptions FileTransfers FileManifestEntry",
+  "environment-variables": "Variables",
+  retention:
+    "planRecoveryRetention pruneRecoveryRetention assertRecoveryQuota RecoveryRetentionPolicy RecoveryRetentionOptions RecoveryRetentionPlan RecoveryRetentionEntry RecoveryPruneResult RecoveryQuotaOptions",
+  "error-handling": "OutpostError FaultCode",
+  "redis-workers":
+    "createBullMQTaskQueue BullMQTaskQueue BullMQTaskQueueOptions",
+  "cron-schedules":
+    "createCronSchedule runSchedules CronSchedule CronOptions TriggerSchedule RunSchedulesOptions ScheduleFailure",
+  "job-queues":
+    "defineWorkflowJob WorkflowJobOptions WorkflowJobContext WorkflowJobCheckpoint WorkflowJobStartOptions",
+};
+
+export const symbolGuides = Object.fromEntries(
+  Object.entries(guidePages).flatMap(([page, names]) =>
+    names.split(" ").map((name) => [name, `guide/${page}`]),
+  ),
+);

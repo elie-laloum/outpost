@@ -15,7 +15,7 @@ import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/dock
 
 Crée un provider de sandbox Docker. Le mode mounted partage workspace et métadonnées Git ; le mode isolated opt-in transfère un checkout privé. L’allocation attend l’acquisition du provider par une sandbox ; le bail possède la fermeture du conteneur.
 
-[Exemple complet et règles détaillées](../../guide/choose-a-sandbox/).
+[Exemple complet et règles détaillées](../../guide/containers/).
 
 ## Paramètres et propriétés
 

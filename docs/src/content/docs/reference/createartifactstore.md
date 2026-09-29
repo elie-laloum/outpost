@@ -15,7 +15,7 @@ import { createArtifactStore } from "@elie-laloum/outpost";
 
 Build an ArtifactStore over a transport. Publication creates immutable blobs or accepts identical existing bytes; conflicts with different bytes fail. Existing artifact contracts and portable references remain unchanged.
 
-[Complete example and detailed rules](../../guide/storage/).
+[Complete example and detailed rules](../../guide/artifacts/).
 
 ## Parameters and properties
 

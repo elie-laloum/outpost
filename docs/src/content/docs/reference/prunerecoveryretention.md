@@ -15,7 +15,7 @@ import { pruneRecoveryRetention } from "@elie-laloum/outpost";
 
 Apply a retention plan after fresh validation. Worktree removal reacquires the Git branch lock. Local and remote journal groups use conditional object deletion; explicit transport plans require the same transporter in the second argument. Changed or partially removed candidates are retained; recovery data remains protected.
 
-[Complete example and detailed rules](../../guide/recovery/).
+[Complete example and detailed rules](../../guide/retention/).
 
 ## Parameters and properties
 

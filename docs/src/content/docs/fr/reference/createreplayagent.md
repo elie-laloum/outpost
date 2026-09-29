@@ -15,7 +15,7 @@ import { createReplayAgent } from "@elie-laloum/outpost";
 
 Crée un agent à usage unique qui rejoue le journal d’un dispatch sans appeler de modèle. Chaque tour vérifie le prompt rendu et réémet les événements et l’usage enregistrés ; le dernier tour de chaque dispatch en sandbox reconstruit les commits enregistrés dans la sandbox avec leurs identités d’origine, si bien qu’une baseline identique donne des identifiants de commit identiques. Les divergences lèvent ReplayDivergence ou, avec divergence: "warn", des avertissements. Un rejeu ne peut être ni repris ni forké.
 
-[Exemple complet et règles détaillées](../../guide/progress/).
+[Exemple complet et règles détaillées](../../guide/record-replay/).
 
 ## Paramètres et propriétés
 

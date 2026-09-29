@@ -15,7 +15,7 @@ import { defineHarnessSubagent } from "@elie-laloum/outpost";
 
 Define a serialized tool that runs a built-in child agent with a fresh history in the parent’s borrowed sandbox. The parent supplies { prompt }; the result is JSON text containing text and an optional conversation identifier. Child tokens count once toward dispatch and every ancestor budget; cancellation and declarative permissions propagate. The tool cannot execute outside the harness runtime.
 
-[Complete example and detailed rules](../../guide/harness/).
+[Complete example and detailed rules](../../guide/subagents/).
 
 ## Parameters and properties
 

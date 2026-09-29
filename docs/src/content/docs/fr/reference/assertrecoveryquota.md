@@ -15,7 +15,7 @@ import { assertRecoveryQuota } from "@elie-laloum/outpost";
 
 Inspecte le stockage de récupération et échoue si les octets observés plus la réservation demandée dépassent maxBytes, ou si l’inspection ne permet pas de décider. Ce contrôle ne réserve pas d’espace et n’impose pas de quota physique ; reserveRecoveryStorage coordonne les écrivains coopératifs.
 
-[Exemple complet et règles détaillées](../../guide/recovery/).
+[Exemple complet et règles détaillées](../../guide/retention/).
 
 ## Paramètres et propriétés
 

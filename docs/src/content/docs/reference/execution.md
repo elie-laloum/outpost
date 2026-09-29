@@ -15,7 +15,7 @@ import type { Execution } from "@elie-laloum/outpost";
 
 | Name           | Type                  | Presence | Meaning                                                                                     |
 | -------------- | --------------------- | -------- | ------------------------------------------------------------------------------------------- |
-| `text`         | `string`              | Required | Final text reported by the agent execution.                                                 |
+| `text`         | `string`              | Required | Text of every turn of the execution, joined with newlines, including response repair turns. |
 | `turns`        | `readonly Turn[]`     | Required | Ordered agent-turn results, including text, status, duration and token usage for each pass. |
 | `usage`        | `Usage`               | Required | Reported usage counters; not a currency estimate.                                           |
 | `conversation` | `string \| undefined` | Optional | Available native conversation identity.                                                     |

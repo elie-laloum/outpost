@@ -4,8 +4,8 @@
     "Configuration du workspace, du provider, de l’agent natif et du terminal interactif."
   ],
   "SandboxOptions.includeUncommitted": [
-    "Include uncommitted host changes when preparing a remote repository snapshot.",
-    "Inclut les modifications hôtes non commitées dans le snapshot du dépôt distant."
+    "Also send the managed worktree's uncommitted changes and untracked, non-ignored files to a remote sandbox. Host checkout edits reach it only through copies.",
+    "Envoie aussi à une sandbox distante les modifications non commitées du worktree géré et ses fichiers non suivis et non ignorés. Les modifications du checkout de l'hôte n'y arrivent que par copies."
   ],
   "SandboxOptions.agent": [
     "Default agent for dispatches on this sandbox: a single agent or a createFallbackAgent(). Only the first candidate is bootstrapped during allocation; attach() requires a single CLI agent.",
@@ -16,8 +16,8 @@
     "Workspace Git appartenant à l’appelant ; exclut un nouveau choix de dépôt/branche."
   ],
   "SandboxOptions.hooks": [
-    "Lifecycle commands in declared execution order.",
-    "Commandes de cycle de vie dans l’ordre déclaré."
+    "Lifecycle commands: workspaceReady runs on the host once the worktree exists; hostReady (in order, on the host) and sandboxReady (in parallel, in the sandbox) run concurrently after allocation.",
+    "Commandes de cycle de vie : workspaceReady s'exécute sur l'hôte une fois le worktree créé ; hostReady (dans l'ordre, sur l'hôte) et sandboxReady (en parallèle, dans la sandbox) s'exécutent simultanément après l'allocation."
   ],
   "SandboxOptions.signal": [
     "Cooperative cancellation for this operation.",
@@ -80,8 +80,8 @@
     "Annulation coopérative de cette opération."
   ],
   "WorkspaceOptions.hooks": [
-    "Lifecycle commands in declared execution order.",
-    "Commandes de cycle de vie dans l’ordre déclaré."
+    "Lifecycle commands: workspaceReady runs on the host once the worktree exists; hostReady (in order, on the host) and sandboxReady (in parallel, in the sandbox) run concurrently after allocation.",
+    "Commandes de cycle de vie : workspaceReady s'exécute sur l'hôte une fois le worktree créé ; hostReady (dans l'ordre, sur l'hôte) et sandboxReady (en parallèle, dans la sandbox) s'exécutent simultanément après l'allocation."
   ],
   "StorageReservationOptions.maxBytes": [
     "Maximum admitted total of observed storage and active reservations, in bytes.",
@@ -132,12 +132,12 @@
     "Commandes hôtes exécutées après préparation du workspace, avant allocation de la sandbox."
   ],
   "LifecycleHooks.hostReady": [
-    "Host commands run after environment acquisition and before sandboxReady.",
-    "Commandes hôtes exécutées après acquisition de l’environnement et avant sandboxReady."
+    "Host commands run one after another after sandbox allocation, at the same time as sandboxReady; the first failure stops both groups.",
+    "Commandes hôte exécutées l'une après l'autre après l'allocation de la sandbox, en même temps que sandboxReady ; le premier échec arrête les deux groupes."
   ],
   "LifecycleHooks.sandboxReady": [
-    "Commands run inside the acquired sandbox after host preparation.",
-    "Commandes exécutées dans la sandbox acquise après préparation hôte."
+    "Commands started together inside the sandbox after allocation, at the same time as hostReady; chain dependent steps in one shell command. The first failure stops both groups.",
+    "Commandes lancées ensemble dans la sandbox après l'allocation, en même temps que hostReady ; enchaînez les étapes dépendantes dans une seule commande shell. Le premier échec arrête les deux groupes."
   ],
   "Command.executable": [
     "Program to execute without implicit shell parsing.",
@@ -180,12 +180,12 @@
     "Demande une exécution élevée à un provider qui la prend en charge."
   ],
   "Command.retain": [
-    "Maximum retained tail per output stream, in bytes.",
-    "Taille maximale de la fin conservée par flux, en octets."
+    "Maximum retained tail of each output stream, in characters.",
+    "Fin conservée de chaque flux de sortie, en caractères."
   ],
   "Command.observe": [
-    "Receive streamed stdout/stderr chunks with their channel; observer failures are isolated.",
-    "Reçoit les fragments stdout/stderr avec leur canal ; les erreurs d’observation sont isolées."
+    "Receive streamed stdout/stderr chunks with their channel; an exception thrown here interrupts the command, which rejects with it.",
+    "Reçoit les fragments stdout/stderr diffusés avec leur canal ; une exception levée ici interrompt la commande, qui la rejette."
   ],
   "AgentAdapter.name": [
     "Native agent identifier used in execution events and diagnostics.",
@@ -664,8 +664,8 @@
     "Bifurque depuis la conversation de ce résultat dans une sandbox nouvellement allouée."
   ],
   "Execution.text": [
-    "Final text reported by the agent execution.",
-    "Texte final rapporté par l’exécution de l’agent."
+    "Text of every turn of the execution, joined with newlines, including response repair turns.",
+    "Texte de tous les tours de l'exécution, joints par des sauts de ligne, y compris les tours de réparation de réponse."
   ],
   "Execution.turns": [
     "Ordered agent-turn results, including text, status, duration and token usage for each pass.",
@@ -1169,8 +1169,8 @@
     "Limites partagées de tentatives et d’usage observé."
   ],
   "WorkflowOptions.stopOnError": [
-    "Stop admitting new tasks after a task failure when enabled.",
-    "Arrête l’admission de nouvelles tâches après un échec lorsque cette option est activée."
+    "Defaults to true: the first failure aborts the run, cancelling running and pending tasks. With false, only dependents of the failed task are skipped and independent tasks continue.",
+    "Vaut true par défaut : le premier échec interrompt l'exécution et annule les tâches en cours et en attente. Avec false, seules les tâches dépendantes de la tâche en échec sont ignorées et les tâches indépendantes continuent."
   ],
   "WorkflowOptions.observe": [
     "Custom workflow lifecycle and usage callback, invoked after telemetry independently; thrown errors are collected in observerErrors. Existing OpenTelemetry observe callbacks remain supported.",

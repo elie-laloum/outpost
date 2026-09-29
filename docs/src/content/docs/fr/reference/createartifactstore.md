@@ -15,7 +15,7 @@ import { createArtifactStore } from "@elie-laloum/outpost";
 
 Construit un ArtifactStore sur un transport. La publication crée des blobs immuables ou accepte des octets existants identiques ; un contenu différent provoque un échec. Les contrats et références portables d’artefacts restent inchangés.
 
-[Exemple complet et règles détaillées](../../guide/storage/).
+[Exemple complet et règles détaillées](../../guide/artifacts/).
 
 ## Paramètres et propriétés
 

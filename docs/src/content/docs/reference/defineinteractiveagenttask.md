@@ -15,7 +15,7 @@ import { defineInteractiveAgentTask } from "@elie-laloum/outpost";
 
 Define a checkpointed agent dialogue with durable human-input waits between turns. The task allocates and closes a sandbox per turn, captures its conversation and retains a named worktree without integrating it. Both the Outpost harness and CLI adapters require portable capture and resume. The result is lossless JSON plus conversation and workspace references; interrupted turns require explicit replay authorization.
 
-[Complete example and detailed rules](../../guide/task-dependencies/).
+[Complete example and detailed rules](../../guide/interactive-tasks/).
 
 ## Parameters and properties
 

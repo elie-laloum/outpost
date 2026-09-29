@@ -15,7 +15,7 @@ import { createWorkflowCheckpointStore } from "@elie-laloum/outpost";
 
 Construit un store dont le jeton de propriété et le checkpoint partagent un objet conditionnel. L’acquisition refuse un propriétaire existant. La libération préserve valeurs et usage. La propriété n’expire pas automatiquement ; après un crash, arrêter l’ancien exécuteur et récupérer explicitement sa révision observée avant reprise.
 
-[Exemple complet et règles détaillées](../../guide/storage/).
+[Exemple complet et règles détaillées](../../guide/durable-runs/).
 
 ## Paramètres et propriétés
 

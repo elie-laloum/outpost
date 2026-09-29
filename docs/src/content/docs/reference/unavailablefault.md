@@ -15,7 +15,7 @@ import { unavailableFault } from "@elie-laloum/outpost";
 
 Return the outage signal of an Outpost error marked unavailable by a CLI adapter or model provider, following up to eight wrapped causes. Quota errors and every other value return undefined. Outages keep their process or provider code, so use this function rather than the code to recognize them; it does not wait or retry.
 
-[Complete example and detailed rules](../../guide/recovery/).
+[Complete example and detailed rules](../../guide/fallback-agents/).
 
 ## Parameters and properties
 

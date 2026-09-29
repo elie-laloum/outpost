@@ -2,7 +2,7 @@ import ts from "typescript";
 import { readFile, writeFile, mkdir, readdir } from "node:fs/promises";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { groups } from "./api-groups.mjs";
+import { groups, symbolGuides } from "./api-groups.mjs";
 import { explain } from "./reference-explanations.mjs";
 import {
   isContract,
@@ -136,6 +136,14 @@ for (const group of groups)
   for (const name of group.names.split(" "))
     if (![...publicNames.keys()].some((symbol) => symbol.name === name))
       throw new Error(`Stale API entry: ${name}`);
+
+const familyNames = new Set(groups.flatMap((group) => group.names.split(" ")));
+for (const [name, guide] of Object.entries(symbolGuides)) {
+  if (!familyNames.has(name)) throw new Error(`Stale guide entry: ${name}`);
+  await readFile(resolve(root, "src/content/docs", `${guide}.md`)).catch(() => {
+    throw new Error(`Missing guide page for ${name}: ${guide}`);
+  });
+}
 
 for (const group of groups) {
   for (const name of group.experimental ?? []) {

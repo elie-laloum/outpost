@@ -15,7 +15,7 @@ import { createHarnessFileTools } from "@elie-laloum/outpost";
 
 Crée le jeu d’outils files : read_file renvoie les lignes numérotées d’un fichier UTF-8 téléchargé depuis le sandbox, et list_files liste les fichiers que Git suit ou n’ignore pas. Les deux sont en lecture seule et déclarent leurs chemins pour les règles de permission.
 
-[Exemple complet et règles détaillées](../../guide/harness/).
+[Exemple complet et règles détaillées](../../guide/harness-tools/).
 
 ## Retour
 

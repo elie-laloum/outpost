@@ -15,7 +15,7 @@ import { recoverWorkflowCheckpoint } from "@elie-laloum/outpost";
 
 Libère explicitement la propriété d’un checkpoint sans supprimer sa progression. L’appelant doit d’abord s’assurer de l’arrêt de l’ancien exécuteur. La révision attendue protège contre les changements concurrents ; rejouer les tâches incomplètes exige toujours resume: retry-incomplete.
 
-[Exemple complet et règles détaillées](../../guide/storage/).
+[Exemple complet et règles détaillées](../../guide/durable-runs/).
 
 ## Paramètres et propriétés
 

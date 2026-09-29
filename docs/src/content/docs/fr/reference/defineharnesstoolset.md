@@ -15,7 +15,7 @@ import { defineHarnessToolset } from "@elie-laloum/outpost";
 
 Regroupe des outils et des jeux imbriqués sous un nom pour les réutiliser entre harness. Aplatit les jeux imbriqués et refuse les noms d’outils en double.
 
-[Exemple complet et règles détaillées](../../guide/harness/).
+[Exemple complet et règles détaillées](../../guide/harness-tools/).
 
 ## Paramètres et propriétés
 

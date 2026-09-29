@@ -13,15 +13,15 @@ import type { Execution } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom            | Type                  | Présence  | Rôle                                                                                            |
-| -------------- | --------------------- | --------- | ----------------------------------------------------------------------------------------------- |
-| `text`         | `string`              | Requis    | Texte final rapporté par l’exécution de l’agent.                                                |
-| `turns`        | `readonly Turn[]`     | Requis    | Résultats ordonnés des tours d’agent : texte, statut, durée et usage de tokens de chaque passe. |
-| `usage`        | `Usage`               | Requis    | Compteurs d’usage rapportés ; aucune estimation monétaire.                                      |
-| `conversation` | `string \| undefined` | Optionnel | Identité de conversation native disponible.                                                     |
-| `value`        | `T`                   | Requis    | Valeur de réponse structurée validée ; undefined en l’absence de spécification de réponse.      |
-| `completed`    | `boolean`             | Requis    | Indique si le marqueur de fin configuré a été détecté.                                          |
-| `completion`   | `string \| undefined` | Optionnel | Marqueur de fin correspondant à la sortie de l’agent lorsqu’il a été trouvé.                    |
+| Nom            | Type                  | Présence  | Rôle                                                                                                                 |
+| -------------- | --------------------- | --------- | -------------------------------------------------------------------------------------------------------------------- |
+| `text`         | `string`              | Requis    | Texte de tous les tours de l'exécution, joints par des sauts de ligne, y compris les tours de réparation de réponse. |
+| `turns`        | `readonly Turn[]`     | Requis    | Résultats ordonnés des tours d’agent : texte, statut, durée et usage de tokens de chaque passe.                      |
+| `usage`        | `Usage`               | Requis    | Compteurs d’usage rapportés ; aucune estimation monétaire.                                                           |
+| `conversation` | `string \| undefined` | Optionnel | Identité de conversation native disponible.                                                                          |
+| `value`        | `T`                   | Requis    | Valeur de réponse structurée validée ; undefined en l’absence de spécification de réponse.                           |
+| `completed`    | `boolean`             | Requis    | Indique si le marqueur de fin configuré a été détecté.                                                               |
+| `completion`   | `string \| undefined` | Optionnel | Marqueur de fin correspondant à la sortie de l’agent lorsqu’il a été trouvé.                                         |
 
 ## Signature
 

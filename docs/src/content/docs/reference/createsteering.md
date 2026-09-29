@@ -15,7 +15,7 @@ import { createSteering } from "@elie-laloum/outpost";
 
 Create an idle Steering controller. Pass it to a dispatch as steering; send() then delivers instructions to the running agent: injected into the built-in harness loop, Claude Code's stream-json input or Codex app-server turns, otherwise by stopping and resuming the conversation. Creating it starts nothing.
 
-[Complete example and detailed rules](../../guide/first-request/).
+[Complete example and detailed rules](../../guide/steering/).
 
 ## Returns
 

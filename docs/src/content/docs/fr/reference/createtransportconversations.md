@@ -15,7 +15,7 @@ import { createTransportConversations } from "@elie-laloum/outpost";
 
 Enveloppe un ConversationStore de base, par exemple createKimiConversations() ou createHarnessConversations(), pour archiver ses captures en snapshots de transport sous un espace de noms stable du projet et le format du store de base. Le passer à l’option conversations du preset correspondant ou de createHarness() ; le store déclare le format de base, donc un harness incompatible échoue dès sa création. La capture préserve la relocalisation, les transcripts enfants et les bundles de session du store de base ; locate matérialise un snapshot immuable sous le dossier de récupération du dépôt cible. Les chemins file restent lisibles et reference identifie l’index distant. Fichiers natifs et identifiants restent distincts ; les archives ne sont ni chiffrées ni authentifiées.
 
-[Exemple complet et règles détaillées](../../guide/storage/).
+[Exemple complet et règles détaillées](../../guide/conversations/).
 
 ## Paramètres et propriétés
 

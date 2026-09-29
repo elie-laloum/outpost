@@ -15,7 +15,7 @@ import { createFirecrackerSandboxProvider } from "@elie-laloum/outpost/providers
 
 Create an opt-in Firecracker microVM provider from explicit kernel, rootfs, TAP and SSH settings. The host must provide KVM and a prepared guest; allocation does not fall back to host execution. The acquired lease owns VM shutdown.
 
-[Complete example and detailed rules](../../guide/choose-a-sandbox/).
+[Complete example and detailed rules](../../guide/firecracker/).
 
 ## Parameters and properties
 

@@ -15,7 +15,7 @@ import { truncateToolResults } from "@elie-laloum/outpost";
 
 Crée une stratégie de contexte qui raccourcit les résultats des anciens appels d’outils et laisse intacts les plus récents. Elle ne change rien tant qu’aucun ancien résultat ne dépasse la limite.
 
-[Exemple complet et règles détaillées](../../guide/harness/).
+[Exemple complet et règles détaillées](../../guide/harness-context/).
 
 ## Paramètres et propriétés
 

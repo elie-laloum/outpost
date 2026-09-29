@@ -15,7 +15,7 @@ import { createFallbackAgent } from "@elie-laloum/outpost";
 
 Compose un FallbackAgent ordonné à partir d’au moins deux agents et d’une liste on explicite. Le dispatch exécute les candidats dans l’ordre dans le même sandbox et le même workspace, en préparant chacun seulement lorsqu’il est essayé, et ne passe au suivant qu’après un échec quota ou unavailable listé dans on ; les autres échecs sont relancés. La construction valide et fige la liste sans rien démarrer.
 
-[Exemple complet et règles détaillées](../../guide/choose-an-agent/).
+[Exemple complet et règles détaillées](../../guide/fallback-agents/).
 
 ## Paramètres et propriétés
 

@@ -15,7 +15,7 @@ import { LoopTaskExhausted } from "@elie-laloum/outpost";
 
 Erreur enregistrée lorsque la vérification du dernier tour autorisé échoue. Consultez key, maxRounds et feedback via WorkflowResult.errors ; reprendre le même checkpoint ne réinitialise pas la limite.
 
-[Exemple complet et règles détaillées](../../guide/task-dependencies/).
+[Exemple complet et règles détaillées](../../guide/verification-loops/).
 
 ## Paramètres et propriétés
 

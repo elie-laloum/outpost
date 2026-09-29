@@ -15,7 +15,7 @@ import { archiveRecovery } from "@elie-laloum/outpost";
 
 Crée et vérifie un snapshot du transfert, envoie des blocs binaires avec empreintes puis publie le manifeste en dernier. La source est conservée. Un envoi interrompu peut laisser des blocs non référencés ; aucun manifeste incomplet n’est publié. L’archive contient les données de récupération, pas un remplacement autonome du dépôt Git source.
 
-[Exemple complet et règles détaillées](../../guide/storage/).
+[Exemple complet et règles détaillées](../../guide/recovery/).
 
 ## Paramètres et propriétés
 

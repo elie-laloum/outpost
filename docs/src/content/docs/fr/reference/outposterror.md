@@ -15,7 +15,7 @@ import { OutpostError } from "@elie-laloum/outpost";
 
 Erreur munie d’un code stable et de détails structurés pour les échecs d’exécution, configuration et récupération. cause conserve l’échec initial et recovery peut identifier du travail conservé ; le nettoyage doit respecter ces emplacements.
 
-[Exemple complet et règles détaillées](../../guide/recovery/).
+[Exemple complet et règles détaillées](../../guide/error-handling/).
 
 ## Paramètres et propriétés
 

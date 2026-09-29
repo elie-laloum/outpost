@@ -15,7 +15,7 @@ import { createHarnessGitTools } from "@elie-laloum/outpost";
 
 Crée le jeu d’outils git : git exécute les commandes en lecture seule status, diff, log ou show et refuse les options qui écrivent des fichiers ou lancent des programmes externes.
 
-[Exemple complet et règles détaillées](../../guide/harness/).
+[Exemple complet et règles détaillées](../../guide/harness-tools/).
 
 ## Retour
 

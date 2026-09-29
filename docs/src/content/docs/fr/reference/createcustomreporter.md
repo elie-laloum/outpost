@@ -15,7 +15,7 @@ import { createCustomReporter } from "@elie-laloum/outpost";
 
 Crée un observateur appelable avec des handlers typés et une barrière flush explicite. Les handlers s’exécutent séquentiellement sans bloquer le dispatch ; onError signale les erreurs et la première reste accessible à chaque flush. Les fichiers, loggers et leur fermeture appartiennent à l’appelant.
 
-[Exemple complet et règles détaillées](../../guide/progress/).
+[Exemple complet et règles détaillées](../../guide/observability/).
 
 ## Paramètres et propriétés
 

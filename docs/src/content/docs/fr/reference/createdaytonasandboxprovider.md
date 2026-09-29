@@ -15,7 +15,7 @@ import { createDaytonaSandboxProvider } from "@elie-laloum/outpost/providers/day
 
 Crée un provider distant Daytona avec réglages distincts de connexion SDK et de création de sandbox. Les transferts utilisent l’environnement distant acquis et la synchronisation valide les modifications hôtes concurrentes avant application. La politique egress optionnelle est validée avant allocation et confirmée par l’API réseau du serveur avant préparation du workspace ; un échec déclenche la suppression. Le démarrage natif de l’image précède cette confirmation. Consultez les [règles sortantes](../../guide/network-restrictions/).
 
-[Exemple complet et règles détaillées](../../guide/choose-a-sandbox/).
+[Exemple complet et règles détaillées](../../guide/cloud-sandboxes/).
 
 ## Paramètres et propriétés
 

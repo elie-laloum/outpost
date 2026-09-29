@@ -15,7 +15,7 @@ import { defineHarnessContextStrategy } from "@elie-laloum/outpost";
 
 Define how a custom harness rewrites its history before a model request. compact receives the messages and a summarize() helper and returns a new list or nothing; the engine validates it, removes replayed reasoning and records a compaction in the transcript.
 
-[Complete example and detailed rules](../../guide/harness/).
+[Complete example and detailed rules](../../guide/harness-context/).
 
 ## Parameters and properties
 
