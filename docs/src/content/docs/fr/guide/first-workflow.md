@@ -3,9 +3,20 @@ title: "D’une tâche à un workflow"
 description: "Transformer une tâche d’agent en workflow qui corrige le code sur une branche, résume le résultat, attend une approbation et reprend depuis un checkpoint."
 ---
 
-Transformez le `dispatch()` unique de [Votre première tâche](../first-request/) en workflow : un agent corrige les tests en échec sur une branche, une deuxième tâche résume son résultat en données typées, un mainteneur l’approuve et un checkpoint permet d’arrêter puis de reprendre l’exécution sans refaire le travail terminé.
+<!-- flow -->
 
-Un workflow est un graphe nommé de tâches. Chaque étape ci-dessous remplace le contenu d’un seul fichier, `fix.mts`, placé à côté du `outpost.config.mts` d’[Installation](../setup/).
+1. **Première exécution**: S’arrête à l’approbation.
+   - `fix`: L’agent corrige les tests sur une branche.
+     - `defineIsolatedTask()`
+   - `summary`: Garde des données typées du résultat.
+     - `defineTask()`
+   - `approve`: Met l’exécution en pause en attendant une décision.
+     - `defineApprovalTask()`
+2. **Seconde exécution**: Reprend avec la décision.
+   - `report`: S’exécute une fois l’approbation donnée.
+     - `defineTask()`
+
+Un workflow est un graphe de tâches. Chaque étape remplace `fix.mts`, placé à côté du `outpost.config.mts` d’[Installation](../setup/).
 
 ## Exécuter l’agent comme tâche de workflow
 
@@ -34,13 +45,11 @@ console.log(branch, commits);
 node fix.mts
 ```
 
-`defineIsolatedTask()` déclare une tâche dont `request` renvoie les options d’un `dispatch()`. Chaque tentative alloue sa propre sandbox et la ferme quand l’agent a terminé ; annuler le workflow arrête l’agent.
-
-`defineWorkflow()` vérifie le graphe et `start()` l’exécute. Une tâche en échec ne fait pas lever d’exception à `start()` : le résultat porte un `status`, et `unwrap()` lève une exception sauf s’il vaut `"done"`. `result.value(fix)` est le résultat de dispatch typé de la tâche. Le script affiche `outpost/fix-tests` et les commits créés par l’agent.
+Le script affiche `outpost/fix-tests` et les commits de l’agent. `defineIsolatedTask()` exécute un `dispatch()` comme tâche, dans sa propre sandbox. `unwrap()` lève une exception sauf si le `status` de l’exécution vaut `"done"`.
 
 ## Passer le résultat à une autre tâche
 
-```ts title="fix.mts"
+```ts title="fix.mts" ins={3,18-25,27,29}
 import {
   defineIsolatedTask,
   defineTask,
@@ -72,13 +81,11 @@ result.unwrap();
 console.log(result.value(summary));
 ```
 
-`after: [fix]` fait attendre à `summary` la réussite de `fix`, et `context.value(fix)` lit sa sortie avec son type. Le script affiche par exemple `{ branch: 'outpost/fix-tests', commits: 1 }`.
-
-Les tâches et leurs listes `after` forment un graphe. Une tâche démarre dès que toutes ses dépendances sont terminées, et elle est ignorée si l’une d’elles échoue. Les tâches sans chemin entre elles sont indépendantes : `start({ concurrency: 2 })` en exécute jusqu’à deux à la fois ; par défaut, une seule. [Tâches et dépendances](../task-dependencies/) détaille le graphe.
+Le script affiche `{ branch: 'outpost/fix-tests', commits: 1 }`. `after: [fix]` démarre `summary` une fois `fix` réussie, et `context.value(fix)` lit sa sortie typée. [Tâches et dépendances](../task-dependencies/) traite des échecs et de la concurrence.
 
 ## Attendre une approbation
 
-```ts title="fix.mts"
+```ts title="fix.mts" ins={2-4,11-12,21-27,36-47,49-72}
 import {
   createLocalTransport,
   createWorkflowCheckpointStore,
@@ -157,11 +164,11 @@ if (result.status === "done") console.log(result.value(report));
 node fix.mts
 ```
 
-`defineApprovalTask()` est une gate : une fois `summary` terminée, l’exécution s’arrête jusqu’à ce qu’un acteur listé dans `actors` approuve ou rejette. `report` ne s’exécute qu’après une approbation ; un rejet l’ignore. Le script affiche `paused` : `start()` a renvoyé `status: "paused"`, et l’enregistrement de la tâche `approve` contient la demande en attente dans `pause`.
+Le script affiche `paused`. La gate `approve` arrête l’exécution jusqu’à ce qu’un acteur listé dans `actors` décide ; l’enregistrement de sa tâche contient la demande dans `pause`.
 
-Une gate exige un checkpoint, car la demande en attente doit survivre au processus. Un checkpoint est l’état enregistré d’une exécution : statuts, sorties et consommation des tâches. `createWorkflowCheckpointStore()` le conserve sous le `runId` dans `.outpost/storage`. `version` fait partie de son identité : changez-la quand vous modifiez les tâches ou leurs entrées.
+Une gate exige un **checkpoint**, l’état enregistré d’une exécution (statuts, sorties et consommation), ici sous `.outpost/storage`. Changez `version` quand vous modifiez les tâches.
 
-Les checkpoints stockent les sorties des tâches en JSON. Un résultat de dispatch porte aussi les méthodes `resume()` et `fork()` : `fix` exécute donc désormais la tâche isolée via son `perform(context)` et ne garde que `branch` et `commits`.
+Les checkpoints stockent du JSON, pas les méthodes d’un résultat de dispatch. `fix` appelle donc `agent.perform(context)` et ne garde que `branch` et `commits`.
 
 ## Reprendre avec la décision
 
@@ -169,19 +176,28 @@ Les checkpoints stockent les sorties des tâches en JSON. Un résultat de dispat
 node fix.mts approve
 ```
 
-Le script démarre d’abord le workflow pour lire la demande en attente, puis le redémarre avec une décision. La décision désigne l’exécution (`executionId`), la gate (`key`), la demande exacte (`requestId`, c’est-à-dire `pause.id`), l’`actor`, une `reason` et l’`action` : `"approve"` ou `"reject"`. Le script affiche `done` puis `maintainer approved outpost/fix-tests`.
+Le script affiche `done` puis `maintainer approved outpost/fix-tests`. `fix` et `summary` viennent du checkpoint : seule `report` s’exécute.
 
-`fix` et `summary` sont restaurées depuis le checkpoint, pas réexécutées : aucune sandbox ne démarre et l’agent n’est pas appelé. Seule `report` s’exécute.
+| Champ de la décision | Valeur                         |
+| -------------------- | ------------------------------ |
+| `executionId`        | `result.executionId`           |
+| `key`                | `"approve"`, la clé de la gate |
+| `requestId`          | `pause.id`                     |
+| `actor`              | L’un des `actors` de la gate   |
+| `reason`             | Une explication non vide       |
+| `action`             | `"approve"` ou `"reject"`      |
 
-Avant de vous appuyer sur ce mécanisme :
-
-- `actor` est une métadonnée fournie par votre application. Authentifiez la personne avant de soumettre une décision : voir [Approbations](../approvals/).
-- Si le processus s’arrête pendant qu’une tâche s’exécute, le `start()` suivant refuse de la rejouer tant que vous ne l’avez pas autorisé : voir [Exécutions persistantes](../durable-runs/).
+:::caution
+Authentifiez la personne avant de soumettre son `actor` : voir [Approbations](../approvals/). Une tâche interrompue en cours d’exécution n’est rejouée qu’avec votre autorisation : voir [Exécutions persistantes](../durable-runs/).
+:::
 
 ## Étapes suivantes
 
-- Relancer la correction avec la sortie des tests en retour : [Boucles de vérification](../verification-loops/).
-- Mettre en pause au lieu d’échouer quand l’agent atteint une limite d’usage : [Pauses sur quota](../quota-pauses/).
-- Exécuter le workflow sans surveillance : [Files de jobs et workers](../job-queues/), [Planification cron](../cron-schedules/) ou [Webhooks](../webhooks/).
-- Exiger une décision signée de l’approbateur : [Approbations](../approvals/).
-- Rejouer les tâches interrompues et récupérer une exécution plantée : [Exécutions persistantes](../durable-runs/).
+<!-- features -->
+
+- [Tâches et dépendances](../task-dependencies/): Organiser le graphe et paralléliser les tâches.
+- [Boucles de vérification](../verification-loops/): Relancer avec la sortie des tests en retour.
+- [Approbations](../approvals/): Authentifier les approbateurs et signer les décisions.
+- [Exécutions persistantes](../durable-runs/): Autoriser les rejeux et récupérer les exécutions plantées.
+- [Pauses sur quota](../quota-pauses/): Mettre en pause quand l’agent atteint une limite d’usage.
+- [Files de jobs et workers](../job-queues/): Exécuter les workflows sans surveillance.

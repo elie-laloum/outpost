@@ -1,4 +1,6 @@
 // Lays documentation pages out as bays: each h2 section splits prose (left) from its proof (right).
+import { applyComponents, isComponent } from "./guide-components.mjs";
+
 const symbolRoles = new Map([
   ["import", "import"],
   ["purpose and behavior", "say"],
@@ -21,6 +23,7 @@ const pageKinds = [
 ];
 const placements = {
   guide: [
+    [isComponent, "wide"],
     [isCode, "show"],
     [isTable, "wide"],
   ],
@@ -31,6 +34,7 @@ export function rehypeBays() {
   return (tree, file) => {
     const kind = pageKind(file.path ?? file.history?.[0] ?? "");
     if (!kind) return;
+    if (kind === "guide") tree.children = applyComponents(tree.children);
     const sections = splitSections(tree.children);
     const bays = layouts[kind](sections);
     tree.children = bays;
@@ -120,13 +124,7 @@ function bay(section, rules) {
   }
   const heading = section.heading ? [section.heading] : [];
   if (!columns.show.length)
-    return assemble(
-      "wide",
-      undefined,
-      [...heading, ...columns.say, ...columns.wide],
-      [],
-      [],
-    );
+    return assemble("wide", undefined, [...heading, ...section.nodes], [], []);
   return assemble(
     "split",
     undefined,

@@ -65,6 +65,29 @@ Every agent page follows the same sections: Install, Account access, API access,
 - **Titles**: sentence case, a noun phrase or an imperative ("Typed responses", "Write a brief"). Headings inside a page are tasks or questions the reader has.
 - **Links**: relative (`../slug/`, `../../reference/symbol/`), descriptive text, no bare "here".
 
+## Show, then tell
+
+Nobody reads long paragraphs. Structure the information, split it, and present it with the page's visual elements before prose.
+
+- **The description is the opening.** The frontmatter `description` is shown under the title; do not repeat it in a first paragraph. Start with the first section.
+- **Paragraphs are one to three short sentences** (about 60 words at most). A section opens with one or two sentences, then shows its content: code, a component, a table.
+- **Choose a visual for any enumeration.** Three or more parallel items become a component or a table, not a paragraph and rarely a plain bullet list. A sequence of steps becomes headings (tutorials), a `path` or a `flow`, never a numbered list of paragraphs.
+- **Cut explanations the visual already carries.** Do not describe a table or a diagram in prose next to it.
+- **Cautions go in asides** (`:::note`, `:::caution`), one or two sentences each, only when the reader would otherwise make a costly mistake.
+
+### Components
+
+An HTML comment placed on its own line before a Markdown list turns that list into a drawn component (`docs/scripts/guide-components.mjs`, styles in `docs/src/styles/guide-components.css`). Each item is a title (a link, bold text or inline code), then `: ` and one short sentence starting with a capital letter. A nested list holds tags or steps. Icons come from the linked page (`docs/scripts/guide-icons.mjs`); add a mapping there for a new page.
+
+| Marker              | Use it for                                                          | Item                                                                           |
+| ------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| `<!-- features -->` | A map of capabilities or choices: three, six, nine or twelve cells. | `[Title](../page/): Sentence.` with an optional nested list of tags.           |
+| `<!-- path -->`     | A reading path or ordered choice of pages, two to five stages.      | `[Title](../page/): Sentence.`                                                 |
+| `<!-- flow -->`     | A process in phases, each with its steps; host or sandbox as tags.  | `**Phase**: Sentence.` with nested `**Step**: Sentence.` items and their tags. |
+| `<!-- files -->`    | Generated files or directories, one line each.                      | `` `name` ``: Sentence. Names ending with `/` are folders and can nest.        |
+
+Tags in inline code are API names and use the code face; plain tags are product or concept names. Keep tags to one to five per cell. Tables remain the tool for comparing options along several attributes.
+
 ## Snippets
 
 - Every `ts` block is typechecked against the built package by `docs:test`. Snippets that import `./outpost.config.mts` use the configuration published on the Setup page; reuse it instead of redefining an agent and a provider.
@@ -94,6 +117,7 @@ Before committing a page:
 - [ ] No validation campaigns, version notes or contributor commands.
 - [ ] No fact repeated from its owning page; links instead.
 - [ ] Negations are rare and grouped under Limits.
+- [ ] No paragraph longer than three sentences; enumerations use a component or a table.
 - [ ] Every claim matches the current source (`src/`) and Reference.
 - [ ] The French page has the same structure, snippets and links.
 - [ ] `docs:check`, `docs:build` and `docs:test` pass.

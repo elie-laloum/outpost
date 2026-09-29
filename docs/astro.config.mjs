@@ -65,7 +65,11 @@ export default defineConfig({
         Head: "./src/components/Head.astro",
         Sidebar: "./src/components/Sidebar.astro",
       },
-      customCss: ["./src/styles/custom.css", "./src/styles/bays.css"],
+      customCss: [
+        "./src/styles/custom.css",
+        "./src/styles/bays.css",
+        "./src/styles/guide-components.css",
+      ],
       lastUpdated: false,
     }),
   ],

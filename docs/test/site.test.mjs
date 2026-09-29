@@ -583,3 +583,26 @@ for (const locale of ["", "fr/"]) {
     ).toBe(true);
   });
 }
+
+for (const locale of ["", "fr/"]) {
+  test(`guide components render as linked cells (${locale || "en"})`, async ({
+    page,
+  }) => {
+    await page.goto(`${locale}guide/introduction/`);
+    const features = page.locator("ul.features").first();
+    await expect(features.locator("a.feature-cell")).toHaveCount(12);
+    await expect(features.locator(".feature-icon svg").first()).toBeVisible();
+    await expect(page.locator("ol.path a.path-cell")).toHaveCount(4);
+    await features.locator("a.feature-cell").first().click();
+    await expect(page).toHaveURL(new RegExp(`/${locale}guide/briefs/$`));
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(`${locale}guide/how-it-works/`);
+    await expect(page.locator("ol.flow > li")).toHaveCount(3);
+    await expect(page.locator("ul.files .file")).not.toHaveCount(0);
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= window.innerWidth,
+      ),
+    ).toBe(true);
+  });
+}

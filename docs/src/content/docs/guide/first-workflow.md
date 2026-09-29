@@ -3,9 +3,20 @@ title: "From a task to a workflow"
 description: "Turn one agent task into a workflow that fixes code on a branch, summarises the result, waits for an approval and resumes from a checkpoint."
 ---
 
-Turn the single `dispatch()` from [Your first task](../first-request/) into a workflow: an agent fixes the failing tests on a branch, a second task summarises its result as typed data, a maintainer approves it and a checkpoint lets the run stop and resume without repeating finished work.
+<!-- flow -->
 
-A workflow is a named graph of tasks. Each step below replaces the content of one file, `fix.mts`, next to the `outpost.config.mts` from [Setup](../setup/).
+1. **First run**: Stops at the approval.
+   - `fix`: The agent fixes the tests on a branch.
+     - `defineIsolatedTask()`
+   - `summary`: Keeps typed data from the result.
+     - `defineTask()`
+   - `approve`: Pauses the run for a decision.
+     - `defineApprovalTask()`
+2. **Second run**: Resumes with the decision.
+   - `report`: Runs once approved.
+     - `defineTask()`
+
+A workflow is a graph of tasks. Each step replaces `fix.mts`, next to the `outpost.config.mts` from [Setup](../setup/).
 
 ## Run the agent as a workflow task
 
@@ -34,13 +45,11 @@ console.log(branch, commits);
 node fix.mts
 ```
 
-`defineIsolatedTask()` declares a task whose `request` returns the options of a `dispatch()`. Each attempt allocates its own sandbox and closes it when the agent finishes; cancelling the workflow stops the agent.
-
-`defineWorkflow()` checks the graph and `start()` runs it. A failed task does not make `start()` throw: the result carries a `status`, and `unwrap()` throws unless it is `"done"`. `result.value(fix)` is the task’s typed dispatch result. The script prints `outpost/fix-tests` and the commits the agent made.
+It prints `outpost/fix-tests` and the agent’s commits. `defineIsolatedTask()` runs a `dispatch()` as a task, in its own sandbox. `unwrap()` throws unless the run’s `status` is `"done"`.
 
 ## Pass the result to another task
 
-```ts title="fix.mts"
+```ts title="fix.mts" ins={3,18-25,27,29}
 import {
   defineIsolatedTask,
   defineTask,
@@ -72,13 +81,11 @@ result.unwrap();
 console.log(result.value(summary));
 ```
 
-`after: [fix]` makes `summary` wait for `fix` to succeed, and `context.value(fix)` reads its output with its type. The script prints, for example, `{ branch: 'outpost/fix-tests', commits: 1 }`.
-
-Tasks and their `after` lists form a graph. A task starts once all its dependencies are done and is skipped if one of them fails. Tasks without a path between them are independent: `start({ concurrency: 2 })` runs up to two at the same time; the default is one. [Tasks and dependencies](../task-dependencies/) covers the graph in detail.
+It prints `{ branch: 'outpost/fix-tests', commits: 1 }`. `after: [fix]` starts `summary` once `fix` succeeds, and `context.value(fix)` reads its typed output. [Tasks and dependencies](../task-dependencies/) covers failures and concurrency.
 
 ## Wait for an approval
 
-```ts title="fix.mts"
+```ts title="fix.mts" ins={2-4,11-12,21-27,36-47,49-72}
 import {
   createLocalTransport,
   createWorkflowCheckpointStore,
@@ -157,11 +164,11 @@ if (result.status === "done") console.log(result.value(report));
 node fix.mts
 ```
 
-`defineApprovalTask()` is a gate: once `summary` is done, the run stops until an actor listed in `actors` approves or rejects. `report` runs only after an approval; a rejection skips it. The script prints `paused`: `start()` returned `status: "paused"`, and the `approve` task record holds the pending request in `pause`.
+It prints `paused`. The `approve` gate stops the run until an actor listed in `actors` decides; its task record holds the request in `pause`.
 
-A gate needs a checkpoint, because the pending request must outlive the process. A checkpoint is the saved state of a run: task statuses, outputs and usage. `createWorkflowCheckpointStore()` keeps it under the `runId` in `.outpost/storage`. `version` is part of its identity: change it when you change the tasks or their inputs.
+A gate needs a **checkpoint**, the saved statuses, outputs and usage of a run, here under `.outpost/storage`. Change `version` when you change the tasks.
 
-Checkpoints store task outputs as JSON. A dispatch result also carries `resume()` and `fork()` methods, so `fix` now runs the isolated task through its `perform(context)` and keeps only `branch` and `commits`.
+Checkpoints hold JSON, not the methods of a dispatch result. `fix` therefore calls `agent.perform(context)` and keeps only `branch` and `commits`.
 
 ## Resume with the decision
 
@@ -169,19 +176,28 @@ Checkpoints store task outputs as JSON. A dispatch result also carries `resume()
 node fix.mts approve
 ```
 
-The script first starts the workflow to read the pending request, then starts it again with a decision. The decision names the run (`executionId`), the gate (`key`), the exact request (`requestId`, the `pause.id`), the `actor`, a `reason` and the `action`: `"approve"` or `"reject"`. The script prints `done` and `maintainer approved outpost/fix-tests`.
+It prints `done` and `maintainer approved outpost/fix-tests`. `fix` and `summary` come from the checkpoint: only `report` runs.
 
-`fix` and `summary` are restored from the checkpoint, not run again: no sandbox starts and the agent is not called. Only `report` runs.
+| Decision field | Value                       |
+| -------------- | --------------------------- |
+| `executionId`  | `result.executionId`        |
+| `key`          | `"approve"`, the gate’s key |
+| `requestId`    | `pause.id`                  |
+| `actor`        | One of the gate’s `actors`  |
+| `reason`       | A nonempty explanation      |
+| `action`       | `"approve"` or `"reject"`   |
 
-Before relying on this:
-
-- `actor` is metadata your application supplies. Authenticate the person before you submit a decision: see [Approvals](../approvals/).
-- If the process stops while a task is running, the next `start()` refuses to replay that task until you authorize it: see [Durable runs](../durable-runs/).
+:::caution
+Authenticate the person before you submit their `actor`: see [Approvals](../approvals/). A task interrupted mid-run replays only once you authorize it: see [Durable runs](../durable-runs/).
+:::
 
 ## Next steps
 
-- Retry the fix with the test output as feedback: [Verification loops](../verification-loops/).
-- Pause instead of failing when the agent reaches a usage limit: [Quota pauses](../quota-pauses/).
-- Run the workflow unattended: [Job queues and workers](../job-queues/), [Cron schedules](../cron-schedules/) or [Webhooks](../webhooks/).
-- Require a signed decision from the approver: [Approvals](../approvals/).
-- Retry interrupted tasks and recover a crashed run: [Durable runs](../durable-runs/).
+<!-- features -->
+
+- [Tasks and dependencies](../task-dependencies/): Shape the graph and run tasks in parallel.
+- [Verification loops](../verification-loops/): Retry with the test output as feedback.
+- [Approvals](../approvals/): Authenticate approvers and sign decisions.
+- [Durable runs](../durable-runs/): Authorize replays and recover crashed runs.
+- [Quota pauses](../quota-pauses/): Pause when the agent hits a usage limit.
+- [Job queues and workers](../job-queues/): Run workflows unattended.

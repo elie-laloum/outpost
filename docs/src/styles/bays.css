@@ -28,7 +28,7 @@
 .sl-markdown-content
   .bay[data-bay="wide"]
   > .bay-say
-  > :not(table, .cells, .props) {
+  > :not(table, .cells, .props, .features, .path, .flow) {
   max-width: 70ch;
 }
 .bay-wide {

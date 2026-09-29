@@ -243,6 +243,18 @@ Reference parameters and properties become ruled rows rather than a table. Each 
 
 Markdown code blocks keep Celestia's highlighting and copy button, set square, inside a hairline border on the code surface. Inline code uses a tonal chip (Slate Panel at 70%) without a border.
 
+### Guide Components
+
+Guide pages show before they tell. An HTML comment before a Markdown list (`<!-- features -->`, `<!-- path -->`, `<!-- flow -->`, `<!-- files -->`) becomes one of four drawn components, built by `docs/scripts/guide-components.mjs` and styled in `docs/src/styles/guide-components.css`. They run flush with the bay edges, like bay cells, and use hairlines only.
+
+- **Feature cells:** a 3-column grid (2 below 64rem, 1 below 40rem). Each cell is a link with a drawn icon in ink, a Title-style name, one Pewter/Steel sentence and a row of tags pushed to the cell's foot. A registration cross (two 1px strokes, gray-4) marks each inner corner, like the corner ticks of a drawing sheet. Hover adds the code-surface fill.
+- **Tags:** 1px hairline boxes at label size. API names keep the monospace; product and concept names stay in Inter.
+- **Path:** linked stages side by side, each divider carrying a drawn chevron (two hairline borders turned 45°) that points to the next stage. Below 64rem the stages stack and the chevron turns down.
+- **Flow:** one column per phase with a tonal head (phase name and one line) above ruled steps; host or sandbox tags under each step, chevrons between phases.
+- **File tree:** ruled rows with a muted file or folder icon, the monospace name in ink and a one-line note; folders indent their entries behind a hairline.
+
+Icons are drawn per Guide page in `docs/scripts/guide-icons.mjs` on the 24px grid with the 1.6 stroke. The sequence of a path or flow is carried by its connectors, never by numerals.
+
 ## Do's and Don'ts
 
 ### Do:

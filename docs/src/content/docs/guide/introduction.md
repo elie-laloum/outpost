@@ -1,15 +1,13 @@
 ---
 title: "Introduction"
-description: "Run coding agents from TypeScript, in a sandbox and on a branch you choose, and compose their work into workflows."
+description: "Outpost runs coding agents from your TypeScript code: any supported agent CLI or its own loop, in a sandbox you choose, on a Git branch you control. Their results become typed data that workflows can check, approve and resume."
 ---
-
-Outpost is a TypeScript library and CLI that runs coding-agent CLIs (Claude Code, Codex, GitHub Copilot CLI, Kimi Code, Antigravity) or its own built-in harness. Each agent works inside a sandbox you choose (Docker, Podman, Vercel, Daytona, Firecracker or the host) on a Git workspace you control. Outpost then composes their results into typed workflows that survive interruptions.
-
-Use it to automate agent work from your own code: you decide which credentials the agent receives, which branch it writes to and when its commits are integrated.
 
 ## One task in code
 
-`dispatch()` starts a sandbox, runs the agent on a branch, collects its commits and releases the sandbox. `coder`, `repository` and `sandboxProvider` come from the configuration file created in [Setup](../setup/).
+`dispatch()` starts a sandbox, runs the agent on a branch, collects its commits and releases the sandbox.
+
+The three imports come from the configuration written in [Setup](../setup/).
 
 ```ts title="fix.mts"
 import { dispatch } from "@elie-laloum/outpost";
@@ -30,63 +28,75 @@ console.log(result.usage); // input, cached and output token counts
 
 ## What you can build
 
-### Run an agent task
+<!-- features -->
 
-- Describe the work with text, files and variables: [Write a brief](../briefs/).
-- Choose the checkout and where commits land: [Repository and branch](../repository-and-branch/).
-- Get validated data instead of free text: [Typed responses](../typed-responses/).
-- Run tests between agent turns in a prepared environment: [Sandbox sessions](../sandbox-sessions/), [Prepare the environment](../environment-setup/).
-- Continue or fork an agent's conversation: [Conversations](../conversations/).
-- Bound, cancel, redirect and follow a running agent: [Limits and cancellation](../limits-and-cancellation/), [Steering](../steering/), [Follow progress](../progress/).
+- [Agent tasks](../briefs/): Brief an agent, pick its branch and get typed data back.
+  - `dispatch()`
+  - `createSandbox()`
+- [Any coding agent](../choose-an-agent/): Five agent CLIs, signed in with your account or, for most, an API key.
+  - Claude Code
+  - Codex
+  - Copilot CLI
+  - Kimi Code
+  - Antigravity
+- [Your own agent loop](../harness/): Drive a model with your tools, permissions and subagents.
+  - OpenAI
+  - Anthropic
+  - `createHarness()`
+- [Any sandbox](../choose-a-sandbox/): Local containers, cloud sandboxes, a microVM or the host.
+  - Docker
+  - Podman
+  - Vercel
+  - Daytona
+  - Firecracker
+- [MCP tools](../mcp-servers/): Give agents Model Context Protocol servers, secrets passed by name.
+  - stdio
+  - HTTP
+  - OAuth
+- [Isolation](../network-restrictions/): Restrict outbound traffic and keep Git metadata private.
+  - egress rules
+  - private Git
+- [Typed workflows](../task-dependencies/): Tasks pass typed results, retry and loop until checks pass.
+  - `defineWorkflow()`
+  - `defineLoopTask()`
+- [Durable runs](../durable-runs/): Checkpoint progress, pause on quotas, resume without redoing work.
+  - checkpoints
+  - quota pauses
+  - cache
+- [People in the loop](../approvals/): Wait for an approval or let the agent ask questions.
+  - `defineApprovalTask()`
+  - `defineInteractiveAgentTask()`
+- [Unattended runs](../job-queues/): Run from CI, queues, cron schedules and verified webhooks.
+  - SQLite
+  - Redis
+  - GitHub
+  - GitLab
+  - Slack
+- [Observe and recover](../observability/): Journals, traces, offline replay and preserved work.
+  - OpenTelemetry
+  - replay
+  - recovery
+- [Extend Outpost](../integration-ports/): Plug in another agent CLI, sandbox or storage.
+  - `AgentAdapter`
+  - `SandboxProvider`
+  - `Transport`
 
-### Choose agents and sandboxes
+## Complete examples
 
-- Pick a CLI agent and how it authenticates: [Choose an agent](../choose-an-agent/), [Authentication](../authentication/).
-- Give agents Model Context Protocol tools, including servers behind a login: [MCP servers](../mcp-servers/), [MCP server login](../mcp-oauth/).
-- Hand a task to another agent when the first hits a limit or goes down: [Fallback agents](../fallback-agents/).
-- Drive OpenAI or Anthropic models with Outpost's own loop, tools, permissions and subagents: [Built-in harness](../harness/).
-- Pick where commands run: [Choose a sandbox](../choose-a-sandbox/), then [Docker and Podman](../containers/), [Cloud sandboxes](../cloud-sandboxes/), [Firecracker microVMs](../firecracker/) or [Host execution](../host-process/).
-- Control what a sandbox receives: [Agent images](../agent-images/), [Environment variables](../environment-variables/), [Network restrictions](../network-restrictions/), [Private Git](../private-git/).
+<!-- features -->
 
-### Compose workflows
-
-- Connect typed tasks into a graph that runs independent work in parallel: [Tasks and dependencies](../task-dependencies/), [Concurrency, retries and timeouts](../concurrency-and-retries/).
-- Repeat work until a check accepts it: [Verification loops](../verification-loops/).
-- Change several repositories, each in its own sandbox: [Multiple repositories](../multiple-repositories/).
-- Run competing candidates and keep the one that passes: [Competing candidates](../speculation/).
-- Cap attempts and tokens, and reuse results whose inputs did not change: [Budgets](../budgets/), [Result cache](../task-cache/).
-- Share typed results across processes: [Artifacts](../artifacts/).
-
-### Run durably and involve people
-
-- Resume a workflow after a crash without repeating finished tasks: [Durable runs](../durable-runs/).
-- Pause on a usage limit and resume after the reset: [Quota pauses](../quota-pauses/).
-- Wait for a human decision, or let the agent ask questions: [Approvals](../approvals/), [Interactive tasks](../interactive-tasks/).
-
-### Run unattended
-
-- Run in a CI pipeline: [Run in CI](../ci-automation/).
-- Execute jobs through a durable queue and workers: [Job queues and workers](../job-queues/), [Redis and BullMQ](../redis-workers/).
-- Start workflows on a schedule or from a webhook: [Cron schedules](../cron-schedules/), [Webhooks](../webhooks/).
-
-### Store, observe and operate
-
-- Keep durable data on disk or in S3 and R2: [Where data lives](../storage/), [S3 and R2](../object-storage/).
-- Record each dispatch, export traces and replay a run without a model: [Journals](../journals/), [Observation hub and OpenTelemetry](../observability/), [Replay without a model](../record-replay/).
-- Check prerequisites, handle errors and recover preserved work: [Diagnostics](../diagnostics/), [Errors](../error-handling/), [Recover work](../recovery/).
-- Clean up, review exposure and use the CLI: [Retention and cleanup](../retention/), [Security](../security/), [CLI commands](../cli/).
-
-### Extend Outpost
-
-- Extend one capability without replacing the runtime, or connect another agent CLI or execution environment: [Integration ports](../integration-ports/), [Add a CLI agent](../custom-agents/), [Native conversation formats](../conversation-formats/), [Add a sandbox provider](../custom-sandbox-providers/).
-
-### Complete examples
-
-[Fix a failing CI build](../fix-failing-ci/) · [Review a pull request on demand](../review-on-label/) · [Nightly maintenance](../nightly-maintenance/) · [Change several repositories](../multi-repository-change/) · [Let agents compete](../compete-agents/) · [Write a specification with a human](../specify-with-a-human/)
+- [Fix a failing CI build](../fix-failing-ci/): Loop until the test command passes.
+- [Review a pull request on demand](../review-on-label/): A label or a comment starts a review.
+- [Nightly maintenance](../nightly-maintenance/): A scheduled run that survives restarts and limits.
+- [Change several repositories](../multi-repository-change/): One change, one sandbox per repository.
+- [Let agents compete](../compete-agents/): Run several approaches, keep the one that passes.
+- [Write a specification with a human](../specify-with-a-human/): Questions first, code after approval.
 
 ## Where to start
 
-1. [How Outpost works](../how-it-works/) explains the agent, the sandbox and the workspace, and who owns each.
-2. [Setup](../setup/) installs Outpost, builds an image and creates `outpost.config.mts`.
-3. [Your first task](../first-request/) runs one task and reads its answer, usage and commits.
-4. [From a task to a workflow](../first-workflow/) turns that task into a checked, approved and resumable workflow.
+<!-- path -->
+
+1. [How Outpost works](../how-it-works/): The agent, the sandbox and the workspace.
+2. [Setup](../setup/): Install Outpost and write its configuration.
+3. [Your first task](../first-request/): Run an agent and read its result.
+4. [From a task to a workflow](../first-workflow/): Check, approve and resume.
