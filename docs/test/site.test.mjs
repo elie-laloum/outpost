@@ -46,6 +46,46 @@ for (const [locale, title, reference] of [
   });
 }
 
+for (const [locale, heading, start, copied] of [
+  ["", "Run an agent,", "Get started", "Copy the install command"],
+  [
+    "fr/",
+    "Exécutez un agent,",
+    "Commencer",
+    "Copier la commande d’installation",
+  ],
+]) {
+  test(`landing files, copy and workflow steps work (${locale || "en"})`, async ({
+    page,
+    context,
+  }) => {
+    await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+    await page.goto(locale);
+    await expect(page.getByRole("heading", { level: 1 })).toContainText(
+      heading,
+    );
+    const tabs = page.getByRole("tablist").first().getByRole("tab");
+    await expect(tabs).toHaveCount(3);
+    await tabs.first().focus();
+    await page.keyboard.press("ArrowRight");
+    await expect(tabs.nth(1)).toHaveAttribute("aria-selected", "true");
+    await expect(page.locator("#hero-files-panel-1")).toBeVisible();
+    await expect(page.locator("#hero-files-panel-0")).toBeHidden();
+    await page.getByRole("button", { name: copied }).click();
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
+      "npx @elie-laloum/outpost init",
+    );
+    const steps = page.locator("[data-workflow] [data-lines]");
+    await expect(steps.first()).toHaveAttribute("aria-pressed", "true");
+    await steps.nth(2).click();
+    await expect(steps.nth(2)).toHaveAttribute("aria-pressed", "true");
+    const active = page.locator("[data-workflow] .line[data-active]");
+    await expect(active.first()).toContainText("defineApprovalTask");
+    await page.getByRole("link", { name: start }).click();
+    await expect(page).toHaveURL(new RegExp(`/${locale}guide/setup/$`));
+  });
+}
+
 test("language switch retains the new guide page", async ({ page }) => {
   await page.goto("guide/first-request/");
   const select = page

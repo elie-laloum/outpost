@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
   mkdtemp,
   mkdir,
+  copyFile,
   readFile,
   readdir,
   writeFile,
@@ -67,6 +68,19 @@ try {
           runnable.push({ file, name: locale + name });
       }
     }
+  }
+  const landing = resolve(root, "docs/src/components/landing/snippets");
+  const landingDirectory = resolve(workspace, "landing");
+  await mkdir(landingDirectory);
+  await copyFile(
+    resolve(workspace, "en/outpost.config.mts"),
+    resolve(landingDirectory, "outpost.config.mts"),
+  );
+  for (const name of await readdir(landing)) {
+    if (!name.endsWith(".ts")) continue;
+    const file = resolve(landingDirectory, name.replace(/\.ts$/, ".mts"));
+    await writeFile(file, await readFile(resolve(landing, name), "utf8"));
+    roots.push(file);
   }
   assert.ok(roots.length > 2, "No guide snippets found");
   const program = ts.createProgram(roots, {

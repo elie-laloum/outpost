@@ -1,8 +1,18 @@
 ---
 import ExistingFrame from "starlight-theme-celestia/components/PageFrame.astro";
-const guide = /^(fr\/)?guide\//.test(Astro.locals.starlightRoute.entry.id);
+import Landing from "./landing/Landing.astro";
+const entry = Astro.locals.starlightRoute.entry;
+const guide = /^(fr\/)?guide\//.test(entry.id);
 ---
-{guide ? (
+{entry.data.landing ? (
+  <div class="guide-frame landing-frame">
+    <header class="guide-top"><slot name="header" /></header>
+    <nav class="guide-sidebar" aria-label={Astro.locals.t('sidebarNav.accessibleLabel')}>
+      <div id="starlight__sidebar"><slot name="sidebar" /></div>
+    </nav>
+    <Landing />
+  </div>
+) : guide ? (
   <div class="guide-frame">
     <header class="guide-top"><slot name="header" /></header>
     <nav class="guide-sidebar" aria-label={Astro.locals.t('sidebarNav.accessibleLabel')}>
@@ -28,10 +38,13 @@ const guide = /^(fr\/)?guide\//.test(Astro.locals.starlightRoute.entry.id);
   .guide-frame :global(.right-sidebar) { padding-top: 6rem; }
   .guide-frame :global(.right-sidebar a) { font-size: .8rem; }
   .guide-frame :global(.pagination-links) { border-top: 1px solid var(--sl-color-hairline-light); padding-top: 1.5rem; }
-  @media (min-width: 100rem) { .guide-sidebar { left: calc((100vw - 100rem) / 2); } .guide-frame { max-width: 100rem; margin: auto; } }
+  .landing-frame { max-width: none; }
+  .landing-frame .guide-sidebar { display: none; }
+  @media (min-width: 100rem) { .guide-sidebar { left: calc((100vw - 100rem) / 2); } .guide-frame:not(.landing-frame) { max-width: 100rem; margin: auto; } }
   @media (max-width: 49.99rem) {
     .guide-sidebar { display: none; width: 100%; }
     :global(body[data-mobile-menu-expanded]) .guide-sidebar { display: block; }
+    :global(body[data-mobile-menu-expanded]) .landing-frame .guide-sidebar { display: block; }
     .guide-main { padding: 5rem 0 0; }
     .guide-frame :global(.content-panel) { padding: .8rem 1.25rem; }
   }

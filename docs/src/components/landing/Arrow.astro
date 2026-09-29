@@ -1,0 +1,29 @@
+<svg
+  class="arrow"
+  viewBox="0 0 24 24"
+  aria-hidden="true"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="1.6"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path d="M5 12h14m-5-5 5 5-5 5"></path>
+</svg>
+
+<style>
+  .arrow {
+    width: 1em;
+    height: 1em;
+    flex: 0 0 auto;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  :global(a:hover) > .arrow {
+    transform: translateX(3px);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .arrow {
+      transition: none;
+    }
+  }
+</style>

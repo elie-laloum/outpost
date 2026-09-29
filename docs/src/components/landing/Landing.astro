@@ -1,0 +1,956 @@
+---
+import Code from "starlight-theme-celestia/components/Code.astro";
+import manifest from "../../../../package.json";
+import Arrow from "./Arrow.astro";
+import CodeWindow from "./CodeWindow.astro";
+import brief from "./snippets/brief.md?raw";
+import pipeline from "./snippets/pipeline.ts?raw";
+import run from "./snippets/run.ts?raw";
+import workflow from "./snippets/workflow.ts?raw";
+
+const route = Astro.locals.starlightRoute;
+const landing = route.entry.data.landing!;
+const locale = route.entry.id.startsWith("fr") ? "fr/" : "";
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const href = (path: string) =>
+  /^https?:/.test(path) ? path : `${base}/${locale}${path}`;
+const swap = [
+  "const agent = createAgent({",
+  '  harness: createCodexHarness({ authentication: "account" }), // [!code --]',
+  '  harness: createClaudeHarness({ authentication: "account" }), // [!code ++]',
+  "});",
+  "const sandboxProvider =",
+  '  createDockerSandboxProvider({ image: "outpost:dev" }); // [!code --]',
+  '  createPodmanSandboxProvider({ image: "outpost:dev" }); // [!code ++]',
+].join("\n");
+const pipelineLines = pipeline.split("\n");
+for (const step of landing.workflow.steps) {
+  const [first = 0] = step.lines.split("-").map(Number);
+  if (!pipelineLines[first - 1]?.startsWith("const "))
+    throw new Error(
+      `Workflow step "${step.title}" does not start at a declaration.`,
+    );
+}
+const heroFiles = [
+  {
+    name: "run.ts",
+    code: run,
+    lang: "ts",
+    note: landing.window.notes.run,
+    command: true,
+  },
+  {
+    name: "brief.md",
+    code: brief,
+    lang: "md",
+    note: landing.window.notes.brief,
+  },
+  {
+    name: "workflow.ts",
+    code: workflow,
+    lang: "ts",
+    note: landing.window.notes.workflow,
+    example: true,
+  },
+];
+const runtimeGroups = [
+  { label: landing.runtimes.agentsLabel, items: landing.runtimes.agents },
+  { label: landing.runtimes.sandboxesLabel, items: landing.runtimes.sandboxes },
+];
+---
+
+<main class="landing" data-pagefind-body>
+  <div class="rail">
+    <section class="bay hero" aria-labelledby="_top">
+      <div class="say hero-copy">
+        <h1 id="_top">
+          {landing.headline.map((clause) => <span>{clause}</span>)}
+        </h1>
+        <p class="lead">{landing.lead}</p>
+        <outpost-install class="install" data-copied={landing.install.copied}>
+          <code><span aria-hidden="true">$ </span>{landing.install.command}</code
+          >
+          <button
+            type="button"
+            aria-label={landing.install.copy}
+            title={landing.install.copy}
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true" class="copy-icon">
+              <rect x="9" y="9" width="12" height="12" rx="1.5"></rect>
+              <path
+                d="M5 15H4.5A1.5 1.5 0 0 1 3 13.5v-9A1.5 1.5 0 0 1 4.5 3h9A1.5 1.5 0 0 1 15 4.5V5"
+              ></path>
+            </svg>
+            <svg viewBox="0 0 24 24" aria-hidden="true" class="done-icon"
+              ><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg
+            >
+          </button>
+          <span class="status" role="status" aria-live="polite"></span>
+        </outpost-install>
+        <div class="actions">
+          <a class="button primary" href={href(landing.primary.href)}>
+            {landing.primary.label}
+            <Arrow />
+          </a>
+          <a class="button" href={href(landing.secondary.href)}
+            >{landing.secondary.label}</a
+          >
+        </div>
+        <p class="facts">
+          {`${landing.facts} · v${manifest.version} · `}
+          <a href={href(landing.reference.href)}>{landing.reference.label}</a>
+        </p>
+      </div>
+      <div class="show hero-code">
+        <CodeWindow
+          id="hero-files"
+          label={landing.window.label}
+          copyLabel={landing.window.copy}
+          copiedLabel={landing.install.copied}
+          exampleLabel={landing.window.example}
+          files={heroFiles}
+        />
+      </div>
+    </section>
+
+    <section class="bay" aria-labelledby="pillar-run">
+      <div class="say">
+        <h2 id="pillar-run">{landing.run.title}</h2>
+        <p>{landing.run.text}</p>
+        <a class="more" href={href(landing.run.link.href)}
+          >{landing.run.link.label}<Arrow /></a
+        >
+      </div>
+      <div class="show">
+        <figure class="swap">
+          <figcaption>{landing.run.caption}</figcaption>
+          <div class="swap-code"><Code code={swap} lang="ts" /></div>
+        </figure>
+      </div>
+    </section>
+
+    <section class="bay" aria-labelledby="pillar-own">
+      <div class="say">
+        <h2 id="pillar-own">{landing.own.title}</h2>
+        <p>{landing.own.text}</p>
+        <a class="more" href={href(landing.own.link.href)}
+          >{landing.own.link.label}<Arrow /></a
+        >
+      </div>
+      <div class="show flush">
+        <dl class="ledger">
+          {
+            landing.own.ledger.map((row) => (
+              <div>
+                <dt>{row.term}</dt>
+                <dd>{row.detail}</dd>
+              </div>
+            ))
+          }
+        </dl>
+      </div>
+    </section>
+
+    <section class="bay" aria-labelledby="pillar-compose">
+      <div class="say">
+        <h2 id="pillar-compose">{landing.compose.title}</h2>
+        <p>{landing.compose.text}</p>
+        <a class="more" href={href(landing.compose.link.href)}
+          >{landing.compose.link.label}<Arrow /></a
+        >
+      </div>
+      <ul class="show flush cells">
+        {
+          landing.compose.primitives.map((primitive) => (
+            <li>
+              <a href={href(primitive.href)}>
+                <code>{primitive.name}()</code>
+                <span>{primitive.detail}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <section class="bay" aria-labelledby="runtimes-title">
+      <div class="say">
+        <h2 id="runtimes-title">{landing.runtimes.title}</h2>
+        <p>{landing.runtimes.text}</p>
+      </div>
+      <div class="show flush">
+        {
+          runtimeGroups.map((group) => (
+            <div class="runtime-group">
+              <h3>{group.label}</h3>
+              <ul class="cells">
+                {group.items.map((item) => (
+                  <li>
+                    <a href={href(item.href)}>
+                      <span class="runtime-name">
+                        {item.name}
+                        {item.experimental && (
+                          <span
+                            class="flask"
+                            role="img"
+                            aria-label={landing.runtimes.experimental}
+                            title={landing.runtimes.experimental}
+                          />
+                        )}
+                      </span>
+                      <span class="runtime-note">{item.note}</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <section
+      class="bay workflow"
+      aria-labelledby="workflow-title"
+      data-workflow
+    >
+      <div class="say flush">
+        <div class="workflow-intro">
+          <h2 id="workflow-title">{landing.workflow.title}</h2>
+          <p>{landing.workflow.text}</p>
+        </div>
+        <ol class="steps" aria-label={landing.workflow.stepsLabel}>
+          {
+            landing.workflow.steps.map((step, index) => (
+              <li>
+                <button
+                  type="button"
+                  data-lines={step.lines}
+                  aria-pressed={index === 0 ? "true" : "false"}
+                  aria-controls="workflow-files-panel-0"
+                >
+                  <span class="step-number">{index + 1}</span>
+                  <span class="step-copy">
+                    <strong>{step.title}</strong>
+                    <span>{step.text}</span>
+                  </span>
+                </button>
+              </li>
+            ))
+          }
+        </ol>
+        <a class="more" href={href(landing.workflow.link.href)}
+          >{landing.workflow.link.label}<Arrow /></a
+        >
+      </div>
+      <div class="show workflow-code">
+        <CodeWindow
+          id="workflow-files"
+          label={landing.workflow.title}
+          copyLabel={landing.window.copy}
+          copiedLabel={landing.install.copied}
+          files={[{ name: "pipeline.ts", code: pipeline, lang: "ts" }]}
+          scroll
+        />
+      </div>
+    </section>
+
+    <footer class="landing-footer">
+      <div class="footer-brand">
+        <p class="wordmark">Outpost</p>
+        <p>{landing.headline.join(" ")}</p>
+      </div>
+      {
+        [landing.footer.documentation, landing.footer.source].map((column) => (
+          <nav aria-label={column.title}>
+            <h2>{column.title}</h2>
+            <ul>
+              {column.links.map((link) => (
+                <li>
+                  <a href={href(link.href)}>{link.label}</a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        ))
+      }
+      <p class="footer-legal">{landing.footer.license} v{manifest.version}</p>
+    </footer>
+  </div>
+</main>
+
+<script>
+  class OutpostInstall extends HTMLElement {
+    connectedCallback() {
+      const button = this.querySelector("button");
+      const status = this.querySelector<HTMLElement>(".status");
+      const command = this.querySelector("code")?.lastChild?.textContent ?? "";
+      button?.addEventListener("click", async () => {
+        await navigator.clipboard.writeText(command.trim());
+        button.dataset.done = "";
+        if (status) status.textContent = this.dataset.copied ?? "";
+        setTimeout(() => {
+          delete button.dataset.done;
+          if (status) status.textContent = "";
+        }, 1600);
+      });
+    }
+  }
+  customElements.define("outpost-install", OutpostInstall);
+
+  const section = document.querySelector<HTMLElement>("[data-workflow]");
+  const steps = [
+    ...(section?.querySelectorAll<HTMLButtonElement>("[data-lines]") ?? []),
+  ];
+  const scroller = section?.querySelector<HTMLElement>(".workflow-code .code");
+  const lines = [...(scroller?.querySelectorAll<HTMLElement>(".line") ?? [])];
+  const highlight = (step: HTMLButtonElement | undefined, reveal = true) => {
+    const [first = 0, last = first] = (step?.dataset.lines ?? "")
+      .split("-")
+      .map(Number);
+    lines.forEach((line, index) => {
+      line.toggleAttribute(
+        "data-active",
+        index + 1 >= first && index + 1 <= last,
+      );
+    });
+    const target = lines[first - 1];
+    if (!reveal || !scroller || !target) return;
+    const offset =
+      target.getBoundingClientRect().top - scroller.getBoundingClientRect().top;
+    scroller.scrollTo({ top: scroller.scrollTop + offset - 24 });
+  };
+  const pinned = () =>
+    steps.find((step) => step.getAttribute("aria-pressed") === "true");
+  for (const step of steps) {
+    step.addEventListener("click", () => {
+      const active = step.getAttribute("aria-pressed") === "true";
+      steps.forEach((other) =>
+        other.setAttribute("aria-pressed", String(other === step && !active)),
+      );
+      highlight(pinned());
+    });
+    step.addEventListener("pointerenter", () => highlight(step));
+    step.addEventListener("pointerleave", () => highlight(pinned()));
+    step.addEventListener("focus", () => highlight(step));
+    step.addEventListener("blur", () => highlight(pinned()));
+  }
+  highlight(pinned(), false);
+</script>
+
+<style>
+  .landing {
+    --landing-line: var(--sl-color-hairline-light);
+    --landing-code-bg: color-mix(
+      in oklch,
+      var(--sl-color-gray-6) 45%,
+      var(--sl-color-black)
+    );
+    --landing-code-bg-active: color-mix(
+      in oklch,
+      var(--sl-color-gray-6) 80%,
+      var(--sl-color-black)
+    );
+    --landing-gutter: var(--sl-color-gray-3);
+    --landing-pad: clamp(1.25rem, 3.2vw, 3rem);
+    --landing-ease: cubic-bezier(0.16, 1, 0.3, 1);
+    padding-top: 4rem;
+    background-color: var(--sl-color-black);
+    background-image: repeating-linear-gradient(
+      -45deg,
+      transparent 0 7px,
+      color-mix(in oklch, var(--sl-color-gray-5) 45%, transparent) 7px 8px
+    );
+    color: var(--sl-color-gray-2);
+  }
+  .rail {
+    max-width: 82rem;
+    margin: 0 auto;
+    border-inline: 1px solid var(--landing-line);
+    background: var(--sl-color-black);
+  }
+  .landing :where(h1, h2, h3, p, ul, ol, dl, dd, figure) {
+    margin: 0;
+  }
+  .landing :where(ul, ol) {
+    padding: 0;
+    list-style: none;
+  }
+  .landing ::selection {
+    background: color-mix(in oklch, var(--sl-color-accent) 32%, transparent);
+    color: var(--sl-color-white);
+  }
+  .landing a {
+    text-underline-offset: 0.22em;
+  }
+  .landing :focus-visible {
+    outline: 2px solid var(--sl-color-accent);
+    outline-offset: 2px;
+  }
+
+  /* Every section splits at track 5 of 12; cells split the right bay at track 9. */
+  .bay {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    border-bottom: 1px solid var(--landing-line);
+  }
+  .say {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-width: 0;
+    padding: 3.5rem var(--landing-pad);
+    border-right: 1px solid var(--landing-line);
+  }
+  .show {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+    padding: 3rem var(--landing-pad);
+  }
+  .flush {
+    padding: 0;
+  }
+  .say > p,
+  .workflow-intro > p {
+    max-width: 34rem;
+    line-height: 1.65;
+    text-wrap: pretty;
+  }
+  .say h2 {
+    color: var(--sl-color-white);
+    font-size: clamp(1.5rem, 2.2vw, 1.875rem);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+  }
+  .more {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    align-self: flex-start;
+    margin-top: auto;
+    padding-top: 0.75rem;
+    color: var(--sl-color-white);
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: underline;
+    text-decoration-color: var(--sl-color-gray-4);
+    transition: text-decoration-color 0.2s var(--landing-ease);
+  }
+  .more:hover {
+    text-decoration-color: var(--sl-color-white);
+  }
+
+  /* Hero */
+  .hero {
+    min-height: min(calc(100svh - 4rem), 48rem);
+  }
+  .hero-copy {
+    justify-content: center;
+    gap: 0;
+    container-type: inline-size;
+  }
+  h1 {
+    color: var(--sl-color-white);
+    font-size: clamp(2.2rem, 10.2cqi, 3.4rem);
+    font-weight: 600;
+    line-height: 1.05;
+    letter-spacing: -0.04em;
+  }
+  h1 span {
+    display: block;
+  }
+  .lead {
+    max-width: 34rem;
+    margin-top: 1.5rem;
+    font-size: 1.0625rem;
+    line-height: 1.65;
+    text-wrap: pretty;
+  }
+  .install {
+    position: relative;
+    display: flex;
+    align-items: center;
+    max-width: 26rem;
+    margin-top: 2rem;
+    border: 1px solid var(--landing-line);
+    background: var(--landing-code-bg);
+  }
+  .install code {
+    flex: 1;
+    min-width: 0;
+    padding: 0.8rem 1rem;
+    overflow-x: auto;
+    color: var(--sl-color-white);
+    background: none;
+    border: 0;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    scrollbar-width: none;
+  }
+  .install code span {
+    color: var(--sl-color-gray-3);
+  }
+  .install button {
+    display: grid;
+    place-items: center;
+    align-self: stretch;
+    width: 2.9rem;
+    border: 0;
+    border-left: 1px solid var(--landing-line);
+    background: none;
+    color: var(--sl-color-gray-3);
+    cursor: pointer;
+  }
+  .install button:hover,
+  .install button[data-done] {
+    color: var(--sl-color-white);
+  }
+  .install svg {
+    width: 1rem;
+    height: 1rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .done-icon,
+  .install button[data-done] .copy-icon {
+    display: none;
+  }
+  .install button[data-done] .done-icon {
+    display: block;
+  }
+  .status {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+  .button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.75rem;
+    padding: 0 1.25rem;
+    border: 1px solid var(--sl-color-gray-5);
+    color: var(--sl-color-white);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition:
+      background-color 0.2s var(--landing-ease),
+      border-color 0.2s var(--landing-ease);
+  }
+  .button:hover {
+    border-color: var(--sl-color-gray-3);
+    background: var(--sl-color-gray-6);
+  }
+  .button.primary {
+    border-color: var(--sl-color-white);
+    background: var(--sl-color-white);
+    color: var(--sl-color-black);
+  }
+  .button.primary:hover {
+    background: var(--sl-color-gray-1);
+  }
+  .facts {
+    margin-top: 1.5rem;
+    color: var(--sl-color-gray-3);
+    font-size: 0.8125rem;
+  }
+  .facts a {
+    color: var(--sl-color-gray-2);
+  }
+  .facts a:hover {
+    color: var(--sl-color-white);
+  }
+
+  /* Run */
+  .swap {
+    border: 1px solid var(--landing-line);
+    background: var(--landing-code-bg);
+  }
+  .swap figcaption {
+    padding: 0.65rem 1rem;
+    border-bottom: 1px solid var(--landing-line);
+    color: var(--sl-color-gray-3);
+    font-size: 0.8125rem;
+  }
+  .swap-code {
+    overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--sl-color-gray-5) transparent;
+  }
+  .swap-code :global([data-celestia-code-container]) {
+    overflow: visible;
+    border: 0;
+    border-radius: 0;
+  }
+  .swap-code :global(celestia-code-copy-button) {
+    display: none;
+  }
+  .swap-code :global(pre) {
+    margin: 0;
+    padding: 0.9rem 0;
+    overflow: visible !important;
+    background: transparent !important;
+    font-size: 0.8125rem;
+    line-height: 1.7;
+  }
+  .swap-code :global(code) {
+    display: block;
+    min-width: max-content;
+  }
+  .swap-code :global(.line) {
+    display: inline-block;
+    min-width: 100%;
+    padding: 0 1rem 0 0;
+  }
+  .swap-code :global(.line)::before {
+    content: "";
+    display: inline-block;
+    width: 2rem;
+    text-align: center;
+  }
+  .swap-code :global(.line.diff.remove) {
+    background: color-mix(in oklch, var(--sl-color-red-high) 11%, transparent);
+  }
+  .swap-code :global(.line.diff.add) {
+    background: color-mix(
+      in oklch,
+      var(--sl-color-green-high) 11%,
+      transparent
+    );
+  }
+  .swap-code :global(.line.diff.remove)::before {
+    content: "−";
+    color: var(--sl-color-red-high);
+  }
+  .swap-code :global(.line.diff.add)::before {
+    content: "+";
+    color: var(--sl-color-green-high);
+  }
+
+  /* Own */
+  .ledger {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+  }
+  .ledger div {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 5fr);
+    gap: 1.5rem;
+    padding: 1.35rem var(--landing-pad);
+  }
+  .ledger div + div {
+    border-top: 1px solid var(--landing-line);
+  }
+  .ledger dt {
+    color: var(--sl-color-white);
+    font-size: 0.9375rem;
+    font-weight: 500;
+  }
+  .ledger dd {
+    color: var(--sl-color-gray-2);
+    font-size: 0.9375rem;
+    line-height: 1.55;
+  }
+
+  /* Cells split the seven-track bay 4|3 so their inner line sits on track 9. */
+  .cells {
+    display: grid;
+    grid-template-columns: minmax(0, 4fr) minmax(0, 3fr);
+  }
+  .cells li {
+    min-width: 0;
+    border-bottom: 1px solid var(--landing-line);
+  }
+  .cells li:nth-child(odd) {
+    border-right: 1px solid var(--landing-line);
+  }
+  .cells li:nth-last-child(2):nth-child(odd),
+  .cells li:last-child {
+    border-bottom: 0;
+  }
+  .cells a {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.4rem;
+    height: 100%;
+    padding: 1.4rem var(--landing-pad);
+    color: var(--sl-color-gray-2);
+    text-decoration: none;
+    transition: background-color 0.2s var(--landing-ease);
+  }
+  .cells a:hover {
+    background: var(--landing-code-bg);
+  }
+  .cells code {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--sl-color-white);
+    font-size: 0.9375rem;
+  }
+  .cells a > span:not(.runtime-name) {
+    font-size: 0.875rem;
+  }
+  ul.show.cells a {
+    min-height: 8.5rem;
+  }
+  .runtime-group + .runtime-group {
+    border-top: 1px solid var(--landing-line);
+  }
+  .runtime-group h3 {
+    padding: 0.8rem var(--landing-pad);
+    border-bottom: 1px solid var(--landing-line);
+    color: var(--sl-color-gray-3);
+    font-size: 0.8125rem;
+    font-weight: 500;
+  }
+  .runtime-name {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--sl-color-white);
+    font-size: 1.0625rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+  .runtime-note {
+    color: var(--sl-color-gray-3);
+    font-size: 0.8125rem;
+  }
+  .flask {
+    width: 1rem;
+    height: 1rem;
+    background-color: var(--sl-color-accent);
+    mask: url("../../assets/reference-experiment.svg") center / contain
+      no-repeat;
+  }
+
+  /* Workflow */
+  .workflow-intro {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 3.5rem var(--landing-pad) 2.5rem;
+  }
+  .steps {
+    border-top: 1px solid var(--landing-line);
+  }
+  .steps li {
+    border-bottom: 1px solid var(--landing-line);
+  }
+  .steps button {
+    display: grid;
+    grid-template-columns: 2rem minmax(0, 1fr);
+    gap: 0.75rem;
+    width: 100%;
+    padding: 1.35rem var(--landing-pad);
+    border: 0;
+    background: none;
+    color: var(--sl-color-gray-2);
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+    transition: background-color 0.2s var(--landing-ease);
+  }
+  .steps button:hover,
+  .steps button[aria-pressed="true"] {
+    background: var(--landing-code-bg);
+  }
+  .steps button:focus-visible {
+    outline-offset: -2px;
+  }
+  .step-number {
+    display: grid;
+    place-items: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border: 1px solid var(--sl-color-gray-5);
+    color: var(--sl-color-gray-3);
+    font-size: 0.8125rem;
+    font-variant-numeric: tabular-nums;
+    transition:
+      border-color 0.2s var(--landing-ease),
+      background-color 0.2s var(--landing-ease),
+      color 0.2s var(--landing-ease);
+  }
+  .steps button[aria-pressed="true"] .step-number {
+    border-color: var(--sl-color-white);
+    background: var(--sl-color-white);
+    color: var(--sl-color-black);
+  }
+  .step-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+  .step-copy strong {
+    color: var(--sl-color-white);
+    font-weight: 500;
+  }
+  .step-copy span {
+    font-size: 0.875rem;
+    line-height: 1.55;
+  }
+  .workflow .say > .more {
+    padding: 1.5rem var(--landing-pad) 2.5rem;
+  }
+  .workflow-code {
+    position: relative;
+  }
+  .workflow-code :global(.window) {
+    position: absolute;
+    inset: 3.5rem var(--landing-pad);
+  }
+
+  /* Footer columns start on tracks 5 and 9. */
+  .landing-footer {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 4fr) minmax(0, 3fr);
+  }
+  .landing-footer > * {
+    padding: 3rem var(--landing-pad) 2.5rem;
+  }
+  .footer-brand p:last-child {
+    max-width: 22rem;
+    margin-top: 0.5rem;
+    color: var(--sl-color-gray-3);
+    font-size: 0.875rem;
+  }
+  .wordmark {
+    color: var(--sl-color-white);
+    font-size: 1.25rem;
+    font-weight: 650;
+    letter-spacing: -0.03em;
+  }
+  .landing-footer h2 {
+    margin-bottom: 0.9rem;
+    color: var(--sl-color-gray-3);
+    font-size: 0.8125rem;
+    font-weight: 500;
+  }
+  .landing-footer li + li {
+    margin-top: 0.55rem;
+  }
+  .landing-footer nav a {
+    color: var(--sl-color-gray-2);
+    font-size: 0.875rem;
+    text-decoration: none;
+  }
+  .landing-footer nav a:hover {
+    color: var(--sl-color-white);
+    text-decoration: underline;
+  }
+  .landing-footer .footer-legal {
+    grid-column: 1 / -1;
+    padding-block: 1.25rem;
+    border-top: 1px solid var(--landing-line);
+    color: var(--sl-color-gray-3);
+    font-size: 0.8125rem;
+  }
+
+  @media (max-width: 64rem) {
+    .bay {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .hero {
+      min-height: 0;
+    }
+    .say {
+      padding-block: 3rem 2rem;
+      border-right: 0;
+    }
+    .hero-copy {
+      padding-block: 3.5rem 3rem;
+      border-bottom: 1px solid var(--landing-line);
+    }
+    .show {
+      padding-block: 0 3rem;
+    }
+    .hero-code,
+    .workflow-code {
+      padding-block: 2rem;
+    }
+    .workflow-code :global(.window) {
+      position: static;
+    }
+    .show.flush {
+      border-top: 1px solid var(--landing-line);
+    }
+    .workflow .say {
+      padding: 0;
+    }
+  }
+  @media (max-width: 40rem) {
+    .rail {
+      border-inline: 0;
+    }
+    .cells {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    ul.show.cells a {
+      min-height: 0;
+    }
+    .cells a {
+      padding: 1.1rem 1.25rem;
+    }
+    .ledger div {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0.25rem;
+      padding-block: 1.1rem;
+    }
+    .landing-footer {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .footer-brand {
+      grid-column: 1 / -1;
+    }
+    .landing-footer .footer-brand {
+      padding-bottom: 0;
+    }
+    .workflow-code,
+    .hero-code {
+      padding-inline: 0;
+    }
+    .workflow-code :global(.window),
+    .hero-code :global(.window) {
+      border-inline: 0;
+    }
+  }
+  @media (max-width: 26rem) {
+    ul.show.cells {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    ul.show.cells li {
+      border-right: 0;
+      border-bottom: 1px solid var(--landing-line);
+    }
+    ul.show.cells li:last-child {
+      border-bottom: 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .landing *,
+    .landing :global(*) {
+      transition: none !important;
+    }
+  }
+</style>
