@@ -147,7 +147,7 @@ export async function serveTaskQueue(
       }),
   };
 }
-export function httpTaskQueue(options: QueueClientOptions): TaskQueue {
+export function createHttpTaskQueue(options: QueueClientOptions): TaskQueue {
   const token = options.token;
   const fixedAuthorization =
     typeof token === "string" ? tokenValue(token) : undefined;

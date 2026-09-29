@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { createServer } from "node:http";
 import { once } from "node:events";
 import { test } from "node:test";
-import { openaiModelProvider } from "../../src/index.ts";
+import { createOpenAIModelProvider } from "../../src/index.ts";
 
 const completion = {
   choices: [
@@ -81,7 +81,7 @@ test("direct model HTTP contracts, cancellation, deadlines and reuse", async (t)
   const address = server.address();
   assert.ok(address && typeof address !== "string");
   const baseUrl = `http://127.0.0.1:${address.port}/prefix/v1/`;
-  const provider = openaiModelProvider({
+  const provider = createOpenAIModelProvider({
     baseUrl,
 
     apiKey: "secret-key",
@@ -118,7 +118,7 @@ test("direct model HTTP contracts, cancellation, deadlines and reuse", async (t)
     },
   });
   mode = "responses";
-  const direct = openaiModelProvider({
+  const direct = createOpenAIModelProvider({
     baseUrl,
 
     apiKey: false,
@@ -189,7 +189,7 @@ test("direct model HTTP contracts, cancellation, deadlines and reuse", async (t)
   }
   for (const hanging of ["hang", "partial"]) {
     mode = hanging;
-    const bounded = openaiModelProvider({
+    const bounded = createOpenAIModelProvider({
       baseUrl,
 
       apiKey: false,
@@ -224,7 +224,7 @@ test("direct model HTTP contracts, cancellation, deadlines and reuse", async (t)
     stream: false,
     store: false,
   });
-  const bounded = openaiModelProvider({
+  const bounded = createOpenAIModelProvider({
     baseUrl,
 
     apiKey: false,

@@ -10,7 +10,7 @@ import type {
 import { executeProcess } from "../infrastructure/process.ts";
 import type { LocalOptions } from "./local.types.ts";
 
-export function localSandboxProvider(
+export function createLocalSandboxProvider(
   options: LocalOptions = {},
 ): SandboxProvider {
   invariant(
@@ -82,3 +82,6 @@ export function localSandboxProvider(
     },
   };
 }
+
+/** @deprecated Use {@link createLocalSandboxProvider}. */
+export const localSandboxProvider = createLocalSandboxProvider;

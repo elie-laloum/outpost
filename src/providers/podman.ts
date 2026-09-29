@@ -3,9 +3,12 @@ import type { ContainerOptions } from "./container.types.ts";
 
 export type { ContainerOptions } from "./container.ts";
 
-export const podmanSandboxProvider = (options: ContainerOptions = {}) =>
+export const createPodmanSandboxProvider = (options: ContainerOptions = {}) =>
   containerProvider("podman", options);
 
 export type { DependencyCache } from "./container-cache.types.ts";
 
 export type { EgressPolicy } from "../domain/egress.types.ts";
+
+/** @deprecated Use {@link createPodmanSandboxProvider}. */
+export const podmanSandboxProvider = createPodmanSandboxProvider;

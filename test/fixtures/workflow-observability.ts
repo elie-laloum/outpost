@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
-import { task, workflow, WorkflowBudgetExceeded } from "../../src/index.ts";
-import { openTelemetry } from "../../src/infrastructure/opentelemetry.ts";
+import {
+  defineTask,
+  defineWorkflow,
+  WorkflowBudgetExceeded,
+} from "../../src/index.ts";
+import { createOpenTelemetryObserver } from "../../src/infrastructure/opentelemetry.ts";
 import {
   BasicTracerProvider,
   InMemorySpanExporter,
@@ -26,12 +30,12 @@ const meter = new MeterProvider({
     }),
   ],
 });
-const observer = openTelemetry({
+const observer = createOpenTelemetryObserver({
   tracer: tracer.getTracer("outpost-fixture"),
   meter: meter.getMeter("outpost-fixture"),
 });
 try {
-  const inspect = task({
+  const inspect = defineTask({
     key: "inspect",
     retry: { attempts: 2 },
     perform(context) {
@@ -39,9 +43,12 @@ try {
       throw new Error("Synthetic retry");
     },
   });
-  const result = await workflow("local-observability-fixture", [inspect]).start(
-    { telemetry: observer, budget: { attempts: 3, usage: { input: 8 } } },
-  );
+  const result = await defineWorkflow("local-observability-fixture", [
+    inspect,
+  ]).start({
+    telemetry: observer,
+    budget: { attempts: 3, usage: { input: 8 } },
+  });
   assert.equal(result.status, "failed");
   assert.ok(result.errors[0] instanceof WorkflowBudgetExceeded);
   assert.equal(result.usage.tokens.input, 8);

@@ -13,7 +13,10 @@ import type { SandboxLease } from "../../src/domain/sandbox.types.ts";
 import { nativeConversations } from "../../src/infrastructure/conversations/native-store.ts";
 import { sessionBundleCommand } from "../../src/infrastructure/conversations/session-bundle.ts";
 import { executeProcess } from "../../src/infrastructure/process.ts";
-import { transportConversations, localTransport } from "../../src/index.ts";
+import {
+  createTransportConversations,
+  createLocalTransport,
+} from "../../src/index.ts";
 import { seedSession, sessionDirectory } from "../fixtures/native-session.ts";
 import { repository } from "../helpers.ts";
 
@@ -121,9 +124,9 @@ for (const format of ["copilot", "kimi"] as const) {
       destination = join(root, "target"),
       id = "session_transport";
     await seedSession(format, home, "/source", id);
-    const store = transportConversations(format, {
+    const store = createTransportConversations(format, {
       namespace: "test",
-      transporter: localTransport({ directory: join(root, "objects") }),
+      transporter: createLocalTransport({ directory: join(root, "objects") }),
     });
     const record = await store.capture(id, {
       repository: root,

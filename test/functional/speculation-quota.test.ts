@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { join } from "node:path";
 import { test } from "node:test";
-import { localTransport, speculate } from "../../src/index.ts";
+import { createLocalTransport, speculate } from "../../src/index.ts";
 import type { SandboxProvider, TransportEntry } from "../../src/index.ts";
-import { localSandboxProvider } from "../../src/providers/local.ts";
+import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { emit, repository, scripted } from "../helpers.ts";
 
 const limited = (resetAt?: string) =>
@@ -15,7 +15,7 @@ const limited = (resetAt?: string) =>
     .join("") + "process.exit(1);";
 
 function recoverable(): SandboxProvider {
-  const local = localSandboxProvider();
+  const local = createLocalSandboxProvider();
   return {
     ...local,
     recover: async () => {},
@@ -31,7 +31,7 @@ test("candidates stopped by a quota report quota with the earliest reset", async
   const early = "2026-09-28T18:00:00.000Z";
   const result = await speculate({
     repository: repo,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     concurrency: 1,
     candidates: [
       { key: "late", agent: scripted(limited("2026-09-29T00:00:00.000Z")) },
@@ -61,7 +61,7 @@ test("candidates stopped by a quota report quota with the earliest reset", async
 test("a winner still takes precedence over quota-stopped candidates", async (t) => {
   const result = await speculate({
     repository: await repository(t),
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     concurrency: 1,
     candidates: [
       { key: "limited", agent: scripted(limited()) },
@@ -86,7 +86,7 @@ test("durable speculation reruns only quota-stopped candidates", async (t) => {
     sandboxProvider: recoverable(),
     concurrency: 1,
     durability: {
-      transporter: localTransport({
+      transporter: createLocalTransport({
         directory: join(repo, ".outpost", "storage"),
       }),
       runId: "quota",
@@ -131,7 +131,7 @@ test("durable speculation reruns only quota-stopped candidates", async (t) => {
 
 test("durable speculation rejects quota records without their limit", async (t) => {
   const repo = await repository(t);
-  const transporter = localTransport({
+  const transporter = createLocalTransport({
     directory: join(repo, ".outpost", "storage"),
   });
   const options = {

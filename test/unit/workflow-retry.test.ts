@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import timers from "node:timers/promises";
 import { setTimeout as delay } from "node:timers/promises";
-import { task, workflow, OutpostError } from "../../src/index.ts";
+import { defineTask, defineWorkflow, OutpostError } from "../../src/index.ts";
 import { retryDelay, waitForRetry } from "../../src/domain/workflow/retry.ts";
 import { maxTimerMs } from "../../src/domain/workflow/retry.constants.ts";
 
@@ -87,14 +87,14 @@ test("retry waits beyond the timer range are chunked and cancellable", async (t)
 test("retry configuration rejects invalid delays and strategy values", () => {
   for (const value of [-1, NaN, Infinity, Number.MAX_VALUE]) {
     assert.throws(() =>
-      task({
+      defineTask({
         key: "bad",
         perform() {},
         retry: { attempts: 2, delayMs: value },
       }),
     );
     assert.throws(() =>
-      task({
+      defineTask({
         key: "bad",
         perform() {},
         retry: { attempts: 2, maxDelayMs: value },
@@ -102,7 +102,7 @@ test("retry configuration rejects invalid delays and strategy values", () => {
     );
   }
   assert.throws(() =>
-    task({
+    defineTask({
       key: "bad",
       perform() {},
       // @ts-expect-error Validate JavaScript callers too.
@@ -110,17 +110,21 @@ test("retry configuration rejects invalid delays and strategy values", () => {
     }),
   );
   assert.throws(() =>
-    // @ts-expect-error Validate JavaScript callers too.
-    task({ key: "bad", perform() {}, retry: { attempts: 2, jitter: true } }),
+    defineTask({
+      key: "bad",
+      perform() {},
+      // @ts-expect-error Validate JavaScript callers too.
+      retry: { attempts: 2, jitter: true },
+    }),
   );
   assert.throws(() =>
-    task({ key: "bad", perform() {}, timeoutMs: maxTimerMs + 1 }),
+    defineTask({ key: "bad", perform() {}, timeoutMs: maxTimerMs + 1 }),
   );
 });
 
 test("workflow retry events expose the selected server minimum", async () => {
   const delays: (number | undefined)[] = [];
-  const item = task({
+  const item = defineTask({
     key: "retry",
     retry: { attempts: 3, delayMs: 1, backoff: "exponential" },
     perform({ attempt }) {
@@ -129,7 +133,7 @@ test("workflow retry events expose the selected server minimum", async () => {
       return "ok";
     },
   });
-  const result = await workflow("retry", [item]).start({
+  const result = await defineWorkflow("retry", [item]).start({
     observe(event) {
       if (event.type === "retry") delays.push(event.delayMs);
     },
@@ -140,7 +144,7 @@ test("workflow retry events expose the selected server minimum", async () => {
 });
 
 test("global timeout interrupts a server retry wait without another attempt", async () => {
-  const item = task({
+  const item = defineTask({
     key: "busy",
     retry: { attempts: 10 },
     perform() {
@@ -149,7 +153,9 @@ test("global timeout interrupts a server retry wait without another attempt", as
       });
     },
   });
-  const result = await workflow("deadline", [item]).start({ timeoutMs: 30 });
+  const result = await defineWorkflow("deadline", [item]).start({
+    timeoutMs: 30,
+  });
   assert.equal(result.status, "failed");
   assert.equal(result.tasks[0]?.attempts, 1);
   assert.equal(result.tasks[0]?.status, "cancelled");
@@ -162,7 +168,7 @@ test("global timeout interrupts a server retry wait without another attempt", as
 test("global timeout cancels parallel tasks, waits for cleanup and rejects late values", async () => {
   const cleaned: string[] = [];
   const items = ["one", "two"].map((key) =>
-    task({
+    defineTask({
       key,
       async perform({ signal }) {
         try {
@@ -176,14 +182,14 @@ test("global timeout cancels parallel tasks, waits for cleanup and rejects late 
       },
     }),
   );
-  const after = task({
+  const after = defineTask({
     key: "after",
     after: items,
     perform() {
       assert.fail("must not run");
     },
   });
-  const result = await workflow("deadline", [...items, after]).start({
+  const result = await defineWorkflow("deadline", [...items, after]).start({
     concurrency: 2,
     timeoutMs: 30,
     stopOnError: false,
@@ -198,7 +204,7 @@ test("global timeout cancels parallel tasks, waits for cleanup and rejects late 
 test("external cancellation remains cancelled even when cleanup outlasts the deadline", async () => {
   const stop = new AbortController();
   const reason = new Error("caller stopped");
-  const item = task({
+  const item = defineTask({
     key: "one",
     async perform() {
       stop.abort(reason);
@@ -206,7 +212,7 @@ test("external cancellation remains cancelled even when cleanup outlasts the dea
       return 1;
     },
   });
-  const result = await workflow("cancel", [item]).start({
+  const result = await defineWorkflow("cancel", [item]).start({
     signal: stop.signal,
     timeoutMs: 10,
   });
@@ -216,7 +222,7 @@ test("external cancellation remains cancelled even when cleanup outlasts the dea
 });
 
 test("global timeout includes conditions and rejects invalid timer ranges before work", async () => {
-  const item = task({
+  const item = defineTask({
     key: "condition",
     async condition({ signal }) {
       await delay(10000, undefined, { signal });
@@ -226,14 +232,16 @@ test("global timeout includes conditions and rejects invalid timer ranges before
       assert.fail();
     },
   });
-  const result = await workflow("condition", [item]).start({ timeoutMs: 10 });
+  const result = await defineWorkflow("condition", [item]).start({
+    timeoutMs: 10,
+  });
   assert.equal(result.status, "failed");
   assert.equal(result.tasks[0]?.attempts, 0);
   for (const timeoutMs of [0, -1, 1.5, NaN, Infinity, maxTimerMs + 1])
     await assert.rejects(
-      workflow("invalid", [item]).start({ timeoutMs }),
+      defineWorkflow("invalid", [item]).start({ timeoutMs }),
       /timeoutMs/,
     );
-  const success = await workflow("empty", []).start({ timeoutMs: 1000 });
+  const success = await defineWorkflow("empty", []).start({ timeoutMs: 1000 });
   success.unwrap();
 });

@@ -3,14 +3,14 @@ import { test, type TestContext } from "node:test";
 import { readFile, rm, stat } from "node:fs/promises";
 import { join } from "node:path";
 import {
-  agent,
+  createAgent,
   defineHarnessTool,
   dispatch,
-  harness,
-  localTransport,
-  response,
+  createHarness,
+  createLocalTransport,
+  defineJsonResponse,
   summarizeHistory,
-  transportConversations,
+  createTransportConversations,
   truncateToolResults,
   type AgentObservation,
   type HarnessOptions,
@@ -18,9 +18,9 @@ import {
   type ModelRequest,
   type ModelResult,
 } from "../../src/index.ts";
-import { localSandboxProvider } from "../../src/providers/local.ts";
+import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { openTranscript } from "../../src/infrastructure/conversations/harness-transcript.ts";
-import { harnessConversations } from "../../src/infrastructure/conversations/harness-store.ts";
+import { createHarnessConversations } from "../../src/infrastructure/conversations/harness-store.ts";
 import { git } from "../../src/infrastructure/git.ts";
 import { repository } from "../helpers.ts";
 
@@ -90,9 +90,9 @@ function worker(
   requests: ModelRequest[],
   extra: Omit<HarnessOptions, "modelProvider"> = {},
 ) {
-  return agent({
+  return createAgent({
     model: "m",
-    harness: harness({
+    harness: createHarness({
       modelProvider: provider(replies, requests),
       tools: [echo, touch],
       ...extra,
@@ -108,7 +108,7 @@ async function run(
 ) {
   return dispatch({
     repository: root ?? (await repository(t)),
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent: selected,
     brief: { text: "first task" },
     logging: false,
@@ -220,7 +220,7 @@ test("interrupted transcripts resume with explicit tool errors and locks prevent
   ]);
   const handle = await openTranscript({
     repository: root,
-    store: harnessConversations(),
+    store: createHarnessConversations(),
     model: "m",
     continuation: { id },
   });
@@ -245,7 +245,7 @@ test("response repairs continue the conversation with read-only tools only", asy
     ),
     {
       brief: { text: "Return <data>JSON</data>" },
-      response: response.json({
+      response: defineJsonResponse({
         tag: "data",
         repairs: 1,
         schema: (value) => value as { ok: boolean },
@@ -327,8 +327,8 @@ test("transport-backed stores persist harness transcripts beyond the host file",
   const root = await repository(t);
   const storage = await repository(t);
   const requests: ModelRequest[] = [];
-  const conversations = transportConversations("harness", {
-    transporter: localTransport({ directory: join(storage, "objects") }),
+  const conversations = createTransportConversations("harness", {
+    transporter: createLocalTransport({ directory: join(storage, "objects") }),
     namespace: "team",
   });
   const first = await run(

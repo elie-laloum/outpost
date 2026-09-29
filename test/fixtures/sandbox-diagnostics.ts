@@ -8,19 +8,22 @@ import {
   diagnoseSandbox,
 } from "../../src/index.ts";
 import { git } from "../../src/infrastructure/git/command.ts";
-import { dockerSandboxProvider } from "../../src/providers/docker.ts";
-import { localSandboxProvider } from "../../src/providers/local.ts";
-import { podmanSandboxProvider } from "../../src/providers/podman.ts";
+import { createDockerSandboxProvider } from "../../src/providers/docker.ts";
+import { createLocalSandboxProvider } from "../../src/providers/local.ts";
+import { createPodmanSandboxProvider } from "../../src/providers/podman.ts";
 
 const engine = process.env.OUTPOST_CONTAINER_ENGINE;
 if (engine !== undefined && engine !== "docker" && engine !== "podman")
   throw new Error("OUTPOST_CONTAINER_ENGINE must be docker or podman when set");
 const image = process.env.OUTPOST_CONTAINER_IMAGE ?? "outpost-ci:latest";
 const sandboxProvider = engine
-  ? { docker: dockerSandboxProvider, podman: podmanSandboxProvider }[engine]({
+  ? {
+      docker: createDockerSandboxProvider,
+      podman: createPodmanSandboxProvider,
+    }[engine]({
       image,
     })
-  : localSandboxProvider();
+  : createLocalSandboxProvider();
 const directory = await realpath(
   await mkdtemp(join(tmpdir(), "outpost-owned-diagnostics-")),
 );

@@ -1,17 +1,17 @@
-import { agent as composeAgent } from "../../src/domain/agent.ts";
+import { createAgent as composeAgent } from "../../src/domain/agent.ts";
 import assert from "node:assert/strict";
 import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { codexHarness } from "../../src/index.ts";
-import { dockerSandboxProvider } from "../../src/providers/docker.ts";
-import { podmanSandboxProvider } from "../../src/providers/podman.ts";
+import { createCodexHarness } from "../../src/index.ts";
+import { createDockerSandboxProvider } from "../../src/providers/docker.ts";
+import { createPodmanSandboxProvider } from "../../src/providers/podman.ts";
 
 const directory = await mkdtemp(join(tmpdir(), "outpost-compatible-native-"));
 const factory =
   process.env.OUTPOST_CONTAINER_ENGINE === "podman"
-    ? podmanSandboxProvider
-    : dockerSandboxProvider;
+    ? createPodmanSandboxProvider
+    : createDockerSandboxProvider;
 try {
   const lease = await factory({
     image: process.env.OUTPOST_CONTAINER_IMAGE ?? "outpost-ci:latest",
@@ -24,7 +24,7 @@ try {
   });
   try {
     const request = composeAgent({
-      harness: codexHarness({
+      harness: createCodexHarness({
         modelProvider: {
           baseUrl: "http://127.0.0.1:18181/v1",
           apiKeyEnvironment: false,

@@ -4,19 +4,19 @@ import { join } from "node:path";
 import { test } from "node:test";
 import { authenticateAgent } from "../../src/application/agent-authentication.ts";
 import { credentialInstaller } from "../../src/application/credential-installer.constants.ts";
-import { agent } from "../../src/domain/agent.ts";
+import { createAgent } from "../../src/domain/agent.ts";
 import type { CliAgent } from "../../src/domain/agent.types.ts";
 import type { Command } from "../../src/domain/command.types.ts";
 import type { SandboxLease } from "../../src/domain/sandbox.types.ts";
 import {
-  claudeHarness,
-  codexHarness,
-  copilotHarness,
-  kimiHarness,
+  createClaudeHarness,
+  createCodexHarness,
+  createCopilotHarness,
+  createKimiHarness,
   createSandbox,
 } from "../../src/index.ts";
 import { executeProcess } from "../../src/infrastructure/process.ts";
-import { localSandboxProvider } from "../../src/providers/local.ts";
+import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { emit, repository, scripted } from "../helpers.ts";
 
 function recordingLease(home: string, calls: Command[]): SandboxLease {
@@ -39,23 +39,25 @@ test("host placement forwards only credential variables and never writes files",
   const directory = await repository(t);
   const calls: Command[] = [];
   const lease = recordingLease(directory, calls);
-  const account = agent({
-    harness: claudeHarness({ authentication: "account" }),
+  const account = createAgent({
+    harness: createClaudeHarness({ authentication: "account" }),
   });
   assert.deepEqual(
     await authenticateAgent(account, {}, lease, "host", signal),
     {},
   );
-  const token = agent({
-    harness: claudeHarness({
+  const token = createAgent({
+    harness: createClaudeHarness({
       authentication: { account: { key: "subscription-token" } },
     }),
   });
   assert.deepEqual(await authenticateAgent(token, {}, lease, "host", signal), {
     CLAUDE_CODE_OAUTH_TOKEN: "subscription-token",
   });
-  const usage = agent({
-    harness: codexHarness({ authentication: { usage: { key: "sk-host" } } }),
+  const usage = createAgent({
+    harness: createCodexHarness({
+      authentication: { usage: { key: "sk-host" } },
+    }),
   });
   assert.deepEqual(await authenticateAgent(usage, {}, lease, "host", signal), {
     OPENAI_API_KEY: "sk-host",
@@ -63,7 +65,7 @@ test("host placement forwards only credential variables and never writes files",
   assert.equal(calls.length, 0);
   assert.deepEqual(
     await authenticateAgent(
-      agent({ harness: claudeHarness() }),
+      createAgent({ harness: createClaudeHarness() }),
       {},
       lease,
       "remote",
@@ -82,8 +84,8 @@ test("isolated placements install host files once and run login commands with me
   );
   const calls: Command[] = [];
   const lease = recordingLease("/home/agent", calls);
-  const copilot = agent({
-    harness: copilotHarness({
+  const copilot = createAgent({
+    harness: createCopilotHarness({
       authentication: { account: { file: profile } },
     }),
   });
@@ -106,8 +108,8 @@ test("isolated placements install host files once and run login commands with me
   assert.equal(calls.length, 0);
   const codexAuth = join(directory, "auth.json");
   await writeFile(codexAuth, '{"tokens":{"access_token":"fixture"}}');
-  const codex = agent({
-    harness: codexHarness({
+  const codex = createAgent({
+    harness: createCodexHarness({
       authentication: { account: { file: codexAuth } },
     }),
   });
@@ -128,8 +130,8 @@ test("isolated placements install host files once and run login commands with me
   });
   assert.equal(calls[0]?.variables, undefined);
   calls.length = 0;
-  const usage = agent({
-    harness: codexHarness({ authentication: "usage" }),
+  const usage = createAgent({
+    harness: createCodexHarness({ authentication: "usage" }),
   });
   assert.deepEqual(
     await authenticateAgent(
@@ -149,8 +151,8 @@ test("isolated placements install host files once and run login commands with me
   });
   await assert.rejects(
     authenticateAgent(
-      agent({
-        harness: codexHarness({
+      createAgent({
+        harness: createCodexHarness({
           authentication: { account: { file: join(directory, "missing") } },
         }),
       }),
@@ -229,7 +231,7 @@ test("sandboxes authenticate each selected adapter once and merge credentials in
   const second = credentialed("second", "two");
   await using sandbox = await createSandbox({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     logging: false,
   });
   for (const selected of [first, first, second, first])
@@ -265,8 +267,8 @@ test("Kimi account defaults to global and installs the scoped OAuth file and pro
       return executeProcess(command);
     return { status: 0, stdout: "", stderr: "" };
   };
-  const selected = agent({
-    harness: kimiHarness({
+  const selected = createAgent({
+    harness: createKimiHarness({
       authentication: { account: { file: profile } },
     }),
   });
@@ -310,8 +312,8 @@ test("Kimi account defaults to global and installs the scoped OAuth file and pro
   calls.length = 0;
   await assert.rejects(
     authenticateAgent(
-      agent({
-        harness: kimiHarness({
+      createAgent({
+        harness: createKimiHarness({
           authentication: { account: { file: profile } },
         }),
       }),

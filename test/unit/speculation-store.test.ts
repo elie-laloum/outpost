@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { join } from "node:path";
-import { localTransport } from "../../src/infrastructure/local-transport.ts";
+import { createLocalTransport } from "../../src/infrastructure/local-transport.ts";
 import {
   openSpeculationStore,
   recoverSpeculation,
@@ -10,7 +10,7 @@ import { repository } from "../helpers.ts";
 
 test("speculation storage fences stale owners and refuses concurrent acquisition", async (t) => {
   const root = await repository(t);
-  const transporter = localTransport({ directory: join(root, "store") });
+  const transporter = createLocalTransport({ directory: join(root, "store") });
   const first = await openSpeculationStore(transporter, "run");
   await first.save({ completed: false });
   await assert.rejects(

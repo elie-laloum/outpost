@@ -5,7 +5,7 @@ import type {
   WorkflowGate,
   WorkflowGateOptions,
 } from "./gates.types.ts";
-import { task } from "./task.ts";
+import { defineTask } from "./task.ts";
 import { gateActions } from "./gates.constants.ts";
 import { validateGate } from "./gate-validation.ts";
 
@@ -21,7 +21,7 @@ function gateTask(
       ? { authentication: options.authentication }
       : {}),
   });
-  return task({
+  return defineTask({
     key: options.key,
     after: options.after ?? [],
     gate: Object.freeze({
@@ -38,13 +38,13 @@ function gateTask(
   });
 }
 
-export function approvalTask(
+export function defineApprovalTask(
   options: WorkflowGateOptions,
 ): Task<WorkflowDecisionRecord> {
   return gateTask("approval", options);
 }
 
-export function pauseTask(
+export function definePauseTask(
   options: WorkflowGateOptions,
 ): Task<WorkflowDecisionRecord> {
   return gateTask("pause", options);

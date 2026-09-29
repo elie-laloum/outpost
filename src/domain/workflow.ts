@@ -16,9 +16,9 @@ export type {
   WorkflowTelemetry,
 } from "./workflow.types.ts";
 export { WorkflowFailure } from "./workflow/failure.ts";
-export { task } from "./workflow/task.ts";
+export { defineTask } from "./workflow/task.ts";
 
-export function workflow(name: string, tasks: readonly Task[]): Workflow {
+export function defineWorkflow(name: string, tasks: readonly Task[]): Workflow {
   if (!name.trim()) throw new Error("Workflow name cannot be empty");
   const graph = Object.freeze([...tasks]);
   validate(graph);

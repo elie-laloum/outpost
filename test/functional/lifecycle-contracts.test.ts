@@ -10,7 +10,7 @@ import {
   openWorkspace,
   attach,
 } from "../../src/index.ts";
-import { localSandboxProvider } from "../../src/providers/local.ts";
+import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { executeProcess } from "../../src/infrastructure/process.ts";
 import { git } from "../../src/infrastructure/git.ts";
 import { restoreTerminal } from "../../src/infrastructure/terminal.ts";
@@ -18,7 +18,7 @@ import { repository, scripted, emit } from "../helpers.ts";
 
 test("cold passes acquire distinct sandboxes while warm dispatch keeps its lease", async (t) => {
   const root = await repository(t),
-    base = localSandboxProvider();
+    base = createLocalSandboxProvider();
   let acquired = 0,
     released = 0;
   const sandboxProvider = {
@@ -88,7 +88,7 @@ test("workspace hooks run immediately once and sandbox hooks start concurrently"
   });
   assert.equal(await readFile(join(root, "ready.txt"), "utf8"), "once");
   const box = await workspace.sandbox({
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
   });
   await box.close();
   await workspace.close();
@@ -98,7 +98,7 @@ test("workspace hooks run immediately once and sandbox hooks start concurrently"
 test("failed allocation preserves a clean owned workspace when provider cleanup is uncertain", async (t) => {
   const root = await repository(t);
   const sandboxProvider = {
-    ...localSandboxProvider(),
+    ...createLocalSandboxProvider(),
     async acquire() {
       throw new Error("provision failure");
     },
@@ -127,7 +127,7 @@ test("relative prompts resolve from the caller directory even with another repos
   );
   const result = await dispatch({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent,
     brief: { file: relative(process.cwd(), prompt) },
     logging: false,
@@ -145,7 +145,7 @@ test("interactive prompt collection asks once per missing variable and retains s
   const requested: string[] = [];
   const result = await attach({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent: scripted((input) => `console.log(${JSON.stringify(input.text)})`),
     brief: { file: prompt, values: { GIVEN: "existing" } },
     ask: async (key) => {

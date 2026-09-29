@@ -1,14 +1,14 @@
 import { taskIdempotencyKey } from "../domain/workflow/idempotency.ts";
 import { setTimeout as delay } from "node:timers/promises";
 import { OutpostError, recordRecovery } from "../domain/errors.ts";
-import { task } from "../domain/workflow.ts";
+import { defineTask } from "../domain/workflow.ts";
 import { queueDefaultPollMs } from "../domain/task-queue.constants.ts";
 import { queueNumber, queueString } from "../domain/task-queue.ts";
 import type { Task } from "../domain/workflow.types.ts";
 import type { QueuedTaskOptions } from "./queued-task.types.ts";
 import type { QueueQuota } from "../domain/task-queue.types.ts";
 
-export function queuedTask<T>(options: QueuedTaskOptions<T>): Task<T> {
+export function defineQueuedTask<T>(options: QueuedTaskOptions<T>): Task<T> {
   const {
     queue,
     handler,
@@ -22,7 +22,7 @@ export function queuedTask<T>(options: QueuedTaskOptions<T>): Task<T> {
   if (!queueNumber(pollMs))
     throw new Error("Queue poll interval must be positive");
   if (deadline !== undefined) queueNumber(deadline);
-  return task({
+  return defineTask({
     ...definition,
     async perform(context) {
       context.signal.throwIfAborted();

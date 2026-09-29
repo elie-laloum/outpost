@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { replayAgent, ReplayDivergence } from "../../src/index.ts";
+import { createReplayAgent, ReplayDivergence } from "../../src/index.ts";
 
 const usage = { input: 2, cached: 1, output: 3 };
 const entry = (kind: string, fields: Record<string, unknown> = {}) => ({
@@ -15,7 +15,7 @@ const entry = (kind: string, fields: Record<string, unknown> = {}) => ({
 const baseline = { commit: "a".repeat(40), tree: "b".repeat(40) };
 
 test("replay agents parse recorded turns, text fallbacks and failures", () => {
-  const selected = replayAgent({
+  const selected = createReplayAgent({
     journal: [
       entry("dispatch-start", { source: "sandbox" }),
       entry("operation", { source: "sandbox", name: "agent.prepare" }),
@@ -99,7 +99,7 @@ test("replay agents parse recorded turns, text fallbacks and failures", () => {
 });
 
 test("replay agents mark unfinished and unrecorded journals", () => {
-  const selected = replayAgent({
+  const selected = createReplayAgent({
     journal: [
       entry("prompt", { text: "work", source: "harness" }),
       entry("failure", { message: "stopped early" }),
@@ -116,7 +116,7 @@ test("replay agents mark unfinished and unrecorded journals", () => {
     kind: "workspace-commits",
     unavailable: "The journal was recorded without logging.replayable",
   });
-  const cancelled = replayAgent({
+  const cancelled = createReplayAgent({
     journal: [
       entry("prompt", { text: "work" }),
       entry("workspace-commits", { baseline, unavailable: "too large" }),
@@ -135,8 +135,8 @@ test("replay agents mark unfinished and unrecorded journals", () => {
     unavailable: "too large",
   });
   assert.equal(
-    replayAgent({ journal: [entry("prompt", { text: "x" })] }).turns[0]?.failure
-      ?.message,
+    createReplayAgent({ journal: [entry("prompt", { text: "x" })] }).turns[0]
+      ?.failure?.message,
     "The recorded agent turn did not finish",
   );
 });
@@ -198,7 +198,7 @@ test("replay agents reject invalid options and malformed journals", () => {
   ];
   for (const [options, message] of invalid)
     assert.throws(
-      () => replayAgent(options as never),
+      () => createReplayAgent(options as never),
       (error: unknown) =>
         error instanceof Error &&
         (error as { code?: string }).code === "configuration" &&

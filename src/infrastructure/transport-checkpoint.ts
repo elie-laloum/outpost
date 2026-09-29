@@ -29,7 +29,7 @@ function envelope(value: unknown): CheckpointEnvelope {
   };
 }
 
-export function workflowCheckpointStore(
+export function createWorkflowCheckpointStore(
   options: TransportStoreOptions,
 ): WorkflowCheckpointStore {
   const { transporter } = options;

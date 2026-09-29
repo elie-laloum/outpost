@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { PassThrough } from "node:stream";
 import { executeProcess } from "../../src/infrastructure/process.ts";
-import { localSandboxProvider } from "../../src/providers/local.ts";
+import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { repository } from "../helpers.ts";
 
 const echoLines = [
@@ -60,7 +60,7 @@ test("cancellation terminates a process that is waiting for live input", async (
 
 test("the local provider advertises live input and keeps the lease reusable", async (t) => {
   const root = await repository(t);
-  const lease = await localSandboxProvider().acquire({
+  const lease = await createLocalSandboxProvider().acquire({
     repository: root,
     directory: root,
     gitDirectories: [],

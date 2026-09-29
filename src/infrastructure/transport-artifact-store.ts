@@ -5,7 +5,9 @@ import { immutableObject } from "./transport-json.ts";
 import { artifactMaxBytes } from "./artifact-store.constants.ts";
 import { readLimit } from "./transport-envelope.ts";
 
-export function artifactStore(options: ArtifactStoreOptions): ArtifactStore {
+export function createArtifactStore(
+  options: ArtifactStoreOptions,
+): ArtifactStore {
   const maxBytes = readLimit(options.maxBytes ?? artifactMaxBytes);
   if (!maxBytes) throw new Error("Artifact maxBytes must be positive");
   const key = (id: string) => {

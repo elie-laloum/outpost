@@ -1,11 +1,11 @@
-import { transportConversations } from "./transport-conversations.ts";
+import { createTransportConversations } from "./transport-conversations.ts";
 import { homedir } from "node:os";
 import { join, resolve } from "node:path";
 import type { ConversationFormat } from "./conversations.types.ts";
 import { captureConversation } from "./conversations/capture.ts";
 import { conversationLayout } from "./conversations/layout.ts";
 import { locateConversation } from "./conversations/locate.ts";
-import { harnessConversations } from "./conversations/harness-store.ts";
+import { createHarnessConversations } from "./conversations/harness-store.ts";
 import { nativeConversations } from "./conversations/native-store.ts";
 import { projectKey, remotePath, validId } from "./conversations/paths.ts";
 import { relocateTranscript } from "./conversations/relocate.ts";
@@ -17,7 +17,7 @@ export type {
   StoredConversationFormat,
 } from "./conversations.types.ts";
 export {
-  harnessConversations,
+  createHarnessConversations,
   harnessTranscriptPath,
 } from "./conversations/harness-store.ts";
 export { captureConversation } from "./conversations/capture.ts";
@@ -28,9 +28,9 @@ export { relocateTranscript } from "./conversations/relocate.ts";
 export { restoreConversation } from "./conversations/restore.ts";
 
 export const conversations = {
-  transported: transportConversations,
+  transported: createTransportConversations,
   native: nativeConversations,
-  harness: harnessConversations,
+  harness: createHarnessConversations,
   locate: locateConversation,
   capture: captureConversation,
   restore: restoreConversation,

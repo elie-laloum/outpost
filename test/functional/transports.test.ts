@@ -16,16 +16,16 @@ import { join } from "node:path";
 import { createHash } from "node:crypto";
 import type { TestContext } from "node:test";
 import {
-  localTransport,
+  createLocalTransport,
   TransportConflict,
-  artifactStore,
-  workflowCheckpointStore,
+  createArtifactStore,
+  createWorkflowCheckpointStore,
   recoverWorkflowCheckpoint,
-  artifact,
+  defineBinaryArtifact,
   publishArtifact,
   readStoredArtifact,
-  workflow,
-  task,
+  defineWorkflow,
+  defineTask,
   readJournal,
   inspectRecovery,
   assertRecoveryQuota,
@@ -33,7 +33,7 @@ import {
   pruneRecoveryRetention,
   archiveRecovery,
   materializeRecoveryArchive,
-  transportConversations,
+  createTransportConversations,
   conversations,
   dispatch,
   createSandbox,
@@ -43,7 +43,7 @@ import { journal } from "../../src/infrastructure/journal.ts";
 import { registerResourceActivity } from "../../src/infrastructure/resource-activity.ts";
 import { reserveTransportStorage } from "../../src/infrastructure/transport-reservations.ts";
 import { captureRecoveryChecksums } from "../../src/application/recovery-checksum-capture.ts";
-import { localSandboxProvider } from "../../src/providers/local.ts";
+import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { s3Fixture } from "../fixtures/s3-transport-server.ts";
 import { repository, scripted, emit } from "../helpers.ts";
 
@@ -56,7 +56,7 @@ async function temporary(t: TestContext) {
 }
 const adapters = {
   local: async (t: TestContext) =>
-    localTransport({ directory: join(await temporary(t), "store") }),
+    createLocalTransport({ directory: join(await temporary(t), "store") }),
   s3: async (t: TestContext) => (await s3Fixture(t)).transporter,
   "s3-tombstone": async (t: TestContext) =>
     (
@@ -77,12 +77,14 @@ test("local transport creates nested storage beneath an existing filesystem root
   const directory = join(await temporary(t), "missing", "nested", "store");
   const alias =
     process.platform === "win32" ? directory.toUpperCase() : directory;
-  const transporter = localTransport({ directory: alias });
+  const transporter = createLocalTransport({ directory: alias });
   const input = Uint8Array.of(0, 255, 128, 10);
   const entry = await transporter.write("nested/payload", input, {
     ifRevision: null,
   });
-  const restored = await localTransport({ directory }).read("nested/payload");
+  const restored = await createLocalTransport({ directory }).read(
+    "nested/payload",
+  );
   assert.ok(restored);
   assert.equal(restored.revision, entry.revision);
   assert.deepEqual([...restored.bytes], [...input]);
@@ -91,7 +93,7 @@ test("local transport creates nested storage beneath an existing filesystem root
 });
 
 test("local transport reads and lists objects replaced by concurrent writers", async (t) => {
-  const transporter = localTransport({ directory: await temporary(t) });
+  const transporter = createLocalTransport({ directory: await temporary(t) });
   let revision = (
     await transporter.write("activity/owner", Uint8Array.of(0), {
       ifRevision: null,
@@ -171,8 +173,8 @@ for (const [name, factory] of Object.entries(adapters)) {
 
   test(`${name}: artifact publication and workflow restart preserve values and ownership`, async (t) => {
     const transporter = await factory(t);
-    const store = artifactStore({ transporter });
-    const contract = artifact.binary({ name: "result", version: "1" });
+    const store = createArtifactStore({ transporter });
+    const contract = defineBinaryArtifact({ name: "result", version: "1" });
     const options = {
       producer: { executionId: "run", taskKey: "build", attempt: 1 },
     };
@@ -186,15 +188,15 @@ for (const [name, factory] of Object.entries(adapters)) {
       [0, 255],
     );
     await assert.rejects(
-      artifactStore({ transporter, maxBytes: 1 }).put(
+      createArtifactStore({ transporter, maxBytes: 1 }).put(
         "a".repeat(64),
         Uint8Array.of(1, 2),
       ),
       /maxBytes/,
     );
     let calls = 0;
-    const graph = workflow("transport", [
-      task({
+    const graph = defineWorkflow("transport", [
+      defineTask({
         key: "build",
         perform: () => {
           calls++;
@@ -203,7 +205,7 @@ for (const [name, factory] of Object.entries(adapters)) {
       }),
     ]);
     const checkpoint = {
-      store: workflowCheckpointStore({ transporter }),
+      store: createWorkflowCheckpointStore({ transporter }),
       runId: "run",
       version: "1",
     };
@@ -212,7 +214,7 @@ for (const [name, factory] of Object.entries(adapters)) {
       await graph.start({
         checkpoint: {
           ...checkpoint,
-          store: workflowCheckpointStore({ transporter }),
+          store: createWorkflowCheckpointStore({ transporter }),
         },
       })
     ).unwrap();
@@ -454,11 +456,11 @@ for (const [name, factory] of Object.entries(adapters)) {
       JSON.stringify({ cwd: repo, text: "child" }) + "\n",
     );
     const transporter = await factory(t);
-    const store = transportConversations("claude", {
+    const store = createTransportConversations("claude", {
       transporter,
       namespace: "shared-project",
     });
-    const sandboxProvider = localSandboxProvider();
+    const sandboxProvider = createLocalSandboxProvider();
     const lease = await sandboxProvider.acquire({
       repository: repo,
       directory: repo,
@@ -518,12 +520,12 @@ for (const [name, factory] of Object.entries(adapters)) {
 
 test("dispatch integrates transport journals, activity and workspace reservations", async (t) => {
   const root = await repository(t),
-    transporter = localTransport({
+    transporter = createLocalTransport({
       directory: join(await temporary(t), "store"),
     });
   const sandbox = await createSandbox({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent: scripted(emit("ok")),
     activityTransport: transporter,
     storageQuota: { transporter, maxBytes: 1_000_000, reserveBytes: 100 },
@@ -561,7 +563,7 @@ test("transport failures preserve host recovery and do not apply incoming change
   t.after(() => workspace.close({ preserve: true }));
   const remote = join(await temporary(t), "remote");
   await mkdir(remote);
-  const lease = await localSandboxProvider().acquire({
+  const lease = await createLocalSandboxProvider().acquire({
     repository: remote,
     directory: remote,
     gitDirectories: [],
@@ -638,7 +640,7 @@ test("journal publication failure preserves the last committed prefix", async (t
 
 test("local object roots reject user symlinks, including ancestors, and archive restoration rejects traversal", async (t) => {
   const root = await temporary(t),
-    transporter = localTransport({ directory: join(root, "store") });
+    transporter = createLocalTransport({ directory: join(root, "store") });
   const { restoreArchiveFiles } =
     await import("../../src/infrastructure/transport-archive.ts");
   const manifest = await transporter.write(
@@ -666,13 +668,15 @@ test("local object roots reject user symlinks, including ancestors, and archive 
   await assert.rejects(stat(join(root, "outside")), { code: "ENOENT" });
   if (process.platform !== "win32") {
     await symlink(join(root, "store"), join(root, "alias"));
-    const alias = localTransport({ directory: join(root, "alias") });
+    const alias = createLocalTransport({ directory: join(root, "alias") });
     await assert.rejects(
       alias.write("artifacts/x", bytes("x"), { ifRevision: null }),
       /symlink/,
     );
     await assert.rejects(alias.read(manifest.key), /changed/);
-    const nested = localTransport({ directory: join(root, "alias", "nested") });
+    const nested = createLocalTransport({
+      directory: join(root, "alias", "nested"),
+    });
     await assert.rejects(
       nested.write("artifacts/x", bytes("x"), { ifRevision: null }),
       /symlink/,
@@ -701,7 +705,7 @@ test("transport modes reject incompatible configuration and malformed state", as
     { ifRevision: null },
   );
   await assert.rejects(
-    workflowCheckpointStore({ transporter }).acquire("invalid"),
+    createWorkflowCheckpointStore({ transporter }).acquire("invalid"),
     /envelope/,
   );
   await assert.rejects(

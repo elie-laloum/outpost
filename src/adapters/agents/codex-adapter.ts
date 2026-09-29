@@ -58,7 +58,7 @@ function bindCodex(settings: Bound<CodexSettings>): AgentAdapter {
   } satisfies AgentAdapter);
 }
 
-export function codexHarness(settings: CodexSettings = {}): CliHarness {
+export function createCodexHarness(settings: CodexSettings = {}): CliHarness {
   harnessSettings(settings);
   conversationSettings("Codex", "codex", settings);
   const configured = configuredSettings(settings);

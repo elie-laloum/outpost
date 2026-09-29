@@ -13,8 +13,8 @@ import {
   PeriodicExportingMetricReader,
   AggregationTemporality,
 } from "@opentelemetry/sdk-metrics";
-import { task, workflow } from "../../src/index.ts";
-import { openTelemetry } from "../../src/infrastructure/opentelemetry.ts";
+import { defineTask, defineWorkflow } from "../../src/index.ts";
+import { createOpenTelemetryObserver } from "../../src/infrastructure/opentelemetry.ts";
 
 function telemetry() {
   const spans = new InMemorySpanExporter();
@@ -35,7 +35,7 @@ function telemetry() {
     tracer,
     metrics,
     meter,
-    observer: openTelemetry({
+    observer: createOpenTelemetryObserver({
       tracer: tracer.getTracer("test"),
       meter: meter.getMeter("test"),
     }),
@@ -49,7 +49,7 @@ test("official SDK exports parented spans, exact usage, retries and duration met
     await sdk.tracer.shutdown();
     await sdk.meter.shutdown();
   });
-  const run = task({
+  const run = defineTask({
     key: "secret-task-token",
     retry: { attempts: 2 },
     perform(context) {
@@ -58,7 +58,7 @@ test("official SDK exports parented spans, exact usage, retries and duration met
       return "secret-output";
     },
   });
-  const result = await workflow("secret-workflow", [run]).start({
+  const result = await defineWorkflow("secret-workflow", [run]).start({
     telemetry: sdk.observer,
   });
   result.unwrap();
@@ -131,24 +131,24 @@ test("cancellation, skipped tasks and concurrent executions close every span", a
     await sdk.meter.shutdown();
   });
   const abort = new AbortController();
-  const slow = task({
+  const slow = defineTask({
     key: "slow",
     async perform(context) {
       abort.abort("secret cancellation");
       await delay(100, undefined, { signal: context.signal });
     },
   });
-  const skipped = task({
+  const skipped = defineTask({
     key: "skip",
     condition: () => false,
     perform: () => assert.fail(),
   });
   const [cancelled, done] = await Promise.all([
-    workflow("cancel", [slow]).start({
+    defineWorkflow("cancel", [slow]).start({
       signal: abort.signal,
       telemetry: sdk.observer,
     }),
-    workflow("done", [skipped]).start({ telemetry: sdk.observer }),
+    defineWorkflow("done", [skipped]).start({ telemetry: sdk.observer }),
   ]);
   assert.equal(cancelled.status, "cancelled");
   done.unwrap();
@@ -207,7 +207,7 @@ test("throwing telemetry APIs and diagnostics never affect workflow outcomes or 
   const tracer = sdk.tracer.getTracer("throwing");
   const original = tracer.startSpan.bind(tracer);
   let errors = 0;
-  const observer = openTelemetry({
+  const observer = createOpenTelemetryObserver({
     tracer: {
       ...tracer,
       startActiveSpan: tracer.startActiveSpan.bind(tracer),
@@ -225,14 +225,14 @@ test("throwing telemetry APIs and diagnostics never affect workflow outcomes or 
       throw new Error("broken diagnostic");
     },
   });
-  const result = await workflow("safe", [
-    task({ key: "run", perform: () => 1 }),
+  const result = await defineWorkflow("safe", [
+    defineTask({ key: "run", perform: () => 1 }),
   ]).start({ telemetry: observer });
   result.unwrap();
   observer.close();
   assert.equal(errors, 3);
   assert.equal(sdk.spans.getFinishedSpans().length, 3);
-  const broken = openTelemetry({
+  const broken = createOpenTelemetryObserver({
     tracer,
     meter: {
       ...sdk.meter.getMeter("broken"),
@@ -244,7 +244,9 @@ test("throwing telemetry APIs and diagnostics never affect workflow outcomes or 
       },
     },
   });
-  const safe = await workflow("safe", []).start({ observe: broken.observe });
+  const safe = await defineWorkflow("safe", []).start({
+    observe: broken.observe,
+  });
   safe.unwrap();
   broken.close();
 });
@@ -380,7 +382,7 @@ test("dispatch telemetry isolates broken instruments and span methods", async (t
   });
   const tracer = sdk.tracer.getTracer("broken-dispatch");
   let errors = 0;
-  const observer = openTelemetry({
+  const observer = createOpenTelemetryObserver({
     tracer: {
       startActiveSpan: tracer.startActiveSpan.bind(tracer),
       startSpan(...args) {
@@ -412,8 +414,8 @@ test("legacy workflow observe wiring still exports the complete span tree", asyn
     await sdk.tracer.shutdown();
     await sdk.meter.shutdown();
   });
-  const result = await workflow("legacy", [
-    task({ key: "step", perform: () => 1 }),
+  const result = await defineWorkflow("legacy", [
+    defineTask({ key: "step", perform: () => 1 }),
   ]).start({ observe: sdk.observer.observe });
   result.unwrap();
   assert.deepEqual(result.observerErrors, []);
@@ -435,7 +437,7 @@ test("hub sink parents dispatch and operation spans and retains dispatch metric 
     await sdk.meter.shutdown();
   });
   const hub = createObservationHub({ sinks: [sdk.observer.sink] });
-  const run = task({
+  const run = defineTask({
     key: "task",
     perform(context) {
       const dispatch = context.observation!.child({ dispatchId: "dispatch" });
@@ -461,7 +463,7 @@ test("hub sink parents dispatch and operation spans and retains dispatch metric 
       });
     },
   });
-  (await workflow("run", [run]).start({ observation: hub })).unwrap();
+  (await defineWorkflow("run", [run]).start({ observation: hub })).unwrap();
   await sdk.tracer.forceFlush();
   await sdk.meter.forceFlush();
   const spans = sdk.spans.getFinishedSpans();

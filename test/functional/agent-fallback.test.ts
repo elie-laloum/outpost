@@ -5,16 +5,16 @@ import { join } from "node:path";
 import { test } from "node:test";
 import type { TestContext } from "node:test";
 import {
-  agentTask,
+  defineAgentTask,
   createSandbox,
   dispatch,
-  fallbackAgent,
+  createFallbackAgent,
   OutpostError,
   quotaFault,
   speculate,
-  task,
+  defineTask,
   unavailableFault,
-  workflow,
+  defineWorkflow,
 } from "../../src/index.ts";
 import type {
   AgentInput,
@@ -29,7 +29,7 @@ import type {
 } from "../../src/index.ts";
 import { recoveryDetails } from "../../src/domain/errors.ts";
 import { quotaWorkspace } from "../../src/application/quota-resume.ts";
-import { localSandboxProvider } from "../../src/providers/local.ts";
+import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { emit, repository, scripted } from "../helpers.ts";
 
 const line = (event: object) =>
@@ -61,12 +61,12 @@ function candidate(
 
 async function session(
   t: TestContext,
-  agent: CliAgent | ReturnType<typeof fallbackAgent>,
+  agent: CliAgent | ReturnType<typeof createFallbackAgent>,
 ) {
   const root = await repository(t);
   const sandbox = await createSandbox({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent,
     logging: false,
   });
@@ -78,7 +78,7 @@ const pair = (
   first: CliAgent,
   second: CliAgent,
   on: readonly FallbackTrigger[] = ["quota", "unavailable"],
-) => fallbackAgent([first, second], { on });
+) => createFallbackAgent([first, second], { on });
 
 test("a quota failure hands the dispatch to the next candidate in the same workspace", async (t) => {
   const second: AgentInput[] = [];
@@ -269,7 +269,7 @@ test("resume continues with the candidate that produced the result", async (t) =
   const root = await repository(t);
   const cold = await dispatch({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent,
     logging: false,
     brief: { text: "go" },
@@ -298,7 +298,7 @@ test("continuations and interactive attachment reject fallback agents", async (t
   await assert.rejects(
     dispatch({
       repository: root,
-      sandboxProvider: localSandboxProvider(),
+      sandboxProvider: createLocalSandboxProvider(),
       agent,
       logging: false,
       brief: { text: "go" },
@@ -308,7 +308,7 @@ test("continuations and interactive attachment reject fallback agents", async (t
   );
 });
 
-test("agentTask counts the usage of failed candidates in the workflow", async (t) => {
+test("defineAgentTask counts the usage of failed candidates in the workflow", async (t) => {
   const sandbox = await session(
     t,
     pair(
@@ -316,12 +316,12 @@ test("agentTask counts the usage of failed candidates in the workflow", async (t
       candidate("backup", `${usage(3, 2)}${emit("done")}`),
     ),
   );
-  const coder = agentTask({
+  const coder = defineAgentTask({
     key: "coder",
     sandbox,
     request: () => ({ brief: { text: "implement" } }),
   });
-  const result = await workflow("fallback", [coder]).start();
+  const result = await defineWorkflow("fallback", [coder]).start();
   result.unwrap();
   assert.equal(result.usage.tokens.input, 13);
   assert.equal(result.usage.tokens.output, 7);
@@ -377,7 +377,7 @@ test("a workflow pauses when every candidate hits a limit and reruns the brief f
     backupInputs,
   );
   const sandbox = await session(t, pair(primary, backup, ["quota"]));
-  const coder = agentTask({
+  const coder = defineAgentTask({
     key: "coder",
     sandbox,
     request: () => ({ brief: { text: "implement" } }),
@@ -395,14 +395,14 @@ test("a workflow pauses when every candidate hits a limit and reruns the brief f
       };
     },
   };
-  const run = task({
+  const run = defineTask({
     key: "run",
     perform: async (context) => {
       const output = await coder.perform(context);
       return { text: output.text, selected: output.fallback?.selected.name };
     },
   });
-  const result = await workflow("nightly", [run]).start({
+  const result = await defineWorkflow("nightly", [run]).start({
     checkpoint: { store, runId: "nightly", version: "1" },
     onQuota: { action: "pause", maxWaitMs: 5_000 },
     observe: (event) => events.push(event),
@@ -441,7 +441,7 @@ test("fallback agents resume integrated work from the interrupted branch unless 
 test("speculation candidates fall back and report quota only once every fallback is exhausted", async (t) => {
   const result = await speculate({
     repository: await repository(t),
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     concurrency: 1,
     candidates: [
       {

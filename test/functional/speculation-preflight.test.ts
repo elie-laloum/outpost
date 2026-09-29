@@ -4,7 +4,7 @@ import { mkdir, rm, writeFile } from "node:fs/promises";
 import { delimiter, join } from "node:path";
 import { test } from "node:test";
 import { checkSpeculationIntegration, speculate } from "../../src/index.ts";
-import { localSandboxProvider } from "../../src/providers/local.ts";
+import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { git } from "../../src/infrastructure/git.ts";
 import { emit, repository, scripted } from "../helpers.ts";
 
@@ -62,7 +62,7 @@ process.exitCode = result.status ?? 1;
         await rm(marker);
         const race = await speculate({
           repository: repo,
-          sandboxProvider: localSandboxProvider(),
+          sandboxProvider: createLocalSandboxProvider(),
           budget: {},
           candidates: [
             {

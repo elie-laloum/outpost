@@ -1,17 +1,17 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
-  agent,
-  harness,
+  createAgent,
+  createHarness,
   defineHarnessTool,
   defineHarnessHook,
   dispatch,
   createObservationHub,
   readJournal,
-  localTransport,
+  createLocalTransport,
 } from "../../src/index.ts";
 import type { Observation, ModelProvider } from "../../src/index.ts";
-import { localSandboxProvider } from "../../src/providers/local.ts";
+import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { repository } from "../helpers.ts";
 
 for (const verbose of [false, true])
@@ -72,9 +72,9 @@ for (const verbose of [false, true])
         return result.stdout;
       },
     });
-    const selected = agent({
+    const selected = createAgent({
       model: "fixture",
-      harness: harness({
+      harness: createHarness({
         modelProvider,
         instructions: ["fixture instructions"],
         tools: [command],
@@ -90,7 +90,7 @@ for (const verbose of [false, true])
     });
     const result = await dispatch({
       repository: root,
-      sandboxProvider: localSandboxProvider(),
+      sandboxProvider: createLocalSandboxProvider(),
       agent: selected,
       observation,
       brief: { text: "test" },
@@ -138,7 +138,9 @@ for (const verbose of [false, true])
     );
     const journal = JSON.stringify(
       await readJournal({
-        transporter: localTransport({ directory: `${root}/.outpost/storage` }),
+        transporter: createLocalTransport({
+          directory: `${root}/.outpost/storage`,
+        }),
         reference: result.logReference!,
       }),
     );
@@ -151,9 +153,9 @@ for (const verbose of [false, true])
 test("provider failures are observed without replacing the original error", async (t) => {
   const root = await repository(t);
   const events: Observation[] = [];
-  const selected = agent({
+  const selected = createAgent({
     model: "fixture",
-    harness: harness({
+    harness: createHarness({
       modelProvider: {
         name: "fixture",
         async request() {
@@ -166,7 +168,7 @@ test("provider failures are observed without replacing the original error", asyn
   await assert.rejects(
     dispatch({
       repository: root,
-      sandboxProvider: localSandboxProvider(),
+      sandboxProvider: createLocalSandboxProvider(),
       agent: selected,
       brief: { text: "test" },
       logging: false,

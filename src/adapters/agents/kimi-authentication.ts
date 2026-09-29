@@ -58,7 +58,7 @@ function modelName(input: CredentialInput): string {
   const name = input.model?.name;
   invariant(
     name,
-    "Kimi Code usage authentication requires a model name on agent()",
+    "Kimi Code usage authentication requires a model name on createAgent()",
   );
   return name;
 }

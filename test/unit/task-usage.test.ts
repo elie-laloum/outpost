@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { task, workflow } from "../../src/index.ts";
+import { defineTask, defineWorkflow } from "../../src/index.ts";
 import { taskUsage } from "../../src/application/task-usage.ts";
 
 test("stream deltas, transcript summary corrections and final fallback reconcile without subtraction", async () => {
   let observed = 0;
-  const run = task({
+  const run = defineTask({
     key: "usage",
     perform(context) {
       const observer = taskUsage(context, () => {
@@ -52,7 +52,7 @@ test("stream deltas, transcript summary corrections and final fallback reconcile
       observer.reconcile({ input: 9, cached: 1, output: 5, cacheCreated: 4 });
     },
   });
-  const result = await workflow("corrections", [run]).start();
+  const result = await defineWorkflow("corrections", [run]).start();
   result.unwrap();
   assert.equal(observed, 5);
   assert.deepEqual(result.usage.tokens, {

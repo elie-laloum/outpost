@@ -21,7 +21,7 @@ import { executeProcess } from "../../src/infrastructure/process.ts";
 import { git } from "../../src/infrastructure/git/command.ts";
 import { openWorkspace, OutpostError } from "../../src/index.ts";
 import { seedRemote } from "../../src/application/remote-workspace.ts";
-import { localSandboxProvider } from "../../src/providers/local.ts";
+import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { repository } from "../helpers.ts";
 
 const cli = resolve("src/cli/main.ts");
@@ -235,7 +235,7 @@ test("checksum capture failure aborts synchronization before host apply and reta
   t.after(() => workspace.close({ preserve: true }));
   const remote = join(root, ".outpost", "recovery", "remote");
   await mkdir(remote, { recursive: true });
-  const lease = await localSandboxProvider().acquire({
+  const lease = await createLocalSandboxProvider().acquire({
     repository: remote,
     directory: remote,
     gitDirectories: [],

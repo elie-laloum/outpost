@@ -8,7 +8,7 @@ import {
 } from "./tools.constants.ts";
 import type { GitInput } from "./tools.types.ts";
 
-export function harnessGitTools(): HarnessToolset {
+export function createHarnessGitTools(): HarnessToolset {
   return defineHarnessToolset({
     name: "git",
     tools: [

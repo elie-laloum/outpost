@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
-  agentTask,
-  isolatedTask,
-  loopTask,
-  task,
-  workflow,
+  defineAgentTask,
+  defineIsolatedTask,
+  defineLoopTask,
+  defineTask,
+  defineWorkflow,
 } from "../../src/index.ts";
 import type {
   Sandbox,
@@ -49,12 +49,12 @@ test("task cache definitions are validated at composition", () => {
     [{ ...valid, mode: "always" }, /reuse or refresh/],
   ] as const)
     assert.throws(
-      () => task({ key: "a", cache: cache as never, perform }),
+      () => defineTask({ key: "a", cache: cache as never, perform }),
       pattern,
     );
   assert.throws(
     () =>
-      task({
+      defineTask({
         key: "a",
         cache: valid,
         interaction: { identity: "i", actors: ["alice"] },
@@ -64,7 +64,7 @@ test("task cache definitions are validated at composition", () => {
   );
   assert.throws(
     () =>
-      task({
+      defineTask({
         key: "a",
         cache: valid,
         gate: { kind: "approval", prompt: "ok?", actors: ["alice"] },
@@ -74,9 +74,9 @@ test("task cache definitions are validated at composition", () => {
   );
   assert.throws(
     () =>
-      workflow("gate", [
+      defineWorkflow("gate", [
         {
-          ...task({ key: "a", perform }),
+          ...defineTask({ key: "a", perform }),
           gate: { kind: "approval", prompt: "ok?", actors: ["alice"] },
           cache: valid,
         },
@@ -85,9 +85,9 @@ test("task cache definitions are validated at composition", () => {
   );
   assert.throws(
     () =>
-      workflow("interaction", [
+      defineWorkflow("interaction", [
         {
-          ...task({ key: "a", perform }),
+          ...defineTask({ key: "a", perform }),
           interaction: { identity: "i", actors: ["alice"] },
           cache: valid,
         },
@@ -97,7 +97,7 @@ test("task cache definitions are validated at composition", () => {
   const sandbox = {} as Sandbox;
   assert.throws(
     () =>
-      agentTask({
+      defineAgentTask({
         key: "agent",
         sandbox,
         request: () => ({ brief: { text: "x" } }),
@@ -107,14 +107,14 @@ test("task cache definitions are validated at composition", () => {
   );
   assert.throws(
     () =>
-      isolatedTask({
+      defineIsolatedTask({
         key: "isolated",
         request: () => ({}) as never,
         ...({ cache: valid } as object),
       }),
     /JSON projection/,
   );
-  const cached = task({
+  const cached = defineTask({
     key: "a",
     cache: { ...valid, mode: "refresh" },
     perform,
@@ -126,8 +126,11 @@ test("a miss stores the result and a later hit skips execution, attempts and usa
   const { store, entries } = memory();
   let runs = 0;
   const definitions = () => {
-    const source = task({ key: "source", perform: () => ({ b: 2, a: 1 }) });
-    const review = task({
+    const source = defineTask({
+      key: "source",
+      perform: () => ({ b: 2, a: 1 }),
+    });
+    const review = defineTask({
       key: "review",
       after: [source],
       retry: { attempts: 2 },
@@ -142,7 +145,7 @@ test("a miss stores the result and a later hit skips execution, attempts and usa
         return { verdict: "ok", findings: [1, 2] };
       },
     });
-    const after = task({
+    const after = defineTask({
       key: "after",
       after: [review],
       perform: (ctx) => ctx.value(review).findings.length,
@@ -150,7 +153,7 @@ test("a miss stores the result and a later hit skips execution, attempts and usa
     return {
       review,
       after,
-      graph: workflow("cached", [source, review, after]),
+      graph: defineWorkflow("cached", [source, review, after]),
     };
   };
   const first = definitions();
@@ -226,12 +229,12 @@ test("fingerprints canonicalize keys and separate workflows, tasks and versions"
   const { store } = memory();
   let runs = 0;
   const run = async (name: string, version: string, key: unknown) => {
-    const item = task({
+    const item = defineTask({
       key: "t",
       cache: { store, version, key: () => key as never },
       perform: () => ++runs,
     });
-    const result = await workflow(name, [item]).start();
+    const result = await defineWorkflow(name, [item]).start();
     result.unwrap();
     return result.value(item);
   };
@@ -246,12 +249,12 @@ test("expired entries and refresh mode execute again and replace the entry", asy
   let runs = 0;
   const run = async (options: Partial<TaskCacheOptions>) => {
     const events: WorkflowEvent[] = [];
-    const item = task({
+    const item = defineTask({
       key: "t",
       cache: { store, version: "1", key: () => "k", ...options },
       perform: () => ++runs,
     });
-    const result = await workflow("w", [item]).start({
+    const result = await defineWorkflow("w", [item]).start({
       observe: (event) => events.push(event),
     });
     result.unwrap();
@@ -284,14 +287,14 @@ test("undefined results are cached and restored", async () => {
   const { store } = memory();
   let runs = 0;
   const run = async () => {
-    const item = task({
+    const item = defineTask({
       key: "t",
       cache: { store, version: "1", key: () => null },
       perform: () => {
         runs++;
       },
     });
-    const result = await workflow("w", [item]).start();
+    const result = await defineWorkflow("w", [item]).start();
     result.unwrap();
     return result;
   };
@@ -304,7 +307,7 @@ test("undefined results are cached and restored", async () => {
 test("non-JSON results and key errors fail the task without storing", async () => {
   const { store, entries } = memory();
   let runs = 0;
-  const output = task({
+  const output = defineTask({
     key: "output",
     retry: { attempts: 3 },
     cache: { store, version: "1", key: () => "k" },
@@ -313,7 +316,7 @@ test("non-JSON results and key errors fail the task without storing", async () =
       return { at: new Date() };
     },
   });
-  const failed = await workflow("w", [output]).start();
+  const failed = await defineWorkflow("w", [output]).start();
   assert.equal(failed.status, "failed");
   assert.equal(runs, 1);
   assert.match(
@@ -328,12 +331,12 @@ test("non-JSON results and key errors fail the task without storing", async () =
     },
     () => undefined as never,
   ]) {
-    const item = task({
+    const item = defineTask({
       key: "keyed",
       cache: { store, version: "1", key },
       perform: () => ++runs,
     });
-    const result = await workflow("w", [item]).start();
+    const result = await defineWorkflow("w", [item]).start();
     assert.equal(result.status, "failed");
     assert.match(String(result.tasks[0]?.error), /no head|lossless JSON/);
   }
@@ -347,12 +350,12 @@ test("store failures and invalid entries never change the task outcome", async (
     write: () => Promise.reject(new Error("store read-only")),
   };
   const events: WorkflowEvent[] = [];
-  const item = task({
+  const item = defineTask({
     key: "t",
     cache: { store: failing, version: "1", key: () => "k" },
     perform: () => ++runs,
   });
-  const result = await workflow("w", [item]).start({
+  const result = await defineWorkflow("w", [item]).start({
     observe: (event) => events.push(event),
   });
   result.unwrap();
@@ -383,12 +386,12 @@ test("store failures and invalid entries never change the task outcome", async (
     write: store.write,
   };
   events.length = 0;
-  const guarded = task({
+  const guarded = defineTask({
     key: "t",
     cache: { store: wrong, version: "1", key: () => "k" },
     perform: () => "fresh",
   });
-  const fresh = await workflow("w", [guarded]).start({
+  const fresh = await defineWorkflow("w", [guarded]).start({
     observe: (event) => events.push(event),
   });
   fresh.unwrap();
@@ -402,7 +405,7 @@ test("store failures and invalid entries never change the task outcome", async (
 
 test("observer failures do not affect cached execution", async () => {
   const { store } = memory();
-  const item = task({
+  const item = defineTask({
     key: "t",
     cache: { store, version: "1", key: () => "k" },
     perform: () => "value",
@@ -412,9 +415,9 @@ test("observer failures do not affect cached execution", async () => {
       throw new Error("observer");
     },
   };
-  const cold = await workflow("w", [item]).start(observed);
+  const cold = await defineWorkflow("w", [item]).start(observed);
   cold.unwrap();
-  const warm = await workflow("w", [item]).start(observed);
+  const warm = await defineWorkflow("w", [item]).start(observed);
   warm.unwrap();
   assert.equal(warm.tasks[0]?.cacheHit, true);
 });
@@ -429,12 +432,12 @@ test("cancellation during lookup cancels the task", async () => {
     async write() {},
   };
   let runs = 0;
-  const item = task({
+  const item = defineTask({
     key: "t",
     cache: { store, version: "1", key: () => "k" },
     perform: () => ++runs,
   });
-  const result = await workflow("w", [item]).start({
+  const result = await defineWorkflow("w", [item]).start({
     signal: controller.signal,
   });
   assert.equal(result.status, "cancelled");
@@ -444,7 +447,7 @@ test("cancellation during lookup cancels the task", async () => {
 test("zero-delay retries still retry with a cache", async () => {
   const { store } = memory();
   let runs = 0;
-  const item = task({
+  const item = defineTask({
     key: "t",
     retry: { attempts: 3 },
     cache: { store, version: "1", key: () => "k" },
@@ -453,7 +456,7 @@ test("zero-delay retries still retry with a cache", async () => {
       return runs;
     },
   });
-  const result = await workflow("w", [item]).start();
+  const result = await defineWorkflow("w", [item]).start();
   result.unwrap();
   assert.equal(result.value(item), 3);
   assert.equal(result.tasks[0]?.attempts, 3);
@@ -463,7 +466,7 @@ test("loop tasks cache their accepted result", async () => {
   const { store } = memory();
   let rounds = 0;
   const definition = () =>
-    loopTask({
+    defineLoopTask({
       key: "fix",
       maxRounds: 3,
       cache: { store, version: "1", key: () => "fix" },
@@ -475,12 +478,12 @@ test("loop tasks cache their accepted result", async () => {
         value === 2 ? { done: true } : { done: false, feedback: "again" },
     });
   const first = definition();
-  const cold = await workflow("loop", [first]).start();
+  const cold = await defineWorkflow("loop", [first]).start();
   cold.unwrap();
   assert.equal(cold.value(first), 2);
   assert.equal(rounds, 2);
   const second = definition();
-  const warm = await workflow("loop", [second]).start();
+  const warm = await defineWorkflow("loop", [second]).start();
   warm.unwrap();
   assert.equal(warm.value(second), 2);
   assert.equal(rounds, 2);

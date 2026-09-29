@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { harness } from "../../src/domain/harness.ts";
+import { createHarness } from "../../src/domain/harness.ts";
 import { mcpConnection } from "../../src/adapters/tools/mcp-connection.ts";
 import {
   mcpTools,
@@ -125,16 +125,17 @@ test("the built-in harness validates and keeps declared MCP servers", () => {
       throw new Error("unused");
     },
   };
-  const configured = harness({
+  const configured = createHarness({
     modelProvider,
     mcpServers: { docs: { url: "https://example.com/mcp" } },
   });
   assert.deepEqual(configured.mcpServers, {
     docs: { url: "https://example.com/mcp" },
   });
-  assert.equal(harness({ modelProvider }).mcpServers, undefined);
+  assert.equal(createHarness({ modelProvider }).mcpServers, undefined);
   assert.throws(
-    () => harness({ modelProvider, mcpServers: { "a b": { command: "x" } } }),
+    () =>
+      createHarness({ modelProvider, mcpServers: { "a b": { command: "x" } } }),
     { code: "configuration" },
   );
 });

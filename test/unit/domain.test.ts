@@ -1,14 +1,18 @@
-import { agent as composeAgent } from "../../src/domain/agent.ts";
+import { createAgent as composeAgent } from "../../src/domain/agent.ts";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { prepareBrief, validateBrief } from "../../src/domain/prompts.ts";
-import { response, ResponseError } from "../../src/domain/response.ts";
 import {
-  antigravityHarness,
-  claudeHarness,
-  codexHarness,
-  copilotHarness,
-  kimiHarness,
+  defineJsonResponse,
+  defineTextResponse,
+  ResponseError,
+} from "../../src/domain/response.ts";
+import {
+  createAntigravityHarness,
+  createClaudeHarness,
+  createCodexHarness,
+  createCopilotHarness,
+  createKimiHarness,
 } from "../../src/providers/agents.ts";
 import { parseEnvironment } from "../../src/infrastructure/settings.ts";
 import { OutpostError } from "../../src/domain/errors.ts";
@@ -48,12 +52,12 @@ test("brief variants are exclusive at runtime", () => {
 
 test("tagged responses support async Standard Schema and take last complete tag", async () => {
   assert.equal(
-    await response
-      .text({ tag: "answer" })
-      .read("<answer>first</answer><answer> last </answer>"),
+    await defineTextResponse({ tag: "answer" }).read(
+      "<answer>first</answer><answer> last </answer>",
+    ),
     "last",
   );
-  const json = response.json({
+  const json = defineJsonResponse({
     tag: "data",
     schema: {
       "~standard": {
@@ -64,18 +68,21 @@ test("tagged responses support async Standard Schema and take last complete tag"
   assert.deepEqual(await json.read('<data>{"ok":true}</data>'), { ok: true });
   await assert.rejects(json.read("<data>{no}</data>"), ResponseError);
   await assert.rejects(json.read("none"), /No complete/);
-  const rejected = response.json({
+  const rejected = defineJsonResponse({
     tag: "data",
     schema: { "~standard": { validate: () => ({ issues: ["wrong"] }) } },
   });
   await assert.rejects(rejected.read("<data>null</data>"), /wrong/);
-  assert.throws(() => response.text({ tag: "x.*" }), /XML/);
-  assert.throws(() => response.text({ tag: "ok", repairs: -1 }), /nonnegative/);
+  assert.throws(() => defineTextResponse({ tag: "x.*" }), /XML/);
+  assert.throws(
+    () => defineTextResponse({ tag: "ok", repairs: -1 }),
+    /nonnegative/,
+  );
 });
 
 test("Claude adapter supports print, terminal, reasoning, resume and fork", () => {
   const agent = composeAgent({
-    harness: claudeHarness({
+    harness: createClaudeHarness({
       permissions: "acceptEdits",
       saveConversations: false,
       variables: { TOKEN: "value" },
@@ -106,7 +113,7 @@ test("Claude adapter supports print, terminal, reasoning, resume and fork", () =
     true,
   );
   assert.ok(
-    composeAgent({ harness: claudeHarness({}) })
+    composeAgent({ harness: createClaudeHarness({}) })
       .request({ text: "" })
       .arguments?.includes("--dangerously-skip-permissions"),
   );
@@ -117,8 +124,8 @@ test("Claude adapter supports print, terminal, reasoning, resume and fork", () =
 });
 
 test("agent streams normalize text, tools, sessions, usage and failures", () => {
-  const c = composeAgent({ harness: claudeHarness({}) }),
-    x = composeAgent({ harness: codexHarness({}) });
+  const c = composeAgent({ harness: createClaudeHarness({}) }),
+    x = composeAgent({ harness: createCodexHarness({}) });
   const parse = (a: typeof c, value: unknown) =>
     a.events(JSON.stringify(value));
   assert.deepEqual(parse(c, { type: "system", session_id: "a" }), [
@@ -199,7 +206,7 @@ test("agent streams normalize text, tools, sessions, usage and failures", () => 
 
 test("Codex adapter selects CLI subcommands and explicit reviewer", () => {
   const agent = composeAgent({
-    harness: codexHarness({ approvalReviewer: "auto_review" }),
+    harness: createCodexHarness({ approvalReviewer: "auto_review" }),
     model: { name: "model", reasoning: "high" },
   });
   assert.ok(
@@ -218,7 +225,7 @@ test("Codex adapter selects CLI subcommands and explicit reviewer", () => {
   ]);
   assert.ok(command.arguments?.includes('approvals_reviewer="auto_review"'));
   assert.ok(
-    composeAgent({ harness: codexHarness({}) })
+    composeAgent({ harness: createCodexHarness({}) })
       .request({})
       .arguments?.includes("--dangerously-bypass-approvals-and-sandbox"),
   );
@@ -240,7 +247,10 @@ test("dotenv handles export, quotes, escapes and comments without expansion", ()
 });
 
 test("agent models normalize names and reject unsupported CLI settings", () => {
-  const named = composeAgent({ harness: claudeHarness(), model: "sonnet" });
+  const named = composeAgent({
+    harness: createClaudeHarness(),
+    model: "sonnet",
+  });
   assert.deepEqual(named.model, { name: "sonnet" });
   assert.ok(Object.isFrozen(named.model));
   for (const [model, message] of [
@@ -253,39 +263,51 @@ test("agent models normalize names and reject unsupported CLI settings", () => {
     assert.throws(
       () =>
         composeAgent({
-          harness: claudeHarness(),
+          harness: createClaudeHarness(),
           model: model as unknown as string,
         }),
       message,
     );
   for (const [harness, model, message] of [
-    [claudeHarness(), { name: "m", reasoning: "none" }, /Claude Code.*"none"/],
-    [codexHarness(), { name: "m", reasoning: "minimal" }, /Codex.*"minimal"/],
     [
-      codexHarness(),
+      createClaudeHarness(),
+      { name: "m", reasoning: "none" },
+      /Claude Code.*"none"/,
+    ],
+    [
+      createCodexHarness(),
+      { name: "m", reasoning: "minimal" },
+      /Codex.*"minimal"/,
+    ],
+    [
+      createCodexHarness(),
       { name: "m", maxOutputTokens: 1 },
       /Codex.*maxOutputTokens/,
     ],
     [
-      antigravityHarness(),
+      createAntigravityHarness(),
       { name: "m", reasoning: "low" },
       /Antigravity CLI.*"low"/,
     ],
-    [antigravityHarness(), { name: "m", maxOutputTokens: 1 }, /Antigravity/],
     [
-      copilotHarness(),
+      createAntigravityHarness(),
+      { name: "m", maxOutputTokens: 1 },
+      /Antigravity/,
+    ],
+    [
+      createCopilotHarness(),
       { name: "m", reasoning: "high" },
       /GitHub Copilot CLI.*"high"/,
     ],
-    [copilotHarness(), { name: "m", maxOutputTokens: 1 }, /Copilot/],
-    [kimiHarness(), { name: "m", reasoning: "max" }, /Kimi Code.*"max"/],
-    [kimiHarness(), { name: "m", maxOutputTokens: 1 }, /Kimi Code/],
+    [createCopilotHarness(), { name: "m", maxOutputTokens: 1 }, /Copilot/],
+    [createKimiHarness(), { name: "m", reasoning: "max" }, /Kimi Code.*"max"/],
+    [createKimiHarness(), { name: "m", maxOutputTokens: 1 }, /Kimi Code/],
   ] as const)
     assert.throws(() => composeAgent({ harness, model }), message);
   assert.throws(
     () =>
       composeAgent({
-        harness: claudeHarness({
+        harness: createClaudeHarness({
           variables: { CLAUDE_CODE_MAX_OUTPUT_TOKENS: "1" },
         }),
         model: { name: "m", maxOutputTokens: 2 },
@@ -294,7 +316,7 @@ test("agent models normalize names and reject unsupported CLI settings", () => {
   );
   for (const settings of [{ model: "m" }, { reasoning: "high" }])
     assert.throws(
-      () => claudeHarness(settings as object),
-      /on agent\(\), not on its harness/,
+      () => createClaudeHarness(settings as object),
+      /on createAgent\(\), not on its harness/,
     );
 });

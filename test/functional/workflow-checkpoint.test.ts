@@ -9,10 +9,10 @@ import { join } from "node:path";
 import { spawn } from "node:child_process";
 import { once } from "node:events";
 import {
-  workflowCheckpointStore,
-  task,
-  workflow,
-  localTransport,
+  createWorkflowCheckpointStore,
+  defineTask,
+  defineWorkflow,
+  createLocalTransport,
 } from "../../src/index.ts";
 import type { Retry, WorkflowCheckpointStore } from "../../src/index.ts";
 
@@ -25,23 +25,27 @@ async function temporary(t: TestContext) {
 test("checkpoints restore typed JSON and undefined across new task definitions", async (t) => {
   const directory = await temporary(t);
   const checkpoint = {
-    store: workflowCheckpointStore({
-      transporter: localTransport({ directory: directory }),
+    store: createWorkflowCheckpointStore({
+      transporter: createLocalTransport({ directory: directory }),
     }),
     runId: "same",
     version: "v1",
   };
   let calls = 0;
   const definitions = () => {
-    const source = task({
+    const source = defineTask({
       key: "source",
       perform: () => {
         calls++;
         return { number: 3, items: [true, null] };
       },
     });
-    const empty = task({ key: "empty", after: [source], perform() {} });
-    return { source, empty, graph: workflow("persisted", [source, empty]) };
+    const empty = defineTask({ key: "empty", after: [source], perform() {} });
+    return {
+      source,
+      empty,
+      graph: defineWorkflow("persisted", [source, empty]),
+    };
   };
   const initial = definitions();
   const first = await initial.graph.start({ checkpoint });
@@ -61,20 +65,20 @@ test("checkpoints restore typed JSON and undefined across new task definitions",
 test("resume is explicit, restores dependency values and accumulates attempts and usage", async (t) => {
   const directory = await temporary(t);
   const checkpoint = {
-    store: workflowCheckpointStore({
-      transporter: localTransport({ directory: directory }),
+    store: createWorkflowCheckpointStore({
+      transporter: createLocalTransport({ directory: directory }),
     }),
     runId: "resume",
     version: "v1",
   };
-  const source = task({
+  const source = defineTask({
     key: "source",
     perform(context) {
       context.reportUsage({ input: 2, cached: 0, output: 3 });
       return 4;
     },
   });
-  const target = task({
+  const target = defineTask({
     key: "target",
     after: [source],
     perform(context) {
@@ -83,7 +87,7 @@ test("resume is explicit, restores dependency values and accumulates attempts an
       return context.value(source) * context.attempt;
     },
   });
-  const graph = workflow("resume", [source, target]);
+  const graph = defineWorkflow("resume", [source, target]);
   const first = await graph.start({ checkpoint });
   assert.equal(first.status, "failed");
   await assert.rejects(
@@ -105,16 +109,16 @@ test("resume is explicit, restores dependency values and accumulates attempts an
 test("resumed admission uses the cumulative budget", async (t) => {
   const directory = await temporary(t);
   const checkpoint = {
-    store: workflowCheckpointStore({
-      transporter: localTransport({ directory: directory }),
+    store: createWorkflowCheckpointStore({
+      transporter: createLocalTransport({ directory: directory }),
     }),
     runId: "budget",
     version: "1",
     resume: "retry-incomplete" as const,
   };
   let calls = 0;
-  const graph = workflow("budget", [
-    task({
+  const graph = defineWorkflow("budget", [
+    defineTask({
       key: "one",
       perform() {
         calls++;
@@ -132,25 +136,27 @@ test("resumed admission uses the cumulative budget", async (t) => {
 test("incompatible identity and corrupt checkpoint fail before effects", async (t) => {
   const directory = await temporary(t);
   const checkpoint = {
-    store: workflowCheckpointStore({
-      transporter: localTransport({ directory: directory }),
+    store: createWorkflowCheckpointStore({
+      transporter: createLocalTransport({ directory: directory }),
     }),
     runId: "identity",
     version: "1",
   };
-  const graph = workflow("identity", [task({ key: "one", perform: () => 1 })]);
+  const graph = defineWorkflow("identity", [
+    defineTask({ key: "one", perform: () => 1 }),
+  ]);
   await graph.start({ checkpoint });
   await assert.rejects(
     graph.start({ checkpoint: { ...checkpoint, version: "2" } }),
     /incompatible/,
   );
   await assert.rejects(
-    workflow("identity", [
-      task({ key: "two", perform: () => assert.fail() }),
+    defineWorkflow("identity", [
+      defineTask({ key: "two", perform: () => assert.fail() }),
     ]).start({ checkpoint }),
     /incompatible/,
   );
-  const transporter = localTransport({ directory });
+  const transporter = createLocalTransport({ directory });
   const key = `checkpoints/${createHash("sha256").update(checkpoint.runId).digest("hex")}.json`;
   let object = (await transporter.read(key))!;
   object = {
@@ -171,8 +177,8 @@ test("incompatible identity and corrupt checkpoint fail before effects", async (
 test("exclusive run ownership rejects a second runner and releases after completion", async (t) => {
   const directory = await temporary(t);
   const checkpoint = {
-    store: workflowCheckpointStore({
-      transporter: localTransport({ directory: directory }),
+    store: createWorkflowCheckpointStore({
+      transporter: createLocalTransport({ directory: directory }),
     }),
     runId: "exclusive",
     version: "1",
@@ -185,8 +191,8 @@ test("exclusive run ownership rejects a second runner and releases after complet
   const blocked = new Promise<void>((resolve) => {
     finish = resolve;
   });
-  const graph = workflow("exclusive", [
-    task({
+  const graph = defineWorkflow("exclusive", [
+    defineTask({
       key: "one",
       async perform() {
         markStarted();
@@ -229,7 +235,7 @@ test("write failures cancel and drain active tasks before releasing ownership", 
       };
     },
   };
-  const fast = task({
+  const fast = defineTask({
     key: "fast",
     async perform() {
       if (++starts === 2) markStarted();
@@ -237,7 +243,7 @@ test("write failures cancel and drain active tasks before releasing ownership", 
       return 1;
     },
   });
-  const slow = task({
+  const slow = defineTask({
     key: "slow",
     async perform(context) {
       if (++starts === 2) markStarted();
@@ -249,7 +255,7 @@ test("write failures cancel and drain active tasks before releasing ownership", 
       drained = true;
     },
   });
-  const child = task({
+  const child = defineTask({
     key: "child",
     after: [fast],
     perform() {
@@ -257,7 +263,7 @@ test("write failures cancel and drain active tasks before releasing ownership", 
     },
   });
   await assert.rejects(
-    workflow("write-failure", [fast, slow, child]).start({
+    defineWorkflow("write-failure", [fast, slow, child]).start({
       concurrency: 3,
       checkpoint: { store, runId: "failure", version: "1" },
     }),
@@ -283,11 +289,11 @@ test("lossy outputs fail tasks without publishing success", async (t) => {
   circular.push(circular);
   values.push(circular);
   for (const [index, value] of values.entries()) {
-    const item = task({ key: "lossy", perform: () => value });
-    const result = await workflow("lossy", [item]).start({
+    const item = defineTask({ key: "lossy", perform: () => value });
+    const result = await defineWorkflow("lossy", [item]).start({
       checkpoint: {
-        store: workflowCheckpointStore({
-          transporter: localTransport({ directory: directory }),
+        store: createWorkflowCheckpointStore({
+          transporter: createLocalTransport({ directory: directory }),
         }),
         runId: String(index),
         version: "1",
@@ -308,10 +314,10 @@ test(
     const module = new URL("../../src/index.ts", import.meta.url).href;
     await writeFile(
       script,
-      `import { workflowCheckpointStore, task, workflow, localTransport } from ${JSON.stringify(module)};
-const first = task({key:'first',perform:()=>42});
-const second = task({key:'second',after:[first],async perform(context){context.reportUsage({input:5,cached:0,output:1}); await context.checkpoint?.(); process.send('active'); return new Promise(()=>{setInterval(()=>{},1000)});}});
-await workflow('process',[first,second]).start({checkpoint:{store:workflowCheckpointStore({ transporter: localTransport({ directory: ${JSON.stringify(directory)} }) }),runId:'process',version:'1'}});`,
+      `import { createWorkflowCheckpointStore, defineTask, defineWorkflow, createLocalTransport } from ${JSON.stringify(module)};
+const first = defineTask({key:'first',perform:()=>42});
+const second = defineTask({key:'second',after:[first],async perform(context){context.reportUsage({input:5,cached:0,output:1}); await context.checkpoint?.(); process.send('active'); return new Promise(()=>{setInterval(()=>{},1000)});}});
+await defineWorkflow('process',[first,second]).start({checkpoint:{store:createWorkflowCheckpointStore({ transporter: createLocalTransport({ directory: ${JSON.stringify(directory)} }) }),runId:'process',version:'1'}});`,
     );
     const child = spawn(process.execPath, [script], {
       stdio: ["ignore", "pipe", "pipe", "ipc"],
@@ -320,27 +326,27 @@ await workflow('process',[first,second]).start({checkpoint:{store:workflowCheckp
     await once(child, "message");
     child.kill("SIGKILL");
     await once(child, "exit");
-    const first = task({
+    const first = defineTask({
       key: "first",
       perform: () => assert.fail("completed task replayed"),
     });
-    const second = task({
+    const second = defineTask({
       key: "second",
       after: [first],
       perform: (context) => context.value(first) + context.attempt,
     });
     const restart = () =>
-      workflow("process", [first, second]).start({
+      defineWorkflow("process", [first, second]).start({
         checkpoint: {
-          store: workflowCheckpointStore({
-            transporter: localTransport({ directory: directory }),
+          store: createWorkflowCheckpointStore({
+            transporter: createLocalTransport({ directory: directory }),
           }),
           runId: "process",
           version: "1",
           resume: "retry-incomplete",
         },
       });
-    const transporter = localTransport({ directory });
+    const transporter = createLocalTransport({ directory });
     const key = `checkpoints/${createHash("sha256").update("process").digest("hex")}.json`;
     await assert.rejects(restart(), /ownership is unknown/);
     const current = (await transporter.read(key))!;
@@ -359,10 +365,10 @@ await workflow('process',[first,second]).start({checkpoint:{store:workflowCheckp
 
 test("checkpoint admission refuses invalid IDs and releases leases after read failure", async (t) => {
   const directory = await temporary(t);
-  const store = workflowCheckpointStore({
-    transporter: localTransport({ directory: directory }),
+  const store = createWorkflowCheckpointStore({
+    transporter: createLocalTransport({ directory: directory }),
   });
-  const graph = workflow("validate", []);
+  const graph = defineWorkflow("validate", []);
   await assert.rejects(
     graph.start({ checkpoint: { store, runId: " ", version: "1" } }),
     /must not be empty/,
@@ -409,12 +415,12 @@ test("JSON validation refuses accessor and sparse arrays without invoking getter
     { [Symbol("key")]: 1 },
   ];
   for (const [index, value] of values.entries()) {
-    const result = await workflow("unsafe", [
-      task({ key: "value", perform: () => value }),
+    const result = await defineWorkflow("unsafe", [
+      defineTask({ key: "value", perform: () => value }),
     ]).start({
       checkpoint: {
-        store: workflowCheckpointStore({
-          transporter: localTransport({ directory: directory }),
+        store: createWorkflowCheckpointStore({
+          transporter: createLocalTransport({ directory: directory }),
         }),
         runId: String(index),
         version: "1",
@@ -442,8 +448,8 @@ test("corrupt records, output envelopes and accounting never replay effects", as
     },
   };
   const checkpoint = { store, runId: "corrupt", version: "1" };
-  const graph = workflow("corrupt", [
-    task({
+  const graph = defineWorkflow("corrupt", [
+    defineTask({
       key: "one",
       perform() {
         calls++;
@@ -489,13 +495,13 @@ test("corrupt records, output envelopes and accounting never replay effects", as
 test("checkpoint restart preserves graph identity across host locales", async (t) => {
   const directory = await temporary(t);
   const program = `
-    import { workflowCheckpointStore, task, workflow, localTransport } from ${JSON.stringify(new URL("../../src/index.ts", import.meta.url).href)};
-    const tasks = ["a", "A"].map(key => task({ key, perform() {
+    import { createWorkflowCheckpointStore, defineTask, defineWorkflow, createLocalTransport } from ${JSON.stringify(new URL("../../src/index.ts", import.meta.url).href)};
+    const tasks = ["a", "A"].map(key => defineTask({ key, perform() {
       if (process.env.OUTPOST_TEST_RESUME === "1") throw new Error("Completed task replayed");
       return key;
     } }));
-    const result = await workflow("portable", tasks).start({ checkpoint: {
-      store: workflowCheckpointStore({ transporter: localTransport({ directory: process.env.OUTPOST_TEST_CHECKPOINT }) }), runId: "portable", version: "v1"
+    const result = await defineWorkflow("portable", tasks).start({ checkpoint: {
+      store: createWorkflowCheckpointStore({ transporter: createLocalTransport({ directory: process.env.OUTPOST_TEST_CHECKPOINT }) }), runId: "portable", version: "v1"
     } });
     result.unwrap();
     console.log(result.value(tasks[0]));
@@ -523,21 +529,21 @@ test("workflow timeout checkpoints completed values and renews its deadline on e
   const { setTimeout: delay } = await import("node:timers/promises");
   const directory = await temporary(t);
   const checkpoint = {
-    store: workflowCheckpointStore({
-      transporter: localTransport({ directory }),
+    store: createWorkflowCheckpointStore({
+      transporter: createLocalTransport({ directory }),
     }),
     runId: "timeout",
     version: "1",
   };
   let sourceCalls = 0;
-  const source = task({
+  const source = defineTask({
     key: "source",
     perform() {
       sourceCalls++;
       return 7;
     },
   });
-  const target = task({
+  const target = defineTask({
     key: "target",
     after: [source],
     async perform({ signal, attempt, value }) {
@@ -551,7 +557,7 @@ test("workflow timeout checkpoints completed values and renews its deadline on e
       return value(source) + attempt;
     },
   });
-  const graph = workflow("deadline", [source, target]);
+  const graph = defineWorkflow("deadline", [source, target]);
   const first = await graph.start({ checkpoint, timeoutMs: 200 });
   assert.equal(first.status, "failed");
   assert.equal(first.value(source), 7);
@@ -573,14 +579,16 @@ test("workflow timeout checkpoints completed values and renews its deadline on e
 test("checkpoint identity includes retry backoff, jitter and cap", async (t) => {
   const directory = await temporary(t);
   const checkpoint = {
-    store: workflowCheckpointStore({
-      transporter: localTransport({ directory }),
+    store: createWorkflowCheckpointStore({
+      transporter: createLocalTransport({ directory }),
     }),
     runId: "retry-policy",
     version: "1",
   };
   const definition = (retry: Retry) =>
-    workflow("retry", [task({ key: "task", retry, perform: () => 1 })]);
+    defineWorkflow("retry", [
+      defineTask({ key: "task", retry, perform: () => 1 }),
+    ]);
   await definition({ attempts: 2 }).start({ checkpoint });
   for (const retry of [
     { attempts: 2, backoff: "exponential" as const },

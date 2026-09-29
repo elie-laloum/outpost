@@ -1,20 +1,21 @@
-import { localTransport, readJournal } from "../../src/index.ts";
-import { agent as composeAgent } from "../../src/domain/agent.ts";
+import { createLocalTransport, readJournal } from "../../src/index.ts";
+import { createAgent as composeAgent } from "../../src/domain/agent.ts";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import {
-  claudeHarness,
-  codexHarness,
+  createClaudeHarness,
+  createCodexHarness,
   conversations,
   dispatch,
   attach,
   createSandbox,
-  response,
+  defineJsonResponse,
+  defineTextResponse,
 } from "../../src/index.ts";
 import type { AgentObservation, ConversationStore } from "../../src/index.ts";
-import { localSandboxProvider } from "../../src/providers/local.ts";
+import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import {
   parseEnvironment,
   resolveVariables,
@@ -36,7 +37,7 @@ test("final Claude results are authoritative without duplicating streamed text",
       { type: "result", result: "answer", is_error: false },
     ];
     const native = composeAgent({
-      harness: claudeHarness({ saveConversations: false }),
+      harness: createClaudeHarness({ saveConversations: false }),
     });
     const agent = {
       ...native,
@@ -50,7 +51,7 @@ test("final Claude results are authoritative without duplicating streamed text",
     };
     const result = await dispatch({
       repository: root,
-      sandboxProvider: localSandboxProvider(),
+      sandboxProvider: createLocalSandboxProvider(),
       agent,
       brief: { text: "test" },
       logging: false,
@@ -80,7 +81,7 @@ test("raw lines and normalized events retain pass and timestamp without losing f
   };
   const result = await dispatch({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent,
     brief: { text: "test" },
     logging: false,
@@ -119,7 +120,7 @@ test("project environment is an allowlist with file precedence and empty-value i
 });
 
 test("JSON responses accept Markdown fences while preserving JSON string escapes", async () => {
-  const spec = response.json({ tag: "payload", schema: (value) => value });
+  const spec = defineJsonResponse({ tag: "payload", schema: (value) => value });
   for (const language of ["json", ""]) {
     const expected = { code: "```", path: "a\\nb" };
     assert.deepEqual(
@@ -177,7 +178,9 @@ test("Claude transcript usage retains four independent counters from the last as
       .map((item) => JSON.stringify(item))
       .join("\n") + "\ninvalid";
   assert.deepEqual(
-    composeAgent({ harness: claudeHarness({}) }).transcriptUsage?.(content),
+    composeAgent({ harness: createClaudeHarness({}) }).transcriptUsage?.(
+      content,
+    ),
     {
       input: 2,
       cacheCreated: 3,
@@ -186,11 +189,13 @@ test("Claude transcript usage retains four independent counters from the last as
     },
   );
   assert.equal(
-    composeAgent({ harness: claudeHarness({}) }).transcriptUsage?.("invalid"),
+    composeAgent({ harness: createClaudeHarness({}) }).transcriptUsage?.(
+      "invalid",
+    ),
     undefined,
   );
   assert.equal(
-    composeAgent({ harness: codexHarness({}) }).events(
+    composeAgent({ harness: createCodexHarness({}) }).events(
       JSON.stringify({ type: "error", error: "native failure" }),
     )[0]?.kind,
     "failure",
@@ -200,7 +205,7 @@ test("Claude transcript usage retains four independent counters from the last as
 test("already cancelled operations preserve the exact reason without touching a repository", async () => {
   let acquired = 0;
   const sandboxProvider = {
-    ...localSandboxProvider(),
+    ...createLocalSandboxProvider(),
     acquire: async () => {
       acquired++;
       throw new Error("unreachable");
@@ -234,7 +239,7 @@ test("structured output preflight rejects missing tags and unsupported repairs b
   const root = await repository(t);
   let acquired = 0;
   const sandboxProvider = {
-    ...localSandboxProvider(),
+    ...createLocalSandboxProvider(),
     acquire: async () => {
       acquired++;
       throw new Error("unreachable");
@@ -247,7 +252,7 @@ test("structured output preflight rejects missing tags and unsupported repairs b
       sandboxProvider,
       agent,
       brief: { text: "no tag" },
-      response: response.text({ tag: "answer" }),
+      response: defineTextResponse({ tag: "answer" }),
     }),
     /opening/,
   );
@@ -257,7 +262,7 @@ test("structured output preflight rejects missing tags and unsupported repairs b
       sandboxProvider,
       agent,
       brief: { text: "<answer>" },
-      response: response.text({ tag: "answer", repairs: 1 }),
+      response: defineTextResponse({ tag: "answer", repairs: 1 }),
     }),
     /continuation/,
   );
@@ -266,12 +271,14 @@ test("structured output preflight rejects missing tags and unsupported repairs b
 
 test("journals retain independent complete runs and recognized raw output when verbose", async (t) => {
   const root = await repository(t);
-  const transporter = localTransport({ directory: join(root, "journals") });
+  const transporter = createLocalTransport({
+    directory: join(root, "journals"),
+  });
   const records: unknown[] = [];
   for (let run = 0; run < 2; run++) {
     const result = await dispatch({
       repository: root,
-      sandboxProvider: localSandboxProvider(),
+      sandboxProvider: createLocalSandboxProvider(),
       agent: scripted(emit("ok")),
       brief: { text: "go" },
       logging: { transporter, verbose: true },
@@ -298,7 +305,7 @@ test("the default completion marker stops later passes without an explicit until
   const root = await repository(t);
   const result = await dispatch({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent: scripted(emit("<outpost>done</outpost>")),
     brief: { text: "go" },
     passes: 3,
@@ -335,7 +342,7 @@ test("custom conversation storage supports cold continuation and per-turn transc
   };
   const result = await dispatch({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent,
     brief: { text: "go" },
     logging: false,

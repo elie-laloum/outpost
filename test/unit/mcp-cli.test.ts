@@ -1,13 +1,13 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { agent } from "../../src/domain/agent.ts";
+import { createAgent } from "../../src/domain/agent.ts";
 import type { CliHarness } from "../../src/domain/agent.types.ts";
 import {
-  antigravityHarness,
-  claudeHarness,
-  codexHarness,
-  copilotHarness,
-  kimiHarness,
+  createAntigravityHarness,
+  createClaudeHarness,
+  createCodexHarness,
+  createCopilotHarness,
+  createKimiHarness,
 } from "../../src/index.ts";
 import type { McpServers } from "../../src/index.ts";
 
@@ -30,7 +30,7 @@ const variables = {
 };
 
 function compose(harness: (settings: object) => CliHarness) {
-  return agent({ harness: harness({ mcpServers: servers }) });
+  return createAgent({ harness: harness({ mcpServers: servers }) });
 }
 
 function assertNoSecrets(value: unknown) {
@@ -39,7 +39,7 @@ function assertNoSecrets(value: unknown) {
 }
 
 test("Claude and Copilot receive inline MCP configuration with variable references", () => {
-  const claude = compose(claudeHarness).request({ text: "go" });
+  const claude = compose(createClaudeHarness).request({ text: "go" });
   const inline = claude.arguments!.find((entry) =>
     entry.startsWith("--mcp-config="),
   )!;
@@ -58,7 +58,7 @@ test("Claude and Copilot receive inline MCP configuration with variable referenc
       },
     },
   });
-  const copilot = compose(copilotHarness).request({ text: "go" });
+  const copilot = compose(createCopilotHarness).request({ text: "go" });
   const index = copilot.arguments!.indexOf("--additional-mcp-config");
   assert.deepEqual(JSON.parse(copilot.arguments![index + 1]!), {
     mcpServers: {
@@ -77,13 +77,15 @@ test("Claude and Copilot receive inline MCP configuration with variable referenc
       },
     },
   });
-  const interactive = compose(copilotHarness).request({ interactive: true });
+  const interactive = compose(createCopilotHarness).request({
+    interactive: true,
+  });
   assert.ok(interactive.arguments!.includes("--additional-mcp-config"));
   for (const command of [claude, copilot]) assertNoSecrets(command);
 });
 
 test("Codex receives MCP servers as TOML configuration overrides", () => {
-  const command = compose(codexHarness).request({ text: "go" });
+  const command = compose(createCodexHarness).request({ text: "go" });
   const overrides = command.arguments!.filter(
     (_entry, index, all) => all[index - 1] === "-c",
   );
@@ -100,14 +102,19 @@ test("Codex receives MCP servers as TOML configuration overrides", () => {
     command.arguments!.indexOf("exec") > command.arguments!.lastIndexOf("-c"),
   );
   assertNoSecrets(command);
-  const live = compose(codexHarness).request({ text: "go", liveInput: true });
+  const live = compose(createCodexHarness).request({
+    text: "go",
+    liveInput: true,
+  });
   assert.equal(live.arguments!.at(-1), "app-server");
   assert.deepEqual(
     live.arguments!.filter((_entry, index, all) => all[index - 1] === "-c"),
     overrides,
   );
-  const plain = agent({
-    harness: codexHarness({ mcpServers: { bare: { command: "server" } } }),
+  const plain = createAgent({
+    harness: createCodexHarness({
+      mcpServers: { bare: { command: "server" } },
+    }),
   }).request({ text: "go" });
   assert.deepEqual(plain.arguments!.slice(0, 4), [
     "-c",
@@ -118,7 +125,7 @@ test("Codex receives MCP servers as TOML configuration overrides", () => {
 });
 
 test("Kimi and Antigravity plan home configuration files with the same servers", () => {
-  const kimi = compose(kimiHarness).configuration!(variables);
+  const kimi = compose(createKimiHarness).configuration!(variables);
   assert.deepEqual(kimi.files, [
     {
       path: ".kimi-code/mcp.json",
@@ -137,7 +144,9 @@ test("Kimi and Antigravity plan home configuration files with the same servers",
       },
     },
   ]);
-  const antigravity = compose(antigravityHarness).configuration!(variables);
+  const antigravity = compose(createAntigravityHarness).configuration!(
+    variables,
+  );
   assert.deepEqual(antigravity.files, [
     {
       path: ".gemini/config/mcp_config.json",
@@ -161,7 +170,7 @@ test("Kimi and Antigravity plan home configuration files with the same servers",
     },
   ]);
   for (const plan of [kimi, antigravity]) assertNoSecrets(plan);
-  for (const harness of [kimiHarness, antigravityHarness]) {
+  for (const harness of [createKimiHarness, createAntigravityHarness]) {
     const request = compose(harness).request({ text: "go" });
     assert.ok(!JSON.stringify(request).includes("mcp"));
   }
@@ -169,25 +178,30 @@ test("Kimi and Antigravity plan home configuration files with the same servers",
 
 test("every CLI requires the variables its MCP servers reference", () => {
   const harnesses = [
-    claudeHarness,
-    codexHarness,
-    copilotHarness,
-    kimiHarness,
-    antigravityHarness,
+    createClaudeHarness,
+    createCodexHarness,
+    createCopilotHarness,
+    createKimiHarness,
+    createAntigravityHarness,
   ] as const;
   for (const harness of harnesses) {
     const configured = compose(harness);
     assert.equal(
       configured.configuration!(variables).files.length,
-      harness === kimiHarness || harness === antigravityHarness ? 1 : 0,
+      harness === createKimiHarness || harness === createAntigravityHarness
+        ? 1
+        : 0,
     );
     assert.throws(() => configured.configuration!({ LINEAR_API_KEY: "x" }), {
       code: "configuration",
       message: /Missing DOCS_TOKEN/,
     });
-    assert.equal(agent({ harness: harness({}) }).configuration, undefined);
     assert.equal(
-      agent({ harness: harness({ mcpServers: {} }) }).configuration,
+      createAgent({ harness: harness({}) }).configuration,
+      undefined,
+    );
+    assert.equal(
+      createAgent({ harness: harness({ mcpServers: {} }) }).configuration,
       undefined,
     );
     assert.throws(
@@ -196,14 +210,14 @@ test("every CLI requires the variables its MCP servers reference", () => {
     );
     assert.ok(
       !JSON.stringify(
-        agent({ harness: harness({}) }).request({ text: "go" }),
+        createAgent({ harness: harness({}) }).request({ text: "go" }),
       ).includes("mcp"),
     );
   }
 });
 
 test("Codex reports MCP tool calls with server-qualified names", () => {
-  const codex = agent({ harness: codexHarness() });
+  const codex = createAgent({ harness: createCodexHarness() });
   const started = codex.events(
     JSON.stringify({
       type: "item.started",

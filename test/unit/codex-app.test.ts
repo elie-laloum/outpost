@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { agent, codexHarness } from "../../src/index.ts";
+import { createAgent, createCodexHarness } from "../../src/index.ts";
 import {
   codexAppInitialize,
   codexAppSession,
@@ -120,7 +120,7 @@ test("Codex app-server sessions restart rejected steering as a new turn and refu
 });
 
 test("Codex decodes app-server notifications and keeps exec events", () => {
-  const codex = agent({ harness: codexHarness() });
+  const codex = createAgent({ harness: createCodexHarness() });
   assert.ok(codex.kind === "cli" && codex.liveInput);
   assert.deepEqual(codex.request({ text: "Work", liveInput: true }), {
     executable: "codex",

@@ -66,7 +66,9 @@ function bindCopilot(settings: Bound<CopilotSettings>): AgentAdapter {
   } satisfies AgentAdapter);
 }
 
-export function copilotHarness(settings: CopilotSettings = {}): CliHarness {
+export function createCopilotHarness(
+  settings: CopilotSettings = {},
+): CliHarness {
   harnessSettings(settings);
   conversationSettings("GitHub Copilot CLI", "copilot", settings);
   const configured = configuredSettings(settings);

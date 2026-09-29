@@ -1,11 +1,11 @@
-export { agent } from "./domain/agent.ts";
+export { createAgent } from "./domain/agent.ts";
 export { defineHarnessSubagent } from "./domain/subagent.ts";
 export type {
   HarnessSubagent,
   HarnessSubagentInput,
   HarnessSubagentOptions,
 } from "./domain/subagent.types.ts";
-export { harness } from "./domain/harness.ts";
+export { createHarness } from "./domain/harness.ts";
 export {
   defineHarnessContextStrategy,
   summarizeHistory,
@@ -47,11 +47,11 @@ export type {
   ToolResources,
 } from "./domain/permissions.types.ts";
 export { defineHarnessTool, defineHarnessToolset } from "./domain/tool.ts";
-export { harnessEditTools } from "./adapters/tools/edit-tools.ts";
-export { harnessFileTools } from "./adapters/tools/file-tools.ts";
-export { harnessGitTools } from "./adapters/tools/git-tools.ts";
-export { harnessSearchTools } from "./adapters/tools/search-tools.ts";
-export { harnessShellTools } from "./adapters/tools/shell-tools.ts";
+export { createHarnessEditTools } from "./adapters/tools/edit-tools.ts";
+export { createHarnessFileTools } from "./adapters/tools/file-tools.ts";
+export { createHarnessGitTools } from "./adapters/tools/git-tools.ts";
+export { createHarnessSearchTools } from "./adapters/tools/search-tools.ts";
+export { createHarnessShellTools } from "./adapters/tools/shell-tools.ts";
 export type { ShellToolsOptions } from "./adapters/tools/tools.types.ts";
 export type {
   AccountCredential,
@@ -102,21 +102,21 @@ export type {
   TransportReference,
   TransportStoreOptions,
 } from "./domain/transport.types.ts";
-export { localTransport } from "./infrastructure/local-transport.ts";
+export { createLocalTransport } from "./infrastructure/local-transport.ts";
 export type { LocalTransportOptions } from "./infrastructure/local-transport.types.ts";
-export { artifactStore } from "./infrastructure/transport-artifact-store.ts";
+export { createArtifactStore } from "./infrastructure/transport-artifact-store.ts";
 export type { ArtifactStoreOptions } from "./infrastructure/transport-artifact-store.types.ts";
 export {
-  workflowCheckpointStore,
+  createWorkflowCheckpointStore,
   recoverWorkflowCheckpoint,
 } from "./infrastructure/transport-checkpoint.ts";
 export type { CheckpointRecoveryOptions } from "./infrastructure/transport-checkpoint.types.ts";
-export { taskCacheStore } from "./infrastructure/transport-task-cache.ts";
+export { createTaskCacheStore } from "./infrastructure/transport-task-cache.ts";
 export { repositoryFingerprint } from "./application/repository-fingerprint.ts";
 export type { TaskCacheStoreOptions } from "./infrastructure/transport-task-cache.types.ts";
 export { readJournal } from "./infrastructure/transport-journal.ts";
 export type { ReadJournalOptions } from "./infrastructure/transport-journal.types.ts";
-export { replayAgent, ReplayDivergence } from "./domain/replay.ts";
+export { createReplayAgent, ReplayDivergence } from "./domain/replay.ts";
 export type {
   RecordedCommit,
   RecordedIdentity,
@@ -130,7 +130,7 @@ export type {
   ReplayTurn,
   WorkspaceCommitsEvent,
 } from "./domain/replay.types.ts";
-export { transportConversations } from "./infrastructure/transport-conversations.ts";
+export { createTransportConversations } from "./infrastructure/transport-conversations.ts";
 export type { TransportConversationOptions } from "./infrastructure/transport-conversations.types.ts";
 export {
   archiveRecovery,
@@ -170,8 +170,8 @@ export {
   WorkflowFailure,
   WorkflowBudgetExceeded,
   WorkflowUsageUnavailable,
-  task,
-  workflow,
+  defineTask,
+  defineWorkflow,
 } from "./domain/workflow.ts";
 
 export type {
@@ -190,22 +190,26 @@ export type {
   WorkflowTelemetry,
 } from "./domain/workflow.ts";
 
-export { agentTask, commandTask, isolatedTask } from "./application/tasks.ts";
+export {
+  defineAgentTask,
+  defineCommandTask,
+  defineIsolatedTask,
+} from "./application/tasks.ts";
 export type { QuotaResumePolicy } from "./application/quota-resume.types.ts";
 
 export {
-  antigravityHarness,
-  claudeHarness,
-  codexHarness,
-  copilotHarness,
-  kimiHarness,
+  createAntigravityHarness,
+  createClaudeHarness,
+  createCodexHarness,
+  createCopilotHarness,
+  createKimiHarness,
 } from "./providers/agents.ts";
 
 export { agentVersions } from "./providers/versions.ts";
 
 export {
   conversations,
-  harnessConversations,
+  createHarnessConversations,
 } from "./infrastructure/conversations.ts";
 
 export type {
@@ -224,11 +228,15 @@ export type {
 } from "./providers/agents.ts";
 
 export {
-  mountedSandboxProvider,
-  remoteSandboxProvider,
+  createMountedSandboxProvider,
+  createRemoteSandboxProvider,
 } from "./providers/factories.ts";
 
-export { ResponseError, response } from "./domain/response.ts";
+export {
+  ResponseError,
+  defineJsonResponse,
+  defineTextResponse,
+} from "./domain/response.ts";
 
 export type { ResponseSpec, StandardValidator } from "./domain/response.ts";
 
@@ -239,7 +247,7 @@ export type { FaultCode } from "./domain/errors.ts";
 export { quotaFault } from "./domain/quota.ts";
 export type { QuotaFault } from "./domain/quota.types.ts";
 export { unavailableFault } from "./domain/unavailable.ts";
-export { fallbackAgent } from "./domain/fallback-agent.ts";
+export { createFallbackAgent } from "./domain/fallback-agent.ts";
 export type {
   DispatchAgent,
   FallbackAgent,
@@ -295,7 +303,7 @@ export type { Brief, PromptVariables } from "./domain/prompts.ts";
 
 export type { Logging } from "./infrastructure/journal.ts";
 
-export { createReporter } from "./infrastructure/custom-reporter.ts";
+export { createCustomReporter } from "./infrastructure/custom-reporter.ts";
 export type {
   CustomReporter,
   CustomReporterOptions,
@@ -306,7 +314,7 @@ export type {
   DispatchTelemetrySession,
   DispatchTelemetryOutcome,
 } from "./domain/dispatch-telemetry.types.ts";
-export { reporter } from "./infrastructure/reporter.ts";
+export { createReporter } from "./infrastructure/reporter.ts";
 
 export type { ReporterOptions } from "./infrastructure/reporter.ts";
 
@@ -371,7 +379,10 @@ export type {
   WorkflowJson,
 } from "./domain/workflow/checkpoint.types.ts";
 
-export { approvalTask, pauseTask } from "./domain/workflow/gates.ts";
+export {
+  defineApprovalTask,
+  definePauseTask,
+} from "./domain/workflow/gates.ts";
 export type {
   WorkflowGate,
   WorkflowGateOptions,
@@ -403,11 +414,15 @@ export type {
 } from "./infrastructure/resource-activity.types.ts";
 
 export {
-  artifact,
+  defineBinaryArtifact,
+  defineJsonArtifact,
   publishArtifact,
   readStoredArtifact,
 } from "./domain/artifact.ts";
-export { artifactTask, readArtifact } from "./application/artifact-tasks.ts";
+export {
+  defineArtifactTask,
+  readArtifact,
+} from "./application/artifact-tasks.ts";
 export type {
   ArtifactContract,
   ArtifactContractOptions,
@@ -421,13 +436,13 @@ export type {
 } from "./domain/artifact.types.ts";
 export type { ArtifactTaskOptions } from "./application/artifact-tasks.types.ts";
 
-export { sqliteTaskQueue } from "./infrastructure/task-queue.ts";
+export { createSqliteTaskQueue } from "./infrastructure/task-queue.ts";
 export {
   serveTaskQueue,
-  httpTaskQueue,
+  createHttpTaskQueue,
 } from "./infrastructure/task-queue-http.ts";
 export { runQueueWorker } from "./application/queue-worker.ts";
-export { queuedTask } from "./application/queued-task.ts";
+export { defineQueuedTask } from "./application/queued-task.ts";
 export type {
   QueueRequest,
   QueueResult,
@@ -520,7 +535,7 @@ export type {
   SpeculativeValidation,
 } from "./application/speculation.types.ts";
 
-export { openaiModelProvider } from "./adapters/models/openai-model-provider.ts";
+export { createOpenAIModelProvider } from "./adapters/models/openai-model-provider.ts";
 export type { OpenAIModelProviderOptions } from "./adapters/models/openai-model-provider.types.ts";
 export type {
   AgentModel,
@@ -539,7 +554,7 @@ export type {
   ModelToolResultBlock,
   ModelToolSpec,
 } from "./domain/model.types.ts";
-export { anthropicModelProvider } from "./adapters/models/anthropic-model-provider.ts";
+export { createAnthropicModelProvider } from "./adapters/models/anthropic-model-provider.ts";
 export type { AnthropicModelProviderOptions } from "./adapters/models/anthropic-model-provider.types.ts";
 
 export { createObservationHub } from "./domain/observation.ts";
@@ -556,7 +571,7 @@ export type {
 
 export {
   signWorkflowDecision,
-  ed25519DecisionVerifier,
+  createEd25519DecisionVerifier,
 } from "./infrastructure/workflow-decision-signature.ts";
 export type {
   WorkflowDecisionSigningOptions,
@@ -564,7 +579,7 @@ export type {
   WorkflowDecisionVerifierOptions,
 } from "./infrastructure/workflow-decision-signature.types.ts";
 
-export { interactiveAgentTask } from "./application/interactive-task.ts";
+export { defineInteractiveAgentTask } from "./application/interactive-task.ts";
 export type {
   InteractiveAgentTaskOptions,
   InteractiveAgentResult,
@@ -578,7 +593,10 @@ export type {
   TaskInteractionRecord,
   TaskInteractionContext,
 } from "./domain/workflow/input.types.ts";
-export { loopTask, LoopTaskExhausted } from "./domain/workflow/loop-task.ts";
+export {
+  defineLoopTask,
+  LoopTaskExhausted,
+} from "./domain/workflow/loop-task.ts";
 export type {
   TaskCacheAccessOptions,
   TaskCacheEntry,
@@ -593,3 +611,47 @@ export type {
   LoopTaskOptions,
   LoopRoundRecord,
 } from "./domain/workflow/loop-task.types.ts";
+
+export {
+  agent,
+  agentTask,
+  antigravityHarness,
+  anthropicModelProvider,
+  approvalTask,
+  artifact,
+  artifactStore,
+  artifactTask,
+  claudeHarness,
+  codexHarness,
+  commandTask,
+  copilotHarness,
+  ed25519DecisionVerifier,
+  fallbackAgent,
+  harness,
+  harnessConversations,
+  harnessEditTools,
+  harnessFileTools,
+  harnessGitTools,
+  harnessSearchTools,
+  harnessShellTools,
+  httpTaskQueue,
+  interactiveAgentTask,
+  isolatedTask,
+  kimiHarness,
+  localTransport,
+  loopTask,
+  mountedSandboxProvider,
+  openaiModelProvider,
+  pauseTask,
+  queuedTask,
+  remoteSandboxProvider,
+  replayAgent,
+  reporter,
+  response,
+  sqliteTaskQueue,
+  task,
+  taskCacheStore,
+  transportConversations,
+  workflow,
+  workflowCheckpointStore,
+} from "./deprecated.ts";

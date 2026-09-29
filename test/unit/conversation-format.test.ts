@@ -1,16 +1,16 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
-  agent,
-  antigravityHarness,
-  claudeHarness,
-  codexHarness,
-  copilotHarness,
-  harness,
-  harnessConversations,
-  kimiHarness,
-  localTransport,
-  transportConversations,
+  createAgent,
+  createAntigravityHarness,
+  createClaudeHarness,
+  createCodexHarness,
+  createCopilotHarness,
+  createHarness,
+  createHarnessConversations,
+  createKimiHarness,
+  createLocalTransport,
+  createTransportConversations,
   type ConversationStore,
   type ModelProvider,
 } from "../../src/index.ts";
@@ -31,17 +31,18 @@ const custom = (format?: unknown): ConversationStore =>
   }) as unknown as ConversationStore;
 
 test("built-in conversation stores declare their format", () => {
-  const transporter = localTransport({ directory: "unused" });
+  const transporter = createLocalTransport({ directory: "unused" });
   for (const format of ["claude", "codex", "copilot", "kimi"] as const) {
     assert.equal(nativeConversations(format).format, format);
     assert.equal(
-      transportConversations(format, { transporter, namespace: "team" }).format,
+      createTransportConversations(format, { transporter, namespace: "team" })
+        .format,
       format,
     );
   }
-  assert.equal(harnessConversations().format, "harness");
+  assert.equal(createHarnessConversations().format, "harness");
   assert.equal(
-    transportConversations("harness", { transporter, namespace: "team" })
+    createTransportConversations("harness", { transporter, namespace: "team" })
       .format,
     "harness",
   );
@@ -57,12 +58,12 @@ test("conversation store validation checks the store shape and format type", () 
 });
 
 test("harness conversations must use the harness format when declared", () => {
-  const transporter = localTransport({ directory: "unused" });
+  const transporter = createLocalTransport({ directory: "unused" });
   assert.throws(
     () =>
-      harness({
+      createHarness({
         modelProvider,
-        conversations: transportConversations("claude", {
+        conversations: createTransportConversations("claude", {
           transporter,
           namespace: "team",
         }),
@@ -70,53 +71,55 @@ test("harness conversations must use the harness format when declared", () => {
     /Harness conversations must use the "harness" format, not "claude"/,
   );
   assert.throws(
-    () => harness({ modelProvider, conversations: custom(1) }),
+    () => createHarness({ modelProvider, conversations: custom(1) }),
     /conversation store or false/,
   );
   const store = custom();
   assert.equal(
-    harness({ modelProvider, conversations: store }).conversations,
+    createHarness({ modelProvider, conversations: store }).conversations,
     store,
   );
   assert.ok(
-    harness({ modelProvider, conversations: harnessConversations() })
-      .conversations,
+    createHarness({
+      modelProvider,
+      conversations: createHarnessConversations(),
+    }).conversations,
   );
   assert.equal(
-    harness({ modelProvider, conversations: false }).conversations,
+    createHarness({ modelProvider, conversations: false }).conversations,
     false,
   );
 });
 
 const presets = {
-  claude: ["Claude Code", claudeHarness],
-  codex: ["Codex", codexHarness],
-  copilot: ["GitHub Copilot CLI", copilotHarness],
-  kimi: ["Kimi Code", kimiHarness],
+  claude: ["Claude Code", createClaudeHarness],
+  codex: ["Codex", createCodexHarness],
+  copilot: ["GitHub Copilot CLI", createCopilotHarness],
+  kimi: ["Kimi Code", createKimiHarness],
 } as const;
 
 for (const [format, [label, preset]] of Object.entries(presets)) {
   test(`${label} stores conversations only in a compatible store`, () => {
-    const transporter = localTransport({ directory: "unused" });
-    const conversations = transportConversations(format as "kimi", {
+    const transporter = createLocalTransport({ directory: "unused" });
+    const conversations = createTransportConversations(format as "kimi", {
       transporter,
       namespace: "team",
     });
     assert.equal(
-      agent({ harness: preset({ conversations }) }).storage,
+      createAgent({ harness: preset({ conversations }) }).storage,
       conversations,
     );
-    assert.equal(agent({ harness: preset() }).storage, undefined);
+    assert.equal(createAgent({ harness: preset() }).storage, undefined);
     const store = custom();
     assert.equal(
-      agent({ harness: preset({ conversations: store }) }).storage,
+      createAgent({ harness: preset({ conversations: store }) }).storage,
       store,
     );
     const other = format === "claude" ? "codex" : "claude";
     assert.throws(
       () =>
         preset({
-          conversations: transportConversations(other, {
+          conversations: createTransportConversations(other, {
             transporter,
             namespace: "team",
           }),
@@ -145,7 +148,8 @@ test("Claude and Codex reject stored conversations when capture is disabled", ()
       ),
     );
   assert.equal(
-    agent({ harness: claudeHarness({ saveConversations: false }) }).capture,
+    createAgent({ harness: createClaudeHarness({ saveConversations: false }) })
+      .capture,
     false,
   );
 });
@@ -153,14 +157,14 @@ test("Claude and Codex reject stored conversations when capture is disabled", ()
 test("Antigravity rejects conversation stores", () => {
   assert.throws(
     () =>
-      antigravityHarness({
-        conversations: harnessConversations(),
+      createAntigravityHarness({
+        conversations: createHarnessConversations(),
       } as never),
     /Antigravity has no portable conversation capture; conversations cannot be stored/,
   );
   assert.equal(
-    agent({
-      harness: antigravityHarness({ conversations: undefined } as never),
+    createAgent({
+      harness: createAntigravityHarness({ conversations: undefined } as never),
     }).storage,
     undefined,
   );

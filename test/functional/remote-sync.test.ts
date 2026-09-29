@@ -4,7 +4,7 @@ import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { openWorkspace } from "../../src/index.ts";
 import { seedRemote } from "../../src/application/remote-workspace.ts";
-import { localSandboxProvider } from "../../src/providers/local.ts";
+import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { git } from "../../src/infrastructure/git.ts";
 import { inside } from "../../src/infrastructure/files.ts";
 import { repository } from "../helpers.ts";
@@ -18,7 +18,7 @@ test("remote synchronization preserves commit identity and handles repeated dirt
   t.after(() => workspace.close({ preserve: true }));
   const remote = join(root, ".outpost", "recovery", "remote");
   await mkdir(remote, { recursive: true });
-  const lease = await localSandboxProvider().acquire({
+  const lease = await createLocalSandboxProvider().acquire({
     repository: remote,
     directory: remote,
     gitDirectories: [],
@@ -84,7 +84,7 @@ test("remote seeds only commits, preserves unrelated staged and untracked files,
   t.after(() => workspace.close({ preserve: true }));
   const remote = join(root, ".outpost", "recovery", "committed-remote");
   await mkdir(remote, { recursive: true });
-  const lease = await localSandboxProvider().acquire({
+  const lease = await createLocalSandboxProvider().acquire({
     repository: remote,
     directory: remote,
     gitDirectories: [],
@@ -140,7 +140,7 @@ test("remote synchronization keeps transfer files inside the sandbox root", asyn
   t.after(() => workspace.close({ preserve: true }));
   const remote = join(root, ".outpost", "recovery", "remote");
   await mkdir(remote, { recursive: true });
-  const local = await localSandboxProvider().acquire({
+  const local = await createLocalSandboxProvider().acquire({
     repository: remote,
     directory: remote,
     gitDirectories: [],

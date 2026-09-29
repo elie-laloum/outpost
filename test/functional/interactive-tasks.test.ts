@@ -3,18 +3,18 @@ import { test } from "node:test";
 import { readFile, writeFile, stat } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import {
-  agent,
-  harness,
-  interactiveAgentTask,
-  localTransport,
-  workflowCheckpointStore,
-  workflow,
-  task,
-  antigravityHarness,
-  codexHarness,
-  claudeHarness,
-  copilotHarness,
-  kimiHarness,
+  createAgent,
+  createHarness,
+  defineInteractiveAgentTask,
+  createLocalTransport,
+  createWorkflowCheckpointStore,
+  defineWorkflow,
+  defineTask,
+  createAntigravityHarness,
+  createCodexHarness,
+  createClaudeHarness,
+  createCopilotHarness,
+  createKimiHarness,
 } from "../../src/index.ts";
 import type {
   WorkflowResult,
@@ -23,13 +23,13 @@ import type {
   ModelProvider,
   WorkflowCheckpointStore,
 } from "../../src/index.ts";
-import { localSandboxProvider } from "../../src/providers/local.ts";
+import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { executeProcess } from "../../src/infrastructure/process.ts";
 import { repository, scripted } from "../helpers.ts";
 
 const checkpointFor = (directory: string) => ({
-  store: workflowCheckpointStore({
-    transporter: localTransport({
+  store: createWorkflowCheckpointStore({
+    transporter: createLocalTransport({
       directory: join(directory, ".outpost", "storage"),
     }),
   }),
@@ -107,8 +107,8 @@ test("input pauses drain independent tasks, preserve values and block dependent 
   let setups = 0,
     deliveries = 0;
   const build = () => {
-    const source = task({ key: "source", perform: () => ++setups });
-    const ask = task({
+    const source = defineTask({ key: "source", perform: () => ++setups });
+    const ask = defineTask({
       ...definition,
       after: [source],
       perform(context) {
@@ -119,7 +119,7 @@ test("input pauses drain independent tasks, preserve values and block dependent 
         return context.interaction!.answer!.value;
       },
     });
-    const deliver = task({
+    const deliver = defineTask({
       key: "deliver",
       after: [ask],
       perform(context) {
@@ -127,9 +127,9 @@ test("input pauses drain independent tasks, preserve values and block dependent 
         return context.value(ask);
       },
     });
-    const independent = task({ key: "independent", perform: () => true });
+    const independent = defineTask({ key: "independent", perform: () => true });
     return {
-      graph: workflow("input", [source, ask, deliver, independent]),
+      graph: defineWorkflow("input", [source, ask, deliver, independent]),
       deliver,
     };
   };
@@ -158,13 +158,13 @@ test("input pauses drain independent tasks, preserve values and block dependent 
 
 test("answers reject wrong execution, actor, choices, stale IDs and duplicates without consuming input", async (t) => {
   const checkpoint = checkpointFor(await repository(t));
-  const item = task({
+  const item = defineTask({
     ...definition,
     perform(context) {
       return context.interaction!.suspend(question, {});
     },
   });
-  const graph = workflow("input", [item]);
+  const graph = defineWorkflow("input", [item]);
   const initial = await graph.start({ checkpoint });
   for (const changes of [
     { executionId: "other" },
@@ -195,13 +195,13 @@ test("answers reject wrong execution, actor, choices, stale IDs and duplicates w
   );
   await assert.rejects(graph.start({ checkpoint, answers: [] }), /empty/);
   await assert.rejects(graph.start(), /checkpoint/);
-  const changed = task({
+  const changed = defineTask({
     ...definition,
     interaction: { identity: "v1", actors: ["other"] },
     perform: () => null,
   });
   await assert.rejects(
-    workflow("input", [changed]).start({ checkpoint }),
+    defineWorkflow("input", [changed]).start({ checkpoint }),
     /incompatible/,
   );
 });
@@ -209,7 +209,7 @@ test("answers reject wrong execution, actor, choices, stale IDs and duplicates w
 test("accepted answers persist before execution and interrupted turns require explicit replay", async (t) => {
   const checkpoint = checkpointFor(await repository(t));
   let fail = true;
-  const item = task({
+  const item = defineTask({
     ...definition,
     perform(context) {
       const interaction = context.interaction!;
@@ -220,7 +220,7 @@ test("accepted answers persist before execution and interrupted turns require ex
       return "completed";
     },
   });
-  const graph = workflow("input", [item]);
+  const graph = defineWorkflow("input", [item]);
   const first = await graph.start({ checkpoint });
   const failure = await graph.start({
     checkpoint,
@@ -239,7 +239,7 @@ test("accepted answers persist before execution and interrupted turns require ex
 test("interaction state is immutable and invalid checkpoints are rejected", async (t) => {
   const checkpoint = checkpointFor(await repository(t));
   let retained: TaskContext | undefined;
-  const item = task({
+  const item = defineTask({
     ...definition,
     perform(context) {
       retained = context;
@@ -249,7 +249,7 @@ test("interaction state is immutable and invalid checkpoints are rejected", asyn
       );
     },
   });
-  const graph = workflow("input", [item]);
+  const graph = defineWorkflow("input", [item]);
   const first = await graph.start({ checkpoint });
   assert.throws(() => {
     Object.assign(first.tasks[0]!.interaction!.state!, { nested: [] });
@@ -313,24 +313,24 @@ test("CLI adapters use the same durable turn protocol and retain uncommitted wor
     },
   });
   const build = () =>
-    interactiveAgentTask({
+    defineInteractiveAgentTask({
       key: "cli",
       repository: repo,
       agent: makeAgent(),
       brief: "Interview",
       actors: ["owner"],
-      sandboxProvider: localSandboxProvider(),
+      sandboxProvider: createLocalSandboxProvider(),
       bootstrap: false,
     });
   const checkpoint = checkpointFor(repo);
-  const initial = await workflow("cli", [build()]).start({ checkpoint });
+  const initial = await defineWorkflow("cli", [build()]).start({ checkpoint });
   assert.equal(
     initial.status,
     "waiting-input",
     initial.errors.map(String).join(),
   );
   const next = build();
-  const result = await workflow("cli", [next]).start({
+  const result = await defineWorkflow("cli", [next]).start({
     checkpoint,
     answers: [answerFor(initial)],
   });
@@ -351,34 +351,34 @@ test("portable presets are admitted and unsupported capture is rejected before a
     actors: ["owner"],
   };
   for (const preset of [
-    codexHarness,
-    claudeHarness,
-    copilotHarness,
-    kimiHarness,
+    createCodexHarness,
+    createClaudeHarness,
+    createCopilotHarness,
+    createKimiHarness,
   ]) {
     assert.ok(
-      interactiveAgentTask({
+      defineInteractiveAgentTask({
         ...options,
-        agent: agent({ harness: preset({ authentication: "account" }) }),
+        agent: createAgent({ harness: preset({ authentication: "account" }) }),
       }),
     );
   }
   assert.throws(
     () =>
-      interactiveAgentTask({
+      defineInteractiveAgentTask({
         ...options,
-        agent: agent({
-          harness: antigravityHarness({ authentication: "account" }),
+        agent: createAgent({
+          harness: createAntigravityHarness({ authentication: "account" }),
         }),
       }),
     /portable/,
   );
   assert.throws(
     () =>
-      interactiveAgentTask({
+      defineInteractiveAgentTask({
         ...options,
-        agent: agent({
-          harness: codexHarness({
+        agent: createAgent({
+          harness: createCodexHarness({
             authentication: "account",
             saveConversations: false,
           }),
@@ -388,7 +388,11 @@ test("portable presets are admitted and unsupported capture is rejected before a
   );
   assert.throws(
     () =>
-      interactiveAgentTask({ ...options, maxTurns: 0, agent: scripted("") }),
+      defineInteractiveAgentTask({
+        ...options,
+        maxTurns: 0,
+        agent: scripted(""),
+      }),
     /maxTurns/,
   );
 });
@@ -410,18 +414,21 @@ test("turn limits and cancellation stop model execution while retaining recovera
       };
     },
   };
-  const item = interactiveAgentTask({
+  const item = defineInteractiveAgentTask({
     key: "ask",
     repository: repo,
     brief: "Ask",
     actors: ["owner"],
     maxTurns: 1,
     bootstrap: false,
-    sandboxProvider: localSandboxProvider(),
-    agent: agent({ model: "fixture", harness: harness({ modelProvider }) }),
+    sandboxProvider: createLocalSandboxProvider(),
+    agent: createAgent({
+      model: "fixture",
+      harness: createHarness({ modelProvider }),
+    }),
   });
   const checkpoint = checkpointFor(repo);
-  const graph = workflow("limit", [item]);
+  const graph = defineWorkflow("limit", [item]);
   const result = await graph.start({ checkpoint });
   assert.equal(result.status, "failed");
   assert.match(String(result.errors[0]), /maxTurns/);
@@ -430,7 +437,7 @@ test("turn limits and cancellation stop model execution while retaining recovera
   });
   assert.equal(retried.status, "failed");
   assert.equal(calls, 1);
-  const stopped = await workflow("abort", [item]).start({
+  const stopped = await defineWorkflow("abort", [item]).start({
     checkpoint: { ...checkpoint, runId: "abort" },
     signal: AbortSignal.abort(new Error("stop")),
   });
@@ -441,7 +448,7 @@ test("turn limits and cancellation stop model execution while retaining recovera
 test("a batch containing an invalid answer consumes none of the independent requests", async (t) => {
   const checkpoint = checkpointFor(await repository(t));
   const make = (key: string) =>
-    task({
+    defineTask({
       ...definition,
       key,
       perform(context) {
@@ -452,7 +459,7 @@ test("a batch containing an invalid answer consumes none of the independent requ
     });
   const left = make("left"),
     right = make("right");
-  const graph = workflow("batch", [left, right]);
+  const graph = defineWorkflow("batch", [left, right]);
   const first = await graph.start({ checkpoint, concurrency: 2 });
   const answers = first.inputRequests.map((request) => ({
     executionId: first.executionId,
@@ -491,7 +498,7 @@ test("a batch containing an invalid answer consumes none of the independent requ
 
 test("sandbox cleanup failure does not publish a question or corrupt recovery", async (t) => {
   const repo = await repository(t);
-  const local = localSandboxProvider();
+  const local = createLocalSandboxProvider();
   let fail = true;
   const provider = {
     ...local,
@@ -519,16 +526,19 @@ test("sandbox cleanup failure does not publish a question or corrupt recovery", 
       };
     },
   };
-  const item = interactiveAgentTask({
+  const item = defineInteractiveAgentTask({
     key: "ask",
     repository: repo,
     brief: "Ask",
     actors: ["owner"],
     bootstrap: false,
     sandboxProvider: provider,
-    agent: agent({ model: "fixture", harness: harness({ modelProvider }) }),
+    agent: createAgent({
+      model: "fixture",
+      harness: createHarness({ modelProvider }),
+    }),
   });
-  const graph = workflow("cleanup", [item]),
+  const graph = defineWorkflow("cleanup", [item]),
     checkpoint = checkpointFor(repo);
   const failed = await graph.start({ checkpoint });
   assert.equal(failed.status, "failed");
@@ -562,17 +572,20 @@ test("a task deadline reaches an in-flight model and leaves an explicitly replay
       throw new Error("unreachable");
     },
   };
-  const item = interactiveAgentTask({
+  const item = defineInteractiveAgentTask({
     key: "ask",
     repository: repo,
     brief: "Ask",
     actors: ["owner"],
     timeoutMs: 5000,
     bootstrap: false,
-    sandboxProvider: localSandboxProvider(),
-    agent: agent({ model: "fixture", harness: harness({ modelProvider }) }),
+    sandboxProvider: createLocalSandboxProvider(),
+    agent: createAgent({
+      model: "fixture",
+      harness: createHarness({ modelProvider }),
+    }),
   });
-  const graph = workflow("deadline", [item]),
+  const graph = defineWorkflow("deadline", [item]),
     checkpoint = checkpointFor(repo);
   const result = await graph.start({ checkpoint });
   assert.equal(result.status, "failed");
@@ -583,7 +596,7 @@ test("a task deadline reaches an in-flight model and leaves an explicitly replay
 
 test("a failed cleanup after generic suspension keeps the checkpoint replayable", async (t) => {
   const checkpoint = checkpointFor(await repository(t));
-  const item = task({
+  const item = defineTask({
     ...definition,
     perform(context) {
       try {
@@ -593,7 +606,7 @@ test("a failed cleanup after generic suspension keeps the checkpoint replayable"
       }
     },
   });
-  const graph = workflow("failed-suspend", [item]);
+  const graph = defineWorkflow("failed-suspend", [item]);
   const failed = await graph.start({ checkpoint });
   assert.equal(failed.status, "failed");
   assert.equal(failed.inputRequests.length, 0);
@@ -604,7 +617,7 @@ test("closed attempts cannot write interaction state during retry backoff", asyn
   const checkpoint = checkpointFor(await repository(t));
   let stale: TaskContext | undefined;
   let verification: Promise<void> | undefined;
-  const item = task({
+  const item = defineTask({
     ...definition,
     retry: { attempts: 2, delayMs: 100 },
     async perform(context) {
@@ -625,7 +638,7 @@ test("closed attempts cannot write interaction state during retry backoff", asyn
       return context.interaction!.suspend(question, {});
     },
   });
-  const result = await workflow("fence", [item]).start({ checkpoint });
+  const result = await defineWorkflow("fence", [item]).start({ checkpoint });
   assert.equal(result.status, "waiting-input");
 });
 
@@ -633,16 +646,16 @@ test("a completed dialogue checkpoint is reused after finalization fails without
   const repo = await repository(t);
   let calls = 0,
     rejectFinalization = true;
-  const item = interactiveAgentTask({
+  const item = defineInteractiveAgentTask({
     key: "ask",
     repository: repo,
     brief: "Complete",
     actors: ["owner"],
     bootstrap: false,
-    sandboxProvider: localSandboxProvider(),
-    agent: agent({
+    sandboxProvider: createLocalSandboxProvider(),
+    agent: createAgent({
       model: "fixture",
-      harness: harness({
+      harness: createHarness({
         modelProvider: {
           name: "complete",
           async request() {
@@ -675,7 +688,7 @@ test("a completed dialogue checkpoint is reused after finalization fails without
     },
   };
   const checkpoint = { ...base, store },
-    graph = workflow("finalize", [item]);
+    graph = defineWorkflow("finalize", [item]);
   await assert.rejects(graph.start({ checkpoint }), /finalization failed/);
   rejectFinalization = false;
   await assert.rejects(graph.start({ checkpoint }), /retry-incomplete/);
@@ -688,11 +701,11 @@ test("a completed dialogue checkpoint is reused after finalization fails without
 });
 
 test("durable loops and interactive tasks compose without replaying completed rounds", async (t) => {
-  const { loopTask } = await import("../../src/index.ts");
+  const { defineLoopTask } = await import("../../src/index.ts");
   const checkpoint = checkpointFor(await repository(t));
   let rounds = 0;
   const build = () => {
-    const prepare = loopTask({
+    const prepare = defineLoopTask({
       key: "prepare",
       maxRounds: 2,
       attempt: (context) => {
@@ -702,7 +715,7 @@ test("durable loops and interactive tasks compose without replaying completed ro
       check: (_, value) =>
         value === 2 ? { done: true } : { done: false, feedback: "Try again" },
     });
-    const ask = task({
+    const ask = defineTask({
       ...definition,
       after: [prepare],
       perform(context) {
@@ -712,14 +725,17 @@ test("durable loops and interactive tasks compose without replaying completed ro
         return context.interaction!.suspend(question, { prepared: true });
       },
     });
-    const verify = loopTask({
+    const verify = defineLoopTask({
       key: "verify",
       after: [ask],
       maxRounds: 1,
       attempt: (context) => context.value(ask),
       check: () => ({ done: true }),
     });
-    return { graph: workflow("composed", [prepare, ask, verify]), verify };
+    return {
+      graph: defineWorkflow("composed", [prepare, ask, verify]),
+      verify,
+    };
   };
   const initial = await build().graph.start({ checkpoint });
   assert.equal(initial.status, "waiting-input");

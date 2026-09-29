@@ -1,19 +1,19 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
-  agent,
-  harness,
-  antigravityHarness,
-  codexHarness,
-  claudeHarness,
-  copilotHarness,
-  kimiHarness,
+  createAgent,
+  createHarness,
+  createAntigravityHarness,
+  createCodexHarness,
+  createClaudeHarness,
+  createCopilotHarness,
+  createKimiHarness,
   defineHarnessInstructions,
   defineHarnessTool,
   dispatch,
   createSandbox,
   attach,
-  response,
+  defineTextResponse,
   type AgentObservation,
   type HarnessOptions,
   type HarnessTool,
@@ -21,7 +21,7 @@ import {
   type ModelRequest,
   type ModelResult,
 } from "../../src/index.ts";
-import { localSandboxProvider } from "../../src/providers/local.ts";
+import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { repository } from "../helpers.ts";
 
 const done = "<outpost>done</outpost>";
@@ -84,9 +84,9 @@ const developer = (
   tools: HarnessTool[] = [echo],
   extra: Omit<HarnessOptions, "modelProvider" | "tools"> = {},
 ) =>
-  agent({
+  createAgent({
     model: "m",
-    harness: harness({ modelProvider, tools, ...extra }),
+    harness: createHarness({ modelProvider, tools, ...extra }),
   });
 
 function resultContents(request: ModelRequest | undefined) {
@@ -97,13 +97,13 @@ function resultContents(request: ModelRequest | undefined) {
 
 test("agents compose without effects and custom harnesses are declarative", () => {
   for (const preset of [
-    codexHarness,
-    claudeHarness,
-    antigravityHarness,
-    copilotHarness,
-    kimiHarness,
+    createCodexHarness,
+    createClaudeHarness,
+    createAntigravityHarness,
+    createCopilotHarness,
+    createKimiHarness,
   ]) {
-    const selected = agent({
+    const selected = createAgent({
       harness: preset(),
       model: "arbitrary-future-model",
     });
@@ -113,11 +113,14 @@ test("agents compose without effects and custom harnesses are declarative", () =
         .arguments?.includes("arbitrary-future-model"),
     );
     assert.deepEqual(selected.model, { name: "arbitrary-future-model" });
-    assert.equal(agent({ harness: preset() }).model, undefined);
-    assert.throws(() => agent({ harness: preset(), model: " " }), /Model name/);
+    assert.equal(createAgent({ harness: preset() }).model, undefined);
+    assert.throws(
+      () => createAgent({ harness: preset(), model: " " }),
+      /Model name/,
+    );
   }
   const provider = scriptedProvider([]);
-  const configured = harness({ modelProvider: provider });
+  const configured = createHarness({ modelProvider: provider });
   assert.deepEqual(configured.tools, []);
   assert.deepEqual(configured.limits, { maxSteps: 100 });
   assert.deepEqual(configured.toolExecution, {
@@ -128,12 +131,12 @@ test("agents compose without effects and custom harnesses are declarative", () =
   assert.equal(configured.cache, true);
   assert.throws(
     // @ts-expect-error A custom harness requires an explicit model.
-    () => agent({ harness: configured }),
+    () => createAgent({ harness: configured }),
     /requires a model/,
   );
   assert.throws(
     // @ts-expect-error Callbacks were replaced by declarative configuration.
-    () => harness({ modelProvider: provider, run: async () => ({}) }),
+    () => createHarness({ modelProvider: provider, run: async () => ({}) }),
     /no longer accepts run/,
   );
   for (const [options, message] of [
@@ -151,11 +154,11 @@ test("agents compose without effects and custom harnesses are declarative", () =
     [{ instructions: [{}] }, /defineHarnessInstructions/],
   ] as const)
     assert.throws(
-      () => harness({ modelProvider: provider, ...(options as object) }),
+      () => createHarness({ modelProvider: provider, ...(options as object) }),
       message,
     );
   const validated: string[] = [];
-  const validating = harness({
+  const validating = createHarness({
     modelProvider: {
       ...provider,
       validate(model) {
@@ -165,33 +168,39 @@ test("agents compose without effects and custom harnesses are declarative", () =
     },
   });
   assert.equal(
-    agent({ harness: validating, model: { name: "m", reasoning: "low" } }).model
-      .reasoning,
+    createAgent({ harness: validating, model: { name: "m", reasoning: "low" } })
+      .model.reasoning,
     "low",
   );
   assert.throws(
     () =>
-      agent({ harness: validating, model: { name: "m", reasoning: "max" } }),
+      createAgent({
+        harness: validating,
+        model: { name: "m", reasoning: "max" },
+      }),
     /unsupported max/,
   );
   assert.deepEqual(validated, ["m", "m"]);
   assert.throws(
     () =>
-      harness({
+      createHarness({
         // @ts-expect-error Provider validation must be callable.
         modelProvider: { ...provider, validate: true },
       }),
     /validate must be a function/,
   );
-  // @ts-expect-error A provider is not an executable harness.
-  assert.throws(() => agent({ harness: provider, model: "m" }), /harness/);
+  assert.throws(
+    // @ts-expect-error A provider is not an executable harness.
+    () => createAgent({ harness: provider, model: "m" }),
+    /harness/,
+  );
   assert.throws(
     () =>
-      agent({
+      createAgent({
         model: "m",
         harness: { kind: "custom", modelProvider: provider } as never,
       }),
-    /Create custom harnesses with harness/,
+    /Create custom harnesses with createHarness/,
   );
 });
 
@@ -216,10 +225,10 @@ test("the built-in loop runs tools in the sandbox and returns the final answer",
   });
   const result = await dispatch({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
-    agent: agent({
+    sandboxProvider: createLocalSandboxProvider(),
+    agent: createAgent({
       model: { name: "tuned", reasoning: "high", maxOutputTokens: 256 },
-      harness: harness({
+      harness: createHarness({
         modelProvider: scriptedProvider(
           [call(["cwd", {}], ["echo", { text: "hi" }]), answer()],
           requests,
@@ -309,7 +318,7 @@ test("tool failures return to the model unless configured to fail the turn", asy
   const requests: ModelRequest[] = [];
   await dispatch({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent: developer(
       scriptedProvider(
         [
@@ -346,7 +355,7 @@ test("tool failures return to the model unless configured to fail the turn", asy
   await assert.rejects(
     dispatch({
       repository: root,
-      sandboxProvider: localSandboxProvider(),
+      sandboxProvider: createLocalSandboxProvider(),
       agent: developer(scriptedProvider([call(["broken", {}])]), [broken], {
         toolExecution: { onError: "fail" },
       }),
@@ -384,7 +393,7 @@ test("read-only calls run concurrently while mutating calls are serialized in ca
   const requests: ModelRequest[] = [];
   await dispatch({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent: developer(
       scriptedProvider(
         [
@@ -420,7 +429,7 @@ test("harness limits fail with identified errors instead of success", async (t) 
   const run = (provider: ModelProvider, extra = {}) =>
     dispatch({
       repository: root,
-      sandboxProvider: localSandboxProvider(),
+      sandboxProvider: createLocalSandboxProvider(),
       agent: developer(provider, [echo], extra),
       brief: { text: "loop" },
       logging: false,
@@ -502,7 +511,7 @@ test("tool deadlines release tools that ignore cancellation and hold the idle wa
   const started = Date.now();
   const bounded = await dispatch({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent: developer(
       scriptedProvider(
         [call(["stuck", {}], ["quiet", {}]), answer()],
@@ -523,7 +532,7 @@ test("tool deadlines release tools that ignore cancellation and hold the idle wa
   ]);
   const patient = await dispatch({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent: developer(
       scriptedProvider([call(["quiet", {}]), answer()], requests),
       [quiet],
@@ -543,7 +552,7 @@ test("custom harness rejects absent capabilities before sandbox allocation", asy
   assert.equal(configured.resumable, false);
   assert.equal(configured.capture, false);
   const sandboxProvider = {
-    ...localSandboxProvider(),
+    ...createLocalSandboxProvider(),
     async acquire() {
       throw new Error("must not allocate");
     },
@@ -566,7 +575,7 @@ test("custom harness rejects absent capabilities before sandbox allocation", asy
       agent: configured,
       sandboxProvider,
       brief: { text: "<x>" },
-      response: response.text({ tag: "x", repairs: 1 }),
+      response: defineTextResponse({ tag: "x", repairs: 1 }),
     }),
     /repair/,
   );
@@ -594,7 +603,7 @@ test("custom harness cancellation reaches tool commands and keeps a warm sandbox
   });
   await using sandbox = await createSandbox({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     logging: false,
   });
   const pending = sandbox.dispatch({
@@ -645,7 +654,7 @@ test("custom harness deadlines abort provider calls and return no late result", 
   await assert.rejects(
     dispatch({
       repository: root,
-      sandboxProvider: localSandboxProvider(),
+      sandboxProvider: createLocalSandboxProvider(),
       agent: developer(hanging),
       brief: { text: "wait" },
       deadlineMs: 30,
@@ -699,7 +708,7 @@ test("borrowed tool sandboxes preserve binary data and cannot release their owne
   });
   await using sandbox = await createSandbox({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     logging: false,
   });
   const requests: ModelRequest[] = [];
@@ -717,7 +726,7 @@ test("borrowed tool sandboxes preserve binary data and cannot release their owne
 test("legacy sandbox selector is rejected instead of silently choosing Docker", async () => {
   await assert.rejects(
     // @ts-expect-error The old selector is intentionally unsupported.
-    createSandbox({ provider: localSandboxProvider() }),
+    createSandbox({ provider: createLocalSandboxProvider() }),
     /Use sandboxProvider/,
   );
 });
@@ -742,7 +751,7 @@ test("switching CLI configurations reactivates authentication without repeating 
   };
   await using sandbox = await createSandbox({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     logging: false,
   });
   for (const chosen of [first, first, second, first])

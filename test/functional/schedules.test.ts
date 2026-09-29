@@ -7,7 +7,7 @@ import { join } from "node:path";
 import {
   cronSchedule,
   runSchedules,
-  sqliteTaskQueue,
+  createSqliteTaskQueue,
 } from "../../src/index.ts";
 import { runSchedulesWithClock } from "../../src/application/schedules.ts";
 import type {
@@ -22,7 +22,7 @@ const plain = (value: unknown): unknown => JSON.parse(JSON.stringify(value));
 
 async function sqliteQueue(t: TestContext) {
   const directory = await mkdtemp(join(tmpdir(), "outpost-schedules-"));
-  const queue = await sqliteTaskQueue(join(directory, "queue.sqlite"));
+  const queue = await createSqliteTaskQueue(join(directory, "queue.sqlite"));
   t.after(async () => {
     queue.close();
     await rm(directory, { recursive: true, force: true });

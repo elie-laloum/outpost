@@ -12,7 +12,7 @@ import {
 import { basename, join } from "node:path";
 import { tmpdir } from "node:os";
 import { setTimeout as delay } from "node:timers/promises";
-import { firecrackerSandboxProvider } from "../src/providers/firecracker.ts";
+import { createFirecrackerSandboxProvider } from "../src/providers/firecracker.ts";
 import type { FirecrackerOptions } from "../src/providers/firecracker.types.ts";
 
 const config = process.env.OUTPOST_FIRECRACKER_JAILER_CONFIG;
@@ -29,7 +29,7 @@ test(
     const root = await mkdtemp(join(tmpdir(), "outpost-jailer-live-"));
     const parent = join(jailer.directory, basename(options.binary));
     const before = await readdir(jailer.cgroup);
-    const provider = firecrackerSandboxProvider(options);
+    const provider = createFirecrackerSandboxProvider(options);
     const lease = await provider.acquire({
       repository: root,
       directory: root,

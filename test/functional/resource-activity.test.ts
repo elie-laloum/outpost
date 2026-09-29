@@ -19,7 +19,7 @@ import {
   pruneRecoveryRetention,
   reserveRecoveryStorage,
 } from "../../src/index.ts";
-import { localSandboxProvider } from "../../src/providers/local.ts";
+import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { executeProcess } from "../../src/infrastructure/process.ts";
 import { localProcessIdentity } from "../../src/infrastructure/git/process-identity.ts";
 import { registerResourceActivity } from "../../src/infrastructure/resource-activity.ts";
@@ -40,7 +40,7 @@ const inspect = async (root: string) =>
 test("real owned commands publish live operation ownership and preserve exclusivity, cancellation, exit status and warm reuse", async (t) => {
   const root = await repository(t);
   const entered = deferred();
-  const sandboxProvider = localSandboxProvider();
+  const sandboxProvider = createLocalSandboxProvider();
   const sandbox = await createSandbox({
     repository: root,
     sandboxProvider: {
@@ -113,7 +113,7 @@ test("owned diagnostics expose in-flight transfers and complete without losing t
   const root = await repository(t);
   const entered = deferred();
   const proceed = deferred();
-  const sandboxProvider = localSandboxProvider();
+  const sandboxProvider = createLocalSandboxProvider();
   const sandbox = await createSandbox({
     repository: root,
     sandboxProvider: {
@@ -162,7 +162,7 @@ test("allocation and closure are observable while independent workspaces outlive
   const acquired = deferred();
   const releasing = deferred();
   const released = deferred();
-  const sandboxProvider = localSandboxProvider();
+  const sandboxProvider = createLocalSandboxProvider();
   const pending = workspace.sandbox({
     sandboxProvider: {
       ...sandboxProvider,
@@ -192,7 +192,7 @@ test("allocation and closure are observable while independent workspaces outlive
   released.resolve();
   await closing;
   const replacement = await workspace.sandbox({
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
   });
   await replacement.close();
   await workspace.close();
@@ -201,7 +201,7 @@ test("allocation and closure are observable while independent workspaces outlive
 
 test("failed provider cleanup keeps bounded records and protects the associated workspace from retention", async (t) => {
   const root = await repository(t);
-  const sandboxProvider = localSandboxProvider();
+  const sandboxProvider = createLocalSandboxProvider();
   const sandbox = await createSandbox({
     repository: root,
     branch: { mode: "named", name: "retained-provider" },
@@ -254,7 +254,7 @@ test("startup failure retains uncertain allocations and failed releases while pr
       repository: root,
       branch: { mode: "named", name: "before-allocation" },
       sandboxProvider: {
-        ...localSandboxProvider(),
+        ...createLocalSandboxProvider(),
         name: "x".repeat(resourceActivityDefaults.maxText + 1),
         async acquire() {
           assert.fail("must not acquire");
@@ -279,7 +279,7 @@ test("startup failure retains uncertain allocations and failed releases while pr
           name: `uncertain-${cause instanceof AggregateError ? "aggregate" : "plain"}`,
         },
         sandboxProvider: {
-          ...localSandboxProvider(),
+          ...createLocalSandboxProvider(),
           async acquire() {
             throw cause;
           },
@@ -294,7 +294,7 @@ test("startup failure retains uncertain allocations and failed releases while pr
     assert.equal(entry.record?.phase, "allocation-uncertain");
     assert.equal((await lstat(entry.record!.workspace)).isDirectory(), true);
   }
-  const sandboxProvider = localSandboxProvider();
+  const sandboxProvider = createLocalSandboxProvider();
   await assert.rejects(
     createSandbox({
       repository: root,
@@ -339,7 +339,7 @@ test("parallel sandboxes and storage reservations keep distinct private ownershi
     ["first", "second"].map((name) =>
       createSandbox({
         repository: root,
-        sandboxProvider: localSandboxProvider(),
+        sandboxProvider: createLocalSandboxProvider(),
         branch: { mode: "named", name },
       }),
     ),
@@ -440,7 +440,7 @@ test("resource CLI reports live records in JSON and text and fails honestly on m
   const root = await repository(t);
   const sandbox = await createSandbox({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
   });
   t.after(() => sandbox.close());
   const run = (...args: string[]) =>
@@ -536,7 +536,7 @@ test("symlinked activity storage and excessive metadata refuse allocation before
     createSandbox({
       repository: root,
       sandboxProvider: {
-        ...localSandboxProvider(),
+        ...createLocalSandboxProvider(),
         async acquire() {
           assert.fail("should not acquire");
         },
@@ -579,7 +579,7 @@ test("activity update failure does not replace the primary execution error", asy
 
 test("a timed out transfer that ignores cancellation retains its owned workspace after release", async (t) => {
   const root = await repository(t);
-  const sandboxProvider = localSandboxProvider();
+  const sandboxProvider = createLocalSandboxProvider();
   const finish = deferred();
   const entered = deferred();
   const sandbox = await createSandbox({
@@ -619,7 +619,7 @@ test("an abruptly terminated owner leaves inspectable resources without reclamat
     arguments: [
       "--input-type=module",
       "-e",
-      `import { createSandbox } from ${JSON.stringify(facade)}; import { localSandboxProvider } from ${JSON.stringify(sandboxProvider)}; await createSandbox({ repository: ${JSON.stringify(root)}, sandboxProvider: localSandboxProvider(), branch: { mode: "named", name: "crashed-owner" } }); process.kill(process.pid, "SIGKILL");`,
+      `import { createSandbox } from ${JSON.stringify(facade)}; import { createLocalSandboxProvider } from ${JSON.stringify(sandboxProvider)}; await createSandbox({ repository: ${JSON.stringify(root)}, sandboxProvider: createLocalSandboxProvider(), branch: { mode: "named", name: "crashed-owner" } }); process.kill(process.pid, "SIGKILL");`,
     ],
     deadlineMs: 10_000,
   });

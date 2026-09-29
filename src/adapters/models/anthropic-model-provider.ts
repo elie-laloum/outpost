@@ -10,7 +10,7 @@ import { readAnthropicResponse } from "./anthropic-response.ts";
 import { anthropicStream } from "./anthropic-stream.ts";
 import { httpModelProvider } from "./http-provider.ts";
 
-export function anthropicModelProvider(
+export function createAnthropicModelProvider(
   options: AnthropicModelProviderOptions,
 ): ModelProvider {
   invariant(

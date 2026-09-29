@@ -3,7 +3,7 @@ import { taskObservation } from "./task-observation.ts";
 import { taskUsage } from "./task-usage.ts";
 import { OutpostError } from "../domain/errors.ts";
 import type { CommandResult } from "../domain/ports.ts";
-import { task, type Task, type TaskOptions } from "../domain/workflow.ts";
+import { defineTask, type Task, type TaskOptions } from "../domain/workflow.ts";
 import type { DispatchResult } from "./outpost.ts";
 import { quotaContinuation, quotaWorkspace } from "./quota-resume.ts";
 import { dispatch } from "./outpost.ts";
@@ -20,13 +20,13 @@ function uncached(options: object): void {
     );
 }
 
-export function agentTask<T>(
+export function defineAgentTask<T>(
   options: Omit<TaskOptions<DispatchResult<T>>, "perform" | "cache"> &
     AgentTaskOptions<T>,
 ): Task<DispatchResult<T>> {
   uncached(options);
   const { sandbox, request, quotaResume, ...definition } = options;
-  return task({
+  return defineTask({
     ...definition,
     async perform(context) {
       const options = quotaContinuation(context, request(context), quotaResume);
@@ -51,13 +51,13 @@ export function agentTask<T>(
   });
 }
 
-export function isolatedTask<T>(
+export function defineIsolatedTask<T>(
   options: Omit<TaskOptions<DispatchResult<T>>, "perform" | "cache"> &
     IsolatedTaskOptions<T>,
 ): Task<DispatchResult<T>> {
   uncached(options);
   const { request, quotaResume, ...definition } = options;
-  return task({
+  return defineTask({
     ...definition,
     async perform(context) {
       const options = quotaWorkspace(
@@ -86,11 +86,11 @@ export function isolatedTask<T>(
   });
 }
 
-export function commandTask(
+export function defineCommandTask(
   options: Omit<TaskOptions<CommandResult>, "perform"> & CommandTaskOptions,
 ): Task<CommandResult> {
   const { sandbox, command, ...definition } = options;
-  return task({
+  return defineTask({
     ...definition,
     async perform(context) {
       const invocation =

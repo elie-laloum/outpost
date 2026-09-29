@@ -3,8 +3,8 @@ import { test, type TestContext } from "node:test";
 import { createServer } from "node:http";
 import { once } from "node:events";
 import {
-  anthropicModelProvider,
-  openaiModelProvider,
+  createAnthropicModelProvider,
+  createOpenAIModelProvider,
   type ModelMessage,
   type ModelProvider,
   type ModelToolSpec,
@@ -107,7 +107,7 @@ test("Anthropic tool conversations group results and replay its own thinking", a
       content: [{ type: "text", text: "It is the Outpost readme." }],
     },
   ]);
-  const provider = anthropicModelProvider({ baseUrl, apiKey: "key" });
+  const provider = createAnthropicModelProvider({ baseUrl, apiKey: "key" });
   await converse(provider, "claude");
   assert.deepEqual(bodies[0]?.cache_control, { type: "ephemeral" });
   assert.deepEqual(bodies[0]?.tools, [
@@ -174,7 +174,7 @@ test("Chat Completions tool conversations use tool messages without reasoning re
       ],
     },
   ]);
-  const provider = openaiModelProvider({ baseUrl, apiKey: false });
+  const provider = createOpenAIModelProvider({ baseUrl, apiKey: false });
   await converse(provider, "gpt");
   assert.deepEqual(bodies[0]?.tools, [
     {
@@ -237,7 +237,7 @@ test("Responses tool conversations replay encrypted reasoning before calls", asy
       ],
     },
   ]);
-  const provider = openaiModelProvider({
+  const provider = createOpenAIModelProvider({
     baseUrl,
     apiKey: false,
     api: "responses",

@@ -3,16 +3,16 @@ import { test } from "node:test";
 import {
   createObservationHub,
   dispatch,
-  isolatedTask,
-  workflow,
+  defineIsolatedTask,
+  defineWorkflow,
   createSandbox,
-  commandTask,
-  localTransport,
+  defineCommandTask,
+  createLocalTransport,
   readJournal,
   recoveryDetails,
 } from "../../src/index.ts";
 import type { Observation } from "../../src/index.ts";
-import { localSandboxProvider } from "../../src/providers/local.ts";
+import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { repository, scripted, emit } from "../helpers.ts";
 
 function recording() {
@@ -35,19 +35,19 @@ test("one workflow sink observes concurrent isolated dispatches, operations and 
   const root = await repository(t);
   const { events, observation } = recording();
   const tasks = ["left", "right"].map((key) =>
-    isolatedTask({
+    defineIsolatedTask({
       key,
       request: () => ({
         repository: root,
         branch: { mode: "named", name: key },
-        sandboxProvider: localSandboxProvider(),
+        sandboxProvider: createLocalSandboxProvider(),
         agent: scripted(emit("<outpost>done</outpost>")),
         brief: { text: "test" },
         logging: false,
       }),
     }),
   );
-  const result = await workflow("parallel", tasks).start({
+  const result = await defineWorkflow("parallel", tasks).start({
     observation,
     concurrency: 2,
   });
@@ -105,9 +105,9 @@ test("command task streams both channels and retains nonzero status", async (t) 
   const { events, observation } = recording();
   await using sandbox = await createSandbox({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
   });
-  const task = commandTask({
+  const task = defineCommandTask({
     key: "command",
     sandbox,
     command: {
@@ -118,7 +118,7 @@ test("command task streams both channels and retains nonzero status", async (t) 
       ],
     },
   });
-  const result = await workflow("command", [task]).start({ observation });
+  const result = await defineWorkflow("command", [task]).start({ observation });
   assert.equal(result.status, "failed");
   const chunks = events.flatMap((value) =>
     value.event.kind === "command-output" ? [value.event] : [],
@@ -153,7 +153,7 @@ test("journal includes scoped operations and finish while stderr remains live-on
   const { events, observation } = recording();
   const result = await dispatch({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent: scripted(
       "process.stderr.write('diagnostic\\ntail');" +
         emit("<outpost>done</outpost>"),
@@ -166,7 +166,9 @@ test("journal includes scoped operations and finish while stderr remains live-on
   );
   assert.deepEqual(stderr, ["diagnostic", "tail"]);
   const journal = await readJournal({
-    transporter: localTransport({ directory: `${root}/.outpost/storage` }),
+    transporter: createLocalTransport({
+      directory: `${root}/.outpost/storage`,
+    }),
     reference: result.logReference!,
   });
   const serialized = JSON.stringify(journal);
@@ -189,7 +191,7 @@ test("sink failures preserve dispatch results and early failure identity", async
   });
   const result = await dispatch({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent: scripted(emit("<outpost>done</outpost>")),
     brief: { text: "test" },
     observation,
@@ -203,7 +205,7 @@ test("sink failures preserve dispatch results and early failure identity", async
     dispatch({
       repository: root,
       sandboxProvider: {
-        ...localSandboxProvider(),
+        ...createLocalSandboxProvider(),
         async acquire() {
           throw failure;
         },
@@ -225,11 +227,11 @@ test("sink failures preserve dispatch results and early failure identity", async
 test("async task callbacks remain additional sinks and report failures without corrupting usage", async (t) => {
   const root = await repository(t);
   const { observation } = recording();
-  const run = isolatedTask({
+  const run = defineIsolatedTask({
     key: "run",
     request: () => ({
       repository: root,
-      sandboxProvider: localSandboxProvider(),
+      sandboxProvider: createLocalSandboxProvider(),
       agent: scripted(
         "console.log(JSON.stringify({kind:'usage',tokens:{input:3,cached:0,output:2}}));" +
           emit("<outpost>done</outpost>"),
@@ -241,7 +243,9 @@ test("async task callbacks remain additional sinks and report failures without c
       },
     }),
   });
-  const result = await workflow("callbacks", [run]).start({ observation });
+  const result = await defineWorkflow("callbacks", [run]).start({
+    observation,
+  });
   result.unwrap();
   assert.equal(result.usage.tokens.input, 3);
   assert.ok(

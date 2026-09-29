@@ -3,12 +3,12 @@ import { readdir, writeFile } from "node:fs/promises";
 import { test } from "node:test";
 import { createSandbox, diagnoseSandbox } from "../../src/index.ts";
 import type { TransferOptions } from "../../src/domain/sandbox.types.ts";
-import { localSandboxProvider } from "../../src/providers/local.ts";
+import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { repository } from "../helpers.ts";
 
 test("owned sandbox diagnostics preserve ownership, exclusivity and reuse with optional binary probes", async (t) => {
   const root = await repository(t);
-  const sandboxProvider = localSandboxProvider();
+  const sandboxProvider = createLocalSandboxProvider();
   let released = 0;
   let acquired = 0;
   const sandbox = await createSandbox({
@@ -64,7 +64,7 @@ test("owned sandbox diagnostics preserve ownership, exclusivity and reuse with o
 
 test("caller owned lease diagnostics are read-only by default and never release or allocate", async (t) => {
   const root = await repository(t);
-  const lease = await localSandboxProvider().acquire({
+  const lease = await createLocalSandboxProvider().acquire({
     repository: root,
     directory: root,
     gitDirectories: [],
@@ -93,7 +93,7 @@ test("caller owned lease diagnostics are read-only by default and never release 
 
 test("response loss after remote directory creation still cleans the unique probe directory", async (t) => {
   const root = await repository(t);
-  const lease = await localSandboxProvider().acquire({
+  const lease = await createLocalSandboxProvider().acquire({
     repository: root,
     directory: root,
     gitDirectories: [],
@@ -133,7 +133,7 @@ test("response loss after remote directory creation still cleans the unique prob
 
 test("deadline stops an owned probe process while keeping the sandbox reusable", async (t) => {
   const root = await repository(t);
-  const sandboxProvider = localSandboxProvider();
+  const sandboxProvider = createLocalSandboxProvider();
   const sandbox = await createSandbox({
     repository: root,
     sandboxProvider: {
@@ -167,7 +167,7 @@ test("deadline stops an owned probe process while keeping the sandbox reusable",
 for (const direction of ["upload", "download"] as const) {
   test(`binary corruption during ${direction} fails the observed transfer probe and cleans files`, async (t) => {
     const root = await repository(t);
-    const lease = await localSandboxProvider().acquire({
+    const lease = await createLocalSandboxProvider().acquire({
       repository: root,
       directory: root,
       gitDirectories: [],

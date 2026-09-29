@@ -3,18 +3,18 @@ import { readFile } from "node:fs/promises";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 import {
-  agent,
-  claudeHarness,
-  codexHarness,
+  createAgent,
+  createClaudeHarness,
+  createCodexHarness,
   createSandbox,
   createSteering,
   defineHarnessSubagent,
   defineHarnessTool,
   dispatch,
-  harness,
+  createHarness,
   OutpostError,
   readJournal,
-  replayAgent,
+  createReplayAgent,
   type AgentInput,
   type AgentObservation,
   type ModelProvider,
@@ -24,7 +24,7 @@ import {
 } from "../../src/index.ts";
 import { git } from "../../src/infrastructure/git.ts";
 import { repositoryTransport } from "../../src/infrastructure/repository-transport.ts";
-import { localSandboxProvider } from "../../src/providers/local.ts";
+import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { emit, repository, scripted } from "../helpers.ts";
 
 const done = "<outpost>done</outpost>";
@@ -67,10 +67,10 @@ test("steering injects instructions between built-in harness steps and persists 
   });
   const result = await dispatch({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
-    agent: agent({
+    sandboxProvider: createLocalSandboxProvider(),
+    agent: createAgent({
       model: "m",
-      harness: harness({
+      harness: createHarness({
         modelProvider: provider(
           [
             () => ({
@@ -129,10 +129,10 @@ test("steering that arrives after the harness answered resumes its conversation"
   let late: Promise<SteeringDelivery> | undefined;
   const result = await dispatch({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
-    agent: agent({
+    sandboxProvider: createLocalSandboxProvider(),
+    agent: createAgent({
       model: "m",
-      harness: harness({
+      harness: createHarness({
         modelProvider: provider([answer("First answer."), answer()], requests),
       }),
     }),
@@ -176,7 +176,7 @@ test("steering interrupts a resumable CLI agent and resumes its conversation", a
   });
   const result = await dispatch({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent: coder,
     brief: { text: "Refactor the auth module" },
     steering,
@@ -215,7 +215,7 @@ test("steering sent before a turn starts joins its prompt", async (t) => {
   const early = steering.send("Prefer small commits.");
   const box = await createSandbox({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent: scripted(
       `let text='';process.stdin.on('data',d=>text+=d);process.stdin.on('end',()=>console.log(JSON.stringify({kind:'text',text:text+' ${done}'})));`,
     ),
@@ -240,7 +240,7 @@ test("steering rejects messages that no turn could deliver and agents that canno
   let undelivered: Promise<SteeringDelivery> | undefined;
   const result = await dispatch({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent: scripted(
       `setTimeout(()=>console.log(${JSON.stringify(JSON.stringify({ kind: "text", text: done }))}),200);`,
     ),
@@ -261,7 +261,7 @@ test("steering rejects messages that no turn could deliver and agents that canno
   await assert.rejects(
     dispatch({
       repository: root,
-      sandboxProvider: localSandboxProvider(),
+      sandboxProvider: createLocalSandboxProvider(),
       agent: fixed,
       brief: { text: "Work" },
       steering: createSteering(),
@@ -271,7 +271,7 @@ test("steering rejects messages that no turn could deliver and agents that canno
   const busy = createSteering();
   const box = await createSandbox({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent: scripted(
       `setTimeout(()=>console.log(${JSON.stringify(JSON.stringify({ kind: "text", text: done }))}),100);`,
     ),
@@ -293,8 +293,8 @@ const claudeFixture = fileURLToPath(
 );
 
 function streamingClaude(calls: (readonly string[])[]) {
-  const native = agent({
-    harness: claudeHarness({ saveConversations: false }),
+  const native = createAgent({
+    harness: createClaudeHarness({ saveConversations: false }),
   });
   assert.equal(native.kind, "cli");
   return {
@@ -320,7 +320,7 @@ test("Claude receives steering on live stdin during a tool call and exits after 
   const started = Date.now();
   const result = await dispatch({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent: streamingClaude(calls),
     brief: { text: "Please use a tool" },
     steering,
@@ -357,7 +357,7 @@ test("Claude processes steering queued during its final answer before stdin clos
   let delivery: Promise<SteeringDelivery> | undefined;
   const result = await dispatch({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent: streamingClaude(calls),
     brief: { text: "Answer directly" },
     steering,
@@ -381,7 +381,7 @@ test("Claude steering after stdin closed resumes the native session", async (t) 
   let delivery: Promise<SteeringDelivery> | undefined;
   const result = await dispatch({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent: streamingClaude(calls),
     brief: { text: "Answer directly" },
     steering,
@@ -420,9 +420,9 @@ test("steering reaches the built-in subagent that is working", async (t) => {
       return "probed";
     },
   });
-  const child = agent({
+  const child = createAgent({
     model: "child",
-    harness: harness({
+    harness: createHarness({
       modelProvider: provider(
         [
           () => ({
@@ -441,10 +441,10 @@ test("steering reaches the built-in subagent that is working", async (t) => {
   });
   const result = await dispatch({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
-    agent: agent({
+    sandboxProvider: createLocalSandboxProvider(),
+    agent: createAgent({
       model: "parent",
-      harness: harness({
+      harness: createHarness({
         modelProvider: provider(
           [
             () => ({
@@ -507,7 +507,7 @@ test("replay reproduces a steered run's turns, instructions, text, usage and com
   );
   const recorded = await dispatch({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent: coder,
     brief: { text: "work" },
     steering,
@@ -526,13 +526,13 @@ test("replay reproduces a steered run's turns, instructions, text, usage and com
     transporter: repositoryTransport(root),
     reference: recorded.logReference,
   });
-  const replaying = replayAgent({ journal });
+  const replaying = createReplayAgent({ journal });
   assert.equal(replaying.turns.length, 2);
   await git(root, ["reset", "--hard", baseline]);
   const replayedEvents: AgentObservation[] = [];
   const replayed = await dispatch({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent: replaying,
     brief: { text: "work" },
     observe: (event) => replayedEvents.push(event),
@@ -564,7 +564,9 @@ const codexFixture = fileURLToPath(
 );
 
 function appServerCodex(calls: (readonly string[])[]) {
-  const native = agent({ harness: codexHarness({ saveConversations: false }) });
+  const native = createAgent({
+    harness: createCodexHarness({ saveConversations: false }),
+  });
   assert.equal(native.kind, "cli");
   return {
     ...native,
@@ -590,7 +592,7 @@ test("Codex receives steering through app-server turn/steer during a tool call",
   let delivery: Promise<SteeringDelivery> | undefined;
   const result = await dispatch({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent: appServerCodex(calls),
     brief: { text: "Please use a tool" },
     steering,
@@ -623,7 +625,7 @@ test("Codex steering after its turn completed resumes the app-server thread", as
   let delivery: Promise<SteeringDelivery> | undefined;
   const result = await dispatch({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent: appServerCodex(calls),
     brief: { text: "Answer directly" },
     steering,

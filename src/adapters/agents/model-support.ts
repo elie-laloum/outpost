@@ -28,7 +28,7 @@ export function harnessSettings(settings: object): void {
   );
   invariant(
     HARNESS_MODEL_KEYS.every((key) => !(key in settings)),
-    "Set the model, reasoning and maxOutputTokens on agent(), not on its harness",
+    "Set the model, reasoning and maxOutputTokens on createAgent(), not on its harness",
   );
 }
 

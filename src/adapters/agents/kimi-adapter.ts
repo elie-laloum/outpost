@@ -68,7 +68,7 @@ function bindKimi(settings: Bound<KimiSettings>): AgentAdapter {
   } satisfies AgentAdapter);
 }
 
-export function kimiHarness(settings: KimiSettings = {}): CliHarness {
+export function createKimiHarness(settings: KimiSettings = {}): CliHarness {
   harnessSettings(settings);
   conversationSettings("Kimi Code", "kimi", settings);
   invariant(

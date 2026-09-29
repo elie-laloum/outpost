@@ -2,14 +2,14 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { turn } from "../../src/application/agent-turn.ts";
 import {
-  agent,
-  antigravityHarness,
-  anthropicModelProvider,
-  claudeHarness,
-  codexHarness,
-  copilotHarness,
-  kimiHarness,
-  openaiModelProvider,
+  createAgent,
+  createAntigravityHarness,
+  createAnthropicModelProvider,
+  createClaudeHarness,
+  createCodexHarness,
+  createCopilotHarness,
+  createKimiHarness,
+  createOpenAIModelProvider,
   OutpostError,
 } from "../../src/index.ts";
 import { quotaFault } from "../../src/domain/quota.ts";
@@ -19,7 +19,7 @@ import type { SandboxLease } from "../../src/domain/sandbox.types.ts";
 import { scripted } from "../helpers.ts";
 
 test("Claude decodes rejected rate-limit events and quota assistant errors", () => {
-  const claude = agent({ harness: claudeHarness() });
+  const claude = createAgent({ harness: createClaudeHarness() });
   const [rejected] = claude.events(
     JSON.stringify({
       type: "rate_limit_event",
@@ -67,7 +67,7 @@ test("Claude decodes rejected rate-limit events and quota assistant errors", () 
 });
 
 test("Copilot classifies quota and rate-limit session errors only", () => {
-  const copilot = agent({ harness: copilotHarness() });
+  const copilot = createAgent({ harness: createCopilotHarness() });
   const decode = (errorType: string) =>
     copilot.events(
       JSON.stringify({
@@ -83,7 +83,7 @@ test("Copilot classifies quota and rate-limit session errors only", () => {
 test("CLI adapters recognize terminal quota text and ignore transient notices", () => {
   const cases: readonly [CliAgent, readonly string[], readonly string[]][] = [
     [
-      agent({ harness: claudeHarness() }),
+      createAgent({ harness: createClaudeHarness() }),
       [
         "You've hit your session limit · resets 3pm (Europe/Paris)",
         "You’ve hit your weekly limit",
@@ -96,7 +96,7 @@ test("CLI adapters recognize terminal quota text and ignore transient notices", 
       ],
     ],
     [
-      agent({ harness: codexHarness() }),
+      createAgent({ harness: createCodexHarness() }),
       [
         "You've hit your usage limit. Upgrade to Pro. Try again at 3:04 PM.",
         "Quota exceeded",
@@ -105,7 +105,7 @@ test("CLI adapters recognize terminal quota text and ignore transient notices", 
       ["Reconnecting... 1/5", "stream disconnected before completion"],
     ],
     [
-      agent({ harness: copilotHarness() }),
+      createAgent({ harness: createCopilotHarness() }),
       [
         "You've reached your weekly rate limit.",
         "You've run out of your included AI credits for the month.",
@@ -113,7 +113,7 @@ test("CLI adapters recognize terminal quota text and ignore transient notices", 
       ["GitHub Copilot CLI ended with exit code 1"],
     ],
     [
-      agent({ harness: kimiHarness() }),
+      createAgent({ harness: createKimiHarness() }),
       [
         "provider.api_error: exceeded_current_quota_error",
         "You exceeded your current token quota, please check your account balance",
@@ -121,7 +121,7 @@ test("CLI adapters recognize terminal quota text and ignore transient notices", 
       ["tool call failed"],
     ],
     [
-      agent({ harness: antigravityHarness() }),
+      createAgent({ harness: createAntigravityHarness() }),
       ["You have exhausted your quota on this model.", "RESOURCE_EXHAUSTED"],
       ["Antigravity ended the turn with status ERROR"],
     ],
@@ -276,8 +276,11 @@ test("HTTP 429 is classified as quota for both model providers", async (t) => {
       new Response(null, { status: 429, headers: { "Retry-After": "60" } }),
   );
   for (const provider of [
-    openaiModelProvider({ apiKey: false, baseUrl: "http://localhost" }),
-    anthropicModelProvider({ apiKey: "test", baseUrl: "http://localhost" }),
+    createOpenAIModelProvider({ apiKey: false, baseUrl: "http://localhost" }),
+    createAnthropicModelProvider({
+      apiKey: "test",
+      baseUrl: "http://localhost",
+    }),
   ])
     await assert.rejects(
       provider.request({ model: "test", prompt: "hi", maxOutputTokens: 1 }),
@@ -296,9 +299,10 @@ test("HTTP 429 is classified as quota for both model providers", async (t) => {
     async () => new Response(null, { status: 503 }),
   );
   await assert.rejects(
-    openaiModelProvider({ apiKey: false, baseUrl: "http://localhost" }).request(
-      { model: "test", prompt: "hi", maxOutputTokens: 1 },
-    ),
+    createOpenAIModelProvider({
+      apiKey: false,
+      baseUrl: "http://localhost",
+    }).request({ model: "test", prompt: "hi", maxOutputTokens: 1 }),
     (error) =>
       error instanceof OutpostError &&
       error.code === "provider" &&

@@ -3,20 +3,20 @@ import { test, type TestContext } from "node:test";
 import { chmod, stat, symlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import {
-  agent,
+  createAgent,
   defineHarnessPermissions,
   dispatch,
-  harness,
-  harnessEditTools,
-  harnessFileTools,
-  harnessGitTools,
-  harnessSearchTools,
-  harnessShellTools,
+  createHarness,
+  createHarnessEditTools,
+  createHarnessFileTools,
+  createHarnessGitTools,
+  createHarnessSearchTools,
+  createHarnessShellTools,
   type HarnessOptions,
   type ModelProvider,
   type ModelRequest,
 } from "../../src/index.ts";
-import { localSandboxProvider } from "../../src/providers/local.ts";
+import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { git } from "../../src/infrastructure/git.ts";
 import { repository } from "../helpers.ts";
 
@@ -64,17 +64,19 @@ async function exercise(
   };
   const result = await dispatch({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
-    agent: agent({
+    sandboxProvider: createLocalSandboxProvider(),
+    agent: createAgent({
       model: "m",
-      harness: harness({
+      harness: createHarness({
         modelProvider: provider,
         tools: [
-          harnessFileTools(),
-          harnessEditTools(),
-          harnessSearchTools(),
-          harnessGitTools(),
-          ...(posixShell ? [harnessShellTools({ deadlineMs: 5_000 })] : []),
+          createHarnessFileTools(),
+          createHarnessEditTools(),
+          createHarnessSearchTools(),
+          createHarnessGitTools(),
+          ...(posixShell
+            ? [createHarnessShellTools({ deadlineMs: 5_000 })]
+            : []),
         ],
         ...extra,
       }),
@@ -308,6 +310,9 @@ test(
       "error: Denied: Denied by permission rule 3",
       "Wrote 1 bytes to src/ok.md",
     ]);
-    assert.throws(() => harnessShellTools({ deadlineMs: 0 }), /deadlineMs/);
+    assert.throws(
+      () => createHarnessShellTools({ deadlineMs: 0 }),
+      /deadlineMs/,
+    );
   },
 );

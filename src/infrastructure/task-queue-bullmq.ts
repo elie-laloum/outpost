@@ -26,7 +26,7 @@ export type {
   BullMQTaskQueue,
 } from "./task-queue-bullmq.types.ts";
 
-export async function bullmqTaskQueue(
+export async function createBullMQTaskQueue(
   options: BullMQTaskQueueOptions,
 ): Promise<BullMQTaskQueue> {
   const resources = await openBullMQResources(options);
@@ -178,3 +178,6 @@ export async function bullmqTaskQueue(
     close: resources.close,
   };
 }
+
+/** @deprecated Use {@link createBullMQTaskQueue}. */
+export const bullmqTaskQueue = createBullMQTaskQueue;

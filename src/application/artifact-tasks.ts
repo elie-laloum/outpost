@@ -5,15 +5,15 @@ import type {
   ArtifactReference,
   ArtifactStore,
 } from "../domain/artifact.types.ts";
-import { task } from "../domain/workflow.ts";
+import { defineTask } from "../domain/workflow.ts";
 import type { Task, TaskContext } from "../domain/workflow.types.ts";
 import type { ArtifactTaskOptions } from "./artifact-tasks.types.ts";
 
-export function artifactTask<T>(
+export function defineArtifactTask<T>(
   options: ArtifactTaskOptions<T>,
 ): Task<ArtifactReference> {
   const { store, contract, produce, parents, ...definition } = options;
-  return task({
+  return defineTask({
     ...definition,
     async perform(context) {
       const lineage = parents?.(context) ?? [];

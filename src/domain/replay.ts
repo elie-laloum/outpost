@@ -54,7 +54,7 @@ export class ReplayDivergence extends OutpostError {
   }
 }
 
-export function replayAgent(options: ReplayAgentOptions): ReplayAgent {
+export function createReplayAgent(options: ReplayAgentOptions): ReplayAgent {
   invariant(
     options && typeof options === "object",
     "Replay options must be an object",

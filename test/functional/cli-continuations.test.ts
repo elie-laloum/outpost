@@ -4,19 +4,19 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { test } from "node:test";
 import {
-  agent,
-  antigravityHarness,
-  claudeHarness,
-  codexHarness,
-  copilotHarness,
-  kimiHarness,
+  createAgent,
+  createAntigravityHarness,
+  createClaudeHarness,
+  createCodexHarness,
+  createCopilotHarness,
+  createKimiHarness,
   createSandbox,
   dispatch,
-  fallbackAgent,
-  localTransport,
-  response,
+  createFallbackAgent,
+  createLocalTransport,
+  defineJsonResponse,
   recoveryDetails,
-  transportConversations,
+  createTransportConversations,
 } from "../../src/index.ts";
 import type { CliAgent, ConversationStore } from "../../src/index.ts";
 import type { SandboxProvider } from "../../src/domain/sandbox.types.ts";
@@ -25,10 +25,10 @@ import { executeProcess } from "../../src/infrastructure/process.ts";
 import { repository, scripted } from "../helpers.ts";
 
 const stored = {
-  claude: claudeHarness,
-  codex: codexHarness,
-  copilot: copilotHarness,
-  kimi: kimiHarness,
+  claude: createClaudeHarness,
+  codex: createCodexHarness,
+  copilot: createCopilotHarness,
+  kimi: createKimiHarness,
 };
 const scripts = {
   antigravity: "continuation-cli.ts",
@@ -41,10 +41,10 @@ function fixture(
   name: keyof typeof scripts,
   conversations?: ConversationStore,
 ) {
-  const adapter = agent({
+  const adapter = createAgent({
     harness:
       name === "antigravity"
-        ? antigravityHarness()
+        ? createAntigravityHarness()
         : stored[name](conversations ? { conversations } : {}),
   });
   const command = (input: Command): Command => ({
@@ -118,7 +118,7 @@ for (const name of ["antigravity", "copilot", "kimi"] as const) {
     assert.equal(second.conversation, first.conversation);
     const repaired = await second.resume({
       brief: { text: "Return invalid JSON inside <answer>" },
-      response: response.json({
+      response: defineJsonResponse({
         tag: "answer",
         repairs: 1,
         schema: (value: unknown) => {
@@ -193,10 +193,10 @@ for (const name of ["claude", "codex", "copilot", "kimi"] as const) {
   test(`${name} transport conversations resume without local captures`, async (t) => {
     const root = await repository(t),
       sandboxProvider = provider(root);
-    const transporter = localTransport({
+    const transporter = createLocalTransport({
       directory: join(await repository(t), "objects"),
     });
-    const conversations = transportConversations(name, {
+    const conversations = createTransportConversations(name, {
       transporter,
       namespace: "team",
     });
@@ -243,7 +243,7 @@ for (const name of ["claude", "codex", "copilot", "kimi"] as const) {
 }
 test("fallback candidates capture into their own conversation store", async (t) => {
   const root = await repository(t);
-  const transporter = localTransport({
+  const transporter = createLocalTransport({
     directory: join(await repository(t), "objects"),
   });
   const limited: CliAgent = {
@@ -256,12 +256,15 @@ test("fallback candidates capture into their own conversation store", async (t) 
   const result = await dispatch({
     repository: root,
     sandboxProvider: provider(root),
-    agent: fallbackAgent(
+    agent: createFallbackAgent(
       [
         limited,
         fixture(
           "kimi",
-          transportConversations("kimi", { transporter, namespace: "team" }),
+          createTransportConversations("kimi", {
+            transporter,
+            namespace: "team",
+          }),
         ),
       ],
       { on: ["quota"] },
@@ -286,7 +289,7 @@ test("unsupported continuation fails before allocation", async (t) => {
     dispatch({
       repository: root,
       sandboxProvider,
-      agent: agent({ harness: antigravityHarness() }),
+      agent: createAgent({ harness: createAntigravityHarness() }),
       brief: { text: "resume" },
       continuation: { id: "session" },
     }),
@@ -296,7 +299,7 @@ test("unsupported continuation fails before allocation", async (t) => {
     dispatch({
       repository: root,
       sandboxProvider,
-      agent: agent({ harness: copilotHarness() }),
+      agent: createAgent({ harness: createCopilotHarness() }),
       brief: { text: "fork" },
       continuation: { id: "session", fork: true },
     }),

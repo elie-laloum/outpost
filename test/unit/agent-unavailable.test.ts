@@ -3,14 +3,14 @@ import { test } from "node:test";
 import { turn } from "../../src/application/agent-turn.ts";
 import { streamFailure } from "../../src/adapters/models/stream-events.ts";
 import {
-  agent,
-  antigravityHarness,
-  anthropicModelProvider,
-  claudeHarness,
-  codexHarness,
-  copilotHarness,
-  kimiHarness,
-  openaiModelProvider,
+  createAgent,
+  createAntigravityHarness,
+  createAnthropicModelProvider,
+  createClaudeHarness,
+  createCodexHarness,
+  createCopilotHarness,
+  createKimiHarness,
+  createOpenAIModelProvider,
   OutpostError,
   quotaFault,
   unavailableFault,
@@ -23,7 +23,7 @@ import { scripted } from "../helpers.ts";
 test("CLI adapters recognize terminal outages and ignore retry notices", () => {
   const cases: readonly [CliAgent, readonly string[], readonly string[]][] = [
     [
-      agent({ harness: claudeHarness() }),
+      createAgent({ harness: createClaudeHarness() }),
       [
         'API Error: 529 {"type":"error","error":{"type":"overloaded_error"}}',
         "API Error: 500 Internal server error",
@@ -36,7 +36,7 @@ test("CLI adapters recognize terminal outages and ignore retry notices", () => {
       ],
     ],
     [
-      agent({ harness: codexHarness() }),
+      createAgent({ harness: createCodexHarness() }),
       [
         "exceeded retry limit, last status: 503 Service Unavailable",
         "stream disconnected before completion: error sending request",
@@ -48,17 +48,17 @@ test("CLI adapters recognize terminal outages and ignore retry notices", () => {
       ],
     ],
     [
-      agent({ harness: copilotHarness() }),
+      createAgent({ harness: createCopilotHarness() }),
       ["Server error: 503 Service Unavailable", "connect ECONNREFUSED"],
       ["GitHub Copilot CLI ended with exit code 1"],
     ],
     [
-      agent({ harness: kimiHarness() }),
+      createAgent({ harness: createKimiHarness() }),
       ["Error code: 503", "APIConnectionError: Connection error."],
       ["Error code: 400", "exceeded_current_quota_error"],
     ],
     [
-      agent({ harness: antigravityHarness() }),
+      createAgent({ harness: createAntigravityHarness() }),
       ["UNAVAILABLE: model endpoint", "The model is overloaded."],
       ["RESOURCE_EXHAUSTED", "Antigravity ended the turn with status ERROR"],
     ],
@@ -210,8 +210,11 @@ test("a timeout after a reported connection failure is an outage without leaking
 
 test("model providers mark 5xx, 529, 408 and transport failures as outages", async (t) => {
   const providers = () => [
-    openaiModelProvider({ apiKey: false, baseUrl: "http://localhost" }),
-    anthropicModelProvider({ apiKey: "test", baseUrl: "http://localhost" }),
+    createOpenAIModelProvider({ apiKey: false, baseUrl: "http://localhost" }),
+    createAnthropicModelProvider({
+      apiKey: "test",
+      baseUrl: "http://localhost",
+    }),
   ];
   const request = { model: "test", prompt: "hi", maxOutputTokens: 1 };
   for (const status of [408, 500, 502, 503, 504, 529]) {

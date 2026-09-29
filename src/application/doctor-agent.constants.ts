@@ -1,13 +1,13 @@
 import { antigravityVariables } from "../adapters/agents/antigravity.constants.ts";
-import { antigravityHarness } from "../adapters/agents/antigravity-adapter.ts";
+import { createAntigravityHarness } from "../adapters/agents/antigravity-adapter.ts";
 import { antigravityDiagnostics } from "../adapters/agents/antigravity-diagnostics.ts";
-import { claudeHarness } from "../adapters/agents/claude-adapter.ts";
+import { createClaudeHarness } from "../adapters/agents/claude-adapter.ts";
 import { claudeDiagnostics } from "../adapters/agents/claude-diagnostics.ts";
-import { codexHarness } from "../adapters/agents/codex-adapter.ts";
+import { createCodexHarness } from "../adapters/agents/codex-adapter.ts";
 import { codexDiagnostics } from "../adapters/agents/codex-diagnostics.ts";
-import { copilotHarness } from "../adapters/agents/copilot-adapter.ts";
+import { createCopilotHarness } from "../adapters/agents/copilot-adapter.ts";
 import { copilotDiagnostics } from "../adapters/agents/copilot-diagnostics.ts";
-import { kimiHarness } from "../adapters/agents/kimi-adapter.ts";
+import { createKimiHarness } from "../adapters/agents/kimi-adapter.ts";
 import { kimiDiagnostics } from "../adapters/agents/kimi-diagnostics.ts";
 import { agentVersions } from "../providers/versions.constants.ts";
 import type { DoctorAgent, DoctorAgentProfile } from "./doctor.types.ts";
@@ -18,32 +18,32 @@ export const doctorAgents: Readonly<Record<DoctorAgent, DoctorAgentProfile>> =
       executable: "codex",
       referenceVersion: agentVersions.codex,
       diagnostics: codexDiagnostics,
-      harness: () => codexHarness(),
+      harness: () => createCodexHarness(),
     },
     claude: {
       executable: "claude",
       referenceVersion: agentVersions.claude,
       diagnostics: claudeDiagnostics,
-      harness: () => claudeHarness(),
+      harness: () => createClaudeHarness(),
     },
     antigravity: {
       executable: "agy",
       referenceVersion: agentVersions.antigravity,
       variables: antigravityVariables,
       diagnostics: antigravityDiagnostics,
-      harness: () => antigravityHarness(),
+      harness: () => createAntigravityHarness(),
     },
     copilot: {
       executable: "copilot",
       referenceVersion: agentVersions.copilot,
       diagnostics: copilotDiagnostics,
-      harness: () => copilotHarness(),
+      harness: () => createCopilotHarness(),
     },
     kimi: {
       executable: "kimi",
       referenceVersion: agentVersions.kimi,
       diagnostics: kimiDiagnostics,
-      harness: () => kimiHarness(),
+      harness: () => createKimiHarness(),
     },
   });
 export const agentDiagnosticDefaults = Object.freeze({ retain: 65_536 });

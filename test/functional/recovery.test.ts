@@ -8,14 +8,14 @@ import {
   createSandbox,
   dispatch,
   openWorkspace,
-  response,
+  defineTextResponse,
   ResponseError,
-  agentTask,
-  commandTask,
-  isolatedTask,
-  workflow,
+  defineAgentTask,
+  defineCommandTask,
+  defineIsolatedTask,
+  defineWorkflow,
 } from "../../src/index.ts";
-import { localSandboxProvider } from "../../src/providers/local.ts";
+import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { shell } from "../../src/infrastructure/process.ts";
 import { repository, scripted, emit } from "../helpers.ts";
 
@@ -23,7 +23,7 @@ test("multi-pass dispatch saves every native conversation before releasing its w
   const root = await realpath(await repository(t)),
     home = join(root, ".outpost", "recovery", "history");
   await mkdir(home, { recursive: true });
-  const host = localSandboxProvider();
+  const host = createLocalSandboxProvider();
   const sandboxProvider = {
     ...host,
     async acquire(context: Parameters<typeof host.acquire>[0]) {
@@ -65,7 +65,7 @@ test("cold result resume and fork round-trip native transcripts while preserving
   const root = await repository(t),
     home = join(root, ".outpost", "recovery", "native-home");
   await mkdir(home, { recursive: true });
-  const host = localSandboxProvider();
+  const host = createLocalSandboxProvider();
   const sandboxProvider = {
     ...host,
     async acquire(context: Parameters<typeof host.acquire>[0]) {
@@ -135,7 +135,7 @@ test("idle and completion watchdogs have distinct outcomes and allow reuse", asy
   let complete = false;
   const box = await createSandbox({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent: scripted(
       () =>
         (complete ? emit("finished-marker") : "") + "setInterval(()=>{},1000)",
@@ -174,7 +174,7 @@ test("prompt commands run after hooks and fail with diagnostics", async (t) => {
   );
   const box = await createSandbox({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent,
     logging: false,
     hooks: {
@@ -213,12 +213,12 @@ test("structured failures retain recovery metadata and release workspace locks",
   await assert.rejects(
     dispatch({
       repository: root,
-      sandboxProvider: localSandboxProvider(),
+      sandboxProvider: createLocalSandboxProvider(),
       agent: scripted(emit("invalid")),
       logging: false,
       branch: { mode: "named", name: "invalid-result" },
       brief: { text: "Return <data>" },
-      response: response.text({ tag: "data" }),
+      response: defineTextResponse({ tag: "data" }),
     }),
     (error) => {
       assert.ok(error instanceof ResponseError);
@@ -235,7 +235,7 @@ test("structured failures retain recovery metadata and release workspace locks",
   await assert.rejects(
     createSandbox({
       repository: root,
-      sandboxProvider: localSandboxProvider(),
+      sandboxProvider: createLocalSandboxProvider(),
       agent: scripted(""),
       hooks: {
         sandboxReady: [
@@ -256,17 +256,17 @@ test("workflow convenience tasks share sequential sandboxes and isolate fanout",
   const root = await repository(t),
     box = await createSandbox({
       repository: root,
-      sandboxProvider: localSandboxProvider(),
+      sandboxProvider: createLocalSandboxProvider(),
       agent: scripted(emit("answer")),
       logging: false,
     });
   t.after(() => box.close());
-  const a = agentTask({
+  const a = defineAgentTask({
     key: "agent",
     sandbox: box,
     request: () => ({ brief: { text: "hello" } }),
   });
-  const b = commandTask({
+  const b = defineCommandTask({
     key: "verify",
     after: [a],
     sandbox: box,
@@ -275,22 +275,24 @@ test("workflow convenience tasks share sequential sandboxes and isolate fanout",
       arguments: ["-e", "console.log('verified')"],
     }),
   });
-  const c = isolatedTask({
+  const c = defineIsolatedTask({
     key: "isolated",
     request: () => ({
       repository: root,
-      sandboxProvider: localSandboxProvider(),
+      sandboxProvider: createLocalSandboxProvider(),
       agent: scripted(emit("isolated")),
       logging: false,
       branch: { mode: "named", name: "isolated-task" },
       brief: { text: "hello" },
     }),
   });
-  const result = await workflow("helpers", [a, b, c]).start({ concurrency: 2 });
+  const result = await defineWorkflow("helpers", [a, b, c]).start({
+    concurrency: 2,
+  });
   result.unwrap();
   assert.equal(result.value(a).text, "answer");
   assert.equal(result.value(c).text, "isolated");
-  const bad = commandTask({
+  const bad = defineCommandTask({
     key: "bad",
     sandbox: box,
     command: {
@@ -298,7 +300,10 @@ test("workflow convenience tasks share sequential sandboxes and isolate fanout",
       arguments: ["-e", "process.exit(9)"],
     },
   });
-  assert.equal((await workflow("failure", [bad]).start()).status, "failed");
+  assert.equal(
+    (await defineWorkflow("failure", [bad]).start()).status,
+    "failed",
+  );
 });
 
 test("native cold continuation preflight happens before provisioning", async (t) => {
@@ -307,7 +312,7 @@ test("native cold continuation preflight happens before provisioning", async (t)
   await mkdir(home);
   let acquired = false;
   const sandboxProvider = {
-    ...localSandboxProvider(),
+    ...createLocalSandboxProvider(),
     async acquire() {
       acquired = true;
       throw new Error("must not provision");

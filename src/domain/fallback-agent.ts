@@ -15,7 +15,7 @@ import type {
 import { quotaFault } from "./quota.ts";
 import { unavailableFault } from "./unavailable.ts";
 
-export function fallbackAgent(
+export function createFallbackAgent(
   agents: readonly [Agent, Agent, ...Agent[]],
   options: FallbackAgentOptions,
 ): FallbackAgent {
@@ -30,7 +30,7 @@ export function fallbackAgent(
         typeof candidate === "object" &&
         fallbackAgentKinds.has(candidate.kind),
     ),
-    "Fallback candidates must be agents created with agent() or replayAgent()",
+    "Fallback candidates must be agents created with createAgent() or createReplayAgent()",
   );
   invariant(
     options && Array.isArray(options.on) && options.on.length > 0,

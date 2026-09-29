@@ -1,12 +1,12 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
-  agent,
-  claudeHarness,
-  codexHarness,
-  copilotHarness,
-  kimiHarness,
-  antigravityHarness,
+  createAgent,
+  createClaudeHarness,
+  createCodexHarness,
+  createCopilotHarness,
+  createKimiHarness,
+  createAntigravityHarness,
 } from "../../src/index.ts";
 import type { AgentObservation } from "../../src/index.ts";
 import { agentOutput } from "../../src/application/agent-output.ts";
@@ -16,7 +16,9 @@ import { stopReason } from "../../src/application/stop-reason.ts";
 import { OutpostError } from "../../src/domain/errors.ts";
 
 test("Claude normalizes tool ids, results, thinking, partial text and message usage", () => {
-  const adapter = agent({ harness: claudeHarness({ partialMessages: true }) });
+  const adapter = createAgent({
+    harness: createClaudeHarness({ partialMessages: true }),
+  });
   assert.ok(
     adapter.request({}).arguments?.includes("--include-partial-messages"),
   );
@@ -86,7 +88,7 @@ test("Claude normalizes tool ids, results, thinking, partial text and message us
 });
 
 test("Codex exposes command failures, MCP results, reasoning and file changes", () => {
-  const adapter = agent({ harness: codexHarness() });
+  const adapter = createAgent({ harness: createCodexHarness() });
   const decode = (type: string, item: unknown) =>
     adapter.events(JSON.stringify({ type, item }));
   const call = decode("item.started", {
@@ -130,7 +132,7 @@ test("Codex exposes command failures, MCP results, reasoning and file changes", 
 });
 
 test("Copilot and Kimi correlate results while Antigravity uses conversation and step index", () => {
-  const copilot = agent({ harness: copilotHarness() });
+  const copilot = createAgent({ harness: createCopilotHarness() });
   const result = copilot.events(
     JSON.stringify({
       type: "tool.execution_complete",
@@ -146,14 +148,14 @@ test("Copilot and Kimi correlate results while Antigravity uses conversation and
       result.callId === "call" &&
       result.isError,
   );
-  const kimi = agent({ harness: kimiHarness() });
+  const kimi = createAgent({ harness: createKimiHarness() });
   assert.equal(
     kimi.events(
       JSON.stringify({ role: "tool", tool_call_id: "call", content: "ok" }),
     )[0]?.kind,
     "tool-result",
   );
-  const antigravity = agent({ harness: antigravityHarness() });
+  const antigravity = createAgent({ harness: createAntigravityHarness() });
   const decode = (state: string) =>
     antigravity.events(
       JSON.stringify({
@@ -178,7 +180,7 @@ test("oversized newline-terminated and unterminated UTF-8 lines are reported bef
   for (const suffix of ["", "\n"]) {
     const events: AgentObservation[] = [];
     const output = agentOutput(
-      agent({ harness: codexHarness() }),
+      createAgent({ harness: createCodexHarness() }),
       {
         brief: { text: "test" },
         observe(value) {

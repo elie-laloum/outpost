@@ -5,7 +5,7 @@ import type { Task, TaskOptions } from "../workflow.types.ts";
 import { positive } from "./validation.ts";
 import { validateTaskCache } from "./task-cache.ts";
 
-export function task<T>(options: TaskOptions<T>): Task<T> {
+export function defineTask<T>(options: TaskOptions<T>): Task<T> {
   if (!/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(options.key))
     throw new Error(`Invalid task key: ${options.key}`);
   if (options.timeoutMs !== undefined) positive(options.timeoutMs, "timeoutMs");

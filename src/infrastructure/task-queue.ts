@@ -16,7 +16,9 @@ import type {
   QueueLease,
 } from "../domain/task-queue.types.ts";
 
-export async function sqliteTaskQueue(path: string): Promise<DurableTaskQueue> {
+export async function createSqliteTaskQueue(
+  path: string,
+): Promise<DurableTaskQueue> {
   const { DatabaseSync } = await import("node:sqlite");
   const file = resolve(path);
   mkdirSync(dirname(file), { recursive: true, mode: 0o700 });

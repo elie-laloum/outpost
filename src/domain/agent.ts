@@ -9,10 +9,10 @@ import type {
   CustomAgent,
 } from "./agent.types.ts";
 
-export function agent(options: CliAgentOptions): CliAgent;
-export function agent(options: CustomAgentOptions): CustomAgent;
-export function agent(options: AgentOptions): Agent;
-export function agent(options: AgentOptions): Agent {
+export function createAgent(options: CliAgentOptions): CliAgent;
+export function createAgent(options: CustomAgentOptions): CustomAgent;
+export function createAgent(options: AgentOptions): Agent;
+export function createAgent(options: AgentOptions): Agent {
   invariant(
     options && typeof options === "object",
     "Agent options must be an object",
@@ -40,7 +40,7 @@ export function agent(options: AgentOptions): Agent {
   invariant(
     typeof harness.modelProvider?.request === "function" &&
       Array.isArray(harness.tools),
-    "Create custom harnesses with harness()",
+    "Create custom harnesses with createHarness()",
   );
   harness.modelProvider.validate?.(model);
   const persisted = harness.conversations !== false;

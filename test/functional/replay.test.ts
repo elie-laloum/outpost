@@ -3,14 +3,14 @@ import assert from "node:assert/strict";
 import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import {
-  agent,
+  createAgent,
   defineHarnessTool,
   dispatch,
-  harness,
+  createHarness,
   readJournal,
-  replayAgent,
+  createReplayAgent,
   ReplayDivergence,
-  response,
+  defineJsonResponse,
 } from "../../src/index.ts";
 import type {
   AgentObservation,
@@ -20,7 +20,7 @@ import type {
 import { recoveryDetails } from "../../src/domain/errors.ts";
 import { git } from "../../src/infrastructure/git.ts";
 import { repositoryTransport } from "../../src/infrastructure/repository-transport.ts";
-import { localSandboxProvider } from "../../src/providers/local.ts";
+import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { emit, repository, scripted } from "../helpers.ts";
 
 const committing = `import {writeFileSync, rmSync} from 'node:fs'; import {execFileSync} from 'node:child_process';
@@ -65,7 +65,7 @@ async function record(
   const baseline = await head(root);
   const result = await dispatch({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent: scripted(script),
     brief: { text: "work" },
     logging: {
@@ -91,14 +91,14 @@ async function journal(
 test("replay reproduces a CLI run's events, result and exact commits", async (t) => {
   const root = await repository(t);
   const recorded = await record(root, committing, { verbose: true });
-  const replaying = replayAgent({ journal: recorded.journal });
+  const replaying = createReplayAgent({ journal: recorded.journal });
   assert.equal(replaying.turns.length, 1);
   assert.equal(replaying.remainingTurns, 1);
   await rewind(root, recorded.baseline);
   const events: AgentObservation[] = [];
   const replayed = await dispatch({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent: replaying,
     brief: { text: "work" },
     logging: { replayable: true },
@@ -133,8 +133,8 @@ test("replay rebuilds equivalent commits from a repository with the same tree", 
   const fresh = await repository(t);
   const replayed = await dispatch({
     repository: fresh,
-    sandboxProvider: localSandboxProvider(),
-    agent: replayAgent({ journal: recorded.journal }),
+    sandboxProvider: createLocalSandboxProvider(),
+    agent: createReplayAgent({ journal: recorded.journal }),
     brief: { text: "work" },
   });
   assert.deepEqual(
@@ -158,7 +158,7 @@ test("replay reports prompt, baseline, tree, exhausted and unrecorded divergence
   const recorded = await record(root, adding);
   const run = (
     repositoryPath: string,
-    selected: ReturnType<typeof replayAgent>,
+    selected: ReturnType<typeof createReplayAgent>,
     text = "work",
     warnings: string[] = [],
   ) =>
@@ -168,7 +168,7 @@ test("replay reports prompt, baseline, tree, exhausted and unrecorded divergence
     ).then(() =>
       dispatch({
         repository: repositoryPath,
-        sandboxProvider: localSandboxProvider(),
+        sandboxProvider: createLocalSandboxProvider(),
         agent: selected,
         brief: { text },
         warn: (message) => warnings.push(message),
@@ -177,7 +177,7 @@ test("replay reports prompt, baseline, tree, exhausted and unrecorded divergence
 
   const prompt = await run(
     root,
-    replayAgent({ journal: recorded.journal }),
+    createReplayAgent({ journal: recorded.journal }),
     "other",
   ).catch((error: unknown) => error);
   assert.ok(prompt instanceof ReplayDivergence);
@@ -190,7 +190,7 @@ test("replay reports prompt, baseline, tree, exhausted and unrecorded divergence
   const warned: string[] = [];
   const tolerated = await run(
     root,
-    replayAgent({ journal: recorded.journal, divergence: "warn" }),
+    createReplayAgent({ journal: recorded.journal, divergence: "warn" }),
     "other",
     warned,
   );
@@ -202,14 +202,14 @@ test("replay reports prompt, baseline, tree, exhausted and unrecorded divergence
   await git(shifted, ["add", "."]);
   await git(shifted, ["commit", "-m", "Extra"]);
   await assert.rejects(
-    run(shifted, replayAgent({ journal: recorded.journal })),
+    run(shifted, createReplayAgent({ journal: recorded.journal })),
     (error: unknown) =>
       error instanceof ReplayDivergence && error.kind === "baseline",
   );
   const shiftedWarnings: string[] = [];
   const shiftedRun = await run(
     shifted,
-    replayAgent({ journal: recorded.journal, divergence: "warn" }),
+    createReplayAgent({ journal: recorded.journal, divergence: "warn" }),
     "work",
     shiftedWarnings,
   );
@@ -228,13 +228,13 @@ test("replay reports prompt, baseline, tree, exhausted and unrecorded divergence
   await git(conflicting, ["commit", "-m", "Conflicting notes"]);
   const conflict = await run(
     conflicting,
-    replayAgent({ journal: recorded.journal, divergence: "warn" }),
+    createReplayAgent({ journal: recorded.journal, divergence: "warn" }),
   ).catch((error: unknown) => error);
   assert.ok(conflict instanceof ReplayDivergence);
   assert.equal(conflict.kind, "tree");
   assert.equal(conflict.commit, recorded.result.commits[0]?.oid);
 
-  const single = replayAgent({ journal: recorded.journal });
+  const single = createReplayAgent({ journal: recorded.journal });
   await run(root, single);
   await assert.rejects(
     run(root, single),
@@ -247,7 +247,7 @@ test("replay reports prompt, baseline, tree, exhausted and unrecorded divergence
   await rewind(root, recorded.baseline);
   const unreplayable = await record(root, adding, { replayable: false });
   await assert.rejects(
-    run(root, replayAgent({ journal: unreplayable.journal })),
+    run(root, createReplayAgent({ journal: unreplayable.journal })),
     (error: unknown) =>
       error instanceof ReplayDivergence &&
       error.kind === "unrecorded" &&
@@ -256,7 +256,7 @@ test("replay reports prompt, baseline, tree, exhausted and unrecorded divergence
   const eventsOnly: string[] = [];
   const partial = await run(
     root,
-    replayAgent({ journal: unreplayable.journal, divergence: "warn" }),
+    createReplayAgent({ journal: unreplayable.journal, divergence: "warn" }),
     "work",
     eventsOnly,
   );
@@ -272,7 +272,7 @@ test("replay rethrows a recorded failure after reproducing its commits", async (
   const baseline = await head(root);
   const failure = await dispatch({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent: scripted(
       `import {writeFileSync} from 'node:fs'; import {execFileSync} from 'node:child_process'; writeFileSync('partial.txt','x'); execFileSync('git',['add','.']); execFileSync('git',['commit','-m','Partial']); console.log(JSON.stringify({kind:'text',text:'partial'})); process.exit(3);`,
     ),
@@ -289,8 +289,8 @@ test("replay rethrows a recorded failure after reproducing its commits", async (
   const events: AgentObservation[] = [];
   const replayed = await dispatch({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
-    agent: replayAgent({ journal: recorded }),
+    sandboxProvider: createLocalSandboxProvider(),
+    agent: createReplayAgent({ journal: recorded }),
     brief: { text: "work" },
     observe: observed(events),
   }).catch((error: unknown) => error);
@@ -311,7 +311,7 @@ test("replay follows recorded response repairs and multiple passes", async (t) =
       ? `console.log(JSON.stringify({kind:'conversation',id:'c1'})); console.log(JSON.stringify({kind:'text',text:'<result>{"ok":true}</result>'}))`
       : `console.log(JSON.stringify({kind:'conversation',id:'c1'})); console.log(JSON.stringify({kind:'text',text:'<result>oops</result>'}))`,
   );
-  const spec = response.json({
+  const spec = defineJsonResponse({
     tag: "result",
     schema: (value) => value as { ok: boolean },
     repairs: 1,
@@ -319,18 +319,18 @@ test("replay follows recorded response repairs and multiple passes", async (t) =
   const brief = { text: "Answer inside <result> tags." };
   const original = await dispatch({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent: repairing,
     brief,
     response: spec,
     logging: { replayable: true },
   });
-  const repairs = replayAgent({ journal: await journal(root, original) });
+  const repairs = createReplayAgent({ journal: await journal(root, original) });
   const baseline = await head(root);
   assert.equal(repairs.turns.length, 2);
   const replayed = await dispatch({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent: repairs,
     brief,
     response: spec,
@@ -340,7 +340,7 @@ test("replay follows recorded response repairs and multiple passes", async (t) =
   await assert.rejects(
     replayed.resume({
       repository: root,
-      sandboxProvider: localSandboxProvider(),
+      sandboxProvider: createLocalSandboxProvider(),
       brief: { text: "again" },
     }),
     /does not support native conversations/,
@@ -353,18 +353,18 @@ ${emit("pass")}`;
   await rewind(root, baseline);
   const passes = await dispatch({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent: scripted(counting),
     brief: { text: "work" },
     passes: 2,
     logging: { replayable: true },
   });
-  const multiple = replayAgent({ journal: await journal(root, passes) });
+  const multiple = createReplayAgent({ journal: await journal(root, passes) });
   assert.equal(multiple.turns.length, 2);
   await rewind(root, baseline);
   const replayedPasses = await dispatch({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent: multiple,
     brief: { text: "work" },
     passes: 2,
@@ -409,28 +409,32 @@ test("replay preserves harness observation sources and honors cancellation", asy
       return "committed";
     },
   });
-  const selected = agent({
+  const selected = createAgent({
     model: "fixture",
-    harness: harness({ modelProvider, tools: [commit], conversations: false }),
+    harness: createHarness({
+      modelProvider,
+      tools: [commit],
+      conversations: false,
+    }),
   });
   const events: AgentObservation[] = [];
   const baseline = await head(root);
   const original = await dispatch({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent: selected,
     brief: { text: "work" },
     logging: { replayable: true, verbose: true },
     observe: observed(events),
   });
   const recorded = await journal(root, original);
-  const replaying = replayAgent({ journal: recorded });
+  const replaying = createReplayAgent({ journal: recorded });
   assert.equal(replaying.source, "harness");
   await rewind(root, baseline);
   const replayedEvents: AgentObservation[] = [];
   const replayed = await dispatch({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent: replaying,
     brief: { text: "work" },
     observe: observed(replayedEvents),
@@ -446,8 +450,8 @@ test("replay preserves harness observation sources and honors cancellation", asy
   await assert.rejects(
     dispatch({
       repository: root,
-      sandboxProvider: localSandboxProvider(),
-      agent: replayAgent({ journal: recorded }),
+      sandboxProvider: createLocalSandboxProvider(),
+      agent: createReplayAgent({ journal: recorded }),
       brief: { text: "work" },
       signal: controller.signal,
       observe(event) {

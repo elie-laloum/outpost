@@ -1,4 +1,4 @@
-import { localTransport, readJournal } from "../../src/index.ts";
+import { createLocalTransport, readJournal } from "../../src/index.ts";
 import assert from "node:assert/strict";
 import { test, type TestContext } from "node:test";
 import { createServer, type ServerResponse } from "node:http";
@@ -7,17 +7,17 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import {
-  agent,
-  anthropicModelProvider,
+  createAgent,
+  createAnthropicModelProvider,
   defineHarnessTool,
   dispatch,
-  harness,
-  openaiModelProvider,
+  createHarness,
+  createOpenAIModelProvider,
   type AgentObservation,
   type ModelProvider,
   type ModelStreamEvent,
 } from "../../src/index.ts";
-import { localSandboxProvider } from "../../src/providers/local.ts";
+import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { repository } from "../helpers.ts";
 
 type Handler = (
@@ -130,7 +130,7 @@ test("providers stream deltas and final results for the three protocols", async 
     },
   ]);
   const chat = await collect(
-    openaiModelProvider({ baseUrl, apiKey: false }).stream!({
+    createOpenAIModelProvider({ baseUrl, apiKey: false }).stream!({
       model: "m",
       prompt: "hello",
     }),
@@ -141,7 +141,8 @@ test("providers stream deltas and final results for the three protocols", async 
   assert.equal(bodies[0]?.stream, true);
   assert.deepEqual(bodies[0]?.stream_options, { include_usage: true });
   const responses = await collect(
-    openaiModelProvider({ baseUrl, apiKey: false, api: "responses" }).stream!({
+    createOpenAIModelProvider({ baseUrl, apiKey: false, api: "responses" })
+      .stream!({
       model: "m",
       prompt: "hello",
     }),
@@ -150,7 +151,7 @@ test("providers stream deltas and final results for the three protocols", async 
   assert.equal(responses.result.stopReason, "end");
   assert.equal(bodies[1]?.stream, true);
   const anthropic = await collect(
-    anthropicModelProvider({ baseUrl, apiKey: "key" }).stream!({
+    createAnthropicModelProvider({ baseUrl, apiKey: "key" }).stream!({
       model: "m",
       prompt: "hello",
       maxOutputTokens: 10,
@@ -165,7 +166,7 @@ test("providers stream deltas and final results for the three protocols", async 
   });
   await assert.rejects(
     collect(
-      openaiModelProvider({ baseUrl, apiKey: false }).stream!({
+      createOpenAIModelProvider({ baseUrl, apiKey: false }).stream!({
         model: "m",
         prompt: "hello",
       }),
@@ -184,7 +185,7 @@ test("stream timeouts measure inactivity between chunks", async (t) => {
       response.end();
     },
   ]);
-  const provider = anthropicModelProvider({
+  const provider = createAnthropicModelProvider({
     baseUrl,
     apiKey: "key",
     timeoutMs: 150,
@@ -254,17 +255,19 @@ test("the harness streams text deltas to observers but not to non-verbose journa
     execute: (input: { text?: string }) => input.text ?? "",
   });
   const events: AgentObservation[] = [];
-  const transporter = localTransport({ directory: join(root, "journals") });
-  const provider: ModelProvider = anthropicModelProvider({
+  const transporter = createLocalTransport({
+    directory: join(root, "journals"),
+  });
+  const provider: ModelProvider = createAnthropicModelProvider({
     baseUrl,
     apiKey: "key",
   });
   const result = await dispatch({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
-    agent: agent({
+    sandboxProvider: createLocalSandboxProvider(),
+    agent: createAgent({
       model: { name: "m", maxOutputTokens: 50 },
-      harness: harness({ modelProvider: provider, tools: [echo] }),
+      harness: createHarness({ modelProvider: provider, tools: [echo] }),
     }),
     brief: { text: "stream" },
     logging: { transporter },

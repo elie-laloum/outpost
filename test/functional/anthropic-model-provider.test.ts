@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { createServer } from "node:http";
 import { once } from "node:events";
-import { anthropicModelProvider } from "../../src/index.ts";
+import { createAnthropicModelProvider } from "../../src/index.ts";
 import { readAnthropicResponse } from "../../src/adapters/models/anthropic-response.ts";
 
 const message = {
@@ -50,7 +50,10 @@ test("Anthropic sends model per request with explicit system cache and normalize
     baseUrl: `http://127.0.0.1:${address.port}/v1`,
     apiKey: "secret",
   };
-  const provider = anthropicModelProvider({ ...options, cacheSystem: true });
+  const provider = createAnthropicModelProvider({
+    ...options,
+    cacheSystem: true,
+  });
   assert.equal(requests.length, 0);
   const result = await provider.request({
     model: "arbitrary-model",
@@ -86,7 +89,7 @@ test("Anthropic sends model per request with explicit system cache and normalize
     provider.request({ model: "m", prompt: "hi" }),
     /System cache/,
   );
-  const uncached = anthropicModelProvider(options);
+  const uncached = createAnthropicModelProvider(options);
   await uncached.request({
     model: "other",
     prompt: "hello",
@@ -172,7 +175,7 @@ test("Anthropic sends model per request with explicit system cache and normalize
 });
 
 test("Anthropic rejects invalid configuration and unsupported or incomplete responses", () => {
-  const provider = anthropicModelProvider({ apiKey: "key" });
+  const provider = createAnthropicModelProvider({ apiKey: "key" });
   assert.throws(
     () => provider.validate?.({ name: "model" }),
     /maxOutputTokens on the agent model/,
@@ -189,17 +192,17 @@ test("Anthropic rejects invalid configuration and unsupported or incomplete resp
   provider.validate?.({ name: "model", maxOutputTokens: 1, reasoning: "max" });
   assert.throws(
     () =>
-      anthropicModelProvider({
+      createAnthropicModelProvider({
         apiKey: "key",
         // @ts-expect-error Output limits belong to the agent model.
         maxOutputTokens: 1,
       }),
     /Unsupported/,
   );
-  assert.throws(() => anthropicModelProvider({ apiKey: "" }), /apiKey/);
+  assert.throws(() => createAnthropicModelProvider({ apiKey: "" }), /apiKey/);
   assert.throws(
     () =>
-      anthropicModelProvider({
+      createAnthropicModelProvider({
         // @ts-expect-error No implicit unauthenticated Anthropic calls.
         apiKey: false,
       }),
@@ -207,7 +210,7 @@ test("Anthropic rejects invalid configuration and unsupported or incomplete resp
   );
   assert.throws(
     () =>
-      anthropicModelProvider({
+      createAnthropicModelProvider({
         apiKey: "key",
         // @ts-expect-error Cache configuration is validated for JavaScript callers.
         cacheSystem: "yes",
@@ -216,7 +219,7 @@ test("Anthropic rejects invalid configuration and unsupported or incomplete resp
   );
   assert.throws(
     () =>
-      anthropicModelProvider({
+      createAnthropicModelProvider({
         apiKey: "key",
         // @ts-expect-error Unsupported options must not be silently ignored.
         tools: [],

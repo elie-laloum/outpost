@@ -3,9 +3,9 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { test } from "node:test";
 import { conversations } from "../src/index.ts";
-import { localSandboxProvider } from "../src/providers/local.ts";
-import { dockerSandboxProvider } from "../src/providers/docker.ts";
-import { podmanSandboxProvider } from "../src/providers/podman.ts";
+import { createLocalSandboxProvider } from "../src/providers/local.ts";
+import { createDockerSandboxProvider } from "../src/providers/docker.ts";
+import { createPodmanSandboxProvider } from "../src/providers/podman.ts";
 import { seedSession } from "./fixtures/native-session.ts";
 import { repository } from "./helpers.ts";
 
@@ -17,7 +17,7 @@ for (const format of ["copilot", "kimi"] as const) {
       const root = await repository(t),
         home = join(root, "source"),
         id = "session_container";
-      const host = await localSandboxProvider().acquire({
+      const host = await createLocalSandboxProvider().acquire({
         repository: root,
         directory: root,
         gitDirectories: [],
@@ -45,8 +45,8 @@ for (const format of ["copilot", "kimi"] as const) {
       });
       const factory =
         process.env.OUTPOST_CONTAINER_ENGINE === "podman"
-          ? podmanSandboxProvider
-          : dockerSandboxProvider;
+          ? createPodmanSandboxProvider
+          : createDockerSandboxProvider;
       const sandbox = await factory({
         image: process.env.OUTPOST_CONTAINER_IMAGE ?? "outpost-ci:latest",
         networks: "none",

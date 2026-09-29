@@ -2,24 +2,26 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { join } from "node:path";
 import {
-  agent,
-  kimiHarness,
+  createAgent,
+  createKimiHarness,
   createSandbox,
-  isolatedTask,
-  task,
-  workflow,
+  defineIsolatedTask,
+  defineTask,
+  defineWorkflow,
   speculate,
-  workflowCheckpointStore,
-  localTransport,
+  createWorkflowCheckpointStore,
+  createLocalTransport,
   WorkflowUsageUnavailable,
   type AgentObservation,
 } from "../../src/index.ts";
-import { localSandboxProvider } from "../../src/providers/local.ts";
+import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { repository, scripted, emit } from "../helpers.ts";
 
 function kimiFixture(home: string, status = 0, hang = false) {
   return {
-    ...agent({ harness: kimiHarness({ variables: { KIMI_CODE_HOME: home } }) }),
+    ...createAgent({
+      harness: createKimiHarness({ variables: { KIMI_CODE_HOME: home } }),
+    }),
     capture: false,
     resumable: false,
     request: () => ({
@@ -48,19 +50,19 @@ function kimiFixture(home: string, status = 0, hang = false) {
 test("session accounting counts failed retries and successful passes once", async (t) => {
   const repo = await repository(t);
   const selected = kimiFixture(join(repo, ".outpost", "kimi-usage"), 7);
-  const run = isolatedTask({
+  const run = defineIsolatedTask({
     key: "kimi",
     retry: { attempts: 2 },
     timeoutMs: 10_000,
     request: () => ({
       repository: repo,
-      sandboxProvider: localSandboxProvider(),
+      sandboxProvider: createLocalSandboxProvider(),
       agent: selected,
       brief: { text: "fixture" },
       logging: false,
     }),
   });
-  const result = await workflow("kimi-failure", [run]).start({
+  const result = await defineWorkflow("kimi-failure", [run]).start({
     budget: { attempts: 2, usage: { input: 100 } },
   });
   assert.equal(result.status, "failed");
@@ -73,7 +75,7 @@ test("session accounting counts failed retries and successful passes once", asyn
   });
   await using sandbox = await createSandbox({
     repository: repo,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent: kimiFixture(join(repo, ".outpost", "kimi-usage")),
     logging: false,
   });
@@ -90,7 +92,7 @@ test("cancelled collection retains measured tokens, marks incompleteness and per
   const events: AgentObservation[] = [];
   await using sandbox = await createSandbox({
     repository: repo,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent: kimiFixture(join(repo, ".outpost", "kimi-usage"), 0, true),
     logging: false,
   });
@@ -131,17 +133,17 @@ test("known unavailable usage refuses a token-only workflow before invoking the 
       throw new Error("must not invoke");
     },
   };
-  const run = isolatedTask({
+  const run = defineIsolatedTask({
     key: "unknown",
     request: () => ({
       repository: repo,
       agent: selected,
-      sandboxProvider: localSandboxProvider(),
+      sandboxProvider: createLocalSandboxProvider(),
       brief: { text: "fixture" },
       logging: false,
     }),
   });
-  const result = await workflow("unknown", [run]).start({
+  const result = await defineWorkflow("unknown", [run]).start({
     budget: { usage: { input: 100 } },
   });
   assert.equal(invoked, false);
@@ -154,27 +156,27 @@ test("known unavailable usage refuses a token-only workflow before invoking the 
 test("missing usage stops retries and dependents unless an attempt budget is configured", async (t) => {
   const repo = await repository(t);
   const selected = { ...scripted(emit("done")), usage: "events" as const };
-  const run = isolatedTask({
+  const run = defineIsolatedTask({
     key: "missing",
     retry: { attempts: 3 },
     timeoutMs: 10_000,
     request: () => ({
       repository: repo,
       agent: selected,
-      sandboxProvider: localSandboxProvider(),
+      sandboxProvider: createLocalSandboxProvider(),
       brief: { text: "fixture" },
       logging: false,
     }),
   });
   let followed = 0;
-  const child = task({
+  const child = defineTask({
     key: "child",
     after: [run],
     perform() {
       followed++;
     },
   });
-  const graph = workflow("missing", [run, child]);
+  const graph = defineWorkflow("missing", [run, child]);
   const rejected = await graph.start({ budget: { usage: { input: 100 } } });
   assert.equal(rejected.status, "failed");
   assert.equal(rejected.usage.attempts, 1);
@@ -192,7 +194,7 @@ test("speculation rejects unknown token-only accounting and accepts a bounded ca
   const repo = await repository(t);
   const options = {
     repository: repo,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     candidates: [
       {
         key: "unknown",
@@ -220,15 +222,15 @@ test("speculation rejects unknown token-only accounting and accepts a bounded ca
 test("checkpoint replay preserves incomplete usage and blocks newly token-only admission", async (t) => {
   const repo = await repository(t);
   const checkpoint = {
-    store: workflowCheckpointStore({
-      transporter: localTransport({
+    store: createWorkflowCheckpointStore({
+      transporter: createLocalTransport({
         directory: join(repo, ".outpost", "checkpoints"),
       }),
     }),
     runId: "usage",
     version: "1",
   };
-  const source = task({
+  const source = defineTask({
     key: "source",
     perform(context) {
       context.reportUsage({ input: 2, cached: 0, output: 1, complete: false });
@@ -236,7 +238,7 @@ test("checkpoint replay preserves incomplete usage and blocks newly token-only a
     },
   });
   let calls = 0;
-  const target = task({
+  const target = defineTask({
     key: "target",
     after: [source],
     perform() {
@@ -244,7 +246,7 @@ test("checkpoint replay preserves incomplete usage and blocks newly token-only a
       throw new Error("retry later");
     },
   });
-  const graph = workflow("persisted-usage", [source, target]);
+  const graph = defineWorkflow("persisted-usage", [source, target]);
   const first = await graph.start({ checkpoint, budget: { attempts: 2 } });
   assert.equal(first.usage.tokens.complete, false);
   const resumed = await graph.start({

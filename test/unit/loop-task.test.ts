@@ -2,19 +2,19 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { setTimeout } from "node:timers/promises";
 import {
-  loopTask,
+  defineLoopTask,
   LoopTaskExhausted,
-  task,
-  workflow,
+  defineTask,
+  defineWorkflow,
 } from "../../src/index.ts";
 import type { LoopTaskContext, WorkflowEvent } from "../../src/index.ts";
 
 test("loop feedback, dependency values, typed result and phase identities", async () => {
-  const source = task({ key: "source", perform: () => 10 });
+  const source = defineTask({ key: "source", perform: () => 10 });
   const seen: (string | undefined)[] = [];
   const contexts: LoopTaskContext[] = [];
   const events: WorkflowEvent[] = [];
-  const fix = loopTask({
+  const fix = defineLoopTask({
     key: "fix",
     after: [source],
     maxRounds: 3,
@@ -32,7 +32,7 @@ test("loop feedback, dependency values, typed result and phase identities", asyn
         : { done: false, feedback: "Try again" };
     },
   });
-  const result = await workflow("fix", [source, fix]).start({
+  const result = await defineWorkflow("fix", [source, fix]).start({
     observe: (event) => events.push(event),
   });
   result.unwrap();
@@ -58,18 +58,18 @@ test("loop feedback, dependency values, typed result and phase identities", asyn
 });
 
 test("exhaustion preserves feedback and blocks dependents", async () => {
-  const fix = loopTask({
+  const fix = defineLoopTask({
     key: "fix",
     maxRounds: 2,
     attempt: () => 1,
     check: () => ({ done: false, feedback: "broken" }),
   });
-  const dependent = task({
+  const dependent = defineTask({
     key: "dependent",
     after: [fix],
     perform: () => assert.fail("must not run"),
   });
-  const result = await workflow("fix", [fix, dependent]).start({
+  const result = await defineWorkflow("fix", [fix, dependent]).start({
     stopOnError: false,
   });
   assert.equal(result.status, "failed");
@@ -85,7 +85,7 @@ test("definition validation and workflow-only execution", () => {
   for (const maxRounds of [0, -1, 1.5, Infinity, Number.MAX_SAFE_INTEGER + 1])
     assert.throws(
       () =>
-        loopTask({
+        defineLoopTask({
           key: "x",
           maxRounds,
           attempt() {},
@@ -93,7 +93,7 @@ test("definition validation and workflow-only execution", () => {
         }),
       /maxRounds/,
     );
-  const fix = loopTask({
+  const fix = defineLoopTask({
     key: "x",
     maxRounds: 1,
     attempt() {},
@@ -109,7 +109,7 @@ test("exceptions in either phase fail without implicitly retrying", async () => 
   for (const phase of ["attempt", "check"]) {
     let calls = 0;
     const expected = new Error(phase);
-    const fix = loopTask({
+    const fix = defineLoopTask({
       key: "fix",
       maxRounds: 5,
       attempt() {
@@ -121,7 +121,7 @@ test("exceptions in either phase fail without implicitly retrying", async () => 
         throw expected;
       },
     });
-    const result = await workflow("fix", [fix]).start();
+    const result = await defineWorkflow("fix", [fix]).start();
     assert.equal(result.status, "failed");
     assert.equal(result.errors[0], expected);
     assert.equal(calls, 1);
@@ -137,7 +137,7 @@ test("cooperative cancellation and round timeout stop the loop", async () => {
         if (!timeout) controller.abort(new Error("stop"));
         await setTimeout(1000, undefined, { signal: context.signal });
       }
-      const fix = loopTask({
+      const fix = defineLoopTask({
         key: "fix",
         maxRounds: 5,
         ...(timeout ? { timeoutMs: 5 } : {}),
@@ -151,7 +151,7 @@ test("cooperative cancellation and round timeout stop the loop", async () => {
           return { done: false, feedback: "again" };
         },
       });
-      const result = await workflow("fix", [fix]).start({
+      const result = await defineWorkflow("fix", [fix]).start({
         signal: controller.signal,
       });
       assert.equal(result.status, timeout ? "failed" : "cancelled");
@@ -162,7 +162,7 @@ test("cooperative cancellation and round timeout stop the loop", async () => {
 
 test("budgets admit each round and token exhaustion prevents review", async () => {
   let reviews = 0;
-  const fix = loopTask({
+  const fix = defineLoopTask({
     key: "fix",
     maxRounds: 5,
     attempt(ctx) {
@@ -174,13 +174,13 @@ test("budgets admit each round and token exhaustion prevents review", async () =
       return { done: false, feedback: "again" };
     },
   });
-  const limited = await workflow("fix", [fix]).start({
+  const limited = await defineWorkflow("fix", [fix]).start({
     budget: { attempts: 2 },
   });
   assert.equal(limited.status, "failed");
   assert.equal(limited.usage.attempts, 2);
   assert.equal(reviews, 2);
-  const tokens = await workflow("fix", [fix]).start({
+  const tokens = await defineWorkflow("fix", [fix]).start({
     budget: { usage: { input: 2 } },
   });
   assert.equal(tokens.status, "failed");
@@ -189,15 +189,15 @@ test("budgets admit each round and token exhaustion prevents review", async () =
 });
 
 test("reusable definitions have independent histories and permit non-JSON in memory", async () => {
-  const fix = loopTask({
+  const fix = defineLoopTask({
     key: "fix",
     maxRounds: 1,
     attempt: () => new Date(0),
     check: (_, value) => ({ done: value.getTime() === 0, feedback: "date" }),
   });
   const results = await Promise.all([
-    workflow("a", [fix]).start(),
-    workflow("b", [fix]).start(),
+    defineWorkflow("a", [fix]).start(),
+    defineWorkflow("b", [fix]).start(),
   ]);
   for (const result of results) {
     result.unwrap();
@@ -207,20 +207,20 @@ test("reusable definitions have independent histories and permit non-JSON in mem
 });
 
 test("condition and observer failures preserve normal task behavior", async () => {
-  const skipped = loopTask({
+  const skipped = defineLoopTask({
     key: "skip",
     maxRounds: 1,
     condition: () => false,
     attempt: () => assert.fail(),
     check: () => ({ done: true }),
   });
-  const fix = loopTask({
+  const fix = defineLoopTask({
     key: "fix",
     maxRounds: 1,
     attempt() {},
     check: () => ({ done: true }),
   });
-  const result = await workflow("fix", [skipped, fix]).start({
+  const result = await defineWorkflow("fix", [skipped, fix]).start({
     observe() {
       throw new Error("observer");
     },

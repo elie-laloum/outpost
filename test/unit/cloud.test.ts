@@ -5,8 +5,8 @@ import { join } from "node:path";
 import { PassThrough, Readable } from "node:stream";
 import type { Sandbox as VercelSandbox } from "@vercel/sandbox";
 import type { Daytona } from "@daytona/sdk";
-import { vercelSandboxProvider } from "../../src/providers/vercel.ts";
-import { daytonaSandboxProvider } from "../../src/providers/daytona.ts";
+import { createVercelSandboxProvider } from "../../src/providers/vercel.ts";
+import { createDaytonaSandboxProvider } from "../../src/providers/daytona.ts";
 import {
   downloadTree,
   manifestScript,
@@ -58,7 +58,7 @@ test("Vercel contract streams bounded output, stages stdin and transfers files",
       };
     },
   };
-  const lease = await vercelSandboxProvider(
+  const lease = await createVercelSandboxProvider(
     { retain: 4 },
     async () => sandbox as unknown as VercelSandbox,
   ).acquire({
@@ -167,7 +167,10 @@ test("Daytona contract isolates commands, preserves streams and cancels without 
         deleted++;
       },
     }) as unknown as Pick<Daytona, "create" | "delete">;
-  const lease = await daytonaSandboxProvider({ retain: 4 }, connect).acquire({
+  const lease = await createDaytonaSandboxProvider(
+    { retain: 4 },
+    connect,
+  ).acquire({
     repository: root,
     directory: root,
     gitDirectories: [],
@@ -277,7 +280,7 @@ test("Vercel and Daytona stage framed stdin and append live input until the end 
     };
     const lease =
       name === "vercel"
-        ? await vercelSandboxProvider(
+        ? await createVercelSandboxProvider(
             {},
             async () =>
               ({
@@ -314,7 +317,7 @@ test("Vercel and Daytona stage framed stdin and append live input until the end 
             gitDirectories: [],
             variables: {},
           })
-        : await daytonaSandboxProvider(
+        : await createDaytonaSandboxProvider(
             {},
             async () =>
               ({

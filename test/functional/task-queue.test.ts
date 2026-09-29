@@ -8,14 +8,14 @@ import { join } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import { createServer } from "node:http";
 import {
-  sqliteTaskQueue,
+  createSqliteTaskQueue,
   serveTaskQueue,
-  httpTaskQueue,
+  createHttpTaskQueue,
   runQueueWorker,
-  queuedTask,
-  workflow,
-  workflowCheckpointStore,
-  localTransport,
+  defineQueuedTask,
+  defineWorkflow,
+  createWorkflowCheckpointStore,
+  createLocalTransport,
   OutpostError,
 } from "../../src/index.ts";
 import { recordRecovery } from "../../src/domain/errors.ts";
@@ -26,9 +26,9 @@ const token = "test-only-token-with-at-least-32-characters";
 async function fixture(t: TestContext) {
   const directory = await mkdtemp(join(tmpdir(), "outpost-queue-"));
   const path = join(directory, "queue.sqlite");
-  const store = await sqliteTaskQueue(path);
+  const store = await createSqliteTaskQueue(path);
   const server = await serveTaskQueue({ queue: store, token });
-  const queue = httpTaskQueue({ url: server.url, token });
+  const queue = createHttpTaskQueue({ url: server.url, token });
   t.after(async () => {
     await server.close();
     store.close();
@@ -122,7 +122,7 @@ test("crashed worker lease expires; restart preserves fences and rejects stale c
     undefined,
   );
   now += 31;
-  const reopened = await sqliteTaskQueue(path);
+  const reopened = await createSqliteTaskQueue(path);
   try {
     const second = await reopened.claim({
       worker: "live",
@@ -148,15 +148,16 @@ test("crashed worker lease expires; restart preserves fences and rejects stale c
 test("HTTP authentication, routing, malformed messages and size bounds", async (t) => {
   const { server, queue } = await fixture(t);
   assert.throws(
-    () => httpTaskQueue({ url: server.url, token: "short" }),
+    () => createHttpTaskQueue({ url: server.url, token: "short" }),
     /token/,
   );
   assert.throws(
-    () => httpTaskQueue({ url: "http://secret:password@localhost", token }),
+    () =>
+      createHttpTaskQueue({ url: "http://secret:password@localhost", token }),
     /URL/,
   );
   assert.throws(
-    () => httpTaskQueue({ url: server.url, token, timeoutMs: 0 }),
+    () => createHttpTaskQueue({ url: server.url, token, timeoutMs: 0 }),
     /timeout/,
   );
   assert.equal(
@@ -227,7 +228,7 @@ test("cancellation revokes active worker and deadline survives coordinator reope
     deadline: Date.now() + 30,
   });
   await delay(50);
-  const reopened = await sqliteTaskQueue(path);
+  const reopened = await createSqliteTaskQueue(path);
   assert.equal((await reopened.get("deadline"))?.status, "cancelled");
   reopened.close();
 });
@@ -287,7 +288,7 @@ test("queued workflow resumes same logical job after connection loss and reports
       return queue.get(id);
     },
   };
-  const remote = queuedTask({
+  const remote = defineQueuedTask({
     key: "remote",
     queue: interrupted,
     handler: "double",
@@ -295,10 +296,10 @@ test("queued workflow resumes same logical job after connection loss and reports
     decode: (value) => Number(value),
     pollMs: 10,
   });
-  const graph = workflow("remote", [remote]);
+  const graph = defineWorkflow("remote", [remote]);
   const checkpoint = {
-    store: workflowCheckpointStore({
-      transporter: localTransport({
+    store: createWorkflowCheckpointStore({
+      transporter: createLocalTransport({
         directory: join(directory, "checkpoints"),
       }),
     }),
@@ -337,7 +338,7 @@ test("queued workflow cancellation cancels remote job; terminal failures reach w
     },
   };
   const stop = new AbortController();
-  const remote = queuedTask({
+  const remote = defineQueuedTask({
     key: "cancel",
     queue: observed,
     handler: "work",
@@ -345,7 +346,9 @@ test("queued workflow cancellation cancels remote job; terminal failures reach w
     decode: (value) => value,
     pollMs: 10,
   });
-  const pending = workflow("cancel", [remote]).start({ signal: stop.signal });
+  const pending = defineWorkflow("cancel", [remote]).start({
+    signal: stop.signal,
+  });
   while (!id) await delay(1);
   stop.abort();
   assert.equal((await pending).status, "cancelled");
@@ -357,7 +360,7 @@ test("queued workflow cancellation cancels remote job; terminal failures reach w
       usage: { input: 7, cached: 0, output: 0 },
     }),
   });
-  const failure = await workflow("failure", [remote]).start();
+  const failure = await defineWorkflow("failure", [remote]).start();
   assert.equal(failure.status, "failed");
   assert.equal(failure.usage.tokens.input, 7);
   running.stop.abort();
@@ -373,7 +376,7 @@ test("HTTP client rejects untrusted malformed responses and response size overfl
   t.after(() => new Promise<void>((resolve) => server.close(() => resolve())));
   const address = server.address();
   assert.ok(address && typeof address !== "string");
-  const queue = httpTaskQueue({
+  const queue = createHttpTaskQueue({
     url: `http://127.0.0.1:${address.port}`,
     token,
   });
@@ -395,7 +398,7 @@ test("failed terminal queue usage is counted once across workflow retries and ch
       };
     },
   });
-  const remote = queuedTask({
+  const remote = defineQueuedTask({
     key: "failed",
     queue,
     handler: "fail",
@@ -404,10 +407,10 @@ test("failed terminal queue usage is counted once across workflow retries and ch
     pollMs: 10,
     retry: { attempts: 2 },
   });
-  const graph = workflow("failed-usage", [remote]);
+  const graph = defineWorkflow("failed-usage", [remote]);
   const checkpoint = {
-    store: workflowCheckpointStore({
-      transporter: localTransport({
+    store: createWorkflowCheckpointStore({
+      transporter: createLocalTransport({
         directory: join(directory, "checkpoints"),
       }),
     }),
@@ -431,10 +434,10 @@ test("failed terminal queue usage is counted once across workflow retries and ch
 test("coordinator closes and reopens with durable job identity and fence", async () => {
   const directory = await mkdtemp(join(tmpdir(), "outpost-queue-restart-"));
   const path = join(directory, "queue.sqlite");
-  let store = await sqliteTaskQueue(path);
+  let store = await createSqliteTaskQueue(path);
   let server = await serveTaskQueue({ queue: store, token });
   try {
-    let queue = httpTaskQueue({ url: server.url, token });
+    let queue = createHttpTaskQueue({ url: server.url, token });
     const request = { id: "persistent", handler: "work", input: 3 };
     await queue.enqueue(request);
     const claim = await queue.claim({
@@ -446,9 +449,9 @@ test("coordinator closes and reopens with durable job identity and fence", async
     await server.close();
     store.close();
     await delay(50);
-    store = await sqliteTaskQueue(path);
+    store = await createSqliteTaskQueue(path);
     server = await serveTaskQueue({ queue: store, token });
-    queue = httpTaskQueue({ url: server.url, token });
+    queue = createHttpTaskQueue({ url: server.url, token });
     assert.equal((await queue.enqueue(request)).id, request.id);
     const next = await queue.claim({
       worker: "second",
@@ -600,13 +603,16 @@ test("HTTP credentials rotate while a handler holds its lease and revoked source
     },
   });
   t.after(() => server.close());
-  const queue = httpTaskQueue({ url: server.url, token: async () => current });
+  const queue = createHttpTaskQueue({
+    url: server.url,
+    token: async () => current,
+  });
   let rotated!: () => void;
   const workerRotated = new Promise<void>((resolve) => {
     rotated = resolve;
   });
   // The heartbeat is sequential: once it reads the new token, no old-token renewal is in flight.
-  const workerQueue = httpTaskQueue({
+  const workerQueue = createHttpTaskQueue({
     url: server.url,
     token: async () => {
       if (current === next) rotated();
@@ -654,7 +660,7 @@ test("HTTP credentials rotate while a handler holds its lease and revoked source
   await workerRotated;
   accepted = [next];
   await assert.rejects(
-    httpTaskQueue({ url: server.url, token }).get("rotation"),
+    createHttpTaskQueue({ url: server.url, token }).get("rotation"),
     /401/,
   );
   const before = (await queue.get("rotation"))!.expires!;
@@ -707,7 +713,7 @@ test("a quota failure crosses the queue and the resumed job keeps its effect key
   });
   const directory = await mkdtemp(join(tmpdir(), "outpost-queue-quota-"));
   t.after(() => rm(directory, { recursive: true, force: true }));
-  const implement = queuedTask({
+  const implement = defineQueuedTask({
     key: "implement",
     queue,
     handler: "implement",
@@ -715,10 +721,10 @@ test("a quota failure crosses the queue and the resumed job keeps its effect key
     input: (context) => ({ resume: context.quota?.conversation ?? null }),
     decode: String,
   });
-  const graph = workflow("queued-quota", [implement]);
+  const graph = defineWorkflow("queued-quota", [implement]);
   const checkpoint = {
-    store: workflowCheckpointStore({
-      transporter: localTransport({ directory }),
+    store: createWorkflowCheckpointStore({
+      transporter: createLocalTransport({ directory }),
     }),
     runId: "queued-quota",
     version: "1",

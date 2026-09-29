@@ -7,8 +7,8 @@ import { join } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 import {
-  agent,
-  harness,
+  createAgent,
+  createHarness,
   defineHarnessPermissions,
   defineHarnessSubagent,
   defineHarnessTool,
@@ -21,7 +21,7 @@ import {
   type ModelResult,
   type SandboxProvider,
 } from "../../src/index.ts";
-import { localSandboxProvider } from "../../src/providers/local.ts";
+import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { repository } from "../helpers.ts";
 
 const server = fileURLToPath(
@@ -95,7 +95,7 @@ const run = (
   replies: Reply[],
   options: Omit<HarnessOptions, "modelProvider">,
   requests: ModelRequest[] = [],
-  sandboxProvider: SandboxProvider = localSandboxProvider({
+  sandboxProvider: SandboxProvider = createLocalSandboxProvider({
     variables: { MCP_SECRET: "fixture-secret" },
   }),
   observe?: (event: AgentObservation) => void,
@@ -104,9 +104,9 @@ const run = (
     repository: root,
     sandboxProvider,
     logging: false,
-    agent: agent({
+    agent: createAgent({
       model: "m",
-      harness: harness({
+      harness: createHarness({
         modelProvider: provider(replies, requests),
         ...options,
       }),
@@ -283,10 +283,10 @@ test("MCP server startup failures stop the turn with a clear cause", async (t) =
     },
   );
   const streamless: SandboxProvider = {
-    ...localSandboxProvider(),
+    ...createLocalSandboxProvider(),
     async acquire(context) {
       const { liveInput: _live, ...lease } =
-        await localSandboxProvider().acquire(context);
+        await createLocalSandboxProvider().acquire(context);
       return lease;
     },
   };
@@ -303,9 +303,9 @@ test("subagents start their own MCP servers on the borrowed sandbox", async (t) 
   const child = defineHarnessSubagent({
     name: "inspect",
     description: "Inspect with MCP",
-    agent: agent({
+    agent: createAgent({
       model: "child",
-      harness: harness({
+      harness: createHarness({
         modelProvider: provider(
           [call(["mcp__fixture__env", { name: "MCP_SECRET" }]), () => done],
           childRequests,
@@ -441,7 +441,7 @@ test("HTTP MCP servers are bridged from inside the sandbox with session headers"
     ],
     { mcpServers: docs },
     requests,
-    localSandboxProvider({ variables: { DOCS_TOKEN: "http-secret" } }),
+    createLocalSandboxProvider({ variables: { DOCS_TOKEN: "http-secret" } }),
   );
   assert.deepEqual(results(requests[1]), [
     "hello outpost",
@@ -463,14 +463,14 @@ test("HTTP MCP servers are bridged from inside the sandbox with session headers"
       [],
       { mcpServers: docs },
       [],
-      localSandboxProvider({
+      createLocalSandboxProvider({
         variables: { DOCS_TOKEN: "wrong" },
       }),
     ),
     { code: "response", message: /HTTP 401: denied/ },
   );
   await assert.rejects(
-    run(root, [], { mcpServers: docs }, [], localSandboxProvider()),
+    run(root, [], { mcpServers: docs }, [], createLocalSandboxProvider()),
     { code: "configuration", message: /Missing DOCS_TOKEN/ },
   );
   await assert.rejects(

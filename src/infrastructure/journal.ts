@@ -1,7 +1,7 @@
 import { transportJournal } from "./transport-journal.ts";
 import { repositoryTransport } from "./repository-transport.ts";
 import type { Journal, Logging } from "./journal.types.ts";
-import { reporter } from "./reporter.ts";
+import { createReporter } from "./reporter.ts";
 
 export type { Logging } from "./journal.types.ts";
 
@@ -18,7 +18,7 @@ export async function journal(
       label,
       started,
     );
-  const display = reporter({ ...(label ? { label } : {}) });
+  const display = createReporter({ ...(label ? { label } : {}) });
   let closed = false;
   return {
     record(event) {

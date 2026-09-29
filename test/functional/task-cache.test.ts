@@ -5,13 +5,13 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
   inspectRecovery,
-  localTransport,
+  createLocalTransport,
   planRecoveryRetention,
   pruneRecoveryRetention,
-  task,
-  taskCacheStore,
-  workflow,
-  workflowCheckpointStore,
+  defineTask,
+  createTaskCacheStore,
+  defineWorkflow,
+  createWorkflowCheckpointStore,
 } from "../../src/index.ts";
 import { repository } from "../helpers.ts";
 import type {
@@ -25,7 +25,7 @@ import type {
 async function storage(t: { after(callback: () => unknown): void }) {
   const directory = await mkdtemp(join(tmpdir(), "outpost-task-cache-"));
   t.after(() => rm(directory, { recursive: true, force: true }));
-  return localTransport({ directory });
+  return createLocalTransport({ directory });
 }
 
 async function keys(transporter: Transport): Promise<string[]> {
@@ -52,16 +52,16 @@ test("separate processes reuse results through a local transport", async (t) => 
   let runs = 0;
   const run = async () => {
     const events: WorkflowEvent[] = [];
-    const item = task({
+    const item = defineTask({
       key: "review",
       cache: {
-        store: taskCacheStore({ transporter }),
+        store: createTaskCacheStore({ transporter }),
         version: "v1",
         key: () => ["commit", "brief"],
       },
       perform: () => ({ run: ++runs }),
     });
-    const result = await workflow("w", [item]).start({
+    const result = await defineWorkflow("w", [item]).start({
       observe: (event) => events.push(event),
     });
     result.unwrap();
@@ -91,7 +91,7 @@ test("separate processes reuse results through a local transport", async (t) => 
 
 test("store validates fingerprints, sizes and entries", async (t) => {
   const transporter = await storage(t);
-  const store = taskCacheStore({ transporter, maxBytes: 256 });
+  const store = createTaskCacheStore({ transporter, maxBytes: 256 });
   const fingerprint = "a".repeat(64);
   assert.equal(await store.read(fingerprint), undefined);
   await assert.rejects(store.read("../escape"), /SHA-256 hex digest/);
@@ -104,7 +104,7 @@ test("store validates fingerprints, sizes and entries", async (t) => {
     /exceeds 256 bytes/,
   );
   assert.throws(
-    () => taskCacheStore({ transporter, maxBytes: 0 }),
+    () => createTaskCacheStore({ transporter, maxBytes: 0 }),
     /positive integer/,
   );
   await store.write(entry(fingerprint, 1));
@@ -141,10 +141,10 @@ test("a concurrent writer keeps its entry", async (t) => {
       return transporter.write(key, bytes, options);
     },
   };
-  await taskCacheStore({ transporter: competing }).write(
+  await createTaskCacheStore({ transporter: competing }).write(
     entry(fingerprint, "second"),
   );
-  const value = await taskCacheStore({ transporter }).read(fingerprint);
+  const value = await createTaskCacheStore({ transporter }).read(fingerprint);
   assert.deepEqual(value?.value, { kind: "json", value: "first" });
 
   const failing: Transport = {
@@ -152,7 +152,9 @@ test("a concurrent writer keeps its entry", async (t) => {
     write: () => Promise.reject(new Error("disk full")),
   };
   await assert.rejects(
-    taskCacheStore({ transporter: failing }).write(entry("d".repeat(64), 1)),
+    createTaskCacheStore({ transporter: failing }).write(
+      entry("d".repeat(64), 1),
+    ),
     /disk full/,
   );
 });
@@ -183,21 +185,21 @@ function memory() {
 
 test("checkpoints persist cache hits and reject inconsistent hit records", async (t) => {
   const transporter = await storage(t);
-  const cache = taskCacheStore({ transporter });
+  const cache = createTaskCacheStore({ transporter });
   let runs = 0;
   const definitions = () => {
-    const review = task({
+    const review = defineTask({
       key: "review",
       cache: { store: cache, version: "1", key: () => "k" },
       perform: () => ++runs,
     });
-    return { review, graph: workflow("w", [review]) };
+    return { review, graph: defineWorkflow("w", [review]) };
   };
   const cold = definitions();
   (
     await cold.graph.start({
       checkpoint: {
-        store: workflowCheckpointStore({ transporter }),
+        store: createWorkflowCheckpointStore({ transporter }),
         runId: "cold",
         version: "1",
       },
@@ -231,7 +233,7 @@ test("checkpoints persist cache hits and reject inconsistent hit records", async
 
 test("retention inventories task cache entries and prunes them only when selected", async (t) => {
   const transporter = await storage(t);
-  const store = taskCacheStore({ transporter });
+  const store = createTaskCacheStore({ transporter });
   const fingerprint = "e".repeat(64);
   await store.write(entry(fingerprint, "kept"));
   const retained = await planRecoveryRetention({
@@ -276,11 +278,13 @@ test("retention inventories task cache entries and prunes them only when selecte
 
 test("repository retention covers task cache entries in the default storage", async (t) => {
   const path = await repository(t);
-  const transporter = localTransport({
+  const transporter = createLocalTransport({
     directory: join(path, ".outpost", "storage"),
   });
   const fingerprint = "f".repeat(64);
-  await taskCacheStore({ transporter }).write(entry(fingerprint, "local"));
+  await createTaskCacheStore({ transporter }).write(
+    entry(fingerprint, "local"),
+  );
   const inspection = await inspectRecovery({ repository: path });
   assert.equal(inspection.complete, true);
   const policy = {
@@ -297,7 +301,7 @@ test("repository retention covers task cache entries in the default storage", as
   const result = await pruneRecoveryRetention(plan);
   assert.ok(result.removed.includes(candidate!.path));
   assert.equal(
-    await taskCacheStore({ transporter }).read(fingerprint),
+    await createTaskCacheStore({ transporter }).read(fingerprint),
     undefined,
   );
 });

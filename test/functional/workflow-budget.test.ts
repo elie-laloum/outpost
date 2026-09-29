@@ -1,14 +1,14 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
-  agentTask,
+  defineAgentTask,
   createSandbox,
-  isolatedTask,
-  response,
-  task,
-  workflow,
+  defineIsolatedTask,
+  defineTextResponse,
+  defineTask,
+  defineWorkflow,
 } from "../../src/index.ts";
-import { localSandboxProvider } from "../../src/providers/local.ts";
+import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { emit, repository, scripted } from "../helpers.ts";
 
 const usage = (input: number) =>
@@ -18,11 +18,11 @@ test("warm agent tasks account each pass once and preserve observer isolation", 
   const repo = await repository(t);
   await using sandbox = await createSandbox({
     repository: repo,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent: scripted(`${usage(3)} ${emit("not finished")}`),
   });
   const events: string[] = [];
-  const run = agentTask({
+  const run = defineAgentTask({
     key: "agent",
     sandbox,
     request: () => ({
@@ -34,7 +34,7 @@ test("warm agent tasks account each pass once and preserve observer isolation", 
       },
     }),
   });
-  const result = await workflow("passes", [run]).start({
+  const result = await defineWorkflow("passes", [run]).start({
     budget: { usage: { input: 7 } },
   });
   result.unwrap();
@@ -45,22 +45,22 @@ test("warm agent tasks account each pass once and preserve observer isolation", 
 
 test("isolated task streaming usage cancels the running process, blocks retries and dependents", async (t) => {
   const repo = await repository(t);
-  const run = isolatedTask({
+  const run = defineIsolatedTask({
     key: "isolated",
     retry: { attempts: 3 },
     request: () => ({
       repository: repo,
-      sandboxProvider: localSandboxProvider(),
+      sandboxProvider: createLocalSandboxProvider(),
       agent: scripted(`${usage(5)} setTimeout(() => {}, 60_000);`),
       brief: { text: "fixture" },
     }),
   });
-  const child = task({
+  const child = defineTask({
     key: "child",
     after: [run],
     perform: () => assert.fail("budget must block child"),
   });
-  const result = await workflow("stream", [run, child]).start({
+  const result = await defineWorkflow("stream", [run, child]).start({
     budget: { usage: { input: 5 } },
   });
   assert.equal(result.status, "failed");
@@ -71,17 +71,17 @@ test("isolated task streaming usage cancels the running process, blocks retries 
 
 test("failed agent attempts remain accounted across workflow retries", async (t) => {
   const repo = await repository(t);
-  const run = isolatedTask({
+  const run = defineIsolatedTask({
     key: "retry",
     retry: { attempts: 2 },
     request: () => ({
       repository: repo,
-      sandboxProvider: localSandboxProvider(),
+      sandboxProvider: createLocalSandboxProvider(),
       agent: scripted(`${usage(3)} process.exitCode = 7;`),
       brief: { text: "fixture" },
     }),
   });
-  const result = await workflow("failed-usage", [run]).start({
+  const result = await defineWorkflow("failed-usage", [run]).start({
     budget: { usage: { input: 20 } },
   });
   assert.equal(result.status, "failed");
@@ -97,18 +97,18 @@ test("structured repair turns share a task admission and count each turn once", 
   );
   await using sandbox = await createSandbox({
     repository: repo,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent,
   });
-  const run = agentTask({
+  const run = defineAgentTask({
     key: "repair",
     sandbox,
     request: () => ({
       brief: { text: "Return <answer>text</answer>" },
-      response: response.text({ tag: "answer", repairs: 1 }),
+      response: defineTextResponse({ tag: "answer", repairs: 1 }),
     }),
   });
-  const result = await workflow("repairs", [run]).start({
+  const result = await defineWorkflow("repairs", [run]).start({
     budget: { attempts: 1, usage: { input: 7 } },
   });
   result.unwrap();
@@ -122,15 +122,15 @@ test("budget cancellation keeps a warm sandbox reusable", async (t) => {
   const repo = await repository(t);
   await using sandbox = await createSandbox({
     repository: repo,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent: scripted(`${usage(5)} setTimeout(() => {}, 60_000);`),
   });
-  const run = agentTask({
+  const run = defineAgentTask({
     key: "cancel",
     sandbox,
     request: () => ({ brief: { text: "fixture" }, passes: 2 }),
   });
-  const result = await workflow("warm-budget", [run]).start({
+  const result = await defineWorkflow("warm-budget", [run]).start({
     budget: { usage: { input: 5 } },
   });
   assert.equal(result.status, "failed");

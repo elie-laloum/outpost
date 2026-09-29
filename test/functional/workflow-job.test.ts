@@ -7,16 +7,16 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import {
-  approvalTask,
+  defineApprovalTask,
   githubWebhook,
   labelAdded,
-  localTransport,
+  createLocalTransport,
   runQueueWorker,
   serveTriggers,
-  sqliteTaskQueue,
-  task,
-  workflow,
-  workflowCheckpointStore,
+  createSqliteTaskQueue,
+  defineTask,
+  defineWorkflow,
+  createWorkflowCheckpointStore,
   workflowJob,
 } from "../../src/index.ts";
 import type {
@@ -30,9 +30,11 @@ const plain = (value: unknown): unknown => JSON.parse(JSON.stringify(value));
 
 async function fixture(t: TestContext) {
   const directory = await mkdtemp(join(tmpdir(), "outpost-workflow-job-"));
-  const queue = await sqliteTaskQueue(join(directory, "queue.sqlite"));
-  const store = workflowCheckpointStore({
-    transporter: localTransport({ directory: join(directory, "storage") }),
+  const queue = await createSqliteTaskQueue(join(directory, "queue.sqlite"));
+  const store = createWorkflowCheckpointStore({
+    transporter: createLocalTransport({
+      directory: join(directory, "storage"),
+    }),
   });
   const workers: (() => Promise<void>)[] = [];
   t.after(async () => {
@@ -74,8 +76,8 @@ test("webhook deliveries run a checkpointed workflow once per run", async (t) =>
       checkpoint: { store, version: "1" },
       workflow(input, context) {
         assert.equal(context.runId, "issue-42");
-        return workflow("fix", [
-          task({
+        return defineWorkflow("fix", [
+          defineTask({
             key: "patch",
             perform: () => {
               performed.push(input);
@@ -153,8 +155,8 @@ test("webhook deliveries run a checkpointed workflow once per run", async (t) =>
 test("workflow jobs report pauses, failures and input conflicts", async (t) => {
   const { queue, store, startWorker } = await fixture(t);
   const review = () =>
-    workflow("review", [
-      approvalTask({
+    defineWorkflow("review", [
+      defineApprovalTask({
         key: "approve",
         prompt: "Deploy?",
         actors: ["maintainer"],
@@ -169,8 +171,8 @@ test("workflow jobs report pauses, failures and input conflicts", async (t) => {
       checkpoint: { store, version: "1" },
       start: { stopOnError: true },
       workflow: () =>
-        workflow("broken", [
-          task({
+        defineWorkflow("broken", [
+          defineTask({
             key: "explode",
             perform: () => {
               throw new Error("boom");
@@ -245,8 +247,8 @@ test("workflow jobs report pauses, failures and input conflicts", async (t) => {
 });
 
 test("workflowJob validates its options", () => {
-  const store = workflowCheckpointStore({
-    transporter: localTransport({ directory: tmpdir() }),
+  const store = createWorkflowCheckpointStore({
+    transporter: createLocalTransport({ directory: tmpdir() }),
   });
   assert.throws(
     () =>
@@ -259,7 +261,7 @@ test("workflowJob validates its options", () => {
     () =>
       workflowJob({
         checkpoint: { store, version: "" },
-        workflow: () => workflow("x", []),
+        workflow: () => defineWorkflow("x", []),
       }),
     /version/,
   );

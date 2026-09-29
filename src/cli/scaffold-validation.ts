@@ -1,11 +1,11 @@
-import { agent as composeAgent } from "../domain/agent.ts";
+import { createAgent as composeAgent } from "../domain/agent.ts";
 import { invariant } from "../domain/errors.ts";
 import {
-  antigravityHarness,
-  claudeHarness,
-  codexHarness,
-  copilotHarness,
-  kimiHarness,
+  createAntigravityHarness,
+  createClaudeHarness,
+  createCodexHarness,
+  createCopilotHarness,
+  createKimiHarness,
 } from "../providers/agents.ts";
 import {
   authenticationChoice,
@@ -16,11 +16,11 @@ import { supportedProviders } from "./scaffold.constants.ts";
 import type { InitOptions } from "./scaffold.types.ts";
 
 const harnesses = {
-  codex: codexHarness,
-  claude: claudeHarness,
-  antigravity: antigravityHarness,
-  copilot: copilotHarness,
-  kimi: kimiHarness,
+  codex: createCodexHarness,
+  claude: createClaudeHarness,
+  antigravity: createAntigravityHarness,
+  copilot: createCopilotHarness,
+  kimi: createKimiHarness,
 } as const;
 
 export function validateInitialization(options: InitOptions): void {

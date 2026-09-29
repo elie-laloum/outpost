@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
-  agent,
-  claudeHarness,
-  fallbackAgent,
+  createAgent,
+  createClaudeHarness,
+  createFallbackAgent,
   OutpostError,
 } from "../../src/index.ts";
 import type { Agent, FallbackTrigger } from "../../src/index.ts";
@@ -14,13 +14,13 @@ import {
 } from "../../src/domain/fallback-agent.ts";
 import { scripted } from "../helpers.ts";
 
-const opus = agent({ harness: claudeHarness(), model: "opus" });
-const sonnet = agent({ harness: claudeHarness(), model: "sonnet" });
+const opus = createAgent({ harness: createClaudeHarness(), model: "opus" });
+const sonnet = createAgent({ harness: createClaudeHarness(), model: "sonnet" });
 
-test("fallbackAgent freezes an ordered candidate list with an explicit policy", () => {
+test("createFallbackAgent freezes an ordered candidate list with an explicit policy", () => {
   const candidates: [Agent, Agent] = [opus, sonnet];
   const on: FallbackTrigger[] = ["quota"];
-  const coder = fallbackAgent(candidates, { on });
+  const coder = createFallbackAgent(candidates, { on });
   candidates.pop();
   on.push("unavailable");
   assert.equal(coder.kind, "fallback");
@@ -40,7 +40,7 @@ test("fallbackAgent freezes an ordered candidate list with an explicit policy", 
   });
 });
 
-test("fallbackAgent rejects ambiguous or implicit configurations", () => {
+test("createFallbackAgent rejects ambiguous or implicit configurations", () => {
   const invalid: readonly [unknown, unknown][] = [
     [[opus], { on: ["quota"] }],
     [[opus, sonnet], {}],
@@ -48,7 +48,7 @@ test("fallbackAgent rejects ambiguous or implicit configurations", () => {
     [[opus, sonnet], { on: ["timeout"] }],
     [[opus, sonnet], { on: ["quota", "quota"] }],
     [
-      [opus, fallbackAgent([opus, sonnet], { on: ["quota"] })],
+      [opus, createFallbackAgent([opus, sonnet], { on: ["quota"] })],
       { on: ["quota"] },
     ],
     [[opus, { kind: "cli" }], undefined],
@@ -57,7 +57,7 @@ test("fallbackAgent rejects ambiguous or implicit configurations", () => {
   for (const [agents, options] of invalid)
     assert.throws(
       () =>
-        fallbackAgent(
+        createFallbackAgent(
           agents as [Agent, Agent],
           options as { on: FallbackTrigger[] },
         ),

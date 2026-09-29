@@ -7,7 +7,7 @@ import type { Sandbox as VercelSandbox } from "@vercel/sandbox";
 import type { Sandbox as DaytonaSandbox } from "@daytona/sdk";
 import { vercelFiles } from "../../src/providers/vercel-files.ts";
 import { daytonaFiles } from "../../src/providers/daytona-files.ts";
-import { localSandboxProvider } from "../../src/providers/local.ts";
+import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { fileBatches } from "../../src/providers/file-batches.ts";
 import { executeProcess } from "../../src/infrastructure/process.ts";
 import { verifyCloudModels } from "../fixtures/cloud-model-contract.ts";
@@ -47,7 +47,7 @@ for (const backend of ["vercel", "daytona"])
           : false,
     },
     async () => {
-      const sandboxProvider = localSandboxProvider();
+      const sandboxProvider = createLocalSandboxProvider();
       const reports = await runCloudCompatibility({
         environment,
         create: () => ({
@@ -128,7 +128,7 @@ for (const backend of ["vercel", "daytona"])
 
 test("cloud runner cleans partial failures and never exposes exception contents", async () => {
   let released = 0;
-  const sandboxProvider = localSandboxProvider();
+  const sandboxProvider = createLocalSandboxProvider();
   const create: CompatibilityOptions["create"] = () => ({
     ...sandboxProvider,
     acquire: async (context) => {
@@ -162,7 +162,7 @@ test("cloud runner cleans partial failures and never exposes exception contents"
 });
 
 test("cloud runner reports cleanup failure even after successful checks", async () => {
-  const sandboxProvider = localSandboxProvider();
+  const sandboxProvider = createLocalSandboxProvider();
   const reports = await runCloudCompatibility({
     environment,
     create: () => ({
@@ -189,7 +189,7 @@ test("cloud runner reports cleanup failure even after successful checks", async 
 });
 
 test("cloud runner bounds stuck verification and releases a late acquisition", async () => {
-  const sandboxProvider = localSandboxProvider();
+  const sandboxProvider = createLocalSandboxProvider();
   const stuck = await runCloudCompatibility({
     environment,
     create: () => sandboxProvider,
@@ -399,7 +399,7 @@ test("cloud runner confirms cleanup for allocations arriving during the cleanup 
 
 for (const agent of ["claude", "codex"] as const) {
   test(`cloud runner preserves ${agent} failure attribution and releases the lease`, async () => {
-    const sandboxProvider = localSandboxProvider();
+    const sandboxProvider = createLocalSandboxProvider();
     const reports = await runCloudCompatibility({
       environment,
       create: () => ({

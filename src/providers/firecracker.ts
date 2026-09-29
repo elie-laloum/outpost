@@ -13,7 +13,7 @@ import type { FirecrackerOptions } from "./firecracker.types.ts";
 
 export type { FirecrackerOptions } from "./firecracker.types.ts";
 
-export function firecrackerSandboxProvider(
+export function createFirecrackerSandboxProvider(
   options: FirecrackerOptions,
 ): SandboxProvider {
   validateFirecracker(options);
@@ -154,3 +154,6 @@ export function firecrackerSandboxProvider(
     },
   };
 }
+
+/** @deprecated Use {@link createFirecrackerSandboxProvider}. */
+export const firecrackerSandboxProvider = createFirecrackerSandboxProvider;

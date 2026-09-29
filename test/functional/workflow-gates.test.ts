@@ -8,12 +8,12 @@ import { join } from "node:path";
 import { spawn } from "node:child_process";
 import { once } from "node:events";
 import {
-  approvalTask,
-  pauseTask,
-  workflowCheckpointStore,
-  task,
-  workflow,
-  localTransport,
+  defineApprovalTask,
+  definePauseTask,
+  createWorkflowCheckpointStore,
+  defineTask,
+  defineWorkflow,
+  createLocalTransport,
 } from "../../src/index.ts";
 import type {
   WorkflowCheckpointStore,
@@ -28,8 +28,8 @@ async function setup(t: TestContext) {
   return {
     directory,
     checkpoint: {
-      store: workflowCheckpointStore({
-        transporter: localTransport({ directory: directory }),
+      store: createWorkflowCheckpointStore({
+        transporter: createLocalTransport({ directory: directory }),
       }),
       runId: "release",
       version: "1",
@@ -63,7 +63,7 @@ test("approval pauses durably, drains independent tasks, and restores values wit
   let builds = 0,
     deliveries = 0;
   const definition = () => {
-    const build = task({
+    const build = defineTask({
       key: "build",
       perform(context) {
         builds++;
@@ -71,9 +71,12 @@ test("approval pauses durably, drains independent tasks, and restores values wit
         return { artifact: "build-42" };
       },
     });
-    const review = approvalTask({ ...gateOptions, after: [build] });
-    const independent = task({ key: "independent", perform: () => "finished" });
-    const ship = task({
+    const review = defineApprovalTask({ ...gateOptions, after: [build] });
+    const independent = defineTask({
+      key: "independent",
+      perform: () => "finished",
+    });
+    const ship = defineTask({
       key: "ship",
       after: [build, review],
       perform(context) {
@@ -87,7 +90,7 @@ test("approval pauses durably, drains independent tasks, and restores values wit
     return {
       ship,
       review,
-      graph: workflow("release", [build, review, independent, ship]),
+      graph: defineWorkflow("release", [build, review, independent, ship]),
     };
   };
   const first = await definition().graph.start({ checkpoint, concurrency: 3 });
@@ -134,13 +137,13 @@ test("approval pauses durably, drains independent tasks, and restores values wit
 
 test("rejection persists its audit trail and blocks dependents on every restart", async (t) => {
   const { checkpoint } = await setup(t);
-  const review = approvalTask(gateOptions);
-  const child = task({
+  const review = defineApprovalTask(gateOptions);
+  const child = defineTask({
     key: "child",
     after: [review],
     perform: () => assert.fail("rejected dependency executed"),
   });
-  const graph = workflow("release", [review, child]);
+  const graph = defineWorkflow("release", [review, child]);
   const first = await graph.start({ checkpoint });
   const rejected = await graph.start({
     checkpoint,
@@ -170,8 +173,8 @@ test("rejection persists its audit trail and blocks dependents on every restart"
 
 test("pause nodes require a resume decision and never approve from elapsed time", async (t) => {
   const { checkpoint } = await setup(t);
-  const pause = pauseTask(gateOptions);
-  const graph = workflow("release", [pause]);
+  const pause = definePauseTask(gateOptions);
+  const graph = defineWorkflow("release", [pause]);
   const first = await graph.start({ checkpoint });
   await assert.rejects(
     graph.start({ checkpoint, decisions: [decision(first)] }),
@@ -190,7 +193,7 @@ test("pause nodes require a resume decision and never approve from elapsed time"
 
 test("all invalid decisions fail atomically and leave the pending request unchanged", async (t) => {
   const { checkpoint } = await setup(t);
-  const graph = workflow("release", [approvalTask(gateOptions)]);
+  const graph = defineWorkflow("release", [defineApprovalTask(gateOptions)]);
   const first = await graph.start({ checkpoint });
   const good = decision(first);
   const invalid = [
@@ -222,15 +225,21 @@ test("all invalid decisions fail atomically and leave the pending request unchan
 test("gates reject absent persistence, invalid owners and unsolicited decisions", async (t) => {
   const { checkpoint } = await setup(t);
   for (const actors of [[], [" "], ["maintainer", "maintainer"]])
-    assert.throws(() => approvalTask({ ...gateOptions, actors }), /actors/);
-  assert.throws(() => pauseTask({ ...gateOptions, prompt: " " }), /prompt/);
-  const review = approvalTask(gateOptions);
+    assert.throws(
+      () => defineApprovalTask({ ...gateOptions, actors }),
+      /actors/,
+    );
+  assert.throws(
+    () => definePauseTask({ ...gateOptions, prompt: " " }),
+    /prompt/,
+  );
+  const review = defineApprovalTask(gateOptions);
   await assert.rejects(
-    workflow("release", [review]).start(),
+    defineWorkflow("release", [review]).start(),
     /require a checkpoint/,
   );
   assert.throws(
-    () => workflow("release", [{ ...review, retry: { attempts: 2 } }]),
+    () => defineWorkflow("release", [{ ...review, retry: { attempts: 2 } }]),
     /cannot have/,
   );
   const unsolicited: WorkflowDecision = {
@@ -242,44 +251,46 @@ test("gates reject absent persistence, invalid owners and unsolicited decisions"
     reason: "ready",
   };
   await assert.rejects(
-    workflow("release", [review]).start({
+    defineWorkflow("release", [review]).start({
       checkpoint,
       decisions: [unsolicited],
     }),
     /Invalid or unauthorized/,
   );
   await assert.rejects(
-    workflow("release", []).start({ decisions: [unsolicited] }),
+    defineWorkflow("release", []).start({ decisions: [unsolicited] }),
     /require a checkpoint/,
   );
-  const first = await workflow("release", [review]).start({ checkpoint });
+  const first = await defineWorkflow("release", [review]).start({ checkpoint });
   assert.equal(first.status, "paused");
 });
 
 test("ownership, prompt, kind and dependency changes invalidate persisted requests", async (t) => {
   const { checkpoint } = await setup(t);
-  await workflow("release", [approvalTask(gateOptions)]).start({ checkpoint });
+  await defineWorkflow("release", [defineApprovalTask(gateOptions)]).start({
+    checkpoint,
+  });
   for (const gate of [
-    approvalTask({ ...gateOptions, actors: ["other"] }),
-    approvalTask({ ...gateOptions, prompt: "Different change?" }),
-    pauseTask(gateOptions),
+    defineApprovalTask({ ...gateOptions, actors: ["other"] }),
+    defineApprovalTask({ ...gateOptions, prompt: "Different change?" }),
+    definePauseTask(gateOptions),
   ])
     await assert.rejects(
-      workflow("release", [gate]).start({ checkpoint }),
+      defineWorkflow("release", [gate]).start({ checkpoint }),
       /incompatible/,
     );
 });
 
 test("approval preserves cumulative attempt budgets across pause and resume", async (t) => {
   const { checkpoint } = await setup(t);
-  const build = task({ key: "build", perform: () => 42 });
-  const review = approvalTask({ ...gateOptions, after: [build] });
-  const child = task({
+  const build = defineTask({ key: "build", perform: () => 42 });
+  const review = defineApprovalTask({ ...gateOptions, after: [build] });
+  const child = defineTask({
     key: "child",
     after: [review],
     perform: () => assert.fail("budget exceeded"),
   });
-  const graph = workflow("release", [build, review, child]);
+  const graph = defineWorkflow("release", [build, review, child]);
   const first = await graph.start({ checkpoint, budget: { attempts: 1 } });
   assert.equal(first.status, "paused");
   const result = await graph.start({
@@ -295,15 +306,15 @@ test("approval preserves cumulative attempt budgets across pause and resume", as
 
 test("independent pending requests can be decided separately and cannot unblock each other", async (t) => {
   const { checkpoint } = await setup(t);
-  const firstGate = approvalTask(gateOptions);
-  const secondGate = approvalTask({ ...gateOptions, key: "second" });
+  const firstGate = defineApprovalTask(gateOptions);
+  const secondGate = defineApprovalTask({ ...gateOptions, key: "second" });
   let calls = 0;
-  const child = task({
+  const child = defineTask({
     key: "child",
     after: [firstGate, secondGate],
     perform: () => ++calls,
   });
-  const graph = workflow("release", [firstGate, secondGate, child]);
+  const graph = defineWorkflow("release", [firstGate, secondGate, child]);
   const first = await graph.start({ checkpoint, concurrency: 3 });
   const partial = await graph.start({
     checkpoint,
@@ -328,10 +339,10 @@ test(
     const module = new URL("../../src/index.ts", import.meta.url).href;
     await writeFile(
       script,
-      `import { approvalTask, task, workflow, workflowCheckpointStore, localTransport } from ${JSON.stringify(module)};
-const source = task({key:'source',perform:()=>42});
-const gate = approvalTask({key:'review',after:[source],prompt:'Ship this change?',actors:['maintainer']});
-const result = await workflow('release',[source,gate]).start({checkpoint:{store:workflowCheckpointStore({ transporter: localTransport({ directory: ${JSON.stringify(directory)} }) }),runId:'release',version:'1'}});
+      `import { defineApprovalTask, defineTask, defineWorkflow, createWorkflowCheckpointStore, createLocalTransport } from ${JSON.stringify(module)};
+const source = defineTask({key:'source',perform:()=>42});
+const gate = defineApprovalTask({key:'review',after:[source],prompt:'Ship this change?',actors:['maintainer']});
+const result = await defineWorkflow('release',[source,gate]).start({checkpoint:{store:createWorkflowCheckpointStore({ transporter: createLocalTransport({ directory: ${JSON.stringify(directory)} }) }),runId:'release',version:'1'}});
 console.log(JSON.stringify(result));`,
     );
     const child = spawn(process.execPath, [script], {
@@ -346,12 +357,12 @@ console.log(JSON.stringify(result));`,
     assert.equal(code, 0);
     const first: WorkflowResult = JSON.parse(output);
     assert.equal(first.status, "paused");
-    const source = task({
+    const source = defineTask({
       key: "source",
       perform: () => assert.fail("source replayed"),
     });
-    const review = approvalTask({ ...gateOptions, after: [source] });
-    const done = await workflow("release", [source, review]).start({
+    const review = defineApprovalTask({ ...gateOptions, after: [source] });
+    const done = await defineWorkflow("release", [source, review]).start({
       checkpoint,
       decisions: [decision(first)],
     });
@@ -363,10 +374,10 @@ console.log(JSON.stringify(result));`,
 
 test("corrupt requests and decisions are rejected before executing anything", async (t) => {
   const { directory, checkpoint } = await setup(t);
-  const review = approvalTask(gateOptions);
-  const graph = workflow("release", [review]);
+  const review = defineApprovalTask(gateOptions);
+  const graph = defineWorkflow("release", [review]);
   const first = await graph.start({ checkpoint });
-  const transporter = localTransport({ directory });
+  const transporter = createLocalTransport({ directory });
   const key = `checkpoints/${createHash("sha256").update(checkpoint.runId).digest("hex")}.json`;
   const read = async () =>
     JSON.parse(Buffer.from((await transporter.read(key))!.bytes).toString())
@@ -444,13 +455,13 @@ test("decision checkpoint failures prevent dependent side effects", async () => 
     },
   };
   const checkpoint = { store, runId: "failure", version: "1" };
-  const review = approvalTask(gateOptions);
-  const child = task({
+  const review = defineApprovalTask(gateOptions);
+  const child = defineTask({
     key: "child",
     after: [review],
     perform: () => assert.fail("uncommitted approval executed"),
   });
-  const graph = workflow("release", [review, child]);
+  const graph = defineWorkflow("release", [review, child]);
   const first = await graph.start({ checkpoint });
   await assert.rejects(
     graph.start({ checkpoint, decisions: [decision(first)] }),
@@ -463,7 +474,7 @@ test("decision checkpoint failures prevent dependent side effects", async () => 
 test("clean pause restarts retain condition skips without evaluating them again", async (t) => {
   const { checkpoint } = await setup(t);
   let checks = 0;
-  const skipped = task({
+  const skipped = defineTask({
     key: "skip",
     condition() {
       return ++checks > 1;
@@ -472,8 +483,8 @@ test("clean pause restarts retain condition skips without evaluating them again"
       assert.fail("completed conditional skip replayed");
     },
   });
-  const review = approvalTask(gateOptions);
-  const graph = workflow("release", [skipped, review]);
+  const review = defineApprovalTask(gateOptions);
+  const graph = defineWorkflow("release", [skipped, review]);
   const first = await graph.start({ checkpoint });
   const pending = await graph.start({
     checkpoint: { ...checkpoint, resume: "retry-incomplete" },
@@ -490,8 +501,8 @@ test("clean pause restarts retain condition skips without evaluating them again"
 
 test("observer mutation cannot change a validated approval decision", async (t) => {
   const { checkpoint } = await setup(t);
-  const review = approvalTask(gateOptions);
-  const graph = workflow("release", [review]);
+  const review = defineApprovalTask(gateOptions);
+  const graph = defineWorkflow("release", [review]);
   const first = await graph.start({ checkpoint });
   const input = { ...decision(first) };
   const result = await graph.start({

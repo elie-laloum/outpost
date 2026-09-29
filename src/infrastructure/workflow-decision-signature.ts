@@ -78,7 +78,7 @@ export function signWorkflowDecision(
   });
 }
 
-export function ed25519DecisionVerifier(
+export function createEd25519DecisionVerifier(
   options: WorkflowDecisionVerifierOptions,
 ): WorkflowDecisionVerifier {
   return async (input) => {

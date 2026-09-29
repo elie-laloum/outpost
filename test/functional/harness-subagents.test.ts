@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { test } from "node:test";
 import {
-  agent,
-  harness,
+  createAgent,
+  createHarness,
   defineHarnessSubagent,
   defineHarnessTool,
   defineHarnessPermissions,
@@ -11,14 +11,14 @@ import {
   defineHarnessHook,
   dispatch,
   createSandbox,
-  harnessConversations,
+  createHarnessConversations,
   type ModelProvider,
   type ModelRequest,
   type ModelResult,
   type HarnessOptions,
   type AgentObservation,
 } from "../../src/index.ts";
-import { localSandboxProvider } from "../../src/providers/local.ts";
+import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { repository } from "../helpers.ts";
 
 const tokens = { input: 4, cached: 1, output: 2 };
@@ -52,9 +52,9 @@ const coder = (
   modelProvider: ModelProvider,
   extra: Omit<HarnessOptions, "modelProvider"> = {},
 ) =>
-  agent({
+  createAgent({
     model: { name: "fixture", maxOutputTokens: 100 },
-    harness: harness({ modelProvider, ...extra }),
+    harness: createHarness({ modelProvider, ...extra }),
   });
 const delegate = (
   modelProvider: ModelProvider,
@@ -132,7 +132,7 @@ test("subagents borrow one sandbox, isolate history, persist lineage and account
   const result = await dispatch({
     repository: root,
     agent: parent,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     brief: { text: "parent-private-marker" },
     logging: false,
     observe: (event) => events.push(event),
@@ -154,7 +154,7 @@ test("subagents borrow one sandbox, isolate history, persist lineage and account
     events.filter((event) => event.kind === "tool-output").length,
     1,
   );
-  const childFile = await harnessConversations().locate(
+  const childFile = await createHarnessConversations().locate(
     childConversation,
     root,
   );
@@ -200,7 +200,7 @@ test("parent permissions restrict tools allowed by the child", async (t) => {
   await dispatch({
     repository: root,
     agent: parent,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     brief: { text: "test" },
     logging: false,
   });
@@ -227,7 +227,7 @@ test("descendant usage exhausts the parent budget even with recoverable tool err
     dispatch({
       repository: root,
       agent: parent,
-      sandboxProvider: localSandboxProvider(),
+      sandboxProvider: createLocalSandboxProvider(),
       brief: { text: "test" },
       logging: false,
     }),
@@ -259,7 +259,7 @@ test("child limits return a tool error while the parent retains its remaining bu
   const result = await dispatch({
     repository: root,
     agent: parent,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     brief: { text: "test" },
     logging: false,
   });
@@ -295,7 +295,7 @@ test("final responses and context summaries cannot escape token budgets", async 
       dispatch({
         repository: root,
         agent: parent,
-        sandboxProvider: localSandboxProvider(),
+        sandboxProvider: createLocalSandboxProvider(),
         brief: { text: "test" },
         logging: false,
       }),
@@ -334,7 +334,7 @@ test("delegation depth cannot be raised by descendants", async (t) => {
   await dispatch({
     repository: root,
     agent: parent,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     brief: { text: "test" },
     logging: false,
   });
@@ -358,7 +358,7 @@ test("child request cancellation reaches its provider and leaves a warm sandbox 
   );
   const sandbox = await createSandbox({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent: coder(provider([() => call("inspect")]), { tools: [child] }),
     logging: false,
   });
@@ -406,7 +406,7 @@ test("child tool deadlines abort model calls and cannot produce a late parent re
   await dispatch({
     repository: root,
     agent: parent,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     brief: { text: "test" },
     logging: false,
   });
@@ -420,12 +420,12 @@ test("subagent configuration rejects CLI agents, invalid prompts and duplicate n
   });
   assert.ok("issues" in (await child.validate({ prompt: "" })));
   assert.throws(
-    () => harness({ modelProvider: provider([]), tools: [child, child] }),
+    () => createHarness({ modelProvider: provider([]), tools: [child, child] }),
     /Duplicate tool/,
   );
   assert.throws(
     () =>
-      harness({
+      createHarness({
         modelProvider: provider([]),
         limits: { maxDelegationDepth: -1 },
       }),
@@ -507,7 +507,7 @@ test("sibling delegations serialize edits and child streams retain correlation",
   );
   const result = await dispatch({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent: parent,
     brief: { text: "test" },
     logging: false,
@@ -530,7 +530,7 @@ test("sibling delegations serialize edits and child streams retain correlation",
 test("child stores capture transcripts and parent continuation does not replay delegation", async (t) => {
   const root = await repository(t);
   const captured: string[] = [];
-  const store = harnessConversations();
+  const store = createHarnessConversations();
   const child = delegate(provider([() => done("child")]), {
     conversations: {
       ...store,
@@ -553,7 +553,7 @@ test("child stores capture transcripts and parent continuation does not replay d
   );
   const sandbox = await createSandbox({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent: parent,
     logging: false,
   });
@@ -586,7 +586,7 @@ test("unknown descendant usage cannot bypass an ancestor token budget", async (t
       dispatch({
         repository: root,
         agent: parent,
-        sandboxProvider: localSandboxProvider(),
+        sandboxProvider: createLocalSandboxProvider(),
         brief: { text: "test" },
         logging: false,
       }),
@@ -598,7 +598,7 @@ test("unknown descendant usage cannot bypass an ancestor token budget", async (t
 test("child capture failures report failure and release transcript ownership", async (t) => {
   const root = await repository(t);
   const events: AgentObservation[] = [];
-  const native = harnessConversations();
+  const native = createHarnessConversations();
   let id = "";
   const child = delegate(provider([() => done()]), {
     conversations: {
@@ -622,7 +622,7 @@ test("child capture failures report failure and release transcript ownership", a
   );
   await dispatch({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent: parent,
     brief: { text: "test" },
     logging: false,
@@ -640,7 +640,7 @@ test("child capture failures report failure and release transcript ownership", a
   );
   const resumed = await dispatch({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent: coder(provider([() => done()])),
     continuation: { id },
     brief: { text: "recover" },
@@ -694,7 +694,7 @@ test("child input rewrites are rechecked against ancestor resource permissions",
   });
   await dispatch({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent: parent,
     brief: { text: "test" },
     logging: false,
@@ -707,7 +707,7 @@ test("unknown model usage reaches synchronous accounting and observers", async (
   const events: AgentObservation[] = [];
   const result = await dispatch({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent: coder(provider([() => ({ text: "<outpost>done</outpost>" })])),
     brief: { text: "test" },
     logging: false,

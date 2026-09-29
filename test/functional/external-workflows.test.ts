@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { test } from "node:test";
-import { isolatedTask, workflow } from "../../src/index.ts";
-import { localSandboxProvider } from "../../src/providers/local.ts";
+import { defineIsolatedTask, defineWorkflow } from "../../src/index.ts";
+import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { emit, repository, scripted } from "../helpers.ts";
 
 test("one workflow coordinates commits in two external repositories", async (t) => {
@@ -20,28 +20,28 @@ test("one workflow coordinates commits in two external repositories", async (t) 
     ${emit("<outpost>done</outpost>")}
   `,
     );
-  const backend = isolatedTask({
+  const backend = defineIsolatedTask({
     key: "backend",
     request: () => ({
       repository: backendRepository,
-      sandboxProvider: localSandboxProvider(),
+      sandboxProvider: createLocalSandboxProvider(),
       agent: change("backend.txt"),
       branch: { mode: "integrate" },
       brief: { text: "Backend change" },
     }),
   });
-  const frontend = isolatedTask({
+  const frontend = defineIsolatedTask({
     key: "frontend",
     after: [backend],
     request: (context) => ({
       repository: frontendRepository,
-      sandboxProvider: localSandboxProvider(),
+      sandboxProvider: createLocalSandboxProvider(),
       agent: change("frontend.txt"),
       branch: { mode: "integrate" },
       brief: { text: `Adapt to ${context.value(backend).commits[0]!.oid}` },
     }),
   });
-  const result = await workflow("external-repositories", [
+  const result = await defineWorkflow("external-repositories", [
     backend,
     frontend,
   ]).start();

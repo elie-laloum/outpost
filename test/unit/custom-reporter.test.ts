@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { createReporter } from "../../src/index.ts";
+import { createCustomReporter } from "../../src/index.ts";
 import type { AgentObservation, ReporterHandlers } from "../../src/index.ts";
 
 const text = (value: string): AgentObservation => ({
@@ -16,7 +16,7 @@ test("reporter routes typed events and serializes asynchronous handlers", async 
   const gate = new Promise<void>((resolve) => {
     release = resolve;
   });
-  const report = createReporter({
+  const report = createCustomReporter({
     async phase(event) {
       output.push(event.name);
       await gate;
@@ -47,7 +47,7 @@ test("reporter drains after failures and retains the first failure for every flu
   const failure = new Error("write failed");
   const diagnostics: unknown[] = [];
   const output: string[] = [];
-  const report = createReporter(
+  const report = createCustomReporter(
     {
       text(event) {
         if (event.text === "fail") throw failure;
@@ -80,7 +80,7 @@ test("flush waits for its snapshot without waiting for later events", async () =
   const gate = new Promise<void>((resolve) => {
     release = resolve;
   });
-  const report = createReporter({
+  const report = createCustomReporter({
     async text(event) {
       if (event.text === "late") await gate;
     },
@@ -91,7 +91,7 @@ test("flush waits for its snapshot without waiting for later events", async () =
   await drained;
   release();
   await report.flush();
-  await createReporter({}).flush();
+  await createCustomReporter({}).flush();
 });
 
 test("undefined rejections are still failures and handlers narrow the event", async () => {
@@ -103,7 +103,7 @@ test("undefined rejections are still failures and handlers narrow the event", as
       throw undefined;
     },
   };
-  const report = createReporter(handlers);
+  const report = createCustomReporter(handlers);
   report({ kind: "phase", name: "running", pass: 1, at: "now" });
   let rejected = false;
   await report.flush().catch((error: unknown) => {

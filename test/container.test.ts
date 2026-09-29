@@ -1,4 +1,4 @@
-import { agent as composeAgent } from "../src/domain/agent.ts";
+import { createAgent as composeAgent } from "../src/domain/agent.ts";
 import { spawn } from "node:child_process";
 import { once } from "node:events";
 import { PassThrough } from "node:stream";
@@ -12,17 +12,17 @@ import {
   createSandbox,
   dispatch,
   readJournal,
-  replayAgent,
-  codexHarness,
-  claudeHarness,
-  copilotHarness,
+  createReplayAgent,
+  createCodexHarness,
+  createClaudeHarness,
+  createCopilotHarness,
   createSteering,
-  kimiHarness,
-  harness,
+  createKimiHarness,
+  createHarness,
 } from "../src/index.ts";
 import type { ModelRequest } from "../src/index.ts";
-import { dockerSandboxProvider } from "../src/providers/docker.ts";
-import { podmanSandboxProvider } from "../src/providers/podman.ts";
+import { createDockerSandboxProvider } from "../src/providers/docker.ts";
+import { createPodmanSandboxProvider } from "../src/providers/podman.ts";
 import { repository } from "./helpers.ts";
 import type {
   AgentEvent,
@@ -46,15 +46,15 @@ test(
     const root = await repository(t),
       sandboxProvider =
         process.env.OUTPOST_CONTAINER_ENGINE === "podman"
-          ? podmanSandboxProvider
-          : dockerSandboxProvider;
+          ? createPodmanSandboxProvider
+          : createDockerSandboxProvider;
     const box = await createSandbox({
       repository: root,
       sandboxProvider: sandboxProvider({
         image: containerImage,
         networks: "none",
       }),
-      agent: composeAgent({ harness: codexHarness({}) }),
+      agent: composeAgent({ harness: createCodexHarness({}) }),
       branch: { mode: "named", name: "container-test" },
       logging: false,
     });
@@ -72,8 +72,8 @@ test(
         "container change\n",
       );
       for (const adapter of [
-        composeAgent({ harness: codexHarness({}) }),
-        composeAgent({ harness: claudeHarness({}) }),
+        composeAgent({ harness: createCodexHarness({}) }),
+        composeAgent({ harness: createClaudeHarness({}) }),
       ]) {
         const version = await box.command({
           executable: adapter.name,
@@ -176,8 +176,8 @@ test(
     const root = await repository(t);
     const sandboxProvider =
       process.env.OUTPOST_CONTAINER_ENGINE === "podman"
-        ? podmanSandboxProvider
-        : dockerSandboxProvider;
+        ? createPodmanSandboxProvider
+        : createDockerSandboxProvider;
     const fixture = (
       name: string,
       script: (input: AgentInput) => string,
@@ -269,8 +269,8 @@ test(
     const root = await repository(t),
       factory =
         process.env.OUTPOST_CONTAINER_ENGINE === "podman"
-          ? podmanSandboxProvider
-          : dockerSandboxProvider;
+          ? createPodmanSandboxProvider
+          : createDockerSandboxProvider;
     const input = join(root, "transfer inputs");
     await mkdir(join(input, "nested folder"), { recursive: true });
     const bytes = Buffer.from([0, 1, 2, 255, 128, 10, 13, 0]);
@@ -340,8 +340,8 @@ test(
     const root = await repository(t);
     const factory =
       process.env.OUTPOST_CONTAINER_ENGINE === "podman"
-        ? podmanSandboxProvider
-        : dockerSandboxProvider;
+        ? createPodmanSandboxProvider
+        : createDockerSandboxProvider;
     const lease = await factory({
       image: containerImage,
       networks: "none",
@@ -432,8 +432,8 @@ test(
     const root = await repository(t);
     const factory =
       process.env.OUTPOST_CONTAINER_ENGINE === "podman"
-        ? podmanSandboxProvider
-        : dockerSandboxProvider;
+        ? createPodmanSandboxProvider
+        : createDockerSandboxProvider;
     const lease = await factory({
       image: containerImage,
       networks: "none",
@@ -710,7 +710,9 @@ test(
     const engine =
       process.env.OUTPOST_CONTAINER_ENGINE === "podman" ? "podman" : "docker";
     const factory =
-      engine === "podman" ? podmanSandboxProvider : dockerSandboxProvider;
+      engine === "podman"
+        ? createPodmanSandboxProvider
+        : createDockerSandboxProvider;
     const { cacheMounts } = await import("../src/providers/container-cache.ts");
     const user = {
       uid: process.getuid?.() ?? 1000,
@@ -798,8 +800,8 @@ test(
     const root = await repository(t);
     const factory =
       process.env.OUTPOST_CONTAINER_ENGINE === "podman"
-        ? podmanSandboxProvider
-        : dockerSandboxProvider;
+        ? createPodmanSandboxProvider
+        : createDockerSandboxProvider;
     await git(root, ["config", "outpost.hostOnly", "private"]);
     const hook = join(root, ".git", "hooks", "pre-commit");
     await writeFile(hook, "host hook sentinel\n");
@@ -882,8 +884,8 @@ test(
     const root = await repository(t);
     const factory =
       process.env.OUTPOST_CONTAINER_ENGINE === "podman"
-        ? podmanSandboxProvider
-        : dockerSandboxProvider;
+        ? createPodmanSandboxProvider
+        : createDockerSandboxProvider;
     for (const concurrent of [false, true]) {
       const workspace = await openWorkspace({
         repository: root,
@@ -935,8 +937,8 @@ test(
     const root = await repository(t);
     const factory =
       process.env.OUTPOST_CONTAINER_ENGINE === "podman"
-        ? podmanSandboxProvider
-        : dockerSandboxProvider;
+        ? createPodmanSandboxProvider
+        : createDockerSandboxProvider;
     const lease = await factory({
       image: "outpost-ci:latest",
       egress: { mode: "deny-all" },
@@ -983,8 +985,8 @@ test(
     const root = await repository(t);
     const provider =
       process.env.OUTPOST_CONTAINER_ENGINE === "podman"
-        ? podmanSandboxProvider
-        : dockerSandboxProvider;
+        ? createPodmanSandboxProvider
+        : createDockerSandboxProvider;
     await using box = await createSandbox({
       repository: root,
       sandboxProvider: provider({ image: containerImage, networks: "none" }),
@@ -992,7 +994,8 @@ test(
     });
     for (const kind of ["copilot", "kimi"] as const) {
       const adapter = composeAgent({
-        harness: kind === "copilot" ? copilotHarness() : kimiHarness(),
+        harness:
+          kind === "copilot" ? createCopilotHarness() : createKimiHarness(),
       });
       const selected = {
         ...adapter,
@@ -1047,8 +1050,8 @@ test(
     const root = await repository(t);
     const provider = (
       process.env.OUTPOST_CONTAINER_ENGINE === "podman"
-        ? podmanSandboxProvider
-        : dockerSandboxProvider
+        ? createPodmanSandboxProvider
+        : createDockerSandboxProvider
     )({ image: containerImage, networks: "none" });
     let resourceId = "";
     const lease = await provider.acquire({
@@ -1083,23 +1086,23 @@ test(
   { skip: !process.env.OUTPOST_CONTAINER_ENGINE },
   async (t) => {
     const {
-      agent,
-      harness,
+      createAgent,
+      createHarness,
       defineHarnessTool,
-      interactiveAgentTask,
-      workflow,
-      workflowCheckpointStore,
-      localTransport,
+      defineInteractiveAgentTask,
+      defineWorkflow,
+      createWorkflowCheckpointStore,
+      createLocalTransport,
     } = await import("../src/index.ts");
     const root = await repository(t);
     const factory =
       process.env.OUTPOST_CONTAINER_ENGINE === "podman"
-        ? podmanSandboxProvider
-        : dockerSandboxProvider;
+        ? createPodmanSandboxProvider
+        : createDockerSandboxProvider;
     const provider = factory({ image: containerImage, networks: "none" });
     const checkpoint = {
-      store: workflowCheckpointStore({
-        transporter: localTransport({
+      store: createWorkflowCheckpointStore({
+        transporter: createLocalTransport({
           directory: join(root, ".outpost", "storage"),
         }),
       }),
@@ -1108,16 +1111,16 @@ test(
     };
     let calls = 0;
     const make = () =>
-      interactiveAgentTask({
+      defineInteractiveAgentTask({
         key: "ask",
         repository: root,
         actors: ["owner"],
         brief: "Prepare a draft, ask its subject, then verify the draft.",
         sandboxProvider: provider,
         bootstrap: false,
-        agent: agent({
+        agent: createAgent({
           model: "fixture",
-          harness: harness({
+          harness: createHarness({
             tools: [
               defineHarnessTool({
                 name: "draft",
@@ -1185,7 +1188,9 @@ test(
           }),
         }),
       });
-    const first = await workflow("interview", [make()]).start({ checkpoint });
+    const first = await defineWorkflow("interview", [make()]).start({
+      checkpoint,
+    });
     assert.equal(
       first.status,
       "waiting-input",
@@ -1193,7 +1198,7 @@ test(
     );
     const pending = first.inputRequests[0]!;
     const next = make();
-    const result = await workflow("interview", [next]).start({
+    const result = await defineWorkflow("interview", [next]).start({
       checkpoint,
       answers: [
         {
@@ -1222,8 +1227,8 @@ test(
     const root = await repository(t);
     const sandboxProvider = (
       process.env.OUTPOST_CONTAINER_ENGINE === "podman"
-        ? podmanSandboxProvider
-        : dockerSandboxProvider
+        ? createPodmanSandboxProvider
+        : createDockerSandboxProvider
     )({ image: containerImage, networks: "none" });
     const fixture = {
       kind: "cli" as const,
@@ -1261,7 +1266,7 @@ test(
     const replayed = await dispatch({
       repository: root,
       sandboxProvider,
-      agent: replayAgent({
+      agent: createReplayAgent({
         journal: await readJournal({
           transporter,
           reference: recorded.logReference!,
@@ -1290,8 +1295,8 @@ test(
     );
     const sandboxProvider =
       process.env.OUTPOST_CONTAINER_ENGINE === "podman"
-        ? podmanSandboxProvider
-        : dockerSandboxProvider;
+        ? createPodmanSandboxProvider
+        : createDockerSandboxProvider;
     const replies = [
       () => ({
         text: "",
@@ -1330,7 +1335,7 @@ test(
       const result = await box.dispatch({
         agent: composeAgent({
           model: "fixture",
-          harness: harness({
+          harness: createHarness({
             modelProvider: {
               name: "fixture",
               async request(request) {

@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { writeFile } from "node:fs/promises";
 import {
-  harnessEditTools,
-  harnessFileTools,
+  createHarnessEditTools,
+  createHarnessFileTools,
   type HarnessToolContext,
   type SandboxLease,
 } from "../../src/index.ts";
@@ -38,7 +38,7 @@ function context(files: (string | Buffer)[], uploads: string[] = []) {
 }
 
 const tool = (name: string) =>
-  [...harnessFileTools().tools, ...harnessEditTools().tools].find(
+  [...createHarnessFileTools().tools, ...createHarnessEditTools().tools].find(
     (candidate) => candidate.name === name,
   )!;
 

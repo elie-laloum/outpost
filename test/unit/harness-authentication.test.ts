@@ -1,12 +1,12 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
-  agent,
-  antigravityHarness,
-  claudeHarness,
-  codexHarness,
-  copilotHarness,
-  kimiHarness,
+  createAgent,
+  createAntigravityHarness,
+  createClaudeHarness,
+  createCodexHarness,
+  createCopilotHarness,
+  createKimiHarness,
   type AgentAuthentication,
   type CliAgent,
 } from "../../src/index.ts";
@@ -68,26 +68,26 @@ test("authentication forms normalize every supported shape and reject ambiguous 
 
 test("agents reject unsupported authentication forms when they are composed", () => {
   const unsupported = [
-    [codexHarness, { account: { key: "x" } }],
-    [codexHarness, { account: { variable: "TOKEN" } }],
-    [antigravityHarness, { account: { key: "x" } }],
-    [antigravityHarness, { account: { variable: "TOKEN" } }],
-    [copilotHarness, "usage"],
-    [copilotHarness, { usage: { key: "x" } }],
-    [copilotHarness, { usage: { variable: "KEY" } }],
-    [kimiHarness, { account: { key: "x" } }],
-    [kimiHarness, { account: { variable: "TOKEN" } }],
+    [createCodexHarness, { account: { key: "x" } }],
+    [createCodexHarness, { account: { variable: "TOKEN" } }],
+    [createAntigravityHarness, { account: { key: "x" } }],
+    [createAntigravityHarness, { account: { variable: "TOKEN" } }],
+    [createCopilotHarness, "usage"],
+    [createCopilotHarness, { usage: { key: "x" } }],
+    [createCopilotHarness, { usage: { variable: "KEY" } }],
+    [createKimiHarness, { account: { key: "x" } }],
+    [createKimiHarness, { account: { variable: "TOKEN" } }],
   ] as const;
   for (const [preset, authentication] of unsupported)
     assert.throws(
-      () => agent({ harness: preset({ authentication }) }),
+      () => createAgent({ harness: preset({ authentication }) }),
       /does not support .* authentication\. Accepted forms: account/,
     );
   assert.throws(
     () =>
-      agent({
+      createAgent({
         model: "vendor/model",
-        harness: codexHarness({
+        harness: createCodexHarness({
           modelProvider: { baseUrl: "http://localhost/v1" },
           authentication: "account",
         }),
@@ -96,9 +96,9 @@ test("agents reject unsupported authentication forms when they are composed", ()
   );
   assert.throws(
     () =>
-      agent({
+      createAgent({
         model: "vendor/model",
-        harness: codexHarness({
+        harness: createCodexHarness({
           modelProvider: {
             baseUrl: "http://localhost/v1",
             apiKeyEnvironment: false,
@@ -110,17 +110,22 @@ test("agents reject unsupported authentication forms when they are composed", ()
   );
   assert.throws(
     () =>
-      agent({
-        harness: claudeHarness({ authentication: { usage: {} } as never }),
+      createAgent({
+        harness: createClaudeHarness({
+          authentication: { usage: {} } as never,
+        }),
       }),
     /exactly one key/,
   );
-  assert.equal(agent({ harness: claudeHarness() }).credentials, undefined);
+  assert.equal(
+    createAgent({ harness: createClaudeHarness() }).credentials,
+    undefined,
+  );
 });
 
 test("Claude account files keep only the subscription login and reject conflicting API keys", () => {
-  const account = agent({
-    harness: claudeHarness({ authentication: "account" }),
+  const account = createAgent({
+    harness: createClaudeHarness({ authentication: "account" }),
   });
   const credential = hostCredential(plan(account));
   assert.deepEqual(credential.source, {
@@ -154,20 +159,22 @@ test("Claude account files keep only the subscription login and reject conflicti
     () => plan(account, { ANTHROPIC_API_KEY: "key" }),
     /Conflicting Claude authentication/,
   );
-  const file = agent({
-    harness: claudeHarness({
+  const file = createAgent({
+    harness: createClaudeHarness({
       authentication: { account: { file: "~/profiles/claude.json" } },
     }),
   });
   assert.deepEqual(hostCredential(plan(file)).source, {
     path: "~/profiles/claude.json",
   });
-  const token = agent({
-    harness: claudeHarness({ authentication: { account: { key: "oauth" } } }),
+  const token = createAgent({
+    harness: createClaudeHarness({
+      authentication: { account: { key: "oauth" } },
+    }),
   });
   assert.deepEqual(plan(token).variables, { CLAUDE_CODE_OAUTH_TOKEN: "oauth" });
-  const variable = agent({
-    harness: claudeHarness({
+  const variable = createAgent({
+    harness: createClaudeHarness({
       authentication: { account: { variable: "TEAM_TOKEN" } },
     }),
   });
@@ -175,7 +182,9 @@ test("Claude account files keep only the subscription login and reject conflicti
     CLAUDE_CODE_OAUTH_TOKEN: "oauth",
   });
   assert.throws(() => plan(variable), /Missing TEAM_TOKEN/);
-  const usage = agent({ harness: claudeHarness({ authentication: "usage" }) });
+  const usage = createAgent({
+    harness: createClaudeHarness({ authentication: "usage" }),
+  });
   assert.deepEqual(plan(usage, { ANTHROPIC_API_KEY: "key" }), {
     variables: { ANTHROPIC_API_KEY: "key" },
     host: [],
@@ -188,8 +197,8 @@ test("Claude account files keep only the subscription login and reject conflicti
       plan(usage, { ANTHROPIC_API_KEY: "key", CLAUDE_CODE_OAUTH_TOKEN: "x" }),
     /Conflicting Claude authentication/,
   );
-  const mapped = agent({
-    harness: claudeHarness({
+  const mapped = createAgent({
+    harness: createClaudeHarness({
       authentication: { usage: { variable: "TEAM_KEY" } },
     }),
   });
@@ -199,8 +208,8 @@ test("Claude account files keep only the subscription login and reject conflicti
 });
 
 test("Codex copies file credentials and logs API keys in through stdin only", () => {
-  const account = agent({
-    harness: codexHarness({ authentication: "account" }),
+  const account = createAgent({
+    harness: createCodexHarness({ authentication: "account" }),
   });
   const credential = hostCredential(plan(account));
   assert.deepEqual(credential.source.home, {
@@ -210,8 +219,10 @@ test("Codex copies file credentials and logs API keys in through stdin only", ()
   assert.deepEqual(credential.destination, { file: ".codex/auth.json" });
   assert.equal(credential.select?.('{"tokens":{}}'), '{"tokens":{}}');
   assert.throws(() => credential.select?.("invalid"), /Codex credential file/);
-  const usage = agent({
-    harness: codexHarness({ authentication: { usage: { key: "sk-secret" } } }),
+  const usage = createAgent({
+    harness: createCodexHarness({
+      authentication: { usage: { key: "sk-secret" } },
+    }),
   });
   const login = plan(usage).commands[0];
   assert.equal(login?.stdin, "sk-secret");
@@ -222,9 +233,9 @@ test("Codex copies file credentials and logs API keys in through stdin only", ()
   ]);
   assert.ok(!login?.arguments?.includes("sk-secret"));
   assert.deepEqual(plan(usage).variables, { OPENAI_API_KEY: "sk-secret" });
-  const external = agent({
+  const external = createAgent({
     model: "vendor/model",
-    harness: codexHarness({
+    harness: createCodexHarness({
       modelProvider: {
         baseUrl: "http://localhost/v1",
         apiKeyEnvironment: "VENDOR_KEY",
@@ -242,8 +253,8 @@ test("Codex copies file credentials and logs API keys in through stdin only", ()
 });
 
 test("Antigravity API keys select the Gemini provider in a generated settings file", () => {
-  const usage = agent({
-    harness: antigravityHarness({ authentication: "usage" }),
+  const usage = createAgent({
+    harness: createAntigravityHarness({ authentication: "usage" }),
   });
   assert.deepEqual(plan(usage, { GEMINI_API_KEY: "key" }), {
     variables: { GEMINI_API_KEY: "key" },
@@ -256,8 +267,8 @@ test("Antigravity API keys select the Gemini provider in a generated settings fi
     ],
     commands: [],
   });
-  const account = agent({
-    harness: antigravityHarness({ authentication: "account" }),
+  const account = createAgent({
+    harness: createAntigravityHarness({ authentication: "account" }),
   });
   assert.deepEqual(hostCredential(plan(account)).destination, {
     file: ".gemini/antigravity-cli/antigravity-oauth-token",
@@ -266,8 +277,8 @@ test("Antigravity API keys select the Gemini provider in a generated settings fi
 });
 
 test("Copilot extracts the stored login token and rejects classic tokens", () => {
-  const account = agent({
-    harness: copilotHarness({ authentication: "account" }),
+  const account = createAgent({
+    harness: createCopilotHarness({ authentication: "account" }),
   });
   const credential = hostCredential(plan(account));
   assert.deepEqual(credential.destination, {
@@ -299,15 +310,15 @@ test("Copilot extracts the stored login token and rejects classic tokens", () =>
   );
   assert.throws(
     () =>
-      agent({
-        harness: copilotHarness({
+      createAgent({
+        harness: createCopilotHarness({
           authentication: { account: { key: "ghp_classic" } },
         }),
       }),
     /classic personal access tokens/,
   );
-  const variable = agent({
-    harness: copilotHarness({
+  const variable = createAgent({
+    harness: createCopilotHarness({
       authentication: { account: { variable: "GITHUB_PAT" } },
     }),
   });
@@ -324,8 +335,8 @@ test("Copilot extracts the stored login token and rejects classic tokens", () =>
 });
 
 test("Kimi copies its profile credentials or translates an API key for a named model", () => {
-  const account = agent({
-    harness: kimiHarness({ authentication: "account" }),
+  const account = createAgent({
+    harness: createKimiHarness({ authentication: "account" }),
   });
   const result = plan(account);
   assert.deepEqual(result.variables, {
@@ -348,8 +359,8 @@ test("Kimi copies its profile credentials or translates an API key for a named m
     "global",
   ]);
   assert.ok((login?.deadlineMs ?? 0) > 0);
-  const profile = agent({
-    harness: kimiHarness({
+  const profile = createAgent({
+    harness: createKimiHarness({
       authentication: { account: { file: "~/.kimi-work" } },
     }),
   });
@@ -358,12 +369,13 @@ test("Kimi copies its profile credentials or translates an API key for a named m
     /^~.\.kimi-work.credentials.kimi-code-env-0e4f99c69cc27850\.json$/,
   );
   assert.throws(
-    () => agent({ harness: kimiHarness({ authentication: "usage" }) }),
+    () =>
+      createAgent({ harness: createKimiHarness({ authentication: "usage" }) }),
     /requires a model/,
   );
-  const usage = agent({
+  const usage = createAgent({
     model: "fixture-model",
-    harness: kimiHarness({ authentication: "usage" }),
+    harness: createKimiHarness({ authentication: "usage" }),
   });
   assert.deepEqual(plan(usage, { KIMI_API_KEY: "key" }).variables, {
     KIMI_API_KEY: "key",
@@ -376,9 +388,9 @@ test("Kimi copies its profile credentials or translates an API key for a named m
     false,
   );
   assert.deepEqual(
-    agent({
+    createAgent({
       model: "kimi-code/fixture",
-      harness: kimiHarness({ authentication: "account" }),
+      harness: createKimiHarness({ authentication: "account" }),
     })
       .request({ text: "go" })
       .arguments?.slice(0, 2),
@@ -388,16 +400,16 @@ test("Kimi copies its profile credentials or translates an API key for a named m
 
 test("Kimi validates account regions and keeps API authentication separate", () => {
   assert.throws(
-    () => kimiHarness({ region: "unknown" as never }),
+    () => createKimiHarness({ region: "unknown" as never }),
     /Kimi region/,
   );
   assert.throws(
-    () => kimiHarness({ region: "global", authentication: "usage" }),
+    () => createKimiHarness({ region: "global", authentication: "usage" }),
     /region selects account authentication/,
   );
   const mainland = plan(
-    agent({
-      harness: kimiHarness({
+    createAgent({
+      harness: createKimiHarness({
         authentication: "account",
         region: "mainland-cn",
       }),
@@ -421,12 +433,12 @@ test("Kimi validates account regions and keeps API authentication separate", () 
     hostCredential(mainland).source.path,
     /credentials[/\\]kimi-code\.json$/,
   );
-  const selected = agent({
-    harness: kimiHarness({ region: "global", authentication: "account" }),
+  const selected = createAgent({
+    harness: createKimiHarness({ region: "global", authentication: "account" }),
   });
   const result = plan(selected);
-  const implicit = agent({
-    harness: kimiHarness({ authentication: "account" }),
+  const implicit = createAgent({
+    harness: createKimiHarness({ authentication: "account" }),
   });
   assert.deepEqual(plan(implicit), result);
   assert.match(
@@ -453,8 +465,8 @@ test("Kimi validates account regions and keeps API authentication separate", () 
 test("Copilot reads object-valued stored tokens for the selected account", () => {
   const credential = hostCredential(
     plan(
-      agent({
-        harness: copilotHarness({ authentication: "account" }),
+      createAgent({
+        harness: createCopilotHarness({ authentication: "account" }),
       }),
     ),
   );

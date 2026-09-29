@@ -2,7 +2,7 @@ import { executeInteractiveTurn } from "./interactive-task-execution.ts";
 import { createHash } from "node:crypto";
 import { resolve } from "node:path";
 import { invariant } from "../domain/errors.ts";
-import { task } from "../domain/workflow/task.ts";
+import { defineTask } from "../domain/workflow/task.ts";
 import { positive } from "../domain/workflow/validation.ts";
 import type { Task, TaskContext } from "../domain/workflow.types.ts";
 import { directory } from "../infrastructure/files.ts";
@@ -15,7 +15,7 @@ import type {
   InteractiveAgentResult,
 } from "./interactive-task.types.ts";
 
-export function interactiveAgentTask(
+export function defineInteractiveAgentTask(
   options: InteractiveAgentTaskOptions,
 ): Task<InteractiveAgentResult> {
   invariant(
@@ -53,7 +53,7 @@ export function interactiveAgentTask(
       }),
     )
     .digest("hex");
-  return task({
+  return defineTask({
     key: options.key,
     ...(options.after ? { after: options.after } : {}),
     ...(options.timeoutMs !== undefined

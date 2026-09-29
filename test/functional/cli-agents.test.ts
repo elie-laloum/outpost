@@ -4,22 +4,22 @@ import { join } from "node:path";
 import { test } from "node:test";
 import { protocolFixtures } from "../../src/adapters/agents/protocol-fixtures.constants.ts";
 import { initialize } from "../../src/cli/scaffold.ts";
-import { agent as composeAgent } from "../../src/domain/agent.ts";
+import { createAgent as composeAgent } from "../../src/domain/agent.ts";
 import {
-  antigravityHarness,
-  copilotHarness,
+  createAntigravityHarness,
+  createCopilotHarness,
   createSandbox,
   dispatch,
-  kimiHarness,
+  createKimiHarness,
   type AgentEvent,
 } from "../../src/index.ts";
-import { localSandboxProvider } from "../../src/providers/local.ts";
+import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { repository } from "../helpers.ts";
 
 const harnesses = {
-  antigravity: antigravityHarness,
-  copilot: copilotHarness,
-  kimi: kimiHarness,
+  antigravity: createAntigravityHarness,
+  copilot: createCopilotHarness,
+  kimi: createKimiHarness,
 } as const;
 
 function fixture(
@@ -48,7 +48,7 @@ for (const name of Object.keys(harnesses) as (keyof typeof harnesses)[]) {
     const observed: AgentEvent[] = [];
     const result = await dispatch({
       repository: root,
-      sandboxProvider: localSandboxProvider(),
+      sandboxProvider: createLocalSandboxProvider(),
       agent: fixture(name, protocolFixtures[name][0]!.lines),
       branch: { mode: "named", name: `${name}-fixture` },
       logging: false,
@@ -76,8 +76,8 @@ test("final-event agents reject truncated or failed turns while keeping the sand
   const root = await repository(t);
   await using sandbox = await createSandbox({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
-    agent: composeAgent({ harness: copilotHarness() }),
+    sandboxProvider: createLocalSandboxProvider(),
+    agent: composeAgent({ harness: createCopilotHarness() }),
     branch: { mode: "named", name: "cli-agent-errors" },
     logging: false,
   });
@@ -150,7 +150,7 @@ test("new agents scaffold their harness, image installation and declared API key
     });
     assert.match(
       await readFile(join(directory, "run.ts"), "utf8"),
-      new RegExp(`harness: ${agent}Harness`),
+      new RegExp(`harness: create${agent}Harness`, "i"),
     );
     assert.equal(
       await readFile(join(directory, ".env.example"), "utf8"),

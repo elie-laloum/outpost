@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
-  anthropicModelProvider,
-  openaiModelProvider,
+  createAnthropicModelProvider,
+  createOpenAIModelProvider,
   OutpostError,
 } from "../../src/index.ts";
 import { retryAfterMs } from "../../src/adapters/models/retry-after.ts";
@@ -43,8 +43,11 @@ test("HTTP failures preserve normalized Retry-After for both providers and strea
       }),
   );
   const providers = [
-    openaiModelProvider({ apiKey: false, baseUrl: "http://localhost" }),
-    anthropicModelProvider({ apiKey: "test", baseUrl: "http://localhost" }),
+    createOpenAIModelProvider({ apiKey: false, baseUrl: "http://localhost" }),
+    createAnthropicModelProvider({
+      apiKey: "test",
+      baseUrl: "http://localhost",
+    }),
   ];
   const check = (error: unknown) => {
     assert.ok(error instanceof OutpostError);
@@ -86,9 +89,10 @@ test("missing or invalid Retry-After retains the existing HTTP error shape", asy
       }),
   );
   await assert.rejects(
-    openaiModelProvider({ apiKey: false, baseUrl: "http://localhost" }).request(
-      { model: "test", prompt: "hello", maxOutputTokens: 100 },
-    ),
+    createOpenAIModelProvider({
+      apiKey: false,
+      baseUrl: "http://localhost",
+    }).request({ model: "test", prompt: "hello", maxOutputTokens: 100 }),
     (error: unknown) => {
       assert.ok(error instanceof OutpostError);
       assert.deepEqual(error.details, { status: 503, unavailable: "HTTP 503" });

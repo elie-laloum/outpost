@@ -5,7 +5,7 @@ import type { ConversationStore } from "../domain/conversation.types.ts";
 import { invariant } from "../domain/errors.ts";
 import { transportKey } from "../domain/transport.ts";
 import type { StoredConversationFormat } from "./conversations.types.ts";
-import { harnessConversations } from "./conversations/harness-store.ts";
+import { createHarnessConversations } from "./conversations/harness-store.ts";
 import type { TransportConversationOptions } from "./transport-conversations.types.ts";
 import { nativeConversations } from "./conversations/native-store.ts";
 import { files } from "./conversations/files.ts";
@@ -19,12 +19,12 @@ const baseStores: Readonly<
 > = {
   claude: () => nativeConversations("claude"),
   codex: () => nativeConversations("codex"),
-  harness: harnessConversations,
+  harness: createHarnessConversations,
   copilot: () => nativeConversations("copilot"),
   kimi: () => nativeConversations("kimi"),
 };
 
-export function transportConversations(
+export function createTransportConversations(
   format: StoredConversationFormat,
   options: TransportConversationOptions,
 ): ConversationStore {

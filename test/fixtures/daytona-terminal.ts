@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { PassThrough, Writable } from "node:stream";
-import { daytonaSandboxProvider } from "../../src/providers/daytona.ts";
+import { createDaytonaSandboxProvider } from "../../src/providers/daytona.ts";
 
 if (process.env.OUTPOST_DAYTONA_TERMINAL !== "1")
   throw new Error(
@@ -8,7 +8,7 @@ if (process.env.OUTPOST_DAYTONA_TERMINAL !== "1")
   );
 const apiKey = process.env.DAYTONA_API_KEY;
 if (!apiKey) throw new Error("Set DAYTONA_API_KEY");
-const lease = await daytonaSandboxProvider({
+const lease = await createDaytonaSandboxProvider({
   connection: { apiKey },
   create: {
     language: "typescript",

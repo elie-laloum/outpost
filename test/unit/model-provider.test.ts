@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
-  openaiModelProvider,
+  createOpenAIModelProvider,
   OutpostError,
   type ModelToolSpec,
 } from "../../src/index.ts";
@@ -36,30 +36,33 @@ test("model provider rejects invalid configuration before networking", () => {
     "https://host?key=x",
     "https://host#x",
   ])
-    assert.throws(() => openaiModelProvider({ ...options, baseUrl }), {
+    assert.throws(() => createOpenAIModelProvider({ ...options, baseUrl }), {
       code: "configuration",
     });
 
   for (const apiKey of ["", " ", "secret\nheader"])
-    assert.throws(() => openaiModelProvider({ ...options, apiKey }), /apiKey/);
+    assert.throws(
+      () => createOpenAIModelProvider({ ...options, apiKey }),
+      /apiKey/,
+    );
   for (const timeoutMs of [0, -1, Infinity, 1.5, 2 ** 31])
     assert.throws(
-      () => openaiModelProvider({ ...options, timeoutMs }),
+      () => createOpenAIModelProvider({ ...options, timeoutMs }),
       /timeoutMs/,
     );
   assert.throws(
-    () => openaiModelProvider({ ...options, maxResponseBytes: 0 }),
+    () => createOpenAIModelProvider({ ...options, maxResponseBytes: 0 }),
     /maxResponseBytes/,
   );
   assert.throws(
     // @ts-expect-error Unsupported protocols must also fail for JavaScript callers.
-    () => openaiModelProvider({ ...options, api: "toString" }),
+    () => createOpenAIModelProvider({ ...options, api: "toString" }),
     /protocol/,
   );
 });
 
 test("text-only requests reject unsupported capabilities and invalid input", async () => {
-  const provider = openaiModelProvider(options);
+  const provider = createOpenAIModelProvider(options);
   for (const model of ["", "  "])
     await assert.rejects(
       provider.request({ model, prompt: "hi" }),

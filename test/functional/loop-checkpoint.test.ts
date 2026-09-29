@@ -4,11 +4,11 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
-  localTransport,
-  loopTask,
+  createLocalTransport,
+  defineLoopTask,
   LoopTaskExhausted,
-  workflow,
-  workflowCheckpointStore,
+  defineWorkflow,
+  createWorkflowCheckpointStore,
 } from "../../src/index.ts";
 import type {
   LoopTaskContext,
@@ -21,8 +21,8 @@ for (const interrupted of ["attempt", "check"]) {
     const directory = await mkdtemp(join(tmpdir(), "outpost-loop-"));
     t.after(() => rm(directory, { recursive: true, force: true }));
     const checkpoint = {
-      store: workflowCheckpointStore({
-        transporter: localTransport({ directory }),
+      store: createWorkflowCheckpointStore({
+        transporter: createLocalTransport({ directory }),
       }),
       runId: "fix",
       version: "1",
@@ -32,7 +32,7 @@ for (const interrupted of ["attempt", "check"]) {
       checks: number[] = [],
       keys: string[] = [];
     const definitions = () => {
-      const fix = loopTask({
+      const fix = defineLoopTask({
         key: "fix",
         maxRounds: 3,
         attempt(ctx, feedback) {
@@ -56,7 +56,7 @@ for (const interrupted of ["attempt", "check"]) {
             : { done: false, feedback: "feedback" };
         },
       });
-      return { fix, graph: workflow("fix", [fix]) };
+      return { fix, graph: defineWorkflow("fix", [fix]) };
     };
     const first = await definitions().graph.start({ checkpoint });
     assert.equal(first.status, "failed");
@@ -125,8 +125,8 @@ test("maxRounds remains exhausted after resume and participates in identity", as
   };
   let calls = 0;
   const build = (maxRounds: number) =>
-    workflow("fix", [
-      loopTask({
+    defineWorkflow("fix", [
+      defineLoopTask({
         key: "fix",
         maxRounds,
         attempt() {
@@ -154,7 +154,7 @@ test("saved verification resumes under cumulative budget and rejects non-JSON ou
   };
   let attempts = 0,
     checks = 0;
-  const fix = loopTask({
+  const fix = defineLoopTask({
     key: "fix",
     maxRounds: 1,
     attempt() {
@@ -165,19 +165,19 @@ test("saved verification resumes under cumulative budget and rejects non-JSON ou
       throw new Error("review offline");
     },
   });
-  const graph = workflow("fix", [fix]);
+  const graph = defineWorkflow("fix", [fix]);
   await graph.start({ checkpoint });
   const result = await graph.start({ checkpoint, budget: { attempts: 1 } });
   assert.equal(result.status, "failed");
   assert.equal(attempts, 1);
   assert.equal(checks, 1);
-  const date = loopTask({
+  const date = defineLoopTask({
     key: "date",
     maxRounds: 1,
     attempt: () => new Date(),
     check: () => assert.fail("must reject before review"),
   });
-  const invalid = await workflow("date", [date]).start({
+  const invalid = await defineWorkflow("date", [date]).start({
     checkpoint: { ...checkpoint, store: memory().store },
   });
   assert.match(String(invalid.errors[0]), /plain JSON/);
@@ -191,13 +191,13 @@ test("malformed loop checkpoints fail before callbacks", async () => {
     version: "1",
     resume: "retry-incomplete" as const,
   };
-  const fix = loopTask({
+  const fix = defineLoopTask({
     key: "fix",
     maxRounds: 1,
     attempt: () => 1,
     check: () => ({ done: true }),
   });
-  await workflow("fix", [fix]).start({ checkpoint });
+  await defineWorkflow("fix", [fix]).start({ checkpoint });
   const valid = storage.read();
   for (const rounds of [
     [],
@@ -216,7 +216,7 @@ test("malformed loop checkpoints fail before callbacks", async () => {
     Object.assign(corrupt.records[0]!, { rounds });
     storage.replace(corrupt);
     await assert.rejects(
-      workflow("fix", [fix]).start({ checkpoint }),
+      defineWorkflow("fix", [fix]).start({ checkpoint }),
       /loop checkpoint|Loop check/,
     );
   }
@@ -226,7 +226,7 @@ test("an accepted persisted round finishes after a crash without another callbac
   const storage = memory();
   const checkpoint = { store: storage.store, runId: "fix", version: "1" };
   let calls = 0;
-  const fix = loopTask({
+  const fix = defineLoopTask({
     key: "fix",
     maxRounds: 1,
     attempt() {
@@ -235,7 +235,7 @@ test("an accepted persisted round finishes after a crash without another callbac
     },
     check: () => ({ done: true }),
   });
-  const graph = workflow("fix", [fix]);
+  const graph = defineWorkflow("fix", [fix]);
   await graph.start({ checkpoint });
   const saved = structuredClone(storage.read());
   Object.assign(saved.records[0]!, { status: "active" });
@@ -259,7 +259,7 @@ test("review mutation cannot change the saved candidate before its checkpoint", 
     resume: "retry-incomplete" as const,
   };
   let calls = 0;
-  const fix = loopTask({
+  const fix = defineLoopTask({
     key: "fix",
     maxRounds: 1,
     attempt: () => ({ count: 0 }),
@@ -271,7 +271,7 @@ test("review mutation cannot change the saved candidate before its checkpoint", 
       return { done: true };
     },
   });
-  const graph = workflow("fix", [fix]);
+  const graph = defineWorkflow("fix", [fix]);
   await graph.start({ checkpoint });
   await graph.start({ checkpoint });
   const result = await graph.start({ checkpoint });

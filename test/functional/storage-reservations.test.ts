@@ -10,7 +10,7 @@ import { createSandbox } from "../../src/application/sandbox.ts";
 import { lock } from "../../src/infrastructure/git/lock.ts";
 import { repositoryTransport } from "../../src/infrastructure/repository-transport.ts";
 import { repository } from "../helpers.ts";
-import { localSandboxProvider } from "../../src/providers/local.ts";
+import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 
 const options = { maxBytes: 1_100_000, reserveBytes: 1_000_000 };
 const records = (root: string) => join(root, ".outpost", "storage");
@@ -221,7 +221,7 @@ test("workspace reservations span warm ownership and release on close while pres
     /owns its repository/,
   );
   const sandbox = await workspace.sandbox({
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
   });
   await assert.rejects(workspace.close(), /Close the sandbox/);
   assert.equal((await reservations(root)).length, 1);

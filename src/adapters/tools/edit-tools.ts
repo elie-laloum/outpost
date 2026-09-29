@@ -14,7 +14,7 @@ import {
 } from "./sandbox-files.ts";
 import type { EditFileInput, WriteFileInput } from "./tools.types.ts";
 
-export function harnessEditTools(): HarnessToolset {
+export function createHarnessEditTools(): HarnessToolset {
   return defineHarnessToolset({
     name: "edit",
     tools: [writeFileTool(), editFileTool()],

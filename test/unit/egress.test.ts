@@ -2,9 +2,9 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { validateEgress } from "../../src/domain/egress.ts";
 import { containerProvider } from "../../src/providers/container.ts";
-import { localSandboxProvider } from "../../src/providers/local.ts";
-import { daytonaSandboxProvider } from "../../src/providers/daytona.ts";
-import { vercelSandboxProvider } from "../../src/providers/vercel.ts";
+import { createLocalSandboxProvider } from "../../src/providers/local.ts";
+import { createDaytonaSandboxProvider } from "../../src/providers/daytona.ts";
+import { createVercelSandboxProvider } from "../../src/providers/vercel.ts";
 import { vercelNetworkPolicy } from "../../src/providers/vercel-network.ts";
 import type { VercelOptions } from "../../src/providers/vercel.types.ts";
 import { daytonaNetworkPolicy } from "../../src/providers/daytona-network.ts";
@@ -134,7 +134,7 @@ test("Vercel preserves native configuration and translates restricted policies",
   );
   assert.throws(
     () =>
-      vercelSandboxProvider({
+      createVercelSandboxProvider({
         egress: { mode: "deny-all" },
         create: { networkPolicy: "allow-all" },
       }),
@@ -161,7 +161,7 @@ test("Vercel preserves native configuration and translates restricted policies",
 test("Vercel sends egress before allocation and snapshots the caller policy", async () => {
   const domains = ["example.com"];
   let received: VercelOptions["create"];
-  const sandboxProvider = vercelSandboxProvider(
+  const sandboxProvider = createVercelSandboxProvider(
     {
       egress: { mode: "allowlist", domains },
       create: { env: { PRESET: "yes" } },
@@ -190,7 +190,10 @@ test("Vercel sends egress before allocation and snapshots the caller policy", as
 
 test("unsupported providers reject policies supplied through shared configuration", () => {
   const options = { variables: {}, egress: { mode: "deny-all" } };
-  assert.throws(() => localSandboxProvider(options), /cannot enforce egress/);
+  assert.throws(
+    () => createLocalSandboxProvider(options),
+    /cannot enforce egress/,
+  );
 });
 
 test("Vercel snapshots native firewall rules before caller mutation", () => {
@@ -241,7 +244,7 @@ test("Daytona translates only representable restrictions", () => {
       ),
     },
   ] as const)
-    assert.throws(() => daytonaSandboxProvider({ egress }), {
+    assert.throws(() => createDaytonaSandboxProvider({ egress }), {
       code: "configuration",
     });
   for (const create of [
@@ -251,7 +254,8 @@ test("Daytona translates only representable restrictions", () => {
     { outboundProxyUrl: "http://proxy.example.com" },
   ])
     assert.throws(
-      () => daytonaSandboxProvider({ create, egress: { mode: "deny-all" } }),
+      () =>
+        createDaytonaSandboxProvider({ create, egress: { mode: "deny-all" } }),
       /not both/,
     );
 });
@@ -275,7 +279,7 @@ test("Daytona confirms a frozen policy before workspace setup and releases once"
       },
     },
   } as unknown as DaytonaSandbox;
-  const provider = daytonaSandboxProvider(
+  const provider = createDaytonaSandboxProvider(
     { egress: { mode: "allowlist", domains }, create },
     async () => ({
       create: async (settings) => {
@@ -338,7 +342,7 @@ test("Daytona rejects unconfirmed enforcement and cleans up before any workspace
         return "/home/test";
       },
     } as unknown as DaytonaSandbox;
-    const provider = daytonaSandboxProvider(
+    const provider = createDaytonaSandboxProvider(
       { egress: { mode: "deny-all" } },
       async () => ({
         create: async () => {
@@ -385,7 +389,7 @@ test("Daytona native configuration remains available without Outpost enforcement
   const create: NonNullable<DaytonaOptions["create"]> = {
     networkBlockAll: true,
   };
-  const provider = daytonaSandboxProvider({ create }, async () => ({
+  const provider = createDaytonaSandboxProvider({ create }, async () => ({
     create: async (settings) => {
       assert.deepEqual(settings, { networkBlockAll: true });
       throw new Error("allocation probe");
@@ -410,17 +414,20 @@ test("Vercel snapshots absent native settings and isolates successive allocation
       ? { networkPolicy: native }
       : {};
     let calls = 0;
-    const provider = vercelSandboxProvider({ create }, async (settings) => {
-      calls++;
-      assert.deepEqual(
-        structuredClone(settings?.networkPolicy),
-        native ? { allow: ["example.com"] } : undefined,
-      );
-      const policy = settings?.networkPolicy;
-      if (policy && typeof policy === "object" && Array.isArray(policy.allow))
-        policy.allow.push("*");
-      throw new Error("allocation probe");
-    });
+    const provider = createVercelSandboxProvider(
+      { create },
+      async (settings) => {
+        calls++;
+        assert.deepEqual(
+          structuredClone(settings?.networkPolicy),
+          native ? { allow: ["example.com"] } : undefined,
+        );
+        const policy = settings?.networkPolicy;
+        if (policy && typeof policy === "object" && Array.isArray(policy.allow))
+          policy.allow.push("*");
+        throw new Error("allocation probe");
+      },
+    );
     create.networkPolicy = "allow-all";
     for (let attempt = 0; attempt < 2; attempt++) {
       await assert.rejects(

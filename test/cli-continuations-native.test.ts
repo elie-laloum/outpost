@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import { mkdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { test } from "node:test";
-import { kimiHarness, conversations } from "../src/index.ts";
-import { localSandboxProvider } from "../src/providers/local.ts";
+import { createKimiHarness, conversations } from "../src/index.ts";
+import { createLocalSandboxProvider } from "../src/providers/local.ts";
 import { seedSession, sessionDirectory } from "./fixtures/native-session.ts";
 import { repository } from "./helpers.ts";
 
@@ -16,7 +16,7 @@ test(
       targetHome = join(root, "target");
     await mkdir(targetHome, { recursive: true });
     const id = "session_synthetic",
-      sandboxProvider = localSandboxProvider();
+      sandboxProvider = createLocalSandboxProvider();
     const nativeLease = await sandboxProvider.acquire({
       repository: root,
       directory: root,
@@ -55,7 +55,7 @@ test(
     const before = await readFile(
       join(sessionDirectory("kimi", targetHome, root, id), "state.json"),
     );
-    const fork = kimiHarness().bind().fork!;
+    const fork = createKimiHarness().bind().fork!;
     const child = await fork(id, (command) =>
       target.invoke({
         ...command,

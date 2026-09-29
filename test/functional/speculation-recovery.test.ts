@@ -8,17 +8,17 @@ import { fileURLToPath } from "node:url";
 import {
   speculate,
   recoverSpeculation,
-  localTransport,
+  createLocalTransport,
   checkSpeculationIntegration,
-  response,
+  defineJsonResponse,
 } from "../../src/index.ts";
-import { localSandboxProvider } from "../../src/providers/local.ts";
+import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { git } from "../../src/infrastructure/git.ts";
 import { repository, scripted, emit } from "../helpers.ts";
 import type { SandboxProvider, Transport } from "../../src/index.ts";
 
 function recoverable(recovered: string[] = []): SandboxProvider {
-  const local = localSandboxProvider();
+  const local = createLocalSandboxProvider();
   return {
     ...local,
     recover: async (id) => {
@@ -42,10 +42,13 @@ const candidate = {
 
 test("durable completion is reused without allocation and preserves structured error fields", async (t) => {
   const repo = await repository(t);
-  const transporter = localTransport({
+  const transporter = createLocalTransport({
     directory: join(repo, ".outpost", "storage"),
   });
-  const parsed = response.json({ tag: "answer", schema: (value) => value });
+  const parsed = defineJsonResponse({
+    tag: "answer",
+    schema: (value) => value,
+  });
   const options = {
     repository: repo,
     sandboxProvider: recoverable(),
@@ -82,7 +85,7 @@ for (const phase of ["allocation", "validation", "cleanup"])
   test(`coordinator SIGKILL during ${phase} requires explicit ownership recovery and replay`, async (t) => {
     const repo = await repository(t);
     const directory = join(repo, ".outpost", "storage");
-    const transporter = localTransport({ directory });
+    const transporter = createLocalTransport({ directory });
     const child = spawn(
       process.execPath,
       [
@@ -174,7 +177,7 @@ for (const phase of ["allocation", "validation", "cleanup"])
 
 test("cleanup deadline retains ownership and can be recovered without replaying a settled candidate", async (t) => {
   const repo = await repository(t);
-  const transporter = localTransport({
+  const transporter = createLocalTransport({
     directory: join(repo, ".outpost", "storage"),
   });
   const provider = recoverable();
@@ -233,7 +236,7 @@ test("aborted noncooperative validation returns with recoverable work within cle
   });
   const result = await speculate({
     repository: repo,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     candidates: [candidate],
     budget: {},
     cleanupMs: 30,
@@ -293,7 +296,7 @@ test("durability rejects unsupported providers and invalid deadlines before allo
   const repo = await repository(t);
   const options = {
     repository: repo,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     candidates: [candidate],
     budget: {},
     validate: () => true,
@@ -303,7 +306,7 @@ test("durability rejects unsupported providers and invalid deadlines before allo
     speculate({
       ...options,
       durability: {
-        transporter: localTransport({ directory: join(repo, "store") }),
+        transporter: createLocalTransport({ directory: join(repo, "store") }),
         runId: "id",
         version: "1",
       },
@@ -314,7 +317,7 @@ test("durability rejects unsupported providers and invalid deadlines before allo
 
 test("completed exhausted races retain their outcome and reject changed versions", async (t) => {
   const repo = await repository(t);
-  const transporter = localTransport({
+  const transporter = createLocalTransport({
     directory: join(repo, ".outpost", "storage"),
   });
   const options = {
@@ -343,7 +346,7 @@ test("integration blocks a candidate ref changed since its validation", async (t
   const repo = await repository(t);
   const result = await speculate({
     repository: repo,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     candidates: [candidate],
     budget: {},
     validate: () => true,
@@ -364,7 +367,7 @@ test("integration blocks a candidate ref changed since its validation", async (t
 
 test("failed admission persistence prevents allocation and retains explicit ownership", async (t) => {
   const repo = await repository(t);
-  const storage = localTransport({
+  const storage = createLocalTransport({
     directory: join(repo, ".outpost", "storage"),
   });
   const transporter: Transport = {
@@ -393,7 +396,7 @@ test("failed admission persistence prevents allocation and retains explicit owne
 
 test("durable outputs refuse lossy serialization", async (t) => {
   const repo = await repository(t);
-  const transporter = localTransport({
+  const transporter = createLocalTransport({
     directory: join(repo, ".outpost", "storage"),
   });
   await assert.rejects(
@@ -407,7 +410,7 @@ test("durable outputs refuse lossy serialization", async (t) => {
           agent: scripted(emit("<answer>{}</answer>")),
           request: {
             brief: { text: "Return <answer> JSON </answer>" },
-            response: response.json({
+            response: defineJsonResponse({
               tag: "answer",
               schema: () => new Date(),
             }),
@@ -423,7 +426,7 @@ test("durable outputs refuse lossy serialization", async (t) => {
 
 test("checkpoint corruption is rejected before recovery or allocation", async (t) => {
   const repo = await repository(t);
-  const transporter = localTransport({
+  const transporter = createLocalTransport({
     directory: join(repo, ".outpost", "storage"),
   });
   const options = {
@@ -462,7 +465,7 @@ test("checkpoint corruption is rejected before recovery or allocation", async (t
 
 test("unprintable callback failures do not break durable error reporting", async (t) => {
   const repo = await repository(t);
-  const transporter = localTransport({
+  const transporter = createLocalTransport({
     directory: join(repo, ".outpost", "storage"),
   });
   const options = {

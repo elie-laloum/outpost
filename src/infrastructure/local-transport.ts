@@ -34,7 +34,9 @@ async function privateDirectory(path: string, target = true): Promise<void> {
   throw new Error("Transport directories must not be symlinks");
 }
 
-export function localTransport(options: LocalTransportOptions): Transport {
+export function createLocalTransport(
+  options: LocalTransportOptions,
+): Transport {
   const root = resolve(options.directory),
     objects = join(root, "objects");
   const path = (key: string) => join(objects, `${transportKey(key)}.object`);

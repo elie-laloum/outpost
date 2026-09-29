@@ -4,9 +4,15 @@ import {
 } from "./init-authentication.ts";
 import type { InitOptions } from "./scaffold.types.ts";
 
+function capitalize(value: string): string {
+  return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
 export function starter(options: InitOptions): string {
   const agent = options.agent ?? "codex",
     sandboxProvider = options.sandboxProvider ?? "docker";
+  const harness = `create${capitalize(agent)}Harness`,
+    provider = `create${capitalize(sandboxProvider)}SandboxProvider`;
   const model = options.model ? `model: ${JSON.stringify(options.model)}` : "";
   const modelProvider = options.baseUrl
     ? `modelProvider: ${JSON.stringify({ baseUrl: options.baseUrl, ...(options.apiKeyEnvironment ? { apiKeyEnvironment: options.apiKeyEnvironment } : {}) })}`
@@ -19,8 +25,8 @@ export function starter(options: InitOptions): string {
   return `import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { parseEnv } from "node:util";
-import { dispatch, agent, ${agent}Harness, OutpostError, reporter } from "@elie-laloum/outpost";
-import { ${sandboxProvider}SandboxProvider } from "@elie-laloum/outpost/providers/${sandboxProvider}";
+import { dispatch, createAgent, ${harness}, OutpostError, createReporter } from "@elie-laloum/outpost";
+import { ${provider} } from "@elie-laloum/outpost/providers/${sandboxProvider}";
 
 // Paths are relative to this workflow, regardless of where Node is launched.
 const repository = resolve(import.meta.dirname, ${JSON.stringify(options.repository ?? ".")});
@@ -32,8 +38,8 @@ const variables = Object.fromEntries(
   Object.entries({ ...parseEnv(${JSON.stringify(authenticationEnvironment(options))}), ...parseEnv(environment) }).map(([key, value]) => [key, value || process.env[key] || ""]),
 );
 const runtime = {
-  agent: agent({ harness: ${agent}Harness({ authentication: ${authenticationSource(options)}${modelProvider ? ", " + modelProvider : ""} }), ${model} }),
-  sandboxProvider: ${sandboxProvider}SandboxProvider({ ${image}variables }),
+  agent: createAgent({ harness: ${harness}({ authentication: ${authenticationSource(options)}${modelProvider ? ", " + modelProvider : ""} }), ${model} }),
+  sandboxProvider: ${provider}({ ${image}variables }),
 };
 const objective = process.argv.slice(2).join(" ") || "Inspect this repository and implement one useful improvement.";
 
@@ -44,7 +50,7 @@ try {
     repository,
     branch: { mode: "integrate" },
     brief: { file: resolve(import.meta.dirname, "brief.md"), values: { OBJECTIVE: objective } },
-    observe: reporter(),
+    observe: createReporter(),
     warn: (message) => console.error(message),
   });
   console.log({ branch: result.branch, commits: result.commits, conversation: result.conversation });

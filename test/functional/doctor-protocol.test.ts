@@ -2,22 +2,22 @@ import assert from "node:assert/strict";
 import { fileURLToPath } from "node:url";
 import { test } from "node:test";
 import {
-  antigravityHarness,
-  claudeHarness,
-  codexHarness,
-  copilotHarness,
-  kimiHarness,
+  createAntigravityHarness,
+  createClaudeHarness,
+  createCodexHarness,
+  createCopilotHarness,
+  createKimiHarness,
   diagnoseAgentProtocol,
 } from "../../src/index.ts";
 import { protocolFixtures } from "../../src/adapters/agents/protocol-fixtures.constants.ts";
 import { executeProcess } from "../../src/infrastructure/process.ts";
 
 const harnesses = {
-  claude: claudeHarness,
-  codex: codexHarness,
-  antigravity: antigravityHarness,
-  copilot: copilotHarness,
-  kimi: kimiHarness,
+  claude: createClaudeHarness,
+  codex: createCodexHarness,
+  antigravity: createAntigravityHarness,
+  copilot: createCopilotHarness,
+  kimi: createKimiHarness,
 } as const;
 const resumable = new Set(["claude", "codex"]);
 

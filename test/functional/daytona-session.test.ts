@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { mkdir } from "node:fs/promises";
 import type { Daytona } from "@daytona/sdk";
 import type { CommandResult } from "../../src/domain/command.types.ts";
-import { daytonaSandboxProvider } from "../../src/providers/daytona.ts";
+import { createDaytonaSandboxProvider } from "../../src/providers/daytona.ts";
 import { executeProcess } from "../../src/infrastructure/process.ts";
 import { repository } from "../helpers.ts";
 
@@ -61,7 +61,7 @@ test(
         getSessionCommand: async () => ({ exitCode: status }),
       },
     };
-    const lease = await daytonaSandboxProvider(
+    const lease = await createDaytonaSandboxProvider(
       {},
       async () =>
         ({

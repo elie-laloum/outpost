@@ -1,4 +1,4 @@
-import { task } from "./task.ts";
+import { defineTask } from "./task.ts";
 import type { Task } from "../workflow.types.ts";
 import type { LoopDefinition, LoopTaskOptions } from "./loop-task.types.ts";
 
@@ -18,19 +18,19 @@ export class LoopTaskExhausted extends Error {
   }
 }
 
-export function loopTask<T>(options: LoopTaskOptions<T>): Task<T> {
+export function defineLoopTask<T>(options: LoopTaskOptions<T>): Task<T> {
   if (!Number.isSafeInteger(options.maxRounds) || options.maxRounds < 1)
     throw new Error("maxRounds must be a positive safe integer");
   if (
     typeof options.attempt !== "function" ||
     typeof options.check !== "function"
   )
-    throw new Error("loopTask requires attempt and check callbacks");
+    throw new Error("defineLoopTask requires attempt and check callbacks");
   const { maxRounds, attempt, check, ...base } = options;
-  const item = task<T>({
+  const item = defineTask<T>({
     ...base,
     perform() {
-      throw new Error("loopTask must be executed by a workflow");
+      throw new Error("defineLoopTask must be executed by a workflow");
     },
   });
   definitions.set(

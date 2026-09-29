@@ -14,10 +14,10 @@ function sandboxProvider(
   });
 }
 
-export const mountedSandboxProvider = (
+export const createMountedSandboxProvider = (
   definition: ProviderDefinition,
 ): SandboxProvider => sandboxProvider("mounted", definition);
 
-export const remoteSandboxProvider = (
+export const createRemoteSandboxProvider = (
   definition: ProviderDefinition,
 ): SandboxProvider => sandboxProvider("remote", definition);

@@ -11,22 +11,22 @@ import {
 import { resolve, join } from "node:path";
 import { randomUUID } from "node:crypto";
 import {
-  agent,
-  harness,
+  createAgent,
+  createHarness,
   defineHarnessSubagent,
   defineHarnessTool,
   createSandbox,
-  openaiModelProvider,
-  anthropicModelProvider,
-  harnessFileTools,
-  harnessEditTools,
-  harnessSearchTools,
-  harnessGitTools,
-  harnessShellTools,
+  createOpenAIModelProvider,
+  createAnthropicModelProvider,
+  createHarnessFileTools,
+  createHarnessEditTools,
+  createHarnessSearchTools,
+  createHarnessGitTools,
+  createHarnessShellTools,
 } from "../src/index.ts";
-import { localSandboxProvider } from "../src/providers/local.ts";
-import { dockerSandboxProvider } from "../src/providers/docker.ts";
-import { podmanSandboxProvider } from "../src/providers/podman.ts";
+import { createLocalSandboxProvider } from "../src/providers/local.ts";
+import { createDockerSandboxProvider } from "../src/providers/docker.ts";
+import { createPodmanSandboxProvider } from "../src/providers/podman.ts";
 
 const [protocol = "offline", backend = "local", scenario = "coding", ...flags] =
   process.argv.slice(2);
@@ -201,19 +201,21 @@ const offline = {
 const factories = {
   offline: () => offline,
   responses: () =>
-    openaiModelProvider({
+    createOpenAIModelProvider({
       baseUrl: "https://api.openai.com/v1",
       api: "responses",
       apiKey: process.env.OPENAI_API_KEY ?? "",
     }),
   "chat-completions": () =>
-    openaiModelProvider({
+    createOpenAIModelProvider({
       baseUrl: "https://api.openai.com/v1",
       api: "chat-completions",
       apiKey: process.env.OPENAI_API_KEY ?? "",
     }),
   anthropic: () =>
-    anthropicModelProvider({ apiKey: process.env.ANTHROPIC_API_KEY ?? "" }),
+    createAnthropicModelProvider({
+      apiKey: process.env.ANTHROPIC_API_KEY ?? "",
+    }),
 };
 const raw = factories[protocol]();
 const start = async (request) => {
@@ -245,17 +247,17 @@ const modelProvider = {
     : {}),
 };
 const sandboxes = {
-  local: () => localSandboxProvider(),
+  local: () => createLocalSandboxProvider(),
   docker: () =>
-    dockerSandboxProvider({
+    createDockerSandboxProvider({
       image: process.env.OUTPOST_CONTAINER_IMAGE ?? "outpost-ci:latest",
     }),
   podman: () =>
-    podmanSandboxProvider({
+    createPodmanSandboxProvider({
       image: process.env.OUTPOST_CONTAINER_IMAGE ?? "outpost-ci:latest",
     }),
   vercel: async () =>
-    (await import("../src/providers/vercel.ts")).vercelSandboxProvider({
+    (await import("../src/providers/vercel.ts")).createVercelSandboxProvider({
       create: {
         token: process.env.VERCEL_TOKEN,
         teamId: process.env.VERCEL_TEAM_ID,
@@ -265,7 +267,7 @@ const sandboxes = {
       },
     }),
   daytona: async () =>
-    (await import("../src/providers/daytona.ts")).daytonaSandboxProvider({
+    (await import("../src/providers/daytona.ts")).createDaytonaSandboxProvider({
       connection: { apiKey: process.env.DAYTONA_API_KEY },
       create: {
         language: "typescript",
@@ -281,9 +283,9 @@ const modelSpec = {
   ...(protocol === "chat-completions" ? { reasoning: "none" } : {}),
 };
 const compose = (options) =>
-  agent({
+  createAgent({
     model: modelSpec,
-    harness: harness({
+    harness: createHarness({
       modelProvider,
       limits: {
         maxSteps: 16,
@@ -297,11 +299,11 @@ const coder = compose({
   instructions:
     "Use the provided tools to inspect and edit only the fixture. Run its tests and commit the fix. Use git -c user.name=Harness -c user.email=harness@example.invalid when committing. Never modify tests. Report the test result.",
   tools: [
-    harnessFileTools(),
-    harnessEditTools(),
-    harnessSearchTools(),
-    harnessGitTools(),
-    harnessShellTools(),
+    createHarnessFileTools(),
+    createHarnessEditTools(),
+    createHarnessSearchTools(),
+    createHarnessGitTools(),
+    createHarnessShellTools(),
   ],
 });
 const delegation = defineHarnessSubagent({

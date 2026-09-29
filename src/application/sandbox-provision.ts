@@ -13,7 +13,7 @@ import { registerResourceActivity } from "../infrastructure/resource-activity.ts
 import type { ResourceActivity } from "../infrastructure/resource-activity.types.ts";
 import { trackedSandboxLease } from "./sandbox-activity.ts";
 import { boundedTransfers } from "../infrastructure/transfer.ts";
-import { dockerSandboxProvider } from "../providers/docker.ts";
+import { createDockerSandboxProvider } from "../providers/docker.ts";
 import { prepareAdapter } from "./agent-bootstrap.ts";
 import { hooks } from "./lifecycle-hooks.ts";
 import type { SandboxOptions } from "./outpost.types.ts";
@@ -33,7 +33,8 @@ export async function provisionSandbox(
     "Use sandboxProvider instead of provider",
   );
   options.signal?.throwIfAborted();
-  const sandboxProvider = options.sandboxProvider ?? dockerSandboxProvider();
+  const sandboxProvider =
+    options.sandboxProvider ?? createDockerSandboxProvider();
   if (
     sandboxProvider.placement === "remote" &&
     !options.workspace &&

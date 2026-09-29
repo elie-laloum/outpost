@@ -17,7 +17,7 @@ export type {
   OpenTelemetryOptions,
 } from "./opentelemetry.types.ts";
 
-export function openTelemetry(
+export function createOpenTelemetryObserver(
   options: OpenTelemetryOptions,
 ): OpenTelemetryObserver {
   const dispatches = dispatchTelemetry(options);
@@ -216,3 +216,6 @@ export function openTelemetry(
   };
   return observer;
 }
+
+/** @deprecated Use {@link createOpenTelemetryObserver}. */
+export const openTelemetry = createOpenTelemetryObserver;

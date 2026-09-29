@@ -21,14 +21,14 @@ import {
 import { harnessSkills, skillCatalog, skillLoader } from "./skill.ts";
 import { harnessTools } from "./tool.ts";
 
-export function harness(options: HarnessOptions): Harness {
+export function createHarness(options: HarnessOptions): Harness {
   invariant(
     options !== null && typeof options === "object",
     "Harness options must be an object",
   );
   invariant(
     !("run" in options),
-    "harness() no longer accepts run; declare tools, instructions and limits",
+    "createHarness() no longer accepts run; declare tools, instructions and limits",
   );
   const unsupported = Object.keys(options).filter(
     (key) => !HARNESS_FIELDS.has(key),

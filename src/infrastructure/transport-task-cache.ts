@@ -14,7 +14,9 @@ function key(fingerprint: string): string {
   return `${taskCachePrefix}/${fingerprint}.json`;
 }
 
-export function taskCacheStore(options: TaskCacheStoreOptions): TaskCacheStore {
+export function createTaskCacheStore(
+  options: TaskCacheStoreOptions,
+): TaskCacheStore {
   const { transporter } = options;
   const maxBytes = options.maxBytes ?? taskCacheMaxBytes;
   if (!Number.isSafeInteger(maxBytes) || maxBytes < 1)

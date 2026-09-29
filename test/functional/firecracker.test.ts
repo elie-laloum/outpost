@@ -17,7 +17,7 @@ import {
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { executeProcess } from "../../src/infrastructure/process.ts";
-import { firecrackerSandboxProvider } from "../../src/providers/firecracker.ts";
+import { createFirecrackerSandboxProvider } from "../../src/providers/firecracker.ts";
 import {
   firecrackerCommand,
   firecrackerSsh,
@@ -220,19 +220,33 @@ test(
   async () => {
     const f = await fixture();
     try {
-      assert.equal(firecrackerSandboxProvider(f.options).placement, "remote");
+      assert.equal(
+        createFirecrackerSandboxProvider(f.options).placement,
+        "remote",
+      );
       const networkOptions = { ...f.options, egress: { mode: "deny-all" } };
-      assert.throws(() => firecrackerSandboxProvider(networkOptions), /egress/);
       assert.throws(
-        () => firecrackerSandboxProvider({ ...f.options, kernel: "relative" }),
+        () => createFirecrackerSandboxProvider(networkOptions),
+        /egress/,
+      );
+      assert.throws(
+        () =>
+          createFirecrackerSandboxProvider({
+            ...f.options,
+            kernel: "relative",
+          }),
         /absolute/,
       );
       assert.throws(
-        () => firecrackerSandboxProvider({ ...f.options, tap: "invalid name" }),
+        () =>
+          createFirecrackerSandboxProvider({
+            ...f.options,
+            tap: "invalid name",
+          }),
         /TAP/,
       );
       assert.throws(
-        () => firecrackerSandboxProvider({ ...f.options, cpus: 0 }),
+        () => createFirecrackerSandboxProvider({ ...f.options, cpus: 0 }),
         /positive/,
       );
       await assert.rejects(firecrackerMachine(f.options, AbortSignal.abort()));
@@ -279,7 +293,7 @@ test(
       }
       assert.equal(machine.isClosed(), true);
       await assert.rejects(lstat(machine.directory), /ENOENT/);
-      const sandboxProvider = firecrackerSandboxProvider(f.options);
+      const sandboxProvider = createFirecrackerSandboxProvider(f.options);
       const context = {
         repository: f.root,
         directory: f.root,

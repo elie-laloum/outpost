@@ -2,8 +2,8 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { vercelSandboxProvider } from "../src/providers/vercel.ts";
-import { daytonaSandboxProvider } from "../src/providers/daytona.ts";
+import { createVercelSandboxProvider } from "../src/providers/vercel.ts";
+import { createDaytonaSandboxProvider } from "../src/providers/daytona.ts";
 import { OutpostError } from "../src/domain/errors.ts";
 import { networkProbeScript } from "./fixtures/network-probe.constants.ts";
 import {
@@ -48,7 +48,7 @@ try {
     const options = egress ? { egress } : {};
     const provider =
       providerName === "vercel"
-        ? vercelSandboxProvider({
+        ? createVercelSandboxProvider({
             ...options,
             create: {
               token: environment.VERCEL_TOKEN!,
@@ -58,7 +58,7 @@ try {
               timeout: 180_000,
             },
           })
-        : daytonaSandboxProvider({
+        : createDaytonaSandboxProvider({
             ...options,
             connection: { apiKey: environment.DAYTONA_API_KEY! },
             create: {

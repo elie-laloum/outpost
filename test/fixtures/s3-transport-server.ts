@@ -6,7 +6,7 @@ import type {
   S3FixtureOptions,
   S3FixtureObject,
 } from "./s3-transport-server.types.ts";
-import { s3Transport } from "../../src/infrastructure/s3-transport.ts";
+import { createS3Transport } from "../../src/infrastructure/s3-transport.ts";
 
 export async function s3Fixture(
   t: TestContext,
@@ -110,7 +110,7 @@ export async function s3Fixture(
     );
   });
   return {
-    transporter: s3Transport({
+    transporter: createS3Transport({
       client,
       bucket: "bucket",
       prefix: "project",

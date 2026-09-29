@@ -1,9 +1,9 @@
-import { speculate, localTransport } from "../../src/index.ts";
-import { localSandboxProvider } from "../../src/providers/local.ts";
+import { speculate, createLocalTransport } from "../../src/index.ts";
+import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { scripted, emit } from "../helpers.ts";
 const repository = process.argv[2]!;
 const directory = process.argv[3]!;
-const local = localSandboxProvider();
+const local = createLocalSandboxProvider();
 const phase = process.argv[4] ?? "validation";
 async function interrupt() {
   process.send?.("ready");
@@ -30,7 +30,7 @@ await speculate({
     },
   },
   durability: {
-    transporter: localTransport({ directory }),
+    transporter: createLocalTransport({ directory }),
     runId: "crash",
     version: "1",
   },

@@ -2,8 +2,8 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import type { Daytona, Sandbox } from "@daytona/sdk";
 import type { Sandbox as VercelSandbox } from "@vercel/sandbox";
-import { vercelSandboxProvider } from "../../src/providers/vercel.ts";
-import { daytonaSandboxProvider } from "../../src/providers/daytona.ts";
+import { createVercelSandboxProvider } from "../../src/providers/vercel.ts";
+import { createDaytonaSandboxProvider } from "../../src/providers/daytona.ts";
 
 const context = {
   repository: "/unused",
@@ -19,7 +19,7 @@ test("Daytona deletes an allocated sandbox when home discovery fails", async () 
       throw new Error("home unavailable");
     },
   };
-  const sandboxProvider = daytonaSandboxProvider(
+  const sandboxProvider = createDaytonaSandboxProvider(
     {},
     async () =>
       ({
@@ -59,7 +59,7 @@ test("Daytona waits for nonzero process completion after output closes and remai
       getSessionCommand: async () => (++polls === 1 ? {} : { exitCode: 17 }),
     },
   };
-  const lease = await daytonaSandboxProvider(
+  const lease = await createDaytonaSandboxProvider(
     {},
     async () =>
       ({
@@ -95,7 +95,7 @@ test("Daytona setup preserves both initialization and cleanup failures", async (
   const failure = new Error("home unavailable");
   const cleanup = new Error("delete unavailable");
   let attempts = 0;
-  const sandboxProvider = daytonaSandboxProvider(
+  const sandboxProvider = createDaytonaSandboxProvider(
     {},
     async () =>
       ({
@@ -165,7 +165,7 @@ test("Vercel retains final status after log closure, cleans stdin and reuses aft
       };
     },
   };
-  const lease = await vercelSandboxProvider(
+  const lease = await createVercelSandboxProvider(
     {},
     async () => sandbox as unknown as VercelSandbox,
   ).acquire(context);

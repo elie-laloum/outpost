@@ -5,17 +5,17 @@ import { promisify } from "node:util";
 import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import {
-  artifact,
-  artifactTask,
-  artifactStore,
-  workflowCheckpointStore,
-  isolatedTask,
+  defineJsonArtifact,
+  defineArtifactTask,
+  createArtifactStore,
+  createWorkflowCheckpointStore,
+  defineIsolatedTask,
   readArtifact,
-  response,
-  workflow,
-  localTransport,
+  defineJsonResponse,
+  defineWorkflow,
+  createLocalTransport,
 } from "../../src/index.ts";
-import { localSandboxProvider } from "../../src/providers/local.ts";
+import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { emit, repository, scripted } from "../helpers.ts";
 
 function schema(value: unknown): { endpoint: string } {
@@ -33,28 +33,28 @@ test("isolated repositories exchange validated artifacts and resume references i
   const backendRepository = await repository(t),
     frontendRepository = await repository(t);
   const directory = join(backendRepository, ".outpost", "artifacts");
-  const store = artifactStore({
-    transporter: localTransport({ directory: directory }),
+  const store = createArtifactStore({
+    transporter: createLocalTransport({ directory: directory }),
   });
-  const contract = artifact.json({ name: "api", version: "1", schema });
-  const backend = isolatedTask({
+  const contract = defineJsonArtifact({ name: "api", version: "1", schema });
+  const backend = defineIsolatedTask({
     key: "backend",
     request: () => ({
       repository: backendRepository,
-      sandboxProvider: localSandboxProvider(),
+      sandboxProvider: createLocalSandboxProvider(),
       agent: scripted(emit('<api>{"endpoint":"/users"}</api>')),
       brief: { text: "Describe API as <api>{...}</api>" },
-      response: response.json({ tag: "api", schema }),
+      response: defineJsonResponse({ tag: "api", schema }),
     }),
   });
-  const published = artifactTask({
+  const published = defineArtifactTask({
     key: "api",
     after: [backend],
     store,
     contract,
     produce: (context) => context.value(backend).value,
   });
-  const frontend = isolatedTask({
+  const frontend = defineIsolatedTask({
     key: "frontend",
     after: [published],
     request: async (context) => {
@@ -62,13 +62,13 @@ test("isolated repositories exchange validated artifacts and resume references i
         context,
         published,
         contract,
-        artifactStore({
-          transporter: localTransport({ directory: directory }),
+        createArtifactStore({
+          transporter: createLocalTransport({ directory: directory }),
         }),
       );
       return {
         repository: frontendRepository,
-        sandboxProvider: localSandboxProvider(),
+        sandboxProvider: createLocalSandboxProvider(),
         branch: { mode: "integrate" },
         brief: { text: api.endpoint },
         agent: scripted(
@@ -83,7 +83,7 @@ test("isolated repositories exchange validated artifacts and resume references i
       };
     },
   });
-  const result = await workflow("artifacts", [
+  const result = await defineWorkflow("artifacts", [
     backend,
     published,
     frontend,
@@ -102,28 +102,30 @@ test("isolated repositories exchange validated artifacts and resume references i
     ".outpost",
     "checkpoints",
   );
-  const persisted = artifactTask({
+  const persisted = defineArtifactTask({
     key: "persisted",
     store,
     contract,
     produce: () => ({ endpoint: "/saved" }),
   });
   const checkpoint = {
-    store: workflowCheckpointStore({
-      transporter: localTransport({ directory: checkpointDirectory }),
+    store: createWorkflowCheckpointStore({
+      transporter: createLocalTransport({ directory: checkpointDirectory }),
     }),
     runId: "artifact",
     version: "1",
   };
-  (await workflow("persisted", [persisted]).start({ checkpoint })).unwrap();
+  (
+    await defineWorkflow("persisted", [persisted]).start({ checkpoint })
+  ).unwrap();
   const script = join(frontendRepository, "read.mjs");
   await writeFile(
     script,
-    `import { artifact, artifactTask, artifactStore, workflowCheckpointStore, readStoredArtifact, workflow, localTransport } from ${JSON.stringify(new URL("../../src/index.ts", import.meta.url).href)};
-    const store=artifactStore({ transporter: localTransport({ directory: ${JSON.stringify(directory)} }) });
-    const contract=artifact.json({name:'api',version:'1',schema:${schema.toString()}});
-    const item=artifactTask({key:'persisted',store,contract,produce(){throw new Error('must not replay')}});
-    const result=await workflow('persisted',[item]).start({checkpoint:{store:workflowCheckpointStore({ transporter: localTransport({ directory: ${JSON.stringify(checkpointDirectory)} }) }),runId:'artifact',version:'1'}});
+    `import { defineJsonArtifact, defineArtifactTask, createArtifactStore, createWorkflowCheckpointStore, readStoredArtifact, defineWorkflow, createLocalTransport } from ${JSON.stringify(new URL("../../src/index.ts", import.meta.url).href)};
+    const store=createArtifactStore({ transporter: createLocalTransport({ directory: ${JSON.stringify(directory)} }) });
+    const contract=defineJsonArtifact({name:'api',version:'1',schema:${schema.toString()}});
+    const item=defineArtifactTask({key:'persisted',store,contract,produce(){throw new Error('must not replay')}});
+    const result=await defineWorkflow('persisted',[item]).start({checkpoint:{store:createWorkflowCheckpointStore({ transporter: createLocalTransport({ directory: ${JSON.stringify(checkpointDirectory)} }) }),runId:'artifact',version:'1'}});
     result.unwrap(); console.log(JSON.stringify(await readStoredArtifact(store,contract,result.value(item))));
   `,
   );

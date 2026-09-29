@@ -2,11 +2,11 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { join } from "node:path";
 import { containerProvider, imageName } from "../../src/providers/container.ts";
-import { dockerSandboxProvider } from "../../src/providers/docker.ts";
-import { podmanSandboxProvider } from "../../src/providers/podman.ts";
+import { createDockerSandboxProvider } from "../../src/providers/docker.ts";
+import { createPodmanSandboxProvider } from "../../src/providers/podman.ts";
 import {
-  mountedSandboxProvider,
-  remoteSandboxProvider,
+  createMountedSandboxProvider,
+  createRemoteSandboxProvider,
 } from "../../src/providers/factories.ts";
 import type { Command } from "../../src/domain/ports.ts";
 import { repository } from "../helpers.ts";
@@ -124,8 +124,8 @@ test("container preflight validates UID, options and missing volumes", async (t)
       gitDirectories: [],
       variables: {},
     };
-  assert.throws(() => dockerSandboxProvider({ cpus: 0 }), /cpus/);
-  assert.throws(() => podmanSandboxProvider({ memoryMb: 1 }), /memory/);
+  assert.throws(() => createDockerSandboxProvider({ cpus: 0 }), /cpus/);
+  assert.throws(() => createPodmanSandboxProvider({ memoryMb: 1 }), /memory/);
   await assert.rejects(
     containerProvider("docker", {}, async () => ({
       status: 0,
@@ -160,14 +160,14 @@ test("custom providers retain their explicit placement", () => {
     throw new Error("unused");
   };
   assert.equal(
-    mountedSandboxProvider({ name: "custom", acquire }).placement,
+    createMountedSandboxProvider({ name: "custom", acquire }).placement,
     "mounted",
   );
   assert.equal(
-    remoteSandboxProvider({ name: "custom", acquire }).placement,
+    createRemoteSandboxProvider({ name: "custom", acquire }).placement,
     "remote",
   );
-  assert.throws(() => remoteSandboxProvider({ name: "", acquire }));
+  assert.throws(() => createRemoteSandboxProvider({ name: "", acquire }));
 });
 
 test("container recovery registers identity before allocation and refuses unknown identities", async (t) => {

@@ -1,19 +1,19 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
-  agent,
+  createAgent,
   defineHarnessHook,
   defineHarnessPermissions,
   defineHarnessTool,
   dispatch,
-  harness,
+  createHarness,
   type AgentObservation,
   type HarnessOptions,
   type ModelProvider,
   type ModelRequest,
   type ModelResult,
 } from "../../src/index.ts";
-import { localSandboxProvider } from "../../src/providers/local.ts";
+import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { repository } from "../helpers.ts";
 
 const done = "<outpost>done</outpost>";
@@ -78,10 +78,10 @@ async function run(
   const root = await repository(t);
   const result = await dispatch({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
-    agent: agent({
+    sandboxProvider: createLocalSandboxProvider(),
+    agent: createAgent({
       model: "m",
-      harness: harness({
+      harness: createHarness({
         modelProvider: provider(replies, requests),
         tools: [write],
         ...options,
@@ -264,7 +264,7 @@ test("hook failures and invalid decisions fail the turn", async (t) => {
   );
   assert.throws(
     () =>
-      harness({
+      createHarness({
         modelProvider: provider([], []),
         // @ts-expect-error Hooks must be defined with defineHarnessHook.
         hooks: [{ on: "stop", run: () => undefined }],
@@ -273,7 +273,7 @@ test("hook failures and invalid decisions fail the turn", async (t) => {
   );
   assert.throws(
     () =>
-      harness({
+      createHarness({
         modelProvider: provider([], []),
         // @ts-expect-error Permissions must be defined with defineHarnessPermissions.
         permissions: { rules: [] },

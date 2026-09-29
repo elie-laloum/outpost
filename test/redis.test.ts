@@ -5,8 +5,12 @@ import type { TestContext } from "node:test";
 import { randomUUID, createHash } from "node:crypto";
 import { setTimeout as delay } from "node:timers/promises";
 import { Queue, Job } from "bullmq";
-import { bullmqTaskQueue } from "../src/infrastructure/task-queue-bullmq.ts";
-import { queuedTask, runQueueWorker, workflow } from "../src/index.ts";
+import { createBullMQTaskQueue } from "../src/infrastructure/task-queue-bullmq.ts";
+import {
+  defineQueuedTask,
+  runQueueWorker,
+  defineWorkflow,
+} from "../src/index.ts";
 import type { QueueJob, TaskQueue } from "../src/index.ts";
 
 const connection = {
@@ -27,8 +31,8 @@ async function fixture(t: TestContext) {
       throw new Error("observer failure");
     },
   };
-  const first = await bullmqTaskQueue(options);
-  const second = await bullmqTaskQueue(options);
+  const first = await createBullMQTaskQueue(options);
+  const second = await createBullMQTaskQueue(options);
   const inspector = new Queue(`${hash(options.name)}-${hash("work")}`, {
     connection,
     prefix: options.prefix,
@@ -155,7 +159,7 @@ test("BullMQ reclaims crashed workers repeatedly and fences every stale operatio
     /Stale queue fence/,
   );
   await delay(120);
-  const reopened = await bullmqTaskQueue(options);
+  const reopened = await createBullMQTaskQueue(options);
   try {
     const next = await eventually(() => claim(reopened, "third"));
     assert.equal(next.fence, replacement.fence + 1);
@@ -268,7 +272,7 @@ test("BullMQ repairs interrupted enqueue and never reruns a durably completed jo
   assert.equal((await second.get(job.id))?.result?.value, "durable");
 });
 
-test("BullMQ works with queuedTask and runQueueWorker including failures, usage and cancellation", async (t) => {
+test("BullMQ works with defineQueuedTask and runQueueWorker including failures, usage and cancellation", async (t) => {
   const { first, second } = await fixture(t);
   const stop = new AbortController();
   let aborted = false;
@@ -296,7 +300,7 @@ test("BullMQ works with queuedTask and runQueueWorker including failures, usage 
     },
   });
   try {
-    const remote = queuedTask({
+    const remote = defineQueuedTask({
       key: "remote",
       queue: first,
       handler: "work",
@@ -304,7 +308,7 @@ test("BullMQ works with queuedTask and runQueueWorker including failures, usage 
       decode: Number,
       pollMs: 10,
     });
-    const result = await workflow("redis", [remote]).start({
+    const result = await defineWorkflow("redis", [remote]).start({
       signal: AbortSignal.timeout(5000),
     });
     result.unwrap();
@@ -332,7 +336,7 @@ test("BullMQ works with queuedTask and runQueueWorker including failures, usage 
 
 test("BullMQ rejects failed authentication and closes its initial connection", async () => {
   await assert.rejects(
-    bullmqTaskQueue({
+    createBullMQTaskQueue({
       name: `invalid-auth-${randomUUID()}`,
       connection: {
         ...connection,
@@ -397,7 +401,7 @@ test("BullMQ refuses eviction policies that can discard queue locks", async () =
       "volatile-lru",
     ]);
     await assert.rejects(
-      bullmqTaskQueue({ name: "unsafe-policy", connection }),
+      createBullMQTaskQueue({ name: "unsafe-policy", connection }),
       /maxmemory-policy must be noeviction/,
     );
   } finally {

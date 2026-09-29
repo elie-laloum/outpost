@@ -1,18 +1,18 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
-  agent,
+  createAgent,
   defineHarnessSkill,
   defineHarnessTool,
   defineHarnessToolset,
   dispatch,
-  harness,
+  createHarness,
   type AgentObservation,
   type ModelProvider,
   type ModelRequest,
   type ModelResult,
 } from "../../src/index.ts";
-import { localSandboxProvider } from "../../src/providers/local.ts";
+import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { repository } from "../helpers.ts";
 
 const done = "<outpost>done</outpost>";
@@ -79,9 +79,9 @@ test("skills are listed, loaded on demand and gate their tools", async (t) => {
       return replies.shift()!(request);
     },
   };
-  const selected = agent({
+  const selected = createAgent({
     model: "m",
-    harness: harness({
+    harness: createHarness({
       modelProvider: provider,
       instructions: "Base.",
       skills: [migrations, style],
@@ -89,7 +89,7 @@ test("skills are listed, loaded on demand and gate their tools", async (t) => {
   });
   const result = await dispatch({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent: selected,
     brief: { text: "update schema" },
     logging: false,
@@ -126,10 +126,10 @@ test("skills are listed, loaded on demand and gate their tools", async (t) => {
   const again = [call("migrate_schema", {}), answer];
   await dispatch({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
-    agent: agent({
+    sandboxProvider: createLocalSandboxProvider(),
+    agent: createAgent({
       model: "m",
-      harness: harness({
+      harness: createHarness({
         modelProvider: {
           name: "scripted",
           async request(request) {
@@ -163,16 +163,16 @@ test("skill definitions are validated and cannot collide with tools", () => {
   ] as const)
     assert.throws(() => defineHarnessSkill(options as never), pattern);
   assert.throws(
-    () => harness({ modelProvider, skills: [style, style] }),
+    () => createHarness({ modelProvider, skills: [style, style] }),
     /Duplicate skill name: style/,
   );
   assert.throws(
-    () => harness({ modelProvider, skills: [{ name: "raw" }] as never }),
+    () => createHarness({ modelProvider, skills: [{ name: "raw" }] as never }),
     /defineHarnessSkill/,
   );
   assert.throws(
     () =>
-      harness({
+      createHarness({
         modelProvider,
         tools: [
           defineHarnessTool({
@@ -186,5 +186,5 @@ test("skill definitions are validated and cannot collide with tools", () => {
       }),
     /Duplicate tool name: load_skill/,
   );
-  assert.deepEqual(harness({ modelProvider }).skills, []);
+  assert.deepEqual(createHarness({ modelProvider }).skills, []);
 });

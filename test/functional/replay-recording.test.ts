@@ -11,7 +11,7 @@ import { recordReplayChanges } from "../../src/application/replay-recording.ts";
 import { git } from "../../src/infrastructure/git.ts";
 import { recordWorkspaceCommits } from "../../src/infrastructure/git/replay-commits.ts";
 import { repositoryTransport } from "../../src/infrastructure/repository-transport.ts";
-import { localSandboxProvider } from "../../src/providers/local.ts";
+import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { emit, repository, scripted } from "../helpers.ts";
 
 const committing = `import {writeFileSync, rmSync, chmodSync} from 'node:fs'; import {execFileSync} from 'node:child_process';
@@ -34,7 +34,7 @@ test("replayable journals record linear commits with reproducible patches", asyn
   const baseline = (await git(root, ["rev-parse", "HEAD"])).trim();
   const output = await dispatch({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent: scripted(committing),
     brief: { text: "work" },
     logging: { replayable: true },
@@ -66,7 +66,7 @@ test("journals omit workspace commits unless replay recording is requested", asy
   const root = await repository(t);
   const output = await dispatch({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent: scripted(committing),
     brief: { text: "work" },
     logging: {},
@@ -85,7 +85,7 @@ test("failed dispatches record their error and workspace commits", async (t) => 
   );
   const failure = await dispatch({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent,
     brief: { text: "work" },
     logging: { replayable: true },

@@ -30,7 +30,7 @@ function status(error: unknown): number | undefined {
     : undefined;
 }
 
-export function s3Transport(options: S3TransportOptions): Transport {
+export function createS3Transport(options: S3TransportOptions): Transport {
   if (!options.bucket.trim()) throw new Error("S3 bucket must not be empty");
   const deleteMode = options.deleteMode ?? s3DeleteMode;
   if (deleteMode !== "conditional" && deleteMode !== "tombstone")
@@ -220,3 +220,6 @@ export function s3Transport(options: S3TransportOptions): Transport {
     },
   };
 }
+
+/** @deprecated Use {@link createS3Transport}. */
+export const s3Transport = createS3Transport;

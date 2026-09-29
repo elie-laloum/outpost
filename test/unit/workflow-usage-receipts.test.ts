@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { task, workflow } from "../../src/index.ts";
+import { defineTask, defineWorkflow } from "../../src/index.ts";
 import type {
   TaskContext,
   WorkflowCheckpoint,
@@ -11,7 +11,7 @@ const usage = { input: 3, cached: 0, output: 2 };
 
 test("usage receipts are scoped per task, suppress retries, reject invalid usage, and enforce active ownership", async () => {
   let previous: TaskContext | undefined;
-  const first = task({
+  const first = defineTask({
     key: "first",
     retry: { attempts: 2 },
     perform(context) {
@@ -36,13 +36,13 @@ test("usage receipts are scoped per task, suppress retries, reject invalid usage
       if (context.attempt === 1) throw new Error("retry");
     },
   });
-  const second = task({
+  const second = defineTask({
     key: "second",
     perform(context) {
       context.reportUsageOnce!("same", usage);
     },
   });
-  const result = await workflow("receipts", [first, second]).start();
+  const result = await defineWorkflow("receipts", [first, second]).start();
   result.unwrap();
   assert.equal(result.usage.tokens.input, 6);
   assert.deepEqual(result.tasks[0]?.usageReceipts, ["same"]);
@@ -66,7 +66,7 @@ test("budget-triggered snapshots include receipt and usage atomically; restored 
       };
     },
   };
-  const run = task({
+  const run = defineTask({
     key: "run",
     perform(context) {
       context.signal.addEventListener(
@@ -79,7 +79,7 @@ test("budget-triggered snapshots include receipt and usage atomically; restored 
       context.reportUsageOnce!("receipt", usage);
     },
   });
-  const graph = workflow("atomic", [run]);
+  const graph = defineWorkflow("atomic", [run]);
   const checkpoint = { store, runId: "one", version: "1" };
   const result = await graph.start({
     checkpoint,

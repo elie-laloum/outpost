@@ -5,13 +5,13 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
-  approvalTask,
-  workflow,
-  task,
-  workflowCheckpointStore,
-  localTransport,
+  defineApprovalTask,
+  defineWorkflow,
+  defineTask,
+  createWorkflowCheckpointStore,
+  createLocalTransport,
   signWorkflowDecision,
-  ed25519DecisionVerifier,
+  createEd25519DecisionVerifier,
 } from "../../src/index.ts";
 import type { WorkflowApproverKey, WorkflowDecision } from "../../src/index.ts";
 
@@ -23,21 +23,25 @@ test("signed gates verify identities atomically, rotate keys, preserve audit and
   const directory = await mkdtemp(join(tmpdir(), "outpost-signed-"));
   t.after(() => rm(directory, { recursive: true, force: true }));
   const checkpoint = {
-    store: workflowCheckpointStore({
-      transporter: localTransport({ directory }),
+    store: createWorkflowCheckpointStore({
+      transporter: createLocalTransport({ directory }),
     }),
     runId: "signed",
     version: "1",
   };
-  const gate = approvalTask({
+  const gate = defineApprovalTask({
     key: "review",
     prompt: "Ship?",
     actors: ["maintainer"],
     authentication: "signed",
   });
   let calls = 0;
-  const child = task({ key: "ship", after: [gate], perform: () => ++calls });
-  const graph = workflow("signed", [gate, child]);
+  const child = defineTask({
+    key: "ship",
+    after: [gate],
+    perform: () => ++calls,
+  });
+  const graph = defineWorkflow("signed", [gate, child]);
   const paused = await graph.start({ checkpoint });
   const decision: WorkflowDecision = {
     executionId: paused.executionId,
@@ -56,7 +60,9 @@ test("signed gates verify identities atomically, rotate keys, preserve audit and
   let keys: readonly WorkflowApproverKey[] = [
     { keyId: "old", actor: "maintainer", publicKey: oldKey.publicKey },
   ];
-  const decisionVerifier = ed25519DecisionVerifier({ keys: async () => keys });
+  const decisionVerifier = createEd25519DecisionVerifier({
+    keys: async () => keys,
+  });
   await assert.rejects(
     graph.start({ checkpoint, decisions: [decision], decisionVerifier }),
     /Signed/,
@@ -117,15 +123,15 @@ test("signed gates verify identities atomically, rotate keys, preserve audit and
     graph.start({ checkpoint, decisions: [rotated], decisionVerifier }),
     /unauthorized/,
   );
-  const downgraded = approvalTask({
+  const downgraded = defineApprovalTask({
     key: "review",
     prompt: "Ship?",
     actors: ["maintainer"],
   });
   await assert.rejects(
-    workflow("signed", [
+    defineWorkflow("signed", [
       downgraded,
-      task({ key: "ship", after: [downgraded], perform: () => 0 }),
+      defineTask({ key: "ship", after: [downgraded], perform: () => 0 }),
     ]).start({ checkpoint }),
     /incompatible/,
   );
@@ -153,19 +159,20 @@ test("decision verifier rejects expired proofs, duplicate IDs and non-Ed25519 ke
     publicKey: oldKey.publicKey,
   };
   await assert.rejects(
-    async () => ed25519DecisionVerifier({ keys: () => [key, key] })(signed),
+    async () =>
+      createEd25519DecisionVerifier({ keys: () => [key, key] })(signed),
     /approver/,
   );
   await assert.rejects(
     async () =>
-      ed25519DecisionVerifier({
+      createEd25519DecisionVerifier({
         keys: () => [{ ...key, publicKey: newKey.publicKey }],
       })(signed),
     /signature/,
   );
   t.mock.timers.enable({ apis: ["Date"], now: Date.parse(expiresAt) });
   await assert.rejects(
-    async () => ed25519DecisionVerifier({ keys: () => [key] })(signed),
+    async () => createEd25519DecisionVerifier({ keys: () => [key] })(signed),
     /expired/,
   );
   assert.throws(
@@ -204,15 +211,15 @@ test("task idempotency keys survive retry and checkpoint replay but separate tas
   const directory = await mkdtemp(join(tmpdir(), "outpost-idempotency-"));
   t.after(() => rm(directory, { recursive: true, force: true }));
   const checkpoint = {
-    store: workflowCheckpointStore({
-      transporter: localTransport({ directory }),
+    store: createWorkflowCheckpointStore({
+      transporter: createLocalTransport({ directory }),
     }),
     runId: "keys",
     version: "1",
   };
   const keys: string[] = [];
   let fail = true;
-  const job = task({
+  const job = defineTask({
     key: "effect",
     retry: { attempts: 2 },
     perform(context) {
@@ -221,7 +228,7 @@ test("task idempotency keys survive retry and checkpoint replay but separate tas
       return context.idempotencyKey;
     },
   });
-  const graph = workflow("keys", [job]);
+  const graph = defineWorkflow("keys", [job]);
   assert.equal((await graph.start({ checkpoint })).status, "failed");
   fail = false;
   const resumed = await graph.start({
@@ -232,34 +239,34 @@ test("task idempotency keys survive retry and checkpoint replay but separate tas
   assert.equal(keys.length, 3);
   const fresh = await graph.start();
   assert.notEqual(fresh.value(job), resumed.value(job));
-  const other = task({
+  const other = defineTask({
     key: "other",
     perform: (context) => context.idempotencyKey,
   });
-  const together = await workflow("distinct", [job, other]).start();
+  const together = await defineWorkflow("distinct", [job, other]).start();
   assert.notEqual(together.value(job), together.value(other));
 });
 
 test("signed pause decisions validate a whole batch before persisting and resist async mutation", async (t) => {
-  const { pauseTask } = await import("../../src/index.ts");
+  const { definePauseTask } = await import("../../src/index.ts");
   const directory = await mkdtemp(join(tmpdir(), "outpost-signed-batch-"));
   t.after(() => rm(directory, { recursive: true, force: true }));
   const checkpoint = {
-    store: workflowCheckpointStore({
-      transporter: localTransport({ directory }),
+    store: createWorkflowCheckpointStore({
+      transporter: createLocalTransport({ directory }),
     }),
     runId: "batch",
     version: "1",
   };
   const gates = ["first", "second"].map((key) =>
-    pauseTask({
+    definePauseTask({
       key,
       prompt: "Continue?",
       actors: ["maintainer"],
       authentication: "signed",
     }),
   );
-  const graph = workflow("batch", gates);
+  const graph = defineWorkflow("batch", gates);
   const first = await graph.start({ checkpoint });
   const decisions = first.tasks.map((record) =>
     signWorkflowDecision({
@@ -280,7 +287,7 @@ test("signed pause decisions validate a whole batch before persisting and resist
     { keyId: "old", actor: "maintainer", publicKey: oldKey.publicKey },
     { keyId: "new", actor: "maintainer", publicKey: newKey.publicKey },
   ];
-  const verifier = ed25519DecisionVerifier({ keys: () => keys });
+  const verifier = createEd25519DecisionVerifier({ keys: () => keys });
   await assert.rejects(
     graph.start({
       checkpoint,
@@ -340,7 +347,7 @@ test("public verifier snapshots decisions before asynchronous key resolution", a
     expiresAt: future(),
   });
   const mutable = { ...signed, proof: { ...signed.proof! } };
-  const verifier = ed25519DecisionVerifier({
+  const verifier = createEd25519DecisionVerifier({
     keys: async () => {
       mutable.actor = "intruder";
       mutable.proof.expiresAt = "2000-01-01T00:00:00Z";
@@ -357,19 +364,19 @@ test("a workflow deadline during signature verification cannot persist a late ap
   const directory = await mkdtemp(join(tmpdir(), "outpost-signed-deadline-"));
   t.after(() => rm(directory, { recursive: true, force: true }));
   const checkpoint = {
-    store: workflowCheckpointStore({
-      transporter: localTransport({ directory }),
+    store: createWorkflowCheckpointStore({
+      transporter: createLocalTransport({ directory }),
     }),
     runId: "deadline",
     version: "1",
   };
-  const gate = approvalTask({
+  const gate = defineApprovalTask({
     key: "review",
     prompt: "Ship?",
     actors: ["maintainer"],
     authentication: "signed",
   });
-  const graph = workflow("deadline", [gate]);
+  const graph = defineWorkflow("deadline", [gate]);
   const paused = await graph.start({ checkpoint });
   const decision = signWorkflowDecision({
     decision: {
@@ -384,7 +391,7 @@ test("a workflow deadline during signature verification cannot persist a late ap
     keyId: "old",
     expiresAt: future(),
   });
-  const decisionVerifier = ed25519DecisionVerifier({
+  const decisionVerifier = createEd25519DecisionVerifier({
     keys: async () => {
       await delay(50);
       return [

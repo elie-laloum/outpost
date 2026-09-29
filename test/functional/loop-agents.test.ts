@@ -1,12 +1,12 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
-  agentTask,
+  defineAgentTask,
   createSandbox,
-  loopTask,
-  workflow,
+  defineLoopTask,
+  defineWorkflow,
 } from "../../src/index.ts";
-import { localSandboxProvider } from "../../src/providers/local.ts";
+import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { emit, repository, scripted } from "../helpers.ts";
 
 const usage = `console.log(JSON.stringify({ kind: "usage", tokens: { input: 3, cached: 1, output: 2 } }));`;
@@ -14,7 +14,7 @@ const usage = `console.log(JSON.stringify({ kind: "usage", tokens: { input: 3, c
 test("scripted coder and reviewer both account streaming usage once per round", async (t) => {
   await using coder = await createSandbox({
     repository: await repository(t),
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent: scripted(
       (input) =>
         usage +
@@ -23,17 +23,17 @@ test("scripted coder and reviewer both account streaming usage once per round", 
   });
   await using reviewer = await createSandbox({
     repository: await repository(t),
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent: scripted(
       (input) =>
         usage + emit(input.text === "fixed" ? "accepted" : "missing case"),
     ),
   });
-  const fix = loopTask({
+  const fix = defineLoopTask({
     key: "fix",
     maxRounds: 3,
     async attempt(ctx, feedback) {
-      const result = await agentTask({
+      const result = await defineAgentTask({
         key: "coder",
         sandbox: coder,
         request: () => ({ brief: { text: feedback ?? "code" } }),
@@ -41,7 +41,7 @@ test("scripted coder and reviewer both account streaming usage once per round", 
       return result.text;
     },
     async check(ctx, text) {
-      const result = await agentTask({
+      const result = await defineAgentTask({
         key: "reviewer",
         sandbox: reviewer,
         request: () => ({ brief: { text } }),
@@ -51,7 +51,7 @@ test("scripted coder and reviewer both account streaming usage once per round", 
         : { done: false, feedback: result.text };
     },
   });
-  const result = await workflow("reviewed", [fix]).start({
+  const result = await defineWorkflow("reviewed", [fix]).start({
     budget: { attempts: 3, usage: { input: 20 } },
   });
   result.unwrap();

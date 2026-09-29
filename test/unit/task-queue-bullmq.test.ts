@@ -1,21 +1,24 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { bullmqTaskQueue } from "../../src/infrastructure/task-queue-bullmq.ts";
+import { createBullMQTaskQueue } from "../../src/infrastructure/task-queue-bullmq.ts";
 import { bullMQState } from "../../src/infrastructure/task-queue-bullmq-state.ts";
 
 test("BullMQ validates configuration before creating connections", async () => {
   const connection = { host: "127.0.0.1" };
-  await assert.rejects(bullmqTaskQueue({ name: "", connection }), /identifier/);
   await assert.rejects(
-    bullmqTaskQueue({ name: "test", connection, prefix: "" }),
+    createBullMQTaskQueue({ name: "", connection }),
     /identifier/,
   );
   await assert.rejects(
-    bullmqTaskQueue({ name: "test", connection, stalledIntervalMs: 0 }),
+    createBullMQTaskQueue({ name: "test", connection, prefix: "" }),
+    /identifier/,
+  );
+  await assert.rejects(
+    createBullMQTaskQueue({ name: "test", connection, stalledIntervalMs: 0 }),
     /interval/,
   );
   await assert.rejects(
-    bullmqTaskQueue({
+    createBullMQTaskQueue({
       name: "test",
       connection: { ...connection, keyPrefix: "wrong" },
     }),

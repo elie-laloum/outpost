@@ -1,12 +1,14 @@
 import { DatabaseSync } from "node:sqlite";
-import { httpTaskQueue, runQueueWorker } from "../../src/index.ts";
-import { bullmqTaskQueue } from "../../src/infrastructure/task-queue-bullmq.ts";
+import { createHttpTaskQueue, runQueueWorker } from "../../src/index.ts";
+import { createBullMQTaskQueue } from "../../src/infrastructure/task-queue-bullmq.ts";
 
 const [backend, configuration, effects, mode] = process.argv.slice(2);
 if (!configuration || !effects) throw new Error("Missing worker configuration");
 const options = JSON.parse(configuration);
 const queue =
-  backend === "redis" ? await bullmqTaskQueue(options) : httpTaskQueue(options);
+  backend === "redis"
+    ? await createBullMQTaskQueue(options)
+    : createHttpTaskQueue(options);
 const database = new DatabaseSync(effects);
 database.exec(
   "PRAGMA busy_timeout = 5000; CREATE TABLE IF NOT EXISTS effects (key TEXT PRIMARY KEY)",

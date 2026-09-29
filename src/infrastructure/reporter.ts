@@ -4,7 +4,7 @@ import type { ReporterOptions, ReportPass } from "./reporter.types.ts";
 
 export type { ReporterOptions } from "./reporter.types.ts";
 
-export function reporter(
+export function createReporter(
   options: ReporterOptions = {},
 ): (event: ObservationEvent & ReportPass) => void {
   const write = options.write ?? ((text) => process.stdout.write(text));

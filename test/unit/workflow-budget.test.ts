@@ -1,13 +1,17 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { setTimeout as delay } from "node:timers/promises";
-import { task, workflow, WorkflowBudgetExceeded } from "../../src/index.ts";
+import {
+  defineTask,
+  defineWorkflow,
+  WorkflowBudgetExceeded,
+} from "../../src/index.ts";
 import type { TaskContext, Usage, WorkflowEvent } from "../../src/index.ts";
 
 test("attempt admission is shared across concurrency and retries", async () => {
   const admitted: string[] = [];
   const tasks = ["a", "b", "c"].map((key) =>
-    task({
+    defineTask({
       key,
       retry: { attempts: 3 },
       async perform(context) {
@@ -17,7 +21,7 @@ test("attempt admission is shared across concurrency and retries", async () => {
       },
     }),
   );
-  const result = await workflow("attempts", tasks).start({
+  const result = await defineWorkflow("attempts", tasks).start({
     concurrency: 2,
     stopOnError: false,
     budget: { attempts: 2 },
@@ -34,19 +38,19 @@ test("attempt admission is shared across concurrency and retries", async () => {
 });
 
 test("the last admitted attempt can finish and false conditions consume no admission", async () => {
-  const skipped = task({
+  const skipped = defineTask({
     key: "skipped",
     condition: () => false,
     perform: () => assert.fail(),
   });
-  const run = task({
+  const run = defineTask({
     key: "run",
     async perform() {
       await delay(2);
       return 7;
     },
   });
-  const result = await workflow("exact", [skipped, run]).start({
+  const result = await defineWorkflow("exact", [skipped, run]).start({
     budget: { attempts: 1 },
   });
   result.unwrap();
@@ -55,16 +59,16 @@ test("the last admitted attempt can finish and false conditions consume no admis
 });
 
 test("zero budgets prevent the first perform and invalid limits reject before observers", async () => {
-  const run = task({ key: "never", perform: () => assert.fail() });
+  const run = defineTask({ key: "never", perform: () => assert.fail() });
   for (const budget of [{ attempts: 0 }, { usage: { input: 0 } }]) {
-    const result = await workflow("zero", [run]).start({ budget });
+    const result = await defineWorkflow("zero", [run]).start({ budget });
     assert.equal(result.status, "failed");
     assert.equal(result.usage.attempts, 0);
     assert.ok(result.errors[0] instanceof WorkflowBudgetExceeded);
   }
   for (const value of [-1, 0.5, Infinity, NaN, Number.MAX_SAFE_INTEGER + 1]) {
     await assert.rejects(
-      workflow("invalid", [run]).start({
+      defineWorkflow("invalid", [run]).start({
         budget: { usage: { output: value } },
         observe: () => assert.fail(),
       }),
@@ -79,7 +83,7 @@ test("usage includes failed retries, cancels concurrent tasks and awaits their c
     release = resolve;
   });
   let cleaned = false;
-  const sibling = task({
+  const sibling = defineTask({
     key: "sibling",
     async perform(context) {
       release();
@@ -91,7 +95,7 @@ test("usage includes failed retries, cancels concurrent tasks and awaits their c
       }
     },
   });
-  const run = task({
+  const run = defineTask({
     key: "run",
     retry: { attempts: 3 },
     async perform(context) {
@@ -101,7 +105,7 @@ test("usage includes failed retries, cancels concurrent tasks and awaits their c
     },
   });
   const events: WorkflowEvent[] = [];
-  const result = await workflow("usage", [sibling, run]).start({
+  const result = await defineWorkflow("usage", [sibling, run]).start({
     concurrency: 2,
     budget: { usage: { input: 6 } },
     observe(event) {
@@ -140,7 +144,7 @@ test("each usage dimension is independently enforceable and contexts cannot repo
     "output",
     "cacheCreated",
   ] as const) {
-    const run = task({
+    const run = defineTask({
       key: "run",
       perform(context) {
         saved = context;
@@ -148,7 +152,7 @@ test("each usage dimension is independently enforceable and contexts cannot repo
         context.reportUsage(usage);
       },
     });
-    const result = await workflow("dimension", [run]).start({
+    const result = await defineWorkflow("dimension", [run]).start({
       budget: { usage: { [dimension]: 3 } },
     });
     assert.equal(result.status, "failed");
@@ -161,25 +165,25 @@ test("each usage dimension is independently enforceable and contexts cannot repo
 });
 
 test("invalid reported usage fails atomically without corrupting accounting", async () => {
-  const run = task({
+  const run = defineTask({
     key: "run",
     perform(context) {
       context.reportUsage({ input: 3, cached: -1, output: 0 });
     },
   });
-  const result = await workflow("invalid", [run]).start();
+  const result = await defineWorkflow("invalid", [run]).start();
   assert.equal(result.status, "failed");
   assert.deepEqual(result.usage.tokens, { input: 0, cached: 0, output: 0 });
 });
 
 test("budgets and usage are fresh for each execution of a graph", async () => {
-  const run = task({
+  const run = defineTask({
     key: "run",
     perform(context) {
       context.reportUsage({ input: 2, cached: 0, output: 1 });
     },
   });
-  const graph = workflow("repeat", [run]);
+  const graph = defineWorkflow("repeat", [run]);
   for (let i = 0; i < 2; i++) {
     const result = await graph.start({
       budget: { attempts: 1, usage: { input: 3 } },
@@ -190,7 +194,7 @@ test("budgets and usage are fresh for each execution of a graph", async () => {
 });
 
 test("denied admission drains an already admitted concurrent task", async () => {
-  const first = task({
+  const first = defineTask({
     key: "first",
     async perform(context) {
       await delay(5);
@@ -198,8 +202,8 @@ test("denied admission drains an already admitted concurrent task", async () => 
       return 9;
     },
   });
-  const second = task({ key: "second", perform: () => assert.fail() });
-  const result = await workflow("drain", [first, second]).start({
+  const second = defineTask({ key: "second", perform: () => assert.fail() });
+  const result = await defineWorkflow("drain", [first, second]).start({
     concurrency: 2,
     budget: { attempts: 1 },
   });
@@ -214,7 +218,7 @@ test("denied admission drains an already admitted concurrent task", async () => 
 
 test("token exhaustion still cancels admitted work after attempt admission closes", async () => {
   let reported = false;
-  const first = task({
+  const first = defineTask({
     key: "first",
     async perform(context) {
       await delay(5);
@@ -223,8 +227,8 @@ test("token exhaustion still cancels admitted work after attempt admission close
       assert.equal(context.signal.aborted, true);
     },
   });
-  const second = task({ key: "second", perform: () => assert.fail() });
-  const result = await workflow("both", [first, second]).start({
+  const second = defineTask({ key: "second", perform: () => assert.fail() });
+  const result = await defineWorkflow("both", [first, second]).start({
     concurrency: 2,
     budget: { attempts: 1, usage: { input: 2 } },
   });
@@ -236,7 +240,7 @@ test("token exhaustion still cancels admitted work after attempt admission close
 
 test("usage from a settled retry cannot be reported during its retry delay", async () => {
   let previous!: TaskContext;
-  const run = task({
+  const run = defineTask({
     key: "retry",
     retry: { attempts: 2 },
     perform(context) {
@@ -245,7 +249,7 @@ test("usage from a settled retry cannot be reported during its retry delay", asy
     },
   });
   let checked = false;
-  const result = await workflow("late", [run]).start({
+  const result = await defineWorkflow("late", [run]).start({
     observe(event) {
       if (event.type !== "retry") return;
       assert.throws(
@@ -262,13 +266,13 @@ test("usage from a settled retry cannot be reported during its retry delay", asy
 });
 
 test("a task throwing the public budget error without exhaustion still fails", async () => {
-  const run = task({
+  const run = defineTask({
     key: "error",
     perform() {
       throw new WorkflowBudgetExceeded("attempts", 1, 1);
     },
   });
-  const result = await workflow("error", [run]).start();
+  const result = await defineWorkflow("error", [run]).start();
   assert.equal(result.status, "failed");
   assert.equal(result.tasks[0]?.status, "failed");
 });

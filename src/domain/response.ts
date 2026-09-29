@@ -60,16 +60,21 @@ function spec<T>(
   });
 }
 
-export const response = {
-  text: (options: TextResponseOptions): ResponseSpec<string> =>
-    spec(options.tag, options.repairs ?? 0, async (text) => text),
-  json: <T>(options: JsonResponseOptions<T>): ResponseSpec<T> =>
-    spec(options.tag, options.repairs ?? 0, async (text) => {
-      const fenced = text.match(/^```(?:json)?\s*\r?\n([\s\S]*?)\r?\n```$/i);
-      const input: unknown = JSON.parse(fenced ? fenced[1]! : text);
-      if (typeof options.schema === "function") return options.schema(input);
-      const result = await validateStandard(options.schema, input);
-      if ("issues" in result) throw new Error(JSON.stringify(result.issues));
-      return result.value;
-    }),
-};
+export function defineTextResponse(
+  options: TextResponseOptions,
+): ResponseSpec<string> {
+  return spec(options.tag, options.repairs ?? 0, async (text) => text);
+}
+
+export function defineJsonResponse<T>(
+  options: JsonResponseOptions<T>,
+): ResponseSpec<T> {
+  return spec(options.tag, options.repairs ?? 0, async (text) => {
+    const fenced = text.match(/^```(?:json)?\s*\r?\n([\s\S]*?)\r?\n```$/i);
+    const input: unknown = JSON.parse(fenced ? fenced[1]! : text);
+    if (typeof options.schema === "function") return options.schema(input);
+    const result = await validateStandard(options.schema, input);
+    if ("issues" in result) throw new Error(JSON.stringify(result.issues));
+    return result.value;
+  });
+}

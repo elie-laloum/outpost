@@ -1,9 +1,9 @@
 import { CloudCheckError, cloudCommandFailure } from "./cloud-failure.ts";
-import { agent as composeAgent } from "../../src/domain/agent.ts";
+import { createAgent as composeAgent } from "../../src/domain/agent.ts";
 import assert from "node:assert/strict";
 import { posix } from "node:path";
-import { claudeHarness } from "../../src/adapters/agents/claude-adapter.ts";
-import { codexHarness } from "../../src/adapters/agents/codex-adapter.ts";
+import { createClaudeHarness } from "../../src/adapters/agents/claude-adapter.ts";
+import { createCodexHarness } from "../../src/adapters/agents/codex-adapter.ts";
 import type { SandboxLease } from "../../src/domain/sandbox.types.ts";
 import type { CompatibilityCheck } from "./cloud-compatibility.types.ts";
 
@@ -75,14 +75,17 @@ export async function verifyCloudModels(
       ];
     const harness =
       name === "claude"
-        ? claudeHarness({
+        ? createClaudeHarness({
             saveConversations: false,
             authentication:
               credential === "CLAUDE_CODE_OAUTH_TOKEN"
                 ? { account: { variable: credential } }
                 : "usage",
           })
-        : codexHarness({ saveConversations: false, authentication: "usage" });
+        : createCodexHarness({
+            saveConversations: false,
+            authentication: "usage",
+          });
     const adapter = composeAgent({ harness, ...(model ? { model } : {}) });
     const request = adapter.request({
       text: "Reply with exactly OUTPOST_AUTH_OK. Do not use tools or modify any files.",

@@ -1,29 +1,29 @@
 import { join } from "node:path";
 import {
-  agent,
-  harness,
-  interactiveAgentTask,
-  localTransport,
-  workflowCheckpointStore,
-  workflow,
+  createAgent,
+  createHarness,
+  defineInteractiveAgentTask,
+  createLocalTransport,
+  createWorkflowCheckpointStore,
+  defineWorkflow,
 } from "../../src/index.ts";
 import type { WorkflowAnswer } from "../../src/index.ts";
-import { localSandboxProvider } from "../../src/providers/local.ts";
+import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 
 const repository = process.argv[2]!;
 const answer: WorkflowAnswer | undefined = process.argv[3]
   ? JSON.parse(process.argv[3])
   : undefined;
-const item = interactiveAgentTask({
+const item = defineInteractiveAgentTask({
   key: "interview",
   repository,
   actors: ["owner"],
   brief: "Design a shop",
   bootstrap: false,
-  sandboxProvider: localSandboxProvider(),
-  agent: agent({
+  sandboxProvider: createLocalSandboxProvider(),
+  agent: createAgent({
     model: "fixture",
-    harness: harness({
+    harness: createHarness({
       modelProvider: {
         name: "scripted-interview",
         async request(request) {
@@ -51,10 +51,10 @@ const item = interactiveAgentTask({
     }),
   }),
 });
-const result = await workflow("interview", [item]).start({
+const result = await defineWorkflow("interview", [item]).start({
   checkpoint: {
-    store: workflowCheckpointStore({
-      transporter: localTransport({
+    store: createWorkflowCheckpointStore({
+      transporter: createLocalTransport({
         directory: join(repository, ".outpost", "storage"),
       }),
     }),

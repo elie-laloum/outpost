@@ -8,11 +8,11 @@ import { join } from "node:path";
 import {
   dispatch,
   createSandbox,
-  reporter,
+  createReporter,
   recoveryDetails,
   openWorkspace,
 } from "../../src/index.ts";
-import { localSandboxProvider } from "../../src/providers/local.ts";
+import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { transfer } from "../../src/infrastructure/transfer.ts";
 import { downloadTree } from "../../src/providers/cloud-files.ts";
 import { seedRemote } from "../../src/application/remote-workspace.ts";
@@ -23,9 +23,9 @@ test("human reporter exposes phases, duration and raw token counts while quiet m
     verbose = "",
     quiet = "";
   const sinks = [
-    reporter({ label: "job", write: (text) => (normal += text) }),
-    reporter({ verbose: true, write: (text) => (verbose += text) }),
-    reporter({ quiet: true, write: (text) => (quiet += text) }),
+    createReporter({ label: "job", write: (text) => (normal += text) }),
+    createReporter({ verbose: true, write: (text) => (verbose += text) }),
+    createReporter({ quiet: true, write: (text) => (quiet += text) }),
   ];
   for (const sink of sinks) {
     sink({
@@ -109,7 +109,7 @@ test("idle diagnostics repeat before timeout and error recovery preserves the jo
   await assert.rejects(
     dispatch({
       repository: root,
-      sandboxProvider: localSandboxProvider(),
+      sandboxProvider: createLocalSandboxProvider(),
       agent: scripted("setTimeout(()=>{},10000)"),
       branch: { mode: "named", name: "idle-test" },
       brief: { text: "wait" },
@@ -133,7 +133,7 @@ test("preparation errors are journaled and sibling hooks are cancelled", async (
   try {
     await createSandbox({
       repository: root,
-      sandboxProvider: localSandboxProvider(),
+      sandboxProvider: createLocalSandboxProvider(),
       branch: { mode: "named", name: "hook-errors" },
       hooks: {
         hostReady: [
@@ -238,7 +238,7 @@ test("remote provisioning bounds uploads and retries only transient Git setup fa
   t.after(() => workspace.close());
   const remote = join(root, ".outpost", "recovery", "retry-remote");
   await mkdir(remote, { recursive: true });
-  const lease = await localSandboxProvider().acquire({
+  const lease = await createLocalSandboxProvider().acquire({
     repository: remote,
     directory: remote,
     variables: {},
@@ -303,7 +303,7 @@ test("local elevated commands run as the current account without escalation", as
   const root = await repository(t);
   const box = await createSandbox({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     logging: false,
   });
   try {
@@ -329,7 +329,7 @@ test("network diagnostics survive an idle timeout and the sandbox remains reusab
   const root = await repository(t);
   const sandbox = await createSandbox({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     logging: false,
   });
   t.after(() => sandbox.close());

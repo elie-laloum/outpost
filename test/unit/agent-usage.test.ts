@@ -4,9 +4,9 @@ import { mkdtemp, mkdir, rm, writeFile, symlink } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
-  agent,
-  copilotHarness,
-  kimiHarness,
+  createAgent,
+  createCopilotHarness,
+  createKimiHarness,
   type Usage,
   type AgentObservation,
 } from "../../src/index.ts";
@@ -37,7 +37,7 @@ const kimiCounts = {
 const expected: Usage = { input: 12, output: 3, cached: 4, cacheCreated: 2 };
 
 test("Copilot decodes model usage and reconciles repeated session totals without double counting", () => {
-  const adapter = agent({ harness: copilotHarness() });
+  const adapter = createAgent({ harness: createCopilotHarness() });
   const observed: AgentObservation[] = [];
   const output = agentOutput(
     adapter,
@@ -113,7 +113,7 @@ test("absent, invalid and partial counters remain explicitly incomplete while re
     sessionUsageResult('{"records":[]}', kimiUsage)?.complete,
     false,
   );
-  const copilot = agent({ harness: copilotHarness() });
+  const copilot = createAgent({ harness: createCopilotHarness() });
   assert.deepEqual(
     copilot.events(
       '{"type":"result","exitCode":0,"usage":{"premiumRequests":5}}',
@@ -127,8 +127,9 @@ for (const kind of ["copilot", "kimi"] as const) {
   test(`${kind} reads only session counters inside the execution environment`, async (t) => {
     const home = await mkdtemp(join(tmpdir(), "outpost-usage-"));
     t.after(() => rm(home, { recursive: true, force: true }));
-    const adapter = agent({
-      harness: kind === "copilot" ? copilotHarness() : kimiHarness(),
+    const adapter = createAgent({
+      harness:
+        kind === "copilot" ? createCopilotHarness() : createKimiHarness(),
     });
     const session = "session_fixture";
     const path =
@@ -253,7 +254,7 @@ test("session readers reject traversal and bound oversized input", async (t) => 
 test("a failed session read cannot turn partial streamed usage into complete accounting", async () => {
   const { collectAgentUsage } =
     await import("../../src/application/agent-usage.ts");
-  const adapter = agent({ harness: copilotHarness() });
+  const adapter = createAgent({ harness: createCopilotHarness() });
   const options = { brief: { text: "fixture" } };
   for (const scenario of ["throw", "nonzero", "invalid", "no-id"] as const) {
     const output = agentOutput(adapter, options, [], 1);
@@ -287,7 +288,7 @@ test("a failed session read cannot turn partial streamed usage into complete acc
 test("resumed session totals exclude prior usage and an unknown fork baseline never bills inherited tokens", async () => {
   const { prepareAgentUsage } =
     await import("../../src/application/agent-usage.ts");
-  const adapter = agent({ harness: copilotHarness() });
+  const adapter = createAgent({ harness: createCopilotHarness() });
   const lease = {
     root: "/fixture",
     home: "/fixture/home",

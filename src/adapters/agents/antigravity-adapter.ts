@@ -59,7 +59,7 @@ function bindAntigravity(settings: Bound<AntigravitySettings>): AgentAdapter {
   } satisfies AgentAdapter);
 }
 
-export function antigravityHarness(
+export function createAntigravityHarness(
   settings: AntigravitySettings = {},
 ): CliHarness {
   harnessSettings(settings);

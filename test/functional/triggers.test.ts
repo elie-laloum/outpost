@@ -10,7 +10,7 @@ import {
   gitlabWebhook,
   serveTriggers,
   slackRequest,
-  sqliteTaskQueue,
+  createSqliteTaskQueue,
   standardWebhook,
 } from "../../src/index.ts";
 import type {
@@ -33,7 +33,7 @@ async function fixture(
   extra: Partial<TriggerServerOptions> = {},
 ) {
   const directory = await mkdtemp(join(tmpdir(), "outpost-triggers-"));
-  const queue = await sqliteTaskQueue(join(directory, "queue.sqlite"));
+  const queue = await createSqliteTaskQueue(join(directory, "queue.sqlite"));
   const failures: { failure: TriggerFailure; error: string }[] = [];
   const server = await serveTriggers({
     queue,

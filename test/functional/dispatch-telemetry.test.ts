@@ -4,14 +4,14 @@ import {
   dispatch,
   createSandbox,
   openWorkspace,
-  createReporter,
+  createCustomReporter,
 } from "../../src/index.ts";
 import type {
   DispatchTelemetry,
   DispatchTelemetryOutcome,
   SandboxProvider,
 } from "../../src/index.ts";
-import { localSandboxProvider as local } from "../../src/providers/local.ts";
+import { createLocalSandboxProvider as local } from "../../src/providers/local.ts";
 import { repository, scripted, emit } from "../helpers.ts";
 
 function recording() {
@@ -56,7 +56,7 @@ test("cold passes share one session and report exact usage after disposal", asyn
       };
     },
   };
-  const report = createReporter({ text: async () => {} });
+  const report = createCustomReporter({ text: async () => {} });
   const result = await dispatch({
     repository: root,
     sandboxProvider,
@@ -247,7 +247,7 @@ test("broken telemetry and reporters cannot change dispatch success", async (t) 
 test("repairs, resume and fork start fresh sessions without losing telemetry configuration", async (t) => {
   const { writeFile } = await import("node:fs/promises");
   const { join } = await import("node:path");
-  const { response } = await import("../../src/index.ts");
+  const { defineTextResponse } = await import("../../src/index.ts");
   const root = await repository(t);
   const record = recording();
   const file = join(root, "native.jsonl");
@@ -278,7 +278,7 @@ test("repairs, resume and fork start fresh sessions without losing telemetry con
     sandboxProvider: local(),
     agent,
     brief: { text: "Return <answer>ok</answer>" },
-    response: response.text({ tag: "answer", repairs: 1 }),
+    response: defineTextResponse({ tag: "answer", repairs: 1 }),
     logging: false,
     telemetry: record.telemetry,
   });

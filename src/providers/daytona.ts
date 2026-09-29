@@ -14,7 +14,7 @@ import type { DaytonaOptions } from "./daytona.types.ts";
 
 export type { DaytonaOptions } from "./daytona.types.ts";
 
-export function daytonaSandboxProvider(
+export function createDaytonaSandboxProvider(
   options: DaytonaOptions = {},
   connect: (
     config?: DaytonaConfig,
@@ -87,3 +87,6 @@ export function daytonaSandboxProvider(
 }
 
 export type { EgressPolicy } from "../domain/egress.types.ts";
+
+/** @deprecated Use {@link createDaytonaSandboxProvider}. */
+export const daytonaSandboxProvider = createDaytonaSandboxProvider;

@@ -1,7 +1,7 @@
 import { fileURLToPath } from "node:url";
 import { cloudCompatibilitySource } from "./fixtures/cloud-compatibility-source.ts";
-import { daytonaSandboxProvider } from "../src/providers/daytona.ts";
-import { vercelSandboxProvider } from "../src/providers/vercel.ts";
+import { createDaytonaSandboxProvider } from "../src/providers/daytona.ts";
+import { createVercelSandboxProvider } from "../src/providers/vercel.ts";
 import { runCloudCompatibility } from "./fixtures/cloud-compatibility.ts";
 
 const source = await cloudCompatibilitySource(
@@ -13,7 +13,7 @@ const reports = await runCloudCompatibility({
   environment,
   create(name) {
     if (name === "vercel")
-      return vercelSandboxProvider({
+      return createVercelSandboxProvider({
         create: {
           token: environment.VERCEL_TOKEN!,
           teamId: environment.VERCEL_TEAM_ID!,
@@ -22,7 +22,7 @@ const reports = await runCloudCompatibility({
           timeout: 300_000,
         },
       });
-    return daytonaSandboxProvider({
+    return createDaytonaSandboxProvider({
       connection: { apiKey: environment.DAYTONA_API_KEY! },
       create: {
         language: "typescript",

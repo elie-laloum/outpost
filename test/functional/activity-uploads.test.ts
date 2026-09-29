@@ -7,7 +7,7 @@ import { trackedSandboxLease } from "../../src/application/sandbox-activity.ts";
 import { registerResourceActivity } from "../../src/infrastructure/resource-activity.ts";
 import { fileManifest } from "../../src/infrastructure/file-manifest.ts";
 import { fileBatches } from "../../src/providers/file-batches.ts";
-import { localSandboxProvider } from "../../src/providers/local.ts";
+import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { repository } from "../helpers.ts";
 
 function deferred() {
@@ -23,7 +23,7 @@ test("incremental uploads remain visible until the underlying batch settles", as
   const destination = join(root, "destination");
   await mkdir(destination);
   await writeFile(join(root, "payload.bin"), Buffer.from([0, 255, 128]));
-  const base = await localSandboxProvider().acquire({
+  const base = await createLocalSandboxProvider().acquire({
     repository: root,
     directory: root,
     gitDirectories: [],

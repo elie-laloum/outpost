@@ -4,10 +4,10 @@ import { join } from "node:path";
 import { test } from "node:test";
 import {
   dispatch,
-  fallbackAgent,
+  createFallbackAgent,
   quotaFault,
   readJournal,
-  replayAgent,
+  createReplayAgent,
 } from "../../src/index.ts";
 import type {
   AgentObservation,
@@ -17,7 +17,7 @@ import type {
 import { recoveryDetails } from "../../src/domain/errors.ts";
 import { git } from "../../src/infrastructure/git.ts";
 import { repositoryTransport } from "../../src/infrastructure/repository-transport.ts";
-import { localSandboxProvider } from "../../src/providers/local.ts";
+import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { repository, scripted } from "../helpers.ts";
 
 const line = (event: object) =>
@@ -52,7 +52,7 @@ const run = (
 ) =>
   dispatch({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent,
     brief: { text: "work" },
     logging: { replayable: true },
@@ -62,7 +62,7 @@ const run = (
 test("replay reproduces a fallback handover, its commits and its usage", async (t) => {
   const root = await repository(t);
   const baseline = (await git(root, ["rev-parse", "HEAD"])).trim();
-  const coder = fallbackAgent(
+  const coder = createFallbackAgent(
     [
       candidate("primary", `${commit("draft.txt")}${limited}`),
       candidate(
@@ -76,7 +76,7 @@ test("replay reproduces a fallback handover, its commits and its usage", async (
   const recorded = await run(root, coder, recordedEvents);
   assert.equal(recorded.fallback?.selected.name, "backup");
 
-  const replaying = replayAgent({
+  const replaying = createReplayAgent({
     journal: await journal(root, recorded.logReference),
   });
   assert.equal(replaying.turns.length, 2);
@@ -113,7 +113,7 @@ test("replay reproduces a fallback handover, its commits and its usage", async (
 
 test("replay rethrows the final quota when every recorded candidate hit a limit", async (t) => {
   const root = await repository(t);
-  const coder = fallbackAgent(
+  const coder = createFallbackAgent(
     [candidate("primary", limited), candidate("backup", limited)],
     { on: ["quota"] },
   );
@@ -122,7 +122,9 @@ test("replay rethrows the final quota when every recorded candidate hit a limit"
     reference = recoveryDetails(error)?.logReference;
     return quotaFault(error) !== undefined;
   });
-  const replaying = replayAgent({ journal: await journal(root, reference) });
+  const replaying = createReplayAgent({
+    journal: await journal(root, reference),
+  });
   assert.equal(replaying.turns[0]!.handover?.failure, "quota");
   assert.equal(replaying.turns[1]!.failure?.code, "quota");
   await assert.rejects(
@@ -148,7 +150,7 @@ test("replay rejects malformed recorded handovers", () => {
   ])
     assert.throws(
       () =>
-        replayAgent({
+        createReplayAgent({
           journal: [
             prompt,
             {

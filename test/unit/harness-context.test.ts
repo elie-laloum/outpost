@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   defineHarnessContextStrategy,
-  harness,
+  createHarness,
   summarizeHistory,
   truncateToolResults,
   type ModelMessage,
@@ -91,20 +91,21 @@ test("context strategies validate their options and keep short histories", async
     request: async () => ({ text: "" }),
   };
   assert.throws(
-    // @ts-expect-error Context strategies must be defined explicitly.
-    () => harness({ modelProvider, context: { compact: () => undefined } }),
+    () =>
+      // @ts-expect-error Context strategies must be defined explicitly.
+      createHarness({ modelProvider, context: { compact: () => undefined } }),
     /defineHarnessContextStrategy/,
   );
   assert.throws(
     () =>
-      harness({
+      createHarness({
         modelProvider,
         conversations: { locate: () => undefined } as never,
       }),
     /conversation store or false/,
   );
   assert.equal(
-    harness({ modelProvider, conversations: false }).conversations,
+    createHarness({ modelProvider, conversations: false }).conversations,
     false,
   );
 });

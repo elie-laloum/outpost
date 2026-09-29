@@ -4,7 +4,7 @@ import type { OpenAIModelProviderOptions } from "./openai-model-provider.types.t
 import { modelProtocols } from "./openai-protocols.ts";
 import { httpModelProvider } from "./http-provider.ts";
 
-export function openaiModelProvider(
+export function createOpenAIModelProvider(
   options: OpenAIModelProviderOptions,
 ): ModelProvider {
   invariant(

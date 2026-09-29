@@ -3,7 +3,7 @@ import { test } from "node:test";
 import { mkdir, readFile, stat, symlink, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { Sandbox as VercelSandbox } from "@vercel/sandbox";
-import { vercelSandboxProvider } from "../../src/providers/vercel.ts";
+import { createVercelSandboxProvider } from "../../src/providers/vercel.ts";
 import { executeProcess } from "../../src/infrastructure/process.ts";
 import { repository } from "../helpers.ts";
 
@@ -36,7 +36,7 @@ test(
         stopped++;
       },
     };
-    const sandboxProvider = vercelSandboxProvider(
+    const sandboxProvider = createVercelSandboxProvider(
       { root },
       async () => sandbox as unknown as VercelSandbox,
     );
@@ -85,7 +85,7 @@ test("Vercel stops allocation when recursive workspace creation fails", async ()
       stopped++;
     },
   };
-  const sandboxProvider = vercelSandboxProvider(
+  const sandboxProvider = createVercelSandboxProvider(
     {},
     async () => sandbox as unknown as VercelSandbox,
   );

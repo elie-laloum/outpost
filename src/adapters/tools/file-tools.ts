@@ -11,7 +11,7 @@ import {
 import { TOOL_LIMITS } from "./tools.constants.ts";
 import type { ListFilesInput, ReadFileInput } from "./tools.types.ts";
 
-export function harnessFileTools(): HarnessToolset {
+export function createHarnessFileTools(): HarnessToolset {
   return defineHarnessToolset({
     name: "files",
     tools: [readFileTool(), listFilesTool()],

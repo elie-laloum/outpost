@@ -1,14 +1,14 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
-  agentTask,
+  defineAgentTask,
   createSandbox,
-  loopTask,
+  defineLoopTask,
   OutpostError,
-  task,
-  workflow,
+  defineTask,
+  defineWorkflow,
 } from "../../src/index.ts";
-import { localSandboxProvider } from "../../src/providers/local.ts";
+import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { emit, repository, scripted } from "../helpers.ts";
 import type {
   TaskRecord,
@@ -53,7 +53,7 @@ const record = (tasks: readonly TaskRecord[], key: string) =>
 test("a quota failure without a known reset pauses durably and resumes on the next start", async () => {
   const memory = memoryCheckpoint();
   let calls = 0;
-  const build = task({
+  const build = defineTask({
     key: "build",
     perform: () => {
       calls++;
@@ -61,9 +61,13 @@ test("a quota failure without a known reset pauses durably and resumes on the ne
       return "built";
     },
   });
-  const deploy = task({ key: "deploy", after: [build], perform: () => "ok" });
-  const lint = task({ key: "lint", perform: () => "clean" });
-  const graph = workflow("nightly", [build, deploy, lint]);
+  const deploy = defineTask({
+    key: "deploy",
+    after: [build],
+    perform: () => "ok",
+  });
+  const lint = defineTask({ key: "lint", perform: () => "clean" });
+  const graph = defineWorkflow("nightly", [build, deploy, lint]);
   const events: WorkflowEvent[] = [];
   const paused = await graph.start({
     checkpoint: memory.checkpoint,
@@ -103,7 +107,7 @@ test("a quota failure without a known reset pauses durably and resumes on the ne
 test("a known reset within maxWaitMs waits in process without consuming retries", async () => {
   const memory = memoryCheckpoint();
   let calls = 0;
-  const build = task({
+  const build = defineTask({
     key: "build",
     retry: { attempts: 1 },
     perform: () => {
@@ -114,7 +118,7 @@ test("a known reset within maxWaitMs waits in process without consuming retries"
   });
   const events: WorkflowEvent[] = [];
   const started = Date.now();
-  const result = await workflow("nightly", [build]).start({
+  const result = await defineWorkflow("nightly", [build]).start({
     checkpoint: memory.checkpoint,
     onQuota: { action: "pause", maxWaitMs: 5_000 },
     observe: (event) => events.push(event),
@@ -133,7 +137,7 @@ test("a reset beyond maxWaitMs stays paused until a start may wait for it", asyn
   const memory = memoryCheckpoint();
   let calls = 0;
   const resetAt = later(150);
-  const build = task({
+  const build = defineTask({
     key: "build",
     perform: () => {
       calls++;
@@ -141,7 +145,7 @@ test("a reset beyond maxWaitMs stays paused until a start may wait for it", asyn
       return "built";
     },
   });
-  const graph = workflow("nightly", [build]);
+  const graph = defineWorkflow("nightly", [build]);
   const first = await graph.start({
     checkpoint: memory.checkpoint,
     onQuota: { action: "pause", maxWaitMs: 10 },
@@ -165,7 +169,7 @@ test("a reset beyond maxWaitMs stays paused until a start may wait for it", asyn
 
 test("without onQuota a quota error keeps the existing retry and failure behavior", async () => {
   let calls = 0;
-  const build = task({
+  const build = defineTask({
     key: "build",
     retry: { attempts: 2 },
     perform: () => {
@@ -173,7 +177,7 @@ test("without onQuota a quota error keeps the existing retry and failure behavio
       throw limit(later(60_000));
     },
   });
-  const result = await workflow("nightly", [build]).start();
+  const result = await defineWorkflow("nightly", [build]).start();
   assert.equal(result.status, "failed");
   assert.equal(calls, 2);
   assert.equal(record(result.tasks, "build").quota, undefined);
@@ -185,13 +189,13 @@ test("without onQuota a quota error keeps the existing retry and failure behavio
 
 test("other failures still fail under onQuota", async () => {
   const memory = memoryCheckpoint();
-  const build = task({
+  const build = defineTask({
     key: "build",
     perform: () => {
       throw new OutpostError("process", "compile error");
     },
   });
-  const result = await workflow("nightly", [build]).start({
+  const result = await defineWorkflow("nightly", [build]).start({
     checkpoint: memory.checkpoint,
     onQuota: { action: "pause", maxWaitMs: 1_000 },
   });
@@ -203,7 +207,7 @@ test("cancelling during a quota wait leaves the task paused and resumable", asyn
   const memory = memoryCheckpoint();
   const controller = new AbortController();
   let calls = 0;
-  const build = task({
+  const build = defineTask({
     key: "build",
     perform: () => {
       calls++;
@@ -214,7 +218,7 @@ test("cancelling during a quota wait leaves the task paused and resumable", asyn
       return "built";
     },
   });
-  const graph = workflow("nightly", [build]);
+  const graph = defineWorkflow("nightly", [build]);
   const cancelled = await graph.start({
     checkpoint: memory.checkpoint,
     signal: controller.signal,
@@ -234,7 +238,7 @@ test("a loop task paused by quota resumes the interrupted phase", async () => {
   const memory = memoryCheckpoint();
   const attempts: number[] = [];
   let checks = 0;
-  const fix = loopTask({
+  const fix = defineLoopTask({
     key: "fix",
     maxRounds: 2,
     attempt: (context) => {
@@ -247,7 +251,7 @@ test("a loop task paused by quota resumes the interrupted phase", async () => {
       return { done: true };
     },
   });
-  const graph = workflow("nightly", [fix]);
+  const graph = defineWorkflow("nightly", [fix]);
   const paused = await graph.start({
     checkpoint: memory.checkpoint,
     onQuota: { action: "pause" },
@@ -261,7 +265,9 @@ test("a loop task paused by quota resumes the interrupted phase", async () => {
 });
 
 test("onQuota requires a checkpoint and a valid policy", async () => {
-  const graph = workflow("nightly", [task({ key: "a", perform: () => 1 })]);
+  const graph = defineWorkflow("nightly", [
+    defineTask({ key: "a", perform: () => 1 }),
+  ]);
   await assert.rejects(
     graph.start({ onQuota: { action: "pause" } }),
     /quota pauses require a checkpoint/,
@@ -311,13 +317,13 @@ test("checkpoints reject malformed or misplaced quota records", async () => {
   ];
   for (const change of cases) {
     const memory = memoryCheckpoint();
-    const build = task({
+    const build = defineTask({
       key: "build",
       perform: () => {
         throw limit();
       },
     });
-    const graph = workflow("nightly", [build]);
+    const graph = defineWorkflow("nightly", [build]);
     await graph.start({
       checkpoint: memory.checkpoint,
       onQuota: { action: "pause" },
@@ -336,7 +342,7 @@ test("an agent task that reports a usage limit pauses and resumes the workflow",
   const failure = JSON.stringify({ kind: "failure", message: "Usage limit" });
   await using sandbox = await createSandbox({
     repository: await repository(t),
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent: scripted(() => {
       if (!limited) return emit("done");
       limited = false;
@@ -344,18 +350,18 @@ test("an agent task that reports a usage limit pauses and resumes the workflow",
       return `const resetAt = new Date(Date.now() + 5000).toISOString(); console.log(JSON.stringify({ kind: "quota", message: "limit", resetAt })); console.log(${JSON.stringify(failure)}); process.exit(1);`;
     }),
   });
-  const coder = agentTask({
+  const coder = defineAgentTask({
     key: "coder",
     sandbox,
     request: () => ({ brief: { text: "code" } }),
   });
-  const run = task({
+  const run = defineTask({
     key: "run",
     perform: async (context) => (await coder.perform(context)).text,
   });
   const events: WorkflowEvent[] = [];
   const started = Date.now();
-  const result = await workflow("nightly", [run]).start({
+  const result = await defineWorkflow("nightly", [run]).start({
     checkpoint: memory.checkpoint,
     onQuota: { action: "pause", maxWaitMs: 30_000 },
     observe: (event) => events.push(event),

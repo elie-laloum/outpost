@@ -193,7 +193,8 @@ test("generated starters select account credentials without reading credential f
     assert.match(
       source,
       new RegExp(
-        `harness: ${agent}Harness\\(\\{ authentication: "account" \\}\\)`,
+        `harness: create${agent}Harness\\(\\{ authentication: "account" \\}\\)`,
+        "i",
       ),
     );
     assert.doesNotMatch(source, /homedir|auth\.json|credentials/);
@@ -213,10 +214,10 @@ test("generated Vercel starter forwards a declared parent token without a workfl
     join(directory, "bridge.mjs"),
     `import assert from "node:assert/strict";
 export class OutpostError extends Error {}
-export const reporter=()=>()=>{};
-export const claudeHarness=(settings)=>({name:"claude",settings});
-export const agent=(options)=>options;
-export const vercelSandboxProvider=(options)=>options;
+export const createReporter=()=>()=>{};
+export const createClaudeHarness=(settings)=>({name:"claude",settings});
+export const createAgent=(options)=>options;
+export const createVercelSandboxProvider=(options)=>options;
 export async function dispatch(options) {
  assert.deepEqual(options.agent.harness.settings.authentication,{account:{variable:"CLAUDE_CODE_OAUTH_TOKEN"}});
  assert.equal(options.sandboxProvider.variables.CLAUDE_CODE_OAUTH_TOKEN,"fixture-subscription-token");

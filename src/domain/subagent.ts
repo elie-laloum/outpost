@@ -1,4 +1,4 @@
-import { agent } from "./agent.ts";
+import { createAgent } from "./agent.ts";
 import { invariant, OutpostError } from "./errors.ts";
 import { SUBAGENT_FIELDS, SUBAGENT_INPUT } from "./subagent.constants.ts";
 import type {
@@ -24,7 +24,7 @@ export function defineHarnessSubagent(
     options.agent?.kind === "custom",
     "Subagents require a built-in harness agent",
   );
-  const child = agent({
+  const child = createAgent({
     harness: options.agent.harness,
     model: options.agent.model,
   });

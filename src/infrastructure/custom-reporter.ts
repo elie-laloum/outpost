@@ -7,7 +7,7 @@ import type {
   ReporterHandlers,
 } from "./custom-reporter.types.ts";
 
-export function createReporter(
+export function createCustomReporter(
   handlers: ReporterHandlers,
   options: CustomReporterOptions = {},
 ): CustomReporter {

@@ -3,13 +3,13 @@ import { test } from "node:test";
 import { writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import {
-  agentTask,
+  defineAgentTask,
   createSandbox,
-  interactiveAgentTask,
-  isolatedTask,
+  defineInteractiveAgentTask,
+  defineIsolatedTask,
   OutpostError,
-  task,
-  workflow,
+  defineTask,
+  defineWorkflow,
 } from "../../src/index.ts";
 import type {
   AgentInput,
@@ -23,7 +23,7 @@ import type {
 import { recordRecovery } from "../../src/domain/errors.ts";
 import { quotaWorkspace } from "../../src/application/quota-resume.ts";
 import type { IsolatedTaskRequest } from "../../src/application/tasks.types.ts";
-import { localSandboxProvider } from "../../src/providers/local.ts";
+import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { emit, repository, scripted } from "../helpers.ts";
 
 function memoryCheckpoint() {
@@ -54,7 +54,7 @@ const limit = (details: Record<string, unknown> = {}) =>
 test("the first attempt after a quota pause receives the captured conversation and branch", async () => {
   const memory = memoryCheckpoint();
   const seen: (WorkflowQuotaPause | undefined)[] = [];
-  const build = task({
+  const build = defineTask({
     key: "build",
     retry: { attempts: 2 },
     perform: (context: TaskContext) => {
@@ -68,7 +68,7 @@ test("the first attempt after a quota pause receives the captured conversation a
       return "built";
     },
   });
-  const graph = workflow("nightly", [build]);
+  const graph = defineWorkflow("nightly", [build]);
   const paused = await graph.start({
     checkpoint: memory.checkpoint,
     onQuota: { action: "pause" },
@@ -91,7 +91,7 @@ test("an uncaptured conversation is not offered for continuation", async () => {
   const memory = memoryCheckpoint();
   let resumed: WorkflowQuotaPause | undefined;
   let calls = 0;
-  const build = task({
+  const build = defineTask({
     key: "build",
     perform: (context: TaskContext) => {
       if (++calls === 1) throw limit({ conversation: "session-1" });
@@ -99,7 +99,7 @@ test("an uncaptured conversation is not offered for continuation", async () => {
       return calls;
     },
   });
-  const graph = workflow("nightly", [build]);
+  const graph = defineWorkflow("nightly", [build]);
   await graph.start({
     checkpoint: memory.checkpoint,
     onQuota: { action: "pause" },
@@ -144,7 +144,7 @@ const interrupted = (conversation: string) => {
 };
 
 for (const quotaResume of ["continue", "restart"] as const)
-  test(`agentTask ${quotaResume}s after a quota pause`, async (t) => {
+  test(`defineAgentTask ${quotaResume}s after a quota pause`, async (t) => {
     const root = await repository(t);
     const inputs: AgentInput[] = [];
     const fixture = await storedAgent(t, root, (input) => {
@@ -153,21 +153,21 @@ for (const quotaResume of ["continue", "restart"] as const)
     });
     await using sandbox = await createSandbox({
       repository: root,
-      sandboxProvider: localSandboxProvider(),
+      sandboxProvider: createLocalSandboxProvider(),
       agent: fixture,
       logging: false,
     });
-    const coder = agentTask({
+    const coder = defineAgentTask({
       key: "coder",
       sandbox,
       quotaResume,
       request: () => ({ brief: { text: "implement the feature" } }),
     });
-    const run = task({
+    const run = defineTask({
       key: "run",
       perform: async (context) => (await coder.perform(context)).text,
     });
-    const result = await workflow("nightly", [run]).start({
+    const result = await defineWorkflow("nightly", [run]).start({
       checkpoint: memoryCheckpoint().checkpoint,
       onQuota: { action: "pause", maxWaitMs: 5_000 },
     });
@@ -182,28 +182,28 @@ for (const quotaResume of ["continue", "restart"] as const)
     }
   });
 
-test("isolatedTask continues the captured conversation in a new dispatch", async (t) => {
+test("defineIsolatedTask continues the captured conversation in a new dispatch", async (t) => {
   const root = await repository(t);
   const inputs: AgentInput[] = [];
   const fixture = await storedAgent(t, root, (input) => {
     inputs.push(input);
     return inputs.length === 1 ? interrupted("session-2") : emit("done");
   });
-  const coder = isolatedTask({
+  const coder = defineIsolatedTask({
     key: "coder",
     request: () => ({
       repository: root,
-      sandboxProvider: localSandboxProvider(),
+      sandboxProvider: createLocalSandboxProvider(),
       agent: fixture,
       logging: false,
       brief: { text: "implement" },
     }),
   });
-  const run = task({
+  const run = defineTask({
     key: "run",
     perform: async (context) => (await coder.perform(context)).text,
   });
-  const result = await workflow("nightly", [run]).start({
+  const result = await defineWorkflow("nightly", [run]).start({
     checkpoint: memoryCheckpoint().checkpoint,
     onQuota: { action: "pause", maxWaitMs: 5_000 },
   });
@@ -228,7 +228,7 @@ test("quota workspaces restart integrated work from the interrupted branch only"
   const remote: IsolatedTaskRequest<undefined> = {
     ...base,
     agent: scripted(""),
-    sandboxProvider: { ...localSandboxProvider(), placement: "remote" },
+    sandboxProvider: { ...createLocalSandboxProvider(), placement: "remote" },
   };
   assert.deepEqual(quotaWorkspace(context, remote).branch, {
     mode: "integrate",
@@ -251,16 +251,16 @@ test("an interactive turn interrupted by quota continues its own conversation", 
     const text = `<interaction>${JSON.stringify({ kind: "completed", output: { ok: true } })}</interaction>`;
     return `console.log(${JSON.stringify(JSON.stringify({ kind: "conversation", id: "turn-1" }))});${emit(text)}`;
   });
-  const interview = interactiveAgentTask({
+  const interview = defineInteractiveAgentTask({
     key: "interview",
     repository: root,
     actors: ["owner"],
     brief: "Design a shop",
     bootstrap: false,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     agent: fixture,
   });
-  const result = await workflow("interview", [interview]).start({
+  const result = await defineWorkflow("interview", [interview]).start({
     checkpoint: memoryCheckpoint().checkpoint,
     onQuota: { action: "pause", maxWaitMs: 5_000 },
   });

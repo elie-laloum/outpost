@@ -17,7 +17,7 @@ import type {
 import type { SandboxLease } from "../../src/domain/sandbox.types.ts";
 import { createSandbox } from "../../src/index.ts";
 import { executeProcess } from "../../src/infrastructure/process.ts";
-import { localSandboxProvider } from "../../src/providers/local.ts";
+import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { emit, repository, scripted } from "../helpers.ts";
 
 const signal = new AbortController().signal;
@@ -140,7 +140,7 @@ test("sandboxes check MCP variables once per adapter before running the agent", 
   };
   await using sandbox = await createSandbox({
     repository: root,
-    sandboxProvider: localSandboxProvider(),
+    sandboxProvider: createLocalSandboxProvider(),
     logging: false,
   });
   await assert.rejects(

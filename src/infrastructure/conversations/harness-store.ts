@@ -15,7 +15,7 @@ export function harnessTranscriptPath(repository: string, id: string): string {
   );
 }
 
-export function harnessConversations(): ConversationStore {
+export function createHarnessConversations(): ConversationStore {
   const locate = async (id: string, repository: string) => {
     const file = harnessTranscriptPath(repository, id);
     await access(file).catch(() => {

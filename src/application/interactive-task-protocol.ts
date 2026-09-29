@@ -1,5 +1,5 @@
 import { invariant } from "../domain/errors.ts";
-import { response } from "../domain/response.ts";
+import { defineJsonResponse } from "../domain/response.ts";
 import { checkpointValue } from "../domain/workflow/checkpoint-value.ts";
 import {
   inputObject,
@@ -11,7 +11,7 @@ import type {
   InteractiveAgentTurn,
 } from "./interactive-task.types.ts";
 
-export const interactiveResponse = response.json<InteractiveAgentTurn>({
+export const interactiveResponse = defineJsonResponse<InteractiveAgentTurn>({
   tag: "interaction",
   repairs: 1,
   schema(value) {

@@ -72,7 +72,7 @@ function bindClaude(settings: Bound<ClaudeSettings>): AgentAdapter {
   } satisfies AgentAdapter);
 }
 
-export function claudeHarness(settings: ClaudeSettings = {}): CliHarness {
+export function createClaudeHarness(settings: ClaudeSettings = {}): CliHarness {
   harnessSettings(settings);
   conversationSettings("Claude Code", "claude", settings);
   const configured = configuredSettings(settings);

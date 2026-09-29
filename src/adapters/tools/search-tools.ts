@@ -4,7 +4,7 @@ import { anywhere, repositoryPath } from "./sandbox-files.ts";
 import { TOOL_LIMITS } from "./tools.constants.ts";
 import type { SearchInput } from "./tools.types.ts";
 
-export function harnessSearchTools(): HarnessToolset {
+export function createHarnessSearchTools(): HarnessToolset {
   return defineHarnessToolset({ name: "search", tools: [searchTool()] });
 }
 

@@ -29,10 +29,10 @@ for (const signal of ["SIGINT", "SIGTERM", undefined] as const) {
     await writeFile(
       bridge,
       `import { dispatch as run } from ${JSON.stringify(new URL("../../src/index.ts", import.meta.url).href)};
-       export { agent, OutpostError, reporter } from ${JSON.stringify(new URL("../../src/index.ts", import.meta.url).href)};
+       export { createAgent, OutpostError, createReporter } from ${JSON.stringify(new URL("../../src/index.ts", import.meta.url).href)};
        import { scripted } from ${JSON.stringify(new URL("../helpers.ts", import.meta.url).href)};
        const fixture = () => scripted(${JSON.stringify(script)});
-       export const codexHarness = () => ({ kind: "cli", bind: fixture });
+       export const createCodexHarness = () => ({ kind: "cli", bind: fixture });
        export const dispatch = (options) => run({
          ...options,
          observe(event) {

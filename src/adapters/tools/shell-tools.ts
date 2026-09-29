@@ -5,7 +5,7 @@ import { commandOutput } from "./sandbox-files.ts";
 import { TOOL_LIMITS } from "./tools.constants.ts";
 import type { ShellInput, ShellToolsOptions } from "./tools.types.ts";
 
-export function harnessShellTools(
+export function createHarnessShellTools(
   options: ShellToolsOptions = {},
 ): HarnessToolset {
   const deadlineMs = positive(

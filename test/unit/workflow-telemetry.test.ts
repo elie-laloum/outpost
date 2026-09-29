@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
-  task,
-  workflow,
+  defineTask,
+  defineWorkflow,
   type WorkflowEvent,
   type WorkflowTelemetry,
 } from "../../src/index.ts";
@@ -18,7 +18,7 @@ test("workflow telemetry and observers receive the full lifecycle independently"
       delivery.push("telemetry");
     },
   };
-  const step = task({
+  const step = defineTask({
     key: "retry",
     retry: { attempts: 2 },
     perform(context) {
@@ -27,7 +27,7 @@ test("workflow telemetry and observers receive the full lifecycle independently"
       return 42;
     },
   });
-  const result = await workflow("instrumented", [step]).start({
+  const result = await defineWorkflow("instrumented", [step]).start({
     telemetry,
     observe(event) {
       observed.push(event);
@@ -67,8 +67,8 @@ test("telemetry and observer errors are collected without blocking each other or
   const observerError = new Error("observer failed");
   const telemetryEvents: WorkflowEvent[] = [];
   const observerEvents: WorkflowEvent[] = [];
-  const step = task({ key: "succeed", perform: () => 42 });
-  const result = await workflow("isolated", [step]).start({
+  const step = defineTask({ key: "succeed", perform: () => 42 });
+  const result = await defineWorkflow("isolated", [step]).start({
     telemetry: {
       observe(event) {
         telemetryEvents.push(event);
@@ -103,7 +103,7 @@ test("a shared telemetry adapter remains caller-owned across workflow executions
       closes++;
     },
   };
-  const flow = workflow("reusable", []);
+  const flow = defineWorkflow("reusable", []);
   const results = await Promise.all([
     flow.start({ telemetry }),
     flow.start({ telemetry }),
