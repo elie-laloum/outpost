@@ -21,7 +21,7 @@ Read `README.md`, `package.json`, `SECURITY.md` and `docs/src/content/docs/guide
 
 Use the repository as the source of truth for versions, supported options and commands. Do not rely on test counts, coverage percentages or publication status remembered from a previous chat.
 
-- Runtime: Node.js 24+, TypeScript, ESM, npm and committed lockfiles.
+- Runtime: Node.js 24+, TypeScript, ESM. Bun (version pinned by `packageManager`) installs dependencies and runs scripts, with committed `bun.lock` files; tests and scripts still execute on Node.js. `images/agents/` keeps its npm lockfile because the agent image installs CLIs with npm.
 - Public package: `@elie-laloum/outpost`.
 - Public facade: `src/index.ts` and the provider subpaths declared in `package.json`.
 - Canonical repository: <https://gitlab.elielaloum.com/elielaloum/outpost>.
@@ -110,30 +110,30 @@ Use `node:test` and `node:assert/strict`, following the existing suite. Test obs
 
 - `test/unit/`: domain rules, protocol adapters, boundaries and isolated infrastructure behavior.
 - `test/functional/`: lifecycle, Git, synchronization, recovery, CLI and workflow behavior using temporary resources.
-- `test/redis.test.ts`: real standalone Redis 7/8 queue behavior, including concurrent claims, stale leases, cancellation and interrupted publication/finalization. Run with `npm run test:redis`; `OUTPOST_REDIS_PORT` selects a dedicated local test server.
+- `test/redis.test.ts`: real standalone Redis 7/8 queue behavior, including concurrent claims, stale leases, cancellation and interrupted publication/finalization. Run with `bun run test:redis`; `OUTPOST_REDIS_PORT` selects a dedicated local test server.
 - `test/container.test.ts`: real Docker/Podman behavior. Mocks alone cannot validate process sessions, tmpfs, mounts, ownership or archive transfer.
 - `test/fixtures/container-terminal.ts`: real PTY input, exit status, cancellation and warm reuse.
 - `scripts/package-smoke.mjs`: the packed package as a consumer sees it, including exports and declarations.
 
 For a bug fix, add a regression that fails for the actual defect. For execution changes, checking stdout alone is insufficient: test nonzero exit status, completion after output closes, cancellation and reuse as relevant. For transfer changes, verify files through a process inside the sandbox, not just an upload/download round trip.
 
-`npm run coverage` enforces **at least 80% lines, branches and functions**. Preserve or improve meaningful coverage. Do not lower thresholds, add exclusions or write trivial tests to make a metric pass. Existing exclusions cover erased type modules and the CLI process entry wrapper; command handlers remain covered.
+`bun run coverage` enforces **at least 80% lines, branches and functions**. Preserve or improve meaningful coverage. Do not lower thresholds, add exclusions or write trivial tests to make a metric pass. Existing exclusions cover erased type modules and the CLI process entry wrapper; command handlers remain covered.
 
 Keep routine tests deterministic and independent of real account credentials or paid model calls. Clearly distinguish mock tests, real container tests and live provider/model tests when reporting results. Never report an unavailable or skipped check as passed.
 
 ### Validation commands
 
-Install root dependencies with `npm ci`; install documentation dependencies with `npm ci --prefix docs` when needed.
+Install root dependencies with `bun install --frozen-lockfile`; install documentation dependencies with `bun install --cwd docs --frozen-lockfile` when needed.
 
 | Change                                                                | Checks                                                                                                         |
 | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| Source behavior or architecture                                       | `npm run check` (architecture, typecheck, unit/functional tests, build), then `npm run coverage`.              |
-| Public API, exports, packaging or dependencies                        | Also `npm run test:package`.                                                                                   |
+| Source behavior or architecture                                       | `bun run check` (architecture, typecheck, unit/functional tests, build), then `bun run coverage`.              |
+| Public API, exports, packaging or dependencies                        | Also `bun run test:package`.                                                                                   |
 | Container commands, transfers, mounts, lifecycle or image scaffolding | Also real Docker and Podman tests and the PTY fixture using the setup in `.github/workflows/ci.yml`.           |
-| BullMQ queue state, distribution or connection ownership              | Also `npm run test:redis` against standalone Redis using the setup in `.github/workflows/ci.yml`.              |
-| API documentation or changelog sources                                | `npm run docs:sync`, then inspect generated changes.                                                           |
-| Documentation content or site configuration                           | `npm run build`, `npm run docs:check`, `npm run docs:build`, `npm run docs:test`, `npm run docs:test:browser`. |
-| Any changed tracked content                                           | Prettier check on changed files; full `npm run format:check` before release.                                   |
+| BullMQ queue state, distribution or connection ownership              | Also `bun run test:redis` against standalone Redis using the setup in `.github/workflows/ci.yml`.              |
+| API documentation or changelog sources                                | `bun run docs:sync`, then inspect generated changes.                                                           |
+| Documentation content or site configuration                           | `bun run build`, `bun run docs:check`, `bun run docs:build`, `bun run docs:test`, `bun run docs:test:browser`. |
+| Any changed tracked content                                           | Prettier check on changed files; full `bun run format:check` before release.                                   |
 
 CI checks Windows, macOS and Linux, real Docker/Podman execution, package consumption, coverage, formatting, documentation and dependency audits. Match relevant CI checks locally where possible. For a guidance-only Markdown edit, formatting and factual/link review are sufficient; do not rerun runtime suites without a reason.
 
@@ -162,8 +162,8 @@ CI checks Windows, macOS and Linux, real Docker/Podman execution, package consum
 - A release tag is `v<package version>`. Keep `package.json`, the lockfile and changelogs consistent. Use the release workflow, including its verification gates and latest-release guard.
 - For every release, update the version history in `CHANGELOG.md` and `docs/translations/changelog.fr.md`, and review and update both roadmaps: `docs/src/content/docs/project/roadmap.md` and `docs/src/content/docs/fr/project/roadmap.md`. Do this before creating the release tag.
 - Reconcile roadmap entries with the actual release: move shipped capabilities into the available section, remove obsolete plans, record removed capabilities where relevant, and revise stale version milestones. Keep unimplemented work explicitly planned; do not imply that a major version delivers every previously associated roadmap item.
-- Regenerate the documentation changelogs with `npm run docs:sync`, inspect the generated changes, and run the required documentation checks. Include the changelog and roadmap updates in the release commit and verify their English/French consistency before tagging.
-- npm publication uses provenance and public access. The workflow sets `repository.url` to the GitHub mirror immediately before publishing; the source manifest retains the canonical GitLab URL.
+- Regenerate the documentation changelogs with `bun run docs:sync`, inspect the generated changes, and run the required documentation checks. Include the changelog and roadmap updates in the release commit and verify their English/French consistency before tagging.
+- npm publication uses provenance and public access. The workflow packs with `bun pm pack`, sets `repository.url` to the GitHub mirror immediately before packing, and uploads the archive with `npm publish` because Bun cannot generate provenance; the source manifest retains the canonical GitLab URL.
 - Do not manually bypass failed release checks, move published tags or republish an existing package version. Verify remote workflow, package and documentation status before claiming publication succeeded.
 - A local change does not itself authorize a release. Follow the requested delivery scope; do not bump versions or create tags for every edit.
 

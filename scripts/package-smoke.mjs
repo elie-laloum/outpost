@@ -10,20 +10,22 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import assert from "node:assert/strict";
 
-const npm = process.env.npm_execpath;
-assert.ok(npm, "Run through npm run test:package");
 const root = process.cwd();
-const runNpm = (args, cwd = root) =>
-  execFileSync(process.execPath, [npm, ...args], {
+const runBun = (args, cwd = root) =>
+  execFileSync("bun", args, {
     cwd,
     encoding: "utf8",
     stdio: ["ignore", "pipe", "inherit"],
   });
-const packing = JSON.parse(runNpm(["pack", "--json", "--ignore-scripts"]));
-const packed = Array.isArray(packing) ? packing[0] : Object.values(packing)[0];
-assert.ok(packed?.filename, "npm pack did not return an archive");
+const packing = runBun(["pm", "pack", "--ignore-scripts"]).split(/\r?\n/);
+const packed = {
+  filename: packing.find((line) => line.endsWith(".tgz")),
+  files: packing.flatMap((line) => /^packed \S+ (.+)$/.exec(line)?.[1] ?? []),
+};
+assert.ok(packed.filename, "bun pm pack did not return an archive");
+assert.ok(packed.files.includes("dist/index.js"), "Build before packing");
 assert.ok(
-  !packed.files.some(({ path }) => path.startsWith("docs/")),
+  !packed.files.some((path) => path.startsWith("docs/")),
   "The documentation site must stay out of the library package",
 );
 const temporary = mkdtempSync(join(tmpdir(), "outpost-package-"));
@@ -32,15 +34,8 @@ try {
     join(temporary, "package.json"),
     JSON.stringify({ private: true, type: "module" }),
   );
-  runNpm(
-    [
-      "install",
-      "--ignore-scripts",
-      "--omit=optional",
-      "--no-audit",
-      "--no-fund",
-      resolve(packed.filename),
-    ],
+  runBun(
+    ["add", "--ignore-scripts", "--omit=optional", resolve(packed.filename)],
     temporary,
   );
   assert.equal(
@@ -436,14 +431,8 @@ console.log(n,once.commits);
       "utf8",
     ),
   );
-  runNpm(
-    [
-      "install",
-      "--ignore-scripts",
-      "--no-audit",
-      "--no-fund",
-      `@opentelemetry/api@${telemetryApi.version}`,
-    ],
+  runBun(
+    ["add", "--ignore-scripts", `@opentelemetry/api@${telemetryApi.version}`],
     temporary,
   );
   const telemetryConsumer = join(temporary, "telemetry.ts");
@@ -475,16 +464,7 @@ telemetry.close();
     stdio: "inherit",
   });
 
-  runNpm(
-    [
-      "install",
-      "--ignore-scripts",
-      "--no-audit",
-      "--no-fund",
-      "bullmq@^5.81.5",
-    ],
-    temporary,
-  );
+  runBun(["add", "--ignore-scripts", "bullmq@^5.81.5"], temporary);
   execFileSync(
     process.execPath,
     [
@@ -510,12 +490,10 @@ void [options, open, compatible];
   const daytonaSdk = JSON.parse(
     readFileSync(resolve("node_modules/@daytona/sdk/package.json"), "utf8"),
   );
-  runNpm(
+  runBun(
     [
-      "install",
+      "add",
       "--ignore-scripts",
-      "--no-audit",
-      "--no-fund",
       `@daytona/sdk@${daytonaSdk.version}`,
       "@types/ws@^8",
     ],

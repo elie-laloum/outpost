@@ -15,19 +15,19 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 24
-          cache: npm
-          cache-dependency-path: |
-            package-lock.json
-            docs/package-lock.json
-      - run: npm ci
-      - run: npm ci --prefix docs
-      - run: npm run build
-      - run: npm run docs:check
-      - run: npm run docs:build
-      - run: npm run docs:test
-      - run: npx --prefix docs playwright install --with-deps chromium
-      - run: npm run docs:test:browser
-      - run: npm audit --prefix docs --audit-level=high
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+      - run: bun install --frozen-lockfile
+      - run: bun install --cwd docs --frozen-lockfile
+      - run: bun run build
+      - run: bun run docs:check
+      - run: bun run docs:build
+      - run: bun run docs:test
+      - run: bunx playwright install --with-deps chromium
+        working-directory: docs
+      - run: bun run docs:test:browser
+      - run: bun audit --cwd docs --audit-level=high
       - uses: actions/upload-pages-artifact@v4
         if: startsWith(github.ref, 'refs/tags/v')
         with:

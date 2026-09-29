@@ -23,15 +23,17 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 24
-          cache: npm
-      - run: npm ci
-      - run: npm run architecture
-      - run: npm run typecheck
-      - run: npm run coverage
-      - run: npm run build
-      - run: npm run format:check
-      - run: npm run test:package
-      - run: npm audit --audit-level=high
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+      - run: bun install --frozen-lockfile
+      - run: bun run architecture
+      - run: bun run typecheck
+      - run: bun run coverage
+      - run: bun run build
+      - run: bun run format:check
+      - run: bun run test:package
+      - run: bun audit --audit-level=high
       - uses: actions/upload-artifact@v7
         with:
           name: coverage-${{ matrix.os }}
@@ -59,9 +61,11 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 24
-          cache: npm
-      - run: npm ci
-      - run: npm run test:redis
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+      - run: bun install --frozen-lockfile
+      - run: bun run test:redis
   containers:
     strategy:
       fail-fast: false
@@ -75,8 +79,10 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 24
-          cache: npm
-      - run: npm ci
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+      - run: bun install --frozen-lockfile
       - run: node src/cli/main.ts init --yes --sandbox-provider ${{ matrix.engine }} --image outpost-ci:latest --build
       - run: node --test test/container.test.ts
         env:
@@ -89,10 +95,10 @@ jobs:
       - run: node test/fixtures/codex-compatible.ts
         env:
           OUTPOST_CONTAINER_ENGINE: ${{ matrix.engine }}
-      - run: npm run build
+      - run: bun run build
       - name: Validate documentation container examples
         run: |
           ${{ matrix.engine }} tag outpost-ci:latest outpost:docs-demo
-          npm run docs:test:container
+          bun run docs:test:container
         env:
           OUTPOST_DOCS_ENGINE: ${{ matrix.engine }}

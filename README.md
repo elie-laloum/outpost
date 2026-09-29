@@ -61,14 +61,14 @@ Learn about [sandboxes](https://elie-laloum.github.io/outpost/guide/sandbox-sess
 ## Development
 
 ```sh
-npm ci
-npm run check
-npm run coverage
-npm run test:package
-npm ci --prefix docs
-npm run docs:sync
-npm run docs:build
-npm run docs:test
+bun install --frozen-lockfile
+bun run check
+bun run coverage
+bun run test:package
+bun install --cwd docs --frozen-lockfile
+bun run docs:sync
+bun run docs:build
+bun run docs:test
 ```
 
 [GitLab](https://gitlab.elielaloum.com/elielaloum/outpost) is the canonical repository. [GitHub](https://github.com/elie-laloum/outpost) is the mirror running tests, package releases and GitHub Pages. Documentation is validated on main and deployed only after a successful stable release.

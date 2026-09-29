@@ -201,7 +201,7 @@ const navigationText = await format(JSON.stringify(navigation), {
 });
 if (check) {
   if ((await readFile(navigationPath, "utf8")) !== navigationText)
-    throw new Error("Outdated reference navigation. Run npm run docs:sync.");
+    throw new Error("Outdated reference navigation. Run bun run docs:sync.");
 } else await writeFile(navigationPath, navigationText);
 const slugs = [...symbols.keys()].map(slug);
 if (new Set(slugs).size !== slugs.length)
@@ -317,7 +317,7 @@ for (const [name, raw] of expected) {
   if (check) {
     if ((await readFile(target, "utf8").catch(() => "")) !== content)
       throw new Error(
-        `Outdated generated page: ${name}. Run npm run docs:sync.`,
+        `Outdated generated page: ${name}. Run bun run docs:sync.`,
       );
   } else {
     await mkdir(dirname(target), { recursive: true });
