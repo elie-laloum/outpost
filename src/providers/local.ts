@@ -48,6 +48,7 @@ export function localSandboxProvider(
       return {
         root: context.directory,
         home: homedir(),
+        liveInput: true,
         invoke(command: Command) {
           if (disposed)
             return Promise.reject(

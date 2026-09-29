@@ -60,8 +60,8 @@ export function firecrackerCommand(
     if (runtime.isClosed())
       throw new OutpostError("provider", "Firecracker sandbox is closed");
     invariant(
-      !command.interactive && !command.elevated,
-      "Firecracker research provider does not support interactive or elevated commands",
+      !command.interactive && !command.elevated && !command.input,
+      "Firecracker research provider does not support interactive, elevated or live-input commands",
     );
     command.signal?.throwIfAborted();
     const variables = { ...runtime.variables, ...command.variables };

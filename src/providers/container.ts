@@ -248,6 +248,7 @@ export function containerProvider(
       return {
         root,
         home,
+        liveInput: true,
         invoke: containerCommand({
           engine,
           config,

@@ -24,6 +24,11 @@ export function daytonaCommand(
         ])
       : AbortSignal.timeout(command.deadlineMs ?? cloudDefaults.deadlineMs);
     signal.throwIfAborted();
+    if (command.input)
+      throw new OutpostError(
+        "provider",
+        "Live command input requires a mounted or local provider",
+      );
     if (command.interactive) return daytonaTerminal(runtime, command, signal);
     const id = `outpost-${randomUUID()}`;
     const input = `/tmp/${id}.stdin`;

@@ -1,3 +1,4 @@
+import { Readable } from "node:stream";
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import { syncBuiltinESMExports } from "node:module";
@@ -109,6 +110,10 @@ test(
       await assert.rejects(
         invoke({ executable: "true", interactive: true }),
         /does not support/,
+      );
+      await assert.rejects(
+        invoke({ executable: "true", input: Readable.from([]) }),
+        /live-input/,
       );
       await assert.rejects(
         invoke({ executable: "true", variables: { "bad-key": "value" } }),

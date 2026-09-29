@@ -103,6 +103,11 @@ test("Vercel contract streams bounded output, stages stdin and transfers files",
     lease.invoke({ executable: "node", interactive: true }),
     /Interactive/,
   );
+  assert.equal(lease.liveInput, undefined);
+  await assert.rejects(
+    lease.invoke({ executable: "node", input: Readable.from([]) }),
+    /Live command input/,
+  );
   await lease.release();
   await lease.release();
   assert.equal(stopped, 1);
@@ -191,6 +196,11 @@ test("Daytona contract isolates commands, preserves streams and cancels without 
   assert.equal(sessions, 0);
   wait = false;
   assert.equal((await lease.invoke({ executable: "true" })).status, 0);
+  assert.equal(lease.liveInput, undefined);
+  await assert.rejects(
+    lease.invoke({ executable: "node", input: Readable.from([]) }),
+    /Live command input/,
+  );
   await lease.release();
   await lease.release();
   assert.equal(deleted, 1);

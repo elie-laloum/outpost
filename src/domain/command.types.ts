@@ -8,6 +8,8 @@ export interface Command {
   readonly executable: string;
   readonly arguments?: readonly string[];
   readonly stdin?: string;
+  /** Live stdin written after `stdin`; stdin closes when this stream ends. */
+  readonly input?: Readable;
   readonly directory?: string;
   readonly variables?: Variables;
   readonly signal?: AbortSignal;

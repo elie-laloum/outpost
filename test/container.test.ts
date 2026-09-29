@@ -1,6 +1,7 @@
 import { agent as composeAgent } from "../src/domain/agent.ts";
 import { spawn } from "node:child_process";
 import { once } from "node:events";
+import { PassThrough } from "node:stream";
 import { diagnoseImage } from "../src/application/doctor-image.ts";
 import { agentVersions } from "../src/providers/versions.constants.ts";
 import { test } from "node:test";
@@ -112,6 +113,26 @@ test(
         variables: { OUTPOST_FIXTURE: "injected" },
       });
       assert.equal(env.stdout.trim(), "injected");
+      const live = new PassThrough();
+      const streamed = box.command({
+        executable: "sh",
+        arguments: [
+          "-c",
+          'read first; echo "received:$first"; read second; echo "$first:$second" > live-input.txt; exit 5',
+        ],
+        stdin: "one\n",
+        input: live,
+        observe(channel, text) {
+          if (channel === "stdout" && text.includes("received:one"))
+            live.end("two\n");
+        },
+      });
+      assert.equal((await streamed).status, 5);
+      const liveFile = await box.command({
+        executable: "cat",
+        arguments: ["live-input.txt"],
+      });
+      assert.equal(liveFile.stdout, "one:two\n");
       const output = await box.dispatch({
         agent: {
           kind: "cli" as const,

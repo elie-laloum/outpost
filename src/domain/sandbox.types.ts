@@ -50,6 +50,8 @@ export interface FileTransfers {
 
 export interface SandboxLease {
   readonly fileTransfers?: FileTransfers;
+  /** Whether invoke accepts Command.input as live stdin for a running process. */
+  readonly liveInput?: boolean;
   readonly root: string;
   readonly home: string;
   invoke(command: Command): Promise<CommandResult>;

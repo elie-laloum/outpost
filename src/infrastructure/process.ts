@@ -109,7 +109,10 @@ export const executeProcess: Executor = (command) => {
     if (command.signal?.aborted) abort();
     child.on("close", (status) => {
       if (interactive) restoreTerminal();
-      if (child.stdin) command.terminal?.input?.unpipe(child.stdin);
+      if (child.stdin) {
+        command.terminal?.input?.unpipe(child.stdin);
+        command.input?.unpipe(child.stdin);
+      }
       clearTimeout(timer);
       clearTimeout(escalation);
       command.signal?.removeEventListener("abort", abort);
@@ -122,7 +125,10 @@ export const executeProcess: Executor = (command) => {
     });
     if (child.stdin && command.terminal?.input)
       command.terminal.input.pipe(child.stdin);
-    else child.stdin?.end(command.stdin);
+    else if (child.stdin && command.input) {
+      if (command.stdin) child.stdin.write(command.stdin);
+      command.input.pipe(child.stdin);
+    } else child.stdin?.end(command.stdin);
     if (child.stdout && command.terminal?.output)
       child.stdout.pipe(command.terminal.output, { end: false });
     if (child.stderr && command.terminal?.error)

@@ -15,6 +15,11 @@ export function vercelCommand(runtime: VercelRuntime): SandboxLease["invoke"] {
         "provider",
         "Interactive terminals require a mounted or local provider",
       );
+    if (command.input)
+      throw new OutpostError(
+        "provider",
+        "Live command input requires a mounted or local provider",
+      );
     const signal = command.signal
       ? AbortSignal.any([
           command.signal,
