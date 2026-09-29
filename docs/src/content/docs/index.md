@@ -134,23 +134,23 @@ landing:
     steps:
       - {
           title: "An agent in its own sandbox",
-          text: "The fix task allocates its own sandbox, runs the agent from your Setup configuration on a named branch and releases the sandbox when it ends.",
-          lines: "11-21",
+          text: "An isolated task allocates its own sandbox, runs the agent from your Setup configuration on a named branch and releases the sandbox. fix keeps its branch and commit count as JSON for the checkpoint.",
+          lines: "11-27",
         }
       - {
           title: "Typed results downstream",
           text: "context.value(fix) is the fix task’s result, fully typed. The summary starts only after it succeeds.",
-          lines: "22-29",
+          lines: "28-33",
         }
       - {
           title: "A human decides",
           text: "The approval gate pauses the run until an allowed actor approves or rejects the change.",
-          lines: "30-35",
+          lines: "34-39",
         }
       - {
           title: "Checkpointed and resumable",
           text: "Finished tasks persist in the checkpoint store. Starting again with the decision resumes the run.",
-          lines: "37-49",
+          lines: "41-53",
         }
     link: { label: "Durable runs", href: "guide/durable-runs/" }
   footer:

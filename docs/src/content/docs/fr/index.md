@@ -141,23 +141,23 @@ landing:
     steps:
       - {
           title: "Un agent dans sa propre sandbox",
-          text: "La tâche fix alloue sa propre sandbox, exécute l’agent de votre configuration sur une branche nommée et libère la sandbox à la fin.",
-          lines: "11-21",
+          text: "Une tâche isolée alloue sa propre sandbox, exécute l’agent de votre configuration sur une branche nommée et libère la sandbox. fix conserve sa branche et son nombre de commits en JSON pour le checkpoint.",
+          lines: "11-27",
         }
       - {
           title: "Des résultats typés en aval",
           text: "context.value(fix) est le résultat de la tâche fix, entièrement typé. Le résumé ne démarre qu’après sa réussite.",
-          lines: "22-29",
+          lines: "28-33",
         }
       - {
           title: "Un humain décide",
           text: "L’étape de validation met l’exécution en pause jusqu’à ce qu’un acteur autorisé approuve ou rejette le changement.",
-          lines: "30-35",
+          lines: "34-39",
         }
       - {
           title: "Checkpoints et reprise",
           text: "Les tâches terminées sont conservées dans le store de checkpoints. Relancer avec la décision reprend l’exécution.",
-          lines: "37-49",
+          lines: "41-53",
         }
     link: { label: "Exécutions persistantes", href: "guide/durable-runs/" }
   footer:

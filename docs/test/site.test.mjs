@@ -2,8 +2,8 @@ import { readFile } from "node:fs/promises";
 import { test, expect } from "@playwright/test";
 
 for (const [locale, title, reference] of [
-  ["", "First request", "Reference"],
-  ["fr/", "Première requête", "Référence"],
+  ["", "Your first task", "Reference"],
+  ["fr/", "Votre première tâche", "Référence"],
 ]) {
   test(`guide navigation opens Reference (${locale || "en"})`, async ({
     page,
@@ -95,7 +95,7 @@ test("language switch retains the new guide page", async ({ page }) => {
   await language.click();
   await expect(page).toHaveURL(/\/fr\/guide\/first-request\/$/);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-    "Première requête",
+    "Votre première tâche",
   );
   await page.locator(".docs-header .language").click();
   await expect(page).toHaveURL(/\/outpost\/guide\/first-request\/$/);
@@ -160,7 +160,7 @@ test("short request snippet copies exactly with the keyboard", async ({
   const expected = markdown
     .match(/```ts title="review\.mts"\n([\s\S]*?)```/)[1]
     .trimEnd();
-  const code = page.locator("pre").filter({ hasText: "import { dispatch }" });
+  const code = page.locator("pre").filter({ hasText: "outpost/readme-review" });
   const copy = code.locator("..").getByRole("button", { name: "Copy code" });
   await copy.focus();
   await page.keyboard.press("Enter");
@@ -183,7 +183,7 @@ for (const locale of ["", "fr/"]) {
     await page.getByRole("button", { name: "Menu", exact: true }).click();
     const setup = page
       .locator(".docs-navigation a")
-      .filter({ hasText: locale ? /^Mise en place$/ : /^Setup$/ });
+      .filter({ hasText: locale ? /^Installation$/ : /^Setup$/ });
     await expect(setup).toBeVisible();
     await setup.click();
     await expect(page).toHaveURL(/\/guide\/setup\/$/);

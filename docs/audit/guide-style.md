@@ -82,7 +82,7 @@ Every agent page follows the same sections: Install, Account access, API access,
 
 ## French
 
-The French page mirrors the English page: same sections in the same order, same snippets, same links. Translate meaning, not word order. Use "vous", typographic apostrophes (’), non-breaking spacing before `:`, `;`, `?`, `!` as in existing pages, and these terms: la sandbox, le workspace, le worktree, le harness, le provider (de sandbox), le brief, le dispatch, le checkpoint, le hook, le webhook, le worker, la tâche, le dépôt, la branche. Keep API names, option names and code identical.
+The French page mirrors the English page: same sections in the same order, same snippets, same links. Translate meaning, not word order. Use "vous", typographic apostrophes (’), a regular space before `:`, `;`, `?` and `!` as in existing pages, and these terms: la sandbox, le workspace, le worktree, le harness, le provider (de sandbox), le brief, le dispatch, le checkpoint, le hook, le webhook, le worker, la tâche, le dépôt, la branche. Keep API names, option names and code identical.
 
 ## Review checklist
 

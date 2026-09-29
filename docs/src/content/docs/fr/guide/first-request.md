@@ -1,11 +1,13 @@
 ---
-title: "Première requête"
-description: "Exécuter une tâche et lire le résultat."
+title: "Votre première tâche"
+description: "Exécuter un agent sur votre dépôt, lire sa réponse, puis le laisser commiter une modification sur une branche séparée."
 ---
 
-`dispatch()` exécute une tâche d’agent et ferme la sandbox qu’il a allouée. Importez la configuration de [Mise en place](../setup/), puis fournissez un brief.
+Exécutez un agent sur votre dépôt, lisez sa réponse, puis laissez-le commiter une modification sur une branche séparée. Il vous faut le fichier `outpost.config.mts` de [Mise en place](../setup/), qui définit `coder`, `repository` et `sandboxProvider`.
 
-## Exécuter une tâche
+## Écrire un script de revue
+
+Créez `review.mts` à côté de `outpost.config.mts`. `dispatch()` exécute une tâche d’agent : il alloue une sandbox, lance l’agent sur votre dépôt et ferme la sandbox quand l’agent a terminé.
 
 ```ts title="review.mts"
 import { dispatch } from "@elie-laloum/outpost";
@@ -22,24 +24,64 @@ const result = await dispatch({
 });
 console.log(result.text);
 console.log(result.usage);
+console.log(result.commits);
 ```
+
+Le brief est l’instruction que vous donnez à l’agent. La branche nommée lui fournit son propre worktree Git : votre checkout reste intact.
+
+## L’exécuter et lire le résultat
 
 ```sh
 node review.mts
 ```
 
-La réponse se trouve dans `result.text`. `result.usage` contient les compteurs de tokens et `result.commits` liste les commits collectés. L’appel utilise le compte ou la facturation API sélectionné sur le harness.
+Le script affiche trois valeurs quand l’agent a terminé :
 
-## Autoriser les modifications
+- `result.text` est la réponse finale de l’agent : ici, la liste de ce qu’il a relevé dans le README.
+- `result.usage` contient les compteurs de tokens déclarés par l’agent (`input`, `cached`, `output`). L’exécution est payée selon l’[authentification](../authentication/) choisie sur le harness : elle est décomptée de votre abonnement avec `"account"` et facturée sur votre clé d’API avec `"usage"`.
+- `result.commits` liste les commits créés par l’agent, chacun avec un `oid` et un `subject`. La liste devrait être vide ici, puisque le brief ne demandait aucune modification.
 
-Remplacez `brief.text` par une demande précise, par exemple : `Corrige la commande d’installation du README, vérifie-la et crée un commit.` La branche nommée conserve le changement séparément pour sa revue. Outpost collecte les commits ; demander un commit fait toujours partie de la tâche de l’agent.
+## Demander une modification
 
-Choisissez un nouveau nom de branche pour chaque travail indépendant. La [stratégie de branches](../repository-and-branch/) explique comment travailler dans le checkout courant ou intégrer une branche terminée.
+Copiez `review.mts` dans `fix.mts`, puis donnez-lui une nouvelle branche et un brief qui demande un commit vérifié. `review.mts` reste inchangé : [Exécuter en CI](../ci-automation/) le réutilise.
 
-## Exploiter le résultat
+```ts title="fix.mts"
+import { dispatch } from "@elie-laloum/outpost";
+import { coder, repository, sandboxProvider } from "./outpost.config.mts";
 
-`text` est la réponse de l’agent, pas un rapport de tests imposé par Outpost. Utilisez une [sortie validée](../typed-responses/) pour les données consommées par votre application, et exécutez les vérifications dans une [session de sandbox](../sandbox-sessions/) pour conditionner l’intégration à leur résultat.
+const result = await dispatch({
+  repository,
+  sandboxProvider,
+  agent: coder,
+  branch: { mode: "named", name: "outpost/readme-fix" },
+  brief: {
+    text: "Fix the README setup command, verify that it works and commit the correction.",
+  },
+});
+console.log(result.text);
+console.log(result.commits);
+```
 
-Une opération échouée rejette sa promesse. Le `start()` d’un workflow renvoie un résultat avec un statut : voir [Gestion des erreurs](../error-handling/).
+Lancez `node fix.mts`. Outpost crée `outpost/readme-fix` à partir de votre `HEAD` courant et conserve la branche après l’exécution : la modification vous y attend pour la revue. Inspectez-la avec Git depuis votre checkout :
+
+```sh
+git log --oneline HEAD..outpost/readme-fix
+git diff HEAD...outpost/readme-fix
+```
+
+Les commits listés par `git log` correspondent à `result.commits`. Choisissez un nouveau nom de branche pour chaque tâche indépendante.
+
+## Ce qui s’est passé
+
+Outpost a préparé un worktree pour la branche nommée sous `.outpost/workspaces/` dans votre dépôt et alloué une sandbox auprès de votre provider. L’agent a travaillé dans ce worktree, avec le brief pour tâche. À la fin, Outpost a collecté les nouveaux commits, fermé la sandbox et supprimé le worktree propre, en gardant la branche. [Fonctionnement d’Outpost](../how-it-works/) détaille ce cycle de vie.
+
+`result.text` rapporte ce que l’agent dit avoir fait. Pour agir sur des faits plutôt que sur de la prose, vérifiez vous-même le résultat avec les outils ci-dessous.
+
+## Étapes suivantes
+
+- [D’une tâche à un workflow](../first-workflow/) : enchaîner plusieurs tâches avec des dépendances.
+- [Réponses typées](../typed-responses/) : recevoir des données validées plutôt que du texte libre.
+- [Sessions de sandbox](../sandbox-sessions/) : lancer vos tests dans la sandbox avant de fusionner.
+- [Dépôt et branche](../repository-and-branch/) : travailler dans le checkout courant ou fusionner la branche automatiquement.
 
 API : [dispatch](../../reference/dispatch/) · [DispatchResult](../../reference/dispatchresult/).

@@ -8,24 +8,28 @@ import {
 } from "@elie-laloum/outpost";
 import { coder, sandboxProvider } from "./outpost.config.mts";
 
-const fix = defineIsolatedTask({
-  key: "fix",
-  request: ({ signal }) => ({
+const agent = defineIsolatedTask({
+  key: "agent",
+  request: () => ({
     repository: "../parser",
     sandboxProvider,
     agent: coder,
-    signal,
     branch: { mode: "named", name: "outpost/fix-parser" },
     brief: { text: "Fix the parser tests, run them, commit." },
   }),
 });
+const fix = defineTask({
+  key: "fix",
+  perform: async (context) => {
+    const { branch, commits } = await agent.perform(context);
+    return { branch, commits: commits.length };
+  },
+});
 const summary = defineTask({
   key: "summary",
   after: [fix],
-  perform: (context) => ({
-    branch: context.value(fix).branch,
-    commits: context.value(fix).commits.length,
-  }),
+  perform: (context) =>
+    `${context.value(fix).commits} commit(s) on ${context.value(fix).branch}`,
 });
 const approve = defineApprovalTask({
   key: "approve",
