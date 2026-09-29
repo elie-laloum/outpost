@@ -15,7 +15,7 @@ Extra devices, host volumes and shared caches expand access. A read-only mount s
 
 Outpost reads only selected CLI credential files and never a system keychain. Isolated copies use private directories and files. Do not bake secrets into images or tracked scripts. Cloud providers receive repository history and selected inputs; transports receive the objects configured for persistence.
 
-[MCP servers](../mcp-servers/) act with the agent’s authority and receive the variables you name. Outpost writes only variable references in their configuration. With the local provider, Kimi and Antigravity entries are merged into your own home.
+[MCP servers](../mcp-servers/) act with the agent’s authority and receive the variables you name. Outpost writes only variable references in their configuration. With the local provider, Kimi and Antigravity entries are merged into your own home. An [MCP login](../mcp-oauth/) copied into a sandbox can rotate the refresh token and invalidate the host login.
 
 ## Application authority
 

@@ -6801,8 +6801,8 @@
     "Vrai lorsque le pilotage a arrêté ce tour enregistré ; son usage est la somme de ses événements usage enregistrés et le tour rejoué indique interrupted: steering."
   ],
   "AgentAdapter.configuration": [
-    "Plan CLI configuration files from the resolved variables, without disk access. Outpost merges each file’s section into the agent home once per sandbox, after authentication; throw when a referenced variable is missing.",
-    "Planifie les fichiers de configuration de la CLI à partir des variables résolues, sans accès disque. Outpost fusionne la section de chaque fichier dans le home de l’agent une fois par sandbox, après l’authentification ; lève une erreur si une variable référencée manque."
+    "Plan CLI configuration from the resolved variables, without disk access: files to merge and host files to copy into the agent home once per sandbox, after authentication. Throw when a referenced variable is missing.",
+    "Planifie la configuration de la CLI à partir des variables résolues, sans accès disque : fichiers à fusionner et fichiers de l’hôte à copier dans le home de l’agent, une fois par sandbox, après l’authentification. Lève une erreur si une variable référencée manque."
   ],
   "AgentConfiguration.files": [
     "JSON files to merge into the agent home. An empty list only validates the variables.",
@@ -6813,8 +6813,8 @@
     "Chemin relatif au home de l’agent, sans segment . ou .."
   ],
   "ConfigurationFile.section": [
-    "Top-level object key that receives the entries, such as mcpServers. Other keys of the file are preserved.",
-    "Clé d’objet de premier niveau qui reçoit les entrées, par exemple mcpServers. Les autres clés du fichier sont conservées."
+    "Top-level object key that receives the entries, such as mcpServers; without it the entries are merged at the root. Other keys of the file are preserved.",
+    "Clé d’objet de premier niveau qui reçoit les entrées, par exemple mcpServers ; sans elle, les entrées sont fusionnées à la racine. Les autres clés du fichier sont conservées."
   ],
   "ConfigurationFile.entries": [
     "Entries added to the section or replacing existing entries with the same name. An unreadable file or a non-object section fails instead of being overwritten.",
@@ -6891,5 +6891,110 @@
   "SteeringSendOptions.subagent": [
     "Built-in subagent run id, read from its subagent event, to deliver only to that run at its next step boundary; null to deliver only to the main loop. Omit it to deliver to the first active loop. Instructions for a run that ended, or sent to CLI agents, reject with code steering.",
     "Identifiant d’exécution d’un sous-agent intégré, lu dans son événement subagent, pour ne remettre qu’à cette exécution à sa prochaine limite d’étape ; null pour ne remettre qu’à la boucle principale. Omettez-le pour remettre à la première boucle active. Les consignes pour une exécution terminée, ou envoyées à des agents CLI, sont rejetées avec le code steering."
+  ],
+  "AgentConfiguration.host": [
+    "Host files read with the credential file safeguards, filtered by select and merged into the agent home. They are skipped on the local provider, where the CLI reads the host home.",
+    "Fichiers de l’hôte lus avec les garde-fous des fichiers d’identifiants, filtrés par select puis fusionnés dans le home de l’agent. Ils sont ignorés avec le fournisseur local, où la CLI lit le home de l’hôte."
+  ],
+  "HostConfiguration.source": [
+    "Host file to read, with an optional environment variable that relocates its directory.",
+    "Fichier de l’hôte à lire, avec une variable d’environnement facultative qui déplace son dossier."
+  ],
+  "HostConfiguration.path": [
+    "Destination relative to the agent home, without . or .. segments.",
+    "Destination relative au home de l’agent, sans segment . ou .."
+  ],
+  "HostConfiguration.section": [
+    "Top-level key that receives the selected entries in the destination; without it they are merged at the root.",
+    "Clé de premier niveau qui reçoit les entrées sélectionnées dans la destination ; sans elle, elles sont fusionnées à la racine."
+  ],
+  "HostConfiguration.optional": [
+    "Skip the file when it does not exist on the host instead of failing.",
+    "Ignorer le fichier s’il n’existe pas sur l’hôte au lieu d’échouer."
+  ],
+  "HostConfiguration.login": [
+    "Host command named in the error when a required file is missing.",
+    "Commande de l’hôte citée dans l’erreur lorsqu’un fichier requis manque."
+  ],
+  "HostConfiguration.select": [
+    "Return the entries to merge from the file content; throw when the expected login is absent.",
+    "Renvoie les entrées à fusionner à partir du contenu du fichier ; lève une erreur si la connexion attendue est absente."
+  ],
+  "HostConfiguration.select.content": [
+    "Text of the host file.",
+    "Texte du fichier de l’hôte."
+  ],
+  "McpToolFilter.include": [
+    "Distinct MCP tool names to keep. Claude Code and Antigravity refuse it; in the built-in harness a name the server does not offer fails the turn.",
+    "Noms d’outils MCP distincts à garder. Claude Code et Antigravity le refusent ; dans le harness intégré, un nom que le serveur ne propose pas fait échouer le tour."
+  ],
+  "McpToolFilter.exclude": [
+    "Distinct MCP tool names to remove after include. Copilot keeps them listed but refuses their calls.",
+    "Noms d’outils MCP distincts à retirer après include. Copilot les laisse listés mais refuse leurs appels."
+  ],
+  "McpStdioServer.tools": [
+    "Tool filter by exact MCP tool name. include keeps only the listed tools and exclude removes tools afterwards. Harnesses that cannot apply a part refuse it when the agent is composed.",
+    "Filtre d’outils par nom MCP exact. include ne garde que les outils listés et exclude en retire ensuite. Les harness qui ne savent pas appliquer une partie la refusent à la composition de l’agent."
+  ],
+  "McpHttpServer.tools": [
+    "Tool filter by exact MCP tool name. include keeps only the listed tools and exclude removes tools afterwards. Harnesses that cannot apply a part refuse it when the agent is composed.",
+    "Filtre d’outils par nom MCP exact. include ne garde que les outils listés et exclude en retire ensuite. Les harness qui ne savent pas appliquer une partie la refusent à la composition de l’agent."
+  ],
+  "McpStdioServer.startupTimeoutMs": [
+    "Maximum time in milliseconds for the server to start, from 1 to 2147483647. The built-in harness defaults to 60000; Codex and Kimi apply it per server, Claude Code through one shared MCP_TIMEOUT, and Copilot and Antigravity refuse it.",
+    "Durée maximale en millisecondes du démarrage du serveur, de 1 à 2147483647. Le harness intégré utilise 60000 par défaut ; Codex et Kimi l’appliquent par serveur, Claude Code via un MCP_TIMEOUT commun, et Copilot et Antigravity la refusent."
+  ],
+  "McpHttpServer.startupTimeoutMs": [
+    "Maximum time in milliseconds for the server to start, from 1 to 2147483647. The built-in harness defaults to 60000; Codex and Kimi apply it per server, Claude Code through one shared MCP_TIMEOUT, and Copilot and Antigravity refuse it.",
+    "Durée maximale en millisecondes du démarrage du serveur, de 1 à 2147483647. Le harness intégré utilise 60000 par défaut ; Codex et Kimi l’appliquent par serveur, Claude Code via un MCP_TIMEOUT commun, et Copilot et Antigravity la refusent."
+  ],
+  "McpHttpServer.oauth": [
+    "\"login\" reuses the MCP OAuth login stored by Claude Code, Codex or Kimi on the host; client credentials let the built-in harness request a token itself. Incompatible with bearerTokenVariable and an Authorization header.",
+    "\"login\" réutilise la connexion OAuth MCP enregistrée sur l’hôte par Claude Code, Codex ou Kimi ; les identifiants client laissent le harness intégré demander lui-même un jeton. Incompatible avec bearerTokenVariable et un en-tête Authorization."
+  ],
+  "McpClientCredentials.clientIdVariable": [
+    "Declared variable holding the OAuth client ID.",
+    "Variable déclarée contenant l’identifiant du client OAuth."
+  ],
+  "McpClientCredentials.clientSecretVariable": [
+    "Declared variable holding the OAuth client secret, sent with client_secret_basic or client_secret_post from the sandbox.",
+    "Variable déclarée contenant le secret du client OAuth, envoyé en client_secret_basic ou client_secret_post depuis la sandbox."
+  ],
+  "McpClientCredentials.scopes": [
+    "OAuth scopes requested with the token. Without it the bridge uses the scope of the server's 401 challenge, if any.",
+    "Scopes OAuth demandés avec le jeton. Sans eux, le pont utilise le scope du défi 401 du serveur, s’il y en a un."
+  ],
+  "McpPromptOptions.server": [
+    "Name of an MCP server declared on the same harness that offers prompts.",
+    "Nom d’un serveur MCP déclaré sur le même harness et qui propose des prompts."
+  ],
+  "McpPromptOptions.name": [
+    "Prompt name as listed by the server.",
+    "Nom du prompt tel que listé par le serveur."
+  ],
+  "McpPromptOptions.arguments": [
+    "String arguments of the prompt; values are passed as given.",
+    "Arguments texte du prompt ; les valeurs sont transmises telles quelles."
+  ],
+  "HarnessInstructionContext.mcp": [
+    "Access to the MCP servers started for this turn, present when the harness declares mcpServers.",
+    "Accès aux serveurs MCP démarrés pour ce tour, présent lorsque le harness déclare mcpServers."
+  ],
+  "HarnessMcpContext.prompt": [
+    "Render a prompt of a running MCP server as role-prefixed text. Fails when the server is not declared or offers no prompts.",
+    "Rend un prompt d’un serveur MCP démarré sous forme de texte préfixé par rôle. Échoue si le serveur n’est pas déclaré ou ne propose pas de prompts."
+  ],
+  "HarnessMcpContext.prompt.server": [
+    "Declared MCP server name.",
+    "Nom du serveur MCP déclaré."
+  ],
+  "HarnessMcpContext.prompt.name": ["Prompt name.", "Nom du prompt."],
+  "HarnessMcpContext.prompt.promptArguments": [
+    "String arguments of the prompt.",
+    "Arguments texte du prompt."
+  ],
+  "defineMcpPrompt.options": [
+    "Server, prompt name and string arguments of the prompt to render.",
+    "Serveur, nom et arguments texte du prompt à rendre."
   ]
 }

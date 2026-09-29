@@ -538,5 +538,9 @@
   "defineBinaryArtifact": [
     "Declare a named, versioned binary artifact contract that copies Uint8Array payloads on encoding and decoding. Declaring a contract does not publish an artifact.",
     "Déclare un contrat d’artefact binaire nommé et versionné qui copie les données Uint8Array à l’encodage et au décodage. Déclarer un contrat ne publie pas d’artefact."
+  ],
+  "defineMcpPrompt": [
+    "Declare harness instructions rendered from a prompt of a declared MCP server at the start of each turn. Construction validates the server name, prompt name and string arguments without contacting the server; resolution fails when the harness has no running server of that name or the server offers no prompts.",
+    "Déclare des instructions de harness rendues à partir d’un prompt d’un serveur MCP déclaré, au début de chaque tour. La construction valide le nom du serveur, le nom du prompt et les arguments texte sans contacter le serveur ; la résolution échoue si le harness n’a pas de serveur démarré de ce nom ou si le serveur ne propose pas de prompts."
   ]
 }

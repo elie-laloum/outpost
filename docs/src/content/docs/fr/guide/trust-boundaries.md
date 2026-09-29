@@ -15,7 +15,7 @@ Périphériques, volumes hôte et caches partagés supplémentaires étendent le
 
 Outpost lit uniquement les fichiers CLI sélectionnés et jamais un trousseau système. Les copies isolées utilisent des dossiers et fichiers privés. N’intégrez pas de secrets dans les images ou scripts suivis par Git. Les fournisseurs cloud reçoivent historique et entrées choisies ; les transports reçoivent les objets configurés pour persistance.
 
-Les [serveurs MCP](../mcp-servers/) agissent avec l’autorité de l’agent et reçoivent les variables que vous nommez. Outpost n’écrit que des références de variables dans leur configuration. Avec le fournisseur local, les entrées Kimi et Antigravity sont fusionnées dans votre propre home.
+Les [serveurs MCP](../mcp-servers/) agissent avec l’autorité de l’agent et reçoivent les variables que vous nommez. Outpost n’écrit que des références de variables dans leur configuration. Avec le fournisseur local, les entrées Kimi et Antigravity sont fusionnées dans votre propre home. Une [connexion MCP](../mcp-oauth/) copiée dans une sandbox peut faire tourner le refresh token et invalider la connexion de l’hôte.
 
 ## Autorité applicative
 

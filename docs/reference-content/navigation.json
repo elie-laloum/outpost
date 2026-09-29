@@ -405,6 +405,10 @@
         "attrs": { "data-api-kind": "function" }
       },
       {
+        "slug": "reference/definemcpprompt",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
         "slug": "reference/createantigravityharness",
         "attrs": { "data-api-kind": "function" }
       },
@@ -570,6 +574,14 @@
         "attrs": { "data-api-kind": "interface" }
       },
       {
+        "slug": "reference/harnessmcpcontext",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/mcppromptoptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
         "slug": "reference/harnesstool",
         "attrs": { "data-api-kind": "interface" }
       },
@@ -698,6 +710,14 @@
         "attrs": { "data-api-kind": "interface" }
       },
       {
+        "slug": "reference/mcptoolfilter",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/mcpclientcredentials",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
         "slug": "reference/agentadapter",
         "attrs": { "data-api-kind": "interface" }
       },
@@ -723,6 +743,10 @@
       },
       {
         "slug": "reference/configurationfile",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/hostconfiguration",
         "attrs": { "data-api-kind": "interface" }
       }
     ]

@@ -71,6 +71,36 @@ Declared servers add to those the CLI already knows. Tool approval follows each 
 
 Kimi and Antigravity have no per-run option, so Outpost merges the declared entries into their home file once per sandbox. Other servers and settings in that file are kept; an unreadable file fails instead of being replaced. In a container or cloud sandbox the home is private and disappears with the sandbox. With [`createLocalSandboxProvider()`](../host-process/) it is your own home, and the merged entries stay after the run.
 
+## Filter tools and set startup timeouts
+
+`tools: { include, exclude }` selects tools by their exact MCP name; exclusions apply after inclusions. `startupTimeoutMs` bounds how long a server may take to start.
+
+```ts
+import type { McpServers } from "@elie-laloum/outpost";
+
+const mcpServers: McpServers = {
+  linear: {
+    command: "npx",
+    arguments: ["-y", "linear-mcp"],
+    tools: { exclude: ["delete_issue"] },
+    startupTimeoutMs: 120_000,
+  },
+};
+```
+
+| Harness       | `include`       | `exclude`                                    | `startupTimeoutMs`                       |
+| ------------- | --------------- | -------------------------------------------- | ---------------------------------------- |
+| Built-in loop | Yes             | Yes                                          | Yes, 60 s by default                     |
+| Claude Code   | Refused         | `--disallowedTools`                          | `MCP_TIMEOUT`, one value for all servers |
+| Codex         | `enabled_tools` | `disabled_tools`                             | `startup_timeout_ms`                     |
+| Copilot CLI   | `tools`         | `--deny-tool`: listed, but calls are refused | Refused                                  |
+| Kimi Code     | `enabledTools`  | `disabledTools`                              | `startupTimeoutMs`                       |
+| Antigravity   | Refused         | `disabledTools`                              | Refused                                  |
+
+An option a CLI cannot apply fails when the agent is composed. Claude Code applies one startup timeout to every server of the run, so declared values must match and cannot be combined with an explicit `MCP_TIMEOUT` variable. In the built-in loop, an included name the server does not offer fails the turn.
+
+For servers that require OAuth, see [MCP server login](../mcp-oauth/).
+
 ## Built-in model loop
 
 Pass the same servers to `createHarness({ mcpServers })`. Each turn starts the servers inside the borrowed sandbox, lists their tools and stops them when the turn ends.
@@ -105,8 +135,25 @@ const reviewer = createAgent({
 
 Tools are named `mcp__<server>__<tool>`; characters outside letters, digits, `_` and `-` become `_`, and long names end with a short hash. [Permission rules](../tool-policies/) match these names, for example `tools: ["mcp__linear__*"]`. Tool deadlines send an MCP cancellation. Server errors reach the model as tool errors; text, structured content and resource text are returned, while images and audio are replaced by a marker.
 
-A stdio server runs through a small Node.js launcher in the sandbox. An HTTP server is reached through a bridge that also runs in the sandbox, so the bearer token stays there and [outbound rules](../outbound-rules/) apply to it. The sandbox therefore needs `node`, and its lease must accept live process input, as every built-in provider does. On Vercel and Daytona each message to a stdio server goes through a polled file in the sandbox, which adds about a second per request. A server that exits or does not initialize within 60 seconds fails the turn. Subagents start the servers of their own harness.
+A stdio server runs through a small Node.js launcher in the sandbox. An HTTP server is reached through a bridge that also runs in the sandbox, so the bearer token stays there and [outbound rules](../outbound-rules/) apply to it. The sandbox therefore needs `node`, and its lease must accept live process input, as every built-in provider does. On Vercel and Daytona each message to a stdio server goes through a polled file in the sandbox, which adds about a second per request. A server that exits or does not initialize within its startup timeout fails the turn. Subagents start the servers of their own harness.
 
 For the built-in loop, declare secrets on the sandbox provider or in `.outpost/.env`: a custom harness has no `variables` of its own.
 
-API: [McpServers](../../reference/mcpservers/) · [McpStdioServer](../../reference/mcpstdioserver/) · [McpHttpServer](../../reference/mcphttpserver/) · [HarnessOptions](../../reference/customharnessoptions/).
+## Resources and prompts
+
+Claude Code, Codex and Antigravity already expose MCP resources to their model. In the built-in loop, servers that announce resources or prompts add four read-only tools, each taking a `server` name: `mcp_list_resources` lists resources and URI templates, `mcp_read_resource` reads a URI, `mcp_list_prompts` lists prompts and `mcp_get_prompt` renders one. Resource text is returned; binary content is replaced by a marker.
+
+Use `defineMcpPrompt()` to put a server prompt into the instructions of the harness. It is rendered at the start of each turn, and fails if the server is not declared on that harness or offers no prompts.
+
+```ts
+import { defineMcpPrompt } from "@elie-laloum/outpost";
+
+const review = defineMcpPrompt({
+  server: "docs",
+  name: "review",
+  arguments: { language: "typescript" },
+});
+// createHarness({ modelProvider, mcpServers, instructions: [review] })
+```
+
+API: [McpServers](../../reference/mcpservers/) · [McpStdioServer](../../reference/mcpstdioserver/) · [McpHttpServer](../../reference/mcphttpserver/) · [McpToolFilter](../../reference/mcptoolfilter/) · [defineMcpPrompt](../../reference/definemcpprompt/) · [HarnessOptions](../../reference/customharnessoptions/).
