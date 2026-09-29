@@ -11,6 +11,12 @@ sidebar:
 import type { SteeringMode } from "@elie-laloum/outpost";
 ```
 
+## Purpose and behavior
+
+How a steering instruction reached the agent, in SteeringDelivery.mode. Values: "injected" (joined the running turn through live input or the built-in harness loop), "resumed" (Outpost stopped the turn and continued the conversation in a new turn).
+
+[Complete example and detailed rules](../../guide/steering/).
+
 ## Signature
 
 ```ts

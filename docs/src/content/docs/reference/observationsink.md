@@ -16,7 +16,7 @@ import type { ObservationSink } from "@elie-laloum/outpost";
 | Name      | Type                                                  | Presence | Meaning                                                                                                   |
 | --------- | ----------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------- |
 | `observe` | `(observation: Observation) => void \| Promise<void>` | Required | Receive one envelope; returned promises are serialized per sink and rejection is isolated from execution. |
-| `flush`   | `(() => void \| Promise<void>) \| undefined`          | Optional | Optional drain of the receiver’s own buffering, invoked by hub flush with its delivery timeout.           |
+| `flush`   | `(() => void \| Promise<void>) \| undefined`          | Optional | Drains the receiver’s own buffer; the hub calls it from flush() with its delivery timeout.                |
 
 ## Signature
 

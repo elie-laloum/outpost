@@ -383,3 +383,14 @@ test("the speculation API is marked experimental", () => {
   );
   assert.equal(entry.attrs?.["data-api-status"], "experimental");
 });
+
+test("type aliases without properties explain their values", async () => {
+  for (const [locale, heading] of [
+    ["", "## Purpose and behavior"],
+    ["fr/", "## Rôle et comportement"],
+  ]) {
+    const source = await page(`${locale}reference/faultcode.md`);
+    assert.ok(source.includes(heading), locale);
+    assert.match(source, /configuration/);
+  }
+});

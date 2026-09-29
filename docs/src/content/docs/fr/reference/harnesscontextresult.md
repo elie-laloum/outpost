@@ -11,6 +11,12 @@ sidebar:
 import type { HarnessContextResult } from "@elie-laloum/outpost";
 ```
 
+## Rôle et comportement
+
+Ce que renvoie le compact() d’une stratégie de contexte avant chaque requête modèle du harness intégré : les messages qui remplacent l’historique, ou undefined pour le laisser inchangé. Les messages de remplacement sont validés et perdent leurs blocs de raisonnement.
+
+[Exemple complet et règles détaillées](../../guide/harness-context/).
+
 ## Signature
 
 ```ts

@@ -5,6 +5,10 @@ sidebar:
   order: 10
 ---
 
+## Rôle et comportement
+
+Catégorie d’une RecoveryInspection. inspectRecovery() parcourt .outpost/&lt;name> pour "storage" (transport local par défaut), "recovery" (transferts de recovery conservés), "logs", "locks" (verrous de possession des workspaces) et "workspaces" (worktrees d’exécution) ; avec un transporter, elle regroupe les clés par premier segment en "artifacts", "checkpoints", "conversations", "recovery", "logs", "reservations", "resources" et "task-cache".
+
 ## Signature
 
 ```ts

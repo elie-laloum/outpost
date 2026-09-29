@@ -12,6 +12,7 @@ const readContent = async (name) =>
   );
 const symbols = await readContent("symbols");
 const fields = await readContent("fields");
+const used = { symbols: new Set(), fields: new Set() };
 const escape = (value) =>
   value.replaceAll("|", "\\|").replaceAll("\n", " ").replaceAll("`", "\\`");
 // Descriptions are prose: placeholders such as <name> must not become HTML.
@@ -46,8 +47,13 @@ export function explain(symbol, declaration, group, language, checker) {
   );
   const fr = language === 1;
   let output = "";
-  if (!contract) {
+  // Interfaces are described by their properties; plain type aliases need a sentence.
+  if (
+    !contract ||
+    (ts.isTypeAliasDeclaration(declaration) && !entries.length)
+  ) {
     output += `\n\n## ${fr ? "Rôle et comportement" : "Purpose and behavior"}\n\n`;
+    used.symbols.add(symbol.name);
     output += prose(bilingual(symbols[symbol.name], symbol.name)[language]);
     if (group)
       output += `\n\n[${fr ? "Exemple complet et règles détaillées" : "Complete example and detailed rules"}](../../${symbolGuides[symbol.name] ?? group.guide}/).`;
@@ -60,6 +66,7 @@ export function explain(symbol, declaration, group, language, checker) {
         : "The fields below cover all variants; the signature specifies their allowed combinations.\n\n";
     output += `| ${fr ? "Nom" : "Name"} | Type | ${fr ? "Présence" : "Presence"} | ${fr ? "Rôle" : "Meaning"} |\n| --- | --- | --- | --- |\n`;
     for (const entry of entries) {
+      used.fields.add(entry.key in fields ? entry.key : entry.owner);
       const description = bilingual(
         fields[entry.key] ?? fields[entry.owner],
         entry.key,
@@ -80,4 +87,12 @@ export function explain(symbol, declaration, group, language, checker) {
       ].join(" · ") + "\n";
   }
   return output;
+}
+
+// Descriptions no generated page uses belong to removed or renamed declarations.
+export function unusedDescriptions() {
+  return [
+    ...Object.keys(symbols).filter((key) => !used.symbols.has(key)),
+    ...Object.keys(fields).filter((key) => !used.fields.has(key)),
+  ];
 }

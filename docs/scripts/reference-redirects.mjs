@@ -61,6 +61,9 @@ export const referenceRedirects = {
   "/reference/approvaltask/": "/reference/defineapprovaltask/",
   "/fr/reference/approvaltask/": "/fr/reference/defineapprovaltask/",
   "/reference/artifact/": "/reference/overview/artifacts/",
+  "/reference/overview/outbound-networking/": "/reference/overview/providers/",
+  "/fr/reference/overview/outbound-networking/":
+    "/fr/reference/overview/providers/",
   "/fr/reference/artifact/": "/fr/reference/overview/artifacts/",
   "/reference/artifacttask/": "/reference/defineartifacttask/",
   "/fr/reference/artifacttask/": "/fr/reference/defineartifacttask/",

@@ -5,7 +5,7 @@
     "Chaque contrat public d’Outpost, regroupé en familles. Ouvrez la vue d’ensemble d’une famille pour ses concepts, ou allez directement à une fonction, un type ou une interface."
   ],
   "body": [
-    "Every page documents one public symbol: its import, behavior, parameters and properties, return value and signature, generated from the package's type declarations. Families group related symbols; each opens with an overview that links to its practical guide.",
-    "Chaque page documente un symbole public : son import, son comportement, ses paramètres et propriétés, sa valeur de retour et sa signature, générés à partir des déclarations de types du package. Les familles regroupent les symboles liés ; chacune commence par une vue d’ensemble qui renvoie vers son guide pratique."
+    "Each symbol page gives the import, behavior, parameters, return value and signature, generated from the package's type declarations. Each family opens with an overview that links to its Guide page.",
+    "Chaque page de symbole donne l’import, le comportement, les paramètres, la valeur de retour et la signature, générés à partir des déclarations de types du package. Chaque famille commence par une vue d’ensemble qui renvoie vers sa page du Guide."
   ]
 }

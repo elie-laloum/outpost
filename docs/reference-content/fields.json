@@ -1361,22 +1361,6 @@
     "Encode a repository path as the Claude native project directory key.",
     "Encode un chemin de dépôt en clé de dossier de projet natif Claude."
   ],
-  "locateConversation.format": [
-    "Native transcript layout: claude, codex, copilot or kimi.",
-    "Organisation native des transcripts : claude, codex, copilot ou kimi."
-  ],
-  "locateConversation.id": [
-    "Native conversation identifier used to locate or continue the session.",
-    "Identifiant de conversation native utilisé pour localiser ou poursuivre la session."
-  ],
-  "locateConversation.repository": [
-    "Target host Git checkout.",
-    "Checkout Git hôte ciblé."
-  ],
-  "locateConversation.home": [
-    "Host agent home used to locate or persist native transcripts.",
-    "Home d’agent hôte utilisé pour localiser ou persister les transcripts natifs."
-  ],
   "ConversationLocation.id": [
     "Native conversation identifier used to locate or continue the session.",
     "Identifiant de conversation native utilisé pour localiser ou poursuivre la session."
@@ -1388,54 +1372,6 @@
   "ConversationLocation.format": [
     "Persisted format name, such as claude, codex, copilot, kimi or harness.",
     "Nom de format persisté, par exemple claude, codex, copilot, kimi ou harness."
-  ],
-  "captureConversation.format": [
-    "Native transcript layout: claude, codex, copilot or kimi.",
-    "Organisation native des transcripts : claude, codex, copilot ou kimi."
-  ],
-  "captureConversation.id": [
-    "Native conversation identifier used to locate or continue the session.",
-    "Identifiant de conversation native utilisé pour localiser ou poursuivre la session."
-  ],
-  "captureConversation.repository": [
-    "Target host Git checkout.",
-    "Checkout Git hôte ciblé."
-  ],
-  "captureConversation.lease": [
-    "Sandbox execution lease used to access the native agent home and transfer transcripts.",
-    "Bail d’exécution de sandbox utilisé pour accéder au home natif de l’agent et transférer les transcripts."
-  ],
-  "captureConversation.staging": [
-    "Host directory used to stage native transcript files during transfer.",
-    "Dossier hôte servant à préparer les fichiers de transcript natif pendant le transfert."
-  ],
-  "captureConversation.options": [
-    "Host transcript home, local access mode and nonfatal warning callback.",
-    "Home hôte des transcripts, mode d’accès local et callback d’avertissement non bloquant."
-  ],
-  "CaptureOptions.home": [
-    "Host agent home used to locate or persist native transcripts.",
-    "Home d’agent hôte utilisé pour localiser ou persister les transcripts natifs."
-  ],
-  "CaptureOptions.warn": [
-    "Callback receiving nonfatal execution or conversation-storage warnings.",
-    "Callback recevant les avertissements non bloquants d’exécution ou de stockage des conversations."
-  ],
-  "CaptureOptions.local": [
-    "Use host-local transcript access instead of transferring through the sandbox lease.",
-    "Utilise l’accès local hôte aux transcripts au lieu d’un transfert par le bail de sandbox."
-  ],
-  "restoreConversation.location": [
-    "Existing transcript identity, format and host file path to restore.",
-    "Identité, format et chemin hôte du transcript existant à restaurer."
-  ],
-  "restoreConversation.lease": [
-    "Sandbox execution lease used to access the native agent home and transfer transcripts.",
-    "Bail d’exécution de sandbox utilisé pour accéder au home natif de l’agent et transférer les transcripts."
-  ],
-  "restoreConversation.staging": [
-    "Host directory used to stage native transcript files during transfer.",
-    "Dossier hôte servant à préparer les fichiers de transcript natif pendant le transfert."
   ],
   "relocateTranscript.text": [
     "Native transcript contents to rewrite.",
@@ -1452,22 +1388,6 @@
   "projectKey.path": [
     "Repository path to encode for Claude’s native project directory layout.",
     "Chemin de dépôt à encoder pour l’organisation des dossiers de projet natifs Claude."
-  ],
-  "remotePath.format": [
-    "Native transcript layout: claude, codex, copilot or kimi.",
-    "Organisation native des transcripts : claude, codex, copilot ou kimi."
-  ],
-  "remotePath.id": [
-    "Native conversation identifier used to locate or continue the session.",
-    "Identifiant de conversation native utilisé pour localiser ou poursuivre la session."
-  ],
-  "remotePath.lease": [
-    "Sandbox execution lease used to access the native agent home and transfer transcripts.",
-    "Bail d’exécution de sandbox utilisé pour accéder au home natif de l’agent et transférer les transcripts."
-  ],
-  "remotePath.original": [
-    "Original native transcript filename, when needed to preserve the Codex session filename.",
-    "Nom d’origine du fichier de transcript natif lorsque nécessaire pour conserver le nom de session Codex."
   ],
   "ProviderDefinition.name": [
     "Identifier recorded in diagnostics and resource activity; a blank name fails with code configuration.",
@@ -3106,10 +3026,6 @@
     "Most events to read, default 100000; a longer chain rejects.",
     "Nombre maximal d’événements à lire, 100000 par défaut ; une chaîne plus longue est refusée."
   ],
-  "createTransportConversations.format": [
-    "Transcript format: claude or codex for native JSONL, copilot or kimi for native session bundles, or harness for custom harness transcripts. Antigravity has no portable conversation store.",
-    "Format : claude ou codex pour le JSONL natif, copilot ou kimi pour les bundles de session, ou harness pour les transcriptions des harness personnalisés. Antigravity n’a pas de store portable."
-  ],
   "createTransportConversations.options": [
     "Transport and stable project namespace shared by all runners restoring these conversations.",
     "Transport et espace de noms stable du projet, partagé par les exécuteurs restaurant ces conversations."
@@ -3315,8 +3231,8 @@
     "Indique si le dispatch réussi a satisfait sa condition de complétion ; absent en cas de rejet."
   ],
   "createCustomReporter.handlers": [
-    "Optional handlers keyed by agent event kind, executed serially in arrival order; omitted kinds are ignored.",
-    "Handlers optionnels par type d’événement agent, exécutés séquentiellement dans l’ordre d’arrivée ; les types absents sont ignorés."
+    "Handlers keyed by agent event kind, run one at a time in arrival order; kinds without a handler are ignored.",
+    "Handlers par type d’événement agent, exécutés un à un dans l’ordre d’arrivée ; les types sans handler sont ignorés."
   ],
   "createCustomReporter.options": [
     "Error diagnostics for the custom reporter; no terminal output or resource ownership is added.",
@@ -3573,10 +3489,6 @@
   "AgentFeatures.variables": [
     "Environment variables added to every command of this agent, over the values from .outpost/.env. A name also set by the sandbox provider fails with code configuration.",
     "Variables d’environnement ajoutées à chaque commande de cet agent, par-dessus les valeurs de .outpost/.env. Un nom également défini par le provider de sandbox échoue avec le code configuration."
-  ],
-  "AgentFeatures.conversations": [
-    "Built-in native transcript format used when no custom storage is supplied.",
-    "Format natif de transcript utilisé en l’absence de stockage personnalisé."
   ],
   "AgentFeatures.storage": [
     "Conversation store that captures, locates and restores this agent’s sessions; absent when its conversations are not portable.",
@@ -4066,26 +3978,6 @@
     "Current step number; 0 during session-start.",
     "Numéro de l’étape en cours ; 0 pendant session-start."
   ],
-  "HarnessHookInput.prompt": [
-    "Rendered prompt of the turn, available to session-start hooks.",
-    "Prompt rendu du tour, disponible pour les hooks session-start."
-  ],
-  "HarnessHookInput.messages": [
-    "Conversation about to be sent in this step, available to before-model hooks.",
-    "Conversation sur le point d’être envoyée à cette étape, disponible pour les hooks before-model."
-  ],
-  "HarnessHookInput.result": [
-    "Model result for after-model hooks, or the tool outcome for after-tool hooks.",
-    "Résultat du modèle pour les hooks after-model, ou issue de l’outil pour les hooks after-tool."
-  ],
-  "HarnessHookInput.call": [
-    "Tool call with its validated input for before-tool and after-tool hooks.",
-    "Appel d’outil avec son entrée validée pour les hooks before-tool et after-tool."
-  ],
-  "HarnessHookInput.text": [
-    "Final answer the model wants to stop with, available to stop hooks.",
-    "Réponse finale avec laquelle le modèle veut s’arrêter, disponible pour les hooks stop."
-  ],
   "HarnessHookEvents.session-start": [
     "Event for session-start hooks: the rendered prompt.",
     "Événement des hooks session-start : le prompt rendu."
@@ -4169,10 +4061,6 @@
   "HarnessToolResultView.isError": [
     "Whether the call is reported as failed.",
     "Indique si l’appel est signalé en échec."
-  ],
-  "HarnessHookInput.deny": [
-    "Reason sent to the model when a before-tool hook refuses the call.",
-    "Raison envoyée au modèle quand un hook before-tool refuse l’appel."
   ],
   "HarnessPermissionRule.effect": [
     "allow or deny when the rule applies.",
@@ -4653,28 +4541,12 @@
     "Laissé vide par createAgent() : le harness intégré forke en copiant la conversation sous un nouvel identifiant. false refuse le fork avant allocation."
   ],
   "AgentAdapter.fork": [
-    "Optional native fork preparation: receive the parent ID and a borrowed sandbox command executor, then return a distinct child ID. Outpost requests continuation on that child; adapters with a fork flag can omit this hook.",
-    "Préparation native optionnelle du fork : reçoit l’identifiant parent et un exécuteur de commandes dans la sandbox empruntée, puis renvoie un identifiant enfant distinct. Outpost continue cet enfant ; les adapters dotés d’un flag de fork peuvent omettre ce hook."
-  ],
-  "AgentAdapter.fork.id": [
-    "Parent conversation identifier already restored in the sandbox.",
-    "Identifiant de la conversation parente déjà restaurée dans la sandbox."
-  ],
-  "AgentAdapter.fork.invoke": [
-    "Run a CLI command in the borrowed sandbox with the operation’s credentials, cancellation and deadline.",
-    "Exécute une commande CLI dans la sandbox empruntée avec les identifiants, l’annulation et le délai de l’opération."
+    "Native fork preparation: receives the parent ID and a command executor on the borrowed sandbox, and returns a distinct child ID that Outpost then continues. Adapters with a fork flag can omit it.",
+    "Préparation native du fork : reçoit l’identifiant parent et un exécuteur de commandes dans la sandbox empruntée, et renvoie un identifiant enfant distinct qu’Outpost continue ensuite. Les adapters dotés d’un flag de fork peuvent l’omettre."
   ],
   "CliAgent.fork": [
     "Native fork step: receives the parent conversation ID and a command runner in the borrowed sandbox, and returns a distinct child ID that the turn then continues. Adapters whose CLI forks through a request flag omit it.",
     "Étape de fork native : reçoit l’identifiant de la conversation parente et un exécuteur de commandes dans la sandbox empruntée, puis renvoie un identifiant enfant distinct que le tour continue. Les adapters dont la CLI forke via un flag de requête l’omettent."
-  ],
-  "CliAgent.fork.id": [
-    "Parent conversation identifier already restored in the sandbox.",
-    "Identifiant de la conversation parente déjà restaurée dans la sandbox."
-  ],
-  "CliAgent.fork.invoke": [
-    "Run a CLI command in the borrowed sandbox with the operation’s credentials, cancellation and deadline.",
-    "Exécute une commande CLI dans la sandbox empruntée avec les identifiants, l’annulation et le délai de l’opération."
   ],
   "AgentEvent.messageId": [
     "Claude Code identifier of the message whose usage a message-usage event reports.",
@@ -4853,8 +4725,8 @@
     "Reçoit une enveloppe ; les promesses retournées sont sérialisées par récepteur et leurs rejets sont isolés de l’exécution."
   ],
   "ObservationSink.flush": [
-    "Optional drain of the receiver’s own buffering, invoked by hub flush with its delivery timeout.",
-    "Vidage facultatif du tampon propre au récepteur, appelé par flush avec le délai de livraison du hub."
+    "Drains the receiver’s own buffer; the hub calls it from flush() with its delivery timeout.",
+    "Vide le tampon propre au récepteur ; le hub l’appelle depuis flush() avec son délai de livraison."
   ],
   "Observation.seq": [
     "Strictly increasing sequence shared by a root hub and all its scoped children; gaps may indicate dropped deliveries.",
@@ -4925,8 +4797,8 @@
     "Hub parent des événements de tous les candidats, délimités par clé de candidat ; il remplace l’observation propre à chaque request."
   ],
   "createObservationHub.options": [
-    "Optional receivers, initial scope, delivery limits and opt-in model payload verbosity.",
-    "Récepteurs, contexte initial, limites de livraison et activation des contenus modèle détaillés facultatifs."
+    "Receivers, initial scope, delivery limits and opt-in model payload verbosity.",
+    "Récepteurs, contexte initial, limites de livraison et activation des contenus modèle détaillés."
   ],
   "ObservationHubOptions.sinks": [
     "Receivers attached to this root and inherited by every child.",
@@ -5204,10 +5076,6 @@
     "Observed UTF-8 byte size of an oversized protocol line or buffered prefix before termination.",
     "Taille UTF-8 constatée d’une ligne de protocole trop volumineuse ou du préfixe reçu avant l’arrêt."
   ],
-  "AgentEventDetails.subagentId": [
-    "Identifier of the built-in child that emitted the event; absent for the root harness. Lifecycle events link that identifier to the delegating tool call.",
-    "Identifiant de l’enfant intégré qui a émis l’événement ; absent pour le harness racine. Les événements de cycle de vie relient cet identifiant à l’appel d’outil de délégation."
-  ],
   "AgentEventDetails.conversation": [
     "Persisted child conversation identifier when the child enables transcript storage.",
     "Identifiant de conversation enfant persistée lorsque l’enfant active le stockage des transcripts."
@@ -5219,10 +5087,6 @@
   "ReporterHandlers.subagent": [
     "Receives a built-in harness subagent start, finish or failure, with the delegating call and the transcript identifier when stored.",
     "Reçoit le démarrage, la fin ou l’échec d’un sous-agent du harness intégré, avec l’appel de délégation et l’identifiant de transcript quand il est stocké."
-  ],
-  "AgentEventHandlers.subagent": [
-    "Handle a built-in child start, completion or failure, with the delegation call and optional transcript identifier.",
-    "Traite le démarrage, la fin ou l’échec d’un enfant intégré, avec l’appel de délégation et l’identifiant de transcript optionnel."
   ],
   "HarnessSubagent.execute": [
     "Throws code configuration when called directly: only the harness runtime runs a subagent, supplying cancellation, budgets, permissions and the child transcript.",
@@ -6878,10 +6742,6 @@
     "Return the entries to merge from the file content; throw when the expected login is absent.",
     "Renvoie les entrées à fusionner à partir du contenu du fichier ; lève une erreur si la connexion attendue est absente."
   ],
-  "HostConfiguration.select.content": [
-    "Text of the host file.",
-    "Texte du fichier de l’hôte."
-  ],
   "McpToolFilter.include": [
     "Distinct MCP tool names to keep. Claude Code and Antigravity refuse it; in the built-in harness a name the server does not offer fails the turn.",
     "Noms d’outils MCP distincts à garder. Claude Code et Antigravity le refusent ; dans le harness intégré, un nom que le serveur ne propose pas fait échouer le tour."
@@ -6941,15 +6801,6 @@
   "HarnessMcpContext.prompt": [
     "Renders a prompt of a running MCP server as role-prefixed text. Fails with code configuration when the server is not declared or offers no prompts.",
     "Rend un prompt d’un serveur MCP en cours d’exécution sous forme de texte préfixé par les rôles. Échoue avec le code configuration si le serveur n’est pas déclaré ou n’offre aucun prompt."
-  ],
-  "HarnessMcpContext.prompt.server": [
-    "Declared MCP server name.",
-    "Nom du serveur MCP déclaré."
-  ],
-  "HarnessMcpContext.prompt.name": ["Prompt name.", "Nom du prompt."],
-  "HarnessMcpContext.prompt.promptArguments": [
-    "String arguments of the prompt.",
-    "Arguments texte du prompt."
   ],
   "defineMcpPrompt.options": [
     "Server, prompt name and string arguments of the prompt to render.",

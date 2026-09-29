@@ -43,22 +43,6 @@
     "Frozen object that groups conversation helpers: transported is createTransportConversations(), harness is createHarnessConversations(), rewrite is relocateTranscript() and projectKey derives Claude’s project folder name.",
     "Objet figé qui regroupe des utilitaires de conversation : transported est createTransportConversations(), harness est createHarnessConversations(), rewrite est relocateTranscript() et projectKey calcule le nom du dossier de projet de Claude."
   ],
-  "nativeConversations": [
-    "Deprecated: return the built-in native ConversationStore of a claude, codex, copilot or kimi format name, and reject any other name. Use createClaudeConversations(), createCodexConversations(), createCopilotConversations() or createKimiConversations() instead.",
-    "Déprécié : renvoie le ConversationStore natif intégré d’un nom de format claude, codex, copilot ou kimi, et refuse tout autre nom. Utilisez plutôt createClaudeConversations(), createCodexConversations(), createCopilotConversations() ou createKimiConversations()."
-  ],
-  "locateConversation": [
-    "Locate an existing native transcript by format, conversation ID and repository in the selected host home. It returns the transcript identity and path and rejects when no matching transcript is found.",
-    "Localise un transcript natif existant selon son format, son identifiant et son dépôt dans le home hôte choisi. Renvoie son identité et son chemin, et échoue si aucun transcript correspondant n’est trouvé."
-  ],
-  "captureConversation": [
-    "Copy a native transcript from the sandbox lease into host staging and return its location when available. Capture can report warnings through options.warn; it does not export credentials.",
-    "Copie un transcript natif depuis le bail de sandbox vers le dossier de capture hôte et renvoie sa localisation lorsqu’il est disponible. La capture peut signaler des avertissements via options.warn ; elle n’exporte pas d’identifiants d’authentification."
-  ],
-  "restoreConversation": [
-    "Upload a previously located native transcript into the sandbox’s agent home, rewriting repository paths from the original checkout to the current workspace before continuation.",
-    "Envoie un transcript natif précédemment localisé dans le home de l’agent en sandbox, en réécrivant les chemins de l’ancien checkout vers le workspace courant avant la continuation."
-  ],
   "relocateTranscript": [
     "Return transcript text in which every cwd value equal to source becomes destination; without source, the first cwd recorded in the text is replaced. Lines that are not JSON are kept as they are, and no file is read or written.",
     "Renvoie le texte du transcript où chaque valeur cwd égale à source devient destination ; sans source, le premier cwd enregistré dans le texte est remplacé. Les lignes qui ne sont pas du JSON restent inchangées, et aucun fichier n’est lu ni écrit."
@@ -66,10 +50,6 @@
   "projectKey": [
     "Return Claude’s project folder name for a repository path, used under ~/.claude/projects: every character other than an ASCII letter or digit becomes -.",
     "Renvoie le nom du dossier de projet de Claude pour un chemin de dépôt, utilisé sous ~/.claude/projects : chaque caractère autre qu’une lettre ASCII ou un chiffre devient -."
-  ],
-  "remotePath": [
-    "Compute the native transcript path inside a sandbox lease from the format and conversation ID, using the lease’s home and workspace path.",
-    "Calcule le chemin du transcript natif à l’intérieur d’un bail de sandbox à partir du format et de l’identifiant de conversation, en utilisant son home et son chemin de workspace."
   ],
   "recoveryDetails": [
     "Return the recovery record Outpost attached to a thrown value: where work survived, such as branch, directory, commits, transcript, logReference or conversation. Works on any thrown object, including a plain Error or an abort reason. Returns an empty object for an OutpostError without a record and undefined for any other value without one.",
@@ -383,10 +363,6 @@
     "Define a tool that runs a built-in child agent, with a fresh history, in the parent's borrowed sandbox. The parent model sends { prompt }; the tool returns JSON text with the child's text and conversation identifier, and a child failure is handled like any tool error. Child tokens count toward the dispatch usage and every ancestor budget, and ancestor permissions also apply to child tools.",
     "Définit un outil qui exécute un agent enfant intégré, avec un historique neuf, dans la sandbox empruntée du parent. Le modèle parent envoie { prompt } ; l’outil renvoie un texte JSON avec le texte de l’enfant et l’identifiant de sa conversation, et un échec de l’enfant est traité comme toute erreur d’outil. Les tokens de l’enfant comptent dans l’usage du dispatch et dans chaque budget ancêtre, et les permissions des ancêtres s’appliquent aussi à ses outils."
   ],
-  "AgentEventDetails": [
-    "Payload variants emitted by CLI adapters and the built-in harness, including child lifecycle events. AgentEvent adds child correlation metadata.",
-    "Variantes de contenu émises par les adapters CLI et le harness intégré, incluant le cycle de vie des enfants. AgentEvent ajoute les métadonnées de corrélation enfant."
-  ],
   "recoverSpeculation": [
     "Release the ownership of a durable race whose coordinator has stopped, provided its saved object is still at the given revision; otherwise rejects with TransportConflict. It stops and deletes nothing: the next speculate() call stops registered resources and needs resume: retry-incomplete to replay interrupted candidates.",
     "Libère la propriété d’une course durable dont le coordinateur s’est arrêté, à condition que son objet enregistré soit toujours à la révision indiquée ; sinon rejette avec TransportConflict. N’arrête et ne supprime rien : le prochain appel à speculate() arrête les ressources enregistrées et exige resume: retry-incomplete pour rejouer les candidats interrompus."
@@ -395,18 +371,6 @@
     "Test with git merge-tree whether a candidate branch merges into the host checkout's HEAD, without changing its files or index. Returns clean or conflict with the exact commits tested, or blocked when the checkout is dirty or detached, the branch moved or Git fails. It never merges.",
     "Vérifie avec git merge-tree si une branche candidate se fusionne dans le HEAD du checkout hôte, sans modifier ses fichiers ni son index. Renvoie clean ou conflict avec les commits exacts vérifiés, ou blocked si le checkout est sale ou détaché, si la branche a bougé ou si Git échoue. Ne fusionne jamais."
   ],
-  "SpeculationDurability": [
-    "Saves a race through a Transport under runId so that it can resume after a crash or a quota stop. One coordinator owns the runId at a time; replaying interrupted candidates requires resume: retry-incomplete.",
-    "Enregistre une course via un Transport sous runId pour la reprendre après un plantage ou un arrêt de quota. Un seul coordinateur possède le runId à la fois ; rejouer des candidats interrompus exige resume: retry-incomplete."
-  ],
-  "SpeculationIntegration": [
-    "Result of a merge preflight between the host HEAD and one candidate commit. A clean status is an observation, not an authorization: the checkout can change before you merge.",
-    "Résultat d’une vérification de fusion entre le HEAD hôte et un commit candidat. Un statut clean est une observation, pas une autorisation : le checkout peut changer avant votre fusion."
-  ],
-  "SpeculationRecoveryOptions": [
-    "Names the durable race to release and the revision you inspected, with confirmation that its coordinator has stopped.",
-    "Désigne la course durable à libérer et la révision que vous avez inspectée, avec la confirmation que son coordinateur s’est arrêté."
-  ],
   "signWorkflowDecision": [
     "Sign one exact decision with an application-owned Ed25519 private key and return a frozen copy carrying its proof. It neither submits the decision nor stores the key. Throws on a non-Ed25519 key, a blank decision field or key identifier, or an expiresAt that is not in the future.",
     "Signe une décision exacte avec une clé privée Ed25519 appartenant à l’application et renvoie une copie figée portant sa preuve. Ne soumet pas la décision et ne stocke pas la clé. Lève une erreur pour une clé non Ed25519, un champ de décision ou un identifiant de clé vide, ou un expiresAt qui n’est pas dans le futur."
@@ -414,30 +378,6 @@
   "createEd25519DecisionVerifier": [
     "Create a WorkflowDecisionVerifier that loads the trusted keys on every call, then checks the proof's key, its actor binding, the Ed25519 signature and the expiry. Returns keyId and verifiedAt; throws on an unknown, duplicated or wrongly bound key, an invalid signature or an expired proof.",
     "Crée un WorkflowDecisionVerifier qui charge les clés de confiance à chaque appel, puis vérifie la clé de la preuve, son acteur associé, la signature Ed25519 et l’expiration. Renvoie keyId et verifiedAt ; lève une erreur pour une clé inconnue, dupliquée ou liée à un autre acteur, une signature invalide ou une preuve expirée."
-  ],
-  "WorkflowDecisionProof": [
-    "Ed25519 proof that signWorkflowDecision() attaches to a decision: key identifier, expiry and a signature over every decision field.",
-    "Preuve Ed25519 que signWorkflowDecision() attache à une décision : identifiant de clé, expiration et signature couvrant chaque champ de la décision."
-  ],
-  "WorkflowDecisionVerification": [
-    "Result of a successful verification, kept in the decision record for audit. Recorded decisions are not verified again, so they stay valid after their key is removed.",
-    "Résultat d’une vérification réussie, conservé dans le record de décision pour audit. Les décisions enregistrées ne sont pas revérifiées : elles restent valides après le retrait de leur clé."
-  ],
-  "WorkflowDecisionVerifier": [
-    "Function passed as decisionVerifier to start(): authenticates a decision's proof and returns a WorkflowDecisionVerification, or throws. Outpost first checks the request, actor and action, then requires the returned keyId to equal the proof's keyId.",
-    "Fonction passée comme decisionVerifier à start() : authentifie la preuve d’une décision et renvoie une WorkflowDecisionVerification, ou lève une erreur. Outpost vérifie d’abord la demande, l’acteur et l’action, puis exige que le keyId renvoyé soit celui de la preuve."
-  ],
-  "WorkflowDecisionSigningOptions": [
-    "Input of signWorkflowDecision(): the decision to sign, the Ed25519 private key, its key identifier and the proof expiry.",
-    "Entrée de signWorkflowDecision() : la décision à signer, la clé privée Ed25519, son identifiant et l’expiration de la preuve."
-  ],
-  "WorkflowApproverKey": [
-    "Trusted public key bound to one actor under a unique keyId, returned by the keys source of createEd25519DecisionVerifier().",
-    "Clé publique de confiance liée à un seul acteur sous un keyId unique, renvoyée par la source keys de createEd25519DecisionVerifier()."
-  ],
-  "WorkflowDecisionVerifierOptions": [
-    "Live trusted-key source used by the Ed25519 verifier for rotation and revocation.",
-    "Source actualisable des clés de confiance utilisée par le vérificateur Ed25519 pour rotation et révocation."
   ],
   "defineInteractiveAgentTask": [
     "Declare an agent dialogue that asks humans questions between turns. Each turn runs in a new sandbox on a retained named branch and continues the captured conversation; a question leaves the task waiting-input until start() receives an answer. Requires a checkpointed run and throws with code configuration for an agent without portable capture and resume.",
@@ -567,28 +507,144 @@
     "Create a NativeConversationStore for a CLI that keeps each session as a directory, described by sessionProfile. A Node.js script in the sandbox packs the selected files into one JSON bundle of at most 64 MiB and 4096 files, refuses symlinks and files that change during capture, and on restore moves an existing session to .outpost-recovery. Script failures use code session; an invalid profile, such as a method hook or a g or y regular expression flag, fails with code configuration at creation.",
     "Crée un NativeConversationStore pour une CLI qui conserve chaque session dans un dossier, décrite par sessionProfile. Un script Node.js dans la sandbox regroupe les fichiers sélectionnés en un bundle JSON d’au plus 64 Mio et 4096 fichiers, refuse les liens symboliques et les fichiers modifiés pendant la capture, et à la restauration déplace une session existante vers .outpost-recovery. Les échecs du script utilisent le code session ; un profil invalide, par exemple un hook écrit comme méthode ou une expression régulière avec l’option g ou y, échoue avec le code configuration à la création."
   ],
-  "NativeConversationStore": [
-    "ConversationStore that owns a native CLI format: it declares the persisted format name and knows where captured conversations live on the host and where restoration writes them in a sandbox.",
-    "ConversationStore propriétaire d’un format natif de CLI : il déclare le nom de format persisté et sait où se trouvent les conversations capturées sur l’hôte et où la restauration les écrit dans une sandbox."
+  "Channel": [
+    "Output stream a command line came from, passed to Command.observe(). Values: \"stdout\" (standard output), \"stderr\" (standard error).",
+    "Flux de sortie d’où provient une ligne de commande, transmis à Command.observe(). Valeurs : \"stdout\" (sortie standard), \"stderr\" (sortie d’erreur)."
   ],
-  "TranscriptConversationLayout": [
-    "Filesystem layout of a CLI that stores one JSONL transcript per conversation, used by createTranscriptConversations(). Host functions receive host paths; remote functions receive sandbox paths.",
-    "Organisation des fichiers d’une CLI qui stocke un transcript JSONL par conversation, utilisée par createTranscriptConversations(). Les fonctions hôte reçoivent des chemins de l’hôte ; les fonctions distantes des chemins de la sandbox."
+  "ConversationFormat": [
+    "Persisted name of a native conversation format, recorded in each ConversationLocation and in transport keys, bundles and records. Built-in names are \"claude\", \"codex\", \"copilot\", \"kimi\" and \"harness\" (built-in Outpost harness); a stored name must not change.",
+    "Nom persisté d’un format de conversation natif, enregistré dans chaque ConversationLocation ainsi que dans les clés de transport, les bundles et les enregistrements. Les noms intégrés sont \"claude\", \"codex\", \"copilot\", \"kimi\" et \"harness\" (harness Outpost intégré) ; un nom stocké ne doit pas changer."
   ],
-  "SessionBundleProfile": [
-    "Describes where a CLI keeps session directories and how to select, validate and relocate their files, for createSessionBundleConversations(). Hooks run inside the sandbox from their source text.",
-    "Décrit où une CLI conserve ses dossiers de session et comment sélectionner, valider et relocaliser leurs fichiers, pour createSessionBundleConversations(). Les hooks s’exécutent dans la sandbox à partir de leur texte source."
+  "DiagnosticStatus": [
+    "Result of one DiagnosticCheck in reports from outpost doctor, diagnoseSandbox() and diagnoseAgentProtocol(). Values: \"pass\" (check succeeded), \"warn\" (problem that does not block use), \"fail\" (blocking problem; sets hasFailures), \"skipped\" (not applicable to this provider or configuration, such as image checks without an image).",
+    "Résultat d’un DiagnosticCheck dans les rapports de outpost doctor, diagnoseSandbox() et diagnoseAgentProtocol(). Valeurs : \"pass\" (vérification réussie), \"warn\" (problème qui n’empêche pas l’utilisation), \"fail\" (problème bloquant ; active hasFailures), \"skipped\" (sans objet pour ce provider ou cette configuration, par exemple les vérifications d’image sans image)."
   ],
-  "SessionBundleFiles": [
-    "Read-only access to the text of bundled files, passed to SessionBundleProfile.validate.",
-    "Accès en lecture au texte des fichiers du bundle, transmis à SessionBundleProfile.validate."
+  "DoctorAgent": [
+    "Built-in agent a diagnostic targets: the agent argument of diagnoseAgentProtocol(), the agent option of diagnoseSandbox() and the agent named in a doctor report. Same values as BuiltInAgentName.",
+    "Agent intégré visé par un diagnostic : l’argument agent de diagnoseAgentProtocol(), l’option agent de diagnoseSandbox() et l’agent indiqué dans un rapport doctor. Mêmes valeurs que BuiltInAgentName."
   ],
-  "SessionBundleHelpers": [
-    "Sandbox-side helpers passed to session bundle hooks, which cannot import modules.",
-    "Utilitaires côté sandbox transmis aux hooks des bundles de session, qui ne peuvent pas importer de modules."
+  "FallbackTrigger": [
+    "Failure category that hands a fallback agent's dispatch to its next candidate, listed in the on option of createFallbackAgent(). Values: \"quota\" (terminal usage or rate limit, code quota), \"unavailable\" (outage recognized by unavailableFault(); the error keeps its process, provider or timeout code).",
+    "Catégorie d’échec qui fait passer le dispatch d’un agent de repli au candidat suivant, listée dans l’option on de createFallbackAgent(). Valeurs : \"quota\" (limite d’usage ou de débit définitive, code quota), \"unavailable\" (panne reconnue par unavailableFault() ; l’erreur garde son code process, provider ou timeout)."
   ],
-  "SessionBundleRelocation": [
-    "Destination details passed to SessionBundleProfile.relocate while a session is restored.",
-    "Détails de destination transmis à SessionBundleProfile.relocate pendant la restauration d’une session."
+  "FaultCode": [
+    "Stable code of every OutpostError; branch on it rather than on message. Values: \"configuration\" (invalid options, overlapping variables, missing or malformed credential file, refused storage reservation), \"process\" (agent or command exits nonzero or without a final event), \"timeout\" (idle, deadline, command, tool, transfer, MCP startup, model request or workflow time limit elapsed), \"aborted\" (sandbox closed, command cancelled, harness turn or tool call ended, model request aborted), \"workspace\" (unsafe path or symlink, refused recovery quota admission, failed remote synchronization or recovery restore), \"conflict\" (worktree locked, branch checked out elsewhere, host edits during synchronization, failed automatic integration), \"prompt\" (missing prompt variable or failed prompt command), \"response\" (missing or invalid typed response, invalid model or MCP reply, model refusal), \"session\" (conversation or transcript missing or unreadable), \"provider\" (sandbox provider operation failed, model HTTP error other than 429, model stream error), \"limit\" (harness maxSteps, maxToolCalls, maxOutputTokens, token budget or delegation depth reached), \"quota\" (agent or model reported a terminal usage or rate limit), \"replay\" (replay agent diverged from its journal), \"steering\" (instruction not delivered before the dispatch ended or the controller closed).",
+    "Code stable de chaque OutpostError ; testez-le plutôt que message. Valeurs : \"configuration\" (options invalides, variables en conflit, fichier d’identifiants absent ou mal formé, réservation de stockage refusée), \"process\" (l’agent ou la commande se termine avec un statut non nul ou sans événement final), \"timeout\" (délai d’inactivité, échéance, limite de temps d’une commande, d’un outil, d’un transfert, du démarrage MCP, d’une requête modèle ou d’un workflow dépassés), \"aborted\" (sandbox fermée, commande annulée, tour de harness ou appel d’outil terminé, requête modèle interrompue), \"workspace\" (chemin ou lien symbolique dangereux, admission refusée par le quota de recovery, échec de la synchronisation distante ou de la restauration d’un recovery), \"conflict\" (worktree verrouillé, branche extraite ailleurs, modifications de l’hôte pendant la synchronisation, échec de l’intégration automatique), \"prompt\" (variable de prompt manquante ou échec d’une commande de prompt), \"response\" (réponse typée absente ou invalide, réponse modèle ou MCP invalide, refus du modèle), \"session\" (conversation ou transcript absent ou illisible), \"provider\" (échec d’une opération du provider de sandbox, erreur HTTP du modèle autre que 429, erreur du flux modèle), \"limit\" (maxSteps, maxToolCalls, maxOutputTokens, budget de tokens ou profondeur de délégation du harness atteints), \"quota\" (l’agent ou le modèle signale une limite d’usage ou de débit définitive), \"replay\" (un agent de rejeu diverge de son journal), \"steering\" (consigne non remise avant la fin du dispatch ou la fermeture du contrôleur)."
+  ],
+  "HarnessContextResult": [
+    "What a context strategy's compact() returns before each model request of the built-in harness: the messages that replace the history, or undefined to keep it unchanged. Replacement messages are validated and lose their reasoning blocks.",
+    "Ce que renvoie le compact() d’une stratégie de contexte avant chaque requête modèle du harness intégré : les messages qui remplacent l’historique, ou undefined pour le laisser inchangé. Les messages de remplacement sont validés et perdent leurs blocs de raisonnement."
+  ],
+  "HarnessHookPhase": [
+    "Point of the built-in harness loop where a hook runs, set by its on option. Values: \"session-start\" (once, before the first model request), \"before-model\" (before each model request), \"after-model\" (after each model result), \"before-tool\" (before each tool call), \"after-tool\" (after each tool result), \"stop\" (when the model gives a final answer).",
+    "Point de la boucle du harness intégré où un hook s’exécute, fixé par son option on. Valeurs : \"session-start\" (une fois, avant la première requête modèle), \"before-model\" (avant chaque requête modèle), \"after-model\" (après chaque résultat du modèle), \"before-tool\" (avant chaque appel d’outil), \"after-tool\" (après chaque résultat d’outil), \"stop\" (quand le modèle donne une réponse finale)."
+  ],
+  "HarnessHookResult": [
+    "What a harness hook's run() returns for its phase: a decision, or undefined to change nothing. session-start: { instructions } adds instructions; before-tool: { deny } refuses the call with that reason, { input } replaces its input; after-tool: { result } replaces the tool result; stop: { continue } sends that text and keeps the loop running; before-model and after-model only observe. Any other shape fails with code configuration.",
+    "Ce que renvoie le run() d’un hook de harness pour sa phase : une décision, ou undefined pour ne rien changer. session-start : { instructions } ajoute des instructions ; before-tool : { deny } refuse l’appel avec ce motif, { input } remplace son entrée ; after-tool : { result } remplace le résultat de l’outil ; stop : { continue } envoie ce texte et relance la boucle ; before-model et after-model observent seulement. Toute autre forme échoue avec le code configuration."
+  ],
+  "HarnessInstructionSource": [
+    "Instruction text, or a function of HarnessInstructionContext (sandbox, signal, model, mcp) that returns it, possibly asynchronously. Accepted by defineHarnessInstructions() and a skill's instructions; empty text, or a function that resolves to anything but a string, fails with code configuration.",
+    "Texte d’instructions, ou fonction de HarnessInstructionContext (sandbox, signal, model, mcp) qui le renvoie, éventuellement de façon asynchrone. Accepté par defineHarnessInstructions() et par les instructions d’un skill ; un texte vide, ou une fonction qui ne se résout pas en chaîne, échoue avec le code configuration."
+  ],
+  "JsonSchema": [
+    "JSON Schema object describing a harness tool's input when no Standard Schema is given, and the form HarnessTool.inputSchema exposes to the model. The root must describe an object, otherwise tool definition fails with code configuration.",
+    "Objet JSON Schema qui décrit l’entrée d’un outil de harness quand aucun Standard Schema n’est fourni, et forme sous laquelle HarnessTool.inputSchema l’expose au modèle. La racine doit décrire un objet, sinon la définition de l’outil échoue avec le code configuration."
+  ],
+  "McpServers": [
+    "MCP server declarations keyed by server name, each a stdio server (command) or an HTTP server (url). Accepted as mcpServers by createHarness() and the CLI harness presets; secrets are referenced by variable name, never by value.",
+    "Déclarations de serveurs MCP indexées par nom de serveur, chacune un serveur stdio (command) ou HTTP (url). Acceptées comme mcpServers par createHarness() et les presets de harness CLI ; les secrets sont référencés par nom de variable, jamais par valeur."
+  ],
+  "ModelReasoning": [
+    "Reasoning effort of an AgentModel or ModelRequest. Values, from least to most effort: \"none\", \"minimal\", \"low\", \"medium\", \"high\", \"xhigh\", \"max\". The executing harness or model provider rejects an unsupported level when the agent is composed: Claude Code and Codex accept \"low\" to \"max\", the Anthropic provider every value except \"minimal\", the OpenAI provider forwards the value as is, and the other CLI agents accept none.",
+    "Effort de raisonnement d’un AgentModel ou d’une ModelRequest. Valeurs, de l’effort le plus faible au plus élevé : \"none\", \"minimal\", \"low\", \"medium\", \"high\", \"xhigh\", \"max\". Le harness ou le provider de modèle qui exécute refuse un niveau non pris en charge dès la composition de l’agent : Claude Code et Codex acceptent de \"low\" à \"max\", le provider Anthropic toutes les valeurs sauf \"minimal\", le provider OpenAI transmet la valeur telle quelle et les autres agents CLI n’en acceptent aucune."
+  ],
+  "ModelStopReason": [
+    "Why a model result ended, normalized by each model provider in ModelResult.stopReason. Values: \"end\" (final answer), \"tool-calls\" (the model requested tool calls), \"max-tokens\" (output or context window limit reached; the built-in harness fails with code limit), \"refusal\" (refusal or content filter; the built-in harness fails with code response).",
+    "Raison de la fin d’un résultat de modèle, normalisée par chaque provider de modèle dans ModelResult.stopReason. Valeurs : \"end\" (réponse finale), \"tool-calls\" (le modèle demande des appels d’outils), \"max-tokens\" (limite de sortie ou de fenêtre de contexte atteinte ; le harness intégré échoue avec le code limit), \"refusal\" (refus ou filtre de contenu ; le harness intégré échoue avec le code response)."
+  ],
+  "ObservationSource": [
+    "Component that emitted an Observation, in its source field. Values: \"agent\" (CLI agent events), \"harness\" (built-in harness events), \"workflow\" (workflow events), \"sandbox\" (sandbox allocation, dispatch and release), \"git\" (workspace allocation and branch integration), \"hooks\" (workspace lifecycle hooks), \"transfer\" (file transfers and repository synchronization), \"conversation\" (conversation capture and restore), \"recovery\" (startup-failure handling and recovery retention).",
+    "Composant qui a émis une Observation, dans son champ source. Valeurs : \"agent\" (événements d’un agent CLI), \"harness\" (événements du harness intégré), \"workflow\" (événements de workflow), \"sandbox\" (allocation, dispatch et libération de la sandbox), \"git\" (allocation du workspace et intégration de branche), \"hooks\" (hooks de cycle de vie du workspace), \"transfer\" (transferts de fichiers et synchronisation du dépôt), \"conversation\" (capture et restauration de conversation), \"recovery\" (traitement des échecs de démarrage et rétention des recovery)."
+  ],
+  "PermissionEffect": [
+    "Effect of a HarnessPermissionRule, and of the permissions default when no rule matches. Values: \"allow\" (the tool call runs), \"deny\" (the call is refused with the rule's reason). The first matching rule decides; an allow rule matches only when every path matches, a deny rule when any path does.",
+    "Effet d’une HarnessPermissionRule, et du défaut des permissions quand aucune règle ne correspond. Valeurs : \"allow\" (l’appel d’outil s’exécute), \"deny\" (l’appel est refusé avec le motif de la règle). La première règle qui correspond décide ; une règle allow ne correspond que si tous les chemins correspondent, une règle deny dès qu’un chemin correspond."
+  ],
+  "PromptVariables": [
+    "Values for the {{name}} placeholders of a file brief (Brief.values): strings, finite numbers or booleans. WORK_BRANCH and BASE_BRANCH are reserved; a placeholder without a value fails with code prompt.",
+    "Valeurs des emplacements {{name}} d’un brief fichier (Brief.values) : chaînes, nombres finis ou booléens. WORK_BRANCH et BASE_BRANCH sont réservés ; un emplacement sans valeur échoue avec le code prompt."
+  ],
+  "QuotaResumePolicy": [
+    "quotaResume option of defineAgentTask() and defineIsolatedTask(): how a task resumes after a quota pause. Values: \"continue\" (default; continue the captured conversation with a resume brief when the agent is resumable and passes is 1, and a fallback agent reruns the brief on the interrupted branch), \"restart\" (run the original brief in a new conversation).",
+    "Option quotaResume de defineAgentTask() et defineIsolatedTask() : manière dont une tâche reprend après une pause de quota. Valeurs : \"continue\" (par défaut ; poursuit la conversation capturée avec un brief de reprise quand l’agent est reprenable et que passes vaut 1, et un agent de repli relance le brief sur la branche interrompue), \"restart\" (exécute le brief d’origine dans une nouvelle conversation)."
+  ],
+  "ReplayDivergenceKind": [
+    "Kind of mismatch a replay agent detects, in ReplayDivergence.kind. Values: \"prompt\" (the turn received a prompt that differs from the recording), \"baseline\" (the turn started from a different workspace tree), \"tree\" (a recorded commit could not be reproduced; always fatal when its patch fails to apply), \"exhausted\" (the journal has no more turns; always fatal), \"unrecorded\" (the journal has no workspace commits because it was recorded without logging.replayable).",
+    "Type d’écart détecté par un agent de rejeu, dans ReplayDivergence.kind. Valeurs : \"prompt\" (le tour a reçu un prompt différent de l’enregistrement), \"baseline\" (le tour a démarré d’un arbre de workspace différent), \"tree\" (un commit enregistré n’a pas pu être reproduit ; toujours fatal quand son patch ne s’applique pas), \"exhausted\" (le journal n’a plus de tour ; toujours fatal), \"unrecorded\" (le journal n’a pas de commits de workspace, car il a été enregistré sans logging.replayable)."
+  ],
+  "ReplayDivergencePolicy": [
+    "divergence option of createReplayAgent(). Values: \"fail\" (default; throw ReplayDivergence with code replay), \"warn\" (report the divergence through the dispatch warn callback and continue). Exhausted journals and patches that fail to apply always fail.",
+    "Option divergence de createReplayAgent(). Valeurs : \"fail\" (par défaut ; lève ReplayDivergence avec le code replay), \"warn\" (signale l’écart via le callback warn du dispatch et continue). Un journal épuisé ou un patch qui ne s’applique pas échoue toujours."
+  ],
+  "ResourceOperationKind": [
+    "Kind of sandbox operation counted in a resource activity record. Values: \"dispatch\", \"attach\", \"diagnose\", \"command\" (exclusive Sandbox operations of the same name), \"invoke\" (a lease command), \"upload\", \"download\" (single transfers), \"manifest\", \"upload-batch\", \"download-batch\" (batch transfer steps).",
+    "Type d’opération de sandbox comptée dans un enregistrement d’activité de ressource. Valeurs : \"dispatch\", \"attach\", \"diagnose\", \"command\" (opérations exclusives de Sandbox du même nom), \"invoke\" (une commande du lease), \"upload\", \"download\" (transferts unitaires), \"manifest\", \"upload-batch\", \"download-batch\" (étapes de transfert par lots)."
+  ],
+  "ResourcePhase": [
+    "Lifecycle phase of a sandbox in its resource activity record; the record is removed after a clean release. Values: \"allocating\" (provider acquisition in progress), \"ready\" (sandbox started), \"closing\" (release in progress), \"cleanup-failed\" (release or workspace cleanup failed; resources may remain), \"allocation-uncertain\" (startup failed before the provider returned a lease, so a sandbox may exist without an owner).",
+    "Phase de cycle de vie d’une sandbox dans son enregistrement d’activité de ressource ; l’enregistrement est supprimé après une libération propre. Valeurs : \"allocating\" (acquisition auprès du provider en cours), \"ready\" (sandbox démarrée), \"closing\" (libération en cours), \"cleanup-failed\" (échec de la libération ou du nettoyage du workspace ; des ressources peuvent subsister), \"allocation-uncertain\" (le démarrage a échoué avant que le provider ne renvoie un lease, une sandbox peut donc exister sans propriétaire)."
+  ],
+  "SteeringMode": [
+    "How a steering instruction reached the agent, in SteeringDelivery.mode. Values: \"injected\" (joined the running turn through live input or the built-in harness loop), \"resumed\" (Outpost stopped the turn and continued the conversation in a new turn).",
+    "Manière dont une consigne de steering a atteint l’agent, dans SteeringDelivery.mode. Valeurs : \"injected\" (ajoutée au tour en cours via l’entrée en direct ou la boucle du harness intégré), \"resumed\" (Outpost a arrêté le tour puis poursuivi la conversation dans un nouveau tour)."
+  ],
+  "SteeringState": [
+    "State of a Steering controller. Values: \"idle\" (no dispatch attached; sent messages wait for the next one), \"active\" (attached to a running dispatch; undelivered messages reject with code steering when it ends), \"closed\" (close() was called; pending and later sends reject with code steering).",
+    "État d’un contrôleur Steering. Valeurs : \"idle\" (aucun dispatch attaché ; les messages envoyés attendent le suivant), \"active\" (attaché à un dispatch en cours ; les messages non remis sont rejetés avec le code steering à sa fin), \"closed\" (close() a été appelé ; les envois en attente et ultérieurs sont rejetés avec le code steering)."
+  ],
+  "BuiltInAgentName": [
+    "Name of a built-in CLI agent registered in the agent catalog, from which outpost init and doctor choices, bootstrap, versions and the image recipe derive. Values: \"claude\" (Claude Code), \"codex\" (Codex), \"antigravity\" (Antigravity, agy), \"copilot\" (GitHub Copilot CLI), \"kimi\" (Kimi Code).",
+    "Nom d’un agent CLI intégré enregistré dans le catalogue d’agents, dont dérivent les choix de outpost init et doctor, le bootstrap, les versions et la recette d’image. Valeurs : \"claude\" (Claude Code), \"codex\" (Codex), \"antigravity\" (Antigravity, agy), \"copilot\" (GitHub Copilot CLI), \"kimi\" (Kimi Code)."
+  ],
+  "RecoveryIntegrity": [
+    "Checksum verdict of verifyRecoveryTransfer() for a recovery directory. Values: \"unverified\" (checksums not requested, or the manifest is missing, invalid or unreadable, or maxBytes was reached), \"checksums-match\" (every entry matches its recorded kind, size and SHA-256), \"checksums-mismatch\" (at least one entry differs). Recovery archives and restore snapshots require \"checksums-match\".",
+    "Verdict de sommes de contrôle de verifyRecoveryTransfer() pour un répertoire de recovery. Valeurs : \"unverified\" (sommes non demandées, ou manifeste absent, invalide ou illisible, ou maxBytes atteint), \"checksums-match\" (chaque entrée correspond au type, à la taille et au SHA-256 enregistrés), \"checksums-mismatch\" (au moins une entrée diffère). Les archives de recovery et les instantanés de restauration exigent \"checksums-match\"."
+  ],
+  "StorageCategoryName": [
+    "Category of a RecoveryInspection. inspectRecovery() scans .outpost/<name> for \"storage\" (default local transport), \"recovery\" (retained recovery transfers), \"logs\", \"locks\" (workspace ownership locks) and \"workspaces\" (runtime worktrees); with a transporter it groups keys by first segment into \"artifacts\", \"checkpoints\", \"conversations\", \"recovery\", \"logs\", \"reservations\", \"resources\" and \"task-cache\".",
+    "Catégorie d’une RecoveryInspection. inspectRecovery() parcourt .outpost/<name> pour \"storage\" (transport local par défaut), \"recovery\" (transferts de recovery conservés), \"logs\", \"locks\" (verrous de possession des workspaces) et \"workspaces\" (worktrees d’exécution) ; avec un transporter, elle regroupe les clés par premier segment en \"artifacts\", \"checkpoints\", \"conversations\", \"recovery\", \"logs\", \"reservations\", \"resources\" et \"task-cache\"."
+  ],
+  "StorageEntryKind": [
+    "Kind of a StorageEntry in a storage inventory. Values: \"file\", \"directory\", \"symlink\" (counted, not followed), \"other\" (special file such as a socket or FIFO; the entry is incomplete), \"unknown\" (not measured because the entry limit was reached or the entry could not be read). Transport entries are always \"file\".",
+    "Type d’une StorageEntry dans un inventaire de stockage. Valeurs : \"file\", \"directory\", \"symlink\" (compté, non suivi), \"other\" (fichier spécial comme un socket ou une FIFO ; l’entrée est incomplète), \"unknown\" (non mesuré, car la limite d’entrées est atteinte ou l’entrée est illisible). Les entrées de transport sont toujours \"file\"."
+  ],
+  "TaskCacheMode": [
+    "mode of a task cache. Values: \"reuse\" (default; return a valid stored value instead of running the task), \"refresh\" (skip the lookup, run the task and overwrite the entry).",
+    "mode d’un cache de tâche. Valeurs : \"reuse\" (par défaut ; renvoie une valeur stockée valide au lieu d’exécuter la tâche), \"refresh\" (ignore la lecture, exécute la tâche et remplace l’entrée)."
+  ],
+  "TaskCacheOutcome": [
+    "Result of a task cache step, in the cache field of a workflow cache event. Values: \"hit\" (a valid entry was reused; the task completes without running), \"miss\" (no entry, entry older than maxAgeMs, or mode refresh), \"stored\" (the result was written after the task succeeded), \"failed\" (a store read, write or entry validation failed; the task continues as on a miss).",
+    "Résultat d’une étape du cache de tâche, dans le champ cache d’un événement de workflow cache. Valeurs : \"hit\" (une entrée valide est réutilisée ; la tâche se termine sans s’exécuter), \"miss\" (aucune entrée, entrée plus ancienne que maxAgeMs, ou mode refresh), \"stored\" (le résultat est écrit après la réussite de la tâche), \"failed\" (échec d’une lecture, d’une écriture ou de la validation d’une entrée ; la tâche continue comme sur un miss)."
+  ],
+  "TaskStatus": [
+    "Status of a workflow task in its TaskRecord, workflow events and checkpoints. Values: \"waiting\" (not started, or queued to run again), \"active\" (running), \"done\" (completed, including a cache hit or an approved gate), \"failed\" (threw an error), \"skipped\" (its condition returned false, or a dependency failed, was skipped, cancelled or rejected), \"cancelled\" (the workflow was aborted or its budget exhausted), \"paused\" (stopped at a gate or by a quota pause), \"rejected\" (a gate decision rejected it), \"waiting-input\" (an interactive task awaits an answer).",
+    "Statut d’une tâche de workflow dans son TaskRecord, les événements de workflow et les checkpoints. Valeurs : \"waiting\" (pas encore démarrée, ou remise en file pour s’exécuter à nouveau), \"active\" (en cours), \"done\" (terminée, y compris sur un hit de cache ou une gate approuvée), \"failed\" (a levé une erreur), \"skipped\" (sa condition a renvoyé false, ou une dépendance a échoué, a été ignorée, annulée ou rejetée), \"cancelled\" (le workflow a été interrompu ou son budget épuisé), \"paused\" (arrêtée à une gate ou par une pause de quota), \"rejected\" (une décision de gate l’a rejetée), \"waiting-input\" (une tâche interactive attend une réponse)."
+  ],
+  "TriggerOutcome": [
+    "Outcome of a verified webhook delivery, passed to TriggerSource.reply(). Values: \"accepted\" (the route published a queue job; default reply 202 with { job }), \"ignored\" (the route returned no job; default reply 204).",
+    "Issue d’une livraison de webhook vérifiée, transmise à TriggerSource.reply(). Valeurs : \"accepted\" (la route a publié un job de file ; réponse par défaut 202 avec { job }), \"ignored\" (la route n’a renvoyé aucun job ; réponse par défaut 204)."
+  ],
+  "TriggerSecret": [
+    "Secret of createGithubWebhook(), createGitlabWebhook(), createSlackSource() and createStandardWebhook(): a string, or a callback returning every currently accepted secret so you can rotate without downtime. An empty string fails when the source is created; a callback that returns no usable secret fails verification.",
+    "Secret de createGithubWebhook(), createGitlabWebhook(), createSlackSource() et createStandardWebhook() : une chaîne, ou un callback qui renvoie tous les secrets acceptés à cet instant pour permettre une rotation sans interruption. Une chaîne vide échoue à la création de la source ; un callback qui ne renvoie aucun secret utilisable fait échouer la vérification."
+  ],
+  "Variables": [
+    "Environment variables as name-to-value strings, used for Command.variables, sandbox variables and agent variables. An agent and its sandbox provider must not declare the same variable; the overlap fails with code configuration.",
+    "Variables d’environnement sous forme de chaînes nom-valeur, utilisées pour Command.variables, les variables de sandbox et les variables d’agent. Un agent et son provider de sandbox ne doivent pas déclarer la même variable ; ce chevauchement échoue avec le code configuration."
+  ],
+  "WorkflowJson": [
+    "JSON value that round-trips without loss: null, boolean, finite number other than -0, string, array or plain object of these. Used for task cache keys, queue job inputs and results, trigger payloads and interactive task state; checkpoint outputs must have this form or be undefined.",
+    "Valeur JSON qui se sérialise sans perte : null, booléen, nombre fini autre que -0, chaîne, tableau ou objet simple de ces valeurs. Utilisée pour les clés de cache de tâche, les entrées et résultats des jobs de file, les payloads de déclencheur et l’état des tâches interactives ; les sorties de checkpoint doivent avoir cette forme ou valoir undefined."
   ]
 }

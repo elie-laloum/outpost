@@ -3,7 +3,7 @@ import { readFile, writeFile, mkdir, readdir } from "node:fs/promises";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { groups, symbolGuides } from "./api-groups.mjs";
-import { explain } from "./reference-explanations.mjs";
+import { explain, unusedDescriptions } from "./reference-explanations.mjs";
 import {
   isContract,
   referenceKind,
@@ -351,6 +351,9 @@ for (const locale of ["", "fr/"]) {
       );
   }
 }
+const unused = unusedDescriptions();
+if (unused.length)
+  throw new Error(`Stale reference descriptions: ${unused.join(", ")}`);
 console.log(
   `${publicNames.size} public symbols and ${symbols.size - publicNames.size} supporting contracts synchronized in English and French.`,
 );

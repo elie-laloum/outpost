@@ -16,7 +16,7 @@ import type { ObservationSink } from "@elie-laloum/outpost";
 | Nom       | Type                                                  | Présence  | Rôle                                                                                                                       |
 | --------- | ----------------------------------------------------- | --------- | -------------------------------------------------------------------------------------------------------------------------- |
 | `observe` | `(observation: Observation) => void \| Promise<void>` | Requis    | Reçoit une enveloppe ; les promesses retournées sont sérialisées par récepteur et leurs rejets sont isolés de l’exécution. |
-| `flush`   | `(() => void \| Promise<void>) \| undefined`          | Optionnel | Vidage facultatif du tampon propre au récepteur, appelé par flush avec le délai de livraison du hub.                       |
+| `flush`   | `(() => void \| Promise<void>) \| undefined`          | Optionnel | Vide le tampon propre au récepteur ; le hub l’appelle depuis flush() avec son délai de livraison.                          |
 
 ## Signature
 

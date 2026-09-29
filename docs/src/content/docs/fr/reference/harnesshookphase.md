@@ -11,6 +11,12 @@ sidebar:
 import type { HarnessHookPhase } from "@elie-laloum/outpost";
 ```
 
+## Rôle et comportement
+
+Point de la boucle du harness intégré où un hook s’exécute, fixé par son option on. Valeurs : "session-start" (une fois, avant la première requête modèle), "before-model" (avant chaque requête modèle), "after-model" (après chaque résultat du modèle), "before-tool" (avant chaque appel d’outil), "after-tool" (après chaque résultat d’outil), "stop" (quand le modèle donne une réponse finale).
+
+[Exemple complet et règles détaillées](../../guide/harness-permissions/).
+
 ## Signature
 
 ```ts
