@@ -99,7 +99,7 @@ Asking an agent in its brief to wait for approval is not a gate: only a gate tas
 
 ## Require a signed decision
 
-With `authentication: "signed"` on the gate, a decision needs an Ed25519 signature from a key bound to its actor. Only your signing service holds private keys.
+With `authentication: "signed"` on the gate, a decision needs an Ed25519 signature from a key bound to its actor. Only your signing service holds private keys; keep them out of worker sandboxes.
 
 ```ts
 import {
@@ -141,7 +141,7 @@ export function submit(
 
 The signature covers every decision field plus `keyId` and `expiresAt`. Each `WorkflowApproverKey` binds a `keyId` to one `actor` and its `publicKey`.
 
-Altered or expired decisions, and keys that are unknown, duplicated or bound to another actor, are rejected. The checkpoint keeps the verified `keyId`, and a restart that drops `authentication` is rejected.
+Expiry is checked against the worker clock, so keep the signing service and workers in time sync. Altered or expired decisions, and keys that are unknown, duplicated or bound to another actor, are rejected. The checkpoint keeps the verified `keyId`, and a restart that drops `authentication` is rejected.
 
 ## Rotate approver keys
 

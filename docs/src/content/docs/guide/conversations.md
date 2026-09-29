@@ -132,7 +132,7 @@ export const coder = createAgent({
   - `conversations`
 - **Stable namespace**: Use one project name on every machine that shares these conversations.
   - `namespace`
-- **Shared transport**: Use [S3 or R2](../object-storage/) between hosts; a local transport on a shared mount also works.
+- **Shared transport**: Use [S3 or R2](../object-storage/) between hosts; a local transport coordinates writers on one machine only.
   - `createS3Transport()`
 
 `result.transcriptReference` identifies the archived copy. The Claude Code, Codex, Copilot and Kimi presets and `createHarness()` accept `conversations`.

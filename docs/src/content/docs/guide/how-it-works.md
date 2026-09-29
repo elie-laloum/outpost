@@ -111,7 +111,7 @@ Outpost keeps its runtime state in the target repository and hides it from Git t
 - `.outpost/`
   - `workspaces/`: Worktrees of `named` and `integrate` branches, including retained ones.
   - `locks/`: Ownership of checkouts, branches and integration.
-  - `storage/`: [Journals](../journals/), checkpoints, artifacts and resource activity.
+  - `storage/`: [Journals](../journals/) and resource activity by default, plus checkpoints, artifacts and caches whose store you point at it ([Where data lives](../storage/)).
   - `conversations/`: Built-in harness transcripts, Copilot and Kimi sessions.
   - `recovery/`: Transfers kept after a failed synchronization.
 

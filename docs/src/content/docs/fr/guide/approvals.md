@@ -99,7 +99,7 @@ Demander à un agent, dans son brief, d’attendre une approbation n’est pas u
 
 ## Exiger une décision signée
 
-Avec `authentication: "signed"` sur la gate, une décision doit porter une signature Ed25519 d’une clé liée à son acteur. Seul votre service de signature détient les clés privées.
+Avec `authentication: "signed"` sur la gate, une décision doit porter une signature Ed25519 d’une clé liée à son acteur. Seul votre service de signature détient les clés privées ; gardez-les hors des sandboxes des workers.
 
 ```ts
 import {
@@ -141,7 +141,7 @@ export function submit(
 
 La signature couvre tous les champs de la décision, plus `keyId` et `expiresAt`. Chaque `WorkflowApproverKey` lie un `keyId` à un seul `actor` et à sa `publicKey`.
 
-Les décisions altérées ou expirées, et les clés inconnues, dupliquées ou liées à un autre acteur, sont refusées. Le checkpoint conserve le `keyId` vérifié, et une reprise qui retire `authentication` est refusée.
+L’expiration est vérifiée avec l’horloge du worker : gardez le service de signature et les workers synchronisés. Les décisions altérées ou expirées, et les clés inconnues, dupliquées ou liées à un autre acteur, sont refusées. Le checkpoint conserve le `keyId` vérifié, et une reprise qui retire `authentication` est refusée.
 
 ## Faire tourner les clés des approbateurs
 

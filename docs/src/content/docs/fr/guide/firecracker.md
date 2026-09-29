@@ -105,6 +105,7 @@ Ctrl+C ou SIGTERM sur le processus Outpost libère aussi la VM. Si l’arrêt es
 - Outpost ne construit ni le noyau ni le système de fichiers racine, et ne crée ni périphérique TAP, ni identité, ni répertoire de prison, ni cgroup, ni règle de pare-feu.
 - Les commandes tournent sous l’utilisateur SSH : les terminaux interactifs ([`attach`](../sandbox-sessions/)) et les commandes élevées sont refusés. Installez les paquets système dans l’image du système de fichiers racine.
 - Les [politiques réseau](../network-restrictions/) sont refusées : restreignez la sortie avec des règles de pare-feu sur l’hôte.
+- Les téléchargements de fichiers depuis l’invité sont mis en mémoire tampon un fichier à la fois dans le processus hôte : la limite mémoire du VMM n’est donc pas un budget mémoire total de l’hôte.
 - Le quota du jailer ne compte pas le travail du noyau effectué hors du cgroup du VMM. Il s’appuie sur l’espace de noms de montage et l’abandon de privilèges du jailer, sans espace de noms PID séparé.
 - Validez démarrage, annulation, transferts de fichiers et libération sur l’hôte visé avant de vous y fier.
 

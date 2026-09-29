@@ -111,7 +111,7 @@ Outpost conserve son état d’exécution dans le dépôt cible et le masque à 
 - `.outpost/`
   - `workspaces/`: Worktrees des branches `named` et `integrate`, y compris ceux conservés.
   - `locks/`: Propriété des checkouts, des branches et de l’intégration.
-  - `storage/`: [Journaux](../journals/), checkpoints, artefacts et activité des ressources.
+  - `storage/`: [Journaux](../journals/) et activité des ressources par défaut, plus les checkpoints, artefacts et caches dont vous y dirigez le store ([Où vivent les données](../storage/)).
   - `conversations/`: Transcripts du harness intégré, sessions Copilot et Kimi.
   - `recovery/`: Transferts conservés après une synchronisation échouée.
 

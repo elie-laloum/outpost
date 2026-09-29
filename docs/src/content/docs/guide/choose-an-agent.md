@@ -69,7 +69,7 @@ The harness checks the settings when you call `createAgent()`: a `reasoning` lev
 | [Steering](../steering/)                        | `injected`                     | `injected`         | `resumed`                      | `resumed`                  | `resumed`                      | `injected`                          |
 | [MCP servers](../mcp-servers/)                  | Yes                            | Yes                | Yes                            | Yes                        | Yes                            | Yes                                 |
 | [MCP OAuth](../mcp-oauth/)                      | Host login                     | Host login         | No                             | Host login                 | No                             | Client credentials                  |
-| [Usage reporting](../budgets/)                  | End of turn                    | End of turn        | Each message                   | After exit                 | End of turn                    | Each model response                 |
+| [Usage reporting](../budgets/)                  | End of turn                    | End of turn        | Each message, total after exit | After exit                 | End of turn                    | Each model response                 |
 | [Quota reset time](../quota-pauses/)            | When reported                  | No                 | No                             | No                         | No                             | From `Retry-After`                  |
 
 <!-- features -->

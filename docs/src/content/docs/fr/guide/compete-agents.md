@@ -268,7 +268,7 @@ export const durability: SpeculationDurability = {
 };
 ```
 
-Changez `version` quand vous modifiez les candidats ou `validate`. Une course durable exige un provider capable de récupération, aujourd’hui Docker ou Podman en mode monté, et conserve le worktree de chaque candidat. Après un crash, récupérez la course avant de la rejouer : [Candidats concurrents](../speculation/).
+`version` fait partie de l’identité de la course : après avoir modifié les candidats ou `validate`, lancez une nouvelle course sous un nouveau `runId`. Une course durable exige un provider capable de récupération, aujourd’hui Docker ou Podman en mode monté, et conserve le worktree de chaque candidat. Après un crash, récupérez la course avant de la rejouer : [Candidats concurrents](../speculation/).
 
 ## Limites
 

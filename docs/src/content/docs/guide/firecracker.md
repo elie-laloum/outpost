@@ -105,6 +105,7 @@ Ctrl+C or SIGTERM on the Outpost process releases the VM too. When termination i
 - Outpost does not build the kernel or root filesystem, or create TAP devices, identities, jail directories, cgroups or firewall rules.
 - Commands run as the SSH user: interactive terminals ([`attach`](../sandbox-sessions/)) and elevated commands are rejected. Install system packages in the root filesystem image.
 - [Network policies](../network-restrictions/) are rejected: restrict egress with host firewall rules.
+- File downloads from the guest are buffered one file at a time in the host process, so the VMM memory limit is not a total host memory budget.
 - The jailer quota does not count kernel work done outside the VMM cgroup. It uses the jailer’s mount namespace and privilege drop, without a separate PID namespace.
 - Validate boot, cancellation, file transfers and release on the host you intend to use before relying on it.
 

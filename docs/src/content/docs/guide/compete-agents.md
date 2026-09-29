@@ -268,7 +268,7 @@ export const durability: SpeculationDurability = {
 };
 ```
 
-Change `version` when you change the candidates or `validate`. Durable races need a provider with recovery, today mounted Docker or Podman, and keep every candidate’s worktree. After a crash, recover the race before replaying it: [Competing candidates](../speculation/).
+`version` is part of the race identity: after changing the candidates or `validate`, start a new race under a new `runId`. Durable races need a provider with recovery, today mounted Docker or Podman, and keep every candidate’s worktree. After a crash, recover the race before replaying it: [Competing candidates](../speculation/).
 
 ## Limits
 

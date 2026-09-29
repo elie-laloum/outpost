@@ -190,7 +190,7 @@ try {
     input: { runId: "fix-42", input: { issue: 42 } },
   });
 } finally {
-  await queue.close();
+  queue.close();
 }
 ```
 
