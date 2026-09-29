@@ -38,6 +38,8 @@ export interface ReplayFailure {
   readonly message: string;
 }
 
+export type FallbackEvent = Extract<AgentEvent, { readonly kind: "fallback" }>;
+
 export interface ReplayTurn {
   readonly prompt: string;
   readonly events: readonly AgentEvent[];
@@ -45,6 +47,8 @@ export interface ReplayTurn {
   readonly usage: Usage;
   readonly conversation?: string;
   readonly failure?: ReplayFailure;
+  /** Recorded handover of a fallback agent to its next candidate after this turn. */
+  readonly handover?: FallbackEvent;
   readonly changes?: WorkspaceCommitsEvent;
 }
 
@@ -96,5 +100,7 @@ export interface DraftTurn {
   conversation?: string;
   failure?: string;
   usage?: Usage;
+  observed: Usage;
+  handover?: FallbackEvent;
   changes?: WorkspaceCommitsEvent;
 }

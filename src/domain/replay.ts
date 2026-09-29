@@ -2,6 +2,12 @@ import { isAgentEvent } from "./agent-observation.ts";
 import { visitAgentEvent } from "./agent-events.ts";
 import type { AgentEvent, Usage } from "./agent.types.ts";
 import { invariant, OutpostError } from "./errors.ts";
+import { fallbackTriggers } from "./fallback-agent.constants.ts";
+import type {
+  FallbackCandidate,
+  FallbackTrigger,
+} from "./fallback-agent.types.ts";
+import { addUsage } from "./usage.ts";
 import type { FaultCode } from "./errors.types.ts";
 import {
   replayDefaults,
@@ -20,6 +26,7 @@ import type {
   ReplayDivergenceKind,
   ReplayFailure,
   DraftTurn,
+  FallbackEvent,
   JournalObject,
   ReplayJournalEvent,
   ReplayRecording,
@@ -104,6 +111,11 @@ function replayRecording(journal: readonly unknown[]): ReplayRecording {
       continue;
     }
     if (origin !== "agent" && origin !== "harness") continue;
+    if (event.kind === "fallback") {
+      if (current) current.handover = fallbackEvent(event, index);
+      current = undefined;
+      continue;
+    }
     if (origin === "harness") source = "harness";
     if (event.kind === "prompt") {
       current = {
@@ -111,6 +123,7 @@ function replayRecording(journal: readonly unknown[]): ReplayRecording {
         events: [],
         texts: [],
         raws: [],
+        observed: { input: 0, cached: 0, output: 0 },
       };
       drafts.push(current);
       continue;
@@ -143,21 +156,25 @@ function turn(
   draft: DraftTurn,
   finished: ReplayFailure | undefined,
 ): ReplayTurn {
-  const failure: ReplayFailure | undefined = draft.usage
-    ? undefined
-    : (finished ?? {
-        code: "process",
-        message: draft.failure ?? replayDefaults.unfinished,
-      });
+  const failure: ReplayFailure | undefined =
+    draft.usage || draft.handover
+      ? undefined
+      : (finished ?? {
+          code: "process",
+          message: draft.failure ?? replayDefaults.unfinished,
+        });
   return Object.freeze({
     prompt: draft.prompt,
     events: Object.freeze(draft.events),
     text:
       draft.result ??
       (draft.texts.length ? draft.texts.join("") : draft.raws.join("\n")),
-    usage: draft.usage ?? { input: 0, cached: 0, output: 0 },
+    usage:
+      draft.usage ??
+      (draft.handover ? draft.observed : { input: 0, cached: 0, output: 0 }),
     ...(draft.conversation ? { conversation: draft.conversation } : {}),
     ...(failure ? { failure } : {}),
+    ...(draft.handover ? { handover: draft.handover } : {}),
     ...(draft.changes ? { changes: draft.changes } : {}),
   });
 }
@@ -176,6 +193,9 @@ function collect(draft: DraftTurn, event: JournalObject, index: number): void {
     },
     raw: () => {
       draft.raws.push(String(event.value));
+    },
+    usage: () => {
+      draft.observed = addUsage(draft.observed, usage(event.tokens, index));
     },
   });
 }
@@ -298,4 +318,37 @@ function text(value: JournalObject, key: string, index: number): string {
     `Replay journal entry ${index} requires a string ${key}`,
   );
   return field;
+}
+
+function fallbackEvent(event: JournalObject, index: number): FallbackEvent {
+  const failure = text(event, "failure", index);
+  invariant(
+    fallbackTriggers.has(failure as FallbackTrigger),
+    `Replay journal entry ${index} has an unknown fallback failure`,
+  );
+  return Object.freeze({
+    kind: "fallback",
+    from: candidate(event.from, index),
+    to: candidate(event.to, index),
+    failure: failure as FallbackTrigger,
+    message: text(event, "message", index),
+    ...(event.resetAt === undefined
+      ? {}
+      : { resetAt: text(event, "resetAt", index) }),
+  });
+}
+
+function candidate(value: unknown, index: number): FallbackCandidate {
+  const recorded = object(value, index);
+  invariant(
+    Number.isSafeInteger(recorded.index) && (recorded.index as number) >= 0,
+    `Replay journal entry ${index} has an invalid fallback candidate`,
+  );
+  return Object.freeze({
+    index: recorded.index as number,
+    name: text(recorded, "name", index),
+    ...(recorded.model === undefined
+      ? {}
+      : { model: text(recorded, "model", index) }),
+  });
 }
