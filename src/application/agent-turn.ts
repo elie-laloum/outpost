@@ -13,7 +13,7 @@ import { OutpostError } from "../domain/errors.ts";
 import type { SandboxLease } from "../domain/sandbox.types.ts";
 import { activityWatchdog } from "./activity-watchdog.ts";
 import { agentOutput } from "./agent-output.ts";
-import { agentQuota } from "./agent-quota.ts";
+import { agentFailure } from "./agent-failure.ts";
 import {
   agentConnectionFailurePattern,
   executionDefaults,
@@ -44,11 +44,11 @@ export async function turn(
     ? AbortSignal.any([options.signal, controller.signal])
     : controller.signal;
   const output = agentOutput(agent, options, markers, pass);
-  const quota = agentQuota(agent, output);
+  const failure = agentFailure(agent, output);
   const watchdog = activityWatchdog(controller, options, pass);
   watchdog.refresh(false);
   const stderr = boundedLines((text, truncated) => {
-    quota.observe(text);
+    failure.observe(text);
     notify(options.observe, {
       kind: "stderr",
       text,
@@ -143,18 +143,10 @@ export async function turn(
         error.code === "timeout" &&
         output.failure &&
         agentConnectionFailurePattern.test(output.failure)
-      ) {
-        const diagnosed = new OutpostError(
-          error.code,
-          `${error.message}. The agent reported a connection failure. Check the model endpoint and network access.`,
-          { ...error.details, agentDiagnostic: "connection" },
-          error,
-        );
-        diagnosed.recovery = error.recovery;
-        throw diagnosed;
-      }
+      )
+        throw failure.connection(error);
       stderr.flush();
-      throw quota.classify(error);
+      throw failure.classify(error);
     }
     notify(
       options.warn,
@@ -182,7 +174,7 @@ export async function turn(
   try {
     outcome = output.result();
   } catch (error) {
-    throw quota.classify(error);
+    throw failure.classify(error);
   }
   return {
     ...(preparedConversation ? { conversation: preparedConversation } : {}),

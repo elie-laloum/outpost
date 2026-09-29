@@ -1,5 +1,9 @@
-import { quotaMatcher } from "./quota.ts";
+import { textMatcher } from "./text-matcher.ts";
 import { copilotQuotaPatterns } from "./quota.constants.ts";
+import {
+  copilotUnavailablePatterns,
+  transientNoticePatterns,
+} from "./unavailable.constants.ts";
 import { copilotUsage } from "./copilot-usage.ts";
 import { sessionUsageCommand, sessionUsageResult } from "./session-usage.ts";
 import type { AgentAdapter, CliHarness } from "../../domain/agent.types.ts";
@@ -35,7 +39,11 @@ function bindCopilot(settings: Bound<CopilotSettings>): AgentAdapter {
     }),
     request: (input) => copilotRequest(settings, input),
     events: copilotEvents,
-    quota: quotaMatcher(copilotQuotaPatterns),
+    quota: textMatcher(copilotQuotaPatterns),
+    unavailable: textMatcher(
+      copilotUnavailablePatterns,
+      transientNoticePatterns,
+    ),
     usage: "session",
     usageCommand: (conversation) =>
       sessionUsageCommand("copilot", conversation),

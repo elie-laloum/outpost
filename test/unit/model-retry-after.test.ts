@@ -91,7 +91,7 @@ test("missing or invalid Retry-After retains the existing HTTP error shape", asy
     ),
     (error: unknown) => {
       assert.ok(error instanceof OutpostError);
-      assert.deepEqual(error.details, { status: 503 });
+      assert.deepEqual(error.details, { status: 503, unavailable: "HTTP 503" });
       return true;
     },
   );

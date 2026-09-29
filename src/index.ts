@@ -232,6 +232,8 @@ export type { FaultCode } from "./domain/errors.ts";
 
 export { quotaFault } from "./domain/quota.ts";
 export type { QuotaFault } from "./domain/quota.types.ts";
+export { unavailableFault } from "./domain/unavailable.ts";
+export type { UnavailableFault } from "./domain/unavailable.types.ts";
 
 export type {
   AgentAdapter,

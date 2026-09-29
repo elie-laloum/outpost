@@ -12,6 +12,7 @@ import type {
 import {
   MODEL_MAX_TIMEOUT_MS,
   MODEL_QUOTA_STATUS,
+  MODEL_UNAVAILABLE_STATUSES,
   MODEL_RESPONSE_BYTES,
   MODEL_TIMEOUT_MS,
 } from "./model.constants.ts";
@@ -88,6 +89,9 @@ export function httpModelProvider(
         status: response.status,
         ...(retryAfter === undefined ? {} : { retryAfterMs: retryAfter }),
         ...(resetAt === undefined ? {} : { resetAt }),
+        ...(MODEL_UNAVAILABLE_STATUSES.has(response.status)
+          ? { unavailable: `HTTP ${response.status}` }
+          : {}),
       },
     );
   };
@@ -108,6 +112,7 @@ export function httpModelProvider(
     return new OutpostError(
       "provider",
       "Model request failed during HTTP transport",
+      { unavailable: "HTTP transport failure" },
     );
   };
   async function* stream(

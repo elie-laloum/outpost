@@ -18,3 +18,12 @@ export const MODEL_QUOTA_ERRORS = new Set([
   "rate_limit_exceeded",
   "insufficient_quota",
 ]);
+/** Statuses reporting a transient model service outage rather than a bad request. */
+export const MODEL_UNAVAILABLE_STATUSES = new Set([
+  408, 500, 502, 503, 504, 529,
+]);
+export const MODEL_UNAVAILABLE_ERRORS = new Set([
+  "overloaded_error",
+  "api_error",
+  "server_error",
+]);

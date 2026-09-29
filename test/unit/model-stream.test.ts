@@ -184,7 +184,10 @@ test("Anthropic streams rebuild text, thinking and partial tool input", () => {
           error: { type: "overloaded_error" },
         }),
       }),
-    { code: "provider", details: { type: "overloaded_error" } },
+    {
+      code: "provider",
+      details: { type: "overloaded_error", unavailable: "overloaded_error" },
+    },
   );
   assert.throws(() => anthropicStream().final(), { code: "response" });
   assert.throws(() => anthropicStream().push({ data: "{" }), /valid JSON/);

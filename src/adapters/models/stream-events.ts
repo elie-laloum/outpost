@@ -1,7 +1,10 @@
 import { OutpostError } from "../../domain/errors.ts";
 import type { ServerSentEvent } from "../../infrastructure/sse.types.ts";
 import { object } from "./model-response.ts";
-import { MODEL_QUOTA_ERRORS } from "./model.constants.ts";
+import {
+  MODEL_QUOTA_ERRORS,
+  MODEL_UNAVAILABLE_ERRORS,
+} from "./model.constants.ts";
 
 export function eventData(event: ServerSentEvent): Record<string, unknown> {
   let value: unknown;
@@ -24,11 +27,18 @@ export function streamFailure(data: Record<string, unknown>): never {
   const quota = [type, code].some(
     (value) => value !== undefined && MODEL_QUOTA_ERRORS.has(value),
   );
+  const unavailable = [type, code].find(
+    (value) => value !== undefined && MODEL_UNAVAILABLE_ERRORS.has(value),
+  );
   throw new OutpostError(
     quota ? "quota" : "provider",
     quota
       ? "Model stream reported a usage or rate limit"
       : "Model stream reported an error",
-    { ...(type ? { type } : {}), ...(quota && code ? { code } : {}) },
+    {
+      ...(type ? { type } : {}),
+      ...(quota && code ? { code } : {}),
+      ...(!quota && unavailable ? { unavailable } : {}),
+    },
   );
 }

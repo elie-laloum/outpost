@@ -183,6 +183,8 @@ export interface AgentAdapter extends AgentFeatures {
   events(line: string): readonly AgentEvent[];
   /** Recognizes a usage-limit or rate-limit message in failure or stderr text. */
   quota?(text: string): boolean;
+  /** Recognizes a terminal service outage or connection failure in failure or stderr text. */
+  unavailable?(text: string): boolean;
   usageCommand?(conversation: string): Command | undefined;
   usageResult?(text: string): Usage | undefined;
 }

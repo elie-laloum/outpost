@@ -1,5 +1,9 @@
-import { quotaMatcher } from "./quota.ts";
+import { textMatcher } from "./text-matcher.ts";
 import { antigravityQuotaPatterns } from "./quota.constants.ts";
+import {
+  antigravityUnavailablePatterns,
+  transientNoticePatterns,
+} from "./unavailable.constants.ts";
 import type { AgentAdapter, CliHarness } from "../../domain/agent.types.ts";
 import type { AgentModel } from "../../domain/model.types.ts";
 import { antigravityCredentials } from "./antigravity-authentication.ts";
@@ -34,7 +38,11 @@ function bindAntigravity(settings: Bound<AntigravitySettings>): AgentAdapter {
     }),
     request: (input) => antigravityRequest(settings, input),
     events: antigravityEvents,
-    quota: quotaMatcher(antigravityQuotaPatterns),
+    quota: textMatcher(antigravityQuotaPatterns),
+    unavailable: textMatcher(
+      antigravityUnavailablePatterns,
+      transientNoticePatterns,
+    ),
   } satisfies AgentAdapter);
 }
 

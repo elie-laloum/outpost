@@ -1,3 +1,4 @@
+import { maxFaultCauseDepth } from "./errors.constants.ts";
 import type { FaultCode } from "./errors.types.ts";
 
 export type { FaultCode } from "./errors.types.ts";
@@ -59,4 +60,18 @@ export function positive(value: number, label: string): number {
     `${label} must be a positive integer`,
   );
   return value;
+}
+
+/** First OutpostError in the cause chain that satisfies the predicate. */
+export function findFault(
+  error: unknown,
+  matches: (fault: OutpostError) => boolean,
+): OutpostError | undefined {
+  let current = error;
+  for (let depth = 0; depth < maxFaultCauseDepth; depth++) {
+    if (current instanceof OutpostError && matches(current)) return current;
+    if (!(current instanceof Error)) return undefined;
+    current = current.cause;
+  }
+  return undefined;
 }

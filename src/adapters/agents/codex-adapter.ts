@@ -1,5 +1,9 @@
-import { quotaMatcher } from "./quota.ts";
+import { textMatcher } from "./text-matcher.ts";
 import { codexQuotaPatterns } from "./quota.constants.ts";
+import {
+  codexUnavailablePatterns,
+  transientNoticePatterns,
+} from "./unavailable.constants.ts";
 import type { AgentModel } from "../../domain/model.types.ts";
 import { credentialPlanner } from "./authentication.ts";
 import { codexCredentials } from "./codex-authentication.ts";
@@ -29,7 +33,8 @@ function bindCodex(settings: Bound<CodexSettings>): AgentAdapter {
     variables: Object.freeze({ ...settings.variables }),
     request: (input) => codexRequest(settings, input),
     events: codexEvents,
-    quota: quotaMatcher(codexQuotaPatterns),
+    quota: textMatcher(codexQuotaPatterns),
+    unavailable: textMatcher(codexUnavailablePatterns, transientNoticePatterns),
   } satisfies AgentAdapter);
 }
 

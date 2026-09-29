@@ -170,7 +170,7 @@ test("providers stream deltas and final results for the three protocols", async 
         prompt: "hello",
       }),
     ),
-    { code: "provider", details: { status: 503 } },
+    { code: "provider", details: { status: 503, unavailable: "HTTP 503" } },
   );
 });
 
