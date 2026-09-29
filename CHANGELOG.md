@@ -1,5 +1,12 @@
 # Changelog
 
+## 9.0.1
+
+- Rewrite the English and French Guide by reader task: twelve chapters in reading order, six complete use-case recipes, and pages drawn with feature cells, reading paths, flows and file trees. Moved Guide URLs redirect to their new pages.
+- Rewrite the Reference: each family overview picks between its entry points with decision and outcome tables, and every symbol and field description was checked against the source and corrected where it was wrong, vague or outdated. Each symbol links to its own Guide page.
+- List the values of 35 type aliases such as `FaultCode`, `TaskStatus` and `SteeringMode`, keep placeholders such as `<name>` visible, and print types from other modules without `import("…")` qualifiers. Documentation sync now rejects descriptions that no page uses.
+- Mark the speculation API experimental in the Reference, as the 9.0.0 notes stated. Add numbered runnable examples under `examples/`. Public library contracts are unchanged.
+
 ## 9.0.0
 
 This major release renames public factories and declarations and removes the previous names, changes conversation and reporter contracts, and extends public event, fault and stop-reason unions. Replace previous names with their `create*`/`define*` equivalents, pass a store instead of a format name to `createTransportConversations()`, use each agent's native store instead of the format-keyed `conversations` helpers, and update exhaustive handling of `AgentEvent` (`fallback`, `steer`), `FaultCode` (`steering`) and stop reasons (`steered`). Firecracker is no longer experimental; speculation remains experimental. Live validation campaigns listed in the roadmap remain outstanding.

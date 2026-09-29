@@ -25,6 +25,8 @@ Disponible en 9.0.0 : les fabriques publiques suivent une règle de nommage uniq
 
 Disponible en 9.0.0 : le [provider Firecracker](../../guide/firecracker/) n’est plus expérimental. Il exige toujours un hôte Linux/KVM et un invité préparés, et l’opérateur prend en charge le réseau et le superviseur root du mode jailer optionnel. La comptabilité des ressources du superviseur et la validation adversariale restent ouvertes.
 
+Disponible en 9.0.1 : le [Guide](../../guide/introduction/) est organisé par tâche du lecteur, et les descriptions de la [Référence](../../reference/) ont été vérifiées dans le code source, avec des tableaux de décision dans la vue d’ensemble de chaque famille. Cette version documentaire ne change pas le statut de validation des fonctionnalités expérimentales.
+
 Disponible en 8.0.0 : [Enregistrer et rejouer](../../guide/record-replay/) rejoue le journal d’un dispatch sans appeler de modèle, reconstruit ses commits dans la sandbox et signale les divergences. Les tests déterministes couvrent les enregistrements CLI et harness, les échecs, les réparations, les passes et une vraie sandbox Docker. Le rejeu d’un workflow entier, les modifications non commitées et une commande CLI restent prévus.
 
 Disponible en 8.0.0 : le [cache de tâches](../../guide/task-cache/) réutilise le résultat JSON d’une tâche lorsque workflow, tâche, version et clé correspondent, avec `repositoryFingerprint()` pour les clés fondées sur l’état du dépôt, expiration, rafraîchissement et périmètre de rétention `task-cache`. Les tests déterministes couvrent les correspondances, les entrées invalides et concurrentes, les checkpoints et la rétention. La coordination entre exécutions concurrentes et l’authentification des entrées restent à faire.

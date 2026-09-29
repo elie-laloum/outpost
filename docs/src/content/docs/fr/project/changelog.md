@@ -7,6 +7,13 @@ sidebar:
 
 Traduction du journal `CHANGELOG.md` conservé à la racine du dépôt. Chaque version publiée possède ses notes dans les deux langues.
 
+## 9.0.1
+
+- Réécriture du Guide en anglais et en français par tâche du lecteur : douze chapitres dans l’ordre de lecture, six recettes complètes de cas d’usage, et des pages dessinées avec des cellules de fonctionnalités, des parcours de lecture, des flux et des arborescences de fichiers. Les URL du Guide déplacées redirigent vers leurs nouvelles pages.
+- Réécriture de la Référence : la vue d’ensemble de chaque famille aide à choisir entre ses points d’entrée avec des tableaux de décision et de résultats, et chaque description de symbole et de champ a été vérifiée dans le code source puis corrigée lorsqu’elle était fausse, vague ou obsolète. Chaque symbole renvoie vers sa propre page du Guide.
+- Liste des valeurs de 35 alias de type comme `FaultCode`, `TaskStatus` et `SteeringMode`, affichage des placeholders comme `<name>` et des types d’autres modules sans qualificatif `import("…")`. La synchronisation de la documentation refuse désormais les descriptions qu’aucune page n’utilise.
+- L’API de spéculation est marquée expérimentale dans la Référence, comme l’indiquaient les notes de la 9.0.0. Ajout d’exemples exécutables numérotés sous `examples/`. Les contrats publics de la bibliothèque sont inchangés.
+
 ## 9.0.0
 
 Cette version majeure renomme les fabriques et déclarations publiques et supprime les anciens noms, modifie les contrats de conversation et de reporter, et étend les unions publiques d’événements, d’erreurs et de raisons d’arrêt. Remplacez les anciens noms par leurs équivalents `create*`/`define*`, passez un store au lieu d’un nom de format à `createTransportConversations()`, utilisez le store natif de chaque agent au lieu des helpers `conversations` indexés par format, et adaptez les traitements exhaustifs de `AgentEvent` (`fallback`, `steer`), `FaultCode` (`steering`) et des raisons d’arrêt (`steered`). Firecracker n’est plus expérimental ; la spéculation reste expérimentale. Les campagnes de validation réelle listées dans la roadmap restent à mener.
