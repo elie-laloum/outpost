@@ -26,7 +26,7 @@ const coder = agent({
 
 ## Behavior
 
-Codex supports captured conversations, resume, fork and response repair. `saveConversations: false` disables capture. `approvalReviewer` selects `user` or `auto_review` where supported by the CLI.
+Codex supports captured conversations, resume, fork and response repair. `saveConversations: false` disables capture. `conversations` stores captured sessions in a `"codex"` [conversation store](../chat-history/#storage), such as `transportConversations("codex", …)`. `approvalReviewer` selects `user` or `auto_review` where supported by the CLI.
 
 ## Custom endpoint
 

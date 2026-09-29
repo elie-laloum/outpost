@@ -26,7 +26,7 @@ const coder = agent({
 
 ## Comportement
 
-Reprenez une conversation émise dans la même sandbox ouverte avec `sandbox.resume(id, options)` ou `resume()` sur un résultat à chaud. Les réparations automatiques de réponse réutilisent cette conversation. Outpost ne dispose pas de format de capture portable vérifié pour Antigravity : la reprise à froid après fermeture de la sandbox et le fork automatisé sont refusés. Un dispatch sans continuation démarre toujours une session neuve. Voir [l’historique](../chat-history/) et [la commande de reprise Google](https://www.antigravity.google/docs/cli/commands/resume/).
+Reprenez une conversation émise dans la même sandbox ouverte avec `sandbox.resume(id, options)` ou `resume()` sur un résultat à chaud. Les réparations automatiques de réponse réutilisent cette conversation. Outpost ne dispose pas de format de capture portable vérifié pour Antigravity : la reprise à froid après fermeture de la sandbox et le fork automatisé sont refusés, et `antigravityHarness()` refuse un store `conversations`. Un dispatch sans continuation démarre toujours une session neuve. Voir [l’historique](../chat-history/) et [la commande de reprise Google](https://www.antigravity.google/docs/cli/commands/resume/).
 
 ## Installation épinglée
 

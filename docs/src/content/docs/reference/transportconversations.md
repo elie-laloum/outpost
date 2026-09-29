@@ -13,7 +13,7 @@ import { transportConversations } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Build a Claude or Codex ConversationStore using transport snapshots and a stable project namespace. Capture preserves native relocation and child transcripts; locate materializes an immutable snapshot below the target repository’s recovery directory. Returned file paths remain readable and reference identifies the remote index. Native files and credentials are separate.
+Build a ConversationStore for the claude, codex, copilot, kimi or harness format using transport snapshots and a stable project namespace. Pass it as the conversations option of the matching harness preset or harness(); the store declares its format so a mismatched harness fails when it is created. Capture preserves native relocation, child transcripts and session bundles; locate materializes an immutable snapshot below the target repository’s recovery directory. Returned file paths remain readable and reference identifies the remote index. Native files and credentials are separate; archives are neither encrypted nor authenticated.
 
 [Complete example and detailed rules](../../guide/operations/storage-transports/).
 

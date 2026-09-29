@@ -235,6 +235,10 @@
     "Identifier of this conversation storage implementation.",
     "Identifiant de cette implémentation de stockage de conversations."
   ],
+  "ConversationStore.format": [
+    "Transcript format this store handles, such as claude, codex, copilot, kimi or harness. Harnesses reject a store whose declared format differs from their own when they are created; omit it for a custom store that validates records itself.",
+    "Format de transcript géré par ce store, par exemple claude, codex, copilot, kimi ou harness. Les harness refusent dès leur création un store dont le format déclaré diffère du leur ; l’omettre pour un store personnalisé qui valide lui-même ses enregistrements."
+  ],
   "ConversationStore.locate": [
     "Find an existing transcript by conversation ID, repository and optional host home.",
     "Recherche un transcript existant par identifiant, dépôt et home hôte optionnel."
@@ -1327,6 +1331,10 @@
   "CommonAgentSettings.saveConversations": [
     "Enable native transcript capture when the adapter supports it.",
     "Activer la capture native si l’adapter la prend en charge."
+  ],
+  "CommonAgentSettings.conversations": [
+    "Store that captures, locates and restores this agent’s sessions instead of the default native store, such as transportConversations() with the agent’s format. The format must match the agent, and saveConversations must not be false.",
+    "Store qui capture, localise et restaure les sessions de cet agent au lieu du store natif par défaut, par exemple transportConversations() au format de l’agent. Le format doit correspondre à l’agent et saveConversations ne doit pas valoir false."
   ],
   "CodexSettings.modelProvider": [
     "Custom Codex model endpoint configuration; requires Responses API compatibility.",
@@ -4550,6 +4558,10 @@
     "Explicit environment declarations; values are strings.",
     "Déclarations d’environnement explicites ; les valeurs sont des chaînes."
   ],
+  "CopilotSettings.conversations": [
+    "Store that captures, locates and restores Copilot session bundles instead of the default native store, such as transportConversations(\"copilot\", …). A store that declares another format is rejected when the harness is created.",
+    "Store qui capture, localise et restaure les bundles de session Copilot au lieu du store natif par défaut, par exemple transportConversations(\"copilot\", …). Un store qui déclare un autre format est refusé dès la création du harness."
+  ],
   "KimiSettings.authentication": [
     "Account authentication reads the OAuth file for the selected region and device_id from ~/.kimi-code or KIMI_CODE_HOME; account.file selects a dedicated profile directory. Usage forms accept KIMI_API_KEY or an explicit key/variable and require a model on agent(). Account key/variable forms are unsupported. Omission prepares no credentials.",
     "Le mode account lit le fichier OAuth de la région choisie et device_id sous ~/.kimi-code ou KIMI_CODE_HOME ; account.file sélectionne un dossier de profil dédié. Les formes usage acceptent KIMI_API_KEY ou une clé/variable explicite et exigent un modèle sur agent(). Les formes account.key/variable ne sont pas prises en charge. Son absence ne prépare aucun identifiant."
@@ -4557,6 +4569,10 @@
   "KimiSettings.variables": [
     "Explicit environment declarations; values are strings.",
     "Déclarations d’environnement explicites ; les valeurs sont des chaînes."
+  ],
+  "KimiSettings.conversations": [
+    "Store that captures, locates and restores Kimi session bundles instead of the default native store, such as transportConversations(\"kimi\", …). A store that declares another format is rejected when the harness is created.",
+    "Store qui capture, localise et restaure les bundles de session Kimi au lieu du store natif par défaut, par exemple transportConversations(\"kimi\", …). Un store qui déclare un autre format est refusé dès la création du harness."
   ],
   "antigravityHarness.settings": [
     "Configuration for the Antigravity CLI harness; pass the selected model to agent() instead.",

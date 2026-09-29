@@ -32,6 +32,30 @@ Désactiver la capture empêche le résultat de fournir une conversation enregis
 
 `conversations.native()` gère les formats natifs ; `harnessConversations()` stocke les transcriptions de la boucle intégrée. `transportConversations()` archive les formats pris en charge via un transport. La restauration réécrit les chemins de workspace pris en charge lorsque la transcription se déplace.
 
+Passez `conversations` à `claudeHarness()`, `codexHarness()`, `copilotHarness()`, `kimiHarness()` ou `harness()` pour capturer les sessions de cet agent dans n’importe quel `ConversationStore` au lieu du store natif par défaut :
+
+```ts
+import {
+  agent,
+  kimiHarness,
+  localTransport,
+  transportConversations,
+} from "@elie-laloum/outpost";
+
+const conversations = transportConversations("kimi", {
+  transporter: localTransport({ directory: "/mnt/shared/outpost" }),
+  namespace: "my-project",
+});
+
+export const coder = agent({
+  harness: kimiHarness({ authentication: "account", conversations }),
+});
+```
+
+Une session capturée par un dispatch peut alors être reprise, ou forkée avec Kimi, depuis une autre machine ou après suppression du dossier `.outpost` local du dépôt. Utilisez un `s3Transport()` pour la partager entre hôtes. Le `format` du store doit correspondre à l’agent : `transportConversations("kimi", …)` pour Kimi, `"harness"` pour `harness()`. Un format incompatible, une valeur qui n’est pas un store, ou `saveConversations: false` combiné à `conversations` échoue dès la création du harness, avant toute allocation de sandbox. Un store personnalisé sans `format` est accepté tel quel. Sans l’option, chaque agent conserve son store natif. `antigravityHarness()` refuse `conversations`, car Antigravity n’a pas de capture portable.
+
+Les conversations archivées contiennent prompts, contenu du dépôt et sorties d’outils. Outpost ne les chiffre ni ne les authentifie ; restreignez l’accès au transport comme celui du dépôt.
+
 Séparez l’accès aux transcriptions de l’authentification. Une conversation enregistrée ne fournit pas d’identifiants de compte, et supprimer les identifiants ne supprime pas le contenu des conversations.
 
 Copilot et Kimi capturent un bundle JSON par session sous `.outpost/conversations/<format>/` dans le dépôt (ou sous `conversationHome` si fourni). `conversations.native("copilot")`, `conversations.native("kimi")` et `transportConversations()` prennent ces bundles en charge. `transcript` désigne le bundle, pas un historique JSONL unique. La capture est limitée à 64 Mio de données et 4 096 fichiers ; fichiers obligatoires absents, liens symboliques et métadonnées non prises en charge sont explicitement refusés. La restauration prépare et valide tous les fichiers avant de remplacer une session existante, en conservant son ancien dossier sous `.outpost-recovery/` dans le home de la CLI.

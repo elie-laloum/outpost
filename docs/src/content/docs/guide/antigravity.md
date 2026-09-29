@@ -26,7 +26,7 @@ const coder = agent({
 
 ## Behavior
 
-Resume a conversation emitted in the same open sandbox with `sandbox.resume(id, options)` or a warm result’s `resume()`. Automatic response repairs use that same conversation. Antigravity has no verified portable capture format in Outpost: cold resume after sandbox disposal and automated fork are rejected. A new dispatch without continuation still starts a fresh session. See [chat history](../chat-history/) and [Google’s resume command](https://www.antigravity.google/docs/cli/commands/resume/).
+Resume a conversation emitted in the same open sandbox with `sandbox.resume(id, options)` or a warm result’s `resume()`. Automatic response repairs use that same conversation. Antigravity has no verified portable capture format in Outpost: cold resume after sandbox disposal and automated fork are rejected, and `antigravityHarness()` refuses a `conversations` store. A new dispatch without continuation still starts a fresh session. See [chat history](../chat-history/) and [Google’s resume command](https://www.antigravity.google/docs/cli/commands/resume/).
 
 ## Pinned installation
 

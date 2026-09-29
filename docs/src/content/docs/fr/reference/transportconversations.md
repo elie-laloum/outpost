@@ -13,7 +13,7 @@ import { transportConversations } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Construit un ConversationStore Claude ou Codex avec snapshots de transport et espace de noms stable du projet. La capture préserve la relocalisation native et les transcripts enfants ; locate matérialise un snapshot immuable sous le dossier de récupération du dépôt cible. Les chemins file restent lisibles et reference identifie l’index distant. Fichiers natifs et identifiants restent distincts.
+Construit un ConversationStore au format claude, codex, copilot, kimi ou harness avec snapshots de transport et espace de noms stable du projet. Le passer à l’option conversations du preset correspondant ou de harness() ; le store déclare son format, donc un harness incompatible échoue dès sa création. La capture préserve la relocalisation native, les transcripts enfants et les bundles de session ; locate matérialise un snapshot immuable sous le dossier de récupération du dépôt cible. Les chemins file restent lisibles et reference identifie l’index distant. Fichiers natifs et identifiants restent distincts ; les archives ne sont ni chiffrées ni authentifiées.
 
 [Exemple complet et règles détaillées](../../guide/operations/storage-transports/).
 
