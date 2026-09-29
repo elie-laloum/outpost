@@ -439,6 +439,18 @@ export type {
   QueueWorkerOptions,
 } from "./application/queue-worker.types.ts";
 export type { QueuedTaskOptions } from "./application/queued-task.types.ts";
+export { cronSchedule } from "./domain/cron.ts";
+export type { CronOptions, CronSchedule } from "./domain/cron.types.ts";
+export type {
+  TriggerJob,
+  TriggerJobInput,
+} from "./domain/trigger-job.types.ts";
+export { runSchedules } from "./application/schedules.ts";
+export type {
+  RunSchedulesOptions,
+  ScheduleFailure,
+  TriggerSchedule,
+} from "./application/schedules.types.ts";
 
 export type { EgressPolicy } from "./domain/egress.types.ts";
 
