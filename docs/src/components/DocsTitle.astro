@@ -1,0 +1,203 @@
+---
+import Code from "starlight-theme-celestia/components/Code.astro";
+import { breadcrumbs, currentLink, docsSpace, isFrench } from "./docs-route.ts";
+
+const route = Astro.locals.starlightRoute;
+const { entry } = route;
+const space = docsSpace(route);
+const crumbs = breadcrumbs(route);
+const link = space === "reference" ? currentLink(route.sidebar) : undefined;
+const kind = link?.attrs["data-api-kind"];
+const experimental = link?.attrs["data-api-status"] === "experimental";
+const importLine = entry.body?.match(/^## Import\n\n```ts\n([\s\S]*?)```/m)?.[1];
+const description = entry.data.description;
+const body = entry.body?.replace(/^:::[\s\S]*?:::\s*/, "").trimStart() ?? "";
+const showDescription =
+  description && !/ — Outpost API$/.test(description) && !body.startsWith(description);
+const experimentalLabel = isFrench(route) ? "Expérimental" : "Experimental";
+---
+
+<div class="docs-title">
+  {
+    crumbs.length > 0 && (
+      <nav class="crumbs" aria-label={isFrench(route) ? "Fil d’Ariane" : "Breadcrumb"}>
+        <ol>
+          {crumbs.map((crumb) => (
+            <li>{crumb.href ? <a href={crumb.href}>{crumb.label}</a> : <span>{crumb.label}</span>}</li>
+          ))}
+        </ol>
+      </nav>
+    )
+  }
+  <header class:list={["title-bay", { split: Boolean(importLine) }]}>
+    <div class="title-say">
+      <h1 id="_top" class:list={{ symbol: Boolean(kind) }} data-api-kind={kind}>
+        {kind && <span class="kind" aria-hidden="true" />}
+        <span>{entry.data.title}</span>
+        {
+          experimental && (
+            <span class="flask" role="img" aria-label={experimentalLabel} title={experimentalLabel} />
+          )
+        }
+      </h1>
+      {showDescription && <p class="description">{description}</p>}
+    </div>
+    {
+      importLine && (
+        <div class="title-show">
+          <Code code={importLine.trimEnd()} lang="ts" />
+        </div>
+      )
+    }
+  </header>
+</div>
+
+<style>
+  .crumbs {
+    height: 2.75rem;
+    padding: 0 var(--docs-pad);
+    border-bottom: 1px solid var(--docs-line);
+  }
+  .crumbs ol {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow-x: auto;
+    list-style: none;
+    font-size: 0.8125rem;
+    white-space: nowrap;
+    scrollbar-width: none;
+  }
+  .crumbs li {
+    display: flex;
+    align-items: center;
+    color: var(--sl-color-gray-3);
+  }
+  .crumbs li + li::before {
+    content: "";
+    width: 0.4rem;
+    height: 0.4rem;
+    margin: 0 0.75rem;
+    border-top: 1px solid var(--sl-color-gray-4);
+    border-right: 1px solid var(--sl-color-gray-4);
+    transform: rotate(45deg);
+  }
+  .crumbs li:last-child {
+    color: var(--sl-color-gray-2);
+  }
+  .crumbs a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .crumbs a:hover {
+    color: var(--sl-color-white);
+    text-decoration: underline;
+    text-underline-offset: 0.22em;
+  }
+  .title-bay {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    border-bottom: 1px solid var(--docs-line);
+  }
+  .title-bay.split {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  }
+  .title-say {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1rem;
+    padding: 3rem var(--docs-pad) 2.75rem;
+  }
+  .split .title-say {
+    border-right: 1px solid var(--docs-line);
+  }
+  h1 {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
+    margin: 0;
+    color: var(--sl-color-white);
+    font-size: clamp(2rem, 3.2vw, 2.75rem);
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+    text-wrap: balance;
+  }
+  h1.symbol {
+    font-family: var(--sl-font-system-mono);
+    font-size: clamp(1.6rem, 2.6vw, 2.2rem);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    overflow-wrap: anywhere;
+  }
+  .kind,
+  .flask {
+    flex: 0 0 auto;
+    width: 1.25rem;
+    height: 1.25rem;
+    background-color: var(--sl-color-gray-3);
+    mask: var(--kind-icon) center / contain no-repeat;
+  }
+  [data-api-kind="function"] {
+    --kind-icon: url("../assets/reference-function.svg");
+  }
+  [data-api-kind="interface"] {
+    --kind-icon: url("../assets/reference-interface.svg");
+  }
+  [data-api-kind="type"] {
+    --kind-icon: url("../assets/reference-type.svg");
+  }
+  [data-api-kind="class"] {
+    --kind-icon: url("../assets/reference-class.svg");
+  }
+  [data-api-kind="constant"] {
+    --kind-icon: url("../assets/reference-constant.svg");
+  }
+  .flask {
+    background-color: var(--sl-color-accent);
+    mask-image: url("../assets/reference-experiment.svg");
+  }
+  .description {
+    max-width: 44rem;
+    margin: 0;
+    color: var(--sl-color-gray-2);
+    font-size: 1.0625rem;
+    line-height: 1.65;
+    text-wrap: pretty;
+  }
+  .title-show {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+    padding: 2rem var(--docs-pad);
+  }
+  .title-show :global([data-celestia-code-container]) {
+    border: 1px solid var(--docs-line);
+    border-radius: 0;
+    background: var(--docs-code-bg);
+  }
+  .title-show :global(pre) {
+    margin: 0;
+    padding: 0.9rem 1rem;
+    overflow-x: auto;
+    background: transparent !important;
+    font-size: 0.8125rem;
+    scrollbar-width: thin;
+  }
+  @media (max-width: 64rem) {
+    .title-bay.split {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .split .title-say {
+      border-right: 0;
+    }
+    .title-show {
+      padding-top: 0;
+    }
+  }
+</style>

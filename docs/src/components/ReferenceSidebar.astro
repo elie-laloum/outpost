@@ -1,0 +1,28 @@
+---
+import SidebarSublist from "@astrojs/starlight/components/SidebarSublist.astro";
+import MobileSettings from "./MobileSettings.astro";
+import { docsHref, isFrench } from "./docs-route.ts";
+
+const route = Astro.locals.starlightRoute;
+const reference = route.sidebar[1];
+const sections = reference?.type === "group" ? reference.entries : [];
+const home = docsHref(route, "reference/");
+const atHome = /^(fr\/)?reference$/.test(route.entry.id);
+---
+
+<div class="docs-navigation reference-navigation">
+  <a class="map" href={home} aria-current={atHome ? "page" : undefined}>
+    {isFrench(route) ? "Plan de la référence" : "Reference map"}
+  </a>
+  {
+    sections.map((section, index) =>
+      section.type === "group" ? (
+        <section class="reference-section" aria-labelledby={`reference-section-${index}`}>
+          <h2 id={`reference-section-${index}`}>{section.label}</h2>
+          <SidebarSublist sublist={section.entries} />
+        </section>
+      ) : null,
+    )
+  }
+  <MobileSettings />
+</div>

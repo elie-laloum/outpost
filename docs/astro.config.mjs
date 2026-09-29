@@ -4,13 +4,14 @@ import starlight from "@astrojs/starlight";
 import celestia from "starlight-theme-celestia";
 import { referenceSidebar } from "./scripts/reference-navigation.mjs";
 import { chapters } from "./scripts/navigation.mjs";
+import { rehypeBays } from "./scripts/rehype-bays.mjs";
 
 const base = process.env.DOCS_BASE ?? "/outpost";
 export default defineConfig({
   site: "https://elie-laloum.github.io",
   base,
   trailingSlash: "always",
-  markdown: { processor: unified() },
+  markdown: { processor: unified(), rehypePlugins: [rehypeBays] },
   integrations: [
     starlight({
       title: "Outpost",
@@ -55,14 +56,16 @@ export default defineConfig({
         },
       ],
       components: {
-        PageFrame: "./src/components/GuideFrame.astro",
-        Header: "./src/components/GuideHeader.astro",
-        PageTitle: "./src/components/GuideTitle.astro",
+        PageFrame: "./src/components/DocsFrame.astro",
+        Header: "./src/components/DocsHeader.astro",
+        PageTitle: "./src/components/DocsTitle.astro",
+        TwoColumnContent: "./src/components/DocsColumns.astro",
+        MarkdownContent: "./src/components/DocsContent.astro",
+        Footer: "./src/components/DocsFooter.astro",
         Head: "./src/components/Head.astro",
         Sidebar: "./src/components/Sidebar.astro",
-        SiteTitle: "./src/components/SiteTitle.astro",
       },
-      customCss: ["./src/styles/custom.css"],
+      customCss: ["./src/styles/custom.css", "./src/styles/bays.css"],
       lastUpdated: false,
     }),
   ],

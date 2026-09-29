@@ -2224,11 +2224,11 @@
     },
     {
       "source": "reference/index.md",
-      "destination": "reference/diagnosesandbox.md"
+      "destination": "reference/index.md"
     },
     {
       "source": "fr/reference/index.md",
-      "destination": "fr/reference/diagnosesandbox.md"
+      "destination": "fr/reference/index.md"
     },
     {
       "source": "reference/overview/remote-transfers.md",

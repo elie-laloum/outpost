@@ -10,22 +10,16 @@ for (const [locale, title, reference] of [
   }) => {
     await page.goto(`${locale}guide/first-request/`);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(title);
-    await expect(page.locator(".guide-navigation section > h2")).toHaveCount(
-      10,
-    );
-    await expect(page.locator(".guide-navigation details")).toHaveCount(0);
+    await expect(page.locator(".docs-navigation section > h2")).toHaveCount(10);
+    await expect(page.locator(".docs-navigation details")).toHaveCount(0);
     await expect(page.locator(".sl-markdown-content details")).toHaveCount(0);
-    await page
-      .locator(".guide-header")
-      .getByRole("link", { name: reference, exact: true })
-      .click();
-    await expect(page).toHaveURL(/\/reference\/diagnosesandbox\/$/);
-    await expect(page.locator(".guide-frame")).toHaveCount(0);
+    const spaces = page.locator(".docs-header nav");
+    await spaces.getByRole("link", { name: reference, exact: true }).click();
+    await expect(page).toHaveURL(new RegExp(`/${locale}reference/$`));
     await expect(
-      page
-        .getByRole("tab", { name: reference, exact: true })
-        .filter({ visible: true }),
-    ).toHaveAttribute("aria-selected", "true");
+      spaces.getByRole("link", { name: reference, exact: true }),
+    ).toHaveAttribute("aria-current", "true");
+    await expect(page.locator(".families > li")).toHaveCount(25);
   });
 
   test(`search finds the new guide (${locale || "en"})`, async ({ page }) => {
@@ -61,10 +55,10 @@ for (const [locale, heading, start, copied] of [
   }) => {
     await context.grantPermissions(["clipboard-read", "clipboard-write"]);
     await page.goto(locale);
-    const brand = page.locator(".guide-header .brand");
+    const brand = page.locator(".docs-header .brand");
     await expect(brand).toHaveAttribute("href", `/outpost/${locale}`);
     await expect(brand.locator(".mark")).toBeVisible();
-    await expect(page.locator(".guide-header nav a").first()).toHaveAttribute(
+    await expect(page.locator(".docs-header nav a").first()).toHaveAttribute(
       "href",
       `/outpost/${locale}guide/introduction/`,
     );
@@ -144,7 +138,7 @@ for (const locale of ["", "fr/"]) {
     ).toBe(true);
     await page.getByRole("button", { name: "Menu", exact: true }).click();
     const setup = page
-      .locator(".guide-navigation a")
+      .locator(".docs-navigation a")
       .filter({ hasText: locale ? /^Mise en place$/ : /^Setup$/ });
     await expect(setup).toBeVisible();
     await setup.click();
@@ -211,12 +205,13 @@ for (const locale of ["", "fr/"]) {
       await expect(page).toHaveURL(new RegExp(`/${locale}guide/${target}/$`));
       await expect(
         page
-          .locator(".guide-header")
+          .locator(".docs-header")
           .getByRole("link", { name: "Guide", exact: true }),
       ).toHaveAttribute("aria-current", "true");
     }
     await page.goto(`${locale}reference/`);
-    await expect(page).toHaveURL(/\/reference\/diagnosesandbox\/$/);
+    await expect(page).toHaveURL(new RegExp(`/${locale}reference/$`));
+    await expect(page.locator(".reference-map")).toHaveCount(5);
     await expect(
       page.getByRole("link", { name: /^(API index|Index de l’API)$/ }),
     ).toHaveCount(0);
@@ -351,14 +346,16 @@ for (const [locale, label] of [
     }) => {
       await page.goto(`${locale}reference/${name}/`);
       const content = page.locator(".sl-markdown-content");
-      const warning = content.locator(":scope > .starlight-aside").first();
+      const lead = content.locator(":scope > .bay").first();
+      const warning = lead.locator(".bay-say > .starlight-aside").first();
       const experimental = ["firecracker", "firecrackeroptions"].includes(name);
       if (!experimental) {
         await expect(
-          content.locator(":scope > .starlight-aside--caution"),
+          content.locator(".bay-say > .starlight-aside--caution"),
         ).toHaveCount(0);
         return;
       }
+      await expect(lead).toHaveAttribute("data-role", "lead");
       await expect(warning).toBeVisible();
       await expect(warning).toHaveClass(/starlight-aside--caution/);
       await expect(warning).toContainText(label);
@@ -410,7 +407,7 @@ for (const locale of ["", "fr/"]) {
       await page.goto(`${locale}reference/firecracker/`);
       if (width < 800)
         await page.getByRole("button", { name: "Menu", exact: true }).click();
-      const panel = page.getByRole("tabpanel").filter({ visible: true });
+      const panel = page.locator(".reference-navigation");
       const headings = panel.locator(".reference-section > h2");
       await expect(headings).toHaveText([
         "Environment",
@@ -478,15 +475,7 @@ for (const locale of ["", "fr/"]) {
       await page.keyboard.press("Enter");
       await expect(family).not.toHaveAttribute("open");
       await expect(headings.first()).toBeVisible();
-      await page.getByRole("tab", { name: "Guide", exact: true }).click();
-      await expect(
-        page
-          .getByRole("tabpanel")
-          .filter({ visible: true })
-          .locator(".reference-section"),
-      ).toHaveCount(0);
-      await page.keyboard.press("ArrowRight");
-      await expect(headings.first()).toBeVisible();
+      await expect(page.getByRole("tab")).toHaveCount(0);
       expect(
         await page.evaluate(
           () => document.documentElement.scrollWidth <= window.innerWidth,
@@ -546,5 +535,38 @@ for (const [locale, overview] of [
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(
       `Harness — ${overview}`,
     );
+  });
+}
+
+for (const locale of ["", "fr/"]) {
+  test(`pages lay code and contracts beside their prose (${locale || "en"})`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(`${locale}guide/first-request/`);
+    const split = page.locator('.bay[data-bay="split"]').first();
+    await expect(split.locator(".bay-show pre").first()).toBeVisible();
+    const say = await split.locator(".bay-say").boundingBox();
+    const show = await split.locator(".bay-show").boundingBox();
+    expect(show.x).toBeGreaterThanOrEqual(say.x + say.width - 1);
+    await page.goto(`${locale}reference/dispatch/`);
+    await expect(page.locator(".title-show")).toContainText(
+      'import { dispatch } from "@elie-laloum/outpost"',
+    );
+    await expect(page.locator(".prop")).toHaveCount(34);
+    await expect(
+      page.locator(".prop").first().locator(".prop-presence"),
+    ).toHaveAttribute("data-required", "");
+    const pin = page.locator('.bay[data-role="contract"] .bay-pin');
+    await expect(pin).toHaveAttribute("data-pinned", "");
+    await page.mouse.wheel(0, 1600);
+    await expect
+      .poll(async () => (await pin.boundingBox()).y)
+      .toBeLessThan(200);
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= window.innerWidth,
+      ),
+    ).toBe(true);
   });
 }

@@ -1,36 +1,46 @@
 ---
 import SidebarSublist from "@astrojs/starlight/components/SidebarSublist.astro";
-import LanguageSelect from "virtual:starlight/components/LanguageSelect";
-import ThemeSelect from "virtual:starlight/components/ThemeSelect";
+import MobileSettings from "./MobileSettings.astro";
+import { docsHref, isFrench } from "./docs-route.ts";
+
 const route = Astro.locals.starlightRoute;
 const guide = route.sidebar[0];
-const french = route.locale === "fr";
-const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const project = [
+  ["Changelog", "project/changelog/"],
+  ["Roadmap", "project/roadmap/"],
+].map(([label, path]) => ({
+  label,
+  href: docsHref(route, path!),
+  current: route.entry.id.replace(/^fr\//, "") === path!.replace(/\/$/, ""),
+}));
 ---
-<div class="guide-navigation">
-  {guide?.type === "group" && guide.entries.map((group) => group.type === "group" && (
-    <section>
-      <h2>{group.label}</h2>
-      <SidebarSublist sublist={group.entries} />
-    </section>
-  ))}
+
+<div class="docs-navigation">
+  {
+    guide?.type === "group" &&
+      guide.entries.map(
+        (group) =>
+          group.type === "group" && (
+            <section>
+              <h2>{group.label}</h2>
+              <SidebarSublist sublist={group.entries} />
+            </section>
+          ),
+      )
+  }
   <section>
-    <h2>{french ? "Projet" : "Project"}</h2>
-    <a href={`${base}/${french ? "fr/" : ""}project/changelog/`}>Changelog</a>
-    <a href={`${base}/${french ? "fr/" : ""}project/roadmap/`}>Roadmap</a>
+    <h2>{isFrench(route) ? "Projet" : "Project"}</h2>
+    <ul>
+      {
+        project.map((link) => (
+          <li>
+            <a href={link.href} aria-current={link.current ? "page" : undefined}>
+              {link.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
   </section>
-  <div class="guide-mobile-settings"><LanguageSelect /><ThemeSelect /></div>
+  <MobileSettings />
 </div>
-<style>
-  .guide-navigation { padding: 1.75rem 1.25rem 3rem; }
-  section + section { margin-top: 1.7rem; }
-  h2 { margin: 0 0 .6rem .65rem; font-size: .78rem; font-weight: 600; color: var(--sl-color-gray-2); }
-  section > a { display: block; padding: .35rem .65rem; color: var(--sl-color-gray-2); text-decoration: none; font-size: .875rem; }
-  .guide-navigation :global(ul) { padding: 0; border: 0; }
-  .guide-navigation :global(li) { margin: .12rem 0; }
-  .guide-navigation :global(a) { border-radius: .3rem; font-size: .875rem; font-weight: 400; line-height: 1.45; }
-  .guide-navigation :global(a[aria-current="page"]) { background: var(--sl-color-gray-6); color: var(--sl-color-white); font-weight: 500; }
-  .guide-navigation :global(a:hover) { color: var(--sl-color-white); background: var(--sl-color-gray-6); }
-  .guide-mobile-settings { display: flex; gap: 1rem; margin: 2rem .65rem; }
-  @media (min-width: 50rem) { .guide-mobile-settings { display: none; } }
-</style>

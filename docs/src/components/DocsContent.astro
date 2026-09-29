@@ -1,0 +1,11 @@
+---
+import MarkdownContent from "starlight-theme-celestia/components/MarkdownContent.astro";
+import ReferenceMap from "./ReferenceMap.astro";
+
+const map = /^(fr\/)?reference$/.test(Astro.locals.starlightRoute.entry.id);
+---
+
+<MarkdownContent>
+  <slot />
+  {map && <ReferenceMap />}
+</MarkdownContent>

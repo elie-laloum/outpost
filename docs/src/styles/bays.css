@@ -1,0 +1,314 @@
+/* Documentation bays: each h2 section on the 12-track frame, split at track 5. */
+.docs-main .sl-markdown-content {
+  font-size: 1.0714rem;
+  line-height: 1.75;
+}
+.docs-main .sl-markdown-content > .bay {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  margin: 0;
+  border-bottom: 1px solid var(--docs-line);
+}
+.docs-main .sl-markdown-content > .bay[data-bay="wide"] {
+  grid-template-columns: minmax(0, 1fr);
+}
+.bay-say,
+.bay-show {
+  min-width: 0;
+  padding: 2.5rem var(--docs-pad) 2.75rem;
+}
+.bay[data-bay="split"] > .bay-say {
+  border-right: 1px solid var(--docs-line);
+}
+.bay[data-bay="wide"] > .bay-say > :not(table, .cells, .props) {
+  max-width: 70ch;
+}
+.bay-wide {
+  grid-column: 1 / -1;
+  min-width: 0;
+  padding: 0 var(--docs-pad) 2.75rem;
+}
+.bay-say > :first-child,
+.bay-show > .bay-pin > :first-child {
+  margin-top: 0;
+}
+.bay-pin > * + * {
+  margin-top: 1.25rem;
+}
+.bay-pin[data-pinned] {
+  position: sticky;
+  top: calc(4rem + 1.5rem);
+}
+
+/* Headings and prose */
+.bay-say > .sl-heading-wrapper.level-h2:not(:first-child),
+.bay-pin > .sl-heading-wrapper.level-h2:not(:first-child) {
+  margin-top: 2.75rem;
+}
+.bay .sl-heading-wrapper.level-h2 h2 {
+  margin: 0;
+}
+.bay ul.cells > li,
+.bay ul.props > li,
+.bay[data-role="log"] .bay-pin > ul > li {
+  list-style: none;
+}
+.bay ul.cells > li::marker,
+.bay ul.props > li::marker,
+.bay[data-role="log"] .bay-pin > ul > li::marker {
+  content: none;
+}
+.bay .prop > *,
+.bay .prop-head > * {
+  margin: 0;
+}
+.bay h2 {
+  color: var(--sl-color-white);
+  font-size: clamp(1.35rem, 1.9vw, 1.6rem);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+.bay h3 {
+  margin-top: 2rem;
+  color: var(--sl-color-white);
+  font-size: 1.1rem;
+  font-weight: 550;
+  letter-spacing: -0.015em;
+}
+.bay p,
+.bay li {
+  color: var(--sl-color-gray-2);
+  text-wrap: pretty;
+}
+.bay a:not(.sl-anchor-link) {
+  color: var(--sl-color-white);
+  text-decoration-color: var(--sl-color-gray-4);
+  text-underline-offset: 0.22em;
+}
+.bay a:not(.sl-anchor-link):hover {
+  text-decoration-color: var(--sl-color-white);
+}
+.bay :not(pre) > code {
+  padding: 0.12em 0.3em;
+  border: 0;
+  border-radius: 0;
+  background: color-mix(in oklch, var(--sl-color-gray-6) 70%, transparent);
+  color: var(--sl-color-white);
+  font-size: 0.86em;
+}
+
+/* Code */
+.bay [data-celestia-code-container] {
+  border: 1px solid var(--docs-line) !important;
+  border-radius: 0 !important;
+  background: var(--docs-code-bg);
+}
+.bay pre.astro-code {
+  background: transparent !important;
+  font-size: 0.8125rem;
+  line-height: 1.7;
+  scrollbar-width: thin;
+  scrollbar-color: var(--sl-color-gray-5) transparent;
+}
+.bay .code-tabs {
+  border-radius: 0 !important;
+}
+
+/* Tables */
+.bay table {
+  display: table;
+  width: 100%;
+  margin-top: 1.5rem;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+.bay th {
+  border-bottom: 1px solid var(--sl-color-gray-5);
+  color: var(--sl-color-gray-3);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  text-align: start;
+}
+.bay td,
+.bay th {
+  padding: 0.7rem 1rem 0.7rem 0;
+  vertical-align: top;
+  background: none;
+}
+.bay td {
+  border-bottom: 1px solid var(--docs-line);
+}
+
+/* Asides */
+.bay .starlight-aside {
+  border: 1px solid var(--docs-line);
+  border-left-width: 1px;
+  border-radius: 0;
+  background: var(--docs-code-bg);
+}
+
+/* Cells: links laid on the frame, flush with the bay edges. */
+.bay ul.cells {
+  display: grid;
+  grid-template-columns: minmax(0, 4fr) minmax(0, 3fr);
+  margin: 1.5rem calc(-1 * var(--docs-pad)) 0;
+  padding: 0;
+  border-top: 1px solid var(--docs-line);
+  list-style: none;
+}
+.bay[data-bay="wide"] ul.cells {
+  grid-template-columns: minmax(0, 5fr) minmax(0, 4fr) minmax(0, 3fr);
+  margin-bottom: -2.75rem;
+}
+.bay ul.cells > li {
+  margin: 0;
+  border-bottom: 1px solid var(--docs-line);
+}
+.bay ul.cells > li + li {
+  margin-top: 0;
+}
+.bay ul.cells > li:not(:last-child) {
+  border-right: 1px solid var(--docs-line);
+}
+.bay[data-bay="split"] ul.cells > li:nth-child(2n) {
+  border-right: 0;
+}
+.bay[data-bay="wide"] ul.cells > li:nth-child(3n) {
+  border-right: 0;
+}
+.bay ul.cells > li > a {
+  display: flex;
+  align-items: center;
+  min-height: 3.75rem;
+  padding: 0.9rem var(--docs-pad);
+  color: var(--sl-color-white);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background-color 0.2s var(--docs-ease);
+}
+.bay ul.cells > li > a:hover {
+  background: var(--docs-code-bg);
+}
+
+/* Reference property rows */
+.bay ul.props {
+  margin: 1.25rem 0 0;
+  padding: 0;
+  border-top: 1px solid var(--docs-line);
+  list-style: none;
+}
+.bay .prop {
+  display: grid;
+  gap: 0.3rem;
+  margin: 0;
+  padding: 0.95rem 0;
+  border-bottom: 1px solid var(--docs-line);
+}
+.bay .prop + .prop {
+  margin-top: 0;
+}
+.bay .prop[data-depth="1"] {
+  margin-left: 0.6rem;
+  padding-left: 1rem;
+  border-left: 1px solid var(--docs-line);
+}
+.bay .prop[data-depth="2"],
+.bay .prop[data-depth="3"] {
+  margin-left: 1.2rem;
+  padding-left: 1rem;
+  border-left: 1px solid var(--docs-line);
+}
+.bay .prop-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.bay .prop-name code {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--sl-color-white);
+  font-size: 0.875rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.bay .prop-presence {
+  flex: 0 0 auto;
+  color: var(--sl-color-gray-3);
+  font-size: 0.75rem;
+}
+.bay .prop-presence[data-required] {
+  color: var(--sl-color-white);
+  font-weight: 500;
+}
+.bay .prop-type code {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--sl-color-gray-3);
+  font-size: 0.8rem;
+  line-height: 1.55;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.bay .prop-meaning {
+  color: var(--sl-color-gray-2);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+/* Project pages: the heading stays beside its entries. */
+.bay[data-role="log"] > .bay-say {
+  align-self: start;
+  position: sticky;
+  top: 4rem;
+}
+.bay[data-role="log"] > .bay-show {
+  padding-top: 2.5rem;
+}
+.bay[data-role="log"] .bay-pin > ul {
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--docs-line);
+}
+.bay[data-role="log"] .bay-pin > ul > li {
+  margin: 0;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--docs-line);
+}
+
+@media (max-width: 64rem) {
+  .docs-main .sl-markdown-content > .bay {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .bay[data-bay="split"] > .bay-say {
+    border-right: 0;
+  }
+  .bay[data-bay="split"] > .bay-show {
+    padding-top: 0;
+  }
+  .bay[data-role="log"] > .bay-say {
+    position: static;
+    padding-bottom: 1rem;
+  }
+  .bay-pin[data-pinned] {
+    position: static;
+  }
+}
+@media (max-width: 40rem) {
+  .bay ul.cells,
+  .bay[data-bay="wide"] ul.cells {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .bay ul.cells > li {
+    border-right: 0 !important;
+  }
+  .bay table {
+    display: block;
+    overflow-x: auto;
+  }
+}

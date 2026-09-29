@@ -1,0 +1,99 @@
+---
+import Search from "virtual:starlight/components/Search";
+import LanguageSelect from "virtual:starlight/components/LanguageSelect";
+import ThemeSelect from "virtual:starlight/components/ThemeSelect";
+import MobileMenuToggle from "starlight-theme-celestia/components/MobileMenuToggle.astro";
+import Brand from "./Brand.astro";
+import { docsHref, docsSpace, isFrench, spaceLinks } from "./docs-route.ts";
+
+const route = Astro.locals.starlightRoute;
+const space = docsSpace(route);
+---
+
+<div class="docs-header">
+  <Brand href={docsHref(route, "")} suffix="docs" class="docs-brand" />
+  <nav aria-label={isFrench(route) ? "Espaces de la documentation" : "Documentation spaces"}>
+    {
+      spaceLinks(route).map((link) => (
+        <a href={link.href} aria-current={link.space === space ? "true" : undefined}>
+          {link.label}
+        </a>
+      ))
+    }
+  </nav>
+  <div class="docs-search"><Search /></div>
+  <div class="docs-settings"><LanguageSelect /><ThemeSelect /></div>
+  <div class="docs-menu"><MobileMenuToggle /></div>
+</div>
+
+<style>
+  .docs-header {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    height: 100%;
+    padding: 0 1.5rem;
+  }
+  nav {
+    display: flex;
+    align-self: stretch;
+    gap: 1.5rem;
+    font-size: 0.875rem;
+  }
+  nav a {
+    display: flex;
+    align-items: center;
+    color: var(--sl-color-gray-3);
+    text-decoration: none;
+    transition: color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  nav a:hover {
+    color: var(--sl-color-white);
+  }
+  nav a[aria-current] {
+    color: var(--sl-color-white);
+    font-weight: 500;
+    box-shadow: inset 0 -2px 0 var(--sl-color-white);
+  }
+  .docs-search {
+    margin-left: auto;
+    width: min(23rem, 30vw);
+  }
+  .docs-settings {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+  .docs-menu {
+    display: none;
+  }
+  @media (max-width: 49.99rem) {
+    .docs-header {
+      gap: 1rem;
+      padding: 0 1rem;
+    }
+    .docs-header :global(.docs-brand .suffix),
+    .docs-settings {
+      display: none;
+    }
+    .docs-menu {
+      display: block;
+    }
+    .docs-search {
+      width: auto;
+    }
+    nav {
+      gap: 0.8rem;
+      font-size: 0.8rem;
+    }
+  }
+  @media (max-width: 26rem) {
+    .docs-header :global(.docs-brand .name) {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+    }
+  }
+</style>

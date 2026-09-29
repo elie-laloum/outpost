@@ -1,0 +1,19 @@
+---
+import LanguageSelect from "virtual:starlight/components/LanguageSelect";
+import ThemeSelect from "virtual:starlight/components/ThemeSelect";
+---
+
+<div class="mobile-settings"><LanguageSelect /><ThemeSelect /></div>
+
+<style>
+  .mobile-settings {
+    display: flex;
+    gap: 1rem;
+    margin: 2rem 0.65rem;
+  }
+  @media (min-width: 50rem) {
+    .mobile-settings {
+      display: none;
+    }
+  }
+</style>

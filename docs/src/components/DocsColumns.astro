@@ -1,0 +1,52 @@
+---
+const { toc } = Astro.locals.starlightRoute;
+---
+
+<div class:list={["docs-columns", { "has-rail": Boolean(toc) }]}>
+  <div class="docs-pane"><slot /></div>
+  {
+    toc && (
+      <aside class="docs-rail print:hidden" aria-label={Astro.locals.t("tableOfContents.onThisPage")}>
+        <slot name="right-sidebar" />
+      </aside>
+    )
+  }
+</div>
+
+<style>
+  .docs-columns {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .docs-pane {
+    min-width: 0;
+    max-width: 84rem;
+    border-right: 1px solid var(--docs-line);
+  }
+  .docs-rail {
+    display: none;
+  }
+  @media (min-width: 100rem) {
+    .has-rail {
+      grid-template-columns: minmax(0, 84rem) 16rem;
+    }
+    .docs-rail {
+      display: block;
+      position: sticky;
+      top: 4rem;
+      align-self: start;
+      max-height: calc(100vh - 4rem);
+      overflow-y: auto;
+      padding: 2.5rem 1.5rem;
+      scrollbar-width: thin;
+    }
+    .docs-rail :global(.right-sidebar-panel) {
+      padding: 0;
+    }
+  }
+  @media (max-width: 49.99rem) {
+    .docs-pane {
+      border-right: 0;
+    }
+  }
+</style>

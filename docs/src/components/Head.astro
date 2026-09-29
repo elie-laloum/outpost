@@ -17,6 +17,21 @@ import StarlightHead from "@astrojs/starlight/components/Head.astro";
       link.setAttribute("aria-label", `${link.textContent?.trim()} — ${label}`);
     }
   };
+  // Pin a section's code only when it fits the viewport and its prose is taller.
+  const pinSectionCode = () => {
+    const wide = window.matchMedia("(min-width: 64rem)").matches;
+    for (const pin of document.querySelectorAll<HTMLElement>('.bay:not([data-role="log"]) .bay-pin')) {
+      const say = pin.closest(".bay")?.querySelector<HTMLElement>(".bay-say");
+      const fits = pin.offsetHeight < window.innerHeight - 112;
+      pin.toggleAttribute("data-pinned", wide && fits && (say?.offsetHeight ?? 0) > pin.offsetHeight);
+    }
+  };
+  const observePins = () => {
+    pinSectionCode();
+    new ResizeObserver(pinSectionCode).observe(document.body);
+  };
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", observePins);
+  else observePins();
   prepareReferenceStatus();
   document.addEventListener("astro:page-load", prepareReferenceStatus);
   prepareCopyButtons();

@@ -311,6 +311,14 @@ for (const [language, locale] of [
       "\n",
   );
 }
+const home = JSON.parse(
+  await readFile(resolve(root, "reference-content/home.json"), "utf8"),
+);
+for (const [language, locale] of ["", "fr/"].entries())
+  expected.set(
+    `${locale}reference/index.md`,
+    `---\ntitle: ${JSON.stringify(home.title[language])}\ndescription: ${JSON.stringify(home.description[language])}\n---\n\n${home.body[language]}\n`,
+  );
 for (const [name, raw] of expected) {
   const content = await format(raw, { parser: "markdown" });
   const target = resolve(root, "src/content/docs", name);

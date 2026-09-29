@@ -1,0 +1,87 @@
+---
+import EditLink from "virtual:starlight/components/EditLink";
+
+const { pagination } = Astro.locals.starlightRoute;
+const cells = [
+  { rel: "prev", link: pagination.prev, label: Astro.locals.t("page.previousLink") },
+  { rel: "next", link: pagination.next, label: Astro.locals.t("page.nextLink") },
+] as const;
+---
+
+<footer class="docs-footer">
+  {
+    (pagination.prev || pagination.next) && (
+      <nav class="pager" aria-label={Astro.locals.t("page.previousLink") + " / " + Astro.locals.t("page.nextLink")}>
+        {cells.map((cell) =>
+          cell.link ? (
+            <a class={cell.rel} href={cell.link.href} rel={cell.rel}>
+              <span class="pager-label">{cell.label}</span>
+              <span class="pager-title">{cell.link.label}</span>
+            </a>
+          ) : (
+            <span class={`${cell.rel} empty`} />
+          ),
+        )}
+      </nav>
+    )
+  }
+  <div class="edit"><EditLink /></div>
+</footer>
+
+<style>
+  .docs-footer {
+    border-top: 1px solid var(--docs-line);
+  }
+  .pager {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    border-bottom: 1px solid var(--docs-line);
+  }
+  .pager > * {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    min-height: 6rem;
+    justify-content: center;
+    padding: 1.25rem var(--docs-pad);
+    text-decoration: none;
+  }
+  .pager .prev {
+    border-right: 1px solid var(--docs-line);
+  }
+  .pager .next {
+    align-items: flex-end;
+    text-align: end;
+  }
+  .pager a {
+    transition: background-color 0.2s var(--docs-ease);
+  }
+  .pager a:hover {
+    background: var(--docs-code-bg);
+  }
+  .pager-label {
+    color: var(--sl-color-gray-3);
+    font-size: 0.8125rem;
+  }
+  .pager-title {
+    color: var(--sl-color-white);
+    font-size: 1.0625rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+  .edit {
+    padding: 1.25rem var(--docs-pad) 2.5rem;
+    font-size: 0.8125rem;
+  }
+  .edit :global(a) {
+    color: var(--sl-color-gray-3);
+  }
+  .edit :global(a:hover) {
+    color: var(--sl-color-white);
+  }
+  @media (max-width: 40rem) {
+    .pager {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+  }
+</style>
