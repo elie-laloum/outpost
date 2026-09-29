@@ -282,6 +282,7 @@ function scopedLease(
   return {
     root: lease.root,
     home: lease.home,
+    ...(lease.liveInput ? { liveInput: true } : {}),
     invoke: (command) => {
       signal.throwIfAborted();
       return lease.invoke({

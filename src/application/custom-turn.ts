@@ -83,6 +83,7 @@ export async function customTurn(
   const sandbox: SandboxLease = {
     root: lease.root,
     home: lease.home,
+    ...(lease.liveInput ? { liveInput: true } : {}),
     invoke: (command) => {
       signal.throwIfAborted();
       return track(

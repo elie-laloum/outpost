@@ -75,6 +75,12 @@ export type {
   HarnessToolExecution,
 } from "./domain/harness.types.ts";
 export type {
+  McpHttpServer,
+  McpServer,
+  McpServers,
+  McpStdioServer,
+} from "./domain/mcp-server.types.ts";
+export type {
   HarnessTool,
   HarnessToolContext,
   HarnessToolEvent,
