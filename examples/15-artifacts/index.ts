@@ -20,21 +20,24 @@ import {
 import { model, modelProvider, sandboxProvider } from "../shared/model.ts";
 import { demoRepository } from "../shared/repository.ts";
 
-
 // The artifact contract: a name, a version, a schema.
 const Endpoints = v.array(v.object({ method: v.string(), path: v.string() }));
 
-const apiContract = defineJsonArtifact({ name: "api-endpoints", version: "1", schema: Endpoints });
+const apiContract = defineJsonArtifact({
+  name: "api-endpoints",
+  version: "1",
+  schema: Endpoints,
+});
 
-const transporter = createLocalTransport({ directory: join(import.meta.dirname, "state") });
+const transporter = createLocalTransport({
+  directory: join(import.meta.dirname, "state"),
+});
 const store = createArtifactStore({ transporter, maxBytes: 1_000_000 });
-
 
 const reader = createAgent({
   model,
   harness: createHarness({ modelProvider, tools: [createHarnessFileTools()] }),
 });
-
 
 // 1. Producer: the agent extracts the API routes, published as an artifact.
 const extract = defineArtifactTask({
@@ -54,7 +57,6 @@ const extract = defineArtifactTask({
   },
 });
 
-
 // 2. Consumer: reads the artifact back (contract and integrity checked) and turns it into docs.
 const docs = defineTask({
   key: "docs",
@@ -62,10 +64,11 @@ const docs = defineTask({
   perform: async (context) => {
     const endpoints = await readArtifact(context, extract, apiContract, store);
 
-    return endpoints.map((endpoint) => `- ${endpoint.method} ${endpoint.path}`).join("\n");
+    return endpoints
+      .map((endpoint) => `- ${endpoint.method} ${endpoint.path}`)
+      .join("\n");
   },
 });
-
 
 const result = await defineWorkflow("api-docs", [extract, docs]).start();
 result.unwrap();

@@ -9,7 +9,6 @@ import {
   defineHarnessToolset,
 } from "@elie-laloum/outpost";
 
-
 // A custom tool: a name, a description read by the model, an input schema
 // and a function that runs in the sandbox.
 export const countLines = defineHarnessTool({
@@ -24,21 +23,26 @@ export const countLines = defineHarnessTool({
   },
 
   async execute(input: { path: string }, { sandbox, signal }) {
-    const result = await sandbox.invoke({ executable: "wc", arguments: ["-l", input.path], signal });
+    const result = await sandbox.invoke({
+      executable: "wc",
+      arguments: ["-l", input.path],
+      signal,
+    });
 
-    return result.status === 0 ? result.stdout : { content: result.stderr, isError: true };
+    return result.status === 0
+      ? result.stdout
+      : { content: result.stderr, isError: true };
   },
 });
-
 
 // The tools provided by Outpost, grouped with ours into a single set.
 export const workbench = defineHarnessToolset({
   name: "workbench",
   tools: [
-    createHarnessFileTools(),   // read_file, list_files
+    createHarnessFileTools(), // read_file, list_files
     createHarnessSearchTools(), // search
-    createHarnessEditTools(),   // write_file, edit_file
-    createHarnessShellTools(),  // shell
+    createHarnessEditTools(), // write_file, edit_file
+    createHarnessShellTools(), // shell
     countLines,
   ],
 });

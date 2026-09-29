@@ -15,7 +15,6 @@ import {
 import { model, modelProvider, sandboxProvider } from "../shared/model.ts";
 import { demoRepository } from "../shared/repository.ts";
 
-
 const repository = demoRepository(import.meta.dirname);
 const brief = (name: string) => ({ file: join(import.meta.dirname, name) });
 
@@ -25,9 +24,9 @@ const reader = createAgent({
 });
 
 const printSteer = (event: AgentEvent) => {
-  if (event.kind === "steer") console.log(`  ✉ consigne reçue (${event.mode}) : ${event.text}`);
+  if (event.kind === "steer")
+    console.log(`  ✉ consigne reçue (${event.mode}) : ${event.text}`);
 };
-
 
 // 1. After the agent's first tool call, a new constraint arrives.
 console.log("1. consigne pendant le travail");
@@ -45,12 +44,13 @@ const named = await dispatch({
     if (event.kind !== "tool" || sent) return;
     sent = true;
     console.log("  outil :", event.name, "→ on envoie une consigne");
-    void steering.send("Le café est à Lyon : le nom doit y faire référence.").then(({ mode }) => console.log(`  livrée : ${mode}`));
+    void steering
+      .send("Le café est à Lyon : le nom doit y faire référence.")
+      .then(({ mode }) => console.log(`  livrée : ${mode}`));
   },
 });
 
 console.log("  réponse :", named.text.trim());
-
 
 // 2. A coordinator delegates to a subagent: the instruction targets that run by its id.
 console.log("\n2. consigne adressée à un sous-agent");
@@ -58,7 +58,13 @@ const coordinator = createAgent({
   model,
   harness: createHarness({
     modelProvider,
-    tools: [defineHarnessSubagent({ name: "inspect", description: "Read files and report their content.", agent: reader })],
+    tools: [
+      defineHarnessSubagent({
+        name: "inspect",
+        description: "Read files and report their content.",
+        agent: reader,
+      }),
+    ],
   }),
 });
 
@@ -72,12 +78,13 @@ const menu = await dispatch({
     printSteer(event);
     if (event.kind !== "subagent" || event.status !== "started") return;
     console.log(`  → sous-agent ${event.name} (${event.id})`);
-    void steering.send("Ne rapporte que les boissons chaudes.", { subagent: event.id });
+    void steering.send("Ne rapporte que les boissons chaudes.", {
+      subagent: event.id,
+    });
   },
 });
 
 console.log("  carte :\n" + menu.text.trim().replace(/^/gm, "    "));
-
 
 // 3. Once closed, the controller refuses every instruction, with code "steering".
 console.log("\n3. contrôleur fermé");

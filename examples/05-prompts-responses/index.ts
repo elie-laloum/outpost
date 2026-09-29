@@ -14,7 +14,6 @@ import {
 import { model, modelProvider, sandboxProvider } from "../shared/model.ts";
 import { demoRepository } from "../shared/repository.ts";
 
-
 // The contract: any Standard Schema (Valibot, Zod…) will do.
 const Summary = v.object({
   name: v.string(),
@@ -22,7 +21,6 @@ const Summary = v.object({
   files: v.array(v.string()),
   difficulty: v.picklist(["easy", "medium", "hard"]),
 });
-
 
 const explorer = createAgent({
   model,
@@ -32,7 +30,6 @@ const explorer = createAgent({
     tools: [createHarnessFileTools()],
   }),
 });
-
 
 const result = await dispatch({
   repository: demoRepository(import.meta.dirname),
@@ -50,7 +47,6 @@ const result = await dispatch({
   // If it's invalid, the agent gets 2 repair attempts.
   response: defineJsonResponse({ tag: "summary", schema: Summary, repairs: 2 }),
 });
-
 
 const summary = result.value; // typed: { name, purpose, files, difficulty }
 

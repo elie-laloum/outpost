@@ -16,7 +16,6 @@ import {
 import { sandboxProvider } from "../shared/model.ts";
 import { demoRepository } from "../shared/repository.ts";
 
-
 const repository = demoRepository(import.meta.dirname);
 const brief = (name: string) => ({ file: join(import.meta.dirname, name) });
 
@@ -34,7 +33,6 @@ const coder = createAgent({
   harness: createKimiHarness({ authentication: "account" }),
 });
 
-
 // 1. First session: the agent explains the bug without touching anything.
 const first = await dispatch({
   repository,
@@ -49,7 +47,6 @@ console.log(first.text);
 console.log("session :", first.conversation, "→", first.transcript);
 console.log("tokens :", tokens(first.usage));
 
-
 // 2. Cold resume: a new sandbox; the captured session is restored before Kimi starts.
 //    Only this turn's tokens are counted, not the history's.
 const fixed = await first.resume({
@@ -61,7 +58,6 @@ const fixed = await first.resume({
 
 console.log("commits :", fixed.commits);
 console.log("tokens :", tokens(fixed.usage));
-
 
 // 3. Native fork: a copy of the first session, on another branch.
 //    The original session stays intact; the fork gets its own ID.
@@ -78,21 +74,28 @@ console.log("nouvelle session :", alternative.conversation);
 console.log(alternative.text);
 console.log("tokens :", tokens(alternative.usage));
 
-
 // 4. A workflow budget on tokens alone can't be checked against a lower bound:
 //    the workflow stops with WorkflowUsageUnavailable. Add `attempts` and a `timeoutMs`
 //    for a bound that doesn't depend on the counters.
 const forked = defineTask({
   key: "fork",
   perform: async (context) => {
-    const result = await first.fork({ repository, sandboxProvider, brief: brief("3-alternative.md"), signal: context.signal });
+    const result = await first.fork({
+      repository,
+      sandboxProvider,
+      brief: brief("3-alternative.md"),
+      signal: context.signal,
+    });
     context.reportUsage(result.usage);
     return result.text;
   },
 });
 
-const budgeted = await defineWorkflow("kimi-budget", [forked]).start({ budget: { usage: { output: 50_000 } } });
+const budgeted = await defineWorkflow("kimi-budget", [forked]).start({
+  budget: { usage: { output: 50_000 } },
+});
 const [error] = budgeted.errors;
 
 console.log("\nbudget en jetons seul :", budgeted.status);
-if (error instanceof WorkflowUsageUnavailable) console.log("  usage incomplet, budget invérifiable :", error.message);
+if (error instanceof WorkflowUsageUnavailable)
+  console.log("  usage incomplet, budget invérifiable :", error.message);

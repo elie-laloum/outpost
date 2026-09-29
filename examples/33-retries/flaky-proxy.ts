@@ -4,24 +4,35 @@
 import { createServer } from "node:http";
 import type { AddressInfo } from "node:net";
 
-export async function flakyProxy(target: string, refusals: number, retryAfterSeconds: number) {
+export async function flakyProxy(
+  target: string,
+  refusals: number,
+  retryAfterSeconds: number,
+) {
   const upstream = new URL(target);
   let seen = 0;
 
   const server = createServer(async (request, reply) => {
     if (seen++ < refusals) {
-      reply.writeHead(429, { "retry-after": String(retryAfterSeconds) }).end("slow down");
+      reply
+        .writeHead(429, { "retry-after": String(retryAfterSeconds) })
+        .end("slow down");
       return;
     }
 
     const body = Buffer.concat(await Array.fromAsync(request));
     const answer = await fetch(new URL(request.url!, upstream.origin), {
       method: request.method,
-      headers: { authorization: request.headers.authorization!, "content-type": "application/json" },
+      headers: {
+        authorization: request.headers.authorization!,
+        "content-type": "application/json",
+      },
       body: body.length ? body : undefined,
     });
 
-    reply.writeHead(answer.status, { "content-type": answer.headers.get("content-type") ?? "application/json" });
+    reply.writeHead(answer.status, {
+      "content-type": answer.headers.get("content-type") ?? "application/json",
+    });
     reply.end(Buffer.from(await answer.arrayBuffer()));
   });
 

@@ -12,19 +12,20 @@ import {
 import { model, modelProvider, sandboxProvider } from "../shared/model.ts";
 import { demoRepository } from "../shared/repository.ts";
 
-
 const repository = demoRepository(import.meta.dirname);
 
 const MB = 1024 * 1024;
 
-
 // 1. A manual reservation: released automatically at the end of the block.
 {
-  await using reservation = await reserveRecoveryStorage({ repository, maxBytes: 500 * MB, reserveBytes: 10 * MB });
+  await using reservation = await reserveRecoveryStorage({
+    repository,
+    maxBytes: 500 * MB,
+    reserveBytes: 10 * MB,
+  });
 
   console.log("réservation :", reservation);
 }
-
 
 // 2. Simpler: the workspace reserves space itself, for its whole lifetime.
 //    If the limit is already reached, opening fails before any work is done.

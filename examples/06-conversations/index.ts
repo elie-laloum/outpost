@@ -13,7 +13,6 @@ import {
 import { model, modelProvider, sandboxProvider } from "../shared/model.ts";
 import { demoRepository } from "../shared/repository.ts";
 
-
 const repository = demoRepository(import.meta.dirname);
 const brief = (name: string) => ({ file: join(import.meta.dirname, name) });
 
@@ -22,10 +21,13 @@ const coder = createAgent({
   harness: createHarness({
     modelProvider,
     instructions: "You are a careful developer.",
-    tools: [createHarnessFileTools(), createHarnessEditTools(), createHarnessShellTools()],
+    tools: [
+      createHarnessFileTools(),
+      createHarnessEditTools(),
+      createHarnessShellTools(),
+    ],
   }),
 });
-
 
 // 1. First discussion: the agent explains the bug without touching anything.
 const first = await dispatch({
@@ -39,7 +41,6 @@ const first = await dispatch({
 console.log("conversation :", first.conversation);
 console.log(first.text);
 
-
 // 2. Resume: the agent remembers its explanation and fixes the bug.
 const fixed = await first.resume({
   repository,
@@ -49,7 +50,6 @@ const fixed = await first.resume({
 });
 
 console.log("commits :", fixed.commits);
-
 
 // 3. Fork: a copy of the first discussion, on another branch.
 //    The original conversation stays intact.

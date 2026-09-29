@@ -15,7 +15,9 @@ export async function quotaProxy(target: string) {
   const server = createServer(async (request, reply) => {
     requests++;
     if (limit && limit.after-- === 0) {
-      reply.writeHead(429, { "retry-after": String(limit.seconds) }).end("quota exceeded");
+      reply
+        .writeHead(429, { "retry-after": String(limit.seconds) })
+        .end("quota exceeded");
       limit = undefined;
       return;
     }
@@ -27,18 +29,25 @@ export async function quotaProxy(target: string) {
 
     const blockedMs = blockedUntil - Date.now();
     if (blockedMs > 0) {
-      reply.writeHead(429, { "retry-after": String(Math.ceil(blockedMs / 1000)) }).end("quota exceeded");
+      reply
+        .writeHead(429, { "retry-after": String(Math.ceil(blockedMs / 1000)) })
+        .end("quota exceeded");
       return;
     }
 
     const body = Buffer.concat(await Array.fromAsync(request));
     const answer = await fetch(new URL(request.url!, upstream.origin), {
       method: request.method,
-      headers: { authorization: request.headers.authorization!, "content-type": "application/json" },
+      headers: {
+        authorization: request.headers.authorization!,
+        "content-type": "application/json",
+      },
       body: body.length ? body : undefined,
     });
 
-    reply.writeHead(answer.status, { "content-type": answer.headers.get("content-type") ?? "application/json" });
+    reply.writeHead(answer.status, {
+      "content-type": answer.headers.get("content-type") ?? "application/json",
+    });
     reply.end(Buffer.from(await answer.arrayBuffer()));
   });
 
@@ -48,11 +57,14 @@ export async function quotaProxy(target: string) {
   return {
     url: `http://127.0.0.1:${port}${upstream.pathname}`,
     /** The request after the next `after` ones is refused; the limit resets `seconds` later. */
-    limitAfter: (after: number, seconds: number) => void (limit = { after, seconds }),
+    limitAfter: (after: number, seconds: number) =>
+      void (limit = { after, seconds }),
     /** Every request is refused for `seconds`. */
-    limitFor: (seconds: number) => void (blockedUntil = Date.now() + seconds * 1000),
+    limitFor: (seconds: number) =>
+      void (blockedUntil = Date.now() + seconds * 1000),
     /** Every request gets "503 Service Unavailable" for `seconds`. */
-    downFor: (seconds: number) => void (downUntil = Date.now() + seconds * 1000),
+    downFor: (seconds: number) =>
+      void (downUntil = Date.now() + seconds * 1000),
     requests: () => requests,
     close: () => new Promise((resolve) => server.close(resolve)),
   };

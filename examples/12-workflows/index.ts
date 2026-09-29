@@ -18,7 +18,6 @@ import {
 import { model, modelProvider, sandboxProvider } from "../shared/model.ts";
 import { demoRepository } from "../shared/repository.ts";
 
-
 await using sandbox = await createSandbox({
   repository: demoRepository(import.meta.dirname),
   sandboxProvider,
@@ -29,19 +28,22 @@ const coder = createAgent({
   model,
   harness: createHarness({
     modelProvider,
-    tools: [createHarnessFileTools(), createHarnessEditTools(), createHarnessShellTools()],
+    tools: [
+      createHarnessFileTools(),
+      createHarnessEditTools(),
+      createHarnessShellTools(),
+    ],
   }),
 });
-
 
 // 1. The agent fixes the bug.
 const fix = defineAgentTask({
   key: "fix",
   sandbox,
-  request: () => ({ 
+  request: () => ({
     agent: coder,
     brief: { file: join(import.meta.dirname, "brief.md") },
-    observe: createReporter({ label: "fix" })
+    observe: createReporter({ label: "fix" }),
   }),
 });
 
@@ -50,8 +52,12 @@ const tests = defineCommandTask({
   key: "tests",
   after: [fix],
   sandbox,
-  command: { executable: "npm", arguments: ["test"], observe: (channel, text) => (channel === "stderr" ? process.stderr : process.stdout).write(text),
- },
+  command: {
+    executable: "npm",
+    arguments: ["test"],
+    observe: (channel, text) =>
+      (channel === "stderr" ? process.stderr : process.stdout).write(text),
+  },
 });
 
 // 3. Plain code reads the typed results of the previous tasks.
@@ -64,15 +70,14 @@ const report = defineTask({
   }),
 });
 
-
 const plan = defineWorkflow("fix-and-verify", [fix, tests, report]);
 
 console.log(plan.diagram()); // the graph in Mermaid format
 
 const result = await plan.start({
   observe(event) {
-    console.log(event.type + ' - ' + event.key + ' - ' + event.status)
-  }
+    console.log(event.type + " - " + event.key + " - " + event.status);
+  },
 });
 result.unwrap(); // throws if a task failed
 

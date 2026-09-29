@@ -14,13 +14,17 @@ import {
 import { sandboxProvider } from "../shared/model.ts";
 import { demoRepository } from "../shared/repository.ts";
 
-
 const repository = demoRepository(import.meta.dirname);
 const brief = (name: string) => ({ file: join(import.meta.dirname, name) });
 
 // Claude's native store, wrapped in a transport: resume and fork read the sessions from there.
-const transporter = createLocalTransport({ directory: join(import.meta.dirname, "state") });
-const conversations = createTransportConversations(createClaudeConversations(), { transporter, namespace: "claude" });
+const transporter = createLocalTransport({
+  directory: join(import.meta.dirname, "state"),
+});
+const conversations = createTransportConversations(
+  createClaudeConversations(),
+  { transporter, namespace: "claude" },
+);
 
 // "account" copies ~/.claude/.credentials.json into the private sandbox home.
 // Log in once on the host: run `claude`, then `/login`.
@@ -28,7 +32,6 @@ const coder = createAgent({
   model: { name: "sonnet", reasoning: "low" },
   harness: createClaudeHarness({ authentication: "account", conversations }),
 });
-
 
 // 1. First session: the agent explains the bug without touching anything.
 const first = await dispatch({
@@ -42,7 +45,6 @@ const first = await dispatch({
 console.log("conversation :", first.conversation);
 console.log(first.text);
 
-
 // 2. Resume: Claude Code reloads its session and fixes what it explained.
 const fixed = await first.resume({
   repository,
@@ -52,7 +54,6 @@ const fixed = await first.resume({
 });
 
 console.log("commits :", fixed.commits);
-
 
 // 3. Fork: a copy of the first session, on another branch.
 //    The original conversation stays untouched.

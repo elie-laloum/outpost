@@ -4,13 +4,20 @@
 // Tokens are read from the session files, inside the sandbox, once Copilot exits.
 
 import { join } from "node:path";
-import { createAgent, createCopilotHarness, dispatch, type Usage } from "@elie-laloum/outpost";
+import {
+  createAgent,
+  createCopilotHarness,
+  dispatch,
+  type Usage,
+} from "@elie-laloum/outpost";
 import { sandboxProvider } from "../shared/model.ts";
 import { demoRepository } from "../shared/repository.ts";
 
-
 const repository = demoRepository(import.meta.dirname);
-const brief = (name: string, values = {}) => ({ file: join(import.meta.dirname, name), values });
+const brief = (name: string, values = {}) => ({
+  file: join(import.meta.dirname, name),
+  values,
+});
 
 // Input excludes the cache; "incomplete" means the counters are only a lower bound.
 const tokens = (usage: Usage) =>
@@ -23,7 +30,6 @@ const tokens = (usage: Usage) =>
 const coder = createAgent({
   harness: createCopilotHarness({ authentication: "account" }),
 });
-
 
 // 1. First session: the agent explains the bug without touching anything.
 const first = await dispatch({
@@ -39,7 +45,6 @@ console.log(first.text);
 console.log("session :", first.conversation, "→", first.transcript);
 console.log("tokens :", tokens(first.usage));
 
-
 // 2. Cold resume: a new sandbox; the captured session is restored before Copilot starts.
 //    Only this turn's tokens are counted, not the history's.
 const fixed = await first.resume({
@@ -52,14 +57,16 @@ const fixed = await first.resume({
 console.log("commits :", fixed.commits);
 console.log("tokens :", tokens(fixed.usage));
 
-
 // 3. Fork is refused before any sandbox starts.
 try {
-  await first.fork({ repository, sandboxProvider, brief: brief("3-alternative.md") });
+  await first.fork({
+    repository,
+    sandboxProvider,
+    brief: brief("3-alternative.md"),
+  });
 } catch (error) {
   console.log("fork refusé :", (error as Error).message);
 }
-
 
 // 4. "Fork" by hand: a new session, on another branch, receives the explanation.
 const alternative = await dispatch({

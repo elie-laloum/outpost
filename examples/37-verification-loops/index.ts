@@ -18,19 +18,22 @@ import {
 import { model, modelProvider, sandboxProvider } from "../shared/model.ts";
 import { demoRepository } from "../shared/repository.ts";
 
-
 // Shows each phase of each round.
 const observe = (event: WorkflowEvent) => {
-  if (event.type === "loop") console.log(`  ↻ ${event.key} · tour ${event.round} · ${event.phase}`);
+  if (event.type === "loop")
+    console.log(`  ↻ ${event.key} · tour ${event.round} · ${event.phase}`);
 };
-
 
 // 1. The agent and its sandbox, kept for every round.
 const coder = createAgent({
   model,
   harness: createHarness({
     modelProvider,
-    tools: [createHarnessFileTools(), createHarnessEditTools(), createHarnessShellTools()],
+    tools: [
+      createHarnessFileTools(),
+      createHarnessEditTools(),
+      createHarnessShellTools(),
+    ],
   }),
 });
 
@@ -39,7 +42,6 @@ await using sandbox = await createSandbox({
   sandboxProvider,
   branch: { mode: "named", name: "demo/verification-loop" },
 });
-
 
 // 2. The loop: attempt = the agent fixes, check = `npm test` decides.
 const fix = defineLoopTask({
@@ -56,7 +58,11 @@ const fix = defineLoopTask({
         agent: coder,
         brief: {
           file: join(import.meta.dirname, "fix.md"),
-          values: { feedback: feedback ? `Les tests échouent encore :\n\n${feedback}` : "" },
+          values: {
+            feedback: feedback
+              ? `Les tests échouent encore :\n\n${feedback}`
+              : "",
+          },
         },
       }),
     });
@@ -66,24 +72,43 @@ const fix = defineLoopTask({
   },
 
   async check(context) {
-    const tests = await sandbox.command({ executable: "npm", arguments: ["test"], signal: context.signal });
+    const tests = await sandbox.command({
+      executable: "npm",
+      arguments: ["test"],
+      signal: context.signal,
+    });
     if (tests.status === 0) return { done: true };
 
-    const failures = tests.stdout.split("\n").filter((line) => /not ok|expected|actual/.test(line));
-    console.log("  ✗", failures.filter((line) => line.includes("not ok")).join(" · "));
+    const failures = tests.stdout
+      .split("\n")
+      .filter((line) => /not ok|expected|actual/.test(line));
+    console.log(
+      "  ✗",
+      failures.filter((line) => line.includes("not ok")).join(" · "),
+    );
     return { done: false, feedback: failures.join("\n") };
   },
 });
 
-
 console.log("1. corriger jusqu'à ce que les tests passent");
-const result = await defineWorkflow("verified-fix", [fix]).start({ observe, budget: { attempts: 6 } });
+const result = await defineWorkflow("verified-fix", [fix]).start({
+  observe,
+  budget: { attempts: 6 },
+});
 result.unwrap();
 
 console.log("  commits :", result.value(fix).commits);
-console.log("  tours :", result.tasks[0]?.rounds?.filter((round) => round.phase === "complete").length);
-console.log("  usage :", result.usage.attempts, "tentatives,", result.usage.tokens.output, "jetons de sortie");
-
+console.log(
+  "  tours :",
+  result.tasks[0]?.rounds?.filter((round) => round.phase === "complete").length,
+);
+console.log(
+  "  usage :",
+  result.usage.attempts,
+  "tentatives,",
+  result.usage.tokens.output,
+  "jetons de sortie",
+);
 
 // 3. When no round passes, the task fails with LoopTaskExhausted and the last feedback.
 console.log("\n2. une vérification qui n'accepte jamais");
@@ -92,11 +117,17 @@ const hopeless = defineLoopTask({
   key: "hopeless",
   maxRounds: 2,
   attempt: (context) => context.round,
-  check: (context) => ({ done: false, feedback: `toujours pas bon au tour ${context.round}` }),
+  check: (context) => ({
+    done: false,
+    feedback: `toujours pas bon au tour ${context.round}`,
+  }),
 });
 
-const exhausted = await defineWorkflow("hopeless", [hopeless]).start({ observe });
+const exhausted = await defineWorkflow("hopeless", [hopeless]).start({
+  observe,
+});
 const [error] = exhausted.errors;
 
 console.log("  statut :", exhausted.status);
-if (error instanceof LoopTaskExhausted) console.log(`  ${error.message} — dernier retour : « ${error.feedback} »`);
+if (error instanceof LoopTaskExhausted)
+  console.log(`  ${error.message} — dernier retour : « ${error.feedback} »`);

@@ -15,14 +15,21 @@ export function releaseChannel(file: string) {
     publishOnce(key: string, notes: string) {
       db.exec("BEGIN IMMEDIATE");
       try {
-        const receipt = db.prepare("SELECT id FROM receipts WHERE key = ?").get(key);
+        const receipt = db
+          .prepare("SELECT id FROM receipts WHERE key = ?")
+          .get(key);
         if (receipt) {
           db.exec("COMMIT");
           return { id: Number(receipt.id), replayed: true };
         }
 
-        const { lastInsertRowid } = db.prepare("INSERT INTO published (notes) VALUES (?)").run(notes);
-        db.prepare("INSERT INTO receipts (key, id) VALUES (?, ?)").run(key, lastInsertRowid);
+        const { lastInsertRowid } = db
+          .prepare("INSERT INTO published (notes) VALUES (?)")
+          .run(notes);
+        db.prepare("INSERT INTO receipts (key, id) VALUES (?, ?)").run(
+          key,
+          lastInsertRowid,
+        );
         db.exec("COMMIT");
         return { id: Number(lastInsertRowid), replayed: false };
       } catch (error) {
@@ -31,7 +38,8 @@ export function releaseChannel(file: string) {
       }
     },
 
-    count: () => Number(db.prepare("SELECT count(*) AS n FROM published").get()!.n),
+    count: () =>
+      Number(db.prepare("SELECT count(*) AS n FROM published").get()!.n),
     close: () => db.close(),
   };
 }

@@ -3,7 +3,6 @@
 
 import { model, modelProvider } from "../shared/model.ts";
 
-
 // 1. A simple request: one prompt, one response.
 const answer = await modelProvider.request({
   model: model.name,
@@ -14,7 +13,6 @@ const answer = await modelProvider.request({
 
 console.log(`[${answer.stopReason}]`, answer.text);
 console.log("usage :", answer.usage);
-
 
 // 2. The same thing, streamed: the text arrives chunk by chunk.
 const stream = modelProvider.stream!({

@@ -14,9 +14,11 @@ import {
 import { sandboxProvider } from "../shared/model.ts";
 import { demoRepository } from "../shared/repository.ts";
 
-
 const repository = demoRepository(import.meta.dirname);
-const brief = (name: string, values = {}) => ({ file: join(import.meta.dirname, name), values });
+const brief = (name: string, values = {}) => ({
+  file: join(import.meta.dirname, name),
+  values,
+});
 
 // "account" copies ~/.gemini/antigravity-cli/antigravity-oauth-token into the sandbox.
 // Log in once on the host: run `agy` and sign in with your Google account.
@@ -25,7 +27,6 @@ const coder = createAgent({
   model: "gemini-3.6-flash-low",
   harness: createAntigravityHarness({ authentication: "account" }),
 });
-
 
 // A sandbox that stays open for the whole conversation.
 await using sandbox = await createSandbox({
@@ -36,22 +37,27 @@ await using sandbox = await createSandbox({
 
 // Outpost pins the Antigravity version it was checked against; an image built earlier
 // keeps its own binary (rebuild it from the root Dockerfile to follow).
-const installed = await sandbox.command({ executable: "agy", arguments: ["--version"] });
-console.log(`agy ${installed.stdout.trim()} dans le sandbox — Outpost attend ${agentVersions.antigravity}`);
-
+const installed = await sandbox.command({
+  executable: "agy",
+  arguments: ["--version"],
+});
+console.log(
+  `agy ${installed.stdout.trim()} dans le sandbox — Outpost attend ${agentVersions.antigravity}`,
+);
 
 // 1. First session: the agent explains the bug without touching anything.
-const first = await sandbox.dispatch({ agent: coder, brief: brief("1-explain.md") });
+const first = await sandbox.dispatch({
+  agent: coder,
+  brief: brief("1-explain.md"),
+});
 
 console.log("conversation :", first.conversation);
 console.log(first.text);
-
 
 // 2. Warm resume: same sandbox, same conversation — the agent remembers its explanation.
 const fixed = await first.resume({ brief: brief("2-fix.md") });
 
 console.log("commits :", fixed.commits);
-
 
 // 3. Fork is refused before anything runs.
 try {
@@ -59,7 +65,6 @@ try {
 } catch (error) {
   console.log("fork refusé :", (error as Error).message);
 }
-
 
 // 4. "Fork" by hand: a new session, on another branch, receives the explanation.
 const alternative = await dispatch({

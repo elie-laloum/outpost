@@ -2,10 +2,13 @@
 // Codex saves its conversations natively, so Outpost can resume and fork them.
 
 import { join } from "node:path";
-import { createAgent, createCodexHarness, dispatch } from "@elie-laloum/outpost";
+import {
+  createAgent,
+  createCodexHarness,
+  dispatch,
+} from "@elie-laloum/outpost";
 import { sandboxProvider } from "../shared/model.ts";
 import { demoRepository } from "../shared/repository.ts";
-
 
 const repository = demoRepository(import.meta.dirname);
 const brief = (name: string) => ({ file: join(import.meta.dirname, name) });
@@ -17,7 +20,6 @@ const brief = (name: string) => ({ file: join(import.meta.dirname, name) });
 const coder = createAgent({
   harness: createCodexHarness({ authentication: "account" }),
 });
-
 
 // 1. First session: the agent explains the bug without touching anything.
 const first = await dispatch({
@@ -31,7 +33,6 @@ const first = await dispatch({
 console.log("conversation :", first.conversation);
 console.log(first.text);
 
-
 // 2. Resume: Codex reloads its session and fixes what it explained.
 const fixed = await first.resume({
   repository,
@@ -41,7 +42,6 @@ const fixed = await first.resume({
 });
 
 console.log("commits :", fixed.commits);
-
 
 // 3. Fork: a copy of the first session, on another branch.
 //    The original conversation stays untouched.

@@ -13,15 +13,15 @@ import {
 import { model, modelProvider, sandboxProvider } from "../shared/model.ts";
 import { demoRepository } from "../shared/repository.ts";
 
-
 // Traces are written to this transport (here, a local folder).
-const transporter = createLocalTransport({ directory: join(import.meta.dirname, "state") });
+const transporter = createLocalTransport({
+  directory: join(import.meta.dirname, "state"),
+});
 
 const reader = createAgent({
   model,
   harness: createHarness({ modelProvider, tools: [createHarnessFileTools()] }),
 });
-
 
 const sandbox = await createSandbox({
   repository: demoRepository(import.meta.dirname),
@@ -30,18 +30,24 @@ const sandbox = await createSandbox({
 });
 
 await sandbox.command({ executable: "git", arguments: ["status", "--short"] });
-await sandbox.dispatch({ agent: reader, brief: { file: join(import.meta.dirname, "brief.md") } });
-
+await sandbox.dispatch({
+  agent: reader,
+  brief: { file: join(import.meta.dirname, "brief.md") },
+});
 
 // While the sandbox is alive: what has been recorded.
 const during = await inspectRecovery({ transporter, resources: true });
 
 for (const { record } of during.resources?.entries ?? []) {
-  console.log("provider :", record?.sandboxProvider, "| phase :", record?.phase);
+  console.log(
+    "provider :",
+    record?.sandboxProvider,
+    "| phase :",
+    record?.phase,
+  );
   console.log("opérations :", record?.operations);
   console.log("dernière :", record?.lastOperation);
 }
-
 
 // A normal close clears the trace: there's nothing left to recover.
 await sandbox.close();

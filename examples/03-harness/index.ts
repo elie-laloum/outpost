@@ -15,14 +15,13 @@ import { demoRepository } from "../shared/repository.ts";
 import { workbench } from "./tools.ts";
 import { hooks, permissions } from "./rules.ts";
 
-
 // A skill: instructions the model only loads when it needs them.
 const testing = defineHarnessSkill({
   name: "testing",
   description: "How to run and fix the tests of this project.",
-  instructions: "Run `npm test` with the shell tool. Fix the code, never the tests.",
+  instructions:
+    "Run `npm test` with the shell tool. Fix the code, never the tests.",
 });
-
 
 const fixer = createAgent({
   model,
@@ -32,7 +31,9 @@ const fixer = createAgent({
     // Fixed text, or computed when the task starts.
     instructions: [
       "You fix bugs in small TypeScript projects.",
-      defineHarnessInstructions(({ sandbox }) => `The repository is mounted at ${sandbox.root}.`),
+      defineHarnessInstructions(
+        ({ sandbox }) => `The repository is mounted at ${sandbox.root}.`,
+      ),
     ],
 
     tools: [workbench],
@@ -48,7 +49,6 @@ const fixer = createAgent({
   }),
 });
 
-
 const result = await dispatch({
   repository: demoRepository(import.meta.dirname),
   sandboxProvider,
@@ -60,8 +60,10 @@ const result = await dispatch({
   observe(event) {
     if (event.kind === "step") console.log(`— étape ${event.index}`);
     if (event.kind === "tool") console.log("  outil :", event.name, event.kind);
-    if (event.kind === "tool-denied") console.log("  refusé :", event.name, event.reason);
-    if (event.kind === "stop-prevented") console.log("  arrêt refusé :", event.message);
+    if (event.kind === "tool-denied")
+      console.log("  refusé :", event.name, event.reason);
+    if (event.kind === "stop-prevented")
+      console.log("  arrêt refusé :", event.message);
     if (event.kind === "tool-result") console.log("resultat :", event.preview);
   },
 });

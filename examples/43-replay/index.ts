@@ -21,7 +21,6 @@ import {
 import { model, modelProvider, sandboxProvider } from "../shared/model.ts";
 import { demoRepository } from "../shared/repository.ts";
 
-
 const repository = demoRepository(import.meta.dirname);
 const state = join(import.meta.dirname, "state");
 await rm(state, { recursive: true, force: true });
@@ -31,14 +30,18 @@ const brief = (name: string) => ({ file: join(import.meta.dirname, name) });
 
 // Every run starts its branches from main: same baseline, so same commit IDs.
 const run = Date.now().toString(36);
-const branch = (name: string) => ({ mode: "named" as const, name: `demo/${name}-${run}`, from: "main" });
+const branch = (name: string) => ({
+  mode: "named" as const,
+  name: `demo/${name}-${run}`,
+  from: "main",
+});
 
-const log = (commits: readonly Commit[]) => commits.map((commit) => `${commit.oid.slice(0, 7)} ${commit.subject}`);
+const log = (commits: readonly Commit[]) =>
+  commits.map((commit) => `${commit.oid.slice(0, 7)} ${commit.subject}`);
 
 const observe = (event: AgentEvent) => {
   if (event.kind === "tool") console.log("    outil :", event.name);
 };
-
 
 // 1. The real run, recorded. `replayable` also stores each commit as a verified patch:
 //    the journal then contains repository content — keep it like the code itself.
@@ -47,7 +50,14 @@ const transporter = createLocalTransport({ directory: state });
 
 const coder = createAgent({
   model,
-  harness: createHarness({ modelProvider, tools: [createHarnessFileTools(), createHarnessEditTools(), createHarnessShellTools()] }),
+  harness: createHarness({
+    modelProvider,
+    tools: [
+      createHarnessFileTools(),
+      createHarnessEditTools(),
+      createHarnessShellTools(),
+    ],
+  }),
 });
 
 const recorded = await dispatch({
@@ -64,9 +74,11 @@ console.log("  commits :", log(recorded.commits));
 console.log("  usage :", recorded.usage);
 
 // The journal is plain JSON: it can be saved next to a test, as a fixture.
-const journal = await readJournal({ transporter, reference: recorded.logReference! });
+const journal = await readJournal({
+  transporter,
+  reference: recorded.logReference!,
+});
 await writeFile(join(state, "journal.json"), JSON.stringify(journal));
-
 
 // 2. The replay: no model provider, no tokens, and it takes a few seconds.
 console.log("\n2. rejeu, sans appeler le modèle");
@@ -84,9 +96,14 @@ const replayed = await dispatch({
 });
 
 console.log("  commits :", log(replayed.commits));
-console.log("  usage rapporté :", replayed.usage, "(celui de l'enregistrement)");
-console.log(`  ${Date.now() - started} ms · tours restants : ${replaying.remainingTurns}`);
-
+console.log(
+  "  usage rapporté :",
+  replayed.usage,
+  "(celui de l'enregistrement)",
+);
+console.log(
+  `  ${Date.now() - started} ms · tours restants : ${replaying.remainingTurns}`,
+);
 
 // 3. A replay agent is single-use, and checks that nothing changed: here, the brief.
 console.log("\n3. le brief a changé depuis l'enregistrement");
@@ -100,9 +117,10 @@ try {
   });
 } catch (error) {
   if (!(error instanceof ReplayDivergence)) throw error;
-  console.log(`  ReplayDivergence « ${error.kind} » au tour ${error.turn} (code ${error.code})`);
+  console.log(
+    `  ReplayDivergence « ${error.kind} » au tour ${error.turn} (code ${error.code})`,
+  );
 }
-
 
 // 4. With divergence: "warn", the difference is reported and the replay goes on.
 console.log("\n4. même écart, en simple avertissement");
