@@ -6384,8 +6384,8 @@
     "idle lorsqu’aucun dispatch n’utilise le contrôleur, active pendant qu’un dispatch l’utilise, closed après close()."
   ],
   "Steering.send": [
-    "Queue a nonempty instruction for the attached dispatch, or the next one when none runs. Resolves with its delivery once the agent receives it; rejects with code steering when the dispatch ends first or the controller is closed.",
-    "Met en file une consigne non vide pour le dispatch attaché, ou le suivant si aucun ne tourne. Se résout avec sa remise dès que l’agent la reçoit ; rejette avec le code steering si le dispatch se termine avant ou si le contrôleur est fermé."
+    "Queue a nonempty instruction for the attached dispatch, or the next one when none runs, optionally addressed to a built-in subagent run or the main loop. Resolves with its delivery once the agent receives it; rejects with code steering when the dispatch or targeted run ends first, the target is unreachable or the controller is closed.",
+    "Met en file une consigne non vide pour le dispatch attaché, ou le suivant si aucun ne tourne, éventuellement adressée à une exécution de sous-agent intégré ou à la boucle principale. Se résout avec sa remise dès que l’agent la reçoit ; rejette avec le code steering si le dispatch ou l’exécution visée se termine avant, si la cible est inaccessible ou si le contrôleur est fermé."
   ],
   "Steering.close": [
     "Close the controller: reject undelivered instructions and every later send(); later dispatches reject it.",
@@ -6887,5 +6887,9 @@
   "defineBinaryArtifact.options": [
     "Contract name and version identifying the binary payload.",
     "Nom et version du contrat identifiant les données binaires."
+  ],
+  "SteeringSendOptions.subagent": [
+    "Built-in subagent run id, read from its subagent event, to deliver only to that run at its next step boundary; null to deliver only to the main loop. Omit it to deliver to the first active loop. Instructions for a run that ended, or sent to CLI agents, reject with code steering.",
+    "Identifiant d’exécution d’un sous-agent intégré, lu dans son événement subagent, pour ne remettre qu’à cette exécution à sa prochaine limite d’étape ; null pour ne remettre qu’à la boucle principale. Omettez-le pour remettre à la première boucle active. Les consignes pour une exécution terminée, ou envoyées à des agents CLI, sont rejetées avec le code steering."
   ]
 }

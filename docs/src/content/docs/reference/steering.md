@@ -13,11 +13,11 @@ import type { Steering } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name    | Type                                          | Presence | Meaning                                                                                                                                                                                                                             |
-| ------- | --------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `state` | `SteeringState`                               | Required | idle when no dispatch uses the controller, active while one does, closed after close().                                                                                                                                             |
-| `send`  | `(text: string) => Promise<SteeringDelivery>` | Required | Queue a nonempty instruction for the attached dispatch, or the next one when none runs. Resolves with its delivery once the agent receives it; rejects with code steering when the dispatch ends first or the controller is closed. |
-| `close` | `() => void`                                  | Required | Close the controller: reject undelivered instructions and every later send(); later dispatches reject it.                                                                                                                           |
+| Name    | Type                                                                         | Presence | Meaning                                                                                                                                                                                                                                                                                                                                          |
+| ------- | ---------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `state` | `SteeringState`                                                              | Required | idle when no dispatch uses the controller, active while one does, closed after close().                                                                                                                                                                                                                                                          |
+| `send`  | `(text: string, options?: SteeringSendOptions) => Promise<SteeringDelivery>` | Required | Queue a nonempty instruction for the attached dispatch, or the next one when none runs, optionally addressed to a built-in subagent run or the main loop. Resolves with its delivery once the agent receives it; rejects with code steering when the dispatch or targeted run ends first, the target is unreachable or the controller is closed. |
+| `close` | `() => void`                                                                 | Required | Close the controller: reject undelivered instructions and every later send(); later dispatches reject it.                                                                                                                                                                                                                                        |
 
 ## Signature
 
@@ -26,7 +26,7 @@ export interface Steering {
   /** `active` while a dispatch uses the controller, `closed` after close(). */
   readonly state: SteeringState;
   /** Resolves when the agent receives the text; rejects when no dispatch can deliver it. */
-  send(text: string): Promise<SteeringDelivery>;
+  send(text: string, options?: SteeringSendOptions): Promise<SteeringDelivery>;
   /** Rejects undelivered messages and every later send. */
   close(): void;
 }
@@ -35,4 +35,5 @@ export interface Steering {
 ## Related contracts
 
 - [SteeringDelivery](../steeringdelivery/)
+- [SteeringSendOptions](../steeringsendoptions/)
 - [SteeringState](../steeringstate/)

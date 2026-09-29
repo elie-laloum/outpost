@@ -41,6 +41,33 @@ Les fichiers déjà modifiés par l’agent restent dans le workspace. Avec une 
 
 Ce partage vient des CLI des agents : `copilot -p` et `kimi --prompt` prennent un seul prompt, et Antigravity met chaque message stdin en file comme un tour séparé.
 
+## Cibler un sous-agent
+
+Chaque délégation à un [sous-agent intégré](../model-loop/) a un identifiant d’exécution, fourni par son événement `subagent` et porté comme `subagentId` par ses autres événements. Passez-le à `send()` pour viser cette exécution :
+
+```ts
+import { createSteering, type DispatchOptions } from "@elie-laloum/outpost";
+
+const steering = createSteering();
+const request: DispatchOptions = {
+  brief: { text: "Passe en revue le dépôt." },
+  steering,
+  observe(event) {
+    if (event.kind !== "subagent" || event.status !== "started") return;
+    if (event.name === "inspect")
+      void steering.send("N’inspecte que src/.", { subagent: event.id });
+  },
+};
+```
+
+| Option `subagent` | Destinataire                                                                                         |
+| ----------------- | ---------------------------------------------------------------------------------------------------- |
+| absente           | La première boucle active qui atteint une limite d’étape : le sous-agent au travail, s’il y en a un. |
+| un identifiant    | Seulement cette exécution de sous-agent, à toute profondeur.                                         |
+| `null`            | Seulement la boucle principale, après le retour de la délégation en cours.                           |
+
+Une consigne encore adressée à une exécution quand celle-ci se termine est rejetée avec le code `steering` et l’identifiant dans `details.subagent`. Les agents CLI ne peuvent pas viser leurs propres sous-agents : une consigne ciblée est rejetée dès qu’un tour CLI la voit.
+
 ## Moment de l’envoi
 
 - **Avant le début du tour.** Les messages envoyés avant que le dispatch atteigne son agent sont ajoutés au prompt.
@@ -66,7 +93,7 @@ Le [rejeu](../record-replay/) d’un run piloté reproduit ses tours : chaque co
 ## Limites
 
 - Les consignes vivent en mémoire. Pour des questions et réponses qui doivent survivre à un redémarrage, utilisez les [tâches interactives](../interactive-tasks/).
-- Quand plusieurs sous-agents tournent en même temps, le premier qui atteint une limite d’étape prend la consigne.
+- Quand plusieurs sous-agents tournent en même temps, une consigne sans cible va au premier qui atteint une limite d’étape ; passez un identifiant d’exécution pour choisir.
 - Le pilotage de Codex utilise le protocole `app-server`, que Codex marque comme expérimental. Son ouverture de session et sa gestion des échecs ont été vérifiées avec Codex 0.155 ; une exécution réelle de `turn/steer` reste à faire.
 - L’injection Claude Code a été vérifiée en réel sur l’hôte, Daytona et Vercel. L’interruption et la reprise pour Copilot, Kimi et Antigravity sont couvertes par des CLI simulées et un sandbox Docker réel, pas par des exécutions réelles.
 

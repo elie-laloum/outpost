@@ -31,7 +31,7 @@ export const groups = [
     title: ["Dispatch", "Dispatch"],
     guide: "guide/agents/dispatch",
     names:
-      "dispatch createSteering DispatchOptions DispatchResult WarmDispatchResult ContinuationOptions Execution Turn SteeringMode SteeringState Steering SteeringDelivery",
+      "dispatch createSteering DispatchOptions DispatchResult WarmDispatchResult ContinuationOptions Execution Turn SteeringMode SteeringState Steering SteeringDelivery SteeringSendOptions",
   },
   {
     id: "commands",

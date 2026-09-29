@@ -272,6 +272,10 @@
       {
         "slug": "reference/steeringdelivery",
         "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/steeringsendoptions",
+        "attrs": { "data-api-kind": "interface" }
       }
     ]
   },

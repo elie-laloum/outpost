@@ -41,6 +41,33 @@ Files the agent already changed stay in the workspace. With `resumed` delivery, 
 
 The agent CLIs decide this split: `copilot -p` and `kimi --prompt` take a single prompt, and Antigravity queues each stdin message as a separate turn.
 
+## Target a subagent
+
+Each [built-in subagent](../model-loop/) delegation has a run id, reported by its `subagent` event and carried as `subagentId` by its other events. Pass it to `send()` to address that run:
+
+```ts
+import { createSteering, type DispatchOptions } from "@elie-laloum/outpost";
+
+const steering = createSteering();
+const request: DispatchOptions = {
+  brief: { text: "Review the repository." },
+  steering,
+  observe(event) {
+    if (event.kind !== "subagent" || event.status !== "started") return;
+    if (event.name === "inspect")
+      void steering.send("Only inspect src/.", { subagent: event.id });
+  },
+};
+```
+
+| `subagent` option | Receiver                                                                      |
+| ----------------- | ----------------------------------------------------------------------------- |
+| omitted           | The first active loop to reach a step boundary: the working subagent, if any. |
+| a run id          | Only that subagent run, at any depth.                                         |
+| `null`            | Only the main loop, after the current delegation returns.                     |
+
+An instruction still addressed to a run when it ends is rejected with code `steering` and the run id in `details.subagent`. CLI agents cannot address their own subagents: a targeted instruction is rejected as soon as a CLI turn sees it.
+
 ## Timing
 
 - **Before the turn starts.** Messages sent before the dispatch reaches its agent are appended to the prompt.
@@ -66,7 +93,7 @@ A [replay](../record-replay/) of a steered run reproduces its turns: each `resum
 ## Limits
 
 - Instructions live in memory. For questions and answers that must survive a restart, use [interactive tasks](../interactive-tasks/).
-- When several subagents run at once, the first one to reach a step boundary takes the instruction.
+- When several subagents run at once, an instruction without a target goes to the first one that reaches a step boundary; pass a run id to choose.
 - Codex steering uses the `app-server` protocol, which Codex marks experimental. Its handshake and failure handling were checked against Codex 0.155; a live `turn/steer` run remains to be done.
 - Claude Code injection was checked live on the host, Daytona and Vercel. Interruption and resumption for Copilot, Kimi and Antigravity are covered by simulated CLIs and a real Docker sandbox, not by live runs.
 
