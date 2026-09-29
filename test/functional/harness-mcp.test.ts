@@ -265,6 +265,15 @@ test("MCP server startup failures stop the turn with a clear cause", async (t) =
   );
   await assert.rejects(
     run(root, [], {
+      mcpServers: fixture(log, {
+        arguments: [server, "hang"],
+        startupTimeoutMs: 300,
+      }),
+    }),
+    { code: "timeout", message: /did not initialize within 300 ms/ },
+  );
+  await assert.rejects(
+    run(root, [], {
       mcpServers: fixture(log, { command: "outpost-missing-mcp-command" }),
     }),
     { code: "process", message: /status 127/ },

@@ -10,6 +10,7 @@ export const MCP_STDIO_FIELDS: ReadonlySet<string> = new Set([
   "environment",
   "variables",
   "tools",
+  "startupTimeoutMs",
 ]);
 
 export const MCP_HTTP_FIELDS: ReadonlySet<string> = new Set([
@@ -17,12 +18,16 @@ export const MCP_HTTP_FIELDS: ReadonlySet<string> = new Set([
   "headers",
   "bearerTokenVariable",
   "tools",
+  "startupTimeoutMs",
 ]);
 
 export const MCP_TOOL_FILTER_FIELDS: ReadonlySet<string> = new Set([
   "include",
   "exclude",
 ]);
+
+// Kimi stores timeouts as 32-bit integers and Node timers overflow above this bound.
+export const MCP_MAX_TIMEOUT_MS = 2_147_483_647;
 
 export const MCP_TOOL_NAME_PATTERN = /^[A-Za-z0-9_.-]{1,128}$/;
 

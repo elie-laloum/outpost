@@ -24,6 +24,9 @@ export function kimiMcpFile(servers: McpServers): ConfigurationFile {
           }),
       ...(server.tools?.include ? { enabledTools: server.tools.include } : {}),
       ...(server.tools?.exclude ? { disabledTools: server.tools.exclude } : {}),
+      ...(server.startupTimeoutMs === undefined
+        ? {}
+        : { startupTimeoutMs: server.startupTimeoutMs }),
     })),
   };
 }

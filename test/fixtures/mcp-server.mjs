@@ -82,6 +82,7 @@ input.on("line", (line) => {
     return;
   }
   log({ method: message.method, params: message.params });
+  if (message.method === "initialize" && process.argv[2] === "hang") return;
   if (message.method === "initialize") {
     process.stdout.write("not json\n");
     send({ id: "server-ping", method: "ping" });

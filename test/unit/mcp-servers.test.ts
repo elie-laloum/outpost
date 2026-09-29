@@ -129,3 +129,16 @@ test("MCP tool filters list distinct names and select tools by include then excl
       code: "configuration",
     });
 });
+
+test("MCP startup timeouts are bounded positive integers", () => {
+  assert.equal(
+    mcpServers({ a: { command: "x", startupTimeoutMs: 1_000 } }).a
+      ?.startupTimeoutMs,
+    1_000,
+  );
+  for (const startupTimeoutMs of [0, -1, 1.5, "1000", 2_147_483_648])
+    assert.throws(
+      () => mcpServers({ a: { url: "https://example.com", startupTimeoutMs } }),
+      { code: "configuration", message: /startupTimeoutMs/ },
+    );
+});

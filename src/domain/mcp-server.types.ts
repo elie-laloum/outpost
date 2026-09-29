@@ -9,6 +9,7 @@ export interface McpStdioServer {
   readonly environment?: Readonly<Record<string, string>>;
   readonly variables?: readonly string[];
   readonly tools?: McpToolFilter;
+  readonly startupTimeoutMs?: number;
 }
 
 export interface McpHttpServer {
@@ -16,6 +17,7 @@ export interface McpHttpServer {
   readonly headers?: Readonly<Record<string, string>>;
   readonly bearerTokenVariable?: string;
   readonly tools?: McpToolFilter;
+  readonly startupTimeoutMs?: number;
 }
 
 export type McpServer = McpStdioServer | McpHttpServer;

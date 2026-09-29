@@ -21,7 +21,28 @@ export function supportMcpServers(
       server.tools?.exclude === undefined || support.excludeTools,
       `${support.agent} cannot exclude tools of MCP server ${name}`,
     );
+    invariant(
+      server.startupTimeoutMs === undefined || support.startupTimeout,
+      `${support.agent} has no MCP startup timeout; remove startupTimeoutMs from MCP server ${name}`,
+    );
   }
+  const timeouts = new Set(
+    Object.values(servers ?? {}).flatMap((server) =>
+      server.startupTimeoutMs === undefined ? [] : [server.startupTimeoutMs],
+    ),
+  );
+  invariant(
+    support.startupTimeout !== "shared" || timeouts.size <= 1,
+    `${support.agent} applies one MCP startup timeout to every server; declare the same startupTimeoutMs on each server`,
+  );
+}
+
+export function sharedStartupTimeout(
+  servers: McpServers | undefined,
+): number | undefined {
+  return Object.values(servers ?? {}).find(
+    (server) => server.startupTimeoutMs !== undefined,
+  )?.startupTimeoutMs;
 }
 
 export function mcpConfigurationPlanner(

@@ -324,3 +324,63 @@ test("tool filters use each CLI's native form and unsupported allowlists are ref
       .arguments!.some((entry) => entry.startsWith("--disallowedTools")),
   );
 });
+
+test("startup timeouts use each CLI's setting and unsupported ones are refused", () => {
+  const timed: McpServers = {
+    linear: { command: "npx", startupTimeoutMs: 90_000 },
+    docs: { url: "https://mcp.example.com/mcp", startupTimeoutMs: 90_000 },
+  };
+  const codex = createAgent({
+    harness: createCodexHarness({ mcpServers: timed }),
+  }).request({ text: "go" }).arguments!;
+  assert.ok(codex.includes("mcp_servers.linear.startup_timeout_ms=90000"));
+  assert.ok(codex.includes("mcp_servers.docs.startup_timeout_ms=90000"));
+  const kimi = createAgent({
+    harness: createKimiHarness({ mcpServers: timed }),
+  }).configuration!({}).files[0]!.entries as Record<
+    string,
+    Record<string, unknown>
+  >;
+  assert.equal(kimi.linear?.startupTimeoutMs, 90_000);
+  const claude = createAgent({
+    harness: createClaudeHarness({
+      mcpServers: { ...timed, bare: { command: "server" } },
+    }),
+  });
+  assert.equal(claude.variables?.MCP_TIMEOUT, "90000");
+  assert.equal(
+    createAgent({ harness: createClaudeHarness({ mcpServers: servers }) })
+      .variables?.MCP_TIMEOUT,
+    undefined,
+  );
+  assert.throws(
+    () =>
+      createAgent({
+        harness: createClaudeHarness({
+          mcpServers: {
+            ...timed,
+            docs: { url: "https://x.example/mcp", startupTimeoutMs: 1_000 },
+          },
+        }),
+      }),
+    { code: "configuration", message: /one MCP startup timeout/ },
+  );
+  assert.throws(
+    () =>
+      createAgent({
+        harness: createClaudeHarness({
+          mcpServers: timed,
+          variables: { MCP_TIMEOUT: "5000" },
+        }),
+      }),
+    { code: "configuration", message: /MCP_TIMEOUT, not both/ },
+  );
+  for (const harness of [createCopilotHarness, createAntigravityHarness])
+    assert.throws(
+      () => createAgent({ harness: harness({ mcpServers: timed }) }),
+      {
+        code: "configuration",
+        message: /has no MCP startup timeout/,
+      },
+    );
+});

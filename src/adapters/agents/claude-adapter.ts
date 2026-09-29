@@ -1,8 +1,12 @@
 import {
   mcpConfigurationPlanner,
+  sharedStartupTimeout,
   supportMcpServers,
 } from "./mcp-configuration.ts";
-import { mcpSupport } from "./mcp-support.constants.ts";
+import {
+  CLAUDE_MCP_TIMEOUT_VARIABLE,
+  mcpSupport,
+} from "./mcp-support.constants.ts";
 import { textMatcher } from "./text-matcher.ts";
 import {
   conversationSettings,
@@ -41,6 +45,12 @@ function bindClaude(settings: Bound<ClaudeSettings>): AgentAdapter {
       !Object.hasOwn(settings.variables ?? {}, CLAUDE_MAX_OUTPUT_VARIABLE),
     `Set maxOutputTokens on the agent model or ${CLAUDE_MAX_OUTPUT_VARIABLE}, not both`,
   );
+  const mcpTimeout = sharedStartupTimeout(settings.mcpServers);
+  invariant(
+    mcpTimeout === undefined ||
+      !Object.hasOwn(settings.variables ?? {}, CLAUDE_MCP_TIMEOUT_VARIABLE),
+    `Set startupTimeoutMs on MCP servers or ${CLAUDE_MCP_TIMEOUT_VARIABLE}, not both`,
+  );
   const credentials = credentialPlanner(
     "Claude Code",
     claudeCredentials,
@@ -64,6 +74,9 @@ function bindClaude(settings: Bound<ClaudeSettings>): AgentAdapter {
       ...(maxOutputTokens === undefined
         ? {}
         : { [CLAUDE_MAX_OUTPUT_VARIABLE]: String(maxOutputTokens) }),
+      ...(mcpTimeout === undefined
+        ? {}
+        : { [CLAUDE_MCP_TIMEOUT_VARIABLE]: String(mcpTimeout) }),
     }),
     request: (input) => claudeRequest(settings, input),
     events: claudeEvents,

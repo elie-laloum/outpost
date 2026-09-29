@@ -2,6 +2,7 @@ import { invariant } from "./errors.ts";
 import {
   MCP_HEADER_PATTERN,
   MCP_HTTP_FIELDS,
+  MCP_MAX_TIMEOUT_MS,
   MCP_SERVER_NAME_PATTERN,
   MCP_STDIO_FIELDS,
   MCP_TOOL_FILTER_FIELDS,
@@ -151,10 +152,25 @@ export function mcpToolFilter(
     !exclude.includes(tool);
 }
 
-function common(name: string, value: McpServer): Pick<McpServer, "tools"> {
-  return value.tools === undefined
-    ? {}
-    : { tools: toolFilter(name, value.tools) };
+function common(
+  name: string,
+  value: McpServer,
+): Pick<McpServer, "tools" | "startupTimeoutMs"> {
+  invariant(
+    value.startupTimeoutMs === undefined ||
+      (Number.isSafeInteger(value.startupTimeoutMs) &&
+        value.startupTimeoutMs > 0 &&
+        value.startupTimeoutMs <= MCP_MAX_TIMEOUT_MS),
+    `MCP server ${name} startupTimeoutMs must be a positive integer of at most ${MCP_MAX_TIMEOUT_MS}`,
+  );
+  return {
+    ...(value.tools === undefined
+      ? {}
+      : { tools: toolFilter(name, value.tools) }),
+    ...(value.startupTimeoutMs === undefined
+      ? {}
+      : { startupTimeoutMs: value.startupTimeoutMs }),
+  };
 }
 
 function toolFilter(name: string, value: unknown): McpToolFilter {

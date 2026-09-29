@@ -51,5 +51,8 @@ function options(key: string, server: McpServer): readonly string[] {
     ...(server.tools?.exclude
       ? [`${key}.disabled_tools=${JSON.stringify(server.tools.exclude)}`]
       : []),
+    ...(server.startupTimeoutMs === undefined
+      ? []
+      : [`${key}.startup_timeout_ms=${server.startupTimeoutMs}`]),
   ];
 }

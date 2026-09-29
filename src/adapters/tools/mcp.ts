@@ -36,7 +36,12 @@ export async function openMcpServers(
           signal,
         );
         opened.push(session);
-        await initialize(name, session, signal);
+        await initialize(
+          name,
+          session,
+          server.startupTimeoutMs ?? mcpDefaults.startupTimeoutMs,
+          signal,
+        );
         return mcpTools(name, session.connection, signal, server.tools);
       }),
     );
@@ -81,9 +86,10 @@ function launch(
 async function initialize(
   name: string,
   session: McpProcess,
+  timeoutMs: number,
   signal: AbortSignal,
 ): Promise<void> {
-  const timeout = AbortSignal.timeout(mcpDefaults.startupTimeoutMs);
+  const timeout = AbortSignal.timeout(timeoutMs);
   try {
     await session.connection.request(
       "initialize",
@@ -98,7 +104,7 @@ async function initialize(
     if (!timeout.aborted || signal.aborted) throw error;
     throw new OutpostError(
       "timeout",
-      `MCP server ${name} did not initialize within ${mcpDefaults.startupTimeoutMs} ms`,
+      `MCP server ${name} did not initialize within ${timeoutMs} ms`,
       { server: name },
     );
   }
