@@ -1,29 +1,60 @@
 ---
 title: "Model providers — Overview"
-description: "A model provider supplies the request transport used by a custom harness."
+description: "A model provider sends the built-in harness’s requests to an HTTP model API and normalizes messages, tools, reasoning and usage."
 sidebar:
   label: Overview
   order: 0
 ---
 
-The `ModelProvider` contract and OpenAI and Anthropic adapters are stable in 7.0.0. See the [validation record](../../../guide/model-providers/) for the tested models and configurations.
+## Which provider to use
 
-A model provider supplies the request transport used by a custom harness. `createOpenAIModelProvider()` supports Chat Completions and Responses services; `createAnthropicModelProvider()` supports Anthropic Messages and optional system-prefix caching. Sandbox allocation is independent.
+Pass the provider to `createHarness({ modelProvider })`. Each built-in provider speaks one protocol and streams over server-sent events.
 
-## How it works
+|                           | Chat Completions                          | Responses                                         | Anthropic Messages                                                                    |
+| ------------------------- | ----------------------------------------- | ------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| Factory                   | `createOpenAIModelProvider()`             | `createOpenAIModelProvider({ api: "responses" })` | `createAnthropicModelProvider()`                                                      |
+| Path added to `baseUrl`   | `chat/completions`                        | `responses`                                       | `messages`; `baseUrl` defaults to `https://api.anthropic.com/v1`                      |
+| `apiKey`                  | Bearer key or `false`                     | Bearer key or `false`                             | Key sent in `x-api-key`, required                                                     |
+| Agent `maxOutputTokens`   | Optional                                  | Optional                                          | Required                                                                              |
+| Agent `reasoning`         | Sent as `reasoning_effort`                | Sent as `reasoning.effort`                        | `none` disables thinking; `low` to `max` use adaptive thinking; `minimal` is rejected |
+| Reasoning kept for replay | None                                      | Reasoning items                                   | `thinking` and `redacted_thinking` blocks                                             |
+| Tool result `isError`     | Not sent                                  | Not sent                                          | Sent as `is_error`                                                                    |
+| Prompt caching            | Automatic on the service; `cache` ignored | Automatic on the service; `cache` ignored         | `cache` and `cacheSystem` add ephemeral breakpoints                                   |
 
-Configure the endpoint, explicit credentials and request bounds, then pass the provider to `createHarness({ modelProvider, tools, instructions, limits })`. Compose that harness with `createAgent({ harness, model })`; the Outpost loop calls the model and runs its tools in the borrowed sandbox. Requests run in the Outpost process, propagate cancellation and account for reported usage once, including children and context summaries.
+Reasoning blocks are replayed only to the provider `identity` and model that produced them; other blocks pass unchanged.
 
-## Boundaries and responsibilities
+## How a request fails
 
-The agent model is a nonempty name, optionally with `reasoning` and `maxOutputTokens` that the provider validates when the agent is composed. The service validates model availability when called; there is no local catalog, retry or protocol fallback. These transports translate tool calls but never execute them; results report a normalized stop reason instead of hiding truncation or refusals. Local HTTP fixtures validate the contracts without proving authenticated compatibility with every service.
+Every failure rejects with an `OutpostError`. `unavailableFault()` recognizes the faults marked unavailable, which [fallback agents](../../../guide/fallback-agents/) can cover.
+
+| Situation                                                                      | Code            | Details                                                   |
+| ------------------------------------------------------------------------------ | --------------- | --------------------------------------------------------- |
+| Invalid options, request or agent model                                        | `configuration` | —                                                         |
+| HTTP 429                                                                       | `quota`         | `status`; `retryAfterMs` and `resetAt` from `Retry-After` |
+| HTTP 408, 500, 502, 503, 504 or 529                                            | `provider`      | `status`, `unavailable`                                   |
+| Other HTTP error status                                                        | `provider`      | `status`                                                  |
+| Connection failure or redirect                                                 | `provider`      | `unavailable`                                             |
+| Stream error `rate_limit_error`, `rate_limit_exceeded` or `insufficient_quota` | `quota`         | `type`, `code`                                            |
+| Stream error `overloaded_error`, `api_error` or `server_error`                 | `provider`      | `type`, `unavailable`                                     |
+| No response within `timeoutMs` (while streaming: no chunk)                     | `timeout`       | —                                                         |
+| Request `signal` aborted                                                       | `aborted`       | —                                                         |
+| Malformed, unsupported or oversized response                                   | `response`      | —                                                         |
+
+:::note
+A provider sends each request once and never switches protocol. Retries come from task retries, quota pauses or fallback agents.
+:::
 
 ## Entry points
+
+Guide: [Model providers](../../../guide/model-providers/) · [Built-in harness](../../../guide/harness/) · [Fallback agents](../../../guide/fallback-agents/)
 
 - [createOpenAIModelProvider](../../createopenaimodelprovider/)
 - [createAnthropicModelProvider](../../createanthropicmodelprovider/)
 - [ModelProvider](../../modelprovider/)
 - [ModelRequest](../../modelrequest/)
 - [ModelResult](../../modelresult/)
-
-[Learn with the practical guide](../../../guide/model-providers/).
+- [ModelMessage](../../modelmessage/)
+- [ModelContentBlock](../../modelcontentblock/)
+- [ModelStreamEvent](../../modelstreamevent/)
+- [OpenAIModelProviderOptions](../../openaimodelprovideroptions/)
+- [AnthropicModelProviderOptions](../../anthropicmodelprovideroptions/)

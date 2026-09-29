@@ -1,28 +1,48 @@
 ---
 title: "Prompts and responses — Overview"
-description: "Prompts describe the work an agent should perform; response contracts describe the data your program accepts from its answer."
+description: "A brief tells the agent what to do; a response contract turns its tagged answer into a validated value."
 sidebar:
   label: Overview
   order: 0
 ---
 
-Prompts describe the work an agent should perform; response contracts describe the data your program accepts from its answer. Keeping these responsibilities separate lets a task remain readable while downstream code receives a validated value.
+## Brief forms
 
-## How it works
+A text brief is sent as written. A file brief is a template that Outpost reads and expands before each pass.
 
-A brief can provide literal text or a file with declared substitutions. `defineTextResponse` extracts tagged text; `defineJsonResponse` parses and validates tagged JSON. Validation narrows unknown model output before your program relies on it. Supported adapters can request a bounded number of repair attempts.
+| Form        | Written as                   | What Outpost does                                                                                         | Failure                                                            |
+| ----------- | ---------------------------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| Text brief  | `{ text }`                   | Sends the text unchanged                                                                                  | `values` given: code `configuration`                               |
+| File brief  | `{ file, values }`           | Reads the file, resolved from the process working directory                                               | Unreadable file rejects the dispatch                               |
+| Placeholder | `{{NAME}}` in the file       | Replaces it with `values.NAME` or the reserved `WORK_BRANCH` / `BASE_BRANCH`                              | Missing value: code `prompt`; unused value: `warn` callback        |
+| Command     | `` !`command` `` in the file | Runs it in the sandbox with `sh -c`, all commands in parallel, and inserts its stdout, trailing space cut | Nonzero exit: code `prompt`; past `expansionMs` (30000): `timeout` |
 
-## Boundaries and responsibilities
+:::caution
+Placeholders inside a command are filled without quoting. Pass only trusted `values` there.
+:::
 
-A valid answer is not evidence that its claims are true or its proposed code passes tests. Keep factual checks and execution gates explicit. Template command expansion also has its own trust boundary: values inserted into an existing shell command must be trusted or quoted by the prompt author.
+## Text or JSON response
+
+Both contracts read the last complete `<tag>…</tag>` pair of the final turn and return the result as `value`.
+
+|                    | `defineTextResponse()`      | `defineJsonResponse()`                                               |
+| ------------------ | --------------------------- | -------------------------------------------------------------------- |
+| `value`            | Trimmed text inside the tag | Output of `schema`, typed from it                                    |
+| Content accepted   | Any text                    | JSON, optionally wrapped in a Markdown code fence                    |
+| `ResponseError` if | No complete tag             | No complete tag, invalid JSON, schema issues or a thrown parse error |
+
+- **Before the sandbox starts**: the brief must contain `<tag>`, and `repairs` above 0 needs an agent that can resume; otherwise code `configuration`. `passes` must be 1.
+- **Invalid answer**: each repair turn resumes the same conversation with the validation error and asks only for the corrected tag.
+- **No repair left**: `dispatch()` throws `ResponseError` with code `response`; `raw` holds the rejected content and `recovery` names the conversation, branch, directory and turns.
 
 ## Entry points
 
+Guide: [Typed responses](../../../guide/typed-responses/) · [Write a brief](../../../guide/briefs/)
+
+- [defineTextResponse](../../definetextresponse/)
+- [defineJsonResponse](../../definejsonresponse/)
 - [Brief](../../brief/)
 - [PromptVariables](../../promptvariables/)
-- [defineTextResponse](../../definetextresponse/) · [defineJsonResponse](../../definejsonresponse/)
 - [ResponseSpec](../../responsespec/)
 - [StandardValidator](../../standardvalidator/)
 - [ResponseError](../../responseerror/)
-
-[Learn with the practical guide](../../../guide/typed-responses/).

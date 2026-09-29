@@ -13,7 +13,7 @@ import { createSessionBundleConversations } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Create a native ConversationStore for a CLI that keeps each session as a directory, described by a SessionBundleProfile. A Node.js script run inside the sandbox packs the selected files into one JSON bundle limited to 64 MiB and 4,096 files, rejects symlinks and files that change during capture, and restores through staging with a .outpost-recovery backup. Profile hooks are serialized and must be self-contained function expressions; a method or a regular expression with the g or y flag is rejected when the store is created.
+Create a NativeConversationStore for a CLI that keeps each session as a directory, described by sessionProfile. A Node.js script in the sandbox packs the selected files into one JSON bundle of at most 64 MiB and 4096 files, refuses symlinks and files that change during capture, and on restore moves an existing session to .outpost-recovery. Script failures use code session; an invalid profile, such as a method hook or a g or y regular expression flag, fails with code configuration at creation.
 
 [Complete example and detailed rules](../../guide/conversation-formats/).
 

@@ -9,7 +9,7 @@ Contrat auxiliaire non exporté directement ; utilisez l’inférence TypeScript
 
 ## Rôle et comportement
 
-Convertit un chemin de dépôt en clé de dossier pour l’organisation native des transcripts de projet Claude. Cet utilitaire de chemins ne produit pas un identifiant de conversation.
+Renvoie le nom du dossier de projet de Claude pour un chemin de dépôt, utilisé sous ~/.claude/projects : chaque caractère autre qu’une lettre ASCII ou un chiffre devient -.
 
 ## Paramètres et propriétés
 

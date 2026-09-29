@@ -13,12 +13,12 @@ import type { HarnessInstructionContext } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom       | Type                             | Présence  | Rôle                                                                                                   |
-| --------- | -------------------------------- | --------- | ------------------------------------------------------------------------------------------------------ |
-| `sandbox` | `SandboxLease`                   | Requis    | Sandbox emprunté de la passe, par exemple pour lire les consignes du projet avant la première requête. |
-| `signal`  | `AbortSignal`                    | Requis    | Signal d’annulation de la passe ; respectez-le dans les résolveurs asynchrones.                        |
-| `model`   | `AgentModel`                     | Requis    | Modèle normalisé de l’agent qui exécute la passe.                                                      |
-| `mcp`     | `HarnessMcpContext \| undefined` | Optionnel | Accès aux serveurs MCP démarrés pour ce tour, présent lorsque le harness déclare mcpServers.           |
+| Nom       | Type                             | Présence  | Rôle                                                                                                                                                     |
+| --------- | -------------------------------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `sandbox` | `SandboxLease`                   | Requis    | Sandbox empruntée du tour, par exemple pour lire les consignes du projet avant la première requête.                                                      |
+| `signal`  | `AbortSignal`                    | Requis    | Signal d’annulation du tour ; respectez-le dans les résolveurs asynchrones.                                                                              |
+| `model`   | `AgentModel`                     | Requis    | Modèle normalisé de l’agent qui exécute le tour.                                                                                                         |
+| `mcp`     | `HarnessMcpContext \| undefined` | Optionnel | Accès aux serveurs MCP démarrés pour ce tour, présent quand le harness déclare mcpServers. Les résolveurs d’instructions des skills ne le reçoivent pas. |
 
 ## Signature
 

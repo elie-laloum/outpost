@@ -15,13 +15,13 @@ import type { ModelStreamEvent } from "@elie-laloum/outpost";
 
 Les champs ci-dessous couvrent toutes les variantes ; la signature précise leurs combinaisons autorisées.
 
-| Nom       | Type                                                 | Présence          | Rôle                                                                                      |
-| --------- | ---------------------------------------------------- | ----------------- | ----------------------------------------------------------------------------------------- |
-| `type`    | `"reasoning" \| "retry" \| "text-delta" \| "result"` | Requis            | text-delta pour un fragment du texte de réponse, ou result pour le résultat final.        |
-| `text`    | `string`                                             | Selon la variante | Fragment du texte de réponse, dans l’ordre d’arrivée.                                     |
-| `attempt` | `number`                                             | Selon la variante | Tentative de reprise signalée par le fournisseur ; l’émettre ne déclenche pas de reprise. |
-| `message` | `string \| undefined`                                | Selon la variante | Diagnostic facultatif associé à la reprise signalée par le fournisseur.                   |
-| `result`  | `ModelResult`                                        | Selon la variante | Résultat final normalisé, identique à celui d’une requête sans streaming.                 |
+| Nom       | Type                                                 | Présence          | Rôle                                                                                                                                                                                                                                       |
+| --------- | ---------------------------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `type`    | `"reasoning" \| "retry" \| "text-delta" \| "result"` | Requis            | text-delta pour un fragment du texte de réponse, reasoning pour un raisonnement lisible, retry pour une reprise signalée par le fournisseur, result pour le résultat final. Les fournisseurs intégrés n’émettent que text-delta et result. |
+| `text`    | `string`                                             | Selon la variante | Fragment du texte de réponse pour text-delta, ou raisonnement lisible pour reasoning, dans l’ordre d’arrivée. Le harness les relaie comme événements du même type.                                                                         |
+| `attempt` | `number`                                             | Selon la variante | Numéro de tentative signalé par le fournisseur. Le harness le relaie comme événement model-retry et ne relance rien lui-même.                                                                                                              |
+| `message` | `string \| undefined`                                | Selon la variante | Diagnostic de la reprise signalée, relayé dans l’événement model-retry.                                                                                                                                                                    |
+| `result`  | `ModelResult`                                        | Selon la variante | Résultat final normalisé, identique à celui d’une requête sans streaming. Le harness en exige exactement un par stream.                                                                                                                    |
 
 ## Signature
 

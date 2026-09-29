@@ -13,7 +13,7 @@ import { createHarnessEditTools } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Crée le jeu d’outils edit : write_file crée ou remplace un fichier, et edit_file remplace un texte exact, conserve fins de ligne et permissions et refuse d’écraser un fichier modifié pendant l’opération.
+Crée le jeu d’outils edit. write_file crée ou remplace un fichier UTF-8 ; edit_file remplace un texte qui doit apparaître une seule fois sauf avec replace_all, conserve les fins de ligne et le mode du fichier, et renvoie une erreur sans écrire si le fichier a changé pendant la modification. Les deux déclarent leurs chemins pour les règles de permission et s’exécutent un par un.
 
 [Exemple complet et règles détaillées](../../guide/harness-tools/).
 

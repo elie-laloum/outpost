@@ -13,13 +13,13 @@ import type { AnthropicModelProviderOptions } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name               | Type                   | Presence | Meaning                                                                                                                                                            |
-| ------------------ | ---------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `apiKey`           | `string`               | Required | Explicit Anthropic API key sent in x-api-key; no CLI account or host credential discovery.                                                                         |
-| `baseUrl`          | `string \| undefined`  | Optional | Messages API base URL including its version prefix; defaults to https://api.anthropic.com/v1.                                                                      |
-| `cacheSystem`      | `boolean \| undefined` | Optional | Opt in to an ephemeral cache breakpoint on the system text. Requests must contain system instructions; a cache hit is not guaranteed.                              |
-| `timeoutMs`        | `number \| undefined`  | Optional | Positive deadline in milliseconds; defaults to 120000 and cannot exceed 2147483647. It covers the whole request, or the silence between two chunks when streaming. |
-| `maxResponseBytes` | `number \| undefined`  | Optional | Positive maximum response body size in bytes after HTTP decompression; defaults to 8388608 (8 MiB). Oversized responses fail.                                      |
+| Name               | Type                   | Presence | Meaning                                                                                                                                                                      |
+| ------------------ | ---------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `apiKey`           | `string`               | Required | Explicit Anthropic API key sent in x-api-key; no CLI account or host credential discovery.                                                                                   |
+| `baseUrl`          | `string \| undefined`  | Optional | Messages API base URL including its version prefix, default https://api.anthropic.com/v1; messages is appended. Credentials, query or fragment fail with code configuration. |
+| `cacheSystem`      | `boolean \| undefined` | Optional | Adds an ephemeral cache breakpoint on the system text, default false. Requests without system instructions then fail with code configuration; a cache hit is not guaranteed. |
+| `timeoutMs`        | `number \| undefined`  | Optional | Request deadline in milliseconds, default 120000, at most 2147483647. While streaming it restarts on each received chunk; expiry rejects with code timeout.                  |
+| `maxResponseBytes` | `number \| undefined`  | Optional | Maximum response body in bytes after decompression, default 8388608 (8 MiB); a streamed response counts all its chunks. A larger response fails with code response.          |
 
 ## Signature
 

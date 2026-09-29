@@ -1,38 +1,52 @@
 ---
 title: "Agents — Vue d’ensemble"
-description: "Un agent compose un harness d’exécution et un modèle."
+description: "Composez un harness et un modèle en agent, ou ordonnez plusieurs agents en agent de secours pour le dispatch."
 sidebar:
   label: Vue d’ensemble
   order: 0
 ---
 
-Un agent compose un harness d’exécution et un modèle. Le harness définit l’exécution ; le modèle est un nom, ou un objet `AgentModel` qui ajoute un niveau de raisonnement et une limite de sortie. Construire cette configuration ne déclenche ni connexion, ni allocation, ni requête réseau.
+## Réglages du modèle par harness
 
-## Fonctionnement
+`createAgent({ harness, model })` ne démarre rien. Il vérifie `reasoning` et `maxOutputTokens` auprès du harness et lève le code `configuration` pour un réglage que le harness ne sait pas appliquer.
 
-Utilisez `createAgent({ harness: createCodexHarness(), model: "..." })`, ou les presets `createClaudeHarness()`, `createAntigravityHarness()`, `createCopilotHarness()` et `createKimiHarness()`. `createHarness({ modelProvider, tools, instructions })` laisse Outpost piloter lui-même un service de modèles. `sandboxProvider` choisit indépendamment où exécuter les commandes du dépôt.
+| Harness                                | `model` omis                                            | `reasoning`                    | `maxOutputTokens`                            |
+| -------------------------------------- | ------------------------------------------------------- | ------------------------------ | -------------------------------------------- |
+| Claude Code                            | Défaut de la CLI                                        | `low` à `max`                  | Transmis via `CLAUDE_CODE_MAX_OUTPUT_TOKENS` |
+| Codex                                  | Défaut de la CLI                                        | `low` à `max`                  | Refusé                                       |
+| Copilot CLI, Antigravity               | Défaut de la CLI                                        | Refusé                         | Refusé                                       |
+| Kimi Code                              | Défaut de la CLI ; un nom est exigé avec l’auth `usage` | Refusé                         | Refusé                                       |
+| Harness intégré, fournisseur OpenAI    | Refusé                                                  | Tout niveau, transmis tel quel | Transmis à chaque requête                    |
+| Harness intégré, fournisseur Anthropic | Refusé                                                  | `none`, `low` à `max`          | Exigé                                        |
 
-`createAgent()` normalise le modèle en `AgentModel` figé et demande au harness ou à son fournisseur de le valider. Un niveau de raisonnement ou une limite de sortie que la CLI ou le service choisi ne sait pas exprimer est refusé immédiatement, avant toute création de sandbox. Antigravity, Copilot et Kimi n’acceptent qu’un nom de modèle ; Kimi en exige un avec l’authentification `usage`.
+## Quand un agent de secours passe la main
 
-`createFallbackAgent([...agents], { on })` regroupe des agents composés dans un `FallbackAgent` ordonné. Le dispatch l’accepte partout où il accepte un agent (`DispatchAgent`) et ne passe la main au candidat suivant que lorsque le candidat courant échoue avec un `FallbackTrigger` listé : `quota` ou `unavailable`. Le `FallbackRecord` du résultat nomme le candidat retenu et la `FallbackAttempt` de chacun de ceux qui se sont arrêtés. L’attache et les continuations explicites exigent un agent unique.
+`createFallbackAgent([first, second], { on })` exécute ses candidats dans l’ordre, dans une seule sandbox et un seul workspace, sans réinitialisation. Chaque candidat suivant repart du brief d’origine, sur le travail déjà présent.
 
-## Frontières et responsabilités
+| Échec du candidat courant                                        | Résultat                                                                                                                                 |
+| ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Code `quota`, avec `quota` dans `on`                             | Candidat suivant ; la tentative est enregistrée dans `result.fallback.attempts`                                                          |
+| Panne détectée par `unavailableFault()`, `unavailable` dans `on` | Candidat suivant ; l’erreur garde son code (`process` ou `provider`)                                                                     |
+| `timeout` après une erreur de connexion signalée par l’agent     | Compté comme une panne : `unavailable` dans `on` fait passer au candidat suivant                                                         |
+| Annulation, autres timeouts, tout autre échec                    | Relancé immédiatement, avec les tentatives précédentes dans `recovery.fallback`                                                          |
+| Échec couvert sur le dernier candidat                            | Relancé de la même façon ; si tous les candidats ont atteint un quota, une seule erreur `quota` avec le `resetAt` signalé le plus proche |
 
-Un agent associe une configuration d’exécution et une sélection de modèle. La famille [Harness](../harness/) regroupe les presets CLI, le moteur intégré, les réglages d’authentification (`AgentAuthentication`, `AccountCredential`, `UsageCredential`) et les capacités d’exécution. Les [fournisseurs de modèles](../model-providers/) fournissent les transports HTTP aux harness personnalisés, tandis que `sandboxProvider` choisit indépendamment l’environnement d’exécution.
-
-Ces API de composition sont disponibles depuis la version 5.0.0. Utilisez l’agent avec dispatch, un sandbox ou une tâche de workflow ; sa construction ne déclenche aucune exécution.
+:::note
+Un agent de secours n’accepte ni `continuation` ni l’attache. Continuez avec `result.resume()` ou `result.fork()`, qui utilisent le candidat retenu.
+:::
 
 ## Points d’entrée
 
+Guide : [Choisir un agent](../../../guide/choose-an-agent/) · [Agents de secours](../../../guide/fallback-agents/) · [Fournisseurs de modèles](../../../guide/model-providers/)
+
 - [createAgent](../../createagent/)
+- [createFallbackAgent](../../createfallbackagent/)
 - [Agent](../../type-agent/)
 - [AgentOptions](../../agentoptions/)
+- [AgentModel](../../agentmodel/)
+- [ModelReasoning](../../modelreasoning/)
 - [CliAgent](../../cliagent/)
 - [CustomAgent](../../customagent/)
-- [AgentModel](../../agentmodel/)
-- [ModelSpec](../../modelspec/)
-- [ModelReasoning](../../modelreasoning/)
-- [createFallbackAgent](../../createfallbackagent/)
 - [FallbackAgent](../../type-fallbackagent/)
-
-[Apprendre avec le guide pratique](../../../guide/choose-an-agent/).
+- [FallbackRecord](../../fallbackrecord/)
+- [FallbackAttempt](../../fallbackattempt/)

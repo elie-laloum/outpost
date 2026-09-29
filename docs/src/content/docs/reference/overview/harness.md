@@ -1,46 +1,59 @@
 ---
 title: "Harness — Overview"
-description: "A harness defines how an agent executes a task and accesses its model."
+description: "Choose who runs the agent loop, then build the built-in harness from tools, instructions, limits, permissions, hooks and subagents."
 sidebar:
   label: Overview
   order: 0
 ---
 
-A harness defines how an agent executes a task and accesses its model. CLI presets and the Outpost engine are composed with a model using `createAgent({ harness, model })`. This family groups their factories, tool and instruction definitions, execution contracts, settings and CLI protocol adapters.
+## Choose a harness
 
-## How it works
+`createAgent({ harness, model })` pairs either kind of harness with a model, and the agent then runs through `dispatch()`.
 
-Choose `createClaudeHarness()`, `createCodexHarness()`, `createAntigravityHarness()`, `createCopilotHarness()` or `createKimiHarness()` to delegate execution to the corresponding CLI. Their settings configure execution, explicit authentication and supported conversation behavior. `authentication` takes an [`AgentAuthentication`](../../agentauthentication/): `"account"` reuses the CLI's own login, optionally through an [`AccountCredential`](../../accountcredential/) (`file`, `key` or `variable`), while `"usage"` bills an API key, optionally through a [`UsageCredential`](../../usagecredential/) (`key` or `variable`). Each preset accepts only the forms its CLI supports and rejects the others when the agent is composed. Without `authentication`, Outpost prepares no credential.
+|               | CLI preset (`createClaudeHarness()`, `createCodexHarness()`, …) | Built-in harness (`createHarness()`)                                             |
+| ------------- | --------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| Model loop    | The agent CLI, inside the sandbox                               | Outpost, in your Node.js process: one model request per step                     |
+| Model         | Optional; the CLI default applies                               | Required, validated by the model provider                                        |
+| Model access  | Account login or API key, chosen by `authentication`            | A [model provider](../model-providers/) with an API key                          |
+| Tools         | The CLI’s own                                                   | Only the tools you declare, run through the borrowed sandbox                     |
+| Conversations | Native session files; capture, resume and fork vary by CLI      | Transcripts, by default under `.outpost/conversations/harness/`; resume and fork |
+| Steering      | Live input (Claude Code, Codex), otherwise stop and resume      | Added to the running loop before its next model request                          |
+| MCP servers   | Written into the CLI’s native configuration                     | Started inside the sandbox for each turn; the lease must support `liveInput`     |
+| Bounds        | CLI settings and dispatch deadlines                             | `limits`: steps, tool calls, delegation depth and tokens, failing with `limit`   |
 
-Use `createHarness()` to let Outpost drive the model itself. It combines a [model provider](../model-providers/), tools from `defineHarnessTool()` and `defineHarnessToolset()`, instructions from text or `defineHarnessInstructions()`, hooks, permissions, loop limits and tool execution settings. Select the model on the [agent](../agents/); a custom harness requires an explicit model, while a CLI preset can keep its native default.
+## Build a built-in harness
 
-Both variants accept `mcpServers`, a [`McpServers`](../../mcpservers/) map of stdio ([`McpStdioServer`](../../mcpstdioserver/)) or HTTP ([`McpHttpServer`](../../mcphttpserver/)) servers. CLI presets translate it into their native configuration, planned by `AgentAdapter.configuration` as [`AgentConfiguration`](../../agentconfiguration/) files when a CLI reads it from its home; the Outpost engine starts the servers inside the sandbox for each turn and exposes their tools as `mcp__<server>__<tool>`, plus resource and prompt tools. [`McpToolFilter`](../../mcptoolfilter/) selects tools, [`McpClientCredentials`](../../mcpclientcredentials/) authenticates HTTP servers of the engine, and [`defineMcpPrompt`](../../definemcpprompt/) renders a server prompt into the instructions through [`HarnessMcpContext`](../../harnessmcpcontext/).
+Pass each building block to `createHarness()`. Definitions are validated when declared and throw code `configuration` on invalid input.
 
-The built-in engine returns a [`Harness`](../../type-customharness/) configured with [`HarnessOptions`](../../customharnessoptions/). [`AgentHarness`](../../harness/) is the union `CliHarness | Harness` for code that accepts either execution variant.
+| Building block | Declare with                                                                               | Role in the loop                                                                                     |
+| -------------- | ------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
+| Tools          | `defineHarnessTool()`, `defineHarnessToolset()`, `createHarnessFileTools()` and other sets | Input checked against the schema; consecutive read-only calls run in parallel, others alone          |
+| Instructions   | Text, `defineHarnessInstructions()`, `defineMcpPrompt()`                                   | Resolved into the system prompt at the start of each turn                                            |
+| Limits         | `limits`, `toolExecution`                                                                  | Defaults: 100 steps, 4 parallel read-only calls, 300000 ms per tool call                             |
+| Permissions    | `defineHarnessPermissions()`                                                               | Allow or deny each call by tool name, path or command; the first matching rule decides               |
+| Hooks          | `defineHarnessHook()`                                                                      | Add instructions, rewrite or deny a tool call, replace its result, or refuse the final answer        |
+| Context        | `truncateToolResults()`, `summarizeHistory()`, `defineHarnessContextStrategy()`            | Rewrites the history before each model request                                                       |
+| Skills         | `defineHarnessSkill()`                                                                     | Listed in the system prompt; `load_skill` returns the instructions and unlocks the tools             |
+| Subagents      | `defineHarnessSubagent()`                                                                  | A tool that runs a built-in child in the same sandbox; its tokens count toward every ancestor budget |
+| MCP servers    | `mcpServers`                                                                               | Adds `mcp__<server>__<tool>` tools for the turn                                                      |
 
-## Boundaries and responsibilities
-
-Constructing a harness starts no process, login or network request; host credential files are read only when a sandbox is prepared, and Outpost never reads a system keychain. A CLI owns its internal model/tool loop. Claude Code and Codex support native capture, resume and fork; Kimi also supports capture, resume and fork; Copilot supports capture and resume; Antigravity resumes only in the same open sandbox. Their models remain names without `reasoning` or `maxOutputTokens`.
-
-The Outpost engine runs in the Outpost process. Each step is one model request; tools run through the borrowed sandbox, and limits fail the turn with the `limit` code instead of succeeding. Turns are recorded as transcripts that support continuation, fork and response repairs, and context strategies can compact long histories. Interactive attachment is unsupported. `AgentAdapter` and `AgentInput` describe CLI command construction and event decoding. Sandbox allocation belongs to [Providers](../providers/).
-
-CLI presets are stable since 5.0.0. The built-in engine and its definitions are stable in 7.0.0. `defineHarnessSubagent()` exposes a built-in child as a serialized tool with its own history and limits; it borrows the sandbox and its tokens also count toward ancestor budgets.
+:::caution
+Permissions and hooks decide what the model may ask for; they do not isolate anything. The sandbox is the boundary, and shell commands can evade command patterns.
+:::
 
 ## Entry points
 
-- [createHarness](../../createharness/) composes the Outpost engine.
-- [defineHarnessTool](../../defineharnesstool/), [defineHarnessToolset](../../defineharnesstoolset/) and [defineHarnessInstructions](../../defineharnessinstructions/) declare what the engine can use.
-- [createHarnessFileTools](../../createharnessfiletools/), [createHarnessEditTools](../../createharnessedittools/), [createHarnessSearchTools](../../createharnesssearchtools/), [createHarnessGitTools](../../createharnessgittools/) and [createHarnessShellTools](../../createharnessshelltools/) provide repository tools.
-- [defineHarnessContextStrategy](../../defineharnesscontextstrategy/), [truncateToolResults](../../truncatetoolresults/) and [summarizeHistory](../../summarizehistory/) keep long histories within the model context.
-- [defineHarnessSkill](../../defineharnessskill/) packages instructions and tools that the model loads on demand.
-- [defineHarnessHook](../../defineharnesshook/) and [defineHarnessPermissions](../../defineharnesspermissions/) control tool calls and the end of the loop.
-- [createClaudeHarness](../../createclaudeharness/), [createCodexHarness](../../createcodexharness/), [createAntigravityHarness](../../createantigravityharness/), [createCopilotHarness](../../createcopilotharness/) and [createKimiHarness](../../createkimiharness/) configure the CLI presets with [ClaudeSettings](../../claudesettings/), [CodexSettings](../../codexsettings/), [AntigravitySettings](../../antigravitysettings/), [CopilotSettings](../../copilotsettings/) and [KimiSettings](../../kimisettings/).
-- [AgentAuthentication](../../agentauthentication/), [AccountCredential](../../accountcredential/) and [UsageCredential](../../usagecredential/) select how a CLI preset authenticates.
-- [McpServers](../../mcpservers/), [McpServer](../../mcpserver/), [McpStdioServer](../../mcpstdioserver/) and [McpHttpServer](../../mcphttpserver/) declare MCP servers for either variant; see [MCP servers](../../../guide/mcp-servers/).
-- [agentVersions](../../agentversions/) lists the CLI versions pinned for generated images and remote bootstrap, including Antigravity archives verified against pinned SHA-512 digests.
-- [Harness](../../harness/) is the shared composition contract.
-- [HarnessToolContext](../../harnesstoolcontext/) describes the sandbox, cancellation signal, model and observer available to a tool.
-- [AgentAdapter](../../agentadapter/) describes the CLI protocol adapter.
-- [AgentConfiguration](../../agentconfiguration/) and [ConfigurationFile](../../configurationfile/) describe CLI configuration merged into the agent home.
+Guide: [Built-in harness](../../../guide/harness/) · [Tools](../../../guide/harness-tools/) · [Permissions and hooks](../../../guide/harness-permissions/)
 
-[Learn with the practical guide](../../../guide/harness/). For CLI presets, see [the adapters guide](../../../guide/choose-an-agent/) and [authentication](../../../guide/manual/authentication/).
+- [createHarness](../../createharness/)
+- [defineHarnessTool](../../defineharnesstool/)
+- [defineHarnessToolset](../../defineharnesstoolset/)
+- [createHarnessFileTools](../../createharnessfiletools/)
+- [defineHarnessPermissions](../../defineharnesspermissions/)
+- [defineHarnessHook](../../defineharnesshook/)
+- [summarizeHistory](../../summarizehistory/)
+- [defineHarnessSkill](../../defineharnessskill/)
+- [defineHarnessSubagent](../../defineharnesssubagent/)
+- [HarnessOptions](../../customharnessoptions/)
+- [HarnessLimits](../../harnesslimits/)
+- [CliHarness](../../cliharness/)

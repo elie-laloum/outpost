@@ -13,9 +13,9 @@ import type { HarnessMcpContext } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name     | Type                                                                                                   | Presence | Meaning                                                                                                                    |
-| -------- | ------------------------------------------------------------------------------------------------------ | -------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `prompt` | `(server: string, name: string, promptArguments: Readonly<Record<string, string>>) => Promise<string>` | Required | Render a prompt of a running MCP server as role-prefixed text. Fails when the server is not declared or offers no prompts. |
+| Name     | Type                                                                                                   | Presence | Meaning                                                                                                                                             |
+| -------- | ------------------------------------------------------------------------------------------------------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `prompt` | `(server: string, name: string, promptArguments: Readonly<Record<string, string>>) => Promise<string>` | Required | Renders a prompt of a running MCP server as role-prefixed text. Fails with code configuration when the server is not declared or offers no prompts. |
 
 ## Signature
 

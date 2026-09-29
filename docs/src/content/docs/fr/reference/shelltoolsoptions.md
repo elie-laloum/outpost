@@ -15,7 +15,7 @@ import type { ShellToolsOptions } from "@elie-laloum/outpost";
 
 | Nom          | Type                  | Présence  | Rôle                                                                                                                   |
 | ------------ | --------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `deadlineMs` | `number \| undefined` | Optionnel | Délai de chaque commande shell en millisecondes ; 120 000 par défaut. Le délai des outils du harness s’applique aussi. |
+| `deadlineMs` | `number \| undefined` | Optionnel | Délai de chaque commande shell, 120000 par défaut (2 minutes). toolExecution.deadlineMs borne toujours l’appel entier. |
 
 ## Signature
 

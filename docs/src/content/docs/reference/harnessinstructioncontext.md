@@ -13,12 +13,12 @@ import type { HarnessInstructionContext } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name      | Type                             | Presence | Meaning                                                                                        |
-| --------- | -------------------------------- | -------- | ---------------------------------------------------------------------------------------------- |
-| `sandbox` | `SandboxLease`                   | Required | Borrowed sandbox of the turn, for example to read project guidance before the first request.   |
-| `signal`  | `AbortSignal`                    | Required | Turn cancellation signal; honor it in asynchronous resolvers.                                  |
-| `model`   | `AgentModel`                     | Required | Normalized model of the agent running the turn.                                                |
-| `mcp`     | `HarnessMcpContext \| undefined` | Optional | Access to the MCP servers started for this turn, present when the harness declares mcpServers. |
+| Name      | Type                             | Presence | Meaning                                                                                                                                       |
+| --------- | -------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `sandbox` | `SandboxLease`                   | Required | Borrowed sandbox of the turn, for example to read project guidance before the first request.                                                  |
+| `signal`  | `AbortSignal`                    | Required | Turn cancellation signal; honor it in asynchronous resolvers.                                                                                 |
+| `model`   | `AgentModel`                     | Required | Normalized model of the agent running the turn.                                                                                               |
+| `mcp`     | `HarnessMcpContext \| undefined` | Optional | Access to the MCP servers started for this turn, present when the harness declares mcpServers. Skill instruction resolvers do not receive it. |
 
 ## Signature
 

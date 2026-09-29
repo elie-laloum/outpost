@@ -13,10 +13,10 @@ import type { HarnessInstructions } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom       | Type                                                      | Présence | Rôle                                                                  |
-| --------- | --------------------------------------------------------- | -------- | --------------------------------------------------------------------- |
-| `kind`    | `"instructions"`                                          | Requis   | Discriminant de la définition : instructions.                         |
-| `resolve` | `(context: HarnessInstructionContext) => Promise<string>` | Requis   | Produit le texte d’instructions d’une passe à partir de son contexte. |
+| Nom       | Type                                                      | Présence | Rôle                                                                |
+| --------- | --------------------------------------------------------- | -------- | ------------------------------------------------------------------- |
+| `kind`    | `"instructions"`                                          | Requis   | Discriminant de la définition : instructions.                       |
+| `resolve` | `(context: HarnessInstructionContext) => Promise<string>` | Requis   | Produit le texte d’instructions d’un tour à partir de son contexte. |
 
 ## Signature
 

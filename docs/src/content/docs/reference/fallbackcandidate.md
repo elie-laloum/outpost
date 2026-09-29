@@ -13,11 +13,11 @@ import type { FallbackCandidate } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name    | Type                  | Presence | Meaning                                                                    |
-| ------- | --------------------- | -------- | -------------------------------------------------------------------------- |
-| `index` | `number`              | Required | Zero-based position of the candidate in FallbackAgent.agents.              |
-| `name`  | `string`              | Required | Adapter name of the candidate, such as claude, codex or custom.            |
-| `model` | `string \| undefined` | Optional | Model name selected on the candidate; absent when the CLI default is used. |
+| Name    | Type                  | Presence | Meaning                                                                                                   |
+| ------- | --------------------- | -------- | --------------------------------------------------------------------------------------------------------- |
+| `index` | `number`              | Required | Zero-based position of the candidate in FallbackAgent.agents.                                             |
+| `name`  | `string`              | Required | Adapter name of the candidate, such as claude, codex, custom or replay.                                   |
+| `model` | `string \| undefined` | Optional | Model name selected on the candidate; absent when a CLI keeps its native default, and for a replay agent. |
 
 ## Signature
 

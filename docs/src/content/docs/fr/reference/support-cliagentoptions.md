@@ -7,10 +7,10 @@ sidebar:
 
 ## Paramètres et propriétés
 
-| Nom       | Type                     | Présence  | Rôle                                                                                                                                                                                                                                                |
-| --------- | ------------------------ | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `harness` | `CliHarness`             | Requis    | Preset CLI à associer au modèle sélectionné.                                                                                                                                                                                                        |
-| `model`   | `ModelSpec \| undefined` | Optionnel | Nom du modèle, ou objet AgentModel avec raisonnement et limite de sortie optionnels. Le harness ou le fournisseur qui exécute valide les valeurs prises en charge à la composition de l’agent. Son absence conserve le modèle par défaut de la CLI. |
+| Nom       | Type                     | Présence  | Rôle                                                                                                                                                                                                                                                                   |
+| --------- | ------------------------ | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `harness` | `CliHarness`             | Requis    | Preset CLI, par exemple createCodexHarness(), lié à model à la création de l’agent.                                                                                                                                                                                    |
+| `model`   | `ModelSpec \| undefined` | Optionnel | Nom de modèle ou { name, reasoning, maxOutputTokens } ; le preset refuse ici reasoning ou maxOutputTokens non pris en charge. En son absence, la CLI utilise son modèle par défaut, sauf que l’authentification usage de Kimi et un modelProvider Codex en exigent un. |
 
 ## Signature
 

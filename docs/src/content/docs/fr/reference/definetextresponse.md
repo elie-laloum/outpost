@@ -13,17 +13,17 @@ import { defineTextResponse } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Déclare une réponse texte balisée. Le validateur lit la dernière balise complète correspondante et renvoie son contenu nettoyé sous forme de chaîne. Un contenu absent ou invalide lève ResponseError ; repairs vaut zéro par défaut.
+Déclare une réponse dont la valeur est le texte, sans espaces aux bords, de la dernière paire &lt;tag>…&lt;/tag> complète. Elle n’échoue avec ResponseError que si aucune paire complète n’existe ; un tag ou un repairs invalide échoue avec le code configuration.
 
 [Exemple complet et règles détaillées](../../guide/typed-responses/).
 
 ## Paramètres et propriétés
 
-| Nom               | Type                  | Présence  | Rôle                                                                                                                   |
-| ----------------- | --------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `options`         | `TextResponseOptions` | Requis    | Balise de réponse, un identifiant de style XML, et nombre de tours de réparation autorisés après une réponse invalide. |
-| `options.tag`     | `string`              | Requis    | Identifiant de balise de type XML.                                                                                     |
-| `options.repairs` | `number \| undefined` | Optionnel | Tentatives supplémentaires de réparation de sortie invalide ; zéro par défaut.                                         |
+| Nom               | Type                  | Présence  | Rôle                                                                                                                                                            |
+| ----------------- | --------------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `options`         | `TextResponseOptions` | Requis    | Nom de la balise et nombre de tours de réparation autorisés après une réponse invalide.                                                                         |
+| `options.tag`     | `string`              | Requis    | Nom de la balise, sans chevrons : une lettre suivie de lettres, chiffres, _ ou -. Toute autre forme échoue avec le code configuration.                          |
+| `options.repairs` | `number \| undefined` | Optionnel | Tours de correction autorisés après une réponse invalide, 0 par défaut ; entier positif ou nul. Au-dessus de 0, l’agent doit pouvoir reprendre sa conversation. |
 
 ## Retour
 

@@ -13,10 +13,10 @@ import type { SummarizeHistoryOptions } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name                 | Type                  | Presence | Meaning                                                                          |
-| -------------------- | --------------------- | -------- | -------------------------------------------------------------------------------- |
-| `triggerCharacters`  | `number \| undefined` | Optional | Serialized history size that triggers a summary; defaults to 400,000 characters. |
-| `keepRecentMessages` | `number \| undefined` | Optional | Number of recent messages kept after the summary; defaults to 6.                 |
+| Name                 | Type                  | Presence | Meaning                                                                                                                    |
+| -------------------- | --------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `triggerCharacters`  | `number \| undefined` | Optional | Length of the JSON-serialized history above which a summary is made, default 400000 characters.                            |
+| `keepRecentMessages` | `number \| undefined` | Optional | Minimum number of recent messages kept after the summary, default 6; the cut moves back to the previous assistant message. |
 
 ## Signature
 

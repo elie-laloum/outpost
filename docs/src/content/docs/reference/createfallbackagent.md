@@ -13,17 +13,17 @@ import { createFallbackAgent } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Compose an ordered FallbackAgent from at least two agents and an explicit on list. Dispatch runs the candidates in order in the same sandbox and workspace, preparing each only when it is tried, and moves on only after a quota or unavailable failure listed in on; other failures are rethrown. Construction validates and freezes the list without starting anything.
+Order at least two agents into a frozen FallbackAgent that dispatch runs in one sandbox and workspace, without reset. A candidate hands over only on a quota or outage fault listed in on, and the next one restarts from the original brief; every other failure is rethrown. Fewer than two candidates, a nested fallback agent or an invalid on list throws code configuration.
 
 [Complete example and detailed rules](../../guide/fallback-agents/).
 
 ## Parameters and properties
 
-| Name         | Type                                  | Presence | Meaning                                                                                                              |
-| ------------ | ------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------- |
-| `agents`     | `readonly [Agent, Agent, ...Agent[]]` | Required | Ordered candidates, at least two, each composed with createAgent() or createReplayAgent(); the first is tried first. |
-| `options`    | `FallbackAgentOptions`                | Required | Fallback policy; on is required.                                                                                     |
-| `options.on` | `readonly FallbackTrigger[]`          | Required | Failure categories that move to the next candidate: quota, unavailable or both, without repetition.                  |
+| Name         | Type                                  | Presence | Meaning                                                                                                                                        |
+| ------------ | ------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `agents`     | `readonly [Agent, Agent, ...Agent[]]` | Required | Ordered candidates, at least two, each composed with createAgent() or createReplayAgent(); the first is tried first.                           |
+| `options`    | `FallbackAgentOptions`                | Required | Fallback policy: the on list of failure categories.                                                                                            |
+| `options.on` | `readonly FallbackTrigger[]`          | Required | Failure categories that move to the next candidate: quota, unavailable or both. An empty, repeated or unknown entry throws code configuration. |
 
 ## Returns
 

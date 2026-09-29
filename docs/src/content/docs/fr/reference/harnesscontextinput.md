@@ -13,13 +13,13 @@ import type { HarnessContextInput } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom         | Type                                                     | Présence | Rôle                                                                                                 |
-| ----------- | -------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------- |
-| `messages`  | `readonly ModelMessage[]`                                | Requis   | Historique effectif sur le point d’être envoyé.                                                      |
-| `step`      | `number`                                                 | Requis   | Numéro de l’étape en cours.                                                                          |
-| `model`     | `AgentModel`                                             | Requis   | Modèle normalisé de l’agent.                                                                         |
-| `signal`    | `AbortSignal`                                            | Requis   | Signal d’annulation de la passe.                                                                     |
-| `summarize` | `(messages: readonly ModelMessage[]) => Promise<string>` | Requis   | Demande au modèle de l’agent un résumé factuel des messages donnés ; la requête compte dans l’usage. |
+| Nom         | Type                                                     | Présence | Rôle                                                                                                                                                                           |
+| ----------- | -------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `messages`  | `readonly ModelMessage[]`                                | Requis   | Historique effectif sur le point d’être envoyé.                                                                                                                                |
+| `step`      | `number`                                                 | Requis   | Numéro de l’étape en cours.                                                                                                                                                    |
+| `model`     | `AgentModel`                                             | Requis   | Modèle normalisé de l’agent.                                                                                                                                                   |
+| `signal`    | `AbortSignal`                                            | Requis   | Signal d’annulation du tour.                                                                                                                                                   |
+| `summarize` | `(messages: readonly ModelMessage[]) => Promise<string>` | Requis   | Demande au modèle de l’agent un résumé factuel des messages donnés. La requête compte dans l’usage et les budgets ; un résumé vide ou interrompu échoue avec le code response. |
 
 ## Signature
 

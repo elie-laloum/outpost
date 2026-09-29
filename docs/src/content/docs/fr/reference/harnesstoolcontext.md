@@ -13,13 +13,13 @@ import type { HarnessToolContext } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom       | Type                                | Présence | Rôle                                                                                                                                                                |
-| --------- | ----------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `sandbox` | `SandboxLease`                      | Requis   | Sandbox emprunté pour les commandes et transferts. Les opérations suivent le délai de l’appel et l’annulation de la passe ; l’outil ne peut pas libérer le sandbox. |
-| `signal`  | `AbortSignal`                       | Requis   | Annulé à l’expiration du délai de l’appel ou à l’annulation de la passe. Un JavaScript qui l’ignore continue détaché.                                               |
-| `callId`  | `string`                            | Requis   | Identifiant de l’appel d’outil du modèle en cours d’exécution.                                                                                                      |
-| `model`   | `AgentModel`                        | Requis   | Modèle normalisé de l’agent qui exécute l’outil.                                                                                                                    |
-| `observe` | `(event: HarnessToolEvent) => void` | Requis   | Signale des événements text, warning ou raw aux observateurs du dispatch ; les autres variantes sont refusées.                                                      |
+| Nom       | Type                                | Présence | Rôle                                                                                                                                                                          |
+| --------- | ----------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `sandbox` | `SandboxLease`                      | Requis   | Sandbox empruntée pour les commandes et les transferts. Les opérations suivent le délai de l’appel et l’annulation du tour ; release() est rejeté avec le code configuration. |
+| `signal`  | `AbortSignal`                       | Requis   | Annulé à l’expiration du délai de l’appel ou à l’annulation du tour. Du JavaScript qui l’ignore continue de s’exécuter, détaché.                                              |
+| `callId`  | `string`                            | Requis   | Identifiant de l’appel d’outil du modèle en cours d’exécution.                                                                                                                |
+| `model`   | `AgentModel`                        | Requis   | Modèle normalisé de l’agent qui exécute l’outil.                                                                                                                              |
+| `observe` | `(event: HarnessToolEvent) => void` | Requis   | Transmet un événement text, warning ou raw aux observateurs du dispatch ; tout autre type lève le code configuration.                                                         |
 
 ## Signature
 

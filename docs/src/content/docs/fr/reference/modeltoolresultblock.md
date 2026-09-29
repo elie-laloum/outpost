@@ -13,12 +13,12 @@ import type { ModelToolResultBlock } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom       | Type                   | Présence  | Rôle                                                                           |
-| --------- | ---------------------- | --------- | ------------------------------------------------------------------------------ |
-| `type`    | `"tool-result"`        | Requis    | Discriminant du bloc : tool-result.                                            |
-| `callId`  | `string`               | Requis    | Identifiant de l’appel d’outil auquel ce résultat répond.                      |
-| `content` | `string`               | Requis    | Texte renvoyé au modèle pour cet appel.                                        |
-| `isError` | `boolean \| undefined` | Optionnel | Signale un échec d’exécution de l’outil pour que le modèle puisse se corriger. |
+| Nom       | Type                   | Présence  | Rôle                                                                                                                                 |
+| --------- | ---------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `type`    | `"tool-result"`        | Requis    | Discriminant du bloc : tool-result.                                                                                                  |
+| `callId`  | `string`               | Requis    | Identifiant de l’appel d’outil auquel ce résultat répond.                                                                            |
+| `content` | `string`               | Requis    | Texte renvoyé au modèle pour cet appel.                                                                                              |
+| `isError` | `boolean \| undefined` | Optionnel | Signale un échec d’exécution de l’outil. Seul Anthropic le transmet, dans is_error ; les protocoles OpenAI envoient le contenu seul. |
 
 ## Signature
 

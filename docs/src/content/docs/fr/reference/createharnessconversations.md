@@ -13,7 +13,7 @@ import { createHarnessConversations } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Crée le store de conversations par défaut des harness personnalisés. Les transcriptions se trouvent dans .outpost/conversations/harness du dépôt cible ; localiser une conversation absente échoue avec le code session, et restore ne fait rien car la boucle tourne sur l’hôte.
+Crée le store par défaut des agents createHarness(), dont les transcripts sont &lt;dépôt>/.outpost/conversations/harness/&lt;id>.jsonl. locate et capture vérifient seulement que ce fichier existe et échouent sinon avec le code session ; restore ne fait rien car la boucle du harness s’exécute sur l’hôte.
 
 [Exemple complet et règles détaillées](../../guide/conversations/).
 

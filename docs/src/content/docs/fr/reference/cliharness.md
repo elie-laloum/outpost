@@ -13,10 +13,10 @@ import type { CliHarness } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom    | Type                                   | Présence | Rôle                                                                                                                                                                    |
-| ------ | -------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `kind` | `"cli"`                                | Requis   | Discriminant d’exécution : cli.                                                                                                                                         |
-| `bind` | `(model?: AgentModel) => AgentAdapter` | Requis   | Construit l’adaptateur CLI pour un AgentModel normalisé optionnel sans lancer le programme ; un raisonnement ou une limite de sortie non pris en charge est refusé ici. |
+| Nom    | Type                                   | Présence | Rôle                                                                                                                                                                                                   |
+| ------ | -------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `kind` | `"cli"`                                | Requis   | Discriminant d’exécution : cli.                                                                                                                                                                        |
+| `bind` | `(model?: AgentModel) => AgentAdapter` | Requis   | Construit l’adapter pour un modèle facultatif sans lancer la CLI ; createAgent() l’appelle. Les réglages de modèle, formes d’authentification et options MCP non pris en charge lèvent une erreur ici. |
 
 ## Signature
 

@@ -13,10 +13,10 @@ import type { HarnessToolsetOptions } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom     | Type                                                  | Présence | Rôle                                                                  |
-| ------- | ----------------------------------------------------- | -------- | --------------------------------------------------------------------- |
-| `name`  | `string`                                              | Requis   | Nom non vide qui identifie le jeu d’outils.                           |
-| `tools` | `readonly (HarnessTool<unknown> \| HarnessToolset)[]` | Requis   | Outils et jeux imbriqués à regrouper ; les noms doivent être uniques. |
+| Nom     | Type                                                  | Présence | Rôle                                                                                                           |
+| ------- | ----------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------- |
+| `name`  | `string`                                              | Requis   | Nom non vide qui identifie le jeu d’outils.                                                                    |
+| `tools` | `readonly (HarnessTool<unknown> \| HarnessToolset)[]` | Requis   | Outils et jeux imbriqués à regrouper ; les jeux imbriqués sont aplatis et les noms d’outils en double refusés. |
 
 ## Signature
 

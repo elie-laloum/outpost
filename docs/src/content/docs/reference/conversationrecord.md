@@ -13,12 +13,12 @@ import type { ConversationRecord } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name        | Type                              | Presence | Meaning                                                                                                |
-| ----------- | --------------------------------- | -------- | ------------------------------------------------------------------------------------------------------ |
-| `id`        | `string`                          | Required | Native conversation identifier used to locate or continue the session.                                 |
-| `file`      | `string`                          | Required | Host path of the native transcript file.                                                               |
-| `reference` | `TransportReference \| undefined` | Optional | Optional pinned remote conversation index. file remains a readable local transcript for compatibility. |
-| `format`    | `string`                          | Required | Transcript format understood by the owning conversation store.                                         |
+| Name        | Type                              | Presence | Meaning                                                                                                                                                 |
+| ----------- | --------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`        | `string`                          | Required | Native conversation identifier used to locate or continue the session.                                                                                  |
+| `file`      | `string`                          | Required | Host path of the captured transcript or session bundle.                                                                                                 |
+| `reference` | `TransportReference \| undefined` | Optional | Transport key and revision of the conversation index, set by createTransportConversations(). file still points to a readable local copy.                |
+| `format`    | `string`                          | Required | Format of the store that produced the record. Transcript and session bundle stores reject restoring a record of another format with code configuration. |
 
 ## Signature
 

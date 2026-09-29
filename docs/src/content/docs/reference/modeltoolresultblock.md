@@ -13,12 +13,12 @@ import type { ModelToolResultBlock } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name      | Type                   | Presence | Meaning                                                              |
-| --------- | ---------------------- | -------- | -------------------------------------------------------------------- |
-| `type`    | `"tool-result"`        | Required | Block discriminator: tool-result.                                    |
-| `callId`  | `string`               | Required | Identifier of the tool call this result answers.                     |
-| `content` | `string`               | Required | Text returned to the model for this call.                            |
-| `isError` | `boolean \| undefined` | Optional | Mark the result as a failed tool execution so the model can recover. |
+| Name      | Type                   | Presence | Meaning                                                                                                                         |
+| --------- | ---------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `type`    | `"tool-result"`        | Required | Block discriminator: tool-result.                                                                                               |
+| `callId`  | `string`               | Required | Identifier of the tool call this result answers.                                                                                |
+| `content` | `string`               | Required | Text returned to the model for this call.                                                                                       |
+| `isError` | `boolean \| undefined` | Optional | Marks the result as a failed tool execution. Only Anthropic transmits it, as is_error; OpenAI protocols send the content alone. |
 
 ## Signature
 

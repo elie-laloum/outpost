@@ -13,7 +13,7 @@ import { createTranscriptConversations } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Create a native ConversationStore for a CLI that keeps one JSONL transcript per conversation, described by a TranscriptConversationLayout. Locate searches the host home, capture finds the transcript in the sandbox with find, and restore uploads it; both rewrite recorded cwd values that match the original workspace. Use it for an external CLI harness; the built-in Claude and Codex stores are built with it.
+Create a NativeConversationStore for a CLI that writes one JSONL transcript per conversation, described by layout. capture finds the file in the sandbox with find and copies it to the host, restore uploads it, and both rewrite recorded cwd values for the destination. A missing transcript fails with code session; the Claude and Codex stores are built with it.
 
 [Complete example and detailed rules](../../guide/conversation-formats/).
 

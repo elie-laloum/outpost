@@ -13,7 +13,7 @@ import { agentVersions } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Expose les versions des CLI Claude Code, Codex, Antigravity, Copilot et Kimi épinglées pour les images générées et le bootstrap distant, qui servent de références à doctor et aux fixtures de protocole intégrées. Les archives Antigravity sont vérifiées avec les empreintes SHA-512 enregistrées dans Outpost. Ces valeurs n’interrogent pas les binaires installés et ne prouvent pas l’accès à un compte.
+Version épinglée de la CLI de chaque agent intégré, indexée par nom d’agent. Les images générées et le bootstrap distant installent ces versions, et doctor les affiche comme référence ; les lire n’interroge pas les binaires installés.
 
 [Exemple complet et règles détaillées](../../guide/agent-images/).
 
@@ -21,8 +21,8 @@ Expose les versions des CLI Claude Code, Codex, Antigravity, Copilot et Kimi ép
 
 | Nom           | Type     | Présence | Rôle                                                                                                                                                                                         |
 | ------------- | -------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `codex`       | `string` | Requis   | Version du CLI Codex utilisée par les fixtures de compatibilité intégrées.                                                                                                                   |
-| `claude`      | `string` | Requis   | Version de Claude Code utilisée par les fixtures de compatibilité intégrées.                                                                                                                 |
+| `codex`       | `string` | Requis   | Version de la CLI Codex installée par les images générées et le bootstrap distant.                                                                                                           |
+| `claude`      | `string` | Requis   | Version de Claude Code installée par les images générées et le bootstrap distant.                                                                                                            |
 | `antigravity` | `string` | Requis   | Version de la CLI Antigravity installée depuis des archives vérifiées par SHA-512 dans les images générées et le bootstrap distant, et utilisée comme référence de compatibilité par doctor. |
 | `copilot`     | `string` | Requis   | Version de GitHub Copilot CLI installée par les images générées et le bootstrap distant.                                                                                                     |
 | `kimi`        | `string` | Requis   | Version de la CLI Kimi Code installée par les images générées et le bootstrap distant.                                                                                                       |

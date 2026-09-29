@@ -15,7 +15,7 @@ import type { FallbackAgent } from "@elie-laloum/outpost";
 
 | Name     | Type                         | Presence | Meaning                                                                                                  |
 | -------- | ---------------------------- | -------- | -------------------------------------------------------------------------------------------------------- |
-| `kind`   | `"fallback"`                 | Required | Discriminator identifying an ordered fallback list rather than a single agent.                           |
+| `kind`   | `"fallback"`                 | Required | Discriminator: fallback, for an ordered list of candidates rather than a single agent.                   |
 | `agents` | `readonly Agent[]`           | Required | Frozen copy of the candidates, in the order they are tried; at least two, none of them a fallback agent. |
 | `on`     | `readonly FallbackTrigger[]` | Required | Frozen copy of the failure categories that move to the next candidate; every other failure is rethrown.  |
 

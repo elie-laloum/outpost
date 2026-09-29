@@ -13,18 +13,18 @@ import { defineHarnessSubagent } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Définit un outil sérialisé exécutant un agent enfant intégré avec un historique neuf dans la sandbox empruntée du parent. Le parent fournit { prompt } ; le résultat est un texte JSON contenant text et un identifiant conversation optionnel. Les tokens enfants comptent une seule fois dans le dispatch et dans chaque budget ancêtre ; annulation et permissions déclaratives se propagent. L’outil ne peut pas être exécuté hors du runtime du harness.
+Définit un outil qui exécute un agent enfant intégré, avec un historique neuf, dans la sandbox empruntée du parent. Le modèle parent envoie { prompt } ; l’outil renvoie un texte JSON avec le texte de l’enfant et l’identifiant de sa conversation, et un échec de l’enfant est traité comme toute erreur d’outil. Les tokens de l’enfant comptent dans l’usage du dispatch et dans chaque budget ancêtre, et les permissions des ancêtres s’appliquent aussi à ses outils.
 
 [Exemple complet et règles détaillées](../../guide/subagents/).
 
 ## Paramètres et propriétés
 
-| Nom                   | Type                     | Présence | Rôle                                                                                                                                                                |
-| --------------------- | ------------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `options`             | `HarnessSubagentOptions` | Requis   | Nom, description visible du modèle et agent enfant intégré composé explicitement. Définir l’outil ne l’exécute pas.                                                 |
-| `options.name`        | `string`                 | Requis   | Nom d’outil unique présenté au modèle parent, composé de 1 à 64 lettres, chiffres, tirets ou underscores.                                                           |
-| `options.description` | `string`                 | Requis   | Explique quand le parent doit déléguer à cet enfant ; transmis avec le schéma de l’outil.                                                                           |
-| `options.agent`       | `CustomAgent`            | Requis   | Agent intégré créé avec createAgent({ harness: createHarness(...), model }) ; définit les instructions, outils et limites de l’enfant. Les agents CLI sont refusés. |
+| Nom                   | Type                     | Présence | Rôle                                                                                                                                                                                                  |
+| --------------------- | ------------------------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `options`             | `HarnessSubagentOptions` | Requis   | Nom de l’outil, description montrée au modèle parent et agent enfant intégré. Les clés inconnues sont refusées.                                                                                       |
+| `options.name`        | `string`                 | Requis   | Nom d’outil unique présenté au modèle parent, composé de 1 à 64 lettres, chiffres, tirets ou underscores.                                                                                             |
+| `options.description` | `string`                 | Requis   | Indique au modèle parent quand déléguer à cet enfant ; envoyée avec le schéma de l’outil.                                                                                                             |
+| `options.agent`       | `CustomAgent`            | Requis   | Agent intégré issu de createAgent({ harness: createHarness(…), model }) qui fournit les instructions, outils, limites et permissions de l’enfant. Un agent CLI est refusé avec le code configuration. |
 
 ## Retour
 

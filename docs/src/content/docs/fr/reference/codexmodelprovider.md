@@ -13,10 +13,10 @@ import type { CodexModelProvider } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom                 | Type                           | Présence  | Rôle                                                                                                            |
-| ------------------- | ------------------------------ | --------- | --------------------------------------------------------------------------------------------------------------- |
-| `baseUrl`           | `string`                       | Requis    | URL de base de l’endpoint de modèle personnalisé compatible Responses.                                          |
-| `apiKeyEnvironment` | `string \| false \| undefined` | Optionnel | Variable d’environnement contenant la clé API de l’endpoint ; false désactive la déclaration de cette variable. |
+| Nom                 | Type                           | Présence  | Rôle                                                                                                                                                                                                  |
+| ------------------- | ------------------------------ | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `baseUrl`           | `string`                       | Requis    | URL de base de l’endpoint compatible Responses : http ou https absolue, sans identifiants, requête ni fragment.                                                                                       |
+| `apiKeyEnvironment` | `string \| false \| undefined` | Optionnel | Variable qui contient la clé API de l’endpoint, OPENAI_API_KEY par défaut ; l’authentification usage la renseigne. false n’envoie aucune clé et ne laisse aucune forme d’authentification disponible. |
 
 ## Signature
 

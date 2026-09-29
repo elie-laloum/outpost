@@ -13,10 +13,10 @@ import type { HarnessContextStrategyOptions } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom       | Type                                                                                    | Présence | Rôle                                                                                                                                                                                         |
-| --------- | --------------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`    | `string`                                                                                | Requis   | Nom non vide indiqué dans les événements compaction.                                                                                                                                         |
-| `compact` | `(input: HarnessContextInput) => HarnessContextResult \| Promise<HarnessContextResult>` | Requis   | Renvoie une liste de messages réécrite, ou rien pour garder l’historique. La liste doit commencer et finir par un message utilisateur et garder chaque appel d’outil associé à son résultat. |
+| Nom       | Type                                                                                    | Présence | Rôle                                                                                                                                                                                                                                                                             |
+| --------- | --------------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`    | `string`                                                                                | Requis   | Nom non vide indiqué dans les événements compaction.                                                                                                                                                                                                                             |
+| `compact` | `(input: HarnessContextInput) => HarnessContextResult \| Promise<HarnessContextResult>` | Requis   | Appelée avant chaque requête au modèle ; renvoie une liste de messages réécrite, ou rien pour garder l’historique. La liste doit commencer et finir par un message utilisateur et associer chaque appel d’outil à son résultat, sinon le tour échoue avec le code configuration. |
 
 ## Signature
 

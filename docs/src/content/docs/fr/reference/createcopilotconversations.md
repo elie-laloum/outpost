@@ -13,7 +13,7 @@ import { createCopilotConversations } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Crée le ConversationStore natif de GitHub Copilot CLI. Chaque dossier de session sous $COPILOT_HOME ou ~/.copilot/session-state est capturé en un bundle JSON borné ; la restauration réécrit les chemins de workspace.yaml et de session.start. C’est le store par défaut de createCopilotHarness().
+Crée le store natif de GitHub Copilot CLI, celui par défaut de createCopilotHarness(). Chaque dossier de session sous &lt;home de la CLI>/session-state, où le home de la CLI est $COPILOT_HOME ou ~/.copilot, est capturé en un bundle JSON à .outpost/conversations/copilot/&lt;id>.json. La restauration réécrit cwd et la racine Git dans workspace.yaml et dans l’événement session.start.
 
 [Exemple complet et règles détaillées](../../guide/conversations/).
 

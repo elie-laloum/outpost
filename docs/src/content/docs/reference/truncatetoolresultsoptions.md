@@ -13,10 +13,10 @@ import type { TruncateToolResultsOptions } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name            | Type                  | Presence | Meaning                                                                |
-| --------------- | --------------------- | -------- | ---------------------------------------------------------------------- |
-| `keepRecent`    | `number \| undefined` | Optional | Number of most recent tool-result messages kept intact; defaults to 4. |
-| `maxCharacters` | `number \| undefined` | Optional | Length older tool results are cut to; defaults to 2,000 characters.    |
+| Name            | Type                  | Presence | Meaning                                                            |
+| --------------- | --------------------- | -------- | ------------------------------------------------------------------ |
+| `keepRecent`    | `number \| undefined` | Optional | Number of most recent tool-result messages kept intact, default 4. |
+| `maxCharacters` | `number \| undefined` | Optional | Length older tool results are cut to, default 2000 characters.     |
 
 ## Signature
 

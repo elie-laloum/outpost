@@ -19,11 +19,11 @@ Group tools and nested toolsets under a name so they can be reused across harnes
 
 ## Parameters and properties
 
-| Name            | Type                                                  | Presence | Meaning                                                   |
-| --------------- | ----------------------------------------------------- | -------- | --------------------------------------------------------- |
-| `options`       | `HarnessToolsetOptions`                               | Required | Toolset name and the tools or nested toolsets it groups.  |
-| `options.name`  | `string`                                              | Required | Nonempty name identifying the toolset.                    |
-| `options.tools` | `readonly (HarnessTool<unknown> \| HarnessToolset)[]` | Required | Tools and nested toolsets to group; names must be unique. |
+| Name            | Type                                                  | Presence | Meaning                                                                                              |
+| --------------- | ----------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------- |
+| `options`       | `HarnessToolsetOptions`                               | Required | Toolset name and the tools or nested toolsets it groups.                                             |
+| `options.name`  | `string`                                              | Required | Nonempty name identifying the toolset.                                                               |
+| `options.tools` | `readonly (HarnessTool<unknown> \| HarnessToolset)[]` | Required | Tools and nested toolsets to group; nested sets are flattened and duplicate tool names are rejected. |
 
 ## Returns
 

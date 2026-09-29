@@ -1,38 +1,52 @@
 ---
 title: "Agents — Overview"
-description: "An agent composes an execution harness with a model."
+description: "Compose a harness and a model into an agent, or order several agents into a fallback agent for dispatch."
 sidebar:
   label: Overview
   order: 0
 ---
 
-An agent composes an execution harness with a model. A harness defines how the task runs; the model is a name, or an `AgentModel` object that adds a reasoning level and an output limit. Constructing this configuration performs no login, allocation or network request.
+## Model settings by harness
 
-## How it works
+`createAgent({ harness, model })` starts nothing. It checks `reasoning` and `maxOutputTokens` against the harness and throws code `configuration` for a setting the harness cannot apply.
 
-Use `createAgent({ harness: createCodexHarness(), model: "..." })`, or the corresponding `createClaudeHarness()`, `createAntigravityHarness()`, `createCopilotHarness()` and `createKimiHarness()` presets. `createHarness({ modelProvider, tools, instructions })` lets Outpost drive a model service itself. `sandboxProvider` independently selects where repository commands execute.
+| Harness                              | `model` omitted                                   | `reasoning`               | `maxOutputTokens`                       |
+| ------------------------------------ | ------------------------------------------------- | ------------------------- | --------------------------------------- |
+| Claude Code                          | CLI default                                       | `low` to `max`            | Sent as `CLAUDE_CODE_MAX_OUTPUT_TOKENS` |
+| Codex                                | CLI default                                       | `low` to `max`            | Rejected                                |
+| Copilot CLI, Antigravity             | CLI default                                       | Rejected                  | Rejected                                |
+| Kimi Code                            | CLI default; a name is required with `usage` auth | Rejected                  | Rejected                                |
+| Built-in harness, OpenAI provider    | Rejected                                          | Any level, sent unchanged | Sent with each request                  |
+| Built-in harness, Anthropic provider | Rejected                                          | `none`, `low` to `max`    | Required                                |
 
-`createAgent()` normalizes the model into a frozen `AgentModel` and asks the harness or its model provider to validate it. A reasoning level or output limit that the selected CLI or service cannot express is rejected immediately, before any sandbox exists. Antigravity, Copilot and Kimi accept only a model name; Kimi with `usage` authentication requires one.
+## When a fallback agent moves on
 
-`createFallbackAgent([...agents], { on })` groups composed agents into an ordered `FallbackAgent`. Dispatch accepts it wherever it accepts an agent (`DispatchAgent`) and hands the work to the next candidate only when the current one fails with a listed `FallbackTrigger`: `quota` or `unavailable`. The result's `FallbackRecord` names the selected candidate and the `FallbackAttempt` of each one that stopped. Attachment and explicit continuations require a single agent.
+`createFallbackAgent([first, second], { on })` runs its candidates in order in one sandbox and workspace, without reset. Each next candidate restarts from the original brief on the work already there.
 
-## Boundaries and responsibilities
+| Failure of the current candidate                            | Outcome                                                                                                       |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Code `quota`, with `quota` in `on`                          | Next candidate; the attempt is recorded in `result.fallback.attempts`                                         |
+| Outage found by `unavailableFault()`, `unavailable` in `on` | Next candidate; the error keeps its code (`process` or `provider`)                                            |
+| `timeout` after the agent reported a connection failure     | Counted as an outage, so `unavailable` in `on` moves to the next candidate                                    |
+| Cancellation, other timeouts, any other failure             | Rethrown at once, with earlier attempts in `recovery.fallback`                                                |
+| Covered failure on the last candidate                       | Rethrown the same way; if every candidate hit a quota, one `quota` error with the earliest reported `resetAt` |
 
-An agent binds execution configuration and model selection. The [Harness](../harness/) family owns CLI presets, the built-in engine, authentication settings (`AgentAuthentication`, `AccountCredential`, `UsageCredential`) and execution capabilities. [Model providers](../model-providers/) supply HTTP transports to custom harnesses, while `sandboxProvider` independently selects the execution environment.
-
-These composition APIs are available since 5.0.0. Use the agent with dispatch, a sandbox or a workflow task; constructing it performs no execution.
+:::note
+A fallback agent cannot take `continuation` or be attached. Continue with `result.resume()` or `result.fork()`, which use the selected candidate.
+:::
 
 ## Entry points
 
+Guide: [Choose an agent](../../../guide/choose-an-agent/) · [Fallback agents](../../../guide/fallback-agents/) · [Model providers](../../../guide/model-providers/)
+
 - [createAgent](../../createagent/)
+- [createFallbackAgent](../../createfallbackagent/)
 - [Agent](../../type-agent/)
 - [AgentOptions](../../agentoptions/)
+- [AgentModel](../../agentmodel/)
+- [ModelReasoning](../../modelreasoning/)
 - [CliAgent](../../cliagent/)
 - [CustomAgent](../../customagent/)
-- [AgentModel](../../agentmodel/)
-- [ModelSpec](../../modelspec/)
-- [ModelReasoning](../../modelreasoning/)
-- [createFallbackAgent](../../createfallbackagent/)
 - [FallbackAgent](../../type-fallbackagent/)
-
-[Learn with the practical guide](../../../guide/choose-an-agent/).
+- [FallbackRecord](../../fallbackrecord/)
+- [FallbackAttempt](../../fallbackattempt/)

@@ -19,8 +19,8 @@ import type { FallbackAttempt } from "@elie-laloum/outpost";
 | `message` | `string`              | Requis    | Message de quota ou de panne qui a arrêté ce candidat.                                                                         |
 | `resetAt` | `string \| undefined` | Optionnel | Horodatage ISO de réinitialisation signalé avec un échec de quota ; absent pour les pannes et les réinitialisations inconnues. |
 | `index`   | `number`              | Requis    | Position du candidat dans FallbackAgent.agents, à partir de zéro.                                                              |
-| `name`    | `string`              | Requis    | Nom de l’adapter du candidat, par exemple claude, codex ou custom.                                                             |
-| `model`   | `string \| undefined` | Optionnel | Nom du modèle choisi sur le candidat ; absent lorsque le modèle par défaut de la CLI est utilisé.                              |
+| `name`    | `string`              | Requis    | Nom de l’adapter du candidat, par exemple claude, codex, custom ou replay.                                                     |
+| `model`   | `string \| undefined` | Optionnel | Nom du modèle choisi sur le candidat ; absent quand une CLI garde son défaut natif, et pour un agent de rejeu.                 |
 
 ## Signature
 

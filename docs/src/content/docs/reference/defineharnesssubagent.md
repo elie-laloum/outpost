@@ -13,18 +13,18 @@ import { defineHarnessSubagent } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Define a serialized tool that runs a built-in child agent with a fresh history in the parent’s borrowed sandbox. The parent supplies { prompt }; the result is JSON text containing text and an optional conversation identifier. Child tokens count once toward dispatch and every ancestor budget; cancellation and declarative permissions propagate. The tool cannot execute outside the harness runtime.
+Define a tool that runs a built-in child agent, with a fresh history, in the parent's borrowed sandbox. The parent model sends { prompt }; the tool returns JSON text with the child's text and conversation identifier, and a child failure is handled like any tool error. Child tokens count toward the dispatch usage and every ancestor budget, and ancestor permissions also apply to child tools.
 
 [Complete example and detailed rules](../../guide/subagents/).
 
 ## Parameters and properties
 
-| Name                  | Type                     | Presence | Meaning                                                                                                                                              |
-| --------------------- | ------------------------ | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `options`             | `HarnessSubagentOptions` | Required | Name, model-visible description and explicitly composed built-in child agent. Defining the tool does not run it.                                     |
-| `options.name`        | `string`                 | Required | Unique tool name exposed to the parent model, using 1–64 letters, digits, underscores or hyphens.                                                    |
-| `options.description` | `string`                 | Required | Explain when the parent should delegate to this child; sent with the tool schema.                                                                    |
-| `options.agent`       | `CustomAgent`            | Required | Built-in agent created with createAgent({ harness: createHarness(...), model }); owns child instructions, tools and limits. CLI agents are rejected. |
+| Name                  | Type                     | Presence | Meaning                                                                                                                                                                                       |
+| --------------------- | ------------------------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `options`             | `HarnessSubagentOptions` | Required | Tool name, description shown to the parent model and built-in child agent. Unknown keys are rejected.                                                                                         |
+| `options.name`        | `string`                 | Required | Unique tool name exposed to the parent model, using 1–64 letters, digits, underscores or hyphens.                                                                                             |
+| `options.description` | `string`                 | Required | Tells the parent model when to delegate to this child; sent with the tool schema.                                                                                                             |
+| `options.agent`       | `CustomAgent`            | Required | Built-in agent from createAgent({ harness: createHarness(…), model }) that supplies the child's instructions, tools, limits and permissions. A CLI agent is rejected with code configuration. |
 
 ## Returns
 

@@ -192,32 +192,32 @@
     "Identifiant d’agent natif utilisé dans les événements et diagnostics."
   ],
   "AgentAdapter.bootstrap": [
-    "Name of the built-in installer used to install a missing CLI on remote providers when bootstrapping is enabled: a pinned npm package for claude, codex, copilot and kimi, or a versioned archive with a pinned SHA-512 digest for antigravity.",
-    "Nom de l’installeur intégré utilisé pour installer une CLI absente sur les providers distants lorsque le bootstrap est activé : un paquet npm épinglé pour claude, codex, copilot et kimi, ou une archive versionnée avec une empreinte SHA-512 épinglée pour antigravity."
+    "Built-in agent whose pinned CLI Outpost installs on a remote sandbox when the executable is missing: an npm package, or a SHA-512-verified archive for antigravity. An unknown name fails.",
+    "Agent intégré dont Outpost installe la CLI épinglée sur une sandbox distante quand l’exécutable manque : un paquet npm, ou une archive vérifiée par SHA-512 pour antigravity. Un nom inconnu échoue."
   ],
   "AgentAdapter.requiresFinishedEvent": [
-    "Require the native finished protocol event before treating an agent turn as complete.",
-    "Exige l’événement natif finished avant de considérer le tour d’agent terminé."
+    "Require the native final event: without it, completion markers do not match and the turn fails with code process, even when the process exits with 0.",
+    "Exige l’événement final natif : sans lui, les marqueurs de fin ne correspondent pas et le tour échoue avec le code process, même si le processus se termine avec 0."
   ],
   "AgentAdapter.variables": [
-    "Explicit environment declarations; values are strings.",
-    "Déclarations d’environnement explicites ; les valeurs sont des chaînes."
+    "Environment variables added to every command of this agent, over the values from .outpost/.env. A name also set by the sandbox provider fails with code configuration.",
+    "Variables d’environnement ajoutées à chaque commande de cet agent, par-dessus les valeurs de .outpost/.env. Un nom également défini par le provider de sandbox échoue avec le code configuration."
   ],
   "AgentAdapter.storage": [
     "Conversation store that captures, locates and restores this adapter’s sessions. Built-in presets default to their native store; absent when the CLI has no portable conversations.",
     "Store de conversations qui capture, localise et restaure les sessions de cet adapter. Les presets intégrés utilisent par défaut leur store natif ; absent quand la CLI n’a pas de conversations portables."
   ],
   "AgentAdapter.capture": [
-    "Whether the adapter enables native transcript capture.",
-    "Indique si l’adapter active la capture des transcripts natifs."
+    "Save the conversation to storage after each turn; false skips it. Omitted, a turn is saved whenever storage is present.",
+    "Enregistre la conversation dans storage après chaque tour ; false l’évite. En son absence, un tour est enregistré dès que storage existe."
   ],
   "AgentAdapter.resumable": [
-    "Whether the agent can continue a conversation, including response repair. Cold continuation additionally requires a conversation store; fork support is declared separately.",
-    "Indique si l’agent peut continuer une conversation, y compris pour réparer une réponse. La reprise à froid exige aussi un store ; le fork est déclaré séparément."
+    "Whether the agent can continue a conversation, as continuation, response repairs and resume-based steering require; false rejects continuation before allocation. Cold continuation also needs storage.",
+    "Indique si l’agent peut poursuivre une conversation, ce qu’exigent continuation, les réparations de réponse et le pilotage par reprise ; false refuse continuation avant l’allocation. La reprise à froid exige aussi storage."
   ],
   "AgentAdapter.transcriptUsage": [
-    "Parse a native transcript to recover token usage when available.",
-    "Analyse un transcript natif pour récupérer l’usage de tokens disponible."
+    "Read token usage from the transcript captured after the turn; a result replaces the usage reported by events, undefined keeps it.",
+    "Lit l’usage de jetons dans la transcription capturée après le tour ; un résultat remplace l’usage rapporté par les événements, undefined le conserve."
   ],
   "AgentAdapter.request": [
     "Build the executable, arguments and environment for the supplied agent input.",
@@ -228,60 +228,60 @@
     "Décode une ligne de sortie du CLI natif en événements d’agent normalisés."
   ],
   "ConversationStore.name": [
-    "Identifier of this conversation storage implementation.",
-    "Identifiant de cette implémentation de stockage de conversations."
+    "Store name, such as claude or transport:<namespace>:<format>. Outpost pairs it with the conversation id to skip restoring a conversation the sandbox already holds.",
+    "Nom du store, par exemple claude ou transport:<namespace>:<format>. Outpost l’associe à l’identifiant de conversation pour ne pas restaurer une conversation déjà présente dans la sandbox."
   ],
   "ConversationStore.format": [
-    "Transcript format this store handles, such as claude, codex, copilot, kimi or harness. Harnesses reject a store whose declared format differs from their own when they are created; omit it for a custom store that validates records itself.",
-    "Format de transcript géré par ce store, par exemple claude, codex, copilot, kimi ou harness. Les harness refusent dès leur création un store dont le format déclaré diffère du leur ; l’omettre pour un store personnalisé qui valide lui-même ses enregistrements."
+    "Persisted format this store reads and writes, such as claude, codex, copilot, kimi or harness. A harness rejects a store of another format at creation with code configuration, and createTransportConversations() requires a base store that declares one.",
+    "Format persisté que ce store lit et écrit, par exemple claude, codex, copilot, kimi ou harness. Un harness refuse à sa création un store d’un autre format avec le code configuration, et createTransportConversations() exige un store de base qui en déclare un."
   ],
   "ConversationStore.locate": [
-    "Find an existing transcript by conversation ID, repository and optional host home.",
-    "Recherche un transcript existant par identifiant, dépôt et home hôte optionnel."
+    "Finds a captured conversation on the host from its id, the repository and an optional home, before it is restored. Rejects when the conversation is missing.",
+    "Retrouve une conversation capturée sur l’hôte à partir de son identifiant, du dépôt et d’un home optionnel, avant sa restauration. Échoue quand la conversation est absente."
   ],
   "ConversationStore.capture": [
-    "Capture the selected sandbox conversation into the context’s host staging directory.",
-    "Capture la conversation de sandbox choisie dans le dossier de capture hôte du contexte."
+    "Saves conversation id from the context’s sandbox to the host after a turn and returns its record.",
+    "Enregistre la conversation id depuis la sandbox du contexte vers l’hôte après un tour et renvoie son enregistrement."
   ],
   "ConversationStore.restore": [
-    "Restore a transcript record into the context’s sandbox before continuation.",
-    "Restaure un transcript dans la sandbox du contexte avant continuation."
+    "Writes a located record into the context’s sandbox before a continued turn, relocating recorded paths to the sandbox workspace.",
+    "Écrit un enregistrement localisé dans la sandbox du contexte avant un tour de continuation, en relocalisant les chemins enregistrés vers le workspace de la sandbox."
   ],
   "ConversationRecord.id": [
     "Native conversation identifier used to locate or continue the session.",
     "Identifiant de conversation native utilisé pour localiser ou poursuivre la session."
   ],
   "ConversationRecord.file": [
-    "Host path of the native transcript file.",
-    "Chemin hôte du fichier de transcript natif."
+    "Host path of the captured transcript or session bundle.",
+    "Chemin sur l’hôte du transcript ou du bundle de session capturé."
   ],
   "ConversationRecord.format": [
-    "Transcript format understood by the owning conversation store.",
-    "Format de transcript compris par le store de conversations propriétaire."
+    "Format of the store that produced the record. Transcript and session bundle stores reject restoring a record of another format with code configuration.",
+    "Format du store qui a produit l’enregistrement. Les stores de transcripts et de bundles de session refusent de restaurer un enregistrement d’un autre format avec le code configuration."
   ],
   "ConversationContext.repository": [
-    "Target host Git checkout.",
-    "Checkout Git hôte ciblé."
+    "Host repository of the task; capture rewrites recorded cwd values to this path.",
+    "Dépôt hôte de la tâche ; la capture réécrit les cwd enregistrés vers ce chemin."
   ],
   "ConversationContext.sandbox": [
     "Execution lease used to transfer transcripts into or out of the agent home.",
     "Bail d’exécution utilisé pour transférer les transcripts vers ou depuis le home de l’agent."
   ],
   "ConversationContext.staging": [
-    "Host directory receiving captured or prepared transcript files.",
-    "Dossier hôte recevant les transcripts capturés ou préparés."
+    "Host scratch directory for files in transit; temporary copies are removed after each transfer.",
+    "Dossier hôte de travail pour les fichiers en transit ; les copies temporaires sont supprimées après chaque transfert."
   ],
   "ConversationContext.home": [
-    "Host agent home used to locate or persist native transcripts.",
-    "Home d’agent hôte utilisé pour localiser ou persister les transcripts natifs."
+    "Host root of captured conversations, from the conversationHome option. Transcript stores default to the user’s home directory and session bundle stores to the repository.",
+    "Racine sur l’hôte des conversations capturées, issue de l’option conversationHome. Par défaut, le home de l’utilisateur pour les stores de transcripts et le dépôt pour les stores de bundles de session."
   ],
   "ConversationContext.local": [
-    "Use host-local transcript access instead of transferring through the sandbox lease.",
-    "Utilise l’accès local hôte aux transcripts au lieu d’un transfert par le bail de sandbox."
+    "True when the sandbox runs on the host. Transcript stores then read the transcript from disk instead of running find, and skip a restore into the original checkout unless the record has a transport reference.",
+    "Vaut true quand la sandbox s’exécute sur l’hôte. Les stores de transcripts lisent alors le transcript sur le disque au lieu de lancer find, et ignorent une restauration dans le checkout d’origine sauf si l’enregistrement porte une référence de transport."
   ],
   "ConversationContext.warn": [
-    "Callback receiving nonfatal execution or conversation-storage warnings.",
-    "Callback recevant les avertissements non bloquants d’exécution ou de stockage des conversations."
+    "Receives nonfatal warnings, such as a child transcript that could not be captured.",
+    "Reçoit les avertissements non bloquants, par exemple un transcript enfant qui n’a pas pu être capturé."
   ],
   "SandboxLease.fileTransfers": [
     "Manifest and batch capabilities for remote synchronization: Outpost downloads only changed files and verifies their SHA-256. Without it, files move one by one through upload() and download(); Vercel and Daytona provide it.",
@@ -384,8 +384,8 @@
     "Prompt préparé transmis au CLI natif de l’agent."
   ],
   "AgentInput.interactive": [
-    "Request an interactive agent invocation or process terminal.",
-    "Demande une invocation d’agent ou un terminal de processus interactif."
+    "Run the CLI in an interactive terminal session instead of its headless stream mode.",
+    "Lance la CLI dans une session de terminal interactive au lieu de son mode flux non interactif."
   ],
   "AgentInput.continuation": [
     "Native conversation ID to continue; fork requests a separate conversation derived from it.",
@@ -572,8 +572,8 @@
     "Durée maximale de chaque processus d’agent, 3600000 par défaut (une heure). Au-delà, le tour échoue avec le code timeout."
   ],
   "DispatchOptions.expansionMs": [
-    "Deadline for each shell expansion in a file brief, default 30000.",
-    "Délai de chaque expansion shell d’un brief fichier, 30000 par défaut."
+    "Deadline for each shell expansion in a file brief, default 30000. Past it the dispatch fails with code timeout.",
+    "Délai de chaque expansion shell d’un brief fichier, 30000 par défaut. Au-delà, le dispatch échoue avec le code timeout."
   ],
   "DispatchOptions.signal": [
     "Aborting it stops the agent process and rejects the dispatch with the signal's reason.",
@@ -604,28 +604,28 @@
     "Inclut les observations brutes du protocole dans le journal du dispatch."
   ],
   "Brief.text": [
-    "Literal brief text; excludes a template file and template values.",
-    "Texte littéral du brief ; exclut un fichier modèle et des valeurs de substitution."
+    "Literal brief sent to the agent unchanged: no placeholders or commands are expanded.",
+    "Brief littéral envoyé tel quel à l’agent : aucune variable ni commande n’est développée."
   ],
   "Brief.file": [
-    "Brief template file to load and expand; mutually exclusive with text.",
-    "Fichier modèle de brief à charger et développer ; mutuellement exclusif avec text."
+    "Path of a template file, resolved from the process working directory and read before each pass. Its {{NAME}} placeholders are filled and each !`command` fragment is replaced by the command's stdout, run in the sandbox.",
+    "Chemin d’un fichier modèle, résolu depuis le répertoire de travail du processus et lu avant chaque passe. Ses variables {{NAME}} sont remplies et chaque fragment !`command` est remplacé par la sortie standard de la commande, exécutée dans la sandbox."
   ],
   "Brief.values": [
-    "Values substituted into placeholders of the file brief; unavailable with literal text briefs.",
-    "Valeurs substituées aux variables du brief fichier ; indisponibles pour les briefs textuels littéraux."
+    "Values for the file's {{NAME}} placeholders, also inserted unquoted into commands. WORK_BRANCH and BASE_BRANCH are reserved; a missing value fails with code prompt and unused values reach warn.",
+    "Valeurs des variables {{NAME}} du fichier, insérées aussi sans échappement dans les commandes. WORK_BRANCH et BASE_BRANCH sont réservées ; une valeur absente échoue avec le code prompt et les valeurs inutilisées sont signalées à warn."
   ],
   "ResponseSpec.tag": [
-    "XML-style delimiter identifier.",
-    "Identifiant de balise de type XML."
+    "Tag name without angle brackets. The brief must contain its opening tag, or the dispatch fails with code configuration before the sandbox starts.",
+    "Nom de la balise, sans chevrons. Le brief doit contenir sa balise ouvrante, sinon le dispatch échoue avec le code configuration avant le démarrage de la sandbox."
   ],
   "ResponseSpec.repairs": [
-    "Additional attempts to repair invalid structured output; zero by default.",
-    "Tentatives supplémentaires de réparation de sortie invalide ; zéro par défaut."
+    "Correction turns allowed after an invalid answer, 0 unless the options set it. Each resumes the same conversation and asks only for the corrected tag.",
+    "Tours de correction autorisés après une réponse invalide, 0 sauf indication contraire dans les options. Chacun reprend la même conversation et ne demande que la balise corrigée."
   ],
   "ResponseSpec.read": [
-    "Extract the last complete tagged answer and validate it, rejecting missing or invalid content.",
-    "Extrait la dernière réponse balisée complète et la valide ; échoue si le contenu est absent ou invalide."
+    "Extract the last complete <tag>…</tag> pair from a text, trim it and parse it. Rejects with ResponseError when no complete pair exists or its content is rejected.",
+    "Extrait la dernière paire <tag>…</tag> complète d’un texte, la nettoie de ses espaces aux bords et l’analyse. Rejette avec ResponseError si aucune paire complète n’existe ou si son contenu est refusé."
   ],
   "AgentObservation.pass": [
     "One-based agent pass number attached to an observation or reporter state.",
@@ -1314,48 +1314,48 @@
     "Construit les options de dépôt, provider, agent et brief pour un dispatch alloué séparément à chaque tentative."
   ],
   "ClaudeSettings.permissions": [
-    "Claude Code permission mode controlling tool approval behavior.",
-    "Mode de permissions Claude Code contrôlant l’approbation des outils."
+    "Claude Code permission mode passed with --permission-mode. Without it, headless runs pass --dangerously-skip-permissions; interactive sessions keep the CLI’s approval prompts.",
+    "Mode de permissions Claude Code transmis avec --permission-mode. Sans lui, les exécutions non interactives passent --dangerously-skip-permissions ; les sessions interactives conservent les demandes d’approbation de la CLI."
   ],
   "CommonAgentSettings.variables": [
-    "Explicit environment declarations; values are strings.",
-    "Déclarations d’environnement explicites ; les valeurs sont des chaînes."
+    "Environment variables for this CLI’s commands, merged over .outpost/.env; a name also set by the sandbox provider fails with code configuration. Claude Code rejects CLAUDE_CODE_MAX_OUTPUT_TOKENS or MCP_TIMEOUT here when maxOutputTokens or startupTimeoutMs already sets it.",
+    "Variables d’environnement des commandes de cette CLI, fusionnées par-dessus .outpost/.env ; un nom également défini par le provider de sandbox échoue avec le code configuration. Claude Code refuse ici CLAUDE_CODE_MAX_OUTPUT_TOKENS ou MCP_TIMEOUT quand maxOutputTokens ou startupTimeoutMs les définit déjà."
   ],
   "CommonAgentSettings.saveConversations": [
-    "Enable native transcript capture when the adapter supports it.",
-    "Activer la capture native si l’adapter la prend en charge."
+    "Save the native conversation after each turn, default true. false disables capture and cannot be combined with conversations.",
+    "Enregistre la conversation native après chaque tour, true par défaut. false désactive la capture et ne peut pas être combiné avec conversations."
   ],
   "CommonAgentSettings.conversations": [
-    "Store that captures, locates and restores this agent’s sessions instead of the default native store, such as createTransportConversations() with the agent’s format. The format must match the agent, and saveConversations must not be false.",
-    "Store qui capture, localise et restaure les sessions de cet agent au lieu du store natif par défaut, par exemple createTransportConversations() au format de l’agent. Le format doit correspondre à l’agent et saveConversations ne doit pas valoir false."
+    "Conversation store used instead of the native one, such as createTransportConversations() over the agent’s format. A store of another format, or saveConversations: false, fails when the harness is created.",
+    "Store de conversations utilisé à la place du store natif, par exemple createTransportConversations() sur le format de l’agent. Un store d’un autre format, ou saveConversations: false, échoue dès la création du harness."
   ],
   "CodexSettings.modelProvider": [
-    "Custom Codex model endpoint configuration; requires Responses API compatibility.",
-    "Configuration d’un endpoint de modèle Codex personnalisé ; exige la compatibilité Responses API."
+    "Custom Responses-compatible endpoint used instead of OpenAI. It requires a model name on createAgent() and accepts only usage authentication; both are checked when the agent is composed.",
+    "Endpoint personnalisé compatible Responses utilisé à la place d’OpenAI. Il exige un nom de modèle sur createAgent() et n’accepte que l’authentification usage ; les deux sont vérifiés à la composition de l’agent."
   ],
   "CodexSettings.approvalReviewer": [
-    "Codex approval reviewer: the user or automatic approval review.",
-    "Responsable de l’approbation Codex : utilisateur ou revue automatique."
+    "auto_review lets Codex’s automatic reviewer decide approval requests, with full file access. Otherwise headless runs bypass approvals and interactive sessions keep the CLI’s prompts.",
+    "auto_review confie les demandes d’approbation au relecteur automatique de Codex, avec un accès complet aux fichiers. Sinon, les exécutions non interactives contournent les approbations et les sessions interactives conservent les demandes de la CLI."
   ],
   "CodexModelProvider.baseUrl": [
-    "Base URL of the custom Responses-compatible model endpoint.",
-    "URL de base de l’endpoint de modèle personnalisé compatible Responses."
+    "Base URL of the Responses-compatible endpoint: absolute http or https, without credentials, query or fragment.",
+    "URL de base de l’endpoint compatible Responses : http ou https absolue, sans identifiants, requête ni fragment."
   ],
   "CodexModelProvider.apiKeyEnvironment": [
-    "Environment variable containing the endpoint API key; false disables the API-key environment declaration.",
-    "Variable d’environnement contenant la clé API de l’endpoint ; false désactive la déclaration de cette variable."
+    "Variable that holds the endpoint’s API key, default OPENAI_API_KEY; usage authentication fills it. false sends no key and leaves no authentication form available.",
+    "Variable qui contient la clé API de l’endpoint, OPENAI_API_KEY par défaut ; l’authentification usage la renseigne. false n’envoie aucune clé et ne laisse aucune forme d’authentification disponible."
   ],
   "agentVersions.codex": [
-    "Codex CLI version used by the bundled compatibility fixtures.",
-    "Version du CLI Codex utilisée par les fixtures de compatibilité intégrées."
+    "Codex CLI version installed by generated images and remote bootstrap.",
+    "Version de la CLI Codex installée par les images générées et le bootstrap distant."
   ],
   "agentVersions.claude": [
-    "Claude Code version used by the bundled compatibility fixtures.",
-    "Version de Claude Code utilisée par les fixtures de compatibilité intégrées."
+    "Claude Code version installed by generated images and remote bootstrap.",
+    "Version de Claude Code installée par les images générées et le bootstrap distant."
   ],
   "conversations.rewrite": [
-    "Rewrite native transcript repository paths from source to destination without file I/O.",
-    "Réécrit les chemins de dépôt d’un transcript natif de source vers destination sans entrée/sortie fichier."
+    "relocateTranscript(): replaces recorded cwd values equal to source with destination in transcript text, without file I/O.",
+    "relocateTranscript() : remplace dans le texte d’un transcript les cwd enregistrés égaux à source par destination, sans entrée/sortie fichier."
   ],
   "conversations.projectKey": [
     "Encode a repository path as the Claude native project directory key.",
@@ -1382,12 +1382,12 @@
     "Identifiant de conversation native utilisé pour localiser ou poursuivre la session."
   ],
   "ConversationLocation.file": [
-    "Host path of the native transcript file.",
-    "Chemin hôte du fichier de transcript natif."
+    "Host path of the captured transcript or session bundle.",
+    "Chemin sur l’hôte du transcript ou du bundle de session capturé."
   ],
   "ConversationLocation.format": [
-    "Native transcript layout: claude, codex, copilot or kimi.",
-    "Organisation native des transcripts : claude, codex, copilot ou kimi."
+    "Persisted format name, such as claude, codex, copilot, kimi or harness.",
+    "Nom de format persisté, par exemple claude, codex, copilot, kimi ou harness."
   ],
   "captureConversation.format": [
     "Native transcript layout: claude, codex, copilot or kimi.",
@@ -1442,12 +1442,12 @@
     "Contenu du transcript natif à réécrire."
   ],
   "relocateTranscript.destination": [
-    "New repository path to embed in relocated transcript records.",
-    "Nouveau chemin de dépôt à inscrire dans les enregistrements du transcript relocalisé."
+    "Path written in place of each matching cwd value.",
+    "Chemin écrit à la place de chaque valeur cwd correspondante."
   ],
   "relocateTranscript.source": [
-    "Original repository path to replace when relocating transcript records.",
-    "Chemin de dépôt d’origine à remplacer lors de la relocalisation du transcript."
+    "Recorded cwd value to replace; defaults to the first cwd recorded in text.",
+    "Valeur cwd enregistrée à remplacer ; par défaut, le premier cwd enregistré dans text."
   ],
   "projectKey.path": [
     "Repository path to encode for Claude’s native project directory layout.",
@@ -1482,12 +1482,12 @@
     "Alloue un environnement et renvoie son bail ; la fabrique ajoute le placement."
   ],
   "ResponseError.tag": [
-    "XML-style delimiter identifier.",
-    "Identifiant de balise de type XML."
+    "Tag the response contract expected.",
+    "Balise attendue par le contrat de réponse."
   ],
   "ResponseError.raw": [
-    "Raw tagged response content available when validation failed.",
-    "Contenu brut de la réponse balisée disponible lors de l’échec de validation."
+    "Trimmed content of the last complete tag that failed parsing or validation; undefined when no complete tag was found.",
+    "Contenu, sans espaces aux bords, de la dernière balise complète refusée à l’analyse ou à la validation ; undefined si aucune balise complète n’a été trouvée."
   ],
   "OutpostError.recovery": [
     "Metadata describing retained workspace and transfer artifacts after failure.",
@@ -1502,28 +1502,28 @@
     "Diagnostics structurés attachés au code d’erreur. Les erreurs HTTP de modèles incluent status et, si valide, retryAfterMs : l’attente minimale en millisecondes d’une reprise de tâche explicitement configurée. Les erreurs de quota incluent resetAt lorsque l’heure de réinitialisation est connue, et agent pour les tours de CLI. Les pannes d’agent et de modèle ajoutent unavailable, le signal lu par unavailableFault() ; une erreur de quota résumant un agent de secours épuisé ajoute fallback."
   ],
   "TextResponseOptions.tag": [
-    "XML-style delimiter identifier.",
-    "Identifiant de balise de type XML."
+    "Tag name without angle brackets: a letter followed by letters, digits, _ or -. Another form fails with code configuration.",
+    "Nom de la balise, sans chevrons : une lettre suivie de lettres, chiffres, _ ou -. Toute autre forme échoue avec le code configuration."
   ],
   "TextResponseOptions.repairs": [
-    "Additional attempts to repair invalid structured output; zero by default.",
-    "Tentatives supplémentaires de réparation de sortie invalide ; zéro par défaut."
+    "Correction turns allowed after an invalid answer, default 0; must be a nonnegative integer. Above 0, the agent must be able to resume its conversation.",
+    "Tours de correction autorisés après une réponse invalide, 0 par défaut ; entier positif ou nul. Au-dessus de 0, l’agent doit pouvoir reprendre sa conversation."
   ],
   "JsonResponseOptions.tag": [
-    "XML-style delimiter identifier.",
-    "Identifiant de balise de type XML."
+    "Tag name without angle brackets: a letter followed by letters, digits, _ or -. Another form fails with code configuration.",
+    "Nom de la balise, sans chevrons : une lettre suivie de lettres, chiffres, _ ou -. Toute autre forme échoue avec le code configuration."
   ],
   "JsonResponseOptions.schema": [
-    "Boundary validator that narrows unknown input.",
-    "Validateur de frontière qui précise une entrée inconnue."
+    "Standard Schema validator, such as Zod or Valibot, or a function that receives the parsed JSON as unknown and returns the typed value. Reported issues or a thrown error reject the answer.",
+    "Validateur Standard Schema, par exemple Zod ou Valibot, ou fonction qui reçoit le JSON analysé comme unknown et renvoie la valeur typée. Des problèmes signalés ou une erreur levée rejettent la réponse."
   ],
   "JsonResponseOptions.repairs": [
-    "Additional attempts to repair invalid structured output; zero by default.",
-    "Tentatives supplémentaires de réparation de sortie invalide ; zéro par défaut."
+    "Correction turns allowed after an invalid answer, default 0; must be a nonnegative integer. Above 0, the agent must be able to resume its conversation.",
+    "Tours de correction autorisés après une réponse invalide, 0 par défaut ; entier positif ou nul. Au-dessus de 0, l’agent doit pouvoir reprendre sa conversation."
   ],
   "StandardValidator.~standard": [
-    "Standard Schema validation entry point; validate returns a typed value or validation issues, optionally asynchronously.",
-    "Point d’entrée de validation Standard Schema ; validate renvoie une valeur typée ou des problèmes de validation, éventuellement de façon asynchrone."
+    "Standard Schema entry point. Its validate returns { value } or { issues }, directly or as a promise; any issue rejects the answer.",
+    "Point d’entrée Standard Schema. Son validate renvoie { value } ou { issues }, directement ou via une promesse ; tout problème signalé rejette la réponse."
   ],
   "recoveryDetails.error": [
     "Unknown thrown value from which to extract Outpost recovery metadata.",
@@ -3122,8 +3122,8 @@
     "Espace de noms logique stable du projet, indépendant des chemins des checkouts. Utiliser des espaces distincts pour des projets différents."
   ],
   "ConversationRecord.reference": [
-    "Optional pinned remote conversation index. file remains a readable local transcript for compatibility.",
-    "Index distant optionnel de la conversation avec sa révision exacte. file reste un transcript local lisible pour compatibilité."
+    "Transport key and revision of the conversation index, set by createTransportConversations(). file still points to a readable local copy.",
+    "Clé de transport et révision de l’index de la conversation, renseignées par createTransportConversations(). file désigne toujours une copie locale lisible."
   ],
   "archiveRecovery.options": [
     "Verified local recovery transfer, destination transport and total payload bound.",
@@ -3182,8 +3182,8 @@
     "Index distant versionné de la conversation capturée après ce tour ; son transcript local reste disponible séparément."
   ],
   "conversations.transported": [
-    "Build a native conversation store over a caller-owned transport with a stable project namespace, including child transcripts and local materialization.",
-    "Construit un store natif sur un transport de l’appelant avec un espace de noms stable du projet, incluant les transcripts enfants et la matérialisation locale."
+    "createTransportConversations(): wraps a base store so each capture is also archived through a transport.",
+    "createTransportConversations() : enveloppe un store de base pour archiver aussi chaque capture via un transport."
   ],
   "RecoveryRetentionOptions.transporter": [
     "Inspect remote objects and plan retention of closed journals. Local workspace cleanup is unsupported in transport mode.",
@@ -3266,32 +3266,32 @@
     "Refuse les nouvelles opérations, attend celles admises, arrête les contrôles de jobs bloqués et ferme les connexions Redis possédées, de façon idempotente. Arrêter et attendre runQueueWorker auparavant. Conserve jobs, générations et résultats ; les baux actifs restent récupérables."
   ],
   "ModelProvider.name": [
-    "Provider identity; the built-in direct client reports openai-compatible.",
-    "Identité du fournisseur ; le client direct intégré indique openai-compatible."
+    "Provider name: openai or anthropic for the built-in providers.",
+    "Nom du fournisseur : openai ou anthropic pour les fournisseurs intégrés."
   ],
   "ModelRequest.prompt": [
-    "Nonempty text sent as a single user message. Use it or messages, never both; no repository content is collected automatically.",
-    "Texte non vide envoyé comme unique message utilisateur. Utilisez-le ou messages, jamais les deux ; aucun contenu du dépôt n’est collecté automatiquement."
+    "Nonempty text sent as a single user message. Set exactly one of prompt and messages.",
+    "Texte non vide envoyé comme unique message utilisateur. Renseignez exactement un champ parmi prompt et messages."
   ],
   "ModelRequest.system": [
-    "Optional instructions sent as a Chat Completions system message, Responses instructions or Anthropic system text.",
-    "Instructions optionnelles envoyées comme message system de Chat Completions, instructions de Responses ou texte system d’Anthropic."
+    "Instructions sent as the Chat Completions system message, the Responses instructions or the Anthropic system text.",
+    "Instructions envoyées comme message system de Chat Completions, instructions de Responses ou texte system d’Anthropic."
   ],
   "ModelRequest.maxOutputTokens": [
-    "Positive output token limit sent as max_completion_tokens, max_output_tokens or max_tokens. Optional for OpenAI, required by Anthropic. Inside a custom harness it defaults to the agent model limit.",
-    "Limite positive de tokens de sortie transmise dans max_completion_tokens, max_output_tokens ou max_tokens. Optionnelle pour OpenAI, exigée par Anthropic. Dans un harness personnalisé, elle reprend par défaut la limite du modèle de l’agent."
+    "Positive output token limit, sent as max_completion_tokens (Chat Completions), max_output_tokens (Responses) or max_tokens (Anthropic). Anthropic requests fail with code configuration without it; inside a harness it defaults to the agent model’s limit.",
+    "Limite positive de tokens de sortie, envoyée dans max_completion_tokens (Chat Completions), max_output_tokens (Responses) ou max_tokens (Anthropic). Sans elle, une requête Anthropic échoue avec le code configuration ; dans un harness, elle reprend par défaut la limite du modèle de l’agent."
   ],
   "ModelRequest.signal": [
-    "Caller-owned cancellation signal for this request, combined with the provider deadline. Cancellation does not dispose the reusable client.",
-    "Signal d’annulation de l’appelant pour cette requête, combiné au délai du fournisseur. L’annulation ne détruit pas le client réutilisable."
+    "Cancellation signal for this request, combined with the provider deadline. Aborting rejects with code aborted; the provider stays reusable.",
+    "Signal d’annulation de cette requête, combiné au délai du fournisseur. L’annulation rejette avec le code aborted ; le fournisseur reste réutilisable."
   ],
   "ModelResult.text": [
     "Concatenated text blocks of the response; empty when the model only called tools.",
     "Blocs de texte concaténés de la réponse ; vide quand le modèle a seulement appelé des outils."
   ],
   "ModelResult.usage": [
-    "Token counts reported by the service, when present. Missing usage stays absent; missing cached-token details become zero. This is not a billing estimate or automatic workflow usage report.",
-    "Comptes de tokens déclarés par le service, si présents. Une consommation absente reste absente ; un détail de cache absent vaut zéro. Ce n’est ni une estimation de facturation ni une déclaration automatique au workflow."
+    "Token counts reported by the service, absent when it reports none. Missing cache details count as zero; Anthropic input includes cache reads and writes.",
+    "Comptes de tokens déclarés par le service, absents s’il n’en déclare pas. Un détail de cache absent vaut zéro ; l’entrée Anthropic inclut les lectures et écritures de cache."
   ],
   "DispatchOptions.telemetry": [
     "Instrumentation spanning the whole dispatch, including preparation, synchronization and cleanup. Its failures do not change the outcome.",
@@ -3446,12 +3446,12 @@
     "Ressources de démarrage hôtes, réseau TAP, accès SSH à l’invité, ressources et jailer optionnel. Des chemins ou valeurs invalides échouent avec le code configuration dès la création."
   ],
   "createOpenAIModelProvider.options": [
-    "HTTP service, protocol, explicit credentials and bounds; the harness supplies the model per request.",
-    "Service HTTP, protocole, credentials explicites et limites ; le harness fournit le modèle à chaque requête."
+    "Base URL, protocol, API key and request bounds. Unknown options fail with code configuration.",
+    "URL de base, protocole, clé API et limites des requêtes. Une option inconnue échoue avec le code configuration."
   ],
   "OpenAIModelProviderOptions.baseUrl": [
-    "Absolute HTTP(S) API base URL, including any /v1 prefix; excludes credentials, query and fragment. The selected protocol path is appended.",
-    "URL HTTP(S) absolue de base de l’API, avec son éventuel préfixe /v1 ; sans identifiants, requête ni fragment. Le chemin du protocole choisi est ajouté."
+    "Absolute HTTP(S) base URL including its version prefix, such as https://api.openai.com/v1; chat/completions or responses is appended. Credentials, query or fragment fail with code configuration, and redirects are refused.",
+    "URL de base HTTP(S) absolue avec son préfixe de version, par exemple https://api.openai.com/v1 ; chat/completions ou responses y est ajouté. Identifiants, requête ou fragment échouent avec le code configuration, et les redirections sont refusées."
   ],
   "OpenAIModelProviderOptions.apiKey": [
     "Explicit bearer API key, or false for an unauthenticated endpoint. No environment variable or account login is read automatically.",
@@ -3462,64 +3462,64 @@
     "Protocole HTTP : chat-completions par défaut, ou responses. Aucun repli automatique entre protocoles."
   ],
   "OpenAIModelProviderOptions.timeoutMs": [
-    "Positive deadline in milliseconds; defaults to 120000 and cannot exceed 2147483647. It covers the whole request, or the silence between two chunks when streaming.",
-    "Délai positif en millisecondes ; 120000 par défaut, sans dépasser 2147483647. Il couvre toute la requête, ou le silence entre deux fragments en streaming."
+    "Request deadline in milliseconds, default 120000, at most 2147483647. While streaming it restarts on each received chunk; expiry rejects with code timeout.",
+    "Délai de la requête en millisecondes, 120000 par défaut, au plus 2147483647. En streaming, il repart à chaque fragment reçu ; son expiration rejette avec le code timeout."
   ],
   "OpenAIModelProviderOptions.maxResponseBytes": [
-    "Positive maximum response body size in bytes after HTTP decompression; defaults to 8388608 (8 MiB). Oversized responses fail.",
-    "Taille maximale positive du corps après décompression HTTP, en octets ; 8388608 (8 Mio) par défaut. Les réponses dépassant cette limite échouent."
+    "Maximum response body in bytes after decompression, default 8388608 (8 MiB); a streamed response counts all its chunks. A larger response fails with code response.",
+    "Taille maximale du corps de réponse en octets après décompression, 8388608 (8 Mio) par défaut ; une réponse en streaming compte tous ses fragments. Au-delà, la requête échoue avec le code response."
   ],
   "createAgent.options": [
     "Harness and model selection to bind into one executable agent.",
     "Harness et sélection de modèle à composer en un agent exécutable."
   ],
   "createHarness.options": [
-    "Model provider, instructions, tools, loop limits, tool execution settings and history caching for the built-in Outpost engine.",
-    "Fournisseur de modèles, instructions, outils, limites de boucle, exécution des outils et cache d’historique du moteur intégré d’Outpost."
+    "Settings of the built-in harness: model provider, instructions, tools, limits, tool execution, hooks, permissions, context strategy, skills, conversations, caching and MCP servers.",
+    "Réglages du harness intégré : fournisseur de modèles, instructions, outils, limites, exécution des outils, hooks, permissions, stratégie de contexte, skills, conversations, cache et serveurs MCP."
   ],
   "AgentOptions.harness": [
-    "Execution harness; its kind selects CLI supervision or the built-in Outpost engine.",
-    "Harness d’exécution ; sa variante sélectionne une CLI ou le moteur intégré d’Outpost."
+    "CLI preset such as createClaudeHarness(), or createHarness() for the built-in loop; any other value throws code configuration.",
+    "Preset CLI comme createClaudeHarness(), ou createHarness() pour la boucle intégrée ; toute autre valeur lève le code configuration."
   ],
   "AgentOptions.model": [
-    "Model name, or an AgentModel object with optional reasoning and output limit. The executing harness or provider validates supported values when the agent is composed. Required for custom harnesses; optional for CLI defaults.",
-    "Nom du modèle, ou objet AgentModel avec raisonnement et limite de sortie optionnels. Le harness ou le fournisseur qui exécute valide les valeurs prises en charge à la composition de l’agent. Requis pour un harness personnalisé ; optionnel pour le défaut CLI."
+    "Model name or AgentModel object, checked against the harness when the agent is composed. Omit it to keep a CLI’s native default; the built-in harness requires it.",
+    "Nom de modèle ou objet AgentModel, vérifié auprès du harness à la composition de l’agent. Omettez-le pour garder le défaut natif d’une CLI ; le harness intégré l’exige."
   ],
   "CliAgentOptions.harness": [
-    "CLI execution preset to bind to the selected model.",
-    "Preset CLI à associer au modèle sélectionné."
+    "CLI preset, such as createCodexHarness(), bound to model when the agent is created.",
+    "Preset CLI, par exemple createCodexHarness(), lié à model à la création de l’agent."
   ],
   "CliAgentOptions.model": [
-    "Model name, or an AgentModel object with optional reasoning and output limit. The executing harness or provider validates supported values when the agent is composed. Omission selects the native CLI default model.",
-    "Nom du modèle, ou objet AgentModel avec raisonnement et limite de sortie optionnels. Le harness ou le fournisseur qui exécute valide les valeurs prises en charge à la composition de l’agent. Son absence conserve le modèle par défaut de la CLI."
+    "Model name or { name, reasoning, maxOutputTokens }; the preset rejects unsupported reasoning or maxOutputTokens here. Omitted, the CLI uses its default model, except that Kimi usage authentication and a Codex modelProvider require one.",
+    "Nom de modèle ou { name, reasoning, maxOutputTokens } ; le preset refuse ici reasoning ou maxOutputTokens non pris en charge. En son absence, la CLI utilise son modèle par défaut, sauf que l’authentification usage de Kimi et un modelProvider Codex en exigent un."
   ],
   "CustomAgentOptions.harness": [
     "Built-in Outpost harness with its configured model provider.",
     "Harness intégré d’Outpost avec son fournisseur de modèles."
   ],
   "CustomAgentOptions.model": [
-    "Required model name or AgentModel object. The model provider validates reasoning and output limits when the agent is composed; model availability is checked by the service.",
-    "Nom de modèle ou objet AgentModel requis. Le fournisseur de modèles valide le raisonnement et la limite de sortie à la composition de l’agent ; le service vérifie la disponibilité du modèle."
+    "Model name or { name, reasoning, maxOutputTokens }. The model provider rejects unsupported reasoning or output limits here; the service checks the model name when it is called.",
+    "Nom de modèle ou { name, reasoning, maxOutputTokens }. Le model provider refuse ici reasoning ou les limites de sortie non pris en charge ; le service vérifie le nom du modèle lors de l’appel."
   ],
   "Agent.harness": [
-    "Execution harness; its kind selects CLI supervision or the built-in Outpost engine.",
-    "Harness d’exécution ; sa variante sélectionne une CLI ou le moteur intégré d’Outpost."
+    "Harness the agent was composed with: a CLI preset or the built-in harness. Absent on a replay agent.",
+    "Harness avec lequel l’agent a été composé : un preset CLI ou le harness intégré. Absent sur un agent de rejeu."
   ],
   "Agent.model": [
-    "Normalized frozen AgentModel of the composed agent; absent when a CLI harness keeps its native default.",
-    "AgentModel normalisé et figé de l’agent composé ; absent quand un harness CLI conserve son défaut natif."
+    "Normalized frozen AgentModel of the composed agent; absent when a CLI harness keeps its native default, and on a replay agent.",
+    "AgentModel normalisé et figé de l’agent composé ; absent quand un harness CLI garde son défaut natif, et sur un agent de rejeu."
   ],
   "CliAgent.harness": [
-    "CLI execution preset to bind to the selected model.",
-    "Preset CLI à associer au modèle sélectionné."
+    "CLI preset the agent was composed with, such as createClaudeHarness() or createCodexHarness().",
+    "Preset CLI avec lequel l’agent a été composé, comme createClaudeHarness() ou createCodexHarness()."
   ],
   "CliAgent.model": [
     "Normalized frozen AgentModel bound to the CLI command; absent when the native CLI default is kept.",
     "AgentModel normalisé et figé lié à la commande CLI ; absent quand le défaut natif de la CLI est conservé."
   ],
   "CustomAgent.harness": [
-    "Built-in Outpost harness with its configured model provider.",
-    "Harness intégré d’Outpost avec son fournisseur de modèles."
+    "Built-in harness from createHarness(), with its model provider, tools and limits.",
+    "Harness intégré issu de createHarness(), avec son fournisseur de modèles, ses outils et ses limites."
   ],
   "CustomAgent.model": [
     "Normalized frozen AgentModel whose name, reasoning and output limit are applied to model requests by default.",
@@ -3550,112 +3550,112 @@
     "Discriminant d’exécution : cli or custom."
   ],
   "CliHarness.bind": [
-    "Build the CLI adapter for an optional normalized AgentModel without launching the program; unsupported reasoning or output limits are rejected here.",
-    "Construit l’adaptateur CLI pour un AgentModel normalisé optionnel sans lancer le programme ; un raisonnement ou une limite de sortie non pris en charge est refusé ici."
+    "Build the adapter for an optional model without starting the CLI; createAgent() calls it. Unsupported model settings, authentication forms and MCP options throw here.",
+    "Construit l’adapter pour un modèle facultatif sans lancer la CLI ; createAgent() l’appelle. Les réglages de modèle, formes d’authentification et options MCP non pris en charge lèvent une erreur ici."
   ],
   "HarnessOptions.modelProvider": [
-    "Request transport the engine calls for each step; it validates the agent model when the agent is composed.",
-    "Transport de requêtes que le moteur appelle à chaque étape ; il valide le modèle de l’agent à la composition."
+    "Model provider called for every step and summary request, such as createOpenAIModelProvider() or createAnthropicModelProvider(). Its validate() checks the agent model when createAgent() composes the agent.",
+    "Fournisseur de modèles appelé à chaque étape et pour chaque résumé, par exemple createOpenAIModelProvider() ou createAnthropicModelProvider(). Son validate() contrôle le modèle de l’agent quand createAgent() compose l’agent."
   ],
   "Harness.modelProvider": [
-    "Request transport the engine calls for each step; it validates the agent model when the agent is composed.",
-    "Transport de requêtes que le moteur appelle à chaque étape ; il valide le modèle de l’agent à la composition."
+    "Model provider called for every step and summary request.",
+    "Fournisseur de modèles appelé à chaque étape et pour chaque résumé."
   ],
   "AgentFeatures.name": [
     "Native agent identifier used in execution events and diagnostics.",
     "Identifiant d’agent natif utilisé dans les événements et diagnostics."
   ],
   "AgentFeatures.bootstrap": [
-    "Name of the built-in installer used to install a missing CLI on remote providers when bootstrapping is enabled: a pinned npm package for claude, codex, copilot and kimi, or a versioned archive with a pinned SHA-512 digest for antigravity.",
-    "Nom de l’installeur intégré utilisé pour installer une CLI absente sur les providers distants lorsque le bootstrap est activé : un paquet npm épinglé pour claude, codex, copilot et kimi, ou une archive versionnée avec une empreinte SHA-512 épinglée pour antigravity."
+    "Built-in agent whose pinned CLI Outpost installs on a remote sandbox when the executable is missing: an npm package, or a SHA-512-verified archive for antigravity. An unknown name fails.",
+    "Agent intégré dont Outpost installe la CLI épinglée sur une sandbox distante quand l’exécutable manque : un paquet npm, ou une archive vérifiée par SHA-512 pour antigravity. Un nom inconnu échoue."
   ],
   "AgentFeatures.requiresFinishedEvent": [
-    "Require the native finished protocol event before treating an agent turn as complete.",
-    "Exige l’événement natif finished avant de considérer le tour d’agent terminé."
+    "Require the native final event: without it, completion markers do not match and the turn fails with code process, even when the process exits with 0.",
+    "Exige l’événement final natif : sans lui, les marqueurs de fin ne correspondent pas et le tour échoue avec le code process, même si le processus se termine avec 0."
   ],
   "AgentFeatures.variables": [
-    "Explicit environment declarations; values are strings.",
-    "Déclarations d’environnement explicites ; les valeurs sont des chaînes."
+    "Environment variables added to every command of this agent, over the values from .outpost/.env. A name also set by the sandbox provider fails with code configuration.",
+    "Variables d’environnement ajoutées à chaque commande de cet agent, par-dessus les valeurs de .outpost/.env. Un nom également défini par le provider de sandbox échoue avec le code configuration."
   ],
   "AgentFeatures.conversations": [
     "Built-in native transcript format used when no custom storage is supplied.",
     "Format natif de transcript utilisé en l’absence de stockage personnalisé."
   ],
   "AgentFeatures.storage": [
-    "Custom conversation persistence implementation for this adapter.",
-    "Implémentation personnalisée de persistance des conversations de cet adapter."
+    "Conversation store that captures, locates and restores this agent’s sessions; absent when its conversations are not portable.",
+    "Store de conversations qui capture, localise et restaure les sessions de cet agent ; absent quand ses conversations ne sont pas portables."
   ],
   "AgentFeatures.capture": [
-    "Whether the adapter enables native transcript capture.",
-    "Indique si l’adapter active la capture des transcripts natifs."
+    "Save the conversation to storage after each turn; false skips it. Omitted, a turn is saved whenever storage is present.",
+    "Enregistre la conversation dans storage après chaque tour ; false l’évite. En son absence, un tour est enregistré dès que storage existe."
   ],
   "AgentFeatures.resumable": [
-    "Whether the agent can continue a conversation, including response repair. Cold continuation additionally requires a conversation store; fork support is declared separately.",
-    "Indique si l’agent peut continuer une conversation, y compris pour réparer une réponse. La reprise à froid exige aussi un store ; le fork est déclaré séparément."
+    "Whether the agent can continue a conversation, as continuation, response repairs and resume-based steering require; false rejects continuation before allocation. Cold continuation also needs storage.",
+    "Indique si l’agent peut poursuivre une conversation, ce qu’exigent continuation, les réparations de réponse et le pilotage par reprise ; false refuse continuation avant l’allocation. La reprise à froid exige aussi storage."
   ],
   "AgentFeatures.transcriptUsage": [
-    "Parse a native transcript to recover token usage when available.",
-    "Analyse un transcript natif pour récupérer l’usage de tokens disponible."
+    "Read token usage from the transcript captured after the turn; a result replaces the usage reported by events, undefined keeps it.",
+    "Lit l’usage de jetons dans la transcription capturée après le tour ; un résultat remplace l’usage rapporté par les événements, undefined le conserve."
   ],
   "ModelProvider.request": [
-    "Perform one bounded, non-streaming request for the supplied model. The harness-scoped wrapper propagates cancellation and records reported usage once.",
-    "Exécute une requête bornée sans streaming pour le modèle fourni. Le wrapper du harness propage l’annulation et comptabilise une fois l’usage rapporté."
+    "Send one request and resolve with its normalized result. Inside a harness, the request receives the agent model’s reasoning and maxOutputTokens and the run’s cancellation signal, and the reported usage is accounted once.",
+    "Envoie une requête et se résout avec son résultat normalisé. Dans un harness, la requête reçoit le reasoning et le maxOutputTokens du modèle de l’agent ainsi que le signal d’annulation de l’exécution, et l’usage rapporté est comptabilisé une fois."
   ],
   "ModelRequest.model": [
     "Nonempty service-specific model identifier; no local catalog or availability probe is used.",
     "Identifiant de modèle non vide propre au service ; aucun catalogue local ni sonde de disponibilité."
   ],
   "CommonAgentSettings.authentication": [
-    "Explicit authentication for this CLI harness: \"account\", \"usage\", { account: { file | key | variable } } or { usage: { key | variable } }. Unsupported forms fail when the agent is composed. Omission prepares nothing and keeps the access already configured in the execution environment.",
-    "Authentification explicite de ce harness CLI : \"account\", \"usage\", { account: { file | key | variable } } ou { usage: { key | variable } }. Les formes non prises en charge échouent à la composition de l’agent. Son absence ne prépare rien et conserve l’accès déjà configuré dans l’environnement d’exécution."
+    "Credential selection: \"account\" (subscription login), \"usage\" (API key), { account: { file | key | variable } } or { usage: { key | variable } }. Codex rejects account key and variable and accepts only usage with modelProvider; unsupported forms fail when the agent is composed. Omitted, Outpost installs no credentials.",
+    "Choix des identifiants : \"account\" (connexion d’abonnement), \"usage\" (clé API), { account: { file | key | variable } } ou { usage: { key | variable } }. Codex refuse account key et variable et n’accepte que usage avec modelProvider ; les formes non prises en charge échouent à la composition de l’agent. En son absence, Outpost n’installe aucun identifiant."
   ],
   "HttpModelOptions.baseUrl": [
-    "Absolute HTTP(S) API base URL, including any /v1 prefix; excludes credentials, query and fragment. The selected protocol path is appended.",
-    "URL HTTP(S) absolue de base de l’API, avec son éventuel préfixe /v1 ; sans identifiants, requête ni fragment. Le chemin du protocole choisi est ajouté."
+    "Absolute HTTP(S) base URL including its version prefix, such as https://api.openai.com/v1; chat/completions or responses is appended. Credentials, query or fragment fail with code configuration, and redirects are refused.",
+    "URL de base HTTP(S) absolue avec son préfixe de version, par exemple https://api.openai.com/v1 ; chat/completions ou responses y est ajouté. Identifiants, requête ou fragment échouent avec le code configuration, et les redirections sont refusées."
   ],
   "HttpModelOptions.apiKey": [
     "Explicit bearer API key, or false for an unauthenticated endpoint. No environment variable or account login is read automatically.",
     "Clé API bearer explicite, ou false pour un endpoint sans authentification. Aucune variable d’environnement ni connexion de compte n’est lue automatiquement."
   ],
   "HttpModelOptions.timeoutMs": [
-    "Positive deadline in milliseconds; defaults to 120000 and cannot exceed 2147483647. It covers the whole request, or the silence between two chunks when streaming.",
-    "Délai positif en millisecondes ; 120000 par défaut, sans dépasser 2147483647. Il couvre toute la requête, ou le silence entre deux fragments en streaming."
+    "Request deadline in milliseconds, default 120000, at most 2147483647. While streaming it restarts on each received chunk; expiry rejects with code timeout.",
+    "Délai de la requête en millisecondes, 120000 par défaut, au plus 2147483647. En streaming, il repart à chaque fragment reçu ; son expiration rejette avec le code timeout."
   ],
   "HttpModelOptions.maxResponseBytes": [
-    "Positive maximum response body size in bytes after HTTP decompression; defaults to 8388608 (8 MiB). Oversized responses fail.",
-    "Taille maximale positive du corps après décompression HTTP, en octets ; 8388608 (8 Mio) par défaut. Les réponses dépassant cette limite échouent."
+    "Maximum response body in bytes after decompression, default 8388608 (8 MiB); a streamed response counts all its chunks. A larger response fails with code response.",
+    "Taille maximale du corps de réponse en octets après décompression, 8388608 (8 Mio) par défaut ; une réponse en streaming compte tous ses fragments. Au-delà, la requête échoue avec le code response."
   ],
   "createAnthropicModelProvider.options": [
-    "Anthropic endpoint, explicit API key, bounds and optional system-prefix cache; output limits belong to the agent model.",
-    "Endpoint Anthropic, clé API explicite, limites de transport et cache optionnel du préfixe système ; la limite de sortie appartient au modèle de l’agent."
+    "API key, base URL, request bounds and system-prompt caching. Unknown options fail with code configuration.",
+    "Clé API, URL de base, limites des requêtes et cache du prompt système. Une option inconnue échoue avec le code configuration."
   ],
   "AnthropicModelProviderOptions.apiKey": [
     "Explicit Anthropic API key sent in x-api-key; no CLI account or host credential discovery.",
     "Clé API Anthropic explicite envoyée dans x-api-key ; aucune session CLI ni recherche de credentials hôte."
   ],
   "AnthropicModelProviderOptions.baseUrl": [
-    "Messages API base URL including its version prefix; defaults to https://api.anthropic.com/v1.",
-    "URL de base de Messages avec son préfixe de version ; défaut : https://api.anthropic.com/v1."
+    "Messages API base URL including its version prefix, default https://api.anthropic.com/v1; messages is appended. Credentials, query or fragment fail with code configuration.",
+    "URL de base de l’API Messages avec son préfixe de version, https://api.anthropic.com/v1 par défaut ; messages y est ajouté. Identifiants, requête ou fragment échouent avec le code configuration."
   ],
   "AnthropicModelProviderOptions.cacheSystem": [
-    "Opt in to an ephemeral cache breakpoint on the system text. Requests must contain system instructions; a cache hit is not guaranteed.",
-    "Active un point de cache éphémère sur le texte système. Les requêtes doivent contenir des instructions système ; une lecture de cache n’est pas garantie."
+    "Adds an ephemeral cache breakpoint on the system text, default false. Requests without system instructions then fail with code configuration; a cache hit is not guaranteed.",
+    "Ajoute un point de cache éphémère sur le texte système, false par défaut. Les requêtes sans instructions système échouent alors avec le code configuration ; une lecture de cache n’est pas garantie."
   ],
   "AnthropicModelProviderOptions.timeoutMs": [
-    "Positive deadline in milliseconds; defaults to 120000 and cannot exceed 2147483647. It covers the whole request, or the silence between two chunks when streaming.",
-    "Délai positif en millisecondes ; 120000 par défaut, sans dépasser 2147483647. Il couvre toute la requête, ou le silence entre deux fragments en streaming."
+    "Request deadline in milliseconds, default 120000, at most 2147483647. While streaming it restarts on each received chunk; expiry rejects with code timeout.",
+    "Délai de la requête en millisecondes, 120000 par défaut, au plus 2147483647. En streaming, il repart à chaque fragment reçu ; son expiration rejette avec le code timeout."
   ],
   "AnthropicModelProviderOptions.maxResponseBytes": [
-    "Positive maximum response body size in bytes after HTTP decompression; defaults to 8388608 (8 MiB). Oversized responses fail.",
-    "Taille maximale positive du corps après décompression HTTP, en octets ; 8388608 (8 Mio) par défaut. Les réponses dépassant cette limite échouent."
+    "Maximum response body in bytes after decompression, default 8388608 (8 MiB); a streamed response counts all its chunks. A larger response fails with code response.",
+    "Taille maximale du corps de réponse en octets après décompression, 8388608 (8 Mio) par défaut ; une réponse en streaming compte tous ses fragments. Au-delà, la requête échoue avec le code response."
   ],
   "CustomAgent.resumable": [
-    "Whether the agent can continue a conversation, including response repair. Cold continuation additionally requires a conversation store; fork support is declared separately.",
-    "Indique si l’agent peut continuer une conversation, y compris pour réparer une réponse. La reprise à froid exige aussi un store ; le fork est déclaré séparément."
+    "True unless the harness sets conversations: false, which disables resume, fork and response repair.",
+    "Vrai sauf si le harness définit conversations: false, ce qui désactive la reprise, le fork et la réparation de réponse."
   ],
   "CustomAgent.capture": [
-    "Always false: the custom runner does not capture native transcripts.",
-    "Toujours faux : le runner personnalisé ne capture pas de transcripts natifs."
+    "True unless the harness sets conversations: false. Transcripts go to the harness conversation store, by default .outpost/conversations/harness in the repository.",
+    "Vrai sauf si le harness définit conversations: false. Les transcripts vont dans le store de conversations du harness, par défaut .outpost/conversations/harness dans le dépôt."
   ],
   "WorkflowOptions.telemetry": [
     "Workflow telemetry adapter, such as createOpenTelemetryObserver({ tracer, meter }); receives events before observe, with isolated exceptions collected in observerErrors. Caller owns its lifecycle; dispatch instrumentation is configured separately.",
@@ -3666,32 +3666,32 @@
     "Reçoit de manière synchrone chaque événement de cycle de vie et d’usage du workflow, avec l’adaptateur comme receveur. Les erreurs levées sont collectées dans WorkflowResult.observerErrors sans affecter les tâches ni le callback observe séparé."
   ],
   "createClaudeHarness.settings": [
-    "Configuration for the Claude Code harness; pass the selected model to createAgent() instead.",
-    "Configuration du harness Claude Code ; transmettez le modèle choisi à createAgent()."
+    "Claude Code settings; model, reasoning and maxOutputTokens belong on createAgent() and are rejected here.",
+    "Réglages de Claude Code ; model, reasoning et maxOutputTokens se placent sur createAgent() et sont refusés ici."
   ],
   "createCodexHarness.settings": [
-    "Configuration for the Codex harness; pass the selected model to createAgent() instead.",
-    "Configuration du harness Codex ; transmettez le modèle choisi à createAgent()."
+    "Codex settings; model, reasoning and maxOutputTokens belong on createAgent() and are rejected here.",
+    "Réglages de Codex ; model, reasoning et maxOutputTokens se placent sur createAgent() et sont refusés ici."
   ],
   "AgentModel.name": [
     "Nonempty model identifier passed unchanged to the CLI or model service; no local catalog is consulted.",
     "Identifiant de modèle non vide transmis tel quel à la CLI ou au service ; aucun catalogue local n’est consulté."
   ],
   "AgentModel.reasoning": [
-    "Optional reasoning effort. Each harness or provider accepts only the levels it can express and rejects the others when the agent is composed; omission keeps the model default.",
-    "Effort de raisonnement optionnel. Chaque harness ou fournisseur n’accepte que les niveaux qu’il sait exprimer et refuse les autres à la composition de l’agent ; son absence conserve le défaut du modèle."
+    "Reasoning effort; omitted keeps the model default. Claude Code and Codex accept low to max, the Anthropic provider none and low to max, the OpenAI provider any level; other CLIs throw code configuration when the agent is composed.",
+    "Effort de raisonnement ; absent, le défaut du modèle s’applique. Claude Code et Codex acceptent low à max, le fournisseur Anthropic none et low à max, le fournisseur OpenAI tout niveau ; les autres CLI lèvent le code configuration à la composition de l’agent."
   ],
   "AgentModel.maxOutputTokens": [
-    "Optional positive output-token limit for each model response. Claude Code receives it as CLAUDE_CODE_MAX_OUTPUT_TOKENS; Codex, Antigravity, Copilot and Kimi reject it; the Anthropic provider requires it.",
-    "Limite positive optionnelle de tokens de sortie pour chaque réponse du modèle. Claude Code la reçoit via CLAUDE_CODE_MAX_OUTPUT_TOKENS ; Codex, Antigravity, Copilot et Kimi la refusent ; le fournisseur Anthropic l’exige."
+    "Positive integer limit on output tokens per model response. Claude Code receives it as CLAUDE_CODE_MAX_OUTPUT_TOKENS, the OpenAI provider sends it with each request and the Anthropic provider requires it; Codex, Antigravity, Copilot and Kimi reject it.",
+    "Limite entière positive de tokens de sortie par réponse du modèle. Claude Code la reçoit via CLAUDE_CODE_MAX_OUTPUT_TOKENS, le fournisseur OpenAI l’envoie à chaque requête et le fournisseur Anthropic l’exige ; Codex, Antigravity, Copilot et Kimi la refusent."
   ],
   "ModelProvider.validate": [
-    "Optional check called by createAgent() with the normalized AgentModel; throw to reject unsupported reasoning levels or missing output limits before any request.",
-    "Contrôle optionnel appelé par createAgent() avec l’AgentModel normalisé ; lever une erreur pour refuser un niveau de raisonnement non pris en charge ou une limite de sortie absente avant toute requête."
+    "Check called by createAgent() with the normalized agent model; throw to reject unsupported settings before any request. The Anthropic provider requires maxOutputTokens and rejects reasoning minimal; the OpenAI provider defines no check.",
+    "Contrôle appelé par createAgent() avec le modèle d’agent normalisé ; levez une erreur pour refuser des réglages non pris en charge avant toute requête. Le fournisseur Anthropic exige maxOutputTokens et refuse reasoning minimal ; le fournisseur OpenAI n’en définit pas."
   ],
   "ModelRequest.reasoning": [
-    "Optional reasoning effort for this request. OpenAI sends it as reasoning_effort or reasoning.effort; Anthropic maps none to disabled thinking and low to max to adaptive thinking with that effort, and rejects minimal.",
-    "Effort de raisonnement optionnel pour cette requête. OpenAI l’envoie dans reasoning_effort ou reasoning.effort ; Anthropic traduit none en réflexion désactivée et low à max en réflexion adaptative avec cet effort, et refuse minimal."
+    "Reasoning effort for this request. OpenAI protocols send the value unchanged as reasoning_effort or reasoning.effort; Anthropic maps none to disabled thinking, low to max to adaptive thinking at that effort, and rejects minimal.",
+    "Effort de raisonnement de cette requête. Les protocoles OpenAI envoient la valeur telle quelle dans reasoning_effort ou reasoning.effort ; Anthropic traduit none en réflexion désactivée, low à max en réflexion adaptative à cet effort, et refuse minimal."
   ],
   "ModelRequest.messages": [
     "Conversation history starting and ending with a user message. Each tool call needs exactly one result in the next user message; reasoning blocks from another provider or model are dropped before sending.",
@@ -3714,8 +3714,8 @@
     "Raison de l’arrêt du modèle : end, tool-calls, max-tokens ou refusal. Un résultat max-tokens peut contenir un texte tronqué ou des appels d’outils incomplets."
   ],
   "ModelProvider.identity": [
-    "Stable key combining the protocol and endpoint. Reasoning blocks carry it so they are replayed only to the service that produced them.",
-    "Clé stable qui combine le protocole et l’endpoint. Les blocs de raisonnement la portent pour n’être rejoués qu’au service qui les a produits."
+    "Stable key made of the provider name, protocol path and base URL, such as openai:responses:https://api.openai.com/v1. Built-in providers stamp it on reasoning blocks and replay them only to the same identity.",
+    "Clé stable formée du nom du fournisseur, du chemin du protocole et de l’URL de base, par exemple openai:responses:https://api.openai.com/v1. Les fournisseurs intégrés l’inscrivent sur les blocs de raisonnement et ne les rejouent qu’à la même identité."
   ],
   "ModelMessage.role": [
     "Author of the message: user for prompts and tool results, assistant for model output.",
@@ -3762,8 +3762,8 @@
     "Texte renvoyé au modèle pour cet appel."
   ],
   "ModelToolResultBlock.isError": [
-    "Mark the result as a failed tool execution so the model can recover.",
-    "Signale un échec d’exécution de l’outil pour que le modèle puisse se corriger."
+    "Marks the result as a failed tool execution. Only Anthropic transmits it, as is_error; OpenAI protocols send the content alone.",
+    "Signale un échec d’exécution de l’outil. Seul Anthropic le transmet, dans is_error ; les protocoles OpenAI envoient le contenu seul."
   ],
   "ModelReasoningBlock.type": [
     "Block discriminator: reasoning.",
@@ -3778,8 +3778,8 @@
     "Modèle qui a produit le bloc ; il n’est rejoué qu’à ce même modèle."
   ],
   "ModelReasoningBlock.data": [
-    "Opaque service payload, such as an Anthropic thinking block with its signature or an OpenAI encrypted reasoning item. Do not modify it.",
-    "Charge opaque du service, comme un bloc thinking Anthropic avec sa signature ou un élément de raisonnement chiffré OpenAI. Ne la modifiez pas."
+    "Opaque service payload: an Anthropic thinking or redacted_thinking block with its signature, or an OpenAI Responses reasoning item. Replay it unchanged.",
+    "Charge opaque du service : un bloc thinking ou redacted_thinking Anthropic avec sa signature, ou un élément reasoning d’OpenAI Responses. Rejouez-la sans la modifier."
   ],
   "ModelToolSpec.name": [
     "Unique tool name of 1 to 64 letters, digits, underscores or hyphens.",
@@ -3794,36 +3794,36 @@
     "Objet JSON Schema qui décrit les arguments de l’outil."
   ],
   "defineHarnessTool.options": [
-    "Tool name, description, input schema, read-only flag and execute function.",
-    "Nom, description, schéma d’entrée, indicateur de lecture seule et fonction execute de l’outil."
+    "Tool name, description, input schema, read-only flag, resources function and execute function. Unknown keys are rejected.",
+    "Nom, description, schéma d’entrée, indicateur de lecture seule, fonction resources et fonction execute de l’outil. Les clés inconnues sont refusées."
   ],
   "defineHarnessToolset.options": [
     "Toolset name and the tools or nested toolsets it groups.",
     "Nom du jeu d’outils et outils ou jeux imbriqués qu’il regroupe."
   ],
   "defineHarnessInstructions.source": [
-    "Nonempty instruction text, or a function that receives the sandbox, signal and model and returns the text when a turn starts.",
-    "Texte d’instructions non vide, ou fonction qui reçoit le sandbox, le signal et le modèle et renvoie le texte au début d’une passe."
+    "Nonempty instruction text, or a function that receives the turn context and returns the text when the turn starts.",
+    "Texte d’instructions non vide, ou fonction qui reçoit le contexte du tour et renvoie le texte au début du tour."
   ],
   "HarnessOptions.instructions": [
-    "System instructions as text, a defineHarnessInstructions() result or a list of both. Resolved at each turn and joined with blank lines; empty results are skipped.",
-    "Instructions système en texte, résultat de defineHarnessInstructions() ou liste des deux. Résolues à chaque passe et jointes par des lignes vides ; les résultats vides sont ignorés."
+    "System instructions as text, a defineHarnessInstructions() or defineMcpPrompt() result, or a list of these. Resolved at each turn and joined with blank lines; empty results are skipped.",
+    "Instructions système en texte, résultat de defineHarnessInstructions() ou de defineMcpPrompt(), ou liste de ces valeurs. Résolues à chaque tour et jointes par des lignes vides ; les résultats vides sont ignorés."
   ],
   "Harness.instructions": [
-    "Normalized instruction sources resolved at the start of each turn.",
-    "Sources d’instructions normalisées, résolues au début de chaque passe."
+    "Instruction sources resolved at the start of each turn, followed by the skill catalog when skills are set.",
+    "Sources d’instructions résolues au début de chaque tour, suivies du catalogue des skills quand des skills sont définies."
   ],
   "HarnessOptions.tools": [
-    "Tools and toolsets the model may call. Nested toolsets are flattened; names must be unique across the harness.",
-    "Outils et jeux d’outils que le modèle peut appeler. Les jeux imbriqués sont aplatis ; les noms doivent être uniques dans tout le harness."
+    "Tools and toolsets the model may call. Nested toolsets are flattened; names must be unique across the harness, including skill and MCP tools.",
+    "Outils et jeux d’outils que le modèle peut appeler. Les jeux imbriqués sont aplatis ; les noms doivent être uniques dans tout le harness, outils de skills et MCP compris."
   ],
   "Harness.tools": [
-    "Flattened, frozen tool list sent to the model in declaration order.",
-    "Liste d’outils aplatie et figée, envoyée au modèle dans l’ordre de déclaration."
+    "Flattened tool list sent to the model: declared tools, then skill tools and load_skill. MCP tools are added when a turn starts.",
+    "Liste aplatie des outils envoyée au modèle : outils déclarés, puis outils des skills et load_skill. Les outils MCP s’ajoutent au début de chaque tour."
   ],
   "HarnessOptions.limits": [
-    "Bounds on steps, tool calls and token usage. Reaching one fails the turn with code limit.",
-    "Bornes sur les étapes, les appels d’outils et l’usage de tokens. En atteindre une fait échouer la passe avec le code limit."
+    "Bounds per turn on steps, tool calls, delegation depth and token usage. Exceeding a bound fails with code limit.",
+    "Bornes par tour sur les étapes, les appels d’outils, la profondeur de délégation et l’usage de tokens. Un dépassement échoue avec le code limit."
   ],
   "Harness.limits": [
     "Normalized limits; maxSteps defaults to 100.",
@@ -3831,43 +3831,43 @@
   ],
   "HarnessOptions.toolExecution": [
     "Tool concurrency, per-call deadline and error policy.",
-    "Concurrence des outils, délai par appel et politique d’erreur."
+    "Parallélisme des outils, délai par appel et politique d’erreur."
   ],
   "Harness.toolExecution": [
-    "Normalized tool execution settings with defaults applied.",
-    "Réglages d’exécution des outils normalisés, valeurs par défaut appliquées."
+    "Tool execution settings with defaults applied: concurrency 4, deadlineMs 300000, onError return-to-model.",
+    "Réglages d’exécution des outils, défauts appliqués : concurrency 4, deadlineMs 300000, onError return-to-model."
   ],
   "HarnessOptions.cache": [
-    "Ask the provider to cache the conversation prefix; defaults to true. OpenAI caches stable prefixes automatically.",
-    "Demande au fournisseur de mettre en cache le préfixe de la conversation ; true par défaut. OpenAI met en cache les préfixes stables automatiquement."
+    "Asks the model provider to cache the conversation prefix on each request, default true. The Anthropic provider marks the prefix for caching; OpenAI caches stable prefixes on its own.",
+    "Demande au fournisseur de modèles de mettre en cache le préfixe de la conversation à chaque requête, true par défaut. Le fournisseur Anthropic marque le préfixe pour le cache ; OpenAI met en cache les préfixes stables de lui-même."
   ],
   "Harness.cache": [
     "Whether each request asks the provider to cache the conversation prefix.",
     "Indique si chaque requête demande au fournisseur de mettre en cache le préfixe de la conversation."
   ],
   "HarnessLimits.maxSteps": [
-    "Maximum number of model requests in one turn; defaults to 100.",
-    "Nombre maximal de requêtes au modèle dans une passe ; 100 par défaut."
+    "Maximum model requests per turn, default 100. Reaching it without a final answer fails the turn with code limit; summary requests do not count.",
+    "Nombre maximal de requêtes au modèle par tour, 100 par défaut. L’atteindre sans réponse finale fait échouer le tour avec le code limit ; les requêtes de résumé ne comptent pas."
   ],
   "HarnessLimits.maxToolCalls": [
-    "Maximum number of tool calls in one turn; unbounded apart from maxSteps when omitted.",
-    "Nombre maximal d’appels d’outils dans une passe ; seulement borné par maxSteps s’il est omis."
+    "Maximum tool calls per turn, unbounded by default. Exceeding it fails the turn with code limit.",
+    "Nombre maximal d’appels d’outils par tour, sans borne par défaut. Le dépasser fait échouer le tour avec le code limit."
   ],
   "HarnessLimits.usage": [
-    "Observed token ceilings per turn, including context summaries and all descendants. Checked after each complete response and before another request; exceeding a ceiling fails even on the final answer. Missing or partial usage rejects token-budgeted execution.",
-    "Plafonds de tokens observés par tour, incluant les résumés de contexte et tous les descendants. Contrôlés après chaque réponse complète et avant une nouvelle requête ; un dépassement échoue même sur la réponse finale. L’usage absent ou partiel fait échouer une exécution avec budget de tokens."
+    "Token ceilings per turn for input, cached, cacheCreated and output, counting context summaries and all subagents. Checked after each response; exceeding one fails the turn with code limit, even on the final answer. A provider that reports no usage or partial usage fails with code configuration.",
+    "Plafonds de tokens par tour pour input, cached, cacheCreated et output, résumés de contexte et sous-agents compris. Contrôlés après chaque réponse ; un dépassement fait échouer le tour avec le code limit, même sur la réponse finale. Un fournisseur qui ne rapporte pas d’usage ou un usage partiel échoue avec le code configuration."
   ],
   "HarnessToolExecution.concurrency": [
-    "Maximum number of read-only tools running at once; other tools run one at a time. Defaults to 4.",
-    "Nombre maximal d’outils en lecture seule exécutés en même temps ; les autres s’exécutent un par un. 4 par défaut."
+    "Maximum read-only calls run in parallel, default 4. Consecutive read-only calls from one model response run together; any other call runs alone, in order.",
+    "Nombre maximal d’appels en lecture seule exécutés en parallèle, 4 par défaut. Les appels en lecture seule consécutifs d’une même réponse du modèle s’exécutent ensemble ; tout autre appel s’exécute seul, dans l’ordre."
   ],
   "HarnessToolExecution.deadlineMs": [
-    "Per-call deadline in milliseconds; defaults to 300,000. An expired call is reported to the model as an error.",
-    "Délai par appel en millisecondes ; 300 000 par défaut. Un appel expiré est signalé au modèle comme une erreur."
+    "Deadline of each tool call, default 300000 (5 minutes). On expiry the tool's signal aborts and the call fails with code timeout, handled by onError.",
+    "Délai de chaque appel d’outil, 300000 par défaut (5 minutes). À expiration, le signal de l’outil est annulé et l’appel échoue avec le code timeout, traité selon onError."
   ],
   "HarnessToolExecution.onError": [
-    "return-to-model (default) sends a thrown error back as an error result; fail rejects the turn with that error.",
-    "return-to-model (par défaut) renvoie une exception comme résultat en erreur ; fail fait échouer la passe avec cette erreur."
+    "What a failed tool call does, including a timeout or a failed subagent: return-to-model (default) sends the error message to the model as an error result; fail rejects the turn with that error.",
+    "Effet d’un appel d’outil en échec, délai dépassé ou sous-agent en échec compris : return-to-model (par défaut) envoie le message d’erreur au modèle comme résultat en erreur ; fail fait échouer le tour avec cette erreur."
   ],
   "HarnessInstructions.kind": [
     "Definition discriminator: instructions.",
@@ -3875,19 +3875,19 @@
   ],
   "HarnessInstructions.resolve": [
     "Produce the instruction text for one turn from its context.",
-    "Produit le texte d’instructions d’une passe à partir de son contexte."
+    "Produit le texte d’instructions d’un tour à partir de son contexte."
   ],
   "HarnessInstructionContext.sandbox": [
     "Borrowed sandbox of the turn, for example to read project guidance before the first request.",
-    "Sandbox emprunté de la passe, par exemple pour lire les consignes du projet avant la première requête."
+    "Sandbox empruntée du tour, par exemple pour lire les consignes du projet avant la première requête."
   ],
   "HarnessInstructionContext.signal": [
     "Turn cancellation signal; honor it in asynchronous resolvers.",
-    "Signal d’annulation de la passe ; respectez-le dans les résolveurs asynchrones."
+    "Signal d’annulation du tour ; respectez-le dans les résolveurs asynchrones."
   ],
   "HarnessInstructionContext.model": [
     "Normalized model of the agent running the turn.",
-    "Modèle normalisé de l’agent qui exécute la passe."
+    "Modèle normalisé de l’agent qui exécute le tour."
   ],
   "HarnessToolOptions.name": [
     "Unique tool name of 1 to 64 letters, digits, underscores or hyphens, shown to the model.",
@@ -3906,20 +3906,20 @@
     "Explication envoyée au modèle avec l’outil."
   ],
   "HarnessToolOptions.input": [
-    "Input schema: a JSON Schema object validated by the built-in subset, or a Standard Schema that exposes JSON Schema, such as Zod 4, whose validator checks the input.",
-    "Schéma d’entrée : objet JSON Schema validé par le sous-ensemble intégré, ou Standard Schema qui expose un JSON Schema, comme Zod 4, dont le validateur contrôle l’entrée."
+    "Input schema: a JSON Schema object checked with the built-in subset (type, properties, required, additionalProperties, items, enum, const and length, range and item-count bounds), or a Standard Schema that exports JSON Schema, such as Zod 4. Other keywords are rejected at definition.",
+    "Schéma d’entrée : un objet JSON Schema contrôlé par le sous-ensemble intégré (type, properties, required, additionalProperties, items, enum, const et bornes de longueur, de valeur et de nombre d’éléments), ou un Standard Schema qui exporte du JSON Schema, comme Zod 4. Les autres mots-clés sont refusés à la définition."
   ],
   "HarnessToolOptions.readOnly": [
-    "Mark tools without side effects so they can run concurrently; defaults to false.",
-    "Marque les outils sans effet de bord pour qu’ils puissent s’exécuter en parallèle ; false par défaut."
+    "Marks a tool without side effects, default false. Read-only calls can run in parallel, and response repair turns keep only read-only tools.",
+    "Marque un outil sans effet de bord, false par défaut. Les appels en lecture seule peuvent s’exécuter en parallèle, et les tours de réparation d’une réponse ne gardent que les outils en lecture seule."
   ],
   "HarnessTool.readOnly": [
     "Whether the tool may run concurrently with other read-only calls.",
     "Indique si l’outil peut s’exécuter en parallèle d’autres appels en lecture seule."
   ],
   "HarnessToolOptions.execute": [
-    "Run the call with validated input and its context. Return text, or { content, isError } to report a failure the model can react to.",
-    "Exécute l’appel avec l’entrée validée et son contexte. Renvoie du texte, ou { content, isError } pour signaler un échec auquel le modèle peut réagir."
+    "Runs the call with validated input and its context, and returns text or { content, isError }. A thrown error is handled by toolExecution.onError; results over 100000 characters are cut before reaching the model.",
+    "Exécute l’appel avec l’entrée validée et son contexte, et renvoie du texte ou { content, isError }. Une exception est traitée selon toolExecution.onError ; les résultats de plus de 100000 caractères sont coupés avant d’atteindre le modèle."
   ],
   "HarnessTool.execute": [
     "Run the call with validated input and its context.",
@@ -3938,12 +3938,12 @@
     "Contrôle les arguments bruts du modèle et renvoie la valeur typée ou une liste de problèmes lisible."
   ],
   "HarnessToolContext.sandbox": [
-    "Borrowed sandbox for commands and transfers. Operations follow the call deadline and turn cancellation; the tool cannot release the sandbox.",
-    "Sandbox emprunté pour les commandes et transferts. Les opérations suivent le délai de l’appel et l’annulation de la passe ; l’outil ne peut pas libérer le sandbox."
+    "Borrowed sandbox for commands and transfers. Operations follow the call deadline and turn cancellation; release() rejects with code configuration.",
+    "Sandbox empruntée pour les commandes et les transferts. Les opérations suivent le délai de l’appel et l’annulation du tour ; release() est rejeté avec le code configuration."
   ],
   "HarnessToolContext.signal": [
     "Aborted when the call deadline expires or the turn is cancelled. JavaScript that ignores it keeps running detached.",
-    "Annulé à l’expiration du délai de l’appel ou à l’annulation de la passe. Un JavaScript qui l’ignore continue détaché."
+    "Annulé à l’expiration du délai de l’appel ou à l’annulation du tour. Du JavaScript qui l’ignore continue de s’exécuter, détaché."
   ],
   "HarnessToolContext.callId": [
     "Identifier of the model tool call being executed.",
@@ -3954,8 +3954,8 @@
     "Modèle normalisé de l’agent qui exécute l’outil."
   ],
   "HarnessToolContext.observe": [
-    "Report text, warning or raw events to dispatch observers; other kinds are rejected.",
-    "Signale des événements text, warning ou raw aux observateurs du dispatch ; les autres variantes sont refusées."
+    "Reports a text, warning or raw event to dispatch observers; any other kind throws code configuration.",
+    "Transmet un événement text, warning ou raw aux observateurs du dispatch ; tout autre type lève le code configuration."
   ],
   "HarnessToolsetOptions.name": [
     "Nonempty name identifying the toolset.",
@@ -3966,8 +3966,8 @@
     "Nom qui identifie le jeu d’outils."
   ],
   "HarnessToolsetOptions.tools": [
-    "Tools and nested toolsets to group; names must be unique.",
-    "Outils et jeux imbriqués à regrouper ; les noms doivent être uniques."
+    "Tools and nested toolsets to group; nested sets are flattened and duplicate tool names are rejected.",
+    "Outils et jeux imbriqués à regrouper ; les jeux imbriqués sont aplatis et les noms d’outils en double refusés."
   ],
   "HarnessToolset.tools": [
     "Flattened, frozen tool list.",
@@ -4019,11 +4019,11 @@
   ],
   "ResolvedHarnessLimits.maxSteps": [
     "Effective maximum number of model requests per turn after defaults.",
-    "Nombre maximal effectif de requêtes au modèle par passe, défauts appliqués."
+    "Nombre maximal effectif de requêtes au modèle par tour, défauts appliqués."
   ],
   "ResolvedHarnessLimits.maxToolCalls": [
     "Configured maximum number of tool calls per turn, when set.",
-    "Nombre maximal d’appels d’outils par passe, s’il est défini."
+    "Nombre maximal d’appels d’outils par tour, s’il est défini."
   ],
   "ResolvedHarnessLimits.usage": [
     "Configured token budget per usage counter, when set.",
@@ -4039,27 +4039,27 @@
   ],
   "HarnessHookContext.sandbox": [
     "Borrowed sandbox of the turn; hooks may inspect the repository through it.",
-    "Sandbox emprunté de la passe ; les hooks peuvent inspecter le dépôt par son intermédiaire."
+    "Sandbox empruntée du tour ; les hooks peuvent inspecter le dépôt par son intermédiaire."
   ],
   "HarnessHookInput.sandbox": [
     "Borrowed sandbox of the turn; hooks may inspect the repository through it.",
-    "Sandbox emprunté de la passe ; les hooks peuvent inspecter le dépôt par son intermédiaire."
+    "Sandbox empruntée du tour ; les hooks peuvent inspecter le dépôt par son intermédiaire."
   ],
   "HarnessHookContext.signal": [
     "Turn cancellation signal; asynchronous hooks should honor it.",
-    "Signal d’annulation de la passe ; les hooks asynchrones doivent le respecter."
+    "Signal d’annulation du tour ; les hooks asynchrones doivent le respecter."
   ],
   "HarnessHookInput.signal": [
     "Turn cancellation signal; asynchronous hooks should honor it.",
-    "Signal d’annulation de la passe ; les hooks asynchrones doivent le respecter."
+    "Signal d’annulation du tour ; les hooks asynchrones doivent le respecter."
   ],
   "HarnessHookContext.model": [
     "Normalized model of the agent running the turn.",
-    "Modèle normalisé de l’agent qui exécute la passe."
+    "Modèle normalisé de l’agent qui exécute le tour."
   ],
   "HarnessHookInput.model": [
     "Normalized model of the agent running the turn.",
-    "Modèle normalisé de l’agent qui exécute la passe."
+    "Modèle normalisé de l’agent qui exécute le tour."
   ],
   "HarnessHookContext.step": [
     "Current step number; 0 during session-start.",
@@ -4071,7 +4071,7 @@
   ],
   "HarnessHookInput.prompt": [
     "Rendered prompt of the turn, available to session-start hooks.",
-    "Prompt rendu de la passe, disponible pour les hooks session-start."
+    "Prompt rendu du tour, disponible pour les hooks session-start."
   ],
   "HarnessHookInput.messages": [
     "Conversation about to be sent in this step, available to before-model hooks.",
@@ -4115,27 +4115,27 @@
   ],
   "HarnessHookDecisions.session-start": [
     "Return { instructions } to append text to the system instructions of the turn.",
-    "Renvoyez { instructions } pour ajouter du texte aux instructions système de la passe."
+    "Renvoyez { instructions } pour ajouter du texte aux instructions système du tour."
   ],
   "HarnessHookDecisions.before-model": [
-    "No decision: return nothing to continue, or throw to fail the turn.",
-    "Aucune décision : ne renvoyez rien pour continuer, ou levez une erreur pour faire échouer la passe."
+    "No decision: any return value is ignored; throw to fail the turn.",
+    "Aucune décision : toute valeur renvoyée est ignorée ; levez une erreur pour faire échouer le tour."
   ],
   "HarnessHookDecisions.after-model": [
-    "No decision: return nothing to continue, or throw to fail the turn.",
-    "Aucune décision : ne renvoyez rien pour continuer, ou levez une erreur pour faire échouer la passe."
+    "No decision: any return value is ignored; throw to fail the turn.",
+    "Aucune décision : toute valeur renvoyée est ignorée ; levez une erreur pour faire échouer le tour."
   ],
   "HarnessHookDecisions.before-tool": [
-    "Return { deny } to refuse the call with a reason sent to the model, or { input } to replace the input, which is validated and checked against permissions again.",
-    "Renvoyez { deny } pour refuser l’appel avec une raison transmise au modèle, ou { input } pour remplacer l’entrée, qui est de nouveau validée et contrôlée par les permissions."
+    "Return { deny } with a nonempty reason to refuse the call and skip later hooks, or { input } to pass a replacement to the next hook. The final input is validated and checked against permissions again.",
+    "Renvoyez { deny } avec une raison non vide pour refuser l’appel et ignorer les hooks suivants, ou { input } pour transmettre une entrée de remplacement au hook suivant. L’entrée finale est validée puis contrôlée de nouveau par les permissions."
   ],
   "HarnessHookDecisions.after-tool": [
-    "Return { result } to replace the text or error flag sent to the model.",
-    "Renvoyez { result } pour remplacer le texte ou l’indicateur d’erreur envoyés au modèle."
+    "Return { result } with text or { content, isError } to replace what the model receives; later hooks see the replacement.",
+    "Renvoyez { result } avec du texte ou { content, isError } pour remplacer ce que reçoit le modèle ; les hooks suivants voient le remplacement."
   ],
   "HarnessHookDecisions.stop": [
-    "Return { continue } with a message to refuse the final answer; the message is sent as the next user message. Bounded by maxSteps.",
-    "Renvoyez { continue } avec un message pour refuser la réponse finale ; le message est envoyé comme message utilisateur suivant. Borné par maxSteps."
+    "Return { continue } with a nonempty message to refuse the final answer; the message becomes the next user message and later stop hooks are skipped. Bounded by maxSteps.",
+    "Renvoyez { continue } avec un message non vide pour refuser la réponse finale ; le message devient le message utilisateur suivant et les hooks stop suivants sont ignorés. Borné par maxSteps."
   ],
   "HarnessHookOptions.on": [
     "Loop point where the hook runs.",
@@ -4146,16 +4146,16 @@
     "Point de la boucle où le hook s’exécute."
   ],
   "HarnessHookOptions.name": [
-    "Optional name for diagnostics; defaults to the phase.",
-    "Nom optionnel pour le diagnostic ; vaut la phase par défaut."
+    "Name for diagnostics, default the phase name.",
+    "Nom utilisé pour les diagnostics, le nom de la phase par défaut."
   ],
   "HarnessHook.name": [
     "Name used for diagnostics.",
     "Nom utilisé pour le diagnostic."
   ],
   "HarnessHookOptions.run": [
-    "Control function for this phase. Hooks of a phase run in declaration order; an exception fails the turn.",
-    "Fonction de contrôle de cette phase. Les hooks d’une phase s’exécutent dans l’ordre de déclaration ; une exception fait échouer la passe."
+    "Control function for this phase. Hooks of a phase run in declaration order; an exception fails the turn, and an invalid decision fails it with code configuration.",
+    "Fonction de contrôle de cette phase. Les hooks d’une phase s’exécutent dans l’ordre de déclaration ; une exception fait échouer le tour, et une décision invalide le fait échouer avec le code configuration."
   ],
   "HarnessHook.run": [
     "Control function for this phase.",
@@ -4186,16 +4186,16 @@
     "Motifs de noms d’outils ; * correspond à n’importe quels caractères. Omettez-les pour viser tous les outils."
   ],
   "HarnessPermissionRule.paths": [
-    "Repository path globs (**, * and ?) matched against paths declared by tool resources. An allow rule needs every path to match; a deny rule needs one. Paths outside the repository never match.",
-    "Globs de chemins du dépôt (**, * et ?) comparés aux chemins déclarés par les ressources de l’outil. Une règle allow exige que tous les chemins correspondent ; une règle deny, un seul. Les chemins hors du dépôt ne correspondent jamais."
+    "Repository path globs (**, * and ?) matched against the paths a call declares. An allow rule applies when every path matches, a deny rule when one does; a call that declares no paths never matches, nor does a path outside the repository.",
+    "Globs de chemins du dépôt (**, * et ?) comparés aux chemins déclarés par l’appel. Une règle allow s’applique quand tous les chemins correspondent, une règle deny quand l’un d’eux correspond ; un appel sans chemin déclaré ne correspond jamais, pas plus qu’un chemin hors du dépôt."
   ],
   "HarnessPermissionRule.commands": [
-    "Command patterns where * matches any characters, compared with the command declared by tool resources. Shell metacharacters can bypass such patterns.",
-    "Motifs de commandes où * correspond à n’importe quels caractères, comparés à la commande déclarée par les ressources de l’outil. Les métacaractères du shell peuvent contourner ces motifs."
+    "Command patterns where * matches any characters, compared with the command a call declares; a call without a declared command never matches. Shell metacharacters can evade these patterns.",
+    "Motifs de commande où * correspond à n’importe quels caractères, comparés à la commande déclarée par l’appel ; un appel sans commande déclarée ne correspond jamais. Les métacaractères du shell peuvent contourner ces motifs."
   ],
   "HarnessPermissionRule.reason": [
-    "Explanation returned to the model when a deny rule applies.",
-    "Explication renvoyée au modèle quand une règle deny s’applique."
+    "Explanation returned to the model when this deny rule applies, default Denied by permission rule <n>.",
+    "Explication renvoyée au modèle quand cette règle deny s’applique, Denied by permission rule <n> par défaut."
   ],
   "HarnessPermissionsOptions.rules": [
     "Ordered rules; the first one that applies decides.",
@@ -4251,8 +4251,8 @@
   ],
   "Harness.hooks": ["Frozen hooks of the harness.", "Hooks figés du harness."],
   "HarnessOptions.permissions": [
-    "Rules from defineHarnessPermissions, evaluated before before-tool hooks.",
-    "Règles issues de defineHarnessPermissions, évaluées avant les hooks before-tool."
+    "Rules from defineHarnessPermissions(), evaluated before before-tool hooks. They also apply to every subagent's tool calls.",
+    "Règles issues de defineHarnessPermissions(), évaluées avant les hooks before-tool. Elles s’appliquent aussi aux appels d’outils de chaque sous-agent."
   ],
   "Harness.permissions": [
     "Permission rules evaluated before before-tool hooks, when set.",
@@ -4279,12 +4279,12 @@
     "Règles ordonnées et effet par défaut quand aucune ne s’applique."
   ],
   "createHarnessShellTools.options": [
-    "Optional shell settings such as the command deadline.",
-    "Réglages optionnels du shell, comme le délai des commandes."
+    "Shell settings: the deadline of each command.",
+    "Réglages du shell : le délai de chaque commande."
   ],
   "ShellToolsOptions.deadlineMs": [
-    "Deadline of each shell command in milliseconds; defaults to 120,000. The harness tool deadline also applies.",
-    "Délai de chaque commande shell en millisecondes ; 120 000 par défaut. Le délai des outils du harness s’applique aussi."
+    "Deadline of each shell command, default 120000 (2 minutes). toolExecution.deadlineMs still bounds the whole call.",
+    "Délai de chaque commande shell, 120000 par défaut (2 minutes). toolExecution.deadlineMs borne toujours l’appel entier."
   ],
   "defineHarnessContextStrategy.options": [
     "Strategy name and compact function.",
@@ -4307,8 +4307,8 @@
     "Nom indiqué dans les événements compaction."
   ],
   "HarnessContextStrategyOptions.compact": [
-    "Return a rewritten message list, or nothing to keep the history. The list must start and end with a user message and keep each tool call paired with its result.",
-    "Renvoie une liste de messages réécrite, ou rien pour garder l’historique. La liste doit commencer et finir par un message utilisateur et garder chaque appel d’outil associé à son résultat."
+    "Called before every model request; returns a rewritten message list, or nothing to keep the history. The list must start and end with a user message and pair each tool call with its result, or the turn fails with code configuration.",
+    "Appelée avant chaque requête au modèle ; renvoie une liste de messages réécrite, ou rien pour garder l’historique. La liste doit commencer et finir par un message utilisateur et associer chaque appel d’outil à son résultat, sinon le tour échoue avec le code configuration."
   ],
   "HarnessContextStrategy.compact": [
     "Run the strategy before a model request.",
@@ -4332,27 +4332,27 @@
   ],
   "HarnessContextInput.signal": [
     "Turn cancellation signal.",
-    "Signal d’annulation de la passe."
+    "Signal d’annulation du tour."
   ],
   "HarnessContextInput.summarize": [
-    "Ask the agent model for a factual summary of the given messages; the request counts toward usage.",
-    "Demande au modèle de l’agent un résumé factuel des messages donnés ; la requête compte dans l’usage."
+    "Asks the agent model for a factual summary of the given messages. The request counts toward usage and budgets; an empty or cut-off summary fails with code response.",
+    "Demande au modèle de l’agent un résumé factuel des messages donnés. La requête compte dans l’usage et les budgets ; un résumé vide ou interrompu échoue avec le code response."
   ],
   "TruncateToolResultsOptions.keepRecent": [
-    "Number of most recent tool-result messages kept intact; defaults to 4.",
-    "Nombre de messages de résultats d’outils les plus récents conservés intacts ; 4 par défaut."
+    "Number of most recent tool-result messages kept intact, default 4.",
+    "Nombre de messages de résultats d’outils les plus récents laissés intacts, 4 par défaut."
   ],
   "TruncateToolResultsOptions.maxCharacters": [
-    "Length older tool results are cut to; defaults to 2,000 characters.",
-    "Longueur à laquelle les anciens résultats d’outils sont coupés ; 2 000 caractères par défaut."
+    "Length older tool results are cut to, default 2000 characters.",
+    "Longueur à laquelle les anciens résultats d’outils sont coupés, 2000 caractères par défaut."
   ],
   "SummarizeHistoryOptions.triggerCharacters": [
-    "Serialized history size that triggers a summary; defaults to 400,000 characters.",
-    "Taille de l’historique sérialisé qui déclenche un résumé ; 400 000 caractères par défaut."
+    "Length of the JSON-serialized history above which a summary is made, default 400000 characters.",
+    "Longueur de l’historique sérialisé en JSON au-delà de laquelle un résumé est produit, 400000 caractères par défaut."
   ],
   "SummarizeHistoryOptions.keepRecentMessages": [
-    "Number of recent messages kept after the summary; defaults to 6.",
-    "Nombre de messages récents conservés après le résumé ; 6 par défaut."
+    "Minimum number of recent messages kept after the summary, default 6; the cut moves back to the previous assistant message.",
+    "Nombre minimal de messages récents conservés après le résumé, 6 par défaut ; la coupure recule jusqu’au message assistant précédent."
   ],
   "HarnessOptions.context": [
     "Strategy that can rewrite the history before each model request, such as truncateToolResults() or summarizeHistory().",
@@ -4363,8 +4363,8 @@
     "Stratégie de contexte du harness, si elle est définie."
   ],
   "HarnessOptions.conversations": [
-    "Store for turn transcripts; defaults to createHarnessConversations(). Use createTransportConversations(createHarnessConversations(), …) for remote storage or false to disable continuation and repairs.",
-    "Store des transcriptions de passes ; createHarnessConversations() par défaut. Utilisez createTransportConversations(createHarnessConversations(), …) pour un stockage distant, ou false pour désactiver continuation et réparations."
+    "Store for turn transcripts, default createHarnessConversations() under .outpost/conversations/harness in the repository. Wrap it with createTransportConversations() for remote storage; false disables capture, continuation and response repairs.",
+    "Store des transcriptions de tours, createHarnessConversations() par défaut, sous .outpost/conversations/harness dans le dépôt. Enveloppez-le avec createTransportConversations() pour un stockage distant ; false désactive la capture, la continuation et les réparations de réponse."
   ],
   "Harness.conversations": [
     "Configured conversation store, or false when recording is disabled; absent means the default store.",
@@ -4391,8 +4391,8 @@
     "Nom, description, instructions et outils optionnels de la skill."
   ],
   "HarnessSkillOptions.name": [
-    "Unique skill name the model passes to load_skill.",
-    "Nom unique de la skill, transmis par le modèle à load_skill."
+    "Unique skill name of 1 to 64 letters, digits, underscores or hyphens, passed by the model to load_skill.",
+    "Nom unique de la skill, de 1 à 64 lettres, chiffres, tirets bas ou tirets, que le modèle passe à load_skill."
   ],
   "HarnessSkill.name": ["Unique skill name.", "Nom unique de la skill."],
   "HarnessSkillOptions.description": [
@@ -4405,15 +4405,15 @@
   ],
   "HarnessSkillOptions.instructions": [
     "Instructions returned when the skill is loaded: text or a resolver receiving the sandbox, signal and model.",
-    "Instructions renvoyées au chargement de la skill : texte ou résolveur recevant le sandbox, le signal et le modèle."
+    "Instructions renvoyées au chargement de la skill : texte ou résolveur recevant la sandbox, le signal et le modèle."
   ],
   "HarnessSkill.instructions": [
     "Instructions resolved when the skill is loaded.",
     "Instructions résolues au chargement de la skill."
   ],
   "HarnessSkillOptions.tools": [
-    "Tools or toolsets enabled once the skill is loaded; their names must be unique across the harness.",
-    "Outils ou jeux d’outils activés une fois la skill chargée ; leurs noms doivent être uniques dans tout le harness."
+    "Tools or toolsets of the skill. They are offered to the model with the other tools, but a call is denied until the skill is loaded; names must be unique across the harness.",
+    "Outils ou jeux d’outils de la skill. Ils sont proposés au modèle avec les autres outils, mais un appel est refusé tant que la skill n’est pas chargée ; les noms doivent être uniques dans tout le harness."
   ],
   "HarnessSkill.tools": [
     "Flattened tools enabled by the skill.",
@@ -4424,28 +4424,28 @@
     "Discriminant de la définition : skill."
   ],
   "HarnessOptions.skills": [
-    "Skills listed in the system instructions and loaded on demand through the load_skill tool.",
-    "Skills listées dans les instructions système et chargées à la demande via l’outil load_skill."
+    "Skills listed in the system instructions and loaded on demand through the load_skill tool; duplicate skill names are rejected.",
+    "Skills listées dans les instructions système et chargées à la demande par l’outil load_skill ; les noms de skills en double sont refusés."
   ],
   "Harness.skills": [
     "Skills of the harness; their tools and load_skill are part of the tool list.",
     "Skills du harness ; leurs outils et load_skill font partie de la liste d’outils."
   ],
   "ModelProvider.stream": [
-    "Optional streaming variant of request: yields text-delta events while the answer arrives, then one result event with the same ModelResult. Custom harnesses use it automatically when present.",
-    "Variante optionnelle de request en streaming : produit des événements text-delta au fil de la réponse, puis un événement result avec le même ModelResult. Les harness personnalisés l’utilisent automatiquement s’il est présent."
+    "Streaming variant of request: yields text-delta events as the answer arrives, then one result event. The harness uses it instead of request when present.",
+    "Variante de request en streaming : produit des événements text-delta au fil de la réponse, puis un événement result. Le harness l’utilise à la place de request quand elle est présente."
   ],
   "ModelStreamEvent.type": [
-    "text-delta for a fragment of answer text, or result for the final result.",
-    "text-delta pour un fragment du texte de réponse, ou result pour le résultat final."
+    "text-delta for a fragment of answer text, reasoning for readable reasoning, retry for a provider-reported retry, result for the final result. Built-in providers emit only text-delta and result.",
+    "text-delta pour un fragment du texte de réponse, reasoning pour un raisonnement lisible, retry pour une reprise signalée par le fournisseur, result pour le résultat final. Les fournisseurs intégrés n’émettent que text-delta et result."
   ],
   "ModelStreamEvent.text": [
-    "Fragment of answer text, in arrival order.",
-    "Fragment du texte de réponse, dans l’ordre d’arrivée."
+    "Fragment of answer text for text-delta, or readable reasoning for reasoning, in arrival order. The harness forwards both as events of the same kind.",
+    "Fragment du texte de réponse pour text-delta, ou raisonnement lisible pour reasoning, dans l’ordre d’arrivée. Le harness les relaie comme événements du même type."
   ],
   "ModelStreamEvent.result": [
-    "Final normalized result, identical to a non-streaming request.",
-    "Résultat final normalisé, identique à celui d’une requête sans streaming."
+    "Final normalized result, identical to a non-streaming request. The harness requires exactly one per stream.",
+    "Résultat final normalisé, identique à celui d’une requête sans streaming. Le harness en exige exactement un par stream."
   ],
   "ReporterHandlers.text-delta": [
     "Handle a streamed fragment of model text from a custom harness; receives pass and at metadata and may return a promise.",
@@ -4468,68 +4468,68 @@
     "Chemin hôte d’un fichier de session, ou d’un dossier de profil Kimi Code, lu à la place de l’emplacement par défaut de la CLI. ~ désigne le home de l’hôte ; les chemins relatifs partent du dossier courant. Seuls des fichiers ordinaires d’au plus 1 Mio sont lus."
   ],
   "AccountCredential.key": [
-    "Literal subscription token forwarded in the CLI's token variable (Claude CLAUDE_CODE_OAUTH_TOKEN, Copilot COPILOT_GITHUB_TOKEN). Prefer variable to keep secrets out of source files.",
-    "Jeton d’abonnement littéral transmis dans la variable de jeton de la CLI (Claude CLAUDE_CODE_OAUTH_TOKEN, Copilot COPILOT_GITHUB_TOKEN). Préférez variable pour garder les secrets hors du code."
+    "Literal subscription token forwarded as CLAUDE_CODE_OAUTH_TOKEN (Claude Code) or COPILOT_GITHUB_TOKEN (Copilot); other CLIs reject it. Prefer variable to keep secrets out of source files.",
+    "Jeton d’abonnement littéral transmis comme CLAUDE_CODE_OAUTH_TOKEN (Claude Code) ou COPILOT_GITHUB_TOKEN (Copilot) ; les autres CLI le refusent. Préférez variable pour garder les secrets hors des fichiers sources."
   ],
   "AccountCredential.variable": [
-    "Name of a resolved workflow variable holding the subscription token; its value is forwarded in the CLI's token variable.",
-    "Nom d’une variable résolue du workflow contenant le jeton d’abonnement ; sa valeur est transmise dans la variable de jeton de la CLI."
+    "Name of a resolved workflow variable holding the subscription token, forwarded like key; Claude Code and Copilot only.",
+    "Nom d’une variable de workflow résolue contenant le jeton d’abonnement, transmis comme key ; Claude Code et Copilot uniquement."
   ],
   "UsageCredential.key": [
-    "Literal API key forwarded in the CLI's standard API-key variable. Prefer variable to keep secrets out of source files.",
-    "Clé API littérale transmise dans la variable de clé API standard de la CLI. Préférez variable pour garder les secrets hors du code."
+    "Literal API key forwarded in the CLI’s API-key variable: ANTHROPIC_API_KEY, OPENAI_API_KEY, GEMINI_API_KEY or KIMI_API_KEY. Prefer variable to keep secrets out of source files.",
+    "Clé API littérale transmise dans la variable de clé API de la CLI : ANTHROPIC_API_KEY, OPENAI_API_KEY, GEMINI_API_KEY ou KIMI_API_KEY. Préférez variable pour garder les secrets hors des fichiers sources."
   ],
   "UsageCredential.variable": [
     "Name of a resolved workflow variable holding the API key; its value is forwarded in the CLI's standard API-key variable.",
     "Nom d’une variable résolue du workflow contenant la clé API ; sa valeur est transmise dans la variable de clé API standard de la CLI."
   ],
   "AntigravitySettings.authentication": [
-    "Explicit authentication for this CLI harness: \"account\", \"usage\", { account: { file | key | variable } } or { usage: { key | variable } }. Unsupported forms fail when the agent is composed. Omission prepares nothing and keeps the access already configured in the execution environment.",
-    "Authentification explicite de ce harness CLI : \"account\", \"usage\", { account: { file | key | variable } } ou { usage: { key | variable } }. Les formes non prises en charge échouent à la composition de l’agent. Son absence ne prépare rien et conserve l’accès déjà configuré dans l’environnement d’exécution."
+    "\"account\" or account.file copies the agy Google sign-in token from ~/.gemini/antigravity-cli; usage forms forward GEMINI_API_KEY and select the Gemini API. Account key and variable fail when the agent is composed.",
+    "\"account\" ou account.file copie le jeton de connexion Google d’agy depuis ~/.gemini/antigravity-cli ; les formes usage transmettent GEMINI_API_KEY et sélectionnent l’API Gemini. Account key et variable échouent à la composition de l’agent."
   ],
   "AntigravitySettings.variables": [
-    "Explicit environment declarations; values are strings.",
-    "Déclarations d’environnement explicites ; les valeurs sont des chaînes."
+    "Environment variables for agy commands, merged over .outpost/.env; AGY_CLI_DISABLE_AUTO_UPDATE is always true. A name also set by the sandbox provider fails with code configuration.",
+    "Variables d’environnement des commandes agy, fusionnées par-dessus .outpost/.env ; AGY_CLI_DISABLE_AUTO_UPDATE vaut toujours true. Un nom également défini par le provider de sandbox échoue avec le code configuration."
   ],
   "AntigravitySettings.mode": [
     "Antigravity execution mode passed with --mode. Without it, headless runs pass --dangerously-skip-permissions; interactive sessions keep the CLI's approval prompts.",
     "Mode d’exécution Antigravity transmis avec --mode. Sans lui, les exécutions non interactives passent --dangerously-skip-permissions ; les sessions interactives conservent les demandes d’approbation de la CLI."
   ],
   "CopilotSettings.authentication": [
-    "Explicit authentication for this CLI harness: \"account\", \"usage\", { account: { file | key | variable } } or { usage: { key | variable } }. Unsupported forms fail when the agent is composed. Omission prepares nothing and keeps the access already configured in the execution environment.",
-    "Authentification explicite de ce harness CLI : \"account\", \"usage\", { account: { file | key | variable } } ou { usage: { key | variable } }. Les formes non prises en charge échouent à la composition de l’agent. Son absence ne prépare rien et conserve l’accès déjà configuré dans l’environnement d’exécution."
+    "Account forms only: \"account\" forwards the token that copilot login stored in ~/.copilot/config.json as COPILOT_GITHUB_TOKEN, key or variable forward a fine-grained token. Usage forms fail when the agent is composed, and classic ghp_ tokens are rejected.",
+    "Formes account uniquement : \"account\" transmet comme COPILOT_GITHUB_TOKEN le jeton enregistré par copilot login dans ~/.copilot/config.json, key ou variable transmettent un jeton fine-grained. Les formes usage échouent à la composition de l’agent, et les jetons classiques ghp_ sont refusés."
   ],
   "CopilotSettings.variables": [
-    "Explicit environment declarations; values are strings.",
-    "Déclarations d’environnement explicites ; les valeurs sont des chaînes."
+    "Environment variables for Copilot commands, merged over .outpost/.env; COPILOT_AUTO_UPDATE defaults to false. A name also set by the sandbox provider fails with code configuration.",
+    "Variables d’environnement des commandes Copilot, fusionnées par-dessus .outpost/.env ; COPILOT_AUTO_UPDATE vaut false par défaut. Un nom également défini par le provider de sandbox échoue avec le code configuration."
   ],
   "CopilotSettings.conversations": [
     "Store that captures, locates and restores Copilot session bundles instead of the default native store, such as createTransportConversations(createCopilotConversations(), …). A store that declares another format is rejected when the harness is created.",
     "Store qui capture, localise et restaure les bundles de session Copilot au lieu du store natif par défaut, par exemple createTransportConversations(createCopilotConversations(), …). Un store qui déclare un autre format est refusé dès la création du harness."
   ],
   "KimiSettings.authentication": [
-    "Account authentication reads the OAuth file for the selected region and device_id from ~/.kimi-code or KIMI_CODE_HOME; account.file selects a dedicated profile directory. Usage forms accept KIMI_API_KEY or an explicit key/variable and require a model on createAgent(). Account key/variable forms are unsupported. Omission prepares no credentials.",
-    "Le mode account lit le fichier OAuth de la région choisie et device_id sous ~/.kimi-code ou KIMI_CODE_HOME ; account.file sélectionne un dossier de profil dédié. Les formes usage acceptent KIMI_API_KEY ou une clé/variable explicite et exigent un modèle sur createAgent(). Les formes account.key/variable ne sont pas prises en charge. Son absence ne prépare aucun identifiant."
+    "\"account\" copies the region’s OAuth file and device_id from ~/.kimi-code (or KIMI_CODE_HOME, or the account.file profile directory) and runs kimi login in the sandbox. Usage forms forward KIMI_API_KEY and require a model on createAgent(); account key and variable fail when the agent is composed.",
+    "\"account\" copie le fichier OAuth de la région et device_id depuis ~/.kimi-code (ou KIMI_CODE_HOME, ou le répertoire de profil account.file) puis exécute kimi login dans la sandbox. Les formes usage transmettent KIMI_API_KEY et exigent un modèle sur createAgent() ; account key et variable échouent à la composition de l’agent."
   ],
   "KimiSettings.variables": [
-    "Explicit environment declarations; values are strings.",
-    "Déclarations d’environnement explicites ; les valeurs sont des chaînes."
+    "Environment variables for Kimi commands, merged over .outpost/.env; KIMI_CODE_NO_AUTO_UPDATE defaults to 1. A name also set by the sandbox provider fails with code configuration.",
+    "Variables d’environnement des commandes Kimi, fusionnées par-dessus .outpost/.env ; KIMI_CODE_NO_AUTO_UPDATE vaut 1 par défaut. Un nom également défini par le provider de sandbox échoue avec le code configuration."
   ],
   "KimiSettings.conversations": [
     "Store that captures, locates and restores Kimi session bundles instead of the default native store, such as createTransportConversations(createKimiConversations(), …). A store that declares another format is rejected when the harness is created.",
     "Store qui capture, localise et restaure les bundles de session Kimi au lieu du store natif par défaut, par exemple createTransportConversations(createKimiConversations(), …). Un store qui déclare un autre format est refusé dès la création du harness."
   ],
   "createAntigravityHarness.settings": [
-    "Configuration for the Antigravity CLI harness; pass the selected model to createAgent() instead.",
-    "Configuration du harness Antigravity CLI ; transmettez le modèle choisi à createAgent()."
+    "Antigravity settings; model, reasoning and maxOutputTokens belong on createAgent() and are rejected here, as is conversations.",
+    "Réglages d’Antigravity ; model, reasoning et maxOutputTokens se placent sur createAgent() et sont refusés ici, tout comme conversations."
   ],
   "createCopilotHarness.settings": [
-    "Configuration for the GitHub Copilot CLI harness; pass the selected model to createAgent() instead.",
-    "Configuration du harness GitHub Copilot CLI ; transmettez le modèle choisi à createAgent()."
+    "GitHub Copilot CLI settings; model, reasoning and maxOutputTokens belong on createAgent() and are rejected here.",
+    "Réglages de GitHub Copilot CLI ; model, reasoning et maxOutputTokens se placent sur createAgent() et sont refusés ici."
   ],
   "createKimiHarness.settings": [
-    "Configuration for the Kimi Code harness; pass the selected model to createAgent() instead.",
-    "Configuration du harness Kimi Code ; transmettez le modèle choisi à createAgent()."
+    "Kimi Code settings; model, reasoning and maxOutputTokens belong on createAgent() and are rejected here.",
+    "Réglages de Kimi Code ; model, reasoning et maxOutputTokens se placent sur createAgent() et sont refusés ici."
   ],
   "agentVersions.copilot": [
     "GitHub Copilot CLI version installed by generated images and remote bootstrap.",
@@ -4548,8 +4548,8 @@
     "Fichiers de credentials de l’hôte à lire puis installer dans le home privé de la sandbox ou exposer en variables ; ignorés avec le provider local."
   ],
   "CredentialPlan.files": [
-    "Fixed files generated by Outpost in the private sandbox home, such as the Antigravity settings selecting the Gemini API.",
-    "Fichiers fixes générés par Outpost dans le home privé de la sandbox, comme les réglages Antigravity qui sélectionnent l’API Gemini."
+    "Fixed files written with mode 0600 in the private sandbox home, such as the Antigravity settings selecting the Gemini API; skipped on the local provider.",
+    "Fichiers fixes écrits avec le mode 0600 dans le home privé de la sandbox, comme les réglages Antigravity qui sélectionnent l’API Gemini ; ignorés sur le provider local."
   ],
   "CredentialPlan.commands": [
     "Login commands run in the sandbox after file installation, with secrets passed on stdin; skipped on the local provider.",
@@ -4592,8 +4592,8 @@
     "Contenu fixe du fichier, écrit avec le mode 0600."
   ],
   "KimiSettings.region": [
-    "Account deployment: \"global\" for kimi.ai (default) or \"mainland-cn\" for kimi.com. Selects the matching OAuth file, account endpoints and sandbox login region without copying the host configuration. Requires account authentication when authentication is supplied; usage forms reject an explicit region. Omission selects global for accounts and does not change API authentication. Conflicting declared account endpoints are rejected, including with the default region.",
-    "Service du compte : \"global\" pour kimi.ai (par défaut) ou \"mainland-cn\" pour kimi.com. Sélectionne le fichier OAuth, les endpoints de compte et la région de connexion dans la sandbox sans copier la configuration hôte. Exige le mode compte lorsqu’une authentification est fournie ; les formes usage refusent une région explicite. Son absence sélectionne global pour les comptes et ne modifie pas l’authentification API. Les endpoints de compte déclarés contradictoires sont refusés, y compris avec la région par défaut."
+    "Kimi account deployment: \"global\" for kimi.ai (default) or \"mainland-cn\" for kimi.com, which selects the OAuth file and sign-in endpoints. Setting it with usage authentication fails when the harness is created.",
+    "Déploiement du compte Kimi : \"global\" pour kimi.ai (par défaut) ou \"mainland-cn\" pour kimi.com, qui sélectionne le fichier OAuth et les endpoints de connexion. Le définir avec l’authentification usage échoue dès la création du harness."
   ],
   "S3TransportOptions.deleteMode": [
     "\"conditional\" (default) requires atomic conditional DELETE support. \"tombstone\" removes objects through conditional PUT markers for endpoints such as R2; reads and lists hide markers and conditional creation can replace them. All writers sharing a prefix must select the same mode. Markers retain a 1 KiB envelope and listing adds a HEAD per object; physically purge markers only after stopping every writer.",
@@ -4612,8 +4612,8 @@
     "False lorsqu’une partie de l’usage n’a pas pu être mesurée ; les compteurs représentent alors une borne inférieure. L’absence ou true conserve la sémantique de l’usage rapporté sans certifier la facturation externe. False persiste dans les agrégations et reprises de checkpoint."
   ],
   "AgentFeatures.usage": [
-    "CLI accounting capability: events expects usage in the decoded stream, session collects counters after exit, and unavailable declares that tokens cannot be measured. Omission preserves legacy adapter behavior.",
-    "Capacité de comptabilité CLI : events attend l’usage dans le flux décodé, session collecte les compteurs après la sortie et unavailable déclare les tokens non mesurables. L’absence conserve le comportement des adaptateurs existants."
+    "How token usage is measured: events reads it from the output stream, session reads the session after the process exits, unavailable records none. Missing counters then mark usage incomplete; omitted, reported events are counted without that check.",
+    "Mode de mesure de l’usage de jetons : events le lit dans le flux de sortie, session lit la session après la sortie du processus, unavailable n’enregistre rien. Des compteurs manquants marquent alors l’usage incomplet ; en son absence, les événements rapportés sont comptés sans cette vérification."
   ],
   "AgentAdapter.usageCommand": [
     "Build a bounded read-only command to collect counters for this conversation inside the borrowed sandbox; return undefined for an unsupported identifier.",
@@ -4636,24 +4636,24 @@
     "Nom d’erreur stable WorkflowUsageUnavailable."
   ],
   "AgentFeatures.forkable": [
-    "Whether conversation branching is supported; false rejects fork before allocation. Omitted preserves the adapter’s existing fork behavior. Resume support is declared separately.",
-    "Indique si la bifurcation est prise en charge ; false refuse le fork avant allocation. L’absence conserve le comportement existant de l’adapter. La reprise est déclarée séparément."
+    "Whether the agent can fork a conversation; false rejects fork before allocation. Omitted, fork is attempted through request() or the fork hook.",
+    "Indique si l’agent peut forker une conversation ; false refuse le fork avant l’allocation. En son absence, le fork est tenté via request() ou le hook fork."
   ],
   "AgentAdapter.forkable": [
-    "Whether conversation branching is supported; false rejects fork before allocation. Omitted preserves the adapter’s existing fork behavior. Resume support is declared separately.",
-    "Indique si la bifurcation est prise en charge ; false refuse le fork avant allocation. L’absence conserve le comportement existant de l’adapter. La reprise est déclarée séparément."
+    "Whether the agent can fork a conversation; false rejects fork before allocation. Omitted, fork is attempted through request() or the fork hook.",
+    "Indique si l’agent peut forker une conversation ; false refuse le fork avant l’allocation. En son absence, le fork est tenté via request() ou le hook fork."
   ],
   "CliAgent.forkable": [
-    "Whether conversation branching is supported; false rejects fork before allocation. Omitted preserves the adapter’s existing fork behavior. Resume support is declared separately.",
-    "Indique si la bifurcation est prise en charge ; false refuse le fork avant allocation. L’absence conserve le comportement existant de l’adapter. La reprise est déclarée séparément."
+    "False rejects a fork before allocation, as on Copilot CLI and Antigravity. Unset or true allows it, through the fork hook or the CLI’s own fork request.",
+    "false refuse le fork avant allocation, comme sur Copilot CLI et Antigravity. Absent ou true, il est permis, via le hook fork ou la requête de fork de la CLI."
   ],
   "CliAgent.resumable": [
-    "Whether the agent can continue a conversation, including response repair. Cold continuation additionally requires a conversation store; fork support is declared separately.",
-    "Indique si l’agent peut continuer une conversation, y compris pour réparer une réponse. La reprise à froid exige aussi un store ; le fork est déclaré séparément."
+    "Whether the CLI can continue a conversation; true on every built-in adapter. False rejects continuation and fork before allocation; when unset, response repair also requires a conversation store.",
+    "Indique si la CLI peut continuer une conversation ; vrai sur tous les adapters intégrés. false refuse la continuation et le fork avant allocation ; s’il est absent, la réparation de réponse exige aussi un store de conversations."
   ],
   "CustomAgent.forkable": [
-    "Whether conversation branching is supported; false rejects fork before allocation. Omitted preserves the adapter’s existing fork behavior. Resume support is declared separately.",
-    "Indique si la bifurcation est prise en charge ; false refuse le fork avant allocation. L’absence conserve le comportement existant de l’adapter. La reprise est déclarée séparément."
+    "Left unset by createAgent(), so the built-in harness forks by copying the conversation under a new ID. False rejects a fork before allocation.",
+    "Laissé vide par createAgent() : le harness intégré forke en copiant la conversation sous un nouvel identifiant. false refuse le fork avant allocation."
   ],
   "AgentAdapter.fork": [
     "Optional native fork preparation: receive the parent ID and a borrowed sandbox command executor, then return a distinct child ID. Outpost requests continuation on that child; adapters with a fork flag can omit this hook.",
@@ -4668,8 +4668,8 @@
     "Exécute une commande CLI dans la sandbox empruntée avec les identifiants, l’annulation et le délai de l’opération."
   ],
   "CliAgent.fork": [
-    "Optional native fork preparation: receive the parent ID and a borrowed sandbox command executor, then return a distinct child ID. Outpost requests continuation on that child; adapters with a fork flag can omit this hook.",
-    "Préparation native optionnelle du fork : reçoit l’identifiant parent et un exécuteur de commandes dans la sandbox empruntée, puis renvoie un identifiant enfant distinct. Outpost continue cet enfant ; les adapters dotés d’un flag de fork peuvent omettre ce hook."
+    "Native fork step: receives the parent conversation ID and a command runner in the borrowed sandbox, and returns a distinct child ID that the turn then continues. Adapters whose CLI forks through a request flag omit it.",
+    "Étape de fork native : reçoit l’identifiant de la conversation parente et un exécuteur de commandes dans la sandbox empruntée, puis renvoie un identifiant enfant distinct que le tour continue. Les adapters dont la CLI forke via un flag de requête l’omettent."
   ],
   "CliAgent.fork.id": [
     "Parent conversation identifier already restored in the sandbox.",
@@ -4732,16 +4732,16 @@
     "Taille UTF-8 constatée d’une ligne de protocole trop volumineuse ou du préfixe reçu avant l’arrêt."
   ],
   "ModelReasoningBlock.text": [
-    "Optional readable reasoning or summary exposed by the provider, separate from opaque replay data.",
-    "Raisonnement lisible ou résumé éventuellement exposé par le fournisseur, distinct des données opaques de rejeu."
+    "Readable reasoning exposed by the service: the Anthropic thinking text or the Responses summary. The harness emits it as a reasoning event; replay uses data.",
+    "Raisonnement lisible exposé par le service : le texte thinking d’Anthropic ou le résumé de Responses. Le harness l’émet comme événement reasoning ; le rejeu utilise data."
   ],
   "ModelStreamEvent.attempt": [
-    "Provider-reported retry attempt; emitting it does not request a retry.",
-    "Tentative de reprise signalée par le fournisseur ; l’émettre ne déclenche pas de reprise."
+    "Retry attempt number reported by the provider. The harness forwards it as a model-retry event and does not retry itself.",
+    "Numéro de tentative signalé par le fournisseur. Le harness le relaie comme événement model-retry et ne relance rien lui-même."
   ],
   "ModelStreamEvent.message": [
-    "Optional diagnostic associated with the provider-reported retry.",
-    "Diagnostic facultatif associé à la reprise signalée par le fournisseur."
+    "Diagnostic for the reported retry, forwarded in the model-retry event.",
+    "Diagnostic de la reprise signalée, relayé dans l’événement model-retry."
   ],
   "ObservationHub.scope": [
     "Immutable correlation fields inherited by emissions from this hub.",
@@ -4912,8 +4912,8 @@
     "Hub parent recevant les enveloppes de workflow, tâche, agent et opération ; les callbacks observe historiques reçoivent toujours WorkflowEvent."
   ],
   "ClaudeSettings.partialMessages": [
-    "Opt into Claude noninteractive partial stream messages and normalized text-delta events; interactive requests are unchanged.",
-    "Active les messages partiels Claude non interactifs et les événements text-delta normalisés ; les requêtes interactives restent inchangées."
+    "Pass --include-partial-messages to headless runs so the stream emits text-delta events. Interactive sessions are unchanged.",
+    "Passe --include-partial-messages aux exécutions non interactives pour que le flux émette des événements text-delta. Les sessions interactives ne changent pas."
   ],
   "CustomReporterOptions.capacity": [
     "Maximum waiting events in the reporter queue, default 1024; overflow drops newest deliveries and makes flush reject.",
@@ -5032,32 +5032,32 @@
     "Traite les événements de sorties de commandes d’outil corrélées par callId ; les gestionnaires asynchrones sont sérialisés et leurs échecs restent des erreurs d’observation."
   ],
   "defineHarnessSubagent.options": [
-    "Name, model-visible description and explicitly composed built-in child agent. Defining the tool does not run it.",
-    "Nom, description visible du modèle et agent enfant intégré composé explicitement. Définir l’outil ne l’exécute pas."
+    "Tool name, description shown to the parent model and built-in child agent. Unknown keys are rejected.",
+    "Nom de l’outil, description montrée au modèle parent et agent enfant intégré. Les clés inconnues sont refusées."
   ],
   "HarnessSubagentOptions.name": [
     "Unique tool name exposed to the parent model, using 1–64 letters, digits, underscores or hyphens.",
     "Nom d’outil unique présenté au modèle parent, composé de 1 à 64 lettres, chiffres, tirets ou underscores."
   ],
   "HarnessSubagentOptions.description": [
-    "Explain when the parent should delegate to this child; sent with the tool schema.",
-    "Explique quand le parent doit déléguer à cet enfant ; transmis avec le schéma de l’outil."
+    "Tells the parent model when to delegate to this child; sent with the tool schema.",
+    "Indique au modèle parent quand déléguer à cet enfant ; envoyée avec le schéma de l’outil."
   ],
   "HarnessSubagentOptions.agent": [
-    "Built-in agent created with createAgent({ harness: createHarness(...), model }); owns child instructions, tools and limits. CLI agents are rejected.",
-    "Agent intégré créé avec createAgent({ harness: createHarness(...), model }) ; définit les instructions, outils et limites de l’enfant. Les agents CLI sont refusés."
+    "Built-in agent from createAgent({ harness: createHarness(…), model }) that supplies the child's instructions, tools, limits and permissions. A CLI agent is rejected with code configuration.",
+    "Agent intégré issu de createAgent({ harness: createHarness(…), model }) qui fournit les instructions, outils, limites et permissions de l’enfant. Un agent CLI est refusé avec le code configuration."
   ],
   "HarnessSubagentInput.prompt": [
     "Nonempty task text supplied by the parent model. Parent message history is not copied into the child conversation.",
     "Texte non vide de la tâche fourni par le modèle parent. L’historique du parent n’est pas copié dans la conversation enfant."
   ],
   "HarnessSubagent.subagent": [
-    "Explicit built-in child configuration, executed by the runtime in the parent’s borrowed sandbox with intersected permissions and cumulative ancestor token budgets.",
-    "Configuration explicite de l’enfant intégré, exécutée par le runtime dans la sandbox empruntée du parent avec intersection des permissions et budgets de tokens cumulés des ancêtres."
+    "Child agent run in the parent's borrowed sandbox, with ancestor permissions added to its own and its tokens counted in every ancestor budget.",
+    "Agent enfant exécuté dans la sandbox empruntée du parent, avec les permissions des ancêtres ajoutées aux siennes et ses tokens comptés dans chaque budget ancêtre."
   ],
   "HarnessLimits.maxDelegationDepth": [
-    "Maximum additional levels of child delegation from this harness; defaults to 3, accepts 0 to disable delegation and cannot raise an ancestor limit.",
-    "Nombre maximal de niveaux supplémentaires de délégation depuis ce harness ; 3 par défaut, 0 désactive la délégation et la limite d’un ancêtre ne peut pas être augmentée."
+    "Levels of subagent delegation allowed below this harness, default 3; 0 disables delegation. A child cannot raise an ancestor's limit, and a delegation past it fails with code limit, handled by onError.",
+    "Niveaux de délégation à des sous-agents autorisés sous ce harness, 3 par défaut ; 0 désactive la délégation. Un enfant ne peut pas relever la limite d’un ancêtre, et une délégation au-delà échoue avec le code limit, traité selon onError."
   ],
   "AgentEvent.subagentId": [
     "Identifier of the built-in child that emitted the event; absent for the root harness. Lifecycle events link that identifier to the delegating tool call.",
@@ -5228,16 +5228,16 @@
     "Traite le démarrage, la fin ou l’échec d’un enfant intégré, avec l’appel de délégation et l’identifiant de transcript optionnel."
   ],
   "HarnessSubagent.execute": [
-    "Direct execution is rejected; the harness runtime supplies cancellation, budgets, permissions and transcript ownership when this tool is called.",
-    "L’exécution directe est refusée ; le runtime du harness fournit annulation, budgets, permissions et gestion du transcript lors de l’appel de cet outil."
+    "Throws code configuration when called directly: only the harness runtime runs a subagent, supplying cancellation, budgets, permissions and the child transcript.",
+    "Lève le code configuration en appel direct : seul le runtime du harness exécute un sous-agent, en fournissant annulation, budgets, permissions et transcription de l’enfant."
   ],
   "HarnessSubagent.readOnly": [
     "Always false: delegations are serialized even if the child only declares read-only tools.",
     "Toujours false : les délégations sont sérialisées même si l’enfant ne déclare que des outils en lecture seule."
   ],
   "HarnessSubagent.resources": [
-    "The delegation call declares no paths or command. Each descendant tool declares its own resources, checked against both child and ancestor permissions.",
-    "L’appel de délégation ne déclare ni chemin ni commande. Chaque outil descendant déclare ses propres ressources, vérifiées selon les permissions de l’enfant et des ancêtres."
+    "Always empty: the delegation call matches permission rules by tool name only. Each child tool call is checked against the child's and every ancestor's permissions.",
+    "Toujours vide : l’appel de délégation ne correspond aux règles de permission que par le nom de l’outil. Chaque appel d’outil de l’enfant est contrôlé par ses permissions et par celles de chaque ancêtre."
   ],
   "HarnessSubagent.inputSchema": [
     "Fixed JSON object schema requiring one nonempty prompt string and rejecting additional properties.",
@@ -5844,8 +5844,8 @@
     "Source d’observation des événements rejoués : harness si le journal provient du harness Outpost, sinon agent."
   ],
   "Agent.divergence": [
-    "Divergence policy: fail throws ReplayDivergence; warn reports prompt, baseline and tree differences as warnings and continues.",
-    "Politique de divergence : fail lève ReplayDivergence ; warn signale les écarts de prompt, de baseline et d’arbre en avertissement puis continue."
+    "Divergence policy, fail by default: fail throws ReplayDivergence; warn reports prompt, baseline and tree differences as warnings and continues.",
+    "Politique de divergence, fail par défaut : fail lève ReplayDivergence ; warn signale les écarts de prompt, de baseline et d’arbre en avertissement puis continue."
   ],
   "Agent.turns": [
     "Recorded turns parsed from the journal, in execution order.",
@@ -6225,24 +6225,24 @@
     "Position du candidat dans FallbackAgent.agents, à partir de zéro."
   ],
   "FallbackCandidate.name": [
-    "Adapter name of the candidate, such as claude, codex or custom.",
-    "Nom de l’adapter du candidat, par exemple claude, codex ou custom."
+    "Adapter name of the candidate, such as claude, codex, custom or replay.",
+    "Nom de l’adapter du candidat, par exemple claude, codex, custom ou replay."
   ],
   "FallbackCandidate.model": [
-    "Model name selected on the candidate; absent when the CLI default is used.",
-    "Nom du modèle choisi sur le candidat ; absent lorsque le modèle par défaut de la CLI est utilisé."
+    "Model name selected on the candidate; absent when a CLI keeps its native default, and for a replay agent.",
+    "Nom du modèle choisi sur le candidat ; absent quand une CLI garde son défaut natif, et pour un agent de rejeu."
   ],
   "DispatchAgent.agents": [
     "Candidates of a fallback agent, in the order they are tried.",
     "Candidats d’un agent de secours, dans l’ordre où ils sont essayés."
   ],
   "DispatchAgent.on": [
-    "Failure categories that hand a fallback agent's dispatch to its next candidate.",
-    "Catégories d’échec qui confient le dispatch d’un agent de secours à son candidat suivant."
+    "Failure categories, quota or unavailable, that hand a fallback agent’s dispatch to its next candidate.",
+    "Catégories d’échec, quota ou unavailable, qui confient le dispatch d’un agent de secours à son candidat suivant."
   ],
   "FallbackAgent.kind": [
-    "Discriminator identifying an ordered fallback list rather than a single agent.",
-    "Discriminant identifiant une liste de secours ordonnée plutôt qu’un agent unique."
+    "Discriminator: fallback, for an ordered list of candidates rather than a single agent.",
+    "Discriminant : fallback, pour une liste ordonnée de candidats plutôt qu’un agent unique."
   ],
   "FallbackAgent.agents": [
     "Frozen copy of the candidates, in the order they are tried; at least two, none of them a fallback agent.",
@@ -6289,16 +6289,16 @@
     "Candidats ordonnés, au moins deux, chacun composé avec createAgent() ou createReplayAgent() ; le premier est essayé en premier."
   ],
   "createFallbackAgent.options": [
-    "Fallback policy; on is required.",
-    "Politique de repli ; on est obligatoire."
+    "Fallback policy: the on list of failure categories.",
+    "Politique de repli : la liste on des catégories d’échec."
   ],
   "createFallbackAgent.options.on": [
-    "Failure categories that move to the next candidate: quota, unavailable or both, without repetition.",
-    "Catégories d’échec qui font passer au candidat suivant : quota, unavailable ou les deux, sans répétition."
+    "Failure categories that move to the next candidate: quota, unavailable or both. An empty, repeated or unknown entry throws code configuration.",
+    "Catégories d’échec qui font passer au candidat suivant : quota, unavailable ou les deux. Une liste vide, une répétition ou une valeur inconnue lève le code configuration."
   ],
   "FallbackAgentOptions.on": [
-    "Failure categories that move to the next candidate: quota, unavailable or both, without repetition. Required so the policy is always explicit.",
-    "Catégories d’échec qui font passer au candidat suivant : quota, unavailable ou les deux, sans répétition. Obligatoire pour que la politique soit toujours explicite."
+    "Failure categories that move to the next candidate: quota, unavailable or both, with no default. An empty, repeated or unknown entry throws code configuration.",
+    "Catégories d’échec qui font passer au candidat suivant : quota, unavailable ou les deux, sans valeur par défaut. Une liste vide, une répétition ou une valeur inconnue lève le code configuration."
   ],
   "ReporterHandlers.fallback": [
     "Handle a fallback agent handing the dispatch to its next candidate, with both candidates, the failure category and its message; receives pass and at metadata and may return a promise.",
@@ -6329,8 +6329,8 @@
     "Demande le protocole liveInput de l’adapter : encoder le prompt avec lui sur stdin et garder stdin ouvert pour d’autres messages utilisateur. Outpost ne le positionne que si le dispatch a un pilotage et que le lease accepte l’entrée en direct."
   ],
   "AgentAdapter.liveInput": [
-    "Protocol for adding user messages to a running turn over stdin: Claude Code stream-json and Codex app-server. Adapters without it are steered by interrupting and resuming their conversation.",
-    "Protocole d’ajout de messages utilisateur à un tour en cours via stdin : stream-json de Claude Code et app-server de Codex. Les adapters qui n’en ont pas sont pilotés par interruption et reprise de leur conversation."
+    "Protocol for adding user messages to a running turn over stdin, used when the lease supports live input: Claude Code stream-json and Codex app-server. Otherwise steering stops the turn and resumes its conversation.",
+    "Protocole d’ajout de messages utilisateur à un tour en cours via stdin, utilisé quand le lease accepte l’entrée en direct : stream-json de Claude Code et app-server de Codex. Sinon, le pilotage arrête le tour puis reprend sa conversation."
   ],
   "Command.input": [
     "Readable stream written to stdin after stdin; standard input stays open until the stream ends. Vercel and Daytona relay its chunks through an append-only file in the sandbox.",
@@ -6782,8 +6782,8 @@
     "Entrées ajoutées à la section ou remplaçant les entrées de même nom. Un fichier illisible ou une section qui n’est pas un objet provoque un échec au lieu d’être écrasé."
   ],
   "CommonAgentSettings.mcpServers": [
-    "MCP servers this CLI can use, keyed by server name. Outpost renders them in the CLI’s native configuration and references secrets by variable name only; each referenced variable must be declared.",
-    "Serveurs MCP utilisables par cette CLI, indexés par nom de serveur. Outpost les traduit dans la configuration native de la CLI et ne référence les secrets que par nom de variable ; chaque variable référencée doit être déclarée."
+    "MCP servers keyed by name, passed on the command line: --mcp-config for Claude Code, -c overrides for Codex. Secrets stay variable references; an undeclared referenced variable fails before the agent starts.",
+    "Serveurs MCP indexés par nom, transmis en ligne de commande : --mcp-config pour Claude Code, surcharges -c pour Codex. Les secrets restent des références de variables ; une variable référencée non déclarée échoue avant le démarrage de l’agent."
   ],
   "CopilotSettings.mcpServers": [
     "MCP servers passed to Copilot with --additional-mcp-config for each run, keyed by server name. Secrets stay ${NAME} references expanded by Copilot; each referenced variable must be declared.",
@@ -6798,8 +6798,8 @@
     "Serveurs MCP fusionnés dans .gemini/config/mcp_config.json du home de l’agent, indexés par nom de serveur ; les autres serveurs du fichier sont conservés. Avec le fournisseur local, c’est votre propre home. Chaque variable référencée doit être déclarée."
   ],
   "HarnessOptions.mcpServers": [
-    "MCP servers whose tools the model may call, keyed by server name. Each turn starts them inside the borrowed sandbox and exposes their tools as mcp__<server>__<tool>; the lease must support liveInput.",
-    "Serveurs MCP dont le modèle peut appeler les outils, indexés par nom de serveur. Chaque tour les démarre dans la sandbox empruntée et expose leurs outils sous la forme mcp__<serveur>__<outil> ; le bail doit prendre en charge liveInput."
+    "MCP servers keyed by name, started inside the borrowed sandbox for each turn; their tools appear as mcp__<server>__<tool>, plus resource and prompt tools when servers offer them. The lease must support liveInput, and oauth: \"login\" servers are rejected.",
+    "Serveurs MCP indexés par nom, démarrés dans la sandbox empruntée à chaque tour ; leurs outils apparaissent sous la forme mcp__<server>__<tool>, avec des outils de ressources et de prompts quand les serveurs en proposent. La sandbox doit prendre en charge liveInput, et les serveurs oauth: \"login\" sont refusés."
   ],
   "Harness.mcpServers": [
     "Validated MCP servers started for each turn, when set.",
@@ -6834,12 +6834,12 @@
     "Nom d’une variable déclarée dont la valeur est envoyée en Authorization: Bearer. Incompatible avec un en-tête Authorization."
   ],
   "defineTextResponse.options": [
-    "Response tag, written as an XML-style identifier, and the number of repair turns allowed after an invalid answer.",
-    "Balise de réponse, un identifiant de style XML, et nombre de tours de réparation autorisés après une réponse invalide."
+    "Tag name and the number of repair turns allowed after an invalid answer.",
+    "Nom de la balise et nombre de tours de réparation autorisés après une réponse invalide."
   ],
   "defineJsonResponse.options": [
-    "Response tag, JSON schema or parsing function, and the number of repair turns allowed after an invalid answer.",
-    "Balise de réponse, schéma JSON ou fonction d’analyse, et nombre de tours de réparation autorisés après une réponse invalide."
+    "Tag name, schema or parsing function, and the number of repair turns allowed after an invalid answer.",
+    "Nom de la balise, schéma ou fonction d’analyse, et nombre de tours de réparation autorisés après une réponse invalide."
   ],
   "defineJsonArtifact.options": [
     "Contract name, version and the schema or parsing function applied when encoding and decoding.",
@@ -6902,16 +6902,16 @@
     "Filtre d’outils par nom MCP exact. include ne garde que les outils listés et exclude en retire ensuite. Les harness qui ne savent pas appliquer une partie la refusent à la composition de l’agent."
   ],
   "McpStdioServer.startupTimeoutMs": [
-    "Maximum time in milliseconds for the server to start, from 1 to 2147483647. The built-in harness defaults to 60000; Codex and Kimi apply it per server, Claude Code through one shared MCP_TIMEOUT, and Copilot and Antigravity refuse it.",
-    "Durée maximale en millisecondes du démarrage du serveur, de 1 à 2147483647. Le harness intégré utilise 60000 par défaut ; Codex et Kimi l’appliquent par serveur, Claude Code via un MCP_TIMEOUT commun, et Copilot et Antigravity la refusent."
+    "Server start limit in milliseconds, 1 to 2147483647; the built-in harness defaults to 60000. Codex and Kimi apply it per server, Claude Code as one MCP_TIMEOUT that must be equal on every server that sets it, and Copilot and Antigravity refuse it.",
+    "Délai de démarrage du serveur en millisecondes, de 1 à 2147483647 ; 60000 par défaut dans le harness intégré. Codex et Kimi l’appliquent par serveur, Claude Code via un seul MCP_TIMEOUT qui doit être identique sur chaque serveur qui le définit, et Copilot et Antigravity le refusent."
   ],
   "McpHttpServer.startupTimeoutMs": [
-    "Maximum time in milliseconds for the server to start, from 1 to 2147483647. The built-in harness defaults to 60000; Codex and Kimi apply it per server, Claude Code through one shared MCP_TIMEOUT, and Copilot and Antigravity refuse it.",
-    "Durée maximale en millisecondes du démarrage du serveur, de 1 à 2147483647. Le harness intégré utilise 60000 par défaut ; Codex et Kimi l’appliquent par serveur, Claude Code via un MCP_TIMEOUT commun, et Copilot et Antigravity la refusent."
+    "Server start limit in milliseconds, 1 to 2147483647; the built-in harness defaults to 60000. Codex and Kimi apply it per server, Claude Code as one MCP_TIMEOUT that must be equal on every server that sets it, and Copilot and Antigravity refuse it.",
+    "Délai de démarrage du serveur en millisecondes, de 1 à 2147483647 ; 60000 par défaut dans le harness intégré. Codex et Kimi l’appliquent par serveur, Claude Code via un seul MCP_TIMEOUT qui doit être identique sur chaque serveur qui le définit, et Copilot et Antigravity le refusent."
   ],
   "McpHttpServer.oauth": [
-    "\"login\" reuses the MCP OAuth login stored by Claude Code, Codex or Kimi on the host; client credentials let the built-in harness request a token itself. Incompatible with bearerTokenVariable and an Authorization header.",
-    "\"login\" réutilise la connexion OAuth MCP enregistrée sur l’hôte par Claude Code, Codex ou Kimi ; les identifiants client laissent le harness intégré demander lui-même un jeton. Incompatible avec bearerTokenVariable et un en-tête Authorization."
+    "\"login\" copies the MCP OAuth login that Claude Code, Codex or Kimi stored on the host; client credentials work only in the built-in harness, which requests the token from the sandbox. Excludes bearerTokenVariable and an Authorization header.",
+    "\"login\" copie la connexion OAuth MCP que Claude Code, Codex ou Kimi ont enregistrée sur l’hôte ; les identifiants client fonctionnent uniquement dans le harness intégré, qui demande le jeton depuis la sandbox. Exclut bearerTokenVariable et un en-tête Authorization."
   ],
   "McpClientCredentials.clientIdVariable": [
     "Declared variable holding the OAuth client ID.",
@@ -6934,16 +6934,16 @@
     "Nom du prompt tel que listé par le serveur."
   ],
   "McpPromptOptions.arguments": [
-    "String arguments of the prompt; values are passed as given.",
-    "Arguments texte du prompt ; les valeurs sont transmises telles quelles."
+    "String arguments of the prompt, default none; values are passed as given.",
+    "Arguments texte du prompt, aucun par défaut ; les valeurs sont transmises telles quelles."
   ],
   "HarnessInstructionContext.mcp": [
-    "Access to the MCP servers started for this turn, present when the harness declares mcpServers.",
-    "Accès aux serveurs MCP démarrés pour ce tour, présent lorsque le harness déclare mcpServers."
+    "Access to the MCP servers started for this turn, present when the harness declares mcpServers. Skill instruction resolvers do not receive it.",
+    "Accès aux serveurs MCP démarrés pour ce tour, présent quand le harness déclare mcpServers. Les résolveurs d’instructions des skills ne le reçoivent pas."
   ],
   "HarnessMcpContext.prompt": [
-    "Render a prompt of a running MCP server as role-prefixed text. Fails when the server is not declared or offers no prompts.",
-    "Rend un prompt d’un serveur MCP démarré sous forme de texte préfixé par rôle. Échoue si le serveur n’est pas déclaré ou ne propose pas de prompts."
+    "Renders a prompt of a running MCP server as role-prefixed text. Fails with code configuration when the server is not declared or offers no prompts.",
+    "Rend un prompt d’un serveur MCP en cours d’exécution sous forme de texte préfixé par les rôles. Échoue avec le code configuration si le serveur n’est pas déclaré ou n’offre aucun prompt."
   ],
   "HarnessMcpContext.prompt.server": [
     "Declared MCP server name.",
@@ -7003,8 +7003,8 @@
     "Chemins relatifs au bundle ignorés même quand include les accepte, comme les journaux ou les verrous."
   ],
   "SessionBundleProfile.required": [
-    "Files that must be present; a session missing one is refused as incomplete.",
-    "Fichiers obligatoires ; une session à laquelle il en manque un est refusée comme incomplète."
+    "Files that must be present, at least one; a session missing one is refused as incomplete.",
+    "Fichiers obligatoires, au moins un ; une session à laquelle il en manque un est refusée comme incomplète."
   ],
   "SessionBundleProfile.relocated": [
     "Files passed as text to relocate during restoration; other files are restored byte for byte.",

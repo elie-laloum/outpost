@@ -13,17 +13,17 @@ import { createFallbackAgent } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Compose un FallbackAgent ordonné à partir d’au moins deux agents et d’une liste on explicite. Le dispatch exécute les candidats dans l’ordre dans le même sandbox et le même workspace, en préparant chacun seulement lorsqu’il est essayé, et ne passe au suivant qu’après un échec quota ou unavailable listé dans on ; les autres échecs sont relancés. La construction valide et fige la liste sans rien démarrer.
+Ordonne au moins deux agents en un FallbackAgent figé que le dispatch exécute dans une seule sandbox et un seul workspace, sans réinitialisation. Un candidat ne passe la main que sur une faute de quota ou de panne listée dans on, et le suivant repart du brief d’origine ; tout autre échec est relancé. Moins de deux candidats, un agent de secours imbriqué ou une liste on invalide lèvent le code configuration.
 
 [Exemple complet et règles détaillées](../../guide/fallback-agents/).
 
 ## Paramètres et propriétés
 
-| Nom          | Type                                  | Présence | Rôle                                                                                                                            |
-| ------------ | ------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `agents`     | `readonly [Agent, Agent, ...Agent[]]` | Requis   | Candidats ordonnés, au moins deux, chacun composé avec createAgent() ou createReplayAgent() ; le premier est essayé en premier. |
-| `options`    | `FallbackAgentOptions`                | Requis   | Politique de repli ; on est obligatoire.                                                                                        |
-| `options.on` | `readonly FallbackTrigger[]`          | Requis   | Catégories d’échec qui font passer au candidat suivant : quota, unavailable ou les deux, sans répétition.                       |
+| Nom          | Type                                  | Présence | Rôle                                                                                                                                                                       |
+| ------------ | ------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `agents`     | `readonly [Agent, Agent, ...Agent[]]` | Requis   | Candidats ordonnés, au moins deux, chacun composé avec createAgent() ou createReplayAgent() ; le premier est essayé en premier.                                            |
+| `options`    | `FallbackAgentOptions`                | Requis   | Politique de repli : la liste on des catégories d’échec.                                                                                                                   |
+| `options.on` | `readonly FallbackTrigger[]`          | Requis   | Catégories d’échec qui font passer au candidat suivant : quota, unavailable ou les deux. Une liste vide, une répétition ou une valeur inconnue lève le code configuration. |
 
 ## Retour
 

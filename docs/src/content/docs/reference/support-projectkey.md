@@ -9,7 +9,7 @@ Supporting contract not directly exported; use TypeScript inference or the publi
 
 ## Purpose and behavior
 
-Convert a repository path into the directory key used by Claude’s native project transcript layout. This is a path-layout helper, not a conversation identifier.
+Return Claude’s project folder name for a repository path, used under ~/.claude/projects: every character other than an ASCII letter or digit becomes -.
 
 ## Parameters and properties
 

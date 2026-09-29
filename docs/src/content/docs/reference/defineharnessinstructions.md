@@ -13,15 +13,15 @@ import { defineHarnessInstructions } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Define system instructions from text or from a resolver called at the start of each turn with the sandbox, signal and model. The resolved text is not stored in the conversation.
+Define system instructions from text or from a resolver called at the start of each turn with the sandbox, signal, model and MCP context. The resolved text is not stored in the conversation.
 
 [Complete example and detailed rules](../../guide/harness-context/).
 
 ## Parameters and properties
 
-| Name     | Type                       | Presence | Meaning                                                                                                                       |
-| -------- | -------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `source` | `HarnessInstructionSource` | Required | Nonempty instruction text, or a function that receives the sandbox, signal and model and returns the text when a turn starts. |
+| Name     | Type                       | Presence | Meaning                                                                                                            |
+| -------- | -------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------ |
+| `source` | `HarnessInstructionSource` | Required | Nonempty instruction text, or a function that receives the turn context and returns the text when the turn starts. |
 
 ## Returns
 

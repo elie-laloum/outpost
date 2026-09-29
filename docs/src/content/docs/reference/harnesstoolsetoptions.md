@@ -13,10 +13,10 @@ import type { HarnessToolsetOptions } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name    | Type                                                  | Presence | Meaning                                                   |
-| ------- | ----------------------------------------------------- | -------- | --------------------------------------------------------- |
-| `name`  | `string`                                              | Required | Nonempty name identifying the toolset.                    |
-| `tools` | `readonly (HarnessTool<unknown> \| HarnessToolset)[]` | Required | Tools and nested toolsets to group; names must be unique. |
+| Name    | Type                                                  | Presence | Meaning                                                                                              |
+| ------- | ----------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------- |
+| `name`  | `string`                                              | Required | Nonempty name identifying the toolset.                                                               |
+| `tools` | `readonly (HarnessTool<unknown> \| HarnessToolset)[]` | Required | Tools and nested toolsets to group; nested sets are flattened and duplicate tool names are rejected. |
 
 ## Signature
 

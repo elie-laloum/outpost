@@ -9,15 +9,15 @@ Supporting contract not directly exported; use TypeScript inference or the publi
 
 ## Purpose and behavior
 
-Rewrite native transcript records from a source repository path to a destination repository path while preserving conversation data. The function returns rewritten text and does not itself read or write files.
+Return transcript text in which every cwd value equal to source becomes destination; without source, the first cwd recorded in the text is replaced. Lines that are not JSON are kept as they are, and no file is read or written.
 
 ## Parameters and properties
 
-| Name          | Type                  | Presence | Meaning                                                                 |
-| ------------- | --------------------- | -------- | ----------------------------------------------------------------------- |
-| `text`        | `string`              | Required | Native transcript contents to rewrite.                                  |
-| `destination` | `string`              | Required | New repository path to embed in relocated transcript records.           |
-| `source`      | `string \| undefined` | Optional | Original repository path to replace when relocating transcript records. |
+| Name          | Type                  | Presence | Meaning                                                                    |
+| ------------- | --------------------- | -------- | -------------------------------------------------------------------------- |
+| `text`        | `string`              | Required | Native transcript contents to rewrite.                                     |
+| `destination` | `string`              | Required | Path written in place of each matching cwd value.                          |
+| `source`      | `string \| undefined` | Optional | Recorded cwd value to replace; defaults to the first cwd recorded in text. |
 
 ## Returns
 

@@ -13,17 +13,17 @@ import { defineHarnessContextStrategy } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Définit comment un harness personnalisé réécrit son historique avant une requête au modèle. compact reçoit les messages et une aide summarize(), et renvoie une nouvelle liste ou rien ; le moteur la valide, retire le raisonnement rejoué et enregistre une compaction dans la transcription.
+Définit comment un harness intégré réécrit son historique avant chaque requête au modèle. compact reçoit les messages et un utilitaire summarize(), et renvoie une nouvelle liste ou rien ; le harness valide la liste, retire le raisonnement rejoué et enregistre une compaction dans la transcription.
 
 [Exemple complet et règles détaillées](../../guide/harness-context/).
 
 ## Paramètres et propriétés
 
-| Nom               | Type                                                                                    | Présence | Rôle                                                                                                                                                                                         |
-| ----------------- | --------------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `options`         | `HarnessContextStrategyOptions`                                                         | Requis   | Nom de la stratégie et fonction compact.                                                                                                                                                     |
-| `options.name`    | `string`                                                                                | Requis   | Nom non vide indiqué dans les événements compaction.                                                                                                                                         |
-| `options.compact` | `(input: HarnessContextInput) => HarnessContextResult \| Promise<HarnessContextResult>` | Requis   | Renvoie une liste de messages réécrite, ou rien pour garder l’historique. La liste doit commencer et finir par un message utilisateur et garder chaque appel d’outil associé à son résultat. |
+| Nom               | Type                                                                                    | Présence | Rôle                                                                                                                                                                                                                                                                             |
+| ----------------- | --------------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `options`         | `HarnessContextStrategyOptions`                                                         | Requis   | Nom de la stratégie et fonction compact.                                                                                                                                                                                                                                         |
+| `options.name`    | `string`                                                                                | Requis   | Nom non vide indiqué dans les événements compaction.                                                                                                                                                                                                                             |
+| `options.compact` | `(input: HarnessContextInput) => HarnessContextResult \| Promise<HarnessContextResult>` | Requis   | Appelée avant chaque requête au modèle ; renvoie une liste de messages réécrite, ou rien pour garder l’historique. La liste doit commencer et finir par un message utilisateur et associer chaque appel d’outil à son résultat, sinon le tour échoue avec le code configuration. |
 
 ## Retour
 

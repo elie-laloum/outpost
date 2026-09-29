@@ -13,7 +13,7 @@ import { createHarnessShellTools } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Crée le jeu d’outils shell : shell exécute sh -c à la racine du dépôt avec un délai et sans entrée, et renvoie statut de sortie, stdout et stderr. Exige un shell POSIX dans le sandbox.
+Crée le jeu d’outils shell : shell exécute sh -c à la racine du dépôt, sans entrée et avec un délai de 120000 ms par défaut, puis renvoie le statut de sortie, stdout et stderr ; un statut non nul donne un résultat en erreur. Il déclare la commande pour les règles de permission et exige un shell POSIX dans la sandbox.
 
 [Exemple complet et règles détaillées](../../guide/harness-tools/).
 
@@ -21,8 +21,8 @@ Crée le jeu d’outils shell : shell exécute sh -c à la racine du dépôt ave
 
 | Nom                  | Type                             | Présence  | Rôle                                                                                                                   |
 | -------------------- | -------------------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `options`            | `ShellToolsOptions \| undefined` | Optionnel | Réglages optionnels du shell, comme le délai des commandes.                                                            |
-| `options.deadlineMs` | `number \| undefined`            | Optionnel | Délai de chaque commande shell en millisecondes ; 120 000 par défaut. Le délai des outils du harness s’applique aussi. |
+| `options`            | `ShellToolsOptions \| undefined` | Optionnel | Réglages du shell : le délai de chaque commande.                                                                       |
+| `options.deadlineMs` | `number \| undefined`            | Optionnel | Délai de chaque commande shell, 120000 par défaut (2 minutes). toolExecution.deadlineMs borne toujours l’appel entier. |
 
 ## Retour
 

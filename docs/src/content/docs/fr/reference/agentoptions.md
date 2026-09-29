@@ -15,10 +15,10 @@ import type { AgentOptions } from "@elie-laloum/outpost";
 
 Les champs ci-dessous couvrent toutes les variantes ; la signature précise leurs combinaisons autorisées.
 
-| Nom       | Type                                  | Présence          | Rôle                                                                                                                                                                                                                                                               |
-| --------- | ------------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `harness` | `CliHarness \| Harness`               | Requis            | Harness d’exécution ; sa variante sélectionne une CLI ou le moteur intégré d’Outpost.                                                                                                                                                                              |
-| `model`   | `ModelSpec \| undefined \| ModelSpec` | Selon la variante | Nom du modèle, ou objet AgentModel avec raisonnement et limite de sortie optionnels. Le harness ou le fournisseur qui exécute valide les valeurs prises en charge à la composition de l’agent. Requis pour un harness personnalisé ; optionnel pour le défaut CLI. |
+| Nom       | Type                                  | Présence          | Rôle                                                                                                                                                                     |
+| --------- | ------------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `harness` | `CliHarness \| Harness`               | Requis            | Preset CLI comme createClaudeHarness(), ou createHarness() pour la boucle intégrée ; toute autre valeur lève le code configuration.                                      |
+| `model`   | `ModelSpec \| undefined \| ModelSpec` | Selon la variante | Nom de modèle ou objet AgentModel, vérifié auprès du harness à la composition de l’agent. Omettez-le pour garder le défaut natif d’une CLI ; le harness intégré l’exige. |
 
 ## Signature
 

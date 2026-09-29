@@ -13,9 +13,9 @@ import type { ShellToolsOptions } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name         | Type                  | Presence | Meaning                                                                                                      |
-| ------------ | --------------------- | -------- | ------------------------------------------------------------------------------------------------------------ |
-| `deadlineMs` | `number \| undefined` | Optional | Deadline of each shell command in milliseconds; defaults to 120,000. The harness tool deadline also applies. |
+| Name         | Type                  | Presence | Meaning                                                                                                           |
+| ------------ | --------------------- | -------- | ----------------------------------------------------------------------------------------------------------------- |
+| `deadlineMs` | `number \| undefined` | Optional | Deadline of each shell command, default 120000 (2 minutes). toolExecution.deadlineMs still bounds the whole call. |
 
 ## Signature
 

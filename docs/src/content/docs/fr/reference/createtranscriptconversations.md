@@ -13,7 +13,7 @@ import { createTranscriptConversations } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Crée un ConversationStore natif pour une CLI qui conserve un transcript JSONL par conversation, décrite par un TranscriptConversationLayout. locate cherche dans le home de l’hôte, capture retrouve le transcript dans la sandbox avec find et restore le téléverse ; les deux réécrivent les cwd enregistrés égaux au workspace d’origine. À utiliser pour un harness CLI externe ; les stores intégrés de Claude et Codex en sont construits.
+Crée un NativeConversationStore pour une CLI qui écrit un transcript JSONL par conversation, décrite par layout. capture retrouve le fichier dans la sandbox avec find et le copie sur l’hôte, restore le téléverse, et tous deux réécrivent les cwd enregistrés pour la destination. Un transcript introuvable échoue avec le code session ; les stores Claude et Codex en sont construits.
 
 [Exemple complet et règles détaillées](../../guide/conversation-formats/).
 

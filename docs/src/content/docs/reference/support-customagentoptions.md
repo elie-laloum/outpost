@@ -7,10 +7,10 @@ sidebar:
 
 ## Parameters and properties
 
-| Name      | Type        | Presence | Meaning                                                                                                                                                                      |
-| --------- | ----------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `harness` | `Harness`   | Required | Built-in Outpost harness with its configured model provider.                                                                                                                 |
-| `model`   | `ModelSpec` | Required | Required model name or AgentModel object. The model provider validates reasoning and output limits when the agent is composed; model availability is checked by the service. |
+| Name      | Type        | Presence | Meaning                                                                                                                                                                          |
+| --------- | ----------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `harness` | `Harness`   | Required | Built-in Outpost harness with its configured model provider.                                                                                                                     |
+| `model`   | `ModelSpec` | Required | Model name or { name, reasoning, maxOutputTokens }. The model provider rejects unsupported reasoning or output limits here; the service checks the model name when it is called. |
 
 ## Signature
 

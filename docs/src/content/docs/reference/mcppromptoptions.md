@@ -13,11 +13,11 @@ import type { McpPromptOptions } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name        | Type                                            | Presence | Meaning                                                                 |
-| ----------- | ----------------------------------------------- | -------- | ----------------------------------------------------------------------- |
-| `server`    | `string`                                        | Required | Name of an MCP server declared on the same harness that offers prompts. |
-| `name`      | `string`                                        | Required | Prompt name as listed by the server.                                    |
-| `arguments` | `Readonly<Record<string, string>> \| undefined` | Optional | String arguments of the prompt; values are passed as given.             |
+| Name        | Type                                            | Presence | Meaning                                                                   |
+| ----------- | ----------------------------------------------- | -------- | ------------------------------------------------------------------------- |
+| `server`    | `string`                                        | Required | Name of an MCP server declared on the same harness that offers prompts.   |
+| `name`      | `string`                                        | Required | Prompt name as listed by the server.                                      |
+| `arguments` | `Readonly<Record<string, string>> \| undefined` | Optional | String arguments of the prompt, default none; values are passed as given. |
 
 ## Signature
 

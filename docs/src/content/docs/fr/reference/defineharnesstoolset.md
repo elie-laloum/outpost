@@ -19,11 +19,11 @@ Regroupe des outils et des jeux imbriqués sous un nom pour les réutiliser entr
 
 ## Paramètres et propriétés
 
-| Nom             | Type                                                  | Présence | Rôle                                                                  |
-| --------------- | ----------------------------------------------------- | -------- | --------------------------------------------------------------------- |
-| `options`       | `HarnessToolsetOptions`                               | Requis   | Nom du jeu d’outils et outils ou jeux imbriqués qu’il regroupe.       |
-| `options.name`  | `string`                                              | Requis   | Nom non vide qui identifie le jeu d’outils.                           |
-| `options.tools` | `readonly (HarnessTool<unknown> \| HarnessToolset)[]` | Requis   | Outils et jeux imbriqués à regrouper ; les noms doivent être uniques. |
+| Nom             | Type                                                  | Présence | Rôle                                                                                                           |
+| --------------- | ----------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------- |
+| `options`       | `HarnessToolsetOptions`                               | Requis   | Nom du jeu d’outils et outils ou jeux imbriqués qu’il regroupe.                                                |
+| `options.name`  | `string`                                              | Requis   | Nom non vide qui identifie le jeu d’outils.                                                                    |
+| `options.tools` | `readonly (HarnessTool<unknown> \| HarnessToolset)[]` | Requis   | Outils et jeux imbriqués à regrouper ; les jeux imbriqués sont aplatis et les noms d’outils en double refusés. |
 
 ## Retour
 

@@ -13,20 +13,20 @@ import { createAnthropicModelProvider } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Configure an Anthropic Messages transport with messages, tool calls, thinking replay, optional streaming and optional system-prefix and history caching. The harness supplies the model per request; the agent model must set maxOutputTokens, and reasoning maps to adaptive or disabled thinking. Cache reads and writes are normalized into usage; server tools are rejected.
+Create a reusable provider for the Anthropic Messages API, with tool calls, thinking replay, streaming and optional prompt caching. createAgent() rejects an agent model without maxOutputTokens or with reasoning minimal. Each request is sent once, with no retry.
 
 [Complete example and detailed rules](../../guide/model-providers/).
 
 ## Parameters and properties
 
-| Name                       | Type                            | Presence | Meaning                                                                                                                                                            |
-| -------------------------- | ------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `options`                  | `AnthropicModelProviderOptions` | Required | Anthropic endpoint, explicit API key, bounds and optional system-prefix cache; output limits belong to the agent model.                                            |
-| `options.apiKey`           | `string`                        | Required | Explicit Anthropic API key sent in x-api-key; no CLI account or host credential discovery.                                                                         |
-| `options.baseUrl`          | `string \| undefined`           | Optional | Messages API base URL including its version prefix; defaults to https://api.anthropic.com/v1.                                                                      |
-| `options.cacheSystem`      | `boolean \| undefined`          | Optional | Opt in to an ephemeral cache breakpoint on the system text. Requests must contain system instructions; a cache hit is not guaranteed.                              |
-| `options.timeoutMs`        | `number \| undefined`           | Optional | Positive deadline in milliseconds; defaults to 120000 and cannot exceed 2147483647. It covers the whole request, or the silence between two chunks when streaming. |
-| `options.maxResponseBytes` | `number \| undefined`           | Optional | Positive maximum response body size in bytes after HTTP decompression; defaults to 8388608 (8 MiB). Oversized responses fail.                                      |
+| Name                       | Type                            | Presence | Meaning                                                                                                                                                                      |
+| -------------------------- | ------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `options`                  | `AnthropicModelProviderOptions` | Required | API key, base URL, request bounds and system-prompt caching. Unknown options fail with code configuration.                                                                   |
+| `options.apiKey`           | `string`                        | Required | Explicit Anthropic API key sent in x-api-key; no CLI account or host credential discovery.                                                                                   |
+| `options.baseUrl`          | `string \| undefined`           | Optional | Messages API base URL including its version prefix, default https://api.anthropic.com/v1; messages is appended. Credentials, query or fragment fail with code configuration. |
+| `options.cacheSystem`      | `boolean \| undefined`          | Optional | Adds an ephemeral cache breakpoint on the system text, default false. Requests without system instructions then fail with code configuration; a cache hit is not guaranteed. |
+| `options.timeoutMs`        | `number \| undefined`           | Optional | Request deadline in milliseconds, default 120000, at most 2147483647. While streaming it restarts on each received chunk; expiry rejects with code timeout.                  |
+| `options.maxResponseBytes` | `number \| undefined`           | Optional | Maximum response body in bytes after decompression, default 8388608 (8 MiB); a streamed response counts all its chunks. A larger response fails with code response.          |
 
 ## Returns
 

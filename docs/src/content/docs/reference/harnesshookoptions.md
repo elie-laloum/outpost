@@ -13,11 +13,11 @@ import type { HarnessHookOptions } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name   | Type                                                                                                | Presence | Meaning                                                                                                  |
-| ------ | --------------------------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------- |
-| `on`   | `Phase`                                                                                             | Required | Loop point where the hook runs.                                                                          |
-| `name` | `string \| undefined`                                                                               | Optional | Optional name for diagnostics; defaults to the phase.                                                    |
-| `run`  | `(input: HarnessHookInput<Phase>) => HarnessHookResult<Phase> \| Promise<HarnessHookResult<Phase>>` | Required | Control function for this phase. Hooks of a phase run in declaration order; an exception fails the turn. |
+| Name   | Type                                                                                                | Presence | Meaning                                                                                                                                                            |
+| ------ | --------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `on`   | `Phase`                                                                                             | Required | Loop point where the hook runs.                                                                                                                                    |
+| `name` | `string \| undefined`                                                                               | Optional | Name for diagnostics, default the phase name.                                                                                                                      |
+| `run`  | `(input: HarnessHookInput<Phase>) => HarnessHookResult<Phase> \| Promise<HarnessHookResult<Phase>>` | Required | Control function for this phase. Hooks of a phase run in declaration order; an exception fails the turn, and an invalid decision fails it with code configuration. |
 
 ## Signature
 

@@ -13,9 +13,9 @@ import type { FallbackAgentOptions } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name | Type                         | Presence | Meaning                                                                                                                                        |
-| ---- | ---------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `on` | `readonly FallbackTrigger[]` | Required | Failure categories that move to the next candidate: quota, unavailable or both, without repetition. Required so the policy is always explicit. |
+| Name | Type                         | Presence | Meaning                                                                                                                                                         |
+| ---- | ---------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `on` | `readonly FallbackTrigger[]` | Required | Failure categories that move to the next candidate: quota, unavailable or both, with no default. An empty, repeated or unknown entry throws code configuration. |
 
 ## Signature
 

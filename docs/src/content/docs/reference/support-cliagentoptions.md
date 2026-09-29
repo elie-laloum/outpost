@@ -7,10 +7,10 @@ sidebar:
 
 ## Parameters and properties
 
-| Name      | Type                     | Presence | Meaning                                                                                                                                                                                                               |
-| --------- | ------------------------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `harness` | `CliHarness`             | Required | CLI execution preset to bind to the selected model.                                                                                                                                                                   |
-| `model`   | `ModelSpec \| undefined` | Optional | Model name, or an AgentModel object with optional reasoning and output limit. The executing harness or provider validates supported values when the agent is composed. Omission selects the native CLI default model. |
+| Name      | Type                     | Presence | Meaning                                                                                                                                                                                                                                     |
+| --------- | ------------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `harness` | `CliHarness`             | Required | CLI preset, such as createCodexHarness(), bound to model when the agent is created.                                                                                                                                                         |
+| `model`   | `ModelSpec \| undefined` | Optional | Model name or { name, reasoning, maxOutputTokens }; the preset rejects unsupported reasoning or maxOutputTokens here. Omitted, the CLI uses its default model, except that Kimi usage authentication and a Codex modelProvider require one. |
 
 ## Signature
 

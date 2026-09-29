@@ -13,7 +13,7 @@ import { agentVersions } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Expose the Claude Code, Codex, Antigravity, Copilot and Kimi CLI versions pinned for generated images and remote bootstrap and used as compatibility references by doctor and bundled protocol fixtures. Antigravity archives are verified against SHA-512 digests recorded in Outpost. These values do not query the installed binaries or prove live account access.
+Pinned CLI version of each built-in agent, keyed by agent name. Generated images and remote bootstrap install these versions, and doctor reports them as the reference; reading them does not query the installed binaries.
 
 [Complete example and detailed rules](../../guide/agent-images/).
 
@@ -21,8 +21,8 @@ Expose the Claude Code, Codex, Antigravity, Copilot and Kimi CLI versions pinned
 
 | Name          | Type     | Presence | Meaning                                                                                                                                                    |
 | ------------- | -------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `codex`       | `string` | Required | Codex CLI version used by the bundled compatibility fixtures.                                                                                              |
-| `claude`      | `string` | Required | Claude Code version used by the bundled compatibility fixtures.                                                                                            |
+| `codex`       | `string` | Required | Codex CLI version installed by generated images and remote bootstrap.                                                                                      |
+| `claude`      | `string` | Required | Claude Code version installed by generated images and remote bootstrap.                                                                                    |
 | `antigravity` | `string` | Required | Antigravity CLI version installed from SHA-512-verified archives by generated images and remote bootstrap, and used as the doctor compatibility reference. |
 | `copilot`     | `string` | Required | GitHub Copilot CLI version installed by generated images and remote bootstrap.                                                                             |
 | `kimi`        | `string` | Required | Kimi Code CLI version installed by generated images and remote bootstrap.                                                                                  |

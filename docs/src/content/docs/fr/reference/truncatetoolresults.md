@@ -13,7 +13,7 @@ import { truncateToolResults } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Crée une stratégie de contexte qui raccourcit les résultats des anciens appels d’outils et laisse intacts les plus récents. Elle ne change rien tant qu’aucun ancien résultat ne dépasse la limite.
+Crée une stratégie de contexte qui coupe les anciens résultats d’outils à maxCharacters en ajoutant un marqueur de troncature, et laisse intacts les keepRecent messages de résultats d’outils les plus récents. Elle ne renvoie rien tant qu’aucun ancien résultat ne dépasse la limite.
 
 [Exemple complet et règles détaillées](../../guide/harness-context/).
 
@@ -22,8 +22,8 @@ Crée une stratégie de contexte qui raccourcit les résultats des anciens appel
 | Nom                     | Type                                      | Présence  | Rôle                                                                                                        |
 | ----------------------- | ----------------------------------------- | --------- | ----------------------------------------------------------------------------------------------------------- |
 | `options`               | `TruncateToolResultsOptions \| undefined` | Optionnel | Nombre de résultats d’outils récents conservés intacts et longueur à laquelle les plus anciens sont coupés. |
-| `options.keepRecent`    | `number \| undefined`                     | Optionnel | Nombre de messages de résultats d’outils les plus récents conservés intacts ; 4 par défaut.                 |
-| `options.maxCharacters` | `number \| undefined`                     | Optionnel | Longueur à laquelle les anciens résultats d’outils sont coupés ; 2 000 caractères par défaut.               |
+| `options.keepRecent`    | `number \| undefined`                     | Optionnel | Nombre de messages de résultats d’outils les plus récents laissés intacts, 4 par défaut.                    |
+| `options.maxCharacters` | `number \| undefined`                     | Optionnel | Longueur à laquelle les anciens résultats d’outils sont coupés, 2000 caractères par défaut.                 |
 
 ## Retour
 

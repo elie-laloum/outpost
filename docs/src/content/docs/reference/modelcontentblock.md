@@ -15,19 +15,19 @@ import type { ModelContentBlock } from "@elie-laloum/outpost";
 
 The fields below cover all variants; the signature specifies their allowed combinations.
 
-| Name       | Type                                                    | Presence          | Meaning                                                                                                                                 |
-| ---------- | ------------------------------------------------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `type`     | `"text" \| "tool-call" \| "tool-result" \| "reasoning"` | Required          | Block discriminator: text.                                                                                                              |
-| `text`     | `string \| string \| undefined`                         | Variant-dependent | Plain text of the block; empty text blocks are not sent to Anthropic.                                                                   |
-| `id`       | `string`                                                | Variant-dependent | Service-issued call identifier that the matching tool result must reference.                                                            |
-| `name`     | `string`                                                | Variant-dependent | Name of the requested tool, as declared in the request tools.                                                                           |
-| `input`    | `unknown`                                               | Variant-dependent | Parsed tool arguments. When the service returns invalid JSON, the raw string is kept so the caller can report the error to the model.   |
-| `callId`   | `string`                                                | Variant-dependent | Identifier of the tool call this result answers.                                                                                        |
-| `content`  | `string`                                                | Variant-dependent | Text returned to the model for this call.                                                                                               |
-| `isError`  | `boolean \| undefined`                                  | Variant-dependent | Mark the result as a failed tool execution so the model can recover.                                                                    |
-| `provider` | `string`                                                | Variant-dependent | Identity of the provider that produced the block; other providers never receive it.                                                     |
-| `model`    | `string`                                                | Variant-dependent | Model that produced the block; it is replayed only to the same model.                                                                   |
-| `data`     | `unknown`                                               | Variant-dependent | Opaque service payload, such as an Anthropic thinking block with its signature or an OpenAI encrypted reasoning item. Do not modify it. |
+| Name       | Type                                                    | Presence          | Meaning                                                                                                                                                  |
+| ---------- | ------------------------------------------------------- | ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `type`     | `"text" \| "tool-call" \| "tool-result" \| "reasoning"` | Required          | Block discriminator: text.                                                                                                                               |
+| `text`     | `string \| string \| undefined`                         | Variant-dependent | Plain text of the block; empty text blocks are not sent to Anthropic.                                                                                    |
+| `id`       | `string`                                                | Variant-dependent | Service-issued call identifier that the matching tool result must reference.                                                                             |
+| `name`     | `string`                                                | Variant-dependent | Name of the requested tool, as declared in the request tools.                                                                                            |
+| `input`    | `unknown`                                               | Variant-dependent | Parsed tool arguments. When the service returns invalid JSON, the raw string is kept so the caller can report the error to the model.                    |
+| `callId`   | `string`                                                | Variant-dependent | Identifier of the tool call this result answers.                                                                                                         |
+| `content`  | `string`                                                | Variant-dependent | Text returned to the model for this call.                                                                                                                |
+| `isError`  | `boolean \| undefined`                                  | Variant-dependent | Marks the result as a failed tool execution. Only Anthropic transmits it, as is_error; OpenAI protocols send the content alone.                          |
+| `provider` | `string`                                                | Variant-dependent | Identity of the provider that produced the block; other providers never receive it.                                                                      |
+| `model`    | `string`                                                | Variant-dependent | Model that produced the block; it is replayed only to the same model.                                                                                    |
+| `data`     | `unknown`                                               | Variant-dependent | Opaque service payload: an Anthropic thinking or redacted_thinking block with its signature, or an OpenAI Responses reasoning item. Replay it unchanged. |
 
 ## Signature
 

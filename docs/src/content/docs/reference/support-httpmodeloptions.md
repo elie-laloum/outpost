@@ -7,12 +7,12 @@ sidebar:
 
 ## Parameters and properties
 
-| Name               | Type                  | Presence | Meaning                                                                                                                                                            |
-| ------------------ | --------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `baseUrl`          | `string`              | Required | Absolute HTTP(S) API base URL, including any /v1 prefix; excludes credentials, query and fragment. The selected protocol path is appended.                         |
-| `apiKey`           | `string \| false`     | Required | Explicit bearer API key, or false for an unauthenticated endpoint. No environment variable or account login is read automatically.                                 |
-| `timeoutMs`        | `number \| undefined` | Optional | Positive deadline in milliseconds; defaults to 120000 and cannot exceed 2147483647. It covers the whole request, or the silence between two chunks when streaming. |
-| `maxResponseBytes` | `number \| undefined` | Optional | Positive maximum response body size in bytes after HTTP decompression; defaults to 8388608 (8 MiB). Oversized responses fail.                                      |
+| Name               | Type                  | Presence | Meaning                                                                                                                                                                                                                       |
+| ------------------ | --------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `baseUrl`          | `string`              | Required | Absolute HTTP(S) base URL including its version prefix, such as https://api.openai.com/v1; chat/completions or responses is appended. Credentials, query or fragment fail with code configuration, and redirects are refused. |
+| `apiKey`           | `string \| false`     | Required | Explicit bearer API key, or false for an unauthenticated endpoint. No environment variable or account login is read automatically.                                                                                            |
+| `timeoutMs`        | `number \| undefined` | Optional | Request deadline in milliseconds, default 120000, at most 2147483647. While streaming it restarts on each received chunk; expiry rejects with code timeout.                                                                   |
+| `maxResponseBytes` | `number \| undefined` | Optional | Maximum response body in bytes after decompression, default 8388608 (8 MiB); a streamed response counts all its chunks. A larger response fails with code response.                                                           |
 
 ## Signature
 

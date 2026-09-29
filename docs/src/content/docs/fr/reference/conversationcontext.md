@@ -13,14 +13,14 @@ import type { ConversationContext } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom          | Type                                       | Présence  | Rôle                                                                                             |
-| ------------ | ------------------------------------------ | --------- | ------------------------------------------------------------------------------------------------ |
-| `repository` | `string`                                   | Requis    | Checkout Git hôte ciblé.                                                                         |
-| `sandbox`    | `SandboxLease`                             | Requis    | Bail d’exécution utilisé pour transférer les transcripts vers ou depuis le home de l’agent.      |
-| `staging`    | `string`                                   | Requis    | Dossier hôte recevant les transcripts capturés ou préparés.                                      |
-| `home`       | `string \| undefined`                      | Optionnel | Home d’agent hôte utilisé pour localiser ou persister les transcripts natifs.                    |
-| `local`      | `boolean \| undefined`                     | Optionnel | Utilise l’accès local hôte aux transcripts au lieu d’un transfert par le bail de sandbox.        |
-| `warn`       | `((message: string) => void) \| undefined` | Optionnel | Callback recevant les avertissements non bloquants d’exécution ou de stockage des conversations. |
+| Nom          | Type                                       | Présence  | Rôle                                                                                                                                                                                                                                                           |
+| ------------ | ------------------------------------------ | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `repository` | `string`                                   | Requis    | Dépôt hôte de la tâche ; la capture réécrit les cwd enregistrés vers ce chemin.                                                                                                                                                                                |
+| `sandbox`    | `SandboxLease`                             | Requis    | Bail d’exécution utilisé pour transférer les transcripts vers ou depuis le home de l’agent.                                                                                                                                                                    |
+| `staging`    | `string`                                   | Requis    | Dossier hôte de travail pour les fichiers en transit ; les copies temporaires sont supprimées après chaque transfert.                                                                                                                                          |
+| `home`       | `string \| undefined`                      | Optionnel | Racine sur l’hôte des conversations capturées, issue de l’option conversationHome. Par défaut, le home de l’utilisateur pour les stores de transcripts et le dépôt pour les stores de bundles de session.                                                      |
+| `local`      | `boolean \| undefined`                     | Optionnel | Vaut true quand la sandbox s’exécute sur l’hôte. Les stores de transcripts lisent alors le transcript sur le disque au lieu de lancer find, et ignorent une restauration dans le checkout d’origine sauf si l’enregistrement porte une référence de transport. |
+| `warn`       | `((message: string) => void) \| undefined` | Optionnel | Reçoit les avertissements non bloquants, par exemple un transcript enfant qui n’a pas pu être capturé.                                                                                                                                                         |
 
 ## Signature
 

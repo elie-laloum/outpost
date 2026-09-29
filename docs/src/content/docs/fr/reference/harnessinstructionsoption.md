@@ -15,10 +15,10 @@ import type { HarnessInstructionsOption } from "@elie-laloum/outpost";
 
 Les champs ci-dessous couvrent toutes les variantes ; la signature précise leurs combinaisons autorisées.
 
-| Nom       | Type                                                      | Présence          | Rôle                                                                  |
-| --------- | --------------------------------------------------------- | ----------------- | --------------------------------------------------------------------- |
-| `kind`    | `"instructions"`                                          | Selon la variante | Discriminant de la définition : instructions.                         |
-| `resolve` | `(context: HarnessInstructionContext) => Promise<string>` | Selon la variante | Produit le texte d’instructions d’une passe à partir de son contexte. |
+| Nom       | Type                                                      | Présence          | Rôle                                                                |
+| --------- | --------------------------------------------------------- | ----------------- | ------------------------------------------------------------------- |
+| `kind`    | `"instructions"`                                          | Selon la variante | Discriminant de la définition : instructions.                       |
+| `resolve` | `(context: HarnessInstructionContext) => Promise<string>` | Selon la variante | Produit le texte d’instructions d’un tour à partir de son contexte. |
 
 ## Signature
 
