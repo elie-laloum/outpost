@@ -446,6 +446,39 @@ export type {
   TriggerJobInput,
 } from "./domain/trigger-job.types.ts";
 export { runSchedules } from "./application/schedules.ts";
+export { serveTriggers } from "./infrastructure/trigger-server.ts";
+export type {
+  TriggerFailure,
+  TriggerRoute,
+  TriggerServer,
+  TriggerServerOptions,
+} from "./infrastructure/trigger-server.types.ts";
+export type {
+  TriggerEvent,
+  TriggerHttpRequest,
+  TriggerOutcome,
+  TriggerReply,
+  TriggerSecret,
+  TriggerSource,
+} from "./domain/trigger.types.ts";
+export { githubWebhook } from "./adapters/triggers/github-webhook.ts";
+export { gitlabWebhook } from "./adapters/triggers/gitlab-webhook.ts";
+export { slackRequest } from "./adapters/triggers/slack-request.ts";
+export { standardWebhook } from "./adapters/triggers/standard-webhook.ts";
+export {
+  commandIssued,
+  labelAdded,
+} from "./adapters/triggers/trigger-events.ts";
+export type {
+  GithubWebhookOptions,
+  GitlabSigningOptions,
+  GitlabTokenOptions,
+  GitlabWebhookOptions,
+  SlackRequestOptions,
+  StandardWebhookOptions,
+  TriggerCommand,
+  TriggerLabel,
+} from "./adapters/triggers/triggers.types.ts";
 export type {
   RunSchedulesOptions,
   ScheduleFailure,

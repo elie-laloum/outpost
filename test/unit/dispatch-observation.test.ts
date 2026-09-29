@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { observeDispatch } from "../../src/application/dispatch-observation.ts";
+import { createObservationHub } from "../../src/index.ts";
 import type { DispatchTelemetryOutcome } from "../../src/index.ts";
 
 test("failure usage replaces streamed totals with authoritative summaries across repeated pass numbers", async () => {
@@ -63,7 +64,6 @@ test(
   "an unresponsive journal cannot block dispatch completion",
   { timeout: 1000 },
   async () => {
-    const { createObservationHub } = await import("../../src/index.ts");
     const result = await observeDispatch(
       {
         brief: { text: "test" },
