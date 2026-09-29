@@ -13,11 +13,11 @@ import type { TriggerJob } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom       | Type                        | Présence  | Rôle                                                                                                                     |
-| --------- | --------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `handler` | `string`                    | Requis    | Handler enregistré du worker de file, généralement un defineWorkflowJob().                                               |
-| `runId`   | `string`                    | Requis    | Exécution de checkpoint, de 1 à 256 caractères ; les événements d’une même exécution convergent vers un seul checkpoint. |
-| `input`   | `WorkflowJson \| undefined` | Optionnel | Entrée JSON sans perte pour le workflow ; null par défaut.                                                               |
+| Nom       | Type                        | Présence  | Rôle                                                                                                                                                                  |
+| --------- | --------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `handler` | `string`                    | Requis    | Handler enregistré du worker de file, généralement un defineWorkflowJob().                                                                                            |
+| `runId`   | `string`                    | Requis    | Exécution de checkpoint, de 1 à 256 caractères et non vide. Les jobs de même runId et de même entrée partagent un checkpoint ; une autre entrée le rend incompatible. |
+| `input`   | `WorkflowJson \| undefined` | Optionnel | Entrée JSON sans perte pour le workflow ; null par défaut.                                                                                                            |
 
 ## Signature
 

@@ -19,12 +19,12 @@ Create a trigger source for senders that follow the Standard Webhooks scheme. It
 
 ## Parameters and properties
 
-| Name                  | Type                     | Presence | Meaning                                                                                                                                                                                            |
-| --------------------- | ------------------------ | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `options`             | `StandardWebhookOptions` | Required | Signing secret, timestamp window and source name.                                                                                                                                                  |
-| `options.secret`      | `TriggerSecret`          | Required | whsec_ secret verifying webhook-signature. Secret, or callback returning every currently accepted secret; return old and new values during a rotation. An empty or failing source denies requests. |
-| `options.toleranceMs` | `number \| undefined`    | Optional | Accepted clock difference for the request timestamp, in milliseconds; defaults to 300000 (5 minutes).                                                                                              |
-| `options.source`      | `string \| undefined`    | Optional | Name reported in TriggerEvent.source; defaults to standard.                                                                                                                                        |
+| Name                  | Type                     | Presence | Meaning                                                                                                                                                                                                                                                                   |
+| --------------------- | ------------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `options`             | `StandardWebhookOptions` | Required | Signing secret, timestamp window and source name.                                                                                                                                                                                                                         |
+| `options.secret`      | `TriggerSecret`          | Required | whsec_ secret verifying webhook-signature, or a callback returning every currently accepted secret (old and new during a rotation). An empty string throws at creation; a callback that fails or returns nothing, or a secret without the whsec_ prefix, denies requests. |
+| `options.toleranceMs` | `number \| undefined`    | Optional | Accepted clock difference for the request timestamp, in milliseconds; defaults to 300000 (5 minutes). A value that is not a positive integer throws at creation.                                                                                                          |
+| `options.source`      | `string \| undefined`    | Optional | Name reported in TriggerEvent.source; defaults to standard.                                                                                                                                                                                                               |
 
 ## Returns
 

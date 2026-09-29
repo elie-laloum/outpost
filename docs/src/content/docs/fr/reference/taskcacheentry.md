@@ -21,7 +21,7 @@ import type { TaskCacheEntry } from "@elie-laloum/outpost";
 | `task`        | `string`                  | Requis   | Clé de la tâche dont l’entrée contient le résultat.                                                                                                                     |
 | `version`     | `string`                  | Requis   | Version du cache déclarée par la tâche lors de l’enregistrement de l’entrée.                                                                                            |
 | `createdAt`   | `string`                  | Requis   | Horodatage ISO de l’enregistrement du résultat ; comparé à maxAgeMs.                                                                                                    |
-| `value`       | `WorkflowCheckpointValue` | Requis   | Résultat de tâche enregistré : JSON sans perte ou undefined au premier niveau.                                                                                          |
+| `value`       | `WorkflowCheckpointValue` | Requis   | Résultat encodé : { kind: "json", value } pour une valeur JSON sans perte, ou { kind: "undefined" }.                                                                    |
 
 ## Signature
 

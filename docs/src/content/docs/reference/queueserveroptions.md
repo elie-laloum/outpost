@@ -13,12 +13,12 @@ import type { QueueServerOptions } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name    | Type                                                                | Presence | Meaning                                                                                                                                                                   |
-| ------- | ------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `queue` | `TaskQueue`                                                         | Required | Task queue used to enqueue, claim and persist job state.                                                                                                                  |
-| `token` | `string \| (() => readonly string[] \| Promise<readonly string[]>)` | Required | Fixed bearer token or callback returning the currently accepted tokens on every request. Overlap old and new tokens during rotation; empty or failed sources deny access. |
-| `host`  | `string \| undefined`                                               | Optional | HTTP bind address; defaults to loopback for local-only access.                                                                                                            |
-| `port`  | `number \| undefined`                                               | Optional | TCP port for the queue HTTP server; zero lets the operating system choose an available port.                                                                              |
+| Name    | Type                                                                | Presence | Meaning                                                                                                                                                                                                                                              |
+| ------- | ------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `queue` | `TaskQueue`                                                         | Required | Queue served over HTTP; closing the server leaves it open.                                                                                                                                                                                           |
+| `token` | `string \| (() => readonly string[] \| Promise<readonly string[]>)` | Required | Accepted bearer token of 32 to 512 non-whitespace characters, or a function returning the accepted tokens, called on every request. Return the old and new tokens together during a rotation; an empty list or a thrown error rejects every request. |
+| `host`  | `string \| undefined`                                               | Optional | Bind address, default 127.0.0.1.                                                                                                                                                                                                                     |
+| `port`  | `number \| undefined`                                               | Optional | TCP port, default 0: the system picks a free port, shown in url.                                                                                                                                                                                     |
 
 ## Signature
 

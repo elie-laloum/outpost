@@ -13,10 +13,10 @@ import type { ArtifactStore } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name  | Type                                                                     | Presence | Meaning                                                                                         |
-| ----- | ------------------------------------------------------------------------ | -------- | ----------------------------------------------------------------------------------------------- |
-| `put` | `(id: string, bytes: Uint8Array, signal?: AbortSignal) => Promise<void>` | Required | Publish bytes atomically under an ID; reject conflicting bytes for an existing ID.              |
-| `get` | `(id: string, signal?: AbortSignal) => Promise<Uint8Array>`              | Required | Read bounded artifact bytes by ID; reject a missing object. Integrity is checked by the caller. |
+| Name  | Type                                                                     | Presence | Meaning                                                                                                                    |
+| ----- | ------------------------------------------------------------------------ | -------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `put` | `(id: string, bytes: Uint8Array, signal?: AbortSignal) => Promise<void>` | Required | Store bytes under an id atomically. Accepts identical bytes for an existing id and rejects different ones.                 |
+| `get` | `(id: string, signal?: AbortSignal) => Promise<Uint8Array>`              | Required | Return the bytes stored under an id; rejects a missing id. The store does not verify integrity: readStoredArtifact() does. |
 
 ## Signature
 

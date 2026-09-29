@@ -13,11 +13,11 @@ import type { JsonArtifactOptions } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom       | Type                                                            | Présence | Rôle                                                                                                                                |
-| --------- | --------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `name`    | `string`                                                        | Requis   | Nom non vide du contrat d’artefact, de 1024 caractères au maximum.                                                                  |
-| `version` | `string`                                                        | Requis   | Version de contrat non vide définie par l’appelant, de 1024 caractères au maximum ; les lectures exigent une correspondance exacte. |
-| `schema`  | `StandardValidator<T> \| ((input: unknown) => T \| Promise<T>)` | Requis   | Validateur de frontière qui précise une entrée inconnue.                                                                            |
+| Nom       | Type                                                            | Présence | Rôle                                                                                                                                                                                                       |
+| --------- | --------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`    | `string`                                                        | Requis   | Nom du contrat, non vide et de 1024 caractères au maximum. Une lecture exige le même nom.                                                                                                                  |
+| `version` | `string`                                                        | Requis   | Version du contrat que vous choisissez, non vide et de 1024 caractères au maximum. Une lecture exige la même version : changez-la quand le format change.                                                  |
+| `schema`  | `StandardValidator<T> \| ((input: unknown) => T \| Promise<T>)` | Requis   | Validateur Standard Schema (Zod, Valibot…) ou fonction qui renvoie la valeur contrôlée ou lève une erreur. S’applique avant l’encodage et après le décodage ; sa sortie est la valeur stockée et renvoyée. |
 
 ## Signature
 

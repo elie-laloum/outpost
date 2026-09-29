@@ -17,17 +17,17 @@ import { checkSpeculationIntegration } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Resolve a candidate ref and use Git merge-tree to check it against the current host commit without modifying the index or worktree. Return conflict paths or a blocking reason, and pin both inspected commits. Rerun immediately before an explicit integration if either ref or host files change.
+Test with git merge-tree whether a candidate branch merges into the host checkout's HEAD, without changing its files or index. Returns clean or conflict with the exact commits tested, or blocked when the checkout is dirty or detached, the branch moved or Git fails. It never merges.
 
 [Complete example and detailed rules](../../guide/speculation/).
 
 ## Parameters and properties
 
-| Name             | Type                  | Presence | Meaning                                                                                         |
-| ---------------- | --------------------- | -------- | ----------------------------------------------------------------------------------------------- |
-| `repository`     | `string`              | Required | Host Git checkout to inspect without changing its index or working files.                       |
-| `branch`         | `string`              | Required | Candidate ref to resolve to a commit and test against the current host HEAD.                    |
-| `expectedCommit` | `string \| undefined` | Optional | Optional validated candidate commit; block the preflight if the ref has moved since validation. |
+| Name             | Type                  | Presence | Meaning                                                                                                     |
+| ---------------- | --------------------- | -------- | ----------------------------------------------------------------------------------------------------------- |
+| `repository`     | `string`              | Required | Host Git checkout to test; it must be clean and on a branch.                                                |
+| `branch`         | `string`              | Required | Candidate branch or ref, resolved to a commit and tested against the checkout's HEAD.                       |
+| `expectedCommit` | `string \| undefined` | Optional | Commit validated earlier, usually winner.commit; the check is blocked if the branch no longer points to it. |
 
 ## Returns
 

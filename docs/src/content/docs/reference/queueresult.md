@@ -13,12 +13,12 @@ import type { QueueResult } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name    | Type                      | Presence | Meaning                                                                                                                |
-| ------- | ------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `value` | `WorkflowJson`            | Required | Lossless JSON output produced by the worker handler.                                                                   |
-| `usage` | `Usage \| undefined`      | Optional | Reported usage counters; not a currency estimate.                                                                      |
-| `error` | `string \| undefined`     | Optional | Worker failure message; when present, completion records the job as failed.                                            |
-| `quota` | `QueueQuota \| undefined` | Optional | Usage or rate limit that failed the handler, with its reset time and captured conversation when known; requires error. |
+| Name    | Type                      | Presence | Meaning                                                                                                                    |
+| ------- | ------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `value` | `WorkflowJson`            | Required | JSON value produced by the handler, at most 262144 bytes serialized; runQueueWorker() stores null when the handler throws. |
+| `usage` | `Usage \| undefined`      | Optional | Token counters (input, output, cached, cacheCreated) that defineQueuedTask() adds to the workflow’s usage.                 |
+| `error` | `string \| undefined`     | Optional | Failure message, at most 512 characters; its presence marks the job failed. runQueueWorker() fills it from a thrown error. |
+| `quota` | `QueueQuota \| undefined` | Optional | Usage or rate limit that failed the handler, with its reset time and captured conversation when known; requires error.     |
 
 ## Signature
 

@@ -16,8 +16,8 @@ import type { QueueHandlerContext } from "@elie-laloum/outpost";
 | Nom              | Type          | Présence | Rôle                                                                                                                                                                                                                          |
 | ---------------- | ------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `idempotencyKey` | `string`      | Requis   | Clé d’effet stable de ce job logique : l’idempotencyKey de la requête si elle est définie, sinon l’identifiant du job partagé par chaque bail et reprise. Utilisez-la pour une déduplication persistante des effets externes. |
-| `signal`         | `AbortSignal` | Requis   | Annulation coopérative de cette opération.                                                                                                                                                                                    |
-| `job`            | `QueueJob`    | Requis   | Travail persisté pris en charge, comprenant son entrée et sa génération de bail.                                                                                                                                              |
+| `signal`         | `AbortSignal` | Requis   | S’interrompt quand le worker s’arrête ou qu’un renouvellement de bail échoue, par exemple après une annulation, une deadline dépassée ou un bail perdu. Transmettez-le à chaque opération lancée par le handler.              |
+| `job`            | `QueueJob`    | Requis   | Job tel que pris en charge, avec sa requête et son fence courant.                                                                                                                                                             |
 
 ## Signature
 

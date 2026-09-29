@@ -15,10 +15,10 @@ import type { WorkflowCheckpointValue } from "@elie-laloum/outpost";
 
 The fields below cover all variants; the signature specifies their allowed combinations.
 
-| Name    | Type                    | Presence          | Meaning                                                                    |
-| ------- | ----------------------- | ----------------- | -------------------------------------------------------------------------- |
-| `kind`  | `"undefined" \| "json"` | Required          | Distinguishes an undefined task output from a lossless JSON value.         |
-| `value` | `WorkflowJson`          | Variant-dependent | Lossless JSON representation of a completed task output when kind is json. |
+| Name    | Type                    | Presence          | Meaning                                                                                                                              |
+| ------- | ----------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `kind`  | `"undefined" \| "json"` | Required          | undefined when the task returned undefined, json otherwise.                                                                          |
+| `value` | `WorkflowJson`          | Variant-dependent | Task output as lossless JSON: plain objects, dense arrays, strings, booleans, null and finite numbers other than -0, with no cycles. |
 
 ## Signature
 

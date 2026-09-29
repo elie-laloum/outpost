@@ -13,9 +13,9 @@ import type { WorkflowDecisionVerifier } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name       | Type               | Presence | Meaning                                                                                                                     |
-| ---------- | ------------------ | -------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `decision` | `WorkflowDecision` | Required | Complete decision and proof to authenticate; reject invalid signatures, identity bindings, revoked keys and expired proofs. |
+| Name       | Type               | Presence | Meaning                                                                                                                                                            |
+| ---------- | ------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `decision` | `WorkflowDecision` | Required | Decision to authenticate, including its proof. Throw when the signature, key, actor binding or expiry is invalid; start() then applies no decision from the batch. |
 
 ## Returns
 

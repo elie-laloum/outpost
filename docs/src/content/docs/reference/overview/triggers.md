@@ -1,32 +1,55 @@
 ---
 title: "Triggers — Overview"
-description: "Triggers turn cron slots and verified webhooks into queue jobs that run checkpointed workflows."
+description: "Turn cron slots and verified webhooks into deterministic queue jobs that run checkpointed workflows."
 sidebar:
   label: Overview
   order: 0
 ---
 
-Triggers start workflows from time or from outside events without running them inside the timer or HTTP request that fires them. Every trigger publishes a queue job carrying a `runId` and a JSON input; a queue worker then runs the workflow with a checkpoint.
+## Choose a trigger source
 
-## How it works
+A schedule publishes from a local timer. A webhook source verifies each request before parsing its body and answers 401 on any failure, including a missing or unusable secret.
 
-`createCronSchedule` describes wall-clock slots in an IANA time zone, and `runSchedules` publishes one job per slot. `serveTriggers` receives webhooks: each route verifies requests with a source (`createGithubWebhook`, `createGitlabWebhook`, `createSlackSource` or `createStandardWebhook`) and maps the normalized `TriggerEvent` to a `TriggerJob`. `labelAdded` and `commandIssued` read common GitHub, GitLab and Slack payloads. On the worker side, `defineWorkflowJob` turns each job into a checkpointed workflow run.
+| Source                                       | Verifies                                                                  | Job id                                                       | `actor`             |
+| -------------------------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------ | ------------------- |
+| `runSchedules()` with `createCronSchedule()` | Nothing: slots come from the cron expression and time zone                | `schedule:<name>:<slot ISO time>`                            | None                |
+| `createGithubWebhook()`                      | `X-Hub-Signature-256` over the body, no timestamp                         | `trigger:<path>:<X-GitHub-Delivery>`                         | `github:<login>`    |
+| `createGitlabWebhook()`                      | `webhook-signature` with `signingToken`, or `X-Gitlab-Token` with `token` | `trigger:<path>:<webhook-id, Idempotency-Key or event UUID>` | `gitlab:<username>` |
+| `createSlackSource()`                        | `X-Slack-Signature` over timestamp and body, within `toleranceMs`         | `trigger:<path>:<trigger_id>`                                | `slack:<user id>`   |
+| `createStandardWebhook()`                    | Standard Webhooks `webhook-signature` over id, timestamp and body         | `trigger:<path>:<webhook-id>`                                | None                |
 
-Job identifiers derive from the schedule slot or the delivery, so replicas, restarts and redeliveries converge on one job. Several events for the same `runId` share one checkpoint, and completed tasks are restored rather than executed again.
+:::caution
+`actor` is the identity the verified sender reports, not an Outpost gate actor. Check it against an allowlist in `on()` before publishing work.
+:::
 
-## Boundaries and responsibilities
+## How jobs converge
 
-A verified signature authenticates the sending integration, not the person behind the event: authorize `TriggerEvent.actor` explicitly before publishing work. Deduplication lasts as long as the queue retains the job, and external effects remain at least once. Outpost does not call GitHub, GitLab or Slack APIs, and gate approvals from these services are not provided.
+Job ids derive from the slot or the delivery, so replicas, restarts and redeliveries publish the same job. Deduplication lasts as long as the queue retains the job.
+
+| Situation                                            | Outcome                                                                     |
+| ---------------------------------------------------- | --------------------------------------------------------------------------- |
+| Several scheduler replicas reach the same slot       | One job                                                                     |
+| Scheduler starts or wakes after missed slots         | Only the latest slot within `maxLateMs` (default 60000) is published        |
+| Wall-clock time skipped by daylight saving           | No slot                                                                     |
+| Wall-clock time repeated by daylight saving          | One slot, at its first occurrence                                           |
+| Sender redelivers a delivery                         | Same job, nothing new published; the reply is repeated                      |
+| `on()` maps a known delivery to a different job      | The queue refuses it and the server answers 503                             |
+| New delivery or slot with the same `runId` and input | New job; `defineWorkflowJob()` restores completed tasks from the checkpoint |
+| Same `runId` with a different input                  | The checkpoint is incompatible and the job completes with an error          |
 
 ## Entry points
 
-- [createCronSchedule](../../createcronschedule/)
+Guide: [Webhooks](../../../guide/webhooks/) · [Cron schedules](../../../guide/cron-schedules/) · [Job queues and workers](../../../guide/job-queues/)
+
 - [runSchedules](../../runschedules/)
+- [createCronSchedule](../../createcronschedule/)
 - [serveTriggers](../../servetriggers/)
 - [createGithubWebhook](../../creategithubwebhook/)
 - [createGitlabWebhook](../../creategitlabwebhook/)
 - [createSlackSource](../../createslacksource/)
 - [createStandardWebhook](../../createstandardwebhook/)
+- [labelAdded](../../labeladded/)
+- [commandIssued](../../commandissued/)
 - [defineWorkflowJob](../../defineworkflowjob/)
-
-[Learn with the practical guide](../../../guide/webhooks/).
+- [TriggerEvent](../../triggerevent/)
+- [TriggerJob](../../triggerjob/)

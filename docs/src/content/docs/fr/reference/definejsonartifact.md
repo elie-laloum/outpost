@@ -13,18 +13,18 @@ import { defineJsonArtifact } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Déclare un contrat d’artefact JSON nommé et versionné. Le schéma valide les valeurs à l’encodage comme au décodage, et les données doivent être du JSON sans perte. Déclarer un contrat ne publie pas d’artefact.
+Déclare un contrat nommé et versionné pour une valeur JSON sans perte ; schema la valide à la publication puis à la lecture. Lève une erreur si name ou version est vide ou dépasse 1024 caractères.
 
 [Exemple complet et règles détaillées](../../guide/artifacts/).
 
 ## Paramètres et propriétés
 
-| Nom               | Type                                                            | Présence | Rôle                                                                                                                                |
-| ----------------- | --------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `options`         | `JsonArtifactOptions<T>`                                        | Requis   | Nom et version du contrat, et schéma ou fonction d’analyse appliqué à l’encodage et au décodage.                                    |
-| `options.name`    | `string`                                                        | Requis   | Nom non vide du contrat d’artefact, de 1024 caractères au maximum.                                                                  |
-| `options.version` | `string`                                                        | Requis   | Version de contrat non vide définie par l’appelant, de 1024 caractères au maximum ; les lectures exigent une correspondance exacte. |
-| `options.schema`  | `StandardValidator<T> \| ((input: unknown) => T \| Promise<T>)` | Requis   | Validateur de frontière qui précise une entrée inconnue.                                                                            |
+| Nom               | Type                                                            | Présence | Rôle                                                                                                                                                                                                       |
+| ----------------- | --------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `options`         | `JsonArtifactOptions<T>`                                        | Requis   | Nom et version du contrat, et schéma appliqué à la publication et à la lecture.                                                                                                                            |
+| `options.name`    | `string`                                                        | Requis   | Nom du contrat, non vide et de 1024 caractères au maximum. Une lecture exige le même nom.                                                                                                                  |
+| `options.version` | `string`                                                        | Requis   | Version du contrat que vous choisissez, non vide et de 1024 caractères au maximum. Une lecture exige la même version : changez-la quand le format change.                                                  |
+| `options.schema`  | `StandardValidator<T> \| ((input: unknown) => T \| Promise<T>)` | Requis   | Validateur Standard Schema (Zod, Valibot…) ou fonction qui renvoie la valeur contrôlée ou lève une erreur. S’applique avant l’encodage et après le décodage ; sa sortie est la valeur stockée et renvoyée. |
 
 ## Retour
 

@@ -26,7 +26,7 @@ En cas de succès, un `dispatch` froid intègre la branche et ferme la sandbox. 
 | Toutes les `passes` exécutées sans marqueur   | 1 passe                   | Se résout avec `completed: false`                                            |
 | Aucune sortie de l’agent pendant `idleMs`     | 10 minutes                | Rejette avec le code `timeout`                                               |
 | Processus de l’agent au-delà de `deadlineMs`  | 1 heure                   | Rejette avec le code `timeout`                                               |
-| Sortie de l’agent avec un statut non nul      | —                         | Rejette avec le code `process`, `quota` ou `unavailable`                     |
+| Sortie de l’agent avec un statut non nul      | —                         | Rejette avec le code `process`, ou `quota` pour une limite d’usage           |
 | `signal` annulé                               | —                         | Rejette avec la raison de l’annulation                                       |
 
 :::note

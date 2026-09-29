@@ -1,38 +1,60 @@
 ---
 title: "Workflows — Vue d’ensemble"
-description: "Un workflow est un graphe de tâches typées et de dépendances déclarées."
+description: "Déclarez des tâches typées et leurs dépendances, exécutez le graphe avec relances, budgets et caches, puis lisez le résultat de chaque tâche."
 sidebar:
   label: Vue d’ensemble
   order: 0
 ---
 
-Un workflow est un graphe de tâches typées et de dépendances déclarées. Il relie opérations TypeScript ordinaires, commandes de sandbox et tâches d’agent sans imposer un modèle à chaque étape. Les dépendances expriment à la fois l’ordre et les résultats qu’une tâche peut lire.
+## Choisir une définition de tâche
 
-## Fonctionnement et philosophie
+Chaque définition renvoie une tâche que vous listez dans `defineWorkflow()` et reliez avec `after`. Rien ne s’exécute avant `start()`.
 
-`defineTask` déclare une opération ; `defineWorkflow` valide et regroupe le graphe ; `start` l’exécute. Les tâches indépendantes peuvent être concurrentes dans la limite configurée. `defineAgentTask` et `defineCommandTask` utilisent une sandbox existante ; `defineIsolatedTask` possède l’allocation de sa tentative d’agent.
+| Définition                            | Exécute à chaque tentative                                         | Sandbox                                           | Sortie                                           |
+| ------------------------------------- | ------------------------------------------------------------------ | ------------------------------------------------- | ------------------------------------------------ |
+| `defineTask(options)`                 | Votre callback `perform`                                           | Aucune, ou celle que gère votre code              | La valeur renvoyée par `perform`                 |
+| `defineCommandTask(options)`          | Une commande ; un code de sortie non nul fait échouer la tentative | La vôtre, laissée ouverte                         | `CommandResult`                                  |
+| `defineAgentTask(options)`            | `sandbox.dispatch()` avec les options de `request`                 | La vôtre, laissée ouverte                         | Résultat de dispatch avec `resume()` et `fork()` |
+| `defineIsolatedTask(options)`         | `dispatch()` avec les options de `request`                         | Allouée puis fermée par chaque tentative          | `DispatchResult` avec `resume()` et `fork()`     |
+| `defineLoopTask(options)`             | `attempt` puis `check`, jusqu’à `maxRounds` tours                  | Aucune, ou celle que gèrent vos callbacks         | La valeur de la tentative acceptée               |
+| `defineInteractiveAgentTask(options)` | Un tour d’agent, puis une question ou le JSON final                | Nouvelle à chaque tour ; le worktree est conservé | `InteractiveAgentResult`                         |
 
-`start({ onQuota })` met une tâche en pause sur une erreur de quota Outpost et la reprend après la réinitialisation, dans le processus ou lors d’un démarrage ultérieur avec le même checkpoint. Voir les [pauses sur quota](../../../guide/quota-pauses/).
+:::caution
+Un checkpoint ne stocke que des sorties JSON sans perte. Dans une exécution avec checkpoint, enveloppez `defineAgentTask()` et `defineIsolatedTask()` dans une `defineTask()` qui renvoie du JSON.
+:::
 
-`defineLoopTask` ajoute des tours essai/vérification bornés avec feedback et progression durable par phase. Consultez les [boucles de vérification](../../../guide/verification-loops/) pour les budgets, le rejeu et les sessions appartenant à l’appelant.
+## Fin d’une exécution
 
-Un `cache` de tâche restaure un résultat JSON enregistré lorsque workflow, tâche, version et clé correspondent, sans exécuter la tâche ni rejouer ses effets de bord. Consultez le [cache de tâches](../../../guide/task-cache/) pour les clés, `repositoryFingerprint`, les échecs et la confiance.
+Par défaut, `start()` exécute une tâche à la fois (`concurrency`). Il se résout dès qu’aucune tâche ne peut plus s’exécuter, même si des tâches ont échoué, et ne rejette qu’en cas d’options ou de réponses invalides, ou d’erreur de checkpoint.
 
-## Limites et responsabilités
+| Événement                                                                                           | Statut de la tâche | Statut de l’exécution                                                                                             |
+| --------------------------------------------------------------------------------------------------- | ------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| `perform` renvoie une valeur, ou son `cache` trouve une entrée (zéro tentative)                     | `done`             | `done` quand chaque tâche est `done` ou `skipped`                                                                 |
+| `condition` renvoie `false`, ou une dépendance n’est pas terminée                                   | `skipped`          | Inchangé                                                                                                          |
+| La dernière tentative de `retry` échoue (1 tentative par défaut)                                    | `failed`           | `failed` ; les autres tâches finissent `cancelled`, ou seules les dépendantes `skipped` avec `stopOnError: false` |
+| Une limite de `budget` est atteinte                                                                 | `cancelled`        | `failed` avec `WorkflowBudgetExceeded`                                                                            |
+| Erreur de quota avec `onQuota` au-delà de l’attente `maxWaitMs`, ou une gate en attente de décision | `paused`           | `paused` ; un `start()` ultérieur reprend la tâche                                                                |
+| Une tâche interactive pose une question                                                             | `waiting-input`    | `waiting-input` jusqu’à `start({ answers })`                                                                      |
+| `signal` annulé                                                                                     | `cancelled`        | `cancelled`                                                                                                       |
+| `start({ timeoutMs })` expire                                                                       | `cancelled`        | `failed` avec une `OutpostError` de code `timeout`                                                                |
 
-Les retries peuvent répéter des effets externes. Les budgets contrôlent l’admission selon les tentatives et l’usage observé, sans garantir un plafond monétaire. Les tâches parallèles nécessitent toujours une propriété indépendante des sandboxes et workspaces. Les checkpoints ajoutent la persistance ; ils ne rendent pas transactionnels les effets externes.
+:::note
+Les relances, les tours de boucle et les tentatives rejouées depuis un checkpoint répètent leurs effets de bord. Passez `context.idempotencyKey` aux services qui dédupliquent.
+:::
 
 ## Points d’entrée
 
-- [defineLoopTask](../../definelooptask/)
+Guide : [Tâches et dépendances](../../../guide/task-dependencies/) · [Concurrence, relances et délais](../../../guide/concurrency-and-retries/) · [Boucles de vérification](../../../guide/verification-loops/)
+
 - [defineTask](../../definetask/)
 - [defineWorkflow](../../defineworkflow/)
-- [TaskContext](../../taskcontext/)
-- [WorkflowResult](../../workflowresult/)
 - [defineAgentTask](../../defineagenttask/)
 - [defineCommandTask](../../definecommandtask/)
 - [defineIsolatedTask](../../defineisolatedtask/)
-
-[Passer à la pratique avec le Guide](../../../guide/task-dependencies/).
-
-`defineInteractiveAgentTask` possède un sandbox neuf par tour de dialogue et conserve son worktree et sa conversation pendant l’attente humaine. Voir les [tâches interactives](../../../guide/interactive-tasks/) pour la saisie durable, les harnesses compatibles et la récupération.
+- [defineLoopTask](../../definelooptask/)
+- [defineInteractiveAgentTask](../../defineinteractiveagenttask/)
+- [repositoryFingerprint](../../repositoryfingerprint/)
+- [WorkflowOptions](../../workflowoptions/)
+- [WorkflowResult](../../workflowresult/)
+- [TaskContext](../../taskcontext/)
+- [TaskRecord](../../taskrecord/)

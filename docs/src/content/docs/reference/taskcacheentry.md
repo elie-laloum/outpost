@@ -21,7 +21,7 @@ import type { TaskCacheEntry } from "@elie-laloum/outpost";
 | `task`        | `string`                  | Required | Key of the task whose result the entry holds.                                                                                       |
 | `version`     | `string`                  | Required | Cache version declared by the task when the entry was stored.                                                                       |
 | `createdAt`   | `string`                  | Required | ISO timestamp when the result was stored; compared with maxAgeMs.                                                                   |
-| `value`       | `WorkflowCheckpointValue` | Required | Stored task result: lossless JSON or top-level undefined.                                                                           |
+| `value`       | `WorkflowCheckpointValue` | Required | Encoded result: { kind: "json", value } for a lossless JSON value, or { kind: "undefined" }.                                        |
 
 ## Signature
 

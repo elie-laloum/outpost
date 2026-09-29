@@ -13,12 +13,12 @@ import type { WorkflowCheckpointOptions } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom       | Type                              | Présence  | Rôle                                                                                                                    |
-| --------- | --------------------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `store`   | `WorkflowCheckpointStore`         | Requis    | Adapter de persistance acquérant, lisant et écrivant les checkpoints du workflow.                                       |
-| `runId`   | `string`                          | Requis    | Identité stable d’une exécution sauvegardée.                                                                            |
-| `version` | `string`                          | Requis    | Version de graphe/implémentation fournie par l’appelant ; à changer lorsque le code des tâches ou les entrées changent. |
-| `resume`  | `"retry-incomplete" \| undefined` | Optionnel | Autorisation explicite retry-incomplete de rejouer les tâches interrompues et leurs effets possibles.                   |
+| Nom       | Type                              | Présence  | Rôle                                                                                                                                                                                                                                                   |
+| --------- | --------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `store`   | `WorkflowCheckpointStore`         | Requis    | Store qui accorde la possession exclusive de l’exécution, puis lit et écrit son checkpoint, en général createWorkflowCheckpointStore().                                                                                                                |
+| `runId`   | `string`                          | Requis    | Clé de l’exécution sauvegardée : un start() ultérieur avec le même runId la restaure. Les valeurs vides sont refusées.                                                                                                                                 |
+| `version` | `string`                          | Requis    | Votre version du code des tâches, des briefs et des entrées, incluse dans l’empreinte d’identité du checkpoint avec le nom du workflow et le graphe des tâches. Une exécution sauvegardée ne change pas de version : démarrez plutôt un nouveau runId. |
+| `resume`  | `"retry-incomplete" \| undefined` | Optionnel | Valeur retry-incomplete pour rouvrir un checkpoint contenant des tâches en échec, annulées ou interrompues et les exécuter de nouveau, avec les effets de bord déjà produits. Sans elle, start() rejette un tel checkpoint avant toute exécution.      |
 
 ## Signature
 

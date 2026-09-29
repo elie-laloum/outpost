@@ -13,11 +13,11 @@ import type { TriggerSource } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom      | Type                                                                     | Présence  | Rôle                                                                                                       |
-| -------- | ------------------------------------------------------------------------ | --------- | ---------------------------------------------------------------------------------------------------------- |
-| `name`   | `string`                                                                 | Requis    | Nom de la source indiqué dans TriggerEvent.source.                                                         |
-| `verify` | `(request: TriggerHttpRequest, now: number) => Promise<TriggerEvent>`    | Requis    | Authentifie la requête et renvoie l’événement normalisé ; lever une erreur la refuse avec 401.             |
-| `reply`  | `((outcome: TriggerOutcome, job?: string) => TriggerReply) \| undefined` | Optionnel | Remplace les réponses 202 et 204 par défaut pour les émetteurs qui attendent un autre statut, comme Slack. |
+| Nom      | Type                                                                     | Présence  | Rôle                                                                                                                                                                    |
+| -------- | ------------------------------------------------------------------------ | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`   | `string`                                                                 | Requis    | Nom de la source indiqué dans TriggerEvent.source.                                                                                                                      |
+| `verify` | `(request: TriggerHttpRequest, now: number) => Promise<TriggerEvent>`    | Requis    | Authentifie la requête et renvoie l’événement normalisé ; lever une erreur la refuse avec 401.                                                                          |
+| `reply`  | `((outcome: TriggerOutcome, job?: string) => TriggerReply) \| undefined` | Optionnel | Remplace les réponses par défaut, 202 avec l’identifiant du job en JSON ou 204 pour un événement ignoré, pour les émetteurs qui attendent un autre statut, comme Slack. |
 
 ## Signature
 

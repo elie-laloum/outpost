@@ -13,20 +13,20 @@ import { definePauseTask } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Define a checkpoint-backed pause that waits for an explicit resume or reject decision from a listed trusted actor. It uses no waiting timer and can survive process restarts; unlike defineApprovalTask, its successful decision action is resume.
+Define a gate task that holds the run once its dependencies are done until a listed actor submits resume or reject. It takes the same options and validation as defineApprovalTask(); resume makes the WorkflowDecisionRecord the gate's value.
 
 [Complete example and detailed rules](../../guide/approvals/).
 
 ## Parameters and properties
 
-| Name                     | Type                                    | Presence | Meaning                                                                                                                                   |
-| ------------------------ | --------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `options`                | `WorkflowGateOptions`                   | Required | Gate key, dependencies, pause prompt and trusted actors allowed to resume or reject.                                                      |
-| `options.authentication` | `"signed" \| undefined`                 | Optional | Require a verified proof for this approval or pause gate and persist that requirement in the graph identity.                              |
-| `options.key`            | `string`                                | Required | Stable task key identifying the node within its workflow graph.                                                                           |
-| `options.after`          | `readonly Task<unknown>[] \| undefined` | Optional | Declared task dependencies whose values may be read.                                                                                      |
-| `options.prompt`         | `string`                                | Required | Instruction explaining the approval or pause decision requested from the trusted actor.                                                   |
-| `options.actors`         | `readonly string[]`                     | Required | Nonempty, unique actor names permitted to decide the gate being created; signed authentication binds the selected actor to a trusted key. |
+| Name                     | Type                                    | Presence | Meaning                                                                                                                                                |
+| ------------------------ | --------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `options`                | `WorkflowGateOptions`                   | Required | Gate key, dependencies, prompt, actors allowed to resume or reject, and the optional signed authentication.                                            |
+| `options.authentication` | `"signed" \| undefined`                 | Optional | Set to signed to require a verified Ed25519 proof on every decision for this gate. Stored in the gate and in checkpoint identity.                      |
+| `options.key`            | `string`                                | Required | Task key of the gate, unique in the workflow and named by each decision. Letters, digits, dot, underscore and hyphen, starting with a letter or digit. |
+| `options.after`          | `readonly Task<unknown>[] \| undefined` | Optional | Tasks that must be done before the gate pauses. If one fails or is skipped, cancelled or rejected, the gate is skipped.                                |
+| `options.prompt`         | `string`                                | Required | Question put to the actors, copied into the pending request. A blank prompt throws.                                                                    |
+| `options.actors`         | `readonly string[]`                     | Required | Names allowed to decide the gate: at least one, unique and nonblank. Outpost trusts the actor your application submits unless the gate is signed.      |
 
 ## Returns
 

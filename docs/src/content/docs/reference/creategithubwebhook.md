@@ -19,10 +19,10 @@ Create a GitHub trigger source. It verifies X-Hub-Signature-256 against every cu
 
 ## Parameters and properties
 
-| Name             | Type                   | Presence | Meaning                                                                                                                                                                                                      |
-| ---------------- | ---------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `options`        | `GithubWebhookOptions` | Required | GitHub webhook secret settings.                                                                                                                                                                              |
-| `options.secret` | `TriggerSecret`        | Required | GitHub webhook secret verifying X-Hub-Signature-256. Secret, or callback returning every currently accepted secret; return old and new values during a rotation. An empty or failing source denies requests. |
+| Name             | Type                   | Presence | Meaning                                                                                                                                                                                                                                |
+| ---------------- | ---------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `options`        | `GithubWebhookOptions` | Required | GitHub webhook secret settings.                                                                                                                                                                                                        |
+| `options.secret` | `TriggerSecret`        | Required | Webhook secret verifying X-Hub-Signature-256, or a callback returning every currently accepted secret (old and new during a rotation). An empty string throws at creation; a callback that fails or returns no secret denies requests. |
 
 ## Returns
 

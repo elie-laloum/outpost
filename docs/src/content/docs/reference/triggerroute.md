@@ -13,11 +13,11 @@ import type { TriggerRoute } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name     | Type                                                                                   | Presence | Meaning                                                                                                                                     |
-| -------- | -------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `path`   | `string`                                                                               | Required | Exact request path, such as /github, unique among routes; part of each job identifier.                                                      |
-| `source` | `TriggerSource`                                                                        | Required | Source verifying and normalizing requests on this path.                                                                                     |
-| `on`     | `(event: TriggerEvent) => TriggerJob \| undefined \| Promise<TriggerJob \| undefined>` | Required | Map a verified event to a job, or return undefined to ignore it; a thrown error answers 500. Must return promptly because senders time out. |
+| Name     | Type                                                                                   | Presence | Meaning                                                                                                                                                                                                                                      |
+| -------- | -------------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `path`   | `string`                                                                               | Required | Exact request path starting with /, such as /github, of at most 128 letters, digits, dots, underscores, tildes, slashes or hyphens. Unique among routes and part of each job identifier.                                                     |
+| `source` | `TriggerSource`                                                                        | Required | Source verifying and normalizing requests on this path.                                                                                                                                                                                      |
+| `on`     | `(event: TriggerEvent) => TriggerJob \| undefined \| Promise<TriggerJob \| undefined>` | Required | Map a verified event to a job, or return undefined to ignore it (204); a thrown error or invalid job answers 500. Return promptly and deterministically: senders time out, and the queue refuses a different job for a known delivery (503). |
 
 ## Signature
 

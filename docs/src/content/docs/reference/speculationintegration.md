@@ -17,13 +17,13 @@ import type { SpeculationIntegration } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name              | Type                                 | Presence | Meaning                                                                                                                                                                                            |
-| ----------------- | ------------------------------------ | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `status`          | `"conflict" \| "clean" \| "blocked"` | Required | clean means a conflict-free merge of the recorded commits; conflict lists conflicting files; blocked reports dirty/detached or changing state and Git failures. This does not perform integration. |
-| `host`            | `SpeculativeHostSnapshot`            | Required | Host snapshot used for this preflight; rerun the check if host state changes before integration.                                                                                                   |
-| `candidateCommit` | `string \| undefined`                | Optional | Exact candidate commit tested against host.head when the preflight completes.                                                                                                                      |
-| `conflicts`       | `readonly string[]`                  | Required | Paths reported by Git merge-tree for a conflicting merge; empty for clean or blocked checks.                                                                                                       |
-| `reason`          | `string \| undefined`                | Optional | Explanation of a blocked preflight, including changed candidate refs or unavailable Git support.                                                                                                   |
+| Name              | Type                                 | Presence | Meaning                                                                                                                                                                                       |
+| ----------------- | ------------------------------------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `status`          | `"conflict" \| "clean" \| "blocked"` | Required | clean when the commits merge without conflict, conflict with the paths in conflicts, blocked with a reason. Nothing is merged.                                                                |
+| `host`            | `SpeculativeHostSnapshot`            | Required | Host snapshot taken at the start of the check; its head is the commit tested.                                                                                                                 |
+| `candidateCommit` | `string \| undefined`                | Optional | Candidate commit tested against host.head; absent when blocked.                                                                                                                               |
+| `conflicts`       | `readonly string[]`                  | Required | Conflicting paths reported by git merge-tree; empty unless status is conflict.                                                                                                                |
+| `reason`          | `string \| undefined`                | Optional | Why the check is blocked: uncommitted changes, detached HEAD, a moved branch, a repository that changed during the check, or a Git failure such as a version without merge-tree --write-tree. |
 
 ## Signature
 

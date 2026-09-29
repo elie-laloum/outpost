@@ -13,13 +13,13 @@ import type { ArtifactContract } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name       | Type                                | Presence | Meaning                                                                                          |
-| ---------- | ----------------------------------- | -------- | ------------------------------------------------------------------------------------------------ |
-| `encode`   | `(value: T) => Promise<Uint8Array>` | Required | Validate and serialize a typed value into immutable artifact bytes.                              |
-| `decode`   | `(bytes: Uint8Array) => Promise<T>` | Required | Decode stored bytes and validate them as the contract’s value type.                              |
-| `name`     | `string`                            | Required | Nonempty artifact contract name, at most 1024 characters.                                        |
-| `version`  | `string`                            | Required | Nonempty caller-defined contract version, at most 1024 characters; reads require an exact match. |
-| `encoding` | `"json" \| "binary"`                | Required | Payload representation required by the artifact contract: json or binary.                        |
+| Name       | Type                                | Presence | Meaning                                                                                                                                    |
+| ---------- | ----------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `encode`   | `(value: T) => Promise<Uint8Array>` | Required | Validate a value and return the bytes to store. Rejects a value the contract does not accept.                                              |
+| `decode`   | `(bytes: Uint8Array) => Promise<T>` | Required | Turn stored bytes back into a validated value. Rejects bytes the contract does not accept.                                                 |
+| `name`     | `string`                            | Required | Contract name, nonempty and at most 1024 characters. A read requires the same name.                                                        |
+| `version`  | `string`                            | Required | Contract version you choose, nonempty and at most 1024 characters. A read requires the same version, so change it when the format changes. |
+| `encoding` | `"json" \| "binary"`                | Required | json for a defineJsonArtifact() contract, binary for a defineBinaryArtifact() contract. A read requires the same encoding.                 |
 
 ## Signature
 

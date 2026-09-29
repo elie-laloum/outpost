@@ -13,13 +13,13 @@ import type { ArtifactContract } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom        | Type                                | Présence | Rôle                                                                                                                                |
-| ---------- | ----------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `encode`   | `(value: T) => Promise<Uint8Array>` | Requis   | Valide et sérialise une valeur typée en octets d’artefact immuables.                                                                |
-| `decode`   | `(bytes: Uint8Array) => Promise<T>` | Requis   | Décode les octets stockés et les valide comme valeur typée du contrat.                                                              |
-| `name`     | `string`                            | Requis   | Nom non vide du contrat d’artefact, de 1024 caractères au maximum.                                                                  |
-| `version`  | `string`                            | Requis   | Version de contrat non vide définie par l’appelant, de 1024 caractères au maximum ; les lectures exigent une correspondance exacte. |
-| `encoding` | `"json" \| "binary"`                | Requis   | Représentation des données exigée par le contrat d’artefact : json ou binary.                                                       |
+| Nom        | Type                                | Présence | Rôle                                                                                                                                                      |
+| ---------- | ----------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `encode`   | `(value: T) => Promise<Uint8Array>` | Requis   | Valide une valeur et renvoie les octets à stocker. Rejette une valeur que le contrat n’accepte pas.                                                       |
+| `decode`   | `(bytes: Uint8Array) => Promise<T>` | Requis   | Reconvertit des octets stockés en valeur validée. Rejette des octets que le contrat n’accepte pas.                                                        |
+| `name`     | `string`                            | Requis   | Nom du contrat, non vide et de 1024 caractères au maximum. Une lecture exige le même nom.                                                                 |
+| `version`  | `string`                            | Requis   | Version du contrat que vous choisissez, non vide et de 1024 caractères au maximum. Une lecture exige la même version : changez-la quand le format change. |
+| `encoding` | `"json" \| "binary"`                | Requis   | json pour un contrat defineJsonArtifact(), binary pour un contrat defineBinaryArtifact(). Une lecture exige le même encodage.                             |
 
 ## Signature
 

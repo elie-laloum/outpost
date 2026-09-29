@@ -13,19 +13,19 @@ import { serveTaskQueue } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Expose a caller-owned task queue over HTTP with explicit bearer-token authentication. The server binds loopback by default and supplies no TLS. Closing the returned server stops listening without taking ownership of queue storage.
+Serve a caller-owned TaskQueue over HTTP at POST /queue, authenticated by bearer tokens. Listens on 127.0.0.1 and a port chosen by the system by default, without TLS. Rejects a fixed token that is not 32 to 512 non-whitespace characters.
 
 [Complete example and detailed rules](../../guide/job-queues/).
 
 ## Parameters and properties
 
-| Name            | Type                                                                | Presence | Meaning                                                                                                                                                                   |
-| --------------- | ------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `options`       | `QueueServerOptions`                                                | Required | Caller-owned queue, bearer token and HTTP bind address/port.                                                                                                              |
-| `options.queue` | `TaskQueue`                                                         | Required | Task queue used to enqueue, claim and persist job state.                                                                                                                  |
-| `options.token` | `string \| (() => readonly string[] \| Promise<readonly string[]>)` | Required | Fixed bearer token or callback returning the currently accepted tokens on every request. Overlap old and new tokens during rotation; empty or failed sources deny access. |
-| `options.host`  | `string \| undefined`                                               | Optional | HTTP bind address; defaults to loopback for local-only access.                                                                                                            |
-| `options.port`  | `number \| undefined`                                               | Optional | TCP port for the queue HTTP server; zero lets the operating system choose an available port.                                                                              |
+| Name            | Type                                                                | Presence | Meaning                                                                                                                                                                                                                                              |
+| --------------- | ------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `options`       | `QueueServerOptions`                                                | Required | Queue to serve, accepted bearer tokens, and bind host and port.                                                                                                                                                                                      |
+| `options.queue` | `TaskQueue`                                                         | Required | Queue served over HTTP; closing the server leaves it open.                                                                                                                                                                                           |
+| `options.token` | `string \| (() => readonly string[] \| Promise<readonly string[]>)` | Required | Accepted bearer token of 32 to 512 non-whitespace characters, or a function returning the accepted tokens, called on every request. Return the old and new tokens together during a rotation; an empty list or a thrown error rejects every request. |
+| `options.host`  | `string \| undefined`                                               | Optional | Bind address, default 127.0.0.1.                                                                                                                                                                                                                     |
+| `options.port`  | `number \| undefined`                                               | Optional | TCP port, default 0: the system picks a free port, shown in url.                                                                                                                                                                                     |
 
 ## Returns
 

@@ -17,12 +17,12 @@ import type { SpeculationRecoveryOptions } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom                  | Type        | Présence | Rôle                                                                                                                                        |
-| -------------------- | ----------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `runId`              | `string`    | Requis   | Identifiant de la course abandonnée dont la propriété est libérée.                                                                          |
-| `revision`           | `string`    | Requis   | Révision exacte du transport inspectée par l’opérateur ; toute différence refuse la récupération et protège les modifications concurrentes. |
-| `coordinatorStopped` | `true`      | Requis   | Confirmation explicite de l’arrêt de l’ancien coordinateur ; un PID distant ou un délai écoulé ne constitue pas une preuve.                 |
-| `transporter`        | `Transport` | Requis   | Transport contenant l’enveloppe de propriété abandonnée de la course.                                                                       |
+| Nom                  | Type        | Présence | Rôle                                                                                                                                |
+| -------------------- | ----------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `runId`              | `string`    | Requis   | runId de la course à libérer.                                                                                                       |
+| `revision`           | `string`    | Requis   | Révision de l’objet enregistré telle que vous l’avez lue ; si elle a changé depuis, la récupération rejette avec TransportConflict. |
+| `coordinatorStopped` | `true`      | Requis   | Confirmation explicite de l’arrêt de l’ancien coordinateur ; un PID distant ou un délai écoulé ne constitue pas une preuve.         |
+| `transporter`        | `Transport` | Requis   | Transport qui contient la course enregistrée.                                                                                       |
 
 ## Signature
 

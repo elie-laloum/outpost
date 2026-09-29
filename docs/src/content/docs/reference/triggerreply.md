@@ -13,11 +13,11 @@ import type { TriggerReply } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name          | Type                  | Presence | Meaning                                     |
-| ------------- | --------------------- | -------- | ------------------------------------------- |
-| `status`      | `number`              | Required | HTTP status returned to the sender.         |
-| `body`        | `string \| undefined` | Optional | Optional response body.                     |
-| `contentType` | `string \| undefined` | Optional | Content type of the body, when one is sent. |
+| Name          | Type                  | Presence | Meaning                                              |
+| ------------- | --------------------- | -------- | ---------------------------------------------------- |
+| `status`      | `number`              | Required | HTTP status returned to the sender.                  |
+| `body`        | `string \| undefined` | Optional | Response body text; the reply is empty when omitted. |
+| `contentType` | `string \| undefined` | Optional | Content type of the body, when one is sent.          |
 
 ## Signature
 

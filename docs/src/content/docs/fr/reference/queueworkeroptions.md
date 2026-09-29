@@ -13,14 +13,14 @@ import type { QueueWorkerOptions } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom        | Type                                     | Présence  | Rôle                                                                                     |
-| ---------- | ---------------------------------------- | --------- | ---------------------------------------------------------------------------------------- |
-| `queue`    | `TaskQueue`                              | Requis    | File de tâches utilisée pour envoyer, prendre en charge et persister l’état des travaux. |
-| `worker`   | `string`                                 | Requis    | Identité du worker prenant en charge ou possédant le bail du travail.                    |
-| `handlers` | `Readonly<Record<string, QueueHandler>>` | Requis    | Registre associant noms de gestionnaires et callbacks d’exécution des travaux.           |
-| `signal`   | `AbortSignal`                            | Requis    | Annulation coopérative de cette opération.                                               |
-| `leaseMs`  | `number \| undefined`                    | Optionnel | Durée du bail worker en millisecondes.                                                   |
-| `pollMs`   | `number \| undefined`                    | Optionnel | Intervalle en millisecondes entre les interrogations de la file.                         |
+| Nom        | Type                                     | Présence  | Rôle                                                                                                                                               |
+| ---------- | ---------------------------------------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `queue`    | `TaskQueue`                              | Requis    | File où le worker prend les jobs et enregistre leurs résultats.                                                                                    |
+| `worker`   | `string`                                 | Requis    | Nom du worker enregistré sur chaque job pris en charge, de 1 à 512 caractères ; donnez-en un distinct à chaque processus.                          |
+| `handlers` | `Readonly<Record<string, QueueHandler>>` | Requis    | Handlers par nom, de 1 à 100 ; le worker ne prend en charge que les jobs dont le handler figure ici.                                               |
+| `signal`   | `AbortSignal`                            | Requis    | Arrête le worker : runQueueWorker() se résout et le signal du handler en cours s’interrompt. Ce job reste active jusqu’à l’expiration de son bail. |
+| `leaseMs`  | `number \| undefined`                    | Optionnel | Durée du bail en millisecondes, 30000 par défaut, de 30 à 300000 ; renouvelé à chaque tiers de cette durée.                                        |
+| `pollMs`   | `number \| undefined`                    | Optionnel | Attente en millisecondes quand aucun job n’est éligible, 250 par défaut ; doit être positive.                                                      |
 
 ## Signature
 

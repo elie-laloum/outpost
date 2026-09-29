@@ -20,7 +20,7 @@ import type { WorkflowInputRequest } from "@elie-laloum/outpost";
 | `key`           | `string`                         | Requis    | Clé de la tâche suspendue sur cette demande.                                      |
 | `requestedAt`   | `string`                         | Requis    | Horodatage ISO de création de la question.                                        |
 | `question`      | `string`                         | Requis    | Question lisible et non vide à afficher au répondant.                             |
-| `choices`       | `readonly string[] \| undefined` | Optionnel | Liste optionnelle non vide de choix de réponse uniques.                           |
+| `choices`       | `readonly string[] \| undefined` | Optionnel | Liste non vide de choix de réponse uniques.                                       |
 | `allowFreeText` | `boolean \| undefined`           | Optionnel | Autorise les réponses hors des choix ; true si omis. false exige des choix.       |
 
 ## Signature

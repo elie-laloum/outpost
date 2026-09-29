@@ -1,38 +1,60 @@
 ---
 title: "Workflows — Overview"
-description: "A workflow is a graph of typed tasks and declared dependencies."
+description: "Declare typed tasks and their dependencies, run the graph with retries, budgets and caches, and read each task’s outcome."
 sidebar:
   label: Overview
   order: 0
 ---
 
-A workflow is a graph of typed tasks and declared dependencies. It connects ordinary TypeScript operations, sandbox commands and agent jobs without requiring every step to use a model. Dependencies express both ordering and which results a task may read.
+## Choose a task definition
 
-## How it works
+Each definition returns a task that you list in `defineWorkflow()` and connect with `after`. Nothing runs until `start()`.
 
-`defineTask` declares an operation; `defineWorkflow` validates and groups the graph; `start` executes it. Independent tasks may run concurrently within the configured limit. `defineAgentTask` and `defineCommandTask` use an existing sandbox, while `defineIsolatedTask` owns allocation for its agent attempt.
+| Definition                            | Runs at each attempt                              | Sandbox                                | Output                                        |
+| ------------------------------------- | ------------------------------------------------- | -------------------------------------- | --------------------------------------------- |
+| `defineTask(options)`                 | Your `perform` callback                           | None, or one your code manages         | The value `perform` returns                   |
+| `defineCommandTask(options)`          | A command; a nonzero exit fails the attempt       | Yours, left open                       | `CommandResult`                               |
+| `defineAgentTask(options)`            | `sandbox.dispatch()` with options from `request`  | Yours, left open                       | Dispatch result with `resume()` and `fork()`  |
+| `defineIsolatedTask(options)`         | `dispatch()` with options from `request`          | Allocated and closed by each attempt   | `DispatchResult` with `resume()` and `fork()` |
+| `defineLoopTask(options)`             | `attempt` then `check`, up to `maxRounds` rounds  | None, or one your callbacks manage     | The accepted attempt’s value                  |
+| `defineInteractiveAgentTask(options)` | One agent turn, then a question or the final JSON | New per turn; the worktree is retained | `InteractiveAgentResult`                      |
 
-`start({ onQuota })` pauses a task on an Outpost quota error and resumes it after the reset, in process or on a later start with the same checkpoint. See [quota pauses](../../../guide/quota-pauses/).
+:::caution
+A checkpoint stores only lossless JSON outputs. In a checkpointed run, wrap `defineAgentTask()` and `defineIsolatedTask()` in a `defineTask()` that returns JSON.
+:::
 
-`defineLoopTask` adds bounded attempt/check rounds with feedback and durable phase progress. See [verification loops](../../../guide/verification-loops/) for budgets, replay and caller-owned sessions.
+## How a run ends
 
-A task `cache` restores a stored JSON result when the workflow, task, version and key match, without executing the task or replaying its side effects. See the [task result cache](../../../guide/task-cache/) for keys, `repositoryFingerprint`, failures and trust.
+`start()` runs one task at a time by default (`concurrency`). It resolves once no task can run, even when tasks failed, and rejects only on invalid options, answers or checkpoint errors.
 
-## Boundaries and responsibilities
+| Event                                                                               | Task status     | Run status                                                                                    |
+| ----------------------------------------------------------------------------------- | --------------- | --------------------------------------------------------------------------------------------- |
+| `perform` returns, or its `cache` hits (zero attempts)                              | `done`          | `done` when every task is `done` or `skipped`                                                 |
+| `condition` returns `false`, or a dependency is not done                            | `skipped`       | Unchanged                                                                                     |
+| Last `retry` attempt fails (default 1 attempt)                                      | `failed`        | `failed`; other tasks end `cancelled`, or only dependents `skipped` with `stopOnError: false` |
+| A `budget` limit is reached                                                         | `cancelled`     | `failed` with `WorkflowBudgetExceeded`                                                        |
+| Quota error with `onQuota` past any `maxWaitMs` wait, or a gate awaiting a decision | `paused`        | `paused`; a later `start()` resumes the task                                                  |
+| An interactive task asks a question                                                 | `waiting-input` | `waiting-input` until `start({ answers })`                                                    |
+| `signal` aborted                                                                    | `cancelled`     | `cancelled`                                                                                   |
+| `start({ timeoutMs })` expires                                                      | `cancelled`     | `failed` with an `OutpostError` code `timeout`                                                |
 
-Retries can repeat side effects. Budgets control admission using attempts and observed usage rather than guaranteeing a currency ceiling. Parallel tasks still need independent sandbox/workspace ownership. Checkpoints add persistence; they do not make external side effects transactional.
+:::note
+Retries, loop rounds and replayed checkpoint attempts repeat side effects. Pass `context.idempotencyKey` to services that deduplicate.
+:::
 
 ## Entry points
 
-- [defineLoopTask](../../definelooptask/)
+Guide: [Tasks and dependencies](../../../guide/task-dependencies/) · [Concurrency, retries and timeouts](../../../guide/concurrency-and-retries/) · [Verification loops](../../../guide/verification-loops/)
+
 - [defineTask](../../definetask/)
 - [defineWorkflow](../../defineworkflow/)
-- [TaskContext](../../taskcontext/)
-- [WorkflowResult](../../workflowresult/)
 - [defineAgentTask](../../defineagenttask/)
 - [defineCommandTask](../../definecommandtask/)
 - [defineIsolatedTask](../../defineisolatedtask/)
-
-[Learn with the practical guide](../../../guide/task-dependencies/).
-
-`defineInteractiveAgentTask` owns a fresh sandbox per dialogue turn and retains its worktree and conversation while waiting for a human answer. See [interactive tasks](../../../guide/interactive-tasks/) for durable input, supported harnesses and recovery.
+- [defineLoopTask](../../definelooptask/)
+- [defineInteractiveAgentTask](../../defineinteractiveagenttask/)
+- [repositoryFingerprint](../../repositoryfingerprint/)
+- [WorkflowOptions](../../workflowoptions/)
+- [WorkflowResult](../../workflowresult/)
+- [TaskContext](../../taskcontext/)
+- [TaskRecord](../../taskrecord/)

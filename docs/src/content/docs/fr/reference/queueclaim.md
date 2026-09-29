@@ -13,11 +13,11 @@ import type { QueueClaim } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom        | Type                | Présence | Rôle                                                                           |
-| ---------- | ------------------- | -------- | ------------------------------------------------------------------------------ |
-| `worker`   | `string`            | Requis   | Identité du worker prenant en charge ou possédant le bail du travail.          |
-| `handlers` | `readonly string[]` | Requis   | Noms des gestionnaires que ce worker peut exécuter lors de la prise en charge. |
-| `leaseMs`  | `number`            | Requis   | Durée du bail worker en millisecondes.                                         |
+| Nom        | Type                | Présence | Rôle                                                                                                            |
+| ---------- | ------------------- | -------- | --------------------------------------------------------------------------------------------------------------- |
+| `worker`   | `string`            | Requis   | Nom du worker qui prend le job en charge, enregistré sur le job et vérifié par renew() et complete().           |
+| `handlers` | `readonly string[]` | Requis   | Noms des handlers que ce worker sait exécuter, de 1 à 100 ; seuls les jobs de ces handlers sont pris en charge. |
+| `leaseMs`  | `number`            | Requis   | Durée du bail en millisecondes, de 30 à 300000.                                                                 |
 
 ## Signature
 

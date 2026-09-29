@@ -13,11 +13,11 @@ import type { TriggerSource } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name     | Type                                                                     | Presence | Meaning                                                                                      |
-| -------- | ------------------------------------------------------------------------ | -------- | -------------------------------------------------------------------------------------------- |
-| `name`   | `string`                                                                 | Required | Source name reported in TriggerEvent.source.                                                 |
-| `verify` | `(request: TriggerHttpRequest, now: number) => Promise<TriggerEvent>`    | Required | Authenticate the request and return the normalized event; throwing rejects it with 401.      |
-| `reply`  | `((outcome: TriggerOutcome, job?: string) => TriggerReply) \| undefined` | Optional | Replace the default 202 and 204 replies for senders expecting another status, such as Slack. |
+| Name     | Type                                                                     | Presence | Meaning                                                                                                                                    |
+| -------- | ------------------------------------------------------------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `name`   | `string`                                                                 | Required | Source name reported in TriggerEvent.source.                                                                                               |
+| `verify` | `(request: TriggerHttpRequest, now: number) => Promise<TriggerEvent>`    | Required | Authenticate the request and return the normalized event; throwing rejects it with 401.                                                    |
+| `reply`  | `((outcome: TriggerOutcome, job?: string) => TriggerReply) \| undefined` | Optional | Replace the default replies, 202 with the job id as JSON or 204 for an ignored event, for senders expecting another status, such as Slack. |
 
 ## Signature
 

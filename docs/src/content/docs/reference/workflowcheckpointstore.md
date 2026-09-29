@@ -13,9 +13,9 @@ import type { WorkflowCheckpointStore } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name      | Type                                                  | Presence | Meaning                                                                |
-| --------- | ----------------------------------------------------- | -------- | ---------------------------------------------------------------------- |
-| `acquire` | `(runId: string) => Promise<WorkflowCheckpointLease>` | Required | Acquire exclusive checkpoint ownership for the supplied stable run ID. |
+| Name      | Type                                                  | Presence | Meaning                                                                                                                                                                                                          |
+| --------- | ----------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `acquire` | `(runId: string) => Promise<WorkflowCheckpointLease>` | Required | Takes exclusive ownership of runId and returns its lease. createWorkflowCheckpointStore() rejects while an owner is recorded, including one left by a dead process, until recoverWorkflowCheckpoint() clears it. |
 
 ## Signature
 

@@ -13,10 +13,10 @@ import type { QueueHandler } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name      | Type                  | Presence | Meaning                                                                              |
-| --------- | --------------------- | -------- | ------------------------------------------------------------------------------------ |
-| `input`   | `WorkflowJson`        | Required | Lossless JSON input supplied to the registered job handler.                          |
-| `context` | `QueueHandlerContext` | Required | Claimed queue job and cancellation signal supplied to the registered worker handler. |
+| Name      | Type                  | Presence | Meaning                                        |
+| --------- | --------------------- | -------- | ---------------------------------------------- |
+| `input`   | `WorkflowJson`        | Required | JSON input from the job’s request.             |
+| `context` | `QueueHandlerContext` | Required | Idempotency key, abort signal and claimed job. |
 
 ## Returns
 

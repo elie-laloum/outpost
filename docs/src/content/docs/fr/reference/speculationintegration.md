@@ -17,13 +17,13 @@ import type { SpeculationIntegration } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom               | Type                                 | Présence  | Rôle                                                                                                                                                                                                               |
-| ----------------- | ------------------------------------ | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `status`          | `"conflict" \| "clean" \| "blocked"` | Requis    | clean indique une fusion sans conflit des commits enregistrés ; conflict liste les fichiers en conflit ; blocked signale un état sale/détaché ou changeant et les erreurs Git. Aucune intégration n’est effectuée. |
-| `host`            | `SpeculativeHostSnapshot`            | Requis    | Snapshot hôte utilisé pour cette vérification ; la relancer si l’état hôte change avant l’intégration.                                                                                                             |
-| `candidateCommit` | `string \| undefined`                | Optionnel | Commit exact du candidat vérifié contre host.head lorsque la vérification aboutit.                                                                                                                                 |
-| `conflicts`       | `readonly string[]`                  | Requis    | Chemins signalés par Git merge-tree lors d’un conflit ; vide pour les vérifications clean ou blocked.                                                                                                              |
-| `reason`          | `string \| undefined`                | Optionnel | Explication d’une vérification bloquée, notamment une référence candidate modifiée ou un support Git indisponible.                                                                                                 |
+| Nom               | Type                                 | Présence  | Rôle                                                                                                                                                                                        |
+| ----------------- | ------------------------------------ | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `status`          | `"conflict" \| "clean" \| "blocked"` | Requis    | clean si les commits se fusionnent sans conflit, conflict avec les chemins dans conflicts, blocked avec une reason. Rien n’est fusionné.                                                    |
+| `host`            | `SpeculativeHostSnapshot`            | Requis    | Snapshot hôte pris au début de la vérification ; son head est le commit vérifié.                                                                                                            |
+| `candidateCommit` | `string \| undefined`                | Optionnel | Commit candidat vérifié contre host.head ; absent si la vérification est bloquée.                                                                                                           |
+| `conflicts`       | `readonly string[]`                  | Requis    | Chemins en conflit signalés par git merge-tree ; vide sauf si le statut est conflict.                                                                                                       |
+| `reason`          | `string \| undefined`                | Optionnel | Raison du blocage : changements non commités, HEAD détaché, branche déplacée, dépôt modifié pendant la vérification, ou échec de Git, par exemple une version sans merge-tree --write-tree. |
 
 ## Signature
 

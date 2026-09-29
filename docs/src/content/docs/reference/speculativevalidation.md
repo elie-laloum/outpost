@@ -17,12 +17,12 @@ import type { SpeculativeValidation } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name      | Type                   | Presence | Meaning                                                                                              |
-| --------- | ---------------------- | -------- | ---------------------------------------------------------------------------------------------------- |
-| `key`     | `string`               | Required | Unique candidate key used to correlate its branch, validation and final result.                      |
-| `result`  | `SpeculativeOutput<T>` | Required | Candidate dispatch output with text, commits, usage and typed value, excluding continuation methods. |
-| `sandbox` | `Sandbox`              | Required | Live candidate sandbox available for validation commands before cleanup.                             |
-| `signal`  | `AbortSignal`          | Required | Cooperative cancellation for this operation.                                                         |
+| Name      | Type                   | Presence | Meaning                                                                                                                                        |
+| --------- | ---------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `key`     | `string`               | Required | Key of the candidate being validated.                                                                                                          |
+| `result`  | `SpeculativeOutput<T>` | Required | Dispatch output of the candidate: text, value, commits and usage.                                                                              |
+| `sandbox` | `Sandbox`              | Required | Candidate's sandbox, still open; it closes after validate returns. Commits made in it during validation become part of the candidate's commit. |
+| `signal`  | `AbortSignal`          | Required | Aborts when another candidate wins, a token limit is reached or the race is cancelled; pass it to every command.                               |
 
 ## Signature
 

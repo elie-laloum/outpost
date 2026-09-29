@@ -13,13 +13,13 @@ import type { WorkflowGateOptions } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom              | Type                                    | Présence  | Rôle                                                                                                                                         |
-| ---------------- | --------------------------------------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `authentication` | `"signed" \| undefined`                 | Optionnel | Exige une preuve vérifiée pour ce gate d’approbation ou de pause et inscrit cette exigence dans l’identité du graphe.                        |
-| `key`            | `string`                                | Requis    | Clé de tâche stable identifiant le nœud dans son graphe de workflow.                                                                         |
-| `after`          | `readonly Task<unknown>[] \| undefined` | Optionnel | Dépendances déclarées dont les valeurs peuvent être lues.                                                                                    |
-| `prompt`         | `string`                                | Requis    | Instruction expliquant la décision d’approbation ou de reprise demandée à l’acteur de confiance.                                             |
-| `actors`         | `readonly string[]`                     | Requis    | Noms d’acteurs non vides et uniques autorisés à décider le gate créé ; l’authentification signée lie l’acteur choisi à une clé de confiance. |
+| Nom              | Type                                    | Présence  | Rôle                                                                                                                                                                       |
+| ---------------- | --------------------------------------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `authentication` | `"signed" \| undefined`                 | Optionnel | signed exige une preuve Ed25519 vérifiée sur chaque décision de cette gate. Enregistré dans la gate et dans l’identité du checkpoint.                                      |
+| `key`            | `string`                                | Requis    | Clé de tâche de la gate, unique dans le workflow et reprise par chaque décision. Lettres, chiffres, point, tiret bas et tiret, en commençant par une lettre ou un chiffre. |
+| `after`          | `readonly Task<unknown>[] \| undefined` | Optionnel | Tâches qui doivent être terminées avant que la gate se suspende. Si l’une échoue ou est ignorée, annulée ou rejetée, la gate est ignorée.                                  |
+| `prompt`         | `string`                                | Requis    | Question posée aux acteurs, copiée dans la demande en attente. Un prompt vide lève une erreur.                                                                             |
+| `actors`         | `readonly string[]`                     | Requis    | Noms autorisés à décider la gate : au moins un, uniques et non vides. Outpost fait confiance à l’acteur soumis par votre application, sauf si la gate est signée.          |
 
 ## Signature
 

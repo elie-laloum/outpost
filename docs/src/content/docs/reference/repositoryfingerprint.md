@@ -13,7 +13,7 @@ import { repositoryFingerprint } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Return a SHA-256 digest of a repository’s HEAD commit, tracked working-tree changes, index and untracked files, excluding .outpost/. Use it in task cache keys so uncommitted edits change the key. It reads the repository without modifying it and fails outside a Git repository.
+Return a SHA-256 hex digest of a repository's HEAD commit, staged and unstaged changes and untracked files that are not ignored, excluding .outpost/. Use it in a task cache key so uncommitted edits change the key. Reads without modifying; rejects outside a Git repository.
 
 [Complete example and detailed rules](../../guide/task-cache/).
 

@@ -13,7 +13,7 @@ import { serveTriggers } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Start an HTTP server that verifies each request with its route source and publishes the job selected by on() as trigger:&lt;path>:&lt;delivery>. Redeliveries of one delivery publish nothing new. It answers 202, 204, 401, 404, 405, 413, 500 or 503, unless the source overrides the success replies, and resolves once listening. The caller closes the server and then its queue.
+Start an HTTP server that verifies each POST with its route source and publishes the job selected by on() as trigger:&lt;path>:&lt;delivery>; redeliveries publish nothing new. It answers 202, 204, 400, 401, 404, 405, 413, 500 or 503, a source can replace 202 and 204, and it resolves once listening; invalid options or an unavailable port reject. The caller closes the server, then its queue.
 
 [Complete example and detailed rules](../../guide/webhooks/).
 

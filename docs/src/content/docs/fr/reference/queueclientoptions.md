@@ -13,11 +13,11 @@ import type { QueueClientOptions } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom         | Type                                          | Présence  | Rôle                                                                                                                         |
-| ----------- | --------------------------------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `url`       | `string`                                      | Requis    | URL HTTP de base du serveur de file de tâches.                                                                               |
-| `token`     | `string \| (() => string \| Promise<string>)` | Requis    | Jeton bearer fixe ou callback résolvant le jeton courant à chaque requête, y compris renouvellement du bail et finalisation. |
-| `timeoutMs` | `number \| undefined`                         | Optionnel | Durée maximale en millisecondes de chaque requête HTTP à la file.                                                            |
+| Nom         | Type                                          | Présence  | Rôle                                                                                                                                                                                                                  |
+| ----------- | --------------------------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `url`       | `string`                                      | Requis    | URL de base d’un serveur serveTaskQueue(), en http ou https, sans identifiants, requête ni fragment ; les requêtes partent vers &lt;url>/queue.                                                                       |
+| `token`     | `string \| (() => string \| Promise<string>)` | Requis    | Jeton bearer, ou fonction appelée avant chaque requête, renouvellements de bail et finalisations compris, pour qu’un jeton renouvelé s’applique aussitôt. Chaque valeur doit compter 32 à 512 caractères sans espace. |
+| `timeoutMs` | `number \| undefined`                         | Optionnel | Durée maximale de chaque requête HTTP en millisecondes, 10000 par défaut, comptée après la résolution du jeton.                                                                                                       |
 
 ## Signature
 

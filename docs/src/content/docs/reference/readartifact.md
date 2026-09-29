@@ -13,18 +13,18 @@ import { readArtifact } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Read an artifact reference from a declared task dependency through context.value, then load and validate its stored payload. It applies the task cancellation signal and checks the producer against the current execution and dependency key.
+Read the artifact published by a declared dependency: take its reference from context.value(), reject with Artifact dependency producer mismatch when another execution or task produced it, then verify and decode it like readStoredArtifact() under the task's signal.
 
 [Complete example and detailed rules](../../guide/artifacts/).
 
 ## Parameters and properties
 
-| Name         | Type                      | Presence | Meaning                                                                             |
-| ------------ | ------------------------- | -------- | ----------------------------------------------------------------------------------- |
-| `context`    | `TaskContext`             | Required | Current workflow task context used to read dependencies and propagate cancellation. |
-| `dependency` | `Task<ArtifactReference>` | Required | Declared task dependency whose completed output is the artifact reference to read.  |
-| `contract`   | `ArtifactContract<T>`     | Required | Named, versioned artifact contract that defines encoding and validation.            |
-| `store`      | `ArtifactStore`           | Required | Artifact byte store used for immutable publication or bounded payload retrieval.    |
+| Name         | Type                      | Presence | Meaning                                                                                                          |
+| ------------ | ------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------- |
+| `context`    | `TaskContext`             | Required | Context of the running task; supplies the dependency output, the execution id and the cancellation signal.       |
+| `dependency` | `Task<ArtifactReference>` | Required | Artifact task listed in this task's after; its output is the reference to read. An undeclared dependency throws. |
+| `contract`   | `ArtifactContract<T>`     | Required | Expected contract; must match the reference's name, version and encoding.                                        |
+| `store`      | `ArtifactStore`           | Required | Store holding the artifact bytes.                                                                                |
 
 ## Returns
 

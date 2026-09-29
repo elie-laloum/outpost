@@ -13,15 +13,15 @@ import type { ArtifactReference } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom        | Type                | Présence | Rôle                                                                                                     |
-| ---------- | ------------------- | -------- | -------------------------------------------------------------------------------------------------------- |
-| `format`   | `1`                 | Requis   | Version du format des métadonnées de référence d’artefact ; actuellement 1.                              |
-| `id`       | `string`            | Requis   | Identité adressée par contenu déduite de l’empreinte, du contrat, du producteur et des parents ordonnés. |
-| `digest`   | `string`            | Requis   | Empreinte SHA-256 des octets encodés de l’artefact.                                                      |
-| `size`     | `number`            | Requis   | Longueur exacte en octets des données encodées de l’artefact.                                            |
-| `contract` | `ArtifactIdentity`  | Requis   | Contrat d’artefact nommé et versionné définissant encodage et validation.                                |
-| `producer` | `ArtifactProducer`  | Requis   | Identité enregistrée du producteur, sans authentification.                                               |
-| `parents`  | `readonly string[]` | Requis   | Identifiants immuables ordonnés des références parentes de l’artefact.                                   |
+| Nom        | Type                | Présence | Rôle                                                                                                                                                                                          |
+| ---------- | ------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `format`   | `1`                 | Requis   | Version du format de référence, toujours 1.                                                                                                                                                   |
+| `id`       | `string`            | Requis   | Id adressé par contenu : SHA-256 du format, de l’empreinte, de la taille, du contrat, du producteur et des parents ordonnés. Les lectures le recalculent et rejettent une référence modifiée. |
+| `digest`   | `string`            | Requis   | SHA-256 des octets stockés, en hexadécimal minuscule. Les lectures rejettent des octets d’une autre empreinte.                                                                                |
+| `size`     | `number`            | Requis   | Longueur en octets des données stockées. Les lectures rejettent des octets d’une autre longueur.                                                                                              |
+| `contract` | `ArtifactIdentity`  | Requis   | Nom, version et encodage du contrat qui a encodé les données. Une lecture avec un autre contrat rejette avec Artifact contract mismatch.                                                      |
+| `producer` | `ArtifactProducer`  | Requis   | Exécution, tâche et tentative qui ont publié l’artefact, telles que déclarées à la publication ; non authentifiées.                                                                           |
+| `parents`  | `readonly string[]` | Requis   | Ids des artefacts parents, dans l’ordre donné à la publication, sans doublon.                                                                                                                 |
 
 ## Signature
 

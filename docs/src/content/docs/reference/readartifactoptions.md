@@ -13,11 +13,11 @@ import type { ReadArtifactOptions } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name       | Type                                        | Presence | Meaning                                                                     |
-| ---------- | ------------------------------------------- | -------- | --------------------------------------------------------------------------- |
-| `producer` | `ArtifactProducer \| undefined`             | Optional | Expected producer execution, task and attempt; a mismatch rejects the read. |
-| `parents`  | `readonly ArtifactReference[] \| undefined` | Optional | Expected ordered parent references; a mismatching lineage rejects the read. |
-| `signal`   | `AbortSignal \| undefined`                  | Optional | Cooperative cancellation for this operation.                                |
+| Name       | Type                                        | Presence | Meaning                                                                                           |
+| ---------- | ------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------- |
+| `producer` | `ArtifactProducer \| undefined`             | Optional | Expected execution, task key and attempt; any difference rejects with Artifact producer mismatch. |
+| `parents`  | `readonly ArtifactReference[] \| undefined` | Optional | Expected parent references, in order; a different list rejects with Artifact lineage mismatch.    |
+| `signal`   | `AbortSignal \| undefined`                  | Optional | Aborting it rejects the read with the signal's reason.                                            |
 
 ## Signature
 

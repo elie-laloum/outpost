@@ -13,7 +13,7 @@ import { WorkflowBudgetExceeded } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Error identifying the attempt or token dimension whose admission limit was reached. limit and observed report the configured threshold and current accounting; observed model usage is not a billing cap.
+Error recorded in WorkflowResult.errors when a budget limit is reached, which fails the run. An attempts limit cancels the tasks not yet started; a token limit also cancels running tasks.
 
 [Complete example and detailed rules](../../guide/budgets/).
 

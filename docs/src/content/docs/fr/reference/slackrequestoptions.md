@@ -13,10 +13,10 @@ import type { SlackRequestOptions } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom             | Type                  | Présence  | Rôle                                                                                                                                                                                                                                                          |
-| --------------- | --------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `signingSecret` | `TriggerSecret`       | Requis    | Secret de signature de l’application Slack qui vérifie X-Slack-Signature. Secret, ou fonction renvoyant chaque secret actuellement accepté ; renvoyez l’ancienne et la nouvelle valeur pendant une rotation. Une source vide ou en échec refuse les requêtes. |
-| `toleranceMs`   | `number \| undefined` | Optionnel | Écart d’horloge accepté pour l’horodatage de la requête, en millisecondes ; 300000 (5 minutes) par défaut.                                                                                                                                                    |
+| Nom             | Type                  | Présence  | Rôle                                                                                                                                                                                                                                                                                |
+| --------------- | --------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `signingSecret` | `TriggerSecret`       | Requis    | Secret de signature de l’application Slack qui vérifie X-Slack-Signature, ou callback renvoyant chaque secret actuellement accepté (l’ancien et le nouveau pendant une rotation). Une chaîne vide lève une erreur à la création ; un callback en échec ou vide refuse les requêtes. |
+| `toleranceMs`   | `number \| undefined` | Optionnel | Écart d’horloge accepté pour l’horodatage de la requête, en millisecondes ; 300000 (5 minutes) par défaut. Une valeur qui n’est pas un entier positif lève une erreur à la création.                                                                                                |
 
 ## Signature
 

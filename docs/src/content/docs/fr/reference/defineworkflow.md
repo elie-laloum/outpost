@@ -13,16 +13,16 @@ import { defineWorkflow } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Valide les clés, dépendances et cycles d’un graphe nommé, puis renvoie une définition de workflow réutilisable. start ordonnance les tâches avec concurrence, annulation et checkpoints optionnels ; diagram produit le graphe de dépendances en Mermaid.
+Valide une liste de tâches nommée et renvoie un Workflow figé dont start() exécute le graphe et diagram() le dessine en Mermaid. Lève une erreur pour un nom vide, une clé en double, une dépendance absente de la liste, un cycle, ou une gate avec condition, retry, délai ou cache.
 
 [Exemple complet et règles détaillées](../../guide/task-dependencies/).
 
 ## Paramètres et propriétés
 
-| Nom     | Type                       | Présence | Rôle                                                                                    |
-| ------- | -------------------------- | -------- | --------------------------------------------------------------------------------------- |
-| `name`  | `string`                   | Requis   | Nom de la définition de workflow, inclus dans ses rapports d’exécution.                 |
-| `tasks` | `readonly Task<unknown>[]` | Requis   | Définitions de tâches composant le graphe, comprenant toutes les dépendances déclarées. |
+| Nom     | Type                       | Présence | Rôle                                                                                           |
+| ------- | -------------------------- | -------- | ---------------------------------------------------------------------------------------------- |
+| `name`  | `string`                   | Requis   | Nom du workflow, non vide ; il fait partie de l’identité du checkpoint et de chaque événement. |
+| `tasks` | `readonly Task<unknown>[]` | Requis   | Toutes les tâches du graphe ; chaque dépendance doit aussi figurer dans la liste.              |
 
 ## Retour
 

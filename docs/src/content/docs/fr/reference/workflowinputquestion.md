@@ -16,7 +16,7 @@ import type { WorkflowInputQuestion } from "@elie-laloum/outpost";
 | Nom             | Type                             | Présence  | Rôle                                                                        |
 | --------------- | -------------------------------- | --------- | --------------------------------------------------------------------------- |
 | `question`      | `string`                         | Requis    | Question lisible et non vide à afficher au répondant.                       |
-| `choices`       | `readonly string[] \| undefined` | Optionnel | Liste optionnelle non vide de choix de réponse uniques.                     |
+| `choices`       | `readonly string[] \| undefined` | Optionnel | Liste non vide de choix de réponse uniques.                                 |
 | `allowFreeText` | `boolean \| undefined`           | Optionnel | Autorise les réponses hors des choix ; true si omis. false exige des choix. |
 
 ## Signature

@@ -13,11 +13,11 @@ import type { JsonArtifactOptions } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name      | Type                                                            | Presence | Meaning                                                                                          |
-| --------- | --------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------ |
-| `name`    | `string`                                                        | Required | Nonempty artifact contract name, at most 1024 characters.                                        |
-| `version` | `string`                                                        | Required | Nonempty caller-defined contract version, at most 1024 characters; reads require an exact match. |
-| `schema`  | `StandardValidator<T> \| ((input: unknown) => T \| Promise<T>)` | Required | Boundary validator that narrows unknown input.                                                   |
+| Name      | Type                                                            | Presence | Meaning                                                                                                                                                                                 |
+| --------- | --------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`    | `string`                                                        | Required | Contract name, nonempty and at most 1024 characters. A read requires the same name.                                                                                                     |
+| `version` | `string`                                                        | Required | Contract version you choose, nonempty and at most 1024 characters. A read requires the same version, so change it when the format changes.                                              |
+| `schema`  | `StandardValidator<T> \| ((input: unknown) => T \| Promise<T>)` | Required | Standard Schema validator (Zod, Valibot…) or a function that returns the checked value or throws. Runs before encoding and after decoding; its output is the value stored and returned. |
 
 ## Signature
 

@@ -13,11 +13,11 @@ import type { QueueClaim } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name       | Type                | Presence | Meaning                                                        |
-| ---------- | ------------------- | -------- | -------------------------------------------------------------- |
-| `worker`   | `string`            | Required | Identity of the worker claiming or owning the job lease.       |
-| `handlers` | `readonly string[]` | Required | Names of handlers this worker can execute when claiming a job. |
-| `leaseMs`  | `number`            | Required | Worker lease duration in milliseconds.                         |
+| Name       | Type                | Presence | Meaning                                                                                 |
+| ---------- | ------------------- | -------- | --------------------------------------------------------------------------------------- |
+| `worker`   | `string`            | Required | Name of the claiming worker, recorded on the job and checked by renew() and complete(). |
+| `handlers` | `readonly string[]` | Required | Handler names this worker can run, 1 to 100; only jobs for these handlers are claimed.  |
+| `leaseMs`  | `number`            | Required | Lease duration in milliseconds, from 30 to 300000.                                      |
 
 ## Signature
 

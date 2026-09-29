@@ -886,8 +886,8 @@
     "Dépôt, politique de branche, copies, hooks, délais par étape, quota de stockage, libellé, signal d’annulation et hub d’observation."
   ],
   "WorkflowFailure.result": [
-    "Complete unsuccessful workflow result retained for task, error and usage inspection.",
-    "Résultat complet du workflow non réussi, conservé pour inspecter tâches, erreurs et usage."
+    "The unsuccessful WorkflowResult, with its task records, errors and usage.",
+    "Le WorkflowResult en échec, avec ses enregistrements de tâches, ses erreurs et son usage."
   ],
   "Error.name": [
     "Error class name used to distinguish this failure from other JavaScript errors.",
@@ -914,16 +914,16 @@
     "Nom de la définition de workflow, inclus dans ses rapports d’exécution."
   ],
   "WorkflowResult.status": [
-    "Overall outcome; waiting-input takes precedence over paused, while failures and cancellation take precedence over both.",
-    "Résultat global ; waiting-input prévaut sur paused, tandis que les échecs et annulations prévalent sur les deux."
+    "Run outcome: done, paused (gate or quota), waiting-input, failed or cancelled. Precedence is cancelled, then failed, then waiting-input, then paused; an expired timeoutMs gives failed.",
+    "Résultat de l’exécution : done, paused (gate ou quota), waiting-input, failed ou cancelled. L’ordre de priorité est cancelled, puis failed, puis waiting-input, puis paused ; un timeoutMs expiré donne failed."
   ],
   "WorkflowResult.tasks": [
-    "Final task records with statuses, attempt counts, errors and pending gates.",
-    "États finaux des tâches avec statuts, nombres de tentatives, erreurs et gates en attente."
+    "One frozen record per task, in list order, with status, attempts, timestamps and error.",
+    "Un enregistrement figé par tâche, dans l’ordre de la liste, avec statut, tentatives, horodatages et erreur."
   ],
   "WorkflowResult.errors": [
-    "Task and scheduling failures collected during the workflow execution.",
-    "Échecs de tâches et d’ordonnancement collectés pendant l’exécution du workflow."
+    "Errors that failed the run: task failures, gate rejections, budget errors and the abort or timeout reason.",
+    "Erreurs qui ont fait échouer l’exécution : échecs de tâches, rejets de gates, erreurs de budget et motif d’annulation ou de dépassement de délai."
   ],
   "WorkflowResult.observerErrors": [
     "Exceptions thrown by telemetry and observe callbacks, collected independently without changing workflow status or task errors.",
@@ -934,12 +934,12 @@
     "Tentatives admises et usage de tokens observé cumulés, y compris la comptabilité restaurée."
   ],
   "WorkflowResult.value": [
-    "Read a successful task’s typed output by task identity; reject unavailable outputs.",
-    "Lit la sortie typée d’une tâche réussie par identité de tâche ; rejette les sorties indisponibles."
+    "Return a task's output from this run or its restored checkpoint; throws when the task has no done value.",
+    "Renvoie la sortie d’une tâche issue de cette exécution ou de son checkpoint restauré ; lève une erreur si la tâche n’a pas de valeur done."
   ],
   "WorkflowResult.unwrap": [
-    "Return normally for a successful run; throw WorkflowFailure for any other workflow outcome.",
-    "Revient normalement si l’exécution a réussi ; lève WorkflowFailure pour tout autre résultat de workflow."
+    "Return when status is done; otherwise throw WorkflowFailure.",
+    "Retourne normalement quand status vaut done ; sinon lève WorkflowFailure."
   ],
   "TaskRecord.usageReceipts": [
     "Persisted receipt IDs that prevent repeated accounting of the same usage report.",
@@ -958,28 +958,28 @@
     "Clé de tâche stable identifiant le nœud dans son graphe de workflow."
   ],
   "TaskRecord.status": [
-    "Task lifecycle state, including waiting, active, done, failure, cancellation, gate pause/rejection or a quota pause.",
-    "État de cycle de vie de tâche, incluant attente, activité, réussite, échec, annulation, pause/rejet d’une gate ou pause sur quota."
+    "Task state: waiting, active, done, failed, skipped, cancelled, paused (gate or quota), rejected or waiting-input.",
+    "État de la tâche : waiting, active, done, failed, skipped, cancelled, paused (gate ou quota), rejected ou waiting-input."
   ],
   "TaskRecord.attempts": [
-    "Number of attempts actually started for this task.",
-    "Nombre de tentatives réellement démarrées pour cette tâche."
+    "Attempts started, cumulative across retries and checkpoint resumes; 0 for a skipped task or a cache hit.",
+    "Tentatives démarrées, cumulées sur les relances et les reprises de checkpoint ; 0 pour une tâche ignorée ou un cache trouvé."
   ],
   "TaskRecord.startedAt": [
-    "ISO timestamp when execution of this task or operation started.",
-    "Horodatage ISO du début d’exécution de cette tâche ou opération."
+    "ISO timestamp of the task's latest start.",
+    "Horodatage ISO du dernier démarrage de la tâche."
   ],
   "TaskRecord.finishedAt": [
-    "ISO timestamp when execution of this task or operation finished.",
-    "Horodatage ISO de fin d’exécution de cette tâche ou opération."
+    "ISO timestamp when the task reached its current status, including paused and waiting-input.",
+    "Horodatage ISO auquel la tâche a atteint son statut actuel, y compris paused et waiting-input."
   ],
   "TaskRecord.error": [
-    "Recorded failure message for the task, when present.",
-    "Message d’échec enregistré pour la tâche lorsqu’il existe."
+    "Message of the error that failed or cancelled the task, or of its gate rejection.",
+    "Message de l’erreur qui a fait échouer ou annulé la tâche, ou du rejet de sa gate."
   ],
   "WorkflowPauseRequest.id": [
-    "Unique ID of this pending gate request; decisions must match it.",
-    "Identifiant unique de cette demande de gate en attente ; les décisions doivent lui correspondre."
+    "Random identifier generated when the gate pauses; a decision's requestId must equal it.",
+    "Identifiant aléatoire généré quand la gate se suspend ; le requestId d’une décision doit lui être égal."
   ],
   "WorkflowPauseRequest.requestedAt": [
     "ISO timestamp when the gate entered its paused state.",
@@ -990,40 +990,40 @@
     "approval attend approve ; pause attend resume. Les deux acceptent un rejet."
   ],
   "WorkflowGate.prompt": [
-    "Instruction explaining the approval or pause decision requested from the trusted actor.",
-    "Instruction expliquant la décision d’approbation ou de reprise demandée à l’acteur de confiance."
+    "Question put to the actors, copied into the pending request.",
+    "Question posée aux acteurs, copiée dans la demande en attente."
   ],
   "WorkflowGate.actors": [
-    "Nonempty list of actors authorized to decide this gate. Signed gates additionally require a verified key bound to the selected actor.",
-    "Liste non vide des acteurs autorisés à décider ce gate. Les gates signés exigent aussi une clé vérifiée associée à l’acteur choisi."
+    "Names allowed to decide this gate. A signed gate also requires a key bound to the chosen actor.",
+    "Noms autorisés à décider cette gate. Une gate signée exige aussi une clé liée à l’acteur choisi."
   ],
   "WorkflowDecisionRecord.decidedAt": [
     "ISO timestamp assigned when the decision was validated and recorded.",
     "Horodatage ISO attribué lors de la validation et de l’enregistrement de la décision."
   ],
   "WorkflowDecision.executionId": [
-    "Identity of the workflow execution, preserved across checkpoint resumption.",
-    "Identité de l’exécution de workflow, conservée lors de la reprise d’un checkpoint."
+    "executionId of the run that paused the gate, from its WorkflowResult; any other value rejects the whole batch.",
+    "executionId de l’exécution qui a suspendu la gate, lu dans son WorkflowResult ; toute autre valeur rejette le lot entier."
   ],
   "WorkflowDecision.key": [
-    "Stable task key identifying the node within its workflow graph.",
-    "Clé de tâche stable identifiant le nœud dans son graphe de workflow."
+    "Key of the gate task being decided.",
+    "Clé de la tâche gate à décider."
   ],
   "WorkflowDecision.requestId": [
-    "ID of the exact pending gate request being answered; stale requests are rejected.",
-    "Identifiant de la demande de gate précise à laquelle répondre ; les demandes périmées sont rejetées."
+    "id of the gate's pending request (WorkflowPauseRequest.id); a stale or unknown id rejects the whole batch.",
+    "id de la demande en attente de la gate (WorkflowPauseRequest.id) ; un id périmé ou inconnu rejette le lot entier."
   ],
   "WorkflowDecision.action": [
-    "approve for an approval gate, resume for a pause gate, or reject to terminate either gate.",
-    "approve pour une approbation, resume pour une pause, ou reject pour terminer l’une ou l’autre par rejet."
+    "approve for an approval gate, resume for a pause gate, or reject for either. reject skips dependent tasks and fails the run.",
+    "approve pour une gate d’approbation, resume pour une gate de pause, ou reject pour l’une ou l’autre. reject ignore les tâches dépendantes et fait échouer l’exécution."
   ],
   "WorkflowDecision.actor": [
-    "Actor name that must be allowed by the gate; signed gates also verify the public key bound to this actor.",
-    "Nom d’acteur autorisé par le gate ; les gates signés vérifient aussi la clé publique associée à cet acteur."
+    "One of the gate's actors. Outpost trusts this name unless the gate is signed, in which case the proof's key must be bound to it.",
+    "L’un des acteurs de la gate. Outpost fait confiance à ce nom, sauf pour une gate signée, où la clé de la preuve doit lui être liée."
   ],
   "WorkflowDecision.reason": [
-    "Nonempty explanation supplied by the trusted actor for the decision.",
-    "Explication non vide fournie par l’acteur de confiance pour sa décision."
+    "Nonblank explanation of the decision, kept in the checkpoint.",
+    "Explication non vide de la décision, conservée dans le checkpoint."
   ],
   "WorkflowUsage.attempts": [
     "Cumulative number of admitted task attempts across the workflow.",
@@ -1034,72 +1034,72 @@
     "Usage cumulé de tokens observé sur les tentatives, y compris la comptabilité restaurée."
   ],
   "Task.key": [
-    "Stable task key identifying the node within its workflow graph.",
-    "Clé de tâche stable identifiant le nœud dans son graphe de workflow."
+    "Unique key in the workflow, matching [A-Za-z0-9][A-Za-z0-9._-]*. Records, events and checkpoints identify the task by it.",
+    "Clé unique dans le workflow, conforme à [A-Za-z0-9][A-Za-z0-9._-]*. Les enregistrements, événements et checkpoints identifient la tâche par elle."
   ],
   "Task.gate": [
     "Persisted approval or pause definition; execution requires a checkpoint and a matching trusted decision.",
     "Définition persistée d’approbation ou pause ; son exécution exige un checkpoint et une décision de confiance correspondante."
   ],
   "Task.after": [
-    "Declared task dependencies whose values may be read.",
-    "Dépendances déclarées dont les valeurs peuvent être lues."
+    "Tasks that must be done before this one starts; only these can be read with context.value(). A failed, skipped, cancelled or rejected dependency skips this task.",
+    "Tâches qui doivent être done avant que celle-ci démarre ; seules celles-ci se lisent avec context.value(). Une dépendance failed, skipped, cancelled ou rejected fait passer cette tâche en skipped."
   ],
   "Task.perform": [
-    "Callback executed for each task attempt; returns its output and must honor context.signal.",
-    "Callback exécuté à chaque tentative ; renvoie sa sortie et doit respecter context.signal."
+    "Runs each attempt and returns the task output; with a checkpoint, the output must be lossless JSON or undefined. Stop work when context.signal aborts.",
+    "S’exécute à chaque tentative et renvoie la sortie de la tâche ; avec un checkpoint, cette sortie doit être du JSON sans perte ou undefined. Arrêtez le travail quand context.signal est annulé."
   ],
   "Task.condition": [
-    "Predicate evaluated before the first task attempt.",
-    "Prédicat évalué avant la première tentative."
+    "Evaluated with attempt 0 before the task runs, including when a later start() resumes it; false ends the task as skipped, which skips its dependents.",
+    "Évaluée avec attempt 0 avant l’exécution de la tâche, y compris quand un start() ultérieur la reprend ; false termine la tâche en skipped, ce qui ignore aussi ses dépendantes."
   ],
   "Task.retry": [
-    "Explicit retry policy; repeated effects require care.",
-    "Politique explicite de reprise ; les effets peuvent se répéter."
+    "Retry policy for failed attempts; without it the task runs once. A retried attempt repeats its side effects.",
+    "Politique de relance des tentatives échouées ; sans elle, la tâche s’exécute une fois. Une tentative relancée répète ses effets de bord."
   ],
   "Task.timeoutMs": [
-    "Positive integer time limit in milliseconds for each task attempt, up to 2147483647; cancellation is cooperative through context.signal.",
-    "Durée entière positive en millisecondes de chaque tentative, jusqu’à 2147483647 ; l’annulation est coopérative via context.signal."
+    "Deadline in milliseconds for each attempt, a positive integer up to 2147483647. Expiry aborts context.signal and fails the attempt, which retry may repeat.",
+    "Délai en millisecondes de chaque tentative, entier positif jusqu’à 2147483647. À l’expiration, context.signal est annulé et la tentative échoue ; retry peut la répéter."
   ],
   "TaskContext.signal": [
-    "Cooperative cancellation for this operation.",
-    "Annulation coopérative de cette opération."
+    "Aborted when the workflow is cancelled, stops on an error or times out, or when this attempt's timeoutMs expires.",
+    "Annulé quand le workflow est annulé, s’arrête sur une erreur ou dépasse son délai, ou quand le timeoutMs de cette tentative expire."
   ],
   "TaskContext.attempt": [
-    "One-based task attempt number.",
-    "Numéro de tentative de tâche commençant à un."
+    "One-based attempt number, cumulative across retries and checkpoint resumes; 0 in condition and cache key callbacks.",
+    "Numéro de tentative à partir de 1, cumulé sur les relances et les reprises de checkpoint ; 0 dans les callbacks condition et clé de cache."
   ],
   "TaskContext.executionId": [
     "Identity of the workflow execution, preserved across checkpoint resumption.",
     "Identité de l’exécution de workflow, conservée lors de la reprise d’un checkpoint."
   ],
   "TaskContext.reportUsage": [
-    "Add token usage observed during this task attempt to the workflow’s cumulative accounting.",
-    "Ajoute l’usage de tokens observé pendant cette tentative à la comptabilité cumulée du workflow."
+    "Add token usage to the workflow budget; throws outside the active attempt. Agent task definitions report their usage themselves.",
+    "Ajoute un usage de tokens au budget du workflow ; lève une erreur hors de la tentative active. Les définitions de tâches d’agent signalent elles-mêmes leur usage."
   ],
   "TaskContext.reportUsageOnce": [
     "Add token usage only if the receipt ID has not already been recorded, including across checkpoint resumes.",
     "Ajoute l’usage de tokens seulement si l’identifiant de reçu n’a pas déjà été enregistré, y compris après reprise d’un checkpoint."
   ],
   "TaskContext.checkpoint": [
-    "Persist the current workflow state when durable execution is enabled.",
-    "Persiste l’état courant du workflow lorsque l’exécution durable est activée."
+    "Save the workflow state now; does nothing without a checkpoint.",
+    "Enregistre immédiatement l’état du workflow ; sans effet sans checkpoint."
   ],
   "TaskContext.value": [
-    "Read the completed output of a task listed in this task’s declared dependencies.",
-    "Lit la sortie terminée d’une tâche figurant dans les dépendances déclarées de cette tâche."
+    "Return the output of a task listed in after; throws for an undeclared dependency.",
+    "Renvoie la sortie d’une tâche listée dans after ; lève une erreur pour une dépendance non déclarée."
   ],
   "Retry.attempts": [
-    "Maximum total attempts, including the first execution.",
-    "Nombre maximal total de tentatives, première exécution comprise."
+    "Maximum attempts, the first included; a positive integer. The count restarts when the task runs again after a quota pause or a checkpoint resume.",
+    "Nombre maximal de tentatives, la première comprise ; entier positif. Le compte repart de zéro quand la tâche s’exécute à nouveau après une pause sur quota ou une reprise de checkpoint."
   ],
   "Retry.delayMs": [
-    "Base delay in milliseconds before a retry; defaults to zero. Exponential backoff doubles it after each failed attempt within this start() call.",
-    "Délai de base en millisecondes avant une reprise ; zéro par défaut. Le backoff exponentiel le double après chaque tentative échouée de cet appel à start()."
+    "Wait in milliseconds before each retry, default 0.",
+    "Attente en millisecondes avant chaque relance, 0 par défaut."
   ],
   "Retry.accepts": [
-    "Predicate deciding whether a failure from the given attempt may be retried.",
-    "Prédicat déterminant si l’échec de la tentative donnée autorise une reprise."
+    "Receives the error and the attempt number; returning false fails the task without further retries.",
+    "Reçoit l’erreur et le numéro de tentative ; renvoyer false fait échouer la tâche sans autre relance."
   ],
   "WorkflowBudgetExceeded.dimension": [
     "Budget dimension whose admission limit was exceeded: attempts or a token counter.",
@@ -1114,20 +1114,20 @@
     "Quantité cumulée courante observée pour la dimension de budget dépassée."
   ],
   "defineTask.options": [
-    "Task identity, dependency edges, perform callback and attempt policy.",
-    "Identité de tâche, dépendances, callback perform et politique de tentatives."
+    "Task key, dependencies and perform callback, with optional condition, retry, timeout, cache, gate or interaction.",
+    "Clé, dépendances et callback perform de la tâche, avec en option condition, retry, délai, cache, gate ou interaction."
   ],
   "TaskOptions.after": [
-    "Declared task dependencies whose values may be read.",
-    "Dépendances déclarées dont les valeurs peuvent être lues."
+    "Tasks that must be done before this one starts, default none; only these can be read with context.value().",
+    "Tâches qui doivent être done avant que celle-ci démarre, aucune par défaut ; seules celles-ci se lisent avec context.value()."
   ],
   "defineWorkflow.name": [
-    "Name of the workflow definition, included in its execution reports.",
-    "Nom de la définition de workflow, inclus dans ses rapports d’exécution."
+    "Workflow name, not empty; part of the checkpoint identity and of every event.",
+    "Nom du workflow, non vide ; il fait partie de l’identité du checkpoint et de chaque événement."
   ],
   "defineWorkflow.tasks": [
-    "Task definitions making up the graph, including every declared dependency.",
-    "Définitions de tâches composant le graphe, comprenant toutes les dépendances déclarées."
+    "Every task of the graph; each dependency must also be in the list.",
+    "Toutes les tâches du graphe ; chaque dépendance doit aussi figurer dans la liste."
   ],
   "Workflow.name": [
     "Name of the workflow definition, included in its execution reports.",
@@ -1138,8 +1138,8 @@
     "Définitions de tâches composant le graphe, comprenant toutes les dépendances déclarées."
   ],
   "Workflow.start": [
-    "Execute the validated graph with concurrency, cooperative cancellation and timeout, budgets and checkpoint settings. Each invocation receives a fresh optional timeoutMs deadline.",
-    "Exécute le graphe validé avec concurrence, annulation et délai coopératifs, budgets et checkpoints. Chaque appel reçoit un nouveau délai timeoutMs optionnel."
+    "Run the graph and resolve with a WorkflowResult once no task can run, even when tasks failed. Rejects on invalid options, a stale or invalid answer or decision, or a checkpoint that cannot be read or saved.",
+    "Exécute le graphe et se résout avec un WorkflowResult dès qu’aucune tâche ne peut plus s’exécuter, même si des tâches ont échoué. Rejette sur des options invalides, une réponse ou une décision périmée ou invalide, ou un checkpoint impossible à lire ou à enregistrer."
   ],
   "Workflow.diagram": [
     "Return a Mermaid diagram of task keys and dependency edges without executing tasks.",
@@ -1150,100 +1150,100 @@
     "Décisions explicites pour les gates persistés en attente."
   ],
   "WorkflowOptions.checkpoint": [
-    "Durable execution storage and replay configuration.",
-    "Stockage durable de l’exécution et configuration de rejeu."
+    "Store, runId and version that persist task states, outputs and usage between start() calls. Required for gates, interactions, answers, decisions and onQuota.",
+    "Store, runId et version qui conservent les états, sorties et usage des tâches entre les appels à start(). Requis pour les gates, les interactions, answers, decisions et onQuota."
   ],
   "WorkflowOptions.signal": [
-    "Cooperative cancellation for this operation.",
-    "Annulation coopérative de cette opération."
+    "Cancels the run: running tasks see context.signal abort, pending tasks end cancelled and the status is cancelled.",
+    "Annule l’exécution : les tâches en cours voient context.signal annulé, les tâches en attente finissent cancelled et le statut est cancelled."
   ],
   "WorkflowOptions.concurrency": [
-    "Maximum number of workflow tasks running concurrently.",
-    "Nombre maximal de tâches de workflow exécutées simultanément."
+    "Maximum tasks running at once, default 1 (tasks run in list order). Must be a positive integer.",
+    "Nombre maximal de tâches exécutées en même temps, 1 par défaut (les tâches s’exécutent dans l’ordre de la liste). Doit être un entier positif."
   ],
   "WorkflowOptions.budget": [
-    "Shared attempt and observed usage admission limits.",
-    "Limites partagées de tentatives et d’usage observé."
+    "Attempt and token limits shared by every task, including restored usage; reaching one fails the run with WorkflowBudgetExceeded.",
+    "Limites de tentatives et de tokens partagées par toutes les tâches, usage restauré compris ; en atteindre une fait échouer l’exécution avec WorkflowBudgetExceeded."
   ],
   "WorkflowOptions.stopOnError": [
     "Defaults to true: the first failure aborts the run, cancelling running and pending tasks. With false, only dependents of the failed task are skipped and independent tasks continue.",
     "Vaut true par défaut : le premier échec interrompt l’exécution et annule les tâches en cours et en attente. Avec false, seules les tâches dépendantes de la tâche en échec sont ignorées et les tâches indépendantes continuent."
   ],
   "WorkflowOptions.observe": [
-    "Custom workflow lifecycle and usage callback, invoked after telemetry independently; thrown errors are collected in observerErrors. Existing OpenTelemetry observe callbacks remain supported.",
-    "Callback personnalisé de cycle de vie et d’usage du workflow, appelé après telemetry de manière indépendante ; les erreurs levées sont collectées dans observerErrors. Les callbacks observe OpenTelemetry existants restent pris en charge."
+    "Receives each WorkflowEvent after telemetry; thrown errors are collected in observerErrors without changing the run.",
+    "Reçoit chaque WorkflowEvent après telemetry ; les erreurs levées sont collectées dans observerErrors sans modifier l’exécution."
   ],
   "WorkflowCheckpointOptions.store": [
-    "Persistence adapter that acquires, reads and writes workflow checkpoints.",
-    "Adapter de persistance acquérant, lisant et écrivant les checkpoints du workflow."
+    "Store that grants exclusive ownership of the run and reads and writes its checkpoint, usually createWorkflowCheckpointStore().",
+    "Store qui accorde la possession exclusive de l’exécution, puis lit et écrit son checkpoint, en général createWorkflowCheckpointStore()."
   ],
   "WorkflowCheckpointOptions.runId": [
-    "Stable identity of a saved workflow execution.",
-    "Identité stable d’une exécution sauvegardée."
+    "Key of the saved run: a later start() with the same runId restores it. Blank values are rejected.",
+    "Clé de l’exécution sauvegardée : un start() ultérieur avec le même runId la restaure. Les valeurs vides sont refusées."
   ],
   "WorkflowCheckpointOptions.version": [
-    "Caller-supplied graph/implementation version; change it when task code or workflow inputs change.",
-    "Version de graphe/implémentation fournie par l’appelant ; à changer lorsque le code des tâches ou les entrées changent."
+    "Your version of task code, briefs and inputs, hashed into the checkpoint identity with the workflow name and task graph. A saved run cannot change version: start a new runId instead.",
+    "Votre version du code des tâches, des briefs et des entrées, incluse dans l’empreinte d’identité du checkpoint avec le nom du workflow et le graphe des tâches. Une exécution sauvegardée ne change pas de version : démarrez plutôt un nouveau runId."
   ],
   "WorkflowCheckpointOptions.resume": [
-    "Explicit retry-incomplete authorization to replay interrupted tasks and their possible side effects.",
-    "Autorisation explicite retry-incomplete de rejouer les tâches interrompues et leurs effets possibles."
+    "Set to retry-incomplete to reopen a checkpoint with failed, cancelled or interrupted tasks and run them again, with any side effects they already made. Without it, start() rejects such a checkpoint before running anything.",
+    "Valeur retry-incomplete pour rouvrir un checkpoint contenant des tâches en échec, annulées ou interrompues et les exécuter de nouveau, avec les effets de bord déjà produits. Sans elle, start() rejette un tel checkpoint avant toute exécution."
   ],
   "WorkflowCheckpointStore.acquire": [
-    "Acquire exclusive checkpoint ownership for the supplied stable run ID.",
-    "Acquiert la possession exclusive du checkpoint pour l’identifiant stable d’exécution fourni."
+    "Takes exclusive ownership of runId and returns its lease. createWorkflowCheckpointStore() rejects while an owner is recorded, including one left by a dead process, until recoverWorkflowCheckpoint() clears it.",
+    "Prend la possession exclusive de runId et renvoie son bail. createWorkflowCheckpointStore() rejette tant qu’un propriétaire est enregistré, y compris celui d’un processus mort, jusqu’à ce que recoverWorkflowCheckpoint() l’efface."
   ],
   "WorkflowCheckpointLease.read": [
-    "Read the saved checkpoint as unknown for validation; return no saved value for a new run.",
-    "Lit le checkpoint sauvegardé comme valeur inconnue à valider ; ne renvoie aucune valeur sauvegardée pour une nouvelle exécution."
+    "Returns the saved checkpoint as unvalidated data, or undefined for a new run. start() validates it against the workflow before running any task.",
+    "Renvoie le checkpoint sauvegardé comme donnée non validée, ou undefined pour une nouvelle exécution. start() le valide par rapport au workflow avant d’exécuter une tâche."
   ],
   "WorkflowCheckpointLease.write": [
-    "Atomically persist the supplied workflow checkpoint while owning the lease.",
-    "Persiste atomiquement le checkpoint fourni sous la possession du bail."
+    "Replaces the saved checkpoint while the lease is held. createWorkflowCheckpointStore() writes conditionally on the last revision, rejecting with TransportConflict once ownership is lost, and rejects checkpoints above 16 MiB.",
+    "Remplace le checkpoint sauvegardé tant que le bail est détenu. createWorkflowCheckpointStore() écrit sous condition de la dernière révision, rejette avec TransportConflict une fois la possession perdue, et refuse les checkpoints de plus de 16 Mio."
   ],
   "WorkflowCheckpointLease.release": [
-    "Release exclusive ownership of the checkpoint without deleting saved state.",
-    "Libère la possession exclusive du checkpoint sans supprimer l’état sauvegardé."
+    "Clears ownership once pending writes settle and keeps the saved checkpoint. start() calls it when it returns or rejects.",
+    "Efface la possession une fois les écritures en cours terminées et conserve le checkpoint sauvegardé. start() l’appelle lorsqu’il se termine ou rejette."
   ],
   "WorkflowCheckpoint.format": [
-    "Checkpoint serialization format version; currently 1.",
-    "Version du format de sérialisation du checkpoint ; actuellement 1."
+    "Serialization format version, always 1.",
+    "Version du format de sérialisation, toujours 1."
   ],
   "WorkflowCheckpoint.identity": [
-    "Fingerprint binding saved state to the workflow graph and caller-supplied version.",
-    "Empreinte liant l’état sauvegardé au graphe de workflow et à la version fournie par l’appelant."
+    "SHA-256 of the workflow name, checkpoint version and task graph: keys, dependencies, timeout, retry, condition, gate, loop and interaction settings. A different identity rejects the checkpoint.",
+    "SHA-256 du nom du workflow, de la version du checkpoint et du graphe des tâches : clés, dépendances, timeout, retry, condition, gates, boucles et interactions. Une identité différente fait refuser le checkpoint."
   ],
   "WorkflowCheckpoint.executionId": [
-    "Identity of the workflow execution, preserved across checkpoint resumption.",
-    "Identité de l’exécution de workflow, conservée lors de la reprise d’un checkpoint."
+    "Execution identity kept across resumes. context.idempotencyKey derives from it and the task key, so it stays the same for each task.",
+    "Identité de l’exécution conservée d’une reprise à l’autre. context.idempotencyKey en dérive avec la clé de la tâche et reste donc le même pour chaque tâche."
   ],
   "WorkflowCheckpoint.records": [
-    "Saved status, attempts, decisions and usage receipts for each task.",
-    "Statuts, tentatives, décisions et reçus d’usage sauvegardés pour chaque tâche."
+    "One record per task: status, attempts, timestamps, error, usage receipts and any gate, input, quota, loop or cache state.",
+    "Un enregistrement par tâche : statut, tentatives, horodatages, erreur, reçus d’usage et état éventuel de gate, de question, de quota, de boucle ou de cache."
   ],
   "WorkflowCheckpoint.values": [
-    "Saved completed task outputs indexed by task key and encoded as JSON or undefined.",
-    "Sorties terminées sauvegardées par clé de tâche et encodées en JSON ou undefined."
+    "Output of each done task, keyed by task key. Restored on resume, so done tasks never run again.",
+    "Sortie de chaque tâche done, indexée par clé de tâche. Restaurée à la reprise, si bien qu’une tâche done ne s’exécute plus."
   ],
   "WorkflowCheckpoint.usage": [
-    "Cumulative admitted attempts and observed token usage, including restored accounting.",
-    "Tentatives admises et usage de tokens observé cumulés, y compris la comptabilité restaurée."
+    "Attempts and token usage summed across every resume; its attempts must equal the sum of the records' attempts. A resumed run's budget continues from these totals.",
+    "Tentatives et usage de tokens cumulés sur toutes les reprises ; ses tentatives doivent égaler la somme de celles des enregistrements. Le budget d’une exécution reprise part de ces totaux."
   ],
   "WorkflowCheckpointValue.kind": [
-    "Distinguishes an undefined task output from a lossless JSON value.",
-    "Distingue une sortie de tâche undefined d’une valeur JSON sans perte."
+    "undefined when the task returned undefined, json otherwise.",
+    "undefined lorsque la tâche a renvoyé undefined, json sinon."
   ],
   "WorkflowCheckpointValue.value": [
-    "Lossless JSON representation of a completed task output when kind is json.",
-    "Représentation JSON sans perte d’une sortie de tâche terminée lorsque kind vaut json."
+    "Task output as lossless JSON: plain objects, dense arrays, strings, booleans, null and finite numbers other than -0, with no cycles.",
+    "Sortie de la tâche en JSON sans perte : objets simples, tableaux denses, chaînes, booléens, null et nombres finis autres que -0, sans cycle."
   ],
   "WorkflowBudget.attempts": [
-    "Maximum cumulative task attempts that the workflow may admit.",
-    "Nombre maximal cumulé de tentatives de tâches que le workflow peut admettre."
+    "Maximum task attempts admitted over the run and its checkpoint resumes. Reaching it cancels the tasks not yet started.",
+    "Nombre maximal de tentatives admises sur l’exécution et ses reprises de checkpoint. L’atteindre annule les tâches non démarrées."
   ],
   "WorkflowBudget.usage": [
-    "Per-token-counter admission thresholds; observed usage may overshoot while admitted work finishes.",
-    "Seuils d’admission par compteur de tokens ; l’usage observé peut dépasser le seuil pendant la fin du travail déjà admis."
+    "Token limits per counter (input, cached, cacheCreated, output). Reaching one cancels running tasks too; usage reported late can exceed it.",
+    "Limites de tokens par compteur (input, cached, cacheCreated, output). En atteindre une annule aussi les tâches en cours ; un usage signalé tardivement peut la dépasser."
   ],
   "WorkflowEvent.executionId": [
     "Identity of the workflow execution, preserved across checkpoint resumption.",
@@ -1258,16 +1258,16 @@
     "Horodatage ISO d’émission de l’événement de workflow."
   ],
   "WorkflowEvent.type": [
-    "Lifecycle notification, including loop phases, input-request when a task suspends, input-answer when an accepted reply makes it ready to run, quota when a quota error pauses a task or a paused task is released, and cache for task cache outcomes.",
-    "Notification du cycle de vie, incluant les phases de boucle, input-request lors d’une suspension, input-answer lorsqu’une réponse acceptée rend la tâche exécutable, quota lorsqu’une erreur de quota met une tâche en pause ou qu’une tâche en pause est relancée, et cache pour les résultats du cache de tâches."
+    "Event kind: start, resume, task, attempt, retry, usage, checkpoint, finish, budget-exceeded, gate, decision, loop, input-request, input-answer, quota or cache.",
+    "Type d’événement : start, resume, task, attempt, retry, usage, checkpoint, finish, budget-exceeded, gate, decision, loop, input-request, input-answer, quota ou cache."
   ],
   "WorkflowEvent.key": [
     "Stable task key identifying the node within its workflow graph.",
     "Clé de tâche stable identifiant le nœud dans son graphe de workflow."
   ],
   "WorkflowEvent.status": [
-    "Task lifecycle state, including waiting, active, done, failure, cancellation or gate pause/rejection. On quota events, waiting means the task will run again in this start() call and paused means it stays paused.",
-    "État de cycle de vie de tâche, incluant attente, activité, réussite, échec, annulation ou pause/rejet d’une gate. Sur les événements quota, waiting signifie que la tâche sera relancée dans cet appel start() et paused qu’elle reste en pause."
+    "Task status on task, quota and input events, or the run status on finish. On quota events, waiting means the task runs again in this start() call and paused means it stays paused.",
+    "Statut de la tâche sur les événements task, quota et input, ou statut de l’exécution sur finish. Sur les événements quota, waiting signifie que la tâche repart dans cet appel à start() et paused qu’elle reste en pause."
   ],
   "WorkflowEvent.attempt": [
     "One-based task attempt number.",
@@ -1310,8 +1310,8 @@
     "Réglages d’ordonnancement et fabrique de requêtes choisissant un dépôt et une sandbox distincts à chaque tentative."
   ],
   "IsolatedTaskOptions.request": [
-    "Build repository, provider, agent and brief options for a separately allocated dispatch at each attempt.",
-    "Construit les options de dépôt, provider, agent et brief pour un dispatch alloué séparément à chaque tentative."
+    "Build the repository, sandbox provider, agent and dispatch options for each attempt; may be async.",
+    "Construit le dépôt, le provider de sandbox, l’agent et les options de dispatch de chaque tentative ; peut être asynchrone."
   ],
   "ClaudeSettings.permissions": [
     "Claude Code permission mode passed with --permission-mode. Without it, headless runs pass --dangerously-skip-permissions; interactive sessions keep the CLI’s approval prompts.",
@@ -2222,28 +2222,28 @@
     "Toujours true : la restauration conserve les artefacts de récupération d’origine."
   ],
   "defineApprovalTask.options": [
-    "Gate key, dependencies, approval prompt and trusted actors allowed to approve or reject.",
-    "Clé de gate, dépendances, demande d’approbation et acteurs de confiance autorisés à approuver ou rejeter."
+    "Gate key, dependencies, prompt, actors allowed to approve or reject, and the optional signed authentication.",
+    "Clé de la gate, dépendances, prompt, acteurs autorisés à approuver ou rejeter, et l’authentification signed facultative."
   ],
   "WorkflowGateOptions.key": [
-    "Stable task key identifying the node within its workflow graph.",
-    "Clé de tâche stable identifiant le nœud dans son graphe de workflow."
+    "Task key of the gate, unique in the workflow and named by each decision. Letters, digits, dot, underscore and hyphen, starting with a letter or digit.",
+    "Clé de tâche de la gate, unique dans le workflow et reprise par chaque décision. Lettres, chiffres, point, tiret bas et tiret, en commençant par une lettre ou un chiffre."
   ],
   "WorkflowGateOptions.after": [
-    "Declared task dependencies whose values may be read.",
-    "Dépendances déclarées dont les valeurs peuvent être lues."
+    "Tasks that must be done before the gate pauses. If one fails or is skipped, cancelled or rejected, the gate is skipped.",
+    "Tâches qui doivent être terminées avant que la gate se suspende. Si l’une échoue ou est ignorée, annulée ou rejetée, la gate est ignorée."
   ],
   "WorkflowGateOptions.prompt": [
-    "Instruction explaining the approval or pause decision requested from the trusted actor.",
-    "Instruction expliquant la décision d’approbation ou de reprise demandée à l’acteur de confiance."
+    "Question put to the actors, copied into the pending request. A blank prompt throws.",
+    "Question posée aux acteurs, copiée dans la demande en attente. Un prompt vide lève une erreur."
   ],
   "WorkflowGateOptions.actors": [
-    "Nonempty, unique actor names permitted to decide the gate being created; signed authentication binds the selected actor to a trusted key.",
-    "Noms d’acteurs non vides et uniques autorisés à décider le gate créé ; l’authentification signée lie l’acteur choisi à une clé de confiance."
+    "Names allowed to decide the gate: at least one, unique and nonblank. Outpost trusts the actor your application submits unless the gate is signed.",
+    "Noms autorisés à décider la gate : au moins un, uniques et non vides. Outpost fait confiance à l’acteur soumis par votre application, sauf si la gate est signée."
   ],
   "definePauseTask.options": [
-    "Gate key, dependencies, pause prompt and trusted actors allowed to resume or reject.",
-    "Clé de gate, dépendances, demande de pause et acteurs de confiance autorisés à reprendre ou rejeter."
+    "Gate key, dependencies, prompt, actors allowed to resume or reject, and the optional signed authentication.",
+    "Clé de la gate, dépendances, prompt, acteurs autorisés à reprendre ou rejeter, et l’authentification signed facultative."
   ],
   "inspectRecovery.options": [
     "Local repository or transport inventory selection, entry limit and optional resource inspection. Git and process-lock checks require local mode.",
@@ -2270,64 +2270,64 @@
     "Inclut les baux de sandbox et opérations actives enregistrés localement."
   ],
   "ArtifactIdentity.name": [
-    "Nonempty artifact contract name, at most 1024 characters.",
-    "Nom non vide du contrat d’artefact, de 1024 caractères au maximum."
+    "Contract name, nonempty and at most 1024 characters. A read requires the same name.",
+    "Nom du contrat, non vide et de 1024 caractères au maximum. Une lecture exige le même nom."
   ],
   "ArtifactIdentity.version": [
-    "Nonempty caller-defined contract version, at most 1024 characters; reads require an exact match.",
-    "Version de contrat non vide définie par l’appelant, de 1024 caractères au maximum ; les lectures exigent une correspondance exacte."
+    "Contract version you choose, nonempty and at most 1024 characters. A read requires the same version, so change it when the format changes.",
+    "Version du contrat que vous choisissez, non vide et de 1024 caractères au maximum. Une lecture exige la même version : changez-la quand le format change."
   ],
   "JsonArtifactOptions.schema": [
-    "Boundary validator that narrows unknown input.",
-    "Validateur de frontière qui précise une entrée inconnue."
+    "Standard Schema validator (Zod, Valibot…) or a function that returns the checked value or throws. Runs before encoding and after decoding; its output is the value stored and returned.",
+    "Validateur Standard Schema (Zod, Valibot…) ou fonction qui renvoie la valeur contrôlée ou lève une erreur. S’applique avant l’encodage et après le décodage ; sa sortie est la valeur stockée et renvoyée."
   ],
   "ArtifactIdentity.encoding": [
-    "Payload representation required by the artifact contract: json or binary.",
-    "Représentation des données exigée par le contrat d’artefact : json ou binary."
+    "json for a defineJsonArtifact() contract, binary for a defineBinaryArtifact() contract. A read requires the same encoding.",
+    "json pour un contrat defineJsonArtifact(), binary pour un contrat defineBinaryArtifact(). Une lecture exige le même encodage."
   ],
   "ArtifactContract.encode": [
-    "Validate and serialize a typed value into immutable artifact bytes.",
-    "Valide et sérialise une valeur typée en octets d’artefact immuables."
+    "Validate a value and return the bytes to store. Rejects a value the contract does not accept.",
+    "Valide une valeur et renvoie les octets à stocker. Rejette une valeur que le contrat n’accepte pas."
   ],
   "ArtifactContract.decode": [
-    "Decode stored bytes and validate them as the contract’s value type.",
-    "Décode les octets stockés et les valide comme valeur typée du contrat."
+    "Turn stored bytes back into a validated value. Rejects bytes the contract does not accept.",
+    "Reconvertit des octets stockés en valeur validée. Rejette des octets que le contrat n’accepte pas."
   ],
   "publishArtifact.store": [
-    "Artifact byte store used for immutable publication or bounded payload retrieval.",
-    "Store d’octets d’artefacts utilisé pour la publication immuable ou la lecture bornée des données."
+    "Store that receives the encoded bytes under the artifact id.",
+    "Store qui reçoit les octets encodés sous l’id de l’artefact."
   ],
   "publishArtifact.contract": [
-    "Named, versioned artifact contract that defines encoding and validation.",
-    "Contrat d’artefact nommé et versionné définissant encodage et validation."
+    "Contract that validates and encodes the value; its name, version and encoding are recorded in the reference.",
+    "Contrat qui valide et encode la valeur ; son nom, sa version et son encodage sont enregistrés dans la référence."
   ],
   "publishArtifact.value": [
-    "Typed payload to validate, encode and publish through the artifact contract.",
-    "Données typées à valider, encoder et publier selon le contrat d’artefact."
+    "Value to publish; the contract validates it before encoding.",
+    "Valeur à publier ; le contrat la valide avant l’encodage."
   ],
   "publishArtifact.options": [
-    "Producer identity, ordered parent lineage and publication cancellation.",
-    "Identité du producteur, filiation parentale ordonnée et annulation de publication."
+    "Producer to record, ordered parent references and cancellation signal.",
+    "Producteur à enregistrer, références parentes ordonnées et signal d’annulation."
   ],
   "PublishArtifactOptions.producer": [
-    "Recorded artifact producer identity, not authentication.",
-    "Identité enregistrée du producteur, sans authentification."
+    "Execution, task key and attempt recorded in the reference and its id, as given: Outpost does not authenticate them.",
+    "Exécution, clé de tâche et tentative enregistrées dans la référence et son id, telles quelles : Outpost ne les authentifie pas."
   ],
   "PublishArtifactOptions.parents": [
-    "Ordered parent references whose IDs are recorded in the published artifact’s lineage.",
-    "Références parentes ordonnées dont les identifiants sont enregistrés dans la filiation de l’artefact publié."
+    "References this artifact was derived from, in order; their ids are recorded in parents and in the id. An invalid or duplicated reference rejects the publication.",
+    "Références dont cet artefact est dérivé, dans l’ordre ; leurs ids sont enregistrés dans parents et dans l’id. Une référence invalide ou en double fait échouer la publication."
   ],
   "PublishArtifactOptions.signal": [
-    "Cooperative cancellation for this operation.",
-    "Annulation coopérative de cette opération."
+    "Aborting it rejects the publication with the signal's reason; bytes already stored are kept.",
+    "Son annulation rejette la publication avec la raison du signal ; les octets déjà stockés sont conservés."
   ],
   "ArtifactStore.put": [
-    "Publish bytes atomically under an ID; reject conflicting bytes for an existing ID.",
-    "Publie atomiquement des octets sous un identifiant ; rejette des octets différents pour un identifiant existant."
+    "Store bytes under an id atomically. Accepts identical bytes for an existing id and rejects different ones.",
+    "Stocke atomiquement des octets sous un id. Accepte des octets identiques pour un id existant et rejette des octets différents."
   ],
   "ArtifactStore.get": [
-    "Read bounded artifact bytes by ID; reject a missing object. Integrity is checked by the caller.",
-    "Lit les octets bornés d’un artefact par identifiant ; échoue si l’objet est absent. L’appelant vérifie l’intégrité."
+    "Return the bytes stored under an id; rejects a missing id. The store does not verify integrity: readStoredArtifact() does.",
+    "Renvoie les octets stockés sous un id ; rejette un id absent. Le store ne vérifie pas l’intégrité : readStoredArtifact() s’en charge."
   ],
   "ArtifactProducer.executionId": [
     "Identity of the workflow execution, preserved across checkpoint resumption.",
@@ -2342,316 +2342,313 @@
     "Numéro de tentative de tâche commençant à un."
   ],
   "ArtifactReference.format": [
-    "Artifact-reference metadata format version; currently 1.",
-    "Version du format des métadonnées de référence d’artefact ; actuellement 1."
+    "Reference format version, always 1.",
+    "Version du format de référence, toujours 1."
   ],
   "ArtifactReference.id": [
-    "Content-addressed identity derived from the payload digest, contract, producer and ordered parents.",
-    "Identité adressée par contenu déduite de l’empreinte, du contrat, du producteur et des parents ordonnés."
+    "Content-addressed id: SHA-256 of the format, digest, size, contract, producer and ordered parents. Reads recompute it and reject an edited reference.",
+    "Id adressé par contenu : SHA-256 du format, de l’empreinte, de la taille, du contrat, du producteur et des parents ordonnés. Les lectures le recalculent et rejettent une référence modifiée."
   ],
   "ArtifactReference.digest": [
-    "SHA-256 digest of the encoded artifact bytes.",
-    "Empreinte SHA-256 des octets encodés de l’artefact."
+    "SHA-256 of the stored bytes, in lowercase hexadecimal. Reads reject bytes with another digest.",
+    "SHA-256 des octets stockés, en hexadécimal minuscule. Les lectures rejettent des octets d’une autre empreinte."
   ],
   "ArtifactReference.size": [
-    "Exact byte length of the encoded artifact payload.",
-    "Longueur exacte en octets des données encodées de l’artefact."
+    "Byte length of the stored payload. Reads reject bytes of another length.",
+    "Longueur en octets des données stockées. Les lectures rejettent des octets d’une autre longueur."
   ],
   "ArtifactReference.contract": [
-    "Named, versioned artifact contract that defines encoding and validation.",
-    "Contrat d’artefact nommé et versionné définissant encodage et validation."
+    "Name, version and encoding of the contract that encoded the payload. A read with another contract rejects with Artifact contract mismatch.",
+    "Nom, version et encodage du contrat qui a encodé les données. Une lecture avec un autre contrat rejette avec Artifact contract mismatch."
   ],
   "ArtifactReference.producer": [
-    "Recorded artifact producer identity, not authentication.",
-    "Identité enregistrée du producteur, sans authentification."
+    "Execution, task and attempt that published the artifact, as declared by the publisher; not authenticated.",
+    "Exécution, tâche et tentative qui ont publié l’artefact, telles que déclarées à la publication ; non authentifiées."
   ],
   "ArtifactReference.parents": [
-    "Ordered immutable IDs of the artifact’s parent references.",
-    "Identifiants immuables ordonnés des références parentes de l’artefact."
+    "Ids of the parent artifacts, in the order given at publication, without duplicates.",
+    "Ids des artefacts parents, dans l’ordre donné à la publication, sans doublon."
   ],
   "readStoredArtifact.store": [
-    "Artifact byte store used for immutable publication or bounded payload retrieval.",
-    "Store d’octets d’artefacts utilisé pour la publication immuable ou la lecture bornée des données."
+    "Store holding the artifact bytes.",
+    "Store qui contient les octets de l’artefact."
   ],
   "readStoredArtifact.contract": [
-    "Named, versioned artifact contract that defines encoding and validation.",
-    "Contrat d’artefact nommé et versionné définissant encodage et validation."
+    "Expected contract: its name, version and encoding must match the reference, and it decodes the bytes.",
+    "Contrat attendu : son nom, sa version et son encodage doivent correspondre à la référence, et il décode les octets."
   ],
   "readStoredArtifact.value": [
-    "Untrusted artifact reference to validate before loading and checking its stored bytes.",
-    "Référence d’artefact non validée à contrôler avant chargement et vérification des octets stockés."
+    "Reference to read, typically parsed from JSON. It is validated and its id recomputed before any bytes are loaded.",
+    "Référence à lire, généralement issue de JSON analysé. Elle est validée et son id recalculé avant tout chargement d’octets."
   ],
   "readStoredArtifact.options": [
-    "Expected producer and parent lineage, plus read cancellation.",
-    "Producteur et filiation parentale attendus, avec annulation de lecture."
+    "Expected producer and parents, and a cancellation signal.",
+    "Producteur et parents attendus, et signal d’annulation."
   ],
   "ReadArtifactOptions.producer": [
-    "Expected producer execution, task and attempt; a mismatch rejects the read.",
-    "Exécution, tâche et tentative du producteur attendu ; une différence fait échouer la lecture."
+    "Expected execution, task key and attempt; any difference rejects with Artifact producer mismatch.",
+    "Exécution, clé de tâche et tentative attendues ; toute différence rejette avec Artifact producer mismatch."
   ],
   "ReadArtifactOptions.parents": [
-    "Expected ordered parent references; a mismatching lineage rejects the read.",
-    "Références parentes ordonnées attendues ; une filiation différente fait échouer la lecture."
+    "Expected parent references, in order; a different list rejects with Artifact lineage mismatch.",
+    "Références parentes attendues, dans l’ordre ; une liste différente rejette avec Artifact lineage mismatch."
   ],
   "ReadArtifactOptions.signal": [
-    "Cooperative cancellation for this operation.",
-    "Annulation coopérative de cette opération."
+    "Aborting it rejects the read with the signal's reason.",
+    "Son annulation rejette la lecture avec la raison du signal."
   ],
   "defineArtifactTask.options": [
-    "Task scheduling, artifact contract/store, value producer and parent-reference factory.",
-    "Ordonnancement de tâche, contrat/store d’artefact, production de valeur et fabrique de références parentes."
+    "Task options (key, after, retry, cache…) plus store, contract, produce and parents; the artifact task supplies perform.",
+    "Options de tâche (key, after, retry, cache…) plus store, contract, produce et parents ; la tâche d’artefact fournit perform."
   ],
   "ArtifactTaskOptions.store": [
-    "Artifact byte store used for immutable publication or bounded payload retrieval.",
-    "Store d’octets d’artefacts utilisé pour la publication immuable ou la lecture bornée des données."
+    "Store that receives the published artifact.",
+    "Store qui reçoit l’artefact publié."
   ],
   "ArtifactTaskOptions.contract": [
-    "Named, versioned artifact contract that defines encoding and validation.",
-    "Contrat d’artefact nommé et versionné définissant encodage et validation."
+    "Contract that validates and encodes the produced value.",
+    "Contrat qui valide et encode la valeur produite."
   ],
   "ArtifactTaskOptions.produce": [
-    "Compute the typed artifact value from the task context and declared dependencies.",
-    "Calcule la valeur typée de l’artefact depuis le contexte de tâche et les dépendances déclarées."
+    "Compute the value to publish from the task context, for example from context.value() of a dependency.",
+    "Calcule la valeur à publier depuis le contexte de tâche, par exemple avec context.value() d’une dépendance."
   ],
   "ArtifactTaskOptions.parents": [
-    "Read parent artifact references from task dependencies to record publication lineage.",
-    "Lit les références parentes d’artefacts depuis les dépendances pour enregistrer la filiation à la publication."
+    "Return the parent references to record, usually context.value() of artifact tasks listed in after. Runs before produce().",
+    "Renvoie les références parentes à enregistrer, en général context.value() de tâches d’artefact listées dans after. S’exécute avant produce()."
   ],
   "readArtifact.context": [
-    "Current workflow task context used to read dependencies and propagate cancellation.",
-    "Contexte courant de tâche utilisé pour lire les dépendances et propager l’annulation."
+    "Context of the running task; supplies the dependency output, the execution id and the cancellation signal.",
+    "Contexte de la tâche en cours ; fournit la sortie de la dépendance, l’id d’exécution et le signal d’annulation."
   ],
   "readArtifact.dependency": [
-    "Declared task dependency whose completed output is the artifact reference to read.",
-    "Dépendance déclarée dont la sortie terminée est la référence d’artefact à lire."
+    "Artifact task listed in this task's after; its output is the reference to read. An undeclared dependency throws.",
+    "Tâche d’artefact listée dans le after de cette tâche ; sa sortie est la référence à lire. Une dépendance non déclarée lève une erreur."
   ],
   "readArtifact.contract": [
-    "Named, versioned artifact contract that defines encoding and validation.",
-    "Contrat d’artefact nommé et versionné définissant encodage et validation."
+    "Expected contract; must match the reference's name, version and encoding.",
+    "Contrat attendu ; doit correspondre au nom, à la version et à l’encodage de la référence."
   ],
   "readArtifact.store": [
-    "Artifact byte store used for immutable publication or bounded payload retrieval.",
-    "Store d’octets d’artefacts utilisé pour la publication immuable ou la lecture bornée des données."
+    "Store holding the artifact bytes.",
+    "Store qui contient les octets de l’artefact."
   ],
   "createSqliteTaskQueue.path": [
-    "Host path to the SQLite queue database.",
-    "Chemin hôte de la base SQLite de la file."
+    "Path of the SQLite database file, resolved from the current directory; the file and its parent directory are created when missing.",
+    "Chemin du fichier de base SQLite, résolu depuis le répertoire courant ; le fichier et son répertoire parent sont créés s’ils manquent."
   ],
   "DurableTaskQueue.close": [
-    "Close the owned SQLite database connection.",
-    "Ferme la connexion à la base SQLite possédée."
+    "Close the SQLite connection synchronously. Jobs and results stay in the file for the next queue opened on it.",
+    "Ferme la connexion SQLite de façon synchrone. Jobs et résultats restent dans le fichier pour la prochaine file ouverte dessus."
   ],
   "TaskQueue.enqueue": [
-    "Persist a JSON job request, deduplicating by ID and rejecting conflicting requests.",
-    "Persiste une demande de travail JSON, déduplique par identifiant et rejette les demandes contradictoires."
+    "Store a pending job, or return the stored job, in any status, when the ID already holds an identical request. A different request under an existing ID is rejected.",
+    "Enregistre un job pending, ou renvoie le job stocké, quel que soit son statut, quand l’identifiant porte déjà une requête identique. Une requête différente sous un identifiant existant est refusée."
   ],
   "TaskQueue.get": [
-    "Return the current persisted job for an ID, or undefined if absent.",
-    "Renvoie le travail persisté courant d’un identifiant, ou undefined s’il est absent."
+    "Return the job for an ID, or undefined when absent; a job past its deadline comes back cancelled.",
+    "Renvoie le job d’un identifiant, ou undefined s’il est absent ; un job dont la deadline est dépassée revient cancelled."
   ],
   "TaskQueue.claim": [
-    "Acquire an eligible job for one of the worker’s registered handlers with a new lease fence.",
-    "Prend en charge un travail éligible pour un gestionnaire du worker avec un nouveau jeton de bail."
+    "Take a pending job, or an active job whose lease expired, for one of the listed handlers; increment its fence and start a lease. Returns undefined when no job is eligible.",
+    "Prend un job pending, ou un job active dont le bail a expiré, pour l’un des handlers listés ; incrémente son fence et ouvre un bail. Renvoie undefined quand aucun job n’est éligible."
   ],
   "TaskQueue.renew": [
-    "Extend the current worker lease; reject a stale worker or fence.",
-    "Prolonge le bail courant du worker ; rejette un worker ou jeton périmé."
+    "Extend the lease by leaseMs, capped at the job’s deadline. Rejects with Stale queue lease when the worker, fence or lease expiry no longer match.",
+    "Prolonge le bail de leaseMs, sans dépasser la deadline du job. Rejette avec Stale queue lease quand le worker, le fence ou l’expiration du bail ne correspondent plus."
   ],
   "TaskQueue.complete": [
-    "Persist a job result only while the worker still owns the matching fenced lease.",
-    "Persiste le résultat seulement si le worker possède encore le bail et le jeton correspondants."
+    "Store the result and mark the job done, or failed when result.error is set. Rejects with Stale queue lease unless the lease is still current.",
+    "Enregistre le résultat et marque le job done, ou failed quand result.error est renseigné. Rejette avec Stale queue lease si le bail n’est plus courant."
   ],
   "TaskQueue.cancel": [
-    "Cancel a job only if its current fence matches the supplied generation.",
-    "Annule un travail seulement si son jeton courant correspond à la génération fournie."
+    "Cancel a pending or active job and increment its fence; a finished job is returned unchanged. Rejects with Stale queue fence when fence differs from the job’s current fence.",
+    "Annule un job pending ou active et incrémente son fence ; un job terminé est renvoyé inchangé. Rejette avec Stale queue fence quand fence diffère du fence courant du job."
   ],
   "QueueRequest.id": [
-    "Durable job identity used for deduplication and lease operations.",
-    "Identité durable du travail utilisée pour la déduplication et les opérations de bail."
+    "Job ID, 1 to 512 characters and unique in the queue; enqueuing it again returns the stored job.",
+    "Identifiant du job, de 1 à 512 caractères et unique dans la file ; le renvoyer rend le job stocké."
   ],
   "QueueRequest.handler": [
-    "Registered worker handler name that will execute this JSON job.",
-    "Nom du gestionnaire enregistré du worker qui exécutera ce travail JSON."
+    "Name of the worker handler that runs the job, 1 to 512 characters.",
+    "Nom du handler de worker qui exécute le job, de 1 à 512 caractères."
   ],
   "QueueRequest.input": [
-    "Lossless JSON input supplied to the registered job handler.",
-    "Entrée JSON sans perte fournie au gestionnaire de travail enregistré."
+    "JSON input passed to the handler, at most 262144 bytes serialized.",
+    "Entrée JSON transmise au handler, 262144 octets au plus une fois sérialisée."
   ],
   "QueueRequest.deadline": [
-    "Absolute job deadline as a Unix timestamp in milliseconds.",
-    "Échéance absolue du travail sous forme d’horodatage Unix en millisecondes."
+    "Time in epoch milliseconds after which a pending or active job becomes cancelled; leases never extend past it.",
+    "Instant en millisecondes epoch après lequel un job pending ou active devient cancelled ; les baux ne le dépassent jamais."
   ],
   "QueueJob.status": [
-    "Durable job state: pending, active, done, failed or cancelled.",
-    "État durable du travail : pending, active, done, failed ou cancelled."
+    "pending until claimed, active while leased, then done, failed or cancelled. The queue never retries a failed job.",
+    "pending avant la prise en charge, active pendant le bail, puis done, failed ou cancelled. La file ne relance jamais un job failed."
   ],
   "QueueJob.fence": [
-    "Lease generation used to reject stale queue writers.",
-    "Génération du bail utilisée pour rejeter les écritures périmées."
+    "Lease generation: 0 at enqueue, incremented by each claim, cancellation and deadline expiry. renew() and complete() must present the current value.",
+    "Génération du bail : 0 à l’envoi, incrémentée à chaque prise en charge, annulation et expiration de deadline. renew() et complete() doivent présenter la valeur courante."
   ],
   "QueueJob.worker": [
-    "Identity of the worker claiming or owning the job lease.",
-    "Identité du worker prenant en charge ou possédant le bail du travail."
+    "Name of the worker that last claimed the job.",
+    "Nom du dernier worker ayant pris le job en charge."
   ],
   "QueueJob.expires": [
-    "Absolute lease expiry as a Unix timestamp in milliseconds.",
-    "Expiration absolue du bail sous forme d’horodatage Unix en millisecondes."
+    "Lease expiry in epoch milliseconds; once it passes, another worker can claim the job.",
+    "Expiration du bail en millisecondes epoch ; une fois passée, un autre worker peut prendre le job en charge."
   ],
   "QueueJob.result": [
-    "Persisted worker result, including JSON value, optional usage and failure message.",
-    "Résultat persisté du worker comprenant valeur JSON, usage optionnel et message d’échec."
+    "Result stored by complete(), present once the job is done or failed.",
+    "Résultat enregistré par complete(), présent dès que le job est done ou failed."
   ],
   "QueueResult.value": [
-    "Lossless JSON output produced by the worker handler.",
-    "Sortie JSON sans perte produite par le gestionnaire du worker."
+    "JSON value produced by the handler, at most 262144 bytes serialized; runQueueWorker() stores null when the handler throws.",
+    "Valeur JSON produite par le handler, 262144 octets au plus une fois sérialisée ; runQueueWorker() enregistre null quand le handler lève une erreur."
   ],
   "QueueResult.usage": [
-    "Reported usage counters; not a currency estimate.",
-    "Compteurs d’usage rapportés ; aucune estimation monétaire."
+    "Token counters (input, output, cached, cacheCreated) that defineQueuedTask() adds to the workflow’s usage.",
+    "Compteurs de jetons (input, output, cached, cacheCreated) que defineQueuedTask() ajoute à l’usage du workflow."
   ],
   "QueueResult.error": [
-    "Worker failure message; when present, completion records the job as failed.",
-    "Message d’échec du worker ; sa présence fait enregistrer le travail comme failed à la finalisation."
+    "Failure message, at most 512 characters; its presence marks the job failed. runQueueWorker() fills it from a thrown error.",
+    "Message d’échec, 512 caractères au plus ; sa présence marque le job failed. runQueueWorker() le remplit à partir d’une erreur levée."
   ],
   "QueueClaim.worker": [
-    "Identity of the worker claiming or owning the job lease.",
-    "Identité du worker prenant en charge ou possédant le bail du travail."
+    "Name of the claiming worker, recorded on the job and checked by renew() and complete().",
+    "Nom du worker qui prend le job en charge, enregistré sur le job et vérifié par renew() et complete()."
   ],
   "QueueClaim.handlers": [
-    "Names of handlers this worker can execute when claiming a job.",
-    "Noms des gestionnaires que ce worker peut exécuter lors de la prise en charge."
+    "Handler names this worker can run, 1 to 100; only jobs for these handlers are claimed.",
+    "Noms des handlers que ce worker sait exécuter, de 1 à 100 ; seuls les jobs de ces handlers sont pris en charge."
   ],
   "QueueClaim.leaseMs": [
-    "Worker lease duration in milliseconds.",
-    "Durée du bail worker en millisecondes."
+    "Lease duration in milliseconds, from 30 to 300000.",
+    "Durée du bail en millisecondes, de 30 à 300000."
   ],
-  "QueueLease.id": [
-    "Durable job identity used for deduplication and lease operations.",
-    "Identité durable du travail utilisée pour la déduplication et les opérations de bail."
-  ],
+  "QueueLease.id": ["ID of the leased job.", "Identifiant du job sous bail."],
   "QueueLease.worker": [
-    "Identity of the worker claiming or owning the job lease.",
-    "Identité du worker prenant en charge ou possédant le bail du travail."
+    "Name of the worker holding the lease.",
+    "Nom du worker qui détient le bail."
   ],
   "QueueLease.fence": [
-    "Lease generation used to reject stale queue writers.",
-    "Génération du bail utilisée pour rejeter les écritures périmées."
+    "Fence returned by the claim; a later claim or a cancellation makes it stale.",
+    "Fence renvoyé par la prise en charge ; une prise en charge ultérieure ou une annulation le rend périmé."
   ],
   "serveTaskQueue.options": [
-    "Caller-owned queue, bearer token and HTTP bind address/port.",
-    "File appartenant à l’appelant, jeton bearer et adresse/port d’écoute HTTP."
+    "Queue to serve, accepted bearer tokens, and bind host and port.",
+    "File à servir, jetons bearer acceptés, ainsi qu’hôte et port d’écoute."
   ],
   "QueueServerOptions.queue": [
-    "Task queue used to enqueue, claim and persist job state.",
-    "File de tâches utilisée pour envoyer, prendre en charge et persister l’état des travaux."
+    "Queue served over HTTP; closing the server leaves it open.",
+    "File servie via HTTP ; fermer le serveur la laisse ouverte."
   ],
   "QueueServerOptions.token": [
-    "Fixed bearer token or callback returning the currently accepted tokens on every request. Overlap old and new tokens during rotation; empty or failed sources deny access.",
-    "Jeton bearer fixe ou callback renvoyant les jetons acceptés à chaque requête. Faites coexister ancien et nouveau jetons pendant la rotation ; une source vide ou en échec refuse l’accès."
+    "Accepted bearer token of 32 to 512 non-whitespace characters, or a function returning the accepted tokens, called on every request. Return the old and new tokens together during a rotation; an empty list or a thrown error rejects every request.",
+    "Jeton bearer accepté de 32 à 512 caractères sans espace, ou fonction renvoyant les jetons acceptés, appelée à chaque requête. Renvoyez ancien et nouveau jetons ensemble pendant une rotation ; une liste vide ou une erreur levée refuse toutes les requêtes."
   ],
   "QueueServerOptions.host": [
-    "HTTP bind address; defaults to loopback for local-only access.",
-    "Adresse d’écoute HTTP ; loopback par défaut pour un accès local uniquement."
+    "Bind address, default 127.0.0.1.",
+    "Adresse d’écoute, 127.0.0.1 par défaut."
   ],
   "QueueServerOptions.port": [
-    "TCP port for the queue HTTP server; zero lets the operating system choose an available port.",
-    "Port TCP du serveur HTTP de file ; zéro laisse le système choisir un port disponible."
+    "TCP port, default 0: the system picks a free port, shown in url.",
+    "Port TCP, 0 par défaut : le système choisit un port libre, visible dans url."
   ],
   "QueueServer.url": [
-    "HTTP base URL of the task queue server.",
-    "URL HTTP de base du serveur de file de tâches."
+    "Base URL of the listening server, such as http://127.0.0.1:8788, to pass to createHttpTaskQueue().",
+    "URL de base du serveur à l’écoute, par exemple http://127.0.0.1:8788, à passer à createHttpTaskQueue()."
   ],
   "QueueServer.close": [
-    "Stop the HTTP listener without closing the caller-owned queue.",
-    "Arrête l’écoute HTTP sans fermer la file appartenant à l’appelant."
+    "Stop listening and close idle connections; the served queue stays open.",
+    "Arrête l’écoute et ferme les connexions inactives ; la file servie reste ouverte."
   ],
   "createHttpTaskQueue.options": [
-    "Queue endpoint URL, bearer token and request timeout.",
-    "URL d’endpoint de file, jeton bearer et délai des requêtes."
+    "Server URL, bearer token and per-request timeout.",
+    "URL du serveur, jeton bearer et délai par requête."
   ],
   "QueueClientOptions.url": [
-    "HTTP base URL of the task queue server.",
-    "URL HTTP de base du serveur de file de tâches."
+    "Base URL of a serveTaskQueue() server, http or https, without credentials, query or fragment; requests go to <url>/queue.",
+    "URL de base d’un serveur serveTaskQueue(), en http ou https, sans identifiants, requête ni fragment ; les requêtes partent vers <url>/queue."
   ],
   "QueueClientOptions.token": [
-    "Fixed bearer token or callback resolving the current token for each request, including lease renewal and completion.",
-    "Jeton bearer fixe ou callback résolvant le jeton courant à chaque requête, y compris renouvellement du bail et finalisation."
+    "Bearer token, or a function called before every request, lease renewals and completions included, so a rotated token applies at once. Each value must be 32 to 512 non-whitespace characters.",
+    "Jeton bearer, ou fonction appelée avant chaque requête, renouvellements de bail et finalisations compris, pour qu’un jeton renouvelé s’applique aussitôt. Chaque valeur doit compter 32 à 512 caractères sans espace."
   ],
   "QueueClientOptions.timeoutMs": [
-    "Time limit in milliseconds for each HTTP queue request.",
-    "Durée maximale en millisecondes de chaque requête HTTP à la file."
+    "Time limit per HTTP request in milliseconds, default 10000, counted after the token is resolved.",
+    "Durée maximale de chaque requête HTTP en millisecondes, 10000 par défaut, comptée après la résolution du jeton."
   ],
   "runQueueWorker.options": [
-    "Queue client, worker identity, handler registry, lease renewal timing and cancellation.",
-    "Client de file, identité du worker, registre de gestionnaires, durée de bail et annulation."
+    "Queue, worker name, handlers, stop signal, and lease and polling timings.",
+    "File, nom du worker, handlers, signal d’arrêt, ainsi que durées de bail et d’interrogation."
   ],
   "QueueWorkerOptions.queue": [
-    "Task queue used to enqueue, claim and persist job state.",
-    "File de tâches utilisée pour envoyer, prendre en charge et persister l’état des travaux."
+    "Queue the worker claims jobs from and reports results to.",
+    "File où le worker prend les jobs et enregistre leurs résultats."
   ],
   "QueueWorkerOptions.worker": [
-    "Identity of the worker claiming or owning the job lease.",
-    "Identité du worker prenant en charge ou possédant le bail du travail."
+    "Worker name recorded on each claimed job, 1 to 512 characters; give each process its own.",
+    "Nom du worker enregistré sur chaque job pris en charge, de 1 à 512 caractères ; donnez-en un distinct à chaque processus."
   ],
   "QueueWorkerOptions.handlers": [
-    "Registry mapping handler names to their job execution callbacks.",
-    "Registre associant noms de gestionnaires et callbacks d’exécution des travaux."
+    "Handlers by name, 1 to 100; the worker claims only jobs whose handler is listed here.",
+    "Handlers par nom, de 1 à 100 ; le worker ne prend en charge que les jobs dont le handler figure ici."
   ],
   "QueueWorkerOptions.signal": [
-    "Cooperative cancellation for this operation.",
-    "Annulation coopérative de cette opération."
+    "Stops the worker: runQueueWorker() resolves and the running handler’s signal aborts. That job stays active until its lease expires.",
+    "Arrête le worker : runQueueWorker() se résout et le signal du handler en cours s’interrompt. Ce job reste active jusqu’à l’expiration de son bail."
   ],
   "QueueWorkerOptions.leaseMs": [
-    "Worker lease duration in milliseconds.",
-    "Durée du bail worker en millisecondes."
+    "Lease duration in milliseconds, default 30000, from 30 to 300000; renewed at every third of it.",
+    "Durée du bail en millisecondes, 30000 par défaut, de 30 à 300000 ; renouvelé à chaque tiers de cette durée."
   ],
   "QueueWorkerOptions.pollMs": [
-    "Interval in milliseconds between queue polls.",
-    "Intervalle en millisecondes entre les interrogations de la file."
+    "Wait in milliseconds after finding no eligible job, default 250; must be positive.",
+    "Attente en millisecondes quand aucun job n’est éligible, 250 par défaut ; doit être positive."
   ],
   "QueueHandler.input": [
-    "Lossless JSON input supplied to the registered job handler.",
-    "Entrée JSON sans perte fournie au gestionnaire de travail enregistré."
+    "JSON input from the job’s request.",
+    "Entrée JSON issue de la requête du job."
   ],
   "QueueHandler.context": [
-    "Claimed queue job and cancellation signal supplied to the registered worker handler.",
-    "Travail pris en charge et signal d’annulation fournis au gestionnaire du worker."
+    "Idempotency key, abort signal and claimed job.",
+    "Clé d’idempotence, signal d’interruption et job pris en charge."
   ],
   "QueueHandlerContext.signal": [
-    "Cooperative cancellation for this operation.",
-    "Annulation coopérative de cette opération."
+    "Aborts when the worker stops or a lease renewal fails, for example after a cancellation, a passed deadline or a lost lease. Pass it to every operation the handler starts.",
+    "S’interrompt quand le worker s’arrête ou qu’un renouvellement de bail échoue, par exemple après une annulation, une deadline dépassée ou un bail perdu. Transmettez-le à chaque opération lancée par le handler."
   ],
   "QueueHandlerContext.job": [
-    "Claimed persisted job, including its input and lease generation.",
-    "Travail persisté pris en charge, comprenant son entrée et sa génération de bail."
+    "Job as claimed, with its request and current fence.",
+    "Job tel que pris en charge, avec sa requête et son fence courant."
   ],
   "defineQueuedTask.options": [
-    "Task scheduling, queue handler, input factory, result decoder and polling settings.",
-    "Ordonnancement de tâche, gestionnaire de file, fabrique d’entrée, décodeur de résultat et interrogation."
+    "Task definition (key, after, retry and the other task options except perform), plus the queue, handler, input builder, decoder, deadline and poll interval.",
+    "Définition de tâche (key, after, retry et les autres options de tâche sauf perform), plus la file, le handler, la fabrique d’entrée, le décodeur, la deadline et l’intervalle d’interrogation."
   ],
   "QueuedTaskOptions.queue": [
-    "Task queue used to enqueue, claim and persist job state.",
-    "File de tâches utilisée pour envoyer, prendre en charge et persister l’état des travaux."
+    "Queue in which the task enqueues its job and polls it.",
+    "File dans laquelle la tâche envoie son job et l’interroge."
   ],
   "QueuedTaskOptions.handler": [
-    "Registered worker handler name that will execute this JSON job.",
-    "Nom du gestionnaire enregistré du worker qui exécutera ce travail JSON."
+    "Name of the worker handler that runs the job, 1 to 512 characters.",
+    "Nom du handler de worker qui exécute le job, de 1 à 512 caractères."
   ],
   "QueuedTaskOptions.input": [
-    "Build the queued job’s JSON input from task dependencies.",
-    "Construit l’entrée JSON du travail en file depuis les dépendances de tâche."
+    "Builds the job’s JSON input from the task context, such as dependency values. Called on each attempt: a different value under the same job ID is rejected.",
+    "Construit l’entrée JSON du job depuis le contexte de tâche, par exemple les valeurs des dépendances. Appelée à chaque tentative : une valeur différente sous le même identifiant de job est refusée."
   ],
   "QueuedTaskOptions.decode": [
-    "Validate and decode the worker’s JSON result into this task’s output type.",
-    "Valide et décode le résultat JSON du worker dans le type de sortie de cette tâche."
+    "Converts the job’s JSON value into the task’s result; throw to fail the task.",
+    "Convertit la valeur JSON du job en résultat de la tâche ; levez une erreur pour faire échouer la tâche."
   ],
   "QueuedTaskOptions.deadline": [
-    "Absolute job deadline as a Unix timestamp in milliseconds.",
-    "Échéance absolue du travail sous forme d’horodatage Unix en millisecondes."
+    "Job deadline in epoch milliseconds; the job becomes cancelled once it passes.",
+    "Deadline du job en millisecondes epoch ; le job devient cancelled une fois qu’elle est dépassée."
   ],
   "QueuedTaskOptions.pollMs": [
-    "Interval in milliseconds between queue polls.",
-    "Intervalle en millisecondes entre les interrogations de la file."
+    "Interval between job reads in milliseconds, default 250; must be positive.",
+    "Intervalle entre deux lectures du job en millisecondes, 250 par défaut ; doit être positif."
   ],
   "EgressPolicy.mode": [
     "deny-all blocks all outbound traffic and takes no other field; allowlist allows only the listed domains and allowCidrs and needs at least one entry. A provider that cannot enforce the policy rejects it with code configuration at creation.",
@@ -2670,140 +2667,140 @@
     "Plages IP bloquées même quand un domaine ou une entrée allowCidrs les autorise. Seul Vercel les applique ; Daytona refuse une liste non vide."
   ],
   "speculate.options": [
-    "Repository, provider, bounded candidates, admission budget and winner-validation callback.",
-    "Dépôt, provider, candidats bornés, budget d’admission et callback de validation du gagnant."
+    "Repository, sandbox provider, candidates, shared budget and validate callback, plus concurrency, cleanup and durability settings.",
+    "Dépôt, provider de sandbox, candidats, budget partagé et callback validate, plus les réglages de concurrence, de nettoyage et de durabilité."
   ],
   "SpeculationOptions.repository": [
-    "Target host Git checkout.",
-    "Checkout Git hôte ciblé."
+    "Host Git checkout. Its HEAD commit when the race first starts is the baseline of every candidate branch.",
+    "Checkout Git hôte. Son commit HEAD au premier démarrage de la course sert de baseline à toutes les branches candidates."
   ],
   "SpeculationOptions.candidates": [
-    "Agent requests to race on separate branches; at most eight candidates.",
-    "Requêtes d’agent mises en concurrence sur des branches distinctes ; huit candidats au maximum."
+    "1 to 8 candidates with unique keys, started in list order as concurrency allows.",
+    "1 à 8 candidats aux clés uniques, démarrés dans l’ordre de la liste selon concurrency."
   ],
   "SpeculationOptions.concurrency": [
-    "Maximum candidates running concurrently; defaults to two.",
-    "Nombre maximal de candidats exécutés simultanément ; deux par défaut."
+    "Maximum candidates running at once, 1 to 8, default 2.",
+    "Nombre maximal de candidats exécutés à la fois, de 1 à 8, 2 par défaut."
   ],
   "SpeculationOptions.budget": [
-    "Shared attempt and observed usage admission limits.",
-    "Limites partagées de tentatives et d’usage observé."
+    "Limits shared by all candidates. Each start consumes one of attempts and the limit stops new starts; reaching a usage token limit cancels running candidates. Tokens used inside validate are not counted.",
+    "Limites partagées par tous les candidats. Chaque démarrage consomme une unité de attempts et la limite empêche tout nouveau démarrage ; atteindre une limite de tokens de usage annule les candidats en cours. Les tokens consommés dans validate ne sont pas comptés."
   ],
   "SpeculationOptions.signal": [
-    "Cooperative cancellation for this operation.",
-    "Annulation coopérative de cette opération."
+    "Aborting it cancels running candidates and ends the race with status aborted.",
+    "Son annulation arrête les candidats en cours et termine la course avec le statut aborted."
   ],
   "SpeculationOptions.sandbox": [
-    "Shared lifecycle, logging and storage settings applied when allocating each candidate sandbox.",
-    "Réglages communs de cycle de vie, journaux et stockage appliqués à l’allocation de chaque sandbox candidate."
+    "Sandbox settings applied to every candidate: hooks, bootstrap, logging, limits, storageQuota and conversationHome.",
+    "Réglages de sandbox appliqués à chaque candidat : hooks, bootstrap, logging, limits, storageQuota et conversationHome."
   ],
   "SpeculationOptions.validate": [
-    "Predicate run with a candidate’s live sandbox and output; true accepts that candidate as a possible winner.",
-    "Prédicat exécuté avec la sandbox active et la sortie d’un candidat ; true l’accepte comme gagnant possible."
+    "Decides whether a finished candidate is acceptable, given its dispatch output and live sandbox; true accepts it. A throw marks the candidate failed.",
+    "Décide si un candidat terminé est acceptable, à partir de sa sortie de dispatch et de sa sandbox active ; true l’accepte. Une exception marque le candidat failed."
   ],
   "SpeculativeCandidate.key": [
-    "Unique candidate key used to correlate its branch, validation and final result.",
-    "Clé unique du candidat reliant sa branche, sa validation et son résultat final."
+    "Unique name of 1 to 64 letters, digits, _ or -, starting with a letter or digit. It appears in the candidate's branch name.",
+    "Nom unique de 1 à 64 lettres, chiffres, _ ou -, commençant par une lettre ou un chiffre. Il figure dans le nom de la branche du candidat."
   ],
   "SpeculativeCandidate.agent": [
-    "Agent that runs the dispatch: a single agent composed with createAgent() or createReplayAgent(), or a createFallbackAgent() whose candidates are tried in order on listed quota or outage failures. The candidate settles with status quota only when every fallback hit a limit.",
-    "Agent qui exécute le dispatch : un agent unique composé avec createAgent() ou createReplayAgent(), ou un createFallbackAgent() dont les candidats sont essayés dans l’ordre sur les échecs de quota ou de panne listés. Le candidat ne prend le statut quota que lorsque tous ses secours ont atteint une limite."
+    "Agent that runs the candidate: one from createAgent() or createReplayAgent(), or a createFallbackAgent(). A quota fault that reaches the race, including one the fallback agent does not absorb, settles the candidate with status quota.",
+    "Agent qui exécute le candidat : issu de createAgent() ou createReplayAgent(), ou un createFallbackAgent(). Une faute quota qui atteint la course, y compris une faute que l’agent de secours n’absorbe pas, donne au candidat le statut quota."
   ],
   "SpeculativeCandidate.request": [
-    "Candidate-specific brief and response settings; the race controls agent, cancellation and fresh-session behavior.",
-    "Réglages de brief et réponse propres au candidat ; la course contrôle agent, annulation et session neuve."
+    "Dispatch options for this candidate, such as brief and response. The race supplies agent and signal; continuation is not accepted.",
+    "Options de dispatch de ce candidat, par exemple brief et response. La course fournit agent et signal ; continuation n’est pas accepté."
   ],
   "SpeculativeValidation.key": [
-    "Unique candidate key used to correlate its branch, validation and final result.",
-    "Clé unique du candidat reliant sa branche, sa validation et son résultat final."
+    "Key of the candidate being validated.",
+    "Clé du candidat en cours de validation."
   ],
   "SpeculativeValidation.result": [
-    "Candidate dispatch output with text, commits, usage and typed value, excluding continuation methods.",
-    "Sortie de dispatch du candidat avec texte, commits, usage et valeur typée, sans méthodes de continuation."
+    "Dispatch output of the candidate: text, value, commits and usage.",
+    "Sortie de dispatch du candidat : texte, valeur, commits et usage."
   ],
   "SpeculativeValidation.sandbox": [
-    "Live candidate sandbox available for validation commands before cleanup.",
-    "Sandbox active du candidat disponible pour les commandes de validation avant nettoyage."
+    "Candidate's sandbox, still open; it closes after validate returns. Commits made in it during validation become part of the candidate's commit.",
+    "Sandbox du candidat, encore ouverte ; elle se ferme après le retour de validate. Les commits créés pendant la validation font partie du commit du candidat."
   ],
   "SpeculativeValidation.signal": [
-    "Cooperative cancellation for this operation.",
-    "Annulation coopérative de cette opération."
+    "Aborts when another candidate wins, a token limit is reached or the race is cancelled; pass it to every command.",
+    "S’annule quand un autre candidat gagne, qu’une limite de tokens est atteinte ou que la course est annulée ; passez-le à chaque commande."
   ],
   "SpeculationResult.id": [
-    "Unique identifier of this speculative race.",
-    "Identifiant unique de cette course spéculative."
+    "Race identifier used in candidate branch names; a durable race keeps it across calls.",
+    "Identifiant de la course utilisé dans les noms des branches candidates ; une course durable le conserve d’un appel à l’autre."
   ],
   "SpeculationResult.baseline": [
-    "Git commit used as the initial snapshot for measuring new work.",
-    "Commit Git utilisé comme état initial pour mesurer le nouveau travail."
+    "Host HEAD commit when the race first started; every candidate branch starts from it.",
+    "Commit HEAD de l’hôte au premier démarrage de la course ; chaque branche candidate part de ce commit."
   ],
   "SpeculationResult.host": [
-    "Host checkout snapshots before and after the race, with change detection and any inspection error.",
-    "Snapshots du checkout hôte avant et après la course, avec détection de changements et éventuelle erreur d’inspection."
+    "Host checkout snapshots before the race and at its end. changed is true when HEAD, branch, dirty state or content moved, or when the end snapshot failed with error.",
+    "Snapshots du checkout hôte avant la course et à sa fin. changed vaut true si le HEAD, la branche, l’état sale ou le contenu ont changé, ou si le snapshot final a échoué avec error."
   ],
   "SpeculationResult.status": [
-    "Race outcome: winner, no-winner, quota when no candidate won and at least one stopped on a usage or rate limit, aborted or budget-exhausted.",
-    "Résultat de la course : winner, no-winner, quota lorsqu’aucun candidat n’a gagné et qu’au moins un s’est arrêté sur une limite d’usage ou de débit, aborted ou budget-exhausted."
+    "winner; aborted when your signal cancelled the race; budget-exhausted; quota when no candidate won and a usage or rate limit stopped at least one; otherwise no-winner. A finished durable race returns its saved status.",
+    "winner ; aborted si votre signal a annulé la course ; budget-exhausted ; quota si aucun candidat n’a gagné et qu’une limite d’usage ou de débit en a arrêté au moins un ; sinon no-winner. Une course durable terminée renvoie son statut enregistré."
   ],
   "SpeculationResult.winner": [
-    "Selected candidate that passed validation and completed cleanup, when one exists.",
-    "Candidat choisi ayant passé la validation et terminé le nettoyage, lorsqu’il existe."
+    "First candidate that validate accepted and whose sandbox closed; absent otherwise.",
+    "Premier candidat accepté par validate dont la sandbox s’est fermée ; absent sinon."
   ],
   "SpeculationResult.candidates": [
-    "Final status, branch, retained work and available output of every candidate.",
-    "Statut final, branche, travail conservé et sortie disponible de chaque candidat."
+    "Latest attempt of every candidate, in the order of options.candidates.",
+    "Dernière tentative de chaque candidat, dans l’ordre de options.candidates."
   ],
   "SpeculationResult.usage": [
-    "Cumulative admitted attempts and observed token usage, including restored accounting.",
-    "Tentatives admises et usage de tokens observé cumulés, y compris la comptabilité restaurée."
+    "Attempts admitted and tokens reported by candidate dispatches, cumulated across the calls of a durable race.",
+    "Tentatives admises et tokens rapportés par les dispatchs des candidats, cumulés sur les appels d’une course durable."
   ],
   "SpeculationResult.error": [
-    "Original failure encountered during candidate execution, validation or race cleanup.",
-    "Échec d’origine rencontré pendant l’exécution, la validation d’un candidat ou le nettoyage de la course."
+    "Budget error that stopped the race, such as an exhausted limit or incomplete token usage; a restored durable race gives its saved message. Candidate failures are on each candidate.",
+    "Erreur de budget qui a arrêté la course, par exemple une limite épuisée ou un usage de tokens incomplet ; une course durable restaurée donne son message enregistré. Les échecs des candidats figurent sur chaque candidat."
   ],
   "SpeculativeHostSnapshot.head": [
-    "Git HEAD commit recorded by the inspection or snapshot.",
-    "Commit Git HEAD enregistré par l’inspection ou le snapshot."
+    "HEAD commit of the checkout.",
+    "Commit HEAD du checkout."
   ],
   "SpeculativeHostSnapshot.branch": [
-    "Name of the work branch used or observed during execution.",
-    "Nom de la branche de travail utilisée ou observée pendant l’exécution."
+    "Current branch name, or HEAD when detached.",
+    "Nom de la branche courante, ou HEAD si le checkout est détaché."
   ],
   "SpeculativeHostSnapshot.fingerprint": [
-    "Digest of the host checkout state used to detect changes during the race.",
-    "Empreinte de l’état du checkout hôte utilisée pour détecter des changements pendant la course."
+    "SHA-256 of HEAD, the uncommitted diff and untracked files, compared across snapshots to detect edits.",
+    "SHA-256 du HEAD, du diff non commité et des fichiers non suivis, comparé d’un snapshot à l’autre pour détecter des modifications."
   ],
   "SpeculativeHostSnapshot.dirty": [
-    "Whether tracked or untracked changes make the checkout dirty.",
-    "Indique si des changements suivis ou non suivis rendent le checkout sale."
+    "True when tracked or untracked changes exist outside .outpost.",
+    "Vrai si des changements suivis ou non suivis existent hors de .outpost."
   ],
   "SpeculativeCandidateResult.key": [
-    "Unique candidate key used to correlate its branch, validation and final result.",
-    "Clé unique du candidat reliant sa branche, sa validation et son résultat final."
+    "Key of the candidate.",
+    "Clé du candidat."
   ],
   "SpeculativeCandidateResult.branch": [
-    "Name of the work branch used or observed during execution.",
-    "Nom de la branche de travail utilisée ou observée pendant l’exécution."
+    "Candidate branch: outpost/speculation/<id>/<key>, or …/<key>/<attempt> in a durable race. It stays in the repository.",
+    "Branche du candidat : outpost/speculation/<id>/<key>, ou …/<key>/<attempt> dans une course durable. Elle reste dans le dépôt."
   ],
   "SpeculativeCandidateResult.status": [
-    "Candidate outcome: winner, rejected, failed, quota (stopped by a usage or rate limit), cancelled or skipped.",
-    "Résultat du candidat : winner, rejected, failed, quota (arrêté par une limite d’usage ou de débit), cancelled ou skipped."
+    "winner; rejected when validate returned false or another candidate won first; failed when allocation, the agent, validate or cleanup threw; quota; cancelled by a winner, a token limit, your signal or a crash; skipped when never started.",
+    "winner ; rejected si validate a renvoyé false ou qu’un autre candidat a gagné avant ; failed si l’allocation, l’agent, validate ou le nettoyage a levé une erreur ; quota ; cancelled par un gagnant, une limite de tokens, votre signal ou un plantage ; skipped s’il n’a jamais démarré."
   ],
   "SpeculativeCandidateResult.directory": [
-    "Host workspace directory used for this execution.",
-    "Dossier hôte du workspace utilisé pour cette exécution."
+    "Host worktree directory of the candidate.",
+    "Répertoire du worktree du candidat sur l’hôte."
   ],
   "SpeculativeCandidateResult.retainedDirectory": [
-    "Workspace retained for inspection or recovery.",
-    "Workspace conservé pour inspection ou récupération."
+    "Worktree kept after the sandbox closed: dirty or detached, failed, with cleanup pending, or in a durable race.",
+    "Worktree conservé après la fermeture de la sandbox : sale ou détaché, en échec, avec un nettoyage en attente, ou dans une course durable."
   ],
   "SpeculativeCandidateResult.result": [
-    "Candidate dispatch output with text, commits, usage and typed value, excluding continuation methods.",
-    "Sortie de dispatch du candidat avec texte, commits, usage et valeur typée, sans méthodes de continuation."
+    "Dispatch output, when the candidate's dispatch completed.",
+    "Sortie de dispatch, quand le dispatch du candidat s’est terminé."
   ],
   "SpeculativeCandidateResult.error": [
-    "Original failure encountered during candidate execution, validation or race cleanup.",
-    "Échec d’origine rencontré pendant l’exécution, la validation d’un candidat ou le nettoyage de la course."
+    "Failure of allocation, dispatch, validate or cleanup; a message string in a restored durable record.",
+    "Échec de l’allocation, du dispatch, de validate ou du nettoyage ; un message texte dans un enregistrement durable restauré."
   ],
   "ContainerOptions.egress": [
     "deny-all only, applied as the none network. An allowlist, or networks other than none, fails with code configuration at creation.",
@@ -3246,8 +3243,8 @@
     "Nom logique commun aux clients ; haché en interne, il accepte les deux-points et Unicode. Des noms différents isolent les identités des jobs."
   ],
   "BullMQTaskQueueOptions.connection": [
-    "BullMQ RedisOptions for standalone Redis, including host, port, db, username, password and tls. Supply settings, not a live client. The adapter owns connections and sets maxRetriesPerRequest to 1 for queue commands and null for BullMQ workers. Do not use keyPrefix.",
-    "RedisOptions BullMQ pour Redis standalone, dont host, port, db, username, password et tls. Fournir des options, pas un client connecté. L’adaptateur possède les connexions et fixe maxRetriesPerRequest à 1 pour les commandes et null pour les workers BullMQ. Ne pas utiliser keyPrefix."
+    "RedisOptions for standalone Redis (host, port, db, username, password, tls), not a live client. Connect and command timeouts default to 10000; keyPrefix is rejected, use prefix instead.",
+    "RedisOptions pour Redis standalone (host, port, db, username, password, tls), pas un client connecté. Les délais de connexion et de commande valent 10000 par défaut ; keyPrefix est refusé, utilisez prefix."
   ],
   "BullMQTaskQueueOptions.prefix": [
     "Redis key prefix, default outpost. Keep it stable across restarts and identical on every client; use a dedicated namespace without external BullMQ consumers or cleanup.",
@@ -3258,12 +3255,12 @@
     "Intervalle positif en millisecondes entre les contrôles BullMQ des jobs bloqués, 1000 par défaut. La reprise après expiration peut nécessiter deux contrôles ; distinct de leaseMs et pollMs."
   ],
   "BullMQTaskQueueOptions.onError": [
-    "Optional synchronous observer for connection, stalled-check and native finalization errors. Observer exceptions are ignored. Foreground queue operations still reject on failure; a committed result remains authoritative if native finalization fails.",
-    "Observateur synchrone optionnel des erreurs de connexion, de contrôle des jobs bloqués et de finalisation native. Ses exceptions sont ignorées. Les opérations de queue rejettent toujours leurs échecs ; un résultat enregistré reste la référence si la finalisation native échoue."
+    "Synchronous observer for connection, stalled-check and BullMQ finalization errors; its exceptions are ignored. Queue operations still reject on their own failures.",
+    "Observateur synchrone des erreurs de connexion, de contrôle des jobs bloqués et de finalisation BullMQ ; ses exceptions sont ignorées. Les opérations de file rejettent toujours leurs propres échecs."
   ],
   "BullMQTaskQueue.close": [
-    "Idempotently rejects new operations, waits for admitted operations, stops stalled checks and closes owned Redis connections. Stop and await runQueueWorker first. Retains jobs, fences and results for later clients; active leases remain reclaimable.",
-    "Refuse les nouvelles opérations, attend celles admises, arrête les contrôles de jobs bloqués et ferme les connexions Redis possédées, de façon idempotente. Arrêter et attendre runQueueWorker auparavant. Conserve jobs, générations et résultats ; les baux actifs restent récupérables."
+    "Refuse new operations, wait for those in progress, then close the queue’s Redis connections; a second call returns the same promise. Stop and await runQueueWorker() first; jobs, fences and results stay in Redis.",
+    "Refuse les nouvelles opérations, attend celles en cours, puis ferme les connexions Redis de la file ; un second appel renvoie la même promesse. Arrêtez et attendez runQueueWorker() avant ; jobs, fences et résultats restent dans Redis."
   ],
   "ModelProvider.name": [
     "Provider name: openai or anthropic for the built-in providers.",
@@ -3410,8 +3407,8 @@
     "Nom du provider possédant la sandbox enregistrée."
   ],
   "SpeculationOptions.sandboxProvider": [
-    "Execution environment backend.",
-    "Backend de l’environnement d’exécution."
+    "Provider that allocates each candidate's sandbox. Durable mode requires one with recover: Docker or Podman in mounted mode.",
+    "Provider qui alloue la sandbox de chaque candidat. Le mode durable en exige un doté de recover : Docker ou Podman en mode monté."
   ],
   "createDockerSandboxProvider.options": [
     "Container image, repository mode, mounts, environment, network and resource limits.",
@@ -3658,8 +3655,8 @@
     "Vrai sauf si le harness définit conversations: false. Les transcripts vont dans le store de conversations du harness, par défaut .outpost/conversations/harness dans le dépôt."
   ],
   "WorkflowOptions.telemetry": [
-    "Workflow telemetry adapter, such as createOpenTelemetryObserver({ tracer, meter }); receives events before observe, with isolated exceptions collected in observerErrors. Caller owns its lifecycle; dispatch instrumentation is configured separately.",
-    "Adaptateur de télémétrie du workflow, par exemple createOpenTelemetryObserver({ tracer, meter }) ; reçoit les événements avant observe, avec exceptions isolées collectées dans observerErrors. Son cycle de vie appartient à l’appelant ; l’instrumentation des dispatchs se configure séparément."
+    "Adapter that receives each WorkflowEvent before observe, such as createOpenTelemetryObserver({ tracer, meter }). Its errors go to observerErrors; you own its lifecycle.",
+    "Adaptateur qui reçoit chaque WorkflowEvent avant observe, par exemple createOpenTelemetryObserver({ tracer, meter }). Ses erreurs vont dans observerErrors ; son cycle de vie vous appartient."
   ],
   "WorkflowTelemetry.observe": [
     "Synchronously receive each workflow lifecycle and usage event with the adapter as receiver. Thrown errors are collected in WorkflowResult.observerErrors without affecting tasks or the separate observe callback.",
@@ -4924,8 +4921,8 @@
     "Attente maximale d’un gestionnaire asynchrone en millisecondes, 5000 par défaut ; le dépassement désactive les livraisons suivantes et fait rejeter flush."
   ],
   "SpeculationOptions.observation": [
-    "Parent hub used to correlate candidate allocation, agent events, validation, selection and cleanup by candidate key.",
-    "Hub parent qui corrèle allocation, événements d’agent, validation, sélection et nettoyage par clé de candidat."
+    "Parent hub for the events of every candidate, scoped by candidate key; it replaces each request's own observation.",
+    "Hub parent des événements de tous les candidats, délimités par clé de candidat ; il remplace l’observation propre à chaque request."
   ],
   "createObservationHub.options": [
     "Optional receivers, initial scope, delivery limits and opt-in model payload verbosity.",
@@ -5256,40 +5253,40 @@
     "Supprime une ressource enregistrée par registerRecovery après l’arrêt de son coordinateur, dans les limites de signal et deadlineMs. Un nouvel appel doit réussir et ne jamais supprimer de données du dépôt hôte. La spéculation durable l’exige ; Docker et Podman le fournissent en mode mounted."
   ],
   "SpeculationOptions.durability": [
-    "Persist this race through Transport; requires provider recovery support. Omit for an in-memory race.",
-    "Persiste cette course via Transport ; exige la récupération du provider. Omettre pour une course en mémoire."
+    "Saves the race through a Transport so it can resume after a crash or a quota stop. Requires a provider with recover; omit it for an in-memory race.",
+    "Enregistre la course via un Transport pour la reprendre après un plantage ou un arrêt de quota. Exige un provider doté de recover ; omettez-le pour une course en mémoire."
   ],
   "SpeculationOptions.cleanupMs": [
-    "Maximum wait in milliseconds for each close/recovery and for workers after cancellation; defaults to 30000. Unsettled resources remain pending.",
-    "Attente maximale en millisecondes par fermeture/récupération et pour les workers après annulation ; 30000 par défaut. Les ressources non terminées restent en attente."
+    "Wait for each sandbox close or resource recovery, and for running candidates after cancellation, default 30000. Past it, cleanup stays pending.",
+    "Attente de chaque fermeture de sandbox ou récupération de ressource, et des candidats en cours après une annulation, 30000 par défaut. Au-delà, le nettoyage reste en attente."
   ],
   "SpeculationDurability.transporter": [
-    "Caller-owned transport storing conditional speculation checkpoints; choose createLocalTransport under the repository .outpost/storage or an explicit remote transport.",
-    "Transport de l’appelant stockant les checkpoints conditionnels ; choisir createLocalTransport sous .outpost/storage du dépôt ou un transport distant explicite."
+    "Transport you own that stores the race under speculations/<sha256 of runId>.json with conditional writes, up to 16 MiB. createLocalTransport() under .outpost/storage is the usual choice.",
+    "Transport qui vous appartient et stocke la course sous speculations/<sha256 du runId>.json avec des écritures conditionnelles, jusqu’à 16 Mio. createLocalTransport() sous .outpost/storage est le choix habituel."
   ],
   "SpeculationDurability.runId": [
-    "Stable nonempty identifier used to locate and exclusively own this race across calls.",
-    "Identifiant stable non vide permettant de retrouver et posséder exclusivement cette course entre appels."
+    "Stable nonempty name of the race. One coordinator owns it at a time; another speculate() call on it rejects until the owner returns or is recovered.",
+    "Nom stable et non vide de la course. Un seul coordinateur le possède à la fois ; un autre appel à speculate() sur ce nom rejette tant que le propriétaire n’a pas terminé ou été récupéré."
   ],
   "SpeculationDurability.version": [
-    "Nonempty implementation/input version; change it when agents, validation, provider configuration or other semantics change. Incompatible resumes are rejected.",
-    "Version non vide des entrées/implémentations ; la changer si les agents, la validation, la configuration du provider ou leur sémantique changent. Les reprises incompatibles sont refusées."
+    "Nonempty version of your agents, validation and settings. With the repository, provider, candidate keys, briefs and budget, it must match the saved race, otherwise speculate() rejects.",
+    "Version non vide de vos agents, de la validation et des réglages. Avec le dépôt, le provider, les clés, briefs et budget des candidats, elle doit correspondre à la course enregistrée, sinon speculate() rejette."
   ],
   "SpeculationDurability.resume": [
-    "Explicit retry-incomplete authorization to replay interrupted candidates and their possible side effects. Completed candidates are retained.",
-    "Autorisation explicite retry-incomplete pour rejouer les candidats interrompus et leurs effets possibles. Les candidats terminés sont conservés."
+    "retry-incomplete replays candidates interrupted while running, with their side effects, as new attempts. Without it, a race with interrupted candidates rejects.",
+    "retry-incomplete rejoue les candidats interrompus en cours d’exécution, avec leurs effets de bord, en nouvelles tentatives. Sans cette valeur, une course aux candidats interrompus rejette."
   ],
   "SpeculationRecoveryOptions.transporter": [
-    "Transport containing the abandoned speculation ownership envelope.",
-    "Transport contenant l’enveloppe de propriété abandonnée de la course."
+    "Transport holding the saved race.",
+    "Transport qui contient la course enregistrée."
   ],
   "SpeculationRecoveryOptions.runId": [
-    "Identifier of the abandoned race whose ownership is being released.",
-    "Identifiant de la course abandonnée dont la propriété est libérée."
+    "runId of the race to release.",
+    "runId de la course à libérer."
   ],
   "SpeculationRecoveryOptions.revision": [
-    "Exact current transport revision inspected by the operator; a mismatch rejects recovery and fences concurrent changes.",
-    "Révision exacte du transport inspectée par l’opérateur ; toute différence refuse la récupération et protège les modifications concurrentes."
+    "Revision of the saved object as you read it; if it changed since, recovery rejects with TransportConflict.",
+    "Révision de l’objet enregistré telle que vous l’avez lue ; si elle a changé depuis, la récupération rejette avec TransportConflict."
   ],
   "SpeculationRecoveryOptions.coordinatorStopped": [
     "Explicit confirmation that the old coordinator has stopped; a remote PID or elapsed time is insufficient evidence.",
@@ -5300,64 +5297,64 @@
     "Identité de la course abandonnée, révision inspectée et confirmation explicite de l’arrêt de son coordinateur."
   ],
   "checkSpeculationIntegration.repository": [
-    "Host Git checkout to inspect without changing its index or working files.",
-    "Checkout Git hôte à inspecter sans changer son index ni ses fichiers de travail."
+    "Host Git checkout to test; it must be clean and on a branch.",
+    "Checkout Git hôte à vérifier ; il doit être propre et sur une branche."
   ],
   "checkSpeculationIntegration.branch": [
-    "Candidate ref to resolve to a commit and test against the current host HEAD.",
-    "Référence du candidat à résoudre en commit et à vérifier contre le HEAD hôte courant."
+    "Candidate branch or ref, resolved to a commit and tested against the checkout's HEAD.",
+    "Branche ou référence candidate, résolue en commit et vérifiée contre le HEAD du checkout."
   ],
   "checkSpeculationIntegration.expectedCommit": [
-    "Optional validated candidate commit; block the preflight if the ref has moved since validation.",
-    "Commit validé optionnel du candidat ; bloque la vérification si la référence a changé depuis la validation."
+    "Commit validated earlier, usually winner.commit; the check is blocked if the branch no longer points to it.",
+    "Commit validé auparavant, en général winner.commit ; la vérification est bloquée si la branche ne pointe plus dessus."
   ],
   "SpeculationIntegration.status": [
-    "clean means a conflict-free merge of the recorded commits; conflict lists conflicting files; blocked reports dirty/detached or changing state and Git failures. This does not perform integration.",
-    "clean indique une fusion sans conflit des commits enregistrés ; conflict liste les fichiers en conflit ; blocked signale un état sale/détaché ou changeant et les erreurs Git. Aucune intégration n’est effectuée."
+    "clean when the commits merge without conflict, conflict with the paths in conflicts, blocked with a reason. Nothing is merged.",
+    "clean si les commits se fusionnent sans conflit, conflict avec les chemins dans conflicts, blocked avec une reason. Rien n’est fusionné."
   ],
   "SpeculationIntegration.host": [
-    "Host snapshot used for this preflight; rerun the check if host state changes before integration.",
-    "Snapshot hôte utilisé pour cette vérification ; la relancer si l’état hôte change avant l’intégration."
+    "Host snapshot taken at the start of the check; its head is the commit tested.",
+    "Snapshot hôte pris au début de la vérification ; son head est le commit vérifié."
   ],
   "SpeculationIntegration.candidateCommit": [
-    "Exact candidate commit tested against host.head when the preflight completes.",
-    "Commit exact du candidat vérifié contre host.head lorsque la vérification aboutit."
+    "Candidate commit tested against host.head; absent when blocked.",
+    "Commit candidat vérifié contre host.head ; absent si la vérification est bloquée."
   ],
   "SpeculationIntegration.conflicts": [
-    "Paths reported by Git merge-tree for a conflicting merge; empty for clean or blocked checks.",
-    "Chemins signalés par Git merge-tree lors d’un conflit ; vide pour les vérifications clean ou blocked."
+    "Conflicting paths reported by git merge-tree; empty unless status is conflict.",
+    "Chemins en conflit signalés par git merge-tree ; vide sauf si le statut est conflict."
   ],
   "SpeculationIntegration.reason": [
-    "Explanation of a blocked preflight, including changed candidate refs or unavailable Git support.",
-    "Explication d’une vérification bloquée, notamment une référence candidate modifiée ou un support Git indisponible."
+    "Why the check is blocked: uncommitted changes, detached HEAD, a moved branch, a repository that changed during the check, or a Git failure such as a version without merge-tree --write-tree.",
+    "Raison du blocage : changements non commités, HEAD détaché, branche déplacée, dépôt modifié pendant la vérification, ou échec de Git, par exemple une version sans merge-tree --write-tree."
   ],
   "SpeculationResult.integration": [
-    "Fresh non-mutating merge preflight for the selected winner, tied to the validated candidate commit and current host snapshot.",
-    "Vérification de fusion récente sans mutation pour le gagnant, liée au commit candidat validé et au snapshot hôte courant."
+    "Merge preflight of the winner's validated commit against the host HEAD at the end of the race; absent without a winner.",
+    "Vérification de fusion du commit validé du gagnant contre le HEAD hôte à la fin de la course ; absente sans gagnant."
   ],
   "SpeculationResult.previousAttempts": [
-    "Earlier interrupted candidate attempts retained by a durable resumed race, with branches and recovery locations.",
-    "Tentatives antérieures interrompues conservées par une course durable reprise, avec branches et emplacements de récupération."
+    "Durable races only: earlier attempts replaced by a replay after a crash or a quota stop, with their branches and retained worktrees.",
+    "Courses durables uniquement : tentatives antérieures remplacées par un rejeu après un plantage ou un arrêt de quota, avec leurs branches et worktrees conservés."
   ],
   "SpeculativeCandidateResult.attempt": [
     "One-based attempt number; a replay uses a new branch and consumes another shared attempt.",
     "Numéro de tentative à partir de un ; un rejeu utilise une nouvelle branche et consomme une tentative supplémentaire du budget partagé."
   ],
   "SpeculativeCandidateResult.commit": [
-    "Candidate HEAD captured after successful validation; integration checks reject subsequent ref movement.",
-    "HEAD candidat capturé après validation réussie ; la vérification d’intégration refuse une modification ultérieure de la référence."
+    "Candidate HEAD read after validate returned, including commits made during validation. checkSpeculationIntegration() blocks if the branch later moves.",
+    "HEAD du candidat lu après le retour de validate, commits de validation compris. checkSpeculationIntegration() bloque si la branche bouge ensuite."
   ],
   "SpeculativeCandidateResult.cleanup": [
-    "done confirms owned cleanup completed; pending requires resource reconciliation and preserves recovery information.",
-    "done confirme la fin du nettoyage possédé ; pending exige une réconciliation des ressources et conserve les informations de récupération."
+    "done once the sandbox has closed; pending when closing failed or exceeded cleanupMs. A durable race then stays owned, and its next call stops the resource first.",
+    "done une fois la sandbox fermée ; pending si la fermeture a échoué ou dépassé cleanupMs. Une course durable reste alors possédée, et son appel suivant arrête d’abord la ressource."
   ],
   "SpeculativeCandidateResult.resourceId": [
-    "Provider identity registered before allocation, used for explicit cleanup after coordinator failure.",
-    "Identité du provider enregistrée avant l’allocation, utilisée pour le nettoyage explicite après échec du coordinateur."
+    "Resource the provider registered before allocating the sandbox, such as a container name; durable races only. The next call uses it to stop an orphaned sandbox.",
+    "Ressource enregistrée par le provider avant l’allocation de la sandbox, par exemple un nom de conteneur ; courses durables uniquement. L’appel suivant s’en sert pour arrêter une sandbox orpheline."
   ],
   "Retry.backoff": [
-    "Delay strategy: fixed by default, or exponential with a factor of two. Does not change attempt admission or the accepts predicate.",
-    "Stratégie de délai : fixed par défaut, ou exponential avec un facteur deux. Ne change ni l’admission des tentatives ni le prédicat accepts."
+    "Delay strategy: fixed (default) keeps delayMs; exponential doubles it after each failed attempt.",
+    "Stratégie d’attente : fixed (par défaut) garde delayMs ; exponential le double après chaque tentative échouée."
   ],
   "Retry.maxDelayMs": [
     "Nonnegative local delay cap, applied before jitter. Defaults to 30000 ms for exponential backoff; fixed delays have no additional cap. A valid server retryAfterMs minimum can exceed it.",
@@ -5368,8 +5365,8 @@
     "Aléa : none par défaut ; full tire uniformément entre zéro et le délai local plafonné. Le minimum serveur est appliqué ensuite et le résultat arrondi à la milliseconde supérieure."
   ],
   "WorkflowOptions.timeoutMs": [
-    "Positive integer deadline in milliseconds for this start() call, up to 2147483647. Includes checkpoint acquisition, conditions, attempts and retry waits. Expiration cooperatively cancels tasks and fails the workflow with an OutpostError timeout; cleanup is awaited. A resumed call receives a fresh deadline.",
-    "Délai entier positif en millisecondes pour cet appel à start(), jusqu’à 2147483647. Inclut acquisition du checkpoint, conditions, tentatives et attentes de reprise. Son expiration annule coopérativement les tâches et fait échouer le workflow avec une OutpostError timeout ; le nettoyage est attendu. Un appel de reprise reçoit un nouveau délai."
+    "Deadline in milliseconds for this start() call, a positive integer up to 2147483647, covering checkpoint acquisition, conditions, attempts and retry waits. Expiry cancels running tasks and the status is failed with an OutpostError code timeout; each call gets a fresh deadline.",
+    "Délai en millisecondes de cet appel à start(), entier positif jusqu’à 2147483647, qui couvre l’acquisition du checkpoint, les conditions, les tentatives et les attentes de relance. À l’expiration, les tâches en cours sont annulées et le statut est failed avec une OutpostError de code timeout ; chaque appel reçoit un nouveau délai."
   ],
   "WorkflowEvent.delayMs": [
     "Selected wait before the next task attempt, present on retry events and on quota events that wait for a reset in process; includes backoff, jitter and any valid server minimum for retries.",
@@ -5380,20 +5377,20 @@
     "Politique portable appliquée par Daytona : deny-all, jusqu’à 100 domaines ou jusqu’à 10 allowCidrs IPv4, pas les deux, et aucun denyCidrs. Outpost la confirme avant de préparer le workspace ; un refus échoue avec le code provider et supprime la sandbox (il faut un compte Tier 3 ou 4 avec WRITE_SANDBOXES)."
   ],
   "WorkflowGate.authentication": [
-    "Require signed decisions when set to signed; omitted preserves application-trusted actor metadata. This requirement is part of checkpoint identity.",
-    "Exige des décisions signées avec signed ; omis, conserve la confiance dans l’acteur fourni par l’application. Cette exigence fait partie de l’identité du checkpoint."
+    "signed requires every decision to carry a proof accepted by the decisionVerifier; when omitted, the actor named by your application is trusted. Part of checkpoint identity: adding or removing it makes a saved checkpoint incompatible.",
+    "signed exige que chaque décision porte une preuve acceptée par le decisionVerifier ; omis, l’acteur nommé par votre application est cru. Fait partie de l’identité du checkpoint : l’ajouter ou le retirer rend un checkpoint sauvegardé incompatible."
   ],
   "WorkflowGateOptions.authentication": [
-    "Require a verified proof for this approval or pause gate and persist that requirement in the graph identity.",
-    "Exige une preuve vérifiée pour ce gate d’approbation ou de pause et inscrit cette exigence dans l’identité du graphe."
+    "Set to signed to require a verified Ed25519 proof on every decision for this gate. Stored in the gate and in checkpoint identity.",
+    "signed exige une preuve Ed25519 vérifiée sur chaque décision de cette gate. Enregistré dans la gate et dans l’identité du checkpoint."
   ],
   "WorkflowPauseRequest.authentication": [
     "Signature requirement copied from the gate into this pending request.",
     "Exigence de signature copiée du gate dans cette demande en attente."
   ],
   "WorkflowDecision.proof": [
-    "Optional Ed25519 proof over this exact decision; required by signed gates and checked before any decision is applied.",
-    "Preuve Ed25519 optionnelle portant sur cette décision exacte ; requise par les gates signés et vérifiée avant application des décisions."
+    "Ed25519 proof from signWorkflowDecision() over this exact decision. A signed gate requires it; a proof sent to an unsigned gate is verified too, so it also needs a decisionVerifier.",
+    "Preuve Ed25519 issue de signWorkflowDecision() portant sur cette décision exacte. Une gate signée l’exige ; une preuve envoyée à une gate non signée est aussi vérifiée et exige donc un decisionVerifier."
   ],
   "WorkflowDecisionRecord.verification": [
     "Verified key identifier and verification time retained for audit; contains neither a private key nor a bearer token.",
@@ -5420,24 +5417,24 @@
     "Source actualisable des clés publiques de confiance appartenant à l’application."
   ],
   "WorkflowDecisionVerifier.decision": [
-    "Complete decision and proof to authenticate; reject invalid signatures, identity bindings, revoked keys and expired proofs.",
-    "Décision complète et preuve à authentifier ; refuser signatures invalides, mauvaises associations d’identité, clés révoquées et preuves expirées."
+    "Decision to authenticate, including its proof. Throw when the signature, key, actor binding or expiry is invalid; start() then applies no decision from the batch.",
+    "Décision à authentifier, preuve comprise. Levez une erreur si la signature, la clé, l’acteur associé ou l’expiration est invalide ; start() n’applique alors aucune décision du lot."
   ],
   "WorkflowDecisionSigningOptions.decision": [
     "Exact execution, pending request, task, actor, action and reason to sign, without an existing proof.",
     "Exécution, demande en attente, tâche, acteur, action et motif exacts à signer, sans preuve préexistante."
   ],
   "WorkflowDecisionSigningOptions.keyId": [
-    "Unique identifier of the corresponding trusted public key; included in the signed payload.",
-    "Identifiant unique de la clé publique de confiance correspondante ; inclus dans le contenu signé."
+    "Identifier of the matching trusted public key, nonblank and at most 512 characters; signed with the decision and copied into the proof.",
+    "Identifiant de la clé publique de confiance correspondante, non vide et d’au plus 512 caractères ; signé avec la décision et copié dans la preuve."
   ],
   "WorkflowDecisionSigningOptions.privateKey": [
-    "Application-owned Ed25519 private KeyObject; never persisted by Outpost.",
-    "KeyObject privé Ed25519 appartenant à l’application ; jamais persisté par Outpost."
+    "Ed25519 private KeyObject owned by your application; any other key type throws. Outpost never stores it.",
+    "KeyObject privé Ed25519 appartenant à votre application ; tout autre type de clé lève une erreur. Outpost ne le stocke jamais."
   ],
   "WorkflowDecisionSigningOptions.expiresAt": [
-    "Future expiration timestamp parseable by Date.parse; the exact string is signed.",
-    "Date d’expiration future interprétable par Date.parse ; la chaîne exacte est signée."
+    "Proof expiry, parseable by Date.parse and later than now; the exact string is signed.",
+    "Expiration de la preuve, interprétable par Date.parse et postérieure à maintenant ; la chaîne exacte est signée."
   ],
   "WorkflowDecisionProof.keyId": [
     "Trusted approver key identifier bound into the signature.",
@@ -5448,8 +5445,8 @@
     "Date d’expiration signée ; la vérification refuse la preuve dès cet instant."
   ],
   "WorkflowDecisionProof.signature": [
-    "Base64url Ed25519 signature of the versioned canonical decision payload.",
-    "Signature Ed25519 en base64url du contenu canonique versionné de la décision."
+    "Base64url Ed25519 signature (86 characters) of the versioned canonical decision payload.",
+    "Signature Ed25519 en base64url (86 caractères) du contenu canonique versionné de la décision."
   ],
   "WorkflowDecisionVerification.keyId": [
     "Identifier of the trusted key that verified this decision.",
@@ -5492,8 +5489,8 @@
     "Checkout Git hôte contenant le worktree conservé et le stockage des conversations par défaut ; doit rester accessible à la reprise."
   ],
   "InteractiveAgentTaskOptions.agent": [
-    "Composed CLI or Outpost agent with portable conversation capture and continuation enabled.",
-    "Agent CLI ou Outpost composé, avec capture portable et continuation des conversations activées."
+    "Agent with portable conversation capture and resume; otherwise defineInteractiveAgentTask() throws with code configuration.",
+    "Agent avec capture et reprise portables de la conversation ; sinon defineInteractiveAgentTask() lève une erreur de code configuration."
   ],
   "InteractiveAgentTaskOptions.brief": [
     "Literal initial instructions; human replies are supplied separately on subsequent turns.",
@@ -5504,12 +5501,12 @@
     "Identifiants uniques et non vides autorisés à répondre ; l’application doit authentifier les utilisateurs."
   ],
   "InteractiveAgentTaskOptions.sandboxProvider": [
-    "Execution provider used to allocate a fresh sandbox for each turn; omitting it uses normal sandbox defaults.",
-    "Provider allouant un nouveau sandbox par tour ; son absence utilise les valeurs par défaut habituelles."
+    "Provider that allocates a new sandbox for each turn, default createDockerSandboxProvider().",
+    "Provider qui alloue une nouvelle sandbox à chaque tour, createDockerSandboxProvider() par défaut."
   ],
   "InteractiveAgentTaskOptions.bootstrap": [
-    "Whether the sandbox may install a missing CLI agent when preparing each turn.",
-    "Indique si le sandbox peut installer une CLI absente lors de la préparation de chaque tour."
+    "Whether each turn's sandbox may install a missing CLI agent, default true.",
+    "Indique si la sandbox de chaque tour peut installer un agent CLI manquant, true par défaut."
   ],
   "InteractiveAgentTaskOptions.conversationHome": [
     "Host home used to locate captured native conversations across turns.",
@@ -5548,8 +5545,8 @@
     "Question lisible et non vide à afficher au répondant."
   ],
   "WorkflowInputQuestion.choices": [
-    "Optional nonempty list of unique answer choices.",
-    "Liste optionnelle non vide de choix de réponse uniques."
+    "Nonempty list of unique answer choices.",
+    "Liste non vide de choix de réponse uniques."
   ],
   "WorkflowInputQuestion.allowFreeText": [
     "Whether answers outside choices are accepted; omitted means true. False requires choices.",
@@ -5644,8 +5641,8 @@
     "État de continuation persisté, dernière question et réponse acceptée d’une tâche interactive."
   ],
   "WorkflowOptions.answers": [
-    "Responses to pending input requests; all answers are validated before any are applied and persisted before scheduling.",
-    "Réponses aux demandes en attente ; toutes sont validées avant application et persistées avant ordonnancement."
+    "Answers to pending input requests, not empty; requires a checkpoint. All are validated before any is applied, and an invalid, stale or duplicate answer makes start() reject.",
+    "Réponses aux demandes de saisie en attente, liste non vide ; requiert un checkpoint. Toutes sont validées avant d’en appliquer une, et une réponse invalide, périmée ou en double fait rejeter start()."
   ],
   "WorkflowResult.inputRequests": [
     "Immutable pending questions from tasks in waiting-input; empty when no human input is pending.",
@@ -5664,8 +5661,8 @@
     "Dépendances devant réussir avant le premier tour ; leurs résultats sont accessibles via context.value."
   ],
   "LoopTaskOptions.condition": [
-    "Optional admission predicate evaluated before running or resuming the loop; false skips the node.",
-    "Prédicat optionnel évalué avant exécution ou reprise de la boucle ; false ignore le nœud."
+    "Predicate evaluated before the loop starts or resumes; false skips the task and its dependents.",
+    "Prédicat évalué avant que la boucle démarre ou reprenne ; false ignore la tâche et ses dépendantes."
   ],
   "LoopTaskOptions.timeoutMs": [
     "Cooperative deadline for one round execution, including attempt and check; renewed when an interrupted phase resumes.",
@@ -5760,16 +5757,16 @@
     "Hub de la tâche avec exécution du workflow, clé et tentative ; le transmettre aux opérations imbriquées personnalisées comme speculate."
   ],
   "LoopTaskContext.signal": [
-    "Cooperative cancellation for this operation.",
-    "Annulation coopérative de cette opération."
+    "Aborted when the workflow stops or this round's timeoutMs expires.",
+    "Annulé quand le workflow s’arrête ou que le timeoutMs de ce tour expire."
   ],
   "LoopTaskContext.executionId": [
     "Identity of the workflow execution, preserved across checkpoint resumption.",
     "Identité de l’exécution de workflow, conservée lors de la reprise d’un checkpoint."
   ],
   "LoopTaskContext.checkpoint": [
-    "Persist the current workflow state when durable execution is enabled.",
-    "Persiste l’état courant du workflow lorsque l’exécution durable est activée."
+    "Save the workflow state now; does nothing without a checkpoint.",
+    "Enregistre immédiatement l’état du workflow ; sans effet sans checkpoint."
   ],
   "LoopTaskContext.value": [
     "Read the completed output of a task listed in this task’s declared dependencies.",
@@ -6053,8 +6050,8 @@
     "Raison de l’absence d’enregistrement : historique non linéaire ou réécrit, limite de taille, encodage non UTF-8, patch qui ne reproduit pas son arbre ou échec Git."
   ],
   "Task.cache": [
-    "Opt-in result cache: a hit restores the stored lossless JSON value without an attempt, usage or side effects. Rejected on gates, interactions and dispatch-result tasks.",
-    "Cache de résultat optionnel : une correspondance restaure la valeur JSON sans perte enregistrée, sans tentative, sans usage ni effet de bord. Refusé sur les gates, interactions et tâches renvoyant un résultat de dispatch."
+    "Result cache: a hit restores the stored lossless JSON value with no attempt, usage or side effects. On a miss, a result that is not lossless JSON fails the task. Rejected on gates, interactions and dispatch-result tasks.",
+    "Cache de résultat : une entrée trouvée restaure la valeur JSON sans perte enregistrée, sans tentative, usage ni effet de bord. En cas d’absence, un résultat qui n’est pas du JSON sans perte fait échouer la tâche. Refusé sur les gates, les interactions et les tâches qui renvoient un résultat de dispatch."
   ],
   "LoopTaskOptions.cache": [
     "Opt-in cache for the accepted loop result; a hit skips every round and records no rounds.",
@@ -6125,8 +6122,8 @@
     "Horodatage ISO de l’enregistrement du résultat ; comparé à maxAgeMs."
   ],
   "TaskCacheEntry.value": [
-    "Stored task result: lossless JSON or top-level undefined.",
-    "Résultat de tâche enregistré : JSON sans perte ou undefined au premier niveau."
+    "Encoded result: { kind: \"json\", value } for a lossless JSON value, or { kind: \"undefined\" }.",
+    "Résultat encodé : { kind: \"json\", value } pour une valeur JSON sans perte, ou { kind: \"undefined\" }."
   ],
   "TaskCacheAccessOptions.signal": [
     "Workflow cancellation signal forwarded to the store read or write.",
@@ -6161,8 +6158,8 @@
     "Pause sur quota reprise par cette tentative, avec la conversation capturée et la branche conservée lorsqu’elles sont connues ; présente seulement lors de la première tentative après la pause et jamais persistée séparément."
   ],
   "AgentTaskOptions.quotaResume": [
-    "After a quota pause, continue the captured conversation with a resume instruction (continue, default) or send the original request again (restart). Continuation is skipped when the agent cannot resume, the request supplies its own continuation or uses several passes.",
-    "Après une pause sur quota, poursuit la conversation capturée avec une consigne de reprise (continue, par défaut) ou renvoie la requête d’origine (restart). La poursuite est ignorée si l’agent ne peut pas reprendre, si la requête fournit sa propre continuation ou utilise plusieurs passes."
+    "After a quota pause, continue the captured conversation with a resume instruction (continue, default) or send the original request again (restart). The original request is sent when the agent cannot resume or is a fallback agent, or when the request sets continuation or several passes.",
+    "Après une pause sur quota, poursuit la conversation capturée avec une consigne de reprise (continue, par défaut) ou renvoie la requête d’origine (restart). La requête d’origine est renvoyée quand l’agent ne peut pas reprendre ou est un agent de secours, ou quand la requête fixe continuation ou plusieurs passes."
   ],
   "IsolatedTaskOptions.quotaResume": [
     "After a quota pause, continue the captured conversation in the new dispatch (continue, default) or start a new one (restart). Automatically integrated workspaces then start from the interrupted branch; uncommitted changes stay in its retained worktree.",
@@ -6361,8 +6358,8 @@
     "Traite une consigne de pilotage remise à l’agent, avec son texte et le fait qu’elle ait été injectée ou reprise ; reçoit les métadonnées pass et at et peut renvoyer une promesse."
   ],
   "createCronSchedule.expression": [
-    "Five fields (minute, hour, day of month, month, day of week) with lists, ranges, steps and names, or a macro such as @hourly or @daily; whitespace is normalized.",
-    "Cinq champs (minute, heure, jour du mois, mois, jour de la semaine) avec listes, intervalles, pas et noms, ou une macro comme @hourly ou @daily ; les espaces sont normalisés."
+    "Five fields (minute, hour, day of month, month, day of week) with lists, ranges, steps and three-letter month or weekday names, or a macro such as @hourly or @daily; at most 256 characters. Weekday 0 and 7 are Sunday, and when both day fields are restricted, a day matching either one matches.",
+    "Cinq champs (minute, heure, jour du mois, mois, jour de la semaine) avec listes, intervalles, pas et noms anglais de mois ou de jour à trois lettres, ou une macro comme @hourly ou @daily ; 256 caractères au plus. Les jours 0 et 7 désignent le dimanche, et quand les deux champs de jour sont restreints, un jour qui correspond à l’un ou l’autre convient."
   ],
   "createCronSchedule.options": [
     "Evaluation options; omit them to evaluate in UTC.",
@@ -6381,8 +6378,8 @@
     "Fuseau horaire IANA canonique utilisé pour l’évaluation."
   ],
   "CronSchedule.next": [
-    "Return the first slot strictly after the given instant; a time skipped by daylight saving does not occur and a repeated time occurs once.",
-    "Renvoie le premier créneau strictement postérieur à l’instant donné ; une heure sautée par l’heure d’été n’existe pas et une heure répétée n’a lieu qu’une fois."
+    "Return the first slot strictly after the given instant. A time skipped by daylight saving does not occur; a repeated time occurs once, at its first instant.",
+    "Renvoie le premier créneau strictement postérieur à l’instant donné. Une heure sautée par le changement d’heure n’a pas lieu ; une heure répétée a lieu une fois, à son premier instant."
   ],
   "CronSchedule.previous": [
     "Return the latest slot at or before the given instant, with the same daylight saving rules as next().",
@@ -6405,12 +6402,12 @@
     "Arrête toutes les planifications ; runSchedules() se résout alors."
   ],
   "RunSchedulesOptions.maxLateMs": [
-    "Maximum delay after a slot for it to still be published, including at startup; defaults to 60000. Older slots are skipped.",
-    "Délai maximal après un créneau pour qu’il soit encore publié, y compris au démarrage ; 60000 par défaut. Les créneaux plus anciens sont ignorés."
+    "Maximum delay after a slot for it to still be published, including at startup; defaults to 60000. Only the latest slot within this window is published; a negative or non-integer value rejects.",
+    "Retard maximal après un créneau pour qu’il soit encore publié, y compris au démarrage ; 60000 par défaut. Seul le dernier créneau de cette fenêtre est publié ; une valeur négative ou non entière rejette."
   ],
   "RunSchedulesOptions.onError": [
-    "Receives each publication failure with its schedule and slot, and scheduling continues; without it the first failure rejects runSchedules(). Errors thrown by the callback are ignored.",
-    "Reçoit chaque échec de publication avec sa planification et son créneau, et la planification continue ; sans lui, le premier échec rejette runSchedules(). Les erreurs levées par le rappel sont ignorées."
+    "Receives each publication failure with its schedule and slot, and scheduling continues; without it the first failure stops every schedule and rejects runSchedules(). Errors thrown by the callback are ignored.",
+    "Reçoit chaque échec de publication avec sa planification et son créneau, et la planification continue ; sans lui, le premier échec arrête toutes les planifications et rejette runSchedules(). Les erreurs levées par le callback sont ignorées."
   ],
   "TriggerSchedule.name": [
     "Stable name of 1 to 128 letters, digits, dots, underscores or hyphens; part of each job identifier.",
@@ -6425,12 +6422,12 @@
     "Handler du worker de file qui reçoit les jobs, généralement un defineWorkflowJob()."
   ],
   "TriggerSchedule.runId": [
-    "Derive the checkpoint run of a slot; defaults to <name>:<slot ISO time>.",
-    "Dérive l’exécution de checkpoint d’un créneau ; <name>:<heure ISO du créneau> par défaut."
+    "Derive the checkpoint run of a slot; defaults to <name>:<slot ISO time>. Return the same value for a slot on every replica, or the queue refuses the later publication.",
+    "Dérive l’exécution de checkpoint d’un créneau ; <name>:<heure ISO du créneau> par défaut. Renvoyez la même valeur pour un créneau sur chaque réplica, sinon la file refuse la publication suivante."
   ],
   "TriggerSchedule.input": [
-    "Derive the JSON input of a slot; defaults to null.",
-    "Dérive l’entrée JSON d’un créneau ; null par défaut."
+    "Derive the JSON input of a slot; defaults to null. Return the same value for a slot on every replica, or the queue refuses the later publication.",
+    "Dérive l’entrée JSON d’un créneau ; null par défaut. Renvoyez la même valeur pour un créneau sur chaque réplica, sinon la file refuse la publication suivante."
   ],
   "ScheduleFailure.schedule": [
     "Name of the schedule whose publication failed.",
@@ -6445,8 +6442,8 @@
     "Handler enregistré du worker de file, généralement un defineWorkflowJob()."
   ],
   "TriggerJob.runId": [
-    "Checkpoint run, 1 to 256 characters; events for the same run converge on one checkpoint.",
-    "Exécution de checkpoint, de 1 à 256 caractères ; les événements d’une même exécution convergent vers un seul checkpoint."
+    "Checkpoint run, 1 to 256 characters and not blank. Jobs with the same runId and input share one checkpoint; a different input makes it incompatible.",
+    "Exécution de checkpoint, de 1 à 256 caractères et non vide. Les jobs de même runId et de même entrée partagent un checkpoint ; une autre entrée le rend incompatible."
   ],
   "TriggerJob.input": [
     "Lossless JSON input for the workflow; defaults to null.",
@@ -6461,16 +6458,16 @@
     "Entrée JSON portée par le job, null lorsqu’aucune n’a été fournie."
   ],
   "TriggerRoute.path": [
-    "Exact request path, such as /github, unique among routes; part of each job identifier.",
-    "Chemin exact de la requête, comme /github, unique parmi les routes ; il fait partie de chaque identifiant de job."
+    "Exact request path starting with /, such as /github, of at most 128 letters, digits, dots, underscores, tildes, slashes or hyphens. Unique among routes and part of each job identifier.",
+    "Chemin exact de la requête commençant par /, comme /github, d’au plus 128 lettres, chiffres, points, tirets bas, tildes, barres obliques ou tirets. Unique parmi les routes et intégré à chaque identifiant de job."
   ],
   "TriggerRoute.source": [
     "Source verifying and normalizing requests on this path.",
     "Source qui vérifie et normalise les requêtes sur ce chemin."
   ],
   "TriggerRoute.on": [
-    "Map a verified event to a job, or return undefined to ignore it; a thrown error answers 500. Must return promptly because senders time out.",
-    "Associe un événement vérifié à un job, ou renvoie undefined pour l’ignorer ; une erreur levée répond 500. Doit répondre vite, car les émetteurs abandonnent après un délai."
+    "Map a verified event to a job, or return undefined to ignore it (204); a thrown error or invalid job answers 500. Return promptly and deterministically: senders time out, and the queue refuses a different job for a known delivery (503).",
+    "Associe un événement vérifié à un job, ou renvoie undefined pour l’ignorer (204) ; une erreur levée ou un job invalide répond 500. Répondez vite et de façon déterministe : les émetteurs abandonnent après un délai, et la file refuse un autre job pour une livraison connue (503)."
   ],
   "serveTriggers.options": [
     "Queue, routes, listening address, body limit and failure observer.",
@@ -6541,8 +6538,8 @@
     "Identité authentifiée par l’émetteur, comme github:octocat, gitlab:user ou slack:U123 ; pas un acteur de gate Outpost."
   ],
   "TriggerEvent.payload": [
-    "Parsed request payload; read it with helpers or narrow it before use.",
-    "Charge de la requête analysée ; lisez-la avec les helpers ou affinez son type avant usage."
+    "Parsed body: the JSON document, the form fields of a Slack slash command or the JSON payload of a Slack interaction. Narrow it before use, or read it with labelAdded() and commandIssued().",
+    "Corps analysé : le document JSON, les champs du formulaire d’une commande slash Slack ou la charge JSON d’une interaction Slack. Affinez son type avant usage, ou lisez-le avec labelAdded() et commandIssued()."
   ],
   "TriggerEvent.receivedAt": [
     "ISO time at which the server verified the request.",
@@ -6569,8 +6566,8 @@
     "Statut HTTP renvoyé à l’émetteur."
   ],
   "TriggerReply.body": [
-    "Optional response body.",
-    "Corps de réponse optionnel."
+    "Response body text; the reply is empty when omitted.",
+    "Texte du corps de réponse ; la réponse est vide s’il est omis."
   ],
   "TriggerReply.contentType": [
     "Content type of the body, when one is sent.",
@@ -6585,56 +6582,56 @@
     "Authentifie la requête et renvoie l’événement normalisé ; lever une erreur la refuse avec 401."
   ],
   "TriggerSource.reply": [
-    "Replace the default 202 and 204 replies for senders expecting another status, such as Slack.",
-    "Remplace les réponses 202 et 204 par défaut pour les émetteurs qui attendent un autre statut, comme Slack."
+    "Replace the default replies, 202 with the job id as JSON or 204 for an ignored event, for senders expecting another status, such as Slack.",
+    "Remplace les réponses par défaut, 202 avec l’identifiant du job en JSON ou 204 pour un événement ignoré, pour les émetteurs qui attendent un autre statut, comme Slack."
   ],
   "createGithubWebhook.options": [
     "GitHub webhook secret settings.",
     "Réglages du secret du webhook GitHub."
   ],
   "GithubWebhookOptions.secret": [
-    "GitHub webhook secret verifying X-Hub-Signature-256. Secret, or callback returning every currently accepted secret; return old and new values during a rotation. An empty or failing source denies requests.",
-    "Secret du webhook GitHub qui vérifie X-Hub-Signature-256. Secret, ou fonction renvoyant chaque secret actuellement accepté ; renvoyez l’ancienne et la nouvelle valeur pendant une rotation. Une source vide ou en échec refuse les requêtes."
+    "Webhook secret verifying X-Hub-Signature-256, or a callback returning every currently accepted secret (old and new during a rotation). An empty string throws at creation; a callback that fails or returns no secret denies requests.",
+    "Secret du webhook qui vérifie X-Hub-Signature-256, ou callback renvoyant chaque secret actuellement accepté (l’ancien et le nouveau pendant une rotation). Une chaîne vide lève une erreur à la création ; un callback en échec ou sans secret refuse les requêtes."
   ],
   "createGitlabWebhook.options": [
-    "Either signingToken (recommended, signs the body) or token (legacy plain-text header), not both.",
-    "Soit signingToken (recommandé, signe le corps), soit token (en-tête historique en clair), pas les deux."
+    "Either signingToken (recommended, signs the body) or token (legacy plain-text header); signingToken is used when both are set.",
+    "Soit signingToken (recommandé, signe le corps), soit token (en-tête historique en clair) ; signingToken est utilisé si les deux sont fournis."
   ],
   "GitlabSigningOptions.signingToken": [
-    "whsec_ signing token of the GitLab webhook (GitLab 19.0+), verifying webhook-signature. Secret, or callback returning every currently accepted secret; return old and new values during a rotation. An empty or failing source denies requests.",
-    "Jeton de signature whsec_ du webhook GitLab (GitLab 19.0+), qui vérifie webhook-signature. Secret, ou fonction renvoyant chaque secret actuellement accepté ; renvoyez l’ancienne et la nouvelle valeur pendant une rotation. Une source vide ou en échec refuse les requêtes."
+    "whsec_ signing token of the GitLab webhook (GitLab 19.0+) verifying webhook-signature, or a callback returning every currently accepted token (old and new during a rotation). An empty string throws at creation; a callback that fails or returns nothing, or a token without the whsec_ prefix, denies requests.",
+    "Jeton de signature whsec_ du webhook GitLab (GitLab 19.0+) qui vérifie webhook-signature, ou callback renvoyant chaque jeton actuellement accepté (l’ancien et le nouveau pendant une rotation). Une chaîne vide lève une erreur à la création ; un callback en échec ou vide, ou un jeton sans préfixe whsec_, refuse les requêtes."
   ],
   "GitlabSigningOptions.toleranceMs": [
-    "Accepted clock difference for the request timestamp, in milliseconds; defaults to 300000 (5 minutes).",
-    "Écart d’horloge accepté pour l’horodatage de la requête, en millisecondes ; 300000 (5 minutes) par défaut."
+    "Accepted clock difference for the request timestamp, in milliseconds; defaults to 300000 (5 minutes). A value that is not a positive integer throws at creation.",
+    "Écart d’horloge accepté pour l’horodatage de la requête, en millisecondes ; 300000 (5 minutes) par défaut. Une valeur qui n’est pas un entier positif lève une erreur à la création."
   ],
   "GitlabTokenOptions.token": [
-    "Secret token compared with X-Gitlab-Token; weaker because the body is not signed. Secret, or callback returning every currently accepted secret; return old and new values during a rotation. An empty or failing source denies requests.",
-    "Jeton secret comparé à X-Gitlab-Token ; plus faible car le corps n’est pas signé. Secret, ou fonction renvoyant chaque secret actuellement accepté ; renvoyez l’ancienne et la nouvelle valeur pendant une rotation. Une source vide ou en échec refuse les requêtes."
+    "Secret token compared in constant time with X-Gitlab-Token, or a callback returning every currently accepted token; weaker because the body is not signed. An empty string throws at creation; a callback that fails or returns nothing denies requests.",
+    "Jeton secret comparé en temps constant à X-Gitlab-Token, ou callback renvoyant chaque jeton actuellement accepté ; plus faible, car le corps n’est pas signé. Une chaîne vide lève une erreur à la création ; un callback en échec ou vide refuse les requêtes."
   ],
   "createSlackSource.options": [
     "Slack app signing secret and timestamp window.",
     "Secret de signature de l’application Slack et fenêtre d’horodatage."
   ],
   "SlackRequestOptions.signingSecret": [
-    "Slack app signing secret verifying X-Slack-Signature. Secret, or callback returning every currently accepted secret; return old and new values during a rotation. An empty or failing source denies requests.",
-    "Secret de signature de l’application Slack qui vérifie X-Slack-Signature. Secret, ou fonction renvoyant chaque secret actuellement accepté ; renvoyez l’ancienne et la nouvelle valeur pendant une rotation. Une source vide ou en échec refuse les requêtes."
+    "Slack app signing secret verifying X-Slack-Signature, or a callback returning every currently accepted secret (old and new during a rotation). An empty string throws at creation; a callback that fails or returns nothing denies requests.",
+    "Secret de signature de l’application Slack qui vérifie X-Slack-Signature, ou callback renvoyant chaque secret actuellement accepté (l’ancien et le nouveau pendant une rotation). Une chaîne vide lève une erreur à la création ; un callback en échec ou vide refuse les requêtes."
   ],
   "SlackRequestOptions.toleranceMs": [
-    "Accepted clock difference for the request timestamp, in milliseconds; defaults to 300000 (5 minutes).",
-    "Écart d’horloge accepté pour l’horodatage de la requête, en millisecondes ; 300000 (5 minutes) par défaut."
+    "Accepted clock difference for the request timestamp, in milliseconds; defaults to 300000 (5 minutes). A value that is not a positive integer throws at creation.",
+    "Écart d’horloge accepté pour l’horodatage de la requête, en millisecondes ; 300000 (5 minutes) par défaut. Une valeur qui n’est pas un entier positif lève une erreur à la création."
   ],
   "createStandardWebhook.options": [
     "Signing secret, timestamp window and source name.",
     "Secret de signature, fenêtre d’horodatage et nom de source."
   ],
   "StandardWebhookOptions.secret": [
-    "whsec_ secret verifying webhook-signature. Secret, or callback returning every currently accepted secret; return old and new values during a rotation. An empty or failing source denies requests.",
-    "Secret whsec_ qui vérifie webhook-signature. Secret, ou fonction renvoyant chaque secret actuellement accepté ; renvoyez l’ancienne et la nouvelle valeur pendant une rotation. Une source vide ou en échec refuse les requêtes."
+    "whsec_ secret verifying webhook-signature, or a callback returning every currently accepted secret (old and new during a rotation). An empty string throws at creation; a callback that fails or returns nothing, or a secret without the whsec_ prefix, denies requests.",
+    "Secret whsec_ qui vérifie webhook-signature, ou callback renvoyant chaque secret actuellement accepté (l’ancien et le nouveau pendant une rotation). Une chaîne vide lève une erreur à la création ; un callback en échec ou vide, ou un secret sans préfixe whsec_, refuse les requêtes."
   ],
   "StandardWebhookOptions.toleranceMs": [
-    "Accepted clock difference for the request timestamp, in milliseconds; defaults to 300000 (5 minutes).",
-    "Écart d’horloge accepté pour l’horodatage de la requête, en millisecondes ; 300000 (5 minutes) par défaut."
+    "Accepted clock difference for the request timestamp, in milliseconds; defaults to 300000 (5 minutes). A value that is not a positive integer throws at creation.",
+    "Écart d’horloge accepté pour l’horodatage de la requête, en millisecondes ; 300000 (5 minutes) par défaut. Une valeur qui n’est pas un entier positif lève une erreur à la création."
   ],
   "StandardWebhookOptions.source": [
     "Name reported in TriggerEvent.source; defaults to standard.",
@@ -6670,8 +6667,8 @@
     "Événement vérifié provenant d’une source GitHub, GitLab ou Slack."
   ],
   "commandIssued.command": [
-    "Single word starting the command, such as /outpost; for Slack it must equal the slash command name.",
-    "Mot unique qui commence la commande, comme /outpost ; pour Slack, il doit être égal au nom de la commande slash."
+    "Single word starting the command, such as /outpost; for Slack it must equal the slash command name. A value containing whitespace throws.",
+    "Mot unique qui ouvre la commande, comme /outpost ; pour Slack, il doit être égal au nom de la commande slash. Une valeur contenant un espace lève une erreur."
   ],
   "TriggerCommand.source": [
     "Sender of the command: github, gitlab or slack.",
@@ -6702,8 +6699,8 @@
     "Construit le workflow pour une entrée de job ; la même entrée doit construire le même workflow, et la fabrique peut être asynchrone."
   ],
   "WorkflowJobOptions.checkpoint": [
-    "Checkpoint store and version used for every job; required.",
-    "Stockage et version de checkpoint utilisés pour chaque job ; obligatoire."
+    "Checkpoint store and base version shared by every job; creation throws without both.",
+    "Stockage de checkpoint et version de base partagés par chaque job ; la création lève une erreur sans les deux."
   ],
   "WorkflowJobOptions.start": [
     "Other workflow start options, such as concurrency, budget, onQuota or timeoutMs; checkpoint, signal, decisions and answers are managed by the job.",
@@ -6718,12 +6715,12 @@
     "Stockage de checkpoints qui contient chaque exécution."
   ],
   "WorkflowJobCheckpoint.version": [
-    "Change when task implementations change; the effective version appends #input: and a digest of the job input.",
-    "À changer lorsque les implémentations de tâches changent ; la version effective ajoute #input: et une empreinte de l’entrée du job."
+    "Base version; change it when task implementations change. The effective version appends #input: and a 32-character SHA-256 digest of the job input.",
+    "Version de base ; changez-la quand l’implémentation des tâches change. La version effective ajoute #input: et une empreinte SHA-256 de 32 caractères de l’entrée du job."
   ],
   "WorkflowJobCheckpoint.resume": [
-    "Explicitly authorize replay of incomplete tasks and their side effects.",
-    "Autorise explicitement le rejeu des tâches incomplètes et de leurs effets de bord."
+    "Set to retry-incomplete to authorize replay of incomplete tasks and their side effects; without it, an incomplete checkpoint completes the job with an error.",
+    "Valeur retry-incomplete pour autoriser le rejeu des tâches incomplètes et de leurs effets de bord ; sans elle, un checkpoint incomplet termine le job avec une erreur."
   ],
   "AgentLiveInput.open": [
     "Start the protocol state of one turn requested with the given input. Outpost opens a session when it runs the turn with liveInput and closes stdin after a final event once every written message was consumed.",
@@ -6842,12 +6839,12 @@
     "Nom de la balise, schéma ou fonction d’analyse, et nombre de tours de réparation autorisés après une réponse invalide."
   ],
   "defineJsonArtifact.options": [
-    "Contract name, version and the schema or parsing function applied when encoding and decoding.",
-    "Nom et version du contrat, et schéma ou fonction d’analyse appliqué à l’encodage et au décodage."
+    "Contract name, version and the schema applied on publish and on read.",
+    "Nom et version du contrat, et schéma appliqué à la publication et à la lecture."
   ],
   "defineBinaryArtifact.options": [
-    "Contract name and version identifying the binary payload.",
-    "Nom et version du contrat identifiant les données binaires."
+    "Contract name and version.",
+    "Nom et version du contrat."
   ],
   "SteeringSendOptions.subagent": [
     "Built-in subagent run id, read from its subagent event, to deliver only to that run at its next step; null delivers only to the main loop. Omitted, the first active loop receives it. CLI agents reject a target with code steering.",

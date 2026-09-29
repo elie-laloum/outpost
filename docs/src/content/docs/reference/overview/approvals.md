@@ -1,28 +1,49 @@
 ---
 title: "Approval and pause gates — Overview"
-description: "An approval or pause gate is a durable decision point in a workflow."
+description: "Gate tasks hold a checkpointed workflow until a listed actor approves, resumes or rejects, optionally with a signed decision."
 sidebar:
   label: Overview
   order: 0
 ---
 
-An approval or pause gate is a durable decision point in a workflow. It represents work that must wait for an explicit external decision before its dependants can proceed, rather than leaving a process blocked on an interactive prompt.
+## How a gate decides
 
-## How it works
+A gate runs no code: it records a request and waits for a decision submitted to a later `start()` on the same checkpoint.
 
-`defineApprovalTask` and `definePauseTask` create gate tasks. The workflow persists the pending request and can return control to the caller. A later start submits decision records against that saved state; dependencies enforce the ordering around the gate.
+| Step                                         | What happens                                                                                                                                                       |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Dependencies are `done`                      | The gate stores a `WorkflowPauseRequest` (`id`, `prompt`, `actors`) in its record; the run returns `paused`                                                        |
+| `start({ checkpoint, decisions })`           | Each decision must match the `executionId`, gate `key` and pending `requestId`, name a listed actor and give a reason; any mismatch throws and applies no decision |
+| `approve` (approval gate) / `resume` (pause) | The gate is `done`; dependent tasks read the `WorkflowDecisionRecord` as its value                                                                                 |
+| `reject`                                     | The gate is `rejected`, dependents are skipped and the run ends `failed`, also on every later start                                                                |
 
-## Boundaries and responsibilities
+Input waits are separate: an interactive task ends the run `waiting-input` and continues with `answers`, not `decisions`.
 
-Actor identifiers are trusted metadata, not authentication. The application must establish who may submit a decision. Rejection is final for that run; an invalid decision batch is rejected before partial application. A persisted pause needs no timer or permanently running worker.
+## Trusted or signed decisions
+
+|                     | Trusted actor (default)                    | Signed (`authentication: "signed"`)                                                      |
+| ------------------- | ------------------------------------------ | ---------------------------------------------------------------------------------------- |
+| Outpost checks      | `actor` is in the gate’s `actors`          | The same, plus an Ed25519 proof from a key bound to that actor                           |
+| Who proves identity | Your application, before calling `start()` | Your signing service, with `signWorkflowDecision()`                                      |
+| `start()` needs     | `decisions`                                | `decisions` with `proof`, and a `decisionVerifier`                                       |
+| Record keeps        | The decision and `decidedAt`               | Also `verification`: the `keyId` and `verifiedAt`                                        |
+| Also rejects        | —                                          | Missing verifier, unknown, duplicated or wrongly bound key, bad signature, expired proof |
+
+:::caution
+A gate’s `kind`, `prompt`, `actors` and `authentication` are part of checkpoint identity. Changing any of them makes a saved checkpoint incompatible.
+:::
 
 ## Entry points
 
+Guide: [Approvals](../../../guide/approvals/) · [Interactive tasks](../../../guide/interactive-tasks/) · [Durable runs](../../../guide/durable-runs/)
+
 - [defineApprovalTask](../../defineapprovaltask/)
 - [definePauseTask](../../definepausetask/)
-- [WorkflowGate](../../workflowgate/)
+- [signWorkflowDecision](../../signworkflowdecision/)
+- [createEd25519DecisionVerifier](../../createed25519decisionverifier/)
 - [WorkflowGateOptions](../../workflowgateoptions/)
+- [WorkflowPauseRequest](../../workflowpauserequest/)
 - [WorkflowDecision](../../workflowdecision/)
 - [WorkflowDecisionRecord](../../workflowdecisionrecord/)
-
-[Learn with the practical guide](../../../guide/approvals/).
+- [WorkflowDecisionVerifier](../../workflowdecisionverifier/)
+- [WorkflowApproverKey](../../workflowapproverkey/)

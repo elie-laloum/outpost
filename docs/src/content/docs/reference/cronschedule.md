@@ -13,12 +13,12 @@ import type { CronSchedule } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name         | Type                    | Presence | Meaning                                                                                                                                   |
-| ------------ | ----------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `expression` | `string`                | Required | Normalized expression, with a macro replaced by its five fields.                                                                          |
-| `timeZone`   | `string`                | Required | Canonical IANA time zone used for evaluation.                                                                                             |
-| `next`       | `(after: Date) => Date` | Required | Return the first slot strictly after the given instant; a time skipped by daylight saving does not occur and a repeated time occurs once. |
-| `previous`   | `(at: Date) => Date`    | Required | Return the latest slot at or before the given instant, with the same daylight saving rules as next().                                     |
+| Name         | Type                    | Presence | Meaning                                                                                                                                                      |
+| ------------ | ----------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `expression` | `string`                | Required | Normalized expression, with a macro replaced by its five fields.                                                                                             |
+| `timeZone`   | `string`                | Required | Canonical IANA time zone used for evaluation.                                                                                                                |
+| `next`       | `(after: Date) => Date` | Required | Return the first slot strictly after the given instant. A time skipped by daylight saving does not occur; a repeated time occurs once, at its first instant. |
+| `previous`   | `(at: Date) => Date`    | Required | Return the latest slot at or before the given instant, with the same daylight saving rules as next().                                                        |
 
 ## Signature
 

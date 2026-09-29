@@ -13,10 +13,10 @@ import type { QueueServer } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom     | Type                  | Présence | Rôle                                                               |
-| ------- | --------------------- | -------- | ------------------------------------------------------------------ |
-| `url`   | `string`              | Requis   | URL HTTP de base du serveur de file de tâches.                     |
-| `close` | `() => Promise<void>` | Requis   | Arrête l’écoute HTTP sans fermer la file appartenant à l’appelant. |
+| Nom     | Type                  | Présence | Rôle                                                                                                    |
+| ------- | --------------------- | -------- | ------------------------------------------------------------------------------------------------------- |
+| `url`   | `string`              | Requis   | URL de base du serveur à l’écoute, par exemple http://127.0.0.1:8788, à passer à createHttpTaskQueue(). |
+| `close` | `() => Promise<void>` | Requis   | Arrête l’écoute et ferme les connexions inactives ; la file servie reste ouverte.                       |
 
 ## Signature
 

@@ -13,7 +13,7 @@ import { WorkflowBudgetExceeded } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Erreur identifiant la dimension de tentatives ou de tokens dont la limite d’admission a été atteinte. limit et observed exposent seuil et comptabilité courante ; l’usage observé ne constitue pas un plafond de facturation.
+Erreur enregistrée dans WorkflowResult.errors quand une limite du budget est atteinte, ce qui fait échouer l’exécution. Une limite attempts annule les tâches non démarrées ; une limite de tokens annule aussi les tâches en cours.
 
 [Exemple complet et règles détaillées](../../guide/budgets/).
 

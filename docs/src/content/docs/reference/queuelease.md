@@ -13,11 +13,11 @@ import type { QueueLease } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name     | Type     | Presence | Meaning                                                           |
-| -------- | -------- | -------- | ----------------------------------------------------------------- |
-| `id`     | `string` | Required | Durable job identity used for deduplication and lease operations. |
-| `worker` | `string` | Required | Identity of the worker claiming or owning the job lease.          |
-| `fence`  | `number` | Required | Lease generation used to reject stale queue writers.              |
+| Name     | Type     | Presence | Meaning                                                                      |
+| -------- | -------- | -------- | ---------------------------------------------------------------------------- |
+| `id`     | `string` | Required | ID of the leased job.                                                        |
+| `worker` | `string` | Required | Name of the worker holding the lease.                                        |
+| `fence`  | `number` | Required | Fence returned by the claim; a later claim or a cancellation makes it stale. |
 
 ## Signature
 

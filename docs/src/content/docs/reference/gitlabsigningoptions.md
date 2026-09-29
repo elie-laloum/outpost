@@ -13,10 +13,10 @@ import type { GitlabSigningOptions } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name           | Type                  | Presence | Meaning                                                                                                                                                                                                                                         |
-| -------------- | --------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `signingToken` | `TriggerSecret`       | Required | whsec_ signing token of the GitLab webhook (GitLab 19.0+), verifying webhook-signature. Secret, or callback returning every currently accepted secret; return old and new values during a rotation. An empty or failing source denies requests. |
-| `toleranceMs`  | `number \| undefined` | Optional | Accepted clock difference for the request timestamp, in milliseconds; defaults to 300000 (5 minutes).                                                                                                                                           |
+| Name           | Type                  | Presence | Meaning                                                                                                                                                                                                                                                                                                             |
+| -------------- | --------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `signingToken` | `TriggerSecret`       | Required | whsec_ signing token of the GitLab webhook (GitLab 19.0+) verifying webhook-signature, or a callback returning every currently accepted token (old and new during a rotation). An empty string throws at creation; a callback that fails or returns nothing, or a token without the whsec_ prefix, denies requests. |
+| `toleranceMs`  | `number \| undefined` | Optional | Accepted clock difference for the request timestamp, in milliseconds; defaults to 300000 (5 minutes). A value that is not a positive integer throws at creation.                                                                                                                                                    |
 
 ## Signature
 

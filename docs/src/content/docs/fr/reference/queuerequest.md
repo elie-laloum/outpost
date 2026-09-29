@@ -15,11 +15,11 @@ import type { QueueRequest } from "@elie-laloum/outpost";
 
 | Nom              | Type                  | Présence  | Rôle                                                                                                                                                                                     |
 | ---------------- | --------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `id`             | `string`              | Requis    | Identité durable du travail utilisée pour la déduplication et les opérations de bail.                                                                                                    |
+| `id`             | `string`              | Requis    | Identifiant du job, de 1 à 512 caractères et unique dans la file ; le renvoyer rend le job stocké.                                                                                       |
 | `idempotencyKey` | `string \| undefined` | Optionnel | Clé d’effet transmise au handler à la place de l’identifiant du job ; defineQueuedTask y place la clé d’origine lorsqu’une pause sur quota republie la tâche sous un nouvel identifiant. |
-| `handler`        | `string`              | Requis    | Nom du gestionnaire enregistré du worker qui exécutera ce travail JSON.                                                                                                                  |
-| `input`          | `WorkflowJson`        | Requis    | Entrée JSON sans perte fournie au gestionnaire de travail enregistré.                                                                                                                    |
-| `deadline`       | `number \| undefined` | Optionnel | Échéance absolue du travail sous forme d’horodatage Unix en millisecondes.                                                                                                               |
+| `handler`        | `string`              | Requis    | Nom du handler de worker qui exécute le job, de 1 à 512 caractères.                                                                                                                      |
+| `input`          | `WorkflowJson`        | Requis    | Entrée JSON transmise au handler, 262144 octets au plus une fois sérialisée.                                                                                                             |
+| `deadline`       | `number \| undefined` | Optionnel | Instant en millisecondes epoch après lequel un job pending ou active devient cancelled ; les baux ne le dépassent jamais.                                                                |
 
 ## Signature
 

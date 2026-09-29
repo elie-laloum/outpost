@@ -13,19 +13,19 @@ import { serveTaskQueue } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Expose une file appartenant à l’appelant via HTTP avec authentification explicite par jeton bearer. Le serveur écoute loopback par défaut et ne fournit pas TLS. Fermer le serveur arrête l’écoute sans prendre possession du stockage de la file.
+Sert une TaskQueue appartenant à l’appelant via HTTP sur POST /queue, authentifiée par jetons bearer. Écoute par défaut sur 127.0.0.1 et un port choisi par le système, sans TLS. Refuse un jeton fixe qui ne compte pas 32 à 512 caractères sans espace.
 
 [Exemple complet et règles détaillées](../../guide/job-queues/).
 
 ## Paramètres et propriétés
 
-| Nom             | Type                                                                | Présence  | Rôle                                                                                                                                                                                      |
-| --------------- | ------------------------------------------------------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `options`       | `QueueServerOptions`                                                | Requis    | File appartenant à l’appelant, jeton bearer et adresse/port d’écoute HTTP.                                                                                                                |
-| `options.queue` | `TaskQueue`                                                         | Requis    | File de tâches utilisée pour envoyer, prendre en charge et persister l’état des travaux.                                                                                                  |
-| `options.token` | `string \| (() => readonly string[] \| Promise<readonly string[]>)` | Requis    | Jeton bearer fixe ou callback renvoyant les jetons acceptés à chaque requête. Faites coexister ancien et nouveau jetons pendant la rotation ; une source vide ou en échec refuse l’accès. |
-| `options.host`  | `string \| undefined`                                               | Optionnel | Adresse d’écoute HTTP ; loopback par défaut pour un accès local uniquement.                                                                                                               |
-| `options.port`  | `number \| undefined`                                               | Optionnel | Port TCP du serveur HTTP de file ; zéro laisse le système choisir un port disponible.                                                                                                     |
+| Nom             | Type                                                                | Présence  | Rôle                                                                                                                                                                                                                                                           |
+| --------------- | ------------------------------------------------------------------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `options`       | `QueueServerOptions`                                                | Requis    | File à servir, jetons bearer acceptés, ainsi qu’hôte et port d’écoute.                                                                                                                                                                                         |
+| `options.queue` | `TaskQueue`                                                         | Requis    | File servie via HTTP ; fermer le serveur la laisse ouverte.                                                                                                                                                                                                    |
+| `options.token` | `string \| (() => readonly string[] \| Promise<readonly string[]>)` | Requis    | Jeton bearer accepté de 32 à 512 caractères sans espace, ou fonction renvoyant les jetons acceptés, appelée à chaque requête. Renvoyez ancien et nouveau jetons ensemble pendant une rotation ; une liste vide ou une erreur levée refuse toutes les requêtes. |
+| `options.host`  | `string \| undefined`                                               | Optionnel | Adresse d’écoute, 127.0.0.1 par défaut.                                                                                                                                                                                                                        |
+| `options.port`  | `number \| undefined`                                               | Optionnel | Port TCP, 0 par défaut : le système choisit un port libre, visible dans url.                                                                                                                                                                                   |
 
 ## Retour
 

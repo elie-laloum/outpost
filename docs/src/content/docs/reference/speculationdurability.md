@@ -17,12 +17,12 @@ import type { SpeculationDurability } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name          | Type                              | Presence | Meaning                                                                                                                                                                |
-| ------------- | --------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `transporter` | `Transport`                       | Required | Caller-owned transport storing conditional speculation checkpoints; choose createLocalTransport under the repository .outpost/storage or an explicit remote transport. |
-| `runId`       | `string`                          | Required | Stable nonempty identifier used to locate and exclusively own this race across calls.                                                                                  |
-| `version`     | `string`                          | Required | Nonempty implementation/input version; change it when agents, validation, provider configuration or other semantics change. Incompatible resumes are rejected.         |
-| `resume`      | `"retry-incomplete" \| undefined` | Optional | Explicit retry-incomplete authorization to replay interrupted candidates and their possible side effects. Completed candidates are retained.                           |
+| Name          | Type                              | Presence | Meaning                                                                                                                                                                                       |
+| ------------- | --------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `transporter` | `Transport`                       | Required | Transport you own that stores the race under speculations/&lt;sha256 of runId>.json with conditional writes, up to 16 MiB. createLocalTransport() under .outpost/storage is the usual choice. |
+| `runId`       | `string`                          | Required | Stable nonempty name of the race. One coordinator owns it at a time; another speculate() call on it rejects until the owner returns or is recovered.                                          |
+| `version`     | `string`                          | Required | Nonempty version of your agents, validation and settings. With the repository, provider, candidate keys, briefs and budget, it must match the saved race, otherwise speculate() rejects.      |
+| `resume`      | `"retry-incomplete" \| undefined` | Optional | retry-incomplete replays candidates interrupted while running, with their side effects, as new attempts. Without it, a race with interrupted candidates rejects.                              |
 
 ## Signature
 

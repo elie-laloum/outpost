@@ -13,16 +13,16 @@ import type { WorkflowDecisionRecord } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom            | Type                                        | Présence  | Rôle                                                                                                                  |
-| -------------- | ------------------------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------- |
-| `verification` | `WorkflowDecisionVerification \| undefined` | Optionnel | Identifiant de clé vérifiée et date de vérification conservés pour audit ; ne contient ni clé privée ni jeton bearer. |
-| `decidedAt`    | `string`                                    | Requis    | Horodatage ISO attribué lors de la validation et de l’enregistrement de la décision.                                  |
-| `executionId`  | `string`                                    | Requis    | Identité de l’exécution de workflow, conservée lors de la reprise d’un checkpoint.                                    |
-| `key`          | `string`                                    | Requis    | Clé de tâche stable identifiant le nœud dans son graphe de workflow.                                                  |
-| `requestId`    | `string`                                    | Requis    | Identifiant de la demande de gate précise à laquelle répondre ; les demandes périmées sont rejetées.                  |
-| `action`       | `"approve" \| "resume" \| "reject"`         | Requis    | approve pour une approbation, resume pour une pause, ou reject pour terminer l’une ou l’autre par rejet.              |
-| `actor`        | `string`                                    | Requis    | Nom d’acteur autorisé par le gate ; les gates signés vérifient aussi la clé publique associée à cet acteur.           |
-| `reason`       | `string`                                    | Requis    | Explication non vide fournie par l’acteur de confiance pour sa décision.                                              |
+| Nom            | Type                                        | Présence  | Rôle                                                                                                                                                                   |
+| -------------- | ------------------------------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `verification` | `WorkflowDecisionVerification \| undefined` | Optionnel | Identifiant de clé vérifiée et date de vérification conservés pour audit ; ne contient ni clé privée ni jeton bearer.                                                  |
+| `decidedAt`    | `string`                                    | Requis    | Horodatage ISO attribué lors de la validation et de l’enregistrement de la décision.                                                                                   |
+| `executionId`  | `string`                                    | Requis    | executionId de l’exécution qui a suspendu la gate, lu dans son WorkflowResult ; toute autre valeur rejette le lot entier.                                              |
+| `key`          | `string`                                    | Requis    | Clé de la tâche gate à décider.                                                                                                                                        |
+| `requestId`    | `string`                                    | Requis    | id de la demande en attente de la gate (WorkflowPauseRequest.id) ; un id périmé ou inconnu rejette le lot entier.                                                      |
+| `action`       | `"approve" \| "resume" \| "reject"`         | Requis    | approve pour une gate d’approbation, resume pour une gate de pause, ou reject pour l’une ou l’autre. reject ignore les tâches dépendantes et fait échouer l’exécution. |
+| `actor`        | `string`                                    | Requis    | L’un des acteurs de la gate. Outpost fait confiance à ce nom, sauf pour une gate signée, où la clé de la preuve doit lui être liée.                                    |
+| `reason`       | `string`                                    | Requis    | Explication non vide de la décision, conservée dans le checkpoint.                                                                                                     |
 
 ## Signature
 

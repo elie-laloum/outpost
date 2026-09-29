@@ -15,9 +15,9 @@ import type { QueueResult } from "@elie-laloum/outpost";
 
 | Nom     | Type                      | Présence  | Rôle                                                                                                                                                              |
 | ------- | ------------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `value` | `WorkflowJson`            | Requis    | Sortie JSON sans perte produite par le gestionnaire du worker.                                                                                                    |
-| `usage` | `Usage \| undefined`      | Optionnel | Compteurs d’usage rapportés ; aucune estimation monétaire.                                                                                                        |
-| `error` | `string \| undefined`     | Optionnel | Message d’échec du worker ; sa présence fait enregistrer le travail comme failed à la finalisation.                                                               |
+| `value` | `WorkflowJson`            | Requis    | Valeur JSON produite par le handler, 262144 octets au plus une fois sérialisée ; runQueueWorker() enregistre null quand le handler lève une erreur.               |
+| `usage` | `Usage \| undefined`      | Optionnel | Compteurs de jetons (input, output, cached, cacheCreated) que defineQueuedTask() ajoute à l’usage du workflow.                                                    |
+| `error` | `string \| undefined`     | Optionnel | Message d’échec, 512 caractères au plus ; sa présence marque le job failed. runQueueWorker() le remplit à partir d’une erreur levée.                              |
 | `quota` | `QueueQuota \| undefined` | Optionnel | Limite d’usage ou de débit ayant fait échouer le handler, avec son heure de réinitialisation et sa conversation capturée lorsqu’elles sont connues ; exige error. |
 
 ## Signature

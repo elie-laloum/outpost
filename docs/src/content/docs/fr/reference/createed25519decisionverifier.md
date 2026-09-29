@@ -13,7 +13,7 @@ import { createEd25519DecisionVerifier } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Crée un vérificateur qui résout les clés de confiance à chaque décision, vérifie la signature Ed25519, l’acteur associé et l’expiration, puis renvoie les métadonnées d’audit. Les identifiants de clé absents, dupliqués ou révoqués sont refusés.
+Crée un WorkflowDecisionVerifier qui charge les clés de confiance à chaque appel, puis vérifie la clé de la preuve, son acteur associé, la signature Ed25519 et l’expiration. Renvoie keyId et verifiedAt ; lève une erreur pour une clé inconnue, dupliquée ou liée à un autre acteur, une signature invalide ou une preuve expirée.
 
 [Exemple complet et règles détaillées](../../guide/approvals/).
 

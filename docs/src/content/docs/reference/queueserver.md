@@ -13,10 +13,10 @@ import type { QueueServer } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name    | Type                  | Presence | Meaning                                                        |
-| ------- | --------------------- | -------- | -------------------------------------------------------------- |
-| `url`   | `string`              | Required | HTTP base URL of the task queue server.                        |
-| `close` | `() => Promise<void>` | Required | Stop the HTTP listener without closing the caller-owned queue. |
+| Name    | Type                  | Presence | Meaning                                                                                            |
+| ------- | --------------------- | -------- | -------------------------------------------------------------------------------------------------- |
+| `url`   | `string`              | Required | Base URL of the listening server, such as http://127.0.0.1:8788, to pass to createHttpTaskQueue(). |
+| `close` | `() => Promise<void>` | Required | Stop listening and close idle connections; the served queue stays open.                            |
 
 ## Signature
 

@@ -13,7 +13,7 @@ import { createEd25519DecisionVerifier } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Create a verifier that resolves trusted approver keys on every decision, checks the Ed25519 signature, actor binding and expiry, and returns audit metadata. Missing, duplicate or revoked key identifiers are rejected.
+Create a WorkflowDecisionVerifier that loads the trusted keys on every call, then checks the proof's key, its actor binding, the Ed25519 signature and the expiry. Returns keyId and verifiedAt; throws on an unknown, duplicated or wrongly bound key, an invalid signature or an expired proof.
 
 [Complete example and detailed rules](../../guide/approvals/).
 

@@ -1,28 +1,54 @@
 ---
 title: "Artefacts typés — Vue d’ensemble"
-description: "Un artefact est une valeur stockée publiée sous un contrat typé explicite."
+description: "Publiez une seule fois une valeur typée et versionnée dans un store, et transmettez une petite référence vérifiée à chaque lecture."
 sidebar:
   label: Vue d’ensemble
   order: 0
 ---
 
-Un artefact est une valeur stockée publiée sous un contrat typé explicite. Sa référence circule dans les résultats du workflow tandis que ses octets restent dans un store indépendant. Cette séparation découple l’échange de données de la durée de vie de la sandbox productrice.
+## Choisir un contrat
 
-## Fonctionnement et philosophie
+Un contrat porte un `name` et une `version`, chacun non vide et de 1024 caractères au maximum. Une lecture exige le même nom, la même version et le même encodage que la référence.
 
-`defineJsonArtifact` et `defineBinaryArtifact` déclarent le contrat. La publication valide et stocke une valeur ; la lecture vérifie le contrat attendu et l’intégrité du contenu. `defineArtifactTask` et `readArtifact` relient ces opérations aux dépendances déclarées des tâches. Les références du producteur et des parents enregistrent la filiation.
+|                  | `defineJsonArtifact()`                                    | `defineBinaryArtifact()`                   |
+| ---------------- | --------------------------------------------------------- | ------------------------------------------ |
+| Valeur           | JSON sans perte, typé par `schema`                        | `Uint8Array`                               |
+| À la publication | Valide avec `schema`, puis sérialise le résultat          | Copie les octets                           |
+| À la lecture     | Analyse du JSON UTF-8 strict, puis valide avec `schema`   | Copie les octets                           |
+| Rejette          | Échecs du schéma, `undefined`, `NaN`, instances de classe | Toute valeur qui n’est pas un `Uint8Array` |
+| `encoding`       | `json`                                                    | `binary`                                   |
 
-## Limites et responsabilités
+## Ce que vérifient publication et lecture
 
-Digests et filiation apportent intégrité et traçabilité, pas authentification du producteur. L’appelant possède la politique de rétention : conservez les objets tant que des résultats sauvegardés les référencent. Fermer une sandbox ne supprime pas un store d’artefacts géré indépendamment.
+`publishArtifact()` stocke les octets encodés sous un `id` dérivé de leur empreinte SHA-256, de leur taille, du contrat, du producteur et des parents. Chaque échec ci-dessous rejette avec une `Error` simple portant le message indiqué.
+
+| Étape                                     | Vérification                                    | Échec                                                            |
+| ----------------------------------------- | ----------------------------------------------- | ---------------------------------------------------------------- |
+| Publication : encodage                    | Le contrat accepte la valeur                    | Erreur de schéma ou de données ; rien n’est stocké               |
+| Publication : stockage                    | `maxBytes` du store, 16 Mio par défaut          | `Artifact exceeds maxBytes`                                      |
+| Publication : `id` déjà stocké            | Octets identiques                               | Octets différents : `Existing object content integrity mismatch` |
+| Lecture : référence                       | Forme, empreintes et `id` recalculé             | `Invalid artifact reference or lineage`                          |
+| Lecture : contrat                         | Mêmes nom, version et encodage                  | `Artifact contract mismatch`                                     |
+| Lecture : `producer` / `parents` attendus | Correspondance exacte, parents dans l’ordre     | `Artifact producer mismatch` / `Artifact lineage mismatch`       |
+| Lecture : octets                          | Même taille et même empreinte SHA-256           | `Artifact content integrity mismatch`                            |
+| `readArtifact()`                          | Produit par cette exécution et cette dépendance | `Artifact dependency producer mismatch`                          |
+
+:::caution
+Empreintes et filiation prouvent l’intégrité, pas l’auteur. Quiconque peut écrire dans le store peut publier n’importe quel `producer`.
+:::
 
 ## Points d’entrée
 
-- [defineJsonArtifact](../../definejsonartifact/) · [defineBinaryArtifact](../../definebinaryartifact/)
+Guide : [Artefacts](../../../guide/artifacts/) · [Tâches et dépendances](../../../guide/task-dependencies/) · [Sécurité](../../../guide/security/)
+
+- [defineJsonArtifact](../../definejsonartifact/)
+- [defineBinaryArtifact](../../definebinaryartifact/)
 - [publishArtifact](../../publishartifact/)
 - [readStoredArtifact](../../readstoredartifact/)
 - [defineArtifactTask](../../defineartifacttask/)
 - [readArtifact](../../readartifact/)
+- [ArtifactContract](../../artifactcontract/)
+- [ArtifactReference](../../artifactreference/)
 - [ArtifactStore](../../artifactstore/)
-
-[Passer à la pratique avec le Guide](../../../guide/artifacts/).
+- [PublishArtifactOptions](../../publishartifactoptions/)
+- [ReadArtifactOptions](../../readartifactoptions/)

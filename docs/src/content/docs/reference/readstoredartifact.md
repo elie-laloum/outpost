@@ -13,21 +13,21 @@ import { readStoredArtifact } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Validate an artifact reference, load its bytes and verify contract identity, size and digest before decoding. Optional producer and parent expectations add lineage checks. Use this outside a task context or when the reference is already available.
+Validate an untrusted reference, check its contract and any expected producer and parents, then load the bytes and verify their size and SHA-256 digest before decoding. Each mismatch rejects with an error naming it, such as Artifact contract mismatch. Use it outside a task, for example in another process.
 
 [Complete example and detailed rules](../../guide/artifacts/).
 
 ## Parameters and properties
 
-| Name               | Type                                        | Presence | Meaning                                                                                |
-| ------------------ | ------------------------------------------- | -------- | -------------------------------------------------------------------------------------- |
-| `store`            | `ArtifactStore`                             | Required | Artifact byte store used for immutable publication or bounded payload retrieval.       |
-| `contract`         | `ArtifactContract<T>`                       | Required | Named, versioned artifact contract that defines encoding and validation.               |
-| `value`            | `unknown`                                   | Required | Untrusted artifact reference to validate before loading and checking its stored bytes. |
-| `options`          | `ReadArtifactOptions \| undefined`          | Optional | Expected producer and parent lineage, plus read cancellation.                          |
-| `options.producer` | `ArtifactProducer \| undefined`             | Optional | Expected producer execution, task and attempt; a mismatch rejects the read.            |
-| `options.parents`  | `readonly ArtifactReference[] \| undefined` | Optional | Expected ordered parent references; a mismatching lineage rejects the read.            |
-| `options.signal`   | `AbortSignal \| undefined`                  | Optional | Cooperative cancellation for this operation.                                           |
+| Name               | Type                                        | Presence | Meaning                                                                                                           |
+| ------------------ | ------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------- |
+| `store`            | `ArtifactStore`                             | Required | Store holding the artifact bytes.                                                                                 |
+| `contract`         | `ArtifactContract<T>`                       | Required | Expected contract: its name, version and encoding must match the reference, and it decodes the bytes.             |
+| `value`            | `unknown`                                   | Required | Reference to read, typically parsed from JSON. It is validated and its id recomputed before any bytes are loaded. |
+| `options`          | `ReadArtifactOptions \| undefined`          | Optional | Expected producer and parents, and a cancellation signal.                                                         |
+| `options.producer` | `ArtifactProducer \| undefined`             | Optional | Expected execution, task key and attempt; any difference rejects with Artifact producer mismatch.                 |
+| `options.parents`  | `readonly ArtifactReference[] \| undefined` | Optional | Expected parent references, in order; a different list rejects with Artifact lineage mismatch.                    |
+| `options.signal`   | `AbortSignal \| undefined`                  | Optional | Aborting it rejects the read with the signal's reason.                                                            |
 
 ## Returns
 

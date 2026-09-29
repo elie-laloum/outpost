@@ -13,9 +13,9 @@ import type { GitlabTokenOptions } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name    | Type            | Presence | Meaning                                                                                                                                                                                                                                   |
-| ------- | --------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `token` | `TriggerSecret` | Required | Secret token compared with X-Gitlab-Token; weaker because the body is not signed. Secret, or callback returning every currently accepted secret; return old and new values during a rotation. An empty or failing source denies requests. |
+| Name    | Type            | Presence | Meaning                                                                                                                                                                                                                                                  |
+| ------- | --------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `token` | `TriggerSecret` | Required | Secret token compared in constant time with X-Gitlab-Token, or a callback returning every currently accepted token; weaker because the body is not signed. An empty string throws at creation; a callback that fails or returns nothing denies requests. |
 
 ## Signature
 

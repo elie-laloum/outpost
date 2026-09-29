@@ -13,14 +13,14 @@ import type { WorkflowCheckpoint } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name          | Type                                                | Presence | Meaning                                                                               |
-| ------------- | --------------------------------------------------- | -------- | ------------------------------------------------------------------------------------- |
-| `format`      | `1`                                                 | Required | Checkpoint serialization format version; currently 1.                                 |
-| `identity`    | `string`                                            | Required | Fingerprint binding saved state to the workflow graph and caller-supplied version.    |
-| `executionId` | `string`                                            | Required | Identity of the workflow execution, preserved across checkpoint resumption.           |
-| `records`     | `readonly Readonly<TaskRecord>[]`                   | Required | Saved status, attempts, decisions and usage receipts for each task.                   |
-| `values`      | `Readonly<Record<string, WorkflowCheckpointValue>>` | Required | Saved completed task outputs indexed by task key and encoded as JSON or undefined.    |
-| `usage`       | `WorkflowUsage`                                     | Required | Cumulative admitted attempts and observed token usage, including restored accounting. |
+| Name          | Type                                                | Presence | Meaning                                                                                                                                                                                           |
+| ------------- | --------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `format`      | `1`                                                 | Required | Serialization format version, always 1.                                                                                                                                                           |
+| `identity`    | `string`                                            | Required | SHA-256 of the workflow name, checkpoint version and task graph: keys, dependencies, timeout, retry, condition, gate, loop and interaction settings. A different identity rejects the checkpoint. |
+| `executionId` | `string`                                            | Required | Execution identity kept across resumes. context.idempotencyKey derives from it and the task key, so it stays the same for each task.                                                              |
+| `records`     | `readonly Readonly<TaskRecord>[]`                   | Required | One record per task: status, attempts, timestamps, error, usage receipts and any gate, input, quota, loop or cache state.                                                                         |
+| `values`      | `Readonly<Record<string, WorkflowCheckpointValue>>` | Required | Output of each done task, keyed by task key. Restored on resume, so done tasks never run again.                                                                                                   |
+| `usage`       | `WorkflowUsage`                                     | Required | Attempts and token usage summed across every resume; its attempts must equal the sum of the records' attempts. A resumed run's budget continues from these totals.                                |
 
 ## Signature
 

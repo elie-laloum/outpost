@@ -13,15 +13,15 @@ import { createSqliteTaskQueue } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Ouvre une file de tâches SQLite durable à path. L’envoi déduplique les identités, les prises en charge créent des baux avec jeton de génération et les workers périmés ne peuvent valider l’état de file. Fermez la base renvoyée après usage ; les effets externes restent au moins une fois.
+Ouvre ou crée une base SQLite de file à path, avec son répertoire parent, et renvoie une DurableTaskQueue. Les jobs sont pris en charge dans l’ordre d’insertion sous des baux protégés par fence, et chaque écriture est synchronisée sur disque. Appelez close() une fois les workers et producteurs arrêtés.
 
 [Exemple complet et règles détaillées](../../guide/job-queues/).
 
 ## Paramètres et propriétés
 
-| Nom    | Type     | Présence | Rôle                                      |
-| ------ | -------- | -------- | ----------------------------------------- |
-| `path` | `string` | Requis   | Chemin hôte de la base SQLite de la file. |
+| Nom    | Type     | Présence | Rôle                                                                                                                                   |
+| ------ | -------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `path` | `string` | Requis   | Chemin du fichier de base SQLite, résolu depuis le répertoire courant ; le fichier et son répertoire parent sont créés s’ils manquent. |
 
 ## Retour
 

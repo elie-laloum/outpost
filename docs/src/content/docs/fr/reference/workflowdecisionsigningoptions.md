@@ -13,12 +13,12 @@ import type { WorkflowDecisionSigningOptions } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom          | Type                              | Présence | Rôle                                                                                                     |
-| ------------ | --------------------------------- | -------- | -------------------------------------------------------------------------------------------------------- |
-| `decision`   | `Omit<WorkflowDecision, "proof">` | Requis   | Exécution, demande en attente, tâche, acteur, action et motif exacts à signer, sans preuve préexistante. |
-| `keyId`      | `string`                          | Requis   | Identifiant unique de la clé publique de confiance correspondante ; inclus dans le contenu signé.        |
-| `privateKey` | `KeyObject`                       | Requis   | KeyObject privé Ed25519 appartenant à l’application ; jamais persisté par Outpost.                       |
-| `expiresAt`  | `string`                          | Requis   | Date d’expiration future interprétable par Date.parse ; la chaîne exacte est signée.                     |
+| Nom          | Type                              | Présence | Rôle                                                                                                                                               |
+| ------------ | --------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `decision`   | `Omit<WorkflowDecision, "proof">` | Requis   | Exécution, demande en attente, tâche, acteur, action et motif exacts à signer, sans preuve préexistante.                                           |
+| `keyId`      | `string`                          | Requis   | Identifiant de la clé publique de confiance correspondante, non vide et d’au plus 512 caractères ; signé avec la décision et copié dans la preuve. |
+| `privateKey` | `KeyObject`                       | Requis   | KeyObject privé Ed25519 appartenant à votre application ; tout autre type de clé lève une erreur. Outpost ne le stocke jamais.                     |
+| `expiresAt`  | `string`                          | Requis   | Expiration de la preuve, interprétable par Date.parse et postérieure à maintenant ; la chaîne exacte est signée.                                   |
 
 ## Signature
 

@@ -13,18 +13,18 @@ import { readArtifact } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Lit une référence d’artefact depuis une dépendance déclarée via context.value, puis charge et valide ses données stockées. Applique le signal d’annulation de la tâche et vérifie le producteur par rapport à l’exécution courante et à la clé de dépendance.
+Lit l’artefact publié par une dépendance déclarée : prend sa référence dans context.value(), rejette avec Artifact dependency producer mismatch si une autre exécution ou une autre tâche l’a produite, puis la vérifie et la décode comme readStoredArtifact() sous le signal de la tâche.
 
 [Exemple complet et règles détaillées](../../guide/artifacts/).
 
 ## Paramètres et propriétés
 
-| Nom          | Type                      | Présence | Rôle                                                                                              |
-| ------------ | ------------------------- | -------- | ------------------------------------------------------------------------------------------------- |
-| `context`    | `TaskContext`             | Requis   | Contexte courant de tâche utilisé pour lire les dépendances et propager l’annulation.             |
-| `dependency` | `Task<ArtifactReference>` | Requis   | Dépendance déclarée dont la sortie terminée est la référence d’artefact à lire.                   |
-| `contract`   | `ArtifactContract<T>`     | Requis   | Contrat d’artefact nommé et versionné définissant encodage et validation.                         |
-| `store`      | `ArtifactStore`           | Requis   | Store d’octets d’artefacts utilisé pour la publication immuable ou la lecture bornée des données. |
+| Nom          | Type                      | Présence | Rôle                                                                                                                                   |
+| ------------ | ------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `context`    | `TaskContext`             | Requis   | Contexte de la tâche en cours ; fournit la sortie de la dépendance, l’id d’exécution et le signal d’annulation.                        |
+| `dependency` | `Task<ArtifactReference>` | Requis   | Tâche d’artefact listée dans le after de cette tâche ; sa sortie est la référence à lire. Une dépendance non déclarée lève une erreur. |
+| `contract`   | `ArtifactContract<T>`     | Requis   | Contrat attendu ; doit correspondre au nom, à la version et à l’encodage de la référence.                                              |
+| `store`      | `ArtifactStore`           | Requis   | Store qui contient les octets de l’artefact.                                                                                           |
 
 ## Retour
 

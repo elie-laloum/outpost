@@ -13,7 +13,7 @@ import { defineInteractiveAgentTask } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Define a checkpointed agent dialogue with durable human-input waits between turns. The task allocates and closes a sandbox per turn, captures its conversation and retains a named worktree without integrating it. Both the Outpost harness and CLI adapters require portable capture and resume. The result is lossless JSON plus conversation and workspace references; interrupted turns require explicit replay authorization.
+Declare an agent dialogue that asks humans questions between turns. Each turn runs in a new sandbox on a retained named branch and continues the captured conversation; a question leaves the task waiting-input until start() receives an answer. Requires a checkpointed run and throws with code configuration for an agent without portable capture and resume.
 
 [Complete example and detailed rules](../../guide/interactive-tasks/).
 
@@ -25,11 +25,11 @@ Define a checkpointed agent dialogue with durable human-input waits between turn
 | `options.key`              | `string`                                | Required | Stable workflow task key; also participates in the retained branch identity.                                                                  |
 | `options.after`            | `readonly Task<unknown>[] \| undefined` | Optional | Dependencies that must finish successfully before the first turn.                                                                             |
 | `options.repository`       | `string`                                | Required | Host Git checkout containing the retained worktree and default conversation storage; must remain accessible on resume.                        |
-| `options.agent`            | `Agent`                                 | Required | Composed CLI or Outpost agent with portable conversation capture and continuation enabled.                                                    |
+| `options.agent`            | `Agent`                                 | Required | Agent with portable conversation capture and resume; otherwise defineInteractiveAgentTask() throws with code configuration.                   |
 | `options.brief`            | `string`                                | Required | Literal initial instructions; human replies are supplied separately on subsequent turns.                                                      |
 | `options.actors`           | `readonly string[]`                     | Required | Nonempty unique identifiers allowed to answer; the application must authenticate their users.                                                 |
-| `options.sandboxProvider`  | `SandboxProvider \| undefined`          | Optional | Execution provider used to allocate a fresh sandbox for each turn; omitting it uses normal sandbox defaults.                                  |
-| `options.bootstrap`        | `boolean \| undefined`                  | Optional | Whether the sandbox may install a missing CLI agent when preparing each turn.                                                                 |
+| `options.sandboxProvider`  | `SandboxProvider \| undefined`          | Optional | Provider that allocates a new sandbox for each turn, default createDockerSandboxProvider().                                                   |
+| `options.bootstrap`        | `boolean \| undefined`                  | Optional | Whether each turn's sandbox may install a missing CLI agent, default true.                                                                    |
 | `options.conversationHome` | `string \| undefined`                   | Optional | Host home used to locate captured native conversations across turns.                                                                          |
 | `options.maxTurns`         | `number \| undefined`                   | Optional | Maximum completed agent turns, including the final result; defaults to 12. A question at the last turn fails instead of waiting indefinitely. |
 | `options.timeoutMs`        | `number \| undefined`                   | Optional | Cooperative deadline for each executing task attempt, excluding time waiting for a human answer.                                              |

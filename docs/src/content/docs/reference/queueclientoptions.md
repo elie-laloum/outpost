@@ -13,11 +13,11 @@ import type { QueueClientOptions } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name        | Type                                          | Presence | Meaning                                                                                                              |
-| ----------- | --------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------- |
-| `url`       | `string`                                      | Required | HTTP base URL of the task queue server.                                                                              |
-| `token`     | `string \| (() => string \| Promise<string>)` | Required | Fixed bearer token or callback resolving the current token for each request, including lease renewal and completion. |
-| `timeoutMs` | `number \| undefined`                         | Optional | Time limit in milliseconds for each HTTP queue request.                                                              |
+| Name        | Type                                          | Presence | Meaning                                                                                                                                                                                       |
+| ----------- | --------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `url`       | `string`                                      | Required | Base URL of a serveTaskQueue() server, http or https, without credentials, query or fragment; requests go to &lt;url>/queue.                                                                  |
+| `token`     | `string \| (() => string \| Promise<string>)` | Required | Bearer token, or a function called before every request, lease renewals and completions included, so a rotated token applies at once. Each value must be 32 to 512 non-whitespace characters. |
+| `timeoutMs` | `number \| undefined`                         | Optional | Time limit per HTTP request in milliseconds, default 10000, counted after the token is resolved.                                                                                              |
 
 ## Signature
 

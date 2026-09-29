@@ -13,11 +13,11 @@ import type { TriggerJob } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name      | Type                        | Presence | Meaning                                                                                  |
-| --------- | --------------------------- | -------- | ---------------------------------------------------------------------------------------- |
-| `handler` | `string`                    | Required | Registered queue worker handler, usually a defineWorkflowJob().                          |
-| `runId`   | `string`                    | Required | Checkpoint run, 1 to 256 characters; events for the same run converge on one checkpoint. |
-| `input`   | `WorkflowJson \| undefined` | Optional | Lossless JSON input for the workflow; defaults to null.                                  |
+| Name      | Type                        | Presence | Meaning                                                                                                                                              |
+| --------- | --------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `handler` | `string`                    | Required | Registered queue worker handler, usually a defineWorkflowJob().                                                                                      |
+| `runId`   | `string`                    | Required | Checkpoint run, 1 to 256 characters and not blank. Jobs with the same runId and input share one checkpoint; a different input makes it incompatible. |
+| `input`   | `WorkflowJson \| undefined` | Optional | Lossless JSON input for the workflow; defaults to null.                                                                                              |
 
 ## Signature
 

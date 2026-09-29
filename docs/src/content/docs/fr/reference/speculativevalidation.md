@@ -17,12 +17,12 @@ import type { SpeculativeValidation } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom       | Type                   | Présence | Rôle                                                                                                      |
-| --------- | ---------------------- | -------- | --------------------------------------------------------------------------------------------------------- |
-| `key`     | `string`               | Requis   | Clé unique du candidat reliant sa branche, sa validation et son résultat final.                           |
-| `result`  | `SpeculativeOutput<T>` | Requis   | Sortie de dispatch du candidat avec texte, commits, usage et valeur typée, sans méthodes de continuation. |
-| `sandbox` | `Sandbox`              | Requis   | Sandbox active du candidat disponible pour les commandes de validation avant nettoyage.                   |
-| `signal`  | `AbortSignal`          | Requis   | Annulation coopérative de cette opération.                                                                |
+| Nom       | Type                   | Présence | Rôle                                                                                                                                                        |
+| --------- | ---------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `key`     | `string`               | Requis   | Clé du candidat en cours de validation.                                                                                                                     |
+| `result`  | `SpeculativeOutput<T>` | Requis   | Sortie de dispatch du candidat : texte, valeur, commits et usage.                                                                                           |
+| `sandbox` | `Sandbox`              | Requis   | Sandbox du candidat, encore ouverte ; elle se ferme après le retour de validate. Les commits créés pendant la validation font partie du commit du candidat. |
+| `signal`  | `AbortSignal`          | Requis   | S’annule quand un autre candidat gagne, qu’une limite de tokens est atteinte ou que la course est annulée ; passez-le à chaque commande.                    |
 
 ## Signature
 

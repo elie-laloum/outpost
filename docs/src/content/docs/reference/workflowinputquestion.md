@@ -16,7 +16,7 @@ import type { WorkflowInputQuestion } from "@elie-laloum/outpost";
 | Name            | Type                             | Presence | Meaning                                                                                   |
 | --------------- | -------------------------------- | -------- | ----------------------------------------------------------------------------------------- |
 | `question`      | `string`                         | Required | Nonempty human-readable question to display to the respondent.                            |
-| `choices`       | `readonly string[] \| undefined` | Optional | Optional nonempty list of unique answer choices.                                          |
+| `choices`       | `readonly string[] \| undefined` | Optional | Nonempty list of unique answer choices.                                                   |
 | `allowFreeText` | `boolean \| undefined`           | Optional | Whether answers outside choices are accepted; omitted means true. False requires choices. |
 
 ## Signature

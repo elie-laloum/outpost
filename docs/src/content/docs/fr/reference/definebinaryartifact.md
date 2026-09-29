@@ -13,17 +13,17 @@ import { defineBinaryArtifact } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Déclare un contrat d’artefact binaire nommé et versionné qui copie les données Uint8Array à l’encodage et au décodage. Déclarer un contrat ne publie pas d’artefact.
+Déclare un contrat nommé et versionné pour des données Uint8Array, copiées à la publication et à la lecture. Lève une erreur si name ou version est vide ou dépasse 1024 caractères.
 
 [Exemple complet et règles détaillées](../../guide/artifacts/).
 
 ## Paramètres et propriétés
 
-| Nom               | Type                      | Présence | Rôle                                                                                                                                |
-| ----------------- | ------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `options`         | `ArtifactContractOptions` | Requis   | Nom et version du contrat identifiant les données binaires.                                                                         |
-| `options.name`    | `string`                  | Requis   | Nom non vide du contrat d’artefact, de 1024 caractères au maximum.                                                                  |
-| `options.version` | `string`                  | Requis   | Version de contrat non vide définie par l’appelant, de 1024 caractères au maximum ; les lectures exigent une correspondance exacte. |
+| Nom               | Type                      | Présence | Rôle                                                                                                                                                      |
+| ----------------- | ------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `options`         | `ArtifactContractOptions` | Requis   | Nom et version du contrat.                                                                                                                                |
+| `options.name`    | `string`                  | Requis   | Nom du contrat, non vide et de 1024 caractères au maximum. Une lecture exige le même nom.                                                                 |
+| `options.version` | `string`                  | Requis   | Version du contrat que vous choisissez, non vide et de 1024 caractères au maximum. Une lecture exige la même version : changez-la quand le format change. |
 
 ## Retour
 

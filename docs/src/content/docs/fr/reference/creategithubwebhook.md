@@ -19,10 +19,10 @@ Crée une source de déclencheur GitHub. Elle vérifie X-Hub-Signature-256 avec 
 
 ## Paramètres et propriétés
 
-| Nom              | Type                   | Présence | Rôle                                                                                                                                                                                                                                          |
-| ---------------- | ---------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `options`        | `GithubWebhookOptions` | Requis   | Réglages du secret du webhook GitHub.                                                                                                                                                                                                         |
-| `options.secret` | `TriggerSecret`        | Requis   | Secret du webhook GitHub qui vérifie X-Hub-Signature-256. Secret, ou fonction renvoyant chaque secret actuellement accepté ; renvoyez l’ancienne et la nouvelle valeur pendant une rotation. Une source vide ou en échec refuse les requêtes. |
+| Nom              | Type                   | Présence | Rôle                                                                                                                                                                                                                                                                |
+| ---------------- | ---------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `options`        | `GithubWebhookOptions` | Requis   | Réglages du secret du webhook GitHub.                                                                                                                                                                                                                               |
+| `options.secret` | `TriggerSecret`        | Requis   | Secret du webhook qui vérifie X-Hub-Signature-256, ou callback renvoyant chaque secret actuellement accepté (l’ancien et le nouveau pendant une rotation). Une chaîne vide lève une erreur à la création ; un callback en échec ou sans secret refuse les requêtes. |
 
 ## Retour
 

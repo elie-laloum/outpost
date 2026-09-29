@@ -19,11 +19,11 @@ Parse a five-field cron expression, or a macro such as @daily, evaluated in an I
 
 ## Parameters and properties
 
-| Name               | Type                       | Presence | Meaning                                                                                                                                                           |
-| ------------------ | -------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `expression`       | `string`                   | Required | Five fields (minute, hour, day of month, month, day of week) with lists, ranges, steps and names, or a macro such as @hourly or @daily; whitespace is normalized. |
-| `options`          | `CronOptions \| undefined` | Optional | Evaluation options; omit them to evaluate in UTC.                                                                                                                 |
-| `options.timeZone` | `string \| undefined`      | Optional | IANA time zone whose wall-clock time the expression describes, such as Europe/Paris; defaults to UTC.                                                             |
+| Name               | Type                       | Presence | Meaning                                                                                                                                                                                                                                                                                               |
+| ------------------ | -------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `expression`       | `string`                   | Required | Five fields (minute, hour, day of month, month, day of week) with lists, ranges, steps and three-letter month or weekday names, or a macro such as @hourly or @daily; at most 256 characters. Weekday 0 and 7 are Sunday, and when both day fields are restricted, a day matching either one matches. |
+| `options`          | `CronOptions \| undefined` | Optional | Evaluation options; omit them to evaluate in UTC.                                                                                                                                                                                                                                                     |
+| `options.timeZone` | `string \| undefined`      | Optional | IANA time zone whose wall-clock time the expression describes, such as Europe/Paris; defaults to UTC.                                                                                                                                                                                                 |
 
 ## Returns
 

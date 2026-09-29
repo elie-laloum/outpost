@@ -17,7 +17,7 @@ import { recoverSpeculation } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Libère la propriété abandonnée d’une course avec une révision du transport inspectée, après arrêt du coordinateur précédent. Bloque les écritures périmées ; le prochain appel à speculate réconcilie les ressources enregistrées et exige une autorisation explicite avant de rejouer les candidats incomplets.
+Libère la propriété d’une course durable dont le coordinateur s’est arrêté, à condition que son objet enregistré soit toujours à la révision indiquée ; sinon rejette avec TransportConflict. N’arrête et ne supprime rien : le prochain appel à speculate() arrête les ressources enregistrées et exige resume: retry-incomplete pour rejouer les candidats interrompus.
 
 [Exemple complet et règles détaillées](../../guide/speculation/).
 
@@ -26,8 +26,8 @@ Libère la propriété abandonnée d’une course avec une révision du transpor
 | Nom                          | Type                         | Présence | Rôle                                                                                                                                        |
 | ---------------------------- | ---------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
 | `options`                    | `SpeculationRecoveryOptions` | Requis   | Identité de la course abandonnée, révision inspectée et confirmation explicite de l’arrêt de son coordinateur.                              |
-| `options.runId`              | `string`                     | Requis   | Identifiant de la course abandonnée dont la propriété est libérée.                                                                          |
-| `options.revision`           | `string`                     | Requis   | Révision exacte du transport inspectée par l’opérateur ; toute différence refuse la récupération et protège les modifications concurrentes. |
+| `options.runId`              | `string`                     | Requis   | runId de la course à libérer.                                                                                                               |
+| `options.revision`           | `string`                     | Requis   | Révision de l’objet enregistré telle que vous l’avez lue ; si elle a changé depuis, la récupération rejette avec TransportConflict.         |
 | `options.coordinatorStopped` | `true`                       | Requis   | Confirmation explicite de l’arrêt de l’ancien coordinateur ; un PID distant ou un délai écoulé ne constitue pas une preuve.                 |
 | `options.transporter`        | `Transport`                  | Requis   | Transport objet appartenant à l’appelant, utilisé par le store ou l’opération. Fermer un workflow ou une sandbox ne ferme pas ce transport. |
 

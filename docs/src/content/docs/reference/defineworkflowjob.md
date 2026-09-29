@@ -13,7 +13,7 @@ import { defineWorkflowJob } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Return a queue handler that builds a workflow from each trigger job input and starts it with the job runId as checkpoint run, the job signal and a version combining checkpoint.version with an input digest. The job value summarizes the run, including that version and pending gates; failed or cancelled workflows complete the job with an error.
+Return a queue handler that builds a workflow from each trigger job input and starts it under the job runId, with the job signal and checkpoint.version plus an input digest as checkpoint version. The job value summarizes the run (status, tasks, paused gates, input requests) with its token usage; a failed or cancelled workflow, or an incompatible checkpoint, completes the job with an error. Creation throws without a workflow factory, checkpoint store and version.
 
 [Complete example and detailed rules](../../guide/job-queues/).
 
@@ -23,7 +23,7 @@ Return a queue handler that builds a workflow from each trigger job input and st
 | -------------------- | ------------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `options`            | `WorkflowJobOptions`                                                                  | Required | Workflow factory, checkpoint settings and start options.                                                                                           |
 | `options.workflow`   | `(input: WorkflowJson, context: WorkflowJobContext) => Workflow \| Promise<Workflow>` | Required | Build the workflow for one job input; the same input must build the same workflow, and it may be asynchronous.                                     |
-| `options.checkpoint` | `WorkflowJobCheckpoint`                                                               | Required | Checkpoint store and version used for every job; required.                                                                                         |
+| `options.checkpoint` | `WorkflowJobCheckpoint`                                                               | Required | Checkpoint store and base version shared by every job; creation throws without both.                                                               |
 | `options.start`      | `WorkflowJobStartOptions \| undefined`                                                | Optional | Other workflow start options, such as concurrency, budget, onQuota or timeoutMs; checkpoint, signal, decisions and answers are managed by the job. |
 
 ## Returns

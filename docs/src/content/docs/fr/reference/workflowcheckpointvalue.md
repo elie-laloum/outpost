@@ -15,10 +15,10 @@ import type { WorkflowCheckpointValue } from "@elie-laloum/outpost";
 
 Les champs ci-dessous couvrent toutes les variantes ; la signature précise leurs combinaisons autorisées.
 
-| Nom     | Type                    | Présence          | Rôle                                                                                  |
-| ------- | ----------------------- | ----------------- | ------------------------------------------------------------------------------------- |
-| `kind`  | `"undefined" \| "json"` | Requis            | Distingue une sortie de tâche undefined d’une valeur JSON sans perte.                 |
-| `value` | `WorkflowJson`          | Selon la variante | Représentation JSON sans perte d’une sortie de tâche terminée lorsque kind vaut json. |
+| Nom     | Type                    | Présence          | Rôle                                                                                                                                         |
+| ------- | ----------------------- | ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `kind`  | `"undefined" \| "json"` | Requis            | undefined lorsque la tâche a renvoyé undefined, json sinon.                                                                                  |
+| `value` | `WorkflowJson`          | Selon la variante | Sortie de la tâche en JSON sans perte : objets simples, tableaux denses, chaînes, booléens, null et nombres finis autres que -0, sans cycle. |
 
 ## Signature
 

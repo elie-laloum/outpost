@@ -17,12 +17,12 @@ import type { SpeculationRecoveryOptions } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name                 | Type        | Presence | Meaning                                                                                                                |
-| -------------------- | ----------- | -------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `runId`              | `string`    | Required | Identifier of the abandoned race whose ownership is being released.                                                    |
-| `revision`           | `string`    | Required | Exact current transport revision inspected by the operator; a mismatch rejects recovery and fences concurrent changes. |
-| `coordinatorStopped` | `true`      | Required | Explicit confirmation that the old coordinator has stopped; a remote PID or elapsed time is insufficient evidence.     |
-| `transporter`        | `Transport` | Required | Transport containing the abandoned speculation ownership envelope.                                                     |
+| Name                 | Type        | Presence | Meaning                                                                                                            |
+| -------------------- | ----------- | -------- | ------------------------------------------------------------------------------------------------------------------ |
+| `runId`              | `string`    | Required | runId of the race to release.                                                                                      |
+| `revision`           | `string`    | Required | Revision of the saved object as you read it; if it changed since, recovery rejects with TransportConflict.         |
+| `coordinatorStopped` | `true`      | Required | Explicit confirmation that the old coordinator has stopped; a remote PID or elapsed time is insufficient evidence. |
+| `transporter`        | `Transport` | Required | Transport holding the saved race.                                                                                  |
 
 ## Signature
 

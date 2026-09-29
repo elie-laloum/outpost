@@ -13,13 +13,13 @@ import type { TriggerSchedule } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name      | Type                                          | Presence | Meaning                                                                                             |
-| --------- | --------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------- |
-| `name`    | `string`                                      | Required | Stable name of 1 to 128 letters, digits, dots, underscores or hyphens; part of each job identifier. |
-| `cron`    | `CronSchedule`                                | Required | Schedule created with createCronSchedule().                                                         |
-| `handler` | `string`                                      | Required | Queue worker handler receiving the jobs, usually a defineWorkflowJob().                             |
-| `runId`   | `((slot: Date) => string) \| undefined`       | Optional | Derive the checkpoint run of a slot; defaults to &lt;name>:&lt;slot ISO time>.                      |
-| `input`   | `((slot: Date) => WorkflowJson) \| undefined` | Optional | Derive the JSON input of a slot; defaults to null.                                                  |
+| Name      | Type                                          | Presence | Meaning                                                                                                                                                                       |
+| --------- | --------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`    | `string`                                      | Required | Stable name of 1 to 128 letters, digits, dots, underscores or hyphens; part of each job identifier.                                                                           |
+| `cron`    | `CronSchedule`                                | Required | Schedule created with createCronSchedule().                                                                                                                                   |
+| `handler` | `string`                                      | Required | Queue worker handler receiving the jobs, usually a defineWorkflowJob().                                                                                                       |
+| `runId`   | `((slot: Date) => string) \| undefined`       | Optional | Derive the checkpoint run of a slot; defaults to &lt;name>:&lt;slot ISO time>. Return the same value for a slot on every replica, or the queue refuses the later publication. |
+| `input`   | `((slot: Date) => WorkflowJson) \| undefined` | Optional | Derive the JSON input of a slot; defaults to null. Return the same value for a slot on every replica, or the queue refuses the later publication.                             |
 
 ## Signature
 

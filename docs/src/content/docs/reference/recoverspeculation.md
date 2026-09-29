@@ -17,7 +17,7 @@ import { recoverSpeculation } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Release abandoned speculation ownership using an inspected transport revision after the previous coordinator has stopped. This fences stale writes; the next speculate call reconciles registered resources and requires explicit authorization before replaying incomplete candidates.
+Release the ownership of a durable race whose coordinator has stopped, provided its saved object is still at the given revision; otherwise rejects with TransportConflict. It stops and deletes nothing: the next speculate() call stops registered resources and needs resume: retry-incomplete to replay interrupted candidates.
 
 [Complete example and detailed rules](../../guide/speculation/).
 
@@ -26,8 +26,8 @@ Release abandoned speculation ownership using an inspected transport revision af
 | Name                         | Type                         | Presence | Meaning                                                                                                                    |
 | ---------------------------- | ---------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------- |
 | `options`                    | `SpeculationRecoveryOptions` | Required | Abandoned race identity, inspected revision and explicit confirmation that its coordinator has stopped.                    |
-| `options.runId`              | `string`                     | Required | Identifier of the abandoned race whose ownership is being released.                                                        |
-| `options.revision`           | `string`                     | Required | Exact current transport revision inspected by the operator; a mismatch rejects recovery and fences concurrent changes.     |
+| `options.runId`              | `string`                     | Required | runId of the race to release.                                                                                              |
+| `options.revision`           | `string`                     | Required | Revision of the saved object as you read it; if it changed since, recovery rejects with TransportConflict.                 |
 | `options.coordinatorStopped` | `true`                       | Required | Explicit confirmation that the old coordinator has stopped; a remote PID or elapsed time is insufficient evidence.         |
 | `options.transporter`        | `Transport`                  | Required | Caller-owned object transport used by the store or operation. Closing a workflow or sandbox does not close this transport. |
 

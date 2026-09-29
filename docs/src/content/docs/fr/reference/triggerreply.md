@@ -13,11 +13,11 @@ import type { TriggerReply } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom           | Type                  | Présence  | Rôle                                           |
-| ------------- | --------------------- | --------- | ---------------------------------------------- |
-| `status`      | `number`              | Requis    | Statut HTTP renvoyé à l’émetteur.              |
-| `body`        | `string \| undefined` | Optionnel | Corps de réponse optionnel.                    |
-| `contentType` | `string \| undefined` | Optionnel | Type de contenu du corps, lorsqu’il y en a un. |
+| Nom           | Type                  | Présence  | Rôle                                                           |
+| ------------- | --------------------- | --------- | -------------------------------------------------------------- |
+| `status`      | `number`              | Requis    | Statut HTTP renvoyé à l’émetteur.                              |
+| `body`        | `string \| undefined` | Optionnel | Texte du corps de réponse ; la réponse est vide s’il est omis. |
+| `contentType` | `string \| undefined` | Optionnel | Type de contenu du corps, lorsqu’il y en a un.                 |
 
 ## Signature
 

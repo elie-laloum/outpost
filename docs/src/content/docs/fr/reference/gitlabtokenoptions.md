@@ -13,9 +13,9 @@ import type { GitlabTokenOptions } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom     | Type            | Présence | Rôle                                                                                                                                                                                                                                                                  |
-| ------- | --------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `token` | `TriggerSecret` | Requis   | Jeton secret comparé à X-Gitlab-Token ; plus faible car le corps n’est pas signé. Secret, ou fonction renvoyant chaque secret actuellement accepté ; renvoyez l’ancienne et la nouvelle valeur pendant une rotation. Une source vide ou en échec refuse les requêtes. |
+| Nom     | Type            | Présence | Rôle                                                                                                                                                                                                                                                            |
+| ------- | --------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `token` | `TriggerSecret` | Requis   | Jeton secret comparé en temps constant à X-Gitlab-Token, ou callback renvoyant chaque jeton actuellement accepté ; plus faible, car le corps n’est pas signé. Une chaîne vide lève une erreur à la création ; un callback en échec ou vide refuse les requêtes. |
 
 ## Signature
 

@@ -13,19 +13,19 @@ import { WorkflowFailure } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Erreur levée par WorkflowResult.unwrap quand l’exécution n’a pas réussi. result conserve les états des tâches, erreurs et usage pour permettre leur inspection.
+Erreur levée par WorkflowResult.unwrap() quand status ne vaut pas done. result contient tout le WorkflowResult et cause sa première erreur.
 
 [Exemple complet et règles détaillées](../../guide/task-dependencies/).
 
 ## Paramètres et propriétés
 
-| Nom       | Type                  | Présence  | Rôle                                                                                       |
-| --------- | --------------------- | --------- | ------------------------------------------------------------------------------------------ |
-| `result`  | `WorkflowResult`      | Requis    | Résultat complet du workflow non réussi, conservé pour inspecter tâches, erreurs et usage. |
-| `name`    | `string`              | Requis    | Nom de classe d’erreur permettant de distinguer cet échec des autres erreurs JavaScript.   |
-| `message` | `string`              | Requis    | Explication lisible de l’échec.                                                            |
-| `stack`   | `string \| undefined` | Optionnel | Trace de pile JavaScript de l’erreur lorsqu’elle est disponible.                           |
-| `cause`   | `unknown`             | Optionnel | Échec d’origine attaché à cette erreur.                                                    |
+| Nom       | Type                  | Présence  | Rôle                                                                                      |
+| --------- | --------------------- | --------- | ----------------------------------------------------------------------------------------- |
+| `result`  | `WorkflowResult`      | Requis    | Le WorkflowResult en échec, avec ses enregistrements de tâches, ses erreurs et son usage. |
+| `name`    | `string`              | Requis    | Nom de classe d’erreur permettant de distinguer cet échec des autres erreurs JavaScript.  |
+| `message` | `string`              | Requis    | Explication lisible de l’échec.                                                           |
+| `stack`   | `string \| undefined` | Optionnel | Trace de pile JavaScript de l’erreur lorsqu’elle est disponible.                          |
+| `cause`   | `unknown`             | Optionnel | Échec d’origine attaché à cette erreur.                                                   |
 
 ## Signature
 

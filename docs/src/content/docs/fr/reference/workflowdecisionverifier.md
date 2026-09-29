@@ -13,9 +13,9 @@ import type { WorkflowDecisionVerifier } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom        | Type               | Présence | Rôle                                                                                                                                              |
-| ---------- | ------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `decision` | `WorkflowDecision` | Requis   | Décision complète et preuve à authentifier ; refuser signatures invalides, mauvaises associations d’identité, clés révoquées et preuves expirées. |
+| Nom        | Type               | Présence | Rôle                                                                                                                                                                                 |
+| ---------- | ------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `decision` | `WorkflowDecision` | Requis   | Décision à authentifier, preuve comprise. Levez une erreur si la signature, la clé, l’acteur associé ou l’expiration est invalide ; start() n’applique alors aucune décision du lot. |
 
 ## Retour
 

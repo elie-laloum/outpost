@@ -13,7 +13,7 @@ import { repositoryFingerprint } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Renvoie une empreinte SHA-256 du commit HEAD d’un dépôt, des modifications suivies de l’arbre de travail, de l’index et des fichiers non suivis, hors .outpost/. Utilisez-la dans les clés de cache pour que les modifications non commitées changent la clé. Elle lit le dépôt sans le modifier et échoue hors d’un dépôt Git.
+Renvoie un condensat SHA-256 hexadécimal du commit HEAD d’un dépôt, de ses modifications indexées ou non et de ses fichiers non suivis et non ignorés, hors .outpost/. Utilisez-le dans une clé de cache de tâche pour que les modifications non commitées changent la clé. Lit sans modifier ; rejette hors d’un dépôt Git.
 
 [Exemple complet et règles détaillées](../../guide/task-cache/).
 

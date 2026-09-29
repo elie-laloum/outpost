@@ -17,12 +17,12 @@ import type { SpeculativeHostSnapshot } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name          | Type      | Presence | Meaning                                                                   |
-| ------------- | --------- | -------- | ------------------------------------------------------------------------- |
-| `head`        | `string`  | Required | Git HEAD commit recorded by the inspection or snapshot.                   |
-| `branch`      | `string`  | Required | Name of the work branch used or observed during execution.                |
-| `fingerprint` | `string`  | Required | Digest of the host checkout state used to detect changes during the race. |
-| `dirty`       | `boolean` | Required | Whether tracked or untracked changes make the checkout dirty.             |
+| Name          | Type      | Presence | Meaning                                                                                               |
+| ------------- | --------- | -------- | ----------------------------------------------------------------------------------------------------- |
+| `head`        | `string`  | Required | HEAD commit of the checkout.                                                                          |
+| `branch`      | `string`  | Required | Current branch name, or HEAD when detached.                                                           |
+| `fingerprint` | `string`  | Required | SHA-256 of HEAD, the uncommitted diff and untracked files, compared across snapshots to detect edits. |
+| `dirty`       | `boolean` | Required | True when tracked or untracked changes exist outside .outpost.                                        |
 
 ## Signature
 

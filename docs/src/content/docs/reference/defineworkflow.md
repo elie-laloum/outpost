@@ -13,16 +13,16 @@ import { defineWorkflow } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Validate a named task graph for duplicate keys, missing dependencies and cycles, then return a reusable workflow definition. start schedules the tasks with concurrency, cancellation and optional checkpoints; diagram renders the dependency graph as Mermaid.
+Validate a named task list and return a frozen Workflow whose start() runs the graph and diagram() draws it as Mermaid. Throws on an empty name, a duplicate key, a dependency missing from the list, a cycle, or a gate with a condition, retry, timeout or cache.
 
 [Complete example and detailed rules](../../guide/task-dependencies/).
 
 ## Parameters and properties
 
-| Name    | Type                       | Presence | Meaning                                                                    |
-| ------- | -------------------------- | -------- | -------------------------------------------------------------------------- |
-| `name`  | `string`                   | Required | Name of the workflow definition, included in its execution reports.        |
-| `tasks` | `readonly Task<unknown>[]` | Required | Task definitions making up the graph, including every declared dependency. |
+| Name    | Type                       | Presence | Meaning                                                                       |
+| ------- | -------------------------- | -------- | ----------------------------------------------------------------------------- |
+| `name`  | `string`                   | Required | Workflow name, not empty; part of the checkpoint identity and of every event. |
+| `tasks` | `readonly Task<unknown>[]` | Required | Every task of the graph; each dependency must also be in the list.            |
 
 ## Returns
 

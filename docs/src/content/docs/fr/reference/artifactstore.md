@@ -13,10 +13,10 @@ import type { ArtifactStore } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom   | Type                                                                     | Présence | Rôle                                                                                                                |
-| ----- | ------------------------------------------------------------------------ | -------- | ------------------------------------------------------------------------------------------------------------------- |
-| `put` | `(id: string, bytes: Uint8Array, signal?: AbortSignal) => Promise<void>` | Requis   | Publie atomiquement des octets sous un identifiant ; rejette des octets différents pour un identifiant existant.    |
-| `get` | `(id: string, signal?: AbortSignal) => Promise<Uint8Array>`              | Requis   | Lit les octets bornés d’un artefact par identifiant ; échoue si l’objet est absent. L’appelant vérifie l’intégrité. |
+| Nom   | Type                                                                     | Présence | Rôle                                                                                                                                  |
+| ----- | ------------------------------------------------------------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `put` | `(id: string, bytes: Uint8Array, signal?: AbortSignal) => Promise<void>` | Requis   | Stocke atomiquement des octets sous un id. Accepte des octets identiques pour un id existant et rejette des octets différents.        |
+| `get` | `(id: string, signal?: AbortSignal) => Promise<Uint8Array>`              | Requis   | Renvoie les octets stockés sous un id ; rejette un id absent. Le store ne vérifie pas l’intégrité : readStoredArtifact() s’en charge. |
 
 ## Signature
 

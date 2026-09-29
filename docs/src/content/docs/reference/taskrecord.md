@@ -23,11 +23,11 @@ import type { TaskRecord } from "@elie-laloum/outpost";
 | `pause`         | `WorkflowPauseRequest \| undefined`       | Optional | Persisted pending gate request, including its unique ID and authorized actors.                                                                   |
 | `decision`      | `WorkflowDecisionRecord \| undefined`     | Optional | Validated decision recorded for the task’s gate.                                                                                                 |
 | `key`           | `string`                                  | Required | Stable task key identifying the node within its workflow graph.                                                                                  |
-| `status`        | `TaskStatus`                              | Required | Task lifecycle state, including waiting, active, done, failure, cancellation, gate pause/rejection or a quota pause.                             |
-| `attempts`      | `number`                                  | Required | Number of attempts actually started for this task.                                                                                               |
-| `startedAt`     | `string \| undefined`                     | Optional | ISO timestamp when execution of this task or operation started.                                                                                  |
-| `finishedAt`    | `string \| undefined`                     | Optional | ISO timestamp when execution of this task or operation finished.                                                                                 |
-| `error`         | `string \| undefined`                     | Optional | Recorded failure message for the task, when present.                                                                                             |
+| `status`        | `TaskStatus`                              | Required | Task state: waiting, active, done, failed, skipped, cancelled, paused (gate or quota), rejected or waiting-input.                                |
+| `attempts`      | `number`                                  | Required | Attempts started, cumulative across retries and checkpoint resumes; 0 for a skipped task or a cache hit.                                         |
+| `startedAt`     | `string \| undefined`                     | Optional | ISO timestamp of the task's latest start.                                                                                                        |
+| `finishedAt`    | `string \| undefined`                     | Optional | ISO timestamp when the task reached its current status, including paused and waiting-input.                                                      |
+| `error`         | `string \| undefined`                     | Optional | Message of the error that failed or cancelled the task, or of its gate rejection.                                                                |
 
 ## Signature
 

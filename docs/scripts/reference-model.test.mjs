@@ -193,7 +193,7 @@ test("task and workflow declarations keep separate pages from their interfaces",
   }
   assert.match(
     await page("fr/reference/defineisolatedtask.md"),
-    /allouer et fermer sa propre sandbox/,
+    /alloue puis ferme sa propre sandbox/,
   );
   assert.match(
     await page("fr/reference/definetask.md"),

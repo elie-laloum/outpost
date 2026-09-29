@@ -13,11 +13,11 @@ import type { WorkflowDecisionProof } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name        | Type     | Presence | Meaning                                                                     |
-| ----------- | -------- | -------- | --------------------------------------------------------------------------- |
-| `keyId`     | `string` | Required | Trusted approver key identifier bound into the signature.                   |
-| `expiresAt` | `string` | Required | Signed expiration timestamp; verification rejects at or after this instant. |
-| `signature` | `string` | Required | Base64url Ed25519 signature of the versioned canonical decision payload.    |
+| Name        | Type     | Presence | Meaning                                                                                  |
+| ----------- | -------- | -------- | ---------------------------------------------------------------------------------------- |
+| `keyId`     | `string` | Required | Trusted approver key identifier bound into the signature.                                |
+| `expiresAt` | `string` | Required | Signed expiration timestamp; verification rejects at or after this instant.              |
+| `signature` | `string` | Required | Base64url Ed25519 signature (86 characters) of the versioned canonical decision payload. |
 
 ## Signature
 

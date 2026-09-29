@@ -13,11 +13,11 @@ import type { PublishArtifactOptions } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name       | Type                                        | Presence | Meaning                                                                               |
-| ---------- | ------------------------------------------- | -------- | ------------------------------------------------------------------------------------- |
-| `producer` | `ArtifactProducer`                          | Required | Recorded artifact producer identity, not authentication.                              |
-| `parents`  | `readonly ArtifactReference[] \| undefined` | Optional | Ordered parent references whose IDs are recorded in the published artifact’s lineage. |
-| `signal`   | `AbortSignal \| undefined`                  | Optional | Cooperative cancellation for this operation.                                          |
+| Name       | Type                                        | Presence | Meaning                                                                                                                                                           |
+| ---------- | ------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `producer` | `ArtifactProducer`                          | Required | Execution, task key and attempt recorded in the reference and its id, as given: Outpost does not authenticate them.                                               |
+| `parents`  | `readonly ArtifactReference[] \| undefined` | Optional | References this artifact was derived from, in order; their ids are recorded in parents and in the id. An invalid or duplicated reference rejects the publication. |
+| `signal`   | `AbortSignal \| undefined`                  | Optional | Aborting it rejects the publication with the signal's reason; bytes already stored are kept.                                                                      |
 
 ## Signature
 

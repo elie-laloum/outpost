@@ -26,7 +26,7 @@ A cold `dispatch` integrates the branch and closes the sandbox on success. On fa
 | All `passes` run without a marker         | 1 pass                    | Resolves with `completed: false`                                |
 | No agent output for `idleMs`              | 10 minutes                | Rejects with code `timeout`                                     |
 | Agent process exceeds `deadlineMs`        | 1 hour                    | Rejects with code `timeout`                                     |
-| Agent exits with a nonzero status         | —                         | Rejects with code `process`, `quota` or `unavailable`           |
+| Agent exits with a nonzero status         | —                         | Rejects with code `process`, or `quota` for a usage limit       |
 | `signal` aborted                          | —                         | Rejects with the abort reason                                   |
 
 :::note

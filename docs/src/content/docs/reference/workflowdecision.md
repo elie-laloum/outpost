@@ -13,15 +13,15 @@ import type { WorkflowDecision } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name          | Type                                 | Presence | Meaning                                                                                                               |
-| ------------- | ------------------------------------ | -------- | --------------------------------------------------------------------------------------------------------------------- |
-| `proof`       | `WorkflowDecisionProof \| undefined` | Optional | Optional Ed25519 proof over this exact decision; required by signed gates and checked before any decision is applied. |
-| `executionId` | `string`                             | Required | Identity of the workflow execution, preserved across checkpoint resumption.                                           |
-| `key`         | `string`                             | Required | Stable task key identifying the node within its workflow graph.                                                       |
-| `requestId`   | `string`                             | Required | ID of the exact pending gate request being answered; stale requests are rejected.                                     |
-| `action`      | `"approve" \| "resume" \| "reject"`  | Required | approve for an approval gate, resume for a pause gate, or reject to terminate either gate.                            |
-| `actor`       | `string`                             | Required | Actor name that must be allowed by the gate; signed gates also verify the public key bound to this actor.             |
-| `reason`      | `string`                             | Required | Nonempty explanation supplied by the trusted actor for the decision.                                                  |
+| Name          | Type                                 | Presence | Meaning                                                                                                                                                                               |
+| ------------- | ------------------------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `proof`       | `WorkflowDecisionProof \| undefined` | Optional | Ed25519 proof from signWorkflowDecision() over this exact decision. A signed gate requires it; a proof sent to an unsigned gate is verified too, so it also needs a decisionVerifier. |
+| `executionId` | `string`                             | Required | executionId of the run that paused the gate, from its WorkflowResult; any other value rejects the whole batch.                                                                        |
+| `key`         | `string`                             | Required | Key of the gate task being decided.                                                                                                                                                   |
+| `requestId`   | `string`                             | Required | id of the gate's pending request (WorkflowPauseRequest.id); a stale or unknown id rejects the whole batch.                                                                            |
+| `action`      | `"approve" \| "resume" \| "reject"`  | Required | approve for an approval gate, resume for a pause gate, or reject for either. reject skips dependent tasks and fails the run.                                                          |
+| `actor`       | `string`                             | Required | One of the gate's actors. Outpost trusts this name unless the gate is signed, in which case the proof's key must be bound to it.                                                      |
+| `reason`      | `string`                             | Required | Nonblank explanation of the decision, kept in the checkpoint.                                                                                                                         |
 
 ## Signature
 

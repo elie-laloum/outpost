@@ -13,12 +13,12 @@ import type { WorkflowGate } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom              | Type                    | Présence  | Rôle                                                                                                                                                                  |
-| ---------------- | ----------------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `authentication` | `"signed" \| undefined` | Optionnel | Exige des décisions signées avec signed ; omis, conserve la confiance dans l’acteur fourni par l’application. Cette exigence fait partie de l’identité du checkpoint. |
-| `kind`           | `"approval" \| "pause"` | Requis    | approval attend approve ; pause attend resume. Les deux acceptent un rejet.                                                                                           |
-| `prompt`         | `string`                | Requis    | Instruction expliquant la décision d’approbation ou de reprise demandée à l’acteur de confiance.                                                                      |
-| `actors`         | `readonly string[]`     | Requis    | Liste non vide des acteurs autorisés à décider ce gate. Les gates signés exigent aussi une clé vérifiée associée à l’acteur choisi.                                   |
+| Nom              | Type                    | Présence  | Rôle                                                                                                                                                                                                                                                   |
+| ---------------- | ----------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `authentication` | `"signed" \| undefined` | Optionnel | signed exige que chaque décision porte une preuve acceptée par le decisionVerifier ; omis, l’acteur nommé par votre application est cru. Fait partie de l’identité du checkpoint : l’ajouter ou le retirer rend un checkpoint sauvegardé incompatible. |
+| `kind`           | `"approval" \| "pause"` | Requis    | approval attend approve ; pause attend resume. Les deux acceptent un rejet.                                                                                                                                                                            |
+| `prompt`         | `string`                | Requis    | Question posée aux acteurs, copiée dans la demande en attente.                                                                                                                                                                                         |
+| `actors`         | `readonly string[]`     | Requis    | Noms autorisés à décider cette gate. Une gate signée exige aussi une clé liée à l’acteur choisi.                                                                                                                                                       |
 
 ## Signature
 

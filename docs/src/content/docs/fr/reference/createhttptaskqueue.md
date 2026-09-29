@@ -13,18 +13,18 @@ import { createHttpTaskQueue } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Crée un client TaskQueue avec jeton bearer fixe ou source résolue à chaque requête. timeoutMs borne l’échange HTTP après résolution du jeton ; les callbacks doivent répondre rapidement. Le client n’exécute jamais les handlers localement.
+Renvoie un client TaskQueue qui envoie chaque opération à un serveur serveTaskQueue() avec un jeton bearer, fixe ou résolu avant chaque requête. Une requête refusée rejette avec Queue request rejected (&lt;status>) et les redirections ne sont pas suivies. Le client ne garde aucune connexion à fermer.
 
 [Exemple complet et règles détaillées](../../guide/job-queues/).
 
 ## Paramètres et propriétés
 
-| Nom                 | Type                                          | Présence  | Rôle                                                                                                                         |
-| ------------------- | --------------------------------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `options`           | `QueueClientOptions`                          | Requis    | URL d’endpoint de file, jeton bearer et délai des requêtes.                                                                  |
-| `options.url`       | `string`                                      | Requis    | URL HTTP de base du serveur de file de tâches.                                                                               |
-| `options.token`     | `string \| (() => string \| Promise<string>)` | Requis    | Jeton bearer fixe ou callback résolvant le jeton courant à chaque requête, y compris renouvellement du bail et finalisation. |
-| `options.timeoutMs` | `number \| undefined`                         | Optionnel | Durée maximale en millisecondes de chaque requête HTTP à la file.                                                            |
+| Nom                 | Type                                          | Présence  | Rôle                                                                                                                                                                                                                  |
+| ------------------- | --------------------------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `options`           | `QueueClientOptions`                          | Requis    | URL du serveur, jeton bearer et délai par requête.                                                                                                                                                                    |
+| `options.url`       | `string`                                      | Requis    | URL de base d’un serveur serveTaskQueue(), en http ou https, sans identifiants, requête ni fragment ; les requêtes partent vers &lt;url>/queue.                                                                       |
+| `options.token`     | `string \| (() => string \| Promise<string>)` | Requis    | Jeton bearer, ou fonction appelée avant chaque requête, renouvellements de bail et finalisations compris, pour qu’un jeton renouvelé s’applique aussitôt. Chaque valeur doit compter 32 à 512 caractères sans espace. |
+| `options.timeoutMs` | `number \| undefined`                         | Optionnel | Durée maximale de chaque requête HTTP en millisecondes, 10000 par défaut, comptée après la résolution du jeton.                                                                                                       |
 
 ## Retour
 

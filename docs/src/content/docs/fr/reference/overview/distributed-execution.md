@@ -1,24 +1,46 @@
 ---
 title: "Exécution distribuée — Vue d’ensemble"
-description: "L’exécution distribuée sépare l’admission des tâches du processus qui effectue le travail."
+description: "Confiez des jobs à des processus workers via une file durable, avec baux protégés, clés d’idempotence et tâches de workflow typées."
 sidebar:
   label: Vue d’ensemble
   order: 0
 ---
 
-L’exécution distribuée sépare l’admission des tâches du processus qui effectue le travail. Une file durable conserve les jobs ; les workers les réclament et exécutent des handlers enregistrés. Le même modèle peut fonctionner sur une seule machine avant de répartir coordinateur et workers sur plusieurs hôtes.
+## Choisir un backend
 
-## Fonctionnement et philosophie
+Chaque backend implémente `TaskQueue` : `runQueueWorker()`, `defineQueuedTask()` et [defineWorkflowJob()](../../defineworkflowjob/) fonctionnent sans changement sur chacun.
 
-`createSqliteTaskQueue` fournit le stockage durable de la file. `serveTaskQueue` et `createHttpTaskQueue` l’exposent via HTTP ; `runQueueWorker` exécute les handlers. `defineQueuedTask` relie les résultats de la file à un workflow typé. Baux et générations de propriété déterminent quelle prise en charge peut encore rapporter un résultat.
+| Backend      | Création                                                                                  | À utiliser pour                                                                                       | Fermeture                                       |
+| ------------ | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| SQLite       | `createSqliteTaskQueue(path)`                                                             | Producteurs et workers d’une même machine partageant un fichier de base                               | `queue.close()`                                 |
+| HTTP         | `serveTaskQueue({ queue, token })`, puis `createHttpTaskQueue({ url, token })`            | Clients sur d’autres machines ; les jetons bearer peuvent tourner, lus à chaque requête               | `await server.close()`, puis la file            |
+| BullMQ/Redis | `createBullMQTaskQueue({ name, connection })` depuis `@elie-laloum/outpost/queues/bullmq` | Workers répartis sur plusieurs machines autour d’un Redis standalone en `maxmemory-policy noeviction` | `await queue.close()` après l’arrêt des workers |
 
-`createBullMQTaskQueue` fournit une alternative Redis via l’entrée optionnelle `queues/bullmq`, sans coordinateur HTTP. Choisir SQLite/HTTP pour un coordinateur sur disque local ; choisir BullMQ lorsque Redis est déjà exploité par votre équipe. Les deux utilisent les mêmes handlers et workflows. Voir le [guide BullMQ/Redis](../../../guide/advanced/bullmq/).
+:::caution
+Le serveur HTTP n’a pas de TLS et un jeton donne accès à toutes les opérations de la file. Servez-le derrière TLS sur un réseau privé.
+:::
 
-## Limites et responsabilités
+## Parcours d’un job
 
-Le contrôle des générations refuse les résultats périmés mais ne peut pas annuler un effet externe déjà produit. Concevez les handlers pour les retries et les effets au moins une fois. Des hôtes séparés nécessitent un transport protégé et authentifié ; les exemples locaux sur loopback ne configurent pas un réseau ni un système d’identité de production.
+Chaque prise en charge incrémente le `fence` du job ; `renew()` et `complete()` ne réussissent qu’avec le fence courant et un bail non expiré.
+
+| Événement                                     | Job                                                                                             |
+| --------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `enqueue()` avec un nouvel identifiant        | `pending`, fence 0                                                                              |
+| `enqueue()` avec un identifiant existant      | Même requête : le job stocké, quel que soit son statut ; requête différente : refusée           |
+| Un worker le prend en charge                  | `active`, fence + 1, bail de `leaseMs` (30000 par défaut), renouvelé à chaque tiers de sa durée |
+| Le bail expire (worker tombé)                 | Un autre worker le prend avec fence + 1 ; les écritures de l’ancien worker sont refusées        |
+| Le handler se termine sans `error`            | `done`                                                                                          |
+| Le handler lève une erreur ou renvoie `error` | `failed` ; la file ne le relance jamais                                                         |
+| `cancel(id, fence)` ou `deadline` dépassée    | `cancelled`, fence + 1 ; le signal du handler en cours s’interrompt au renouvellement suivant   |
+
+:::caution
+Le fencing refuse les écritures périmées, pas les effets répétés : un job repris exécute à nouveau son handler. Dédupliquez les effets externes avec `QueueHandlerContext.idempotencyKey`.
+:::
 
 ## Points d’entrée
+
+Guide : [Files de jobs et workers](../../../guide/job-queues/) · [Redis et BullMQ](../../../guide/redis-workers/)
 
 - [createSqliteTaskQueue](../../createsqlitetaskqueue/)
 - [createBullMQTaskQueue](../../createbullmqtaskqueue/)
@@ -26,6 +48,8 @@ Le contrôle des générations refuse les résultats périmés mais ne peut pas 
 - [createHttpTaskQueue](../../createhttptaskqueue/)
 - [runQueueWorker](../../runqueueworker/)
 - [defineQueuedTask](../../definequeuedtask/)
-- [QueueLease](../../queuelease/)
-
-[Passer à la pratique avec le Guide](../../../guide/job-queues/).
+- [TaskQueue](../../taskqueue/)
+- [QueueJob](../../queuejob/)
+- [QueueHandlerContext](../../queuehandlercontext/)
+- [QueueWorkerOptions](../../queueworkeroptions/)
+- [BullMQTaskQueueOptions](../../bullmqtaskqueueoptions/)

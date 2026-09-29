@@ -16,7 +16,7 @@ import type { WorkflowJobOptions } from "@elie-laloum/outpost";
 | Nom          | Type                                                                                  | Présence  | Rôle                                                                                                                                                       |
 | ------------ | ------------------------------------------------------------------------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `workflow`   | `(input: WorkflowJson, context: WorkflowJobContext) => Workflow \| Promise<Workflow>` | Requis    | Construit le workflow pour une entrée de job ; la même entrée doit construire le même workflow, et la fabrique peut être asynchrone.                       |
-| `checkpoint` | `WorkflowJobCheckpoint`                                                               | Requis    | Stockage et version de checkpoint utilisés pour chaque job ; obligatoire.                                                                                  |
+| `checkpoint` | `WorkflowJobCheckpoint`                                                               | Requis    | Stockage de checkpoint et version de base partagés par chaque job ; la création lève une erreur sans les deux.                                             |
 | `start`      | `WorkflowJobStartOptions \| undefined`                                                | Optionnel | Autres options de démarrage du workflow, comme concurrency, budget, onQuota ou timeoutMs ; checkpoint, signal, decisions et answers sont gérés par le job. |
 
 ## Signature

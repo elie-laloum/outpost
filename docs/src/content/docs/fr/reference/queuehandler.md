@@ -13,10 +13,10 @@ import type { QueueHandler } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom       | Type                  | Présence | Rôle                                                                             |
-| --------- | --------------------- | -------- | -------------------------------------------------------------------------------- |
-| `input`   | `WorkflowJson`        | Requis   | Entrée JSON sans perte fournie au gestionnaire de travail enregistré.            |
-| `context` | `QueueHandlerContext` | Requis   | Travail pris en charge et signal d’annulation fournis au gestionnaire du worker. |
+| Nom       | Type                  | Présence | Rôle                                                            |
+| --------- | --------------------- | -------- | --------------------------------------------------------------- |
+| `input`   | `WorkflowJson`        | Requis   | Entrée JSON issue de la requête du job.                         |
+| `context` | `QueueHandlerContext` | Requis   | Clé d’idempotence, signal d’interruption et job pris en charge. |
 
 ## Retour
 

@@ -13,12 +13,12 @@ import type { WorkflowCheckpointOptions } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name      | Type                              | Presence | Meaning                                                                                              |
-| --------- | --------------------------------- | -------- | ---------------------------------------------------------------------------------------------------- |
-| `store`   | `WorkflowCheckpointStore`         | Required | Persistence adapter that acquires, reads and writes workflow checkpoints.                            |
-| `runId`   | `string`                          | Required | Stable identity of a saved workflow execution.                                                       |
-| `version` | `string`                          | Required | Caller-supplied graph/implementation version; change it when task code or workflow inputs change.    |
-| `resume`  | `"retry-incomplete" \| undefined` | Optional | Explicit retry-incomplete authorization to replay interrupted tasks and their possible side effects. |
+| Name      | Type                              | Presence | Meaning                                                                                                                                                                                                                        |
+| --------- | --------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `store`   | `WorkflowCheckpointStore`         | Required | Store that grants exclusive ownership of the run and reads and writes its checkpoint, usually createWorkflowCheckpointStore().                                                                                                 |
+| `runId`   | `string`                          | Required | Key of the saved run: a later start() with the same runId restores it. Blank values are rejected.                                                                                                                              |
+| `version` | `string`                          | Required | Your version of task code, briefs and inputs, hashed into the checkpoint identity with the workflow name and task graph. A saved run cannot change version: start a new runId instead.                                         |
+| `resume`  | `"retry-incomplete" \| undefined` | Optional | Set to retry-incomplete to reopen a checkpoint with failed, cancelled or interrupted tasks and run them again, with any side effects they already made. Without it, start() rejects such a checkpoint before running anything. |
 
 ## Signature
 

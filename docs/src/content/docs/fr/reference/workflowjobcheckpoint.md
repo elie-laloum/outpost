@@ -13,11 +13,11 @@ import type { WorkflowJobCheckpoint } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom       | Type                              | Présence  | Rôle                                                                                                                                |
-| --------- | --------------------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `store`   | `WorkflowCheckpointStore`         | Requis    | Stockage de checkpoints qui contient chaque exécution.                                                                              |
-| `version` | `string`                          | Requis    | À changer lorsque les implémentations de tâches changent ; la version effective ajoute #input: et une empreinte de l’entrée du job. |
-| `resume`  | `"retry-incomplete" \| undefined` | Optionnel | Autorise explicitement le rejeu des tâches incomplètes et de leurs effets de bord.                                                  |
+| Nom       | Type                              | Présence  | Rôle                                                                                                                                                                     |
+| --------- | --------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `store`   | `WorkflowCheckpointStore`         | Requis    | Stockage de checkpoints qui contient chaque exécution.                                                                                                                   |
+| `version` | `string`                          | Requis    | Version de base ; changez-la quand l’implémentation des tâches change. La version effective ajoute #input: et une empreinte SHA-256 de 32 caractères de l’entrée du job. |
+| `resume`  | `"retry-incomplete" \| undefined` | Optionnel | Valeur retry-incomplete pour autoriser le rejeu des tâches incomplètes et de leurs effets de bord ; sans elle, un checkpoint incomplet termine le job avec une erreur.   |
 
 ## Signature
 

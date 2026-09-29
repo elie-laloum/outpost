@@ -13,11 +13,11 @@ import type { QueueLease } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom      | Type     | Présence | Rôle                                                                                  |
-| -------- | -------- | -------- | ------------------------------------------------------------------------------------- |
-| `id`     | `string` | Requis   | Identité durable du travail utilisée pour la déduplication et les opérations de bail. |
-| `worker` | `string` | Requis   | Identité du worker prenant en charge ou possédant le bail du travail.                 |
-| `fence`  | `number` | Requis   | Génération du bail utilisée pour rejeter les écritures périmées.                      |
+| Nom      | Type     | Présence | Rôle                                                                                                    |
+| -------- | -------- | -------- | ------------------------------------------------------------------------------------------------------- |
+| `id`     | `string` | Requis   | Identifiant du job sous bail.                                                                           |
+| `worker` | `string` | Requis   | Nom du worker qui détient le bail.                                                                      |
+| `fence`  | `number` | Requis   | Fence renvoyé par la prise en charge ; une prise en charge ultérieure ou une annulation le rend périmé. |
 
 ## Signature
 
