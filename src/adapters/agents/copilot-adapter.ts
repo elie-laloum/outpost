@@ -1,4 +1,8 @@
 import { textMatcher } from "./text-matcher.ts";
+import {
+  conversationSettings,
+  conversationStorage,
+} from "./conversation-settings.ts";
 import { copilotQuotaPatterns } from "./quota.constants.ts";
 import {
   copilotUnavailablePatterns,
@@ -32,6 +36,7 @@ function bindCopilot(settings: Bound<CopilotSettings>): AgentAdapter {
     resumable: true,
     forkable: false,
     conversations: "copilot",
+    ...conversationStorage(settings),
     requiresFinishedEvent: true,
     variables: Object.freeze({
       COPILOT_AUTO_UPDATE: "false",
@@ -53,6 +58,7 @@ function bindCopilot(settings: Bound<CopilotSettings>): AgentAdapter {
 
 export function copilotHarness(settings: CopilotSettings = {}): CliHarness {
   harnessSettings(settings);
+  conversationSettings("GitHub Copilot CLI", "copilot", settings);
   const configured = Object.freeze({
     ...settings,
     variables: Object.freeze({ ...settings.variables }),

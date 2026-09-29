@@ -1,4 +1,8 @@
 import { textMatcher } from "./text-matcher.ts";
+import {
+  conversationSettings,
+  conversationStorage,
+} from "./conversation-settings.ts";
 import { kimiQuotaPatterns } from "./quota.constants.ts";
 import {
   kimiUnavailablePatterns,
@@ -37,6 +41,7 @@ function bindKimi(settings: Bound<KimiSettings>): AgentAdapter {
     forkable: true,
     fork: forkKimi,
     conversations: "kimi",
+    ...conversationStorage(settings),
     variables: Object.freeze({
       KIMI_CODE_NO_AUTO_UPDATE: "1",
       ...settings.variables,
@@ -53,6 +58,7 @@ function bindKimi(settings: Bound<KimiSettings>): AgentAdapter {
 
 export function kimiHarness(settings: KimiSettings = {}): CliHarness {
   harnessSettings(settings);
+  conversationSettings("Kimi Code", "kimi", settings);
   invariant(
     settings.region === undefined ||
       Object.hasOwn(kimiRegions, settings.region),

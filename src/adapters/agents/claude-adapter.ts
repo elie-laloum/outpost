@@ -1,4 +1,8 @@
 import { textMatcher } from "./text-matcher.ts";
+import {
+  conversationSettings,
+  conversationStorage,
+} from "./conversation-settings.ts";
 import { claudeQuotaPatterns } from "./quota.constants.ts";
 import {
   claudeUnavailablePatterns,
@@ -37,6 +41,7 @@ function bindClaude(settings: Bound<ClaudeSettings>): AgentAdapter {
     name: "claude",
     ...(credentials ? { credentials } : {}),
     conversations: "claude",
+    ...conversationStorage(settings),
     resumable: true,
     capture: settings.saveConversations ?? true,
     variables: Object.freeze({
@@ -59,6 +64,7 @@ function bindClaude(settings: Bound<ClaudeSettings>): AgentAdapter {
 
 export function claudeHarness(settings: ClaudeSettings = {}): CliHarness {
   harnessSettings(settings);
+  conversationSettings("Claude Code", "claude", settings);
   const configured = Object.freeze({
     ...settings,
     variables: Object.freeze({ ...settings.variables }),

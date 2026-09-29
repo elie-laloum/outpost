@@ -1,8 +1,14 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
+  agent,
+  antigravityHarness,
+  claudeHarness,
+  codexHarness,
+  copilotHarness,
   harness,
   harnessConversations,
+  kimiHarness,
   localTransport,
   transportConversations,
   type ConversationStore,
@@ -79,5 +85,83 @@ test("harness conversations must use the harness format when declared", () => {
   assert.equal(
     harness({ modelProvider, conversations: false }).conversations,
     false,
+  );
+});
+
+const presets = {
+  claude: ["Claude Code", claudeHarness],
+  codex: ["Codex", codexHarness],
+  copilot: ["GitHub Copilot CLI", copilotHarness],
+  kimi: ["Kimi Code", kimiHarness],
+} as const;
+
+for (const [format, [label, preset]] of Object.entries(presets)) {
+  test(`${label} stores conversations only in a compatible store`, () => {
+    const transporter = localTransport({ directory: "unused" });
+    const conversations = transportConversations(format as "kimi", {
+      transporter,
+      namespace: "team",
+    });
+    assert.equal(
+      agent({ harness: preset({ conversations }) }).storage,
+      conversations,
+    );
+    assert.equal(agent({ harness: preset() }).storage, undefined);
+    const store = custom();
+    assert.equal(
+      agent({ harness: preset({ conversations: store }) }).storage,
+      store,
+    );
+    const other = format === "claude" ? "codex" : "claude";
+    assert.throws(
+      () =>
+        preset({
+          conversations: transportConversations(other, {
+            transporter,
+            namespace: "team",
+          }),
+        }),
+      new RegExp(
+        `${label} conversations must use the "${format}" format, not "${other}"`,
+      ),
+    );
+    assert.throws(
+      () => preset({ conversations: custom("harness") }),
+      /format, not "harness"/,
+    );
+    assert.throws(
+      () => preset({ conversations: { name: "broken" } as never }),
+      new RegExp(`${label} conversations must be a conversation store`),
+    );
+  });
+}
+
+test("Claude and Codex reject stored conversations when capture is disabled", () => {
+  for (const [label, preset] of [presets.claude, presets.codex])
+    assert.throws(
+      () => preset({ saveConversations: false, conversations: custom() }),
+      new RegExp(
+        `${label} cannot store conversations when saveConversations is false`,
+      ),
+    );
+  assert.equal(
+    agent({ harness: claudeHarness({ saveConversations: false }) }).capture,
+    false,
+  );
+});
+
+test("Antigravity rejects conversation stores", () => {
+  assert.throws(
+    () =>
+      antigravityHarness({
+        conversations: harnessConversations(),
+      } as never),
+    /Antigravity has no portable conversation capture; conversations cannot be stored/,
+  );
+  assert.equal(
+    agent({
+      harness: antigravityHarness({ conversations: undefined } as never),
+    }).storage,
+    undefined,
   );
 });

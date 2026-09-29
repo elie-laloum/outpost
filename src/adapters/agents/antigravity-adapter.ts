@@ -5,6 +5,7 @@ import {
   transientNoticePatterns,
 } from "./unavailable.constants.ts";
 import type { AgentAdapter, CliHarness } from "../../domain/agent.types.ts";
+import { invariant } from "../../domain/errors.ts";
 import type { AgentModel } from "../../domain/model.types.ts";
 import { antigravityCredentials } from "./antigravity-authentication.ts";
 import { antigravityVariables } from "./antigravity.constants.ts";
@@ -50,6 +51,10 @@ export function antigravityHarness(
   settings: AntigravitySettings = {},
 ): CliHarness {
   harnessSettings(settings);
+  invariant(
+    !("conversations" in settings) || settings.conversations === undefined,
+    "Antigravity has no portable conversation capture; conversations cannot be stored",
+  );
   const configured = Object.freeze({
     ...settings,
     variables: Object.freeze({ ...settings.variables }),

@@ -1,4 +1,8 @@
 import { textMatcher } from "./text-matcher.ts";
+import {
+  conversationSettings,
+  conversationStorage,
+} from "./conversation-settings.ts";
 import { codexQuotaPatterns } from "./quota.constants.ts";
 import {
   codexUnavailablePatterns,
@@ -28,6 +32,7 @@ function bindCodex(settings: Bound<CodexSettings>): AgentAdapter {
     name: "codex",
     ...(credentials ? { credentials } : {}),
     conversations: "codex",
+    ...conversationStorage(settings),
     resumable: true,
     capture: settings.saveConversations ?? true,
     variables: Object.freeze({ ...settings.variables }),
@@ -40,6 +45,7 @@ function bindCodex(settings: Bound<CodexSettings>): AgentAdapter {
 
 export function codexHarness(settings: CodexSettings = {}): CliHarness {
   harnessSettings(settings);
+  conversationSettings("Codex", "codex", settings);
   const configured = Object.freeze({
     ...settings,
     variables: Object.freeze({ ...settings.variables }),

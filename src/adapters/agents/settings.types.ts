@@ -1,10 +1,17 @@
 import type { AgentAuthentication } from "../../domain/agent.types.ts";
 import type { Variables } from "../../domain/command.types.ts";
+import type { ConversationStore } from "../../domain/conversation.types.ts";
 import type { AgentModel, ModelReasoning } from "../../domain/model.types.ts";
 
 export interface CommonAgentSettings {
   readonly authentication?: AgentAuthentication;
   readonly variables?: Variables;
+  readonly saveConversations?: boolean;
+  readonly conversations?: ConversationStore;
+}
+
+export interface ConversationSettings {
+  readonly conversations?: ConversationStore;
   readonly saveConversations?: boolean;
 }
 
