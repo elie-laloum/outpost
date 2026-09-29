@@ -194,9 +194,7 @@ test(
       request: (input: AgentInput) => ({
         executable: "node",
         arguments: ["-e", script(input)],
-        stdin: input.liveInput
-          ? (liveInput?.encode(input.text ?? "") ?? "")
-          : (input.text ?? ""),
+        stdin: input.liveInput ? `${input.text ?? ""}\n` : (input.text ?? ""),
       }),
       events: (line: string) => [JSON.parse(line) as AgentEvent],
     });
@@ -205,8 +203,13 @@ test(
       () =>
         "const rl=require('readline').createInterface({input:process.stdin});const seen=[];rl.on('line',l=>{seen.push(l);console.log(JSON.stringify({kind:'text',text:'ack:'+l}));if(seen.length===2){console.log(JSON.stringify({kind:'result',text:seen.join('|')+' <outpost>done</outpost>'}));console.log(JSON.stringify({kind:'finished'}))}});rl.on('close',()=>process.exit(0));",
       {
-        encode: (text) => `${text}\n`,
-        consumed: (line) => line.includes("ack:"),
+        open: () => ({
+          encode: (text) => `${text}\n`,
+          read: (line) => ({
+            consumed: line.includes("ack:") ? 1 : 0,
+            replies: [],
+          }),
+        }),
       },
     );
     const interrupted = fixture("interrupt-fixture", (input) =>

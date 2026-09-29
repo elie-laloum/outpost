@@ -1,5 +1,9 @@
 import { PassThrough } from "node:stream";
-import type { AgentAdapter, AgentLiveInput } from "../domain/agent.types.ts";
+import type {
+  AgentAdapter,
+  AgentLiveInput,
+  AgentLiveSession,
+} from "../domain/agent.types.ts";
 import type { SandboxLease } from "../domain/sandbox.types.ts";
 import { steeringInbox } from "../domain/steering.ts";
 import type { SteeringInbox } from "../domain/steering.types.ts";
@@ -38,37 +42,45 @@ function liveSteering(
   pass: number,
 ): CliSteering {
   const input = new PassThrough();
+  let session: AgentLiveSession | undefined;
   let written = 1,
     consumed = 0,
     open = true;
   let unsubscribe: () => void = () => undefined;
+  const write = (data: string) => {
+    if (open && data) input.write(data);
+  };
   const end = () => {
     if (!open) return;
     open = false;
     input.end();
   };
   const flush = () => {
-    if (!open) return;
+    if (!open || !session) return;
     const messages = inbox.take();
-    for (const message of messages) input.write(protocol.encode(message.text));
+    for (const message of messages) write(session.encode(message.text));
     written += messages.length;
     deliverSteering(messages, "injected", pass, options.observe);
   };
   return {
     liveInput: true,
     command: (command) => ({ ...command, input }),
-    start() {
+    start(request) {
+      session = protocol.open(request);
       unsubscribe = inbox.subscribe(flush);
       flush();
     },
     observe(event) {
       if (
+        session &&
         event.kind === "raw" &&
         typeof event.value === "string" &&
-        !event.truncated &&
-        protocol.consumed(event.value)
-      )
-        consumed++;
+        !event.truncated
+      ) {
+        const read = session.read(event.value);
+        consumed += read.consumed;
+        for (const reply of read.replies) write(reply);
+      }
       // The agent keeps reading stdin after a turn; close it once every message was consumed.
       if (event.kind === "failure") end();
       if (event.kind === "finished" && consumed >= written) end();

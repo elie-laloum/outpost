@@ -1,6 +1,6 @@
 import type { AgentInput } from "../../domain/agent.types.ts";
 import type { Command } from "../../domain/command.types.ts";
-import { claudeLiveInput } from "./claude-input.ts";
+import { claudeUserMessage } from "./claude-input.ts";
 import { validateContinuation } from "./continuation.ts";
 import type { Bound, ClaudeSettings } from "./settings.types.ts";
 
@@ -36,7 +36,7 @@ export function claudeRequest(
       ? { interactive: true }
       : {
           stdin: input.liveInput
-            ? claudeLiveInput.encode(input.text ?? "")
+            ? claudeUserMessage(input.text ?? "")
             : (input.text ?? ""),
         }),
   };

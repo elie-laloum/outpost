@@ -490,15 +490,19 @@ test("Claude live input keeps stream-json stdin open and ignores replayed user m
     parent_tool_use_id: null,
   };
   assert.equal(live.stdin, `${JSON.stringify(message)}\n`);
-  assert.equal(agent.liveInput.encode("Refactor"), live.stdin);
+  const session = agent.liveInput.open({ text: "Refactor", liveInput: true });
+  assert.equal(session.encode("Refactor"), live.stdin);
   assert.equal(agent.request({ text: "Refactor" }).stdin, "Refactor");
   assert.ok(
     !agent.request({ text: "Refactor" }).arguments?.includes("--input-format"),
   );
   const replay = JSON.stringify({ ...message, isReplay: true });
-  assert.equal(agent.liveInput.consumed(replay), true);
-  assert.equal(agent.liveInput.consumed(JSON.stringify(message)), false);
-  assert.equal(agent.liveInput.consumed("not json"), false);
+  assert.deepEqual(session.read(replay), { consumed: 1, replies: [] });
+  assert.deepEqual(session.read(JSON.stringify(message)), {
+    consumed: 0,
+    replies: [],
+  });
+  assert.equal(session.read("not json").consumed, 0);
   assert.deepEqual(agent.events(replay), [
     { kind: "raw", value: JSON.parse(replay) },
   ]);

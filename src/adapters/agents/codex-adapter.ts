@@ -11,7 +11,12 @@ import {
 import type { AgentModel } from "../../domain/model.types.ts";
 import { credentialPlanner } from "./authentication.ts";
 import { codexCredentials } from "./codex-authentication.ts";
-import type { AgentAdapter, CliHarness } from "../../domain/agent.types.ts";
+import type {
+  AgentAdapter,
+  AgentInput,
+  CliHarness,
+} from "../../domain/agent.types.ts";
+import { codexAppSession } from "./codex-app-session.ts";
 import { codexProvider } from "./codex-provider.ts";
 import { codexEvents } from "./codex-events.ts";
 import { codexRequest } from "./codex-request.ts";
@@ -38,6 +43,9 @@ function bindCodex(settings: Bound<CodexSettings>): AgentAdapter {
     variables: Object.freeze({ ...settings.variables }),
     request: (input) => codexRequest(settings, input),
     events: codexEvents,
+    liveInput: Object.freeze({
+      open: (input: AgentInput) => codexAppSession(settings, input),
+    }),
     quota: textMatcher(codexQuotaPatterns),
     unavailable: textMatcher(codexUnavailablePatterns, transientNoticePatterns),
   } satisfies AgentAdapter);

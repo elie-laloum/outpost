@@ -213,10 +213,20 @@ export interface AgentAdapter extends AgentFeatures {
 }
 
 export interface AgentLiveInput {
-  /** Encodes one user message, including its line terminator. */
+  /** Starts the protocol state of one turn requested with input. */
+  open(input: AgentInput): AgentLiveSession;
+}
+
+export interface AgentLiveSession {
+  /** Encodes one user message for stdin, or returns "" when the session sends it later. */
   encode(text: string): string;
-  /** Recognizes an output line confirming the agent consumed one user message. */
-  consumed(line: string): boolean;
+  /** Reads one output line: user messages it confirms and protocol replies to write. */
+  read(line: string): AgentLiveRead;
+}
+
+export interface AgentLiveRead {
+  readonly consumed: number;
+  readonly replies: readonly string[];
 }
 
 export interface RequiredAgent {

@@ -1,7 +1,8 @@
 import { toolResult } from "./tool-result.ts";
 import type { AgentEvent } from "../../domain/agent.types.ts";
 import { decodeEvent, decodeLine } from "./event-decoder.ts";
-import { asRecord, numberOrZero } from "./protocol.ts";
+import { codexAppEvents } from "./codex-app-events.ts";
+import { asRecord, decodeRecord, numberOrZero } from "./protocol.ts";
 import type { ProtocolRecord } from "./protocol.types.ts";
 
 function conversation(event: ProtocolRecord): AgentEvent[] {
@@ -95,6 +96,12 @@ function failure(event: ProtocolRecord): AgentEvent[] {
 }
 
 export function codexEvents(line: string): AgentEvent[] {
+  const record = decodeRecord(line);
+  // app-server speaks JSON-RPC (method or id); exec emits typed events.
+  if (record && ("method" in record || "id" in record)) {
+    const events = codexAppEvents(record);
+    return events.length ? events : [{ kind: "raw", value: record }];
+  }
   return decodeLine(line, {
     "thread.started": conversation,
     "item.completed": completedItem,

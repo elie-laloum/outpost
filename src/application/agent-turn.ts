@@ -89,13 +89,14 @@ export async function turn(
     }
     await prepareAgentUsage(lease, agent, output, continuation, signal);
     signal.throwIfAborted();
+    const request = {
+      text: prompt,
+      ...(steering.liveInput ? { liveInput: true } : {}),
+      ...(continuation ? { continuation } : {}),
+    };
     const command = await agentRequest(
       agent,
-      {
-        text: prompt,
-        ...(steering.liveInput ? { liveInput: true } : {}),
-        ...(continuation ? { continuation } : {}),
-      },
+      request,
       (command) =>
         lease.invoke({
           ...command,
@@ -112,7 +113,7 @@ export async function turn(
         });
       },
     );
-    steering.start();
+    steering.start(request);
     const result = await lease.invoke({
       ...steering.command(command),
       signal,

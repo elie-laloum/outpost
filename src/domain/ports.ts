@@ -3,6 +3,8 @@ export type {
   AgentEvent,
   AgentInput,
   AgentLiveInput,
+  AgentLiveRead,
+  AgentLiveSession,
   AgentObservation,
   Usage,
 } from "./agent.types.ts";

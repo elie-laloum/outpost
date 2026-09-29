@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import {
   agent,
   claudeHarness,
+  codexHarness,
   createSandbox,
   createSteering,
   defineHarnessSubagent,
@@ -556,4 +557,85 @@ test("replay reproduces a steered run's turns, instructions, text, usage and com
           : [event.kind],
       );
   assert.deepEqual(kinds(replayedEvents), kinds(events));
+});
+
+const codexFixture = fileURLToPath(
+  new URL("../fixtures/codex-app-server.ts", import.meta.url),
+);
+
+function appServerCodex(calls: (readonly string[])[]) {
+  const native = agent({ harness: codexHarness({ saveConversations: false }) });
+  assert.equal(native.kind, "cli");
+  return {
+    ...native,
+    request(input: AgentInput) {
+      const command = native.request(input);
+      calls.push(command.arguments ?? []);
+      return input.liveInput
+        ? {
+            ...command,
+            executable: process.execPath,
+            arguments: [codexFixture, ...(command.arguments ?? [])],
+          }
+        : command;
+    },
+  };
+}
+
+test("Codex receives steering through app-server turn/steer during a tool call", async (t) => {
+  const root = await repository(t);
+  const steering = createSteering();
+  const calls: (readonly string[])[] = [];
+  const events: AgentObservation[] = [];
+  let delivery: Promise<SteeringDelivery> | undefined;
+  const result = await dispatch({
+    repository: root,
+    sandboxProvider: localSandboxProvider(),
+    agent: appServerCodex(calls),
+    brief: { text: "Please use a tool" },
+    steering,
+    settleMs: 30_000,
+    observe(event) {
+      events.push(event);
+      if (event.kind === "tool" && !delivery)
+        delivery = steering.send("Leave legacy/ untouched.");
+    },
+  });
+  assert.deepEqual(await delivery, { mode: "injected" });
+  assert.deepEqual(calls, [["app-server"]]);
+  assert.equal(result.turns.length, 1);
+  assert.equal(result.completed, true);
+  assert.equal(result.conversation, "thread-1");
+  assert.match(result.text, /injected: Leave legacy\/ untouched\./);
+  assert.deepEqual(result.usage, {
+    input: 10,
+    cached: 4,
+    cacheCreated: 0,
+    output: 2,
+  });
+  assert.ok(!events.some((event) => event.kind === "failure"));
+});
+
+test("Codex steering after its turn completed resumes the app-server thread", async (t) => {
+  const root = await repository(t);
+  const steering = createSteering();
+  const calls: (readonly string[])[] = [];
+  let delivery: Promise<SteeringDelivery> | undefined;
+  const result = await dispatch({
+    repository: root,
+    sandboxProvider: localSandboxProvider(),
+    agent: appServerCodex(calls),
+    brief: { text: "Answer directly" },
+    steering,
+    settleMs: 30_000,
+    observe(event) {
+      if (event.kind === "finished" && !delivery)
+        delivery = steering.send("Mention the tests.");
+    },
+  });
+  assert.deepEqual(await delivery, { mode: "resumed" });
+  assert.equal(calls.length, 2);
+  assert.equal(result.turns.length, 2);
+  assert.equal(result.turns[1]!.conversation, "thread-1");
+  assert.match(result.turns[1]!.text, /handled: Mention the tests\./);
 });
