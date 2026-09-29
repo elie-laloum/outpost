@@ -1,4 +1,4 @@
-import { Readable } from "node:stream";
+import { PassThrough } from "node:stream";
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import { syncBuiltinESMExports } from "node:module";
@@ -111,10 +111,23 @@ test(
         invoke({ executable: "true", interactive: true }),
         /does not support/,
       );
-      await assert.rejects(
-        invoke({ executable: "true", input: Readable.from([]) }),
-        /live-input/,
-      );
+      const live = new PassThrough();
+      const streamed = invoke({
+        executable: "sh",
+        arguments: [
+          "-c",
+          'read first; echo "received:$first"; read second; echo "$first:$second"; exit 6',
+        ],
+        stdin: "one\n",
+        input: live,
+        observe(channel, text) {
+          if (channel === "stdout" && text.includes("received:one"))
+            live.end("two\n");
+        },
+      });
+      const liveResult = await streamed;
+      assert.equal(liveResult.status, 6);
+      assert.match(liveResult.stdout, /one:two/);
       await assert.rejects(
         invoke({ executable: "true", variables: { "bad-key": "value" } }),
         /Invalid environment/,

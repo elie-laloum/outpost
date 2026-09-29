@@ -134,6 +134,7 @@ export function firecrackerSandboxProvider(
       return {
         root,
         home: options.home,
+        liveInput: true,
         invoke: (command) =>
           track((signal) => invoke({ ...command, signal }), command.signal),
         upload: (source, destination, options = {}) =>
