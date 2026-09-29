@@ -165,7 +165,7 @@ export const groups = [
     title: ["Triggers", "Déclencheurs"],
     guide: "guide/triggers",
     names:
-      "cronSchedule runSchedules serveTriggers githubWebhook gitlabWebhook slackRequest standardWebhook labelAdded commandIssued workflowJob CronSchedule CronOptions TriggerSchedule RunSchedulesOptions ScheduleFailure TriggerJob TriggerJobInput TriggerRoute TriggerServerOptions TriggerServer TriggerFailure TriggerEvent TriggerHttpRequest TriggerOutcome TriggerReply TriggerSecret TriggerSource GithubWebhookOptions GitlabWebhookOptions GitlabSigningOptions GitlabTokenOptions SlackRequestOptions StandardWebhookOptions TriggerLabel TriggerCommand WorkflowJobOptions WorkflowJobContext WorkflowJobCheckpoint WorkflowJobStartOptions",
+      "createCronSchedule runSchedules serveTriggers createGithubWebhook createGitlabWebhook createSlackSource createStandardWebhook labelAdded commandIssued defineWorkflowJob CronSchedule CronOptions TriggerSchedule RunSchedulesOptions ScheduleFailure TriggerJob TriggerJobInput TriggerRoute TriggerServerOptions TriggerServer TriggerFailure TriggerEvent TriggerHttpRequest TriggerOutcome TriggerReply TriggerSecret TriggerSource GithubWebhookOptions GitlabWebhookOptions GitlabSigningOptions GitlabTokenOptions SlackRequestOptions StandardWebhookOptions TriggerLabel TriggerCommand WorkflowJobOptions WorkflowJobContext WorkflowJobCheckpoint WorkflowJobStartOptions",
   },
   {
     id: "speculation",

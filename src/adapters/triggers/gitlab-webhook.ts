@@ -41,7 +41,9 @@ function tokenDelivery(options: GitlabTokenOptions): DeliveryVerifier {
 }
 
 /** Receive GitLab webhooks, preferably verified with a signing token. */
-export function gitlabWebhook(options: GitlabWebhookOptions): TriggerSource {
+export function createGitlabWebhook(
+  options: GitlabWebhookOptions,
+): TriggerSource {
   const delivery =
     "signingToken" in options
       ? signedDelivery(options)

@@ -1,6 +1,6 @@
 ---
-title: "slackRequest"
-description: "slackRequest — Outpost API"
+title: "createSlackSource"
+description: "createSlackSource — Outpost API"
 sidebar:
   order: 0
 ---
@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { slackRequest } from "@elie-laloum/outpost";
+import { createSlackSource } from "@elie-laloum/outpost";
 ```
 
 ## Purpose and behavior
@@ -32,7 +32,7 @@ Create a Slack trigger source for slash commands and interactive payloads. It ve
 ## Signature
 
 ```ts
-export declare function slackRequest(
+export declare function createSlackSource(
   options: SlackRequestOptions,
 ): TriggerSource;
 ```

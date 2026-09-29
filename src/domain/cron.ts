@@ -159,7 +159,7 @@ function normalizedExpression(expression: string): string {
   return cronMacros[text.toLowerCase()] ?? text;
 }
 
-export function cronSchedule(
+export function createCronSchedule(
   expression: string,
   options: CronOptions = {},
 ): CronSchedule {

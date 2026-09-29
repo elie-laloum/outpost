@@ -31,7 +31,9 @@ function validSchedules(
       typeof schedule.cron?.next !== "function" ||
       typeof schedule.cron.previous !== "function"
     )
-      throw new Error(`Schedule ${schedule.name} requires cronSchedule()`);
+      throw new Error(
+        `Schedule ${schedule.name} requires createCronSchedule()`,
+      );
     if (typeof schedule.handler !== "string" || !schedule.handler)
       throw new Error(`Schedule ${schedule.name} requires a handler`);
     names.add(schedule.name);

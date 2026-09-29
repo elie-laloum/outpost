@@ -1,6 +1,6 @@
 ---
-title: "standardWebhook"
-description: "standardWebhook — Outpost API"
+title: "createStandardWebhook"
+description: "createStandardWebhook — Outpost API"
 sidebar:
   order: 0
 ---
@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { standardWebhook } from "@elie-laloum/outpost";
+import { createStandardWebhook } from "@elie-laloum/outpost";
 ```
 
 ## Rôle et comportement
@@ -33,7 +33,7 @@ Crée une source de déclencheur pour les émetteurs qui suivent le schéma Stan
 ## Signature
 
 ```ts
-export declare function standardWebhook(
+export declare function createStandardWebhook(
   options: StandardWebhookOptions,
 ): TriggerSource;
 ```

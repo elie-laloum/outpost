@@ -1,6 +1,6 @@
 ---
-title: "standardWebhook"
-description: "standardWebhook — Outpost API"
+title: "createStandardWebhook"
+description: "createStandardWebhook — Outpost API"
 sidebar:
   order: 0
 ---
@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { standardWebhook } from "@elie-laloum/outpost";
+import { createStandardWebhook } from "@elie-laloum/outpost";
 ```
 
 ## Purpose and behavior
@@ -33,7 +33,7 @@ Create a trigger source for senders that follow the Standard Webhooks scheme. It
 ## Signature
 
 ```ts
-export declare function standardWebhook(
+export declare function createStandardWebhook(
   options: StandardWebhookOptions,
 ): TriggerSource;
 ```

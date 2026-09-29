@@ -5,7 +5,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
-  cronSchedule,
+  createCronSchedule,
   runSchedules,
   createSqliteTaskQueue,
 } from "../../src/index.ts";
@@ -112,12 +112,12 @@ test("schedules publish one trigger job per slot with derived identities", async
       schedules: [
         {
           name: "hourly",
-          cron: cronSchedule("0 * * * *"),
+          cron: createCronSchedule("0 * * * *"),
           handler: "audit",
         },
         {
           name: "report",
-          cron: cronSchedule("30 10 * * *"),
+          cron: createCronSchedule("30 10 * * *"),
           handler: "report",
           runId: (slot) => `report-${slot.toISOString().slice(0, 10)}`,
           input: (slot) => ({ day: slot.toISOString().slice(0, 10) }),
@@ -150,7 +150,11 @@ test("schedules publish one trigger job per slot with derived identities", async
 test("concurrent schedulers converge on the same queue job", async (t) => {
   const queue = await sqliteQueue(t);
   const schedules = [
-    { name: "nightly", cron: cronSchedule("0 2 * * *"), handler: "audit" },
+    {
+      name: "nightly",
+      cron: createCronSchedule("0 2 * * *"),
+      handler: "audit",
+    },
   ];
   for (let replica = 0; replica < 2; replica++) {
     const stop = new AbortController();
@@ -192,7 +196,7 @@ test("a restart catches up only the latest slot within maxLateMs", async () => {
         schedules: [
           {
             name: "minutely",
-            cron: cronSchedule("* * * * *"),
+            cron: createCronSchedule("* * * * *"),
             handler: "tick",
           },
         ],
@@ -229,7 +233,11 @@ test("a late wake-up publishes only the latest missed slot", async () => {
       signal: stop.signal,
       maxLateMs: 10_000,
       schedules: [
-        { name: "tick", cron: cronSchedule("* * * * *"), handler: "tick" },
+        {
+          name: "tick",
+          cron: createCronSchedule("* * * * *"),
+          handler: "tick",
+        },
       ],
     },
     time.clock,
@@ -257,8 +265,8 @@ test("publication failures reject by default or reach onError", async () => {
     queue: failing.queue,
     signal: stop.signal,
     schedules: [
-      { name: "a", cron: cronSchedule("* * * * *"), handler: "tick" },
-      { name: "b", cron: cronSchedule("0 0 1 1 *"), handler: "tick" },
+      { name: "a", cron: createCronSchedule("* * * * *"), handler: "tick" },
+      { name: "b", cron: createCronSchedule("0 0 1 1 *"), handler: "tick" },
     ],
     ...extra,
   });
@@ -296,7 +304,7 @@ test("publication failures reject by default or reach onError", async () => {
       schedules: [
         {
           name: "invalid",
-          cron: cronSchedule("* * * * *"),
+          cron: createCronSchedule("* * * * *"),
           handler: "tick",
           runId: () => "",
         },
@@ -310,7 +318,7 @@ test("publication failures reject by default or reach onError", async () => {
 test("runSchedules validates schedules and stops on abort", async () => {
   const { queue } = recordingQueue();
   const signal = AbortSignal.abort();
-  const cron = cronSchedule("* * * * *");
+  const cron = createCronSchedule("* * * * *");
   for (const schedules of [
     [],
     [{ name: "bad name", cron, handler: "x" }],
@@ -334,7 +342,9 @@ test("runSchedules validates schedules and stops on abort", async () => {
   const running = runSchedules({
     queue,
     signal: stop.signal,
-    schedules: [{ name: "x", cron: cronSchedule("0 0 1 1 *"), handler: "x" }],
+    schedules: [
+      { name: "x", cron: createCronSchedule("0 0 1 1 *"), handler: "x" },
+    ],
   });
   stop.abort();
   await running;

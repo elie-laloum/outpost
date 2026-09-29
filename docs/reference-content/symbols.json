@@ -483,7 +483,7 @@
     "Create an idle Steering controller. Pass it to a dispatch as steering; send() then delivers instructions to the running agent: injected into the built-in harness loop, Claude Code's stream-json input or Codex app-server turns, otherwise by stopping and resuming the conversation. Creating it starts nothing.",
     "Crée un contrôleur Steering inactif. Passez-le à un dispatch avec steering ; send() remet alors des consignes à l’agent en cours : injectées dans la boucle du harness intégré, l’entrée stream-json de Claude Code ou les tours app-server de Codex, sinon par arrêt et reprise de la conversation. Sa création ne démarre rien."
   ],
-  "cronSchedule": [
+  "createCronSchedule": [
     "Parse a five-field cron expression, or a macro such as @daily, evaluated in an IANA time zone (UTC by default). The frozen result computes slots with next() and previous() and publishes nothing. Construction rejects invalid fields, unknown time zones and expressions without any occurrence.",
     "Analyse une expression cron à cinq champs, ou une macro comme @daily, évaluée dans un fuseau horaire IANA (UTC par défaut). Le résultat figé calcule les créneaux avec next() et previous() et ne publie rien. La construction refuse les champs invalides, les fuseaux inconnus et les expressions sans aucune occurrence."
   ],
@@ -495,19 +495,19 @@
     "Start an HTTP server that verifies each request with its route source and publishes the job selected by on() as trigger:<path>:<delivery>. Redeliveries of one delivery publish nothing new. It answers 202, 204, 401, 404, 405, 413, 500 or 503, unless the source overrides the success replies, and resolves once listening. The caller closes the server and then its queue.",
     "Démarre un serveur HTTP qui vérifie chaque requête avec la source de sa route et publie le job choisi par on() sous trigger:<path>:<delivery>. Les relivraisons d’une même livraison ne publient rien de nouveau. Il répond 202, 204, 401, 404, 405, 413, 500 ou 503, sauf si la source remplace les réponses de succès, et se résout une fois à l’écoute. L’appelant ferme le serveur puis sa file."
   ],
-  "githubWebhook": [
+  "createGithubWebhook": [
     "Create a GitHub trigger source. It verifies X-Hub-Signature-256 against every current secret in constant time, accepts JSON and form payloads, and reports X-GitHub-Delivery, the X-GitHub-Event name, the payload action and the sender as github:<login>. GitHub signatures carry no timestamp.",
     "Crée une source de déclencheur GitHub. Elle vérifie X-Hub-Signature-256 avec chaque secret courant en temps constant, accepte les charges JSON et formulaire, et renvoie X-GitHub-Delivery, le nom X-GitHub-Event, l’action de la charge et l’émetteur sous la forme github:<login>. Les signatures GitHub ne portent pas d’horodatage."
   ],
-  "gitlabWebhook": [
+  "createGitlabWebhook": [
     "Create a GitLab trigger source. With signingToken it verifies the webhook-signature header of a whsec_ signing token (GitLab 19.0+) within a timestamp window and uses webhook-id; with token it compares X-Gitlab-Token and uses Idempotency-Key or X-Gitlab-Event-UUID. It reports object_kind, the object action and the user as gitlab:<username>.",
     "Crée une source de déclencheur GitLab. Avec signingToken, elle vérifie l’en-tête webhook-signature d’un jeton de signature whsec_ (GitLab 19.0+) dans une fenêtre d’horodatage et utilise webhook-id ; avec token, elle compare X-Gitlab-Token et utilise Idempotency-Key ou X-Gitlab-Event-UUID. Elle renvoie object_kind, l’action de l’objet et l’utilisateur sous la forme gitlab:<username>."
   ],
-  "slackRequest": [
+  "createSlackSource": [
     "Create a Slack trigger source for slash commands and interactive payloads. It verifies X-Slack-Signature over v0:timestamp:body within a timestamp window, uses trigger_id as delivery, reports command or the interaction type with the user as slack:<user id>, and replies 200 with an empty body. The Events API is not supported.",
     "Crée une source de déclencheur Slack pour les commandes slash et les charges interactives. Elle vérifie X-Slack-Signature sur v0:timestamp:body dans une fenêtre d’horodatage, utilise trigger_id comme livraison, renvoie command ou le type d’interaction avec l’utilisateur sous la forme slack:<user id>, et répond 200 avec un corps vide. L’Events API n’est pas prise en charge."
   ],
-  "standardWebhook": [
+  "createStandardWebhook": [
     "Create a trigger source for senders that follow the Standard Webhooks scheme. It verifies every v1 signature of webhook-signature over id.timestamp.body with whsec_ secrets within a timestamp window, uses webhook-id as delivery and the payload type field, or webhook, as kind. It reports no actor.",
     "Crée une source de déclencheur pour les émetteurs qui suivent le schéma Standard Webhooks. Elle vérifie chaque signature v1 de webhook-signature sur id.timestamp.body avec des secrets whsec_ dans une fenêtre d’horodatage, utilise webhook-id comme livraison et le champ type de la charge, ou webhook, comme kind. Elle ne renvoie pas d’acteur."
   ],
@@ -519,7 +519,7 @@
     "Return the text following a command in a newly created GitHub or GitLab comment, on the first line that starts with it, or in a matching Slack slash command; otherwise undefined. Edited comments are ignored. It does not authorize the actor; compare event.actor with an allowlist.",
     "Renvoie le texte qui suit une commande dans un commentaire GitHub ou GitLab nouvellement créé, sur la première ligne qui commence par elle, ou dans une commande slash Slack correspondante ; sinon undefined. Les commentaires modifiés sont ignorés. Elle n’autorise pas l’acteur ; comparez event.actor à une liste autorisée."
   ],
-  "workflowJob": [
+  "defineWorkflowJob": [
     "Return a queue handler that builds a workflow from each trigger job input and starts it with the job runId as checkpoint run, the job signal and a version combining checkpoint.version with an input digest. The job value summarizes the run, including that version and pending gates; failed or cancelled workflows complete the job with an error.",
     "Renvoie un handler de file qui construit un workflow à partir de l’entrée de chaque job de déclencheur et le démarre avec le runId du job comme exécution de checkpoint, le signal du job et une version combinant checkpoint.version et une empreinte de l’entrée. La valeur du job résume l’exécution, y compris cette version et les gates en attente ; les workflows failed ou cancelled terminent le job avec une erreur."
   ],

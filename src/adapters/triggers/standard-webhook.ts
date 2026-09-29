@@ -53,7 +53,7 @@ export function standardVerifier(secret: TriggerSecret, tolerance: number) {
 }
 
 /** Receive webhooks signed with the Standard Webhooks scheme. */
-export function standardWebhook(
+export function createStandardWebhook(
   options: StandardWebhookOptions,
 ): TriggerSource {
   const source = options.source ?? "standard";

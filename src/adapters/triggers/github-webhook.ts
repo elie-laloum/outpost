@@ -22,7 +22,9 @@ function githubPayload(request: TriggerHttpRequest) {
 }
 
 /** Receive GitHub webhooks signed with `X-Hub-Signature-256`. */
-export function githubWebhook(options: GithubWebhookOptions): TriggerSource {
+export function createGithubWebhook(
+  options: GithubWebhookOptions,
+): TriggerSource {
   const secrets = webhookSecret(options.secret, "GitHub webhook");
   return Object.freeze({
     name: "github",

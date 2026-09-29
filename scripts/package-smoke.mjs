@@ -122,10 +122,10 @@ try {
     assert.equal(replaying.kind,'replay');
     assert.equal(replaying.remainingTurns,1);
     assert.equal(new api.ReplayDivergence({kind:'exhausted',turn:2}).code,'replay');
-    assert.equal(api.cronSchedule('0 2 * * *',{timeZone:'Europe/Paris'}).next(new Date('2026-06-30T12:00:00Z')).toISOString(),'2026-07-01T00:00:00.000Z');
-    for (const name of ['runSchedules','serveTriggers','githubWebhook','gitlabWebhook','slackRequest','standardWebhook','labelAdded','commandIssued','workflowJob'])
+    assert.equal(api.createCronSchedule('0 2 * * *',{timeZone:'Europe/Paris'}).next(new Date('2026-06-30T12:00:00Z')).toISOString(),'2026-07-01T00:00:00.000Z');
+    for (const name of ['runSchedules','serveTriggers','createGithubWebhook','createGitlabWebhook','createSlackSource','createStandardWebhook','labelAdded','commandIssued','defineWorkflowJob'])
       assert.equal(typeof api[name],'function',name);
-    assert.equal(api.githubWebhook({secret:'smoke'}).name,'github');
+    assert.equal(api.createGithubWebhook({secret:'smoke'}).name,'github');
     const transporter=api.createLocalTransport({directory:'consumer-store'});
     const artifact=api.createArtifactStore({transporter});
     const id='a'.repeat(64);
@@ -269,9 +269,9 @@ const recordedCommits: WorkspaceCommitsEvent['kind'] = 'workspace-commits';
 const replayCoder: Agent | undefined = replaying;
 const replayLogging: Parameters<typeof dispatch>[0]['logging'] = {replayable:true};
 void readJournal;
-import { cronSchedule, runSchedules, serveTriggers, githubWebhook, gitlabWebhook, slackRequest, standardWebhook, labelAdded, commandIssued, workflowJob, createWorkflowCheckpointStore as triggerCheckpoints, type CronSchedule, type CronOptions, type RunSchedulesOptions, type TriggerSchedule, type ScheduleFailure, type TriggerJob, type TriggerJobInput, type TriggerRoute, type TriggerServer, type TriggerServerOptions, type TriggerFailure, type TriggerEvent, type TriggerSource, type TriggerSecret, type TriggerHttpRequest, type TriggerReply, type TriggerOutcome, type GithubWebhookOptions, type GitlabWebhookOptions, type GitlabSigningOptions, type GitlabTokenOptions, type SlackRequestOptions, type StandardWebhookOptions, type TriggerLabel, type TriggerCommand, type WorkflowJobOptions, type WorkflowJobContext, type WorkflowJobCheckpoint, type WorkflowJobStartOptions, type QueueHandler } from '@elie-laloum/outpost';
+import { createCronSchedule, runSchedules, serveTriggers, createGithubWebhook, createGitlabWebhook, createSlackSource, createStandardWebhook, labelAdded, commandIssued, defineWorkflowJob, createWorkflowCheckpointStore as triggerCheckpoints, type CronSchedule, type CronOptions, type RunSchedulesOptions, type TriggerSchedule, type ScheduleFailure, type TriggerJob, type TriggerJobInput, type TriggerRoute, type TriggerServer, type TriggerServerOptions, type TriggerFailure, type TriggerEvent, type TriggerSource, type TriggerSecret, type TriggerHttpRequest, type TriggerReply, type TriggerOutcome, type GithubWebhookOptions, type GitlabWebhookOptions, type GitlabSigningOptions, type GitlabTokenOptions, type SlackRequestOptions, type StandardWebhookOptions, type TriggerLabel, type TriggerCommand, type WorkflowJobOptions, type WorkflowJobContext, type WorkflowJobCheckpoint, type WorkflowJobStartOptions, type QueueHandler } from '@elie-laloum/outpost';
 const cronOptions: CronOptions = {timeZone:'UTC'};
-const nightly: CronSchedule = cronSchedule('0 2 * * *',cronOptions);
+const nightly: CronSchedule = createCronSchedule('0 2 * * *',cronOptions);
 const triggerSchedule: TriggerSchedule = {name:'nightly',cron:nightly,handler:'audit',runId:(slot)=>slot.toISOString()};
 const scheduleOptions: Omit<RunSchedulesOptions,'queue'|'signal'> = {schedules:[triggerSchedule],onError:(_,failure: ScheduleFailure)=>void failure.slot};
 const triggerJob: TriggerJob = {handler:'fix',runId:'issue-1',input:{issue:1}};
@@ -283,7 +283,7 @@ const gitlabOptions: readonly GitlabWebhookOptions[] = [signedGitlab,legacyGitla
 const slackOptions: SlackRequestOptions = {signingSecret:'s'};
 const standardOptions: StandardWebhookOptions = {secret:'whsec_c21va2U=',source:'billing'};
 const secret: TriggerSecret = 'secret';
-const sources: readonly TriggerSource[] = [githubWebhook(githubOptions),gitlabWebhook(signedGitlab),slackRequest(slackOptions),standardWebhook(standardOptions)];
+const sources: readonly TriggerSource[] = [createGithubWebhook(githubOptions),createGitlabWebhook(signedGitlab),createSlackSource(slackOptions),createStandardWebhook(standardOptions)];
 const route: TriggerRoute = {path:'/github',source:sources[0]!,on:(event: TriggerEvent)=>{const issue: TriggerLabel | undefined=labelAdded(event,'fix');const command: TriggerCommand | undefined=commandIssued(event,'/outpost');return issue&&!command?triggerJob:undefined;}};
 const serverOptions: Omit<TriggerServerOptions,'queue'> = {routes:[route],maxBytes:1024,onError:(_,failure: TriggerFailure)=>void failure.stage};
 const outcome: TriggerOutcome = 'accepted';
@@ -292,7 +292,7 @@ const httpRequest: TriggerHttpRequest = {method:'POST',path:'/github',headers:{}
 const checkpoint: WorkflowJobCheckpoint = {store:triggerCheckpoints({transporter:createLocalTransport({directory:'jobs'})}),version:'1'};
 const jobStart: WorkflowJobStartOptions = {concurrency:1};
 const jobOptions: WorkflowJobOptions = {checkpoint,start:jobStart,workflow:(input,context: WorkflowJobContext)=>defineWorkflow(context.runId,[defineTask({key:'echo',perform:()=>input})])};
-const jobHandler: QueueHandler = workflowJob(jobOptions);
+const jobHandler: QueueHandler = defineWorkflowJob(jobOptions);
 const triggerServer: ((options: TriggerServerOptions)=>Promise<TriggerServer>) = serveTriggers;
 void [scheduleOptions,jobInput,gitlabOptions,secret,serverOptions,reply,httpRequest,jobHandler,triggerServer,runSchedules];
 import { defineTask, createTaskCacheStore, createLocalTransport, type TaskCacheOptions, type TaskCacheStore, type TaskCacheEntry, type TaskCacheStoreOptions, type TaskCacheOutcome, type WorkflowEvent } from '@elie-laloum/outpost';

@@ -6,12 +6,12 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
-  githubWebhook,
-  gitlabWebhook,
+  createGithubWebhook,
+  createGitlabWebhook,
   serveTriggers,
-  slackRequest,
+  createSlackSource,
   createSqliteTaskQueue,
-  standardWebhook,
+  createStandardWebhook,
 } from "../../src/index.ts";
 import type {
   QueueRequest,
@@ -111,7 +111,7 @@ const labeled = JSON.stringify({
 function issueRoute(events: TriggerEvent[] = []): TriggerRoute {
   return {
     path: "/github",
-    source: githubWebhook({ secret: githubSecret }),
+    source: createGithubWebhook({ secret: githubSecret }),
     on(event) {
       events.push(event);
       if (event.action !== "labeled") return undefined;
@@ -187,7 +187,7 @@ test("GitHub accepts form payloads and rotated secrets", async (t) => {
   const { post } = await fixture(t, [
     {
       ...issueRoute(),
-      source: githubWebhook({ secret: async () => secrets }),
+      source: createGithubWebhook({ secret: async () => secrets }),
     },
   ]);
   const form = new URLSearchParams({ payload: labeled }).toString();
@@ -211,7 +211,7 @@ test("GitHub accepts form payloads and rotated secrets", async (t) => {
     401,
     "an empty secret source denies access",
   );
-  assert.throws(() => githubWebhook({ secret: "" }), /secret/);
+  assert.throws(() => createGithubWebhook({ secret: "" }), /secret/);
 });
 
 test("GitLab signing tokens and legacy tokens identify deliveries", async (t) => {
@@ -230,8 +230,8 @@ test("GitLab signing tokens and legacy tokens identify deliveries", async (t) =>
     },
   });
   const { post, queue } = await fixture(t, [
-    route("/gitlab", gitlabWebhook({ signingToken: standardSecret })),
-    route("/legacy", gitlabWebhook({ token: "legacy-token" })),
+    route("/gitlab", createGitlabWebhook({ signingToken: standardSecret })),
+    route("/legacy", createGitlabWebhook({ token: "legacy-token" })),
   ]);
   const headers = {
     ...standard(payload, "gl-1"),
@@ -277,7 +277,7 @@ test("GitLab signing tokens and legacy tokens identify deliveries", async (t) =>
     401,
   );
   assert.throws(
-    () => gitlabWebhook({ signingToken: standardSecret, toleranceMs: 0 }),
+    () => createGitlabWebhook({ signingToken: standardSecret, toleranceMs: 0 }),
     /tolerance/,
   );
 });
@@ -287,7 +287,7 @@ test("Slack commands and interactions are signed and acknowledged with 200", asy
   const { post, queue } = await fixture(t, [
     {
       path: "/slack",
-      source: slackRequest({ signingSecret: slackSecret }),
+      source: createSlackSource({ signingSecret: slackSecret }),
       on(event) {
         seen.push(event);
         if (event.kind !== "command") return undefined;
@@ -333,7 +333,10 @@ test("Standard Webhooks sources verify any compliant sender", async (t) => {
   const { post, queue } = await fixture(t, [
     {
       path: "/billing",
-      source: standardWebhook({ secret: standardSecret, source: "billing" }),
+      source: createStandardWebhook({
+        secret: standardSecret,
+        source: "billing",
+      }),
       on: (event) => ({
         handler: "sync",
         runId: `${event.source}-${event.kind}`,
@@ -352,7 +355,7 @@ test("Standard Webhooks sources verify any compliant sender", async (t) => {
   const plainSecret = await fixture(t, [
     {
       path: "/plain",
-      source: standardWebhook({ secret: "not-a-whsec-secret" }),
+      source: createStandardWebhook({ secret: "not-a-whsec-secret" }),
       on: () => ({ handler: "sync", runId: "x" }),
     },
   ]);
@@ -374,14 +377,14 @@ test("the server maps routing, size and queue failures to HTTP statuses", async 
     issueRoute(),
     {
       path: "/broken",
-      source: githubWebhook({ secret: githubSecret }),
+      source: createGithubWebhook({ secret: githubSecret }),
       on: () => {
         throw new Error("route bug");
       },
     },
     {
       path: "/invalid",
-      source: githubWebhook({ secret: githubSecret }),
+      source: createGithubWebhook({ secret: githubSecret }),
       on: () => ({ handler: "fix", runId: "" }),
     },
   ];
@@ -421,7 +424,7 @@ test("observer failures do not change responses and options are validated", asyn
   });
   assert.equal((await post("/github", "{}", github("{}x"))).status, 401);
   const queue = {} as TaskQueue;
-  const source = githubWebhook({ secret: githubSecret });
+  const source = createGithubWebhook({ secret: githubSecret });
   const on = () => undefined;
   for (const routes of [
     [],

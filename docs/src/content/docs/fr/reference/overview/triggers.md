@@ -10,7 +10,7 @@ Les déclencheurs lancent des workflows à partir du temps ou d’événements e
 
 ## Fonctionnement et philosophie
 
-`cronSchedule` décrit des créneaux en heure murale dans un fuseau horaire IANA, et `runSchedules` publie un job par créneau. `serveTriggers` reçoit des webhooks : chaque route vérifie les requêtes avec une source (`githubWebhook`, `gitlabWebhook`, `slackRequest` ou `standardWebhook`) et associe le `TriggerEvent` normalisé à un `TriggerJob`. `labelAdded` et `commandIssued` lisent les charges GitHub, GitLab et Slack courantes. Côté worker, `workflowJob` transforme chaque job en exécution de workflow avec checkpoint.
+`createCronSchedule` décrit des créneaux en heure murale dans un fuseau horaire IANA, et `runSchedules` publie un job par créneau. `serveTriggers` reçoit des webhooks : chaque route vérifie les requêtes avec une source (`createGithubWebhook`, `createGitlabWebhook`, `createSlackSource` ou `createStandardWebhook`) et associe le `TriggerEvent` normalisé à un `TriggerJob`. `labelAdded` et `commandIssued` lisent les charges GitHub, GitLab et Slack courantes. Côté worker, `defineWorkflowJob` transforme chaque job en exécution de workflow avec checkpoint.
 
 Les identifiants de job dérivent du créneau ou de la livraison, si bien que les réplicas, les redémarrages et les relivraisons convergent vers un seul job. Plusieurs événements pour le même `runId` partagent un checkpoint, et les tâches terminées sont restaurées au lieu d’être exécutées à nouveau.
 
@@ -20,13 +20,13 @@ Une signature vérifiée authentifie l’intégration émettrice, pas la personn
 
 ## Points d’entrée
 
-- [cronSchedule](../../cronschedule/)
+- [createCronSchedule](../../createcronschedule/)
 - [runSchedules](../../runschedules/)
 - [serveTriggers](../../servetriggers/)
-- [githubWebhook](../../githubwebhook/)
-- [gitlabWebhook](../../gitlabwebhook/)
-- [slackRequest](../../slackrequest/)
-- [standardWebhook](../../standardwebhook/)
-- [workflowJob](../../workflowjob/)
+- [createGithubWebhook](../../creategithubwebhook/)
+- [createGitlabWebhook](../../creategitlabwebhook/)
+- [createSlackSource](../../createslacksource/)
+- [createStandardWebhook](../../createstandardwebhook/)
+- [defineWorkflowJob](../../defineworkflowjob/)
 
 [Passer à la pratique avec le Guide](../../../guide/triggers/).

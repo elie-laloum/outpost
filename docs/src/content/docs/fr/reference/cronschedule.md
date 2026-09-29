@@ -1,44 +1,34 @@
 ---
-title: "cronSchedule"
-description: "cronSchedule — Outpost API"
+title: "CronSchedule"
+description: "CronSchedule — Outpost API"
 sidebar:
-  order: 0
+  order: 20
 ---
 
 ## Import
 
 ```ts
-import { cronSchedule } from "@elie-laloum/outpost";
+import type { CronSchedule } from "@elie-laloum/outpost";
 ```
-
-## Rôle et comportement
-
-Analyse une expression cron à cinq champs, ou une macro comme @daily, évaluée dans un fuseau horaire IANA (UTC par défaut). Le résultat figé calcule les créneaux avec next() et previous() et ne publie rien. La construction refuse les champs invalides, les fuseaux inconnus et les expressions sans aucune occurrence.
-
-[Exemple complet et règles détaillées](../../guide/triggers/).
 
 ## Paramètres et propriétés
 
-| Nom                | Type                       | Présence  | Rôle                                                                                                                                                                           |
-| ------------------ | -------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `expression`       | `string`                   | Requis    | Cinq champs (minute, heure, jour du mois, mois, jour de la semaine) avec listes, intervalles, pas et noms, ou une macro comme @hourly ou @daily ; les espaces sont normalisés. |
-| `options`          | `CronOptions \| undefined` | Optionnel | Options d’évaluation ; omettez-les pour évaluer en UTC.                                                                                                                        |
-| `options.timeZone` | `string \| undefined`      | Optionnel | Fuseau horaire IANA dont l’heure murale est décrite par l’expression, comme Europe/Paris ; UTC par défaut.                                                                     |
-
-## Retour
-
-`CronSchedule`
+| Nom          | Type                    | Présence | Rôle                                                                                                                                                             |
+| ------------ | ----------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `expression` | `string`                | Requis   | Expression normalisée, une macro étant remplacée par ses cinq champs.                                                                                            |
+| `timeZone`   | `string`                | Requis   | Fuseau horaire IANA canonique utilisé pour l’évaluation.                                                                                                         |
+| `next`       | `(after: Date) => Date` | Requis   | Renvoie le premier créneau strictement postérieur à l’instant donné ; une heure sautée par l’heure d’été n’existe pas et une heure répétée n’a lieu qu’une fois. |
+| `previous`   | `(at: Date) => Date`    | Requis   | Renvoie le dernier créneau égal ou antérieur à l’instant donné, avec les mêmes règles d’heure d’été que next().                                                  |
 
 ## Signature
 
 ```ts
-export declare function cronSchedule(
-  expression: string,
-  options?: CronOptions,
-): CronSchedule;
+export interface CronSchedule {
+  readonly expression: string;
+  readonly timeZone: string;
+  /** First occurrence strictly after `after`. */
+  next(after: Date): Date;
+  /** Latest occurrence at or before `at`. */
+  previous(at: Date): Date;
+}
 ```
-
-## Contrats associés
-
-- [CronOptions](../cronoptions/)
-- [CronSchedule](../type-cronschedule/)

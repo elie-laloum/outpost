@@ -1788,7 +1788,7 @@
         "attrs": { "data-reference-overview": "" }
       },
       {
-        "slug": "reference/cronschedule",
+        "slug": "reference/createcronschedule",
         "attrs": { "data-api-kind": "function" }
       },
       {
@@ -1800,19 +1800,19 @@
         "attrs": { "data-api-kind": "function" }
       },
       {
-        "slug": "reference/githubwebhook",
+        "slug": "reference/creategithubwebhook",
         "attrs": { "data-api-kind": "function" }
       },
       {
-        "slug": "reference/gitlabwebhook",
+        "slug": "reference/creategitlabwebhook",
         "attrs": { "data-api-kind": "function" }
       },
       {
-        "slug": "reference/slackrequest",
+        "slug": "reference/createslacksource",
         "attrs": { "data-api-kind": "function" }
       },
       {
-        "slug": "reference/standardwebhook",
+        "slug": "reference/createstandardwebhook",
         "attrs": { "data-api-kind": "function" }
       },
       {
@@ -1824,7 +1824,7 @@
         "attrs": { "data-api-kind": "function" }
       },
       {
-        "slug": "reference/workflowjob",
+        "slug": "reference/defineworkflowjob",
         "attrs": { "data-api-kind": "function" }
       },
       {
@@ -1844,7 +1844,7 @@
         "attrs": { "data-api-kind": "type" }
       },
       {
-        "slug": "reference/type-cronschedule",
+        "slug": "reference/cronschedule",
         "attrs": { "data-api-kind": "interface" }
       },
       {

@@ -1,6 +1,6 @@
 ---
-title: "githubWebhook"
-description: "githubWebhook — Outpost API"
+title: "createGithubWebhook"
+description: "createGithubWebhook — Outpost API"
 sidebar:
   order: 0
 ---
@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { githubWebhook } from "@elie-laloum/outpost";
+import { createGithubWebhook } from "@elie-laloum/outpost";
 ```
 
 ## Purpose and behavior
@@ -31,7 +31,7 @@ Create a GitHub trigger source. It verifies X-Hub-Signature-256 against every cu
 ## Signature
 
 ```ts
-export declare function githubWebhook(
+export declare function createGithubWebhook(
   options: GithubWebhookOptions,
 ): TriggerSource;
 ```

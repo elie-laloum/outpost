@@ -58,11 +58,13 @@ function failure(result: WorkflowResult): string {
 }
 
 /** Queue handler running one checkpointed workflow per trigger job. */
-export function workflowJob(options: WorkflowJobOptions): QueueHandler {
+export function defineWorkflowJob(options: WorkflowJobOptions): QueueHandler {
   if (typeof options.workflow !== "function")
-    throw new Error("workflowJob() requires a workflow factory");
+    throw new Error("defineWorkflowJob() requires a workflow factory");
   if (!options.checkpoint?.store || !options.checkpoint.version)
-    throw new Error("workflowJob() requires a checkpoint store and version");
+    throw new Error(
+      "defineWorkflowJob() requires a checkpoint store and version",
+    );
   return async (value, context): Promise<QueueResult> => {
     const { runId, input } = triggerJobInput(value);
     const workflow = await options.workflow(input, { ...context, runId });

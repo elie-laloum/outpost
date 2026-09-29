@@ -36,7 +36,7 @@ function slackPayload(request: TriggerHttpRequest) {
 }
 
 /** Receive Slack slash commands and interactions signed with `X-Slack-Signature`. */
-export function slackRequest(options: SlackRequestOptions): TriggerSource {
+export function createSlackSource(options: SlackRequestOptions): TriggerSource {
   const secrets = webhookSecret(options.signingSecret, "Slack");
   const tolerance = toleranceMs(options.toleranceMs, triggerDefaultToleranceMs);
   return Object.freeze({

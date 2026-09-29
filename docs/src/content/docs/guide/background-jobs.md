@@ -31,7 +31,7 @@ try {
 
 ## Submit work
 
-A producer opens the same queue and calls `enqueue({ id, handler: "count", input: [1, 2, 3] })`. Use stable IDs for deduplication and read retained job results through the queue contract. `defineQueuedTask()` wraps submission and polling as a workflow node and validates the returned value with `decode`. [Triggers](../triggers/) publish jobs from cron schedules and verified webhooks, and `workflowJob()` runs a checkpointed workflow for each one.
+A producer opens the same queue and calls `enqueue({ id, handler: "count", input: [1, 2, 3] })`. Use stable IDs for deduplication and read retained job results through the queue contract. `defineQueuedTask()` wraps submission and polling as a workflow node and validates the returned value with `decode`. [Triggers](../triggers/) publish jobs from cron schedules and verified webhooks, and `defineWorkflowJob()` runs a checkpointed workflow for each one.
 
 ```ts title="submit.mts"
 import { createSqliteTaskQueue } from "@elie-laloum/outpost";

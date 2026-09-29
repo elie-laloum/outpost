@@ -1,6 +1,6 @@
 ---
-title: "workflowJob"
-description: "workflowJob — Outpost API"
+title: "defineWorkflowJob"
+description: "defineWorkflowJob — Outpost API"
 sidebar:
   order: 0
 ---
@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { workflowJob } from "@elie-laloum/outpost";
+import { defineWorkflowJob } from "@elie-laloum/outpost";
 ```
 
 ## Rôle et comportement
@@ -33,7 +33,9 @@ Renvoie un handler de file qui construit un workflow à partir de l’entrée de
 ## Signature
 
 ```ts
-export declare function workflowJob(options: WorkflowJobOptions): QueueHandler;
+export declare function defineWorkflowJob(
+  options: WorkflowJobOptions,
+): QueueHandler;
 ```
 
 ## Contrats associés

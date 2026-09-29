@@ -15,7 +15,7 @@ import type { TriggerJob } from "@elie-laloum/outpost";
 
 | Name      | Type                        | Presence | Meaning                                                                                  |
 | --------- | --------------------------- | -------- | ---------------------------------------------------------------------------------------- |
-| `handler` | `string`                    | Required | Registered queue worker handler, usually a workflowJob().                                |
+| `handler` | `string`                    | Required | Registered queue worker handler, usually a defineWorkflowJob().                          |
 | `runId`   | `string`                    | Required | Checkpoint run, 1 to 256 characters; events for the same run converge on one checkpoint. |
 | `input`   | `WorkflowJson \| undefined` | Optional | Lossless JSON input for the workflow; defaults to null.                                  |
 
@@ -23,7 +23,7 @@ import type { TriggerJob } from "@elie-laloum/outpost";
 
 ```ts
 export interface TriggerJob {
-  /** Registered queue worker handler, usually a `workflowJob()`. */
+  /** Registered queue worker handler, usually a `defineWorkflowJob()`. */
   readonly handler: string;
   /** Checkpoint run identifier; events for the same run converge on one checkpoint. */
   readonly runId: string;

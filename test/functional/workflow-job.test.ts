@@ -8,7 +8,7 @@ import { join } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import {
   defineApprovalTask,
-  githubWebhook,
+  createGithubWebhook,
   labelAdded,
   createLocalTransport,
   runQueueWorker,
@@ -17,7 +17,7 @@ import {
   defineTask,
   defineWorkflow,
   createWorkflowCheckpointStore,
-  workflowJob,
+  defineWorkflowJob,
 } from "../../src/index.ts";
 import type {
   QueueHandler,
@@ -72,7 +72,7 @@ test("webhook deliveries run a checkpointed workflow once per run", async (t) =>
   const { queue, store, startWorker } = await fixture(t);
   const performed: WorkflowJson[] = [];
   startWorker({
-    fix: workflowJob({
+    fix: defineWorkflowJob({
       checkpoint: { store, version: "1" },
       workflow(input, context) {
         assert.equal(context.runId, "issue-42");
@@ -94,7 +94,7 @@ test("webhook deliveries run a checkpointed workflow once per run", async (t) =>
     routes: [
       {
         path: "/github",
-        source: githubWebhook({ secret }),
+        source: createGithubWebhook({ secret }),
         on(event) {
           const issue = labelAdded(event, "outpost:fix");
           if (!issue) return undefined;
@@ -163,11 +163,11 @@ test("workflow jobs report pauses, failures and input conflicts", async (t) => {
       }),
     ]);
   startWorker({
-    review: workflowJob({
+    review: defineWorkflowJob({
       checkpoint: { store, version: "1" },
       workflow: review,
     }),
-    broken: workflowJob({
+    broken: defineWorkflowJob({
       checkpoint: { store, version: "1" },
       start: { stopOnError: true },
       workflow: () =>
@@ -246,20 +246,20 @@ test("workflow jobs report pauses, failures and input conflicts", async (t) => {
   assert.match((await settle(queue, "malformed")).result?.error ?? "", /runId/);
 });
 
-test("workflowJob validates its options", () => {
+test("defineWorkflowJob validates its options", () => {
   const store = createWorkflowCheckpointStore({
     transporter: createLocalTransport({ directory: tmpdir() }),
   });
   assert.throws(
     () =>
-      workflowJob({
+      defineWorkflowJob({
         checkpoint: { store, version: "1" },
-      } as unknown as Parameters<typeof workflowJob>[0]),
+      } as unknown as Parameters<typeof defineWorkflowJob>[0]),
     /factory/,
   );
   assert.throws(
     () =>
-      workflowJob({
+      defineWorkflowJob({
         checkpoint: { store, version: "" },
         workflow: () => defineWorkflow("x", []),
       }),

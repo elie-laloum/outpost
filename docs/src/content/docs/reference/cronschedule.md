@@ -1,44 +1,34 @@
 ---
-title: "cronSchedule"
-description: "cronSchedule — Outpost API"
+title: "CronSchedule"
+description: "CronSchedule — Outpost API"
 sidebar:
-  order: 0
+  order: 20
 ---
 
 ## Import
 
 ```ts
-import { cronSchedule } from "@elie-laloum/outpost";
+import type { CronSchedule } from "@elie-laloum/outpost";
 ```
-
-## Purpose and behavior
-
-Parse a five-field cron expression, or a macro such as @daily, evaluated in an IANA time zone (UTC by default). The frozen result computes slots with next() and previous() and publishes nothing. Construction rejects invalid fields, unknown time zones and expressions without any occurrence.
-
-[Complete example and detailed rules](../../guide/triggers/).
 
 ## Parameters and properties
 
-| Name               | Type                       | Presence | Meaning                                                                                                                                                           |
-| ------------------ | -------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `expression`       | `string`                   | Required | Five fields (minute, hour, day of month, month, day of week) with lists, ranges, steps and names, or a macro such as @hourly or @daily; whitespace is normalized. |
-| `options`          | `CronOptions \| undefined` | Optional | Evaluation options; omit them to evaluate in UTC.                                                                                                                 |
-| `options.timeZone` | `string \| undefined`      | Optional | IANA time zone whose wall-clock time the expression describes, such as Europe/Paris; defaults to UTC.                                                             |
-
-## Returns
-
-`CronSchedule`
+| Name         | Type                    | Presence | Meaning                                                                                                                                   |
+| ------------ | ----------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `expression` | `string`                | Required | Normalized expression, with a macro replaced by its five fields.                                                                          |
+| `timeZone`   | `string`                | Required | Canonical IANA time zone used for evaluation.                                                                                             |
+| `next`       | `(after: Date) => Date` | Required | Return the first slot strictly after the given instant; a time skipped by daylight saving does not occur and a repeated time occurs once. |
+| `previous`   | `(at: Date) => Date`    | Required | Return the latest slot at or before the given instant, with the same daylight saving rules as next().                                     |
 
 ## Signature
 
 ```ts
-export declare function cronSchedule(
-  expression: string,
-  options?: CronOptions,
-): CronSchedule;
+export interface CronSchedule {
+  readonly expression: string;
+  readonly timeZone: string;
+  /** First occurrence strictly after `after`. */
+  next(after: Date): Date;
+  /** Latest occurrence at or before `at`. */
+  previous(at: Date): Date;
+}
 ```
-
-## Related contracts
-
-- [CronOptions](../cronoptions/)
-- [CronSchedule](../type-cronschedule/)

@@ -6399,11 +6399,11 @@
     "Handle a steering instruction delivered to the agent, with its text and whether it was injected or resumed; receives pass and at metadata and may return a promise.",
     "Traite une consigne de pilotage remise à l’agent, avec son texte et le fait qu’elle ait été injectée ou reprise ; reçoit les métadonnées pass et at et peut renvoyer une promesse."
   ],
-  "cronSchedule.expression": [
+  "createCronSchedule.expression": [
     "Five fields (minute, hour, day of month, month, day of week) with lists, ranges, steps and names, or a macro such as @hourly or @daily; whitespace is normalized.",
     "Cinq champs (minute, heure, jour du mois, mois, jour de la semaine) avec listes, intervalles, pas et noms, ou une macro comme @hourly ou @daily ; les espaces sont normalisés."
   ],
-  "cronSchedule.options": [
+  "createCronSchedule.options": [
     "Evaluation options; omit them to evaluate in UTC.",
     "Options d’évaluation ; omettez-les pour évaluer en UTC."
   ],
@@ -6456,12 +6456,12 @@
     "Nom stable de 1 à 128 lettres, chiffres, points, tirets bas ou tirets ; il fait partie de chaque identifiant de job."
   ],
   "TriggerSchedule.cron": [
-    "Schedule created with cronSchedule().",
-    "Planification créée avec cronSchedule()."
+    "Schedule created with createCronSchedule().",
+    "Planification créée avec createCronSchedule()."
   ],
   "TriggerSchedule.handler": [
-    "Queue worker handler receiving the jobs, usually a workflowJob().",
-    "Handler du worker de file qui reçoit les jobs, généralement un workflowJob()."
+    "Queue worker handler receiving the jobs, usually a defineWorkflowJob().",
+    "Handler du worker de file qui reçoit les jobs, généralement un defineWorkflowJob()."
   ],
   "TriggerSchedule.runId": [
     "Derive the checkpoint run of a slot; defaults to <name>:<slot ISO time>.",
@@ -6480,8 +6480,8 @@
     "Créneau qui n’a pas pu être publié."
   ],
   "TriggerJob.handler": [
-    "Registered queue worker handler, usually a workflowJob().",
-    "Handler enregistré du worker de file, généralement un workflowJob()."
+    "Registered queue worker handler, usually a defineWorkflowJob().",
+    "Handler enregistré du worker de file, généralement un defineWorkflowJob()."
   ],
   "TriggerJob.runId": [
     "Checkpoint run, 1 to 256 characters; events for the same run converge on one checkpoint.",
@@ -6627,7 +6627,7 @@
     "Replace the default 202 and 204 replies for senders expecting another status, such as Slack.",
     "Remplace les réponses 202 et 204 par défaut pour les émetteurs qui attendent un autre statut, comme Slack."
   ],
-  "githubWebhook.options": [
+  "createGithubWebhook.options": [
     "GitHub webhook secret settings.",
     "Réglages du secret du webhook GitHub."
   ],
@@ -6635,7 +6635,7 @@
     "GitHub webhook secret verifying X-Hub-Signature-256. Secret, or callback returning every currently accepted secret; return old and new values during a rotation. An empty or failing source denies requests.",
     "Secret du webhook GitHub qui vérifie X-Hub-Signature-256. Secret, ou fonction renvoyant chaque secret actuellement accepté ; renvoyez l’ancienne et la nouvelle valeur pendant une rotation. Une source vide ou en échec refuse les requêtes."
   ],
-  "gitlabWebhook.options": [
+  "createGitlabWebhook.options": [
     "Either signingToken (recommended, signs the body) or token (legacy plain-text header), not both.",
     "Soit signingToken (recommandé, signe le corps), soit token (en-tête historique en clair), pas les deux."
   ],
@@ -6651,7 +6651,7 @@
     "Secret token compared with X-Gitlab-Token; weaker because the body is not signed. Secret, or callback returning every currently accepted secret; return old and new values during a rotation. An empty or failing source denies requests.",
     "Jeton secret comparé à X-Gitlab-Token ; plus faible car le corps n’est pas signé. Secret, ou fonction renvoyant chaque secret actuellement accepté ; renvoyez l’ancienne et la nouvelle valeur pendant une rotation. Une source vide ou en échec refuse les requêtes."
   ],
-  "slackRequest.options": [
+  "createSlackSource.options": [
     "Slack app signing secret and timestamp window.",
     "Secret de signature de l’application Slack et fenêtre d’horodatage."
   ],
@@ -6663,7 +6663,7 @@
     "Accepted clock difference for the request timestamp, in milliseconds; defaults to 300000 (5 minutes).",
     "Écart d’horloge accepté pour l’horodatage de la requête, en millisecondes ; 300000 (5 minutes) par défaut."
   ],
-  "standardWebhook.options": [
+  "createStandardWebhook.options": [
     "Signing secret, timestamp window and source name.",
     "Secret de signature, fenêtre d’horodatage et nom de source."
   ],
@@ -6732,7 +6732,7 @@
     "issue or pull-request, present with number.",
     "issue ou pull-request, présent avec number."
   ],
-  "workflowJob.options": [
+  "defineWorkflowJob.options": [
     "Workflow factory, checkpoint settings and start options.",
     "Fabrique de workflow, réglages de checkpoint et options de démarrage."
   ],

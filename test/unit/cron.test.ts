@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { cronSchedule } from "../../src/index.ts";
+import { createCronSchedule } from "../../src/index.ts";
 
 function next(expression: string, after: string, timeZone?: string) {
-  return cronSchedule(expression, timeZone ? { timeZone } : {})
+  return createCronSchedule(expression, timeZone ? { timeZone } : {})
     .next(new Date(after))
     .toISOString();
 }
@@ -33,12 +33,12 @@ test("cron fields accept lists, ranges, steps, names and macros", () => {
     next("0 0 * * 7", "2026-09-29T00:00:00Z"),
     "2026-10-04T00:00:00.000Z",
   );
-  assert.equal(cronSchedule("  @Daily ").expression, "0 0 * * *");
+  assert.equal(createCronSchedule("  @Daily ").expression, "0 0 * * *");
   assert.equal(
     next("@hourly", "2026-09-29T10:00:00Z"),
     "2026-09-29T11:00:00.000Z",
   );
-  assert.equal(cronSchedule("0 3  * *\t*").expression, "0 3 * * *");
+  assert.equal(createCronSchedule("0 3  * *\t*").expression, "0 3 * * *");
 });
 
 test("cron day fields follow Vixie semantics", () => {
@@ -63,7 +63,7 @@ test("cron finds rare slots and rejects impossible ones", () => {
     next("0 0 29 2 *", "2096-03-01T00:00:00Z"),
     "2104-02-29T00:00:00.000Z",
   );
-  assert.throws(() => cronSchedule("0 0 30 2 *"), /no occurrence/);
+  assert.throws(() => createCronSchedule("0 0 30 2 *"), /no occurrence/);
   for (const invalid of [
     "",
     "* * * *",
@@ -82,20 +82,23 @@ test("cron finds rare slots and rejects impossible ones", () => {
     ", * * * *",
     "0 0 * FOO *",
   ])
-    assert.throws(() => cronSchedule(invalid), Error, invalid);
-  assert.throws(() => cronSchedule("x".repeat(300)), /Invalid cron expression/);
+    assert.throws(() => createCronSchedule(invalid), Error, invalid);
   assert.throws(
-    () => cronSchedule("* * * * *", { timeZone: "Mars/Olympus" }),
+    () => createCronSchedule("x".repeat(300)),
+    /Invalid cron expression/,
+  );
+  assert.throws(
+    () => createCronSchedule("* * * * *", { timeZone: "Mars/Olympus" }),
     /time zone/,
   );
   assert.throws(
-    () => cronSchedule("* * * * *").next(new Date(Number.NaN)),
+    () => createCronSchedule("* * * * *").next(new Date(Number.NaN)),
     /date/,
   );
 });
 
 test("cron evaluates wall-clock time across daylight saving changes", () => {
-  const paris = cronSchedule("30 2 * * *", { timeZone: "Europe/Paris" });
+  const paris = createCronSchedule("30 2 * * *", { timeZone: "Europe/Paris" });
   assert.equal(paris.timeZone, "Europe/Paris");
   assert.equal(
     paris.next(new Date("2026-03-28T12:00:00Z")).toISOString(),
@@ -115,7 +118,9 @@ test("cron evaluates wall-clock time across daylight saving changes", () => {
     paris.previous(new Date("2026-10-25T01:45:00Z")).toISOString(),
     "2026-10-25T00:30:00.000Z",
   );
-  const york = cronSchedule("0 9 * * *", { timeZone: "America/New_York" });
+  const york = createCronSchedule("0 9 * * *", {
+    timeZone: "America/New_York",
+  });
   assert.equal(
     york.next(new Date("2026-07-01T00:00:00Z")).toISOString(),
     "2026-07-01T13:00:00.000Z",
@@ -127,7 +132,7 @@ test("cron evaluates wall-clock time across daylight saving changes", () => {
 });
 
 test("cron previous returns the latest slot at or before a time", () => {
-  const every = cronSchedule("*/10 * * * *");
+  const every = createCronSchedule("*/10 * * * *");
   assert.equal(
     every.previous(new Date("2026-09-29T10:20:00Z")).toISOString(),
     "2026-09-29T10:20:00.000Z",
@@ -137,7 +142,7 @@ test("cron previous returns the latest slot at or before a time", () => {
     "2026-09-29T10:20:00.000Z",
   );
   assert.equal(
-    cronSchedule("0 0 1 1 *")
+    createCronSchedule("0 0 1 1 *")
       .previous(new Date("2026-09-29T00:00:00Z"))
       .toISOString(),
     "2026-01-01T00:00:00.000Z",

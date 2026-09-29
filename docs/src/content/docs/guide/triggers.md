@@ -3,7 +3,7 @@ title: "Triggers"
 description: "Start workflows on a cron schedule or from verified GitHub, GitLab, Slack and Standard Webhooks events."
 ---
 
-Implemented, not yet released. A trigger never runs a workflow inside the request or timer that fires it. It publishes a job to a [queue](../background-jobs/), and a worker runs the workflow with a checkpoint. Every job carries a `runId` and a JSON `input`; `workflowJob()` turns them into a checkpointed run.
+Implemented, not yet released. A trigger never runs a workflow inside the request or timer that fires it. It publishes a job to a [queue](../background-jobs/), and a worker runs the workflow with a checkpoint. Every job carries a `runId` and a JSON `input`; `defineWorkflowJob()` turns them into a checkpointed run.
 
 ```ts
 import {
@@ -13,7 +13,7 @@ import {
   defineTask,
   defineWorkflow,
   createWorkflowCheckpointStore,
-  workflowJob,
+  defineWorkflowJob,
 } from "@elie-laloum/outpost";
 
 const queue = await createSqliteTaskQueue(".outpost/jobs.sqlite");
@@ -28,7 +28,7 @@ try {
     worker: "worker-1",
     signal: stop.signal,
     handlers: {
-      fix: workflowJob({
+      fix: defineWorkflowJob({
         checkpoint: { store, version: "1" },
         workflow: (input, { runId }) =>
           defineWorkflow(runId, [
@@ -46,11 +46,11 @@ Replace the task with your own graph, for example a `defineAgentTask` that fixes
 
 ## Schedule runs
 
-`cronSchedule()` parses a five-field cron expression evaluated in an IANA time zone (UTC by default). `runSchedules()` publishes one job per slot until its signal aborts.
+`createCronSchedule()` parses a five-field cron expression evaluated in an IANA time zone (UTC by default). `runSchedules()` publishes one job per slot until its signal aborts.
 
 ```ts
 import {
-  cronSchedule,
+  createCronSchedule,
   runSchedules,
   createSqliteTaskQueue,
 } from "@elie-laloum/outpost";
@@ -65,7 +65,7 @@ try {
     schedules: [
       {
         name: "nightly-audit",
-        cron: cronSchedule("0 2 * * 1-5", { timeZone: "Europe/Paris" }),
+        cron: createCronSchedule("0 2 * * 1-5", { timeZone: "Europe/Paris" }),
         handler: "audit",
         runId: (slot) => `audit-${slot.toISOString().slice(0, 10)}`,
         input: (slot) => ({ day: slot.toISOString().slice(0, 10) }),
@@ -83,12 +83,12 @@ try {
 - **Late slots.** A slot is published only if at most `maxLateMs` (60 seconds by default) has passed. After a restart or a suspended process, only the latest missed slot within that window is published; older slots are skipped rather than replayed in a burst.
 - **Failures.** Without `onError`, the first publication failure rejects `runSchedules()`. With it, the failure is reported with the schedule and slot, and scheduling continues.
 
-`cronSchedule()` rejects an expression that has no occurrence, such as `0 0 30 2 *`. Its `next()` and `previous()` methods compute slots without publishing anything:
+`createCronSchedule()` rejects an expression that has no occurrence, such as `0 0 30 2 *`. Its `next()` and `previous()` methods compute slots without publishing anything:
 
 ```ts
-import { cronSchedule } from "@elie-laloum/outpost";
+import { createCronSchedule } from "@elie-laloum/outpost";
 
-const nightly = cronSchedule("30 2 * * *", { timeZone: "Europe/Paris" });
+const nightly = createCronSchedule("30 2 * * *", { timeZone: "Europe/Paris" });
 console.log(nightly.next(new Date("2026-03-28T12:00:00Z")).toISOString());
 ```
 
@@ -104,7 +104,7 @@ A CI schedule, such as a GitHub Actions `schedule` workflow running a script, is
 
 ```ts
 import {
-  githubWebhook,
+  createGithubWebhook,
   labelAdded,
   serveTriggers,
   createSqliteTaskQueue,
@@ -119,7 +119,7 @@ const server = await serveTriggers({
   routes: [
     {
       path: "/github",
-      source: githubWebhook({ secret }),
+      source: createGithubWebhook({ secret }),
       on(event) {
         const issue = labelAdded(event, "outpost:fix");
         if (!issue) return undefined;
@@ -136,7 +136,7 @@ const server = await serveTriggers({
 console.log(`Listening on ${server.url}`);
 ```
 
-The job identifier is `trigger:<path>:<delivery>`. A sender retry or a manual redelivery keeps its delivery identifier, so it does not publish a second job. A different delivery for the same `runId`, such as the label being added again, runs the job again: `workflowJob()` restores the tasks already completed in that run's checkpoint.
+The job identifier is `trigger:<path>:<delivery>`. A sender retry or a manual redelivery keeps its delivery identifier, so it does not publish a second job. A different delivery for the same `runId`, such as the label being added again, runs the job again: `defineWorkflowJob()` restores the tasks already completed in that run's checkpoint.
 
 | Response  | Meaning                                                                               |
 | --------- | ------------------------------------------------------------------------------------- |
@@ -152,13 +152,13 @@ Slack routes answer `200` with an empty body instead of `202` and `204`, because
 
 ## Sources
 
-| Source                            | Verification                                                                             | Delivery identifier                           | Actor               |
-| --------------------------------- | ---------------------------------------------------------------------------------------- | --------------------------------------------- | ------------------- |
-| `githubWebhook({ secret })`       | `X-Hub-Signature-256` (HMAC-SHA256 of the body); JSON or form payloads.                  | `X-GitHub-Delivery`                           | `github:<login>`    |
-| `gitlabWebhook({ signingToken })` | `webhook-signature` with a `whsec_` signing token (GitLab 19.0+), 5-minute window.       | `webhook-id`                                  | `gitlab:<username>` |
-| `gitlabWebhook({ token })`        | `X-Gitlab-Token` compared in constant time.                                              | `Idempotency-Key`, else `X-Gitlab-Event-UUID` | `gitlab:<username>` |
-| `slackRequest({ signingSecret })` | `X-Slack-Signature` over `v0:timestamp:body`, 5-minute window.                           | `trigger_id`                                  | `slack:<user id>`   |
-| `standardWebhook({ secret })`     | [Standard Webhooks](https://www.standardwebhooks.com/) `whsec_` secret, 5-minute window. | `webhook-id`                                  | none                |
+| Source                                  | Verification                                                                             | Delivery identifier                           | Actor               |
+| --------------------------------------- | ---------------------------------------------------------------------------------------- | --------------------------------------------- | ------------------- |
+| `createGithubWebhook({ secret })`       | `X-Hub-Signature-256` (HMAC-SHA256 of the body); JSON or form payloads.                  | `X-GitHub-Delivery`                           | `github:<login>`    |
+| `createGitlabWebhook({ signingToken })` | `webhook-signature` with a `whsec_` signing token (GitLab 19.0+), 5-minute window.       | `webhook-id`                                  | `gitlab:<username>` |
+| `createGitlabWebhook({ token })`        | `X-Gitlab-Token` compared in constant time.                                              | `Idempotency-Key`, else `X-Gitlab-Event-UUID` | `gitlab:<username>` |
+| `createSlackSource({ signingSecret })`  | `X-Slack-Signature` over `v0:timestamp:body`, 5-minute window.                           | `trigger_id`                                  | `slack:<user id>`   |
+| `createStandardWebhook({ secret })`     | [Standard Webhooks](https://www.standardwebhooks.com/) `whsec_` secret, 5-minute window. | `webhook-id`                                  | none                |
 
 Prefer a GitLab signing token: a plain `X-Gitlab-Token` is sent as is and does not sign the body. Slack sources accept slash commands and interactive payloads; the Events API and its URL verification challenge are not supported. Every secret can be a callback returning the currently accepted values; during a rotation, return both the old and the new secret. An empty or failing source denies every request.
 
@@ -189,7 +189,7 @@ The actor is the sender's identity, not an Outpost gate actor. [Review gates](..
 
 ## Run the workflow
 
-`workflowJob({ workflow, checkpoint, start })` returns a queue handler. For each job it builds the workflow from `input`, then starts it with the job's `runId` as checkpoint run and the job's cancellation signal. The same input must build the same workflow.
+`defineWorkflowJob({ workflow, checkpoint, start })` returns a queue handler. For each job it builds the workflow from `input`, then starts it with the job's `runId` as checkpoint run and the job's cancellation signal. The same input must build the same workflow.
 
 - **Checkpoint version.** The run's version is `checkpoint.version` followed by a digest of the input. The same `runId` with a different input is rejected by the checkpoint identity check instead of mixing two requests in one run.
 - **Result.** The job value reports `runId`, the effective checkpoint `version`, `executionId`, `status`, each task's status, pending gates (`pauses`) and `inputRequests`. Usage is the workflow's cumulative token usage.
@@ -209,4 +209,4 @@ Deduplication lasts as long as the queue retains the job. GitHub signatures have
 
 Outpost does not call GitHub, GitLab or Slack APIs: posting a comment or a message about the result belongs to your workflow. Approving a gate from a comment or a Slack button, a CLI command to run the server and the Slack Events API are not provided. Tests use locally computed signatures and simulated senders, not live integrations.
 
-API: [cronSchedule](../../reference/cronschedule/) · [runSchedules](../../reference/runschedules/) · [serveTriggers](../../reference/servetriggers/) · [githubWebhook](../../reference/githubwebhook/) · [gitlabWebhook](../../reference/gitlabwebhook/) · [slackRequest](../../reference/slackrequest/) · [standardWebhook](../../reference/standardwebhook/) · [workflowJob](../../reference/workflowjob/).
+API: [createCronSchedule](../../reference/createcronschedule/) · [runSchedules](../../reference/runschedules/) · [serveTriggers](../../reference/servetriggers/) · [createGithubWebhook](../../reference/creategithubwebhook/) · [createGitlabWebhook](../../reference/creategitlabwebhook/) · [createSlackSource](../../reference/createslacksource/) · [createStandardWebhook](../../reference/createstandardwebhook/) · [defineWorkflowJob](../../reference/defineworkflowjob/).

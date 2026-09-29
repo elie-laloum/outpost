@@ -1,6 +1,6 @@
 ---
-title: "gitlabWebhook"
-description: "gitlabWebhook — Outpost API"
+title: "createGitlabWebhook"
+description: "createGitlabWebhook — Outpost API"
 sidebar:
   order: 0
 ---
@@ -8,7 +8,7 @@ sidebar:
 ## Import
 
 ```ts
-import { gitlabWebhook } from "@elie-laloum/outpost";
+import { createGitlabWebhook } from "@elie-laloum/outpost";
 ```
 
 ## Purpose and behavior
@@ -35,7 +35,7 @@ The fields below cover all variants; the signature specifies their allowed combi
 ## Signature
 
 ```ts
-export declare function gitlabWebhook(
+export declare function createGitlabWebhook(
   options: GitlabWebhookOptions,
 ): TriggerSource;
 ```

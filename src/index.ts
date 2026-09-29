@@ -464,7 +464,7 @@ export type {
   QueueWorkerOptions,
 } from "./application/queue-worker.types.ts";
 export type { QueuedTaskOptions } from "./application/queued-task.types.ts";
-export { cronSchedule } from "./domain/cron.ts";
+export { createCronSchedule } from "./domain/cron.ts";
 export type { CronOptions, CronSchedule } from "./domain/cron.types.ts";
 export type {
   TriggerJob,
@@ -486,10 +486,10 @@ export type {
   TriggerSecret,
   TriggerSource,
 } from "./domain/trigger.types.ts";
-export { githubWebhook } from "./adapters/triggers/github-webhook.ts";
-export { gitlabWebhook } from "./adapters/triggers/gitlab-webhook.ts";
-export { slackRequest } from "./adapters/triggers/slack-request.ts";
-export { standardWebhook } from "./adapters/triggers/standard-webhook.ts";
+export { createGithubWebhook } from "./adapters/triggers/github-webhook.ts";
+export { createGitlabWebhook } from "./adapters/triggers/gitlab-webhook.ts";
+export { createSlackSource } from "./adapters/triggers/slack-request.ts";
+export { createStandardWebhook } from "./adapters/triggers/standard-webhook.ts";
 export {
   commandIssued,
   labelAdded,
@@ -504,7 +504,7 @@ export type {
   TriggerCommand,
   TriggerLabel,
 } from "./adapters/triggers/triggers.types.ts";
-export { workflowJob } from "./application/workflow-job.ts";
+export { defineWorkflowJob } from "./application/workflow-job.ts";
 export type {
   WorkflowJobCheckpoint,
   WorkflowJobContext,

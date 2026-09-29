@@ -2,7 +2,7 @@ import type { WorkflowJson } from "./workflow/checkpoint.types.ts";
 
 /** Work requested by a schedule or webhook route, published as a queue job. */
 export interface TriggerJob {
-  /** Registered queue worker handler, usually a `workflowJob()`. */
+  /** Registered queue worker handler, usually a `defineWorkflowJob()`. */
   readonly handler: string;
   /** Checkpoint run identifier; events for the same run converge on one checkpoint. */
   readonly runId: string;

@@ -16,8 +16,8 @@ import type { TriggerSchedule } from "@elie-laloum/outpost";
 | Nom       | Type                                          | Présence  | Rôle                                                                                                                 |
 | --------- | --------------------------------------------- | --------- | -------------------------------------------------------------------------------------------------------------------- |
 | `name`    | `string`                                      | Requis    | Nom stable de 1 à 128 lettres, chiffres, points, tirets bas ou tirets ; il fait partie de chaque identifiant de job. |
-| `cron`    | `CronSchedule`                                | Requis    | Planification créée avec cronSchedule().                                                                             |
-| `handler` | `string`                                      | Requis    | Handler du worker de file qui reçoit les jobs, généralement un workflowJob().                                        |
+| `cron`    | `CronSchedule`                                | Requis    | Planification créée avec createCronSchedule().                                                                       |
+| `handler` | `string`                                      | Requis    | Handler du worker de file qui reçoit les jobs, généralement un defineWorkflowJob().                                  |
 | `runId`   | `((slot: Date) => string) \| undefined`       | Optionnel | Dérive l’exécution de checkpoint d’un créneau ; <name>:<heure ISO du créneau> par défaut.                            |
 | `input`   | `((slot: Date) => WorkflowJson) \| undefined` | Optionnel | Dérive l’entrée JSON d’un créneau ; null par défaut.                                                                 |
 
@@ -38,5 +38,5 @@ export interface TriggerSchedule {
 
 ## Contrats associés
 
-- [CronSchedule](../type-cronschedule/)
+- [CronSchedule](../cronschedule/)
 - [WorkflowJson](../workflowjson/)
