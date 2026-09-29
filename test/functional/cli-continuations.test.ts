@@ -1,37 +1,57 @@
 import assert from "node:assert/strict";
-import { cp, mkdir, readFile } from "node:fs/promises";
+import { cp, mkdir, readFile, rm } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { test } from "node:test";
 import {
   agent,
   antigravityHarness,
+  claudeHarness,
+  codexHarness,
   copilotHarness,
   kimiHarness,
   createSandbox,
   dispatch,
+  fallbackAgent,
+  localTransport,
   response,
   recoveryDetails,
+  transportConversations,
 } from "../../src/index.ts";
+import type { CliAgent, ConversationStore } from "../../src/index.ts";
 import type { SandboxProvider } from "../../src/domain/sandbox.types.ts";
 import type { Command } from "../../src/domain/command.types.ts";
 import { executeProcess } from "../../src/infrastructure/process.ts";
-import { repository } from "../helpers.ts";
+import { repository, scripted } from "../helpers.ts";
 
-const harnesses = {
-  antigravity: antigravityHarness,
+const stored = {
+  claude: claudeHarness,
+  codex: codexHarness,
   copilot: copilotHarness,
   kimi: kimiHarness,
 };
-function fixture(name: keyof typeof harnesses) {
-  const adapter = agent({ harness: harnesses[name]() });
+const scripts = {
+  antigravity: "continuation-cli.ts",
+  claude: "transcript-cli.ts",
+  codex: "transcript-cli.ts",
+  copilot: "continuation-cli.ts",
+  kimi: "continuation-cli.ts",
+};
+function fixture(
+  name: keyof typeof scripts,
+  conversations?: ConversationStore,
+) {
+  const adapter = agent({
+    harness:
+      name === "antigravity"
+        ? antigravityHarness()
+        : stored[name](conversations ? { conversations } : {}),
+  });
   const command = (input: Command): Command => ({
     ...input,
     executable: process.execPath,
     arguments: [
-      fileURLToPath(
-        new URL("../fixtures/continuation-cli.ts", import.meta.url),
-      ),
+      fileURLToPath(new URL(`../fixtures/${scripts[name]}`, import.meta.url)),
       name,
       ...(input.arguments ?? []),
     ],
@@ -169,6 +189,90 @@ for (const name of ["copilot", "kimi"] as const) {
     }
   });
 }
+for (const name of ["claude", "codex", "copilot", "kimi"] as const) {
+  test(`${name} transport conversations resume without local captures`, async (t) => {
+    const root = await repository(t),
+      sandboxProvider = provider(root);
+    const transporter = localTransport({
+      directory: join(await repository(t), "objects"),
+    });
+    const conversations = transportConversations(name, {
+      transporter,
+      namespace: "team",
+    });
+    const forget = async (transcript: string | undefined) => {
+      await rm(transcript!, { force: true });
+      await rm(join(root, ".outpost", "conversations"), {
+        recursive: true,
+        force: true,
+      });
+    };
+    const first = await dispatch({
+      repository: root,
+      sandboxProvider,
+      agent: fixture(name, conversations),
+      branch: { mode: "named", name: "first" },
+      brief: { text: "first prompt" },
+      logging: false,
+    });
+    assert.ok(first.transcriptReference);
+    await forget(first.transcript);
+    const second = await first.resume({
+      branch: { mode: "named", name: "second" },
+      brief: { text: "next prompt" },
+    });
+    assert.equal(second.conversation, first.conversation);
+    assert.match(second.text, /first prompt/);
+    assert.ok(second.transcriptReference);
+    if (name !== "kimi") return;
+    const parent = second.transcriptReference;
+    await forget(second.transcript);
+    const child = await second.fork({
+      branch: { mode: "named", name: "child" },
+      brief: { text: "fork prompt" },
+    });
+    assert.notEqual(child.conversation, second.conversation);
+    assert.match(child.text, /next prompt/);
+    assert.ok(child.transcriptReference);
+    assert.notEqual(child.transcriptReference.key, parent.key);
+    assert.equal(
+      (await transporter.read(parent.key))?.revision,
+      parent.revision,
+    );
+  });
+}
+test("fallback candidates capture into their own conversation store", async (t) => {
+  const root = await repository(t);
+  const transporter = localTransport({
+    directory: join(await repository(t), "objects"),
+  });
+  const limited: CliAgent = {
+    ...scripted(
+      `console.log(JSON.stringify({ kind: "failure", message: "usage limit reached" }));process.exit(1);`,
+    ),
+    name: "limited",
+    quota: (text) => /usage limit/.test(text),
+  };
+  const result = await dispatch({
+    repository: root,
+    sandboxProvider: provider(root),
+    agent: fallbackAgent(
+      [
+        limited,
+        fixture(
+          "kimi",
+          transportConversations("kimi", { transporter, namespace: "team" }),
+        ),
+      ],
+      { on: ["quota"] },
+    ),
+    brief: { text: "handover" },
+    logging: false,
+  });
+  assert.deepEqual(result.fallback?.selected, { index: 1, name: "kimi" });
+  assert.ok(result.transcriptReference);
+  assert.ok(await transporter.read(result.transcriptReference.key));
+});
 test("unsupported continuation fails before allocation", async (t) => {
   const root = await repository(t);
   const sandboxProvider: SandboxProvider = {
