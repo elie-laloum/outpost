@@ -78,7 +78,7 @@ const readme = await readFile(
   "utf8",
 );
 for (const match of readme.matchAll(
-  /https:\/\/elie-laloum\.github\.io\/outpost(\/[^)#\s]*)/g,
+  /https:\/\/elie-laloum\.github\.io\/outpost(\/[^)#\s"]*)/g,
 )) {
   const path = match[1] === "/" ? "/index/" : match[1];
   assert.ok(
