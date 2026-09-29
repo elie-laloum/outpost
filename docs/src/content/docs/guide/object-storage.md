@@ -1,9 +1,11 @@
 ---
 title: "S3 and R2"
-description: "Use an S3 transport for durable Outpost objects."
+description: "Keep checkpoints, artifacts, journals and conversations in an S3 bucket or Cloudflare R2, so any machine can resume or read them."
 ---
 
-Install the optional AWS SDK and configure an existing private bucket with conditional PUT and DELETE support.
+## Create the transport
+
+Install the AWS SDK, an optional dependency used only by this transport.
 
 ```sh
 npm install @aws-sdk/client-s3
@@ -11,52 +13,119 @@ npm install @aws-sdk/client-s3
 
 ```ts
 import { S3Client } from "@aws-sdk/client-s3";
+import { createWorkflowCheckpointStore } from "@elie-laloum/outpost";
 import { createS3Transport } from "@elie-laloum/outpost/transports/s3";
-import { createArtifactStore } from "@elie-laloum/outpost";
 
-const client = new S3Client({ region: "eu-west-1" });
 const transporter = createS3Transport({
-  client,
+  client: new S3Client({ region: "eu-west-1" }),
   bucket: "my-private-outpost",
-  prefix: "reviews/",
+  prefix: "outpost/",
 });
-const store = createArtifactStore({ transporter });
+const checkpoints = createWorkflowCheckpointStore({ transporter });
 ```
 
-Replace the bucket and region with your deployment. Configure credentials on the host-side S3 client; they are not forwarded to agents. Destroy the client only after all stores and operations using it have finished.
+`transporter` replaces `createLocalTransport()` wherever a [transport](../storage/) is accepted. Every object lands under `outpost/` in the bucket.
 
-## Share a transport
+| Option       | Default         | Meaning                                                                                           |
+| ------------ | --------------- | ------------------------------------------------------------------------------------------------- |
+| `client`     | Required        | Your `S3Client`, with region, credentials and endpoint.                                           |
+| `bucket`     | Required        | An existing private bucket.                                                                       |
+| `prefix`     | Bucket root     | Key prefix for Outpost objects. Keep unrelated objects outside it.                                |
+| `deleteMode` | `"conditional"` | `"conditional"` deletes with a conditional DELETE; `"tombstone"` is for [R2](#use-cloudflare-r2). |
 
-Pass the transport to artifact and checkpoint stores, `logging.transporter`, `activityTransport`, `recoveryTransport` or a transport conversation store according to what you want to persist. Use an isolated prefix and storage policy for these objects.
+## Prepare the bucket
 
-## Compatibility
+Create the bucket first: Outpost does not create it. The endpoint must support these operations, not only upload and download.
 
-An S3-compatible endpoint must implement the required conditional operations and paginated listing, not merely basic upload/download. Revisions fence stale writers. They do not authenticate actors, prove remote process liveness or make incomplete task replay safe automatically.
+<!-- features -->
 
-## Cloudflare R2
+- **Conditional PUT**: `If-None-Match: *` to create a key, `If-Match` to replace it.
+- **Conditional DELETE**: `If-Match` on removal, in the default `"conditional"` mode.
+- **Paginated listing**: `ListObjectsV2` with continuation tokens.
 
-R2 supports conditional PUT, but the live validation found that DELETE accepts stale `If-Match` values. Select logical deletion explicitly:
+## Pass it to the stores
+
+One transport serves every store. Pass it where you want each kind of object kept.
+
+```ts
+import { S3Client } from "@aws-sdk/client-s3";
+import {
+  createArtifactStore,
+  createWorkflowCheckpointStore,
+  dispatch,
+} from "@elie-laloum/outpost";
+import { createS3Transport } from "@elie-laloum/outpost/transports/s3";
+import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+
+const transporter = createS3Transport({
+  client: new S3Client({ region: "eu-west-1" }),
+  bucket: "my-private-outpost",
+  prefix: "outpost/",
+});
+export const checkpoints = createWorkflowCheckpointStore({ transporter });
+export const artifacts = createArtifactStore({ transporter });
+
+await dispatch({
+  repository,
+  sandboxProvider,
+  agent: coder,
+  brief: { text: "Update the changelog for the last release." },
+  logging: { transporter },
+  activityTransport: transporter,
+  recoveryTransport: transporter,
+});
+```
+
+<!-- features -->
+
+- [Checkpoints](../durable-runs/): Resume a workflow run from another machine.
+  - `createWorkflowCheckpointStore()`
+- [Artifacts](../artifacts/): Share task outputs by reference.
+  - `createArtifactStore()`
+- [Journals](../journals/): Keep the dispatch journal.
+  - `logging.transporter`
+- [Conversations](../conversations/): Archive captures to resume them anywhere.
+  - `createTransportConversations()`
+- [Recovery archives](../recovery/): Back up remote changes before applying them.
+  - `recoveryTransport`
+- [Sandbox activity](../retention/): Record which sandboxes are in use.
+  - `activityTransport`
+
+## Keep credentials on the host
+
+The `S3Client` runs in your Node.js process. Its credentials never reach the sandbox or the agent. Configure them as for any AWS SDK client, and close the client only after every store using it has finished: Outpost never closes it.
+
+## Use Cloudflare R2
+
+R2 accepts a DELETE whose `If-Match` is stale, so a conditional DELETE cannot stop a concurrent writer. Select `deleteMode: "tombstone"`.
 
 ```ts
 import { S3Client } from "@aws-sdk/client-s3";
 import { createS3Transport } from "@elie-laloum/outpost/transports/s3";
 
-const client = new S3Client({
-  region: "auto",
-  endpoint: "https://<account-id>.r2.cloudflarestorage.com",
-});
 const transporter = createS3Transport({
-  client,
+  client: new S3Client({
+    region: "auto",
+    endpoint: "https://<account-id>.r2.cloudflarestorage.com",
+  }),
   bucket: "my-private-outpost",
-  prefix: "reviews/",
+  prefix: "outpost/",
   deleteMode: "tombstone",
 });
 ```
 
-Configure the client credentials as above. In this mode, `remove` writes a fresh deletion marker with conditional PUT. Stale revisions fail; `read` returns absence and `list` omits deleted keys. A create with `ifRevision: null` can replace a marker conditionally, so concurrent recreations still have one winner. Empty payloads remain regular live objects.
+Removing a key writes a deletion marker with a conditional PUT. Reads and listings hide markers, and creating the key again replaces its marker, still conditionally.
 
-All writers sharing a prefix must use `deleteMode: "tombstone"`. Stop existing writers before switching modes. The default `"conditional"` mode remains appropriate only for services with atomic conditional DELETE support.
+Each marker stays in the bucket as a billed 1 KiB object. Creating a key adds one HEAD request, and listing adds one HEAD per object.
 
-Logical deletion retains a 1 KiB marker per deleted key and adds HEAD requests when creating and listing objects. Listing observes current objects, not a transactionally consistent snapshot. Markers remain billable physical objects despite disappearing from transport inventories and logical storage usage. Do not automatically expire or purge them while writers can still run: physical deletion could erase a concurrent recreation. Only an explicit maintenance operation after stopping all writers may remove them from the bucket.
+:::caution
+Every writer sharing a prefix must use the same `deleteMode`: stop them all before switching. Never expire or purge markers while a writer can run, since a purge can erase a concurrent recreation.
+:::
 
-API: [createS3Transport](../../reference/creates3transport/).
+## Limits
+
+- **Fencing, not identity**: Revisions reject stale writers; they do not authenticate who wrote.
+- **No snapshot**: A listing shows current objects, not a consistent view of the prefix.
+- **Local files remain**: Git worktrees, execution staging and native conversations still need a local filesystem ([Where data lives](../storage/)).
+
+API: [createS3Transport](../../reference/creates3transport/) · [S3TransportOptions](../../reference/s3transportoptions/) · [Transport](../../reference/transport/).

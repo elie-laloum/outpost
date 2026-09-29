@@ -1,13 +1,11 @@
 ---
 title: "Observation hub and OpenTelemetry"
-description: "Receive every event of a run through one hub and export traces with OpenTelemetry."
+description: "Receive the workflow, agent and operation events of a whole run in one place, and export them as OpenTelemetry traces and metrics."
 ---
 
-Collect workflow, agent and operation events in one place and export them as traces and metrics.
+## Observe a whole run
 
-## Observe the whole run
-
-Attach an `ObservationHub` through `observation` to receive workflow, agent and operation events through one receiver. Existing `observe` callbacks keep their agent or workflow event shape; they can be used alongside the hub.
+`observe` follows one dispatch or one workflow ([Follow progress](../progress/)). An observation hub receives everything a run emits, each event tagged with where it came from. Create it with sinks, then pass it as `observation`.
 
 ```ts
 import {
@@ -21,7 +19,7 @@ const observation = createObservationHub({
   sinks: [
     {
       observe({ seq, source, scope, event }) {
-        console.log(seq, source, scope.taskKey, scope.attempt, event.kind);
+        console.log(seq, source, scope.taskKey, event.kind);
       },
     },
   ],
@@ -36,46 +34,214 @@ const review = defineIsolatedTask({
   }),
 });
 const result = await defineWorkflow("review", [review]).start({ observation });
-result.unwrap();
 await observation.close();
+result.unwrap();
 ```
 
-`seq` increases across a root hub and its children. `at` is Outpost's emission time. `scope` carries the known `executionId`, `taskKey`, `attempt`, `dispatchId`, `pass` and speculative `candidate`. `defineAgentTask` and `defineIsolatedTask` propagate task scope automatically; custom tasks pass `context.observation` to nested dispatches or speculation explicitly. Each dispatch emits its outcome after owned cleanup, including on failure.
+The sink prints workflow transitions, sandbox and Git operations and the agent’s events, in `seq` order. `dispatch()` accepts the same `observation` option for a single task.
 
-Operation events pair a unique `id` with `started` and `finished` or `failed`; terminal events carry `durationMs`. They cover workspace preparation and locks, sandbox allocation and release, authentication/bootstrap, hooks, transfers, native conversations, synchronization and cleanup. Recovery planning, restoration, archival and retention helpers accept an optional hub as their final argument, kept outside serialized plans.
+Each sink receives an envelope:
 
-`defineCommandTask` streams stdout/stderr. Workflow events also expose gates, decisions, checkpoint persistence/resume and budget exhaustion. Speculative events identify the candidate. Queued tasks report enqueue, polling and completion/failure; remote worker events stay on the worker.
+| Field    | Holds                                                                                                          |
+| -------- | -------------------------------------------------------------------------------------------------------------- |
+| `seq`    | An order number, increasing across the hub and every scope derived from it.                                    |
+| `at`     | The ISO time at which Outpost emitted the event.                                                               |
+| `source` | `agent`, `harness`, `workflow`, `sandbox`, `git`, `hooks`, `transfer`, `conversation` or `recovery`.           |
+| `scope`  | The known `executionId`, `taskKey`, `attempt`, `dispatchId`, `pass`, `subagentId` and speculative `candidate`. |
+| `event`  | The event itself. Narrow on `event.kind`.                                                                      |
 
-## Delivery and failure handling
+## Carry the scope into your own tasks
 
-Synchronous receivers run immediately; asynchronous receivers have independent ordered queues. The default capacity is 1,024 waiting envelopes per sink. Overflow drops the newest deliveries to that sink, increments `dropped` and records an error. A receiver exceeding `deliveryTimeoutMs` (5,000 ms by default) is disabled; its underlying promise cannot be forcibly cancelled. Synchronous user code must return promptly.
-
-`flush()` drains the current delivery snapshot and receiver buffers. `close()` stops that scope and its descendants and drains its receivers; it does not close caller-owned parents. Dispatch and workflow entry points drain their owned scopes before returning. Failures are collected in `observerErrors` and the hub's bounded `errors` collection; they do not replace execution failures. A shared hub retains diagnostics across its uses. `createCustomReporter()` uses the same bounded delivery mechanism and its `flush()` rejects on reporting failure.
-
-This is a live observation stream, not a durable state registry or an exactly-once delivery guarantee. Check `errors` and `dropped` before treating a captured trace as complete.
-
-## Telemetry
-
-Install `@opentelemetry/api` and import the adapter through `@elie-laloum/outpost/opentelemetry`. Workflow `telemetry` measures graph execution; dispatch `telemetry` measures preparation, agent execution, synchronization and cleanup. They are separate instrumentation boundaries.
+`defineAgentTask` and `defineIsolatedTask` attach their dispatch to the task’s scope. In a task you write with `defineTask`, pass `context.observation` to each dispatch.
 
 ```ts
-import { trace, metrics } from "@opentelemetry/api";
+import { defineTask, dispatch } from "@elie-laloum/outpost";
+import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+
+const audit = defineTask({
+  key: "audit",
+  perform: async (context) => {
+    const result = await dispatch({
+      repository,
+      sandboxProvider,
+      agent: coder,
+      brief: { text: "List outdated dependencies without changing files." },
+      signal: context.signal,
+      ...(context.observation ? { observation: context.observation } : {}),
+    });
+    return result.text;
+  },
+});
+```
+
+Without it, the dispatch still reports to its own `observe`, but its events never reach the hub. `observation.child(scope, sinks)` derives a hub that adds scope fields; sinks passed to a child receive only the events emitted below it.
+
+[Speculation](../speculation/) takes the same `observation` option, and the [recovery](../recovery/) and [retention](../retention/) helpers accept a hub as their last argument.
+
+## What the hub receives
+
+Agent events, listed in [Follow progress](../progress/), arrive with source `agent` or `harness`. The hub adds these kinds:
+
+| `event.kind`                          | Carries                                            | Emitted when                                                                                                                                            |
+| ------------------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `operation`                           | `id`, `name`, `status`, `durationMs`               | A step starts, then finishes or fails: workspace and lock, sandbox acquire and release, agent authentication, hooks, transfers, conversations, cleanup. |
+| `dispatch-start`, `dispatch-finished` | `status`, `completed`, `commits`, `usage`, `error` | A dispatch starts; it finishes after its cleanup, including on failure.                                                                                 |
+| `workflow`                            | `event`, a workflow event                          | The run, a task, a cache lookup, a loop round, a gate or a budget changes state ([Follow progress](../progress/)).                                      |
+| `command-output`                      | `channel`, `text`                                  | A `defineCommandTask` command writes to stdout or stderr.                                                                                               |
+| `candidate`                           | `status`                                           | [Speculation](../speculation/) validates, accepts, rejects or cleans up a candidate.                                                                    |
+| `queue`                               | `id`, `status`                                     | A [queued task](../job-queues/) is enqueued, polled, completed or failed.                                                                               |
+| `workspace-commits`                   | `baseline`, `commits`                              | A replayable journal records the agent’s commits ([Replay without a model](../record-replay/)).                                                         |
+
+An `operation` event pairs `started` with `finished` or `failed` through its `id`. Only the terminal event carries `durationMs`.
+
+### Built-in harness events
+
+The [built-in harness](../harness/) reports its loop with these kinds. They also reach `observe`.
+
+| `event.kind`                      | Emitted when                                                                                |
+| --------------------------------- | ------------------------------------------------------------------------------------------- |
+| `step`                            | A new model step starts.                                                                    |
+| `subagent`                        | A [subagent](../subagents/) starts, finishes or fails; its events carry `scope.subagentId`. |
+| `tool-denied`                     | A [permission or hook](../harness-permissions/) refuses a tool call; `reason` says why.     |
+| `stop-prevented`                  | A stop hook sends the model back to work with `message`.                                    |
+| `compaction`                      | The history is compacted; `strategy` and `messages` describe it.                            |
+| `skills-loaded`                   | [Skills](../harness-context/) are loaded; `names` lists them.                               |
+| `tool-output`                     | A tool’s sandbox command writes to stdout or stderr, in chunks of up to 8,192 characters.   |
+| `model-request`, `model-response` | The model is called. Emitted only when the hub was created with `verbose: true`.            |
+
+`tool-result` keeps only a 2,000-character `preview` of a result; subscribe to `tool-output` for the full stream.
+
+:::caution
+`model-request`, `model-response` and `tool-output` can contain repository content and secrets the agent read. Keep them out of public logs.
+:::
+
+## Delivery and failures
+
+A sink that returns nothing runs during emission, so keep it fast. A sink that returns a promise gets its own ordered queue. An optional `flush()` on the sink runs whenever the hub drains.
+
+| Situation                                                     | What happens                                                                    |
+| ------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| A sink queue already holds `capacity` events (default 1,024). | New events for that sink are dropped and `dropped` increases.                   |
+| A delivery exceeds `deliveryTimeoutMs` (default 5,000).       | The sink is disabled. Its pending promise keeps running.                        |
+| A sink throws or rejects.                                     | The error joins `errors` and the run’s `observerErrors`. The run is unaffected. |
+
+`dispatch()` and `start()` drain their deliveries before they return. `flush()` drains the hub at any time; `close()` drains it and stops accepting events.
+
+```ts
+import {
+  createObservationHub,
+  defineTask,
+  defineWorkflow,
+} from "@elie-laloum/outpost";
+
+const observation = createObservationHub({
+  deliveryTimeoutMs: 2_000,
+  sinks: [
+    {
+      async observe({ seq, event }) {
+        await new Promise((resolve) => setTimeout(resolve, 5));
+        console.log(seq, event.kind);
+      },
+    },
+  ],
+});
+const greet = defineTask({ key: "greet", perform: () => "hello" });
+const result = await defineWorkflow("greet", [greet]).start({ observation });
+await observation.close();
+console.log(result.status, observation.dropped, observation.errors.length);
+```
+
+<!-- check:run -->
+
+The sink prints the numbered `workflow` events, then the script prints `done 0 0`. Check `dropped` and `errors` before treating a trace as complete.
+
+## When agent output is too large
+
+A single protocol line above 16 MiB stops a CLI agent. The hub and `observe` receive a `raw` event holding its first 2,000 characters, with `bytes` and `truncated: true`, then `stopped` with reason `oversized-event`. The dispatch fails with code `process` ([Errors](../error-handling/)).
+
+## Export to OpenTelemetry
+
+Install `@opentelemetry/api` and an OpenTelemetry SDK, then register the SDK and its exporters before you create the observer. Its `sink` turns hub events into linked spans and metrics.
+
+```ts
+import { metrics, trace } from "@opentelemetry/api";
 import { createOpenTelemetryObserver } from "@elie-laloum/outpost/opentelemetry";
+import {
+  createObservationHub,
+  defineIsolatedTask,
+  defineWorkflow,
+} from "@elie-laloum/outpost";
+import { coder, repository, sandboxProvider } from "./outpost.config.mts";
 
 const telemetry = createOpenTelemetryObserver({
   tracer: trace.getTracer("outpost"),
   meter: metrics.getMeter("outpost"),
 });
+const observation = createObservationHub({ sinks: [telemetry.sink] });
+const review = defineIsolatedTask({
+  key: "review",
+  request: () => ({
+    repository,
+    sandboxProvider,
+    agent: coder,
+    brief: { text: "Review the public API without modifying files." },
+  }),
+});
+await defineWorkflow("review", [review]).start({ observation });
+await observation.close();
+telemetry.close();
 ```
 
-Register your OpenTelemetry SDK and exporters before creating these handles, then pass `telemetry` to the workflow or dispatch options. Without a registered SDK, these API handles do not export data.
+The trace nests `outpost.workflow`, `outpost.task`, `outpost.task.attempt` and `outpost.dispatch` spans, with one span per operation such as `outpost.sandbox.acquire`. Without a registered SDK, the API handles export nothing.
 
-The application owns tracer/meter provider shutdown. Instrumentation failures are isolated from execution outcomes. Custom reporting is available through `createCustomReporter()`.
+| Metric                                                                                                             | Measures                                                  |
+| ------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------- |
+| `outpost.workflow.executions`, `outpost.task.executions`, `outpost.dispatch.executions`                            | Finished runs, tasks and dispatches, by `outpost.status`. |
+| `outpost.task.attempts`, `outpost.task.retries`                                                                    | Started attempts and retries.                             |
+| `outpost.workflow.duration`, `outpost.task.duration`, `outpost.task.attempt.duration`, `outpost.dispatch.duration` | Durations in seconds, by `outpost.status`.                |
+| `outpost.agent.tokens`, `outpost.dispatch.tokens`                                                                  | Tokens, by `outpost.token.type`.                          |
 
-API: [Logging](../../reference/logging/) · [readJournal](../../reference/readjournal/) · [createReplayAgent](../../reference/createreplayagent/) · [DispatchTelemetry](../../reference/dispatchtelemetry/) · [createCustomReporter](../../reference/createcustomreporter/).
+`telemetry.close()` ends the spans still open. Your application flushes and shuts down the SDK. Pass `onError` to receive instrumentation errors; they never change a run’s outcome.
 
-## Correlate traces through the hub
+### Without a hub
 
-Attach `telemetry.sink` to `createObservationHub({ sinks: [telemetry.sink] })`, then pass that hub through `observation`. This links workflow, task, attempt, dispatch and operation spans while retaining existing metric names. Use this wiring once per telemetry instance; combining it with legacy `telemetry` wiring for the same run would count events twice. OpenTelemetry remains an optional subpath dependency.
+Pass the observer as `telemetry` to `start()` for workflow, task and attempt spans, or to `dispatch()` for a dispatch span. Operation spans need the hub.
 
-Dispatch journals are hub receivers. They contain scoped operations from preparation through cleanup and a terminal `dispatch-finished`, including early failures. `logging.verbose` retains raw events, deltas, stderr, reasoning and streamed tool output; the normal journal excludes these verbose events. Full model requests/responses additionally require `createObservationHub({ verbose: true })` before they are produced. Journal delivery failures are observation errors and can leave an incomplete journal; inspect `observerErrors` and hub diagnostics.
+:::caution
+Wire the observer once per run: passing `telemetry` and a hub holding `telemetry.sink` to the same run duplicates its spans and metrics.
+:::
+
+## Handle agent events asynchronously
+
+`createCustomReporter()` builds an `observe` callback from handlers keyed by event kind. Handlers may be asynchronous; they run on a bounded queue like hub sinks.
+
+```ts
+import { appendFile } from "node:fs/promises";
+import { createCustomReporter, dispatch } from "@elie-laloum/outpost";
+import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+
+const report = createCustomReporter({
+  async tool(event) {
+    await appendFile("tools.log", `${event.at} ${event.name}\n`);
+  },
+});
+await dispatch({
+  repository,
+  sandboxProvider,
+  agent: coder,
+  brief: { text: "Summarize the public API without changing files." },
+  observe: report,
+});
+await report.flush();
+```
+
+The dispatch waits for pending handlers before it returns and reports the first handler error in `result.observerErrors`. `report.flush()` rethrows that error. The second argument takes `onError`, called for each failure, plus the hub’s `capacity` and `deliveryTimeoutMs`.
+
+## Limits
+
+- The hub is a live, in-memory stream: it stores nothing, and a slow sink loses events. To read events after the run, use the dispatch’s [journal](../journals/).
+- A disabled sink stays disabled for the hub’s lifetime, and `errors` keeps the first 100 errors.
+- A closed hub ignores new events. A hub reused across runs keeps its `errors` and `dropped` count, so each run’s `observerErrors` includes earlier errors.
+- Events emitted on a remote [worker](../job-queues/) stay on that worker’s hub.
+
+API: [createObservationHub](../../reference/createobservationhub/) · [ObservationHub](../../reference/observationhub/) · [Observation](../../reference/observation/) · [ObservationEvent](../../reference/observationevent/) · [OperationEvent](../../reference/operationevent/) · [createOpenTelemetryObserver](../../reference/createopentelemetryobserver/) · [OpenTelemetryObserver](../../reference/opentelemetryobserver/) · [createCustomReporter](../../reference/createcustomreporter/).

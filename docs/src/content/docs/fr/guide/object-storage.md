@@ -1,9 +1,11 @@
 ---
 title: "S3 et R2"
-description: "Utiliser un transport S3 pour les objets persistants Outpost."
+description: "Conservez checkpoints, artefacts, journaux et conversations dans un bucket S3 ou Cloudflare R2, pour les reprendre ou les lire depuis n’importe quelle machine."
 ---
 
-Installez le SDK AWS optionnel et configurez un bucket privé existant prenant en charge PUT et DELETE conditionnels.
+## Créer le transport
+
+Installez le SDK AWS, une dépendance optionnelle utilisée uniquement par ce transport.
 
 ```sh
 npm install @aws-sdk/client-s3
@@ -11,52 +13,119 @@ npm install @aws-sdk/client-s3
 
 ```ts
 import { S3Client } from "@aws-sdk/client-s3";
+import { createWorkflowCheckpointStore } from "@elie-laloum/outpost";
 import { createS3Transport } from "@elie-laloum/outpost/transports/s3";
-import { createArtifactStore } from "@elie-laloum/outpost";
 
-const client = new S3Client({ region: "eu-west-1" });
 const transporter = createS3Transport({
-  client,
+  client: new S3Client({ region: "eu-west-1" }),
   bucket: "my-private-outpost",
-  prefix: "reviews/",
+  prefix: "outpost/",
 });
-const store = createArtifactStore({ transporter });
+const checkpoints = createWorkflowCheckpointStore({ transporter });
 ```
 
-Remplacez bucket et région par ceux de votre déploiement. Configurez les identifiants dans le client S3 côté hôte ; ils ne sont pas transmis aux agents. Détruisez le client seulement après la fin de tous les stores et opérations qui l’utilisent.
+`transporter` remplace `createLocalTransport()` partout où un [transport](../storage/) est accepté. Chaque objet est rangé sous `outpost/` dans le bucket.
 
-## Partager un transport
+| Option       | Défaut           | Rôle                                                                                                          |
+| ------------ | ---------------- | ------------------------------------------------------------------------------------------------------------- |
+| `client`     | Obligatoire      | Votre `S3Client`, avec région, identifiants et endpoint.                                                      |
+| `bucket`     | Obligatoire      | Un bucket privé existant.                                                                                     |
+| `prefix`     | Racine du bucket | Préfixe des clés d’Outpost. Laissez les objets étrangers en dehors.                                           |
+| `deleteMode` | `"conditional"`  | `"conditional"` supprime par DELETE conditionnel ; `"tombstone"` est destiné à [R2](#utiliser-cloudflare-r2). |
 
-Passez le transport aux stores d’artefacts et checkpoints, à `logging.transporter`, `activityTransport`, `recoveryTransport` ou au stockage de conversations selon les objets à conserver. Utilisez un préfixe isolé et une politique de stockage dédiée.
+## Préparer le bucket
 
-## Compatibilité
+Créez le bucket au préalable : Outpost ne le crée pas. L’endpoint doit prendre en charge ces opérations, pas seulement l’envoi et le téléchargement.
 
-Un endpoint compatible S3 doit implémenter les opérations conditionnelles requises et la pagination, pas seulement upload/download. Les révisions bloquent les écrivains périmés. Elles n’authentifient pas les acteurs, ne prouvent pas la vie d’un processus distant et ne sécurisent pas automatiquement le rejeu d’une tâche incomplète.
+<!-- features -->
 
-## Cloudflare R2
+- **PUT conditionnel** : `If-None-Match: *` pour créer une clé, `If-Match` pour la remplacer.
+- **DELETE conditionnel** : `If-Match` à la suppression, dans le mode par défaut `"conditional"`.
+- **Listing paginé** : `ListObjectsV2` avec jetons de continuation.
 
-R2 prend en charge PUT conditionnel, mais la validation réelle a constaté que DELETE accepte les valeurs `If-Match` périmées. Sélectionnez explicitement la suppression logique :
+## Le passer aux stores
+
+Un seul transport sert tous les stores. Passez-le là où chaque type d’objet doit être conservé.
+
+```ts
+import { S3Client } from "@aws-sdk/client-s3";
+import {
+  createArtifactStore,
+  createWorkflowCheckpointStore,
+  dispatch,
+} from "@elie-laloum/outpost";
+import { createS3Transport } from "@elie-laloum/outpost/transports/s3";
+import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+
+const transporter = createS3Transport({
+  client: new S3Client({ region: "eu-west-1" }),
+  bucket: "my-private-outpost",
+  prefix: "outpost/",
+});
+export const checkpoints = createWorkflowCheckpointStore({ transporter });
+export const artifacts = createArtifactStore({ transporter });
+
+await dispatch({
+  repository,
+  sandboxProvider,
+  agent: coder,
+  brief: { text: "Update the changelog for the last release." },
+  logging: { transporter },
+  activityTransport: transporter,
+  recoveryTransport: transporter,
+});
+```
+
+<!-- features -->
+
+- [Checkpoints](../durable-runs/) : Reprenez une exécution de workflow depuis une autre machine.
+  - `createWorkflowCheckpointStore()`
+- [Artefacts](../artifacts/) : Partagez les sorties des tâches par référence.
+  - `createArtifactStore()`
+- [Journaux](../journals/) : Conservez le journal du dispatch.
+  - `logging.transporter`
+- [Conversations](../conversations/) : Archivez les captures pour les reprendre n’importe où.
+  - `createTransportConversations()`
+- [Archives de récupération](../recovery/) : Sauvegardez les changements distants avant de les appliquer.
+  - `recoveryTransport`
+- [Activité des sandboxes](../retention/) : Enregistrez les sandboxes en cours d’utilisation.
+  - `activityTransport`
+
+## Garder les identifiants sur l’hôte
+
+Le `S3Client` s’exécute dans votre processus Node.js. Ses identifiants n’atteignent jamais la sandbox ni l’agent. Configurez-les comme pour tout client du SDK AWS, et fermez le client seulement une fois que tous les stores qui l’utilisent ont terminé : Outpost ne le ferme jamais.
+
+## Utiliser Cloudflare R2
+
+R2 accepte un DELETE dont le `If-Match` est périmé : un DELETE conditionnel ne peut donc pas arrêter un écrivain concurrent. Choisissez `deleteMode: "tombstone"`.
 
 ```ts
 import { S3Client } from "@aws-sdk/client-s3";
 import { createS3Transport } from "@elie-laloum/outpost/transports/s3";
 
-const client = new S3Client({
-  region: "auto",
-  endpoint: "https://<account-id>.r2.cloudflarestorage.com",
-});
 const transporter = createS3Transport({
-  client,
+  client: new S3Client({
+    region: "auto",
+    endpoint: "https://<account-id>.r2.cloudflarestorage.com",
+  }),
   bucket: "my-private-outpost",
-  prefix: "reviews/",
+  prefix: "outpost/",
   deleteMode: "tombstone",
 });
 ```
 
-Configurez les identifiants du client comme indiqué plus haut. Dans ce mode, `remove` écrit un nouveau marqueur de suppression par PUT conditionnel. Les anciennes révisions sont refusées ; `read` renvoie l’absence et `list` masque les clés supprimées. Une création avec `ifRevision: null` peut remplacer un marqueur sous condition, donc les recréations concurrentes conservent un seul gagnant. Un contenu vide reste un objet vivant ordinaire.
+Supprimer une clé écrit un marqueur de suppression par PUT conditionnel. Les lectures et les listings masquent les marqueurs, et recréer la clé remplace son marqueur, toujours sous condition.
 
-Tous les écrivains partageant un préfixe doivent utiliser `deleteMode: "tombstone"`. Arrêtez les écrivains existants avant de changer de mode. Le mode par défaut `"conditional"` reste réservé aux services assurant DELETE conditionnel atomique.
+Chaque marqueur reste dans le bucket comme un objet facturé de 1 Kio. Créer une clé ajoute une requête HEAD, et lister ajoute une requête HEAD par objet.
 
-La suppression logique conserve un marqueur de 1 Kio par clé supprimée et ajoute des requêtes HEAD à la création et au listing. La liste observe les objets courants, sans instantané transactionnel. Les marqueurs restent des objets physiques facturables, bien que masqués des inventaires du transport et de son usage logique. Ne les expirez ou purgez pas automatiquement tant que des écrivains peuvent tourner : une suppression physique pourrait effacer une recréation concurrente. Seule une maintenance explicite après arrêt de tous les écrivains peut les retirer du bucket.
+:::caution
+Tous les écrivains d’un même préfixe doivent utiliser le même `deleteMode` : arrêtez-les tous avant d’en changer. N’expirez ni ne purgez jamais les marqueurs tant qu’un écrivain peut tourner : une purge peut effacer une recréation concurrente.
+:::
 
-API : [createS3Transport](../../reference/creates3transport/).
+## Limites
+
+- **Exclusion, pas identité** : Les révisions rejettent les écrivains périmés ; elles n’authentifient pas l’auteur d’une écriture.
+- **Pas d’instantané** : Un listing montre les objets actuels, pas une vue cohérente du préfixe.
+- **Fichiers locaux maintenus** : Les worktrees Git, la préparation de l’exécution et les conversations natives exigent toujours un système de fichiers local ([Où vivent les données](../storage/)).
+
+API : [createS3Transport](../../reference/creates3transport/) · [S3TransportOptions](../../reference/s3transportoptions/) · [Transport](../../reference/transport/).
