@@ -1,28 +1,144 @@
 ---
 title: "Diagnostics"
-description: "Diagnose prerequisites before paying for a model call."
+description: "Check the host, the container engine, the image and the agent CLI before paying for a model call, then probe an open sandbox from code."
 ---
 
-Run `doctor` for the provider and agent you intend to use.
+## Check prerequisites
+
+`outpost doctor` runs short probes for the sandbox provider and agent you intend to use. Add `--image` to also start the image in a temporary container.
 
 ```sh
-npx outpost doctor --sandbox-provider docker --agent codex --image outpost:dev --json
+npx outpost doctor --sandbox-provider docker --agent codex --image outpost:dev
 ```
 
-The report separates available, unsupported and failing capabilities. Fix the reported executable, image or engine problem before retrying a dispatch.
+Each line shows a status (`PASS`, `WARN`, `FAIL`, `SKIPPED`), a check name and a remedy when something is missing. Fix every `FAIL` before your first dispatch, and read each `WARN`.
 
-Interrupting `doctor` stops its active host probe and its descendants. SIGINT exits with status 130; SIGTERM exits with status 143. Image diagnostics also clean up their temporary container.
+| Flag                 | Default  | What it selects                                                         |
+| -------------------- | -------- | ----------------------------------------------------------------------- |
+| `--sandbox-provider` | `docker` | `docker`, `podman`, `local`, `vercel` or `daytona`.                     |
+| `--agent`            | `codex`  | `claude`, `codex`, `antigravity`, `copilot` or `kimi`.                  |
+| `--image`            | none     | A local image to test in a temporary container. Docker and Podman only. |
+| `--json`             | off      | Prints the report as JSON instead of text.                              |
 
-## Diagnose an owned sandbox
+| Exit status | Meaning                                                                  |
+| ----------- | ------------------------------------------------------------------------ |
+| `0`         | No check failed. Warnings and skipped checks still need review.          |
+| `1`         | A check failed, or an option is invalid.                                 |
+| `130`       | Interrupted by Ctrl+C (SIGINT). The running probe and its children stop. |
+| `143`       | Stopped by SIGTERM, with the same cleanup.                               |
 
-`sandbox.diagnose()` inspects an existing sandbox under its operation gate. The diagnostic does not own or close the sandbox. Do not run it concurrently with another command on that same sandbox.
+An interrupted run also removes its temporary container.
 
-`diagnoseAgentProtocol()` checks recorded protocol fixtures. It does not authenticate a real account or prove that a live model is available.
+## What doctor checks
 
-## Interpret validation
+Each probe has a five-second deadline. Host checks always run; image checks run only with `--image`.
 
-A passing local preflight is not a paid model test. Cloud SDK configuration, real provider allocation and live model availability are separate checks. Use a small non-mutating first request after setup, and inspect its actual outcome.
+| Check                                   | What it verifies                                                            | If it fails                            |
+| --------------------------------------- | --------------------------------------------------------------------------- | -------------------------------------- |
+| `host.node`, `host.git`                 | Node.js 24 or later, and Git on `PATH`.                                     | `FAIL`                                 |
+| `provider.cli`, `provider.connection`   | Docker or Podman is installed and its engine answers.                       | `FAIL`                                 |
+| `host.tar`                              | `tar` is available for container transfers.                                 | `FAIL`                                 |
+| `agent.host`                            | The agent CLI on the host and its version against the version Outpost pins. | `WARN`: a sandbox may have its own CLI |
+| `image.runtime`                         | The image starts with the network disabled and an empty workspace.          | `FAIL`                                 |
+| `image.node`, `image.git`, `image.home` | Node.js and Git inside the image, and a writable home directory.            | `FAIL`                                 |
+| `agent.sandbox`                         | The agent CLI inside the image. A version other than the pinned one warns.  | `FAIL` when missing                    |
+| `agent.cli.*`                           | The CLI help declares the options Outpost passes to it.                     | `FAIL`                                 |
+| `image.cleanup`                         | The temporary container was removed.                                        | `FAIL`, with the container name        |
 
-When a CLI agent keeps retrying a connection until its deadline, Outpost preserves the `timeout` error code. If the latest failure event reports a recognized connection problem, the error message also suggests checking the model endpoint and network access; `details.agentDiagnostic` is `"connection"`. This hint summarizes the agent’s report, does not prove the endpoint is down, and does not copy the reported URL or credential. An ordinary timeout or an authentication-only failure does not receive this connection hint.
+The engine checks and `host.tar` apply to Docker and Podman. For Vercel and Daytona, `provider.cloud` is skipped: the SDK, credentials and allocation are not checked. The last check, `execution`, is always skipped and lists what doctor never tests.
 
-API: [diagnoseSandbox](../../reference/diagnosesandbox/) · [diagnoseAgentProtocol](../../reference/diagnoseagentprotocol/).
+## Read the JSON report
+
+`--json` prints the same checks for a script or a CI job ([Run in CI](../ci-automation/)).
+
+```sh
+npx outpost doctor --image outpost:dev --json > doctor.json
+jq -r '.checks[] | select(.status != "pass") | "\(.status) \(.id): \(.message)"' doctor.json
+```
+
+```json
+{
+  "sandboxProvider": "docker",
+  "agent": "codex",
+  "image": "outpost:dev",
+  "scope": "host-and-image",
+  "placement": "mounted",
+  "interactiveTerminal": true,
+  "checks": [
+    {
+      "id": "agent.sandbox",
+      "status": "warn",
+      "version": "0.155.0",
+      "referenceVersion": "0.156.1",
+      "message": "Differs from the version pinned by Outpost; compatibility is unverified."
+    }
+  ],
+  "hasFailures": false
+}
+```
+
+`hasFailures` is `true` when any check has the status `fail`, which is also when the exit status is `1`. `scope` is `host` without `--image`. `version` and `referenceVersion` appear on version checks only.
+
+## Diagnose an open sandbox
+
+`sandbox.diagnose()` probes the sandbox your code already holds, with its real provider and mounts. It leaves the sandbox open.
+
+```ts
+import { createSandbox } from "@elie-laloum/outpost";
+import { repository, sandboxProvider } from "./outpost.config.mts";
+
+await using sandbox = await createSandbox({ repository, sandboxProvider });
+const report = await sandbox.diagnose({ agent: "codex", transfers: true });
+for (const check of report.checks)
+  console.log(check.status, check.id, check.message);
+```
+
+<!-- features -->
+
+- `sandbox.*`: Node.js, Git, a writable home, and a command whose separate output streams and nonzero exit status must come back intact.
+- `agent`: Adds the agent CLI version and help checks from doctor.
+- `transfers`: Uploads a binary file, verifies it with a process in the sandbox, then downloads it.
+
+Each probe stops after `deadlineMs` (5,000 ms by default, 60,000 at most). `report.capabilities` compares what the provider advertises with what was observed. The diagnosis is a sandbox operation: it fails while a dispatch or command is running on the same sandbox.
+
+For a [custom sandbox provider](../custom-sandbox-providers/), `diagnoseSandbox(lease)` runs the same probes on a `SandboxLease`.
+
+## Check an agent adapter offline
+
+`diagnoseAgentProtocol()` replays the event recordings bundled with Outpost through an agent's adapter. It runs no CLI and no model.
+
+```ts
+import { diagnoseAgentProtocol } from "@elie-laloum/outpost";
+
+const report = diagnoseAgentProtocol("claude");
+console.log(report.referenceVersion, report.hasFailures);
+```
+
+<!-- check:run -->
+
+It prints the Claude Code version the recordings come from, then `false` when every recording decodes as expected.
+
+## Make a first paid run
+
+Doctor stops before sign-in and model access. After it passes, run a small task that edits nothing, such as the review script in [Your first task](../first-request/), and read its actual result.
+
+## Read a connection timeout
+
+A CLI agent can keep retrying an unreachable endpoint until its deadline. The error keeps the code `timeout`. When the agent's last reported failure was a connection problem, Outpost adds a hint.
+
+<!-- features -->
+
+- `error.message`: Ends with "The agent reported a connection failure. Check the model endpoint and network access."
+- `error.details.agentDiagnostic`: Equals `"connection"`.
+- `unavailableFault(error)`: Returns `{ message: "connection failure" }`, so a [fallback agent](../fallback-agents/) covering `unavailable` moves to its next candidate.
+
+The hint summarizes the agent's report without copying its URL or credentials. It does not prove that the endpoint is down. Other error codes are listed in [Errors](../error-handling/).
+
+## Limits
+
+- Doctor tests neither sign-in, credentials nor model access, and allocates no sandbox without `--image`.
+- `--image` uses a local image and never pulls one. The image user's UID must match yours, and the image needs `sh`, `sleep`, `setsid`, `kill`, `tar` and `cp`.
+- Without `--image`, the agent version inside a container or cloud sandbox is not checked: the host version says nothing about it.
+- `diagnoseAgentProtocol()` checks the adapter against recorded events, not the CLI you installed.
+
+API: [diagnoseSandbox](../../reference/diagnosesandbox/) · [Sandbox](../../reference/sandbox/) · [SandboxDiagnosticReport](../../reference/sandboxdiagnosticreport/) · [diagnoseAgentProtocol](../../reference/diagnoseagentprotocol/) · [unavailableFault](../../reference/unavailablefault/)
