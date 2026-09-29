@@ -5,6 +5,8 @@ coverage/
 
 docs/.astro/
 docs/.examples/
+docs/.claude/
+docs/.impeccable/
 
 docs/test-results/
 docs/playwright-report/

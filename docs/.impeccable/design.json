@@ -1,0 +1,411 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-29T14:07:22+00:00",
+  "title": "Design System: Outpost",
+  "extensions": {
+    "colorMeta": {
+      "night": {
+        "role": "neutral",
+        "displayName": "Night",
+        "canonical": "oklch(13% 0.028 261.692)",
+        "tonalRamp": [
+          "oklch(15% 0.02 262)",
+          "oklch(25% 0.02 262)",
+          "oklch(35% 0.02 262)",
+          "oklch(45% 0.02 262)",
+          "oklch(58% 0.02 262)",
+          "oklch(70% 0.02 262)",
+          "oklch(82% 0.02 262)",
+          "oklch(95% 0.02 262)"
+        ]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Paper",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "oklch(15% 0.02 262)",
+          "oklch(25% 0.02 262)",
+          "oklch(35% 0.02 262)",
+          "oklch(45% 0.02 262)",
+          "oklch(58% 0.02 262)",
+          "oklch(70% 0.02 262)",
+          "oklch(82% 0.02 262)",
+          "oklch(95% 0.02 262)"
+        ]
+      },
+      "white-ink": {
+        "role": "neutral",
+        "displayName": "White Ink",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "oklch(15% 0.02 262)",
+          "oklch(25% 0.02 262)",
+          "oklch(35% 0.02 262)",
+          "oklch(45% 0.02 262)",
+          "oklch(58% 0.02 262)",
+          "oklch(70% 0.02 262)",
+          "oklch(82% 0.02 262)",
+          "oklch(95% 0.02 262)"
+        ]
+      },
+      "slate-ink": {
+        "role": "neutral",
+        "displayName": "Slate Ink",
+        "canonical": "oklch(21% 0.034 264.665)",
+        "tonalRamp": [
+          "oklch(15% 0.02 262)",
+          "oklch(25% 0.02 262)",
+          "oklch(35% 0.02 262)",
+          "oklch(45% 0.02 262)",
+          "oklch(58% 0.02 262)",
+          "oklch(70% 0.02 262)",
+          "oklch(82% 0.02 262)",
+          "oklch(95% 0.02 262)"
+        ]
+      },
+      "mist": {
+        "role": "neutral",
+        "displayName": "Mist",
+        "canonical": "oklch(87.2% 0.01 258.338)",
+        "tonalRamp": [
+          "oklch(15% 0.02 262)",
+          "oklch(25% 0.02 262)",
+          "oklch(35% 0.02 262)",
+          "oklch(45% 0.02 262)",
+          "oklch(58% 0.02 262)",
+          "oklch(70% 0.02 262)",
+          "oklch(82% 0.02 262)",
+          "oklch(95% 0.02 262)"
+        ]
+      },
+      "graphite": {
+        "role": "neutral",
+        "displayName": "Graphite",
+        "canonical": "oklch(37.3% 0.034 259.733)",
+        "tonalRamp": [
+          "oklch(15% 0.02 262)",
+          "oklch(25% 0.02 262)",
+          "oklch(35% 0.02 262)",
+          "oklch(45% 0.02 262)",
+          "oklch(58% 0.02 262)",
+          "oklch(70% 0.02 262)",
+          "oklch(82% 0.02 262)",
+          "oklch(95% 0.02 262)"
+        ]
+      },
+      "pewter": {
+        "role": "neutral",
+        "displayName": "Pewter",
+        "canonical": "oklch(70.7% 0.022 261.325)",
+        "tonalRamp": [
+          "oklch(15% 0.02 262)",
+          "oklch(25% 0.02 262)",
+          "oklch(35% 0.02 262)",
+          "oklch(45% 0.02 262)",
+          "oklch(58% 0.02 262)",
+          "oklch(70% 0.02 262)",
+          "oklch(82% 0.02 262)",
+          "oklch(95% 0.02 262)"
+        ]
+      },
+      "steel": {
+        "role": "neutral",
+        "displayName": "Steel",
+        "canonical": "oklch(55.1% 0.027 264.364)",
+        "tonalRamp": [
+          "oklch(15% 0.02 262)",
+          "oklch(25% 0.02 262)",
+          "oklch(35% 0.02 262)",
+          "oklch(45% 0.02 262)",
+          "oklch(58% 0.02 262)",
+          "oklch(70% 0.02 262)",
+          "oklch(82% 0.02 262)",
+          "oklch(95% 0.02 262)"
+        ]
+      },
+      "slate-panel": {
+        "role": "neutral",
+        "displayName": "Slate Panel",
+        "canonical": "oklch(27.8% 0.033 256.848)",
+        "tonalRamp": [
+          "oklch(15% 0.02 262)",
+          "oklch(25% 0.02 262)",
+          "oklch(35% 0.02 262)",
+          "oklch(45% 0.02 262)",
+          "oklch(58% 0.02 262)",
+          "oklch(70% 0.02 262)",
+          "oklch(82% 0.02 262)",
+          "oklch(95% 0.02 262)"
+        ]
+      },
+      "fog-line": {
+        "role": "neutral",
+        "displayName": "Fog Line",
+        "canonical": "oklch(92.8% 0.006 264.531)",
+        "tonalRamp": [
+          "oklch(15% 0.02 262)",
+          "oklch(25% 0.02 262)",
+          "oklch(35% 0.02 262)",
+          "oklch(45% 0.02 262)",
+          "oklch(58% 0.02 262)",
+          "oklch(70% 0.02 262)",
+          "oklch(82% 0.02 262)",
+          "oklch(95% 0.02 262)"
+        ]
+      },
+      "ember": {
+        "role": "primary",
+        "displayName": "Ember",
+        "canonical": "#fb923c",
+        "tonalRamp": [
+          "oklch(15% 0.15 50)",
+          "oklch(25% 0.15 50)",
+          "oklch(35% 0.15 50)",
+          "oklch(45% 0.15 50)",
+          "oklch(58% 0.15 50)",
+          "oklch(70% 0.15 50)",
+          "oklch(82% 0.15 50)",
+          "oklch(95% 0.15 50)"
+        ]
+      },
+      "ember-deep": {
+        "role": "primary",
+        "displayName": "Ember Deep",
+        "canonical": "#c2410c",
+        "tonalRamp": [
+          "oklch(15% 0.17 41)",
+          "oklch(25% 0.17 41)",
+          "oklch(35% 0.17 41)",
+          "oklch(45% 0.17 41)",
+          "oklch(58% 0.17 41)",
+          "oklch(70% 0.17 41)",
+          "oklch(82% 0.17 41)",
+          "oklch(95% 0.17 41)"
+        ]
+      },
+      "diff-red": {
+        "role": "tertiary",
+        "displayName": "Removed Line",
+        "canonical": "oklch(88.5% 0.062 18.334)",
+        "tonalRamp": [
+          "oklch(15% 0.1 18)",
+          "oklch(25% 0.1 18)",
+          "oklch(35% 0.1 18)",
+          "oklch(45% 0.1 18)",
+          "oklch(58% 0.1 18)",
+          "oklch(70% 0.1 18)",
+          "oklch(82% 0.1 18)",
+          "oklch(95% 0.1 18)"
+        ]
+      },
+      "diff-green": {
+        "role": "tertiary",
+        "displayName": "Added Line",
+        "canonical": "oklch(92.5% 0.084 155.995)",
+        "tonalRamp": [
+          "oklch(15% 0.1 156)",
+          "oklch(25% 0.1 156)",
+          "oklch(35% 0.1 156)",
+          "oklch(45% 0.1 156)",
+          "oklch(58% 0.1 156)",
+          "oklch(70% 0.1 156)",
+          "oklch(82% 0.1 156)",
+          "oklch(95% 0.1 156)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Landing tagline, one clause per line, sized from its bay with container units."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Section headings in the left bays."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Agent, sandbox and step names."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Explanatory copy, capped near 34rem."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Captions, group labels, footer headings, facts line."
+      },
+      "code": {
+        "displayName": "Code",
+        "purpose": "Code windows, commands and API names only."
+      }
+    },
+    "shadows": [],
+    "motion": [
+      {
+        "name": "ease-out-expo",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Every landing transition: fills, arrows, active code ranges."
+      },
+      {
+        "name": "state",
+        "value": "0.2s",
+        "purpose": "Hover fills, border shifts and arrow nudges."
+      },
+      {
+        "name": "range",
+        "value": "0.45s",
+        "purpose": "Active code-range tint and gutter marker."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "stack",
+        "value": "64rem"
+      },
+      {
+        "name": "compact",
+        "value": "40rem"
+      },
+      {
+        "name": "narrow",
+        "value": "26rem"
+      },
+      {
+        "name": "guide-mobile",
+        "value": "49.99rem"
+      },
+      {
+        "name": "docs-rail",
+        "value": "100rem"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Inverted, square call to action with a drawn arrow.",
+      "html": "<a class=\"ds-btn-primary\" href=\"#\">Get started<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M5 12h14m-5-5 5 5-5 5\"/></svg></a>",
+      "css": ".ds-btn-primary{display:inline-flex;align-items:center;gap:.5rem;min-height:2.75rem;padding:0 1.25rem;border:1px solid #fff;background:#fff;color:#030712;font:500 .9375rem/1 Inter,system-ui,sans-serif;text-decoration:none;transition:background-color .2s cubic-bezier(.16,1,.3,1)}.ds-btn-primary svg{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s cubic-bezier(.16,1,.3,1)}.ds-btn-primary:hover{background:#e5e7eb}.ds-btn-primary:hover svg{transform:translateX(3px)}.ds-btn-primary:focus-visible{outline:2px solid #fb923c;outline-offset:2px}"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Secondary square action on a hairline border.",
+      "html": "<a class=\"ds-btn-outline\" href=\"#\">Read the guide</a>",
+      "css": ".ds-btn-outline{display:inline-flex;align-items:center;min-height:2.75rem;padding:0 1.25rem;border:1px solid #364153;color:#fff;font:500 .9375rem/1 Inter,system-ui,sans-serif;text-decoration:none;transition:background-color .2s cubic-bezier(.16,1,.3,1),border-color .2s cubic-bezier(.16,1,.3,1)}.ds-btn-outline:hover{border-color:#99a1af;background:#1e2939}.ds-btn-outline:focus-visible{outline:2px solid #fb923c;outline-offset:2px}"
+    },
+    {
+      "name": "Install Field",
+      "kind": "input",
+      "refersTo": "install-field",
+      "description": "One-line command with a copy button behind a hairline.",
+      "html": "<div class=\"ds-install\"><code><span>$ </span>npx @elie-laloum/outpost init</code><button type=\"button\" aria-label=\"Copy the install command\"><svg viewBox=\"0 0 24 24\"><rect x=\"9\" y=\"9\" width=\"12\" height=\"12\" rx=\"1.5\"/><path d=\"M5 15H4.5A1.5 1.5 0 0 1 3 13.5v-9A1.5 1.5 0 0 1 4.5 3h9A1.5 1.5 0 0 1 15 4.5V5\"/></svg></button></div>",
+      "css": ".ds-install{display:flex;max-width:26rem;border:1px solid #364153;background:#0f1520}.ds-install code{flex:1;padding:.8rem 1rem;color:#fff;font:400 .875rem ui-monospace,SFMono-Regular,Menlo,monospace;white-space:nowrap}.ds-install code span{color:#99a1af}.ds-install button{width:2.9rem;border:0;border-left:1px solid #364153;background:none;color:#99a1af;cursor:pointer}.ds-install button:hover{color:#fff}.ds-install button:focus-visible{outline:2px solid #fb923c;outline-offset:-2px}.ds-install svg{width:1rem;height:1rem;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}"
+    },
+    {
+      "name": "Code Window",
+      "kind": "custom",
+      "refersTo": "code-tab-selected",
+      "description": "Tabbed code surface with gutter, ink tab underline and an ember active range.",
+      "html": "<div class=\"ds-code\"><div class=\"ds-code-bar\"><button class=\"ds-tab\" aria-selected=\"true\">run.ts</button><button class=\"ds-tab\" aria-selected=\"false\">brief.md</button></div><pre><span class=\"ds-line\">const agent = createAgent({</span><span class=\"ds-line ds-active\">  harness: createCodexHarness(),</span><span class=\"ds-line\">});</span></pre></div>",
+      "css": ".ds-code{border:1px solid #364153;background:#0f1520;counter-reset:line}.ds-code-bar{display:flex;min-height:2.75rem;border-bottom:1px solid #364153}.ds-tab{padding:0 1rem;border:0;border-right:1px solid #364153;background:none;color:#99a1af;font:400 .8125rem ui-monospace,SFMono-Regular,Menlo,monospace;cursor:pointer}.ds-tab:hover{color:#fff}.ds-tab[aria-selected=true]{color:#fff;background:#18202d;box-shadow:inset 0 -2px 0 #fff}.ds-tab:focus-visible{outline:2px solid #fb923c;outline-offset:-2px}.ds-code pre{margin:0;padding:1.1rem 0;color:#adbac7;font:400 .8125rem/1.7 ui-monospace,SFMono-Regular,Menlo,monospace}.ds-line{display:block}.ds-line::before{counter-increment:line;content:counter(line);display:inline-block;width:2.25rem;margin-right:1.1rem;color:#99a1af;text-align:right}.ds-active{background:rgba(251,146,60,.1);box-shadow:inset 2px 0 0 #fb923c}.ds-active::before{color:#fff}"
+    },
+    {
+      "name": "Bay Cell",
+      "kind": "card",
+      "refersTo": "bay-cell",
+      "description": "Hairline-bounded linked cell: title over a muted note.",
+      "html": "<a class=\"ds-cell\" href=\"#\"><strong>Claude Code</strong><span>capture · resume · fork</span></a>",
+      "css": ".ds-cell{display:flex;flex-direction:column;gap:.4rem;padding:1.4rem 2.5rem;border:1px solid #364153;color:#d1d5dc;text-decoration:none;font-family:Inter,system-ui,sans-serif;transition:background-color .2s cubic-bezier(.16,1,.3,1)}.ds-cell strong{color:#fff;font-size:1.0625rem;font-weight:500;letter-spacing:-.01em}.ds-cell span{color:#99a1af;font-size:.8125rem}.ds-cell:hover{background:#0f1520}.ds-cell:focus-visible{outline:2px solid #fb923c;outline-offset:2px}"
+    },
+    {
+      "name": "Step Button",
+      "kind": "custom",
+      "refersTo": "step-button",
+      "description": "Numbered workflow step; pressed state fills the number box with ink.",
+      "html": "<button class=\"ds-step\" aria-pressed=\"true\"><span class=\"ds-step-n\">1</span><span><strong>An agent in its own sandbox</strong><span>The fix task allocates its own sandbox.</span></span></button>",
+      "css": ".ds-step{display:grid;grid-template-columns:2rem 1fr;gap:.75rem;width:100%;padding:1.35rem 2.5rem;border:0;border-bottom:1px solid #364153;background:none;color:#d1d5dc;font:400 .875rem/1.55 Inter,system-ui,sans-serif;text-align:start;cursor:pointer}.ds-step strong{display:block;color:#fff;font-weight:500;font-size:1rem}.ds-step:hover,.ds-step[aria-pressed=true]{background:#0f1520}.ds-step-n{display:grid;place-items:center;width:1.75rem;height:1.75rem;border:1px solid #364153;color:#99a1af;font-variant-numeric:tabular-nums}.ds-step[aria-pressed=true] .ds-step-n{border-color:#fff;background:#fff;color:#030712}.ds-step:focus-visible{outline:2px solid #fb923c;outline-offset:-2px}"
+    },
+    {
+      "name": "Header Navigation",
+      "kind": "nav",
+      "refersTo": "nav-link-current",
+      "description": "Fixed hairline header with wordmark and Guide/Reference links.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-brand\" href=\"#\">Outpost<span>docs</span></a><a href=\"#\" aria-current=\"true\">Guide</a><a href=\"#\">Reference</a></nav>",
+      "css": ".ds-nav{display:flex;align-items:center;gap:1.25rem;height:4rem;padding:0 1.5rem;border-bottom:1px solid #364153;background:#030712;font:400 .875rem Inter,system-ui,sans-serif}.ds-nav a{color:#99a1af;text-decoration:none}.ds-nav a:hover,.ds-nav a[aria-current]{color:#fff}.ds-brand{display:flex;gap:.6rem;align-items:baseline;margin-right:.75rem;color:#fff!important;font-size:1.2rem;font-weight:650;letter-spacing:-.03em}.ds-brand span{color:#99a1af;font-size:.8rem;font-weight:400;letter-spacing:0}.ds-nav a:focus-visible{outline:2px solid #fb923c;outline-offset:2px}"
+    },
+    {
+      "name": "Property Row",
+      "kind": "custom",
+      "refersTo": "property-row",
+      "description": "Reference parameter or property: name and presence, full type, meaning; nested options indented behind a hairline.",
+      "html": "<ul class=\"ds-props\"><li class=\"ds-prop\"><div class=\"ds-prop-head\"><code>options</code><span data-required>Required</span></div><code class=\"ds-prop-type\">DispatchRequest&lt;T&gt;</code><p>Repository and sandbox setup combined with the agent brief.</p></li><li class=\"ds-prop ds-nested\"><div class=\"ds-prop-head\"><code>options.agent</code><span>Optional</span></div><code class=\"ds-prop-type\">DispatchAgent | undefined</code><p>Agent that runs the dispatch.</p></li></ul>",
+      "css": ".ds-props{margin:0;padding:0;list-style:none;border-top:1px solid #364153;font-family:Inter,system-ui,sans-serif}.ds-prop{display:grid;gap:.3rem;padding:.95rem 0;border-bottom:1px solid #364153}.ds-nested{margin-left:.6rem;padding-left:1rem;border-left:1px solid #364153}.ds-prop-head{display:flex;justify-content:space-between;align-items:baseline;gap:1rem}.ds-prop-head code{color:#fff;font:600 .875rem ui-monospace,SFMono-Regular,Menlo,monospace}.ds-prop-head span{color:#99a1af;font-size:.75rem}.ds-prop-head span[data-required]{color:#fff;font-weight:500}.ds-prop-type{color:#99a1af;font:400 .8rem/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;overflow-wrap:anywhere}.ds-prop p{margin:0;color:#d1d5dc;font-size:.9rem;line-height:1.6}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Survey Sheet",
+    "overview": "Outpost's web surfaces read like a technical drawing. The frame is drawn first: one hairline grid, measured bays, and every element placed on it. The page has no decoration to fall back on. The structure is the lines, the content is real code and plain facts, and color appears only where something is live: an active code range, a focus ring, an experimental flag. It serves developers who read with a terminal open, so density is welcome and ornament is not.\n\nThe system is inherited from the Starlight documentation chrome with the Celestia theme: a cool grayscale in both light and dark, Inter for all prose, the platform monospace for code, and a single ember accent. The landing page on the docs home extends that chrome with no new identity. It is the same header, the same hairlines and the same grays, set out as a blueprint of bays.\n\nBoth themes are first-class. Every value below has a dark and a light counterpart, and the theme switch in the header selects between them.",
+    "keyCharacteristics": [
+      "One 12-track frame; sections split at track 5, inner cells at track 9.",
+      "1px hairlines as the only structure; square corners on the landing.",
+      "Grayscale everywhere; ember only for live state and focus.",
+      "Monospace strictly for code, commands and API names.",
+      "Real, typechecked code as the proof inside every bay."
+    ],
+    "rules": [
+      {
+        "name": "The Live-Only Ember Rule",
+        "body": "Ember marks what is active or focused right now: highlighted code, focus, selection, experimental status. Selected tabs, pressed steps, hovers and link underlines use white or slate ink and fills, never ember.",
+        "section": "colors"
+      },
+      {
+        "name": "The Two-Theme Rule",
+        "body": "No color is picked for one theme alone. Each role above has a dark and a light value, and both must meet WCAG 2.2 AA.",
+        "section": "colors"
+      },
+      {
+        "name": "The Working Mono Rule",
+        "body": "Monospace appears only on text a developer could paste or look up: code, commands, file names, function names. Never on labels, eyebrows or decoration.",
+        "section": "typography"
+      },
+      {
+        "name": "The Tight Display Rule",
+        "body": "Display and headline tracking never goes below -0.04em. Hierarchy comes from size and weight, never from gradient or color.",
+        "section": "typography"
+      },
+      {
+        "name": "The Shared Track Rule",
+        "body": "Every vertical hairline falls on a track of the 12-column frame, at 5 or 9 on the landing. A section that needs a new division reuses one of these lines rather than adding another.",
+        "section": "layout"
+      },
+      {
+        "name": "The Flat Sheet Rule",
+        "body": "Nothing casts a shadow. When an element needs to stand apart, it gets a tonal fill or a hairline.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do place every vertical division on the shared 12-track frame (tracks 5 and 9 on the landing).",
+      "Do prove each claim with real, typechecked code or a factual ledger in the bay beside it.",
+      "Do keep ember for highlighted code, focus, selection and experimental status only.",
+      "Do give every color role a dark and a light value that meet WCAG 2.2 AA.",
+      "Do use drawn SVG icons with a 1.6 stroke and round caps and joins.",
+      "Do make every code window scroll inside itself, with edge fades instead of page overflow."
+    ],
+    "donts": [
+      "Don't add shadows, glows or glass. Depth is tonal.",
+      "Don't round the corners of landing bays, cells, buttons or code windows.",
+      "Don't use monospace for labels, eyebrows or decoration.",
+      "Don't put kickers or eyebrows above headings.",
+      "Don't reduce inactive code to low-contrast gray to emphasize a range. Tint the active range instead.",
+      "Don't use Unicode arrows or emoji as icons.",
+      "Don't add superlatives, adoption claims, testimonials or invented logos."
+    ]
+  }
+}
