@@ -74,6 +74,61 @@ const calls = {
   [`${"x".repeat(80)}`]: () => ({ content: [{ type: "text", text: "long" }] }),
 };
 
+const rich = process.argv[2] === "rich";
+
+const resources = {
+  "resources/list": (params) =>
+    params.cursor === undefined
+      ? {
+          resources: [{ uri: "file:///readme.md", name: "readme" }],
+          nextCursor: "page-2",
+        }
+      : { resources: [{ uri: "file:///logo.png", name: "logo" }] },
+  "resources/templates/list": () => ({
+    resourceTemplates: [{ uriTemplate: "file:///{path}", name: "file" }],
+  }),
+  "resources/read": (params) =>
+    params.uri === "file:///readme.md"
+      ? {
+          contents: [
+            { uri: params.uri, mimeType: "text/markdown", text: "# Readme" },
+          ],
+        }
+      : params.uri === "file:///logo.png"
+        ? {
+            contents: [
+              { uri: params.uri, mimeType: "image/png", blob: "AAAA" },
+            ],
+          }
+        : undefined,
+  "prompts/list": () => ({
+    prompts: [
+      { name: "review", arguments: [{ name: "lang", required: true }] },
+    ],
+  }),
+  "prompts/get": (params) =>
+    params.name === "review"
+      ? {
+          messages: [
+            {
+              role: "user",
+              content: {
+                type: "text",
+                text: `Review ${params.arguments.lang} code.`,
+              },
+            },
+            {
+              role: "assistant",
+              content: {
+                type: "resource",
+                resource: { uri: "file:///rules.md", text: "Be strict." },
+              },
+            },
+          ],
+        }
+      : undefined,
+};
+
 const input = createInterface({ input: process.stdin });
 input.on("line", (line) => {
   const message = JSON.parse(line);
@@ -97,10 +152,19 @@ input.on("line", (line) => {
       id: message.id,
       result: {
         protocolVersion: message.params.protocolVersion,
-        capabilities: { tools: {} },
+        capabilities: rich
+          ? { tools: {}, resources: {}, prompts: {} }
+          : { tools: {} },
         serverInfo: { name: "fixture", version: "1" },
       },
     });
+  } else if (Object.hasOwn(resources, message.method)) {
+    const result = resources[message.method](message.params ?? {});
+    send(
+      result
+        ? { id: message.id, result }
+        : { id: message.id, error: { code: -32602, message: "not found" } },
+    );
   } else if (message.method === "tools/list") {
     const first = message.params.cursor === undefined;
     send({

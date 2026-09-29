@@ -18,3 +18,10 @@ export const mcpDefaults = Object.freeze({
 export const MCP_TOOL_PREFIX = "mcp__";
 
 export const MCP_METHOD_NOT_FOUND = -32601;
+
+export const MCP_CAPABILITY_TOOLS = Object.freeze({
+  listResources: "mcp_list_resources",
+  readResource: "mcp_read_resource",
+  listPrompts: "mcp_list_prompts",
+  getPrompt: "mcp_get_prompt",
+});

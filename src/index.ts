@@ -6,6 +6,7 @@ export type {
   HarnessSubagentOptions,
 } from "./domain/subagent.types.ts";
 export { createHarness } from "./domain/harness.ts";
+export { defineMcpPrompt } from "./domain/mcp-prompt.ts";
 export {
   defineHarnessContextStrategy,
   summarizeHistory,
@@ -68,6 +69,7 @@ export type {
   Harness,
   HarnessOptions,
   HarnessInstructionContext,
+  HarnessMcpContext,
   HarnessInstructions,
   HarnessInstructionSource,
   HarnessInstructionsOption,
@@ -79,7 +81,9 @@ export type {
   McpServer,
   McpServers,
   McpStdioServer,
+  McpToolFilter,
 } from "./domain/mcp-server.types.ts";
+export type { McpPromptOptions } from "./domain/mcp-prompt.types.ts";
 export type {
   HarnessTool,
   HarnessToolContext,

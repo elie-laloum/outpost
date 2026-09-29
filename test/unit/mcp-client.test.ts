@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { createHarness } from "../../src/domain/harness.ts";
+import { defineMcpPrompt } from "../../src/domain/mcp-prompt.ts";
+import { renderPrompt } from "../../src/adapters/tools/mcp-resources.ts";
 import { mcpConnection } from "../../src/adapters/tools/mcp-connection.ts";
 import {
   mcpTools,
@@ -137,5 +139,47 @@ test("the built-in harness validates and keeps declared MCP servers", () => {
     () =>
       createHarness({ modelProvider, mcpServers: { "a b": { command: "x" } } }),
     { code: "configuration" },
+  );
+});
+
+test("MCP prompt declarations validate their target and render messages", async () => {
+  for (const options of [
+    null,
+    { server: "bad name", name: "review" },
+    { server: "docs", name: " " },
+    { server: "docs", name: "review", arguments: { lang: 1 } },
+    { server: "docs", name: "review", arguments: ["ts"] },
+  ])
+    assert.throws(() => defineMcpPrompt(options as never), {
+      code: "configuration",
+    });
+  const calls: unknown[] = [];
+  const instructions = defineMcpPrompt({
+    server: "docs",
+    name: "review",
+    arguments: { lang: "ts" },
+  });
+  const text = await instructions.resolve({
+    sandbox: {} as never,
+    signal,
+    model: { name: "m" },
+    mcp: {
+      async prompt(...values: unknown[]) {
+        calls.push(values);
+        return "rendered";
+      },
+    },
+  });
+  assert.equal(text, "rendered");
+  assert.deepEqual(calls, [["docs", "review", { lang: "ts" }]]);
+  assert.equal(renderPrompt(null), "");
+  assert.equal(
+    renderPrompt({
+      messages: [
+        { role: "user", content: { type: "image", mimeType: "image/png" } },
+        "odd",
+      ],
+    }),
+    "user: [image omitted: image/png]",
   );
 });

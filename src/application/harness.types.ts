@@ -1,3 +1,4 @@
+import type { HarnessMcpContext } from "../domain/harness.types.ts";
 import type { HarnessBudget } from "./harness-budget.types.ts";
 import type { HarnessPermissions } from "../domain/permissions.types.ts";
 import type { HarnessModelScope } from "./harness-model-provider.types.ts";
@@ -26,6 +27,7 @@ export interface HarnessRuntime {
   readonly tools: readonly HarnessTool[];
   readonly modelProvider: ModelProvider;
   readonly sandbox: SandboxLease;
+  readonly mcp?: HarnessMcpContext | undefined;
   readonly signal: AbortSignal;
   /** Run id of the built-in subagent this loop runs, absent for the main loop. */
   readonly subagentId?: string | undefined;

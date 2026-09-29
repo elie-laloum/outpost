@@ -9,10 +9,19 @@ import type { HarnessSkill } from "./skill.types.ts";
 import type { SandboxLease } from "./sandbox.types.ts";
 import type { HarnessTool, HarnessToolset } from "./tool.types.ts";
 
+export interface HarnessMcpContext {
+  prompt(
+    server: string,
+    name: string,
+    promptArguments: Readonly<Record<string, string>>,
+  ): Promise<string>;
+}
+
 export interface HarnessInstructionContext {
   readonly sandbox: SandboxLease;
   readonly signal: AbortSignal;
   readonly model: AgentModel;
+  readonly mcp?: HarnessMcpContext;
 }
 
 export type HarnessInstructionSource =

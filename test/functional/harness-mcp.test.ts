@@ -12,6 +12,7 @@ import {
   defineHarnessPermissions,
   defineHarnessSubagent,
   defineHarnessTool,
+  defineMcpPrompt,
   dispatch,
   type AgentObservation,
   type HarnessOptions,
@@ -513,5 +514,115 @@ test("MCP tool filters limit the tools offered to the model and catch unknown na
       mcpServers: fixture(log, { tools: { include: ["echo", "missing"] } }),
     }),
     { code: "configuration", message: /has no tool named missing/ },
+  );
+});
+
+test("resource and prompt tools and MCP prompt instructions reach the model", async (t) => {
+  const root = await repository(t);
+  const log = join(root, "mcp.log");
+  const requests: ModelRequest[] = [];
+  const rich = fixture(log, { arguments: [server, "rich"] });
+  await run(
+    root,
+    [
+      (request) => {
+        assert.match(
+          request.system ?? "",
+          /user: Review ts code\.\n\nassistant: Be strict\./,
+        );
+        const names = (request.tools ?? []).map((tool) => tool.name);
+        assert.deepEqual(names.slice(-4), [
+          "mcp_list_resources",
+          "mcp_read_resource",
+          "mcp_list_prompts",
+          "mcp_get_prompt",
+        ]);
+        const list = request.tools!.find(
+          (tool) => tool.name === "mcp_list_resources",
+        );
+        assert.deepEqual(
+          (list?.inputSchema.properties as Record<string, unknown>).server,
+          { type: "string", enum: ["fixture"] },
+        );
+        return call(
+          ["mcp_list_resources", { server: "fixture" }],
+          ["mcp_list_resources", { server: "fixture", cursor: "page-2" }],
+          [
+            "mcp_read_resource",
+            { server: "fixture", uri: "file:///readme.md" },
+          ],
+          ["mcp_read_resource", { server: "fixture", uri: "file:///logo.png" }],
+          ["mcp_read_resource", { server: "fixture", uri: "file:///missing" }],
+          ["mcp_list_prompts", { server: "fixture" }],
+          [
+            "mcp_get_prompt",
+            { server: "fixture", name: "review", arguments: { lang: "go" } },
+          ],
+          ["mcp_get_prompt", { server: "fixture", name: "missing" }],
+          ["mcp_read_resource", { server: "other", uri: "x" }],
+        )(request);
+      },
+      () => done,
+    ],
+    {
+      mcpServers: rich,
+      instructions: [
+        defineMcpPrompt({
+          server: "fixture",
+          name: "review",
+          arguments: { lang: "ts" },
+        }),
+      ],
+      toolExecution: { concurrency: 1 },
+    },
+    requests,
+  );
+  const outputs = results(requests[1]);
+  assert.deepEqual(JSON.parse(outputs[0]!), {
+    resources: [{ uri: "file:///readme.md", name: "readme" }],
+    resourceTemplates: [{ uriTemplate: "file:///{path}", name: "file" }],
+    nextCursor: "page-2",
+  });
+  assert.deepEqual(JSON.parse(outputs[1]!), {
+    resources: [{ uri: "file:///logo.png", name: "logo" }],
+  });
+  assert.deepEqual(outputs.slice(2, 5), [
+    "# Readme",
+    "[resource file:///logo.png image/png]",
+    "error:MCP server fixture returned error -32602: not found",
+  ]);
+  assert.deepEqual(JSON.parse(outputs[5]!), {
+    prompts: [
+      { name: "review", arguments: [{ name: "lang", required: true }] },
+    ],
+  });
+  assert.equal(outputs[6], "user: Review go code.\n\nassistant: Be strict.");
+  assert.match(outputs[7]!, /^error:MCP server fixture returned error -32602/);
+  assert.match(outputs[8]!, /^error:.*server/);
+});
+
+test("MCP prompt instructions need a running server that offers prompts", async (t) => {
+  const root = await repository(t);
+  const log = join(root, "mcp.log");
+  const instructions = [defineMcpPrompt({ server: "fixture", name: "review" })];
+  await assert.rejects(run(root, [], { instructions }), {
+    code: "configuration",
+    message: /needs mcpServers on the harness/,
+  });
+  await assert.rejects(
+    run(root, [], { instructions, mcpServers: fixture(log) }),
+    { code: "configuration", message: /offers no prompts/ },
+  );
+  await run(
+    root,
+    [
+      (request) => {
+        assert.ok(
+          !(request.tools ?? []).some((tool) => /^mcp_[a-z]/.test(tool.name)),
+        );
+        return done;
+      },
+    ],
+    { mcpServers: fixture(log) },
   );
 });

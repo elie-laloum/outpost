@@ -18,6 +18,7 @@ import { harnessHistory } from "./harness-history.ts";
 import { harnessLoop } from "./harness-loop.ts";
 import { withMcpTools } from "./harness-mcp.ts";
 import type { HarnessTool } from "../domain/tool.types.ts";
+import type { HarnessMcpContext } from "../domain/harness.types.ts";
 import type { CustomTurnContext } from "./harness.types.ts";
 import { stopReason } from "./stop-reason.ts";
 import { notify } from "./observation.ts";
@@ -147,7 +148,10 @@ export async function customTurn(
         })
       : undefined;
     if (transcript) emit({ kind: "conversation", id: transcript.id });
-    const run = (tools: readonly HarnessTool[]) =>
+    const run = (
+      tools: readonly HarnessTool[],
+      mcp: HarnessMcpContext | undefined,
+    ) =>
       harnessLoop(
         {
           agent,
@@ -165,6 +169,7 @@ export async function customTurn(
           tools,
           modelProvider,
           sandbox,
+          mcp,
           signal,
           ...(inbox ? { steering: harnessSteering(inbox) } : {}),
           emit,
@@ -173,15 +178,18 @@ export async function customTurn(
         prompt,
         harnessHistory(transcript),
       );
-    const text = context.repair
-      ? await run(agent.harness.tools.filter((tool) => tool.readOnly))
-      : await withMcpTools(
-          agent.harness,
-          sandbox,
-          signal,
-          agent.harness.tools,
-          run,
-        );
+    // Repairs keep read-only tools but still start MCP servers for prompt instructions.
+    const text = await withMcpTools(
+      agent.harness,
+      sandbox,
+      signal,
+      agent.harness.tools,
+      (tools, mcp) =>
+        run(
+          context.repair ? tools.filter((tool) => tool.readOnly) : tools,
+          mcp,
+        ),
+    );
     signal.throwIfAborted();
     for (const value of [
       usage.input,

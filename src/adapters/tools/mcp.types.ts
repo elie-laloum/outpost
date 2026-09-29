@@ -42,7 +42,35 @@ export interface McpToolResult {
   readonly isError?: boolean;
 }
 
+export interface McpSession {
+  readonly name: string;
+  readonly connection: McpConnection;
+  readonly capabilities: Readonly<Record<string, unknown>>;
+}
+
 export interface OpenedMcpServers {
   readonly tools: readonly HarnessTool[];
+  prompt(
+    server: string,
+    name: string,
+    promptArguments: Readonly<Record<string, string>>,
+    signal: AbortSignal,
+  ): Promise<string>;
   close(): Promise<void>;
+}
+
+export interface McpListInput {
+  readonly server: string;
+  readonly cursor?: string;
+}
+
+export interface McpReadResourceInput {
+  readonly server: string;
+  readonly uri: string;
+}
+
+export interface McpGetPromptInput {
+  readonly server: string;
+  readonly name: string;
+  readonly arguments?: Readonly<Record<string, string>>;
 }

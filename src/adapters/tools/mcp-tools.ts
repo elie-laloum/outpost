@@ -8,28 +8,13 @@ import type {
   StandardJsonSchema,
   ToolOutput,
 } from "../../domain/tool.types.ts";
+import { mcpRecord, renderContentBlock } from "./mcp-content.ts";
 import { MCP_TOOL_PREFIX } from "./mcp.constants.ts";
 import type {
   McpConnection,
-  McpContentBlock,
   McpToolDescription,
   McpToolResult,
 } from "./mcp.types.ts";
-
-const blockRenderers: Readonly<
-  Record<string, (block: McpContentBlock) => string>
-> = {
-  text: (block) => String(block.text ?? ""),
-  image: (block) => `[image omitted: ${String(block.mimeType)}]`,
-  audio: (block) => `[audio omitted: ${String(block.mimeType)}]`,
-  resource_link: (block) => `[resource ${String(block.uri)}]`,
-  resource: (block) => {
-    const resource = record(block.resource) ?? {};
-    return typeof resource.text === "string"
-      ? resource.text
-      : `[resource ${String(resource.uri)}]`;
-  },
-};
 
 export async function mcpTools(
   server: string,
@@ -40,7 +25,7 @@ export async function mcpTools(
   const descriptions: McpToolDescription[] = [];
   let cursor: string | undefined;
   do {
-    const page = record(
+    const page = mcpRecord(
       await connection.request("tools/list", cursor ? { cursor } : {}, signal),
     );
     if (!page || !Array.isArray(page.tools))
@@ -88,13 +73,9 @@ export function toolName(server: string, tool: string): string {
 }
 
 export function renderToolResult(value: unknown): ToolOutput {
-  const result = (record(value) ?? {}) as McpToolResult;
+  const result = (mcpRecord(value) ?? {}) as McpToolResult;
   const text = (Array.isArray(result.content) ? result.content : [])
-    .map((entry) => {
-      const block = record(entry) ?? {};
-      const render = blockRenderers[String(block.type)];
-      return render ? render(block) : JSON.stringify(entry);
-    })
+    .map(renderContentBlock)
     .join("\n");
   return {
     content:
@@ -114,7 +95,7 @@ function harnessTool(
   const input: StandardJsonSchema<Record<string, unknown>> = {
     "~standard": {
       validate: (value) =>
-        record(value)
+        mcpRecord(value)
           ? { value: value as Record<string, unknown> }
           : { issues: [{ message: "Expected an object" }] },
       jsonSchema: { input: () => ({ ...tool.inputSchema, type: "object" }) },
@@ -146,8 +127,8 @@ function harnessTool(
 }
 
 function description(server: string, value: unknown): McpToolDescription {
-  const tool = record(value);
-  const schema = record(tool?.inputSchema) ?? { type: "object" };
+  const tool = mcpRecord(value);
+  const schema = mcpRecord(tool?.inputSchema) ?? { type: "object" };
   if (!tool || typeof tool.name !== "string" || !tool.name)
     throw new OutpostError(
       "response",
@@ -161,10 +142,4 @@ function description(server: string, value: unknown): McpToolDescription {
       : {}),
     inputSchema: schema,
   };
-}
-
-function record(value: unknown): Record<string, unknown> | undefined {
-  return value !== null && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : undefined;
 }

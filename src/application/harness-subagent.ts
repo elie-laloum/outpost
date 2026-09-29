@@ -65,11 +65,12 @@ export async function runSubagent(
       context.sandbox,
       context.signal,
       agent.harness.tools,
-      (tools) =>
+      (tools, mcp) =>
         harnessLoop(
           {
             ...runtime,
             agent,
+            mcp,
             budget,
             depth,
             maxDepth: Math.min(

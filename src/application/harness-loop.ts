@@ -153,6 +153,7 @@ async function instructions(runtime: HarnessRuntime): Promise<string> {
         sandbox: runtime.sandbox,
         signal: runtime.signal,
         model: runtime.agent.model,
+        ...(runtime.mcp ? { mcp: runtime.mcp } : {}),
       }),
     ),
   );

@@ -11,7 +11,9 @@ import {
   MCP_PROTOCOL_VERSION,
   mcpDefaults,
 } from "./mcp.constants.ts";
-import type { McpProcess, OpenedMcpServers } from "./mcp.types.ts";
+import { mcpRecord } from "./mcp-content.ts";
+import { getMcpPrompt, mcpCapabilityTools } from "./mcp-resources.ts";
+import type { McpProcess, McpSession, OpenedMcpServers } from "./mcp.types.ts";
 
 export async function openMcpServers(
   servers: McpServers,
@@ -23,12 +25,13 @@ export async function openMcpServers(
     "MCP servers in the built-in harness need a sandbox lease with live process input",
   );
   const opened: McpProcess[] = [];
+  const sessions: McpSession[] = [];
   const close = async () => {
     await Promise.allSettled(opened.map((session) => session.close()));
   };
   try {
     const tools = await Promise.all(
-      Object.entries(servers).map(async ([name, server]) => {
+      Object.entries(servers).map(async ([name, server], index) => {
         const session = openMcpProcess(
           name,
           lease,
@@ -36,16 +39,26 @@ export async function openMcpServers(
           signal,
         );
         opened.push(session);
-        await initialize(
+        const capabilities = await initialize(
           name,
           session,
           server.startupTimeoutMs ?? mcpDefaults.startupTimeoutMs,
           signal,
         );
+        sessions[index] = {
+          name,
+          connection: session.connection,
+          capabilities,
+        };
         return mcpTools(name, session.connection, signal, server.tools);
       }),
     );
-    return { tools: tools.flat(), close };
+    return {
+      tools: [...tools.flat(), ...mcpCapabilityTools(sessions)],
+      prompt: (server, name, promptArguments, promptSignal) =>
+        getMcpPrompt(sessions, server, name, promptArguments, promptSignal),
+      close,
+    };
   } catch (error) {
     await close();
     throw error;
@@ -88,10 +101,11 @@ async function initialize(
   session: McpProcess,
   timeoutMs: number,
   signal: AbortSignal,
-): Promise<void> {
+): Promise<Readonly<Record<string, unknown>>> {
   const timeout = AbortSignal.timeout(timeoutMs);
+  let result: unknown;
   try {
-    await session.connection.request(
+    result = await session.connection.request(
       "initialize",
       {
         protocolVersion: MCP_PROTOCOL_VERSION,
@@ -109,4 +123,5 @@ async function initialize(
     );
   }
   session.connection.notify("notifications/initialized");
+  return mcpRecord(mcpRecord(result)?.capabilities) ?? {};
 }
