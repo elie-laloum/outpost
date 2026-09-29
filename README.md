@@ -1,76 +1,128 @@
-# Outpost
+<p align="center">
+  <a href="https://elie-laloum.github.io/outpost/">
+    <img src="docs/src/assets/outpost-logo.png" alt="Outpost" width="180">
+  </a>
+</p>
 
-[Documentation](https://elie-laloum.github.io/outpost/) · [Français](https://elie-laloum.github.io/outpost/fr/) · [API](https://elie-laloum.github.io/outpost/reference/) · [Changelog](CHANGELOG.md)
+<h1 align="center">Outpost</h1>
 
-Outpost is a TypeScript library for running coding agents in reusable sandboxes, managing their Git workspaces and composing typed workflows. Claude Code, Codex, Antigravity, GitHub Copilot CLI and Kimi Code adapters work with Docker, Podman, Vercel, Daytona or explicit host execution. Each harness authenticates explicitly with your account login or an API key. Claude Code, Codex and Kimi support native capture, resume and fork. Copilot supports capture and resume; Antigravity resumes conversations only while their sandbox remains open. These continuation additions are available in 7.0.0.
+<p align="center"><strong>Coding agents. Isolated workspaces. Workflows in TypeScript.</strong></p>
 
-Version 8.0.0 adds verification loops, interactive agent tasks, dispatch record and replay, task result caching and quota pauses that resume interrupted conversations. It extends public status, event and fault unions and reclassifies model-provider rate limits as `quota`: see the [changelog](CHANGELOG.md#800) for migration notes.
+<p align="center">
+  <a href="https://github.com/elie-laloum/outpost/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/elie-laloum/outpost/ci.yml?branch=main&amp;label=tests" alt="Tests: CI status on main"></a>
+  <a href="https://github.com/elie-laloum/outpost/blob/main/package.json"><img src="https://img.shields.io/badge/coverage%20gate-%E2%89%A580%25-586475" alt="Coverage gate: at least 80% lines, branches and functions"></a>
+  <a href="https://www.npmjs.com/package/@elie-laloum/outpost"><img src="https://img.shields.io/npm/v/%40elie-laloum%2Foutpost" alt="npm version"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-586475" alt="License: MIT"></a>
+</p>
 
-Version 7.0.0 stabilizes the built-in harness and adds bounded subagents, unified observation, native CLI continuation, signed workflow decisions and recoverable speculation. It extends public TypeScript unions and context contracts: see the [changelog](CHANGELOG.md#700) for migration notes. Firecracker and speculation remain experimental; the [roadmap](https://elie-laloum.github.io/outpost/project/roadmap/) records remaining validation and planned work.
+<p align="center">
+  <a href="#quickstart">Quickstart</a> ·
+  <a href="https://elie-laloum.github.io/outpost/">Documentation</a> ·
+  <a href="https://elie-laloum.github.io/outpost/reference/">API reference</a> ·
+  <a href="https://elie-laloum.github.io/outpost/fr/">Français</a>
+</p>
 
-## Get started
+Outpost is a TypeScript library and CLI for running coding agents in sandboxes and composing their work. Give an agent a task, choose its execution environment, and collect its answer, commits and usage. Start with one request; add parallel tasks, verification loops and human decisions as your workflow grows.
 
-Start with [Setup](https://elie-laloum.github.io/outpost/guide/setup/), then [send your first request](https://elie-laloum.github.io/outpost/guide/first-request/). The [Guide](https://elie-laloum.github.io/outpost/guide/introduction/) explains each capability with focused snippets; the [Reference](https://elie-laloum.github.io/outpost/reference/) documents exact API contracts.
+## Why Outpost?
 
-Requires Node.js **24+**, Git, a target repository with a commit, and the credentials of your chosen agent. The workflow can live in its own directory. This example uses Docker.
+- **Choose your agent and sandbox independently.** Run Claude Code, Codex, Antigravity, GitHub Copilot CLI or Kimi Code with Docker, Podman, Vercel or Daytona.
+- **Keep Git work explicit.** Give tasks their own worktrees, retain branches for review, or opt into local integration. Compose work across repositories with declared dependencies.
+- **Write workflows as code.** Connect typed tasks, validate structured responses, enforce budgets and pause for human input or approval.
+- **Continue work across runs.** Capture supported agent conversations, resume checkpointed workflows and recover interrupted work with explicit replay controls.
+- **Build your own agent loop.** Use the built-in harness with OpenAI or Anthropic model providers, sandbox tools and bounded subagents.
+
+## Quickstart
+
+You need **Node.js 24+**, **Git**, a repository with at least one commit, and **Docker** running. This example uses Codex with account authentication: prepare its host login using the [setup guide](https://elie-laloum.github.io/outpost/guide/setup/) before running a task. [Authentication](https://elie-laloum.github.io/outpost/guide/access-credentials/) covers other agents and API-key billing.
+
+Create a workflow directory and point it at your checkout:
 
 ```sh
-mkdir workflow1
-cd workflow1
-npx @elie-laloum/outpost init --yes --repository /path1/repository --install
+mkdir my-workflow
+cd my-workflow
+npx @elie-laloum/outpost init --yes --repository /absolute/path/to/repository --image outpost:dev --install
 ```
 
-The generated script uses `authentication: "account"`: log in to Codex on the host with file credential storage (`codex -c cli_auth_credentials_store='"file"' login`), and Outpost copies that login into the private sandbox home. For API billing instead, add `--authentication usage`, copy `.env.example` to `.env` and declare `OPENAI_API_KEY`; an empty declaration inherits the matching process variable. Then run the generated script:
+This installs the workflow dependencies, generates `run.ts`, `brief.md` and configuration files, and builds the Docker image. The first build downloads the agent CLIs. Use `--no-build` if the image already exists. Existing package manifests are preserved; explicit CommonJS projects get `run.mts`.
+
+Run your first task:
 
 ```sh
-node run.ts "Add validation, run tests and commit the change"
+node run.ts "Describe this repository and suggest one small improvement. Do not edit files."
 ```
 
-`init` creates `package.json`, `run.ts`, `brief.md`, `.env.example`, `.gitignore` and a container recipe directly in the workflow directory. Existing package manifests are preserved; explicit CommonJS projects get `run.mts` for compatibility. The script resolves its brief, environment and relative repository paths from its own directory. See [multi-repository workflows](https://elie-laloum.github.io/outpost/guide/parallel-repositories/) to orchestrate several repositories.
-
-Outpost never reads a system keychain. See [authentication](https://elie-laloum.github.io/outpost/guide/access-credentials/) for every agent's account and API-key forms before dispatching.
+The generated script prints the branch, collected commits and conversation reference. It uses **local branch integration**: when you later ask the agent to change and commit code, those commits are integrated into the target checkout. Use a named branch, as below, to keep changes separate for review. See [branch strategies](https://elie-laloum.github.io/outpost/guide/branch-strategy/).
 
 ## Use the library
 
-After preparing the selected agent credentials and provider, library calls follow this shape. For configuration and a first call, see [First request](https://elie-laloum.github.io/outpost/guide/first-request/).
+The workflow is ordinary TypeScript. After the setup above, save this as `task.mts` next to the generated script, replace the repository path, and run `node task.mts`:
 
 ```ts
 import {
   createAgent,
-  dispatch,
   createCodexHarness,
+  dispatch,
 } from "@elie-laloum/outpost";
+import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
 
 const result = await dispatch({
-  repository: "/path1/repository",
+  repository: "/absolute/path/to/repository",
   agent: createAgent({
     harness: createCodexHarness({ authentication: "account" }),
   }),
-  branch: { mode: "integrate" },
-  brief: { text: "Fix the failing tests, verify and commit." },
+  sandboxProvider: createDockerSandboxProvider({ image: "outpost:dev" }),
+  branch: { mode: "named", name: "outpost/fix-tests" },
+  brief: {
+    text: "Fix the failing tests, run them to verify and commit the change.",
+  },
 });
+
+console.log(result.text);
 console.log(result.branch, result.commits);
+console.log(result.usage);
 ```
 
-`repository` selects a local Git checkout; without it, library calls use the current working directory. See [repository paths](https://elie-laloum.github.io/outpost/guide/repository-context/) for external checkouts and paths relative to the workflow script.
+`dispatch()` closes the sandbox it allocates; the named branch remains for review. Use a fresh branch name for each independent task. The agent’s answer is not an enforced test result: add explicit verification when checks must gate integration.
 
-Let Outpost drive a model itself with `createHarness({ modelProvider, tools, instructions, limits })` and tools from `defineHarnessTool()`, then compose it with `createAgent({ harness, model })`. Use `defineHarnessSubagent()` to expose a built-in child as a tool with its own history and limits; its token usage also counts toward the parent budget. The built-in contracts and OpenAI and Anthropic integrations are stable in 7.0.0. See [build a custom harness](https://elie-laloum.github.io/outpost/guide/model-loop/) for configuration.
+## Choose your building blocks
 
-Learn about [sandboxes](https://elie-laloum.github.io/outpost/guide/sandbox-sessions/), [workflows](https://elie-laloum.github.io/outpost/guide/task-dependencies/), [providers](https://elie-laloum.github.io/outpost/guide/execution-backends/) and [recovery](https://elie-laloum.github.io/outpost/guide/failure-recovery/) in the English/French documentation. The [roadmap](https://elie-laloum.github.io/outpost/project/roadmap/) describes future work.
+| You want to…                                        | Start here                                                                                       |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| Choose an agent, model and credentials              | [Agent configuration](https://elie-laloum.github.io/outpost/guide/agent-config/)                 |
+| Run locally in containers or in the cloud           | [Execution backends](https://elie-laloum.github.io/outpost/guide/execution-backends/)            |
+| Reuse a sandbox across commands and agent turns     | [Sandbox sessions](https://elie-laloum.github.io/outpost/guide/sandbox-sessions/)                |
+| Connect tasks and run independent work in parallel  | [Task dependencies](https://elie-laloum.github.io/outpost/guide/task-dependencies/)              |
+| Coordinate changes across repositories              | [Multi-repository workflows](https://elie-laloum.github.io/outpost/guide/parallel-repositories/) |
+| Return data your application can validate           | [Validated output](https://elie-laloum.github.io/outpost/guide/output-validation/)               |
+| Build an agent with your own tools and instructions | [Custom harness](https://elie-laloum.github.io/outpost/guide/model-loop/)                        |
+| Resume or recover interrupted work                  | [Failure recovery](https://elie-laloum.github.io/outpost/guide/failure-recovery/)                |
 
-## Development
+The [Guide](https://elie-laloum.github.io/outpost/guide/introduction/) explains behavior with focused examples. The [Reference](https://elie-laloum.github.io/outpost/reference/) documents exact contracts. Both are available in English and French.
+
+## Boundaries worth knowing
+
+Account login and API-key authentication are explicit choices with different billing. Outpost never reads a system keychain. Credentials are made available to the chosen agent in its execution environment.
+
+Conversation support varies: Claude Code, Codex and Kimi support capture, resume and fork; Copilot supports capture and resume; Antigravity resumes only in its existing sandbox.
+
+Docker and Podman mount the selected workspace and Git metadata by default. These mounts are not an adversarial security boundary. Cloud providers receive repository data and declared credentials; explicit local execution runs on the host without isolation. Read [SECURITY.md](SECURITY.md) before choosing an environment for untrusted code.
+
+Firecracker and speculation remain experimental. See the [roadmap](https://elie-laloum.github.io/outpost/project/roadmap/) for validation limits and planned work, and the [changelog](CHANGELOG.md) for version history and migration notes.
+
+## Development and contributions
+
+Bug reports, reproducible cases and focused contributions are welcome through [GitHub issues](https://github.com/elie-laloum/outpost/issues). Read [AGENTS.md](AGENTS.md) for architecture, conventions and the checks required for your change.
 
 ```sh
 bun install --frozen-lockfile
 bun run check
 bun run coverage
 bun run test:package
-bun install --cwd docs --frozen-lockfile
-bun run docs:sync
-bun run docs:build
-bun run docs:test
 ```
 
-[GitLab](https://gitlab.elielaloum.com/elielaloum/outpost) is the canonical repository. [GitHub](https://github.com/elie-laloum/outpost) is the mirror running tests, package releases and GitHub Pages. Documentation is validated on main and deployed only after a successful stable release.
+CI checks Windows, macOS and Linux, plus real Docker/Podman execution and Redis queue behavior. The coverage gate requires **at least 80% lines, branches and functions**; the badge shows that configured minimum, not a measured coverage percentage. Coverage reports are uploaded as CI artifacts. Routine tests do not require paid model calls.
 
-See [SECURITY.md](SECURITY.md) for execution boundaries and [LICENSE](LICENSE) for the MIT license.
+[GitLab](https://gitlab.elielaloum.com/elielaloum/outpost) is the canonical repository. [GitHub](https://github.com/elie-laloum/outpost) is the public mirror and runs CI, package releases and documentation deployment. The documentation site deploys after eligible stable releases.
+
+Created by **Elie Laloum**. Released under the [MIT license](LICENSE).
