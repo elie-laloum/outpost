@@ -40,6 +40,7 @@ export function transportConversations(
   };
   return {
     name: `transport:${options.namespace}:${format}`,
+    format,
     async locate(id, repository) {
       const current = await options.transporter.read(key(id));
       invariant(current, "Conversation does not exist");

@@ -1,4 +1,4 @@
-import type { ConversationStore } from "./conversation.types.ts";
+import { conversationFormat, isConversationStore } from "./conversation.ts";
 import { invariant, positive } from "./errors.ts";
 import {
   HARNESS_DEFAULTS,
@@ -61,9 +61,11 @@ export function harness(options: HarnessOptions): Harness {
   invariant(
     options.conversations === undefined ||
       options.conversations === false ||
-      conversationStore(options.conversations),
+      isConversationStore(options.conversations),
     "Harness conversations must be a conversation store or false",
   );
+  if (options.conversations)
+    conversationFormat("Harness", options.conversations, "harness");
   const skills = harnessSkills(options.skills);
   return Object.freeze({
     kind: "custom",
@@ -160,14 +162,4 @@ function toolExecution(
     ),
     onError: value.onError ?? HARNESS_DEFAULTS.onError,
   });
-}
-
-function conversationStore(value: ConversationStore): boolean {
-  return (
-    value !== null &&
-    typeof value === "object" &&
-    typeof value.locate === "function" &&
-    typeof value.capture === "function" &&
-    typeof value.restore === "function"
-  );
 }

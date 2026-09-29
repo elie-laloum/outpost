@@ -19,6 +19,7 @@ export interface ConversationContext {
 
 export interface ConversationStore {
   readonly name: string;
+  readonly format?: string;
   locate(
     id: string,
     repository: string,

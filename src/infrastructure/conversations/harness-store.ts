@@ -27,6 +27,7 @@ export function harnessConversations(): ConversationStore {
   };
   const store: ConversationStore = {
     name: "harness",
+    format: "harness",
     locate,
     capture: (id, context) => locate(id, context.repository),
     async restore() {},

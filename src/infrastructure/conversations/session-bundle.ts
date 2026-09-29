@@ -72,6 +72,7 @@ export function sessionConversations(
 ): ConversationStore {
   return {
     name: format,
+    format,
     async locate(id, repository, home) {
       const file = sessionBundlePath(format, id, repository, home);
       if (

@@ -13,6 +13,7 @@ export function nativeConversations(
     return sessionConversations(format);
   return {
     name: format,
+    format,
     locate(id, repository, home) {
       return locateConversation(format, id, repository, home);
     },
