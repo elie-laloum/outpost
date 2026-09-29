@@ -53,4 +53,6 @@ The pinned `@moonshot-ai/kimi-code` 2.1.1 CLI omits usage from `stream-json`. Af
 
 A missing session ID, absent or malformed records, interrupted execution or exceeded reader limits produces `usage.complete === false`; measured counters are retained as a lower bound. Collection warns at startup because it happens after execution. Combine `budget.attempts` with a task timeout or dispatch deadline; see [Usage budgets](../token-budgets/).
 
+`mcpServers` merges [MCP servers](../mcp-servers/) into `~/.kimi-code/mcp.json` in the agent home, which is your own home with the local provider.
+
 API: [kimiHarness](../../reference/kimiharness/).

@@ -53,4 +53,6 @@ La CLI épinglée `@moonshot-ai/kimi-code` 2.1.1 omet l’usage dans `stream-jso
 
 Un identifiant absent, des entrées manquantes ou malformées, une interruption ou le dépassement des limites de lecture produisent `usage.complete === false` ; les compteurs mesurés restent une borne inférieure. Un avertissement au démarrage précise que la collecte intervient après l’exécution. Combinez `budget.attempts` avec un timeout de tâche ou un délai de dispatch ; voir [Budgets de consommation](../token-budgets/).
 
+`mcpServers` fusionne des [serveurs MCP](../mcp-servers/) dans `~/.kimi-code/mcp.json` du home de l’agent, qui est votre propre home avec le fournisseur local.
+
 API : [kimiHarness](../../reference/kimiharness/).

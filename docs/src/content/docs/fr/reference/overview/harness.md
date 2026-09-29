@@ -14,6 +14,8 @@ Choisissez `claudeHarness()`, `codexHarness()`, `antigravityHarness()`, `copilot
 
 Utilisez `harness()` pour qu’Outpost pilote lui-même le modèle. Il combine un [fournisseur de modèles](../model-providers/), des outils issus de `defineHarnessTool()` et `defineHarnessToolset()`, des instructions en texte ou via `defineHarnessInstructions()`, des hooks, des permissions, des limites de boucle et des réglages d’exécution des outils. Sélectionnez le modèle sur l’[agent](../agents/) ; un harness personnalisé exige un modèle explicite, tandis qu’un preset CLI peut conserver son modèle natif par défaut.
 
+Les deux variantes acceptent `mcpServers`, une table [`McpServers`](../../mcpservers/) de serveurs stdio ([`McpStdioServer`](../../mcpstdioserver/)) ou HTTP ([`McpHttpServer`](../../mcphttpserver/)). Les presets CLI la traduisent dans leur configuration native, planifiée par `AgentAdapter.configuration` sous forme de fichiers [`AgentConfiguration`](../../agentconfiguration/) lorsqu’une CLI la lit dans son home ; le moteur Outpost démarre les serveurs dans la sandbox à chaque tour et expose leurs outils sous la forme `mcp__<serveur>__<outil>`.
+
 Le moteur intégré renvoie un [`Harness`](../../type-customharness/) configuré avec [`HarnessOptions`](../../customharnessoptions/). [`AgentHarness`](../../harness/) est l’union `CliHarness | Harness` pour le code qui accepte les deux variantes d’exécution.
 
 ## Frontières et responsabilités
@@ -34,9 +36,11 @@ Les presets CLI sont stables depuis la version 5.0.0. Le moteur intégré et ses
 - [defineHarnessHook](../../defineharnesshook/) et [defineHarnessPermissions](../../defineharnesspermissions/) contrôlent les appels d’outils et la fin de la boucle.
 - [claudeHarness](../../claudeharness/), [codexHarness](../../codexharness/), [antigravityHarness](../../antigravityharness/), [copilotHarness](../../copilotharness/) et [kimiHarness](../../kimiharness/) configurent les presets CLI avec [ClaudeSettings](../../claudesettings/), [CodexSettings](../../codexsettings/), [AntigravitySettings](../../antigravitysettings/), [CopilotSettings](../../copilotsettings/) et [KimiSettings](../../kimisettings/).
 - [AgentAuthentication](../../agentauthentication/), [AccountCredential](../../accountcredential/) et [UsageCredential](../../usagecredential/) choisissent comment un preset CLI s’authentifie.
+- [McpServers](../../mcpservers/), [McpServer](../../mcpserver/), [McpStdioServer](../../mcpstdioserver/) et [McpHttpServer](../../mcphttpserver/) déclarent des serveurs MCP pour les deux variantes ; voir [Serveurs MCP](../../../guide/mcp-servers/).
 - [agentVersions](../../agentversions/) liste les versions de CLI épinglées pour les images générées et le bootstrap distant, y compris les archives Antigravity vérifiées avec des empreintes SHA-512 épinglées.
 - [Harness](../../harness/) est le contrat commun de composition.
 - [HarnessToolContext](../../harnesstoolcontext/) décrit le sandbox, le signal d’annulation, le modèle et l’observateur accessibles à un outil.
 - [AgentAdapter](../../agentadapter/) décrit l’adaptateur de protocole CLI.
+- [AgentConfiguration](../../agentconfiguration/) et [ConfigurationFile](../../configurationfile/) décrivent la configuration CLI fusionnée dans le home de l’agent.
 
 [Apprendre avec le guide pratique](../../../guide/agents/harness/). Pour les presets CLI, consultez [le guide des adapters](../../../guide/agents/adapters/) et [l’authentification](../../../guide/manual/authentication/).

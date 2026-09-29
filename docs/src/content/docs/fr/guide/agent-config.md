@@ -31,6 +31,10 @@ Omettez `model` pour utiliser le modèle par défaut de la CLI. Fournissez un no
 
 La [boucle de modèle](../model-loop/) personnalisée exige un modèle explicite et un fournisseur de modèle. Elle n’installe pas de CLI d’agent de code.
 
+## Donner des outils MCP aux agents
+
+Chaque harness accepte `mcpServers`. Voir [Serveurs MCP](../mcp-servers/).
+
 ## Se replier sur un autre agent ou modèle
 
 Enveloppez plusieurs agents dans `fallbackAgent([...], { on })` pour confier un dispatch au suivant quand une limite ou une panne arrête l’agent courant. Voir [Agents de secours](../agent-fallback/).

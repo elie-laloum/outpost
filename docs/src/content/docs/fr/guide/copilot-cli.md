@@ -38,4 +38,6 @@ La CLI Copilot épinglée est 1.0.88. Entrée, sortie, lectures et écritures de
 
 La collecte est bornée et peut se terminer après la consommation des tokens. Combinez un budget de tentatives avec un timeout de tâche ou un délai de dispatch ; voir [Budgets de consommation](../token-budgets/).
 
+`mcpServers` transmet des [serveurs MCP](../mcp-servers/) avec `--additional-mcp-config` à chaque exécution.
+
 API : [copilotHarness](../../reference/copilotharness/).

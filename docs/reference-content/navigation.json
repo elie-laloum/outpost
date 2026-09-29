@@ -516,6 +516,8 @@
         "slug": "reference/usagecredential",
         "attrs": { "data-api-kind": "type" }
       },
+      { "slug": "reference/mcpserver", "attrs": { "data-api-kind": "type" } },
+      { "slug": "reference/mcpservers", "attrs": { "data-api-kind": "type" } },
       {
         "slug": "reference/agentversions",
         "attrs": { "data-api-kind": "constant" }
@@ -681,6 +683,14 @@
         "attrs": { "data-api-kind": "interface" }
       },
       {
+        "slug": "reference/mcpstdioserver",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/mcphttpserver",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
         "slug": "reference/agentadapter",
         "attrs": { "data-api-kind": "interface" }
       },
@@ -698,6 +708,14 @@
       },
       {
         "slug": "reference/agentliveread",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/agentconfiguration",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/configurationfile",
         "attrs": { "data-api-kind": "interface" }
       }
     ]

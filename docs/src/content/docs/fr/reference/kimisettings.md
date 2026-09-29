@@ -19,6 +19,7 @@ import type { KimiSettings } from "@elie-laloum/outpost";
 | `authentication` | `AgentAuthentication \| undefined`              | Optionnel | Le mode account lit le fichier OAuth de la région choisie et device_id sous ~/.kimi-code ou KIMI_CODE_HOME ; account.file sélectionne un dossier de profil dédié. Les formes usage acceptent KIMI_API_KEY ou une clé/variable explicite et exigent un modèle sur agent(). Les formes account.key/variable ne sont pas prises en charge. Son absence ne prépare aucun identifiant.                                                                                                                                                      |
 | `variables`      | `Readonly<Record<string, string>> \| undefined` | Optionnel | Déclarations d’environnement explicites ; les valeurs sont des chaînes.                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | `conversations`  | `ConversationStore \| undefined`                | Optionnel | Store qui capture, localise et restaure les bundles de session Kimi au lieu du store natif par défaut, par exemple transportConversations("kimi", …). Un store qui déclare un autre format est refusé dès la création du harness.                                                                                                                                                                                                                                                                                                      |
+| `mcpServers`     | `McpServers \| undefined`                       | Optionnel | Serveurs MCP fusionnés dans .kimi-code/mcp.json du home de l’agent, indexés par nom de serveur ; les autres serveurs du fichier sont conservés. Avec le fournisseur local, c’est votre propre home. Chaque variable référencée doit être déclarée.                                                                                                                                                                                                                                                                                     |
 
 ## Signature
 
@@ -28,6 +29,7 @@ export interface KimiSettings {
   readonly authentication?: AgentAuthentication;
   readonly variables?: Variables;
   readonly conversations?: ConversationStore;
+  readonly mcpServers?: McpServers;
 }
 ```
 
@@ -35,4 +37,5 @@ export interface KimiSettings {
 
 - [AgentAuthentication](../agentauthentication/)
 - [ConversationStore](../conversationstore/)
+- [McpServers](../mcpservers/)
 - [Variables](../variables/)

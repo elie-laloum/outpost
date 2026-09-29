@@ -32,4 +32,6 @@ Codex prend en charge la capture des conversations, la reprise, le fork et la r�
 
 Définissez `modelProvider: { baseUrl, apiKeyEnvironment }` sur `codexHarness()` et un `model` explicite sur `agent()`. L’endpoint doit implémenter l’API Responses. `apiKeyEnvironment: false` sélectionne un endpoint sans authentification ; sinon, déclarez la variable de clé choisie. Voir [Authentification Codex](https://developers.openai.com/codex/auth).
 
+`mcpServers` transmet des [serveurs MCP](../mcp-servers/) sous forme de surcharges `-c mcp_servers.<nom>…` à chaque exécution. Les événements d’outils MCP s’appellent `mcp__<serveur>__<outil>`.
+
 API : [codexHarness](../../reference/codexharness/).

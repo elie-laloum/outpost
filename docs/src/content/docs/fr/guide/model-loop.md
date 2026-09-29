@@ -36,7 +36,7 @@ Définissez `MODEL_NAME` avec un modèle disponible sur votre service, puis pass
 
 `limits` borne les étapes, appels d’outils et consommation observée. Atteindre une borne échoue avec le code `limit`. `toolExecution` contrôle concurrence, délais par appel et renvoi des erreurs au modèle ou échec du tour. Les callbacks d’outils s’exécutent dans le processus Outpost et doivent utiliser la sandbox fournie pour les opérations du dépôt.
 
-La boucle prend en charge les [politiques d’outils](../tool-policies/), la [gestion du contexte](../history-management/) et les [skills à la demande](../loadable-skills/). Ces réglages configurent la boucle intégrée, pas les mécanismes internes des CLI Codex ou Claude.
+La boucle prend en charge les [politiques d’outils](../tool-policies/), la [gestion du contexte](../history-management/), les [skills à la demande](../loadable-skills/) et les [serveurs MCP](../mcp-servers/). Ces réglages configurent la boucle intégrée, pas les mécanismes internes des CLI Codex ou Claude.
 
 API : [harness](../../reference/function-harness/) · [HarnessOptions](../../reference/customharnessoptions/).
 

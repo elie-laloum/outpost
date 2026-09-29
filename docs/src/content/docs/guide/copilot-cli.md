@@ -38,4 +38,6 @@ The pinned Copilot CLI is 1.0.88. Input, output, cache reads and cache writes re
 
 Collection is bounded and may only finish after the model has spent tokens. Combine an attempt budget with a task timeout or dispatch deadline; see [Usage budgets](../token-budgets/).
 
+`mcpServers` passes [MCP servers](../mcp-servers/) with `--additional-mcp-config` for each run.
+
 API: [copilotHarness](../../reference/copilotharness/).

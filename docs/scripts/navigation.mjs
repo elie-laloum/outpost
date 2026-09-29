@@ -30,6 +30,7 @@ export const chapters = [
       "guide/antigravity",
       "guide/copilot-cli",
       "guide/kimi-code",
+      "guide/mcp-servers",
     ],
   ],
   [

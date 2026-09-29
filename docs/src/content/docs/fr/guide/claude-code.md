@@ -30,4 +30,6 @@ Claude prend en charge les conversations natives, la reprise, le fork et la rép
 
 Voir [Authentification Claude Code](https://code.claude.com/docs/en/authentication) pour les conditions d’accès du fournisseur.
 
+`mcpServers` transmet des [serveurs MCP](../mcp-servers/) avec `--mcp-config` à chaque exécution.
+
 API : [claudeHarness](../../reference/claudeharness/).

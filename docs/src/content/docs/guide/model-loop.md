@@ -36,7 +36,7 @@ Set `MODEL_NAME` to a model available on your service, then pass this agent to a
 
 `limits` bounds steps, tool calls and observed usage. Hitting a bound fails with code `limit`. `toolExecution` controls concurrency, per-call deadlines and whether tool errors return to the model or fail the turn. Tool callbacks execute in the Outpost process and must use the supplied sandbox for repository operations.
 
-The loop supports [tool policies](../tool-policies/), [context management](../history-management/) and [loadable skills](../loadable-skills/). These settings configure the built-in loop, not Codex or Claude CLI internals.
+The loop supports [tool policies](../tool-policies/), [context management](../history-management/), [loadable skills](../loadable-skills/) and [MCP servers](../mcp-servers/). These settings configure the built-in loop, not Codex or Claude CLI internals.
 
 API: [harness](../../reference/function-harness/) · [HarnessOptions](../../reference/customharnessoptions/).
 

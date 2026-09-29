@@ -17,6 +17,7 @@ import type { AgentAdapter } from "@elie-laloum/outpost";
 | ----------------------- | ------------------------------------------------------------------------------------------------------ | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `fork`                  | `((id: string, invoke: (command: Command) => Promise<CommandResult>) => Promise<string>) \| undefined` | Optionnel | Préparation native optionnelle du fork : reçoit l’identifiant parent et un exécuteur de commandes dans la sandbox empruntée, puis renvoie un identifiant enfant distinct. Outpost continue cet enfant ; les adapters dotés d’un flag de fork peuvent omettre ce hook.                                                            |
 | `credentials`           | `((variables: Variables) => CredentialPlan) \| undefined`                                              | Optionnel | Planifie les credentials de cette CLI à partir des variables résolues du workflow, sans accès disque : variables à transmettre, fichiers hôte à copier dans le home privé de la sandbox, fichiers générés et commandes de connexion. Appelé une fois par adapter et par sandbox ; le provider local ne reçoit que les variables. |
+| `configuration`         | `((variables: Variables) => AgentConfiguration) \| undefined`                                          | Optionnel | Planifie les fichiers de configuration de la CLI à partir des variables résolues, sans accès disque. Outpost fusionne la section de chaque fichier dans le home de l’agent une fois par sandbox, après l’authentification ; lève une erreur si une variable référencée manque.                                                   |
 | `request`               | `(input: AgentInput) => Command`                                                                       | Requis    | Construit le programme, ses arguments et son environnement depuis l’entrée d’agent fournie.                                                                                                                                                                                                                                      |
 | `events`                | `(line: string) => readonly AgentEvent[]`                                                              | Requis    | Décode une ligne de sortie du CLI natif en événements d’agent normalisés.                                                                                                                                                                                                                                                        |
 | `quota`                 | `((text: string) => boolean) \| undefined`                                                             | Optionnel | Reconnaît un message terminal de limite d’usage ou de débit dans un événement failure ou une ligne stderr. Si le processus échoue ensuite, le tour est rejeté avec le code OutpostError quota au lieu de process ; les avis de reprise transitoires ne doivent pas correspondre.                                                 |
@@ -45,6 +46,8 @@ export interface AgentAdapter extends AgentFeatures {
     invoke: (command: Command) => Promise<CommandResult>,
   ): Promise<string>;
   credentials?(variables: Variables): CredentialPlan;
+  /** Plans CLI configuration merged into the agent home; throws when a referenced variable is missing. */
+  configuration?(variables: Variables): AgentConfiguration;
   request(input: AgentInput): Command;
   events(line: string): readonly AgentEvent[];
   /** Recognizes a usage-limit or rate-limit message in failure or stderr text. */
@@ -60,6 +63,7 @@ export interface AgentAdapter extends AgentFeatures {
 
 ## Contrats associés
 
+- [AgentConfiguration](../agentconfiguration/)
 - [AgentEvent](../agentevent/)
 - [AgentFeatures](../support-agentfeatures/)
 - [AgentInput](../agentinput/)

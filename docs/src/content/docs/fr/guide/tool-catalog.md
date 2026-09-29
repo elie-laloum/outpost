@@ -37,4 +37,6 @@ const gitStatus = defineHarnessTool({
 
 `readOnly` est une métadonnée d’ordonnancement, pas une isolation. Déclarez `resources(input)` si les règles de permissions doivent inspecter les chemins ou commandes. Utilisez `context.sandbox` pour l’exécution et respectez `context.signal` ; des appels au système de fichiers hôte contourneraient la sandbox empruntée.
 
+Pour utiliser les outils d’un serveur existant, déclarez des [serveurs MCP](../mcp-servers/) avec `harness({ mcpServers })`.
+
 API : [defineHarnessTool](../../reference/defineharnesstool/) · [defineHarnessToolset](../../reference/defineharnesstoolset/) · [HarnessToolContext](../../reference/harnesstoolcontext/).

@@ -15,6 +15,8 @@ Périphériques, volumes hôte et caches partagés supplémentaires étendent le
 
 Outpost lit uniquement les fichiers CLI sélectionnés et jamais un trousseau système. Les copies isolées utilisent des dossiers et fichiers privés. N’intégrez pas de secrets dans les images ou scripts suivis par Git. Les fournisseurs cloud reçoivent historique et entrées choisies ; les transports reçoivent les objets configurés pour persistance.
 
+Les [serveurs MCP](../mcp-servers/) agissent avec l’autorité de l’agent et reçoivent les variables que vous nommez. Outpost n’écrit que des références de variables dans leur configuration. Avec le fournisseur local, les entrées Kimi et Antigravity sont fusionnées dans votre propre home.
+
 ## Autorité applicative
 
 Acteur d’approbation, producteur d’artefact et PID distant enregistré sont des métadonnées. Votre application authentifie les utilisateurs, autorise la publication et établit si un propriétaire distant est réellement arrêté. Empreintes et écritures conditionnelles protègent intégrité et concurrence ; elles n’établissent pas l’identité. De même, quiconque peut écrire dans le transport d’un [cache de tâches](../task-cache/) contrôle les résultats que les tâches en cache restaurent.

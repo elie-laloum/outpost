@@ -27,6 +27,7 @@ import type { Harness } from "@elie-laloum/outpost";
 | `conversations` | `false \| ConversationStore \| undefined`                            | Optional | Configured conversation store, or false when recording is disabled; absent means the default store.        |
 | `skills`        | `readonly HarnessSkill[]`                                            | Required | Skills of the harness; their tools and load_skill are part of the tool list.                               |
 | `cache`         | `boolean`                                                            | Required | Whether each request asks the provider to cache the conversation prefix.                                   |
+| `mcpServers`    | `McpServers \| undefined`                                            | Optional | Validated MCP servers started for each turn, when set.                                                     |
 
 ## Signature
 
@@ -44,6 +45,7 @@ export interface Harness {
   readonly conversations?: ConversationStore | false;
   readonly skills: readonly HarnessSkill[];
   readonly cache: boolean;
+  readonly mcpServers?: McpServers;
 }
 ```
 
@@ -57,5 +59,6 @@ export interface Harness {
 - [HarnessSkill](../harnessskill/)
 - [HarnessTool](../harnesstool/)
 - [HarnessToolExecution](../harnesstoolexecution/)
+- [McpServers](../mcpservers/)
 - [ModelProvider](../modelprovider/)
 - [ResolvedHarnessLimits](../support-resolvedharnesslimits/)

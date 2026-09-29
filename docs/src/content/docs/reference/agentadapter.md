@@ -17,6 +17,7 @@ import type { AgentAdapter } from "@elie-laloum/outpost";
 | ----------------------- | ------------------------------------------------------------------------------------------------------ | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `fork`                  | `((id: string, invoke: (command: Command) => Promise<CommandResult>) => Promise<string>) \| undefined` | Optional | Optional native fork preparation: receive the parent ID and a borrowed sandbox command executor, then return a distinct child ID. Outpost requests continuation on that child; adapters with a fork flag can omit this hook.                                                                 |
 | `credentials`           | `((variables: Variables) => CredentialPlan) \| undefined`                                              | Optional | Plan the credentials of this CLI from the resolved workflow variables, without disk access: variables to forward, host files to copy into the private sandbox home, generated files and login commands. Called once per adapter and sandbox; the local provider receives only the variables. |
+| `configuration`         | `((variables: Variables) => AgentConfiguration) \| undefined`                                          | Optional | Plan CLI configuration files from the resolved variables, without disk access. Outpost merges each file’s section into the agent home once per sandbox, after authentication; throw when a referenced variable is missing.                                                                   |
 | `request`               | `(input: AgentInput) => Command`                                                                       | Required | Build the executable, arguments and environment for the supplied agent input.                                                                                                                                                                                                                |
 | `events`                | `(line: string) => readonly AgentEvent[]`                                                              | Required | Decode one native CLI output line into normalized agent events.                                                                                                                                                                                                                              |
 | `quota`                 | `((text: string) => boolean) \| undefined`                                                             | Optional | Recognize a terminal usage-limit or rate-limit message in a failure event or stderr line. When the process then fails, the turn rejects with OutpostError code quota instead of process; transient retry notices must not match.                                                             |
@@ -45,6 +46,8 @@ export interface AgentAdapter extends AgentFeatures {
     invoke: (command: Command) => Promise<CommandResult>,
   ): Promise<string>;
   credentials?(variables: Variables): CredentialPlan;
+  /** Plans CLI configuration merged into the agent home; throws when a referenced variable is missing. */
+  configuration?(variables: Variables): AgentConfiguration;
   request(input: AgentInput): Command;
   events(line: string): readonly AgentEvent[];
   /** Recognizes a usage-limit or rate-limit message in failure or stderr text. */
@@ -60,6 +63,7 @@ export interface AgentAdapter extends AgentFeatures {
 
 ## Related contracts
 
+- [AgentConfiguration](../agentconfiguration/)
 - [AgentEvent](../agentevent/)
 - [AgentFeatures](../support-agentfeatures/)
 - [AgentInput](../agentinput/)

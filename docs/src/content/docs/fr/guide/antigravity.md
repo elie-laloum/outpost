@@ -36,4 +36,6 @@ Outpost définit `AGY_CLI_DISABLE_AUTO_UPDATE=true` dans les images générées,
 
 Le bootstrap réutilise un exécutable existant sans le remplacer ni vérifier ses octets. Lancez `outpost doctor --agent antigravity --sandbox-provider local` pour l’hôte, ou ajoutez `--sandbox-provider docker --image votre-image` pour inspecter une image. Doctor affiche les versions installée et de référence et avertit si elles diffèrent ; il ne vérifie pas l’empreinte du binaire installé. Les images et recettes existantes doivent être régénérées ou modifiées puis reconstruites pour adopter cette installation. Ces contrôles ne prouvent pas la compatibilité des exécutions authentifiées de modèles.
 
+`mcpServers` fusionne des [serveurs MCP](../mcp-servers/) dans `~/.gemini/config/mcp_config.json` du home de l’agent, qui est votre propre home avec le fournisseur local.
+
 API : [antigravityHarness](../../reference/antigravityharness/).

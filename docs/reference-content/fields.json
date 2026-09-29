@@ -6815,5 +6815,77 @@
   "ReplayTurn.interrupted": [
     "True when steering stopped this recorded turn; its usage is the sum of its recorded usage events and the replayed turn reports interrupted: steering.",
     "Vrai lorsque le pilotage a arrêté ce tour enregistré ; son usage est la somme de ses événements usage enregistrés et le tour rejoué indique interrupted: steering."
+  ],
+  "AgentAdapter.configuration": [
+    "Plan CLI configuration files from the resolved variables, without disk access. Outpost merges each file’s section into the agent home once per sandbox, after authentication; throw when a referenced variable is missing.",
+    "Planifie les fichiers de configuration de la CLI à partir des variables résolues, sans accès disque. Outpost fusionne la section de chaque fichier dans le home de l’agent une fois par sandbox, après l’authentification ; lève une erreur si une variable référencée manque."
+  ],
+  "AgentConfiguration.files": [
+    "JSON files to merge into the agent home. An empty list only validates the variables.",
+    "Fichiers JSON à fusionner dans le home de l’agent. Une liste vide ne fait que valider les variables."
+  ],
+  "ConfigurationFile.path": [
+    "Path relative to the agent home, without . or .. segments.",
+    "Chemin relatif au home de l’agent, sans segment . ou .."
+  ],
+  "ConfigurationFile.section": [
+    "Top-level object key that receives the entries, such as mcpServers. Other keys of the file are preserved.",
+    "Clé d’objet de premier niveau qui reçoit les entrées, par exemple mcpServers. Les autres clés du fichier sont conservées."
+  ],
+  "ConfigurationFile.entries": [
+    "Entries added to the section or replacing existing entries with the same name. An unreadable file or a non-object section fails instead of being overwritten.",
+    "Entrées ajoutées à la section ou remplaçant les entrées de même nom. Un fichier illisible ou une section qui n’est pas un objet provoque un échec au lieu d’être écrasé."
+  ],
+  "CommonAgentSettings.mcpServers": [
+    "MCP servers this CLI can use, keyed by server name. Outpost renders them in the CLI’s native configuration and references secrets by variable name only; each referenced variable must be declared.",
+    "Serveurs MCP utilisables par cette CLI, indexés par nom de serveur. Outpost les traduit dans la configuration native de la CLI et ne référence les secrets que par nom de variable ; chaque variable référencée doit être déclarée."
+  ],
+  "CopilotSettings.mcpServers": [
+    "MCP servers passed to Copilot with --additional-mcp-config for each run, keyed by server name. Secrets stay ${NAME} references expanded by Copilot; each referenced variable must be declared.",
+    "Serveurs MCP transmis à Copilot avec --additional-mcp-config à chaque exécution, indexés par nom de serveur. Les secrets restent des références ${NAME} résolues par Copilot ; chaque variable référencée doit être déclarée."
+  ],
+  "KimiSettings.mcpServers": [
+    "MCP servers merged into .kimi-code/mcp.json in the agent home, keyed by server name; other servers in the file are kept. On the local provider this is your own home. Each referenced variable must be declared.",
+    "Serveurs MCP fusionnés dans .kimi-code/mcp.json du home de l’agent, indexés par nom de serveur ; les autres serveurs du fichier sont conservés. Avec le fournisseur local, c’est votre propre home. Chaque variable référencée doit être déclarée."
+  ],
+  "AntigravitySettings.mcpServers": [
+    "MCP servers merged into .gemini/config/mcp_config.json in the agent home, keyed by server name; other servers in the file are kept. On the local provider this is your own home. Each referenced variable must be declared.",
+    "Serveurs MCP fusionnés dans .gemini/config/mcp_config.json du home de l’agent, indexés par nom de serveur ; les autres serveurs du fichier sont conservés. Avec le fournisseur local, c’est votre propre home. Chaque variable référencée doit être déclarée."
+  ],
+  "HarnessOptions.mcpServers": [
+    "MCP servers whose tools the model may call, keyed by server name. Each turn starts them inside the borrowed sandbox and exposes their tools as mcp__<server>__<tool>; the lease must support liveInput.",
+    "Serveurs MCP dont le modèle peut appeler les outils, indexés par nom de serveur. Chaque tour les démarre dans la sandbox empruntée et expose leurs outils sous la forme mcp__<serveur>__<outil> ; le bail doit prendre en charge liveInput."
+  ],
+  "Harness.mcpServers": [
+    "Validated MCP servers started for each turn, when set.",
+    "Serveurs MCP validés, démarrés à chaque tour, lorsqu’ils sont définis."
+  ],
+  "McpStdioServer.command": [
+    "Executable started in the sandbox. Literal text; it cannot contain ${ or NUL.",
+    "Exécutable lancé dans la sandbox. Texte littéral ; il ne peut pas contenir ${ ni NUL."
+  ],
+  "McpStdioServer.arguments": [
+    "Literal arguments passed to the command, without ${ references.",
+    "Arguments littéraux transmis à la commande, sans référence ${."
+  ],
+  "McpStdioServer.environment": [
+    "Non-secret environment values set for the server, written verbatim into the configuration.",
+    "Valeurs d’environnement non secrètes définies pour le serveur, écrites telles quelles dans la configuration."
+  ],
+  "McpStdioServer.variables": [
+    "Names of declared variables forwarded to the server. Values never appear in arguments or files; a missing variable fails before the agent starts.",
+    "Noms de variables déclarées transmises au serveur. Les valeurs n’apparaissent jamais dans les arguments ni dans les fichiers ; une variable manquante fait échouer avant le démarrage de l’agent."
+  ],
+  "McpHttpServer.url": [
+    "Absolute http or https URL of a Streamable HTTP MCP endpoint, without embedded credentials.",
+    "URL http ou https absolue d’un point d’accès MCP Streamable HTTP, sans identifiants intégrés."
+  ],
+  "McpHttpServer.headers": [
+    "Non-secret HTTP headers sent with every request. Use bearerTokenVariable for an Authorization token.",
+    "En-têtes HTTP non secrets envoyés avec chaque requête. Utilisez bearerTokenVariable pour un jeton Authorization."
+  ],
+  "McpHttpServer.bearerTokenVariable": [
+    "Name of a declared variable whose value is sent as Authorization: Bearer. It cannot be combined with an Authorization header.",
+    "Nom d’une variable déclarée dont la valeur est envoyée en Authorization: Bearer. Incompatible avec un en-tête Authorization."
   ]
 }

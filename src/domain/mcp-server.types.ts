@@ -13,4 +13,6 @@ export interface McpHttpServer {
 
 export type McpServer = McpStdioServer | McpHttpServer;
 
-export type McpServers = Readonly<Record<string, McpServer>>;
+export type McpServers = {
+  readonly [name: string]: McpServer;
+};

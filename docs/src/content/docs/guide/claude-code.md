@@ -30,4 +30,6 @@ Claude supports native conversations, resume, fork and response repair. `convers
 
 See [Claude Code authentication](https://code.claude.com/docs/en/authentication) for the vendor’s account requirements.
 
+`mcpServers` passes [MCP servers](../mcp-servers/) with `--mcp-config` for each run.
+
 API: [claudeHarness](../../reference/claudeharness/).
