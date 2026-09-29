@@ -1,78 +1,184 @@
 ---
 title: "Sandboxes cloud"
-description: "Exécuter les agents dans des sandboxes Vercel ou Daytona et synchroniser leurs modifications."
+description: "Exécuter les agents dans des sandboxes Vercel ou Daytona : Outpost téléverse le dépôt, exécute l’agent à distance et rapatrie ses commits sur votre machine."
 ---
 
-Les fournisseurs montés voient le workspace via le montage hôte actif. Les fournisseurs distants téléversent un snapshot puis synchronisent les changements en retour. Votre application utilise les mêmes opérations de sandbox, mais la propriété des fichiers diffère.
+## Prérequis
 
-## Vercel Sandbox
-
-Installez le SDK optionnel à côté d’Outpost. Un moteur de conteneurs local n’est pas nécessaire.
+Installez le SDK de votre provider à côté d’Outpost. Aucun moteur de conteneurs local n’est nécessaire.
 
 ```sh
-npm install @vercel/sandbox
+npm install @vercel/sandbox   # Vercel
+npm install @daytona/sdk      # Daytona
 ```
+
+L’hôte a besoin d’identifiants d’allocation pour créer les sandboxes. Ils restent sur l’hôte et sont distincts des [identifiants de l’agent](../authentication/), qu’Outpost installe dans le home privé de la sandbox.
+
+| Provider | Identifiants d’allocation sur l’hôte                                                                      |
+| -------- | --------------------------------------------------------------------------------------------------------- |
+| Vercel   | `VERCEL_OIDC_TOKEN` (obtenu par `npx vercel env pull`), ou `token`, `teamId` et `projectId` dans `create` |
+| Daytona  | `DAYTONA_API_KEY`, ou `apiKey` dans `connection`                                                          |
+
+L’image de la sandbox doit fournir `sh` et `git` pour synchroniser le dépôt, et `node` pour transmettre des entrées à l’agent en direct.
+
+## Vercel Sandbox
 
 ```ts
 import { createVercelSandboxProvider } from "@elie-laloum/outpost/providers/vercel";
 
-const sandboxProvider = createVercelSandboxProvider({
-  create: { runtime: "node24" },
+export const sandboxProvider = createVercelSandboxProvider({
+  create: { runtime: "node24", timeout: 30 * 60_000 },
 });
 ```
 
-### Configurer l’allocation
+Vercel arrête une sandbox après `create.timeout` millisecondes : choisissez une durée supérieure à celle de votre tâche.
 
-Configurez les identifiants d’allocation du SDK Vercel dans l’environnement hôte. Vous pouvez utiliser un jeton OIDC Vercel ou les réglages de jeton, équipe et projet du SDK. Ils sont distincts du compte ou de la clé API de l’agent.
+<!-- features -->
 
-Vercel rejette l’attachement d’un terminal interactif. Utilisez `sandbox.command()` et les requêtes sans interface. `create` transmet les réglages de création pris en charge au SDK ; `root` sélectionne l’emplacement distant du workspace.
+- `create`: Transmet les réglages de création au SDK Vercel : runtime, image ou `source` de snapshot, `resources`, `timeout`.
+  - `runtime`
+  - `timeout`
+- `root`: Fixe l’emplacement du dépôt dans la sandbox. Par défaut, `/vercel/sandbox/outpost`.
+  - `root`
+- `variables`: Déclare les [variables](../environment-variables/) que reçoit chaque commande de la sandbox.
+  - `variables`
 
-### Synchronisation du dépôt
-
-Outpost téléverse l’historique Git et les entrées sélectionnées, exécute le travail à distance, puis valide et synchronise les changements en retour. `includeUncommitted` inclut explicitement les modifications hôte. Des changements concurrents sur l’hôte peuvent arrêter la synchronisation et laisser du matériel de récupération.
-
-Une CLI prise en charge absente peut être installée à distance. Définissez `bootstrap: false` dans les options de sandbox si votre image doit fournir tous les outils. Utilisez `sandboxReady` pour installer les dépendances du projet.
-
-Fermez les sandboxes possédées dans `finally` ; l’allocation cloud peut être facturée jusqu’à leur libération. Voir [Échange de fichiers](../cloud-sandboxes/) et [Récupération après échec](../recovery/).
-
-API : [createVercelSandboxProvider](../../reference/createvercelsandboxprovider/).
+API : [createVercelSandboxProvider](../../reference/createvercelsandboxprovider/) · [VercelOptions](../../reference/verceloptions/).
 
 ## Daytona Sandbox
-
-Installez le SDK optionnel à côté d’Outpost. Un moteur de conteneurs local n’est pas nécessaire.
-
-```sh
-npm install @daytona/sdk
-```
 
 ```ts
 import { createDaytonaSandboxProvider } from "@elie-laloum/outpost/providers/daytona";
 
-const sandboxProvider = createDaytonaSandboxProvider({
+export const sandboxProvider = createDaytonaSandboxProvider({
   connection: { apiKey: process.env.DAYTONA_API_KEY ?? "" },
+  create: { image: "node:24" },
 });
 ```
 
-### Configurer l’allocation
+<!-- features -->
 
-Fournissez les identifiants d’allocation Daytona via `connection` sur l’hôte. Sélectionnez une image ou un snapshot avec `create` ; vérifiez qu’il contient le runtime du projet et un shell fonctionnel.
+- `connection`: Configure le client Daytona : clé d’API, URL de l’API, région cible.
+  - `apiKey`
+  - `target`
+- `create`: Choisit une `image` ou un `snapshot`, avec les ressources et l’arrêt automatique.
+  - `image`
+  - `snapshot`
+- `root`: Fixe l’emplacement du dépôt dans la sandbox. Par défaut, `outpost` dans le home de l’utilisateur de la sandbox.
+  - `root`
+- `variables`: Déclare les [variables](../environment-variables/) que reçoit chaque commande de la sandbox.
+  - `variables`
 
-Daytona prend en charge l’attachement interactif via son API PTY native. Les identifiants de compte de l’agent restent installés séparément. `variables` contrôle les valeurs transmises à l’exécution.
+API : [createDaytonaSandboxProvider](../../reference/createdaytonasandboxprovider/) · [DaytonaOptions](../../reference/daytonaoptions/).
 
-### Synchronisation du dépôt
+## Comparer Vercel et Daytona
 
-Outpost téléverse l’historique Git et les entrées sélectionnées, exécute le travail à distance, puis valide et synchronise les changements en retour. `includeUncommitted` inclut explicitement les modifications hôte. Des changements concurrents sur l’hôte peuvent arrêter la synchronisation et laisser du matériel de récupération.
+|                                              | Vercel                                                    | Daytona                                          |
+| -------------------------------------------- | --------------------------------------------------------- | ------------------------------------------------ |
+| `attach()`                                   | Non : les terminaux interactifs sont refusés              | Oui, via l’API PTY de Daytona                    |
+| [Entrées en direct](../steering/)            | Chaque instruction est ajoutée à un fichier de la sandbox | Idem                                             |
+| [Règles de sortie](../network-restrictions/) | Pare-feu natif : domaines, CIDR autorisés et refusés      | Confirmées par Daytona : domaines ou CIDR IPv4   |
+| Facturation                                  | Jusqu’à l’arrêt de la sandbox par Outpost                 | Jusqu’à la suppression de la sandbox par Outpost |
 
-Une CLI prise en charge absente peut être installée à distance. Définissez `bootstrap: false` dans les options de sandbox si votre image doit fournir tous les outils. Utilisez `sandboxReady` pour installer les dépendances du projet.
+Chaque instruction en direct coûte une commande du provider : un wrapper lancé avec l’agent lit le fichier et alimente son entrée standard.
 
-Fermez les sandboxes possédées dans `finally` ; l’allocation cloud peut être facturée jusqu’à leur libération. Voir [Échange de fichiers](../cloud-sandboxes/) et [Récupération après échec](../recovery/).
+## Lancer une tâche
 
-API : [createDaytonaSandboxProvider](../../reference/createdaytonasandboxprovider/).
+Passez le provider à `dispatch()` ou à `createSandbox()`, comme pour toute sandbox.
 
-## Entrées distantes
+```ts
+import { dispatch } from "@elie-laloum/outpost";
+import { createDaytonaSandboxProvider } from "@elie-laloum/outpost/providers/daytona";
+import { coder, repository } from "./outpost.config.mts";
 
-`copies` sélectionne des fichiers supplémentaires relatifs au dépôt. `includeUncommitted` inclut les modifications hôte dans le snapshot distant. Envoyez uniquement les entrées nécessaires ; l’allocation distante les téléverse dans votre compte cloud.
+const result = await dispatch({
+  agent: coder,
+  repository,
+  sandboxProvider: createDaytonaSandboxProvider({
+    create: { image: "node:24" },
+  }),
+  hooks: { sandboxReady: [{ executable: "npm", arguments: ["ci"] }] },
+  brief: {
+    text: "Fix the failing test in src/date.test.ts and commit the fix.",
+  },
+});
+console.log(result.branch, result.commits.length);
+```
 
-## Synchronisation
+Avant le premier tour, Outpost installe la CLI de l’agent, dans sa version épinglée, si l’image ne la contient pas ; c’est le cas sur toute sandbox distante. Définissez `bootstrap: false` quand l’image doit la fournir. Le hook `sandboxReady` installe ensuite les dépendances du projet ([Préparer l’environnement](../environment-setup/)).
 
-Avant d’appliquer les changements entrants, Outpost valide le transfert et sauvegarde l’état hôte. Si l’hôte a changé entre-temps, la synchronisation échoue au lieu de l’écraser silencieusement. Conservez le dossier de transfert indiqué et utilisez la [récupération après échec](../recovery/) pour inspecter les deux versions.
+`dispatch()` libère la sandbox à son retour. Fermez une sandbox créée par `createSandbox()` dans un `finally`, ou avec `await using` : le provider la facture jusque-là.
+
+## Accès au dépôt
+
+La sandbox travaille sur sa propre copie du dépôt. Outpost la maintient alignée sur le worktree géré de votre machine. Les sandboxes [Firecracker](../firecracker/) et les conteneurs en [Git privé](../private-git/) se synchronisent de la même façon.
+
+<!-- flow -->
+
+1. **Téléverser**: Au démarrage de la sandbox.
+   - **Envoyer l’historique**: Un bundle Git du dépôt, extrait sur la branche de travail.
+     - hôte
+     - sandbox
+   - **Envoyer les fichiers choisis**: Les `copies`, et le travail non commité quand `includeUncommitted` est activé.
+     - hôte
+     - sandbox
+2. **Exécuter**: L’agent travaille et commite dans la sandbox.
+   - **Exécuter l’opération**: `dispatch()`, `command()` ou `attach()`.
+     - sandbox
+3. **Rapatrier**: Après chaque opération.
+   - **Télécharger**: Les nouveaux commits, les modifications non commitées et les nouveaux fichiers non suivis.
+     - sandbox
+   - **Valider**: Vérifier les commits et que le worktree n’a pas changé entre-temps.
+     - hôte
+   - **Sauvegarder**: Enregistrer l’état du worktree sous `.outpost/recovery`.
+     - hôte
+   - **Appliquer**: Avancer la branche de travail en fast-forward et appliquer les modifications.
+     - hôte
+
+## Choisir la branche
+
+Sans `branch`, une sandbox cloud utilise `integrate` : une nouvelle branche `outpost/job-…`, fusionnée dans votre branche courante à la fin. `named` garde le travail sur une branche que vous nommez. `current` est refusé, car la sandbox ne peut pas modifier votre checkout sur place. Voir [Dépôt et branche](../repository-and-branch/).
+
+## Envoyer des fichiers absents de Git
+
+La sandbox ne reçoit que les fichiers commités. Deux options en ajoutent d’autres.
+
+<!-- features -->
+
+- `copies`: Copie des chemins de votre checkout dans le worktree, puis les téléverse. Pour des entrées ignorées comme `.env.test`.
+  - votre checkout
+- `includeUncommitted`: Envoie les modifications non commitées du worktree géré et ses fichiers non suivis et non ignorés.
+  - worktree géré
+- **Commiter d’abord**: Les commits de la branche de travail voyagent avec l’historique.
+  - Git
+
+:::caution
+`includeUncommitted` lit le worktree géré sous `.outpost/workspaces`, pas votre checkout. Les modifications non commitées de votre checkout n’atteignent la sandbox que par `copies`.
+:::
+
+Une copie exclue par `.gitignore` voyage dans un seul sens : les modifications que l’agent y apporte restent dans la sandbox. Toute autre copie devient du travail non commité dans le worktree : passez alors `includeUncommitted: true`.
+
+## Quand la synchronisation s’arrête
+
+Outpost n’écrase jamais un travail qu’il ne peut pas sauvegarder. Il s’arrête sur une erreur dont `details.recovery` désigne le dossier de `.outpost/recovery` qui contient les changements téléchargés et la sauvegarde. Inspectez-le avec [Récupérer du travail](../recovery/).
+
+| Cause                                                                | Solution                                                          |
+| -------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| Le worktree géré a changé pendant que la sandbox était ouverte       | Ne touchez pas à `.outpost/workspaces` pendant l’exécution        |
+| L’agent a modifié un fichier non commité dans le worktree            | Commitez d’abord le fichier, ou passez `includeUncommitted: true` |
+| L’agent a créé un fichier que votre hôte ignore hors de `.gitignore` | Déplacez la règle d’exclusion dans le `.gitignore` commité        |
+| L’agent a réécrit un commit déjà synchronisé                         | Demandez de nouveaux commits plutôt qu’un amend ou un rebase      |
+
+`recoveryTransport` sur `dispatch()` ou `createSandbox()` archive aussi chaque sauvegarde dans un [stockage objet](../object-storage/).
+
+## Limites
+
+- **Toutes les références**: Le bundle d’historique contient toutes les branches et tous les tags du dépôt, pas seulement la branche de travail.
+- **Délai des commandes**: `sandbox.command()` sans `deadlineMs` s’arrête au bout de 10 minutes. Les tours de l’agent suivent leurs propres [limites](../limits-and-cancellation/).
+- **Fin de sortie**: Le résultat d’une commande garde les 64 derniers Kio de chaque flux. L’option `retain` du provider le modifie.
+- **Installation de la CLI**: Elle demande `npm` (ou `curl` pour Antigravity) et un accès réseau dans la sandbox. Avec un [agent de repli](../fallback-agents/), seul le premier candidat est installé.
+- **Arrêts imprévus**: Outpost libère les sandboxes sur `SIGINT` et `SIGTERM`. Un processus tué laisse la sandbox tourner jusqu’au délai propre du provider.
+
+Implémenter un autre provider distant : [Ajouter un provider de sandbox](../custom-sandbox-providers/).
+
+API : [SandboxOptions](../../reference/sandboxoptions/) · [EgressPolicy](../../reference/egresspolicy/).

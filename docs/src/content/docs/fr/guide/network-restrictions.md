@@ -1,26 +1,35 @@
 ---
 title: "Restrictions réseau"
-description: "Demander des restrictions réseau explicitement prises en charge par le provider."
+description: "Bloquer ou filtrer par liste d’autorisation le trafic sortant d’une sandbox avec une politique egress sur Docker, Podman, Vercel ou Daytona."
 ---
 
-:::note[Expérimental]
-Les politiques réseau sont opt-in. Le support Daytona et la configuration Vercel immuable sont disponibles en 7.0.0. La validation réelle propre à chaque provider reste nécessaire.
+## Choisir une politique
+
+:::caution[Expérimental]
+Les politiques egress sont expérimentales. Vérifiez que votre provider et votre compte appliquent la politique avant de vous y fier.
 :::
 
-Définissez `egress` sur le provider de sandbox. Outpost valide les combinaisons non prises en charge avant allocation ; un service cloud peut encore refuser une politique pendant l’acquisition. Sans politique, les valeurs réseau par défaut du provider restent applicables.
+Définissez `egress` sur le provider de sandbox. Sans cette option, le provider garde ses propres réglages réseau par défaut.
 
-## Choisir un provider
+| Politique                               | Effet                                                               |
+| --------------------------------------- | ------------------------------------------------------------------- |
+| `{ mode: "deny-all" }`                  | Bloque tout le trafic sortant de la sandbox.                        |
+| `{ mode: "allowlist", domains }`        | Autorise uniquement les noms DNS listés.                            |
+| `{ mode: "allowlist", allowCidrs }`     | Autorise les plages IP listées, indépendamment de `domains`.        |
+| `{ mode: "allowlist", ..., denyCidrs }` | Refuse ces plages IP même quand un domaine ou un CIDR les autorise. |
 
-| Provider            | `deny-all`                   | Liste de domaines                              | Règles CIDR                                            |
-| ------------------- | ---------------------------- | ---------------------------------------------- | ------------------------------------------------------ |
-| Docker / Podman     | Oui, espace réseau isolé     | Refusée                                        | Refusées                                               |
-| Vercel              | Pare-feu natif               | Noms exacts et `*.example.com`                 | Autorisations et refus IPv4/IPv6                       |
-| Daytona             | Confirmation serveur requise | Noms exacts ; racine explicite pour les jokers | Autorisation IPv4 seule ; pas de mélange domaines/CIDR |
-| Local / Firecracker | Refusé par Outpost           | Refusée                                        | Refusées                                               |
+La prise en charge dépend du provider. Outpost refuse une politique non prise en charge par une erreur `configuration` dès la création du provider.
 
-Les listes d’autorisation des conteneurs et les changements de politique en cours d’exécution restent des travaux futurs distincts. Le réseau hôte de Firecracker relève de l’opérateur.
+| Provider           | `deny-all`                | `domains`   | `allowCidrs`                       | `denyCidrs` |
+| ------------------ | ------------------------- | ----------- | ---------------------------------- | ----------- |
+| Docker, Podman     | Oui (réseau `none`)       | Non         | Non                                | Non         |
+| Vercel             | Oui                       | Oui         | IPv4 et IPv6                       | Oui         |
+| Daytona            | Oui, confirmé par serveur | Jusqu’à 100 | Jusqu’à 10 en IPv4, sans `domains` | Non         |
+| Local, Firecracker | Non                       | Non         | Non                                | Non         |
 
 ## Autoriser les API de modèles et les registres
+
+Un agent CLI dans une sandbox cloud a besoin de l’API de son modèle et des registres depuis lesquels il installe. Listez chaque hôte qu’il contacte.
 
 ```ts
 import { createVercelSandboxProvider } from "@elie-laloum/outpost/providers/vercel";
@@ -33,34 +42,50 @@ const sandboxProvider = createVercelSandboxProvider({
 });
 ```
 
-Cet exemple autorise l’API du modèle et le registre, pas tous les endpoints dont un agent pourrait avoir besoin. Outpost n’ajoute aucun domaine automatiquement. Déclarez explicitement les hôtes de téléchargement, redirections, endpoints d’authentification et URL de modèles personnalisés. Préférez des outils préinstallés si le bootstrap demande des accès plus larges ; consultez [l’authentification](../authentication/) et les [images](../agent-images/).
+Les entrées de `domains` suivent ces règles :
 
-Les entrées sont des noms DNS sans protocole, chemin ni port. Un nom exact n’autorise pas les sous-domaines. `*.example.com` autorise les sous-domaines ; ajoutez `example.com` séparément si la racine est nécessaire. Les listes vides, IP brutes dans `domains`, `*` seul et jokers partiels sont refusés. Utilisez des CIDR pour l’accès explicite par IP. Limitez les destinations : les services autorisés peuvent toujours recevoir des données de l’agent.
+- Des noms DNS uniquement, sans protocole, chemin ni port : `api.openai.com`.
+- Un nom exact correspond à cet hôte, pas à ses sous-domaines.
+- `*.example.com` correspond aux sous-domaines ; ajoutez `example.com` pour le domaine racine.
+- Les listes vides, adresses IP, `*` seul, noms sans point et jokers partiels comme `api*.example.com` sont refusés.
 
-## Comportement Vercel
+Outpost n’ajoute aucune destination à votre place. Incluez les hôtes de téléchargement, les cibles de redirection, les endpoints d’authentification et les URL de modèles personnalisées. Si le bootstrap exige un accès large, préinstallez plutôt les outils dans une [image d’agent](../agent-images/).
 
-Vercel filtre les domaines par TLS SNI, pas par chemin HTTP ni par en-tête `Host` chiffré. HTTP non chiffré exige une autorisation CIDR. Les CIDR autorisés donnent un accès IP indépendant ; ils ne restreignent pas les domaines autorisés. Les CIDR refusés sont prioritaires. Des CIDR larges peuvent donc neutraliser la restriction par domaine. Une politique exclusivement CIDR permet aussi la résolution DNS d’autres destinations. Consultez les [garanties du pare-feu natif](https://vercel.com/docs/sandbox/concepts/firewall).
+## Particularités de Vercel
 
-Choisissez `egress` ou `create.networkPolicy`. Outpost copie les deux formes pour que les mutations ultérieures de l’appelant ne changent pas les allocations futures. Les transformations de requêtes et redirections natives restent accessibles par `create.networkPolicy`, hors du contrat portable.
+Vercel applique la politique avec son [pare-feu natif](https://vercel.com/docs/sandbox/concepts/firewall).
 
-## Confirmation Daytona
+- Les règles de domaine portent sur le nom de serveur TLS (SNI). Le HTTP non chiffré exige une règle CIDR.
+- `allowCidrs` ouvre un accès IP à lui seul ; une plage large contourne votre liste de domaines.
+- `denyCidrs` l’emporte sur toutes les règles d’autorisation.
+- Une politique uniquement CIDR laisse la sandbox résoudre d’autres noms DNS.
+
+Pour des règles de requête par domaine et des transformations, utilisez plutôt l’option native de Vercel `create.networkPolicy`. Elle sort de la politique portable, et Outpost refuse un provider qui définit les deux.
+
+## Particularités de Daytona
+
+Daytona n’applique des règles réseau propres à une sandbox que sur les comptes Tier 3 ou 4 disposant de la permission `WRITE_SANDBOXES`.
 
 ```ts
 import { createDaytonaSandboxProvider } from "@elie-laloum/outpost/providers/daytona";
 
 const sandboxProvider = createDaytonaSandboxProvider({
-  egress: {
-    mode: "allowlist",
-    domains: ["api.openai.com", "registry.npmjs.org"],
-  },
+  egress: { mode: "allowlist", allowCidrs: ["203.0.113.0/24"] },
 });
 ```
 
-Daytona exige Tier 3/4 et `WRITE_SANDBOXES` pour les restrictions propres à une sandbox. Outpost transmet la politique à la création, puis la réapplique par l’API réseau du serveur avant de préparer le workspace ou de rendre le lease. Un refus fait échouer l’acquisition et déclenche la suppression. Cette confirmation ne couvre pas le démarrage autonome de l’image avant la fin de l’acquisition ; utilisez des images de confiance sans tâche au démarrage ni secret embarqué.
+Outpost transmet la politique à la création, puis l’applique de nouveau par l’API réseau de Daytona avant de préparer le workspace. Si Daytona refuse, l’acquisition échoue avec une erreur `provider` et Outpost supprime la sandbox.
 
-Daytona accepte au plus 100 domaines ou 10 CIDR IPv4. Il ne représente ni `denyCidrs` ni les mélanges domaines/CIDR. Son joker natif inclut la racine : Outpost exige donc cette racine explicitement dans `domains` pour éviter d’élargir silencieusement l’accès. Choisissez `egress` ou les paramètres réseau natifs de création, proxy compris. Sans `egress`, les options natives gardent la sémantique Daytona et ne reçoivent pas de confirmation Outpost. Consultez les [limites réseau Daytona](https://www.daytona.io/docs/en/network-limits/).
+- Utilisez `domains` ou `allowCidrs`, pas les deux, et aucun `denyCidrs`.
+- Listez au plus 100 domaines ou 10 CIDR IPv4.
+- Chez Daytona, `*.example.com` correspond aussi à `example.com` : Outpost exige donc `example.com` dans la liste.
+- Choisissez `egress` ou les réglages réseau natifs de Daytona dans `create`, `outboundProxyUrl` compris. Les réglages natifs gardent la sémantique de Daytona, sans la confirmation d’Outpost.
 
-## Exécution hors ligne et périmètre
+La confirmation intervient après le démarrage de la sandbox : du code lancé par l’image elle-même peut s’exécuter avant. Utilisez des images de confiance, sans tâche au démarrage ni secret embarqué. Consultez les [limites réseau de Daytona](https://www.daytona.io/docs/en/network-limits/).
+
+## Exécuter un conteneur hors ligne
+
+`deny-all` rattache un conteneur Docker ou Podman au réseau `none`. Préparez d’abord outils et dépendances dans l’[image](../agent-images/).
 
 ```ts
 import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
@@ -71,19 +96,21 @@ const sandboxProvider = createDockerSandboxProvider({
 });
 ```
 
-Préparez d’abord outils et dépendances dans l’image. Une CLI dans cette sandbox ne peut pas joindre un modèle distant. Les appels du fournisseur de modèles effectués sur l’hôte par le harness intégré sont hors du périmètre réseau de la sandbox, comme les téléchargements d’images, transferts et requêtes de contrôle cloud de l’hôte. Les règles réseau ne limitent pas les montages, identifiants ou sockets hôtes volontairement exposés par montage.
+Un agent CLI dans cette sandbox ne peut pas joindre son modèle. Le [harness intégré](../harness/) le peut : ses requêtes au modèle partent de votre hôte, et seuls ses outils s’exécutent hors ligne.
 
-## Reproduire les contrôles réels
+La politique egress de la sandbox ne couvre pas le trafic qu’Outpost gère sur l’hôte :
 
-Depuis un checkout du dépôt avec Node.js 24 et les dépendances installées :
+- Les requêtes au modèle du harness intégré.
+- Les téléchargements d’images et les transferts de fichiers.
+- Les requêtes vers le plan de contrôle d’un fournisseur cloud.
 
-```sh
-OUTPOST_NETWORK_LIVE=1 OUTPOST_NETWORK_PROVIDER=vercel \
-  node --env-file=test/.env test/network-live.ts
-```
+## Limites
 
-Utilisez `daytona` pour cet autre backend. Ces contrôles créent des sandboxes cloud temporaires facturables, ne font aucun appel de modèle et libèrent les leases acquis. Fournissez les identifiants du provider dans le fichier d’environnement ignoré. Les rapports comparent une connexion témoin sans restriction aux sondes filtrées, dont redirections, accès IP et réutilisation à chaud. Une destination témoin inaccessible est `unverified`, jamais une preuve de filtrage. Les codes de sortie sont 0 pour réussi, 1 pour échec et 2 pour validation partielle/ignorée. Un refus de confirmation Daytona est signalé comme indisponible, pas comme une isolation réussie.
+- Une politique est fixée à la création du provider. Outpost ne la modifie pas pendant une exécution.
+- Docker et Podman n’appliquent que `deny-all`, incompatible avec tout `networks` autre que `none`. Pour une liste d’autorisation, utilisez Vercel ou un pare-feu que vous gérez.
+- L’exécution locale et [Firecracker](../firecracker/) refusent `egress` ; le réseau de Firecracker se configure sur votre hôte.
+- Un service cloud peut encore refuser une politique quand Outpost acquiert la sandbox.
+- Les destinations autorisées peuvent toujours recevoir des données de l’agent.
+- Les règles réseau ne restreignent ni les montages, ni les identifiants, ni les sockets de l’hôte que vous exposez à la sandbox. Consultez [Sécurité](../security/).
 
-La campagne du 28 septembre 2026 a vérifié sur Vercel les domaines exacts et jokers, redirections bloquées, accès IPv4 et priorité des refus CIDR, ainsi que deny-all et la réutilisation à chaud. IPv6 n’avait pas de témoin accessible et reste non vérifié. Le compte Daytona disponible a refusé les restrictions domaines, CIDR et deny-all ; leur application sur un compte éligible reste à valider. Les tests Docker réels ont réussi ; Podman était indisponible sur cet hôte.
-
-API : [EgressPolicy](../../reference/egresspolicy/) · [DaytonaOptions](../../reference/daytonaoptions/) · [VercelOptions](../../reference/verceloptions/).
+API : [EgressPolicy](../../reference/egresspolicy/) · [ContainerOptions](../../reference/containeroptions/) · [VercelOptions](../../reference/verceloptions/) · [DaytonaOptions](../../reference/daytonaoptions/).

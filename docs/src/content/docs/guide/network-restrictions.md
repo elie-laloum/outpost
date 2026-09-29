@@ -1,26 +1,35 @@
 ---
 title: "Network restrictions"
-description: "Request explicit provider-supported network restrictions."
+description: "Block or allowlist the outbound traffic of a sandbox with an egress policy on Docker, Podman, Vercel or Daytona."
 ---
 
-:::note[Experimental]
-Egress policies are opt-in. Daytona support and immutable Vercel configuration are available in 7.0.0. Provider-specific live validation remains necessary.
+## Choose a policy
+
+:::caution[Experimental]
+Egress policies are experimental. Check that your provider and account enforce a policy before you rely on it.
 :::
 
-Set `egress` on the sandbox provider. Outpost validates unsupported combinations before allocation; a cloud service can still reject a policy during acquisition. An omitted policy preserves the provider's existing network defaults.
+Set `egress` on the sandbox provider. Without it, the provider keeps its own network defaults.
 
-## Choose a provider
+| Policy                                  | Effect                                                         |
+| --------------------------------------- | -------------------------------------------------------------- |
+| `{ mode: "deny-all" }`                  | Blocks all outbound traffic from the sandbox.                  |
+| `{ mode: "allowlist", domains }`        | Allows the listed DNS names only.                              |
+| `{ mode: "allowlist", allowCidrs }`     | Allows the listed IP ranges, independently of `domains`.       |
+| `{ mode: "allowlist", ..., denyCidrs }` | Denies these IP ranges even when a domain or CIDR allows them. |
 
-| Provider            | `deny-all`                      | Domain allowlist                             | CIDR rules                             |
-| ------------------- | ------------------------------- | -------------------------------------------- | -------------------------------------- |
-| Docker / Podman     | Yes, isolated network namespace | Rejected                                     | Rejected                               |
-| Vercel              | Native firewall                 | Exact names and `*.example.com`              | IPv4/IPv6 allow and deny               |
-| Daytona             | Requires server confirmation    | Exact names; wildcards require explicit apex | IPv4 allow only; no domain/CIDR mixing |
-| Local / Firecracker | Rejected by Outpost             | Rejected                                     | Rejected                               |
+Support depends on the provider. Outpost rejects an unsupported policy with a `configuration` error when you create the provider.
 
-Container allowlists and runtime policy changes are separate future work. Firecracker host networking remains the operator's responsibility.
+| Provider           | `deny-all`            | `domains` | `allowCidrs`                     | `denyCidrs` |
+| ------------------ | --------------------- | --------- | -------------------------------- | ----------- |
+| Docker, Podman     | Yes (network `none`)  | No        | No                               | No          |
+| Vercel             | Yes                   | Yes       | IPv4 and IPv6                    | Yes         |
+| Daytona            | Yes, server-confirmed | Up to 100 | Up to 10 IPv4, without `domains` | No          |
+| Local, Firecracker | No                    | No        | No                               | No          |
 
-## Allow model APIs and package registries
+## Allow model APIs and registries
+
+A CLI agent in a cloud sandbox needs its model API and the registries it installs from. List each host it contacts.
 
 ```ts
 import { createVercelSandboxProvider } from "@elie-laloum/outpost/providers/vercel";
@@ -33,34 +42,50 @@ const sandboxProvider = createVercelSandboxProvider({
 });
 ```
 
-This example permits the model endpoint and registry, not every endpoint an agent may need. Outpost adds no domains automatically. Include download hosts, redirects, authentication endpoints and custom model URLs explicitly. Prefer preinstalled tools when bootstrap would require broader access; see [authentication](../authentication/) and [images](../agent-images/).
+Entries in `domains` follow these rules:
 
-Entries are DNS names without scheme, path or port. Exact names do not grant subdomain access. `*.example.com` grants subdomains; list `example.com` separately when the apex is needed. Empty allowlists, raw IPs in `domains`, bare `*` and partial-label wildcards are rejected. Use CIDRs for explicit IP access. Keep any destination list narrow: allowed services can still receive data from the agent.
+- DNS names only, without scheme, path or port: `api.openai.com`.
+- An exact name matches that host, not its subdomains.
+- `*.example.com` matches subdomains; add `example.com` for the apex.
+- Empty allowlists, IP addresses, bare `*`, single-label names and partial wildcards such as `api*.example.com` are rejected.
 
-## Vercel behavior
+Outpost adds no destination for you. Include download hosts, redirect targets, authentication endpoints and custom model URLs. When bootstrap needs broad access, preinstall the tools in an [agent image](../agent-images/) instead.
 
-Vercel domain filtering uses TLS SNI, not an HTTP path or the encrypted `Host` header. Plain HTTP needs CIDR access. Allowed CIDRs independently grant IP access; they do not narrow allowed domains. Denied CIDRs take priority. Broad CIDRs can therefore defeat domain scoping. CIDR-only policies also permit DNS resolution beyond those destinations. See the [native firewall guarantees](https://vercel.com/docs/sandbox/concepts/firewall).
+## Vercel specifics
 
-Choose either `egress` or native `create.networkPolicy`. Outpost snapshots both forms so later caller mutations cannot change future allocations. Native request transforms and forwarding remain available through `create.networkPolicy`; they are outside the portable contract.
+Vercel enforces the policy with its [native firewall](https://vercel.com/docs/sandbox/concepts/firewall).
 
-## Daytona confirmation
+- Domain rules match the TLS server name (SNI). Plain HTTP needs a CIDR rule.
+- `allowCidrs` grant IP access on their own; a broad range bypasses your domain list.
+- `denyCidrs` take priority over every allow rule.
+- A CIDR-only policy still lets the sandbox resolve other DNS names.
+
+For per-domain request rules and transforms, set Vercel's native `create.networkPolicy` instead. It is outside the portable policy, and Outpost rejects a provider that sets both.
+
+## Daytona specifics
+
+Daytona enforces sandbox-level network rules only on Tier 3 or 4 accounts with the `WRITE_SANDBOXES` permission.
 
 ```ts
 import { createDaytonaSandboxProvider } from "@elie-laloum/outpost/providers/daytona";
 
 const sandboxProvider = createDaytonaSandboxProvider({
-  egress: {
-    mode: "allowlist",
-    domains: ["api.openai.com", "registry.npmjs.org"],
-  },
+  egress: { mode: "allowlist", allowCidrs: ["203.0.113.0/24"] },
 });
 ```
 
-Daytona requires Tier 3/4 and `WRITE_SANDBOXES` for sandbox-specific enforcement. Outpost supplies the policy at creation, then reapplies it through the server's network-update API before workspace setup or returning a lease. Rejection fails acquisition and triggers deletion. This confirmation does not cover autonomous image startup before acquisition completes; use trusted images without startup workloads or embedded secrets.
+Outpost sends the policy at creation, then applies it again through Daytona's network API before it prepares the workspace. If Daytona refuses, acquisition fails with a `provider` error and Outpost deletes the sandbox.
 
-Daytona accepts up to 100 domains or 10 IPv4 CIDRs. It cannot represent `denyCidrs` or combined domain/CIDR rules. Its native wildcard includes the apex, so Outpost requires that apex explicitly in `domains` to avoid silently broadening access. Choose either `egress` or native creation networking, including proxy settings. Native options without `egress` retain Daytona's own semantics and do not receive Outpost confirmation. See [Daytona network limits](https://www.daytona.io/docs/en/network-limits/).
+- Use `domains` or `allowCidrs`, not both, and no `denyCidrs`.
+- List at most 100 domains or 10 IPv4 CIDRs.
+- Daytona's `*.example.com` also matches `example.com`, so Outpost requires `example.com` in the list too.
+- Choose `egress` or Daytona's native network settings in `create`, including `outboundProxyUrl`. Native settings keep Daytona's semantics, without Outpost's confirmation.
 
-## Offline execution and scope
+Confirmation happens after the sandbox starts, so code the image launches on its own may run first. Use trusted images without startup workloads or embedded secrets. See [Daytona network limits](https://www.daytona.io/docs/en/network-limits/).
+
+## Run a container offline
+
+`deny-all` attaches a Docker or Podman container to the `none` network. Prepare tools and dependencies in the [image](../agent-images/) first.
 
 ```ts
 import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
@@ -71,19 +96,21 @@ const sandboxProvider = createDockerSandboxProvider({
 });
 ```
 
-Prepare tools and dependencies in the image first. A CLI inside this sandbox cannot reach a remote model. Model-provider requests made by the built-in harness on the host are outside sandbox egress; so are host-side image pulls, transfers and cloud control-plane requests. Network rules do not constrain filesystem mounts, credentials or host sockets deliberately exposed through mounts.
+A CLI agent in this sandbox cannot reach its model. The [built-in harness](../harness/) can: its model requests leave from your host, and only its tools run offline.
 
-## Reproduce live checks
+Sandbox egress does not govern traffic that Outpost handles on the host:
 
-From a repository checkout with Node.js 24 and installed dependencies:
+- Model requests from the built-in harness.
+- Image pulls and file transfers.
+- Requests to a cloud provider's control plane.
 
-```sh
-OUTPOST_NETWORK_LIVE=1 OUTPOST_NETWORK_PROVIDER=vercel \
-  node --env-file=test/.env test/network-live.ts
-```
+## Limits
 
-Use `daytona` to exercise that backend. These checks create temporary billable cloud sandboxes, make no model calls, and release acquired leases. Supply the chosen provider's credentials in the ignored environment file. Reports compare unrestricted reachability with restricted probes, including redirects, IP access and warm reuse. An unreachable baseline is `unverified`, never proof of filtering. Exit codes are 0 for passed, 1 for failed and 2 for partial/skipped validation. Daytona confirmation rejection is reported as unavailable, not successful isolation.
+- A policy is fixed when you create the provider. Outpost does not change it during a run.
+- Docker and Podman enforce `deny-all` only; `networks` other than `none` conflict with it. For allowlists, use Vercel or a firewall you manage.
+- Local execution and [Firecracker](../firecracker/) reject `egress`; Firecracker networking is configured on your host.
+- A cloud service can still reject a policy when Outpost acquires the sandbox.
+- Allowed destinations can still receive data from the agent.
+- Network rules do not restrict mounts, credentials or host sockets you expose to the sandbox. See [Security](../security/).
 
-The 28 September 2026 campaign verified Vercel exact/wildcard domains, blocked redirects, IPv4 access and CIDR deny precedence, plus deny-all and warm reuse. IPv6 had no reachable baseline and remains unverified. The available Daytona account rejected domain, CIDR and deny-all enforcement; eligible-account enforcement remains unvalidated. Real Docker tests passed; Podman was unavailable on this host.
-
-API: [EgressPolicy](../../reference/egresspolicy/) · [DaytonaOptions](../../reference/daytonaoptions/) · [VercelOptions](../../reference/verceloptions/).
+API: [EgressPolicy](../../reference/egresspolicy/) · [ContainerOptions](../../reference/containeroptions/) · [VercelOptions](../../reference/verceloptions/) · [DaytonaOptions](../../reference/daytonaoptions/).
