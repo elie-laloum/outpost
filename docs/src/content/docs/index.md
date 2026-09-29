@@ -115,12 +115,7 @@ landing:
           href: "guide/host-process/",
           note: "explicit, no isolation",
         }
-      - {
-          name: "Firecracker",
-          href: "guide/microvms/",
-          note: "microVM",
-          experimental: true,
-        }
+      - { name: "Firecracker", href: "guide/microvms/", note: "microVM" }
   workflow:
     title: "From one task to a durable workflow"
     text: "A fix, a typed summary and a human approval, checkpointed so the run can stop and resume without repeating finished work."

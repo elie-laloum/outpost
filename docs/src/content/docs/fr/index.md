@@ -123,12 +123,7 @@ landing:
           href: "guide/host-process/",
           note: "explicite, sans isolation",
         }
-      - {
-          name: "Firecracker",
-          href: "guide/microvms/",
-          note: "microVM",
-          experimental: true,
-        }
+      - { name: "Firecracker", href: "guide/microvms/", note: "microVM" }
   workflow:
     title: "D’une tâche à un workflow persistant"
     text: "Une correction, un résumé typé et une validation humaine, avec des checkpoints pour que l’exécution puisse s’arrêter et reprendre sans refaire le travail terminé."

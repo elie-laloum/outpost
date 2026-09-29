@@ -5,10 +5,6 @@ sidebar:
   order: 0
 ---
 
-:::caution[Experimental]
-This provider requires a prepared Linux/KVM host and guest. Optional jailer launch adds cgroup v2 limits and a private jail under a trusted root supervisor. Direct execution remains available. Supported-host and adversarial validation are still incomplete; this is not a production isolation certification. See the [prerequisites and limits](../../guide/microvms/).
-:::
-
 ## Import
 
 ```ts

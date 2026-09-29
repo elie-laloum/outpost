@@ -1,9 +1,9 @@
 ---
 title: "Exécution en microVM"
-description: "Configurer le fournisseur Firecracker expérimental."
+description: "Configurer le fournisseur Firecracker."
 ---
 
-:::note[Expérimental]
+:::note[Prérequis de l’hôte]
 Firecracker exige un hôte Linux/KVM et un invité préparés. Ce n’est ni un constructeur automatique d’images VM ni une certification d’isolation de production.
 :::
 

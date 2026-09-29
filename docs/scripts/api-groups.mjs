@@ -85,7 +85,6 @@ export const groups = [
   {
     id: "providers",
     title: ["Providers", "Providers"],
-    experimental: ["createFirecrackerSandboxProvider", "FirecrackerOptions"],
     guide: "guide/environment/providers/overview",
     names:
       "createDockerSandboxProvider createPodmanSandboxProvider createLocalSandboxProvider createVercelSandboxProvider createDaytonaSandboxProvider createFirecrackerSandboxProvider FirecrackerOptions ContainerOptions DependencyCache EgressPolicy VercelOptions DaytonaOptions createMountedSandboxProvider createRemoteSandboxProvider SandboxContext SandboxLease SandboxProvider TransferOptions FileTransfers FileManifestEntry Variables Volume",

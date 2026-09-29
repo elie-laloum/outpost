@@ -5,10 +5,6 @@ sidebar:
   order: 20
 ---
 
-:::caution[Expérimental]
-Configuration Firecracker expérimentale avec assets de démarrage, réseau et SSH préparés manuellement. La configuration optionnelle du jailer exige une préparation privilégiée, des chemins hôte protégés et des contrôleurs cgroup v2 dédiés. La validation pour la production reste incomplète. Consultez les [prérequis et limites](../../guide/microvms/).
-:::
-
 ## Import
 
 ```ts

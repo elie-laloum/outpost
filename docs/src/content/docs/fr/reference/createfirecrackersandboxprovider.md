@@ -5,10 +5,6 @@ sidebar:
   order: 0
 ---
 
-:::caution[Expérimental]
-Ce provider exige un hôte Linux/KVM et un invité préparés. Le lancement optionnel par jailer ajoute des limites cgroup v2 et une prison privée sous un superviseur root de confiance. Le lancement direct reste disponible. Les validations des hôtes pris en charge et de résistance aux attaques restent incomplètes ; ce n’est pas une certification d’isolation en production. Consultez les [prérequis et limites](../../guide/microvms/).
-:::
-
 ## Import
 
 ```ts

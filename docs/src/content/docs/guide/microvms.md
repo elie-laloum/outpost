@@ -1,9 +1,9 @@
 ---
 title: "MicroVM execution"
-description: "Configure the experimental Firecracker provider."
+description: "Configure the Firecracker provider."
 ---
 
-:::note[Experimental]
+:::note[Host requirements]
 Firecracker requires a prepared Linux/KVM host and guest. This is not an automatic VM image builder or a production isolation certification.
 :::
 

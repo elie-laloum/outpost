@@ -12,7 +12,7 @@ A sandbox provider allocates an environment, runs commands, transfers files and 
 | [Host process](../host-process/)     | Direct host filesystem                | Yes                  | Installed tools; no isolation      |
 | [Vercel Sandbox](../vercel-cloud/)   | Uploaded snapshot and synchronization | No                   | Optional SDK and cloud credentials |
 | [Daytona Sandbox](../daytona-cloud/) | Uploaded snapshot and synchronization | Yes                  | Optional SDK and cloud credentials |
-| [Firecracker VM](../microvms/)       | Private guest environment             | Capability-dependent | Experimental Linux/KVM setup       |
+| [Firecracker VM](../microvms/)       | Private guest environment             | Capability-dependent | Prepared Linux/KVM host and guest  |
 
 ## Choose by ownership
 

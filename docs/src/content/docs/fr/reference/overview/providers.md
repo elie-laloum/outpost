@@ -16,7 +16,7 @@ Docker et Podman utilisent des conteneurs locaux, Vercel et Daytona allouent des
 
 ## Limites et responsabilités
 
-Les capacités et garanties d’isolation dépendent du backend ; les opérations non prises en charge doivent être refusées explicitement. Firecracker et `FirecrackerOptions` décrivent un provider microVM expérimental nécessitant un hôte Linux/KVM et un invité préparés. Son icône de fiole signale un travail de recherche inachevé, pas une garantie de sécurité de production. Aucun repli silencieux vers l’exécution hôte n’est effectué.
+Les capacités et garanties d’isolation dépendent du backend ; les opérations non prises en charge doivent être refusées explicitement. Firecracker et `FirecrackerOptions` décrivent un provider microVM nécessitant un hôte Linux/KVM et un invité préparés ; l’opérateur prend en charge la préparation de l’hôte, le réseau et le superviseur root du mode jailer optionnel. Aucun repli silencieux vers l’exécution hôte n’est effectué.
 
 Les API compatibles OpenAI sont des [fournisseurs de modèles](../model-providers/), distincts des backends de sandbox. `createOpenAIModelProvider()` permet des appels textuels directs expérimentaux sans Codex ; le harness d’agent est prévu en deuxième phase.
 

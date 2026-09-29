@@ -278,7 +278,7 @@ test("every family starts with its own bilingual conceptual overview", async () 
   }
 });
 
-test("Firecracker is classified only under Providers and marked experimental", () => {
+test("Firecracker is classified only under Providers and marked stable", () => {
   const providers = navigation.find((group) => group.title[0] === "Providers");
   assert.ok(providers);
   assert.ok(!navigation.some((group) => /Firecracker/.test(group.title[0])));
@@ -291,7 +291,7 @@ test("Firecracker is classified only under Providers and marked experimental", (
     const entries = all.filter((item) => item.slug === route);
     assert.equal(entries.length, 1);
     assert.ok(providers.items.includes(entries[0]));
-    assert.equal(entries[0].attrs["data-api-status"], "experimental");
+    assert.equal(entries[0].attrs?.["data-api-status"], undefined);
   }
 });
 
@@ -299,7 +299,6 @@ test("experimental references explain their status before the API content in bot
   const experimental = navigation
     .flatMap((group) => group.items)
     .filter((item) => item.attrs?.["data-api-status"] === "experimental");
-  assert.ok(experimental.length > 0);
   for (const item of experimental) {
     for (const [locale, label] of [
       ["", "Experimental"],
@@ -313,8 +312,13 @@ test("experimental references explain their status before the API content in bot
       assert.ok(end < body.indexOf("## Import"), item.slug);
     }
   }
-  const stable = await page("reference/createcodexharness.md");
-  assert.ok(!stable.includes(":::caution[Experimental]"));
+  for (const name of [
+    "createcodexharness",
+    "createfirecrackersandboxprovider",
+  ]) {
+    const stable = await page(`reference/${name}.md`);
+    assert.ok(!stable.includes(":::caution[Experimental]"), name);
+  }
 });
 
 test("CLI harness factories expose settings without nested methods", () => {

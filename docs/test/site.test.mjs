@@ -311,17 +311,17 @@ test("reference symbol icons retain accessible names in both languages", async (
   }
 });
 
-for (const [locale, label, overview] of [
-  ["", "Experimental", "Overview"],
-  ["fr/", "Expérimental", "Vue d’ensemble"],
+for (const [locale, overview] of [
+  ["", "Overview"],
+  ["fr/", "Vue d’ensemble"],
 ]) {
-  test(`provider overview and experimental icons are accessible (${locale || "en"})`, async ({
+  test(`provider overview icon is accessible and Firecracker is stable (${locale || "en"})`, async ({
     page,
   }) => {
     await page.goto(`${locale}reference/firecracker/`);
     const firecracker = page
       .getByRole("link", {
-        name: `createFirecrackerSandboxProvider — ${label}`,
+        name: "createFirecrackerSandboxProvider",
         exact: true,
       })
       .filter({ visible: true });
@@ -341,24 +341,9 @@ for (const [locale, label, overview] of [
       "createFirecrackerSandboxProvider",
       "FirecrackerOptions",
     ]) {
-      const link = family.getByRole("link", {
-        name: `${name} — ${label}`,
-        exact: true,
-      });
-      await expect(link).toHaveAttribute("title", label);
-      const icon = await link.evaluate((element) => {
-        const style = getComputedStyle(element, "::after");
-        return {
-          mask: style.maskImage,
-          width: parseFloat(style.width),
-          spacing:
-            parseFloat(style.marginInlineStart) +
-            parseFloat(getComputedStyle(element).columnGap),
-        };
-      });
-      expect(icon.mask).not.toBe("none");
-      expect(icon.width).toBeGreaterThan(0);
-      expect(icon.spacing).toBeGreaterThan(0);
+      const link = family.getByRole("link", { name, exact: true });
+      await expect(link).toHaveCount(1);
+      await expect(link).not.toHaveAttribute("data-api-status", "experimental");
     }
     await family.getByRole("link", { name: overview, exact: true }).click();
     await expect(page).toHaveURL(
@@ -370,10 +355,7 @@ for (const [locale, label, overview] of [
   });
 }
 
-for (const [locale, label] of [
-  ["", "Experimental"],
-  ["fr/", "Expérimental"],
-]) {
+for (const locale of ["", "fr/"]) {
   for (const name of [
     "firecracker",
     "firecrackeroptions",
@@ -385,30 +367,15 @@ for (const [locale, label] of [
     "anthropicmodelprovider",
     "anthropicmodelprovideroptions",
   ]) {
-    test(`reference warning matches stability (${locale}${name})`, async ({
+    test(`stable reference has no experimental warning (${locale}${name})`, async ({
       page,
     }) => {
       await page.goto(`${locale}reference/${name}/`);
-      const content = page.locator(".sl-markdown-content");
-      const lead = content.locator(":scope > .bay").first();
-      const warning = lead.locator(".bay-say > .starlight-aside").first();
-      const experimental = ["firecracker", "firecrackeroptions"].includes(name);
-      if (!experimental) {
-        await expect(
-          content.locator(".bay-say > .starlight-aside--caution"),
-        ).toHaveCount(0);
-        return;
-      }
-      await expect(lead).toHaveAttribute("data-role", "lead");
-      await expect(warning).toBeVisible();
-      await expect(warning).toHaveClass(/starlight-aside--caution/);
-      await expect(warning).toContainText(label);
-      await expect(warning).toContainText(/jailer|harness/i);
-      expect(
-        await warning.evaluate(
-          (element) => element.previousElementSibling === null,
+      await expect(
+        page.locator(
+          ".sl-markdown-content .bay-say > .starlight-aside--caution",
         ),
-      ).toBe(true);
+      ).toHaveCount(0);
     });
   }
 }
