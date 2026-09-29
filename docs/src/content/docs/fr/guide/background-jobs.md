@@ -31,7 +31,7 @@ try {
 
 ## Soumettre du travail
 
-Un producteur ouvre la même file et appelle `enqueue({ id, handler: "count", input: [1, 2, 3] })`. Utilisez des identifiants stables pour la déduplication et lisez les résultats conservés via le contrat de file. `queuedTask()` enveloppe soumission et attente dans un nœud de workflow et valide la valeur renvoyée avec `decode`.
+Un producteur ouvre la même file et appelle `enqueue({ id, handler: "count", input: [1, 2, 3] })`. Utilisez des identifiants stables pour la déduplication et lisez les résultats conservés via le contrat de file. `queuedTask()` enveloppe soumission et attente dans un nœud de workflow et valide la valeur renvoyée avec `decode`. Les [déclencheurs](../triggers/) publient des jobs à partir de planifications cron et de webhooks vérifiés, et `workflowJob()` exécute un workflow avec checkpoint pour chacun.
 
 ```ts title="submit.mts"
 import { sqliteTaskQueue } from "@elie-laloum/outpost";

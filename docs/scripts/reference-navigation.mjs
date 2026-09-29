@@ -29,6 +29,7 @@ const sections = [
       ["approvals", "Gates"],
       ["artifacts", "Artifacts"],
       ["distributed-execution", "Queues"],
+      ["triggers", "Triggers"],
       ["speculation", "Speculation"],
     ],
   ],

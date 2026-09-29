@@ -1741,6 +1741,171 @@
     ]
   },
   {
+    "title": ["Triggers", "Déclencheurs"],
+    "items": [
+      {
+        "slug": "reference/overview/triggers",
+        "attrs": { "data-reference-overview": "" }
+      },
+      {
+        "slug": "reference/cronschedule",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/runschedules",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/servetriggers",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/githubwebhook",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/gitlabwebhook",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/slackrequest",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/standardwebhook",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/labeladded",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/commandissued",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/workflowjob",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/triggeroutcome",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/triggersecret",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/gitlabwebhookoptions",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/workflowjobstartoptions",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/type-cronschedule",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/cronoptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/triggerschedule",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/runschedulesoptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/schedulefailure",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/triggerjob",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/triggerjobinput",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/triggerroute",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/triggerserveroptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/triggerserver",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/triggerfailure",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/triggerevent",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/triggerhttprequest",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/triggerreply",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/triggersource",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/githubwebhookoptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/gitlabsigningoptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/gitlabtokenoptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/slackrequestoptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/standardwebhookoptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/triggerlabel",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/triggercommand",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/workflowjoboptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/workflowjobcontext",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/workflowjobcheckpoint",
+        "attrs": { "data-api-kind": "interface" }
+      }
+    ]
+  },
+  {
     "title": ["Speculative execution", "Exécution spéculative"],
     "items": [
       {

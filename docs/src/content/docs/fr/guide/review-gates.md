@@ -139,3 +139,5 @@ Publiez une nouvelle clé publique avec un `keyId` unique et le même acteur, ba
 Séparez au besoin les contrôles d’accès applicatifs aux clés de signature et à la soumission des décisions. Un `WorkflowDecisionVerifier` personnalisé est du code de confiance et doit vérifier lui-même signature, acteur et expiration. Consultez [l’exploitation des workers](../background-jobs/#exploiter-les-workers) pour les identifiants des files et la reprise.
 
 Pour des questions adaptatives générées par un agent, utilisez les [tâches interactives](../interactive-tasks/). Leurs réponses reprennent la conversation au lieu de terminer une gate prédéfinie.
+
+Une exécution lancée par un [déclencheur](../triggers/#exécuter-le-workflow) indique la `version` de checkpoint à utiliser pour soumettre ses décisions.

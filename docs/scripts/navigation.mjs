@@ -67,6 +67,7 @@ export const chapters = [
       "guide/shared-artifacts",
       "guide/background-jobs",
       "guide/redis-workers",
+      "guide/triggers",
     ],
   ],
   [

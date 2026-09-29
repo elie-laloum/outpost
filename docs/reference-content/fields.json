@@ -6422,5 +6422,370 @@
   "ReporterHandlers.steer": [
     "Handle a steering instruction delivered to the agent, with its text and whether it was injected or resumed; receives pass and at metadata and may return a promise.",
     "Traite une consigne de pilotage remise à l’agent, avec son texte et le fait qu’elle ait été injectée ou reprise ; reçoit les métadonnées pass et at et peut renvoyer une promesse."
+  ],
+  "cronSchedule.expression": [
+    "Five fields (minute, hour, day of month, month, day of week) with lists, ranges, steps and names, or a macro such as @hourly or @daily; whitespace is normalized.",
+    "Cinq champs (minute, heure, jour du mois, mois, jour de la semaine) avec listes, intervalles, pas et noms, ou une macro comme @hourly ou @daily ; les espaces sont normalisés."
+  ],
+  "cronSchedule.options": [
+    "Evaluation options; omit them to evaluate in UTC.",
+    "Options d’évaluation ; omettez-les pour évaluer en UTC."
+  ],
+  "CronOptions.timeZone": [
+    "IANA time zone whose wall-clock time the expression describes, such as Europe/Paris; defaults to UTC.",
+    "Fuseau horaire IANA dont l’heure murale est décrite par l’expression, comme Europe/Paris ; UTC par défaut."
+  ],
+  "CronSchedule.expression": [
+    "Normalized expression, with a macro replaced by its five fields.",
+    "Expression normalisée, une macro étant remplacée par ses cinq champs."
+  ],
+  "CronSchedule.timeZone": [
+    "Canonical IANA time zone used for evaluation.",
+    "Fuseau horaire IANA canonique utilisé pour l’évaluation."
+  ],
+  "CronSchedule.next": [
+    "Return the first slot strictly after the given instant; a time skipped by daylight saving does not occur and a repeated time occurs once.",
+    "Renvoie le premier créneau strictement postérieur à l’instant donné ; une heure sautée par l’heure d’été n’existe pas et une heure répétée n’a lieu qu’une fois."
+  ],
+  "CronSchedule.previous": [
+    "Return the latest slot at or before the given instant, with the same daylight saving rules as next().",
+    "Renvoie le dernier créneau égal ou antérieur à l’instant donné, avec les mêmes règles d’heure d’été que next()."
+  ],
+  "runSchedules.options": [
+    "Queue, schedules, stop signal and lateness policy.",
+    "File, planifications, signal d’arrêt et politique de retard."
+  ],
+  "RunSchedulesOptions.queue": [
+    "Queue receiving one trigger job per slot; share it between scheduler replicas so they converge on the same job.",
+    "File qui reçoit un job de déclencheur par créneau ; partagez-la entre les réplicas du planificateur pour qu’ils convergent vers le même job."
+  ],
+  "RunSchedulesOptions.schedules": [
+    "At least one schedule, each with a unique name.",
+    "Au moins une planification, chacune avec un nom unique."
+  ],
+  "RunSchedulesOptions.signal": [
+    "Stops every schedule; runSchedules() then resolves.",
+    "Arrête toutes les planifications ; runSchedules() se résout alors."
+  ],
+  "RunSchedulesOptions.maxLateMs": [
+    "Maximum delay after a slot for it to still be published, including at startup; defaults to 60000. Older slots are skipped.",
+    "Délai maximal après un créneau pour qu’il soit encore publié, y compris au démarrage ; 60000 par défaut. Les créneaux plus anciens sont ignorés."
+  ],
+  "RunSchedulesOptions.onError": [
+    "Receives each publication failure with its schedule and slot, and scheduling continues; without it the first failure rejects runSchedules(). Errors thrown by the callback are ignored.",
+    "Reçoit chaque échec de publication avec sa planification et son créneau, et la planification continue ; sans lui, le premier échec rejette runSchedules(). Les erreurs levées par le rappel sont ignorées."
+  ],
+  "TriggerSchedule.name": [
+    "Stable name of 1 to 128 letters, digits, dots, underscores or hyphens; part of each job identifier.",
+    "Nom stable de 1 à 128 lettres, chiffres, points, tirets bas ou tirets ; il fait partie de chaque identifiant de job."
+  ],
+  "TriggerSchedule.cron": [
+    "Schedule created with cronSchedule().",
+    "Planification créée avec cronSchedule()."
+  ],
+  "TriggerSchedule.handler": [
+    "Queue worker handler receiving the jobs, usually a workflowJob().",
+    "Handler du worker de file qui reçoit les jobs, généralement un workflowJob()."
+  ],
+  "TriggerSchedule.runId": [
+    "Derive the checkpoint run of a slot; defaults to <name>:<slot ISO time>.",
+    "Dérive l’exécution de checkpoint d’un créneau ; <name>:<heure ISO du créneau> par défaut."
+  ],
+  "TriggerSchedule.input": [
+    "Derive the JSON input of a slot; defaults to null.",
+    "Dérive l’entrée JSON d’un créneau ; null par défaut."
+  ],
+  "ScheduleFailure.schedule": [
+    "Name of the schedule whose publication failed.",
+    "Nom de la planification dont la publication a échoué."
+  ],
+  "ScheduleFailure.slot": [
+    "Slot that could not be published.",
+    "Créneau qui n’a pas pu être publié."
+  ],
+  "TriggerJob.handler": [
+    "Registered queue worker handler, usually a workflowJob().",
+    "Handler enregistré du worker de file, généralement un workflowJob()."
+  ],
+  "TriggerJob.runId": [
+    "Checkpoint run, 1 to 256 characters; events for the same run converge on one checkpoint.",
+    "Exécution de checkpoint, de 1 à 256 caractères ; les événements d’une même exécution convergent vers un seul checkpoint."
+  ],
+  "TriggerJob.input": [
+    "Lossless JSON input for the workflow; defaults to null.",
+    "Entrée JSON sans perte pour le workflow ; null par défaut."
+  ],
+  "TriggerJobInput.runId": [
+    "Checkpoint run carried by the job.",
+    "Exécution de checkpoint portée par le job."
+  ],
+  "TriggerJobInput.input": [
+    "JSON input carried by the job, null when none was given.",
+    "Entrée JSON portée par le job, null lorsqu’aucune n’a été fournie."
+  ],
+  "TriggerRoute.path": [
+    "Exact request path, such as /github, unique among routes; part of each job identifier.",
+    "Chemin exact de la requête, comme /github, unique parmi les routes ; il fait partie de chaque identifiant de job."
+  ],
+  "TriggerRoute.source": [
+    "Source verifying and normalizing requests on this path.",
+    "Source qui vérifie et normalise les requêtes sur ce chemin."
+  ],
+  "TriggerRoute.on": [
+    "Map a verified event to a job, or return undefined to ignore it; a thrown error answers 500. Must return promptly because senders time out.",
+    "Associe un événement vérifié à un job, ou renvoie undefined pour l’ignorer ; une erreur levée répond 500. Doit répondre vite, car les émetteurs abandonnent après un délai."
+  ],
+  "serveTriggers.options": [
+    "Queue, routes, listening address, body limit and failure observer.",
+    "File, routes, adresse d’écoute, limite de corps et observateur d’échecs."
+  ],
+  "TriggerServerOptions.queue": [
+    "Queue receiving the jobs; a rejected enqueue answers 503.",
+    "File qui reçoit les jobs ; une publication refusée répond 503."
+  ],
+  "TriggerServerOptions.routes": [
+    "At least one route with a unique path.",
+    "Au moins une route avec un chemin unique."
+  ],
+  "TriggerServerOptions.host": [
+    "Listening address; defaults to 127.0.0.1. Expose the server through a TLS-terminating proxy.",
+    "Adresse d’écoute ; 127.0.0.1 par défaut. Exposez le serveur derrière un proxy qui termine TLS."
+  ],
+  "TriggerServerOptions.port": [
+    "Listening port; 0 or omitted selects a free port reported in url.",
+    "Port d’écoute ; 0 ou l’absence choisit un port libre indiqué dans url."
+  ],
+  "TriggerServerOptions.maxBytes": [
+    "Request body limit in bytes; defaults to 1 MiB, at most 25 MiB. Larger bodies answer 413.",
+    "Limite du corps de requête en octets ; 1 Mio par défaut, au plus 25 Mio. Les corps plus grands répondent 413."
+  ],
+  "TriggerServerOptions.onError": [
+    "Observes verification, routing and publication failures with the path and, after verification, the delivery; never receives secrets. Errors thrown by the callback are ignored.",
+    "Observe les échecs de vérification, de routage et de publication avec le chemin et, après vérification, la livraison ; ne reçoit jamais de secrets. Les erreurs levées par le rappel sont ignorées."
+  ],
+  "TriggerServer.url": [
+    "Base URL of the listening server, such as http://127.0.0.1:8787.",
+    "URL de base du serveur à l’écoute, comme http://127.0.0.1:8787."
+  ],
+  "TriggerServer.close": [
+    "Stop accepting connections and resolve once the server is closed; the queue stays open.",
+    "Cesse d’accepter les connexions et se résout une fois le serveur fermé ; la file reste ouverte."
+  ],
+  "TriggerFailure.path": [
+    "Route path of the failed request.",
+    "Chemin de route de la requête en échec."
+  ],
+  "TriggerFailure.stage": [
+    "Failing step: verify (401), route (500) or enqueue (503).",
+    "Étape en échec : verify (401), route (500) ou enqueue (503)."
+  ],
+  "TriggerFailure.delivery": [
+    "Delivery identifier, known only after verification succeeded.",
+    "Identifiant de livraison, connu seulement après une vérification réussie."
+  ],
+  "TriggerEvent.source": [
+    "Source name, such as github, gitlab, slack or standard.",
+    "Nom de la source, comme github, gitlab, slack ou standard."
+  ],
+  "TriggerEvent.delivery": [
+    "Sender delivery identifier, shared by retries of one delivery; 1 to 200 visible ASCII characters.",
+    "Identifiant de livraison de l’émetteur, partagé par les nouvelles tentatives d’une livraison ; de 1 à 200 caractères ASCII visibles."
+  ],
+  "TriggerEvent.kind": [
+    "Event type: the GitHub event name, the GitLab object_kind, command or the Slack interaction type, or the Standard Webhooks payload type.",
+    "Type d’événement : nom d’événement GitHub, object_kind GitLab, command ou type d’interaction Slack, ou type de charge Standard Webhooks."
+  ],
+  "TriggerEvent.action": [
+    "Sub-action when the sender provides one, such as labeled, update or the Slack command name.",
+    "Sous-action lorsque l’émetteur en fournit une, comme labeled, update ou le nom de la commande Slack."
+  ],
+  "TriggerEvent.actor": [
+    "Sender-authenticated identity such as github:octocat, gitlab:user or slack:U123; not an Outpost gate actor.",
+    "Identité authentifiée par l’émetteur, comme github:octocat, gitlab:user ou slack:U123 ; pas un acteur de gate Outpost."
+  ],
+  "TriggerEvent.payload": [
+    "Parsed request payload; read it with helpers or narrow it before use.",
+    "Charge de la requête analysée ; lisez-la avec les helpers ou affinez son type avant usage."
+  ],
+  "TriggerEvent.receivedAt": [
+    "ISO time at which the server verified the request.",
+    "Heure ISO à laquelle le serveur a vérifié la requête."
+  ],
+  "TriggerHttpRequest.method": [
+    "HTTP method; routes only receive POST.",
+    "Méthode HTTP ; les routes ne reçoivent que POST."
+  ],
+  "TriggerHttpRequest.path": [
+    "Request path without query string.",
+    "Chemin de la requête sans chaîne de requête."
+  ],
+  "TriggerHttpRequest.headers": [
+    "Request headers with lowercase names; repeated headers are joined with commas.",
+    "En-têtes de la requête aux noms en minuscules ; les en-têtes répétés sont joints par des virgules."
+  ],
+  "TriggerHttpRequest.body": [
+    "Raw body bytes, verified before any parsing.",
+    "Octets bruts du corps, vérifiés avant toute analyse."
+  ],
+  "TriggerReply.status": [
+    "HTTP status returned to the sender.",
+    "Statut HTTP renvoyé à l’émetteur."
+  ],
+  "TriggerReply.body": [
+    "Optional response body.",
+    "Corps de réponse optionnel."
+  ],
+  "TriggerReply.contentType": [
+    "Content type of the body, when one is sent.",
+    "Type de contenu du corps, lorsqu’il y en a un."
+  ],
+  "TriggerSource.name": [
+    "Source name reported in TriggerEvent.source.",
+    "Nom de la source indiqué dans TriggerEvent.source."
+  ],
+  "TriggerSource.verify": [
+    "Authenticate the request and return the normalized event; throwing rejects it with 401.",
+    "Authentifie la requête et renvoie l’événement normalisé ; lever une erreur la refuse avec 401."
+  ],
+  "TriggerSource.reply": [
+    "Replace the default 202 and 204 replies for senders expecting another status, such as Slack.",
+    "Remplace les réponses 202 et 204 par défaut pour les émetteurs qui attendent un autre statut, comme Slack."
+  ],
+  "githubWebhook.options": [
+    "GitHub webhook secret settings.",
+    "Réglages du secret du webhook GitHub."
+  ],
+  "GithubWebhookOptions.secret": [
+    "GitHub webhook secret verifying X-Hub-Signature-256. Secret, or callback returning every currently accepted secret; return old and new values during a rotation. An empty or failing source denies requests.",
+    "Secret du webhook GitHub qui vérifie X-Hub-Signature-256. Secret, ou fonction renvoyant chaque secret actuellement accepté ; renvoyez l’ancienne et la nouvelle valeur pendant une rotation. Une source vide ou en échec refuse les requêtes."
+  ],
+  "gitlabWebhook.options": [
+    "Either signingToken (recommended, signs the body) or token (legacy plain-text header), not both.",
+    "Soit signingToken (recommandé, signe le corps), soit token (en-tête historique en clair), pas les deux."
+  ],
+  "GitlabSigningOptions.signingToken": [
+    "whsec_ signing token of the GitLab webhook (GitLab 19.0+), verifying webhook-signature. Secret, or callback returning every currently accepted secret; return old and new values during a rotation. An empty or failing source denies requests.",
+    "Jeton de signature whsec_ du webhook GitLab (GitLab 19.0+), qui vérifie webhook-signature. Secret, ou fonction renvoyant chaque secret actuellement accepté ; renvoyez l’ancienne et la nouvelle valeur pendant une rotation. Une source vide ou en échec refuse les requêtes."
+  ],
+  "GitlabSigningOptions.toleranceMs": [
+    "Accepted clock difference for the request timestamp, in milliseconds; defaults to 300000 (5 minutes).",
+    "Écart d’horloge accepté pour l’horodatage de la requête, en millisecondes ; 300000 (5 minutes) par défaut."
+  ],
+  "GitlabTokenOptions.token": [
+    "Secret token compared with X-Gitlab-Token; weaker because the body is not signed. Secret, or callback returning every currently accepted secret; return old and new values during a rotation. An empty or failing source denies requests.",
+    "Jeton secret comparé à X-Gitlab-Token ; plus faible car le corps n’est pas signé. Secret, ou fonction renvoyant chaque secret actuellement accepté ; renvoyez l’ancienne et la nouvelle valeur pendant une rotation. Une source vide ou en échec refuse les requêtes."
+  ],
+  "slackRequest.options": [
+    "Slack app signing secret and timestamp window.",
+    "Secret de signature de l’application Slack et fenêtre d’horodatage."
+  ],
+  "SlackRequestOptions.signingSecret": [
+    "Slack app signing secret verifying X-Slack-Signature. Secret, or callback returning every currently accepted secret; return old and new values during a rotation. An empty or failing source denies requests.",
+    "Secret de signature de l’application Slack qui vérifie X-Slack-Signature. Secret, ou fonction renvoyant chaque secret actuellement accepté ; renvoyez l’ancienne et la nouvelle valeur pendant une rotation. Une source vide ou en échec refuse les requêtes."
+  ],
+  "SlackRequestOptions.toleranceMs": [
+    "Accepted clock difference for the request timestamp, in milliseconds; defaults to 300000 (5 minutes).",
+    "Écart d’horloge accepté pour l’horodatage de la requête, en millisecondes ; 300000 (5 minutes) par défaut."
+  ],
+  "standardWebhook.options": [
+    "Signing secret, timestamp window and source name.",
+    "Secret de signature, fenêtre d’horodatage et nom de source."
+  ],
+  "StandardWebhookOptions.secret": [
+    "whsec_ secret verifying webhook-signature. Secret, or callback returning every currently accepted secret; return old and new values during a rotation. An empty or failing source denies requests.",
+    "Secret whsec_ qui vérifie webhook-signature. Secret, ou fonction renvoyant chaque secret actuellement accepté ; renvoyez l’ancienne et la nouvelle valeur pendant une rotation. Une source vide ou en échec refuse les requêtes."
+  ],
+  "StandardWebhookOptions.toleranceMs": [
+    "Accepted clock difference for the request timestamp, in milliseconds; defaults to 300000 (5 minutes).",
+    "Écart d’horloge accepté pour l’horodatage de la requête, en millisecondes ; 300000 (5 minutes) par défaut."
+  ],
+  "StandardWebhookOptions.source": [
+    "Name reported in TriggerEvent.source; defaults to standard.",
+    "Nom indiqué dans TriggerEvent.source ; standard par défaut."
+  ],
+  "labelAdded.event": [
+    "Verified event from a GitHub or GitLab source.",
+    "Événement vérifié provenant d’une source GitHub ou GitLab."
+  ],
+  "labelAdded.label": [
+    "Exact label name that must have just been added.",
+    "Nom exact du label qui doit venir d’être ajouté."
+  ],
+  "TriggerLabel.source": [
+    "Sender of the event: github or gitlab.",
+    "Émetteur de l’événement : github ou gitlab."
+  ],
+  "TriggerLabel.repository": [
+    "owner/name on GitHub, the project path with namespace on GitLab.",
+    "owner/name sur GitHub, chemin du projet avec son espace de noms sur GitLab."
+  ],
+  "TriggerLabel.number": [
+    "Issue or pull request number on GitHub, issue or merge request IID on GitLab.",
+    "Numéro de l’issue ou de la pull request sur GitHub, IID de l’issue ou de la merge request sur GitLab."
+  ],
+  "TriggerLabel.target": [
+    "issue, or pull-request for a GitHub pull request or a GitLab merge request.",
+    "issue, ou pull-request pour une pull request GitHub ou une merge request GitLab."
+  ],
+  "TriggerLabel.label": ["Label that was added.", "Label ajouté."],
+  "commandIssued.event": [
+    "Verified event from a GitHub, GitLab or Slack source.",
+    "Événement vérifié provenant d’une source GitHub, GitLab ou Slack."
+  ],
+  "commandIssued.command": [
+    "Single word starting the command, such as /outpost; for Slack it must equal the slash command name.",
+    "Mot unique qui commence la commande, comme /outpost ; pour Slack, il doit être égal au nom de la commande slash."
+  ],
+  "TriggerCommand.source": [
+    "Sender of the command: github, gitlab or slack.",
+    "Émetteur de la commande : github, gitlab ou slack."
+  ],
+  "TriggerCommand.text": [
+    "Trimmed text after the command; empty when the command has no argument.",
+    "Texte après la commande, sans espaces de bord ; vide lorsque la commande n’a pas d’argument."
+  ],
+  "TriggerCommand.repository": [
+    "Repository of the commented issue or request, for GitHub and GitLab comments.",
+    "Dépôt de l’issue ou de la demande commentée, pour les commentaires GitHub et GitLab."
+  ],
+  "TriggerCommand.number": [
+    "Number or IID of the commented issue or request, when the payload provides it.",
+    "Numéro ou IID de l’issue ou de la demande commentée, lorsque la charge le fournit."
+  ],
+  "TriggerCommand.target": [
+    "issue or pull-request, present with number.",
+    "issue ou pull-request, présent avec number."
+  ],
+  "workflowJob.options": [
+    "Workflow factory, checkpoint settings and start options.",
+    "Fabrique de workflow, réglages de checkpoint et options de démarrage."
+  ],
+  "WorkflowJobOptions.workflow": [
+    "Build the workflow for one job input; the same input must build the same workflow, and it may be asynchronous.",
+    "Construit le workflow pour une entrée de job ; la même entrée doit construire le même workflow, et la fabrique peut être asynchrone."
+  ],
+  "WorkflowJobOptions.checkpoint": [
+    "Checkpoint store and version used for every job; required.",
+    "Stockage et version de checkpoint utilisés pour chaque job ; obligatoire."
+  ],
+  "WorkflowJobOptions.start": [
+    "Other workflow start options, such as concurrency, budget, onQuota or timeoutMs; checkpoint, signal, decisions and answers are managed by the job.",
+    "Autres options de démarrage du workflow, comme concurrency, budget, onQuota ou timeoutMs ; checkpoint, signal, decisions et answers sont gérés par le job."
+  ],
+  "WorkflowJobContext.runId": [
+    "Checkpoint run carried by the job.",
+    "Exécution de checkpoint portée par le job."
+  ],
+  "WorkflowJobCheckpoint.store": [
+    "Checkpoint store holding every run.",
+    "Stockage de checkpoints qui contient chaque exécution."
+  ],
+  "WorkflowJobCheckpoint.version": [
+    "Change when task implementations change; the effective version appends #input: and a digest of the job input.",
+    "À changer lorsque les implémentations de tâches changent ; la version effective ajoute #input: et une empreinte de l’entrée du job."
+  ],
+  "WorkflowJobCheckpoint.resume": [
+    "Explicitly authorize replay of incomplete tasks and their side effects.",
+    "Autorise explicitement le rejeu des tâches incomplètes et de leurs effets de bord."
   ]
 }
