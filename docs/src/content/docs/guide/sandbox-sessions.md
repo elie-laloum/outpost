@@ -36,18 +36,17 @@ An `agent` passed to `sandbox.dispatch()` replaces the one given to `createSandb
 
 `sandbox.command()` runs one executable with an array of arguments. No shell parses them: `*`, `|` and `$HOME` reach the program as plain text. Call a shell yourself when you need one.
 
-```ts
+```ts title="command.mts"
 import { createSandbox } from "@elie-laloum/outpost";
 import { repository, sandboxProvider } from "./outpost.config.mts";
 
 await using sandbox = await createSandbox({ repository, sandboxProvider });
 const result = await sandbox.command({
   executable: "sh",
-  arguments: ["-c", "npm test 2>&1 | tail -n 20"],
-  directory: `${sandbox.root}/packages/api`,
+  arguments: ["-c", "node --version | tail -n 1"],
   variables: { CI: "1" },
 });
-console.log(result.status, result.stdout);
+console.log(result.stdout.trim()); // v24.15.0
 ```
 
 `sandbox.root` is the repository path inside the sandbox and the default working directory.

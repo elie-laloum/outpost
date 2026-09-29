@@ -31,7 +31,7 @@ for (const locale of ["", "fr/"]) {
     const content = resolve(root, `docs/src/content/docs/${locale}guide`);
     const setup = await readFile(resolve(content, "setup.md"), "utf8");
     const page = await readFile(
-      resolve(content, "process-execution.md"),
+      resolve(content, "sandbox-sessions.md"),
       "utf8",
     );
     let config = setup.match(
@@ -75,7 +75,7 @@ for (const locale of ["", "fr/"]) {
     });
     assert.match(output.trim(), /^v\d+\.\d+\.\d+$/);
     console.log(
-      `${engine}: ${locale || "en/"}process-execution command snippet passed`,
+      `${engine}: ${locale || "en/"}sandbox-sessions command snippet passed`,
     );
   } finally {
     await rm(workspace, { recursive: true, force: true });
