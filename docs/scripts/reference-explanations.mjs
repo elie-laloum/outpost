@@ -14,6 +14,8 @@ const symbols = await readContent("symbols");
 const fields = await readContent("fields");
 const escape = (value) =>
   value.replaceAll("|", "\\|").replaceAll("\n", " ").replaceAll("`", "\\`");
+// Descriptions are prose: placeholders such as <name> must not become HTML.
+const prose = (value) => value.replaceAll("<", "&lt;");
 const bilingual = (values, key) => {
   if (
     !Array.isArray(values) ||
@@ -46,7 +48,7 @@ export function explain(symbol, declaration, group, language, checker) {
   let output = "";
   if (!contract) {
     output += `\n\n## ${fr ? "Rôle et comportement" : "Purpose and behavior"}\n\n`;
-    output += bilingual(symbols[symbol.name], symbol.name)[language];
+    output += prose(bilingual(symbols[symbol.name], symbol.name)[language]);
     if (group)
       output += `\n\n[${fr ? "Exemple complet et règles détaillées" : "Complete example and detailed rules"}](../../${symbolGuides[symbol.name] ?? group.guide}/).`;
   }
@@ -62,7 +64,7 @@ export function explain(symbol, declaration, group, language, checker) {
         fields[entry.key] ?? fields[entry.owner],
         entry.key,
       )[language];
-      output += `| \`${escape(entry.name)}\` | \`${escape(entry.type)}\` | ${presence(entry, language)} | ${escape(description)} |\n`;
+      output += `| \`${escape(entry.name)}\` | \`${escape(entry.type)}\` | ${presence(entry, language)} | ${prose(escape(description))} |\n`;
     }
   }
   if (signatures.length && !ts.isInterfaceDeclaration(declaration)) {

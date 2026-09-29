@@ -13,7 +13,7 @@ import { createTaskCacheStore } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Crée un store de cache de tâches sur un Transport appartenant à l’appelant. Les entrées sont stockées sous task-cache/<empreinte>.json ; les écritures remplacent conditionnellement les anciennes entrées et conservent celle d’un écrivain concurrent. Les lectures valident l’entrée et sa taille. Les entrées ne sont pas authentifiées : quiconque peut écrire dans le transport contrôle les résultats restaurés.
+Crée un store de cache de tâches sur un Transport appartenant à l’appelant. Les entrées sont stockées sous task-cache/&lt;empreinte>.json ; les écritures remplacent conditionnellement les anciennes entrées et conservent celle d’un écrivain concurrent. Les lectures valident l’entrée et sa taille. Les entrées ne sont pas authentifiées : quiconque peut écrire dans le transport contrôle les résultats restaurés.
 
 [Exemple complet et règles détaillées](../../guide/task-cache/).
 

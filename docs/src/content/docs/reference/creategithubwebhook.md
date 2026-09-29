@@ -13,7 +13,7 @@ import { createGithubWebhook } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Create a GitHub trigger source. It verifies X-Hub-Signature-256 against every current secret in constant time, accepts JSON and form payloads, and reports X-GitHub-Delivery, the X-GitHub-Event name, the payload action and the sender as github:<login>. GitHub signatures carry no timestamp.
+Create a GitHub trigger source. It verifies X-Hub-Signature-256 against every current secret in constant time, accepts JSON and form payloads, and reports X-GitHub-Delivery, the X-GitHub-Event name, the payload action and the sender as github:&lt;login>. GitHub signatures carry no timestamp.
 
 [Complete example and detailed rules](../../guide/webhooks/).
 

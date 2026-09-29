@@ -13,7 +13,7 @@ import { createGithubWebhook } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Crée une source de déclencheur GitHub. Elle vérifie X-Hub-Signature-256 avec chaque secret courant en temps constant, accepte les charges JSON et formulaire, et renvoie X-GitHub-Delivery, le nom X-GitHub-Event, l’action de la charge et l’émetteur sous la forme github:<login>. Les signatures GitHub ne portent pas d’horodatage.
+Crée une source de déclencheur GitHub. Elle vérifie X-Hub-Signature-256 avec chaque secret courant en temps constant, accepte les charges JSON et formulaire, et renvoie X-GitHub-Delivery, le nom X-GitHub-Event, l’action de la charge et l’émetteur sous la forme github:&lt;login>. Les signatures GitHub ne portent pas d’horodatage.
 
 [Exemple complet et règles détaillées](../../guide/webhooks/).
 

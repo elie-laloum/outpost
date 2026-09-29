@@ -13,7 +13,7 @@ import { serveTriggers } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Démarre un serveur HTTP qui vérifie chaque requête avec la source de sa route et publie le job choisi par on() sous trigger:<path>:<delivery>. Les relivraisons d’une même livraison ne publient rien de nouveau. Il répond 202, 204, 401, 404, 405, 413, 500 ou 503, sauf si la source remplace les réponses de succès, et se résout une fois à l’écoute. L’appelant ferme le serveur puis sa file.
+Démarre un serveur HTTP qui vérifie chaque requête avec la source de sa route et publie le job choisi par on() sous trigger:&lt;path>:&lt;delivery>. Les relivraisons d’une même livraison ne publient rien de nouveau. Il répond 202, 204, 401, 404, 405, 413, 500 ou 503, sauf si la source remplace les réponses de succès, et se résout une fois à l’écoute. L’appelant ferme le serveur puis sa file.
 
 [Exemple complet et règles détaillées](../../guide/webhooks/).
 

@@ -15,14 +15,14 @@ import type { Turn } from "@elie-laloum/outpost";
 
 | Name                  | Type                              | Presence | Meaning                                                                                                                                                               |
 | --------------------- | --------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `text`                | `string`                          | Required | Text reported for this single agent pass.                                                                                                                             |
-| `status`              | `number`                          | Required | Process exit code; zero denotes success.                                                                                                                              |
+| `text`                | `string`                          | Required | Text of this turn.                                                                                                                                                    |
+| `status`              | `number`                          | Required | Exit status of the agent process. Always 0 in a returned turn: a nonzero status fails the dispatch.                                                                   |
 | `interrupted`         | `"steering" \| undefined`         | Optional | steering when Outpost stopped this turn to resume its conversation with a steering instruction; the next turn continues it. Absent for turns that ended on their own. |
-| `conversation`        | `string \| undefined`             | Optional | Available native conversation identity.                                                                                                                               |
-| `transcript`          | `string \| undefined`             | Optional | Available host path to the captured transcript.                                                                                                                       |
+| `conversation`        | `string \| undefined`             | Optional | Native conversation id after this turn, when the agent reported one.                                                                                                  |
+| `transcript`          | `string \| undefined`             | Optional | Host path of the transcript captured after this turn.                                                                                                                 |
 | `transcriptReference` | `TransportReference \| undefined` | Optional | Pinned remote index of the conversation captured after this turn; its local transcript remains available separately.                                                  |
-| `usage`               | `Usage`                           | Required | Reported usage counters; not a currency estimate.                                                                                                                     |
-| `durationMs`          | `number`                          | Required | Elapsed execution time in milliseconds.                                                                                                                               |
+| `usage`               | `Usage`                           | Required | Token counters reported for this turn; not a cost.                                                                                                                    |
+| `durationMs`          | `number`                          | Required | Duration of this turn in milliseconds.                                                                                                                                |
 
 ## Signature
 

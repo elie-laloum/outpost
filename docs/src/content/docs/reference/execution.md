@@ -13,15 +13,15 @@ import type { Execution } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name           | Type                  | Presence | Meaning                                                                                     |
-| -------------- | --------------------- | -------- | ------------------------------------------------------------------------------------------- |
-| `text`         | `string`              | Required | Text of every turn of the execution, joined with newlines, including response repair turns. |
-| `turns`        | `readonly Turn[]`     | Required | Ordered agent-turn results, including text, status, duration and token usage for each pass. |
-| `usage`        | `Usage`               | Required | Reported usage counters; not a currency estimate.                                           |
-| `conversation` | `string \| undefined` | Optional | Available native conversation identity.                                                     |
-| `value`        | `T`                   | Required | Validated structured response value; undefined when no response specification was supplied. |
-| `completed`    | `boolean`             | Required | Whether the configured completion marker matched.                                           |
-| `completion`   | `string \| undefined` | Optional | Completion marker that matched the agent’s output, when one was found.                      |
+| Name           | Type                  | Presence | Meaning                                                                                              |
+| -------------- | --------------------- | -------- | ---------------------------------------------------------------------------------------------------- |
+| `text`         | `string`              | Required | Text of every turn of the execution, joined with newlines, including response repair turns.          |
+| `turns`        | `readonly Turn[]`     | Required | Every turn in order, including response repairs and turns resumed by steering.                       |
+| `usage`        | `Usage`               | Required | Token counters summed over every turn; not a cost.                                                   |
+| `conversation` | `string \| undefined` | Optional | Native conversation id of the last turn, when the agent reported one.                                |
+| `value`        | `T`                   | Required | Parsed and validated response; undefined without a response option.                                  |
+| `completed`    | `boolean`             | Required | True when the last turn's text contains a completion marker, or when a typed response was validated. |
+| `completion`   | `string \| undefined` | Optional | Completion marker found in the last turn's text.                                                     |
 
 ## Signature
 

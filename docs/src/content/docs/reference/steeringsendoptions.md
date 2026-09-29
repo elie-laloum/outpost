@@ -13,9 +13,9 @@ import type { SteeringSendOptions } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name       | Type                          | Presence | Meaning                                                                                                                                                                                                                                                                                 |
-| ---------- | ----------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `subagent` | `string \| null \| undefined` | Optional | Built-in subagent run id, read from its subagent event, to deliver only to that run at its next step boundary; null to deliver only to the main loop. Omit it to deliver to the first active loop. Instructions for a run that ended, or sent to CLI agents, reject with code steering. |
+| Name       | Type                          | Presence | Meaning                                                                                                                                                                                                                               |
+| ---------- | ----------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `subagent` | `string \| null \| undefined` | Optional | Built-in subagent run id, read from its subagent event, to deliver only to that run at its next step; null delivers only to the main loop. Omitted, the first active loop receives it. CLI agents reject a target with code steering. |
 
 ## Signature
 

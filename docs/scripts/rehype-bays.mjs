@@ -64,21 +64,18 @@ const layouts = {
           )
         : assemble("wide", undefined, section.nodes, [], []),
     ),
-  overview(sections) {
-    const entries = sections.filter((section) =>
-      entryHeadings.has(headingText(section)),
-    );
-    const concept = sections.filter((section) => !entries.includes(section));
-    return [
-      assemble(
-        "split",
-        "overview",
-        concept.flatMap(sectionNodes),
-        entries.flatMap(sectionNodes).map(asCells),
-        [],
-      ),
-    ];
-  },
+  overview: (sections) =>
+    sections.map((section) =>
+      entryHeadings.has(headingText(section))
+        ? assemble(
+            "wide",
+            "overview",
+            sectionNodes(section).map(asCells),
+            [],
+            [],
+          )
+        : bay(section, placements.guide),
+    ),
   symbol(sections) {
     const byRole = { say: [], show: [], wide: [], lead: [] };
     for (const section of sections) {

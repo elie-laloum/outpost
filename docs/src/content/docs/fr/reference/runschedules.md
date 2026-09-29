@@ -13,7 +13,7 @@ import { runSchedules } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Publie un job de déclencheur par créneau cron de chaque planification jusqu’à l’interruption du signal, puis se résout. Chaque créneau publie schedule:<name>:<heure ISO du créneau>, si bien que les réplicas et les redémarrages qui partagent une file convergent vers un seul job ; un créneau plus en retard que maxLateMs est ignoré et seul le dernier créneau manqué est rattrapé. Sans onError, le premier échec de publication rejette.
+Publie un job de déclencheur par créneau cron de chaque planification jusqu’à l’interruption du signal, puis se résout. Chaque créneau publie schedule:&lt;name>:&lt;heure ISO du créneau>, si bien que les réplicas et les redémarrages qui partagent une file convergent vers un seul job ; un créneau plus en retard que maxLateMs est ignoré et seul le dernier créneau manqué est rattrapé. Sans onError, le premier échec de publication rejette.
 
 [Exemple complet et règles détaillées](../../guide/cron-schedules/).
 

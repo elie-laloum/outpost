@@ -18,7 +18,7 @@ import type { TriggerSchedule } from "@elie-laloum/outpost";
 | `name`    | `string`                                      | Required | Stable name of 1 to 128 letters, digits, dots, underscores or hyphens; part of each job identifier. |
 | `cron`    | `CronSchedule`                                | Required | Schedule created with createCronSchedule().                                                         |
 | `handler` | `string`                                      | Required | Queue worker handler receiving the jobs, usually a defineWorkflowJob().                             |
-| `runId`   | `((slot: Date) => string) \| undefined`       | Optional | Derive the checkpoint run of a slot; defaults to <name>:<slot ISO time>.                            |
+| `runId`   | `((slot: Date) => string) \| undefined`       | Optional | Derive the checkpoint run of a slot; defaults to &lt;name>:&lt;slot ISO time>.                      |
 | `input`   | `((slot: Date) => WorkflowJson) \| undefined` | Optional | Derive the JSON input of a slot; defaults to null.                                                  |
 
 ## Signature

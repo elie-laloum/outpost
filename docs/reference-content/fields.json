@@ -532,72 +532,72 @@
     "Politique de branche choisie à l’ouverture du workspace."
   ],
   "DispatchOptions.agent": [
-    "Agent that runs the dispatch: a single agent composed with createAgent() or createReplayAgent(), or a createFallbackAgent() whose candidates are tried in order on listed quota or outage failures. A fallback agent cannot be combined with continuation.",
-    "Agent qui exécute le dispatch : un agent unique composé avec createAgent() ou createReplayAgent(), ou un createFallbackAgent() dont les candidats sont essayés dans l’ordre sur les échecs de quota ou de panne listés. Un agent de secours ne peut pas être combiné avec continuation."
+    "Agent that runs the brief: one from createAgent() or createReplayAgent(), or a createFallbackAgent() that moves to its next candidate on a listed quota or unavailable fault. A fallback agent cannot take continuation.",
+    "Agent qui exécute le brief : issu de createAgent() ou createReplayAgent(), ou un createFallbackAgent() qui passe au candidat suivant sur une faute quota ou unavailable listée. Un agent de secours n’accepte pas continuation."
   ],
   "DispatchOptions.logging": [
-    "Configure the dispatch journal transport, verbose event retention and replayable commit recording.",
-    "Configure le transport du journal du dispatch, la conservation des événements détaillés et l’enregistrement rejouable des commits."
+    "Journal settings: transport, verbose event retention and commit recording for replay.",
+    "Réglages du journal : transport, conservation détaillée des événements et enregistrement des commits pour le rejeu."
   ],
   "DispatchOptions.label": [
-    "Human-readable label used in execution reporting.",
-    "Libellé lisible utilisé dans les rapports d’exécution."
+    "Name shown for this dispatch in progress reports.",
+    "Nom affiché pour ce dispatch dans les rapports de progression."
   ],
   "DispatchOptions.brief": [
-    "Literal text or file-based task input.",
-    "Entrée de tâche textuelle littérale ou provenant d’un fichier."
+    "Task given to the agent: literal text or a file brief.",
+    "Tâche confiée à l’agent : texte littéral ou brief lu depuis un fichier."
   ],
   "DispatchOptions.passes": [
-    "Maximum agent passes; one by default.",
-    "Nombre maximal de passes d’agent ; une par défaut."
+    "Maximum passes, default 1. Each pass reruns the brief in a new conversation and the dispatch stops at the first pass whose text contains a completion marker. Must be 1 with response or continuation.",
+    "Nombre maximal de passes, 1 par défaut. Chaque passe relance le brief dans une nouvelle conversation, et le dispatch s’arrête à la première passe dont le texte contient un marqueur de fin. Doit valoir 1 avec response ou continuation."
   ],
   "DispatchOptions.until": [
-    "Completion marker or markers; an empty list disables matching.",
-    "Marqueur(s) de fin ; une liste vide désactive la détection."
+    "Completion marker or markers searched in the last turn's text, default <outpost>done</outpost>. An empty list disables matching, so every pass runs; empty strings are rejected.",
+    "Marqueur ou marqueurs de fin recherchés dans le texte du dernier tour, <outpost>done</outpost> par défaut. Une liste vide désactive la recherche et toutes les passes s’exécutent ; les chaînes vides sont refusées."
   ],
   "DispatchOptions.idleMs": [
-    "Maximum silent interval in milliseconds.",
-    "Intervalle silencieux maximal en millisecondes."
+    "Longest silence allowed from the agent, default 600000 (10 minutes). Past it the turn stops with code timeout.",
+    "Silence maximal accepté de l’agent, 600000 par défaut (10 minutes). Au-delà, le tour s’arrête avec le code timeout."
   ],
   "DispatchOptions.idleWarningMs": [
-    "Silence interval in milliseconds before emitting an idle warning.",
-    "Intervalle de silence en millisecondes avant émission d’un avertissement d’inactivité."
+    "Silence after which a warning event is emitted, then repeated at the same interval; default 60000.",
+    "Durée de silence après laquelle un événement d’avertissement est émis, puis répété au même intervalle ; 60000 par défaut."
   ],
   "DispatchOptions.settleMs": [
-    "Grace period in milliseconds after completion detection before stopping a lingering agent process.",
-    "Délai de grâce en millisecondes après détection de fin avant l’arrêt d’un processus d’agent encore actif."
+    "Wait after a completion marker before stopping an agent that is still running, default 60000. The turn still succeeds.",
+    "Attente après un marqueur de fin avant d’arrêter un agent encore actif, 60000 par défaut. Le tour reste un succès."
   ],
   "DispatchOptions.deadlineMs": [
-    "Maximum duration of each agent process in milliseconds; defaults to one hour.",
-    "Durée maximale de chaque processus d’agent en millisecondes ; une heure par défaut."
+    "Maximum duration of each agent process, default 3600000 (one hour). Past it the turn fails with code timeout.",
+    "Durée maximale de chaque processus d’agent, 3600000 par défaut (une heure). Au-delà, le tour échoue avec le code timeout."
   ],
   "DispatchOptions.expansionMs": [
-    "Deadline in milliseconds for each original shell expansion in a file brief; defaults to 30000.",
-    "Délai en millisecondes de chaque expansion shell d’origine d’un brief fichier ; 30000 par défaut."
+    "Deadline for each shell expansion in a file brief, default 30000.",
+    "Délai de chaque expansion shell d’un brief fichier, 30000 par défaut."
   ],
   "DispatchOptions.signal": [
-    "Cooperative cancellation for this operation.",
-    "Annulation coopérative de cette opération."
+    "Aborting it stops the agent process and rejects the dispatch with the signal's reason.",
+    "Son annulation arrête le processus de l’agent et rejette le dispatch avec la raison du signal."
   ],
   "DispatchOptions.continuation": [
-    "Native conversation ID to continue; fork requests a separate conversation derived from it.",
-    "Identifiant de conversation native à poursuivre ; fork demande une conversation distincte dérivée de celle-ci."
+    "Native conversation to continue, by id; fork: true continues a copy and leaves the original unchanged. Requires one pass and an agent that supports resume.",
+    "Conversation native à continuer, par identifiant ; fork: true continue une copie et laisse l’originale intacte. Exige une seule passe et un agent qui sait reprendre."
   ],
   "DispatchOptions.response": [
-    "Parser and validator for the tagged agent answer.",
-    "Analyseur et validateur de la réponse balisée."
+    "Typed response contract: the tagged answer is parsed and validated, and an invalid answer gets up to repairs correction turns. Requires one pass.",
+    "Contrat de réponse typée : la réponse balisée est analysée et validée, et une réponse invalide reçoit jusqu’à repairs tours de correction. Exige une seule passe."
   ],
   "DispatchOptions.observe": [
-    "Receive normalized agent observations with pass number and timestamp; observer failures are isolated.",
-    "Reçoit les observations normalisées d’agent avec numéro de passe et horodatage ; les erreurs d’observation sont isolées."
+    "Receives each normalized agent event with its pass number and timestamp. An exception thrown here is collected in observerErrors and does not change the outcome.",
+    "Reçoit chaque événement normalisé de l’agent avec son numéro de passe et son horodatage. Une exception levée ici est collectée dans observerErrors et ne change pas le résultat."
   ],
   "DispatchOptions.warn": [
-    "Callback receiving nonfatal execution or conversation-storage warnings.",
-    "Callback recevant les avertissements non bloquants d’exécution ou de stockage des conversations."
+    "Receives nonfatal warnings, such as an idle agent or a conversation storage problem.",
+    "Reçoit les avertissements non bloquants, par exemple un agent silencieux ou un problème de stockage de conversation."
   ],
   "DispatchOptions.diagnostic": [
-    "Callback receiving execution diagnostic messages.",
-    "Callback recevant les messages de diagnostic d’exécution."
+    "Receives diagnostic messages, such as the estimated token size of each expanded brief command.",
+    "Reçoit les messages de diagnostic, par exemple la taille estimée en tokens de chaque commande développée du brief."
   ],
   "Logging.verbose": [
     "Include raw protocol observations in the dispatch journal.",
@@ -636,84 +636,81 @@
     "Horodatage ISO attribué à l’observation d’agent."
   ],
   "DispatchResult.branch": [
-    "Name of the work branch used or observed during execution.",
-    "Nom de la branche de travail utilisée ou observée pendant l’exécution."
+    "Work branch of this dispatch.",
+    "Branche de travail de ce dispatch."
   ],
   "DispatchResult.directory": [
-    "Host workspace directory used for this execution.",
-    "Dossier hôte du workspace utilisé pour cette exécution."
+    "Host worktree directory of this dispatch.",
+    "Répertoire du worktree de ce dispatch sur l’hôte."
   ],
   "DispatchResult.commits": [
-    "Collected Git commit identities and subjects.",
-    "Identités et sujets des commits Git collectés."
+    "Commits created during the dispatch, as oid and subject; with several passes, the commits of every pass.",
+    "Commits créés pendant le dispatch, avec oid et sujet ; avec plusieurs passes, les commits de toutes les passes."
   ],
   "DispatchResult.transcript": [
-    "Available host path to the captured transcript.",
-    "Chemin hôte disponible du transcript capturé."
+    "Host path of the captured native transcript, when the agent's conversation was captured.",
+    "Chemin sur l’hôte de la transcription native capturée, quand la conversation de l’agent l’a été."
   ],
   "DispatchResult.retainedDirectory": [
-    "Workspace retained for inspection or recovery.",
-    "Workspace conservé pour inspection ou récupération."
+    "Worktree kept after closing because it was detached or held uncommitted changes.",
+    "Worktree conservé à la fermeture parce qu’il était détaché ou contenait des modifications non commitées."
   ],
   "DispatchResult.resume": [
-    "Continue this result’s conversation in a newly allocated sandbox.",
-    "Poursuit la conversation de ce résultat dans une sandbox nouvellement allouée."
+    "Continue this conversation in a new cold dispatch with the agent that produced it; your options are merged over the original ones. Fails when no conversation was captured.",
+    "Continue cette conversation dans un nouveau dispatch froid avec l’agent qui l’a produite ; vos options s’ajoutent aux options d’origine. Échoue si aucune conversation n’a été capturée."
   ],
   "DispatchResult.fork": [
-    "Fork this result’s conversation in a newly allocated sandbox.",
-    "Bifurque depuis la conversation de ce résultat dans une sandbox nouvellement allouée."
+    "Continue a copy of this conversation in a new cold dispatch, leaving the original unchanged. Fails when no conversation was captured.",
+    "Continue une copie de cette conversation dans un nouveau dispatch froid, sans modifier l’originale. Échoue si aucune conversation n’a été capturée."
   ],
   "Execution.text": [
     "Text of every turn of the execution, joined with newlines, including response repair turns.",
     "Texte de tous les tours de l'exécution, joints par des sauts de ligne, y compris les tours de réparation de réponse."
   ],
   "Execution.turns": [
-    "Ordered agent-turn results, including text, status, duration and token usage for each pass.",
-    "Résultats ordonnés des tours d’agent : texte, statut, durée et usage de tokens de chaque passe."
+    "Every turn in order, including response repairs and turns resumed by steering.",
+    "Tous les tours dans l’ordre, y compris les corrections de réponse et les tours repris par le steering."
   ],
   "Execution.usage": [
-    "Reported usage counters; not a currency estimate.",
-    "Compteurs d’usage rapportés ; aucune estimation monétaire."
+    "Token counters summed over every turn; not a cost.",
+    "Compteurs de tokens additionnés sur tous les tours ; pas un coût."
   ],
   "Execution.conversation": [
-    "Available native conversation identity.",
-    "Identité de conversation native disponible."
+    "Native conversation id of the last turn, when the agent reported one.",
+    "Identifiant de conversation native du dernier tour, quand l’agent en a fourni un."
   ],
   "Execution.value": [
-    "Validated structured response value; undefined when no response specification was supplied.",
-    "Valeur de réponse structurée validée ; undefined en l’absence de spécification de réponse."
+    "Parsed and validated response; undefined without a response option.",
+    "Réponse analysée et validée ; undefined sans option response."
   ],
   "Execution.completed": [
-    "Whether the configured completion marker matched.",
-    "Indique si le marqueur de fin configuré a été détecté."
+    "True when the last turn's text contains a completion marker, or when a typed response was validated.",
+    "Vrai quand le texte du dernier tour contient un marqueur de fin, ou quand une réponse typée a été validée."
   ],
   "Execution.completion": [
-    "Completion marker that matched the agent’s output, when one was found.",
-    "Marqueur de fin correspondant à la sortie de l’agent lorsqu’il a été trouvé."
+    "Completion marker found in the last turn's text.",
+    "Marqueur de fin trouvé dans le texte du dernier tour."
   ],
-  "Turn.text": [
-    "Text reported for this single agent pass.",
-    "Texte rapporté pour cette passe d’agent."
-  ],
+  "Turn.text": ["Text of this turn.", "Texte de ce tour."],
   "Turn.status": [
-    "Process exit code; zero denotes success.",
-    "Code de sortie du processus ; zéro indique le succès."
+    "Exit status of the agent process. Always 0 in a returned turn: a nonzero status fails the dispatch.",
+    "Statut de sortie du processus de l’agent. Toujours 0 dans un tour retourné : un statut non nul fait échouer le dispatch."
   ],
   "Turn.conversation": [
-    "Available native conversation identity.",
-    "Identité de conversation native disponible."
+    "Native conversation id after this turn, when the agent reported one.",
+    "Identifiant de conversation native après ce tour, quand l’agent en a fourni un."
   ],
   "Turn.transcript": [
-    "Available host path to the captured transcript.",
-    "Chemin hôte disponible du transcript capturé."
+    "Host path of the transcript captured after this turn.",
+    "Chemin sur l’hôte de la transcription capturée après ce tour."
   ],
   "Turn.usage": [
-    "Reported usage counters; not a currency estimate.",
-    "Compteurs d’usage rapportés ; aucune estimation monétaire."
+    "Token counters reported for this turn; not a cost.",
+    "Compteurs de tokens rapportés pour ce tour ; pas un coût."
   ],
   "Turn.durationMs": [
-    "Elapsed execution time in milliseconds.",
-    "Durée d’exécution écoulée en millisecondes."
+    "Duration of this turn in milliseconds.",
+    "Durée de ce tour en millisecondes."
   ],
   "Commit.oid": ["Git commit object ID.", "Identifiant d’objet du commit Git."],
   "Commit.subject": [
@@ -833,12 +830,12 @@
     "Version épinglée du CLI visée par les fixtures de protocole intégrées ; absente pour Antigravity, qui n’a pas de version épinglée."
   ],
   "WarmDispatchResult.resume": [
-    "Continue this result’s conversation on the still-open original sandbox.",
-    "Poursuit la conversation de ce résultat dans sa sandbox d’origine encore ouverte."
+    "Continue this conversation on the same open sandbox with new dispatch options.",
+    "Continue cette conversation dans la même sandbox ouverte avec de nouvelles options de dispatch."
   ],
   "WarmDispatchResult.fork": [
-    "Fork this result’s conversation on the still-open original sandbox.",
-    "Bifurque depuis la conversation de ce résultat dans sa sandbox d’origine encore ouverte."
+    "Continue a copy of this conversation on the same open sandbox, leaving the original unchanged.",
+    "Continue une copie de cette conversation dans la même sandbox ouverte, sans modifier l’originale."
   ],
   "AttachOptions.agent": [
     "Native coding-agent adapter.",
@@ -881,8 +878,8 @@
     "Configuration de possession du workspace, allocation du provider, agent par défaut et cycle de vie."
   ],
   "dispatch.options": [
-    "Repository and sandbox setup combined with the agent brief, response validation and execution limits.",
-    "Préparation du dépôt et de la sandbox, avec brief d’agent, validation de réponse et limites d’exécution."
+    "Sandbox settings (repository, branch, provider, hooks) combined with the agent, brief, response contract and limits.",
+    "Réglages de la sandbox (dépôt, branche, provider, hooks) combinés avec l’agent, le brief, le contrat de réponse et les limites."
   ],
   "openWorkspace.options": [
     "Repository, branch policy, copied inputs, hooks and storage admission settings.",
@@ -3297,8 +3294,8 @@
     "Comptes de tokens déclarés par le service, si présents. Une consommation absente reste absente ; un détail de cache absent vaut zéro. Ce n’est ni une estimation de facturation ni une déclaration automatique au workflow."
   ],
   "DispatchOptions.telemetry": [
-    "Optional instrumentation of the complete dispatch, including preparation, synchronization and cleanup; telemetry failures do not change its outcome.",
-    "Instrumentation optionnelle du dispatch complet, préparation, synchronisation et nettoyage compris ; ses erreurs ne changent pas le résultat."
+    "Instrumentation spanning the whole dispatch, including preparation, synchronization and cleanup. Its failures do not change the outcome.",
+    "Instrumentation de tout le dispatch, préparation, synchronisation et nettoyage compris. Ses échecs ne changent pas le résultat."
   ],
   "DispatchTelemetry.startDispatch": [
     "Start an independent session for one public dispatch invocation; called before validation.",
@@ -4887,8 +4884,8 @@
     "Hub facultatif appartenant à l’appelant pour les opérations de workspace, allocation, transfert et nettoyage ; créer un workspace ne ferme pas le hub."
   ],
   "DispatchOptions.observation": [
-    "Optional parent hub; dispatch creates a child with its own dispatchId and drains it before returning or throwing.",
-    "Hub parent facultatif ; le dispatch crée un enfant avec son dispatchId et le vide avant retour ou exception."
+    "Parent observation hub. The dispatch opens a child hub with its own dispatchId and drains it before returning or throwing.",
+    "Hub d’observation parent. Le dispatch ouvre un hub enfant avec son propre dispatchId et le vide avant de retourner ou de lever une erreur."
   ],
   "AgentObservation.seq": [
     "Hub sequence when delivered through a dispatch; optional for manually constructed legacy observations.",
@@ -4903,8 +4900,8 @@
     "Contexte de corrélation supplémentaire conservant les champs historiques kind, pass et at."
   ],
   "DispatchResult.observerErrors": [
-    "Collected sink and journal failures, separate from execution success; a supplied shared hub also exposes its accumulated diagnostics.",
-    "Erreurs collectées des récepteurs et du journal, distinctes du succès de l’exécution ; un hub partagé fourni expose également ses diagnostics cumulés."
+    "Sink and journal failures collected during the dispatch; they do not affect success. With a shared hub, also includes its earlier failures.",
+    "Échecs des sinks et du journal collectés pendant le dispatch ; ils n’affectent pas le succès. Avec un hub partagé, inclut aussi ses échecs antérieurs."
   ],
   "TaskContext.observation": [
     "Task-scoped hub with workflow execution, task key and attempt; pass it to custom nested work such as speculate.",
@@ -6320,8 +6317,8 @@
     "Manière dont un événement steer a atteint l’agent : injecté dans le tour en cours, ou repris dans un nouveau tour de la même conversation."
   ],
   "DispatchOptions.steering": [
-    "Controller from createSteering() whose send() delivers instructions to the agent while this dispatch runs. It is attached for the whole dispatch, shared across passes and released afterwards; resume() and fork() do not reuse it.",
-    "Contrôleur issu de createSteering() dont send() remet des consignes à l’agent pendant ce dispatch. Il est attaché pour tout le dispatch, partagé entre les passes puis libéré ; resume() et fork() ne le réutilisent pas."
+    "Controller from createSteering(), attached for the whole dispatch and released when it ends. resume() and fork() do not reuse it.",
+    "Contrôleur issu de createSteering(), attaché pendant tout le dispatch et libéré à sa fin. resume() et fork() ne le réutilisent pas."
   ],
   "Turn.interrupted": [
     "steering when Outpost stopped this turn to resume its conversation with a steering instruction; the next turn continues it. Absent for turns that ended on their own.",
@@ -6344,16 +6341,16 @@
     "Vrai lorsque invoke() accepte Command.input comme stdin en direct pour un processus en cours. Tous les fournisseurs intégrés le positionnent."
   ],
   "Steering.state": [
-    "idle when no dispatch uses the controller, active while one does, closed after close().",
-    "idle lorsqu’aucun dispatch n’utilise le contrôleur, active pendant qu’un dispatch l’utilise, closed après close()."
+    "idle before and between dispatches, active while one runs, closed after close().",
+    "idle avant et entre les dispatchs, active pendant l’un d’eux, closed après close()."
   ],
   "Steering.send": [
-    "Queue a nonempty instruction for the attached dispatch, or the next one when none runs, optionally addressed to a built-in subagent run or the main loop. Resolves with its delivery once the agent receives it; rejects with code steering when the dispatch or targeted run ends first, the target is unreachable or the controller is closed.",
-    "Met en file une consigne non vide pour le dispatch attaché, ou le suivant si aucun ne tourne, éventuellement adressée à une exécution de sous-agent intégré ou à la boucle principale. Se résout avec sa remise dès que l’agent la reçoit ; rejette avec le code steering si le dispatch ou l’exécution visée se termine avant, si la cible est inaccessible ou si le contrôleur est fermé."
+    "Queue an instruction; with no dispatch running, it waits for the next one. Resolves with its delivery mode once the agent receives it. Rejects with code configuration for empty text, and with code steering when the dispatch or target run ends first or the controller is closed.",
+    "Met une consigne en file ; sans dispatch en cours, elle attend le suivant. Se résout avec son mode de remise quand l’agent la reçoit. Rejette avec le code configuration pour un texte vide, et avec le code steering si le dispatch ou l’exécution ciblée se termine avant, ou si le contrôleur est fermé."
   ],
   "Steering.close": [
-    "Close the controller: reject undelivered instructions and every later send(); later dispatches reject it.",
-    "Ferme le contrôleur : rejette les consignes non remises et tout send() ultérieur ; les dispatchs suivants le refusent."
+    "Close the controller: pending and later instructions reject with code steering, and a dispatch given this controller fails.",
+    "Ferme le contrôleur : les consignes en attente et suivantes sont rejetées avec le code steering, et un dispatch qui reçoit ce contrôleur échoue."
   ],
   "SteeringDelivery.mode": [
     "injected when the instruction joined the running turn or its prompt; resumed when Outpost continued the conversation in a new turn with it.",
@@ -6853,8 +6850,8 @@
     "Nom et version du contrat identifiant les données binaires."
   ],
   "SteeringSendOptions.subagent": [
-    "Built-in subagent run id, read from its subagent event, to deliver only to that run at its next step boundary; null to deliver only to the main loop. Omit it to deliver to the first active loop. Instructions for a run that ended, or sent to CLI agents, reject with code steering.",
-    "Identifiant d’exécution d’un sous-agent intégré, lu dans son événement subagent, pour ne remettre qu’à cette exécution à sa prochaine limite d’étape ; null pour ne remettre qu’à la boucle principale. Omettez-le pour remettre à la première boucle active. Les consignes pour une exécution terminée, ou envoyées à des agents CLI, sont rejetées avec le code steering."
+    "Built-in subagent run id, read from its subagent event, to deliver only to that run at its next step; null delivers only to the main loop. Omitted, the first active loop receives it. CLI agents reject a target with code steering.",
+    "Identifiant d’exécution d’un sous-agent intégré, lu dans son événement subagent, pour ne remettre la consigne qu’à cette exécution à sa prochaine étape ; null la réserve à la boucle principale. Omis, la première boucle active la reçoit. Les agents CLI rejettent une cible avec le code steering."
   ],
   "AgentConfiguration.host": [
     "Host files read with the credential file safeguards, filtered by select and merged into the agent home. They are skipped on the local provider, where the CLI reads the host home.",

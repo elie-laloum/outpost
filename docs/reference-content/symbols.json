@@ -8,8 +8,8 @@
     "Alloue un environnement autour d’un workspace nouveau ou fourni par l’appelant. La sandbox renvoyée permet d’enchaîner commandes et tours d’agent sur le même bail ; l’appelant doit la fermer. Un workspace fourni conserve sa durée de vie indépendante."
   ],
   "dispatch": [
-    "Run an agent brief with a sandbox allocated for this call, collect turns, validated output, usage and commits, then close owned resources. Each cold pass receives a fresh environment. The result can resume or fork a captured conversation in a later environment.",
-    "Exécute le brief d’un agent avec une sandbox allouée pour cet appel, collecte les tours, la sortie validée, l’usage et les commits, puis ferme les ressources possédées. Chaque passe froide reçoit un environnement neuf. Le résultat permet de reprendre ou de bifurquer une conversation capturée dans un environnement ultérieur."
+    "Run a brief in a sandbox allocated for this call, integrate the branch on success, then close the sandbox. On failure the sandbox closes, the worktree is kept and the error's recovery names the branch and directory. With passes above 1, each pass is a separate dispatch that stops once a completion marker matches.",
+    "Exécute un brief dans une sandbox allouée pour cet appel, intègre la branche en cas de succès, puis ferme la sandbox. En cas d’échec, la sandbox est fermée, le worktree est conservé et le recovery de l’erreur indique la branche et le répertoire. Avec passes supérieur à 1, chaque passe est un dispatch distinct qui s’arrête dès qu’un marqueur de fin apparaît."
   ],
   "openWorkspace": [
     "Acquire a repository lock and prepare the checkout selected by the branch policy. The returned workspace can own several successive sandboxes and remains open until explicitly closed. integrate applies its branch changes; close preserves work that cannot safely be removed.",
@@ -480,8 +480,8 @@
     "Compose un FallbackAgent ordonné à partir d’au moins deux agents et d’une liste on explicite. Le dispatch exécute les candidats dans l’ordre dans le même sandbox et le même workspace, en préparant chacun seulement lorsqu’il est essayé, et ne passe au suivant qu’après un échec quota ou unavailable listé dans on ; les autres échecs sont relancés. La construction valide et fige la liste sans rien démarrer."
   ],
   "createSteering": [
-    "Create an idle Steering controller. Pass it to a dispatch as steering; send() then delivers instructions to the running agent: injected into the built-in harness loop, Claude Code's stream-json input or Codex app-server turns, otherwise by stopping and resuming the conversation. Creating it starts nothing.",
-    "Crée un contrôleur Steering inactif. Passez-le à un dispatch avec steering ; send() remet alors des consignes à l’agent en cours : injectées dans la boucle du harness intégré, l’entrée stream-json de Claude Code ou les tours app-server de Codex, sinon par arrêt et reprise de la conversation. Sa création ne démarre rien."
+    "Create an idle controller to pass as a dispatch's steering option. Its send() delivers instructions to the running agent: injected into the current turn when the agent accepts live input, otherwise by stopping the turn and resuming its conversation. A controller serves one dispatch at a time.",
+    "Crée un contrôleur inactif à passer dans l’option steering d’un dispatch. Son send() remet des consignes à l’agent en cours : injectées dans le tour courant quand l’agent accepte une entrée en direct, sinon en arrêtant le tour puis en reprenant sa conversation. Un contrôleur sert un seul dispatch à la fois."
   ],
   "createCronSchedule": [
     "Parse a five-field cron expression, or a macro such as @daily, evaluated in an IANA time zone (UTC by default). The frozen result computes slots with next() and previous() and publishes nothing. Construction rejects invalid fields, unknown time zones and expressions without any occurrence.",

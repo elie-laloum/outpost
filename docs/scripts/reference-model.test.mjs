@@ -365,3 +365,11 @@ test("harness factory and contracts preserve distinct reference routes", async (
     );
   }
 });
+
+test("reference prose keeps angle-bracket placeholders visible", async () => {
+  for (const locale of ["", "fr/"])
+    assert.match(
+      await page(`${locale}reference/runschedules.md`),
+      /schedule:&lt;name>:&lt;/,
+    );
+});

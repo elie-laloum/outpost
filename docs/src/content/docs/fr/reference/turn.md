@@ -15,14 +15,14 @@ import type { Turn } from "@elie-laloum/outpost";
 
 | Nom                   | Type                              | Présence  | Rôle                                                                                                                                                                             |
 | --------------------- | --------------------------------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `text`                | `string`                          | Requis    | Texte rapporté pour cette passe d’agent.                                                                                                                                         |
-| `status`              | `number`                          | Requis    | Code de sortie du processus ; zéro indique le succès.                                                                                                                            |
+| `text`                | `string`                          | Requis    | Texte de ce tour.                                                                                                                                                                |
+| `status`              | `number`                          | Requis    | Statut de sortie du processus de l’agent. Toujours 0 dans un tour retourné : un statut non nul fait échouer le dispatch.                                                         |
 | `interrupted`         | `"steering" \| undefined`         | Optionnel | steering lorsqu’Outpost a arrêté ce tour pour reprendre sa conversation avec une consigne de pilotage ; le tour suivant la poursuit. Absent pour les tours terminés d’eux-mêmes. |
-| `conversation`        | `string \| undefined`             | Optionnel | Identité de conversation native disponible.                                                                                                                                      |
-| `transcript`          | `string \| undefined`             | Optionnel | Chemin hôte disponible du transcript capturé.                                                                                                                                    |
+| `conversation`        | `string \| undefined`             | Optionnel | Identifiant de conversation native après ce tour, quand l’agent en a fourni un.                                                                                                  |
+| `transcript`          | `string \| undefined`             | Optionnel | Chemin sur l’hôte de la transcription capturée après ce tour.                                                                                                                    |
 | `transcriptReference` | `TransportReference \| undefined` | Optionnel | Index distant versionné de la conversation capturée après ce tour ; son transcript local reste disponible séparément.                                                            |
-| `usage`               | `Usage`                           | Requis    | Compteurs d’usage rapportés ; aucune estimation monétaire.                                                                                                                       |
-| `durationMs`          | `number`                          | Requis    | Durée d’exécution écoulée en millisecondes.                                                                                                                                      |
+| `usage`               | `Usage`                           | Requis    | Compteurs de tokens rapportés pour ce tour ; pas un coût.                                                                                                                        |
+| `durationMs`          | `number`                          | Requis    | Durée de ce tour en millisecondes.                                                                                                                                               |
 
 ## Signature
 

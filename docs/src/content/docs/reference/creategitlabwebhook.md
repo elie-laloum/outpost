@@ -13,7 +13,7 @@ import { createGitlabWebhook } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Create a GitLab trigger source. With signingToken it verifies the webhook-signature header of a whsec_ signing token (GitLab 19.0+) within a timestamp window and uses webhook-id; with token it compares X-Gitlab-Token and uses Idempotency-Key or X-Gitlab-Event-UUID. It reports object_kind, the object action and the user as gitlab:<username>.
+Create a GitLab trigger source. With signingToken it verifies the webhook-signature header of a whsec_ signing token (GitLab 19.0+) within a timestamp window and uses webhook-id; with token it compares X-Gitlab-Token and uses Idempotency-Key or X-Gitlab-Event-UUID. It reports object_kind, the object action and the user as gitlab:&lt;username>.
 
 [Complete example and detailed rules](../../guide/webhooks/).
 
