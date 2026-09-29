@@ -4,16 +4,17 @@ import Search from "virtual:starlight/components/Search";
 import LanguageSelect from "virtual:starlight/components/LanguageSelect";
 import ThemeSelect from "virtual:starlight/components/ThemeSelect";
 import MobileMenuToggle from "starlight-theme-celestia/components/MobileMenuToggle.astro";
+import Brand from "./Brand.astro";
 const id = Astro.locals.starlightRoute.entry.id;
 const landing = Boolean(Astro.locals.starlightRoute.entry.data.landing);
 const guide = landing || /^(fr\/)?guide\//.test(id);
-const french = id.startsWith("fr/");
+const french = Astro.locals.starlightRoute.locale === "fr";
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 const locale = french ? "fr/" : "";
 ---
 {guide ? (
   <div class="guide-header">
-    <a class="guide-brand" href={`${base}/${locale}`}>Outpost<span>docs</span></a>
+    <Brand href={`${base}/${locale}`} suffix="docs" class="guide-brand" />
     <nav aria-label={french ? "Documentation" : "Documentation"}>
       <a href={`${base}/${locale}guide/introduction/`} aria-current={landing ? undefined : "true"}>Guide</a>
       <a href={`${base}/${locale}reference/`}>{french ? "Référence" : "Reference"}</a>
@@ -25,8 +26,6 @@ const locale = french ? "fr/" : "";
 ) : <ExistingHeader />}
 <style>
   .guide-header { display: flex; align-items: center; gap: 2rem; height: 100%; max-width: 100rem; margin: auto; padding: 0 1.5rem; }
-  .guide-brand { display: flex; gap: .6rem; align-items: baseline; color: var(--sl-color-white); font-size: 1.2rem; font-weight: 650; text-decoration: none; letter-spacing: -.03em; }
-  .guide-brand span { color: var(--sl-color-gray-3); font-size: .8rem; font-weight: 400; letter-spacing: 0; }
   nav { display: flex; gap: 1.25rem; font-size: .875rem; }
   nav a { color: var(--sl-color-gray-3); text-decoration: none; }
   nav a[aria-current] { color: var(--sl-color-white); }
@@ -35,7 +34,7 @@ const locale = french ? "fr/" : "";
   .guide-menu { display: none; }
   @media (max-width: 49.99rem) {
     .guide-header { gap: 1rem; padding: 0 1rem; }
-    .guide-brand span, .guide-settings { display: none; }
+    .guide-header :global(.guide-brand .suffix), .guide-settings { display: none; }
     .guide-menu { display: block; }
     .guide-search { width: auto; }
     nav { gap: .7rem; font-size: .8rem; }

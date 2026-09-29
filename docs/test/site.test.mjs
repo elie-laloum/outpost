@@ -61,6 +61,13 @@ for (const [locale, heading, start, copied] of [
   }) => {
     await context.grantPermissions(["clipboard-read", "clipboard-write"]);
     await page.goto(locale);
+    const brand = page.locator(".guide-header .brand");
+    await expect(brand).toHaveAttribute("href", `/outpost/${locale}`);
+    await expect(brand.locator(".mark")).toBeVisible();
+    await expect(page.locator(".guide-header nav a").first()).toHaveAttribute(
+      "href",
+      `/outpost/${locale}guide/introduction/`,
+    );
     await expect(page.getByRole("heading", { level: 1 })).toContainText(
       heading,
     );

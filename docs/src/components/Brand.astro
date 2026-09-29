@@ -1,0 +1,44 @@
+---
+interface Props {
+  href: string;
+  suffix?: string;
+  class?: string;
+}
+
+const { href, suffix, class: className } = Astro.props;
+---
+
+<a class:list={["brand", className]} href={href} translate="no">
+  <span class="mark" aria-hidden="true"></span>
+  <span class="name">Outpost</span>
+  {suffix && <span class="suffix">{suffix}</span>}
+</a>
+
+<style>
+  .brand {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    color: var(--sl-color-white);
+    font-size: 1.2rem;
+    font-weight: 650;
+    letter-spacing: -0.03em;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .mark {
+    flex: 0 0 auto;
+    align-self: center;
+    width: 1.125em;
+    height: 1em;
+    background-color: currentColor;
+    mask: url("../assets/outpost-mark.png") center / contain no-repeat;
+  }
+  .suffix {
+    margin-left: 0.1rem;
+    color: var(--sl-color-gray-3);
+    font-size: 0.8rem;
+    font-weight: 400;
+    letter-spacing: 0;
+  }
+</style>

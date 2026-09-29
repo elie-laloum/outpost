@@ -60,6 +60,7 @@ export default defineConfig({
         PageTitle: "./src/components/GuideTitle.astro",
         Head: "./src/components/Head.astro",
         Sidebar: "./src/components/Sidebar.astro",
+        SiteTitle: "./src/components/SiteTitle.astro",
       },
       customCss: ["./src/styles/custom.css"],
       lastUpdated: false,
