@@ -9,27 +9,27 @@ Supporting contract not directly exported; use TypeScript inference or the publi
 
 ## Purpose and behavior
 
-Create the native ConversationStore for the selected Claude, Codex, Copilot or Kimi format, binding locate, capture and restore to that format’s filesystem layout. Copilot/Kimi use bounded JSON session bundles rather than a single transcript.
+Deprecated: return the built-in native ConversationStore of a claude, codex, copilot or kimi format name, and reject any other name. Use createClaudeConversations(), createCodexConversations(), createCopilotConversations() or createKimiConversations() instead.
 
 ## Parameters and properties
 
-| Name     | Type                 | Presence | Meaning                                                   |
-| -------- | -------------------- | -------- | --------------------------------------------------------- |
-| `format` | `ConversationFormat` | Required | Native transcript layout: claude, codex, copilot or kimi. |
+| Name     | Type     | Presence | Meaning                                                      |
+| -------- | -------- | -------- | ------------------------------------------------------------ |
+| `format` | `string` | Required | Built-in native format name: claude, codex, copilot or kimi. |
 
 ## Returns
 
-`ConversationStore`
+`NativeConversationStore`
 
 ## Signature
 
 ```ts
-export declare function nativeConversations(
+declare function nativeConversations(
   format: ConversationFormat,
-): ConversationStore;
+): NativeConversationStore;
 ```
 
 ## Related contracts
 
 - [ConversationFormat](../conversationformat/)
-- [ConversationStore](../conversationstore/)
+- [NativeConversationStore](../nativeconversationstore/)

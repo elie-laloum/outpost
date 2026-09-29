@@ -30,19 +30,20 @@ Désactiver la capture empêche le résultat de fournir une conversation enregis
 
 ## Stockage
 
-`conversations.native()` gère les formats natifs ; `createHarnessConversations()` stocke les transcriptions de la boucle intégrée. `createTransportConversations()` archive les formats pris en charge via un transport. La restauration réécrit les chemins de workspace pris en charge lorsque la transcription se déplace.
+Chaque preset CLI capture ses sessions dans son store natif : `createClaudeConversations()`, `createCodexConversations()`, `createCopilotConversations()` et `createKimiConversations()` créent directement ces stores. `createHarnessConversations()` stocke les transcriptions de la boucle intégrée. `createTransportConversations()` enveloppe n’importe lequel de ces stores pour archiver ses captures via un transport. La restauration réécrit les chemins de workspace pris en charge lorsque la transcription se déplace. Pour donner une capture native à un harness CLI externe, voir [les formats de conversation natifs](../integration-ports/#formats-de-conversation-natifs).
 
 Passez `conversations` à `createClaudeHarness()`, `createCodexHarness()`, `createCopilotHarness()`, `createKimiHarness()` ou `createHarness()` pour capturer les sessions de cet agent dans n’importe quel `ConversationStore` au lieu du store natif par défaut :
 
 ```ts
 import {
   createAgent,
+  createKimiConversations,
   createKimiHarness,
   createLocalTransport,
   createTransportConversations,
 } from "@elie-laloum/outpost";
 
-const conversations = createTransportConversations("kimi", {
+const conversations = createTransportConversations(createKimiConversations(), {
   transporter: createLocalTransport({ directory: "/mnt/shared/outpost" }),
   namespace: "my-project",
 });
@@ -52,14 +53,14 @@ export const coder = createAgent({
 });
 ```
 
-Une session capturée par un dispatch peut alors être reprise, ou forkée avec Kimi, depuis une autre machine ou après suppression du dossier `.outpost` local du dépôt. Utilisez un `createS3Transport()` pour la partager entre hôtes. Le `format` du store doit correspondre à l’agent : `createTransportConversations("kimi", …)` pour Kimi, `"harness"` pour `createHarness()`. Un format incompatible, une valeur qui n’est pas un store, ou `saveConversations: false` combiné à `conversations` échoue dès la création du harness, avant toute allocation de sandbox. Un store personnalisé sans `format` est accepté tel quel. Sans l’option, chaque agent conserve son store natif. `createAntigravityHarness()` refuse `conversations`, car Antigravity n’a pas de capture portable.
+Une session capturée par un dispatch peut alors être reprise, ou forkée avec Kimi, depuis une autre machine ou après suppression du dossier `.outpost` local du dépôt. Utilisez un `createS3Transport()` pour la partager entre hôtes. Le `format` du store doit correspondre à l’agent : envelopper `createKimiConversations()` pour Kimi et `createHarnessConversations()` pour `createHarness()`. Un format incompatible, une valeur qui n’est pas un store, ou `saveConversations: false` combiné à `conversations` échoue dès la création du harness, avant toute allocation de sandbox. Un store personnalisé sans `format` est accepté tel quel. Sans l’option, chaque agent conserve son store natif. `createAntigravityHarness()` refuse `conversations`, car Antigravity n’a pas de capture portable.
 
 Les conversations archivées contiennent prompts, contenu du dépôt et sorties d’outils. Outpost ne les chiffre ni ne les authentifie ; restreignez l’accès au transport comme celui du dépôt.
 
 Séparez l’accès aux transcriptions de l’authentification. Une conversation enregistrée ne fournit pas d’identifiants de compte, et supprimer les identifiants ne supprime pas le contenu des conversations.
 
-Copilot et Kimi capturent un bundle JSON par session sous `.outpost/conversations/<format>/` dans le dépôt (ou sous `conversationHome` si fourni). `conversations.native("copilot")`, `conversations.native("kimi")` et `createTransportConversations()` prennent ces bundles en charge. `transcript` désigne le bundle, pas un historique JSONL unique. La capture est limitée à 64 Mio de données et 4 096 fichiers ; fichiers obligatoires absents, liens symboliques et métadonnées non prises en charge sont explicitement refusés. La restauration prépare et valide tous les fichiers avant de remplacer une session existante, en conservant son ancien dossier sous `.outpost-recovery/` dans le home de la CLI.
+Copilot et Kimi capturent un bundle JSON par session sous `.outpost/conversations/<format>/` dans le dépôt (ou sous `conversationHome` si fourni). `createCopilotConversations()`, `createKimiConversations()` et `createTransportConversations()` prennent ces bundles en charge. `transcript` désigne le bundle, pas un historique JSONL unique. La capture est limitée à 64 Mio de données et 4 096 fichiers ; fichiers obligatoires absents, liens symboliques et métadonnées non prises en charge sont explicitement refusés. La restauration prépare et valide tous les fichiers avant de remplacer une session existante, en conservant son ancien dossier sous `.outpost-recovery/` dans le home de la CLI.
 
 La capture Kimi exclut logs de diagnostic, tâches de fond, tâches cron, notifications et fichiers de verrou. Elle restaure la conversation, pas les processus ou planifications. Une session Kimi déjà présente sous un autre workspace dans le home cible est refusée ; utilisez un home de sandbox privé pour une continuation portable. Fournissez séparément les identifiants et la configuration personnalisée des outils/modèles. L’exécution locale partage le stockage natif de l’hôte ; une restauration peut y relocaliser les métadonnées de session.
 
-API : [DispatchResult](../../reference/dispatchresult/) · [ConversationStore](../../reference/conversationstore/) · [createTransportConversations](../../reference/createtransportconversations/).
+API : [DispatchResult](../../reference/dispatchresult/) · [ConversationStore](../../reference/conversationstore/) · [NativeConversationStore](../../reference/nativeconversationstore/) · [createKimiConversations](../../reference/createkimiconversations/) · [createTransportConversations](../../reference/createtransportconversations/).

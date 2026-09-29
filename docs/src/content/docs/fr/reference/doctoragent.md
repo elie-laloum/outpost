@@ -14,6 +14,9 @@ import type { DoctorAgent } from "@elie-laloum/outpost";
 ## Signature
 
 ```ts
-export type DoctorAgent =
-  "codex" | "claude" | "antigravity" | "copilot" | "kimi";
+export type DoctorAgent = BuiltInAgentName;
 ```
+
+## Contrats associés
+
+- [BuiltInAgentName](../support-builtinagentname/)

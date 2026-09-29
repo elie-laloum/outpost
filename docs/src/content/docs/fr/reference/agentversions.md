@@ -19,22 +19,16 @@ Expose les versions des CLI Claude Code, Codex, Antigravity, Copilot et Kimi ép
 
 ## Paramètres et propriétés
 
-| Nom           | Type        | Présence | Rôle                                                                                                                                                                                         |
-| ------------- | ----------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `codex`       | `"0.156.1"` | Requis   | Version du CLI Codex utilisée par les fixtures de compatibilité intégrées.                                                                                                                   |
-| `claude`      | `"2.1.280"` | Requis   | Version de Claude Code utilisée par les fixtures de compatibilité intégrées.                                                                                                                 |
-| `copilot`     | `"1.0.88"`  | Requis   | Version de GitHub Copilot CLI installée par les images générées et le bootstrap distant.                                                                                                     |
-| `kimi`        | `"2.1.1"`   | Requis   | Version de la CLI Kimi Code installée par les images générées et le bootstrap distant.                                                                                                       |
-| `antigravity` | `"1.2.12"`  | Requis   | Version de la CLI Antigravity installée depuis des archives vérifiées par SHA-512 dans les images générées et le bootstrap distant, et utilisée comme référence de compatibilité par doctor. |
+| Nom           | Type     | Présence | Rôle                                                                                                                                                                                         |
+| ------------- | -------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `codex`       | `string` | Requis   | Version du CLI Codex utilisée par les fixtures de compatibilité intégrées.                                                                                                                   |
+| `claude`      | `string` | Requis   | Version de Claude Code utilisée par les fixtures de compatibilité intégrées.                                                                                                                 |
+| `antigravity` | `string` | Requis   | Version de la CLI Antigravity installée depuis des archives vérifiées par SHA-512 dans les images générées et le bootstrap distant, et utilisée comme référence de compatibilité par doctor. |
+| `copilot`     | `string` | Requis   | Version de GitHub Copilot CLI installée par les images générées et le bootstrap distant.                                                                                                     |
+| `kimi`        | `string` | Requis   | Version de la CLI Kimi Code installée par les images générées et le bootstrap distant.                                                                                                       |
 
 ## Signature
 
 ```ts
-export declare const agentVersions: Readonly<{
-  codex: "0.156.1";
-  claude: "2.1.280";
-  copilot: "1.0.88";
-  kimi: "2.1.1";
-  antigravity: "1.2.12";
-}>;
+export declare const agentVersions: Readonly<Record<BuiltInAgentName, string>>;
 ```

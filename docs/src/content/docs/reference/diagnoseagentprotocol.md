@@ -19,9 +19,9 @@ Replay bundled event fixtures through the selected agent adapter and report deco
 
 ## Parameters and properties
 
-| Name    | Type          | Presence | Meaning                                                                                                   |
-| ------- | ------------- | -------- | --------------------------------------------------------------------------------------------------------- |
-| `agent` | `DoctorAgent` | Required | Agent CLI identifier to report or diagnose: claude, codex, antigravity (executable agy), copilot or kimi. |
+| Name    | Type                                                             | Presence | Meaning                                                                                                   |
+| ------- | ---------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------- |
+| `agent` | `import("../adapters/agents/catalog.types.js").BuiltInAgentName` | Required | Agent CLI identifier to report or diagnose: claude, codex, antigravity (executable agy), copilot or kimi. |
 
 ## Returns
 

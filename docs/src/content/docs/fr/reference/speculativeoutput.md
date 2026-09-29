@@ -15,6 +15,7 @@ import type { SpeculativeOutput } from "@elie-laloum/outpost";
 
 | Nom                   | Type                              | Présence  | Rôle                                                                                                                                                   |
 | --------------------- | --------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `directory`           | `string`                          | Requis    | Dossier hôte du workspace utilisé pour cette exécution.                                                                                                |
 | `completion`          | `string \| undefined`             | Optionnel | Marqueur de fin correspondant à la sortie de l’agent lorsqu’il a été trouvé.                                                                           |
 | `text`                | `string`                          | Requis    | Texte final rapporté par l’exécution de l’agent.                                                                                                       |
 | `conversation`        | `string \| undefined`             | Optionnel | Identité de conversation native disponible.                                                                                                            |
@@ -23,7 +24,6 @@ import type { SpeculativeOutput } from "@elie-laloum/outpost";
 | `completed`           | `boolean`                         | Requis    | Indique si le marqueur de fin configuré a été détecté.                                                                                                 |
 | `branch`              | `string`                          | Requis    | Nom de la branche de travail utilisée ou observée pendant l’exécution.                                                                                 |
 | `observerErrors`      | `readonly unknown[] \| undefined` | Optionnel | Erreurs collectées des récepteurs et du journal, distinctes du succès de l’exécution ; un hub partagé fourni expose également ses diagnostics cumulés. |
-| `directory`           | `string`                          | Requis    | Dossier hôte du workspace utilisé pour cette exécution.                                                                                                |
 | `commits`             | `readonly Commit[]`               | Requis    | Identités et sujets des commits Git collectés.                                                                                                         |
 | `transcript`          | `string \| undefined`             | Optionnel | Chemin hôte disponible du transcript capturé.                                                                                                          |
 | `transcriptReference` | `TransportReference \| undefined` | Optionnel | Index distant versionné de la dernière conversation capturée, lorsque son stockage utilise un transport.                                               |

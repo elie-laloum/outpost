@@ -175,4 +175,23 @@ export const referenceRedirects = {
     "/fr/reference/createvercelsandboxprovider/",
   "/reference/workflow/": "/reference/defineworkflow/",
   "/fr/reference/workflow/": "/fr/reference/defineworkflow/",
+  "/reference/storedconversationformat/": "/reference/conversationformat/",
+  "/fr/reference/storedconversationformat/":
+    "/fr/reference/conversationformat/",
+  "/reference/support-locateconversation/":
+    "/reference/nativeconversationstore/",
+  "/fr/reference/support-locateconversation/":
+    "/fr/reference/nativeconversationstore/",
+  "/reference/support-captureconversation/":
+    "/reference/nativeconversationstore/",
+  "/fr/reference/support-captureconversation/":
+    "/fr/reference/nativeconversationstore/",
+  "/reference/support-restoreconversation/":
+    "/reference/nativeconversationstore/",
+  "/fr/reference/support-restoreconversation/":
+    "/fr/reference/nativeconversationstore/",
+  "/reference/support-remotepath/": "/reference/nativeconversationstore/",
+  "/fr/reference/support-remotepath/": "/fr/reference/nativeconversationstore/",
+  "/reference/support-captureoptions/": "/reference/conversationcontext/",
+  "/fr/reference/support-captureoptions/": "/fr/reference/conversationcontext/",
 };

@@ -40,12 +40,12 @@
     "Expose les versions des CLI Claude Code, Codex, Antigravity, Copilot et Kimi épinglées pour les images générées et le bootstrap distant, qui servent de références à doctor et aux fixtures de protocole intégrées. Les archives Antigravity sont vérifiées avec les empreintes SHA-512 enregistrées dans Outpost. Ces valeurs n’interrogent pas les binaires installés et ne prouvent pas l’accès à un compte."
   ],
   "conversations": [
-    "Group native transcript operations: locate on the host, capture from a sandbox, restore before continuation and rewrite repository paths. native constructs a ConversationStore for Claude, Codex, Copilot or Kimi; these storage utilities do not manage agent authentication. Copilot/Kimi use bounded JSON session bundles rather than a single transcript.",
-    "Regroupe les opérations sur les transcripts natifs : localisation sur l’hôte, capture depuis une sandbox, restauration avant continuation et réécriture des chemins du dépôt. native construit un ConversationStore pour Claude, Codex, Copilot ou Kimi ; ces outils de stockage ne gèrent pas l’authentification. Copilot/Kimi utilisent des bundles JSON bornés plutôt qu’un transcript unique."
+    "Group conversation utilities: transported builds a transport-backed store, harness the custom harness store, rewrite relocates recorded cwd values and projectKey derives the Claude project folder name. The format-keyed helpers native, locate, capture, restore, directory, destination and claudePath are deprecated; use the store of each agent (createClaudeConversations(), createCodexConversations(), createCopilotConversations(), createKimiConversations()) instead. These utilities do not manage agent authentication.",
+    "Regroupe les utilitaires de conversations : transported construit un store adossé à un transport, harness le store des harness personnalisés, rewrite relocalise les cwd enregistrés et projectKey calcule le nom de dossier de projet Claude. Les helpers indexés par format native, locate, capture, restore, directory, destination et claudePath sont dépréciés ; utilisez à la place le store de chaque agent (createClaudeConversations(), createCodexConversations(), createCopilotConversations(), createKimiConversations()). Ces utilitaires ne gèrent pas l’authentification des agents."
   ],
   "nativeConversations": [
-    "Create the native ConversationStore for the selected Claude, Codex, Copilot or Kimi format, binding locate, capture and restore to that format’s filesystem layout. Copilot/Kimi use bounded JSON session bundles rather than a single transcript.",
-    "Crée le ConversationStore natif du format Claude, Codex, Copilot ou Kimi choisi, en liant localisation, capture et restauration à son organisation de fichiers. Copilot/Kimi utilisent des bundles JSON bornés plutôt qu’un transcript unique."
+    "Deprecated: return the built-in native ConversationStore of a claude, codex, copilot or kimi format name, and reject any other name. Use createClaudeConversations(), createCodexConversations(), createCopilotConversations() or createKimiConversations() instead.",
+    "Déprécié : renvoie le ConversationStore natif intégré d’un nom de format claude, codex, copilot ou kimi, et refuse tout autre nom. Utilisez plutôt createClaudeConversations(), createCodexConversations(), createCopilotConversations() ou createKimiConversations()."
   ],
   "locateConversation": [
     "Locate an existing native transcript by format, conversation ID and repository in the selected host home. It returns the transcript identity and path and rejects when no matching transcript is found.",
@@ -224,8 +224,8 @@
     "Lit les événements validés d’un journal dans l’ordre chronologique depuis une révision exacte de l’index. Chaque révision de segment est vérifiée ; cycles, segments absents et dépassements de limite provoquent un échec. Un journal ouvert expose uniquement son préfixe validé."
   ],
   "createTransportConversations": [
-    "Build a ConversationStore for the claude, codex, copilot, kimi or harness format using transport snapshots and a stable project namespace. Pass it as the conversations option of the matching harness preset or createHarness(); the store declares its format so a mismatched harness fails when it is created. Capture preserves native relocation, child transcripts and session bundles; locate materializes an immutable snapshot below the target repository’s recovery directory. Returned file paths remain readable and reference identifies the remote index. Native files and credentials are separate; archives are neither encrypted nor authenticated.",
-    "Construit un ConversationStore au format claude, codex, copilot, kimi ou harness avec snapshots de transport et espace de noms stable du projet. Le passer à l’option conversations du preset correspondant ou de createHarness() ; le store déclare son format, donc un harness incompatible échoue dès sa création. La capture préserve la relocalisation native, les transcripts enfants et les bundles de session ; locate matérialise un snapshot immuable sous le dossier de récupération du dépôt cible. Les chemins file restent lisibles et reference identifie l’index distant. Fichiers natifs et identifiants restent distincts ; les archives ne sont ni chiffrées ni authentifiées."
+    "Wrap a base ConversationStore, such as createKimiConversations() or createHarnessConversations(), so captures are archived as transport snapshots under a stable project namespace and the base store’s format. Pass it as the conversations option of the matching harness preset or createHarness(); the store declares the base format so a mismatched harness fails when it is created. Capture preserves the base store’s relocation, child transcripts and session bundles; locate materializes an immutable snapshot below the target repository’s recovery directory. Returned file paths remain readable and reference identifies the remote index. Native files and credentials are separate; archives are neither encrypted nor authenticated. Passing a format name instead of a store is deprecated.",
+    "Enveloppe un ConversationStore de base, par exemple createKimiConversations() ou createHarnessConversations(), pour archiver ses captures en snapshots de transport sous un espace de noms stable du projet et le format du store de base. Le passer à l’option conversations du preset correspondant ou de createHarness() ; le store déclare le format de base, donc un harness incompatible échoue dès sa création. La capture préserve la relocalisation, les transcripts enfants et les bundles de session du store de base ; locate matérialise un snapshot immuable sous le dossier de récupération du dépôt cible. Les chemins file restent lisibles et reference identifie l’index distant. Fichiers natifs et identifiants restent distincts ; les archives ne sont ni chiffrées ni authentifiées. Passer un nom de format au lieu d’un store est déprécié."
   ],
   "archiveRecovery": [
     "Snapshot and verify an existing recovery transfer, upload binary chunks with hashes, and publish its manifest last. The source is retained. An interrupted upload may retain unreferenced chunks; no incomplete manifest is published. The archive contains recovery payloads, not an independent replacement for the source Git repository.",
@@ -542,5 +542,53 @@
   "defineMcpPrompt": [
     "Declare harness instructions rendered from a prompt of a declared MCP server at the start of each turn. Construction validates the server name, prompt name and string arguments without contacting the server; resolution fails when the harness has no running server of that name or the server offers no prompts.",
     "Déclare des instructions de harness rendues à partir d’un prompt d’un serveur MCP déclaré, au début de chaque tour. La construction valide le nom du serveur, le nom du prompt et les arguments texte sans contacter le serveur ; la résolution échoue si le harness n’a pas de serveur démarré de ce nom ou si le serveur ne propose pas de prompts."
+  ],
+  "createClaudeConversations": [
+    "Create the native ConversationStore of Claude Code. Transcripts are single JSONL files under ~/.claude/projects/<project key>, with child transcripts under <id>/subagents; capture and restore rewrite recorded cwd values for the destination workspace. This is the default store of createClaudeHarness().",
+    "Crée le ConversationStore natif de Claude Code. Les transcripts sont des fichiers JSONL uniques sous ~/.claude/projects/<clé du projet>, avec les transcripts enfants sous <id>/subagents ; capture et restauration réécrivent les cwd enregistrés pour le workspace de destination. C’est le store par défaut de createClaudeHarness()."
+  ],
+  "createCodexConversations": [
+    "Create the native ConversationStore of Codex. Rollouts are JSONL files named *-<id>.jsonl under ~/.codex/sessions; capture writes them under today’s date folder and rewrites recorded cwd values. This is the default store of createCodexHarness().",
+    "Crée le ConversationStore natif de Codex. Les rollouts sont des fichiers JSONL nommés *-<id>.jsonl sous ~/.codex/sessions ; la capture les écrit dans le dossier daté du jour et réécrit les cwd enregistrés. C’est le store par défaut de createCodexHarness()."
+  ],
+  "createCopilotConversations": [
+    "Create the native ConversationStore of GitHub Copilot CLI. Each session directory under $COPILOT_HOME or ~/.copilot/session-state is captured as one bounded JSON bundle; restoration rewrites workspace.yaml and session.start paths. This is the default store of createCopilotHarness().",
+    "Crée le ConversationStore natif de GitHub Copilot CLI. Chaque dossier de session sous $COPILOT_HOME ou ~/.copilot/session-state est capturé en un bundle JSON borné ; la restauration réécrit les chemins de workspace.yaml et de session.start. C’est le store par défaut de createCopilotHarness()."
+  ],
+  "createKimiConversations": [
+    "Create the native ConversationStore of Kimi Code. Session directories under $KIMI_CODE_HOME or ~/.kimi-code/sessions/<workspace bucket> are captured as bounded JSON bundles without logs, tasks, cron, notifications or locks; restoration picks the destination bucket and rewrites state.json. This is the default store of createKimiHarness().",
+    "Crée le ConversationStore natif de Kimi Code. Les dossiers de session sous $KIMI_CODE_HOME ou ~/.kimi-code/sessions/<bucket du workspace> sont capturés en bundles JSON bornés, sans logs, tâches, cron, notifications ni verrous ; la restauration choisit le bucket de destination et réécrit state.json. C’est le store par défaut de createKimiHarness()."
+  ],
+  "createTranscriptConversations": [
+    "Create a native ConversationStore for a CLI that keeps one JSONL transcript per conversation, described by a TranscriptConversationLayout. Locate searches the host home, capture finds the transcript in the sandbox with find, and restore uploads it; both rewrite recorded cwd values that match the original workspace. Use it for an external CLI harness; the built-in Claude and Codex stores are built with it.",
+    "Crée un ConversationStore natif pour une CLI qui conserve un transcript JSONL par conversation, décrite par un TranscriptConversationLayout. locate cherche dans le home de l’hôte, capture retrouve le transcript dans la sandbox avec find et restore le téléverse ; les deux réécrivent les cwd enregistrés égaux au workspace d’origine. À utiliser pour un harness CLI externe ; les stores intégrés de Claude et Codex en sont construits."
+  ],
+  "createSessionBundleConversations": [
+    "Create a native ConversationStore for a CLI that keeps each session as a directory, described by a SessionBundleProfile. A Node.js script run inside the sandbox packs the selected files into one JSON bundle limited to 64 MiB and 4,096 files, rejects symlinks and files that change during capture, and restores through staging with a .outpost-recovery backup. Profile hooks are serialized and must be self-contained function expressions; a method or a regular expression with the g or y flag is rejected when the store is created.",
+    "Crée un ConversationStore natif pour une CLI qui conserve chaque session dans un dossier, décrite par un SessionBundleProfile. Un script Node.js exécuté dans la sandbox regroupe les fichiers sélectionnés en un bundle JSON limité à 64 Mio et 4 096 fichiers, refuse les liens symboliques et les fichiers modifiés pendant la capture, et restaure via un staging avec sauvegarde .outpost-recovery. Les hooks du profil sont sérialisés et doivent être des expressions de fonction autonomes ; une méthode ou une expression régulière avec l’option g ou y est refusée à la création du store."
+  ],
+  "NativeConversationStore": [
+    "ConversationStore that owns a native CLI format: it declares the persisted format name and knows where captured conversations live on the host and where restoration writes them in a sandbox.",
+    "ConversationStore propriétaire d’un format natif de CLI : il déclare le nom de format persisté et sait où se trouvent les conversations capturées sur l’hôte et où la restauration les écrit dans une sandbox."
+  ],
+  "TranscriptConversationLayout": [
+    "Filesystem layout of a CLI that stores one JSONL transcript per conversation, used by createTranscriptConversations(). Host functions receive host paths; remote functions receive sandbox paths.",
+    "Organisation des fichiers d’une CLI qui stocke un transcript JSONL par conversation, utilisée par createTranscriptConversations(). Les fonctions hôte reçoivent des chemins de l’hôte ; les fonctions distantes des chemins de la sandbox."
+  ],
+  "SessionBundleProfile": [
+    "Describes where a CLI keeps session directories and how to select, validate and relocate their files, for createSessionBundleConversations(). Hooks run inside the sandbox from their source text.",
+    "Décrit où une CLI conserve ses dossiers de session et comment sélectionner, valider et relocaliser leurs fichiers, pour createSessionBundleConversations(). Les hooks s’exécutent dans la sandbox à partir de leur texte source."
+  ],
+  "SessionBundleFiles": [
+    "Read-only access to the text of bundled files, passed to SessionBundleProfile.validate.",
+    "Accès en lecture au texte des fichiers du bundle, transmis à SessionBundleProfile.validate."
+  ],
+  "SessionBundleHelpers": [
+    "Sandbox-side helpers passed to session bundle hooks, which cannot import modules.",
+    "Utilitaires côté sandbox transmis aux hooks des bundles de session, qui ne peuvent pas importer de modules."
+  ],
+  "SessionBundleRelocation": [
+    "Destination details passed to SessionBundleProfile.relocate while a session is restored.",
+    "Détails de destination transmis à SessionBundleProfile.relocate pendant la restauration d’une session."
   ]
 }

@@ -203,13 +203,9 @@
     "Explicit environment declarations; values are strings.",
     "Déclarations d’environnement explicites ; les valeurs sont des chaînes."
   ],
-  "AgentAdapter.conversations": [
-    "Built-in native transcript format used when no custom storage is supplied.",
-    "Format natif de transcript utilisé en l’absence de stockage personnalisé."
-  ],
   "AgentAdapter.storage": [
-    "Custom conversation persistence implementation for this adapter.",
-    "Implémentation personnalisée de persistance des conversations de cet adapter."
+    "Conversation store that captures, locates and restores this adapter’s sessions. Built-in presets default to their native store; absent when the CLI has no portable conversations.",
+    "Store de conversations qui capture, localise et restaure les sessions de cet adapter. Les presets intégrés utilisent par défaut leur store natif ; absent quand la CLI n’a pas de conversations portables."
   ],
   "AgentAdapter.capture": [
     "Whether the adapter enables native transcript capture.",
@@ -1361,20 +1357,20 @@
     "Version de Claude Code utilisée par les fixtures de compatibilité intégrées."
   ],
   "conversations.native": [
-    "Create a native Claude, Codex, Copilot or Kimi ConversationStore for transcript persistence.",
-    "Crée un ConversationStore natif Claude, Codex, Copilot ou Kimi pour persister les transcripts."
+    "Deprecated: return the built-in native store of a format name; use the agent’s create*Conversations() function.",
+    "Déprécié : renvoie le store natif intégré d’un nom de format ; utilisez la fonction create*Conversations() de l’agent."
   ],
   "conversations.locate": [
-    "Locate a native transcript on the host by format, ID, repository and optional home.",
-    "Localise un transcript natif sur l’hôte par format, identifiant, dépôt et home optionnel."
+    "Deprecated: locate a native transcript on the host by format, ID, repository and optional home. Use the native store’s locate() instead.",
+    "Déprécié : localise un transcript natif sur l’hôte par format, identifiant, dépôt et home optionnel. Utilisez plutôt la méthode locate() du store natif."
   ],
   "conversations.capture": [
-    "Capture the selected conversation from a sandbox lease into host staging.",
-    "Capture la conversation choisie depuis un bail de sandbox vers le dossier de capture hôte."
+    "Deprecated: capture the selected conversation from a sandbox lease into host staging. Use the native store’s capture() instead.",
+    "Déprécié : capture la conversation choisie depuis un bail de sandbox vers le dossier de capture hôte. Utilisez plutôt la méthode capture() du store natif."
   ],
   "conversations.restore": [
-    "Restore a located transcript into a sandbox and relocate its repository paths.",
-    "Restaure un transcript localisé dans une sandbox et adapte ses chemins de dépôt."
+    "Deprecated: restore a located transcript into a sandbox and relocate its repository paths. Use the native store’s restore() instead.",
+    "Déprécié : restaure un transcript localisé dans une sandbox et adapte ses chemins de dépôt. Utilisez plutôt la méthode restore() du store natif."
   ],
   "conversations.rewrite": [
     "Rewrite native transcript repository paths from source to destination without file I/O.",
@@ -1385,20 +1381,20 @@
     "Encode un chemin de dépôt en clé de dossier de projet natif Claude."
   ],
   "conversations.claudePath": [
-    "Compute the host Claude transcript file path for an ID and repository.",
-    "Calcule le chemin du transcript Claude hôte pour un identifiant et un dépôt."
+    "Deprecated: compute the host Claude transcript file path for an ID and repository. Use createClaudeConversations().directory() instead.",
+    "Déprécié : calcule le chemin du transcript Claude hôte pour un identifiant et un dépôt. Utilisez plutôt createClaudeConversations().directory()."
   ],
   "conversations.directory": [
-    "Compute the host transcript directory for the selected format and repository.",
-    "Calcule le dossier hôte des transcripts pour le format et le dépôt choisis."
+    "Deprecated: compute the host transcript directory for the selected format and repository. Use the native store’s directory() instead.",
+    "Déprécié : calcule le dossier hôte des transcripts pour le format et le dépôt choisis. Utilisez plutôt la méthode directory() du store natif."
   ],
   "conversations.destination": [
-    "Compute the transcript destination within the sandbox home; Copilot/Kimi return a bundle staging path, which requires restore to materialize native files.",
-    "Calcule la destination dans le home de sandbox ; Copilot/Kimi renvoient un chemin de staging du bundle, que restore doit matérialiser en fichiers natifs."
+    "Deprecated: compute the transcript destination within the sandbox home; Copilot/Kimi return a bundle staging path, which requires restore to materialize native files. Use the native store’s destination() instead.",
+    "Déprécié : calcule la destination dans le home de sandbox ; Copilot/Kimi renvoient un chemin de staging du bundle, que restore doit matérialiser en fichiers natifs. Utilisez plutôt la méthode destination() du store natif."
   ],
   "nativeConversations.format": [
-    "Native transcript layout: claude, codex, copilot or kimi.",
-    "Organisation native des transcripts : claude, codex, copilot ou kimi."
+    "Built-in native format name: claude, codex, copilot or kimi.",
+    "Nom de format natif intégré : claude, codex, copilot ou kimi."
   ],
   "locateConversation.format": [
     "Native transcript layout: claude, codex, copilot or kimi.",
@@ -6996,5 +6992,141 @@
   "defineMcpPrompt.options": [
     "Server, prompt name and string arguments of the prompt to render.",
     "Serveur, nom et arguments texte du prompt à rendre."
+  ],
+  "createTransportConversations.base": [
+    "Store whose captures are archived, such as createKimiConversations() or createHarnessConversations(); it must declare a format, which names the transport keys. A format name (claude, codex, copilot, kimi or harness) is deprecated and selects the matching built-in store.",
+    "Store dont les captures sont archivées, par exemple createKimiConversations() ou createHarnessConversations() ; il doit déclarer un format, qui nomme les clés de transport. Un nom de format (claude, codex, copilot, kimi ou harness) est déprécié et sélectionne le store intégré correspondant."
+  ],
+  "NativeConversationStore.format": [
+    "Persisted format name written in conversation records, transport keys and session bundles. Keep it stable once conversations have been captured.",
+    "Nom de format persisté dans les enregistrements de conversation, les clés de transport et les bundles de session. Le garder stable une fois des conversations capturées."
+  ],
+  "NativeConversationStore.directory": [
+    "Host directory that holds this format’s captured conversations for a repository, below home when given.",
+    "Dossier de l’hôte qui contient les conversations capturées de ce format pour un dépôt, sous home s’il est fourni."
+  ],
+  "NativeConversationStore.destination": [
+    "Sandbox path that restoring the conversation id writes, given its captured host file.",
+    "Chemin dans la sandbox écrit par la restauration de la conversation id, d’après son fichier capturé sur l’hôte."
+  ],
+  "createSessionBundleConversations.sessionProfile": [
+    "Session directory layout, file selection and sandbox-side hooks of the CLI.",
+    "Organisation des dossiers de session, sélection des fichiers et hooks côté sandbox de la CLI."
+  ],
+  "SessionBundleProfile.format": [
+    "Persisted format name, used in bundles, transport keys and .outpost/conversations/<format> host paths.",
+    "Nom de format persisté, utilisé dans les bundles, les clés de transport et les chemins hôte .outpost/conversations/<format>."
+  ],
+  "SessionBundleProfile.root": [
+    "CLI home inside the sandbox: the value of the variable environment variable when set, otherwise directory under the agent home.",
+    "Home de la CLI dans la sandbox : la valeur de la variable d’environnement variable si elle est définie, sinon directory sous le home de l’agent."
+  ],
+  "SessionBundleProfile.sessions": [
+    "Directory under the CLI home that contains the session directories.",
+    "Dossier sous le home de la CLI qui contient les dossiers de session."
+  ],
+  "SessionBundleProfile.buckets": [
+    "Whether sessions live in <sessions>/<bucket>/<id>. Capture requires exactly one match across buckets, and restoration refuses an id already present under another bucket.",
+    "Indique si les sessions sont rangées dans <sessions>/<bucket>/<id>. La capture exige une seule correspondance parmi les buckets, et la restauration refuse un id déjà présent sous un autre bucket."
+  ],
+  "SessionBundleProfile.include": [
+    "Bundle-relative paths to capture; a directory is tested by its own path before its files. The g and y flags are rejected.",
+    "Chemins relatifs au bundle à capturer ; un dossier est testé sur son propre chemin avant ses fichiers. Les options g et y sont refusées."
+  ],
+  "SessionBundleProfile.exclude": [
+    "Bundle-relative paths skipped even when include matches them, such as logs or lock files.",
+    "Chemins relatifs au bundle ignorés même quand include les accepte, comme les journaux ou les verrous."
+  ],
+  "SessionBundleProfile.required": [
+    "Files that must be present; a session missing one is refused as incomplete.",
+    "Fichiers obligatoires ; une session à laquelle il en manque un est refusée comme incomplète."
+  ],
+  "SessionBundleProfile.relocated": [
+    "Files passed as text to relocate during restoration; other files are restored byte for byte.",
+    "Fichiers transmis comme texte à relocate pendant la restauration ; les autres sont restaurés à l’identique."
+  ],
+  "SessionBundleProfile.validate": [
+    "Self-contained function that returns an error message when the bundled session uses unsupported metadata. It runs in the sandbox during capture and on the host when an existing bundle is located.",
+    "Fonction autonome qui renvoie un message d’erreur quand la session du bundle utilise des métadonnées non prises en charge. Elle s’exécute dans la sandbox à la capture et sur l’hôte quand un bundle existant est localisé."
+  ],
+  "SessionBundleProfile.bucket": [
+    "Self-contained function that names the bucket restoration uses for the destination workspace; required when buckets is true.",
+    "Fonction autonome qui nomme le bucket utilisé par la restauration pour le workspace de destination ; obligatoire quand buckets vaut true."
+  ],
+  "SessionBundleProfile.relocate": [
+    "Self-contained function that rewrites one relocated file for the destination workspace and returns its new text; throwing aborts the restoration without replacing the existing session.",
+    "Fonction autonome qui réécrit un fichier relocalisé pour le workspace de destination et renvoie son nouveau texte ; lever une erreur annule la restauration sans remplacer la session existante."
+  ],
+  "SessionBundleFiles.text": [
+    "UTF-8 text of a bundled file by bundle-relative path, or undefined when the bundle does not contain it.",
+    "Texte UTF-8 d’un fichier du bundle d’après son chemin relatif, ou undefined s’il est absent du bundle."
+  ],
+  "SessionBundleHelpers.join": [
+    "Joins path segments with the sandbox platform separator.",
+    "Assemble des segments de chemin avec le séparateur de la plateforme de la sandbox."
+  ],
+  "SessionBundleHelpers.sha256": [
+    "Hexadecimal SHA-256 digest of a UTF-8 string.",
+    "Empreinte SHA-256 hexadécimale d’une chaîne UTF-8."
+  ],
+  "SessionBundleRelocation.id": [
+    "Identifier of the restored conversation.",
+    "Identifiant de la conversation restaurée."
+  ],
+  "SessionBundleRelocation.cwd": [
+    "Sandbox workspace the restored session must point to.",
+    "Workspace de la sandbox vers lequel la session restaurée doit pointer."
+  ],
+  "SessionBundleRelocation.target": [
+    "Sandbox directory the session is restored into.",
+    "Dossier de la sandbox dans lequel la session est restaurée."
+  ],
+  "SessionBundleRelocation.helpers": [
+    "Sandbox-side path and hashing helpers.",
+    "Utilitaires de chemins et d’empreinte côté sandbox."
+  ],
+  "createTranscriptConversations.layout": [
+    "Transcript locations on the host and in the sandbox, with the persisted format name.",
+    "Emplacements des transcripts sur l’hôte et dans la sandbox, avec le nom de format persisté."
+  ],
+  "TranscriptConversationLayout.format": [
+    "Persisted format name written in conversation records and transport keys.",
+    "Nom de format persisté dans les enregistrements de conversation et les clés de transport."
+  ],
+  "TranscriptConversationLayout.sidecars": [
+    "Whether child transcripts under <transcript directory>/<id>/subagents are captured and restored with the main transcript; a failed child capture only warns.",
+    "Indique si les transcripts enfants sous <dossier du transcript>/<id>/subagents sont capturés et restaurés avec le transcript principal ; l’échec d’un enfant produit seulement un avertissement."
+  ],
+  "TranscriptConversationLayout.searchRoot": [
+    "Host directory searched recursively for a transcript when locating a conversation.",
+    "Dossier de l’hôte parcouru récursivement pour localiser le transcript d’une conversation."
+  ],
+  "TranscriptConversationLayout.remoteSearchRoot": [
+    "Sandbox directory searched with find when capturing a conversation.",
+    "Dossier de la sandbox parcouru avec find lors de la capture d’une conversation."
+  ],
+  "TranscriptConversationLayout.pattern": [
+    "find -name pattern that matches the transcript file of a conversation in the sandbox.",
+    "Motif find -name qui correspond au fichier transcript d’une conversation dans la sandbox."
+  ],
+  "TranscriptConversationLayout.matches": [
+    "Whether a host file found under searchRoot is the transcript of the conversation.",
+    "Indique si un fichier de l’hôte trouvé sous searchRoot est le transcript de la conversation."
+  ],
+  "TranscriptConversationLayout.directory": [
+    "Host directory that holds the captured transcripts of a repository.",
+    "Dossier de l’hôte qui contient les transcripts capturés d’un dépôt."
+  ],
+  "TranscriptConversationLayout.preferredPath": [
+    "Host path checked first when locating a conversation, before searching searchRoot.",
+    "Chemin de l’hôte vérifié en premier pour localiser une conversation, avant de parcourir searchRoot."
+  ],
+  "TranscriptConversationLayout.capturePath": [
+    "Host path where capture writes the transcript found at original in the sandbox.",
+    "Chemin de l’hôte où la capture écrit le transcript trouvé à original dans la sandbox."
+  ],
+  "TranscriptConversationLayout.remotePath": [
+    "Sandbox path where restoration writes a captured transcript for the lease workspace.",
+    "Chemin de la sandbox où la restauration écrit un transcript capturé pour le workspace du bail."
   ]
 }

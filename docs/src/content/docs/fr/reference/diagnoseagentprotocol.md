@@ -19,9 +19,9 @@ Rejoue les fixtures d’événements intégrées dans l’adapter choisi et rapp
 
 ## Paramètres et propriétés
 
-| Nom     | Type          | Présence | Rôle                                                                                                                    |
-| ------- | ------------- | -------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `agent` | `DoctorAgent` | Requis   | Identifiant du CLI d’agent à rapporter ou diagnostiquer : claude, codex, antigravity (exécutable agy), copilot ou kimi. |
+| Nom     | Type                                                             | Présence | Rôle                                                                                                                    |
+| ------- | ---------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `agent` | `import("../adapters/agents/catalog.types.js").BuiltInAgentName` | Requis   | Identifiant du CLI d’agent à rapporter ou diagnostiquer : claude, codex, antigravity (exécutable agy), copilot ou kimi. |
 
 ## Retour
 

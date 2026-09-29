@@ -14,5 +14,5 @@ import type { ConversationFormat } from "@elie-laloum/outpost";
 ## Signature
 
 ```ts
-export type ConversationFormat = "claude" | "codex" | "copilot" | "kimi";
+export type ConversationFormat = string;
 ```

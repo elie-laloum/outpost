@@ -66,7 +66,7 @@ export const groups = [
     title: ["Conversations", "Conversations"],
     guide: "guide/agents/conversations",
     names:
-      "conversations createHarnessConversations ConversationFormat StoredConversationFormat ConversationLocation ConversationContext ConversationRecord ConversationStore",
+      "createClaudeConversations createCodexConversations createCopilotConversations createKimiConversations createTranscriptConversations createSessionBundleConversations createHarnessConversations conversations ConversationFormat ConversationLocation TranscriptConversationLayout SessionBundleProfile SessionBundleFiles SessionBundleHelpers SessionBundleRelocation ConversationContext ConversationRecord ConversationStore NativeConversationStore",
   },
   {
     id: "observability",

@@ -793,6 +793,30 @@
         "attrs": { "data-reference-overview": "" }
       },
       {
+        "slug": "reference/createclaudeconversations",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/createcodexconversations",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/createcopilotconversations",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/createkimiconversations",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/createtranscriptconversations",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/createsessionbundleconversations",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
         "slug": "reference/createharnessconversations",
         "attrs": { "data-api-kind": "function" }
       },
@@ -805,11 +829,27 @@
         "attrs": { "data-api-kind": "type" }
       },
       {
-        "slug": "reference/storedconversationformat",
-        "attrs": { "data-api-kind": "type" }
+        "slug": "reference/conversationlocation",
+        "attrs": { "data-api-kind": "interface" }
       },
       {
-        "slug": "reference/conversationlocation",
+        "slug": "reference/transcriptconversationlayout",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/sessionbundleprofile",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/sessionbundlefiles",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/sessionbundlehelpers",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/sessionbundlerelocation",
         "attrs": { "data-api-kind": "interface" }
       },
       {
@@ -822,6 +862,10 @@
       },
       {
         "slug": "reference/conversationstore",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/nativeconversationstore",
         "attrs": { "data-api-kind": "interface" }
       }
     ]

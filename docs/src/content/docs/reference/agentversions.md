@@ -19,22 +19,16 @@ Expose the Claude Code, Codex, Antigravity, Copilot and Kimi CLI versions pinned
 
 ## Parameters and properties
 
-| Name          | Type        | Presence | Meaning                                                                                                                                                    |
-| ------------- | ----------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `codex`       | `"0.156.1"` | Required | Codex CLI version used by the bundled compatibility fixtures.                                                                                              |
-| `claude`      | `"2.1.280"` | Required | Claude Code version used by the bundled compatibility fixtures.                                                                                            |
-| `copilot`     | `"1.0.88"`  | Required | GitHub Copilot CLI version installed by generated images and remote bootstrap.                                                                             |
-| `kimi`        | `"2.1.1"`   | Required | Kimi Code CLI version installed by generated images and remote bootstrap.                                                                                  |
-| `antigravity` | `"1.2.12"`  | Required | Antigravity CLI version installed from SHA-512-verified archives by generated images and remote bootstrap, and used as the doctor compatibility reference. |
+| Name          | Type     | Presence | Meaning                                                                                                                                                    |
+| ------------- | -------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `codex`       | `string` | Required | Codex CLI version used by the bundled compatibility fixtures.                                                                                              |
+| `claude`      | `string` | Required | Claude Code version used by the bundled compatibility fixtures.                                                                                            |
+| `antigravity` | `string` | Required | Antigravity CLI version installed from SHA-512-verified archives by generated images and remote bootstrap, and used as the doctor compatibility reference. |
+| `copilot`     | `string` | Required | GitHub Copilot CLI version installed by generated images and remote bootstrap.                                                                             |
+| `kimi`        | `string` | Required | Kimi Code CLI version installed by generated images and remote bootstrap.                                                                                  |
 
 ## Signature
 
 ```ts
-export declare const agentVersions: Readonly<{
-  codex: "0.156.1";
-  claude: "2.1.280";
-  copilot: "1.0.88";
-  kimi: "2.1.1";
-  antigravity: "1.2.12";
-}>;
+export declare const agentVersions: Readonly<Record<BuiltInAgentName, string>>;
 ```

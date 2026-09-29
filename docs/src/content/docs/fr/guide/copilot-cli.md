@@ -26,7 +26,7 @@ Lancez `copilot login` sur l’hôte et sélectionnez `authentication: "account"
 
 ## Gestion des sessions
 
-La capture native, la reprise à chaud et à froid et les réparations automatiques sont prises en charge. Outpost reprend l’identifiant exact avec `--resume` et conserve historique, métadonnées, plans, checkpoints et fichiers persistants dans un bundle borné. Le fork automatisé est explicitement refusé : la commande interactive `/fork` ne constitue pas un contrat de fork headless pris en charge. `conversations` stocke les sessions capturées dans un [store de conversations](../chat-history/#stockage) au format `"copilot"`, par exemple `createTransportConversations("copilot", …)`. Voir [l’historique](../chat-history/) et [le stockage des sessions GitHub](https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-best-practices).
+La capture native, la reprise à chaud et à froid et les réparations automatiques sont prises en charge. Outpost reprend l’identifiant exact avec `--resume` et conserve historique, métadonnées, plans, checkpoints et fichiers persistants dans un bundle borné. Le fork automatisé est explicitement refusé : la commande interactive `/fork` ne constitue pas un contrat de fork headless pris en charge. `conversations` stocke les sessions capturées dans un [store de conversations](../chat-history/#stockage) au format `"copilot"`, par exemple `createTransportConversations(createCopilotConversations(), …)`. Voir [l’historique](../chat-history/) et [le stockage des sessions GitHub](https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-best-practices).
 
 Voir le [démarrage CLI GitHub](https://docs.github.com/en/copilot/get-started/cli-quickstart) pour les conditions d’accès et de connexion Copilot.
 
