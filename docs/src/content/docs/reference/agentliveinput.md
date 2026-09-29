@@ -13,18 +13,20 @@ import type { AgentLiveInput } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name       | Type                        | Presence | Meaning                                                                                                                                                               |
-| ---------- | --------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `encode`   | `(text: string) => string`  | Required | Encode one user message for stdin, including its line terminator; also used for the initial prompt.                                                                   |
-| `consumed` | `(line: string) => boolean` | Required | Return true for an output line confirming that the agent consumed one user message. Outpost closes stdin after a final event once every written message was consumed. |
+| Name   | Type                                      | Presence | Meaning                                                                                                                                                                                                         |
+| ------ | ----------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `open` | `(input: AgentInput) => AgentLiveSession` | Required | Start the protocol state of one turn requested with the given input. Outpost opens a session when it runs the turn with liveInput and closes stdin after a final event once every written message was consumed. |
 
 ## Signature
 
 ```ts
 export interface AgentLiveInput {
-  /** Encodes one user message, including its line terminator. */
-  encode(text: string): string;
-  /** Recognizes an output line confirming the agent consumed one user message. */
-  consumed(line: string): boolean;
+  /** Starts the protocol state of one turn requested with input. */
+  open(input: AgentInput): AgentLiveSession;
 }
 ```
+
+## Related contracts
+
+- [AgentInput](../agentinput/)
+- [AgentLiveSession](../agentlivesession/)

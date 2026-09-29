@@ -691,6 +691,14 @@
       {
         "slug": "reference/agentliveinput",
         "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/agentlivesession",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/agentliveread",
+        "attrs": { "data-api-kind": "interface" }
       }
     ]
   },

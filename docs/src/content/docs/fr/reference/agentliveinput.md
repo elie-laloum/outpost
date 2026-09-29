@@ -13,18 +13,20 @@ import type { AgentLiveInput } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom        | Type                        | Présence | Rôle                                                                                                                                                                                      |
-| ---------- | --------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `encode`   | `(text: string) => string`  | Requis   | Encode un message utilisateur pour stdin, terminaison de ligne comprise ; sert aussi pour le prompt initial.                                                                              |
-| `consumed` | `(line: string) => boolean` | Requis   | Renvoie true pour une ligne de sortie confirmant que l’agent a consommé un message utilisateur. Outpost ferme stdin après un événement final une fois tous les messages écrits consommés. |
+| Nom    | Type                                      | Présence | Rôle                                                                                                                                                                                                                        |
+| ------ | ----------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `open` | `(input: AgentInput) => AgentLiveSession` | Requis   | Démarre l’état de protocole d’un tour demandé avec l’entrée donnée. Outpost ouvre une session lorsqu’il exécute le tour avec liveInput et ferme stdin après un événement final une fois tous les messages écrits consommés. |
 
 ## Signature
 
 ```ts
 export interface AgentLiveInput {
-  /** Encodes one user message, including its line terminator. */
-  encode(text: string): string;
-  /** Recognizes an output line confirming the agent consumed one user message. */
-  consumed(line: string): boolean;
+  /** Starts the protocol state of one turn requested with input. */
+  open(input: AgentInput): AgentLiveSession;
 }
 ```
+
+## Contrats associés
+
+- [AgentInput](../agentinput/)
+- [AgentLiveSession](../agentlivesession/)

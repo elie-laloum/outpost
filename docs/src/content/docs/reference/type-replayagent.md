@@ -21,6 +21,7 @@ import type { ReplayAgent } from "@elie-laloum/outpost";
 | `turns`                 | `readonly ReplayTurn[]`                                   | Required | Recorded turns parsed from the journal, in execution order.                                                                                                                                                                                    |
 | `remainingTurns`        | `number`                                                  | Required | Number of recorded turns not yet consumed by a dispatch; 0 after a complete replay.                                                                                                                                                            |
 | `nextTurn`              | `() => ReplayTurn \| undefined`                           | Required | Consume and return the next recorded turn, or undefined when the journal is exhausted. Dispatch calls it once per turn; a replay agent is single-use.                                                                                          |
+| `pendingSteering`       | `() => readonly string[] \| undefined`                    | Required | Recorded instructions that resumed the next turn, without consuming it; dispatch uses them to continue a steered pass as recorded. Undefined when the next turn was not a steering resumption.                                                 |
 | `name`                  | `string`                                                  | Required | Native agent identifier used in execution events and diagnostics.                                                                                                                                                                              |
 | `bootstrap`             | `string \| undefined`                                     | Optional | Name of the built-in installer used to install a missing CLI on remote providers when bootstrapping is enabled: a pinned npm package for claude, codex, copilot and kimi, or a versioned archive with a pinned SHA-512 digest for antigravity. |
 | `requiresFinishedEvent` | `boolean \| undefined`                                    | Optional | Require the native finished protocol event before treating an agent turn as complete.                                                                                                                                                          |
@@ -43,6 +44,8 @@ export interface ReplayAgent extends AgentFeatures {
   readonly turns: readonly ReplayTurn[];
   readonly remainingTurns: number;
   nextTurn(): ReplayTurn | undefined;
+  /** Instructions that resumed the next recorded turn, without consuming it. */
+  pendingSteering(): readonly string[] | undefined;
 }
 ```
 

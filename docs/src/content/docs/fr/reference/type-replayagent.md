@@ -21,6 +21,7 @@ import type { ReplayAgent } from "@elie-laloum/outpost";
 | `turns`                 | `readonly ReplayTurn[]`                                   | Requis    | Tours enregistrés extraits du journal, dans l’ordre d’exécution.                                                                                                                                                                                                           |
 | `remainingTurns`        | `number`                                                  | Requis    | Nombre de tours enregistrés pas encore consommés par un dispatch ; 0 après un rejeu complet.                                                                                                                                                                               |
 | `nextTurn`              | `() => ReplayTurn \| undefined`                           | Requis    | Consomme et renvoie le tour enregistré suivant, ou undefined quand le journal est épuisé. Le dispatch l’appelle une fois par tour ; un agent de rejeu ne sert qu’une fois.                                                                                                 |
+| `pendingSteering`       | `() => readonly string[] \| undefined`                    | Requis    | Consignes enregistrées qui ont repris le tour suivant, sans le consommer ; le dispatch s’en sert pour poursuivre une passe pilotée comme enregistrée. Undefined lorsque le tour suivant n’était pas une reprise de pilotage.                                               |
 | `name`                  | `string`                                                  | Requis    | Identifiant d’agent natif utilisé dans les événements et diagnostics.                                                                                                                                                                                                      |
 | `bootstrap`             | `string \| undefined`                                     | Optionnel | Nom de l’installeur intégré utilisé pour installer une CLI absente sur les providers distants lorsque le bootstrap est activé : un paquet npm épinglé pour claude, codex, copilot et kimi, ou une archive versionnée avec une empreinte SHA-512 épinglée pour antigravity. |
 | `requiresFinishedEvent` | `boolean \| undefined`                                    | Optionnel | Exige l’événement natif finished avant de considérer le tour d’agent terminé.                                                                                                                                                                                              |
@@ -43,6 +44,8 @@ export interface ReplayAgent extends AgentFeatures {
   readonly turns: readonly ReplayTurn[];
   readonly remainingTurns: number;
   nextTurn(): ReplayTurn | undefined;
+  /** Instructions that resumed the next recorded turn, without consuming it. */
+  pendingSteering(): readonly string[] | undefined;
 }
 ```
 

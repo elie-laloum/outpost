@@ -6384,24 +6384,16 @@
     "Demande le protocole liveInput de l’adapter : encoder le prompt avec lui sur stdin et garder stdin ouvert pour d’autres messages utilisateur. Outpost ne le positionne que si le dispatch a un pilotage et que le lease accepte l’entrée en direct."
   ],
   "AgentAdapter.liveInput": [
-    "Protocol for adding user messages to a running turn over stdin. Adapters without it are steered by interrupting and resuming their conversation.",
-    "Protocole d’ajout de messages utilisateur à un tour en cours via stdin. Les adapters qui n’en ont pas sont pilotés par interruption et reprise de leur conversation."
-  ],
-  "AgentLiveInput.encode": [
-    "Encode one user message for stdin, including its line terminator; also used for the initial prompt.",
-    "Encode un message utilisateur pour stdin, terminaison de ligne comprise ; sert aussi pour le prompt initial."
-  ],
-  "AgentLiveInput.consumed": [
-    "Return true for an output line confirming that the agent consumed one user message. Outpost closes stdin after a final event once every written message was consumed.",
-    "Renvoie true pour une ligne de sortie confirmant que l’agent a consommé un message utilisateur. Outpost ferme stdin après un événement final une fois tous les messages écrits consommés."
+    "Protocol for adding user messages to a running turn over stdin: Claude Code stream-json and Codex app-server. Adapters without it are steered by interrupting and resuming their conversation.",
+    "Protocole d’ajout de messages utilisateur à un tour en cours via stdin : stream-json de Claude Code et app-server de Codex. Les adapters qui n’en ont pas sont pilotés par interruption et reprise de leur conversation."
   ],
   "Command.input": [
-    "Readable stream piped to stdin after stdin, which stays open until the stream ends. Requires a lease with liveInput; Vercel, Daytona and Firecracker reject it.",
-    "Flux lisible transmis sur stdin après stdin, qui reste ouvert jusqu’à la fin du flux. Exige un lease avec liveInput ; Vercel, Daytona et Firecracker le refusent."
+    "Readable stream delivered to stdin after stdin, which stays open until the stream ends. Local, Docker and Podman pipe it, Firecracker forwards it through SSH, and Vercel and Daytona append framed chunks that a wrapper in the sandbox feeds to the process.",
+    "Flux lisible remis sur stdin après stdin, qui reste ouvert jusqu’à la fin du flux. Local, Docker et Podman le transmettent par tube, Firecracker via SSH, et Vercel et Daytona ajoutent des morceaux encadrés qu’un wrapper du sandbox transmet au processus."
   ],
   "SandboxLease.liveInput": [
-    "True when invoke() accepts Command.input as live stdin for a running process. Local, Docker and Podman leases set it.",
-    "Vrai lorsque invoke() accepte Command.input comme stdin en direct pour un processus en cours. Les leases local, Docker et Podman le positionnent."
+    "True when invoke() accepts Command.input as live stdin for a running process. Every built-in provider sets it.",
+    "Vrai lorsque invoke() accepte Command.input comme stdin en direct pour un processus en cours. Tous les fournisseurs intégrés le positionnent."
   ],
   "Steering.state": [
     "idle when no dispatch uses the controller, active while one does, closed after close().",
@@ -6787,5 +6779,41 @@
   "WorkflowJobCheckpoint.resume": [
     "Explicitly authorize replay of incomplete tasks and their side effects.",
     "Autorise explicitement le rejeu des tâches incomplètes et de leurs effets de bord."
+  ],
+  "AgentLiveInput.open": [
+    "Start the protocol state of one turn requested with the given input. Outpost opens a session when it runs the turn with liveInput and closes stdin after a final event once every written message was consumed.",
+    "Démarre l’état de protocole d’un tour demandé avec l’entrée donnée. Outpost ouvre une session lorsqu’il exécute le tour avec liveInput et ferme stdin après un événement final une fois tous les messages écrits consommés."
+  ],
+  "AgentLiveSession.encode": [
+    "Encode one user message for stdin, including its line terminator, or return an empty string when the session sends it itself once the agent can accept input.",
+    "Encode un message utilisateur pour stdin, terminaison de ligne comprise, ou renvoie une chaîne vide lorsque la session l’envoie elle-même dès que l’agent peut accepter une entrée."
+  ],
+  "AgentLiveSession.read": [
+    "Read one output line and return the user messages it confirms consumed and the protocol replies Outpost writes to stdin, such as handshake requests or refusals of server requests.",
+    "Lit une ligne de sortie et renvoie les messages utilisateur qu’elle confirme consommés ainsi que les réponses de protocole qu’Outpost écrit sur stdin, comme les requêtes d’ouverture de session ou les refus de requêtes serveur."
+  ],
+  "AgentLiveRead.consumed": [
+    "Number of written user messages, including the prompt, that this output line confirms the agent accepted.",
+    "Nombre de messages utilisateur écrits, prompt compris, dont cette ligne de sortie confirme l’acceptation par l’agent."
+  ],
+  "AgentLiveRead.replies": [
+    "Complete stdin messages to write in response to this output line, in order.",
+    "Messages stdin complets à écrire en réponse à cette ligne de sortie, dans l’ordre."
+  ],
+  "Agent.pendingSteering": [
+    "For a replay agent, the recorded instructions that resumed the next turn, without consuming it; dispatch uses them to continue a steered pass as recorded.",
+    "Pour un agent de rejeu, consignes enregistrées qui ont repris le tour suivant, sans le consommer ; le dispatch s’en sert pour poursuivre une passe pilotée comme enregistrée."
+  ],
+  "ReplayAgent.pendingSteering": [
+    "Recorded instructions that resumed the next turn, without consuming it; dispatch uses them to continue a steered pass as recorded. Undefined when the next turn was not a steering resumption.",
+    "Consignes enregistrées qui ont repris le tour suivant, sans le consommer ; le dispatch s’en sert pour poursuivre une passe pilotée comme enregistrée. Undefined lorsque le tour suivant n’était pas une reprise de pilotage."
+  ],
+  "ReplayTurn.resumedBy": [
+    "Steering instructions delivered with mode resumed that started this turn; the turn's prompt joins them with blank lines.",
+    "Consignes de pilotage remises en mode resumed qui ont ouvert ce tour ; le prompt du tour les joint par des lignes vides."
+  ],
+  "ReplayTurn.interrupted": [
+    "True when steering stopped this recorded turn; its usage is the sum of its recorded usage events and the replayed turn reports interrupted: steering.",
+    "Vrai lorsque le pilotage a arrêté ce tour enregistré ; son usage est la somme de ses événements usage enregistrés et le tour rejoué indique interrupted: steering."
   ]
 }

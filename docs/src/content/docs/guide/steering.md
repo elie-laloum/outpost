@@ -28,15 +28,18 @@ const result = await running;
 
 ## How the instruction reaches the agent
 
-| Agent and sandbox                                                                                            | Delivery                                                                                                                                                                                        |
-| ------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [Built-in harness](../model-loop/)                                                                           | `injected`: added before the next model request, after the current tool results. If the model was about to finish, it continues with the instruction.                                           |
-| [Claude Code](../claude-code/) on [Docker](../docker/), [Podman](../podman/) or the [host](../host-process/) | `injected`: written to Claude's stream-json input. Read during a tool call, it joins the running turn; read while Claude writes its final answer, it runs as a queued turn in the same process. |
-| Codex, Copilot CLI, Kimi Code, Antigravity, and Claude Code on Vercel, Daytona or Firecracker                | `resumed`: Outpost stops the running process once its conversation is known, keeps the sandbox, then resumes the same conversation with the instruction. The action in progress is cut short.   |
+| Agent                               | Delivery                                                                                                                                                                                                  |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Built-in harness](../model-loop/)  | `injected`: added before the next model request, after the current tool results. If the model was about to finish, it continues. While a built-in subagent works, that subagent receives the instruction. |
+| [Claude Code](../claude-code/)      | `injected`: written to Claude's stream-json input. Read during a tool call, it joins the running turn; read while Claude writes its final answer, it runs as a queued turn in the same process.           |
+| [Codex](../codex/)                  | `injected`: Codex runs as `codex app-server` for steered dispatches and receives the instruction with `turn/steer` in the active turn. When no turn is active, it starts the next turn of the thread.     |
+| Copilot CLI, Kimi Code, Antigravity | `resumed`: Outpost stops the running process once its conversation is known, keeps the sandbox, then resumes the same conversation with the instruction. The action in progress is cut short.             |
+
+Every provider accepts live input: local, Docker and Podman pipe stdin, Firecracker forwards it through SSH, and Vercel and Daytona append framed chunks to a file that a small Node wrapper in the sandbox feeds to the agent. On Vercel and Daytona each instruction costs one provider command, so it arrives about one to two seconds later.
 
 Files the agent already changed stay in the workspace. With `resumed` delivery, the interrupted turn appears in `result.turns` with `interrupted: "steering"` and emits a `stopped` event with reason `steered`.
 
-The agent CLIs decide this split. Claude Code accepts user messages on stdin while it works; `codex exec`, Copilot and Kimi prompt mode take a single prompt; Antigravity queues each stdin message as a separate turn. Vercel, Daytona and Firecracker stage stdin before the command starts.
+The agent CLIs decide this split: `copilot -p` and `kimi --prompt` take a single prompt, and Antigravity queues each stdin message as a separate turn.
 
 ## Timing
 
@@ -56,13 +59,15 @@ Before running, a dispatch rejects agents that can neither receive live input no
 
 ## Events, history and usage
 
-Each delivery emits a `steer` [agent event](../live-events/) with `text`, `mode` and `pass`; the terminal reporter prints it. Harness transcripts and Claude Code sessions record the instruction as a user message. A pass still emits one `summary`, and `result.usage` includes interrupted turns.
+Each delivery emits a `steer` [agent event](../live-events/) with `text`, `mode` and `pass`, and `subagentId` when a subagent received it; the terminal reporter prints it. Harness transcripts and native sessions record the instruction as a user message. A pass still emits one `summary`, and `result.usage` includes interrupted turns.
+
+A [replay](../record-replay/) of a steered run reproduces its turns: each `resumed` instruction starts the next recorded turn, and the interrupted turn keeps `interrupted: "steering"`, its own text and usage.
 
 ## Limits
 
 - Instructions live in memory. For questions and answers that must survive a restart, use [interactive tasks](../interactive-tasks/).
-- Built-in [subagents](../model-loop/) do not receive steering; only the top-level loop does.
-- Replaying a journal of a steered run diverges at the resumed prompt.
-- Claude Code injection was checked once against Claude Code 2.1.282. Interruption and resumption for Codex, Copilot, Kimi and Antigravity are covered by deterministic tests with simulated CLIs and a real Docker sandbox, not by live runs.
+- When several subagents run at once, the first one to reach a step boundary takes the instruction.
+- Codex steering uses the `app-server` protocol, which Codex marks experimental. Its handshake and failure handling were checked against Codex 0.155; a live `turn/steer` run remains to be done.
+- Claude Code injection was checked live on the host, Daytona and Vercel. Interruption and resumption for Copilot, Kimi and Antigravity are covered by simulated CLIs and a real Docker sandbox, not by live runs.
 
 API: [createSteering](../../reference/createsteering/) · [Steering](../../reference/steering/) · [SteeringDelivery](../../reference/steeringdelivery/) · [DispatchOptions](../../reference/dispatchoptions/).

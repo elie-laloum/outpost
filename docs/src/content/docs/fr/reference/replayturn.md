@@ -23,6 +23,8 @@ import type { ReplayTurn } from "@elie-laloum/outpost";
 | `failure`      | `ReplayFailure \| undefined`                                                                                                                                                                                                                                                                                                                              | Optionnel | Erreur enregistrée d’un tour inachevé ; le rejeu la relance après les événements et les commits.                                                                                                                       |
 | `handover`     | `({ readonly kind: "fallback"; readonly from: import("./fallback-agent.types.js").FallbackCandidate; readonly to: import("./fallback-agent.types.js").FallbackCandidate; readonly failure: import("./fallback-agent.types.js").FallbackTrigger; readonly message: string; readonly resetAt?: string; } & { readonly subagentId?: string; }) \| undefined` | Optionnel | Événement fallback enregistré après ce tour ; le tour est alors traité comme passé en relais plutôt qu’en échec, son usage est la somme de ses événements usage enregistrés, et le rejeu enchaîne sur le tour suivant. |
 | `changes`      | `WorkspaceCommitsEvent \| undefined`                                                                                                                                                                                                                                                                                                                      | Optionnel | Commits du workspace appliqués dans la sandbox après ce tour, le dernier de son dispatch en sandbox.                                                                                                                   |
+| `resumedBy`    | `readonly string[] \| undefined`                                                                                                                                                                                                                                                                                                                          | Optionnel | Consignes de pilotage remises en mode resumed qui ont ouvert ce tour ; le prompt du tour les joint par des lignes vides.                                                                                               |
+| `interrupted`  | `boolean \| undefined`                                                                                                                                                                                                                                                                                                                                    | Optionnel | Vrai lorsque le pilotage a arrêté ce tour enregistré ; son usage est la somme de ses événements usage enregistrés et le tour rejoué indique interrupted: steering.                                                     |
 
 ## Signature
 
@@ -37,6 +39,10 @@ export interface ReplayTurn {
   /** Recorded handover of a fallback agent to its next candidate after this turn. */
   readonly handover?: FallbackEvent;
   readonly changes?: WorkspaceCommitsEvent;
+  /** Steering instructions that resumed the conversation into this turn. */
+  readonly resumedBy?: readonly string[];
+  /** Whether steering stopped this turn before it finished. */
+  readonly interrupted?: boolean;
 }
 ```
 

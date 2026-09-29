@@ -26,7 +26,7 @@ const coder = agent({
 
 ## Comportement
 
-Codex prend en charge la capture des conversations, la reprise, le fork et la réparation des réponses. `saveConversations: false` désactive la capture. `conversations` stocke les sessions capturées dans un [store de conversations](../chat-history/#stockage) au format `"codex"`, par exemple `transportConversations("codex", …)`. `approvalReviewer` sélectionne `user` ou `auto_review` lorsque la CLI le prend en charge.
+Codex prend en charge la capture des conversations, la reprise, le fork et la réparation des réponses. `saveConversations: false` désactive la capture. `conversations` stocke les sessions capturées dans un [store de conversations](../chat-history/#stockage) au format `"codex"`, par exemple `transportConversations("codex", …)`. `approvalReviewer` sélectionne `user` ou `auto_review` lorsque la CLI le prend en charge. Un dispatch avec [pilotage](../steering/) exécute `codex app-server` au lieu de `codex exec`, avec les mêmes réglages de modèle, de raisonnement, de fournisseur et d’approbation, pour que les consignes atteignent le tour en cours.
 
 ## Endpoint personnalisé
 

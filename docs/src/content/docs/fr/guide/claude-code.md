@@ -26,7 +26,7 @@ const coder = agent({
 
 ## Comportement
 
-Claude prend en charge les conversations natives, la reprise, le fork et la réparation des réponses. `conversations` stocke les sessions capturées dans un [store de conversations](../chat-history/#stockage) au format `"claude"`, par exemple `transportConversations("claude", …)`. Avec le [pilotage](../steering/) sur Docker, Podman ou l’hôte, Claude reçoit les consignes sur son entrée stream-json pendant le tour. `permissions` configure le mode de permissions CLI ; il ne remplace pas l’isolation de la sandbox. Ne fournissez pas `ANTHROPIC_API_KEY` avec des identifiants de compte, ni `CLAUDE_CODE_OAUTH_TOKEN` avec l’authentification API : Outpost rejette ces conflits.
+Claude prend en charge les conversations natives, la reprise, le fork et la réparation des réponses. `conversations` stocke les sessions capturées dans un [store de conversations](../chat-history/#stockage) au format `"claude"`, par exemple `transportConversations("claude", …)`. Avec le [pilotage](../steering/), Claude reçoit les consignes sur son entrée stream-json pendant le tour, quel que soit le fournisseur de sandbox. `permissions` configure le mode de permissions CLI ; il ne remplace pas l’isolation de la sandbox. Ne fournissez pas `ANTHROPIC_API_KEY` avec des identifiants de compte, ni `CLAUDE_CODE_OAUTH_TOKEN` avec l’authentification API : Outpost rejette ces conflits.
 
 Voir [Authentification Claude Code](https://code.claude.com/docs/en/authentication) pour les conditions d’accès du fournisseur.
 
