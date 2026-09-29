@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import ts from "typescript";
-import { referenceModel } from "./reference-model.mjs";
+import { displayType, referenceModel } from "./reference-model.mjs";
 import { symbolGuides } from "./api-groups.mjs";
 
 const readContent = async (name) =>
@@ -74,7 +74,7 @@ export function explain(symbol, declaration, group, language, checker) {
         ...new Set(
           signatures.map(
             (signature) =>
-              `\`${checker.typeToString(signature.getReturnType(), declaration, ts.TypeFormatFlags.NoTruncation)}\``,
+              `\`${displayType(checker.typeToString(signature.getReturnType(), declaration, ts.TypeFormatFlags.NoTruncation))}\``,
           ),
         ),
       ].join(" · ") + "\n";

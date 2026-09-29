@@ -71,10 +71,12 @@ export function referenceModel(symbol, declaration, checker) {
       key: `${symbol.name}.${prefix}${name}`,
       owner: `${owner}.${name}`,
       field: name,
-      type: checker.typeToString(
-        fieldType,
-        location,
-        ts.TypeFormatFlags.NoTruncation,
+      type: displayType(
+        checker.typeToString(
+          fieldType,
+          location,
+          ts.TypeFormatFlags.NoTruncation,
+        ),
       ),
       conditional:
         container.isUnion() &&
@@ -108,3 +110,6 @@ export function referenceModel(symbol, declaration, checker) {
   }
   return { contract, signatures, entries: [...unique.values()] };
 }
+
+// Types from other modules print as import("./module").Name; readers only need Name.
+export const displayType = (text) => text.replace(/import\("[^"]*"\)\./g, "");

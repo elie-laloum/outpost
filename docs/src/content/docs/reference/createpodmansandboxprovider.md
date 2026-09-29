@@ -40,7 +40,7 @@ Create a Podman sandbox provider using the container execution and streamed-tran
 
 ## Returns
 
-`import("../index.ts").SandboxProvider`
+`SandboxProvider`
 
 ## Signature
 

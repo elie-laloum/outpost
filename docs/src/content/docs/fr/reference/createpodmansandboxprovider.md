@@ -40,7 +40,7 @@ Crée un provider Podman avec les contrats d’exécution en conteneur et de tra
 
 ## Retour
 
-`import("../index.ts").SandboxProvider`
+`SandboxProvider`
 
 ## Signature
 

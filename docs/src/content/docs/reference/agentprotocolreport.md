@@ -13,15 +13,15 @@ import type { AgentProtocolReport } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name                 | Type                                                             | Presence | Meaning                                                                                                       |
-| -------------------- | ---------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------- |
-| `scope`              | `"bundled-protocol-fixtures"`                                    | Required | Always bundled-protocol-fixtures: checks replay recorded adapter fixtures.                                    |
-| `agent`              | `import("../adapters/agents/catalog.types.js").BuiltInAgentName` | Required | Agent CLI identifier to report or diagnose: claude, codex, antigravity (executable agy), copilot or kimi.     |
-| `referenceVersion`   | `string \| undefined`                                            | Optional | Pinned CLI version the bundled protocol fixtures target; absent for Antigravity, which has no pinned version. |
-| `installedCli`       | `"unverified"`                                                   | Required | Always unverified: bundled fixture checks do not invoke the installed CLI.                                    |
-| `modelCompatibility` | `"unverified"`                                                   | Required | Always unverified: these diagnostics do not call a live model.                                                |
-| `checks`             | `readonly DiagnosticCheck[]`                                     | Required | Individual diagnostic checks with status, message and available version information.                          |
-| `hasFailures`        | `boolean`                                                        | Required | Whether at least one diagnostic check failed.                                                                 |
+| Name                 | Type                          | Presence | Meaning                                                                                                       |
+| -------------------- | ----------------------------- | -------- | ------------------------------------------------------------------------------------------------------------- |
+| `scope`              | `"bundled-protocol-fixtures"` | Required | Always bundled-protocol-fixtures: checks replay recorded adapter fixtures.                                    |
+| `agent`              | `BuiltInAgentName`            | Required | Agent CLI identifier to report or diagnose: claude, codex, antigravity (executable agy), copilot or kimi.     |
+| `referenceVersion`   | `string \| undefined`         | Optional | Pinned CLI version the bundled protocol fixtures target; absent for Antigravity, which has no pinned version. |
+| `installedCli`       | `"unverified"`                | Required | Always unverified: bundled fixture checks do not invoke the installed CLI.                                    |
+| `modelCompatibility` | `"unverified"`                | Required | Always unverified: these diagnostics do not call a live model.                                                |
+| `checks`             | `readonly DiagnosticCheck[]`  | Required | Individual diagnostic checks with status, message and available version information.                          |
+| `hasFailures`        | `boolean`                     | Required | Whether at least one diagnostic check failed.                                                                 |
 
 ## Signature
 

@@ -40,7 +40,7 @@ Create a Docker sandbox provider. Mounted repository mode shares the workspace a
 
 ## Returns
 
-`import("../index.ts").SandboxProvider`
+`SandboxProvider`
 
 ## Signature
 

@@ -13,13 +13,13 @@ import type { SandboxDiagnosticOptions } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name              | Type                                                                          | Presence | Meaning                                                                                                   |
-| ----------------- | ----------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------- |
-| `agent`           | `import("../adapters/agents/catalog.types.js").BuiltInAgentName \| undefined` | Optional | Agent CLI identifier to report or diagnose: claude, codex, antigravity (executable agy), copilot or kimi. |
-| `deadlineMs`      | `number \| undefined`                                                         | Optional | Maximum duration of each diagnostic probe in milliseconds.                                                |
-| `signal`          | `AbortSignal \| undefined`                                                    | Optional | Cooperative cancellation for this operation.                                                              |
-| `transfers`       | `boolean \| undefined`                                                        | Optional | Enable temporary upload/download probes during sandbox diagnosis.                                         |
-| `sandboxProvider` | `Pick<SandboxProvider, "name" \| "placement"> \| undefined`                   | Optional | Provider name and placement metadata used to interpret the diagnostic report.                             |
+| Name              | Type                                                        | Presence | Meaning                                                                                                   |
+| ----------------- | ----------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------- |
+| `agent`           | `BuiltInAgentName \| undefined`                             | Optional | Agent CLI identifier to report or diagnose: claude, codex, antigravity (executable agy), copilot or kimi. |
+| `deadlineMs`      | `number \| undefined`                                       | Optional | Maximum duration of each diagnostic probe in milliseconds.                                                |
+| `signal`          | `AbortSignal \| undefined`                                  | Optional | Cooperative cancellation for this operation.                                                              |
+| `transfers`       | `boolean \| undefined`                                      | Optional | Enable temporary upload/download probes during sandbox diagnosis.                                         |
+| `sandboxProvider` | `Pick<SandboxProvider, "name" \| "placement"> \| undefined` | Optional | Provider name and placement metadata used to interpret the diagnostic report.                             |
 
 ## Signature
 

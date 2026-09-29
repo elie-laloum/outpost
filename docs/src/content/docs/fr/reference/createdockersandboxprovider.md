@@ -40,7 +40,7 @@ Crée un provider de sandbox Docker. Le mode mounted partage workspace et métad
 
 ## Retour
 
-`import("../index.ts").SandboxProvider`
+`SandboxProvider`
 
 ## Signature
 
