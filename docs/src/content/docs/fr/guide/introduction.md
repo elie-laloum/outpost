@@ -86,7 +86,7 @@ console.log(result.usage); // input, cached and output token counts
 <!-- features -->
 
 - [Réparer une CI en échec](../fix-failing-ci/): Bouclez jusqu’à ce que la commande de test passe.
-- [Relire une pull request à la demande](../review-on-label/): Un label ou un commentaire lance une revue.
+- [Relire une pull request à la demande](../review-on-label/): Ajouter un label à une pull request lance une revue.
 - [Maintenance nocturne](../nightly-maintenance/): Une exécution planifiée qui survit aux redémarrages et aux limites.
 - [Modifier plusieurs dépôts](../multi-repository-change/): Un changement, une sandbox par dépôt.
 - [Mettre des agents en concurrence](../compete-agents/): Essayez plusieurs approches, gardez celle qui passe.
