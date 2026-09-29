@@ -16,39 +16,22 @@ const other = french
   : { name: "Français", code: "FR", lang: "fr" };
 ---
 
-<div class="language-cell">
-  <Icon name="translate" size="1rem" class="language-icon" />
+<a class="language" href={`${base}${target}`} hreflang={other.lang} lang={other.lang}>
+  <Icon name="translate" size="1rem" />
   <span class="current" aria-hidden="true">{current}</span>
-  <a class="language" href={`${base}${target}`} hreflang={other.lang} lang={other.lang}>
-    <span class="name">{other.name}</span>
-    <span class="code" aria-hidden="true">{other.code}</span>
-  </a>
-</div>
+  <span class="name">{other.name}</span>
+  <span class="code" aria-hidden="true">{other.code}</span>
+</a>
 
 <style>
-  .language-cell {
-    display: flex;
-    align-items: center;
-    height: 100%;
-    padding-left: 0.9rem;
-    color: var(--sl-color-gray-3);
-    font-size: 0.8125rem;
-  }
-  .language-cell :global(.language-icon) {
-    margin-right: 0.45rem;
-  }
-  .current {
-    display: none;
-    color: var(--sl-color-white);
-    font-weight: 500;
-    letter-spacing: 0.02em;
-  }
   .language {
     display: flex;
     align-items: center;
+    gap: 0.45rem;
     height: 100%;
-    padding: 0 0.9rem 0 0.2rem;
+    padding: 0 0.9rem;
     color: var(--sl-color-gray-3);
+    font-size: 0.8125rem;
     text-decoration: none;
     transition:
       color 0.2s cubic-bezier(0.16, 1, 0.3, 1),
@@ -62,16 +45,20 @@ const other = french
     outline: 2px solid var(--sl-color-accent);
     outline-offset: -2px;
   }
+  .current {
+    display: none;
+    color: var(--sl-color-white);
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
   .code {
     display: none;
     letter-spacing: 0.02em;
   }
   @media (max-width: 79.99rem) {
-    .current {
+    .current,
+    .code {
       display: inline;
-    }
-    .language {
-      padding-left: 0.6rem;
     }
     .name {
       position: absolute;
@@ -79,9 +66,6 @@ const other = french
       height: 1px;
       overflow: hidden;
       clip-path: inset(50%);
-    }
-    .code {
-      display: inline;
     }
   }
 </style>
