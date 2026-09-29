@@ -101,6 +101,23 @@ test("language switch retains the new guide page", async ({ page }) => {
   await expect(page).toHaveURL(/\/outpost\/guide\/first-request\/$/);
 });
 
+test("documentation section styles leave the landing untouched", async ({
+  page,
+}) => {
+  await page.goto("");
+  const primary = page.locator(".landing .button.primary");
+  await expect(primary).toHaveText(/Get started/);
+  const colors = await primary.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return [style.color, style.backgroundColor];
+  });
+  expect(colors[0]).not.toBe(colors[1]);
+  const code = await page
+    .locator(".landing .install code")
+    .evaluate((element) => getComputedStyle(element).paddingTop);
+  expect(parseFloat(code)).toBeGreaterThan(8);
+});
+
 test("navigation bar links the source and the released version", async ({
   page,
 }) => {

@@ -136,3 +136,14 @@ site-search .pagefind-ui__result,
 site-search .pagefind-ui__button {
   border-radius: 0 !important;
 }
+site-search .pagefind-ui__search-input {
+  border: 1px solid var(--sl-color-gray-5) !important;
+  box-shadow: none !important;
+}
+site-search .pagefind-ui__search-input:focus,
+site-search .pagefind-ui__search-input:focus-visible {
+  outline: 2px solid var(--sl-color-accent) !important;
+  outline-offset: -1px;
+  border-color: var(--sl-color-gray-5) !important;
+  box-shadow: none !important;
+}

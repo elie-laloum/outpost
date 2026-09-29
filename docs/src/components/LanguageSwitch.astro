@@ -10,26 +10,45 @@ const path = /(^|\/)404$/.test(route.entry.id)
   ? "/"
   : Astro.url.pathname.slice(base.length) || "/";
 const target = french ? path.replace(/^\/fr(\/|$)/, "/") : `/fr${path}`;
-const language = french
+const current = french ? "FR" : "EN";
+const other = french
   ? { name: "English", code: "EN", lang: "en" }
   : { name: "Français", code: "FR", lang: "fr" };
 ---
 
-<a class="language" href={`${base}${target}`} hreflang={language.lang} lang={language.lang}>
-  <Icon name="translate" size="1rem" />
-  <span class="name">{language.name}</span>
-  <span class="code" aria-hidden="true">{language.code}</span>
-</a>
+<div class="language-cell">
+  <Icon name="translate" size="1rem" class="language-icon" />
+  <span class="current" aria-hidden="true">{current}</span>
+  <a class="language" href={`${base}${target}`} hreflang={other.lang} lang={other.lang}>
+    <span class="name">{other.name}</span>
+    <span class="code" aria-hidden="true">{other.code}</span>
+  </a>
+</div>
 
 <style>
+  .language-cell {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    padding-left: 0.9rem;
+    color: var(--sl-color-gray-3);
+    font-size: 0.8125rem;
+  }
+  .language-cell :global(.language-icon) {
+    margin-right: 0.45rem;
+  }
+  .current {
+    display: none;
+    color: var(--sl-color-white);
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
   .language {
     display: flex;
     align-items: center;
-    gap: 0.45rem;
     height: 100%;
-    padding: 0 0.9rem;
+    padding: 0 0.9rem 0 0.2rem;
     color: var(--sl-color-gray-3);
-    font-size: 0.8125rem;
     text-decoration: none;
     transition:
       color 0.2s cubic-bezier(0.16, 1, 0.3, 1),
@@ -45,10 +64,15 @@ const language = french
   }
   .code {
     display: none;
-    font-weight: 500;
     letter-spacing: 0.02em;
   }
   @media (max-width: 79.99rem) {
+    .current {
+      display: inline;
+    }
+    .language {
+      padding-left: 0.6rem;
+    }
     .name {
       position: absolute;
       width: 1px;
