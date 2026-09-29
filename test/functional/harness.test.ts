@@ -503,7 +503,7 @@ test("tool deadlines release tools that ignore cancellation and hold the idle wa
     description: "Silent work longer than the idle deadline.",
     input: { type: "object" },
     execute: async () => {
-      await new Promise((resolve) => setTimeout(resolve, 150));
+      await new Promise((resolve) => setTimeout(resolve, 600));
       return "finished";
     },
   });
@@ -521,7 +521,7 @@ test("tool deadlines release tools that ignore cancellation and hold the idle wa
       { toolExecution: { deadlineMs: 50 } },
     ),
     brief: { text: "wait" },
-    idleMs: 100,
+    idleMs: 400,
     logging: false,
   });
   assert.equal(bounded.completed, true);
@@ -538,7 +538,7 @@ test("tool deadlines release tools that ignore cancellation and hold the idle wa
       [quiet],
     ),
     brief: { text: "wait" },
-    idleMs: 100,
+    idleMs: 400,
     logging: false,
   });
   assert.equal(patient.completed, true);

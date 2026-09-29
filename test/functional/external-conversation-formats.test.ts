@@ -56,8 +56,8 @@ function fixtureScript(
   const id = input.continuation?.id ?? "session_1";
   const file =
     store === "transcript"
-      ? `path.join(os.homedir(), '.mycli', 'sessions', '${id}.jsonl')`
-      : `path.join(os.homedir(), '.mybundle', 'sessions', '${id}', 'state.json')`;
+      ? `path.join(process.env.HOME || os.homedir(), '.mycli', 'sessions', '${id}.jsonl')`
+      : `path.join(process.env.HOME || os.homedir(), '.mybundle', 'sessions', '${id}', 'state.json')`;
   return `import fs from 'node:fs'; import os from 'node:os'; import path from 'node:path';
 const file = ${file};
 let count = 0;
