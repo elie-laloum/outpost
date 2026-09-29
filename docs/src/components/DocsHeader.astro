@@ -132,11 +132,16 @@ const space = docsSpace(route);
   }
   .source {
     flex: 0 0 auto;
+    align-items: stretch;
+    border-right: 0;
   }
   .settings {
     flex: 0 0 auto;
     align-items: stretch;
     border-right: 0;
+  }
+  .settings :global(.language) {
+    border-right: 1px solid var(--sl-color-hairline-light);
   }
   .settings :global(starlight-theme-select) {
     display: flex;
@@ -147,14 +152,12 @@ const space = docsSpace(route);
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 3rem;
+    width: auto;
     height: 100%;
+    aspect-ratio: 1;
+    padding: 0;
     border-radius: 0;
-    transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-  .docs-header :global(.theme-toggle:hover),
-  :global(.nav-footer .theme-toggle:hover) {
-    background: var(--sl-color-gray-6);
+    background: none;
   }
   .docs-header :global(.theme-toggle:focus-visible),
   :global(.nav-footer .theme-toggle:focus-visible) {
@@ -169,11 +172,6 @@ const space = docsSpace(route);
   :global(.nav-footer .theme-toggle path) {
     color: var(--sl-color-gray-3);
     fill: currentColor;
-  }
-  .docs-header :global(.theme-toggle:hover),
-  .docs-header :global(.theme-toggle:hover svg),
-  .docs-header :global(.theme-toggle:hover path) {
-    color: var(--sl-color-white);
   }
   .docs-menu {
     display: none;
