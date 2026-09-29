@@ -1,94 +1,95 @@
 ---
 title: "Agents de secours"
-description: "Confier un dispatch à un autre agent ou modèle quand le premier atteint une limite ou que son service est indisponible."
+description: "Confier un dispatch à un autre agent ou modèle quand le premier atteint une limite d’usage ou que son service est indisponible."
 ---
 
-`createFallbackAgent()` prend une liste ordonnée d’agents. Quand un candidat échoue pour une raison listée dans `on`, le suivant prend le relais dans le même sandbox et le même workspace.
+## Composer un agent de secours
+
+Listez les candidats dans l’ordre où les essayer, et les échecs qui passent la main dans `on`. Ici, Claude Opus s’exécute d’abord, puis Claude Sonnet, puis l’agent Codex de l’[Installation](../setup/).
 
 ```ts
 import {
   createAgent,
   createClaudeHarness,
-  createCodexHarness,
-  createSandbox,
   createFallbackAgent,
+  dispatch,
 } from "@elie-laloum/outpost";
-import { repository, sandboxProvider } from "./outpost.config.mts";
+import { coder, repository, sandboxProvider } from "./outpost.config.mts";
 
-const coder = createFallbackAgent(
+const claude = createClaudeHarness({ authentication: "account" });
+const agent = createFallbackAgent(
   [
-    createAgent({
-      harness: createClaudeHarness({ authentication: "account" }),
-      model: "opus",
-    }),
-    createAgent({
-      harness: createClaudeHarness({ authentication: "account" }),
-      model: "sonnet",
-    }),
-    createAgent({ harness: createCodexHarness({ authentication: "usage" }) }),
+    createAgent({ harness: claude, model: "opus" }),
+    createAgent({ harness: claude, model: "sonnet" }),
+    coder,
   ],
   { on: ["quota", "unavailable"] },
 );
 
-await using sandbox = await createSandbox({
+const result = await dispatch({
   repository,
   sandboxProvider,
-  agent: coder,
-});
-const result = await sandbox.dispatch({
+  agent,
   brief: { text: "Fix the failing tests." },
 });
-console.log(result.fallback?.selected, result.fallback?.attempts);
+console.log(result.fallback?.selected.name);
 ```
 
-Un modèle de secours est le même harness avec un autre `model` ; un agent de secours est un autre harness. Chaque candidat garde sa propre authentification : l’exemple peut utiliser d’abord un abonnement Claude, puis se replier sur l’API Codex, facturée à l’usage.
+Un agent de secours s’utilise partout où un agent est accepté, y compris `createSandbox()`, les tâches d’agent et les [candidats concurrents](../speculation/). Chaque candidat garde sa propre [authentification](../authentication/) : un abonnement peut ainsi se replier sur une clé d’API.
 
-## Quand le candidat suivant prend le relais
+## Choisir quand passer la main
 
-`on` est obligatoire ; listez les catégories explicitement :
+`on` est obligatoire et nomme une catégorie ou les deux.
 
-| Catégorie     | Échecs reconnus                                                                                                                                               |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `quota`       | Une limite d’usage ou de débit, classée comme pour les [pauses sur quota](../quota-pauses/#ce-qui-compte-comme-quota) : `OutpostError` de code `quota`.       |
-| `unavailable` | Une panne terminale signalée par un tour en échec : surcharge, HTTP 408/5xx/529, échec de connexion ou de transport. Lisez-la avec `unavailableFault(error)`. |
+| Valeur de `on` | Passe la main quand le tour échoue sur                                                                                    |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `quota`        | Une limite d’usage ou de débit : `OutpostError` de code `quota`, classée comme dans [Pauses sur quota](../quota-pauses/). |
+| `unavailable`  | Une panne du service : surcharge, HTTP 408, 5xx ou 529, ou échec de connexion ou de transport.                            |
 
-Seul un tour en échec portant l’un de ces signaux passe la main. Tout le reste est relancé immédiatement : annulation, délais, erreurs de configuration et d’authentification, réponses invalides et plantages. Les avis de nouvelle tentative qu’une CLI affiche pendant qu’elle réessaie encore sont ignorés. Une panne conserve son code d’origine (`process` ou `provider`) ; `unavailableFault()` lit le marqueur à travers les causes imbriquées.
+Tout autre échec, y compris une annulation ou un délai dépassé, est relancé immédiatement. Une panne garde son code (`process` ou `provider`) ; détectez-la avec `unavailableFault(error)`.
 
 ## Ce que voit le candidat suivant
 
-- **Même workspace.** Les fichiers et commits laissés par le candidat en échec restent en place. Rien n’est réinitialisé ni supprimé.
-- **Brief d’origine.** Les conversations ne sont pas portables d’un agent à l’autre : le candidat suivant démarre une nouvelle conversation à partir du brief d’origine. Son prompt ne décrit pas le travail partiel ; indiquez dans le brief que le workspace peut déjà contenir des changements si cela compte.
-- **Préparation à la demande.** Un candidat n’est bootstrappé et authentifié que lorsqu’il est essayé. Sa CLI doit exister dans l’image du sandbox et ses identifiants doivent être déclarés. Tous les candidats sont validés avant le démarrage du premier.
-- **Historique capturé.** Les conversations des candidats en échec sont toujours capturées pour la [récupération](../recovery/).
+<!-- features -->
 
-## Résultats, événements et usage
+- **Même workspace** : Les fichiers et commits laissés par le candidat en échec restent en place ; rien n’est réinitialisé.
+- **Brief d’origine** : Il démarre une nouvelle conversation à partir du brief ; la conversation en échec reste capturée pour la [récupération](../recovery/).
+- **Préparation à la demande** : Il n’est préparé et authentifié que lorsque son tour arrive.
 
-`result.fallback` indique le candidat qui a produit le résultat et pourquoi les candidats précédents se sont arrêtés :
+:::note
+Le candidat suivant n’est pas informé du travail partiel. Si cela compte, précisez dans le brief que le workspace peut déjà contenir des changements.
+:::
 
-```ts
-import type { FallbackRecord } from "@elie-laloum/outpost";
+## Savoir quel candidat a répondu
 
-function describe(fallback: FallbackRecord | undefined) {
-  if (!fallback) return "single agent";
-  const tried = fallback.attempts.map(
-    (attempt) => `${attempt.name}: ${attempt.failure}`,
-  );
-  return `${fallback.selected.name} after ${tried.join(", ")}`;
-}
-```
+Un dispatch par un agent de secours renvoie `result.fallback` :
 
-Chaque passage de relais émet un [événement d’agent](../progress/) `fallback` avec `from`, `to`, `failure` et `message`, que les journaux enregistrent. Les numéros de passe continuent d’un candidat à l’autre. `result.usage` et les budgets de workflow incluent les tokens signalés par les candidats en échec.
+| Champ      | Contenu                                                                                      |
+| ---------- | -------------------------------------------------------------------------------------------- |
+| `selected` | `index`, `name` et `model` du candidat qui a produit le résultat.                            |
+| `attempts` | Candidats arrêtés avant lui, chacun avec `failure`, `message` et, le cas échéant, `resetAt`. |
 
-`resume()` et `fork()` continuent avec le candidat retenu. Passer un agent de secours avec une `continuation` explicite, ou à `attach()`, est refusé : une conversation appartient à un seul agent.
+Chaque passage de relais émet un [événement d’agent](../progress/) `fallback` avec `from`, `to`, `failure` et `message`. `result.usage` et les [budgets](../budgets/) de workflow incluent les tokens des candidats en échec. `resume()` et `fork()` sur le résultat continuent avec le candidat retenu.
 
 ## Quand tous les candidats échouent
 
-La dernière erreur est relancée, avec les candidats arrêtés dans `recoveryDetails(error).fallback`. Quand tous les candidats ont atteint une limite, l’erreur a le code `quota` et sa réinitialisation est la plus proche, fournie seulement si chaque candidat en a indiqué une.
+La dernière erreur est relancée, et `recoveryDetails(error).fallback` liste les candidats arrêtés. S’ils ont tous atteint une limite, l’erreur a le code `quota` et porte la réinitialisation la plus proche, à condition que chaque candidat en ait indiqué une.
 
-Avec [`onQuota`](../quota-pauses/), le workflow se met alors en pause jusqu’à cette réinitialisation. La tentative reprise repart du premier candidat, avec le brief d’origine au lieu d’une continuation de conversation : `defineAgentTask` réutilise son sandbox, et un `defineIsolatedTask` intégré automatiquement repart de la branche interrompue. `quotaResume: "restart"` repart de zéro. Dans une [course spéculative](../speculation/), un candidat ne prend le statut `quota` que lorsque tous ses secours ont atteint une limite.
+Avec [`onQuota`](../quota-pauses/), le workflow se met en pause jusqu’à cette réinitialisation. La tentative reprise repart du premier candidat, avec le brief d’origine :
+
+| Tâche                                 | Tentative reprise                                                           |
+| ------------------------------------- | --------------------------------------------------------------------------- |
+| `defineAgentTask`                     | S’exécute dans la sandbox de la tâche, sur le travail déjà présent.         |
+| `defineIsolatedTask` avec intégration | Repart de la branche interrompue ; `quotaResume: "restart"` repart de zéro. |
+
+Parmi des [candidats concurrents](../speculation/), un agent de secours prend le statut `quota` quand l’erreur qui termine sa liste est une limite.
 
 ## Limites
 
-Les motifs de panne et de limite proviennent de formats CLI et fournisseurs enregistrés ; un message non reconnu ne déclenche pas de repli. Un [rejeu](../record-replay/) reproduit un passage de relais enregistré, sans `result.fallback`. Le comportement est couvert par des tests déterministes avec des agents simulés, pas par des campagnes réelles sur des comptes épuisés.
+- Seuls les messages de limite et de panne reconnus passent la main. Un avis de nouvelle tentative, affiché par la CLI pendant qu’elle réessaie, ne compte pas.
+- Chaque candidat doit prendre en charge les options du dispatch, comme le pilotage ou les réparations de réponse ; c’est vérifié avant le démarrage du premier.
+- Dans un conteneur ou sur l’hôte, la CLI de chaque candidat doit déjà être installée. Seules les [sandboxes cloud](../cloud-sandboxes/) installent une CLI manquante quand le candidat est essayé.
+- Une conversation appartient à un seul agent : un agent de secours refuse une `continuation` explicite et `attach()`.
+- Un [rejeu](../record-replay/) reproduit un passage de relais enregistré, mais ne renvoie pas `result.fallback`.
 
-API : [createFallbackAgent](../../reference/createfallbackagent/) · [FallbackAgentOptions](../../reference/fallbackagentoptions/) · [FallbackRecord](../../reference/fallbackrecord/) · [unavailableFault](../../reference/unavailablefault/).
+API : [createFallbackAgent](../../reference/createfallbackagent/) · [FallbackAgentOptions](../../reference/fallbackagentoptions/) · [FallbackRecord](../../reference/fallbackrecord/) · [unavailableFault](../../reference/unavailablefault/) · [recoveryDetails](../../reference/recoverydetails/)

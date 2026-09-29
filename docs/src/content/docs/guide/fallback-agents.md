@@ -1,94 +1,95 @@
 ---
 title: "Fallback agents"
-description: "Hand a dispatch to another agent or model when the first one hits a limit or its service is down."
+description: "Hand a dispatch to another agent or model when the first one hits a usage limit or its service is down."
 ---
 
-`createFallbackAgent()` takes an ordered list of agents. When a candidate fails for a reason listed in `on`, the next one takes over in the same sandbox and workspace.
+## Compose a fallback agent
+
+List the candidates in the order to try them, and the failures that hand over in `on`. Here Claude Opus runs first, then Claude Sonnet, then the Codex agent from [Setup](../setup/).
 
 ```ts
 import {
   createAgent,
   createClaudeHarness,
-  createCodexHarness,
-  createSandbox,
   createFallbackAgent,
+  dispatch,
 } from "@elie-laloum/outpost";
-import { repository, sandboxProvider } from "./outpost.config.mts";
+import { coder, repository, sandboxProvider } from "./outpost.config.mts";
 
-const coder = createFallbackAgent(
+const claude = createClaudeHarness({ authentication: "account" });
+const agent = createFallbackAgent(
   [
-    createAgent({
-      harness: createClaudeHarness({ authentication: "account" }),
-      model: "opus",
-    }),
-    createAgent({
-      harness: createClaudeHarness({ authentication: "account" }),
-      model: "sonnet",
-    }),
-    createAgent({ harness: createCodexHarness({ authentication: "usage" }) }),
+    createAgent({ harness: claude, model: "opus" }),
+    createAgent({ harness: claude, model: "sonnet" }),
+    coder,
   ],
   { on: ["quota", "unavailable"] },
 );
 
-await using sandbox = await createSandbox({
+const result = await dispatch({
   repository,
   sandboxProvider,
-  agent: coder,
-});
-const result = await sandbox.dispatch({
+  agent,
   brief: { text: "Fix the failing tests." },
 });
-console.log(result.fallback?.selected, result.fallback?.attempts);
+console.log(result.fallback?.selected.name);
 ```
 
-A backup model is the same harness with another `model`; a backup agent is another harness. Each candidate keeps its own authentication, so the example can use a Claude subscription first and fall back to the Codex API, which bills usage.
+A fallback agent goes wherever an agent does, including `createSandbox()`, agent tasks and [competing candidates](../speculation/). Each candidate keeps its own [authentication](../authentication/), so a subscription can fall back to an API key.
 
-## When the next candidate takes over
+## Choose when to hand over
 
-`on` is required; list the categories explicitly:
+`on` is required and names one or both categories.
 
-| Category      | Recognized failures                                                                                                                               |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `quota`       | A usage or rate limit, as classified for [quota pauses](../quota-pauses/#what-counts-as-a-quota): `OutpostError` code `quota`.                    |
-| `unavailable` | A terminal outage reported by a failed turn: overload, HTTP 408/5xx/529, connection or transport failure. Read it with `unavailableFault(error)`. |
+| `on` value    | Hands over when the turn fails with                                                                    |
+| ------------- | ------------------------------------------------------------------------------------------------------ |
+| `quota`       | A usage or rate limit: `OutpostError` code `quota`, as classified on [Quota pauses](../quota-pauses/). |
+| `unavailable` | A service outage: overload, HTTP 408, 5xx or 529, or a connection or transport failure.                |
 
-Only a failed turn with one of these signals moves on. Everything else is rethrown immediately: cancellation, deadlines, configuration and authentication errors, invalid responses and crashes. Retry notices that a CLI prints while it is still retrying are ignored. An outage keeps its original fault code (`process` or `provider`); `unavailableFault()` reads the marker through wrapped causes.
+Any other failure, including cancellation and deadlines, is rethrown at once. An outage keeps its code (`process` or `provider`); detect it with `unavailableFault(error)`.
 
 ## What the next candidate sees
 
-- **Same workspace.** Files and commits left by the failed candidate stay in place. Nothing is reset or discarded.
-- **Original brief.** Conversations are not portable between agents, so the next candidate starts a new conversation from the original brief. Its prompt does not describe the partial work; mention in the brief that the workspace may already contain changes if that matters.
-- **Lazy preparation.** A candidate is bootstrapped and authenticated only when it is tried. Its CLI must exist in the sandbox image, and its credentials must be declared. Every candidate is validated before the first one starts.
-- **Captured history.** Conversations of failed candidates are still captured for [recovery](../recovery/).
+<!-- features -->
 
-## Results, events and usage
+- **Same workspace**: Files and commits left by the failed candidate stay in place; nothing is reset.
+- **Original brief**: It starts a new conversation from the brief; the failed conversation is still captured for [recovery](../recovery/).
+- **Lazy preparation**: It is set up and signed in only when its turn comes.
 
-`result.fallback` records the candidate that produced the result and why earlier candidates stopped:
+:::note
+The next candidate is not told about the partial work. If that matters, say in the brief that the workspace may already contain changes.
+:::
 
-```ts
-import type { FallbackRecord } from "@elie-laloum/outpost";
+## Read which candidate answered
 
-function describe(fallback: FallbackRecord | undefined) {
-  if (!fallback) return "single agent";
-  const tried = fallback.attempts.map(
-    (attempt) => `${attempt.name}: ${attempt.failure}`,
-  );
-  return `${fallback.selected.name} after ${tried.join(", ")}`;
-}
-```
+A dispatch through a fallback agent returns `result.fallback`:
 
-Each handover emits a `fallback` [agent event](../progress/) with `from`, `to`, `failure` and `message`, which journals record. Pass numbers continue across candidates. `result.usage` and workflow budgets include the tokens reported by failed candidates.
+| Field      | What it holds                                                                             |
+| ---------- | ----------------------------------------------------------------------------------------- |
+| `selected` | `index`, `name` and `model` of the candidate that produced the result.                    |
+| `attempts` | Candidates that stopped before it, each with `failure`, `message` and optional `resetAt`. |
 
-`resume()` and `fork()` continue with the selected candidate. Passing a fallback agent with an explicit `continuation`, or to `attach()`, is rejected: a conversation belongs to one agent.
+Each handover emits a `fallback` [agent event](../progress/) with `from`, `to`, `failure` and `message`. `result.usage` and workflow [budgets](../budgets/) include the tokens of failed candidates. `resume()` and `fork()` on the result continue with the selected candidate.
 
 ## When every candidate fails
 
-The last error is rethrown, with the stopped candidates in `recoveryDetails(error).fallback`. When every candidate hit a limit, the error has code `quota` and its reset is the earliest one, reported only if every candidate provided a reset.
+The last error is rethrown, and `recoveryDetails(error).fallback` lists the stopped candidates. If they all hit a limit, the error has code `quota` and carries the earliest reset, provided every candidate reported one.
 
-With [`onQuota`](../quota-pauses/), the workflow then pauses until that reset. The resumed attempt starts again from the first candidate, with the original brief instead of a conversation continuation: `defineAgentTask` reuses its sandbox, and an automatically integrated `defineIsolatedTask` starts from the interrupted branch. `quotaResume: "restart"` starts from scratch. In a [speculative race](../speculation/), a candidate reports status `quota` only when all its fallbacks hit a limit.
+With [`onQuota`](../quota-pauses/), the workflow pauses until that reset. The resumed attempt starts again from the first candidate, with the original brief:
+
+| Task                                  | Resumed attempt                                                            |
+| ------------------------------------- | -------------------------------------------------------------------------- |
+| `defineAgentTask`                     | Runs in the task’s sandbox, on the work already there.                     |
+| `defineIsolatedTask` with integration | Starts from the interrupted branch; `quotaResume: "restart"` starts fresh. |
+
+In a [competing-candidates race](../speculation/), a fallback candidate reports status `quota` when the error that ends its list is a limit.
 
 ## Limits
 
-Outage and limit patterns come from recorded CLI and provider formats; an unrecognized message does not trigger a fallback. A [replay](../record-replay/) reproduces a recorded handover, without `result.fallback`. The behavior is covered by deterministic tests with simulated agents, not by live campaigns against exhausted accounts.
+- Only recognized limit and outage messages hand over. A retry notice the CLI prints while it keeps retrying does not.
+- Every candidate must support the dispatch options, such as steering or response repairs; this is checked before the first one starts.
+- In a container or on the host, every candidate’s CLI must already be installed. Only [cloud sandboxes](../cloud-sandboxes/) install a missing CLI when it is tried.
+- A conversation belongs to one agent: a fallback agent rejects an explicit `continuation` and `attach()`.
+- A [replay](../record-replay/) reproduces a recorded handover but returns no `result.fallback`.
 
-API: [createFallbackAgent](../../reference/createfallbackagent/) · [FallbackAgentOptions](../../reference/fallbackagentoptions/) · [FallbackRecord](../../reference/fallbackrecord/) · [unavailableFault](../../reference/unavailablefault/).
+API: [createFallbackAgent](../../reference/createfallbackagent/) · [FallbackAgentOptions](../../reference/fallbackagentoptions/) · [FallbackRecord](../../reference/fallbackrecord/) · [unavailableFault](../../reference/unavailablefault/) · [recoveryDetails](../../reference/recoverydetails/)

@@ -1,36 +1,68 @@
 ---
 title: "Kimi Code"
-description: "Connecter Kimi Code à une sandbox Outpost."
+description: "Exécuter la CLI Kimi Code de Moonshot dans une sandbox, connectée avec votre compte Kimi ou une clé API."
 ---
 
-Utilisez `createKimiHarness()` avec un [environnement d’exécution](../choose-a-sandbox/) pris en charge. Installez la CLI dans votre image ou autorisez le bootstrap chez les fournisseurs distants.
+## Installation
+
+<!-- features -->
+
+- [Images d’agent](../agent-images/): Les images générées contiennent déjà `kimi`.
+- [Sandboxes cloud](../cloud-sandboxes/): Outpost installe `@moonshot-ai/kimi-code` avec npm quand `kimi` est absent.
+- [Exécution sur l’hôte](../host-process/): Installez-la vous-même avec `npm install -g @moonshot-ai/kimi-code`.
+
+Les images et les installations cloud utilisent la version de [`agentVersions.kimi`](../../reference/agentversions/). Outpost désactive la mise à jour automatique de la CLI. `outpost init --agent kimi` génère un projet Kimi ([commandes CLI](../cli/)).
 
 ## Accès par compte
 
-Connectez-vous avec `kimi login --region global` pour un compte `kimi.ai`, ou `kimi login --region mainland-cn` pour un compte `kimi.com`. Outpost utilise `global` par défaut ; définissez explicitement `region: "mainland-cn"` pour un compte chinois :
+Connectez-vous sur l’hôte avec `kimi login --region global` (`mainland-cn` pour un compte kimi.com), puis sélectionnez `account`. L’exécution utilise votre abonnement Kimi Code.
 
 ```ts
 import { createAgent, createKimiHarness } from "@elie-laloum/outpost";
 
-const coder = createAgent({
+export const coder = createAgent({
   harness: createKimiHarness({ authentication: "account" }),
 });
 ```
 
-Outpost lit le fichier OAuth de la région et `device_id` sous `~/.kimi-code` (ou `KIMI_CODE_HOME`), les installe dans le home privé de la sandbox, puis lance `kimi login --region global` pour configurer le service international. Le reste de la configuration et des identifiants n’est pas copié. Le fichier international est `credentials/kimi-code-env-0e4f99c69cc27850.json` ; la Chine utilise `credentials/kimi-code.json`. Ces noms correspondent aux emplacements régionaux de la CLI épinglée.
+Dans un conteneur ou une sandbox cloud, Outpost copie le fichier d’identifiants de la région et `device_id` depuis `~/.kimi-code` (ou `$KIMI_CODE_HOME`) dans le home privé de la sandbox, puis y lance `kimi login --region <region>`. Rien d’autre de votre home Kimi n’est copié. Sur l’[hôte](../host-process/), la CLI utilise votre propre `~/.kimi-code` tel quel.
 
-Pour un profil dédié, utilisez `authentication: { account: { file: "/chemin/du/profil" } }` avec la `region` correspondante. Le chemin désigne le dossier contenant `credentials/` et `device_id`. Omettre `region` sélectionne `global`, comme `region: "global"`. Définissez `region: "mainland-cn"` pour utiliser le fichier d’identifiants et le service chinois. Les variables déclarées pour les endpoints OAuth/API doivent correspondre à la région sélectionnée, y compris par défaut. Le provider local transmet les variables de région mais ne copie aucun fichier et ne lance aucune commande de connexion.
+Un `model` sur `createAgent()` devient `--model` ; sans lui, la CLI choisit son modèle par défaut.
 
-Consultez la [commande de connexion Kimi](https://www.kimi.com/code/docs/en/kimi-code-cli/reference/kimi-command.html) et les [variables d’environnement OAuth](https://www.kimi.com/code/docs/en/kimi-code-cli/configuration/env-vars.html).
+### Choisir la région
 
-## Accès API
+`region` sélectionne le service du compte. Sa valeur par défaut est `"global"`.
 
-Fournissez explicitement `KIMI_API_KEY`. L’usage API suit la facturation API du fournisseur.
+| `region`                | Compte   | Fichier d’identifiants                            | Endpoints                       |
+| ----------------------- | -------- | ------------------------------------------------- | ------------------------------- |
+| `"global"` (par défaut) | kimi.ai  | `credentials/kimi-code-env-0e4f99c69cc27850.json` | `auth.kimi.ai`, `api.kimi.ai`   |
+| `"mainland-cn"`         | kimi.com | `credentials/kimi-code.json`                      | `auth.kimi.com`, `api.kimi.com` |
+
+Outpost définit `KIMI_CODE_OAUTH_HOST` et `KIMI_CODE_BASE_URL` sur les endpoints de la région. Voir la [commande de connexion](https://www.kimi.com/code/docs/en/kimi-code-cli/reference/kimi-command.html) de Kimi.
+
+### Utiliser un profil dédié
+
+`{ account: { file } }` désigne un dossier de profil qui contient `credentials/` et `device_id`. Indiquez la `region` du compte connecté dans ce profil.
 
 ```ts
 import { createAgent, createKimiHarness } from "@elie-laloum/outpost";
 
-const coder = createAgent({
+export const coder = createAgent({
+  harness: createKimiHarness({
+    authentication: { account: { file: "/srv/outpost/kimi-profile" } },
+    region: "mainland-cn",
+  }),
+});
+```
+
+## Accès API
+
+Passez `KIMI_API_KEY` et un modèle : sans modèle, la composition échoue. Les appels relèvent de la facturation API de Kimi, pas de votre abonnement.
+
+```ts
+import { createAgent, createKimiHarness } from "@elie-laloum/outpost";
+
+export const coder = createAgent({
   harness: createKimiHarness({
     authentication: "usage",
     variables: { KIMI_API_KEY: process.env.KIMI_API_KEY ?? "" },
@@ -39,20 +71,46 @@ const coder = createAgent({
 });
 ```
 
-## Comportement
+Outpost transmet la clé et le modèle à la CLI dans `KIMI_MODEL_API_KEY` et `KIMI_MODEL_NAME`. Pour un autre endpoint, ajoutez `KIMI_MODEL_BASE_URL` à `variables` ([variables Kimi](https://www.kimi.com/code/docs/en/kimi-code-cli/configuration/env-vars.html)). Autres formes de clé : [Authentification](../authentication/).
 
-L’authentification API exige un modèle explicite sur `createAgent()`. L’option `region` est réservée à l’authentification par compte ; configurez les endpoints API via les variables de modèle de la CLI si nécessaire. Définissez `KIMI_MODEL` dans l’environnement de votre application pour le snippet ci-dessus ; cette variable appartient à l’exemple, pas aux réglages d’Outpost. L’authentification par compte peut utiliser le modèle par défaut de la CLI.
+## Ce qu’il prend en charge
 
-La capture native, la reprise à chaud et à froid, le fork et les réparations automatiques sont pris en charge pour Kimi Code 2.1.1. Outpost reprend avec `--session` et exécute `kimi fork <id> --yes` avant de continuer le nouvel identifiant. Le parent reste indépendant. La capture conserve les métadonnées et fichiers des agents, dont l’historique natif et les plans. `conversations` stocke les sessions capturées dans un [store de conversations](../conversations/#stockage) au format `"kimi"`, par exemple `createTransportConversations(createKimiConversations(), …)`. Voir [l’historique](../conversations/) et [la documentation des sessions Kimi](https://www.kimi.com/code/docs/en/kimi-code-cli/guides/sessions.html).
+[Choisir un agent](../choose-an-agent/) compare les agents.
 
-## Comptabilité des tokens
+<!-- features -->
 
-La CLI épinglée `@moonshot-ai/kimi-code` 2.1.1 omet l’usage dans `stream-json`. Après la fin de la commande, Outpost utilise l’identifiant de session pour lire les entrées `usage.record` sous `KIMI_CODE_HOME/sessions/<workspace>/<id>/agents/*/wire.jsonl` (home par défaut : `~/.kimi-code`), dans la sandbox. Les entrées de l’agent principal et des sous-agents sont additionnées une seule fois ; tailles de contexte et résumés d’étape ne sont pas ajoutés à nouveau.
+- [Conversations](../conversations/): Capture, reprise à froid et à chaud, et fork avec `kimi fork`. La session parente reste inchangée.
+  - `createKimiConversations()`
+- [Réponses typées](../typed-responses/): Une réponse invalide est réparée en reprenant la session.
+  - `repairs`
+- [Réorientation](../steering/): Outpost arrête la CLI dès que sa session est connue, puis la reprend avec votre texte.
+  - `resumed`
+- [Serveurs MCP](../mcp-servers/): Fusionnés dans `~/.kimi-code/mcp.json` du home de l’agent. Les serveurs `oauth: "login"` réutilisent votre connexion de l’hôte.
+  - `mcpServers`
+- [Pauses sur quota](../quota-pauses/): Les erreurs de quota et de solde arrêtent le tour avec le code `quota`.
+  - `onQuota`
+- [Budgets](../budgets/): L’usage des tokens est lu dans la session après la fin de la CLI.
+  - `result.usage`
 
-`inputOther` devient `usage.input`, `output` devient `usage.output`, `inputCacheRead` devient `usage.cached` et `inputCacheCreation` devient `usage.cacheCreated`. L’entrée exclut les lectures et écritures de cache. Seul l’usage rapporté est disponible ; un zéro fourni par la CLI ne prouve pas qu’un appel modèle non rapporté était gratuit.
+### Usage des tokens
 
-Un identifiant absent, des entrées manquantes ou malformées, une interruption ou le dépassement des limites de lecture produisent `usage.complete === false` ; les compteurs mesurés restent une borne inférieure. Un avertissement au démarrage précise que la collecte intervient après l’exécution. Combinez `budget.attempts` avec un timeout de tâche ou un délai de dispatch ; voir [Budgets de consommation](../budgets/).
+Une fois la CLI terminée, Outpost lit les entrées `usage.record` de la session dans la sandbox, pour l’agent principal et ses sous-agents. Une session reprise ne compte que le nouveau tour.
 
-`mcpServers` fusionne des [serveurs MCP](../mcp-servers/) dans `~/.kimi-code/mcp.json` du home de l’agent, qui est votre propre home avec le fournisseur local.
+| Champ Kimi           | Champ Outpost        |
+| -------------------- | -------------------- |
+| `inputOther`         | `usage.input`        |
+| `output`             | `usage.output`       |
+| `inputCacheRead`     | `usage.cached`       |
+| `inputCacheCreation` | `usage.cacheCreated` |
 
-API : [createKimiHarness](../../reference/createkimiharness/).
+`usage.complete` vaut `false` après une interruption, sans identifiant de session, avec des entrées absentes, malformées ou trop volumineuses, et au premier tour d’un fork. Les compteurs sont alors une borne inférieure : limitez l’exécution avec `budget.attempts` et un timeout ([Budgets](../budgets/)).
+
+## Limites
+
+- **Réglages du modèle** : `reasoning` et `maxOutputTokens` sont refusés à la composition de l’agent. Seul le nom du modèle s’applique.
+- **Région** : `region` ne s’applique qu’à l’accès par compte ; combinée à l’authentification `usage`, elle est refusée.
+- **Variables d’endpoint** : avec l’accès par compte, un `KIMI_CODE_OAUTH_HOST`, `KIMI_OAUTH_HOST` ou `KIMI_CODE_BASE_URL` déclaré qui ne correspond pas à la région échoue, y compris avec la région par défaut.
+- **Formes de compte** : `{ account: { key } }` et `{ account: { variable } }` ne sont pas prises en charge.
+- **Compteurs tardifs** : un budget de tokens ne voit l’usage d’un tour qu’après la fin de la CLI.
+
+API : [createKimiHarness](../../reference/createkimiharness/) · [KimiSettings](../../reference/kimisettings/) · [createKimiConversations](../../reference/createkimiconversations/) · [agentVersions](../../reference/agentversions/).

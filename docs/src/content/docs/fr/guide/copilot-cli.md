@@ -1,18 +1,26 @@
 ---
 title: "GitHub Copilot CLI"
-description: "Utiliser un compte ou un jeton Copilot."
+description: "Exécuter la CLI copilot avec votre abonnement Copilot, via une connexion enregistrée ou un jeton GitHub à permissions fines."
 ---
 
-Utilisez `createCopilotHarness()` pour exécuter la CLI `copilot`. Cet adaptateur utilise l’accès au compte Copilot ; `authentication: "usage"` n’est pas pris en charge.
+## Installer
 
-## Fournir un jeton
+Les [images d’agent](../agent-images/) générées installent la CLI `copilot` (`@github/copilot`) dans la version épinglée par [`agentVersions.copilot`](../../reference/agentversions/). Pour générer un projet Copilot qui lit un jeton depuis `.env` :
 
-Utilisez un jeton à permissions fines avec la permission Copilot Requests. Les jetons classiques `ghp_` sont rejetés.
+```sh
+npx outpost init --yes --agent copilot --authentication account-token --image outpost:dev
+```
+
+Votre compte GitHub doit avoir accès à Copilot ; voir le [démarrage rapide de la CLI GitHub](https://docs.github.com/en/copilot/get-started/cli-quickstart).
+
+## Accès par compte
+
+Copilot s’exécute toujours sur votre abonnement Copilot. Fournissez un jeton GitHub à permissions fines disposant de la permission **Copilot Requests** :
 
 ```ts
 import { createAgent, createCopilotHarness } from "@elie-laloum/outpost";
 
-const coder = createAgent({
+export const coder = createAgent({
   harness: createCopilotHarness({
     authentication: { account: { variable: "COPILOT_GITHUB_TOKEN" } },
     variables: { COPILOT_GITHUB_TOKEN: process.env.COPILOT_GITHUB_TOKEN ?? "" },
@@ -20,24 +28,46 @@ const coder = createAgent({
 });
 ```
 
-## Utiliser une connexion enregistrée
+Pour réutiliser plutôt une connexion de l’hôte, lancez `copilot login` et indiquez `authentication: "account"`. Outpost lit le jeton du dernier utilisateur connecté dans `~/.copilot/config.json` (ou `$COPILOT_HOME/config.json`) et le transmet à la sandbox sous le nom `COPILOT_GITHUB_TOKEN`.
 
-Lancez `copilot login` sur l’hôte et sélectionnez `authentication: "account"`. Outpost lit le jeton du dernier utilisateur connecté dans `~/.copilot/config.json`, ou sous `COPILOT_HOME`. Si le jeton est stocké uniquement dans un trousseau système, utilisez la variable explicite ci-dessus.
+:::caution
+Par défaut, Copilot enregistre sa connexion dans le trousseau système, qu’Outpost ne lit jamais. Si `config.json` ne contient aucun jeton, utilisez la forme par jeton ci-dessus.
+:::
 
-## Gestion des sessions
+Autres formes d’identifiants et emplacement des secrets : [Authentification](../authentication/).
 
-La capture native, la reprise à chaud et à froid et les réparations automatiques sont prises en charge. Outpost reprend l’identifiant exact avec `--resume` et conserve historique, métadonnées, plans, checkpoints et fichiers persistants dans un bundle borné. Le fork automatisé est explicitement refusé : la commande interactive `/fork` ne constitue pas un contrat de fork headless pris en charge. `conversations` stocke les sessions capturées dans un [store de conversations](../conversations/#stockage) au format `"copilot"`, par exemple `createTransportConversations(createCopilotConversations(), …)`. Voir [l’historique](../conversations/) et [le stockage des sessions GitHub](https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-best-practices).
+## Accès API
 
-Voir le [démarrage CLI GitHub](https://docs.github.com/en/copilot/get-started/cli-quickstart) pour les conditions d’accès et de connexion Copilot.
+Copilot n’a pas de mode par clé API : `authentication: "usage"` est refusé à la composition de l’agent. Les requêtes sont décomptées de votre abonnement Copilot.
 
-## Comptabilité des tokens
+## Ce qu’il prend en charge
 
-Outpost lit `session.shutdown.modelMetrics` dans `COPILOT_HOME/session-state/<id>/events.jsonl` (par défaut : `~/.copilot`), à l’intérieur de la sandbox après la fin de la commande. Les événements `assistant.usage` disponibles sont comptés pendant l’exécution ; le total final de session les réconcilie sans les ajouter deux fois. Les requêtes premium et crédits de facturation ne sont pas des tokens.
+<!-- features -->
 
-La CLI Copilot épinglée est 1.0.88. Entrée, sortie, lectures et écritures de cache conservent les compteurs rapportés par la CLI ; n’ajoutez pas le cache à l’entrée pour estimer une facture. Des champs manquants, fichiers illisibles ou une collecte interrompue produisent `usage.complete === false` et un avertissement explicite.
+- [Conversations](../conversations/) : Capturées sous forme de bundle de session, puis reprises à chaud ou à froid avec `--resume`.
+  - `conversations`
+  - `createCopilotConversations()`
+- [Réponses typées](../typed-responses/) : Une réponse invalide est réparée en reprenant la même conversation.
+  - `response`
+- [Réorientation](../steering/) : Outpost arrête le processus et reprend la session avec votre texte.
+  - `resumed`
+- [Serveurs MCP](../mcp-servers/) : Transmis à chaque exécution avec `--additional-mcp-config`.
+  - `mcpServers`
+- [Consommation](../budgets/) : Tokens lus après l’exécution dans `session-state/<id>/events.jsonl`.
+  - `usage.complete`
+- [Pauses sur quota](../quota-pauses/) : Les messages de limite de débit et de crédits de Copilot échouent avec le code `quota`.
+  - `onQuota`
 
-La collecte est bornée et peut se terminer après la consommation des tokens. Combinez un budget de tentatives avec un timeout de tâche ou un délai de dispatch ; voir [Budgets de consommation](../budgets/).
+`conversations` accepte un store au format `"copilot"`, par exemple `createTransportConversations(createCopilotConversations(), …)`. [Choisir un agent](../choose-an-agent/) compare ces capacités d’un agent à l’autre.
 
-`mcpServers` transmet des [serveurs MCP](../mcp-servers/) avec `--additional-mcp-config` à chaque exécution.
+## Limites
 
-API : [createCopilotHarness](../../reference/createcopilotharness/).
+- **Pas de fork automatisé** : Le fork d’une conversation Copilot est refusé ; reprenez-la plutôt.
+- **Réglages du modèle** : `model` n’accepte qu’un nom. `reasoning` et `maxOutputTokens` sont refusés.
+- **Jetons classiques** : Les jetons d’accès personnels `ghp_` sont refusés.
+- **Consommation incomplète** : Un fichier de session absent ou illisible met `usage.complete` à `false`, avec un avertissement.
+- **Décompte tardif** : Les totaux de tokens peuvent arriver après leur consommation par le modèle. Associez un [budget](../budgets/) à un timeout.
+- **Requêtes premium** : Copilot facture des requêtes premium ; `usage` compte des tokens, pas des requêtes premium.
+- **Options MCP** : `startupTimeoutMs` et `oauth` sont refusés ; authentifiez les serveurs HTTP avec `bearerTokenVariable`.
+
+API : [createCopilotHarness](../../reference/createcopilotharness/) · [CopilotSettings](../../reference/copilotsettings/) · [createCopilotConversations](../../reference/createcopilotconversations/).

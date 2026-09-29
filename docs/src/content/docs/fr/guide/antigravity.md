@@ -1,22 +1,51 @@
 ---
 title: "Antigravity"
-description: "Connecter Antigravity à une sandbox Outpost."
+description: "Exécuter la CLI Antigravity de Google (agy) dans une sandbox, connectée avec votre compte Google ou une clé API Gemini."
 ---
 
-Utilisez `createAntigravityHarness()` avec un [environnement d’exécution](../choose-a-sandbox/) pris en charge. Installez la CLI dans votre image ou autorisez le bootstrap chez les fournisseurs distants.
+## Installer
+
+Les [images d’agent](../agent-images/) générées contiennent l’exécutable `agy`. Les [sandboxes cloud](../cloud-sandboxes/) l’installent à la première utilisation s’il manque, sauf avec `bootstrap: false`.
+
+<!-- features -->
+
+- **Version épinglée** : `agentVersions.antigravity`, téléchargée depuis les archives versionnées de Google.
+- **Contrôle SHA-512** : Chaque archive est vérifiée avant extraction ; une empreinte incorrecte interrompt l’installation.
+- **Pas de mise à jour automatique** : Les images, les exécutions et `doctor` définissent `AGY_CLI_DISABLE_AUTO_UPDATE=true`.
+
+L’installateur prend en charge Linux amd64 et arm64 (glibc et musl) ainsi que macOS Intel et Apple Silicon. Les autres plateformes échouent.
+
+Comparez la version installée à la version épinglée :
+
+```sh
+npx outpost doctor --agent antigravity --image outpost:dev
+npx outpost doctor --agent antigravity --sandbox-provider local
+```
+
+`doctor` avertit quand les versions diffèrent. Il ne vérifie ni l’empreinte du binaire ni la connexion.
 
 ## Accès par compte
 
-Lancez `agy` sur l’hôte et connectez-vous. Outpost copie `~/.gemini/antigravity-cli/antigravity-oauth-token` dans le home privé de la sandbox. L’exécutable est `agy`, pas l’ancienne CLI Gemini.
-
-## Accès API
-
-Fournissez explicitement `GEMINI_API_KEY`. L’usage API suit la facturation API du fournisseur.
+Lancez `agy` sur l’hôte et connectez-vous avec votre compte Google.
 
 ```ts
 import { createAgent, createAntigravityHarness } from "@elie-laloum/outpost";
 
-const coder = createAgent({
+export const coder = createAgent({
+  harness: createAntigravityHarness({ authentication: "account" }),
+});
+```
+
+Outpost copie `~/.gemini/antigravity-cli/antigravity-oauth-token` dans le home privé de la sandbox. Pour un jeton rangé ailleurs, passez `{ account: { file: "/path/to/token" } }`. Voir [Authentification](../authentication/).
+
+## Accès API
+
+Déclarez `GEMINI_API_KEY`. L’usage de l’API Gemini est facturé séparément des forfaits Google AI.
+
+```ts
+import { createAgent, createAntigravityHarness } from "@elie-laloum/outpost";
+
+export const coder = createAgent({
   harness: createAntigravityHarness({
     authentication: "usage",
     variables: { GEMINI_API_KEY: process.env.GEMINI_API_KEY ?? "" },
@@ -24,18 +53,26 @@ const coder = createAgent({
 });
 ```
 
-## Comportement
+Outpost écrit aussi `~/.gemini/antigravity-cli/settings.json` dans le home de la sandbox pour sélectionner le fournisseur Gemini. `{ usage: { variable: "NAME" } }` lit la clé dans une autre variable déclarée.
 
-Reprenez une conversation émise dans la même sandbox ouverte avec `sandbox.resume(id, options)` ou `resume()` sur un résultat à chaud. Les réparations automatiques de réponse réutilisent cette conversation. Outpost ne dispose pas de format de capture portable vérifié pour Antigravity : la reprise à froid après fermeture de la sandbox et le fork automatisé sont refusés, et `createAntigravityHarness()` refuse un store `conversations`. Un dispatch sans continuation démarre toujours une session neuve. Voir [l’historique](../conversations/) et [la commande de reprise Google](https://www.antigravity.google/docs/cli/commands/resume/).
+## Ce qu’il prend en charge
 
-## Installation épinglée
+<!-- features -->
 
-Les images générées et le bootstrap distant installent la version de [`agentVersions.antigravity`](../../reference/agentversions/) depuis des archives Google versionnées, dont les empreintes SHA-512 enregistrées dans Outpost sont vérifiées avant extraction. Les distributions Linux amd64/arm64 couvrent glibc et musl ; l’installateur reconnaît aussi macOS Intel/Apple Silicon. Une plateforme non prise en charge ou une empreinte incorrecte provoque un échec explicite. Les fichiers temporaires sont nettoyés après réussite, échec ou interruption interceptée.
+- [Conversations](../conversations/) : Reprise dans la même [session de sandbox](../sandbox-sessions/) avec `sandbox.resume(id, options)` ou `resume()` sur un résultat à chaud.
+- [Réparations de réponse](../typed-responses/) : Une réponse typée invalide est réparée dans cette même conversation.
+- [Réorientation](../steering/) : Livrée en mode `resumed` : Outpost arrête `agy`, puis reprend la conversation avec votre texte.
+- [Serveurs MCP](../mcp-servers/) : Fusionnés dans `~/.gemini/config/mcp_config.json` du home de l’agent.
+- **Consommation** : Jetons d’entrée, en cache et de sortie par tour ; les jetons de réflexion comptent en sortie.
+- **Modèle et mode** : Le `model` de l’agent devient `--model` ; `mode` passe `--mode accept-edits` ou `plan`.
 
-Outpost définit `AGY_CLI_DISABLE_AUTO_UPDATE=true` dans les images générées, les requêtes Antigravity et les commandes de diagnostic, conformément aux [instructions de Google](https://antigravity.google/docs/cli/troubleshooting/). Cela empêche les mises à jour en arrière-plan pendant ces invocations.
+Sans `mode`, les exécutions non interactives passent `--dangerously-skip-permissions` : c’est la sandbox qui borne ce que l’agent peut faire. Les terminaux interactifs conservent les demandes d’approbation de la CLI. [Choisir un agent](../choose-an-agent/) compare tous les agents.
 
-Le bootstrap réutilise un exécutable existant sans le remplacer ni vérifier ses octets. Lancez `outpost doctor --agent antigravity --sandbox-provider local` pour l’hôte, ou ajoutez `--sandbox-provider docker --image votre-image` pour inspecter une image. Doctor affiche les versions installée et de référence et avertit si elles diffèrent ; il ne vérifie pas l’empreinte du binaire installé. Les images et recettes existantes doivent être régénérées ou modifiées puis reconstruites pour adopter cette installation. Ces contrôles ne prouvent pas la compatibilité des exécutions authentifiées de modèles.
+## Limites
 
-`mcpServers` fusionne des [serveurs MCP](../mcp-servers/) dans `~/.gemini/config/mcp_config.json` du home de l’agent, qui est votre propre home avec le fournisseur local.
+- Les conversations ne sont pas capturées : elles disparaissent avec la sandbox. La reprise à froid et `fork()` sont refusés, et `createAntigravityHarness()` refuse un store `conversations`.
+- Un modèle avec `reasoning` ou `maxOutputTokens` est refusé à la composition de l’agent.
+- Les options MCP `tools.include`, `startupTimeoutMs` et `oauth: "login"` sont refusées.
+- Le bootstrap réutilise un `agy` déjà présent dans le PATH sans vérifier sa version ni son empreinte.
 
-API : [createAntigravityHarness](../../reference/createantigravityharness/).
+API : [createAntigravityHarness](../../reference/createantigravityharness/) · [AntigravitySettings](../../reference/antigravitysettings/) · [agentVersions](../../reference/agentversions/).

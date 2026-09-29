@@ -23,7 +23,7 @@ Use `--file` for a custom recipe and `--directory` for another build context. `-
 
 Install binaries and system packages in the image. Supply account credentials at runtime through the harness. The private agent home is ephemeral and must have the correct user ownership; do not bake a host login into an image layer.
 
-All generated CLI versions are pinned by Outpost. [Antigravity](../antigravity/#pinned-installation) uses versioned archives with SHA-512 verification and automatic updates disabled. Regenerate or update existing recipes and rebuild images to adopt the pinned installer. These pins alone do not make the entire image reproducible byte for byte.
+All generated CLI versions are pinned by Outpost. [Antigravity](../antigravity/) uses versioned archives with SHA-512 verification and automatic updates disabled. Regenerate or update existing recipes and rebuild images to adopt the pinned installer. These pins alone do not make the entire image reproducible byte for byte.
 
 `outpost image remove` removes the selected image. Dependency cache volumes have a separate lifetime.
 

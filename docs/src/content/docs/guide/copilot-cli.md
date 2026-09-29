@@ -1,18 +1,26 @@
 ---
 title: "GitHub Copilot CLI"
-description: "Use a Copilot account or token."
+description: "Run the copilot CLI on your Copilot plan, with a stored login or a fine-grained GitHub token."
 ---
 
-Use `createCopilotHarness()` to run the `copilot` CLI. This adapter uses Copilot account access; `authentication: "usage"` is unsupported.
+## Install
 
-## Supply a token
+Generated [agent images](../agent-images/) install the `copilot` CLI (`@github/copilot`) at the version pinned in [`agentVersions.copilot`](../../reference/agentversions/). To generate a Copilot project that reads a token from `.env`:
 
-Use a fine-grained token with the Copilot Requests permission. Classic `ghp_` tokens are rejected.
+```sh
+npx outpost init --yes --agent copilot --authentication account-token --image outpost:dev
+```
+
+Your GitHub account needs Copilot access; see [GitHub’s CLI quickstart](https://docs.github.com/en/copilot/get-started/cli-quickstart).
+
+## Account access
+
+Copilot always runs on your Copilot plan. Pass a fine-grained GitHub token with the **Copilot Requests** permission:
 
 ```ts
 import { createAgent, createCopilotHarness } from "@elie-laloum/outpost";
 
-const coder = createAgent({
+export const coder = createAgent({
   harness: createCopilotHarness({
     authentication: { account: { variable: "COPILOT_GITHUB_TOKEN" } },
     variables: { COPILOT_GITHUB_TOKEN: process.env.COPILOT_GITHUB_TOKEN ?? "" },
@@ -20,24 +28,46 @@ const coder = createAgent({
 });
 ```
 
-## Use a stored login
+To reuse a host login instead, run `copilot login` and set `authentication: "account"`. Outpost reads the token of the last logged-in user from `~/.copilot/config.json` (or `$COPILOT_HOME/config.json`) and passes it to the sandbox as `COPILOT_GITHUB_TOKEN`.
 
-Run `copilot login` on the host and select `authentication: "account"`. Outpost reads the last logged-in user’s token from `~/.copilot/config.json`, or under `COPILOT_HOME`. If the token is stored only in a system keychain, use the explicit variable form above.
+:::caution
+Copilot stores its login in the system keychain by default, which Outpost never reads. If `config.json` holds no token, use the token form above.
+:::
 
-## Session support
+Other credential forms and where credentials go: [Authentication](../authentication/).
 
-Native capture, warm and cold resume, and automatic response repairs are supported. Outpost resumes the exact session ID with `--resume`; it preserves history, metadata, plans, checkpoints and persistent files in a bounded session bundle. Automated fork is explicitly rejected: the interactive `/fork` command does not establish a supported headless fork contract. `conversations` stores captured sessions in a `"copilot"` [conversation store](../conversations/#storage), such as `createTransportConversations(createCopilotConversations(), …)`. See [chat history](../conversations/) and [GitHub’s session storage](https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-best-practices).
+## API access
 
-See [GitHub’s CLI quickstart](https://docs.github.com/en/copilot/get-started/cli-quickstart) for Copilot access and login requirements.
+Copilot has no API-key mode: `authentication: "usage"` is rejected when the agent is composed. Requests count against your Copilot plan.
 
-## Token accounting
+## What it supports
 
-Outpost reads the session’s `session.shutdown.modelMetrics` from `COPILOT_HOME/session-state/<id>/events.jsonl` (default: `~/.copilot`) inside the sandbox after the command exits. Available `assistant.usage` events are counted during execution; the final session total reconciles them without adding them twice. Premium requests and billing credits are not token counts.
+<!-- features -->
 
-The pinned Copilot CLI is 1.0.88. Input, output, cache reads and cache writes retain the CLI’s reported counters; do not add cache counters to input to estimate a bill. Missing fields, unreadable files or interrupted collection produce `usage.complete === false` and an explicit warning.
+- [Conversations](../conversations/): Captured as a session bundle, then resumed warm or cold with `--resume`.
+  - `conversations`
+  - `createCopilotConversations()`
+- [Typed responses](../typed-responses/): An invalid answer is repaired by resuming the same conversation.
+  - `response`
+- [Steering](../steering/): Outpost stops the process and resumes the session with your text.
+  - `resumed`
+- [MCP servers](../mcp-servers/): Passed on each run with `--additional-mcp-config`.
+  - `mcpServers`
+- [Usage reporting](../budgets/): Token counts read after the run from `session-state/<id>/events.jsonl`.
+  - `usage.complete`
+- [Quota pauses](../quota-pauses/): Copilot rate-limit and credit messages fail with code `quota`.
+  - `onQuota`
 
-Collection is bounded and may only finish after the model has spent tokens. Combine an attempt budget with a task timeout or dispatch deadline; see [Usage budgets](../budgets/).
+`conversations` accepts a `"copilot"` store, such as `createTransportConversations(createCopilotConversations(), …)`. [Choose an agent](../choose-an-agent/) compares these capabilities across agents.
 
-`mcpServers` passes [MCP servers](../mcp-servers/) with `--additional-mcp-config` for each run.
+## Limits
 
-API: [createCopilotHarness](../../reference/createcopilotharness/).
+- **No automated fork**: Forking a Copilot conversation is rejected; resume it instead.
+- **Model settings**: `model` accepts a name only. `reasoning` and `maxOutputTokens` are rejected.
+- **Classic tokens**: `ghp_` personal access tokens are rejected.
+- **Incomplete usage**: A missing or unreadable session file sets `usage.complete` to `false`, with a warning.
+- **Late counts**: Token totals can arrive after the model has spent them. Pair a [budget](../budgets/) with a timeout.
+- **Premium requests**: Copilot bills premium requests; `usage` reports tokens, not premium requests.
+- **MCP options**: `startupTimeoutMs` and `oauth` are rejected; authenticate HTTP servers with `bearerTokenVariable`.
+
+API: [createCopilotHarness](../../reference/createcopilotharness/) · [CopilotSettings](../../reference/copilotsettings/) · [createCopilotConversations](../../reference/createcopilotconversations/).

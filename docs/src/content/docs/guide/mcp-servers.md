@@ -1,9 +1,11 @@
 ---
 title: "MCP servers"
-description: "Give agents the tools of Model Context Protocol servers."
+description: "Give any agent the tools of Model Context Protocol servers, declared once and passed secrets by name only."
 ---
 
-Declare MCP servers once and pass them to any CLI harness or to the built-in model loop. A server is either a command that speaks MCP over stdio or a Streamable HTTP endpoint.
+## Declare servers
+
+`mcpServers` maps a server name to a stdio command or a Streamable HTTP endpoint. Every CLI preset and `createHarness()` accept the same declaration.
 
 ```ts
 import type { McpServers } from "@elie-laloum/outpost";
@@ -12,7 +14,6 @@ const mcpServers: McpServers = {
   linear: {
     command: "npx",
     arguments: ["-y", "linear-mcp"],
-    environment: { LOG_LEVEL: "warn" },
     variables: ["LINEAR_API_KEY"],
   },
   docs: {
@@ -22,11 +23,23 @@ const mcpServers: McpServers = {
 };
 ```
 
-Server names use letters, digits, `_` and `-`, up to 32 characters. `command`, `arguments`, `environment`, `url` and `headers` are literal, non-secret values: they are copied into command lines or configuration files and cannot contain `${`. Pass secrets by name with `variables` or `bearerTokenVariable`.
+A server has either `command` (stdio) or `url` (HTTP). Names use 1 to 32 letters, digits, `_` or `-`.
 
-## Declare the secrets
+| Field                  | Server | Holds                                                                     |
+| ---------------------- | ------ | ------------------------------------------------------------------------- |
+| `command`, `arguments` | stdio  | The executable and its arguments, started in the sandbox.                 |
+| `environment`          | stdio  | Non-secret environment values.                                            |
+| `variables`            | stdio  | Names of secret variables forwarded to the server.                        |
+| `url`                  | HTTP   | An absolute `http` or `https` endpoint, without credentials.              |
+| `headers`              | HTTP   | Non-secret headers sent with every request.                               |
+| `bearerTokenVariable`  | HTTP   | Name of the variable sent as `Authorization: Bearer`.                     |
+| `oauth`                | HTTP   | A CLI login or client credentials: see [MCP server login](../mcp-oauth/). |
+| `tools`                | Both   | `include` and `exclude` lists of exact MCP tool names.                    |
+| `startupTimeoutMs`     | Both   | How long the server may take to start.                                    |
 
-Each name in `variables` and `bearerTokenVariable` must be a declared variable: on the harness `variables`, on the sandbox provider, or in `.outpost/.env`. A missing value fails before the agent starts with `Missing NAME`. See [Environment values](../environment-variables/).
+## Pass secrets by name
+
+`command`, `arguments`, `environment`, `url` and `headers` are copied as written and cannot contain `${`. Put secrets in [declared variables](../environment-variables/) and reference them by name.
 
 ```ts
 import { createAgent, createClaudeHarness } from "@elie-laloum/outpost";
@@ -40,40 +53,31 @@ const coder = createAgent({
         arguments: ["-y", "linear-mcp"],
         variables: ["LINEAR_API_KEY"],
       },
-      docs: {
-        url: "https://mcp.example.com/mcp",
-        bearerTokenVariable: "DOCS_TOKEN",
-      },
     },
-    variables: {
-      LINEAR_API_KEY: process.env.LINEAR_API_KEY ?? "",
-      DOCS_TOKEN: process.env.DOCS_TOKEN ?? "",
-    },
+    variables: { LINEAR_API_KEY: process.env.LINEAR_API_KEY ?? "" },
   }),
 });
 ```
 
-Outpost only writes references such as `${LINEAR_API_KEY}` or the variable name. The CLI resolves them from its own environment, so secret values never appear in arguments or files.
+Declare each name on the harness `variables`, on the sandbox provider or in `.outpost/.env`. A missing value fails before the agent starts with `Missing LINEAR_API_KEY`. Outpost writes only the name or a `${NAME}` reference; the CLI reads the value from its environment.
 
-## CLI harnesses
+## Where each CLI receives them
 
-Every CLI preset accepts `mcpServers`. Outpost translates them into the native configuration of that CLI.
+Outpost translates the declaration into each CLI’s own configuration. Declared servers add to those the CLI already knows, and tool approval follows the CLI’s permission settings.
 
-| Harness     | Where the servers go                                             |
-| ----------- | ---------------------------------------------------------------- |
-| Claude Code | `--mcp-config` for each run                                      |
-| Codex       | `-c mcp_servers.<name>…` overrides for each run                  |
-| Copilot CLI | `--additional-mcp-config` for each run                           |
-| Kimi Code   | Merged into `~/.kimi-code/mcp.json` in the agent home            |
-| Antigravity | Merged into `~/.gemini/config/mcp_config.json` in the agent home |
+| Harness     | Servers go to                                        | Secrets are written as                                    |
+| ----------- | ---------------------------------------------------- | --------------------------------------------------------- |
+| Claude Code | `--mcp-config` on each run                           | `${NAME}` in `env` and headers                            |
+| Codex       | `-c mcp_servers.<name>.…` on each run                | `env_vars` and `bearer_token_env_var` names               |
+| Copilot CLI | `--additional-mcp-config` on each run                | `${NAME}` in `env` and headers                            |
+| Kimi Code   | `~/.kimi-code/mcp.json` in the agent home            | Inherited environment (stdio), `bearerTokenEnvVar` (HTTP) |
+| Antigravity | `~/.gemini/config/mcp_config.json` in the agent home | `${NAME}` in `env` and headers                            |
 
-Declared servers add to those the CLI already knows. Tool approval follows each CLI’s own permission settings: headless presets that skip permissions also allow MCP tools.
-
-Kimi and Antigravity have no per-run option, so Outpost merges the declared entries into their home file once per sandbox. Other servers and settings in that file are kept; an unreadable file fails instead of being replaced. In a container or cloud sandbox the home is private and disappears with the sandbox. With [`createLocalSandboxProvider()`](../host-process/) it is your own home, and the merged entries stay after the run.
+Kimi Code and Antigravity have no per-run option. Outpost merges the declared entries into their file once per sandbox and keeps the other entries.
 
 ## Filter tools and set startup timeouts
 
-`tools: { include, exclude }` selects tools by their exact MCP name; exclusions apply after inclusions. `startupTimeoutMs` bounds how long a server may take to start.
+`tools.include` keeps only the listed tools; `tools.exclude` removes tools afterwards. `startupTimeoutMs` bounds server start-up.
 
 ```ts
 import type { McpServers } from "@elie-laloum/outpost";
@@ -88,22 +92,22 @@ const mcpServers: McpServers = {
 };
 ```
 
-| Harness       | `include`       | `exclude`                                    | `startupTimeoutMs`                       |
-| ------------- | --------------- | -------------------------------------------- | ---------------------------------------- |
-| Built-in loop | Yes             | Yes                                          | Yes, 60 s by default                     |
-| Claude Code   | Refused         | `--disallowedTools`                          | `MCP_TIMEOUT`, one value for all servers |
-| Codex         | `enabled_tools` | `disabled_tools`                             | `startup_timeout_ms`                     |
-| Copilot CLI   | `tools`         | `--deny-tool`: listed, but calls are refused | Refused                                  |
-| Kimi Code     | `enabledTools`  | `disabledTools`                              | `startupTimeoutMs`                       |
-| Antigravity   | Refused         | `disabledTools`                              | Refused                                  |
+An option a harness cannot apply fails when the agent is composed.
 
-An option a CLI cannot apply fails when the agent is composed. Claude Code applies one startup timeout to every server of the run, so declared values must match and cannot be combined with an explicit `MCP_TIMEOUT` variable. In the built-in loop, an included name the server does not offer fails the turn.
+| Harness          | `include`       | `exclude`                            | `startupTimeoutMs`                   |
+| ---------------- | --------------- | ------------------------------------ | ------------------------------------ |
+| Built-in harness | Yes             | Yes                                  | Yes, 60 s by default                 |
+| Claude Code      | Refused         | `--disallowedTools`                  | `MCP_TIMEOUT`, one value for the run |
+| Codex            | `enabled_tools` | `disabled_tools`                     | `startup_timeout_ms`                 |
+| Copilot CLI      | `tools`         | `--deny-tool`: listed, calls refused | Refused                              |
+| Kimi Code        | `enabledTools`  | `disabledTools`                      | `startupTimeoutMs`                   |
+| Antigravity      | Refused         | `disabledTools`                      | Refused                              |
 
-For servers that require OAuth, see [MCP server login](../mcp-oauth/).
+With Claude Code, every server that sets `startupTimeoutMs` must use the same value, and you cannot also set `MCP_TIMEOUT` in the harness `variables`.
 
-## Built-in model loop
+## Use them in the built-in harness
 
-Pass the same servers to `createHarness({ mcpServers })`. Each turn starts the servers inside the borrowed sandbox, lists their tools and stops them when the turn ends.
+Pass the same servers to `createHarness({ mcpServers })`. Each turn starts them inside the borrowed sandbox and stops them when the turn ends.
 
 ```ts
 import {
@@ -111,6 +115,7 @@ import {
   createHarness,
   createHarnessFileTools,
   createOpenAIModelProvider,
+  defineHarnessPermissions,
 } from "@elie-laloum/outpost";
 
 const reviewer = createAgent({
@@ -129,21 +134,37 @@ const reviewer = createAgent({
         variables: ["LINEAR_API_KEY"],
       },
     },
+    permissions: defineHarnessPermissions({
+      rules: [{ effect: "deny", tools: ["mcp__linear__delete_*"] }],
+    }),
   }),
 });
 ```
 
-Tools are named `mcp__<server>__<tool>`; characters outside letters, digits, `_` and `-` become `_`, and long names end with a short hash. [Permission rules](../harness-permissions/) match these names, for example `tools: ["mcp__linear__*"]`. Tool deadlines send an MCP cancellation. Server errors reach the model as tool errors; text, structured content and resource text are returned, while images and audio are replaced by a marker.
+<!-- features -->
 
-A stdio server runs through a small Node.js launcher in the sandbox. An HTTP server is reached through a bridge that also runs in the sandbox, so the bearer token stays there and [outbound rules](../network-restrictions/) apply to it. The sandbox therefore needs `node`, and its lease must accept live process input, as every built-in provider does. On Vercel and Daytona each message to a stdio server goes through a polled file in the sandbox, which adds about a second per request. A server that exits or does not initialize within its startup timeout fails the turn. Subagents start the servers of their own harness.
+- `mcp__<server>__<tool>`: The name the model sees and [permission rules](../harness-permissions/) match. Characters other than letters, digits, `_` and `-` become `_`; long names end with a hash.
+- **Inside the sandbox**: Stdio servers and the HTTP bridge run there, so tokens stay in the sandbox and [network rules](../network-restrictions/) apply.
+- **Results**: Text, structured content and resource text reach the model. Images and audio become a marker; server errors become tool errors.
 
-For the built-in loop, declare secrets on the sandbox provider or in `.outpost/.env`: a custom harness has no `variables` of its own.
+The harness has no `variables` of its own: declare secrets on the sandbox provider or in `.outpost/.env`. A [subagent](../subagents/) starts the servers of its own harness.
 
-## Resources and prompts
+:::note
+The sandbox needs `node` and must accept live input (`liveInput`). Every built-in sandbox provider does.
+:::
 
-Claude Code, Codex and Antigravity already expose MCP resources to their model. In the built-in loop, servers that announce resources or prompts add four read-only tools, each taking a `server` name: `mcp_list_resources` lists resources and URI templates, `mcp_read_resource` reads a URI, `mcp_list_prompts` lists prompts and `mcp_get_prompt` renders one. Resource text is returned; binary content is replaced by a marker.
+## Read resources and prompts
 
-Use `defineMcpPrompt()` to put a server prompt into the instructions of the harness. It is rendered at the start of each turn, and fails if the server is not declared on that harness or offers no prompts.
+In the built-in harness, servers that announce resources or prompts add read-only tools. Each takes a `server` name.
+
+| Tool                 | Does                                    |
+| -------------------- | --------------------------------------- |
+| `mcp_list_resources` | Lists resources and resource templates. |
+| `mcp_read_resource`  | Reads a resource by URI.                |
+| `mcp_list_prompts`   | Lists prompts.                          |
+| `mcp_get_prompt`     | Renders a prompt with its arguments.    |
+
+`defineMcpPrompt()` puts a server prompt into the harness instructions. It is rendered at the start of each turn.
 
 ```ts
 import { defineMcpPrompt } from "@elie-laloum/outpost";
@@ -155,5 +176,12 @@ const review = defineMcpPrompt({
 });
 // createHarness({ modelProvider, mcpServers, instructions: [review] })
 ```
+
+## Limits
+
+- With [`createLocalSandboxProvider()`](../host-process/), Kimi Code and Antigravity entries are merged into your own home and stay after the run.
+- A config file Outpost cannot read as JSON fails the run instead of being replaced.
+- In the built-in harness, a server that exits or does not initialize within its startup timeout fails the turn, as does an `include` name the server does not offer.
+- On Vercel and Daytona, each MCP message passes through a file in the sandbox, which adds latency per request.
 
 API: [McpServers](../../reference/mcpservers/) · [McpStdioServer](../../reference/mcpstdioserver/) · [McpHttpServer](../../reference/mcphttpserver/) · [McpToolFilter](../../reference/mcptoolfilter/) · [defineMcpPrompt](../../reference/definemcpprompt/) · [HarnessOptions](../../reference/customharnessoptions/).
