@@ -5,14 +5,14 @@ description: "Choisir où les commandes de l’agent s’exécutent."
 
 Un fournisseur de sandbox alloue un environnement, exécute des commandes, transfère des fichiers et libère ses ressources. Choisissez-le indépendamment du harness de l’agent.
 
-| Environnement                        | Accès au dépôt                        | Terminal interactif | Préparation                           |
-| ------------------------------------ | ------------------------------------- | ------------------- | ------------------------------------- |
-| [Docker](../docker/)                 | Montages hôte par défaut              | Oui                 | Moteur Docker et image                |
-| [Podman](../podman/)                 | Montages hôte par défaut              | Oui                 | Moteur Podman et image                |
-| [Processus hôte](../host-process/)   | Système de fichiers hôte direct       | Oui                 | Outils installés ; aucune isolation   |
-| [Vercel Sandbox](../vercel-cloud/)   | Snapshot téléversé et synchronisation | Non                 | SDK optionnel et identifiants cloud   |
-| [Daytona Sandbox](../daytona-cloud/) | Snapshot téléversé et synchronisation | Oui                 | SDK optionnel et identifiants cloud   |
-| [VM Firecracker](../microvms/)       | Environnement invité privé            | Selon les capacités | Hôte Linux/KVM et invité préparés     |
+| Environnement                        | Accès au dépôt                        | Terminal interactif | Préparation                         |
+| ------------------------------------ | ------------------------------------- | ------------------- | ----------------------------------- |
+| [Docker](../docker/)                 | Montages hôte par défaut              | Oui                 | Moteur Docker et image              |
+| [Podman](../podman/)                 | Montages hôte par défaut              | Oui                 | Moteur Podman et image              |
+| [Processus hôte](../host-process/)   | Système de fichiers hôte direct       | Oui                 | Outils installés ; aucune isolation |
+| [Vercel Sandbox](../vercel-cloud/)   | Snapshot téléversé et synchronisation | Non                 | SDK optionnel et identifiants cloud |
+| [Daytona Sandbox](../daytona-cloud/) | Snapshot téléversé et synchronisation | Oui                 | SDK optionnel et identifiants cloud |
+| [VM Firecracker](../microvms/)       | Environnement invité privé            | Selon les capacités | Hôte Linux/KVM et invité préparés   |
 
 ## Choisir selon la propriété
 

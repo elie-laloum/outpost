@@ -3,7 +3,7 @@ title: "Déclencheurs"
 description: "Lancer des workflows selon une planification cron ou à partir d’événements GitHub, GitLab, Slack et Standard Webhooks vérifiés."
 ---
 
-Implémenté, pas encore publié. Un déclencheur n’exécute jamais un workflow dans la requête ou le minuteur qui le déclenche. Il publie un job dans une [file](../background-jobs/), et un worker exécute le workflow avec un checkpoint. Chaque job porte un `runId` et une entrée JSON `input` ; `defineWorkflowJob()` les transforme en exécution avec checkpoint.
+Un déclencheur n’exécute jamais un workflow dans la requête ou le minuteur qui le déclenche. Il publie un job dans une [file](../background-jobs/), et un worker exécute le workflow avec un checkpoint. Chaque job porte un `runId` et une entrée JSON `input` ; `defineWorkflowJob()` les transforme en exécution avec checkpoint.
 
 ```ts
 import {

@@ -3,7 +3,7 @@ title: "Agents de secours"
 description: "Confier un dispatch à un autre agent ou modèle quand le premier atteint une limite ou que son service est indisponible."
 ---
 
-Implémenté, pas encore publié. `createFallbackAgent()` prend une liste ordonnée d’agents. Quand un candidat échoue pour une raison listée dans `on`, le suivant prend le relais dans le même sandbox et le même workspace.
+`createFallbackAgent()` prend une liste ordonnée d’agents. Quand un candidat échoue pour une raison listée dans `on`, le suivant prend le relais dans le même sandbox et le même workspace.
 
 ```ts
 import {

@@ -3,7 +3,7 @@ title: "Piloter un agent en cours"
 description: "Envoyer une consigne à un agent qui travaille déjà."
 ---
 
-Implémenté, pas encore publié. `createSteering()` renvoie un contrôleur que vous passez à un dispatch avec `steering`. Pendant le dispatch, `send()` transmet une consigne à son agent sans annuler le travail.
+`createSteering()` renvoie un contrôleur que vous passez à un dispatch avec `steering`. Pendant le dispatch, `send()` transmet une consigne à son agent sans annuler le travail.
 
 ```ts
 import { createSandbox, createSteering } from "@elie-laloum/outpost";

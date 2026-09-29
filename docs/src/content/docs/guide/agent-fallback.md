@@ -3,7 +3,7 @@ title: "Fallback agents"
 description: "Hand a dispatch to another agent or model when the first one hits a limit or its service is down."
 ---
 
-Implemented, not yet released. `createFallbackAgent()` takes an ordered list of agents. When a candidate fails for a reason listed in `on`, the next one takes over in the same sandbox and workspace.
+`createFallbackAgent()` takes an ordered list of agents. When a candidate fails for a reason listed in `on`, the next one takes over in the same sandbox and workspace.
 
 ```ts
 import {

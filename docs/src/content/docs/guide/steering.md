@@ -3,7 +3,7 @@ title: "Steering a running agent"
 description: "Send an instruction to an agent that is already working."
 ---
 
-Implemented, not yet released. `createSteering()` returns a controller that you pass to a dispatch as `steering`. While the dispatch runs, `send()` hands an instruction to its agent without cancelling the work.
+`createSteering()` returns a controller that you pass to a dispatch as `steering`. While the dispatch runs, `send()` hands an instruction to its agent without cancelling the work.
 
 ```ts
 import { createSandbox, createSteering } from "@elie-laloum/outpost";

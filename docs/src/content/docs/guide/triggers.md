@@ -3,7 +3,7 @@ title: "Triggers"
 description: "Start workflows on a cron schedule or from verified GitHub, GitLab, Slack and Standard Webhooks events."
 ---
 
-Implemented, not yet released. A trigger never runs a workflow inside the request or timer that fires it. It publishes a job to a [queue](../background-jobs/), and a worker runs the workflow with a checkpoint. Every job carries a `runId` and a JSON `input`; `defineWorkflowJob()` turns them into a checkpointed run.
+A trigger never runs a workflow inside the request or timer that fires it. It publishes a job to a [queue](../background-jobs/), and a worker runs the workflow with a checkpoint. Every job carries a `runId` and a JSON `input`; `defineWorkflowJob()` turns them into a checkpointed run.
 
 ```ts
 import {
