@@ -89,6 +89,6 @@ With [`onQuota`](../quota-pauses/), the workflow then pauses until that reset. T
 
 ## Limits
 
-Outage and limit patterns come from recorded CLI and provider formats; an unrecognized message does not trigger a fallback. Replaying a journal that contains a handover is not supported. The behavior is covered by deterministic tests with simulated agents, not by live campaigns against exhausted accounts.
+Outage and limit patterns come from recorded CLI and provider formats; an unrecognized message does not trigger a fallback. A [replay](../record-replay/) reproduces a recorded handover, without `result.fallback`. The behavior is covered by deterministic tests with simulated agents, not by live campaigns against exhausted accounts.
 
 API: [fallbackAgent](../../reference/fallbackagent/) · [FallbackAgentOptions](../../reference/fallbackagentoptions/) · [FallbackRecord](../../reference/fallbackrecord/) · [unavailableFault](../../reference/unavailablefault/).

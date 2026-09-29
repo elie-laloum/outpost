@@ -89,6 +89,6 @@ Avec [`onQuota`](../quota-pauses/), le workflow se met alors en pause jusqu’à
 
 ## Limites
 
-Les motifs de panne et de limite proviennent de formats CLI et fournisseurs enregistrés ; un message non reconnu ne déclenche pas de repli. Le rejeu d’un journal contenant un passage de relais n’est pas pris en charge. Le comportement est couvert par des tests déterministes avec des agents simulés, pas par des campagnes réelles sur des comptes épuisés.
+Les motifs de panne et de limite proviennent de formats CLI et fournisseurs enregistrés ; un message non reconnu ne déclenche pas de repli. Un [rejeu](../record-replay/) reproduit un passage de relais enregistré, sans `result.fallback`. Le comportement est couvert par des tests déterministes avec des agents simulés, pas par des campagnes réelles sur des comptes épuisés.
 
 API : [fallbackAgent](../../reference/fallbackagent/) · [FallbackAgentOptions](../../reference/fallbackagentoptions/) · [FallbackRecord](../../reference/fallbackrecord/) · [unavailableFault](../../reference/unavailablefault/).

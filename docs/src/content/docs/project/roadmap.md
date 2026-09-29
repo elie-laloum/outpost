@@ -13,7 +13,7 @@ Outpost's next priority is reliable everyday execution: a successful first run, 
 
 ## Starting point
 
-Implemented, unreleased: [fallback agents](../../guide/agent-fallback/) hand a dispatch to the next agent or model when a limit or an outage stops the current one, in the same workspace, and pause with `onQuota` only when every candidate hits a limit. Outages are classified for every CLI adapter and model provider. Deterministic tests cover handover, exhaustion, usage, resumption and speculation with simulated agents; live limit and outage campaigns remain required. Continuing the owning candidate's conversation after a quota pause and replaying journals that contain a handover remain planned.
+Implemented, unreleased: [fallback agents](../../guide/agent-fallback/) hand a dispatch to the next agent or model when a limit or an outage stops the current one, in the same workspace, and pause with `onQuota` only when every candidate hits a limit. Outages are classified for every CLI adapter and model provider. Deterministic tests cover handover, exhaustion, usage, resumption, speculation and journal replay with simulated agents; live limit and outage campaigns remain required. Continuing the owning candidate's conversation after a quota pause remains planned.
 
 Available in 8.0.0: [record and replay](../../guide/record-replay/) replays a dispatch journal without calling a model, rebuilding its commits inside the sandbox and reporting divergences. Deterministic tests cover CLI and harness recordings, failures, repairs, passes and a real Docker sandbox. Replaying a whole workflow, uncommitted changes and a CLI command remain planned.
 

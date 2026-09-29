@@ -6342,5 +6342,9 @@
   "ReporterHandlers.fallback": [
     "Handle a fallback agent handing the dispatch to its next candidate, with both candidates, the failure category and its message; receives pass and at metadata and may return a promise.",
     "Traite : passage de relais d’un agent de secours à son candidat suivant, avec les deux candidats, la catégorie d’échec et son message ; reçoit pass et at et peut retourner une promesse."
+  ],
+  "ReplayTurn.handover": [
+    "Recorded fallback event that followed this turn; the turn is then treated as handed over rather than failed, its usage is the sum of its recorded usage events, and replay continues with the next turn.",
+    "Événement fallback enregistré après ce tour ; le tour est alors traité comme passé en relais plutôt qu’en échec, son usage est la somme de ses événements usage enregistrés, et le rejeu enchaîne sur le tour suivant."
   ]
 }

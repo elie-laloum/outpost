@@ -66,6 +66,8 @@ L’agent de rejeu travaille tour par tour, dans l’ordre de l’enregistrement
 3. Au dernier tour d’un dispatch en sandbox, il reconstruit les commits dans la sandbox. Il vérifie l’arbre de la baseline, applique chaque patch avec `git apply --index` et compare l’arbre obtenu. Il recrée ensuite le commit avec les identités et le message enregistrés. Tout passe par la sandbox : cela fonctionne aussi avec les fournisseurs distants.
 4. Si le tour enregistré a échoué, il relance le code et le message d’erreur enregistrés après avoir rejoué ses événements et ses commits.
 
+Le passage de relais d’un [agent de secours](../agent-fallback/) est rejoué dans le même tour : après les événements du candidat arrêté, le rejeu réémet l’événement `fallback` et enchaîne sur le tour enregistré du candidat suivant. Son prompt n’est pas comparé, car ce candidat est reparti du brief d’origine. Le résultat rejoué contient le texte du candidat retenu, les commits de tous les candidats et leur usage cumulé, mais pas de `result.fallback` : le dispatch ne voit que l’agent de rejeu.
+
 Les réparations de réponses structurées et les passes multiples sont rejouées tour par tour. L’usage rapporté est l’usage enregistré ; aucun token n’est consommé. Un agent de rejeu ne sert qu’une fois : `remainingTurns` compte les tours qui restent à rejouer. Créez-en un nouveau pour chaque rejeu.
 
 Le workspace a besoin de `git`, comme tout agent qui commite. Avec le même commit de départ, les identifiants des commits rejoués sont identiques. Depuis un autre commit qui a le même arbre, les arbres et les messages sont les mêmes mais les identifiants diffèrent. Les commits signés sont reconstruits sans leur signature.
