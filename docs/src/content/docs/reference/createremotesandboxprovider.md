@@ -13,15 +13,15 @@ import { createRemoteSandboxProvider } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Wrap a provider definition with remote placement, enabling application-managed repository upload and synchronization around the lease supplied by acquire.
+Build a SandboxProvider with placement remote from a name, variables and acquire(). Outpost uploads the repository history to the lease root, installs a missing agent CLI and synchronizes changes back without overwriting concurrent host edits. A blank name fails with code configuration.
 
 [Complete example and detailed rules](../../guide/custom-sandbox-providers/).
 
 ## Parameters and properties
 
-| Name         | Type                 | Presence | Meaning                                                                                            |
-| ------------ | -------------------- | -------- | -------------------------------------------------------------------------------------------------- |
-| `definition` | `ProviderDefinition` | Required | Provider name, environment variables and acquire implementation to wrap with a placement contract. |
+| Name         | Type                 | Presence | Meaning                                                                                     |
+| ------------ | -------------------- | -------- | ------------------------------------------------------------------------------------------- |
+| `definition` | `ProviderDefinition` | Required | Name, optional variables and acquire() of your provider; the factory adds placement remote. |
 
 ## Returns
 

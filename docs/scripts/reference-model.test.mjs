@@ -373,3 +373,13 @@ test("reference prose keeps angle-bracket placeholders visible", async () => {
       /schedule:&lt;name>:&lt;/,
     );
 });
+
+test("the speculation API is marked experimental", () => {
+  const speculation = navigation.find(
+    (group) => group.items[0].slug === "reference/overview/speculation",
+  );
+  const entry = speculation.items.find(
+    (item) => item.slug === "reference/speculate",
+  );
+  assert.equal(entry.attrs?.["data-api-status"], "experimental");
+});

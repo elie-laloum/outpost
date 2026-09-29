@@ -13,15 +13,15 @@ import { createRemoteSandboxProvider } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Enveloppe une définition de provider avec le placement remote, pour activer l’envoi du dépôt et sa synchronisation par l’application autour du bail fourni par acquire.
+Construit un SandboxProvider au placement remote à partir d’un nom, de variables et d’acquire(). Outpost envoie l’historique du dépôt dans la racine du bail, installe un CLI d’agent manquant et resynchronise les changements sans écraser les modifications hôtes concurrentes. Un nom vide échoue avec le code configuration.
 
 [Exemple complet et règles détaillées](../../guide/custom-sandbox-providers/).
 
 ## Paramètres et propriétés
 
-| Nom          | Type                 | Présence | Rôle                                                                                                            |
-| ------------ | -------------------- | -------- | --------------------------------------------------------------------------------------------------------------- |
-| `definition` | `ProviderDefinition` | Requis   | Nom de provider, variables d’environnement et implémentation acquire à envelopper dans un contrat de placement. |
+| Nom          | Type                 | Présence | Rôle                                                                                                 |
+| ------------ | -------------------- | -------- | ---------------------------------------------------------------------------------------------------- |
+| `definition` | `ProviderDefinition` | Requis   | Nom, variables optionnelles et acquire() de votre provider ; la fabrique ajoute le placement remote. |
 
 ## Retour
 

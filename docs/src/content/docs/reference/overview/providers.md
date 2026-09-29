@@ -1,43 +1,56 @@
 ---
 title: "Providers — Overview"
-description: "A provider is the backend that allocates an execution environment for a sandbox."
+description: "Sandbox providers allocate the place where agent commands run: a container, a hosted sandbox, a microVM or the host."
 sidebar:
   label: Overview
   order: 0
 ---
 
-A provider is the backend that allocates an execution environment for a sandbox. It supplies command execution, file transfer and disposal through a lease. Agent protocols remain separate: choosing a different backend does not require rewriting the agent adapter.
+## Which provider to use
 
-## How it works
+Pass a provider as `sandboxProvider`; without one, Outpost uses Docker. Nothing falls back to the host: a missing engine, SDK, credential or KVM fails the acquisition.
 
-Docker and Podman use local containers, Vercel and Daytona allocate remote environments, and `createLocalSandboxProvider()` explicitly executes on the host. Placement determines how the repository becomes available and how changes return. A provider configuration is reusable; its acquired lease represents one allocated environment.
+| Provider                                                         | Isolation                              | Commands run in                          | Repository                                             | Live input                    |
+| ---------------------------------------------------------------- | -------------------------------------- | ---------------------------------------- | ------------------------------------------------------ | ----------------------------- |
+| `createDockerSandboxProvider()`, `createPodmanSandboxProvider()` | Container                              | A container on your local engine         | Worktree and Git metadata mounted (`mounted`)          | Yes                           |
+| Same, with `repositoryMode: "isolated"`                          | Container, host repository not mounted | A container on your local engine         | History uploaded, changes synchronized back (`remote`) | Yes                           |
+| `createVercelSandboxProvider()`                                  | Hosted sandbox                         | A Vercel Sandbox                         | History uploaded, changes synchronized back (`remote`) | Yes                           |
+| `createDaytonaSandboxProvider()`                                 | Hosted sandbox                         | A Daytona sandbox                        | History uploaded, changes synchronized back (`remote`) | Yes                           |
+| `createFirecrackerSandboxProvider()`                             | MicroVM with its own kernel            | A guest on your Linux KVM host, over SSH | History uploaded, changes synchronized back (`remote`) | Yes                           |
+| `createLocalSandboxProvider()`                                   | None                                   | Host processes, in the worktree          | Host worktree used in place (`host`)                   | Yes                           |
+| `createMountedSandboxProvider(definition)`                       | What your `acquire()` provides         | Your environment                         | Your `acquire()` mounts the worktree (`mounted`)       | If the lease sets `liveInput` |
+| `createRemoteSandboxProvider(definition)`                        | What your `acquire()` provides         | Your environment                         | History uploaded, changes synchronized back (`remote`) | If the lease sets `liveInput` |
 
-`SandboxLease.fileTransfers` exposes optional transfer capabilities through `FileTransfers`; `FileManifestEntry` describes files used for comparison and verification. Providers can support incremental payload reuse and bounded batches. Repository synchronization combines these capabilities with Git history and host-state checks. See the [remote transfers guide](../../../guide/operations/remote-transfers/) for practical usage.
+:::caution
+`createLocalSandboxProvider()` runs the agent with your user’s files, environment and credentials. A mounted container can write the repository’s Git metadata, so it is not a boundary against a hostile agent.
+:::
 
-## Boundaries and responsibilities
+## Which egress rules apply
 
-Capabilities and isolation guarantees depend on the backend; unsupported operations must be rejected explicitly. Firecracker and `FirecrackerOptions` describe a microVM provider requiring a prepared Linux/KVM host and guest; the operator owns host preparation, networking and the root supervisor of the optional jailer mode. There is no silent fallback to host execution.
+Set `egress` in the provider options. A provider that cannot enforce a requested rule rejects it with code `configuration` when you create it.
 
-OpenAI-compatible APIs are [model providers](../model-providers/), separate from sandbox backends. `createOpenAIModelProvider()` enables experimental direct text calls without Codex; the agent harness is planned for phase two.
+| Provider           | `deny-all` | `domains`                              | `allowCidrs`                     | `denyCidrs` | Enforced by                                   |
+| ------------------ | ---------- | -------------------------------------- | -------------------------------- | ----------- | --------------------------------------------- |
+| Docker, Podman     | Yes        | No                                     | No                               | No          | The `none` network                            |
+| Vercel             | Yes        | Yes                                    | IPv4 and IPv6                    | Yes         | Vercel’s firewall, domains matched by TLS SNI |
+| Daytona            | Yes        | Up to 100; list the apex of a wildcard | Up to 10 IPv4, without `domains` | No          | Daytona, confirmed before workspace setup     |
+| Local, Firecracker | No         | No                                     | No                               | No          | —                                             |
 
-`EgressPolicy` configures outbound network access independently of agent prompts. The provider validates and applies the requested restrictions during environment setup. These opt-in research capabilities depend on backend support; unsupported policies are rejected explicitly. Network controls do not replace repository isolation or credential scoping. See the [outbound networking guide](../../../guide/advanced/egress/) for supported modes and verification.
-
-Transfers must preserve binary contents and supported file properties. A digest verifies integrity, not the identity of the data supplier. Incoming changes must not silently overwrite concurrent host edits; conflicts and interrupted synchronization can retain recovery data for inspection.
+If Daytona refuses the confirmation, acquisition fails with code `provider` and the sandbox is deleted. Egress covers the sandbox only: harness model requests, image pulls and file transfers leave from the host.
 
 ## Entry points
 
+Guide: [Choose a sandbox](../../../guide/choose-a-sandbox/) · [Network restrictions](../../../guide/network-restrictions/) · [Add a sandbox provider](../../../guide/custom-sandbox-providers/)
+
 - [createDockerSandboxProvider](../../createdockersandboxprovider/)
 - [createPodmanSandboxProvider](../../createpodmansandboxprovider/)
-- [createLocalSandboxProvider](../../createlocalsandboxprovider/)
 - [createVercelSandboxProvider](../../createvercelsandboxprovider/)
 - [createDaytonaSandboxProvider](../../createdaytonasandboxprovider/)
 - [createFirecrackerSandboxProvider](../../createfirecrackersandboxprovider/)
-- [FirecrackerOptions](../../firecrackeroptions/)
-- [EgressPolicy](../../egresspolicy/)
+- [createLocalSandboxProvider](../../createlocalsandboxprovider/)
+- [createRemoteSandboxProvider](../../createremotesandboxprovider/)
+- [createMountedSandboxProvider](../../createmountedsandboxprovider/)
 - [SandboxProvider](../../sandboxprovider/)
 - [SandboxLease](../../sandboxlease/)
-- [TransferOptions](../../transferoptions/)
-- [FileTransfers](../../filetransfers/)
-- [FileManifestEntry](../../filemanifestentry/)
-
-[Learn with the practical guide](../../../guide/choose-a-sandbox/).
+- [ContainerOptions](../../containeroptions/)
+- [EgressPolicy](../../egresspolicy/)

@@ -1,19 +1,19 @@
 {
   "attach": [
-    "Open a real interactive agent terminal in a newly allocated sandbox, then collect its exit status and commits and close owned resources. Prompt questions can be supplied through ask; terminal attachment does not produce a typed response.",
-    "Ouvre le terminal interactif réel d’un agent dans une nouvelle sandbox, puis collecte son statut de sortie et ses commits et ferme les ressources possédées. ask permet de fournir les réponses aux variables du brief ; le terminal ne produit pas de réponse typée."
+    "Open a CLI agent's own interactive terminal in a sandbox allocated for this call, then return the session's exit status and commits. Status 0 applies the branch policy and closes the sandbox; a nonzero status or a failure closes it and keeps the worktree. The agent process has a deadline of 86400000 (24 hours).",
+    "Ouvre le terminal interactif de la CLI d’un agent dans une sandbox allouée pour cet appel, puis renvoie le statut de sortie et les commits de la session. Le statut 0 applique la politique de branche et ferme la sandbox ; un statut non nul ou un échec la ferme et conserve le worktree. Le processus de l’agent a un délai de 86400000 (24 heures)."
   ],
   "createSandbox": [
-    "Allocate an environment around a new or caller-owned workspace. The returned sandbox supports sequential commands and agent turns on the same lease; the caller must close it. A supplied workspace keeps its independent lifetime.",
-    "Alloue un environnement autour d’un workspace nouveau ou fourni par l’appelant. La sandbox renvoyée permet d’enchaîner commandes et tours d’agent sur le même bail ; l’appelant doit la fermer. Un workspace fourni conserve sa durée de vie indépendante."
+    "Allocate an environment with sandboxProvider and keep it open for sequential dispatches, commands and terminal sessions until you close it. Without workspace, it opens one that close() also closes, by default on the checkout in the current directory with Docker. If setup fails, it releases what it allocated, closes the workspace it opened and rethrows.",
+    "Alloue un environnement avec sandboxProvider et le garde ouvert pour enchaîner dispatchs, commandes et sessions de terminal jusqu’à ce que vous le fermiez. Sans workspace, elle en ouvre un que close() ferme aussi, par défaut sur le checkout du répertoire courant avec Docker. Si la préparation échoue, elle libère ce qu’elle a alloué, ferme le workspace qu’elle a ouvert et relance l’erreur."
   ],
   "dispatch": [
     "Run a brief in a sandbox allocated for this call, integrate the branch on success, then close the sandbox. On failure the sandbox closes, the worktree is kept and the error's recovery names the branch and directory. With passes above 1, each pass is a separate dispatch that stops once a completion marker matches.",
     "Exécute un brief dans une sandbox allouée pour cet appel, intègre la branche en cas de succès, puis ferme la sandbox. En cas d’échec, la sandbox est fermée, le worktree est conservé et le recovery de l’erreur indique la branche et le répertoire. Avec passes supérieur à 1, chaque passe est un dispatch distinct qui s’arrête dès qu’un marqueur de fin apparaît."
   ],
   "openWorkspace": [
-    "Acquire a repository lock and prepare the checkout selected by the branch policy. The returned workspace can own several successive sandboxes and remains open until explicitly closed. integrate applies its branch changes; close preserves work that cannot safely be removed.",
-    "Prend le verrou du dépôt et prépare le checkout choisi par la politique de branche. Le workspace renvoyé peut posséder plusieurs sandboxes successives et reste ouvert jusqu’à sa fermeture explicite. integrate applique ses changements de branche ; close préserve le travail dont la suppression serait risquée."
+    "Open a workspace on a host Git checkout: take its lock, prepare the checkout or worktree the branch policy selects, copy copies, then run workspaceReady. It serves successive sandboxes, one at a time, until close(). A lock held by a live process fails with code conflict instead of waiting.",
+    "Ouvre un workspace sur un checkout Git hôte : prend son verrou, prépare le checkout ou le worktree choisi par la politique de branche, copie copies, puis exécute workspaceReady. Il sert des sandboxes successives, une à la fois, jusqu’à close(). Un verrou détenu par un processus actif échoue avec le code conflict au lieu d’attendre."
   ],
   "defineTask": [
     "Define and freeze a workflow node whose perform callback runs when its dependencies succeed. Creating the node does not execute it or allocate a sandbox. Use context.value to read declared dependencies; defineIsolatedTask supplies sandbox allocation around an agent dispatch instead of a custom perform callback.",
@@ -244,36 +244,36 @@
     "Crée un observateur appelable avec des handlers typés et une barrière flush explicite. Les handlers s’exécutent séquentiellement sans bloquer le dispatch ; onError signale les erreurs et la première reste accessible à chaque flush. Les fichiers, loggers et leur fermeture appartiennent à l’appelant."
   ],
   "createMountedSandboxProvider": [
-    "Wrap a provider definition with mounted placement. The provider exposes the host workspace through a mount and supplies its own allocation and release implementation.",
-    "Enveloppe une définition de provider avec le placement mounted. Le provider expose le workspace hôte par montage et fournit sa propre implémentation d’allocation et de libération."
+    "Build a SandboxProvider with placement mounted from a name, variables and acquire(). Your acquire() exposes context.directory and context.gitDirectories in the environment, so the agent edits the host worktree directly. A blank name fails with code configuration.",
+    "Construit un SandboxProvider au placement mounted à partir d’un nom, de variables et d’acquire(). Votre acquire() expose context.directory et context.gitDirectories dans l’environnement : l’agent modifie directement le worktree hôte. Un nom vide échoue avec le code configuration."
   ],
   "createRemoteSandboxProvider": [
-    "Wrap a provider definition with remote placement, enabling application-managed repository upload and synchronization around the lease supplied by acquire.",
-    "Enveloppe une définition de provider avec le placement remote, pour activer l’envoi du dépôt et sa synchronisation par l’application autour du bail fourni par acquire."
+    "Build a SandboxProvider with placement remote from a name, variables and acquire(). Outpost uploads the repository history to the lease root, installs a missing agent CLI and synchronizes changes back without overwriting concurrent host edits. A blank name fails with code configuration.",
+    "Construit un SandboxProvider au placement remote à partir d’un nom, de variables et d’acquire(). Outpost envoie l’historique du dépôt dans la racine du bail, installe un CLI d’agent manquant et resynchronise les changements sans écraser les modifications hôtes concurrentes. Un nom vide échoue avec le code configuration."
   ],
   "createDockerSandboxProvider": [
-    "Create a Docker sandbox provider. Mounted repository mode shares the workspace and Git metadata; opt-in isolated mode transfers a private checkout. Allocation is deferred until a sandbox acquires the provider; its lease owns container disposal.",
-    "Crée un provider de sandbox Docker. Le mode mounted partage workspace et métadonnées Git ; le mode isolated opt-in transfère un checkout privé. L’allocation attend l’acquisition du provider par une sandbox ; le bail possède la fermeture du conteneur."
+    "Create the Docker provider, used when sandboxProvider is omitted. By default the worktree and its Git metadata are mounted at /workspace; repositoryMode isolated uploads the history instead. Each acquire creates a container, and release removes it.",
+    "Crée le provider Docker, utilisé quand sandboxProvider est omis. Par défaut, le worktree et ses métadonnées Git sont montés dans /workspace ; repositoryMode isolated envoie l’historique à la place. Chaque acquire crée un conteneur, que release supprime."
   ],
   "createPodmanSandboxProvider": [
-    "Create a Podman sandbox provider using the container execution and streamed-transfer contracts. userns can preserve host UID mapping, and label controls SELinux mount relabeling. The provider is allocated only when acquired by a sandbox.",
-    "Crée un provider Podman avec les contrats d’exécution en conteneur et de transfert par flux. userns peut conserver la correspondance d’UID hôte et label contrôle le réétiquetage SELinux des montages. Le provider n’est alloué que lors de son acquisition par une sandbox."
+    "Create the container provider on the Podman engine, with the same options as Docker. When Outpost does not run as root, userns keep-id maps your user by default; on macOS a Podman machine must be running.",
+    "Crée le provider de conteneur sur le moteur Podman, avec les mêmes options que Docker. Quand Outpost ne tourne pas en root, userns keep-id conserve votre utilisateur par défaut ; sur macOS, une machine Podman doit être démarrée."
   ],
   "createLocalSandboxProvider": [
-    "Create an explicitly unisolated provider that executes commands on the host in the selected workspace. No container or VM is allocated; host filesystem access and credentials remain those of the calling process.",
-    "Crée un provider explicitement sans isolation qui exécute les commandes sur l’hôte dans le workspace choisi. Aucun conteneur ni VM n’est alloué ; l’accès aux fichiers et aux identifiants reste celui du processus appelant."
+    "Create an unisolated provider that runs commands as host processes in the worktree, with your home, environment, files and credentials. No container or VM is allocated. An egress option fails with code configuration.",
+    "Crée un provider sans isolation qui exécute les commandes comme processus hôtes dans le worktree, avec votre home, votre environnement, vos fichiers et vos identifiants. Aucun conteneur ni VM n’est alloué. Une option egress échoue avec le code configuration."
   ],
   "createVercelSandboxProvider": [
-    "Create a remote Vercel Sandbox provider, loading the optional SDK on acquisition. Repository state is uploaded and synchronized back with host-change protection. A supplied connect function can replace SDK sandbox creation for an integration.",
-    "Crée un provider distant Vercel Sandbox, avec chargement du SDK optionnel à l’acquisition. L’état du dépôt est envoyé puis resynchronisé avec protection des modifications hôtes concurrentes. Une fonction connect fournie peut remplacer la création de sandbox du SDK pour une intégration."
+    "Create a remote provider on Vercel Sandbox; the optional @vercel/sandbox SDK loads on acquire. Each acquire creates a sandbox, Outpost uploads the repository and synchronizes changes back, and release stops the sandbox.",
+    "Crée un provider distant sur Vercel Sandbox ; le SDK optionnel @vercel/sandbox se charge à l’acquisition. Chaque acquire crée une sandbox, Outpost y envoie le dépôt puis resynchronise les changements, et release arrête la sandbox."
   ],
   "createDaytonaSandboxProvider": [
-    "Create a remote Daytona provider with separate SDK connection and sandbox creation settings. Repository transfers use the acquired remote environment, and synchronization validates concurrent host edits before applying changes. Optional egress is validated before allocation and confirmed through the server network-update API before workspace setup; failure triggers deletion. Native image startup precedes that confirmation. See [outbound rules](../../guide/network-restrictions/).",
-    "Crée un provider distant Daytona avec réglages distincts de connexion SDK et de création de sandbox. Les transferts utilisent l’environnement distant acquis et la synchronisation valide les modifications hôtes concurrentes avant application. La politique egress optionnelle est validée avant allocation et confirmée par l’API réseau du serveur avant préparation du workspace ; un échec déclenche la suppression. Le démarrage natif de l’image précède cette confirmation. Consultez les [règles sortantes](../../guide/network-restrictions/)."
+    "Create a remote provider on Daytona; the optional @daytona/sdk loads on acquire. Each acquire creates a sandbox and confirms any egress policy before preparing the workspace. Release, or a failed setup, deletes the sandbox.",
+    "Crée un provider distant sur Daytona ; le SDK optionnel @daytona/sdk se charge à l’acquisition. Chaque acquire crée une sandbox et confirme la politique egress éventuelle avant de préparer le workspace. release, ou une préparation en échec, supprime la sandbox."
   ],
   "createFirecrackerSandboxProvider": [
-    "Create an opt-in Firecracker microVM provider from explicit kernel, rootfs, TAP and SSH settings. The host must provide KVM and a prepared guest; allocation does not fall back to host execution. The acquired lease owns VM shutdown.",
-    "Crée un provider microVM Firecracker opt-in à partir de réglages explicites de noyau, rootfs, TAP et SSH. L’hôte doit fournir KVM et un invité préparé ; l’allocation ne se replie pas sur l’exécution hôte. Le bail acquis possède l’arrêt de la VM."
+    "Create a remote provider that boots a Firecracker microVM from your kernel, root filesystem and TAP device, and reaches the guest over SSH. It needs Linux with /dev/kvm and a guest with Node.js 24+, git, setsid and tar. One provider runs one VM at a time; release stops it and deletes its private rootfs copy.",
+    "Crée un provider distant qui démarre une microVM Firecracker à partir de votre noyau, de votre système de fichiers racine et de votre périphérique TAP, puis joint l’invité par SSH. Il exige Linux avec /dev/kvm et un invité avec Node.js 24+, git, setsid et tar. Un provider exécute une VM à la fois ; release l’arrête et supprime sa copie privée du rootfs."
   ],
   "createOpenAIModelProvider": [
     "Configure a reusable request transport using Chat Completions or Responses, with messages, tool calls, reasoning effort and optional streaming. The harness supplies the model on each request. Construction performs local validation only; requests enforce cancellation, response size and deadlines without retries or protocol fallback.",

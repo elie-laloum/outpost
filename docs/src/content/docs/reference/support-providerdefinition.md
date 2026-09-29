@@ -7,11 +7,11 @@ sidebar:
 
 ## Parameters and properties
 
-| Name        | Type                                                 | Presence | Meaning                                                                             |
-| ----------- | ---------------------------------------------------- | -------- | ----------------------------------------------------------------------------------- |
-| `name`      | `string`                                             | Required | Provider identifier used in diagnostics and resource activity records.              |
-| `variables` | `Readonly<Record<string, string>> \| undefined`      | Optional | Explicit environment declarations; values are strings.                              |
-| `acquire`   | `(context: SandboxContext) => Promise<SandboxLease>` | Required | Allocate the lease using the prepared workspace and explicit environment variables. |
+| Name        | Type                                                 | Presence | Meaning                                                                                                             |
+| ----------- | ---------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------- |
+| `name`      | `string`                                             | Required | Identifier recorded in diagnostics and resource activity; a blank name fails with code configuration.               |
+| `variables` | `Readonly<Record<string, string>> \| undefined`      | Optional | Environment variables set for every command in the sandbox, as literal values; the factory copies and freezes them. |
+| `acquire`   | `(context: SandboxContext) => Promise<SandboxLease>` | Required | Allocates one environment and returns its lease; the factory adds the placement.                                    |
 
 ## Signature
 

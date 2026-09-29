@@ -15,11 +15,11 @@ import type { BranchPolicy } from "@elie-laloum/outpost";
 
 The fields below cover all variants; the signature specifies their allowed combinations.
 
-| Name   | Type                                  | Presence          | Meaning                                                                                                                    |
-| ------ | ------------------------------------- | ----------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `mode` | `"current" \| "named" \| "integrate"` | Required          | current uses the current checkout, named retains a chosen work branch, integrate prepares a branch to merge into the base. |
-| `name` | `string`                              | Variant-dependent | Name of the work branch retained by named mode.                                                                            |
-| `from` | `string \| undefined`                 | Variant-dependent | Git revision used as the starting point for the managed work branch.                                                       |
+| Name   | Type                                  | Presence          | Meaning                                                                                                                                                                                                                    |
+| ------ | ------------------------------------- | ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mode` | `"current" \| "named" \| "integrate"` | Required          | current works in the checkout itself; named works on the branch name in a worktree under .outpost/workspaces; integrate creates an outpost/&lt;label>-&lt;id> branch there, which integrate() merges into the base branch. |
+| `name` | `string`                              | Variant-dependent | Work branch for named mode, kept when the workspace closes. An existing branch continues from its tip and reuses its managed worktree; one checked out outside .outpost/workspaces fails with code conflict.               |
+| `from` | `string \| undefined`                 | Variant-dependent | Revision a new work branch starts from, default HEAD. Ignored when the named branch already exists.                                                                                                                        |
 
 ## Signature
 

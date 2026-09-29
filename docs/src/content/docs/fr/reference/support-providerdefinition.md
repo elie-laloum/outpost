@@ -7,11 +7,11 @@ sidebar:
 
 ## Paramètres et propriétés
 
-| Nom         | Type                                                 | Présence  | Rôle                                                                                    |
-| ----------- | ---------------------------------------------------- | --------- | --------------------------------------------------------------------------------------- |
-| `name`      | `string`                                             | Requis    | Identifiant de provider utilisé dans les diagnostics et enregistrements d’activité.     |
-| `variables` | `Readonly<Record<string, string>> \| undefined`      | Optionnel | Déclarations d’environnement explicites ; les valeurs sont des chaînes.                 |
-| `acquire`   | `(context: SandboxContext) => Promise<SandboxLease>` | Requis    | Alloue le bail depuis le workspace préparé et les variables d’environnement explicites. |
+| Nom         | Type                                                 | Présence  | Rôle                                                                                                                              |
+| ----------- | ---------------------------------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `name`      | `string`                                             | Requis    | Identifiant enregistré dans les diagnostics et l’activité des ressources ; un nom vide échoue avec le code configuration.         |
+| `variables` | `Readonly<Record<string, string>> \| undefined`      | Optionnel | Variables d’environnement définies pour chaque commande de la sandbox, en valeurs littérales ; la fabrique les copie et les fige. |
+| `acquire`   | `(context: SandboxContext) => Promise<SandboxLease>` | Requis    | Alloue un environnement et renvoie son bail ; la fabrique ajoute le placement.                                                    |
 
 ## Signature
 

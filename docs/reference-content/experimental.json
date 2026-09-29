@@ -1,1 +1,54 @@
-{}
+{
+  "speculate": [
+    "Speculation is experimental: its options and result can still change. See [Competing candidates](../../guide/speculation/).",
+    "La spéculation est expérimentale : ses options et son résultat peuvent encore changer. Consultez [Candidats concurrents](../../guide/speculation/)."
+  ],
+  "recoverSpeculation": [
+    "Speculation is experimental: its options and result can still change. See [Competing candidates](../../guide/speculation/).",
+    "La spéculation est expérimentale : ses options et son résultat peuvent encore changer. Consultez [Candidats concurrents](../../guide/speculation/)."
+  ],
+  "checkSpeculationIntegration": [
+    "Speculation is experimental: its options and result can still change. See [Competing candidates](../../guide/speculation/).",
+    "La spéculation est expérimentale : ses options et son résultat peuvent encore changer. Consultez [Candidats concurrents](../../guide/speculation/)."
+  ],
+  "SpeculationDurability": [
+    "Part of the experimental speculation API: this contract can still change. See [Competing candidates](../../guide/speculation/).",
+    "Fait partie de l’API expérimentale de spéculation : ce contrat peut encore changer. Consultez [Candidats concurrents](../../guide/speculation/)."
+  ],
+  "SpeculationRecoveryOptions": [
+    "Part of the experimental speculation API: this contract can still change. See [Competing candidates](../../guide/speculation/).",
+    "Fait partie de l’API expérimentale de spéculation : ce contrat peut encore changer. Consultez [Candidats concurrents](../../guide/speculation/)."
+  ],
+  "SpeculationIntegration": [
+    "Part of the experimental speculation API: this contract can still change. See [Competing candidates](../../guide/speculation/).",
+    "Fait partie de l’API expérimentale de spéculation : ce contrat peut encore changer. Consultez [Candidats concurrents](../../guide/speculation/)."
+  ],
+  "SpeculationOptions": [
+    "Part of the experimental speculation API: this contract can still change. See [Competing candidates](../../guide/speculation/).",
+    "Fait partie de l’API expérimentale de spéculation : ce contrat peut encore changer. Consultez [Candidats concurrents](../../guide/speculation/)."
+  ],
+  "SpeculationResult": [
+    "Part of the experimental speculation API: this contract can still change. See [Competing candidates](../../guide/speculation/).",
+    "Fait partie de l’API expérimentale de spéculation : ce contrat peut encore changer. Consultez [Candidats concurrents](../../guide/speculation/)."
+  ],
+  "SpeculativeCandidate": [
+    "Part of the experimental speculation API: this contract can still change. See [Competing candidates](../../guide/speculation/).",
+    "Fait partie de l’API expérimentale de spéculation : ce contrat peut encore changer. Consultez [Candidats concurrents](../../guide/speculation/)."
+  ],
+  "SpeculativeCandidateResult": [
+    "Part of the experimental speculation API: this contract can still change. See [Competing candidates](../../guide/speculation/).",
+    "Fait partie de l’API expérimentale de spéculation : ce contrat peut encore changer. Consultez [Candidats concurrents](../../guide/speculation/)."
+  ],
+  "SpeculativeOutput": [
+    "Part of the experimental speculation API: this contract can still change. See [Competing candidates](../../guide/speculation/).",
+    "Fait partie de l’API expérimentale de spéculation : ce contrat peut encore changer. Consultez [Candidats concurrents](../../guide/speculation/)."
+  ],
+  "SpeculativeHostSnapshot": [
+    "Part of the experimental speculation API: this contract can still change. See [Competing candidates](../../guide/speculation/).",
+    "Fait partie de l’API expérimentale de spéculation : ce contrat peut encore changer. Consultez [Candidats concurrents](../../guide/speculation/)."
+  ],
+  "SpeculativeValidation": [
+    "Part of the experimental speculation API: this contract can still change. See [Competing candidates](../../guide/speculation/).",
+    "Fait partie de l’API expérimentale de spéculation : ce contrat peut encore changer. Consultez [Candidats concurrents](../../guide/speculation/)."
+  ]
+}

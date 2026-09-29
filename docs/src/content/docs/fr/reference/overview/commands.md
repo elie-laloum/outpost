@@ -1,28 +1,47 @@
 ---
 title: "Commandes et terminal — Vue d’ensemble"
-description: "Les commandes et terminaux interactifs donnent un accès direct à l’environnement d’exécution."
+description: "Exécutez un programme dans une sandbox et lisez son statut de sortie, ou ouvrez-y le terminal interactif d’un agent."
 sidebar:
   label: Vue d’ensemble
   order: 0
 ---
 
-Les commandes et terminaux interactifs donnent un accès direct à l’environnement d’exécution. Une commande lance un programme nommé avec des arguments explicites et renvoie son résultat de processus. Un terminal connecte un humain à une session interactive native d’agent.
+## Choisir un appel
 
-## Fonctionnement et philosophie
+| Appel                      | Sandbox                                | Renvoie                                            | À utiliser pour                                              |
+| -------------------------- | -------------------------------------- | -------------------------------------------------- | ------------------------------------------------------------ |
+| `sandbox.command(command)` | Votre sandbox ouverte, laissée ouverte | `status`, `stdout`, `stderr`                       | Tests, builds et vérifications entre deux exécutions d’agent |
+| `sandbox.attach(options)`  | Votre sandbox ouverte, laissée ouverte | `status`, `commits`, `branch`                      | Travailler à la main dans la CLI de l’agent                  |
+| `attach(options)`          | Allouée pour l’appel, fermée ensuite   | `status`, `commits`, `branch`, `retainedDirectory` | Une session interactive dans une sandbox neuve               |
 
-Utilisez `sandbox.command` pour les contrôles reproductibles et l’automatisation. L’analyse shell n’est pas implicite : choisissez explicitement un shell si sa syntaxe est nécessaire. `attach` ouvre une session interactive et gère ses ressources propres ; la prise en charge du terminal dépend du provider.
+Aucun shell n’analyse `arguments` : lancez vous-même `sh -c` pour les tubes ou les motifs. Une sandbox exécute une opération à la fois ; un second appel lancé entre-temps est rejeté avec le code `configuration`.
 
-## Limites et responsabilités
+:::note
+`attach` et `interactive: true` exigent un terminal : Docker, Podman, l’hôte et Daytona les prennent en charge, Vercel et Firecracker les refusent.
+:::
 
-La fin du processus et la fermeture des flux de sortie sont deux événements différents. Examinez le statut de sortie en plus du texte. Annulation et délais ciblent l’opération ; ils ne doivent pas transformer silencieusement une sandbox réutilisable en environnement fermé. L’attachement interactif ne renvoie pas de réponse d’agent typée et validée.
+## Fin d’une commande
+
+| Événement                                         | Défaut                                                   | Résultat                                                                                              |
+| ------------------------------------------------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Le processus se termine, quel que soit son statut | —                                                        | Se résout à la fin du processus ; vérifiez `status`                                                   |
+| Les flux de sortie se ferment avant la fin        | —                                                        | Continue d’attendre le processus                                                                      |
+| `deadlineMs` écoulé                               | 600000 (10 minutes) ; 86400000 (24 heures) pour `attach` | Arrête le groupe de processus ; rejette avec le code `timeout` (`TimeoutError` sur Vercel et Daytona) |
+| `signal` annulé                                   | —                                                        | Arrête le groupe de processus ; rejette avec la raison du signal                                      |
+| `observe` lève une exception                      | —                                                        | Arrête le groupe de processus ; rejette avec cette exception                                          |
+| Sortie plus longue que `retain`                   | 65536 caractères par flux                                | Le résultat garde la fin ; `observe` reçoit chaque fragment                                           |
+
+La sandbox reste ouverte après un dépassement de délai ou une annulation. `attach()` applique la politique de branche quand la session se termine avec le statut 0 et conserve le worktree sinon.
 
 ## Points d’entrée
 
+Guide : [Sessions de sandbox](../../../guide/sandbox-sessions/) · [Limites et annulation](../../../guide/limits-and-cancellation/) · [Rédiger le brief](../../../guide/briefs/)
+
+- [attach](../../attach/)
 - [Command](../../command/)
 - [CommandResult](../../commandresult/)
-- [attach](../../attach/)
+- [Channel](../../channel/)
 - [AttachOptions](../../attachoptions/)
 - [AttachResult](../../attachresult/)
-- [Channel](../../channel/)
-
-[Passer à la pratique avec le Guide](../../../guide/sandbox-sessions/).
+- [VariableQuestion](../../variablequestion/)
+- [RequiredAgent](../../support-requiredagent/)

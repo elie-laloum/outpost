@@ -13,15 +13,15 @@ import { createMountedSandboxProvider } from "@elie-laloum/outpost";
 
 ## Rôle et comportement
 
-Enveloppe une définition de provider avec le placement mounted. Le provider expose le workspace hôte par montage et fournit sa propre implémentation d’allocation et de libération.
+Construit un SandboxProvider au placement mounted à partir d’un nom, de variables et d’acquire(). Votre acquire() expose context.directory et context.gitDirectories dans l’environnement : l’agent modifie directement le worktree hôte. Un nom vide échoue avec le code configuration.
 
 [Exemple complet et règles détaillées](../../guide/custom-sandbox-providers/).
 
 ## Paramètres et propriétés
 
-| Nom          | Type                 | Présence | Rôle                                                                                                            |
-| ------------ | -------------------- | -------- | --------------------------------------------------------------------------------------------------------------- |
-| `definition` | `ProviderDefinition` | Requis   | Nom de provider, variables d’environnement et implémentation acquire à envelopper dans un contrat de placement. |
+| Nom          | Type                 | Présence | Rôle                                                                                                  |
+| ------------ | -------------------- | -------- | ----------------------------------------------------------------------------------------------------- |
+| `definition` | `ProviderDefinition` | Requis   | Nom, variables optionnelles et acquire() de votre provider ; la fabrique ajoute le placement mounted. |
 
 ## Retour
 

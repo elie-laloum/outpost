@@ -7,9 +7,9 @@ sidebar:
 
 ## Paramètres et propriétés
 
-| Nom     | Type    | Présence | Rôle                              |
-| ------- | ------- | -------- | --------------------------------- |
-| `agent` | `Agent` | Requis   | Adapter natif de l’agent de code. |
+| Nom     | Type    | Présence | Rôle                                                                                                                                       |
+| ------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `agent` | `Agent` | Requis   | Agent dont la CLI s’ouvre dans le terminal. Les agents du harness intégré, de rejeu et de secours sont rejetés avec le code configuration. |
 
 ## Signature
 

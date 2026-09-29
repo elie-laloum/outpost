@@ -13,16 +13,16 @@ import { createLocalSandboxProvider } from "@elie-laloum/outpost/providers/local
 
 ## Purpose and behavior
 
-Create an explicitly unisolated provider that executes commands on the host in the selected workspace. No container or VM is allocated; host filesystem access and credentials remain those of the calling process.
+Create an unisolated provider that runs commands as host processes in the worktree, with your home, environment, files and credentials. No container or VM is allocated. An egress option fails with code configuration.
 
 [Complete example and detailed rules](../../guide/host-process/).
 
 ## Parameters and properties
 
-| Name                | Type                                            | Presence | Meaning                                                       |
-| ------------------- | ----------------------------------------------- | -------- | ------------------------------------------------------------- |
-| `options`           | `LocalOptions \| undefined`                     | Optional | Explicit environment variables for unisolated host execution. |
-| `options.variables` | `Readonly<Record<string, string>> \| undefined` | Optional | Explicit environment declarations; values are strings.        |
+| Name                | Type                                            | Presence | Meaning                                                                                                                       |
+| ------------------- | ----------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `options`           | `LocalOptions \| undefined`                     | Optional | Explicit environment variables for unisolated host execution.                                                                 |
+| `options.variables` | `Readonly<Record<string, string>> \| undefined` | Optional | Environment variables added to host commands, as literal values. A key the agent also declares fails with code configuration. |
 
 ## Returns
 

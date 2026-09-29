@@ -5,6 +5,10 @@ sidebar:
   order: 20
 ---
 
+:::caution[Expérimental]
+Fait partie de l’API expérimentale de spéculation : ce contrat peut encore changer. Consultez [Candidats concurrents](../../guide/speculation/).
+:::
+
 ## Import
 
 ```ts

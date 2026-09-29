@@ -15,7 +15,7 @@ import type { Execution } from "@elie-laloum/outpost";
 
 | Nom            | Type                  | Présence  | Rôle                                                                                                                 |
 | -------------- | --------------------- | --------- | -------------------------------------------------------------------------------------------------------------------- |
-| `text`         | `string`              | Requis    | Texte de tous les tours de l'exécution, joints par des sauts de ligne, y compris les tours de réparation de réponse. |
+| `text`         | `string`              | Requis    | Texte de tous les tours de l’exécution, joints par des sauts de ligne, y compris les tours de réparation de réponse. |
 | `turns`        | `readonly Turn[]`     | Requis    | Tous les tours dans l’ordre, y compris les corrections de réponse et les tours repris par le steering.               |
 | `usage`        | `Usage`               | Requis    | Compteurs de tokens additionnés sur tous les tours ; pas un coût.                                                    |
 | `conversation` | `string \| undefined` | Optionnel | Identifiant de conversation native du dernier tour, quand l’agent en a fourni un.                                    |

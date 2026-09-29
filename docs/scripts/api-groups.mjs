@@ -169,6 +169,21 @@ export const groups = [
   {
     id: "speculation",
     title: ["Speculative execution", "Exécution spéculative"],
+    experimental: [
+      "speculate",
+      "recoverSpeculation",
+      "checkSpeculationIntegration",
+      "SpeculationDurability",
+      "SpeculationRecoveryOptions",
+      "SpeculationIntegration",
+      "SpeculationOptions",
+      "SpeculationResult",
+      "SpeculativeCandidate",
+      "SpeculativeCandidateResult",
+      "SpeculativeOutput",
+      "SpeculativeHostSnapshot",
+      "SpeculativeValidation",
+    ],
     guide: "guide/speculation",
     names:
       "speculate recoverSpeculation checkSpeculationIntegration SpeculationDurability SpeculationRecoveryOptions SpeculationIntegration SpeculationOptions SpeculationResult SpeculativeCandidate SpeculativeCandidateResult SpeculativeOutput SpeculativeHostSnapshot SpeculativeValidation",

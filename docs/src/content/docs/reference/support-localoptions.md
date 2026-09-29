@@ -7,9 +7,9 @@ sidebar:
 
 ## Parameters and properties
 
-| Name        | Type                                            | Presence | Meaning                                                |
-| ----------- | ----------------------------------------------- | -------- | ------------------------------------------------------ |
-| `variables` | `Readonly<Record<string, string>> \| undefined` | Optional | Explicit environment declarations; values are strings. |
+| Name        | Type                                            | Presence | Meaning                                                                                                                       |
+| ----------- | ----------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `variables` | `Readonly<Record<string, string>> \| undefined` | Optional | Environment variables added to host commands, as literal values. A key the agent also declares fails with code configuration. |
 
 ## Signature
 

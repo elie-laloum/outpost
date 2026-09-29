@@ -5,6 +5,10 @@ sidebar:
   order: 0
 ---
 
+:::caution[Expérimental]
+La spéculation est expérimentale : ses options et son résultat peuvent encore changer. Consultez [Candidats concurrents](../../guide/speculation/).
+:::
+
 ## Import
 
 ```ts

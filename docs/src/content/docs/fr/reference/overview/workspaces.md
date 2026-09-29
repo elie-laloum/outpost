@@ -1,27 +1,49 @@
 ---
 title: "Workspaces — Vue d’ensemble"
-description: "Un workspace possède l’état Git d’une tâche : checkout, politique de branche, point de départ et verrou."
+description: "Un workspace possède l’état Git d’une tâche : checkout ou worktree, branche, verrou et moment de la fusion."
 sidebar:
   label: Vue d’ensemble
   order: 0
 ---
 
-Un workspace possède l’état Git d’une tâche : checkout, politique de branche, point de départ et verrou. Il sépare le travail produit de l’environnement qui le produit. Un même workspace peut ainsi survivre à une sandbox et accueillir des tâches d’agent successives.
+## Choisir une politique de branche
 
-## Fonctionnement et philosophie
+`branch` détermine où l’agent travaille et ce que font `integrate()` et `close()`. Un verrou déjà pris échoue avec le code `conflict` au lieu d’attendre.
 
-`openWorkspace` prépare et possède ce contexte Git. La politique de branche choisit le checkout courant ou une branche gérée. Un workspace admet une seule sandbox active à la fois ; le travail parallèle demande des workspaces distincts. L’intégration est explicite et différente de la collecte des commits.
+| Mode        | L’agent travaille dans                                      | Verrou pris sur | `integrate()`                       | `close()` sur un worktree propre                    |
+| ----------- | ----------------------------------------------------------- | --------------- | ----------------------------------- | --------------------------------------------------- |
+| `current`   | Votre checkout, sur sa branche courante                     | Le checkout     | Ne fait rien                        | Laisse tout en place                                |
+| `named`     | Un worktree sous `.outpost/workspaces/` sur `name`          | Cette branche   | Ne fait rien                        | Supprime le worktree, garde la branche              |
+| `integrate` | Un worktree sur une nouvelle branche `outpost/<label>-<id>` | Cette branche   | La fusionne dans la branche de base | Supprime le worktree, supprime la branche fusionnée |
 
-## Limites et responsabilités
+`copies` exige `named` ou `integrate`, et les providers de sandbox distants refusent `current`.
 
-Fermez la sandbox avant son workspace. Un workspace fourni par l’appelant reste à sa charge. La fermeture doit préserver le travail modifié, détaché ou autrement récupérable ; le dossier conservé indique où l’examiner. Fermer un workspace ne donne pas l’autorisation de pousser sa branche.
+## Cycle de vie
+
+Un workspace survit à ses sandboxes : il en sert une seule à la fois et reste ouvert jusqu’à ce que vous le fermiez.
+
+| Appel                                             | Sandbox                                     | Effet Git                                                                      |
+| ------------------------------------------------- | ------------------------------------------- | ------------------------------------------------------------------------------ |
+| `openWorkspace(options)`                          | Aucune                                      | Prend le verrou, prépare le worktree, copie `copies`, exécute `workspaceReady` |
+| `workspace.sandbox()`                             | Nouvelle, ouverte jusqu’à sa fermeture      | Aucun ; la fermer laisse le workspace ouvert et non fusionné                   |
+| `workspace.dispatch()` / `workspace.attach()`     | Nouvelle, fermée après l’exécution          | Fusionne une branche `integrate` quand l’exécution réussit                     |
+| `workspace.integrate()`                           | —                                           | `git merge` dans la branche de base ; `conflict` si la branche hôte a changé   |
+| `workspace.close()`                               | Doit déjà être fermée                       | Libère le verrou et supprime un worktree propre                                |
+| `dispatch()` / `createSandbox()` sans `workspace` | Possède un workspace qu’elle ouvre et ferme | Même politique, fermé avec la sandbox                                          |
+
+:::note
+La fermeture conserve un worktree dont le `HEAD` est détaché ou qui contient des fichiers modifiés, non suivis ou ignorés, copies comprises, et le renvoie dans `retainedDirectory`. Outpost ne pousse jamais une branche.
+:::
 
 ## Points d’entrée
+
+Guide : [Dépôt et branche](../../../guide/repository-and-branch/) · [Sessions de sandbox](../../../guide/sandbox-sessions/) · [Récupérer du travail](../../../guide/recovery/)
 
 - [openWorkspace](../../openworkspace/)
 - [Workspace](../../workspace/)
 - [WorkspaceOptions](../../workspaceoptions/)
 - [BranchPolicy](../../branchpolicy/)
+- [LifecycleHooks](../../lifecyclehooks/)
+- [StageLimits](../../stagelimits/)
+- [WorkspaceRecord](../../workspacerecord/)
 - [Disposal](../../disposal/)
-
-[Passer à la pratique avec le Guide](../../../guide/repository-and-branch/).

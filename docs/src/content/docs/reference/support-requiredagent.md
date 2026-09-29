@@ -7,9 +7,9 @@ sidebar:
 
 ## Parameters and properties
 
-| Name    | Type    | Presence | Meaning                      |
-| ------- | ------- | -------- | ---------------------------- |
-| `agent` | `Agent` | Required | Native coding-agent adapter. |
+| Name    | Type    | Presence | Meaning                                                                                                             |
+| ------- | ------- | -------- | ------------------------------------------------------------------------------------------------------------------- |
+| `agent` | `Agent` | Required | Agent whose CLI opens in the terminal. Built-in harness, replay and fallback agents reject with code configuration. |
 
 ## Signature
 

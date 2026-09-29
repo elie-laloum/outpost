@@ -1,43 +1,56 @@
 ---
 title: "Providers — Vue d’ensemble"
-description: "Un provider est le backend qui alloue l’environnement d’exécution d’une sandbox."
+description: "Les providers de sandbox allouent l’endroit où s’exécutent les commandes de l’agent : conteneur, sandbox hébergée, microVM ou hôte."
 sidebar:
   label: Vue d’ensemble
   order: 0
 ---
 
-Un provider est le backend qui alloue l’environnement d’exécution d’une sandbox. Il fournit l’exécution des commandes, les transferts de fichiers et la libération des ressources via un bail. Les protocoles d’agents restent séparés : changer de backend ne demande pas de réécrire l’adapter d’agent.
+## Quel provider choisir
 
-## Fonctionnement et philosophie
+Passez un provider dans `sandboxProvider` ; sans lui, Outpost utilise Docker. Rien ne se replie sur l’hôte : un moteur, un SDK, un identifiant ou KVM manquant fait échouer l’acquisition.
 
-Docker et Podman utilisent des conteneurs locaux, Vercel et Daytona allouent des environnements distants, et `createLocalSandboxProvider()` exécute explicitement sur l’hôte. Le placement détermine comment le dépôt devient accessible et comment les changements reviennent. Une configuration de provider est réutilisable ; son bail acquis représente un environnement alloué.
+| Provider                                                         | Isolation                           | Les commandes s’exécutent dans              | Dépôt                                                    | Entrée en direct               |
+| ---------------------------------------------------------------- | ----------------------------------- | ------------------------------------------- | -------------------------------------------------------- | ------------------------------ |
+| `createDockerSandboxProvider()`, `createPodmanSandboxProvider()` | Conteneur                           | Un conteneur de votre moteur local          | Worktree et métadonnées Git montés (`mounted`)           | Oui                            |
+| Idem, avec `repositoryMode: "isolated"`                          | Conteneur, dépôt hôte non monté     | Un conteneur de votre moteur local          | Historique envoyé, changements resynchronisés (`remote`) | Oui                            |
+| `createVercelSandboxProvider()`                                  | Sandbox hébergée                    | Une Vercel Sandbox                          | Historique envoyé, changements resynchronisés (`remote`) | Oui                            |
+| `createDaytonaSandboxProvider()`                                 | Sandbox hébergée                    | Une sandbox Daytona                         | Historique envoyé, changements resynchronisés (`remote`) | Oui                            |
+| `createFirecrackerSandboxProvider()`                             | MicroVM avec son propre noyau       | Un invité sur votre hôte Linux KVM, via SSH | Historique envoyé, changements resynchronisés (`remote`) | Oui                            |
+| `createLocalSandboxProvider()`                                   | Aucune                              | Des processus hôtes, dans le worktree       | Worktree hôte utilisé sur place (`host`)                 | Oui                            |
+| `createMountedSandboxProvider(definition)`                       | Celle que fournit votre `acquire()` | Votre environnement                         | Votre `acquire()` monte le worktree (`mounted`)          | Si le bail définit `liveInput` |
+| `createRemoteSandboxProvider(definition)`                        | Celle que fournit votre `acquire()` | Votre environnement                         | Historique envoyé, changements resynchronisés (`remote`) | Si le bail définit `liveInput` |
 
-`SandboxLease.fileTransfers` expose les capacités optionnelles de transfert via `FileTransfers` ; `FileManifestEntry` décrit les fichiers utilisés pour la comparaison et la vérification. Les providers peuvent proposer la réutilisation incrémentale des contenus et des lots bornés. La synchronisation du dépôt combine ces capacités avec l’historique Git et les contrôles de l’état hôte. Le [guide des transferts distants](../../../guide/operations/remote-transfers/) détaille leur utilisation.
+:::caution
+`createLocalSandboxProvider()` exécute l’agent avec les fichiers, l’environnement et les identifiants de votre utilisateur. Un conteneur monté peut écrire dans les métadonnées Git du dépôt : il ne protège pas d’un agent hostile.
+:::
 
-## Limites et responsabilités
+## Quelles règles egress s’appliquent
 
-Les capacités et garanties d’isolation dépendent du backend ; les opérations non prises en charge doivent être refusées explicitement. Firecracker et `FirecrackerOptions` décrivent un provider microVM nécessitant un hôte Linux/KVM et un invité préparés ; l’opérateur prend en charge la préparation de l’hôte, le réseau et le superviseur root du mode jailer optionnel. Aucun repli silencieux vers l’exécution hôte n’est effectué.
+Définissez `egress` dans les options du provider. Un provider qui ne peut pas imposer une règle demandée la refuse avec le code `configuration` dès sa création.
 
-Les API compatibles OpenAI sont des [fournisseurs de modèles](../model-providers/), distincts des backends de sandbox. `createOpenAIModelProvider()` permet des appels textuels directs expérimentaux sans Codex ; le harness d’agent est prévu en deuxième phase.
+| Provider           | `deny-all` | `domains`                                 | `allowCidrs`                    | `denyCidrs` | Appliquée par                                        |
+| ------------------ | ---------- | ----------------------------------------- | ------------------------------- | ----------- | ---------------------------------------------------- |
+| Docker, Podman     | Oui        | Non                                       | Non                             | Non         | Le réseau `none`                                     |
+| Vercel             | Oui        | Oui                                       | IPv4 et IPv6                    | Oui         | Le pare-feu Vercel, domaines filtrés par SNI TLS     |
+| Daytona            | Oui        | Jusqu’à 100 ; listez la racine d’un joker | Jusqu’à 10 IPv4, sans `domains` | Non         | Daytona, confirmée avant la préparation du workspace |
+| Local, Firecracker | Non        | Non                                       | Non                             | Non         | —                                                    |
 
-`EgressPolicy` configure l’accès au réseau sortant indépendamment des prompts de l’agent. Le provider valide et applique les restrictions demandées lors de la préparation de l’environnement. Ces capacités de recherche optionnelles dépendent du backend ; les politiques non prises en charge sont refusées explicitement. Les contrôles réseau ne remplacent ni l’isolation du dépôt ni la limitation des identifiants transmis. Le [guide du réseau sortant](../../../guide/advanced/egress/) détaille les modes pris en charge et leur vérification.
-
-Les transferts doivent préserver les contenus binaires et les propriétés de fichiers prises en charge. Un digest vérifie l’intégrité, pas l’identité du fournisseur des données. Les changements entrants ne doivent pas écraser silencieusement les modifications hôtes concurrentes ; conflits et synchronisations interrompues peuvent conserver des données de récupération à examiner.
+Si Daytona refuse la confirmation, l’acquisition échoue avec le code `provider` et la sandbox est supprimée. L’egress ne couvre que la sandbox : les requêtes de modèle du harness, les téléchargements d’images et les transferts de fichiers partent de l’hôte.
 
 ## Points d’entrée
 
+Guide : [Choisir une sandbox](../../../guide/choose-a-sandbox/) · [Restrictions réseau](../../../guide/network-restrictions/) · [Ajouter un provider de sandbox](../../../guide/custom-sandbox-providers/)
+
 - [createDockerSandboxProvider](../../createdockersandboxprovider/)
 - [createPodmanSandboxProvider](../../createpodmansandboxprovider/)
-- [createLocalSandboxProvider](../../createlocalsandboxprovider/)
 - [createVercelSandboxProvider](../../createvercelsandboxprovider/)
 - [createDaytonaSandboxProvider](../../createdaytonasandboxprovider/)
 - [createFirecrackerSandboxProvider](../../createfirecrackersandboxprovider/)
-- [FirecrackerOptions](../../firecrackeroptions/)
-- [EgressPolicy](../../egresspolicy/)
+- [createLocalSandboxProvider](../../createlocalsandboxprovider/)
+- [createRemoteSandboxProvider](../../createremotesandboxprovider/)
+- [createMountedSandboxProvider](../../createmountedsandboxprovider/)
 - [SandboxProvider](../../sandboxprovider/)
 - [SandboxLease](../../sandboxlease/)
-- [TransferOptions](../../transferoptions/)
-- [FileTransfers](../../filetransfers/)
-- [FileManifestEntry](../../filemanifestentry/)
-
-[Passer à la pratique avec le Guide](../../../guide/choose-a-sandbox/).
+- [ContainerOptions](../../containeroptions/)
+- [EgressPolicy](../../egresspolicy/)

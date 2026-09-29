@@ -14,10 +14,10 @@ import type { DependencyCache } from "@elie-laloum/outpost/providers/podman";
 
 ## Paramètres et propriétés
 
-| Nom    | Type     | Présence | Rôle                                                                                                                                             |
-| ------ | -------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `name` | `string` | Requis   | Nom logique de cache utilisé dans le chemin de montage ; le nom du volume moteur est déduit du dépôt, de l’image, de l’utilisateur et de la clé. |
-| `key`  | `string` | Requis   | Clé d’invalidation du cache définie par l’appelant ; sa modification sélectionne un nouveau volume moteur.                                       |
+| Nom    | Type     | Présence | Rôle                                                                                                                                                       |
+| ------ | -------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name` | `string` | Requis   | Nom du cache et de son répertoire sous /outpost/cache : jusqu’à 48 lettres minuscules, chiffres ou tirets, commençant par une lettre, unique par provider. |
+| `key`  | `string` | Requis   | Clé d’invalidation de 1 à 1024 caractères ; la changer sélectionne un nouveau volume du moteur.                                                            |
 
 ## Signature
 

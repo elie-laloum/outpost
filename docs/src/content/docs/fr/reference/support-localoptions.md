@@ -7,9 +7,9 @@ sidebar:
 
 ## Paramètres et propriétés
 
-| Nom         | Type                                            | Présence  | Rôle                                                                    |
-| ----------- | ----------------------------------------------- | --------- | ----------------------------------------------------------------------- |
-| `variables` | `Readonly<Record<string, string>> \| undefined` | Optionnel | Déclarations d’environnement explicites ; les valeurs sont des chaînes. |
+| Nom         | Type                                            | Présence  | Rôle                                                                                                                                                 |
+| ----------- | ----------------------------------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `variables` | `Readonly<Record<string, string>> \| undefined` | Optionnel | Variables d’environnement ajoutées aux commandes hôtes, en valeurs littérales. Une clé aussi déclarée par l’agent échoue avec le code configuration. |
 
 ## Signature
 

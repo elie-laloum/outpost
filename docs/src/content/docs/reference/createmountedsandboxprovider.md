@@ -13,15 +13,15 @@ import { createMountedSandboxProvider } from "@elie-laloum/outpost";
 
 ## Purpose and behavior
 
-Wrap a provider definition with mounted placement. The provider exposes the host workspace through a mount and supplies its own allocation and release implementation.
+Build a SandboxProvider with placement mounted from a name, variables and acquire(). Your acquire() exposes context.directory and context.gitDirectories in the environment, so the agent edits the host worktree directly. A blank name fails with code configuration.
 
 [Complete example and detailed rules](../../guide/custom-sandbox-providers/).
 
 ## Parameters and properties
 
-| Name         | Type                 | Presence | Meaning                                                                                            |
-| ------------ | -------------------- | -------- | -------------------------------------------------------------------------------------------------- |
-| `definition` | `ProviderDefinition` | Required | Provider name, environment variables and acquire implementation to wrap with a placement contract. |
+| Name         | Type                 | Presence | Meaning                                                                                      |
+| ------------ | -------------------- | -------- | -------------------------------------------------------------------------------------------- |
+| `definition` | `ProviderDefinition` | Required | Name, optional variables and acquire() of your provider; the factory adds placement mounted. |
 
 ## Returns
 

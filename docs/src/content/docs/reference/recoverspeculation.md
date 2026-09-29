@@ -5,6 +5,10 @@ sidebar:
   order: 0
 ---
 
+:::caution[Experimental]
+Speculation is experimental: its options and result can still change. See [Competing candidates](../../guide/speculation/).
+:::
+
 ## Import
 
 ```ts

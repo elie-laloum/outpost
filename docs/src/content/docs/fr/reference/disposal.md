@@ -13,9 +13,9 @@ import type { Disposal } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom                 | Type                  | Présence  | Rôle                                                |
-| ------------------- | --------------------- | --------- | --------------------------------------------------- |
-| `retainedDirectory` | `string \| undefined` | Optionnel | Workspace conservé pour inspection ou récupération. |
+| Nom                 | Type                  | Présence  | Rôle                                                                                                                                                                                                                            |
+| ------------------- | --------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `retainedDirectory` | `string \| undefined` | Optionnel | Worktree conservé à la fermeture : renseigné quand preserve a été demandé, ou quand il a un HEAD détaché ou des fichiers modifiés, non suivis ou ignorés. Absent quand le worktree a été supprimé, et toujours en mode current. |
 
 ## Signature
 
