@@ -1,13 +1,13 @@
 ---
 title: "Candidats concurrents"
-description: "Valider des résultats concurrents avant de choisir un gagnant."
+description: "Lancer plusieurs agents ou approches sur la même tâche, chacun sur sa branche, et garder le premier résultat qui passe vos contrôles."
 ---
 
-:::note[Expérimental]
-`speculate()` est un helper explicite pour des exécutions concurrentes bornées.
-:::
+## Mettre des candidats en concurrence
 
-Fournissez dépôt, fournisseur de sandbox, jusqu’à huit candidats, budget partagé et callback `validate`. Chaque candidat tourne sur une branche distincte. `concurrency` vaut deux par défaut.
+:::caution[Expérimental]
+`speculate()` est expérimental : ses options et son résultat peuvent encore changer. Il sélectionne une branche ; il ne la fusionne jamais.
+:::
 
 ```ts
 import { speculate } from "@elie-laloum/outpost";
@@ -21,57 +21,191 @@ const result = await speculate({
     key,
     agent: coder,
     request: {
-      brief: {
-        text: `Fix the parser using a ${key} approach. Test and commit.`,
-      },
+      brief: { text: `Fix the parser with a ${key} change. Test and commit.` },
     },
   })),
-  async validate({ sandbox }) {
-    const test = await sandbox.command({
+  async validate({ result, sandbox, signal }) {
+    if (result.commits.length === 0) return false;
+    const tests = await sandbox.command({
       executable: "npm",
       arguments: ["test"],
+      signal,
     });
-    return test.status === 0;
+    return tests.status === 0;
   },
 });
 console.log(result.status, result.winner?.branch);
 ```
 
+Chaque candidat part du commit courant du checkout, sur sa propre branche `outpost/speculation/<id>/<key>`, dans son propre worktree et sa propre sandbox. Le premier candidat accepté par `validate` gagne ; les autres s’arrêtent.
+
+| Option        | Défaut      | Rôle                                                                               |
+| ------------- | ----------- | ---------------------------------------------------------------------------------- |
+| `candidates`  | Obligatoire | 1 à 8 requêtes, chacune avec une `key` unique, un `agent` et une `request`.        |
+| `validate`    | Obligatoire | Renvoie `true` quand un candidat est acceptable.                                   |
+| `budget`      | Obligatoire | Tentatives et tokens partagés par tous les candidats.                              |
+| `concurrency` | `2`         | Candidats exécutés en même temps, de 1 à 8. Les autres attendent une place.        |
+| `cleanupMs`   | `30000`     | Durée d’attente de la fermeture de chaque sandbox à la fin d’un candidat.          |
+| `sandbox`     | Aucun       | Réglages de sandbox communs à tous les candidats : `hooks`, `bootstrap`, `limits`. |
+| `durability`  | Aucun       | Enregistre la course pour qu’elle survive à un crash : voir plus bas.              |
+
+Pour un scénario complet opposant Codex à Claude Code, voir la recette [Mettre des agents en concurrence](../compete-agents/).
+
 ## Valider le comportement réel
 
-Le callback reçoit la sandbox active et la sortie du candidat. Exécutez-y les contrôles requis et renvoyez true uniquement si le candidat est acceptable. Une affirmation de réussite de l’agent ne suffit pas à le sélectionner.
+`validate` reçoit la `key` du candidat, le `result` de son dispatch et sa `sandbox`, encore ouverte. Lancez-y vos tests et renvoyez `true` seulement s’ils passent : un agent qui affirme avoir réussi ne prouve rien.
+
+Passez `signal` à chaque commande. Il se déclenche quand un autre candidat gagne ou que la course s’arrête.
+
+Le `commit` du gagnant est le `HEAD` lu après le retour de `validate`. Un commit créé pendant la validation fait partie du gagnant ; les modifications non commitées, non. Un agent de revue lancé dans `validate` ne doit donc pas commiter : voir [Laisser un agent de revue trancher](../compete-agents/).
+
+## Lire le résultat
+
+| `result.status`    | Signification                                                                   |
+| ------------------ | ------------------------------------------------------------------------------- |
+| `winner`           | Un candidat a réussi ; voir `result.winner`.                                    |
+| `no-winner`        | Chaque candidat lancé a été rejeté ou a échoué.                                 |
+| `budget-exhausted` | Le budget a arrêté la course avant ; voir `result.error`.                       |
+| `quota`            | Aucun gagnant, et une limite d’usage ou de débit a arrêté au moins un candidat. |
+| `aborted`          | Votre `signal` a annulé la course.                                              |
+
+`result.candidates` liste chaque candidat avec sa `branch`, son `status`, le `result` de son dispatch et son `error` :
+
+| Statut du candidat | Signification                                                                     |
+| ------------------ | --------------------------------------------------------------------------------- |
+| `winner`           | Premier à passer `validate`.                                                      |
+| `rejected`         | `validate` a renvoyé `false`.                                                     |
+| `failed`           | La sandbox, l’agent, `validate` ou le nettoyage a levé une erreur ; voir `error`. |
+| `quota`            | Une limite d’usage ou de débit l’a arrêté ; voir `quota.resetAt`.                 |
+| `cancelled`        | Arrêté par un gagnant, le budget de tokens ou votre `signal`.                     |
+| `skipped`          | Jamais démarré.                                                                   |
+
+`result.usage` contient les tentatives et les tokens décomptés du budget. `result.host.changed` indique si votre checkout a bougé pendant la course.
 
 ## Budget et nettoyage
 
-Le budget partagé contrôle tentatives et tokens observés. Les candidats déjà actifs peuvent consommer davantage avant l’arrivée de leurs résultats. Les perdants sont annulés et les ressources fermées selon leur propriété ; le travail récupérable reste soumis aux règles de conservation.
+<!-- features -->
 
-Examinez le résultat sélectionné et l’état hôte avant intégration. La mise en concurrence n’autorise pas la publication et ne résout pas tous les conflits hôte possibles. Consultez le contrat exact `SpeculationResult` et la [roadmap](../../project/roadmap/) avant de dépendre de ce chemin de recherche.
+- **Limite de tentatives**: Chaque démarrage de candidat consomme une des `budget.attempts`. Une fois atteinte, aucun nouveau candidat ne démarre ; ceux en cours terminent.
+- **Limite de tokens**: Une fois `budget.usage` atteint, tous les candidats en cours sont annulés.
+- **Gagnant**: Les candidats en cours sont annulés et ceux en attente sont ignorés.
 
-API : [speculate](../../reference/speculate/) · [SpeculationResult](../../reference/speculationresult/) · [recoverSpeculation](../../reference/recoverspeculation/) · [checkSpeculationIntegration](../../reference/checkspeculationintegration/).
+Les tokens consommés dans `validate`, par exemple par un agent de revue, ne comptent pas dans `budget`. Les candidats en cours peuvent dépasser la limite de tokens avant que leur usage soit remonté. [Budgets](../budgets/) explique comment les limites sont mesurées.
 
-## Courses durables et récupération
+Chaque sandbox est libérée à la fin de son candidat. Si elle ne se ferme pas dans le délai `cleanupMs`, le candidat indique `cleanup: "pending"` et son `resourceId`.
 
-Ces ajouts sont disponibles en 7.0.0 ; la spéculation reste expérimentale. Ajouter `durability: { transporter, runId: "parser-race", version: "1" }` aux options ci-dessus. Utiliser `createLocalTransport({ directory: join(repository, ".outpost", "storage") })` pour la persistance locale, ou un Transport distant explicitement configuré. L’appelant possède le transport. Changer `version` lorsque les agents, la validation ou les réglages du provider changent. Les résultats doivent contenir des valeurs JSON sans perte ou `undefined` au premier niveau.
+## Ce qui est conservé
 
-Docker/Podman en mode monté prennent en charge le nettoyage durable. L’exécution hôte locale, les conteneurs isolés, Vercel, Daytona et Firecracker refusent actuellement les courses durables, sauf si un provider personnalisé implémente le contrat de récupération. Celui-ci doit attendre `context.registerRecovery(resourceId)` exactement une fois avant l’allocation et implémenter `recover(resourceId, options)` de façon idempotente en préservant les données du dépôt. Un enregistrement après allocation laisse une fenêtre de crash irrécupérable et viole ce contrat.
+Les branches des candidats restent toujours dans votre dépôt, gagnant comme perdants.
 
-Après un crash du coordinateur :
+Un worktree n’est supprimé que s’il est propre. Un worktree contenant des fichiers non commités, non suivis ou ignorés, comme `node_modules`, reste sous `.outpost/workspaces`, et son chemin figure dans le `retainedDirectory` du candidat. Le worktree d’un candidat en échec est conservé lui aussi, et les courses durables conservent le worktree de chaque candidat. [Rétention et nettoyage](../retention/) montre comment les supprimer.
 
-1. Arrêter indépendamment l’ancien coordinateur. Un délai expiré ou un PID distant ne prouve pas son arrêt.
-2. Inspecter l’enveloppe de la course avec `transporter.list("speculations/")` et `transporter.read(entry.key)`. La clé est `speculations/<SHA-256 de runId>.json` ; conserver la `revision` de l’objet inspecté et les identifiants de ressources.
-3. Appeler `recoverSpeculation({ transporter, runId, revision, coordinatorStopped: true })`. Une révision modifiée refuse la récupération. Cela libère la propriété sans supprimer directement les ressources.
-4. Appeler `speculate()` avec la même configuration et `durability.resume: "retry-incomplete"` pour autoriser le rejeu. Les ressources enregistrées sont réconciliées avant les nouvelles tentatives. Une course terminée est renvoyée sans réallouer de candidats.
+## Vérifier l’intégration avant de fusionner
 
-Une course terminée avec le statut `quota` n’est pas définitive : l’appel suivant relance seulement les candidats arrêtés par une limite d’usage ou de débit, en nouvelles tentatives. Voir les [pauses sur quota](../quota-pauses/#spéculation).
+`result.integration` indique si le gagnant se fusionne dans le `HEAD` de votre checkout, calculé avec `git merge-tree` sans toucher à vos fichiers ni à l’index.
 
-Les candidats validés survivent à un crash entre validation et nettoyage. Les exécutions interrompues repartent sur une nouvelle branche depuis le commit initial ; leurs anciennes branches et worktrees restent disponibles dans `previousAttempts`. Le mode durable conserve les worktrees candidats même en cas de réussite. Les workspaces, l’historique Git et les transcripts sur disque doivent rester accessibles : stocker le checkpoint dans S3 ne rend pas le checkout portable. La reprise concerne l’orchestration, pas un processus d’agent interrompu. Un rejeu peut répéter des effets externes et consomme une tentative supplémentaire ; aucune exécution exactement une fois n’est garantie.
+| `integration.status` | Signification                                                                                     |
+| -------------------- | ------------------------------------------------------------------------------------------------- |
+| `clean`              | La branche se fusionne sans conflit.                                                              |
+| `conflict`           | Les chemins en conflit sont dans `conflicts`.                                                     |
+| `blocked`            | Voir `reason` : modifications non commitées, `HEAD` détaché, branche déplacée ou Git trop ancien. |
 
-L’usage observé et les tentatives restent cumulés. Un crash pendant l’exécution marque l’usage incomplet car les tokens non rapportés ne peuvent pas être reconstruits. Les budgets exclusivement en tokens refusent alors toute nouvelle admission ; fournir aussi un budget de tentatives. Les écritures conditionnelles bloquent les anciens coordinateurs. Une erreur de stockage arrête les admissions ; la propriété est conservée pour une récupération explicite. Les erreurs sont persistées sous forme de chaînes diagnostiques, pas d’instances Error actives.
+Votre checkout peut changer après la course. Vérifiez à nouveau juste avant de fusionner :
 
-`cleanupMs` vaut 30 secondes par défaut pour chaque fermeture/récupération et pour les workers après annulation. Le délai borne l’attente, pas la capacité physique du provider à s’arrêter. `cleanup: "pending"` et les identifiants enregistrés restent visibles si le travail ne se termine pas ; la propriété reste détenue. Arrêter le coordinateur avant de la récupérer, puis réconcilier toute ressource encore active. Une allocation tardive reste possible tant que ce coordinateur n’est pas arrêté. Un crash avant l’enregistrement ne laisse aucune sandbox allouée selon le contrat du provider, mais peut laisser un worktree à inspecter.
+```ts
+import { checkSpeculationIntegration } from "@elie-laloum/outpost";
+import { repository } from "./outpost.config.mts";
 
-## Vérifier l’intégration
+export async function canMerge(branch: string, commit?: string) {
+  const check = await checkSpeculationIntegration(repository, branch, commit);
+  return check.status === "clean";
+}
+```
 
-Le gagnant sélectionné comporte `result.integration` : `clean`, `conflict` avec les chemins concernés, ou `blocked` avec une raison. Un checkout hôte sale ou détaché bloque la vérification. Git doit prendre en charge `merge-tree --write-tree` ; son absence produit blocked. La vérification enregistre les commits exacts sans modifier les fichiers de travail ni l’index.
+Passez `winner.branch` et `winner.commit`. Une branche déplacée depuis la validation donne `blocked`. La vérification ne fusionne jamais : lancez `git merge` vous-même.
 
-Juste avant une fusion explicite, relancer `checkSpeculationIntegration(repository, winner.branch, winner.commit)`. Une branche candidate déplacée bloque la vérification. Toute modification hôte rend un ancien résultat périmé ; un contrôle clean n’est ni un verrou ni une autorisation de fusion. Résoudre explicitement les conflits et conserver la branche candidate pour revue.
+## Survivre à un crash
+
+Passez `durability` à `speculate()`. Tentatives, usage, sorties et ressources allouées sont enregistrés via un [transport](../storage/), et une course terminée est renvoyée sans être relancée.
+
+```ts
+import { join } from "node:path";
+import {
+  createLocalTransport,
+  type SpeculationDurability,
+} from "@elie-laloum/outpost";
+import { repository } from "./outpost.config.mts";
+
+export const durability: SpeculationDurability = {
+  transporter: createLocalTransport({
+    directory: join(repository, ".outpost", "storage"),
+  }),
+  runId: "parser-race",
+  version: "1",
+};
+```
+
+Changez `version` quand vous modifiez les agents ou `validate`. Une course enregistrée dont les briefs, le budget, le provider ou la `version` diffèrent est refusée : relancez-la sous un nouveau `runId`.
+
+Une course durable exige un provider capable de retrouver et d’arrêter ses sandboxes après un crash. Docker et Podman dans leur mode monté par défaut en sont capables ; les autres providers sont refusés, sauf si vous [implémentez la récupération](../custom-sandbox-providers/).
+
+### Récupérer après un crash
+
+Une course interrompue par un crash reste détenue par son coordinateur, le processus qui a lancé `speculate()`. Libérez-la avant de la rejouer.
+
+<!-- flow -->
+
+1. **Arrêter**: Terminer l’ancien coordinateur.
+   - **Arrêter le processus**: Un délai écoulé ou un PID absent ne prouve pas qu’il est arrêté.
+     - host
+2. **Inspecter**: Lire la course enregistrée.
+   - **Lire l’état enregistré**: Gardez sa `revision` ; le contenu liste le `resourceId` de chaque candidat.
+     - `transporter.read()`
+3. **Libérer**: Abandonner l’ancienne propriété.
+   - **Récupérer**: Échoue si la révision a changé depuis votre lecture ; ne supprime rien.
+     - `recoverSpeculation()`
+4. **Rejouer**: Relancer la course.
+   - **Autoriser le rejeu**: Mêmes options, avec `resume: "retry-incomplete"` dans `durability`.
+     - `speculate()`
+   - **Réconcilier**: Les sandboxes enregistrées sont arrêtées ; les candidats interrompus repartent sur une nouvelle branche.
+     - sandbox
+
+```ts
+import { createHash } from "node:crypto";
+import { join } from "node:path";
+import { createLocalTransport, recoverSpeculation } from "@elie-laloum/outpost";
+import { repository } from "./outpost.config.mts";
+
+const transporter = createLocalTransport({
+  directory: join(repository, ".outpost", "storage"),
+});
+const runId = "parser-race";
+const key = `speculations/${createHash("sha256").update(runId).digest("hex")}.json`;
+const saved = await transporter.read(key);
+if (saved) {
+  console.log(new TextDecoder().decode(saved.bytes));
+  await recoverSpeculation({
+    transporter,
+    runId,
+    revision: saved.revision,
+    coordinatorStopped: true,
+  });
+}
+```
+
+Un candidat interrompu repart comme une nouvelle tentative, sur `…/<key>/2`, depuis le commit d’origine. Son ancienne branche et son ancien worktree figurent dans `result.previousAttempts`. Les candidats validés avant le crash gardent leur issue.
+
+## Reprendre après un quota
+
+Une course durable terminée avec le statut `quota` n’est pas définitive. Rappeler `speculate()` avec la même `durability` relance uniquement les candidats arrêtés par une limite d’usage ou de débit, comme nouvelles tentatives. `result.quota.resetAt` donne l’heure de réinitialisation quand l’agent la communique ; [Pauses sur quota](../quota-pauses/) explique comment l’attendre.
+
+## Limites
+
+- `speculate()` ne fusionne jamais, ne pousse rien et n’ouvre aucune pull request.
+- Une intégration `clean` n’est pas un verrou : toute modification ultérieure de votre checkout la rend obsolète.
+- `cleanupMs` borne l’attente, pas le provider : une sandbox `pending` peut encore tourner jusqu’à sa réconciliation.
+- La récupération reprend la course, pas un processus d’agent interrompu. Un candidat rejoué peut répéter des effets externes.
+- Une course durable a besoin de ses worktrees sur disque : un transport distant enregistre l’état, pas le checkout.
+- Les résultats durables doivent contenir des valeurs JSON, et un crash en cours d’exécution rend l’usage incomplet : ajoutez `budget.attempts` aux limites de tokens.
+
+API : [speculate](../../reference/speculate/) · [SpeculationOptions](../../reference/speculationoptions/) · [SpeculationResult](../../reference/speculationresult/) · [SpeculativeCandidateResult](../../reference/speculativecandidateresult/) · [SpeculativeValidation](../../reference/speculativevalidation/) · [checkSpeculationIntegration](../../reference/checkspeculationintegration/) · [SpeculationDurability](../../reference/speculationdurability/) · [recoverSpeculation](../../reference/recoverspeculation/).

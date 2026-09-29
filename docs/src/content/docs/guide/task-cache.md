@@ -1,9 +1,11 @@
 ---
 title: "Result cache"
-description: "Reuse a task's JSON result instead of executing it again with the same inputs."
+description: "Reuse a task's JSON result when its inputs have not changed, so a repeated review or analysis is not paid for twice."
 ---
 
-Available since 8.0.0. A task with a `cache` fingerprints its inputs and stores its JSON result in a Transport. A later execution with the same fingerprint restores that result instead of running the task, so a repeated review or analysis is not paid for twice.
+## Cache a task
+
+Give a task a `cache` with a store, a `version` and a `key`. The second run finds an entry with the same fingerprint and restores its value without executing the task.
 
 ```ts
 import { mkdtemp } from "node:fs/promises";
@@ -40,79 +42,127 @@ for (let run = 1; run <= 2; run++) {
 
 <!-- check:run -->
 
+The second run restores the first result: `execution` stays at 1 and `cacheHit` is `true`.
+
 ## Choose the key
 
-`key(ctx)` returns the lossless JSON inputs that determine the result. The fingerprint combines it with the workflow name, the task key and `version`. Object key order does not matter. The callback runs before each execution with `attempt` 0 and can read declared dependencies with `ctx.value()`. An exception, or a value that is not lossless JSON, fails the task.
+The fingerprint combines the workflow name, the task key, `version` and the JSON value `key(ctx)` returns. Put in it everything that can change the answer.
 
-Include everything that can change the answer: the repository state, the brief, the agent and model, and relevant dependency values. `repositoryFingerprint()` hashes `HEAD`, tracked changes, the index and untracked files (excluding `.outpost/`), so an uncommitted edit changes the key. A commit ID alone would reuse a result computed for a different working tree.
+| Input                                   | Where it goes                             |
+| --------------------------------------- | ----------------------------------------- |
+| Repository state, including local edits | `await repositoryFingerprint(repository)` |
+| Brief or prompt text                    | The key                                   |
+| Agent and model                         | The key                                   |
+| Values from dependencies                | The key, read with `ctx.value(task)`      |
+| Task code, output shape, configuration  | `version`: change it when they change     |
 
-```ts
+```ts title="review.mts"
 import {
-  defineAgentTask,
   createLocalTransport,
-  repositoryFingerprint,
-  defineTask,
   createTaskCacheStore,
+  defineIsolatedTask,
+  defineTask,
+  repositoryFingerprint,
 } from "@elie-laloum/outpost";
-import type { Sandbox } from "@elie-laloum/outpost";
+import { coder, repository, sandboxProvider } from "./outpost.config.mts";
 
-declare const session: Sandbox;
-const repository = "/projects/app";
-const brief = "Review the parser for unsafe input handling.";
+const brief = "Review the parser for unsafe input handling. Do not edit files.";
 const store = createTaskCacheStore({
   transporter: createLocalTransport({
     directory: `${repository}/.outpost/storage`,
   }),
 });
-const reviewer = defineAgentTask({
+const reviewer = defineIsolatedTask({
   key: "reviewer",
-  sandbox: session,
-  request: () => ({ brief: { text: brief } }),
+  request: () => ({
+    repository,
+    sandboxProvider,
+    agent: coder,
+    brief: { text: brief },
+  }),
 });
 const review = defineTask({
   key: "review",
   cache: {
     store,
     version: "review-v1",
-    key: async () => [
-      await repositoryFingerprint(repository),
-      brief,
-      "claude-sonnet-5",
-    ],
+    key: async () => [await repositoryFingerprint(repository), brief, "codex"],
   },
-  async perform(ctx) {
-    const result = await reviewer.perform(ctx);
-    return { text: result.text };
+  perform: async (ctx) => {
+    const { text } = await reviewer.perform(ctx);
+    return { text };
   },
 });
 ```
 
-`version` is required. Change it when the task implementation, agent configuration, prompt or output contract changes. Outpost does not invalidate entries on upgrades or code changes it cannot see.
+`repositoryFingerprint()` hashes `HEAD`, the index, uncommitted changes and non-ignored untracked files outside `.outpost/`, so a local edit changes the key. A key that throws or is not lossless JSON fails the task.
 
-## What a hit restores
+## Know what a hit restores
 
-A hit restores only the stored value. It records no attempt and no usage, consumes no attempt budget, and sets `TaskRecord.cacheHit`. Dependent tasks receive the restored value as usual.
+| On a hit                                                  | Result                                 |
+| --------------------------------------------------------- | -------------------------------------- |
+| Task value                                                | Restored and passed to dependent tasks |
+| `TaskRecord.cacheHit`                                     | `true`                                 |
+| Attempts, usage, attempt budget                           | None recorded or consumed              |
+| Files, commits, branches, sandbox state, artifacts, calls | Not replayed                           |
 
-Nothing else is replayed: no files, commits, branches, sandbox state, artifacts or external calls. Cache only tasks whose value is the product, such as reviews, classifications, summaries or analyses. A cached value naming a commit does not put that commit on your current branch.
+Cache tasks whose value is the product: reviews, classifications, summaries, analyses.
 
-Results must be lossless JSON or `undefined`. Otherwise the task fails after it executes, without retrying. `defineAgentTask` and `defineIsolatedTask` reject `cache` because their dispatch result is not JSON; cache a task that returns a projection, as above. Gates and interactive tasks also reject it. `defineLoopTask` accepts `cache`: a hit skips every round.
+## Pick a task that accepts a cache
 
-## Expiry and refresh
+The result must be lossless JSON or `undefined`; otherwise the task fails after it executes, without a retry.
 
-`maxAgeMs` treats an older entry as a miss; the task runs and replaces it. `mode: "refresh"` ignores existing entries, runs the task and replaces its entry, for example to repopulate the cache after a model update.
+| Task                                                                                                                                | `cache`                                                     |
+| ----------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| [`defineTask`](../../reference/definetask/) and helpers built on it (`defineCommandTask`, `defineArtifactTask`, `defineQueuedTask`) | Yes                                                         |
+| [`defineLoopTask`](../../reference/definelooptask/)                                                                                 | Yes: a hit skips every round                                |
+| `defineAgentTask`, `defineIsolatedTask`                                                                                             | No: call it from a `defineTask` that returns JSON, as above |
+| Gates (`defineApprovalTask`, `definePauseTask`) and interactive tasks                                                               | No                                                          |
 
-## Failures and events
+## Expire or refresh entries
 
-Each cached task emits `WorkflowEvent` with `type: "cache"` and `cache` set to `hit`, `miss`, `stored` or `failed`. Exhaustive event consumers must handle this type.
+| Option                 | Effect                                                                                 |
+| ---------------------- | -------------------------------------------------------------------------------------- |
+| `maxAgeMs: 86_400_000` | An entry older than one day is a miss; the task runs and replaces it.                  |
+| `mode: "refresh"`      | Skip the lookup, run the task and replace its entry, for example after a model update. |
 
-The cache never decides the task outcome. If the store cannot be read, an entry is corrupt or belongs to another fingerprint, or the result cannot be written, the event is `failed` with an `error` message and the task runs or completes normally. Cancellation still cancels the task.
+## Watch cache events
 
-There is no single-flight coordination: concurrent executions with the same fingerprint all run, and the first entry written is kept. With [checkpoints](../durable-runs/), a completed task is restored from the checkpoint without consulting the cache, and `cacheHit` is persisted with its record.
+```ts
+import type { Workflow } from "@elie-laloum/outpost";
 
-## Trust and retention
+declare const workflow: Workflow;
 
-Entries are neither signed nor authenticated. Anyone who can write the transport controls the values tasks restore. Use a transport at least as trusted as the repository, and do not share it across trust boundaries. Entries contain task outputs, which may be sensitive.
+await workflow.start({
+  observe: (event) => {
+    if (event.type === "cache")
+      console.log(event.key, event.cache, event.error);
+  },
+});
+```
 
-`createTaskCacheStore` stores entries under `task-cache/<fingerprint>.json`. They are kept until you remove them: add the `task-cache` scope to a [retention policy](../retention/) to prune entries older than `minAgeMs`.
+| `event.cache` | Meaning                                                                     |
+| ------------- | --------------------------------------------------------------------------- |
+| `hit`         | The value was restored.                                                     |
+| `miss`        | No usable entry: missing, expired, or `mode: "refresh"`.                    |
+| `stored`      | The result was written after the task succeeded.                            |
+| `failed`      | The store failed, or an entry was invalid; `event.error` holds the message. |
 
-API: [TaskCacheOptions](../../reference/taskcacheoptions/) · [createTaskCacheStore](../../reference/createtaskcachestore/) · [repositoryFingerprint](../../reference/repositoryfingerprint/) · [TaskCacheEntry](../../reference/taskcacheentry/).
+The cache never decides the outcome: after a `failed` read the task runs, after a `failed` write it completes normally.
+
+## Protect and prune entries
+
+:::caution
+Entries are not authenticated: anyone who can write to the transport controls the values your tasks restore. Use a transport at least as trusted as the repository.
+:::
+
+Entries live under `task-cache/` in the transport until you remove them. Add the `task-cache` scope to a [retention policy](../retention/) to prune those older than `minAgeMs`.
+
+## Limits
+
+- Concurrent executions with the same fingerprint all run; the first entry written is kept.
+- A task already completed in a [checkpoint](../durable-runs/) is restored from it without reading the cache.
+- Entries are not invalidated when your code or agent changes: change `version`.
+- `createTaskCacheStore` does not store entries above 16 MiB (`maxBytes`); the write reports `failed`.
+
+API: [TaskCacheOptions](../../reference/taskcacheoptions/) · [createTaskCacheStore](../../reference/createtaskcachestore/) · [repositoryFingerprint](../../reference/repositoryfingerprint/) · [TaskCacheEntry](../../reference/taskcacheentry/) · [WorkflowEvent](../../reference/workflowevent/).

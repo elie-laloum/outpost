@@ -1,9 +1,25 @@
 ---
 title: "Verification loops"
-description: "Repeat work with feedback until a check accepts it or a limit is reached."
+description: "Let an agent try again with the check's feedback until the check accepts its work or the rounds run out, all in one workflow task."
 ---
 
-`defineLoopTask()` alternates `attempt` and `check` inside one workflow node. It is available since 8.0.0. A rejected check supplies text feedback to the next round; a successful check exposes the accepted attempt result to dependent tasks.
+## Repeat until a check accepts
+
+`defineLoopTask()` alternates two callbacks inside one workflow task: `attempt` produces a candidate, `check` accepts it or says what is wrong.
+
+<!-- flow -->
+
+1. **Attempt**: Your `attempt(context, feedback)` returns a candidate.
+   - **First round**: The callback receives `undefined` as feedback.
+   - **Later rounds**: The callback receives the text of the last rejection.
+2. **Check**: Your `check(context, candidate)` returns a verdict.
+   - **Accept**: Return `{ done: true }`.
+   - **Reject**: Return `{ done: false, feedback }` with a text.
+3. **Next**: The verdict decides.
+   - **Next round**: A rejection feeds the next attempt.
+   - **Done**: The accepted candidate becomes the task's value.
+   - **Exhausted**: A rejection in the last round fails the task.
+     - `LoopTaskExhausted`
 
 ```ts
 import { defineLoopTask, defineWorkflow } from "@elie-laloum/outpost";
@@ -11,84 +27,153 @@ import { defineLoopTask, defineWorkflow } from "@elie-laloum/outpost";
 const fix = defineLoopTask({
   key: "fix",
   maxRounds: 3,
-  attempt: (ctx, feedback) => ({ round: ctx.round, feedback: feedback ?? "" }),
+  attempt: (context, feedback) => ({
+    round: context.round,
+    feedback: feedback ?? "",
+  }),
   check: (_, candidate) =>
     candidate.round === 2
       ? { done: true }
       : { done: false, feedback: "Cover the missing edge case." },
 });
-const result = await defineWorkflow("verified", [fix]).start({
-  budget: { attempts: 3 },
-});
+
+const result = await defineWorkflow("verified", [fix]).start();
 result.unwrap();
-console.log(result.value(fix).round); // 2
+console.log(result.value(fix)); // { round: 2, feedback: 'Cover the missing edge case.' }
 ```
 
 <!-- check:run -->
 
+Round 1 is rejected; round 2 receives the feedback and is accepted. `after`, `condition` and [`cache`](../task-cache/) work as on [other tasks](../task-dependencies/).
+
 ## Code, then run a command
 
-Reuse a caller-owned sandbox prepared as in [sandbox sessions](../sandbox-sessions/). Calling a `defineAgentTask`'s `perform(ctx)` connects streaming usage, cancellation and observation to the loop context. Return a JSON projection of its result when using checkpoints: the full dispatch result has continuation methods and cannot be persisted as JSON.
+The agent works in `attempt`, the tests run in `check`, both in one warm [sandbox](../sandbox-sessions/).
 
 ```ts
-import { defineAgentTask, defineLoopTask } from "@elie-laloum/outpost";
-import type { Sandbox } from "@elie-laloum/outpost";
+import {
+  createSandbox,
+  defineAgentTask,
+  defineLoopTask,
+  defineWorkflow,
+} from "@elie-laloum/outpost";
+import { coder, repository, sandboxProvider } from "./outpost.config.mts";
 
-declare const session: Sandbox;
+await using sandbox = await createSandbox({
+  repository,
+  sandboxProvider,
+  agent: coder,
+  branch: { mode: "named", name: "outpost/fix-tests" },
+});
+
 const fix = defineLoopTask({
   key: "fix-tests",
   maxRounds: 4,
-  timeoutMs: 300_000,
-  async attempt(ctx, feedback) {
-    const run = defineAgentTask({
+  async attempt(context, feedback) {
+    const coding = defineAgentTask({
       key: "coder",
-      sandbox: session,
+      sandbox,
       request: () => ({
-        brief: { text: `Fix the failing tests.\n${feedback ?? ""}` },
+        brief: { text: `Fix the failing tests and commit.\n${feedback ?? ""}` },
       }),
     });
-    const result = await run.perform(ctx);
-    return { text: result.text, conversation: result.conversation ?? null };
+    const result = await coding.perform(context);
+    return { summary: result.text, commits: result.commits.length };
   },
-  async check(ctx) {
-    const run = await session.command({
+  async check(context) {
+    const tests = await sandbox.command({
       executable: "npm",
       arguments: ["test"],
-      signal: ctx.signal,
+      signal: context.signal,
     });
-    return run.status === 0
+    return tests.status === 0
       ? { done: true }
-      : { done: false, feedback: `${run.stdout}\n${run.stderr}` };
+      : { done: false, feedback: `${tests.stdout}\n${tests.stderr}` };
   },
 });
+
+const result = await defineWorkflow("fix-tests", [fix]).start();
+result.unwrap();
+console.log(result.value(fix).summary);
 ```
 
-Only `fix` belongs in the workflow graph; `coder` is an execution helper. The caller owns sandbox closure and Git integration. Concurrent nodes must not dispatch into the same exclusively owned session.
+`coding.perform(context)` ties the agent's tokens and cancellation to the loop and its [budget](../budgets/). `coder` is a helper: only `fix` goes in the workflow. `attempt` returns JSON because a [checkpoint](../durable-runs/) saves every candidate, even rejected ones.
 
-## Use a second agent to review
+A failing `npm test` returns a nonzero `status`, and its output becomes the feedback. You decide where it goes: the next brief, as here, or a [continued conversation](../conversations/).
 
-`check` may call another `defineAgentTask.perform(ctx)` on a reviewer sandbox and turn its structured response into `{ done: true }` or `{ done: false, feedback }`. Both agents' reported usage counts against the same workflow budget. Use [structured responses](../typed-responses/) to validate the review decision.
+:::caution
+A direct `sandbox.dispatch()` escapes the loop's budget and cancellation. Pass it `context.signal` and report its tokens with `context.reportUsage()`.
+:::
 
-A direct `session.dispatch()` inside a callback does not automatically connect its usage or signal to the workflow. Prefer the helper above; custom integrations must forward `ctx.signal`, propagate observation and report usage synchronously through `ctx.reportUsage`, including failed requests. Do not also report a helper's final totals: it already reconciles streamed counters.
+## Ask a second agent to review
 
-Feedback is passed unchanged to `attempt`; the callback chooses its prompt. To continue an existing conversation, explicitly set the dispatch request's `continuation` to a supported conversation ID and use the feedback in the next brief. See [conversation history](../conversations/) for capture and restoration. The loop never silently selects a continuation strategy or restores a sandbox.
+`check` can dispatch a reviewer and turn its [typed response](../typed-responses/) into a verdict. Both agents count against the same budget.
 
-## Limits and failures
+```ts
+import {
+  createAgent,
+  createClaudeHarness,
+  defineAgentTask,
+  defineJsonResponse,
+} from "@elie-laloum/outpost";
+import type {
+  LoopCheckResult,
+  LoopTaskContext,
+  Sandbox,
+} from "@elie-laloum/outpost";
+import { z } from "zod";
 
-`maxRounds` is a positive safe integer and bounds logical rounds. `ctx.round` starts at one. Each new round consumes one workflow attempt; replaying an interrupted phase consumes another, even when only the check runs. Tokens are counted as callbacks report them. Set [workflow budgets](../budgets/) and pass cancellation to every operation.
+declare const sandbox: Sandbox;
 
-`timeoutMs` covers both callbacks in one round execution and renews on phase replay. Cancellation and deadlines are cooperative: callbacks must honor `ctx.signal`. An exception from either callback fails the task without automatically consuming the remaining rounds. A rejected check is not a technical retry. There is no loop-level `retry` option.
+const reviewer = createAgent({
+  harness: createClaudeHarness({ authentication: "account" }),
+});
+const review = defineJsonResponse({
+  tag: "review",
+  schema: z.object({ approved: z.boolean(), feedback: z.string() }),
+});
 
-When the last check rejects, `WorkflowResult.errors` includes `LoopTaskExhausted`, with `key`, `maxRounds` and the last `feedback`. Dependent tasks cannot run. `result.unwrap()` still uses the ordinary workflow failure contract.
+async function reviewChanges(
+  context: LoopTaskContext,
+): Promise<LoopCheckResult> {
+  const reviewing = defineAgentTask({
+    key: "reviewer",
+    sandbox,
+    request: () => ({
+      agent: reviewer,
+      response: review,
+      brief: {
+        text: 'Review the last commit. End with <review>{"approved": false, "feedback": "What to change"}</review>.',
+      },
+    }),
+  });
+  const { value } = await reviewing.perform(context);
+  return value.approved
+    ? { done: true }
+    : { done: false, feedback: value.feedback };
+}
+```
+
+Pass it as `check: reviewChanges`. The request's `agent` replaces the sandbox's agent for this dispatch only.
+
+## Limits
+
+| Limit or event         | What happens                                                                                     |
+| ---------------------- | ------------------------------------------------------------------------------------------------ |
+| `maxRounds`            | Caps the rounds, resumes included.                                                               |
+| Workflow attempts      | Each round, and each replay of an interrupted round, counts against `budget.attempts`.           |
+| `timeoutMs`            | Bounds each round. It stops callbacks that honor `context.signal`.                               |
+| An exception           | Fails the task at once. A loop task has no `retry` option.                                       |
+| The last check rejects | The task fails with `LoopTaskExhausted`, which holds the last `feedback`. Dependents do not run. |
+
+[Fix a failing CI build](../fix-failing-ci/) handles each outcome in a complete script.
 
 ## Checkpoint and resume
 
-Use the existing [durable-run configuration](../durable-runs/). Each round records `attempt`, `check` and `complete` transitions in `TaskRecord.rounds`, and emits `WorkflowEvent` with `type: "loop"`, `round` and `phase`. Exhaustive event consumers must handle this new type. Observer delivery remains separate from durable storage.
+With a [checkpoint](../durable-runs/), each candidate is saved before `check`. On resume, a saved candidate goes straight to `check`, and rejected rounds are not rerun.
 
-The candidate is saved before `check`. On resume, a saved candidate goes directly to verification; completed rejected rounds supply feedback without rerunning their callbacks. A saved accepted round can finish the task without another callback. Resuming an incomplete workflow still requires `resume: "retry-incomplete"`, because an interrupted callback may already have performed effects. An exhausted round limit stays exhausted. Changing `maxRounds` invalidates the checkpoint identity; change the checkpoint version when callback implementations or inputs change.
+An interrupted round replays only with `resume: "retry-incomplete"`, since it may already have changed files. Changing `maxRounds` makes the checkpoint incompatible.
 
-All persisted candidates must be lossless JSON or top-level `undefined`, even those rejected later. Without a checkpoint, arbitrary in-memory values are allowed and round records omit candidate outputs. Checkpoints preserve workflow progress, not sandbox files or executable callbacks: recreate compatible definitions and restore the intended workspace/session before resuming.
+Each task record lists its `rounds`, and each phase emits a `loop` workflow event. `context.idempotencyKey` differs per round and phase, to deduplicate effects as in [Job queues and workers](../job-queues/).
 
-`ctx.idempotencyKey` is stable for one execution, task, logical round and callback phase; attempt and check have distinct keys. Effect services must persist their own deduplication receipts. Re-executed paid model calls are still new consumption; do not reuse an old usage receipt to hide their cost.
-
-API: [defineLoopTask](../../reference/definelooptask/) · [LoopTaskOptions](../../reference/looptaskoptions/) · [LoopTaskContext](../../reference/looptaskcontext/) · [LoopTaskExhausted](../../reference/looptaskexhausted/).
+API: [defineLoopTask](../../reference/definelooptask/) · [LoopTaskOptions](../../reference/looptaskoptions/) · [LoopTaskContext](../../reference/looptaskcontext/) · [LoopCheckResult](../../reference/loopcheckresult/) · [LoopTaskExhausted](../../reference/looptaskexhausted/) · [defineAgentTask](../../reference/defineagenttask/).

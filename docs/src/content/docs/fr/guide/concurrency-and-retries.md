@@ -1,34 +1,52 @@
 ---
 title: "Concurrence, relances et délais"
-description: "Contrôler concurrence, propagation des échecs et tentatives."
+description: "Exécuter les tâches indépendantes en parallèle, relancer celles qui échouent, borner leur durée et choisir ce qu’un échec arrête."
 ---
-
-Définissez `concurrency` sur `start()` et la politique de reprise sur chaque tâche. Les reprises sont explicites car une nouvelle tentative peut répéter des effets.
 
 ```ts
 import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
 
-const check = defineTask({
-  key: "check",
-  retry: { attempts: 2, delayMs: 100 },
-  timeoutMs: 5_000,
-  perform: ({ signal, attempt }) => {
-    signal.throwIfAborted();
-    return { attempt, ok: true };
+const flaky = defineTask({
+  key: "flaky",
+  retry: { attempts: 3, delayMs: 100 },
+  perform: ({ attempt }) => {
+    if (attempt < 2) throw new Error("Temporary failure");
+    return { attempt };
   },
 });
-const result = await defineWorkflow("checks", [check]).start({
+const lint = defineTask({ key: "lint", perform: () => "clean" });
+
+const result = await defineWorkflow("checks", [flaky, lint]).start({
   concurrency: 2,
 });
 result.unwrap();
-console.log(result.status);
+console.log(result.value(flaky)); // { attempt: 2 }
 ```
 
 <!-- check:run -->
 
-## Reprises progressives
+`flaky` et `lint` démarrent ensemble. `flaky` échoue une fois, attend 100 ms et réussit à sa deuxième tentative ; son enregistrement dans `result.tasks` indique `attempts: 2`.
 
-Le délai fixe existant reste le comportement par défaut. `backoff: "exponential"` double `delayMs` après chaque échec ; `maxDelayMs` plafonne le délai local (30 secondes par défaut en mode exponentiel) ; `jitter: "full"` répartit uniformément les reprises entre zéro et ce délai plafonné. L’aléa vaut `"none"` par défaut. Configurez un `delayMs` positif pour obtenir une attente progressive utile.
+## Exécuter des tâches en parallèle
+
+`start({ concurrency })` fixe le nombre de tâches exécutées en même temps. La valeur par défaut est `1` : les tâches s’enchaînent une par une. Une tâche attend toujours chaque tâche de sa liste `after`.
+
+:::caution
+Des tâches qui partagent une sandbox ne doivent pas s’exécuter en même temps. Ordonnez-les avec `after`, ou donnez à chacune sa propre sandbox avec `defineIsolatedTask()`.
+:::
+
+## Relancer une tâche en échec
+
+Une tâche s’exécute une seule fois, sauf si vous lui donnez une politique `retry`.
+
+| Option       | Défaut                                          | Effet                                                          |
+| ------------ | ----------------------------------------------- | -------------------------------------------------------------- |
+| `attempts`   | Obligatoire                                     | Nombre total de tentatives, la première comprise.              |
+| `delayMs`    | `0`                                             | Attente avant chaque relance.                                  |
+| `backoff`    | `"fixed"`                                       | `"exponential"` double l’attente après chaque échec.           |
+| `maxDelayMs` | 30 000 en mode exponentiel, sinon aucun plafond | Borne supérieure de l’attente calculée.                        |
+| `jitter`     | `"none"`                                        | `"full"` tire une attente au hasard entre zéro et le plafond.  |
+| `accepts`    | Toute erreur est relancée                       | `(error, attempt) => boolean` ; `false` fait échouer la tâche. |
 
 ```ts
 import { OutpostError, defineTask, defineWorkflow } from "@elie-laloum/outpost";
@@ -47,37 +65,103 @@ const request = defineTask({
   },
   perform: ({ signal }) => {
     signal.throwIfAborted();
-    return "Remplacez par votre requête annulable";
+    return "Replace with your cancellable request";
   },
 });
-const result = await defineWorkflow("requests", [request]).start({
-  timeoutMs: 60_000,
-});
+const result = await defineWorkflow("requests", [request]).start();
 result.unwrap();
+console.log(result.tasks[0]?.attempts); // 1
 ```
 
-Les fournisseurs HTTP de modèles conservent les en-têtes `Retry-After` valides (secondes ou date HTTP) dans `OutpostError.details.retryAfterMs`. La reprise de tâche attend au minimum cette durée, même au-delà de `maxDelayMs`, sans la réduire par l’aléa. Les en-têtes invalides sont ignorés ; une date passée donne zéro. Une intégration personnalisée peut lever une `OutpostError` avec un `details.retryAfterMs` fini, positif ou nul, inférieur ou égal à `Number.MAX_SAFE_INTEGER`, en millisecondes. Les erreurs arbitraires de clients HTTP et stderr des CLI ne sont pas analysés automatiquement.
+<!-- check:run -->
 
-Les reprises exigent toujours une politique explicite de tâche et respectent `accepts`. Les fournisseurs ne relancent pas eux-mêmes les requêtes : rejouer une tâche peut répéter ses appels d’outils ou autres effets antérieurs. Les événements de reprise exposent le `delayMs` choisi. Les longues attentes sont découpées en segments annulables pour éviter qu’un dépassement de capacité des timers ne provoque une reprise immédiate.
+Chaque relance émet un événement `retry` avec son `delayMs` (voir [Suivre la progression](../progress/)). Les relances comptent dans `budget.attempts` si vous fixez un [budget](../budgets/).
 
-## Délai global du workflow
+### Respecter `Retry-After`
 
-`start({ timeoutMs })` démarre un délai unique avant l’acquisition du checkpoint et couvre conditions, tentatives, ordonnancement des dépendances et attentes de reprise. Le `timeoutMs` de tâche s’applique toujours indépendamment à chaque tentative. Les deux délais doivent être des entiers positifs dans la plage des timers (au maximum 2 147 483 647 millisecondes).
+Les [fournisseurs de modèles](../model-providers/) recopient un en-tête `Retry-After` valide dans `OutpostError.details.retryAfterMs`. La relance attend alors au moins cette durée, même au-delà de `maxDelayMs` et quel que soit le jitter. Votre propre code obtient le même comportement en levant une `OutpostError` avec `details.retryAfterMs` en millisecondes.
 
-L’expiration arrête l’admission, annule les tâches actives via `context.signal` et retourne `status: "failed"` avec une `OutpostError` de `code: "timeout"` dans `errors`. Une annulation externe survenue en premier conserve `status: "cancelled"`. Les valeurs déjà terminées restent disponibles ; les valeurs tardives sont refusées. Nettoyage et persistance sont attendus : du code ou du stockage ignorant l’annulation peut retarder la fin au-delà du délai.
+## Fixer des délais
 
-Chaque appel de reprise à `start()` reçoit un nouveau délai ; le temps entre appels et les pauses d’approbation ne s’accumulent pas. Les checkpoints incomplets exigent toujours `resume: "retry-incomplete"`. Les nouveaux réglages de reprise participent à l’identité du checkpoint ; leur modification rend un checkpoint existant incompatible. Utilisez un nouveau runId et actualisez version lorsque la définition du workflow change. Les checkpoints existants sans ces réglages gardent leur identité. Le backoff repart du délai de base à chaque appel, tandis que les numéros de tentative et l’usage restent cumulés.
+| Réglage                | Couvre                                                                                                           | À l’expiration                                                                                                                                   |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `timeoutMs` de tâche   | Une tentative.                                                                                                   | Le `signal` de la tentative est interrompu avec l’erreur `<key> timed out` ; la tâche est relancée s’il reste des tentatives.                    |
+| `start({ timeoutMs })` | Tout l’appel à `start()` : acquisition du checkpoint, conditions, chaque tentative et chaque attente de relance. | Les tâches en cours sont annulées, aucune ne démarre plus, `status` vaut `"failed"` et `errors` contient une `OutpostError` de code `"timeout"`. |
 
-## Propagation des échecs
+```ts
+import { setTimeout as sleep } from "node:timers/promises";
+import { OutpostError, defineTask, defineWorkflow } from "@elie-laloum/outpost";
 
-`stopOnError` arrête l’admission de nouveaux travaux après un échec lorsqu’il est activé. Une dépendance échouée empêche la réussite des tâches en aval. Inspectez les statuts et tentatives de chaque tâche, pas seulement le statut global.
+const slow = defineTask({
+  key: "slow",
+  timeoutMs: 200,
+  retry: { attempts: 2 },
+  perform: ({ signal }) => sleep(5_000, "late", { signal }),
+});
+const result = await defineWorkflow("deadline", [slow]).start({
+  timeoutMs: 300,
+});
+console.log(
+  result.status,
+  result.errors.map((error) =>
+    error instanceof OutpostError ? error.code : error,
+  ),
+); // failed [ 'timeout' ]
+```
 
-`condition` s’évalue avant la première tentative. Utilisez-la pour sauter un travail optionnel selon les dépendances déclarées. Une tâche sautée ne fournit pas de sortie réussie à consommer comme si elle avait tourné.
+<!-- check:run -->
 
-## Annulation coopérative
+La première tentative expire après 200 ms, la seconde est annulée par l’échéance du workflow à 300 ms. Les deux valeurs sont des entiers positifs d’au plus 2 147 483 647 ms. Chaque `start()` de reprise reçoit une nouvelle échéance ; le temps écoulé entre deux appels ne compte pas.
 
-Transmettez `context.signal` aux commandes, requêtes réseau et requêtes d’agent. `timeoutMs` signale l’annulation d’une tentative ; il ne peut pas terminer de force du code applicatif arbitraire. `retry.accepts(error, attempt)` limite les erreurs autorisant une reprise.
+## Choisir ce qu’un échec arrête
 
-N’exécutez pas d’opérations concurrentes dans une même sandbox empruntée. Ajoutez des dépendances ou allouez des environnements distincts avec `defineIsolatedTask`.
+Une tâche échoue quand sa dernière tentative échoue. La suite dépend de `stopOnError`.
 
-API : [TaskOptions](../../reference/taskoptions/) · [WorkflowOptions](../../reference/workflowoptions/) · [Retry](../../reference/retry/).
+| Autres tâches        | `stopOnError: true` (défaut)                                | `stopOnError: false`                                                               |
+| -------------------- | ----------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| En cours             | Leur `signal` est interrompu ; elles finissent `cancelled`. | Continuent.                                                                        |
+| Pas démarrées        | Finissent `cancelled`.                                      | Les dépendantes de la tâche en échec finissent `skipped` ; les autres s’exécutent. |
+| `status` du workflow | `"failed"`                                                  | `"failed"`                                                                         |
+
+`unwrap()` lève une `WorkflowFailure` sauf si `status` vaut `"done"`. Lisez `result.tasks` pour le `status`, les `attempts` et l’`error` de chaque tâche, et `result.errors` pour les échecs eux-mêmes.
+
+## Sauter une tâche avec une condition
+
+`condition` s’exécute une fois, avant la première tentative. Si elle renvoie `false`, la tâche finit `skipped`, tout comme les tâches qui en dépendent.
+
+```ts
+import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
+
+const changes = defineTask({ key: "changes", perform: () => ["README.md"] });
+const tests = defineTask({
+  key: "tests",
+  after: [changes],
+  condition: (context) =>
+    context.value(changes).some((file) => file.endsWith(".ts")),
+  perform: () => "Tests passed",
+});
+const result = await defineWorkflow("docs-only", [changes, tests]).start();
+result.unwrap();
+console.log(result.tasks.map((task) => `${task.key}: ${task.status}`));
+// [ 'changes: done', 'tests: skipped' ]
+```
+
+<!-- check:run -->
+
+Une tâche sautée n’a pas de valeur : `result.value(tests)` lève une exception.
+
+## Annuler une exécution
+
+Passez un `AbortSignal` dans `start({ signal })`. Il interrompt le `context.signal` de chaque tâche en cours, et le workflow se termine avec `status: "cancelled"`.
+
+Les tâches d’agent, de commande et isolées transmettent `context.signal` pour vous. Dans `defineTask()`, passez-le à chaque commande, requête et attente que lance votre code.
+
+## Limites
+
+- L’annulation est coopérative : un code qui ignore `context.signal` continue jusqu’à son retour, même au-delà de l’échéance du workflow ; sa valeur est alors ignorée.
+- Une relance réexécute toute la tâche et peut répéter ses effets de bord. Dédupliquez-les avec `context.idempotencyKey`, identique d’une relance à l’autre : voir [Files de jobs et workers](../job-queues/).
+- Le backoff exponentiel repart de `delayMs` à chaque appel à `start()` ; les numéros de tentative restent cumulés dans un checkpoint.
+- Avec les [pauses sur quota](../quota-pauses/), une erreur de quota met la tâche en pause au lieu de la relancer.
+- Les réglages de relance, les délais de tâche et la présence d’une condition font partie de l’identité du checkpoint : les modifier fait rejeter un checkpoint existant (voir [Exécutions durables](../durable-runs/)).
+
+API : [defineTask](../../reference/definetask/) · [Retry](../../reference/retry/) · [TaskOptions](../../reference/taskoptions/) · [WorkflowOptions](../../reference/workflowoptions/) · [WorkflowResult](../../reference/workflowresult/) · [OutpostError](../../reference/outposterror/)

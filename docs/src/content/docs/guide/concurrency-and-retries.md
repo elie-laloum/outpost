@@ -1,34 +1,52 @@
 ---
 title: "Concurrency, retries and timeouts"
-description: "Control concurrency, failure propagation and attempts."
+description: "Run independent tasks in parallel, retry the ones that fail, bound their duration and decide what a failure stops."
 ---
-
-Set `concurrency` on `start()` and retry policy on individual tasks. Retries are explicit because a second attempt can repeat side effects.
 
 ```ts
 import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
 
-const check = defineTask({
-  key: "check",
-  retry: { attempts: 2, delayMs: 100 },
-  timeoutMs: 5_000,
-  perform: ({ signal, attempt }) => {
-    signal.throwIfAborted();
-    return { attempt, ok: true };
+const flaky = defineTask({
+  key: "flaky",
+  retry: { attempts: 3, delayMs: 100 },
+  perform: ({ attempt }) => {
+    if (attempt < 2) throw new Error("Temporary failure");
+    return { attempt };
   },
 });
-const result = await defineWorkflow("checks", [check]).start({
+const lint = defineTask({ key: "lint", perform: () => "clean" });
+
+const result = await defineWorkflow("checks", [flaky, lint]).start({
   concurrency: 2,
 });
 result.unwrap();
-console.log(result.status);
+console.log(result.value(flaky)); // { attempt: 2 }
 ```
 
 <!-- check:run -->
 
-## Progressive retries
+`flaky` and `lint` start together. `flaky` fails once, waits 100 ms and succeeds on its second attempt; its task record in `result.tasks` shows `attempts: 2`.
 
-The existing fixed delay remains the default. Set `backoff: "exponential"` to double `delayMs` after each failure, `maxDelayMs` to cap the local delay (30 seconds by default in exponential mode), and `jitter: "full"` to spread retries uniformly between zero and that cap-adjusted delay. Jitter defaults to `"none"`. Configure a positive `delayMs` for a useful progressive wait.
+## Run tasks in parallel
+
+`start({ concurrency })` sets how many tasks run at once. The default is `1`: tasks run one after another. A task still waits for every task in its `after` list.
+
+:::caution
+Tasks that share a sandbox must not run at the same time. Order them with `after`, or give each its own sandbox with `defineIsolatedTask()`.
+:::
+
+## Retry a failing task
+
+A task runs once unless you give it a `retry` policy.
+
+| Option       | Default                                 | Effect                                                 |
+| ------------ | --------------------------------------- | ------------------------------------------------------ |
+| `attempts`   | Required                                | Total attempts, the first one included.                |
+| `delayMs`    | `0`                                     | Wait before each retry.                                |
+| `backoff`    | `"fixed"`                               | `"exponential"` doubles the wait after each failure.   |
+| `maxDelayMs` | 30 000 in exponential mode, else no cap | Upper bound on the computed wait.                      |
+| `jitter`     | `"none"`                                | `"full"` picks a random wait between zero and the cap. |
+| `accepts`    | Every error is retried                  | `(error, attempt) => boolean`; `false` fails the task. |
 
 ```ts
 import { OutpostError, defineTask, defineWorkflow } from "@elie-laloum/outpost";
@@ -50,34 +68,100 @@ const request = defineTask({
     return "Replace with your cancellable request";
   },
 });
-const result = await defineWorkflow("requests", [request]).start({
-  timeoutMs: 60_000,
-});
+const result = await defineWorkflow("requests", [request]).start();
 result.unwrap();
+console.log(result.tasks[0]?.attempts); // 1
 ```
 
-HTTP model providers preserve valid `Retry-After` headers (seconds or an HTTP date) as `OutpostError.details.retryAfterMs`. The task retry waits at least that duration, even above `maxDelayMs`, and never randomizes below it. Invalid headers are ignored and dates in the past mean zero. Custom integrations can throw an `OutpostError` with a finite, nonnegative `details.retryAfterMs` no greater than `Number.MAX_SAFE_INTEGER`, expressed in milliseconds. Arbitrary HTTP client errors and CLI stderr are not parsed automatically.
+<!-- check:run -->
 
-Retries still require an explicit task policy and respect `accepts`. Providers do not retry requests themselves: replaying a task can repeat its earlier tool calls or other effects. Retry observation events expose the selected `delayMs`. Long waits are split into cancellable timer segments so they cannot overflow into immediate retries.
+Each retry emits a `retry` event with its `delayMs` (see [Follow progress](../progress/)). Retries count against `budget.attempts` when you set a [budget](../budgets/).
 
-## Workflow deadline
+### Honour `Retry-After`
 
-`start({ timeoutMs })` starts one deadline before checkpoint acquisition and covers conditions, all attempts, dependency scheduling and retry waits. Task `timeoutMs` still applies independently to each attempt. Both timeout values must be positive integers within the runtime timer range (at most 2,147,483,647 milliseconds).
+[Model providers](../model-providers/) copy a valid `Retry-After` header into `OutpostError.details.retryAfterMs`. The retry then waits at least that long, even beyond `maxDelayMs` and whatever the jitter. Your own code can throw an `OutpostError` with `details.retryAfterMs` in milliseconds to get the same behaviour.
 
-Expiration stops admission, cancels active tasks through `context.signal`, and returns `status: "failed"` with an `OutpostError` whose `code` is `"timeout"` in `errors`. An external cancellation that occurs first keeps `status: "cancelled"`. Already completed values remain available; late values are rejected. Cleanup and persistence are awaited: code or storage that ignores cancellation can delay completion beyond the deadline.
+## Set timeouts
 
-Each resumed `start()` call receives a fresh deadline; time between calls and approval pauses is not accumulated. Incomplete checkpoints still require `resume: "retry-incomplete"`. New retry settings participate in checkpoint identity; changing them rejects an existing checkpoint. Use a new runId, and update version when the workflow definition changes. Existing checkpoints without those settings retain their identity. Backoff restarts from the base delay on each call, while recorded attempt numbers and usage remain cumulative.
+| Setting                | Covers                                                                                      | When it expires                                                                                                                     |
+| ---------------------- | ------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Task `timeoutMs`       | One attempt.                                                                                | The attempt’s `signal` aborts with the error `<key> timed out`; the task retries if attempts remain.                                |
+| `start({ timeoutMs })` | The whole `start()` call: checkpoint acquisition, conditions, every attempt and retry wait. | Running tasks are cancelled, nothing new starts, `status` is `"failed"` and `errors` holds an `OutpostError` with code `"timeout"`. |
 
-## Failure propagation
+```ts
+import { setTimeout as sleep } from "node:timers/promises";
+import { OutpostError, defineTask, defineWorkflow } from "@elie-laloum/outpost";
 
-`stopOnError` stops admitting new work after failure when enabled. Dependency failures prevent downstream work from running successfully. Inspect each task record’s status and attempts, not only the workflow status.
+const slow = defineTask({
+  key: "slow",
+  timeoutMs: 200,
+  retry: { attempts: 2 },
+  perform: ({ signal }) => sleep(5_000, "late", { signal }),
+});
+const result = await defineWorkflow("deadline", [slow]).start({
+  timeoutMs: 300,
+});
+console.log(
+  result.status,
+  result.errors.map((error) =>
+    error instanceof OutpostError ? error.code : error,
+  ),
+); // failed [ 'timeout' ]
+```
 
-`condition` runs before the first attempt. Use it to skip optional work based on declared dependencies. A skipped task does not provide a successful output to consume as if it ran.
+<!-- check:run -->
 
-## Cooperative cancellation
+The first attempt times out after 200 ms, the second is cancelled by the workflow deadline at 300 ms. Both values are positive integers of at most 2,147,483,647 ms. Each resumed `start()` gets a fresh deadline; the time between calls does not count.
 
-Pass `context.signal` to commands, fetches and agent requests. `timeoutMs` signals cancellation for an attempt; it cannot forcibly terminate arbitrary application code. `retry.accepts(error, attempt)` narrows which failures may be retried.
+## Choose what a failure stops
 
-Do not run concurrent operations against one borrowed sandbox. Add dependency edges or allocate separate environments with `defineIsolatedTask`.
+A task fails when its last attempt fails. What happens next depends on `stopOnError`.
 
-API: [TaskOptions](../../reference/taskoptions/) · [WorkflowOptions](../../reference/workflowoptions/) · [Retry](../../reference/retry/).
+| Other tasks       | `stopOnError: true` (default)                | `stopOnError: false`                                         |
+| ----------------- | -------------------------------------------- | ------------------------------------------------------------ |
+| Running           | Their `signal` aborts; they end `cancelled`. | Continue.                                                    |
+| Not started       | End `cancelled`.                             | Dependents of the failed task end `skipped`; the others run. |
+| Workflow `status` | `"failed"`                                   | `"failed"`                                                   |
+
+`unwrap()` throws a `WorkflowFailure` unless `status` is `"done"`. Read `result.tasks` for each task’s `status`, `attempts` and `error`, and `result.errors` for the failures themselves.
+
+## Skip a task with a condition
+
+`condition` runs once, before the first attempt. When it returns `false`, the task ends `skipped` and so do the tasks that depend on it.
+
+```ts
+import { defineTask, defineWorkflow } from "@elie-laloum/outpost";
+
+const changes = defineTask({ key: "changes", perform: () => ["README.md"] });
+const tests = defineTask({
+  key: "tests",
+  after: [changes],
+  condition: (context) =>
+    context.value(changes).some((file) => file.endsWith(".ts")),
+  perform: () => "Tests passed",
+});
+const result = await defineWorkflow("docs-only", [changes, tests]).start();
+result.unwrap();
+console.log(result.tasks.map((task) => `${task.key}: ${task.status}`));
+// [ 'changes: done', 'tests: skipped' ]
+```
+
+<!-- check:run -->
+
+A skipped task has no value: `result.value(tests)` throws.
+
+## Cancel a run
+
+Pass an `AbortSignal` as `start({ signal })`. It aborts every running task’s `context.signal`, and the workflow ends with `status: "cancelled"`.
+
+Agent, command and isolated tasks forward `context.signal` for you. In `defineTask()`, pass it to every command, request and wait your code starts.
+
+## Limits
+
+- Cancellation is cooperative: code that ignores `context.signal` keeps running until it returns, even past the workflow deadline; its value is then discarded.
+- A retry runs the whole task again and can repeat its side effects. Deduplicate them with `context.idempotencyKey`, which stays the same across retries: see [Job queues and workers](../job-queues/).
+- Exponential backoff restarts from `delayMs` on each `start()` call; attempt numbers stay cumulative in a checkpoint.
+- With [quota pauses](../quota-pauses/) enabled, a quota error pauses the task instead of retrying it.
+- Retry settings, task timeouts and the presence of a condition are part of the checkpoint identity: changing them rejects an existing checkpoint (see [Durable runs](../durable-runs/)).
+
+API: [defineTask](../../reference/definetask/) · [Retry](../../reference/retry/) · [TaskOptions](../../reference/taskoptions/) · [WorkflowOptions](../../reference/workflowoptions/) · [WorkflowResult](../../reference/workflowresult/) · [OutpostError](../../reference/outposterror/)
