@@ -77,7 +77,7 @@ export function vercelSandboxProvider(
         ...vercelFiles(sandbox),
         release,
       };
-      return { ...lease, fileTransfers: fileBatches(lease) };
+      return { ...lease, liveInput: true, fileTransfers: fileBatches(lease) };
     },
   };
 }

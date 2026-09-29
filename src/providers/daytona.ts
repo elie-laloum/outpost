@@ -81,7 +81,7 @@ export function daytonaSandboxProvider(
         ...daytonaFiles(sandbox),
         release,
       };
-      return { ...lease, fileTransfers: fileBatches(lease) };
+      return { ...lease, liveInput: true, fileTransfers: fileBatches(lease) };
     },
   };
 }

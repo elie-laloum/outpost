@@ -5,6 +5,12 @@ import type { SandboxLease } from "../domain/sandbox.types.ts";
 import { interruptible } from "../infrastructure/abort.ts";
 import { quote } from "../infrastructure/process.ts";
 import { cloudDefaults } from "./cloud.constants.ts";
+import {
+  cloudInputFeed,
+  cloudInputFrames,
+  cloudInputProgram,
+} from "./cloud-input.ts";
+import type { CloudInputFeed } from "./cloud-input.types.ts";
 import { daytonaCommandScript } from "./daytona-command.constants.ts";
 import { daytonaOutput } from "./daytona-output.ts";
 import { daytonaTerminal } from "./daytona-terminal.ts";
@@ -24,33 +30,36 @@ export function daytonaCommand(
         ])
       : AbortSignal.timeout(command.deadlineMs ?? cloudDefaults.deadlineMs);
     signal.throwIfAborted();
-    if (command.input)
-      throw new OutpostError(
-        "provider",
-        "Live command input requires a mounted or local provider",
-      );
     if (command.interactive) return daytonaTerminal(runtime, command, signal);
     const id = `outpost-${randomUUID()}`;
     const input = `/tmp/${id}.stdin`;
     const pid = `/tmp/${id}.pid`;
-    if (command.stdin !== undefined)
-      await sandbox.fs.uploadFile(Buffer.from(command.stdin), input);
+    const live = command.input;
+    const staged = live ? cloudInputFrames(command.stdin) : command.stdin;
+    if (staged !== undefined)
+      await sandbox.fs.uploadFile(Buffer.from(staged), input);
+    const failure = new AbortController();
+    const stopped = AbortSignal.any([signal, failure.signal]);
     const variables = { ...context.variables, ...command.variables };
-    const program = [
+    const quoted = [
       ...(command.elevated ? ["sudo", "-n", "--"] : []),
       command.executable,
       ...(command.arguments ?? []),
     ]
       .map(quote)
       .join(" ");
+    const program = live ? cloudInputProgram(input, quoted) : quoted;
+    const redirect =
+      !live && command.stdin !== undefined ? ` < ${quote(input)}` : "";
     const script = `cd ${quote(command.directory ?? root)} && env ${Object.entries(
       variables,
     )
       .map(([key, value]) => quote(`${key}=${value}`))
       .join(
         " ",
-      )} setsid --wait sh -c ${quote(`echo $$ > ${quote(pid)}; test ! -f ${quote(pid + ".cancel")} || exit 130; exec node -e ${quote(daytonaCommandScript)} -- ${program}${command.stdin === undefined ? "" : ` < ${quote(input)}`}`)}`;
+      )} setsid --wait sh -c ${quote(`echo $$ > ${quote(pid)}; test ! -f ${quote(pid + ".cancel")} || exit 130; exec node -e ${quote(daytonaCommandScript)} -- ${program}${redirect}`)}`;
     const output = { stdout: "", stderr: "" };
+    let feed: CloudInputFeed | undefined;
     let cancellation: Promise<unknown> | undefined;
     const cancel = () => {
       cancellation ??= sandbox.process.executeCommand(
@@ -60,20 +69,36 @@ export function daytonaCommand(
     };
     await sandbox.process.createSession(id);
     try {
-      signal.addEventListener("abort", cancel, { once: true });
-      if (signal.aborted) cancel();
-      signal.throwIfAborted();
+      stopped.addEventListener("abort", cancel, { once: true });
+      if (stopped.aborted) cancel();
+      stopped.throwIfAborted();
       const response = await interruptible(
         sandbox.process.executeSessionCommand(id, {
           command: script,
           async: true,
         }),
-        signal,
+        stopped,
       );
       if (!response.cmdId)
         throw new OutpostError(
           "provider",
           "Cloud provider returned no command identifier",
+        );
+      const commandId = response.cmdId;
+      if (live)
+        feed = cloudInputFeed(
+          live,
+          async (line) => {
+            const appended = await sandbox.process.executeCommand(
+              `printf '%s' ${quote(line)} >> ${quote(input)}`,
+            );
+            if (appended.exitCode !== 0)
+              throw new OutpostError(
+                "provider",
+                "Cloud live input could not be appended",
+              );
+          },
+          (cause) => failure.abort(cause),
         );
       const consume = (channel: "stdout" | "stderr") => (chunk: string) => {
         output[channel] = (output[channel] + chunk).slice(
@@ -86,24 +111,26 @@ export function daytonaCommand(
       await interruptible(
         sandbox.process.getSessionCommandLogs(
           id,
-          response.cmdId,
+          commandId,
           stdout.write,
           stderr.write,
         ),
-        signal,
+        stopped,
       );
       stdout.close();
       stderr.close();
       if (cancellation) await cancellation;
-      signal.throwIfAborted();
+      stopped.throwIfAborted();
       while (true) {
         const result = await interruptible(
-          sandbox.process.getSessionCommand(id, response.cmdId),
-          signal,
+          sandbox.process.getSessionCommand(id, commandId),
+          stopped,
         );
         if (result.exitCode !== undefined)
           return { status: result.exitCode, ...output };
-        await setTimeout(cloudDefaults.pollMs, undefined, { signal });
+        await setTimeout(cloudDefaults.pollMs, undefined, {
+          signal: stopped,
+        });
       }
     } catch (cause) {
       cancel();
@@ -120,7 +147,8 @@ export function daytonaCommand(
       }
       throw cause;
     } finally {
-      signal.removeEventListener("abort", cancel);
+      stopped.removeEventListener("abort", cancel);
+      await feed?.finish();
       await sandbox.process.deleteSession(id);
       await sandbox.process
         .executeCommand(`rm -f ${quote(input)} ${quote(pid)}`)
