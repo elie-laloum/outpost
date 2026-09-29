@@ -105,7 +105,7 @@ Pour un [provider de sandbox personnalisé](../custom-sandbox-providers/), `diag
 
 ## Vérifier un adaptateur d’agent hors ligne
 
-`diagnoseAgentProtocol()` rejoue à travers l’adaptateur d’un agent les enregistrements d’événements fournis avec Outpost. Il ne lance ni CLI ni modèle.
+`diagnoseAgentProtocol()` rejoue à travers l’adaptateur d’un agent des événements synthétiques fournis avec Outpost. Il ne lance ni CLI ni modèle.
 
 ```ts
 import { diagnoseAgentProtocol } from "@elie-laloum/outpost";
@@ -116,7 +116,7 @@ console.log(report.referenceVersion, report.hasFailures);
 
 <!-- check:run -->
 
-Il affiche la version de Claude Code dont proviennent les enregistrements, puis `false` si chaque enregistrement est décodé comme prévu.
+Il affiche la version de Claude Code qu’Outpost épingle, puis `false` si chaque échantillon est décodé comme prévu.
 
 ## Faire un premier appel payant
 

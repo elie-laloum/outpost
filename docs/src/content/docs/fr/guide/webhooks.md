@@ -143,7 +143,9 @@ Une nouvelle livraison publie un nouveau job, même pour le même événement, c
 
 ## Dériver l’exécution de la charge
 
-Construisez le `runId` à partir de ce qui identifie le travail dans la charge : `owner/name#12`, ou un commit de tête. Les jobs de même `runId` partagent un [checkpoint](../durable-runs/) : `defineWorkflowJob()` restaure les tâches déjà terminées au lieu de les relancer.
+Construisez le `runId` à partir de ce qui identifie le travail dans la charge : `owner/name#12`, ou un commit de tête. Les jobs de même `runId` et de même `input` partagent un [checkpoint](../durable-runs/) : `defineWorkflowJob()` restaure les tâches déjà terminées au lieu de les relancer.
+
+Un `input` différent sous le même `runId` échoue sur un checkpoint incompatible, car la version du checkpoint inclut une empreinte de l’input. Deux commandes au texte différent sur une même issue ont donc besoin de `runId` distincts, par exemple en y ajoutant `event.delivery`.
 
 Les signatures GitHub ne portent pas d’horodatage : une requête interceptée peut être rejouée sous un nouvel identifiant de livraison. Un `runId` dérivé de la charge fait converger ce rejeu vers la même exécution. La recette [Relire une pull request à la demande](../review-on-label/) associe chaque exécution au commit de tête.
 

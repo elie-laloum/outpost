@@ -77,13 +77,13 @@ A transfer holds two sides: `previous`, your checkout before the sandbox’s cha
 npx outpost recovery inspect --repository /projects/app --git --locks --resources
 ```
 
-| Flag                   | Adds to the inventory                                              |
-| ---------------------- | ------------------------------------------------------------------ |
-| `--git`                | Branch, clean or dirty, detached `HEAD` and Git lock per worktree. |
-| `--locks`              | Lock files and the PID that holds each one.                        |
-| `--resources`          | Recorded sandbox activity and its ownership.                       |
-| `--max-entries NUMBER` | A bound on scanned entries; the default is 100,000.                |
-| `--json`               | The full report as JSON.                                           |
+| Flag                   | Adds to the inventory                                                                                     |
+| ---------------------- | --------------------------------------------------------------------------------------------------------- |
+| `--git`                | Branch, clean or dirty, detached `HEAD` and Git’s `locked` flag per worktree.                             |
+| `--locks`              | Lock files, the PID recorded in each and its ownership status; a live PID alone does not prove ownership. |
+| `--resources`          | Recorded sandbox activity and its ownership.                                                              |
+| `--max-entries NUMBER` | A bound on scanned entries; the default is 100,000.                                                       |
+| `--json`               | The full report as JSON.                                                                                  |
 
 The command exits with status 1 when the inventory is incomplete.
 
@@ -202,6 +202,7 @@ Never delete `.outpost` or its folders by hand: they can hold the only copy of t
 
 - Checksums detect damage against an unsigned manifest; they do not prove who produced the transfer.
 - Restorability covers commits, the bundle and patches, not submodules or external dependencies.
+- A transfer is restorable only once the host backup ran: a synchronization that failed during download or validation leaves no `state.json`, and the restore plan rejects it.
 - A lock PID or recorded activity is an observation. It does not prove that a remote process has stopped.
 - A worktree reported `clean` can still hold ignored files, such as copies or `node_modules`.
 - An archive holds recovery files, not the repository: restoring still needs the source repository.

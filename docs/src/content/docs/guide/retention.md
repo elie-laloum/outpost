@@ -139,7 +139,7 @@ A refused reservation rejects with code `configuration`; a failed `assertRecover
 ## Limits
 
 - Reservations coordinate writers that use them. They are not a filesystem quota: any other process can still write to `.outpost`.
-- A reservation whose process died stays in the ledger (`reservations/ledger` in the transport) and keeps counting. Remove its entry only after checking that its owner stopped.
+- A reservation whose process died stays in the ledger (`reservations/ledger` in the transport) and keeps counting. Remove its entry only after checking that its owner stopped, with a conditional write (`ifRevision`) through the same transport.
 - Retention never removes branches, checkpoints, artifacts, conversations, recovery transfers or locks.
 - A remote transport cannot use the `clean-workspaces` scope or `maxWorkspaces`.
 - Do not delete `.outpost` by hand: it can hold the only copy of unfinished work.

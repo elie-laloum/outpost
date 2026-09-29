@@ -90,7 +90,7 @@ Trois types d’identifiants servent trois clients distincts. Une clé Vercel ou
 
 ## Limites
 
-- Claude rejette les variables contradictoires : les formes compte échouent si `ANTHROPIC_API_KEY` est déclarée, les formes `usage` si `CLAUDE_CODE_OAUTH_TOKEN` l’est.
+- Claude rejette les variables contradictoires au dispatch : les formes compte échouent si `ANTHROPIC_API_KEY` a une valeur dans `.outpost/.env` ou dans les `variables` du harness ou du provider, les formes `usage` si `CLAUDE_CODE_OAUTH_TOKEN` en a une.
 - Les formes compte de Kimi rejettent des valeurs de `KIMI_CODE_OAUTH_HOST`, `KIMI_OAUTH_HOST` ou `KIMI_CODE_BASE_URL` qui contredisent la région choisie. Le mode `usage` de Kimi exige un nom de modèle dans `createAgent()`.
 - Copilot n’a pas de mode `usage` et refuse les jetons classiques `ghp_`. Une connexion conservée dans le trousseau système est illisible : transmettez le jeton avec `{ account: { variable } }`.
 - Codex avec un `modelProvider` personnalisé n’accepte que les formes `usage`.

@@ -91,7 +91,7 @@ Each slot publishes the job `schedule:<name>:<slot ISO time>`. A restarted sched
 
 `runId` and `input` must depend only on the slot. The queue rejects a second publication of the same ID with a different request.
 
-Two schedules can return the same `runId` for one day: the second job then reuses the same checkpointed run, like the 07:00 resume in [Nightly maintenance](../nightly-maintenance/).
+Two schedules can return the same `runId` for one day: the second job then reuses the same checkpointed run if its `input` is the same (a different input fails with an incompatible checkpoint), like the 07:00 resume in [Nightly maintenance](../nightly-maintenance/).
 
 ## Catch up after a restart
 

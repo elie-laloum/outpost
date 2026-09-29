@@ -207,7 +207,7 @@ Each declaration returns a task that you list in `defineWorkflow()` and connect 
 ## Limits
 
 - Outputs live in memory for one `start()`. A restarted run reruns every task unless you pass a [checkpoint](../durable-runs/).
-- Approval and pause tasks, interactive tasks and quota pauses require a checkpoint: `start()` throws without one.
+- Approval and pause tasks, interactive tasks, quota pauses, `answers` and `decisions` require a checkpoint: `start()` throws without one.
 - A workflow does not commit, merge or push across tasks as one transaction. To change several repositories, see [Multiple repositories](../multiple-repositories/).
 
 API: [defineTask](../../reference/definetask/) · [defineWorkflow](../../reference/defineworkflow/) · [TaskContext](../../reference/taskcontext/) · [WorkflowResult](../../reference/workflowresult/) · [TaskRecord](../../reference/taskrecord/) · [WorkflowFailure](../../reference/workflowfailure/)

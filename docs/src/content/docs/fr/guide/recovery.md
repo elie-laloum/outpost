@@ -77,13 +77,13 @@ Un transfert contient deux versions : `previous`, votre checkout avant les chang
 npx outpost recovery inspect --repository /projects/app --git --locks --resources
 ```
 
-| Option                 | Ajoute à l’inventaire                                                             |
-| ---------------------- | --------------------------------------------------------------------------------- |
-| `--git`                | Branche, état propre ou modifié, `HEAD` détaché et verrou Git de chaque worktree. |
-| `--locks`              | Les fichiers de verrou et le PID qui détient chacun.                              |
-| `--resources`          | L’activité enregistrée des sandboxes et sa propriété.                             |
-| `--max-entries NUMBER` | Une limite d’entrées parcourues ; 100 000 par défaut.                             |
-| `--json`               | Le rapport complet en JSON.                                                       |
+| Option                 | Ajoute à l’inventaire                                                                                                                    |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `--git`                | Branche, état propre ou modifié, `HEAD` détaché et indicateur `locked` de Git pour chaque worktree.                                      |
+| `--locks`              | Les fichiers de verrou, le PID enregistré dans chacun et son statut de possession ; un PID actif ne prouve pas à lui seul la possession. |
+| `--resources`          | L’activité enregistrée des sandboxes et sa propriété.                                                                                    |
+| `--max-entries NUMBER` | Une limite d’entrées parcourues ; 100 000 par défaut.                                                                                    |
+| `--json`               | Le rapport complet en JSON.                                                                                                              |
 
 La commande se termine avec le statut 1 quand l’inventaire est incomplet.
 
@@ -202,6 +202,7 @@ Ne supprimez jamais `.outpost` ni ses dossiers à la main : ils peuvent contenir
 
 - Les empreintes détectent une altération par rapport à un manifeste non signé ; elles ne prouvent pas qui a produit le transfert.
 - La restaurabilité couvre les commits, le bundle et les patches, pas les sous-modules ni les dépendances externes.
+- Un transfert n’est restaurable qu’une fois la sauvegarde de l’hôte effectuée : une synchronisation échouée pendant le téléchargement ou la validation ne laisse aucun `state.json`, et le plan de restauration la rejette.
 - Un PID de verrou ou une activité enregistrée est une observation. Elle ne prouve pas qu’un processus distant s’est arrêté.
 - Un worktree signalé `clean` peut encore contenir des fichiers ignorés, comme des copies ou `node_modules`.
 - Une archive contient les fichiers de récupération, pas le dépôt : la restauration exige toujours le dépôt source.

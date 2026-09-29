@@ -105,7 +105,7 @@ For a [custom sandbox provider](../custom-sandbox-providers/), `diagnoseSandbox(
 
 ## Check an agent adapter offline
 
-`diagnoseAgentProtocol()` replays the event recordings bundled with Outpost through an agent's adapter. It runs no CLI and no model.
+`diagnoseAgentProtocol()` replays synthetic events bundled with Outpost through an agent's adapter. It runs no CLI and no model.
 
 ```ts
 import { diagnoseAgentProtocol } from "@elie-laloum/outpost";
@@ -116,7 +116,7 @@ console.log(report.referenceVersion, report.hasFailures);
 
 <!-- check:run -->
 
-It prints the Claude Code version the recordings come from, then `false` when every recording decodes as expected.
+It prints the Claude Code version Outpost pins, then `false` when every sample decodes as expected.
 
 ## Make a first paid run
 

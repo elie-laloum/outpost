@@ -139,7 +139,7 @@ Une réservation refusée rejette avec le code `configuration` ; un `assertRecov
 ## Limites
 
 - Les réservations coordonnent les écrivains qui les utilisent. Ce n’est pas un quota du système de fichiers : tout autre processus peut encore écrire dans `.outpost`.
-- La réservation d’un processus mort reste dans le registre (`reservations/ledger` dans le transport) et continue de compter. Retirez son entrée seulement après avoir vérifié que son propriétaire s’est arrêté.
+- La réservation d’un processus mort reste dans le registre (`reservations/ledger` dans le transport) et continue de compter. Retirez son entrée seulement après avoir vérifié que son propriétaire s’est arrêté, par une écriture conditionnelle (`ifRevision`) dans le même transport.
 - La rétention ne supprime jamais les branches, checkpoints, artefacts, conversations, transferts de récupération ni verrous.
 - Un transport distant ne peut pas utiliser le périmètre `clean-workspaces` ni `maxWorkspaces`.
 - Ne supprimez pas `.outpost` à la main : il peut contenir la seule copie d’un travail inachevé.

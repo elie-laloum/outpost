@@ -64,18 +64,18 @@ console.log(result.status, result.stdout);
 | `retain`     | Nombre de derniers caractères conservés par flux dans le résultat. Par défaut, 65 536.                     |
 | `deadlineMs` | Durée maximale avant qu’Outpost arrête le processus. Par défaut, 10 minutes.                               |
 | `signal`     | `AbortSignal` qui annule la commande.                                                                      |
-| `elevated`   | Exécute en root sur les providers qui le permettent : Docker, Podman, Vercel et Daytona.                   |
+| `elevated`   | Exécute en root sur Docker, Podman, Vercel et Daytona. L’hôte l’ignore ; Firecracker le rejette.           |
 
 ## Vérifier le résultat
 
 Une commande qui se termine résout avec `status`, `stdout` et `stderr`, quel que soit son code de sortie. Une commande qu’Outpost a dû arrêter rejette.
 
-| Issue                                    | Résultat                                           |
-| ---------------------------------------- | -------------------------------------------------- |
-| Le processus sort, même avec le statut 1 | Résout ; testez `result.status`.                   |
-| `deadlineMs` expire                      | Rejette avec une `OutpostError` de code `timeout`. |
-| `signal` est déclenché                   | Rejette avec la raison du signal.                  |
-| La sandbox se ferme pendant la commande  | Rejette ; le processus est arrêté.                 |
+| Issue                                    | Résultat                                                                                            |
+| ---------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Le processus sort, même avec le statut 1 | Résout ; testez `result.status`.                                                                    |
+| `deadlineMs` expire                      | Rejette avec une `OutpostError` de code `timeout` ; sur Vercel et Daytona, avec une `TimeoutError`. |
+| `signal` est déclenché                   | Rejette avec la raison du signal.                                                                   |
+| La sandbox se ferme pendant la commande  | Rejette ; le processus est arrêté.                                                                  |
 
 Le résultat attend la sortie du processus, pas la fermeture de ses flux. Lisez `status` plutôt que de déduire la réussite de `stdout`. Les codes d’erreur sont listés dans [Erreurs](../error-handling/).
 
@@ -129,7 +129,7 @@ Lancez-le depuis un vrai terminal. `continuation` rouvre une conversation captur
 | Daytona              | Pris en charge |
 | Vercel, Firecracker  | Rejeté         |
 
-`attach()` exige un agent CLI comme Codex ou Claude Code. Le [harness intégré](../harness/) et les [agents de secours](../fallback-agents/) sont rejetés.
+`attach()` exige un agent CLI comme Codex ou Claude Code. Le [harness intégré](../harness/), les [agents de secours](../fallback-agents/) et les [agents de rejeu](../record-replay/) sont rejetés.
 
 ## Intégrer le travail vous-même
 

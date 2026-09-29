@@ -239,7 +239,7 @@ Le dispatch attend les handlers en cours avant de rendre la main et signale la p
 
 ## Limites
 
-- Le hub est un flux en mémoire et en direct : il ne stocke rien, et un sink lent perd des événements. Pour relire les événements après l’exécution, utilisez le [journal](../journals/) du dispatch.
+- Le hub est un flux en mémoire et en direct : il ne stocke rien, et un sink lent perd des événements. Pour relire les événements après l’exécution, utilisez le [journal](../journals/) du dispatch, lui-même un sink soumis aux mêmes limites `capacity` et `deliveryTimeoutMs`.
 - Un sink désactivé le reste pendant toute la vie du hub, et `errors` conserve les 100 premières erreurs.
 - Un hub fermé ignore les nouveaux événements. Un hub réutilisé entre plusieurs exécutions conserve ses `errors` et son compteur `dropped` : les `observerErrors` de chaque exécution incluent alors les erreurs précédentes.
 - Les événements émis sur un [worker](../job-queues/) distant restent sur le hub de ce worker.

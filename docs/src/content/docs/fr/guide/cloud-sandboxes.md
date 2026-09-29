@@ -160,14 +160,15 @@ Une copie exclue par `.gitignore` voyage dans un seul sens : les modifications q
 
 ## Quand la synchronisation s’arrête
 
-Outpost n’écrase jamais un travail qu’il ne peut pas sauvegarder. Il s’arrête sur une erreur dont `details.recovery` désigne le dossier de `.outpost/recovery` qui contient les changements téléchargés et la sauvegarde. Inspectez-le avec [Récupérer du travail](../recovery/).
+Outpost n’écrase jamais un travail qu’il ne peut pas sauvegarder. Il s’arrête sur une erreur de code `workspace` dont `details.recovery` désigne le dossier de `.outpost/recovery` qui contient les changements téléchargés et la sauvegarde. Inspectez-le avec [Récupérer du travail](../recovery/).
 
-| Cause                                                                | Solution                                                          |
-| -------------------------------------------------------------------- | ----------------------------------------------------------------- |
-| Le worktree géré a changé pendant que la sandbox était ouverte       | Ne touchez pas à `.outpost/workspaces` pendant l’exécution        |
-| L’agent a modifié un fichier non commité dans le worktree            | Commitez d’abord le fichier, ou passez `includeUncommitted: true` |
-| L’agent a créé un fichier que votre hôte ignore hors de `.gitignore` | Déplacez la règle d’exclusion dans le `.gitignore` commité        |
-| L’agent a réécrit un commit déjà synchronisé                         | Demandez de nouveaux commits plutôt qu’un amend ou un rebase      |
+| Cause                                                                             | Solution                                                                   |
+| --------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| Le worktree géré a changé pendant que la sandbox était ouverte                    | Ne touchez pas à `.outpost/workspaces` pendant l’exécution                 |
+| L’agent a modifié un fichier non commité dans le worktree                         | Commitez d’abord le fichier, ou passez `includeUncommitted: true`          |
+| Une copie n’est pas exclue par le `.gitignore` commité (première synchronisation) | Passez `includeUncommitted: true`, ou ignorez le fichier dans `.gitignore` |
+| L’agent a créé un fichier que votre hôte ignore hors de `.gitignore`              | Déplacez la règle d’exclusion dans le `.gitignore` commité                 |
+| L’agent a réécrit un commit déjà synchronisé                                      | Demandez de nouveaux commits plutôt qu’un amend ou un rebase               |
 
 `recoveryTransport` sur `dispatch()` ou `createSandbox()` archive aussi chaque sauvegarde dans un [stockage objet](../object-storage/).
 

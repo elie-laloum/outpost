@@ -128,7 +128,7 @@ Journals stay in their transport until you remove them. A retention policy with 
 
 ## Limits
 
-- A journal is written by an [observation hub](../observability/) receiver. When its transport fails or falls behind, the journal can miss events or stay open, and the failure appears in `result.observerErrors` (in `recoveryDetails(error)` when the dispatch fails). `readJournal()` then returns the events written before the failure.
+- A journal is written by an [observation hub](../observability/) receiver. It shares the hub’s bounded queue (`capacity`, `deliveryTimeoutMs`): when its transport fails or falls behind, the journal can miss events, be disabled for the rest of the run or stay open, and the failure appears in `result.observerErrors` (in `recoveryDetails(error)` when the dispatch fails). `readJournal()` then returns the events written before the failure.
 - Journals hold prompts, agent messages and tool results, so they contain repository content. Store and share them like the code; `replayable` adds the patches of every commit.
 
 API: [Logging](../../reference/logging/) · [readJournal](../../reference/readjournal/) · [ReadJournalOptions](../../reference/readjournaloptions/) · [DispatchResult](../../reference/dispatchresult/) · [recoveryDetails](../../reference/recoverydetails/) · [createObservationHub](../../reference/createobservationhub/).

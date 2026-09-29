@@ -160,7 +160,7 @@ Agent, command and isolated tasks forward `context.signal` for you. In `defineTa
 
 - Cancellation is cooperative: code that ignores `context.signal` keeps running until it returns, even past the workflow deadline; its value is then discarded.
 - A retry runs the whole task again and can repeat its side effects. Deduplicate them with `context.idempotencyKey`, which stays the same across retries: see [Job queues and workers](../job-queues/).
-- Exponential backoff restarts from `delayMs` on each `start()` call; attempt numbers stay cumulative in a checkpoint.
+- Each `start()` call, such as a checkpoint resume or a resume after a quota pause, allows `retry.attempts` again and restarts the backoff from `delayMs`; attempt numbers stay cumulative in a checkpoint.
 - With [quota pauses](../quota-pauses/) enabled, a quota error pauses the task instead of retrying it.
 - Retry settings, task timeouts and the presence of a condition are part of the checkpoint identity: changing them rejects an existing checkpoint (see [Durable runs](../durable-runs/)).
 

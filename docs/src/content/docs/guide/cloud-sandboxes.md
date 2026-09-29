@@ -160,14 +160,15 @@ A copy that `.gitignore` excludes travels one way: the agent’s edits to it sta
 
 ## When synchronization stops
 
-Outpost never overwrites work it cannot back up. It stops with an error whose `details.recovery` names the directory under `.outpost/recovery` holding the downloaded changes and the backup. Inspect it with [Recover work](../recovery/).
+Outpost never overwrites work it cannot back up. It stops with an error of code `workspace` whose `details.recovery` names the directory under `.outpost/recovery` holding the downloaded changes and the backup. Inspect it with [Recover work](../recovery/).
 
-| Cause                                                           | Fix                                                       |
-| --------------------------------------------------------------- | --------------------------------------------------------- |
-| The managed worktree changed while the sandbox was open         | Leave `.outpost/workspaces` alone during the run          |
-| The agent changed a file that is uncommitted in the worktree    | Commit the file first, or pass `includeUncommitted: true` |
-| The agent created a file your host ignores outside `.gitignore` | Move the ignore rule into the committed `.gitignore`      |
-| The agent rewrote a commit that was already synchronized        | Ask for new commits instead of an amend or a rebase       |
+| Cause                                                                        | Fix                                                                 |
+| ---------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| The managed worktree changed while the sandbox was open                      | Leave `.outpost/workspaces` alone during the run                    |
+| The agent changed a file that is uncommitted in the worktree                 | Commit the file first, or pass `includeUncommitted: true`           |
+| A copy is not excluded by the committed `.gitignore` (first synchronization) | Pass `includeUncommitted: true`, or ignore the file in `.gitignore` |
+| The agent created a file your host ignores outside `.gitignore`              | Move the ignore rule into the committed `.gitignore`                |
+| The agent rewrote a commit that was already synchronized                     | Ask for new commits instead of an amend or a rebase                 |
 
 `recoveryTransport` on `dispatch()` or `createSandbox()` also archives each backup to [object storage](../object-storage/).
 

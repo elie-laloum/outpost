@@ -39,15 +39,15 @@ console.log(result.status, result.winner?.branch);
 
 Chaque candidat part du commit courant du checkout, sur sa propre branche `outpost/speculation/<id>/<key>`, dans son propre worktree et sa propre sandbox. Le premier candidat accepté par `validate` gagne ; les autres s’arrêtent.
 
-| Option        | Défaut      | Rôle                                                                               |
-| ------------- | ----------- | ---------------------------------------------------------------------------------- |
-| `candidates`  | Obligatoire | 1 à 8 requêtes, chacune avec une `key` unique, un `agent` et une `request`.        |
-| `validate`    | Obligatoire | Renvoie `true` quand un candidat est acceptable.                                   |
-| `budget`      | Obligatoire | Tentatives et tokens partagés par tous les candidats.                              |
-| `concurrency` | `2`         | Candidats exécutés en même temps, de 1 à 8. Les autres attendent une place.        |
-| `cleanupMs`   | `30000`     | Durée d’attente de la fermeture de chaque sandbox à la fin d’un candidat.          |
-| `sandbox`     | Aucun       | Réglages de sandbox communs à tous les candidats : `hooks`, `bootstrap`, `limits`. |
-| `durability`  | Aucun       | Enregistre la course pour qu’elle survive à un crash : voir plus bas.              |
+| Option        | Défaut      | Rôle                                                                                                                                                |
+| ------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `candidates`  | Obligatoire | 1 à 8 requêtes, chacune avec une `key` unique, un `agent` et une `request`.                                                                         |
+| `validate`    | Obligatoire | Renvoie `true` quand un candidat est acceptable.                                                                                                    |
+| `budget`      | Obligatoire | Tentatives et tokens partagés par tous les candidats.                                                                                               |
+| `concurrency` | `2`         | Candidats exécutés en même temps, de 1 à 8. Les autres attendent une place.                                                                         |
+| `cleanupMs`   | `30000`     | Durée d’attente de la fermeture de chaque sandbox, de chaque récupération de ressource à la reprise et des candidats en cours après une annulation. |
+| `sandbox`     | Aucun       | Réglages de sandbox communs à tous les candidats : `hooks`, `bootstrap`, `limits`.                                                                  |
+| `durability`  | Aucun       | Enregistre la course pour qu’elle survive à un crash : voir plus bas.                                                                               |
 
 Pour un scénario complet opposant Codex à Claude Code, voir la recette [Mettre des agents en concurrence](../compete-agents/).
 
@@ -92,7 +92,7 @@ Le `commit` du gagnant est le `HEAD` lu après le retour de `validate`. Un commi
 
 Les tokens consommés dans `validate`, par exemple par un agent de revue, ne comptent pas dans `budget`. Les candidats en cours peuvent dépasser la limite de tokens avant que leur usage soit remonté. [Budgets](../budgets/) explique comment les limites sont mesurées.
 
-Chaque sandbox est libérée à la fin de son candidat. Si elle ne se ferme pas dans le délai `cleanupMs`, le candidat indique `cleanup: "pending"` et son `resourceId`.
+Chaque sandbox est libérée à la fin de son candidat. Si elle ne se ferme pas dans le délai `cleanupMs`, le candidat indique `cleanup: "pending"`, avec son `resourceId` dans une course durable. Une course durable dont un nettoyage reste en attente reste possédée : appelez `recoverSpeculation()` avant le prochain `speculate()`.
 
 ## Ce qui est conservé
 

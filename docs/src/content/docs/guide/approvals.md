@@ -166,6 +166,7 @@ Submit decisions with `checkpoint: { store, runId, version }` from that value: s
 
 - A gate takes no condition, retry, timeout or cache.
 - A queued workflow job takes no decisions: call `start()` outside the worker.
+- Changing a gate’s `prompt`, `actors` or `authentication` makes a paused run’s checkpoint incompatible: resume it with the unchanged gate.
 - Signatures do not protect the checkpoint: anyone who can write its store is trusted.
 - A custom `decisionVerifier` must check the signature, actor and expiry itself.
 - For questions the agent asks while working, use [interactive tasks](../interactive-tasks/).

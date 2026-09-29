@@ -76,7 +76,7 @@ Vercel and Daytona load their SDK when they allocate a sandbox. Install it next 
 
 Remote providers (Vercel, Daytona, Firecracker) work on a copy of the Git history. They install a missing supported CLI before the first turn unless you pass `bootstrap: false`, and they reject the `current` branch mode.
 
-With `repositoryMode: "isolated"`, Docker and Podman behave like a remote provider: see [Private Git](../private-git/).
+With `repositoryMode: "isolated"`, Docker and Podman behave like a remote provider: see [Private Git](../private-git/). They then lose durable speculation recovery, which needs the default mounted mode.
 
 ## Limits
 

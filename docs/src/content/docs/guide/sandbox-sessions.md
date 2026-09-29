@@ -52,30 +52,30 @@ console.log(result.status, result.stdout);
 
 `sandbox.root` is the repository path inside the sandbox and the default working directory.
 
-| Option       | What it does                                                                                   |
-| ------------ | ---------------------------------------------------------------------------------------------- |
-| `executable` | Program to run, required.                                                                      |
-| `arguments`  | Arguments passed as-is, without shell expansion.                                               |
-| `directory`  | Working directory inside the sandbox. Defaults to `sandbox.root`.                              |
-| `variables`  | Environment values for this command only ([Environment variables](../environment-variables/)). |
-| `stdin`      | Text written to standard input, which then closes.                                             |
-| `input`      | A `Readable` stream written after `stdin`; standard input stays open until it ends.            |
-| `observe`    | Callback receiving each `stdout` or `stderr` chunk as it arrives.                              |
-| `retain`     | Number of trailing characters kept per stream in the result. Defaults to 65,536.               |
-| `deadlineMs` | Maximum duration before Outpost stops the process. Defaults to 10 minutes.                     |
-| `signal`     | `AbortSignal` that cancels the command.                                                        |
-| `elevated`   | Runs as root on providers that support it: Docker, Podman, Vercel and Daytona.                 |
+| Option       | What it does                                                                                     |
+| ------------ | ------------------------------------------------------------------------------------------------ |
+| `executable` | Program to run, required.                                                                        |
+| `arguments`  | Arguments passed as-is, without shell expansion.                                                 |
+| `directory`  | Working directory inside the sandbox. Defaults to `sandbox.root`.                                |
+| `variables`  | Environment values for this command only ([Environment variables](../environment-variables/)).   |
+| `stdin`      | Text written to standard input, which then closes.                                               |
+| `input`      | A `Readable` stream written after `stdin`; standard input stays open until it ends.              |
+| `observe`    | Callback receiving each `stdout` or `stderr` chunk as it arrives.                                |
+| `retain`     | Number of trailing characters kept per stream in the result. Defaults to 65,536.                 |
+| `deadlineMs` | Maximum duration before Outpost stops the process. Defaults to 10 minutes.                       |
+| `signal`     | `AbortSignal` that cancels the command.                                                          |
+| `elevated`   | Runs as root on Docker, Podman, Vercel and Daytona. The host ignores it; Firecracker rejects it. |
 
 ## Check the outcome
 
 A command that exits resolves with `status`, `stdout` and `stderr`, whatever its exit code. A command Outpost had to stop rejects instead.
 
-| Outcome                               | Result                                            |
-| ------------------------------------- | ------------------------------------------------- |
-| Process exits, even with status 1     | Resolves; test `result.status`.                   |
-| `deadlineMs` elapses                  | Rejects with an `OutpostError` of code `timeout`. |
-| `signal` aborts                       | Rejects with the signal’s reason.                 |
-| The sandbox closes during the command | Rejects; the process is stopped.                  |
+| Outcome                               | Result                                                                                          |
+| ------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Process exits, even with status 1     | Resolves; test `result.status`.                                                                 |
+| `deadlineMs` elapses                  | Rejects with an `OutpostError` of code `timeout`; on Vercel and Daytona, with a `TimeoutError`. |
+| `signal` aborts                       | Rejects with the signal’s reason.                                                               |
+| The sandbox closes during the command | Rejects; the process is stopped.                                                                |
 
 The result waits for the process to exit, not for its output to close. Read `status` rather than guessing success from `stdout`. Error codes are listed in [Errors](../error-handling/).
 
@@ -129,7 +129,7 @@ Run it from a real terminal. `continuation` reopens a captured conversation. The
 | Daytona              | Supported  |
 | Vercel, Firecracker  | Rejected   |
 
-Attach needs a CLI agent such as Codex or Claude Code. The [built-in harness](../harness/) and [fallback agents](../fallback-agents/) are rejected.
+Attach needs a CLI agent such as Codex or Claude Code. The [built-in harness](../harness/), [fallback agents](../fallback-agents/) and [replay agents](../record-replay/) are rejected.
 
 ## Integrate the work yourself
 

@@ -76,7 +76,7 @@ Vercel et Daytona chargent leur SDK au moment d’allouer une sandbox. Installez
 
 Les providers distants (Vercel, Daytona, Firecracker) travaillent sur une copie de l’historique Git. Si un CLI pris en charge manque, ils l’installent avant le premier tour, sauf si vous passez `bootstrap: false`. Ils refusent le mode de branche `current`.
 
-Avec `repositoryMode: "isolated"`, Docker et Podman se comportent comme un provider distant : voir [Git privé](../private-git/).
+Avec `repositoryMode: "isolated"`, Docker et Podman se comportent comme un provider distant : voir [Git privé](../private-git/). Ils perdent alors la reprise de spéculation durable, qui exige le mode monté par défaut.
 
 ## Limites
 

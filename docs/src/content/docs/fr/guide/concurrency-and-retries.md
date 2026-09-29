@@ -160,7 +160,7 @@ Les tâches d’agent, de commande et isolées transmettent `context.signal` pou
 
 - L’annulation est coopérative : un code qui ignore `context.signal` continue jusqu’à son retour, même au-delà de l’échéance du workflow ; sa valeur est alors ignorée.
 - Une relance réexécute toute la tâche et peut répéter ses effets de bord. Dédupliquez-les avec `context.idempotencyKey`, identique d’une relance à l’autre : voir [Files de jobs et workers](../job-queues/).
-- Le backoff exponentiel repart de `delayMs` à chaque appel à `start()` ; les numéros de tentative restent cumulés dans un checkpoint.
+- Chaque appel à `start()`, comme une reprise depuis un checkpoint ou après une pause sur quota, accorde de nouveau `retry.attempts` et fait repartir le backoff de `delayMs` ; les numéros de tentative restent cumulés dans un checkpoint.
 - Avec les [pauses sur quota](../quota-pauses/), une erreur de quota met la tâche en pause au lieu de la relancer.
 - Les réglages de relance, les délais de tâche et la présence d’une condition font partie de l’identité du checkpoint : les modifier fait rejeter un checkpoint existant (voir [Exécutions durables](../durable-runs/)).
 

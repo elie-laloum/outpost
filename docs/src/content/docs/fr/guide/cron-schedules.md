@@ -91,7 +91,7 @@ Chaque créneau publie le job `schedule:<name>:<heure ISO du créneau>`. Un plan
 
 `runId` et `input` ne doivent dépendre que du créneau. La file refuse une deuxième publication du même identifiant avec une requête différente.
 
-Deux planifications peuvent renvoyer le même `runId` pour un même jour : le second job reprend alors la même exécution avec checkpoint, comme la reprise de 07:00 dans [Maintenance nocturne](../nightly-maintenance/).
+Deux planifications peuvent renvoyer le même `runId` pour un même jour : le second job reprend alors la même exécution avec checkpoint si son `input` est identique (un `input` différent échoue sur un checkpoint incompatible), comme la reprise de 07:00 dans [Maintenance nocturne](../nightly-maintenance/).
 
 ## Rattraper un créneau après un redémarrage
 

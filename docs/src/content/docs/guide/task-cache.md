@@ -164,5 +164,6 @@ Entries live under `task-cache/` in the transport until you remove them. Add the
 - A task already completed in a [checkpoint](../durable-runs/) is restored from it without reading the cache.
 - Entries are not invalidated when your code or agent changes: change `version`.
 - `createTaskCacheStore` does not store entries above 16 MiB (`maxBytes`); the write reports `failed`.
+- Do not cache a `defineArtifactTask` read by a later task: a hit in a new run restores a reference to the earlier run, and `readArtifact()` fails with “Artifact dependency producer mismatch”.
 
 API: [TaskCacheOptions](../../reference/taskcacheoptions/) · [createTaskCacheStore](../../reference/createtaskcachestore/) · [repositoryFingerprint](../../reference/repositoryfingerprint/) · [TaskCacheEntry](../../reference/taskcacheentry/) · [WorkflowEvent](../../reference/workflowevent/).

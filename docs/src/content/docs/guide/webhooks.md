@@ -143,7 +143,9 @@ A new delivery publishes a new job, even for the same event, such as a label add
 
 ## Derive the run from the payload
 
-Build `runId` from what identifies the work in the payload: `owner/name#12`, or a head commit. Jobs with the same `runId` share one [checkpoint](../durable-runs/): `defineWorkflowJob()` restores the tasks already done instead of running them again.
+Build `runId` from what identifies the work in the payload: `owner/name#12`, or a head commit. Jobs with the same `runId` and the same `input` share one [checkpoint](../durable-runs/): `defineWorkflowJob()` restores the tasks already done instead of running them again.
+
+A different `input` under the same `runId` fails with an incompatible checkpoint, because the checkpoint version includes a digest of the input. Two commands with different text on one issue therefore need distinct run IDs, for example with `event.delivery` added.
 
 GitHub signatures carry no timestamp, so a captured request can be replayed under a new delivery identifier. A payload-derived `runId` makes that replay converge on the same run. The [Review a pull request on demand](../review-on-label/) recipe keys each run on the head commit.
 

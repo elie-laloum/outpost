@@ -46,7 +46,7 @@ A fallback agent goes wherever an agent does, including `createSandbox()`, agent
 | `quota`       | A usage or rate limit: `OutpostError` code `quota`, as classified on [Quota pauses](../quota-pauses/). |
 | `unavailable` | A service outage: overload, HTTP 408, 5xx or 529, or a connection or transport failure.                |
 
-Any other failure, including cancellation and deadlines, is rethrown at once. An outage keeps its code (`process` or `provider`); detect it with `unavailableFault(error)`.
+Any other failure, including cancellation and deadlines, is rethrown at once. One exception: a deadline reached after the agent reported a connection failure counts as an outage. An outage keeps its code (`process`, `provider` or `timeout`); detect it with `unavailableFault(error)`.
 
 ## What the next candidate sees
 

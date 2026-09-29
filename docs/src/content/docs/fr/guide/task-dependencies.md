@@ -207,7 +207,7 @@ Chaque déclaration renvoie une tâche que vous listez dans `defineWorkflow()` e
 ## Limites
 
 - Les sorties restent en mémoire le temps d’un `start()`. Une exécution relancée réexécute toutes les tâches, sauf si vous passez un [checkpoint](../durable-runs/).
-- Les tâches d’approbation et de pause, les tâches interactives et les pauses de quota exigent un checkpoint : sans lui, `start()` lève une exception.
+- Les tâches d’approbation et de pause, les tâches interactives, les pauses de quota, `answers` et `decisions` exigent un checkpoint : sans lui, `start()` lève une exception.
 - Un workflow ne committe, ne fusionne et ne pousse pas les tâches en une seule transaction. Pour modifier plusieurs dépôts, voir [Plusieurs dépôts](../multiple-repositories/).
 
 API : [defineTask](../../reference/definetask/) · [defineWorkflow](../../reference/defineworkflow/) · [TaskContext](../../reference/taskcontext/) · [WorkflowResult](../../reference/workflowresult/) · [TaskRecord](../../reference/taskrecord/) · [WorkflowFailure](../../reference/workflowfailure/)

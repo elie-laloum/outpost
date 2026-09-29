@@ -39,15 +39,15 @@ console.log(result.status, result.winner?.branch);
 
 Each candidate starts from the checkout’s current commit, on its own branch `outpost/speculation/<id>/<key>`, in its own worktree and sandbox. The first candidate that `validate` accepts wins; the others stop.
 
-| Option        | Default  | Role                                                                        |
-| ------------- | -------- | --------------------------------------------------------------------------- |
-| `candidates`  | Required | 1 to 8 requests, each with a unique `key`, an `agent` and a `request`.      |
-| `validate`    | Required | Returns `true` when a candidate is acceptable.                              |
-| `budget`      | Required | Attempts and tokens shared by every candidate.                              |
-| `concurrency` | `2`      | Candidates running at once, 1 to 8. The others wait for a free slot.        |
-| `cleanupMs`   | `30000`  | How long to wait for each sandbox to close after a candidate ends.          |
-| `sandbox`     | None     | Sandbox settings shared by every candidate: `hooks`, `bootstrap`, `limits`. |
-| `durability`  | None     | Saves the race so it survives a crash: see below.                           |
+| Option        | Default  | Role                                                                                                                      |
+| ------------- | -------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `candidates`  | Required | 1 to 8 requests, each with a unique `key`, an `agent` and a `request`.                                                    |
+| `validate`    | Required | Returns `true` when a candidate is acceptable.                                                                            |
+| `budget`      | Required | Attempts and tokens shared by every candidate.                                                                            |
+| `concurrency` | `2`      | Candidates running at once, 1 to 8. The others wait for a free slot.                                                      |
+| `cleanupMs`   | `30000`  | How long to wait for each sandbox to close, each resource recovery on resume and running candidates after a cancellation. |
+| `sandbox`     | None     | Sandbox settings shared by every candidate: `hooks`, `bootstrap`, `limits`.                                               |
+| `durability`  | None     | Saves the race so it survives a crash: see below.                                                                         |
 
 For a complete scenario with Codex against Claude Code, see the recipe [Let agents compete](../compete-agents/).
 
@@ -92,7 +92,7 @@ The winner’s `commit` is `HEAD` read after `validate` returns. A commit made d
 
 Tokens used inside `validate`, such as a reviewer agent’s, do not count in `budget`. Running candidates can exceed the token limit before their usage is reported. [Budgets](../budgets/) explains how limits are measured.
 
-Each sandbox is released when its candidate ends. If it does not close within `cleanupMs`, the candidate reports `cleanup: "pending"` and its `resourceId`.
+Each sandbox is released when its candidate ends. If it does not close within `cleanupMs`, the candidate reports `cleanup: "pending"`, with its `resourceId` in a durable race. A durable race with a pending cleanup stays owned: call `recoverSpeculation()` before the next `speculate()`.
 
 ## What is kept
 

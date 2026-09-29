@@ -46,7 +46,7 @@ Un agent de secours s’utilise partout où un agent est accepté, y compris `cr
 | `quota`        | Une limite d’usage ou de débit : `OutpostError` de code `quota`, classée comme dans [Pauses sur quota](../quota-pauses/). |
 | `unavailable`  | Une panne du service : surcharge, HTTP 408, 5xx ou 529, ou échec de connexion ou de transport.                            |
 
-Tout autre échec, y compris une annulation ou un délai dépassé, est relancé immédiatement. Une panne garde son code (`process` ou `provider`) ; détectez-la avec `unavailableFault(error)`.
+Tout autre échec, y compris une annulation ou un délai dépassé, est relancé immédiatement. Exception : un délai dépassé après que l’agent a signalé un échec de connexion compte comme une panne. Une panne garde son code (`process`, `provider` ou `timeout`) ; détectez-la avec `unavailableFault(error)`.
 
 ## Ce que voit le candidat suivant
 

@@ -166,6 +166,7 @@ Soumettez les décisions avec `checkpoint: { store, runId, version }` issus de c
 
 - Une gate ne prend ni condition, ni retry, ni timeout, ni cache.
 - Un job de workflow en file ne reçoit pas de décisions : appelez `start()` hors du worker.
+- Modifier le `prompt`, les `actors` ou l’`authentication` d’une gate rend incompatible le checkpoint d’une exécution en pause : reprenez-la avec la gate inchangée.
 - Les signatures ne protègent pas le checkpoint : quiconque peut écrire dans son store est de confiance.
 - Un `decisionVerifier` personnalisé doit vérifier lui-même la signature, l’acteur et l’expiration.
 - Pour les questions que l’agent pose en travaillant, utilisez les [tâches interactives](../interactive-tasks/).

@@ -239,7 +239,7 @@ The dispatch waits for pending handlers before it returns and reports the first 
 
 ## Limits
 
-- The hub is a live, in-memory stream: it stores nothing, and a slow sink loses events. To read events after the run, use the dispatch’s [journal](../journals/).
+- The hub is a live, in-memory stream: it stores nothing, and a slow sink loses events. To read events after the run, use the dispatch’s [journal](../journals/), itself a sink with the same `capacity` and `deliveryTimeoutMs` bounds.
 - A disabled sink stays disabled for the hub’s lifetime, and `errors` keeps the first 100 errors.
 - A closed hub ignores new events. A hub reused across runs keeps its `errors` and `dropped` count, so each run’s `observerErrors` includes earlier errors.
 - Events emitted on a remote [worker](../job-queues/) stay on that worker’s hub.

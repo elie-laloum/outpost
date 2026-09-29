@@ -128,7 +128,7 @@ Les journaux restent dans leur transport jusqu’à ce que vous les supprimiez. 
 
 ## Limites
 
-- Un journal est écrit par un récepteur du [hub d’observation](../observability/). Si son transport échoue ou prend du retard, le journal peut manquer des événements ou rester ouvert, et l’échec apparaît dans `result.observerErrors` (dans `recoveryDetails(error)` quand le dispatch échoue). `readJournal()` renvoie alors les événements écrits avant l’échec.
+- Un journal est écrit par un récepteur du [hub d’observation](../observability/). Il partage la file bornée du hub (`capacity`, `deliveryTimeoutMs`) : si son transport échoue ou prend du retard, le journal peut manquer des événements, être désactivé pour le reste de l’exécution ou rester ouvert, et l’échec apparaît dans `result.observerErrors` (dans `recoveryDetails(error)` quand le dispatch échoue). `readJournal()` renvoie alors les événements écrits avant l’échec.
 - Les journaux contiennent les prompts, les messages de l’agent et les résultats d’outils, donc du contenu du dépôt. Stockez-les et partagez-les avec le même soin que le code ; `replayable` y ajoute les patchs de chaque commit.
 
 API : [Logging](../../reference/logging/) · [readJournal](../../reference/readjournal/) · [ReadJournalOptions](../../reference/readjournaloptions/) · [DispatchResult](../../reference/dispatchresult/) · [recoveryDetails](../../reference/recoverydetails/) · [createObservationHub](../../reference/createobservationhub/).

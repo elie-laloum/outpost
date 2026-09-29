@@ -90,7 +90,7 @@ Three kinds of credentials serve three different clients. A Vercel or S3 key nev
 
 ## Limits
 
-- Claude rejects conflicting variables: account forms fail when `ANTHROPIC_API_KEY` is declared, `usage` forms when `CLAUDE_CODE_OAUTH_TOKEN` is.
+- Claude rejects conflicting variables at dispatch: account forms fail when `ANTHROPIC_API_KEY` has a value in `.outpost/.env` or in the harness or provider `variables`, `usage` forms when `CLAUDE_CODE_OAUTH_TOKEN` does.
 - Kimi account forms reject `KIMI_CODE_OAUTH_HOST`, `KIMI_OAUTH_HOST` or `KIMI_CODE_BASE_URL` values that contradict the selected region. Kimi `usage` needs a model name on `createAgent()`.
 - Copilot has no `usage` mode and rejects classic `ghp_` tokens. A login kept in the system keychain is unreadable: pass the token with `{ account: { variable } }`.
 - Codex with a custom `modelProvider` accepts only `usage` forms.
