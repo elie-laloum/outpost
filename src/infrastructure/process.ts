@@ -1,4 +1,5 @@
 import { spawn } from "node:child_process";
+import type { Writable } from "node:stream";
 import { StringDecoder } from "node:string_decoder";
 import type {
   Channel,
@@ -123,18 +124,27 @@ export const executeProcess: Executor = (command) => {
       if (failed) reject(reason);
       else resolve({ status: status ?? 1, ...output });
     });
-    if (child.stdin && command.terminal?.input)
-      command.terminal.input.pipe(child.stdin);
-    else if (child.stdin && command.input) {
-      if (command.stdin) child.stdin.write(command.stdin);
-      command.input.pipe(child.stdin);
-    } else child.stdin?.end(command.stdin);
+    connectStdin(child.stdin, command);
     if (child.stdout && command.terminal?.output)
       child.stdout.pipe(command.terminal.output, { end: false });
     if (child.stderr && command.terminal?.error)
       child.stderr.pipe(command.terminal.error, { end: false });
   });
 };
+
+function connectStdin(stdin: Writable | null, command: Command): void {
+  if (!stdin) return;
+  if (command.terminal?.input) {
+    command.terminal.input.pipe(stdin);
+    return;
+  }
+  if (!command.input) {
+    stdin.end(command.stdin);
+    return;
+  }
+  if (command.stdin) stdin.write(command.stdin);
+  command.input.pipe(stdin);
+}
 
 export async function requireSuccess(
   command: Command,

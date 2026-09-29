@@ -50,6 +50,7 @@ test("human reporter exposes phases, duration and raw token counts while quiet m
     sink({ kind: "compaction", strategy: "summarize-history", messages: 4 });
     sink({ kind: "tool-denied", callId: "d", name: "rm", reason: "unsafe" });
     sink({ kind: "stop-prevented", message: "run tests first" });
+    sink({ kind: "steer", text: "keep legacy/", mode: "injected" });
     sink({
       kind: "tool-result",
       callId: "c",
@@ -86,6 +87,7 @@ test("human reporter exposes phases, duration and raw token counts while quiet m
   assert.match(normal, /tool failed: read\n/);
   assert.match(normal, /tool denied: rm · unsafe/);
   assert.match(normal, /stop prevented: run tests first/);
+  assert.match(normal, /steering injected: keep legacy\//);
   assert.match(
     normal,
     /fallback: claude \(opus\) → codex · quota: limit reached/,

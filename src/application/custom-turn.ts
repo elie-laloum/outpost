@@ -2,6 +2,8 @@ import type { AgentEvent, CustomAgent, Usage } from "../domain/agent.types.ts";
 import type { ModelResult } from "../domain/model.types.ts";
 import type { SandboxLease } from "../domain/sandbox.types.ts";
 import { invariant, OutpostError } from "../domain/errors.ts";
+import { steeringInbox } from "../domain/steering.ts";
+import { deliverSteering } from "./steering-scope.ts";
 import { harnessBudget } from "./harness-budget.ts";
 import { harnessModelProvider } from "./harness-model-provider.ts";
 import { MAX_DELEGATION_DEPTH } from "../domain/subagent.constants.ts";
@@ -54,6 +56,7 @@ export async function customTurn(
     notify(options.observe, { ...event, pass, at: new Date().toISOString() });
   };
   const budget = harnessBudget(agent.harness.limits);
+  const inbox = steeringInbox(options.steering);
   const account = (result: ModelResult, subagentId?: string): void => {
     const tokens = result.usage ?? {
       input: 0,
@@ -161,6 +164,15 @@ export async function customTurn(
         modelProvider,
         sandbox,
         signal,
+        ...(inbox
+          ? {
+              steer: () => {
+                const messages = inbox.take();
+                deliverSteering(messages, "injected", pass, options.observe);
+                return messages.map((message) => message.text);
+              },
+            }
+          : {}),
         emit,
         hold: () => watchdog.hold(),
       },

@@ -7,6 +7,7 @@ import type { DispatchTelemetry } from "../domain/dispatch-telemetry.types.ts";
 import type { Brief } from "../domain/prompts.types.ts";
 import type { ResponseSpec } from "../domain/response.types.ts";
 import type { Logging } from "../infrastructure/journal.types.ts";
+import type { Steering } from "../domain/steering.types.ts";
 
 export interface DispatchOptions<T = undefined> {
   readonly observation?: ObservationHub;
@@ -22,6 +23,8 @@ export interface DispatchOptions<T = undefined> {
   readonly deadlineMs?: number;
   readonly expansionMs?: number;
   readonly signal?: AbortSignal;
+  /** Controller from createSteering() that sends instructions while the agent runs. */
+  readonly steering?: Steering;
   readonly continuation?: { readonly id: string; readonly fork?: boolean };
   readonly response?: ResponseSpec<T>;
   readonly telemetry?: DispatchTelemetry;
@@ -38,6 +41,8 @@ export interface TurnContext {
 export interface Turn {
   readonly text: string;
   readonly status: number;
+  /** Set when steering stopped this turn to resume the conversation with new instructions. */
+  readonly interrupted?: "steering";
   readonly conversation?: string;
   readonly transcript?: string;
   readonly transcriptReference?: TransportReference;
@@ -58,6 +63,7 @@ export interface AgentOutput {
   append(chunk: string): void;
   flush(): void;
   result(): Pick<Turn, "text" | "usage" | "conversation">;
+  partial(): Pick<Turn, "text" | "usage" | "conversation">;
 }
 
 export interface ActivityWatchdog {

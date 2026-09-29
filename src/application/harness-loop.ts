@@ -27,11 +27,18 @@ const stopHandlers: Readonly<Record<ModelStopReason, StopHandler>> = {
   end: async (runtime, state, result, content) => {
     const message = await stopRequest(runtime, result.text, state.step);
     await state.history.append({ role: "assistant", content });
-    if (message === undefined) return result.text;
-    runtime.emit({ kind: "stop-prevented", message });
+    const instructions = steering(runtime);
+    if (message === undefined && !instructions.length) return result.text;
+    if (message !== undefined)
+      runtime.emit({ kind: "stop-prevented", message });
     await state.history.append({
       role: "user",
-      content: [{ type: "text", text: message }],
+      content: [
+        ...(message === undefined
+          ? []
+          : [{ type: "text" as const, text: message }]),
+        ...instructions,
+      ],
     });
     return undefined;
   },
@@ -59,14 +66,15 @@ const stopHandlers: Readonly<Record<ModelStopReason, StopHandler>> = {
         `Harness exceeded ${maxToolCalls} tool calls`,
       );
     await state.history.append({ role: "assistant", content });
+    const results = await executeToolCalls(
+      runtime,
+      calls,
+      state.step,
+      loadedSkills(state.history.messages),
+    );
     await state.history.append({
       role: "user",
-      content: await executeToolCalls(
-        runtime,
-        calls,
-        state.step,
-        loadedSkills(state.history.messages),
-      ),
+      content: [...results, ...steering(runtime)],
     });
     return undefined;
   },
@@ -91,7 +99,7 @@ export async function harnessLoop(
   }));
   await history.append({
     role: "user",
-    content: [{ type: "text", text: prompt }],
+    content: [{ type: "text", text: prompt }, ...steering(runtime)],
   });
   let toolCalls = 0;
   const announcedSkills = new Set<string>();
@@ -154,6 +162,10 @@ async function instructions(runtime: HarnessRuntime): Promise<string> {
     count: texts.filter((text) => text.trim()).length,
   });
   return texts.filter((text) => text.trim()).join("\n\n");
+}
+
+function steering(runtime: HarnessRuntime): ModelContentBlock[] {
+  return (runtime.steer?.() ?? []).map((text) => ({ type: "text", text }));
 }
 
 function inferredStop(content: readonly ModelContentBlock[]): ModelStopReason {

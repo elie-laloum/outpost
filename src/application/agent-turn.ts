@@ -8,7 +8,8 @@ import { boundedLines } from "./output-lines.ts";
 import { stopReason } from "./stop-reason.ts";
 import { customTurn } from "./custom-turn.ts";
 import { replayTurn } from "./replay-turn.ts";
-import type { Agent } from "../domain/agent.types.ts";
+import type { Agent, AgentObservation } from "../domain/agent.types.ts";
+import { cliSteering } from "./cli-steering.ts";
 import { OutpostError } from "../domain/errors.ts";
 import type { SandboxLease } from "../domain/sandbox.types.ts";
 import { activityWatchdog } from "./activity-watchdog.ts";
@@ -19,6 +20,7 @@ import {
   executionDefaults,
 } from "./execution.constants.ts";
 import type { DispatchOptions, Turn, TurnContext } from "./execution.types.ts";
+import { steeringInterruption } from "./execution.constants.ts";
 import { notify } from "./observation.ts";
 
 export async function turn(
@@ -43,7 +45,17 @@ export async function turn(
   const signal = options.signal
     ? AbortSignal.any([options.signal, controller.signal])
     : controller.signal;
-  const output = agentOutput(agent, options, markers, pass);
+  let preparedConversation: string | undefined;
+  const steering = cliSteering(agent, lease, options, pass, {
+    conversation: () => output.conversation ?? preparedConversation,
+    completed: () => output.completed,
+    interrupt: () => controller.abort(steeringInterruption),
+  });
+  const observe = (event: AgentObservation) => {
+    steering.observe(event);
+    notify(options.observe, event);
+  };
+  const output = agentOutput(agent, { ...options, observe }, markers, pass);
   const failure = agentFailure(agent, output);
   const watchdog = activityWatchdog(controller, options, pass);
   watchdog.refresh(false);
@@ -58,8 +70,8 @@ export async function turn(
     });
   });
   let status = 0;
+  let interrupted = false;
   let commandCompleted = false;
-  let preparedConversation: string | undefined;
   try {
     if (agent.usage === "session")
       warnUsage(
@@ -81,6 +93,7 @@ export async function turn(
       agent,
       {
         text: prompt,
+        ...(steering.liveInput ? { liveInput: true } : {}),
         ...(continuation ? { continuation } : {}),
       },
       (command) =>
@@ -91,7 +104,7 @@ export async function turn(
         }),
       (id) => {
         preparedConversation = id;
-        notify(options.observe, {
+        observe({
           kind: "conversation",
           id,
           pass,
@@ -99,8 +112,9 @@ export async function turn(
         });
       },
     );
+    steering.start();
     const result = await lease.invoke({
-      ...command,
+      ...steering.command(command),
       signal,
       deadlineMs: options.deadlineMs ?? executionDefaults.deadlineMs,
       observe(channel, chunk) {
@@ -133,7 +147,8 @@ export async function turn(
         at: new Date().toISOString(),
       });
     options.signal?.throwIfAborted();
-    if (controller.signal.reason !== "completion") {
+    interrupted = controller.signal.reason === steeringInterruption;
+    if (controller.signal.reason !== "completion" && !interrupted) {
       const error =
         controller.signal.reason instanceof OutpostError
           ? controller.signal.reason
@@ -148,11 +163,13 @@ export async function turn(
       stderr.flush();
       throw failure.classify(error);
     }
-    notify(
-      options.warn,
-      "Agent remained active after completion; its command was stopped and trailing output retained",
-    );
+    if (!interrupted)
+      notify(
+        options.warn,
+        "Agent remained active after completion; its command was stopped and trailing output retained",
+      );
   } finally {
+    steering.close();
     stderr.flush();
     watchdog.close();
     try {
@@ -172,7 +189,7 @@ export async function turn(
   options.signal?.throwIfAborted();
   let outcome: ReturnType<typeof output.result>;
   try {
-    outcome = output.result();
+    outcome = interrupted ? output.partial() : output.result();
   } catch (error) {
     throw failure.classify(error);
   }
@@ -180,6 +197,7 @@ export async function turn(
     ...(preparedConversation ? { conversation: preparedConversation } : {}),
     ...outcome,
     status,
+    ...(interrupted ? { interrupted: "steering" as const } : {}),
     durationMs: Date.now() - start,
   };
 }

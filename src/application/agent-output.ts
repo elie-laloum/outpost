@@ -33,7 +33,8 @@ export function agentOutput(
       text += event.text;
     },
     result: (event) => {
-      finalText = event.text;
+      finalText =
+        finalText === undefined ? event.text : `${finalText}\n${event.text}`;
     },
     conversation: (event) => {
       conversation = event.id;
@@ -149,6 +150,13 @@ export function agentOutput(
     flush() {
       if (pending) consume(pending);
       pending = "";
+    },
+    partial() {
+      return {
+        text: finalText ?? text,
+        usage,
+        ...(conversation ? { conversation } : {}),
+      };
     },
     result() {
       if (failure) throw new OutpostError("process", failure, { conversation });

@@ -13,6 +13,7 @@ import { attachInSandbox } from "./sandbox-attach.ts";
 import { observeDispatch } from "./dispatch-observation.ts";
 import { dispatchInSandbox } from "./sandbox-dispatch.ts";
 import { provisionSandbox } from "./sandbox-provision.ts";
+import { steeringScope } from "./steering-scope.ts";
 
 export async function createSandbox(
   options: SandboxOptions = {},
@@ -31,19 +32,21 @@ export async function createSandbox(
     root: runtime.root,
     dispatch(settings) {
       validateDispatch(settings);
-      return exclusive("dispatch", () =>
-        observeDispatch(
-          {
-            ...(options.logging === undefined
-              ? {}
-              : { logging: options.logging }),
-            ...(options.observation
-              ? { observation: options.observation }
-              : {}),
-            ...settings,
-          },
-          (observed) => dispatchInSandbox(context, agents, result, observed),
-          workspace.repository,
+      return steeringScope(settings.steering, () =>
+        exclusive("dispatch", () =>
+          observeDispatch(
+            {
+              ...(options.logging === undefined
+                ? {}
+                : { logging: options.logging }),
+              ...(options.observation
+                ? { observation: options.observation }
+                : {}),
+              ...settings,
+            },
+            (observed) => dispatchInSandbox(context, agents, result, observed),
+            workspace.repository,
+          ),
         ),
       );
     },

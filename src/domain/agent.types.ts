@@ -3,6 +3,7 @@ import type { AgentModel, ModelSpec } from "./model.types.ts";
 import type { Command, CommandResult, Variables } from "./command.types.ts";
 import type { ConversationStore } from "./conversation.types.ts";
 import type { ReplayAgent } from "./replay.types.ts";
+import type { SteeringMode } from "./steering.types.ts";
 import type {
   FallbackCandidate,
   FallbackTrigger,
@@ -47,7 +48,13 @@ export type AgentEventDetails =
         | "idle-timeout"
         | "deadline"
         | "aborted"
-        | "oversized-event";
+        | "oversized-event"
+        | "steered";
+    }
+  | {
+      readonly kind: "steer";
+      readonly text: string;
+      readonly mode: SteeringMode;
     }
   | {
       readonly kind: "reasoning";
@@ -168,6 +175,8 @@ export type AgentEventHandlers = {
 export interface AgentInput {
   readonly text?: string;
   readonly interactive?: boolean;
+  /** Keeps stdin open so the adapter's liveInput protocol can add user messages. */
+  readonly liveInput?: boolean;
   readonly continuation?: { readonly id: string; readonly fork?: boolean };
 }
 
@@ -199,6 +208,15 @@ export interface AgentAdapter extends AgentFeatures {
   unavailable?(text: string): boolean;
   usageCommand?(conversation: string): Command | undefined;
   usageResult?(text: string): Usage | undefined;
+  /** Protocol for adding user messages to a running turn through live stdin. */
+  readonly liveInput?: AgentLiveInput;
+}
+
+export interface AgentLiveInput {
+  /** Encodes one user message, including its line terminator. */
+  encode(text: string): string;
+  /** Recognizes an output line confirming the agent consumed one user message. */
+  consumed(line: string): boolean;
 }
 
 export interface RequiredAgent {

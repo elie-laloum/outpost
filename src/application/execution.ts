@@ -5,6 +5,7 @@ import type { SandboxLease } from "../domain/sandbox.types.ts";
 import { addUsage } from "../domain/usage.ts";
 import type { WorkspaceRecord } from "../domain/workspace.types.ts";
 import { turn } from "./agent-turn.ts";
+import { steeringTurns } from "./steering-turns.ts";
 import { renderBrief } from "./brief-renderer.ts";
 import { validateDispatch } from "./dispatch-validation.ts";
 import { executionDefaults } from "./execution.constants.ts";
@@ -72,23 +73,37 @@ export async function execute<T>(
       pass: index + 1,
       at: new Date().toISOString(),
     });
-    const finished = await turn(
-      lease,
+    const steered = await steeringTurns(
       agent,
-      prompt,
       options,
+      prompt,
       continuation,
-      markers,
       index + 1,
-      { repository: workspace.repository, repair: repair !== undefined },
+      async (text, resumed) => {
+        const finished = await turn(
+          lease,
+          agent,
+          text,
+          options,
+          resumed,
+          markers,
+          index + 1,
+          { repository: workspace.repository, repair: repair !== undefined },
+        );
+        return afterTurn ? await afterTurn(finished) : finished;
+      },
     );
-    const current = afterTurn ? await afterTurn(finished) : finished;
-    turns.push(current);
+    turns.push(...steered);
+    const current = steered.at(-1)!;
     notify(options.observe, {
       kind: "summary",
-      durationMs: current.durationMs,
+      durationMs: steered.reduce((sum, item) => sum + item.durationMs, 0),
       status: current.status,
-      tokens: current.usage,
+      tokens: steered.reduce((sum, item) => addUsage(sum, item.usage), {
+        input: 0,
+        cached: 0,
+        output: 0,
+      } as Usage),
       pass: index + 1,
       at: new Date().toISOString(),
     });

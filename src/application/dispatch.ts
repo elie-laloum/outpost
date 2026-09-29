@@ -14,15 +14,19 @@ import type {
 } from "./outpost.types.ts";
 import { observeDispatch } from "./dispatch-observation.ts";
 import { createSandbox } from "./sandbox.ts";
+import { steeringScope } from "./steering-scope.ts";
 
 export async function dispatch<T = undefined>(
   options: DispatchRequest<T>,
 ): Promise<DispatchResult<T>> {
   const { telemetry: _telemetry, ...configuration } = options;
-  return observeDispatch(
-    options,
-    (observed) => dispatchOperation({ ...configuration, ...observed }, options),
-    options.workspace?.repository ?? options.repository ?? process.cwd(),
+  return steeringScope(options.steering, () =>
+    observeDispatch(
+      options,
+      (observed) =>
+        dispatchOperation({ ...configuration, ...observed }, options),
+      options.workspace?.repository ?? options.repository ?? process.cwd(),
+    ),
   );
 }
 
@@ -90,6 +94,7 @@ async function dispatchOperation<T>(
     response: _response,
     continuation: _continuation,
     passes: _passes,
+    steering: _steering,
     ...configuration
   } = original;
   let successful = false;

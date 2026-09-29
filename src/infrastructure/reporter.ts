@@ -55,6 +55,9 @@ export function reporter(
       case "stop-prevented":
         write(`${prefix} stop prevented: ${event.message}\n`);
         break;
+      case "steer":
+        write(`\n${prefix} steering ${event.mode}: ${event.text}\n`);
+        break;
       case "compaction":
         if (options.verbose)
           write(

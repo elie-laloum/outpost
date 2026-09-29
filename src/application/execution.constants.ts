@@ -22,3 +22,6 @@ export const dispatchDeadlines = [
 
 export const agentConnectionFailurePattern =
   /\b(?:connection (?:failed|refused|reset)|error sending request|ECONNREFUSED|ENOTFOUND|EAI_AGAIN)\b/i;
+
+/** Abort reason that stops a CLI turn so steering can resume its conversation. */
+export const steeringInterruption = "steer";

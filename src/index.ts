@@ -244,11 +244,19 @@ export type {
   FallbackTrigger,
 } from "./domain/fallback-agent.types.ts";
 export type { UnavailableFault } from "./domain/unavailable.types.ts";
+export { createSteering } from "./domain/steering.ts";
+export type {
+  Steering,
+  SteeringDelivery,
+  SteeringMode,
+  SteeringState,
+} from "./domain/steering.types.ts";
 
 export type {
   AgentAdapter,
   AgentEvent,
   AgentInput,
+  AgentLiveInput,
   AgentObservation,
   BranchPolicy,
   Channel,

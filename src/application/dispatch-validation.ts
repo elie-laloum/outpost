@@ -3,11 +3,13 @@ import { resolve } from "node:path";
 import type { Agent } from "../domain/agent.types.ts";
 import { invariant, positive } from "../domain/errors.ts";
 import { validateBrief } from "../domain/prompts.ts";
+import { steeringChannel } from "../domain/steering.ts";
 import { dispatchDeadlines, executionDefaults } from "./execution.constants.ts";
 import type { DispatchOptions } from "./execution.types.ts";
 
 export function validateDispatch(options: DispatchOptions<unknown>): void {
   options.signal?.throwIfAborted();
+  if (options.steering) steeringChannel(options.steering);
   validateBrief(options.brief);
   positive(options.passes ?? executionDefaults.passes, "passes");
   invariant(
@@ -39,6 +41,7 @@ export async function preflightDispatch(
   agent?: Agent,
 ): Promise<void> {
   validateDispatch(options);
+  if (options.steering && agent) validateSteering(agent);
   if (options.continuation)
     invariant(
       agent?.resumable !== false,
@@ -63,5 +66,16 @@ export async function preflightDispatch(
   invariant(
     resolved.includes(`<${options.response.tag}>`),
     `Brief must request an opening <${options.response.tag}> tag`,
+  );
+}
+
+function validateSteering(agent: Agent): void {
+  invariant(
+    agent.kind !== "replay",
+    "Replay agents reproduce a recording and cannot be steered",
+  );
+  invariant(
+    agent.kind === "custom" || agent.liveInput || agent.resumable,
+    `${agent.name} cannot be steered: it accepts no live input and cannot resume its conversation`,
   );
 }

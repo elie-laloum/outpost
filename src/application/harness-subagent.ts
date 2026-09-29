@@ -78,6 +78,7 @@ export async function runSubagent(
         ],
         sandbox: context.sandbox,
         signal: context.signal,
+        steer: undefined,
         modelProvider: harnessModelProvider({
           agent,
           signal: context.signal,

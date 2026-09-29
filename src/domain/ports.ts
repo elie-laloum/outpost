@@ -2,6 +2,7 @@ export type {
   AgentAdapter,
   AgentEvent,
   AgentInput,
+  AgentLiveInput,
   AgentObservation,
   Usage,
 } from "./agent.types.ts";

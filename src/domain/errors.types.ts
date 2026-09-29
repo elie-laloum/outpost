@@ -11,4 +11,5 @@ export type FaultCode =
   | "provider"
   | "limit"
   | "quota"
-  | "replay";
+  | "replay"
+  | "steering";
