@@ -1,28 +1,103 @@
 ---
-import SidebarSublist from "@astrojs/starlight/components/SidebarSublist.astro";
+import Identifier from "./Identifier.astro";
 import MobileSettings from "./MobileSettings.astro";
 import { docsHref, isFrench } from "./docs-route.ts";
+import type { SidebarEntry } from "./docs-route.types.ts";
 
 const route = Astro.locals.starlightRoute;
 const reference = route.sidebar[1];
 const sections = reference?.type === "group" ? reference.entries : [];
-const home = docsHref(route, "reference/");
 const atHome = /^(fr\/)?reference$/.test(route.entry.id);
+const holdsCurrent = (entry: SidebarEntry): boolean =>
+  entry.type === "link" ? entry.isCurrent : entry.entries.some(holdsCurrent);
 ---
 
 <div class="docs-navigation reference-navigation">
-  <a class="map" href={home} aria-current={atHome ? "page" : undefined}>
+  <a class="map" href={docsHref(route, "reference/")} aria-current={atHome ? "page" : undefined}>
     {isFrench(route) ? "Plan de la référence" : "Reference map"}
   </a>
   {
-    sections.map((section, index) =>
-      section.type === "group" ? (
-        <section class="reference-section" aria-labelledby={`reference-section-${index}`}>
-          <h2 id={`reference-section-${index}`}>{section.label}</h2>
-          <SidebarSublist sublist={section.entries} />
-        </section>
-      ) : null,
+    sections.map(
+      (section, index) =>
+        section.type === "group" && (
+          <section class="reference-section" aria-labelledby={`reference-section-${index}`}>
+            <h2 id={`reference-section-${index}`}>{section.label}</h2>
+            <ul>
+              {section.entries.map(
+                (family) =>
+                  family.type === "group" && (
+                    <li>
+                      <details open={holdsCurrent(family) || !family.collapsed}>
+                        <summary>
+                          <span class="large">{family.label}</span>
+                          <svg class="caret" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="m9 6 6 6-6 6" />
+                          </svg>
+                        </summary>
+                        <ul>
+                          {family.entries.map(
+                            (link) =>
+                              link.type === "link" && (
+                                <li>
+                                  <a
+                                    href={link.href}
+                                    aria-current={link.isCurrent ? "page" : undefined}
+                                    {...link.attrs}
+                                  >
+                                    <span class="label">
+                                      <Identifier name={link.label} />
+                                    </span>
+                                  </a>
+                                </li>
+                              ),
+                          )}
+                        </ul>
+                      </details>
+                    </li>
+                  ),
+              )}
+            </ul>
+          </section>
+        ),
     )
   }
   <MobileSettings />
 </div>
+
+<style>
+  summary {
+    align-items: center;
+    justify-content: space-between;
+    list-style: none;
+    cursor: pointer;
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  .large {
+    color: var(--sl-color-white);
+    font-size: 0.9375rem;
+    font-weight: 500;
+  }
+  .caret {
+    width: 1rem;
+    height: 1rem;
+    fill: none;
+    stroke: var(--sl-color-gray-3);
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  details[open] > summary .caret {
+    transform: rotate(90deg);
+  }
+  .label {
+    min-width: 0;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .caret {
+      transition: none;
+    }
+  }
+</style>

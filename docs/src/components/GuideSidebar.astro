@@ -1,18 +1,8 @@
 ---
 import SidebarSublist from "@astrojs/starlight/components/SidebarSublist.astro";
 import MobileSettings from "./MobileSettings.astro";
-import { docsHref, isFrench } from "./docs-route.ts";
 
-const route = Astro.locals.starlightRoute;
-const guide = route.sidebar[0];
-const project = [
-  ["Changelog", "project/changelog/"],
-  ["Roadmap", "project/roadmap/"],
-].map(([label, path]) => ({
-  label,
-  href: docsHref(route, path!),
-  current: route.entry.id.replace(/^fr\//, "") === path!.replace(/\/$/, ""),
-}));
+const guide = Astro.locals.starlightRoute.sidebar[0];
 ---
 
 <div class="docs-navigation">
@@ -28,19 +18,5 @@ const project = [
           ),
       )
   }
-  <section>
-    <h2>{isFrench(route) ? "Projet" : "Project"}</h2>
-    <ul>
-      {
-        project.map((link) => (
-          <li>
-            <a href={link.href} aria-current={link.current ? "page" : undefined}>
-              {link.label}
-            </a>
-          </li>
-        ))
-      }
-    </ul>
-  </section>
   <MobileSettings />
 </div>

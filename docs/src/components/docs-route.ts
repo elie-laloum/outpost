@@ -93,3 +93,8 @@ function familyOverview(group: SidebarEntry): string | undefined {
     return undefined;
   return first.isCurrent ? undefined : first.href;
 }
+
+// Identifier words, so long API names wrap between words rather than mid-word.
+export function identifierParts(label: string): string[] {
+  return label.split(/(?<=[a-z0-9])(?=[A-Z])/);
+}

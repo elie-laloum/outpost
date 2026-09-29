@@ -10,7 +10,7 @@ for (const [locale, title, reference] of [
   }) => {
     await page.goto(`${locale}guide/first-request/`);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(title);
-    await expect(page.locator(".docs-navigation section > h2")).toHaveCount(10);
+    await expect(page.locator(".docs-navigation section > h2")).toHaveCount(9);
     await expect(page.locator(".docs-navigation details")).toHaveCount(0);
     await expect(page.locator(".sl-markdown-content details")).toHaveCount(0);
     const spaces = page.locator(".docs-header nav");

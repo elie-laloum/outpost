@@ -1,0 +1,33 @@
+---
+import MobileSettings from "./MobileSettings.astro";
+import { docsHref, isFrench } from "./docs-route.ts";
+
+const route = Astro.locals.starlightRoute;
+const page = route.entry.id.replace(/^fr\//, "");
+const links = [
+  ["Changelog", "project/changelog"],
+  ["Roadmap", "project/roadmap"],
+].map(([label, path]) => ({
+  label,
+  href: docsHref(route, `${path}/`),
+  current: page === path,
+}));
+---
+
+<div class="docs-navigation">
+  <section>
+    <h2>{isFrench(route) ? "Projet" : "Project"}</h2>
+    <ul>
+      {
+        links.map((link) => (
+          <li>
+            <a href={link.href} aria-current={link.current ? "page" : undefined}>
+              {link.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+  <MobileSettings />
+</div>

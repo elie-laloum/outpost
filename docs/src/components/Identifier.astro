@@ -1,0 +1,7 @@
+---
+import { identifierParts } from "./docs-route.ts";
+
+const parts = identifierParts(Astro.props.name as string);
+---
+
+{parts.map((part, index) => (index ? <><wbr />{part}</> : part))}

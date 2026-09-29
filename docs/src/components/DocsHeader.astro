@@ -67,6 +67,17 @@ const space = docsSpace(route);
   .docs-menu {
     display: none;
   }
+  .docs-settings :global(.theme-toggle),
+  .docs-settings :global(.theme-toggle svg),
+  .docs-settings :global(.theme-toggle path) {
+    color: var(--sl-color-gray-3);
+    fill: currentColor;
+  }
+  .docs-settings :global(.theme-toggle:hover),
+  .docs-settings :global(.theme-toggle:hover svg),
+  .docs-settings :global(.theme-toggle:hover path) {
+    color: var(--sl-color-white);
+  }
   @media (max-width: 49.99rem) {
     .docs-header {
       gap: 1rem;

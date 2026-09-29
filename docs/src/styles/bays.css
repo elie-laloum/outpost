@@ -13,12 +13,17 @@
   grid-template-columns: minmax(0, 1fr);
 }
 .bay-say,
+.bay-show,
+.bay-wide {
+  margin: 0;
+}
+.bay-say,
 .bay-show {
   min-width: 0;
   padding: 2.5rem var(--docs-pad) 2.75rem;
 }
-.bay[data-bay="split"] > .bay-say {
-  border-right: 1px solid var(--docs-line);
+.bay[data-bay="split"] > .bay-show {
+  border-left: 1px solid var(--docs-line);
 }
 .bay[data-bay="wide"] > .bay-say > :not(table, .cells, .props) {
   max-width: 70ch;
@@ -285,8 +290,8 @@
   .docs-main .sl-markdown-content > .bay {
     grid-template-columns: minmax(0, 1fr);
   }
-  .bay[data-bay="split"] > .bay-say {
-    border-right: 0;
+  .bay[data-bay="split"] > .bay-show {
+    border-left: 0;
   }
   .bay[data-bay="split"] > .bay-show {
     padding-top: 0;

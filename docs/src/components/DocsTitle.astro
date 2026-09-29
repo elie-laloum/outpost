@@ -1,5 +1,6 @@
 ---
 import Code from "starlight-theme-celestia/components/Code.astro";
+import Identifier from "./Identifier.astro";
 import { breadcrumbs, currentLink, docsSpace, isFrench } from "./docs-route.ts";
 
 const route = Astro.locals.starlightRoute;
@@ -15,6 +16,8 @@ const body = entry.body?.replace(/^:::[\s\S]*?:::\s*/, "").trimStart() ?? "";
 const showDescription =
   description && !/ — Outpost API$/.test(description) && !body.startsWith(description);
 const experimentalLabel = isFrench(route) ? "Expérimental" : "Experimental";
+// Long names need the full width; their import then sits under the title.
+const split = Boolean(importLine) && entry.data.title.length <= 24;
 ---
 
 <div class="docs-title">
@@ -29,11 +32,11 @@ const experimentalLabel = isFrench(route) ? "Expérimental" : "Experimental";
       </nav>
     )
   }
-  <header class:list={["title-bay", { split: Boolean(importLine) }]}>
+  <header class:list={["title-bay", { split }]}>
     <div class="title-say">
       <h1 id="_top" class:list={{ symbol: Boolean(kind) }} data-api-kind={kind}>
         {kind && <span class="kind" aria-hidden="true" />}
-        <span>{entry.data.title}</span>
+        {kind ? <Identifier name={entry.data.title} /> : entry.data.title}
         {
           experimental && (
             <span class="flask" role="img" aria-label={experimentalLabel} title={experimentalLabel} />
@@ -41,9 +44,16 @@ const experimentalLabel = isFrench(route) ? "Expérimental" : "Experimental";
         }
       </h1>
       {showDescription && <p class="description">{description}</p>}
+      {
+        importLine && !split && (
+          <div class="title-import">
+            <Code code={importLine.trimEnd()} lang="ts" />
+          </div>
+        )
+      }
     </div>
     {
-      importLine && (
+      importLine && split && (
         <div class="title-show">
           <Code code={importLine.trimEnd()} lang="ts" />
         </div>
@@ -115,10 +125,6 @@ const experimentalLabel = isFrench(route) ? "Expérimental" : "Experimental";
     border-right: 1px solid var(--docs-line);
   }
   h1 {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.6rem;
     margin: 0;
     color: var(--sl-color-white);
     font-size: clamp(2rem, 3.2vw, 2.75rem);
@@ -132,13 +138,13 @@ const experimentalLabel = isFrench(route) ? "Expérimental" : "Experimental";
     font-size: clamp(1.6rem, 2.6vw, 2.2rem);
     font-weight: 500;
     letter-spacing: -0.02em;
-    overflow-wrap: anywhere;
   }
   .kind,
   .flask {
-    flex: 0 0 auto;
+    display: inline-block;
     width: 1.25rem;
     height: 1.25rem;
+    vertical-align: -0.1em;
     background-color: var(--sl-color-gray-3);
     mask: var(--kind-icon) center / contain no-repeat;
   }
@@ -157,7 +163,11 @@ const experimentalLabel = isFrench(route) ? "Expérimental" : "Experimental";
   [data-api-kind="constant"] {
     --kind-icon: url("../assets/reference-constant.svg");
   }
+  .kind {
+    margin-right: 0.6rem;
+  }
   .flask {
+    margin-left: 0.6rem;
     background-color: var(--sl-color-accent);
     mask-image: url("../assets/reference-experiment.svg");
   }
@@ -176,12 +186,17 @@ const experimentalLabel = isFrench(route) ? "Expérimental" : "Experimental";
     min-width: 0;
     padding: 2rem var(--docs-pad);
   }
-  .title-show :global([data-celestia-code-container]) {
+  .title-import {
+    max-width: 52rem;
+  }
+  .title-show :global([data-celestia-code-container]),
+  .title-import :global([data-celestia-code-container]) {
     border: 1px solid var(--docs-line);
     border-radius: 0;
     background: var(--docs-code-bg);
   }
-  .title-show :global(pre) {
+  .title-show :global(pre),
+  .title-import :global(pre) {
     margin: 0;
     padding: 0.9rem 1rem;
     overflow-x: auto;
