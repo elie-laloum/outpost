@@ -1,10 +1,12 @@
 import { createHash, randomUUID } from "node:crypto";
 import { mkdir, open, rm } from "node:fs/promises";
 import { join } from "node:path";
+import { setTimeout } from "node:timers/promises";
 import { OutpostError } from "../../domain/errors.ts";
 import { localProcessIdentity, observeOwnership } from "./process-identity.ts";
 import { readInspectionFile } from "../inspection-file.ts";
 import { lockInspectionDefaults } from "./lock-inspection.constants.ts";
+import { lockDefaults } from "./lock.constants.ts";
 
 export function lockPath(root: string, key: string): string {
   return join(
@@ -49,6 +51,23 @@ async function createLock(path: string): Promise<() => Promise<void>> {
   };
 }
 
+async function createReleasedLock(path: string): Promise<() => Promise<void>> {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await createLock(path);
+    } catch (cause) {
+      // Windows reports EPERM while a just-released lock file is pending deletion.
+      if (
+        process.platform !== "win32" ||
+        (cause as NodeJS.ErrnoException).code !== "EPERM" ||
+        attempt >= lockDefaults.pendingDeleteAttempts
+      )
+        throw cause;
+      await setTimeout(lockDefaults.pendingDeleteRetryMs);
+    }
+  }
+}
+
 export async function lock(
   root: string,
   key: string,
@@ -56,7 +75,7 @@ export async function lock(
   await mkdir(join(root, ".outpost", "locks"), { recursive: true });
   const path = lockPath(root, key);
   try {
-    return await createLock(path);
+    return await createReleasedLock(path);
   } catch (cause) {
     if (!(
       cause &&
@@ -95,7 +114,7 @@ export async function lock(
         : undefined;
     if (ownership?.status !== "inactive") throw conflict();
     await rm(path, { force: true });
-    return await createLock(path);
+    return await createReleasedLock(path);
   } finally {
     await releaseGuard();
   }
