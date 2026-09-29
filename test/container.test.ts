@@ -19,6 +19,7 @@ import {
   createSteering,
   createKimiHarness,
   createHarness,
+  defineMcpPrompt,
 } from "../src/index.ts";
 import type { ModelRequest } from "../src/index.ts";
 import { createDockerSandboxProvider } from "../src/providers/docker.ts";
@@ -1298,25 +1299,33 @@ test(
         ? createPodmanSandboxProvider
         : createDockerSandboxProvider;
     const replies = [
-      () => ({
-        text: "",
-        stopReason: "tool-calls" as const,
-        usage: { input: 1, cached: 0, output: 1 },
-        content: [
-          {
-            type: "tool-call" as const,
-            id: "call-1",
-            name: "mcp__fixture__env",
-            input: { name: "HOME" },
-          },
-        ],
-      }),
       (request: ModelRequest) => {
-        const block = request.messages?.at(-1)?.content[0];
-        assert.equal(
-          block?.type === "tool-result" && block.content,
-          "/home/agent",
+        assert.match(request.system ?? "", /user: Review ts code\./);
+        return {
+          text: "",
+          stopReason: "tool-calls" as const,
+          usage: { input: 1, cached: 0, output: 1 },
+          content: [
+            {
+              type: "tool-call" as const,
+              id: "call-1",
+              name: "mcp__fixture__env",
+              input: { name: "HOME" },
+            },
+            {
+              type: "tool-call" as const,
+              id: "call-2",
+              name: "mcp_read_resource",
+              input: { server: "fixture", uri: "file:///readme.md" },
+            },
+          ],
+        };
+      },
+      (request: ModelRequest) => {
+        const outputs = (request.messages?.at(-1)?.content ?? []).map(
+          (block) => (block.type === "tool-result" ? block.content : ""),
         );
+        assert.deepEqual(outputs, ["/home/agent", "# Readme"]);
         return {
           text: "<outpost>done</outpost>",
           usage: { input: 1, cached: 0, output: 1 },
@@ -1345,10 +1354,17 @@ test(
             mcpServers: {
               fixture: {
                 command: "node",
-                arguments: ["mcp-server.mjs"],
+                arguments: ["mcp-server.mjs", "rich"],
                 environment: { MCP_LOG: "mcp.log" },
               },
             },
+            instructions: [
+              defineMcpPrompt({
+                server: "fixture",
+                name: "review",
+                arguments: { lang: "ts" },
+              }),
+            ],
           }),
         }),
         brief: { text: "Use MCP inside the container" },
