@@ -31,6 +31,8 @@ const request: DispatchOptions = {
 | `settleMs`      | Grace period after completion detection.            |
 | `signal`        | Cancellation across the operation.                  |
 
+To change direction without cancelling, [steer the running agent](../steering/) instead of aborting it.
+
 A completion marker expresses the agent’s declaration, not proof of a successful change. Inspect `completed`, `completion` and actual validation results separately.
 
 Workspace `limits` bounds copying, Git preparation, collection and integration. Workflow [token budgets](../token-budgets/) bound shared observed usage and attempts; they do not replace provider billing limits.

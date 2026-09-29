@@ -28,6 +28,7 @@ import type { DispatchOptions } from "@elie-laloum/outpost";
 | `deadlineMs`    | `number \| undefined`                                            | Optional | Maximum duration of each agent process in milliseconds; defaults to one hour.                                                                                                                                                            |
 | `expansionMs`   | `number \| undefined`                                            | Optional | Deadline in milliseconds for each original shell expansion in a file brief; defaults to 30000.                                                                                                                                           |
 | `signal`        | `AbortSignal \| undefined`                                       | Optional | Cooperative cancellation for this operation.                                                                                                                                                                                             |
+| `steering`      | `Steering \| undefined`                                          | Optional | Controller from createSteering() whose send() delivers instructions to the agent while this dispatch runs. It is attached for the whole dispatch, shared across passes and released afterwards; resume() and fork() do not reuse it.     |
 | `continuation`  | `{ readonly id: string; readonly fork?: boolean; } \| undefined` | Optional | Native conversation ID to continue; fork requests a separate conversation derived from it.                                                                                                                                               |
 | `response`      | `ResponseSpec<T> \| undefined`                                   | Optional | Parser and validator for the tagged agent answer.                                                                                                                                                                                        |
 | `telemetry`     | `DispatchTelemetry \| undefined`                                 | Optional | Optional instrumentation of the complete dispatch, including preparation, synchronization and cleanup; telemetry failures do not change its outcome.                                                                                     |
@@ -52,6 +53,8 @@ export interface DispatchOptions<T = undefined> {
   readonly deadlineMs?: number;
   readonly expansionMs?: number;
   readonly signal?: AbortSignal;
+  /** Controller from createSteering() that sends instructions while the agent runs. */
+  readonly steering?: Steering;
   readonly continuation?: {
     readonly id: string;
     readonly fork?: boolean;
@@ -73,3 +76,4 @@ export interface DispatchOptions<T = undefined> {
 - [Logging](../logging/)
 - [ObservationHub](../observationhub/)
 - [ResponseSpec](../responsespec/)
+- [Steering](../steering/)

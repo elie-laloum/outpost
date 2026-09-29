@@ -13,20 +13,21 @@ import type { Command } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom           | Type                                                                                                 | Présence  | Rôle                                                                                         |
-| ------------- | ---------------------------------------------------------------------------------------------------- | --------- | -------------------------------------------------------------------------------------------- |
-| `executable`  | `string`                                                                                             | Requis    | Programme à exécuter sans analyse shell implicite.                                           |
-| `arguments`   | `readonly string[] \| undefined`                                                                     | Optionnel | Arguments transmis directement au programme.                                                 |
-| `stdin`       | `string \| undefined`                                                                                | Optionnel | Entrée fournie au processus.                                                                 |
-| `directory`   | `string \| undefined`                                                                                | Optionnel | Dossier de travail dans l’environnement d’exécution ; racine du workspace par défaut.        |
-| `variables`   | `Readonly<Record<string, string>> \| undefined`                                                      | Optionnel | Déclarations d’environnement explicites ; les valeurs sont des chaînes.                      |
-| `signal`      | `AbortSignal \| undefined`                                                                           | Optionnel | Annulation coopérative de cette opération.                                                   |
-| `deadlineMs`  | `number \| undefined`                                                                                | Optionnel | Durée maximale de l’opération en millisecondes avant arrêt de la commande ou du transfert.   |
-| `interactive` | `boolean \| undefined`                                                                               | Optionnel | Demande une invocation d’agent ou un terminal de processus interactif.                       |
-| `terminal`    | `{ readonly input?: Readable; readonly output?: Writable; readonly error?: Writable; } \| undefined` | Optionnel | Flux d’entrée, de sortie et d’erreur pour l’attachement à un terminal interactif réel.       |
-| `elevated`    | `boolean \| undefined`                                                                               | Optionnel | Demande une exécution élevée à un provider qui la prend en charge.                           |
-| `retain`      | `number \| undefined`                                                                                | Optionnel | Taille maximale de la fin conservée par flux, en octets.                                     |
-| `observe`     | `((channel: Channel, text: string) => void) \| undefined`                                            | Optionnel | Reçoit les fragments stdout/stderr avec leur canal ; les erreurs d’observation sont isolées. |
+| Nom           | Type                                                                                                 | Présence  | Rôle                                                                                                                                                              |
+| ------------- | ---------------------------------------------------------------------------------------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `executable`  | `string`                                                                                             | Requis    | Programme à exécuter sans analyse shell implicite.                                                                                                                |
+| `arguments`   | `readonly string[] \| undefined`                                                                     | Optionnel | Arguments transmis directement au programme.                                                                                                                      |
+| `stdin`       | `string \| undefined`                                                                                | Optionnel | Entrée fournie au processus.                                                                                                                                      |
+| `input`       | `Readable \| undefined`                                                                              | Optionnel | Flux lisible transmis sur stdin après stdin, qui reste ouvert jusqu’à la fin du flux. Exige un lease avec liveInput ; Vercel, Daytona et Firecracker le refusent. |
+| `directory`   | `string \| undefined`                                                                                | Optionnel | Dossier de travail dans l’environnement d’exécution ; racine du workspace par défaut.                                                                             |
+| `variables`   | `Readonly<Record<string, string>> \| undefined`                                                      | Optionnel | Déclarations d’environnement explicites ; les valeurs sont des chaînes.                                                                                           |
+| `signal`      | `AbortSignal \| undefined`                                                                           | Optionnel | Annulation coopérative de cette opération.                                                                                                                        |
+| `deadlineMs`  | `number \| undefined`                                                                                | Optionnel | Durée maximale de l’opération en millisecondes avant arrêt de la commande ou du transfert.                                                                        |
+| `interactive` | `boolean \| undefined`                                                                               | Optionnel | Demande une invocation d’agent ou un terminal de processus interactif.                                                                                            |
+| `terminal`    | `{ readonly input?: Readable; readonly output?: Writable; readonly error?: Writable; } \| undefined` | Optionnel | Flux d’entrée, de sortie et d’erreur pour l’attachement à un terminal interactif réel.                                                                            |
+| `elevated`    | `boolean \| undefined`                                                                               | Optionnel | Demande une exécution élevée à un provider qui la prend en charge.                                                                                                |
+| `retain`      | `number \| undefined`                                                                                | Optionnel | Taille maximale de la fin conservée par flux, en octets.                                                                                                          |
+| `observe`     | `((channel: Channel, text: string) => void) \| undefined`                                            | Optionnel | Reçoit les fragments stdout/stderr avec leur canal ; les erreurs d’observation sont isolées.                                                                      |
 
 ## Signature
 
@@ -37,6 +38,8 @@ export interface Command {
   readonly executable: string;
   readonly arguments?: readonly string[];
   readonly stdin?: string;
+  /** Live stdin written after `stdin`; stdin closes when this stream ends. */
+  readonly input?: Readable;
   readonly directory?: string;
   readonly variables?: Variables;
   readonly signal?: AbortSignal;

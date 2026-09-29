@@ -10,7 +10,7 @@ Dispatch is the operation that gives an agent a brief and collects what happened
 
 ## How it works
 
-The top-level `dispatch` function allocates and closes its own environment. Calling `sandbox.dispatch` instead uses an existing warm environment owned by the caller. Passes, deadlines, cancellation and response validation bound the operation; continuation can carry native agent context into a later run.
+The top-level `dispatch` function allocates and closes its own environment. Calling `sandbox.dispatch` instead uses an existing warm environment owned by the caller. Passes, deadlines, cancellation and response validation bound the operation; continuation can carry native agent context into a later run. A `createSteering()` controller sends instructions while the dispatch runs: injected into the running turn when the agent accepts live input, otherwise delivered by stopping and resuming its conversation. See [Steering a running agent](../../../guide/steering/).
 
 ## Boundaries and responsibilities
 
@@ -23,5 +23,7 @@ Read the result according to its contract. A completion marker, generated answer
 - [DispatchResult](../../dispatchresult/)
 - [WarmDispatchResult](../../warmdispatchresult/)
 - [ContinuationOptions](../../continuationoptions/)
+- [createSteering](../../createsteering/)
+- [Steering](../../steering/)
 
 [Learn with the practical guide](../../../guide/agents/dispatch/).

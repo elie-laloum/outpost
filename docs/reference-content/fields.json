@@ -392,8 +392,8 @@
     "Identifiant de conversation native à poursuivre ; fork demande une conversation distincte dérivée de celle-ci."
   ],
   "AgentEvent.kind": [
-    "Discriminator selecting the event payload: phase, summary, warning, text, text-delta, result, prompt, tool, tool-result, tool-denied, step, stop-prevented, compaction, conversation, usage, quota, fallback, failure, finished or raw.",
-    "Discriminant sélectionnant les données de l’événement : phase, summary, warning, text, text-delta, result, prompt, tool, tool-result, tool-denied, step, stop-prevented, compaction, conversation, usage, quota, fallback, failure, finished ou raw."
+    "Discriminator selecting the event payload: phase, summary, warning, text, text-delta, result, prompt, tool, tool-result, tool-denied, step, stop-prevented, steer, compaction, conversation, usage, quota, fallback, failure, finished or raw.",
+    "Discriminant sélectionnant les données de l’événement : phase, summary, warning, text, text-delta, result, prompt, tool, tool-result, tool-denied, step, stop-prevented, steer, compaction, conversation, usage, quota, fallback, failure, finished ou raw."
   ],
   "AgentEvent.name": [
     "Phase name for phase events, or tool name for tool and tool-result events.",
@@ -428,8 +428,8 @@
     "Message d’avertissement, d’échec ou de quota, échec ayant déclenché un repli, ou message qu’un hook stop a renvoyé au modèle."
   ],
   "AgentEvent.text": [
-    "Text carried by the event: a streamed fragment, streamed text, final answer or submitted prompt according to kind.",
-    "Texte porté par l’événement : fragment diffusé, texte diffusé, réponse finale ou prompt soumis selon la variante."
+    "Text carried by the event: a streamed fragment, streamed text, final answer, submitted prompt or delivered steering instruction according to kind.",
+    "Texte porté par l’événement : fragment diffusé, texte diffusé, réponse finale, prompt soumis ou consigne de pilotage remise selon la variante."
   ],
   "AgentEvent.input": [
     "Raw arguments supplied to the tool named by this tool event.",
@@ -4306,8 +4306,8 @@
     "Règles de permission évaluées avant les hooks before-tool, si elles sont définies."
   ],
   "AgentEvent.reason": [
-    "Reason for tool denial or forced termination; stopped distinguishes completion, idle timeout, deadline, cancellation and oversized protocol output.",
-    "Motif de refus d’outil ou d’arrêt forcé ; stopped distingue complétion, inactivité, deadline, annulation et sortie de protocole trop volumineuse."
+    "Reason for tool denial or forced termination; stopped distinguishes completion, idle timeout, deadline, cancellation, oversized protocol output and steered, when steering stopped the process to resume its conversation.",
+    "Motif de refus d’outil ou d’arrêt forcé ; stopped distingue complétion, inactivité, deadline, annulation, sortie de protocole trop volumineuse et steered, lorsque le pilotage a arrêté le processus pour reprendre sa conversation."
   ],
   "ReporterHandlers.tool-denied": [
     "Handle a tool call denied by permissions or a hook, with its reason; receives pass and at metadata and may return a promise.",
@@ -5107,8 +5107,8 @@
     "Identifiant de l’enfant intégré dans le dispatch, propagé depuis ses événements sans remplacer le contexte de workflow, tâche ou passe."
   ],
   "AgentEventDetails.kind": [
-    "Discriminator selecting the event payload: phase, summary, warning, text, text-delta, result, prompt, tool, tool-result, tool-denied, step, stop-prevented, compaction, conversation, usage, quota, fallback, failure, finished or raw.",
-    "Discriminant sélectionnant les données de l’événement : phase, summary, warning, text, text-delta, result, prompt, tool, tool-result, tool-denied, step, stop-prevented, compaction, conversation, usage, quota, fallback, failure, finished ou raw."
+    "Discriminator selecting the event payload: phase, summary, warning, text, text-delta, result, prompt, tool, tool-result, tool-denied, step, stop-prevented, steer, compaction, conversation, usage, quota, fallback, failure, finished or raw.",
+    "Discriminant sélectionnant les données de l’événement : phase, summary, warning, text, text-delta, result, prompt, tool, tool-result, tool-denied, step, stop-prevented, steer, compaction, conversation, usage, quota, fallback, failure, finished ou raw."
   ],
   "AgentEventDetails.name": [
     "Phase name for phase events, or tool name for tool and tool-result events.",
@@ -5143,8 +5143,8 @@
     "Message d’avertissement, d’échec ou de quota, échec ayant déclenché un repli, ou message qu’un hook stop a renvoyé au modèle."
   ],
   "AgentEventDetails.text": [
-    "Text carried by the event: a streamed fragment, streamed text, final answer or submitted prompt according to kind.",
-    "Texte porté par l’événement : fragment diffusé, texte diffusé, réponse finale ou prompt soumis selon la variante."
+    "Text carried by the event: a streamed fragment, streamed text, final answer, submitted prompt or delivered steering instruction according to kind.",
+    "Texte porté par l’événement : fragment diffusé, texte diffusé, réponse finale, prompt soumis ou consigne de pilotage remise selon la variante."
   ],
   "AgentEventDetails.input": [
     "Raw arguments supplied to the tool named by this tool event.",
@@ -5179,8 +5179,8 @@
     "Numéro d’étape, à partir de 1, d’une passe de harness personnalisé."
   ],
   "AgentEventDetails.reason": [
-    "Reason for tool denial or forced termination; stopped distinguishes completion, idle timeout, deadline, cancellation and oversized protocol output.",
-    "Motif de refus d’outil ou d’arrêt forcé ; stopped distingue complétion, inactivité, deadline, annulation et sortie de protocole trop volumineuse."
+    "Reason for tool denial or forced termination; stopped distinguishes completion, idle timeout, deadline, cancellation, oversized protocol output and steered, when steering stopped the process to resume its conversation.",
+    "Motif de refus d’outil ou d’arrêt forcé ; stopped distingue complétion, inactivité, deadline, annulation, sortie de protocole trop volumineuse et steered, lorsque le pilotage a arrêté le processus pour reprendre sa conversation."
   ],
   "AgentEventDetails.strategy": [
     "Name of the context strategy that rewrote the history.",
@@ -6346,5 +6346,65 @@
   "ReplayTurn.handover": [
     "Recorded fallback event that followed this turn; the turn is then treated as handed over rather than failed, its usage is the sum of its recorded usage events, and replay continues with the next turn.",
     "Événement fallback enregistré après ce tour ; le tour est alors traité comme passé en relais plutôt qu’en échec, son usage est la somme de ses événements usage enregistrés, et le rejeu enchaîne sur le tour suivant."
+  ],
+  "AgentEvent.mode": [
+    "How a steer event reached the agent: injected into the running turn, or resumed in a new turn of the same conversation.",
+    "Manière dont un événement steer a atteint l’agent : injecté dans le tour en cours, ou repris dans un nouveau tour de la même conversation."
+  ],
+  "AgentEventDetails.mode": [
+    "How a steer event reached the agent: injected into the running turn, or resumed in a new turn of the same conversation.",
+    "Manière dont un événement steer a atteint l’agent : injecté dans le tour en cours, ou repris dans un nouveau tour de la même conversation."
+  ],
+  "DispatchOptions.steering": [
+    "Controller from createSteering() whose send() delivers instructions to the agent while this dispatch runs. It is attached for the whole dispatch, shared across passes and released afterwards; resume() and fork() do not reuse it.",
+    "Contrôleur issu de createSteering() dont send() remet des consignes à l’agent pendant ce dispatch. Il est attaché pour tout le dispatch, partagé entre les passes puis libéré ; resume() et fork() ne le réutilisent pas."
+  ],
+  "Turn.interrupted": [
+    "steering when Outpost stopped this turn to resume its conversation with a steering instruction; the next turn continues it. Absent for turns that ended on their own.",
+    "steering lorsqu’Outpost a arrêté ce tour pour reprendre sa conversation avec une consigne de pilotage ; le tour suivant la poursuit. Absent pour les tours terminés d’eux-mêmes."
+  ],
+  "AgentInput.liveInput": [
+    "Request the adapter's liveInput protocol: encode the prompt with it on stdin and keep stdin open for further user messages. Outpost sets it only when the dispatch has steering and the lease supports live input.",
+    "Demande le protocole liveInput de l’adapter : encoder le prompt avec lui sur stdin et garder stdin ouvert pour d’autres messages utilisateur. Outpost ne le positionne que si le dispatch a un pilotage et que le lease accepte l’entrée en direct."
+  ],
+  "AgentAdapter.liveInput": [
+    "Protocol for adding user messages to a running turn over stdin. Adapters without it are steered by interrupting and resuming their conversation.",
+    "Protocole d’ajout de messages utilisateur à un tour en cours via stdin. Les adapters qui n’en ont pas sont pilotés par interruption et reprise de leur conversation."
+  ],
+  "AgentLiveInput.encode": [
+    "Encode one user message for stdin, including its line terminator; also used for the initial prompt.",
+    "Encode un message utilisateur pour stdin, terminaison de ligne comprise ; sert aussi pour le prompt initial."
+  ],
+  "AgentLiveInput.consumed": [
+    "Return true for an output line confirming that the agent consumed one user message. Outpost closes stdin after a final event once every written message was consumed.",
+    "Renvoie true pour une ligne de sortie confirmant que l’agent a consommé un message utilisateur. Outpost ferme stdin après un événement final une fois tous les messages écrits consommés."
+  ],
+  "Command.input": [
+    "Readable stream piped to stdin after stdin, which stays open until the stream ends. Requires a lease with liveInput; Vercel, Daytona and Firecracker reject it.",
+    "Flux lisible transmis sur stdin après stdin, qui reste ouvert jusqu’à la fin du flux. Exige un lease avec liveInput ; Vercel, Daytona et Firecracker le refusent."
+  ],
+  "SandboxLease.liveInput": [
+    "True when invoke() accepts Command.input as live stdin for a running process. Local, Docker and Podman leases set it.",
+    "Vrai lorsque invoke() accepte Command.input comme stdin en direct pour un processus en cours. Les leases local, Docker et Podman le positionnent."
+  ],
+  "Steering.state": [
+    "idle when no dispatch uses the controller, active while one does, closed after close().",
+    "idle lorsqu’aucun dispatch n’utilise le contrôleur, active pendant qu’un dispatch l’utilise, closed après close()."
+  ],
+  "Steering.send": [
+    "Queue a nonempty instruction for the attached dispatch, or the next one when none runs. Resolves with its delivery once the agent receives it; rejects with code steering when the dispatch ends first or the controller is closed.",
+    "Met en file une consigne non vide pour le dispatch attaché, ou le suivant si aucun ne tourne. Se résout avec sa remise dès que l’agent la reçoit ; rejette avec le code steering si le dispatch se termine avant ou si le contrôleur est fermé."
+  ],
+  "Steering.close": [
+    "Close the controller: reject undelivered instructions and every later send(); later dispatches reject it.",
+    "Ferme le contrôleur : rejette les consignes non remises et tout send() ultérieur ; les dispatchs suivants le refusent."
+  ],
+  "SteeringDelivery.mode": [
+    "injected when the instruction joined the running turn or its prompt; resumed when Outpost continued the conversation in a new turn with it.",
+    "injected lorsque la consigne a rejoint le tour en cours ou son prompt ; resumed lorsqu’Outpost a poursuivi la conversation dans un nouveau tour avec elle."
+  ],
+  "ReporterHandlers.steer": [
+    "Handle a steering instruction delivered to the agent, with its text and whether it was injected or resumed; receives pass and at metadata and may return a promise.",
+    "Traite une consigne de pilotage remise à l’agent, avec son texte et le fait qu’elle ait été injectée ou reprise ; reçoit les métadonnées pass et at et peut renvoyer une promesse."
   ]
 }

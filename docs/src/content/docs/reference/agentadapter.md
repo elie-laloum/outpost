@@ -23,6 +23,7 @@ import type { AgentAdapter } from "@elie-laloum/outpost";
 | `unavailable`           | `((text: string) => boolean) \| undefined`                                                             | Optional | Recognize a terminal service outage or connection failure in a failure event or stderr line. When the process then fails without a quota signal, the turn keeps code process and records details.unavailable, read by unavailableFault(); retry notices must not match.                      |
 | `usageCommand`          | `((conversation: string) => Command \| undefined) \| undefined`                                        | Optional | Build a bounded read-only command to collect counters for this conversation inside the borrowed sandbox; return undefined for an unsupported identifier.                                                                                                                                     |
 | `usageResult`           | `((text: string) => Usage \| undefined) \| undefined`                                                  | Optional | Decode the successful usage command’s stdout into session totals. Return undefined when unreadable, or complete: false for partial totals; do not return transcript content.                                                                                                                 |
+| `liveInput`             | `AgentLiveInput \| undefined`                                                                          | Optional | Protocol for adding user messages to a running turn over stdin. Adapters without it are steered by interrupting and resuming their conversation.                                                                                                                                             |
 | `name`                  | `string`                                                                                               | Required | Native agent identifier used in execution events and diagnostics.                                                                                                                                                                                                                            |
 | `bootstrap`             | `string \| undefined`                                                                                  | Optional | Name of the built-in installer used to install a missing CLI on remote providers when bootstrapping is enabled: a pinned npm package for claude, codex, copilot and kimi, or a versioned archive with a pinned SHA-512 digest for antigravity.                                               |
 | `requiresFinishedEvent` | `boolean \| undefined`                                                                                 | Optional | Require the native finished protocol event before treating an agent turn as complete.                                                                                                                                                                                                        |
@@ -52,6 +53,8 @@ export interface AgentAdapter extends AgentFeatures {
   unavailable?(text: string): boolean;
   usageCommand?(conversation: string): Command | undefined;
   usageResult?(text: string): Usage | undefined;
+  /** Protocol for adding user messages to a running turn through live stdin. */
+  readonly liveInput?: AgentLiveInput;
 }
 ```
 
@@ -60,6 +63,7 @@ export interface AgentAdapter extends AgentFeatures {
 - [AgentEvent](../agentevent/)
 - [AgentFeatures](../support-agentfeatures/)
 - [AgentInput](../agentinput/)
+- [AgentLiveInput](../agentliveinput/)
 - [Command](../command/)
 - [CommandResult](../commandresult/)
 - [CredentialPlan](../support-credentialplan/)

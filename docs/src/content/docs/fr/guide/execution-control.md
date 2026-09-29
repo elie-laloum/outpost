@@ -31,6 +31,8 @@ const request: DispatchOptions = {
 | `settleMs`      | Délai de grâce après détection de fin.           |
 | `signal`        | Annulation de l’opération.                       |
 
+Pour changer de direction sans annuler, [pilotez l’agent en cours](../steering/) plutôt que de l’interrompre.
+
 Un marqueur de fin exprime la déclaration de l’agent, pas la preuve d’un changement réussi. Inspectez séparément `completed`, `completion` et les véritables résultats de validation.
 
 Les `limits` du workspace bornent la copie, la préparation Git, la collecte et l’intégration. Les [budgets de tokens](../token-budgets/) bornent la consommation observée et les tentatives partagées du workflow ; ils ne remplacent pas les limites de facturation du fournisseur.

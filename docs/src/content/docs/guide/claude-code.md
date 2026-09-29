@@ -26,7 +26,7 @@ const coder = agent({
 
 ## Behavior
 
-Claude supports native conversations, resume, fork and response repair. `permissions` configures the CLI permission mode; it does not replace sandbox isolation. Do not supply `ANTHROPIC_API_KEY` alongside account credentials or `CLAUDE_CODE_OAUTH_TOKEN` alongside API authentication: Outpost rejects these conflicts.
+Claude supports native conversations, resume, fork and response repair. With [steering](../steering/) on Docker, Podman or the host, Claude receives instructions on its stream-json input during the turn. `permissions` configures the CLI permission mode; it does not replace sandbox isolation. Do not supply `ANTHROPIC_API_KEY` alongside account credentials or `CLAUDE_CODE_OAUTH_TOKEN` alongside API authentication: Outpost rejects these conflicts.
 
 See [Claude Code authentication](https://code.claude.com/docs/en/authentication) for the vendor’s account requirements.
 

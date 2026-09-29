@@ -233,7 +233,19 @@
         "attrs": { "data-api-kind": "function" }
       },
       {
+        "slug": "reference/createsteering",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
         "slug": "reference/continuationoptions",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/steeringmode",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/steeringstate",
         "attrs": { "data-api-kind": "type" }
       },
       {
@@ -252,7 +264,15 @@
         "slug": "reference/execution",
         "attrs": { "data-api-kind": "interface" }
       },
-      { "slug": "reference/turn", "attrs": { "data-api-kind": "interface" } }
+      { "slug": "reference/turn", "attrs": { "data-api-kind": "interface" } },
+      {
+        "slug": "reference/steering",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/steeringdelivery",
+        "attrs": { "data-api-kind": "interface" }
+      }
     ]
   },
   {
@@ -666,6 +686,10 @@
       },
       {
         "slug": "reference/agentinput",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/agentliveinput",
         "attrs": { "data-api-kind": "interface" }
       }
     ]

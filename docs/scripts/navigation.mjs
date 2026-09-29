@@ -16,6 +16,7 @@ export const chapters = [
       "guide/output-validation",
       "guide/chat-history",
       "guide/execution-control",
+      "guide/steering",
       "guide/environment-values",
     ],
   ],

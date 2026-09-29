@@ -13,15 +13,16 @@ import type { Turn } from "@elie-laloum/outpost";
 
 ## Paramètres et propriétés
 
-| Nom                   | Type                              | Présence  | Rôle                                                                                                                  |
-| --------------------- | --------------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------- |
-| `text`                | `string`                          | Requis    | Texte rapporté pour cette passe d’agent.                                                                              |
-| `status`              | `number`                          | Requis    | Code de sortie du processus ; zéro indique le succès.                                                                 |
-| `conversation`        | `string \| undefined`             | Optionnel | Identité de conversation native disponible.                                                                           |
-| `transcript`          | `string \| undefined`             | Optionnel | Chemin hôte disponible du transcript capturé.                                                                         |
-| `transcriptReference` | `TransportReference \| undefined` | Optionnel | Index distant versionné de la conversation capturée après ce tour ; son transcript local reste disponible séparément. |
-| `usage`               | `Usage`                           | Requis    | Compteurs d’usage rapportés ; aucune estimation monétaire.                                                            |
-| `durationMs`          | `number`                          | Requis    | Durée d’exécution écoulée en millisecondes.                                                                           |
+| Nom                   | Type                              | Présence  | Rôle                                                                                                                                                                             |
+| --------------------- | --------------------------------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `text`                | `string`                          | Requis    | Texte rapporté pour cette passe d’agent.                                                                                                                                         |
+| `status`              | `number`                          | Requis    | Code de sortie du processus ; zéro indique le succès.                                                                                                                            |
+| `interrupted`         | `"steering" \| undefined`         | Optionnel | steering lorsqu’Outpost a arrêté ce tour pour reprendre sa conversation avec une consigne de pilotage ; le tour suivant la poursuit. Absent pour les tours terminés d’eux-mêmes. |
+| `conversation`        | `string \| undefined`             | Optionnel | Identité de conversation native disponible.                                                                                                                                      |
+| `transcript`          | `string \| undefined`             | Optionnel | Chemin hôte disponible du transcript capturé.                                                                                                                                    |
+| `transcriptReference` | `TransportReference \| undefined` | Optionnel | Index distant versionné de la conversation capturée après ce tour ; son transcript local reste disponible séparément.                                                            |
+| `usage`               | `Usage`                           | Requis    | Compteurs d’usage rapportés ; aucune estimation monétaire.                                                                                                                       |
+| `durationMs`          | `number`                          | Requis    | Durée d’exécution écoulée en millisecondes.                                                                                                                                      |
 
 ## Signature
 
@@ -29,6 +30,8 @@ import type { Turn } from "@elie-laloum/outpost";
 export interface Turn {
   readonly text: string;
   readonly status: number;
+  /** Set when steering stopped this turn to resume the conversation with new instructions. */
+  readonly interrupted?: "steering";
   readonly conversation?: string;
   readonly transcript?: string;
   readonly transcriptReference?: TransportReference;
