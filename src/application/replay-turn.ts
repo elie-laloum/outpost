@@ -75,6 +75,7 @@ export async function replayTurn(
     usage: addUsage(handedOver, recorded.usage),
     status: 0,
     durationMs: Date.now() - start,
+    ...(recorded.interrupted ? { interrupted: "steering" as const } : {}),
     ...(recorded.conversation ? { conversation: recorded.conversation } : {}),
   };
 }

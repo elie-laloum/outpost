@@ -24,7 +24,6 @@ export const replayExecutionEvents: ReadonlySet<string> = new Set([
   "prompt",
   "summary",
   "fallback",
-  "steer",
 ]);
 
 export const replayFaultCodes: ReadonlySet<string> = new Set([

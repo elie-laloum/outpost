@@ -50,6 +50,10 @@ export interface ReplayTurn {
   /** Recorded handover of a fallback agent to its next candidate after this turn. */
   readonly handover?: FallbackEvent;
   readonly changes?: WorkspaceCommitsEvent;
+  /** Steering instructions that resumed the conversation into this turn. */
+  readonly resumedBy?: readonly string[];
+  /** Whether steering stopped this turn before it finished. */
+  readonly interrupted?: boolean;
 }
 
 export type ReplayDivergencePolicy = "fail" | "warn";
@@ -77,6 +81,8 @@ export interface ReplayAgent extends AgentFeatures {
   readonly turns: readonly ReplayTurn[];
   readonly remainingTurns: number;
   nextTurn(): ReplayTurn | undefined;
+  /** Instructions that resumed the next recorded turn, without consuming it. */
+  pendingSteering(): readonly string[] | undefined;
 }
 
 export type JournalObject = Readonly<Record<string, unknown>>;
@@ -92,7 +98,7 @@ export interface ReplayRecording {
 }
 
 export interface DraftTurn {
-  readonly prompt: string;
+  prompt: string;
   readonly events: AgentEvent[];
   readonly texts: string[];
   readonly raws: string[];
@@ -103,4 +109,10 @@ export interface DraftTurn {
   observed: Usage;
   handover?: FallbackEvent;
   changes?: WorkspaceCommitsEvent;
+  /** Steering instructions that resumed the conversation into this turn. */
+  resumedBy?: string[];
+  /** Usage of the earlier turns of the same pass, included in its summary. */
+  before?: Usage;
+  interrupted?: boolean;
+  continued?: boolean;
 }

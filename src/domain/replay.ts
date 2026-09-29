@@ -7,7 +7,7 @@ import type {
   FallbackCandidate,
   FallbackTrigger,
 } from "./fallback-agent.types.ts";
-import { addUsage } from "./usage.ts";
+import { addUsage, usageDifference } from "./usage.ts";
 import type { FaultCode } from "./errors.types.ts";
 import {
   replayDefaults,
@@ -87,6 +87,9 @@ export function replayAgent(options: ReplayAgentOptions): ReplayAgent {
       if (position >= turns.length) return undefined;
       return turns[position++];
     },
+    pendingSteering() {
+      return turns[position]?.resumedBy;
+    },
   });
 }
 
@@ -130,10 +133,20 @@ function replayRecording(journal: readonly unknown[]): ReplayRecording {
     }
     if (!current) continue;
     if (event.kind === "summary") {
-      current.usage = usage(event.tokens, index);
+      const total = usage(event.tokens, index);
+      current.usage = current.before
+        ? usageDifference(total, current.before)
+        : total;
       current = undefined;
       continue;
     }
+    if (event.kind === "steer" && event.mode === "resumed") {
+      current = resumed(current, text(event, "text", index));
+      if (current !== drafts.at(-1)) drafts.push(current);
+      continue;
+    }
+    if (event.kind === "stopped" && event.reason === "steered")
+      current.interrupted = true;
     const agentEvent = event as unknown as AgentEvent;
     if (replayExecutionEvents.has(event.kind) || !isAgentEvent(agentEvent))
       continue;
@@ -152,12 +165,34 @@ function replayRecording(journal: readonly unknown[]): ReplayRecording {
   };
 }
 
+function resumed(current: DraftTurn, instruction: string): DraftTurn {
+  // Instructions delivered together form one resumed prompt.
+  if (current.resumedBy && current.events.length === 0) {
+    current.resumedBy.push(instruction);
+    current.prompt = current.resumedBy.join("\n\n");
+    return current;
+  }
+  current.continued = true;
+  return {
+    prompt: instruction,
+    resumedBy: [instruction],
+    before: addUsage(
+      current.before ?? { input: 0, cached: 0, output: 0 },
+      current.observed,
+    ),
+    events: [],
+    texts: [],
+    raws: [],
+    observed: { input: 0, cached: 0, output: 0 },
+  };
+}
+
 function turn(
   draft: DraftTurn,
   finished: ReplayFailure | undefined,
 ): ReplayTurn {
   const failure: ReplayFailure | undefined =
-    draft.usage || draft.handover
+    draft.usage || draft.handover || draft.continued
       ? undefined
       : (finished ?? {
           code: "process",
@@ -171,11 +206,15 @@ function turn(
       (draft.texts.length ? draft.texts.join("") : draft.raws.join("\n")),
     usage:
       draft.usage ??
-      (draft.handover ? draft.observed : { input: 0, cached: 0, output: 0 }),
+      (draft.handover || draft.continued
+        ? draft.observed
+        : { input: 0, cached: 0, output: 0 }),
     ...(draft.conversation ? { conversation: draft.conversation } : {}),
     ...(failure ? { failure } : {}),
     ...(draft.handover ? { handover: draft.handover } : {}),
     ...(draft.changes ? { changes: draft.changes } : {}),
+    ...(draft.resumedBy ? { resumedBy: Object.freeze(draft.resumedBy) } : {}),
+    ...(draft.interrupted ? { interrupted: true } : {}),
   });
 }
 
@@ -183,7 +222,9 @@ function collect(draft: DraftTurn, event: JournalObject, index: number): void {
   visitAgentEvent(event as unknown as AgentEvent, {
     text: () => draft.texts.push(text(event, "text", index)),
     result: () => {
-      draft.result = text(event, "text", index);
+      const value = text(event, "text", index);
+      draft.result =
+        draft.result === undefined ? value : `${draft.result}\n${value}`;
     },
     conversation: () => {
       draft.conversation = text(event, "id", index);

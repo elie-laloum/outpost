@@ -1,6 +1,7 @@
 import type { Agent } from "../domain/agent.types.ts";
 import { steeringInbox } from "../domain/steering.ts";
 import type { DispatchOptions, Turn } from "./execution.types.ts";
+import { notify } from "./observation.ts";
 import { deliverSteering } from "./steering-scope.ts";
 import type { SteeringTurnInput } from "./steering-turns.types.ts";
 
@@ -27,6 +28,23 @@ export async function steeringTurns(
       .join("\n\n");
     const turn = await run(text, next.continuation);
     turns.push(turn);
+    const recorded = agent.kind === "replay" ? agent.pendingSteering() : [];
+    if (recorded?.length) {
+      for (const instruction of recorded)
+        notify(options.observe, {
+          kind: "steer",
+          text: instruction,
+          mode: "resumed",
+          pass,
+          at: new Date().toISOString(),
+        });
+      next = {
+        prompt: recorded.join("\n\n"),
+        continuation: turn.conversation ? { id: turn.conversation } : undefined,
+        mode: "resumed",
+      };
+      continue;
+    }
     if (!inbox?.size || !turn.conversation || agent.resumable === false)
       return turns;
     next = {

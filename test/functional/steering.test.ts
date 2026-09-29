@@ -12,6 +12,8 @@ import {
   dispatch,
   harness,
   OutpostError,
+  readJournal,
+  replayAgent,
   type AgentInput,
   type AgentObservation,
   type ModelProvider,
@@ -19,6 +21,8 @@ import {
   type ModelResult,
   type SteeringDelivery,
 } from "../../src/index.ts";
+import { git } from "../../src/infrastructure/git.ts";
+import { repositoryTransport } from "../../src/infrastructure/repository-transport.ts";
 import { localSandboxProvider } from "../../src/providers/local.ts";
 import { emit, repository, scripted } from "../helpers.ts";
 
@@ -485,4 +489,71 @@ test("steering reaches the built-in subagent that is working", async (t) => {
   const steer = events.find((event) => event.kind === "steer");
   assert.equal(steer?.kind === "steer" && steer.mode, "injected");
   assert.ok(steer?.subagentId);
+});
+
+test("replay reproduces a steered run's turns, instructions, text, usage and commits", async (t) => {
+  const root = await repository(t);
+  const baseline = (await git(root, ["rev-parse", "HEAD"])).trim();
+  const steering = createSteering();
+  const events: AgentObservation[] = [];
+  let sent = false;
+  const commit = (file: string) =>
+    `const {writeFileSync}=await import('node:fs');const {execFileSync}=await import('node:child_process');writeFileSync('${file}','${file}\\n');execFileSync('git',['add','.']);execFileSync('git',['commit','-m','${file}']);`;
+  const coder = scripted((input) =>
+    input.continuation
+      ? `${commit("second.txt")}console.log(JSON.stringify({kind:'usage',tokens:{input:7,cached:0,output:3}}));${emit(`resumed ${done}`)}`
+      : `${commit("first.txt")}console.log(JSON.stringify({kind:'usage',tokens:{input:5,cached:1,output:2}}));${emit("partial")}console.log(JSON.stringify({kind:'conversation',id:'conv-r'}));setInterval(()=>{},1000);`,
+  );
+  const recorded = await dispatch({
+    repository: root,
+    sandboxProvider: localSandboxProvider(),
+    agent: coder,
+    brief: { text: "work" },
+    steering,
+    logging: { replayable: true },
+    observe(event) {
+      events.push(event);
+      if (event.kind === "conversation" && !sent) {
+        sent = true;
+        void steering.send("Also add second.txt");
+      }
+    },
+  });
+  assert.equal(recorded.turns.length, 2);
+  assert.ok(recorded.logReference);
+  const journal = await readJournal({
+    transporter: repositoryTransport(root),
+    reference: recorded.logReference,
+  });
+  const replaying = replayAgent({ journal });
+  assert.equal(replaying.turns.length, 2);
+  await git(root, ["reset", "--hard", baseline]);
+  const replayedEvents: AgentObservation[] = [];
+  const replayed = await dispatch({
+    repository: root,
+    sandboxProvider: localSandboxProvider(),
+    agent: replaying,
+    brief: { text: "work" },
+    observe: (event) => replayedEvents.push(event),
+  });
+  assert.equal(replaying.remainingTurns, 0);
+  assert.deepEqual(
+    replayed.turns.map((turn) => [turn.text, turn.interrupted, turn.usage]),
+    recorded.turns.map((turn) => [turn.text, turn.interrupted, turn.usage]),
+  );
+  assert.equal(replayed.text, recorded.text);
+  assert.deepEqual(replayed.usage, recorded.usage);
+  assert.deepEqual(
+    replayed.commits.map((commit) => commit.subject),
+    recorded.commits.map((commit) => commit.subject),
+  );
+  const kinds = (list: AgentObservation[]) =>
+    list
+      .filter((event) => ["steer", "stopped", "summary"].includes(event.kind))
+      .map((event) =>
+        event.kind === "steer"
+          ? [event.kind, event.text, event.mode]
+          : [event.kind],
+      );
+  assert.deepEqual(kinds(replayedEvents), kinds(events));
 });
