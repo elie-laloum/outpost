@@ -294,6 +294,10 @@
         "attrs": { "data-reference-overview": "" }
       },
       { "slug": "reference/agent", "attrs": { "data-api-kind": "function" } },
+      {
+        "slug": "reference/fallbackagent",
+        "attrs": { "data-api-kind": "function" }
+      },
       { "slug": "reference/type-agent", "attrs": { "data-api-kind": "type" } },
       {
         "slug": "reference/agentoptions",
@@ -302,6 +306,14 @@
       { "slug": "reference/modelspec", "attrs": { "data-api-kind": "type" } },
       {
         "slug": "reference/modelreasoning",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/dispatchagent",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/fallbacktrigger",
         "attrs": { "data-api-kind": "type" }
       },
       {
@@ -314,6 +326,26 @@
       },
       {
         "slug": "reference/agentmodel",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/type-fallbackagent",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/fallbackagentoptions",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/fallbackcandidate",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/fallbackattempt",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/fallbackrecord",
         "attrs": { "data-api-kind": "interface" }
       }
     ]
@@ -1291,12 +1323,20 @@
         "attrs": { "data-api-kind": "function" }
       },
       {
+        "slug": "reference/unavailablefault",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
         "slug": "reference/outposterror",
         "attrs": { "data-api-kind": "class" }
       },
       { "slug": "reference/faultcode", "attrs": { "data-api-kind": "type" } },
       {
         "slug": "reference/type-quotafault",
+        "attrs": { "data-api-kind": "interface" }
+      },
+      {
+        "slug": "reference/type-unavailablefault",
         "attrs": { "data-api-kind": "interface" }
       }
     ]

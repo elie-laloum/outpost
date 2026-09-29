@@ -14,6 +14,8 @@ Use `agent({ harness: codexHarness(), model: "..." })`, or the corresponding `cl
 
 `agent()` normalizes the model into a frozen `AgentModel` and asks the harness or its model provider to validate it. A reasoning level or output limit that the selected CLI or service cannot express is rejected immediately, before any sandbox exists. Antigravity, Copilot and Kimi accept only a model name; Kimi with `usage` authentication requires one.
 
+`fallbackAgent([...agents], { on })` groups composed agents into an ordered `FallbackAgent`. Dispatch accepts it wherever it accepts an agent (`DispatchAgent`) and hands the work to the next candidate only when the current one fails with a listed `FallbackTrigger`: `quota` or `unavailable`. The result's `FallbackRecord` names the selected candidate and the `FallbackAttempt` of each one that stopped. Attachment and explicit continuations require a single agent.
+
 ## Boundaries and responsibilities
 
 An agent binds execution configuration and model selection. The [Harness](../harness/) family owns CLI presets, the built-in engine, authentication settings (`AgentAuthentication`, `AccountCredential`, `UsageCredential`) and execution capabilities. [Model providers](../model-providers/) supply HTTP transports to custom harnesses, while `sandboxProvider` independently selects the execution environment.
@@ -30,5 +32,7 @@ These composition APIs are available since 5.0.0. Use the agent with dispatch, a
 - [AgentModel](../../agentmodel/)
 - [ModelSpec](../../modelspec/)
 - [ModelReasoning](../../modelreasoning/)
+- [fallbackAgent](../../fallbackagent/)
+- [FallbackAgent](../../type-fallbackagent/)
 
 [Learn with the practical guide](../../../guide/agents/adapters/).

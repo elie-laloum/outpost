@@ -45,7 +45,7 @@ export const groups = [
     title: ["Agents", "Agents"],
     guide: "guide/agents/adapters",
     names:
-      "agent Agent AgentOptions CliAgent CustomAgent AgentModel ModelSpec ModelReasoning",
+      "agent fallbackAgent Agent AgentOptions CliAgent CustomAgent AgentModel ModelSpec ModelReasoning DispatchAgent FallbackTrigger FallbackAgent FallbackAgentOptions FallbackCandidate FallbackAttempt FallbackRecord",
   },
   {
     id: "harness",
@@ -108,7 +108,8 @@ export const groups = [
     id: "errors",
     title: ["Errors", "Erreurs"],
     guide: "guide/operations/recovery",
-    names: "OutpostError recoveryDetails quotaFault FaultCode QuotaFault",
+    names:
+      "OutpostError recoveryDetails quotaFault unavailableFault FaultCode QuotaFault UnavailableFault",
   },
   {
     id: "storage-reservations",

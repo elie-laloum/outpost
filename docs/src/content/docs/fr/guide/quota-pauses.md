@@ -60,6 +60,8 @@ Pour les agents CLI, un signal ne reclasse qu’un tour dont le processus d’ag
 
 Utilisez `quotaFault(error)` pour lire le message et l’heure de réinitialisation d’une erreur interceptée, y compris imbriquée.
 
+Pour continuer avec un autre agent ou modèle au lieu d’attendre, utilisez un [agent de secours](../agent-fallback/) : la tâche ne se met en pause que lorsque tous les candidats ont atteint une limite, jusqu’à la réinitialisation la plus proche.
+
 ## Pause et reprise
 
 Une erreur de quota termine la tentative en cours sans consommer les tentatives de `retry`. La tâche passe en `paused` avec un enregistrement `quota`, puis le checkpoint est sauvegardé. Ensuite :

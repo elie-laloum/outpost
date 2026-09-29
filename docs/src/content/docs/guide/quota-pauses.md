@@ -60,6 +60,8 @@ For CLI agents, a signal only reclassifies a turn whose agent process fails. Tra
 
 Use `quotaFault(error)` to read the message and reset time of a caught error, including a wrapped one.
 
+To keep working with another agent or model instead of waiting, use a [fallback agent](../agent-fallback/): the task pauses only when every candidate hits a limit, until the earliest reset.
+
 ## Pause and resume
 
 A quota error ends the current attempt; it does not consume `retry` attempts. The task becomes `paused` with a `quota` record, and the checkpoint is saved. Then:

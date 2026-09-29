@@ -60,6 +60,7 @@ export const chapters = [
       "guide/parallel-repositories",
       "guide/durable-runs",
       "guide/quota-pauses",
+      "guide/agent-fallback",
       "guide/review-gates",
       "guide/interactive-tasks",
       "guide/shared-artifacts",

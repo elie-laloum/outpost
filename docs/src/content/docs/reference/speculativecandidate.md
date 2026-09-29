@@ -13,18 +13,18 @@ import type { SpeculativeCandidate } from "@elie-laloum/outpost";
 
 ## Parameters and properties
 
-| Name      | Type                                                              | Presence | Meaning                                                                                                           |
-| --------- | ----------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------- |
-| `key`     | `string`                                                          | Required | Unique candidate key used to correlate its branch, validation and final result.                                   |
-| `agent`   | `Agent`                                                           | Required | Native coding-agent adapter.                                                                                      |
-| `request` | `Omit<DispatchOptions<T>, "signal" \| "agent" \| "continuation">` | Required | Candidate-specific brief and response settings; the race controls agent, cancellation and fresh-session behavior. |
+| Name      | Type                                                              | Presence | Meaning                                                                                                                                                                                                                                                         |
+| --------- | ----------------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `key`     | `string`                                                          | Required | Unique candidate key used to correlate its branch, validation and final result.                                                                                                                                                                                 |
+| `agent`   | `DispatchAgent`                                                   | Required | Agent that runs the dispatch: a single agent composed with agent() or replayAgent(), or a fallbackAgent() whose candidates are tried in order on listed quota or outage failures. The candidate settles with status quota only when every fallback hit a limit. |
+| `request` | `Omit<DispatchOptions<T>, "signal" \| "agent" \| "continuation">` | Required | Candidate-specific brief and response settings; the race controls agent, cancellation and fresh-session behavior.                                                                                                                                               |
 
 ## Signature
 
 ```ts
 export interface SpeculativeCandidate<T = undefined> {
   readonly key: string;
-  readonly agent: Agent;
+  readonly agent: DispatchAgent;
   readonly request: Omit<
     DispatchOptions<T>,
     "agent" | "signal" | "continuation"
@@ -34,5 +34,5 @@ export interface SpeculativeCandidate<T = undefined> {
 
 ## Related contracts
 
-- [Agent](../type-agent/)
+- [DispatchAgent](../dispatchagent/)
 - [DispatchOptions](../dispatchoptions/)

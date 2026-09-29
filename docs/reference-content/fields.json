@@ -8,8 +8,8 @@
     "Inclut les modifications hôtes non commitées dans le snapshot du dépôt distant."
   ],
   "SandboxOptions.agent": [
-    "Native coding-agent adapter.",
-    "Adapter natif de l’agent de code."
+    "Default agent for dispatches on this sandbox: a single agent or a fallbackAgent(). Only the first candidate is bootstrapped during allocation; attach() requires a single CLI agent.",
+    "Agent par défaut des dispatchs sur ce sandbox : un agent unique ou un fallbackAgent(). Seul le premier candidat est bootstrappé à l’allocation ; attach() exige un agent CLI unique."
   ],
   "SandboxOptions.workspace": [
     "Caller-owned Git workspace; excludes new repository/branch choices.",
@@ -392,8 +392,8 @@
     "Identifiant de conversation native à poursuivre ; fork demande une conversation distincte dérivée de celle-ci."
   ],
   "AgentEvent.kind": [
-    "Discriminator selecting the event payload: phase, summary, warning, text, text-delta, result, prompt, tool, tool-result, tool-denied, step, stop-prevented, compaction, conversation, usage, quota, failure, finished or raw.",
-    "Discriminant sélectionnant les données de l’événement : phase, summary, warning, text, text-delta, result, prompt, tool, tool-result, tool-denied, step, stop-prevented, compaction, conversation, usage, quota, failure, finished ou raw."
+    "Discriminator selecting the event payload: phase, summary, warning, text, text-delta, result, prompt, tool, tool-result, tool-denied, step, stop-prevented, compaction, conversation, usage, quota, fallback, failure, finished or raw.",
+    "Discriminant sélectionnant les données de l’événement : phase, summary, warning, text, text-delta, result, prompt, tool, tool-result, tool-denied, step, stop-prevented, compaction, conversation, usage, quota, fallback, failure, finished ou raw."
   ],
   "AgentEvent.name": [
     "Phase name for phase events, or tool name for tool and tool-result events.",
@@ -424,8 +424,8 @@
     "Compteurs d’usage de tokens portés par un événement usage ou summary."
   ],
   "AgentEvent.message": [
-    "Warning, failure or quota message, or the message a stop hook sent back to the model.",
-    "Message d’avertissement, d’échec ou de quota, ou message qu’un hook stop a renvoyé au modèle."
+    "Warning, failure or quota message, the failure that triggered a fallback, or the message a stop hook sent back to the model.",
+    "Message d’avertissement, d’échec ou de quota, échec ayant déclenché un repli, ou message qu’un hook stop a renvoyé au modèle."
   ],
   "AgentEvent.text": [
     "Text carried by the event: a streamed fragment, streamed text, final answer or submitted prompt according to kind.",
@@ -532,8 +532,8 @@
     "Politique de branche choisie à l’ouverture du workspace."
   ],
   "DispatchOptions.agent": [
-    "Native coding-agent adapter.",
-    "Adapter natif de l’agent de code."
+    "Agent that runs the dispatch: a single agent composed with agent() or replayAgent(), or a fallbackAgent() whose candidates are tried in order on listed quota or outage failures. A fallback agent cannot be combined with continuation.",
+    "Agent qui exécute le dispatch : un agent unique composé avec agent() ou replayAgent(), ou un fallbackAgent() dont les candidats sont essayés dans l’ordre sur les échecs de quota ou de panne listés. Un agent de secours ne peut pas être combiné avec continuation."
   ],
   "DispatchOptions.logging": [
     "Configure the dispatch journal transport, verbose event retention and replayable commit recording.",
@@ -1529,8 +1529,8 @@
     "Catégorie stable d’erreur Outpost utilisée pour le traitement programmatique des échecs."
   ],
   "OutpostError.details": [
-    "Structured diagnostics attached to the fault code. HTTP model errors include status and, when valid, retryAfterMs: the minimum wait in milliseconds for an explicitly configured task retry. Quota errors include resetAt when the reset time is known, and agent for CLI turns.",
-    "Diagnostics structurés attachés au code d’erreur. Les erreurs HTTP de modèles incluent status et, si valide, retryAfterMs : l’attente minimale en millisecondes d’une reprise de tâche explicitement configurée. Les erreurs de quota incluent resetAt lorsque l’heure de réinitialisation est connue, et agent pour les tours de CLI."
+    "Structured diagnostics attached to the fault code. HTTP model errors include status and, when valid, retryAfterMs: the minimum wait in milliseconds for an explicitly configured task retry. Quota errors include resetAt when the reset time is known, and agent for CLI turns. Agent and model outages add unavailable, the signal read by unavailableFault(); a quota error summarizing an exhausted fallback agent adds fallback.",
+    "Diagnostics structurés attachés au code d’erreur. Les erreurs HTTP de modèles incluent status et, si valide, retryAfterMs : l’attente minimale en millisecondes d’une reprise de tâche explicitement configurée. Les erreurs de quota incluent resetAt lorsque l’heure de réinitialisation est connue, et agent pour les tours de CLI. Les pannes d’agent et de modèle ajoutent unavailable, le signal lu par unavailableFault() ; une erreur de quota résumant un agent de secours épuisé ajoute fallback."
   ],
   "response.text": [
     "Build a validator that returns trimmed content of the last complete tag as a string.",
@@ -2753,8 +2753,8 @@
     "Clé unique du candidat reliant sa branche, sa validation et son résultat final."
   ],
   "SpeculativeCandidate.agent": [
-    "Native coding-agent adapter.",
-    "Adapter natif de l’agent de code."
+    "Agent that runs the dispatch: a single agent composed with agent() or replayAgent(), or a fallbackAgent() whose candidates are tried in order on listed quota or outage failures. The candidate settles with status quota only when every fallback hit a limit.",
+    "Agent qui exécute le dispatch : un agent unique composé avec agent() ou replayAgent(), ou un fallbackAgent() dont les candidats sont essayés dans l’ordre sur les échecs de quota ou de panne listés. Le candidat ne prend le statut quota que lorsque tous ses secours ont atteint une limite."
   ],
   "SpeculativeCandidate.request": [
     "Candidate-specific brief and response settings; the race controls agent, cancellation and fresh-session behavior.",
@@ -5107,8 +5107,8 @@
     "Identifiant de l’enfant intégré dans le dispatch, propagé depuis ses événements sans remplacer le contexte de workflow, tâche ou passe."
   ],
   "AgentEventDetails.kind": [
-    "Discriminator selecting the event payload: phase, summary, warning, text, text-delta, result, prompt, tool, tool-result, tool-denied, step, stop-prevented, compaction, conversation, usage, quota, failure, finished or raw.",
-    "Discriminant sélectionnant les données de l’événement : phase, summary, warning, text, text-delta, result, prompt, tool, tool-result, tool-denied, step, stop-prevented, compaction, conversation, usage, quota, failure, finished ou raw."
+    "Discriminator selecting the event payload: phase, summary, warning, text, text-delta, result, prompt, tool, tool-result, tool-denied, step, stop-prevented, compaction, conversation, usage, quota, fallback, failure, finished or raw.",
+    "Discriminant sélectionnant les données de l’événement : phase, summary, warning, text, text-delta, result, prompt, tool, tool-result, tool-denied, step, stop-prevented, compaction, conversation, usage, quota, fallback, failure, finished ou raw."
   ],
   "AgentEventDetails.name": [
     "Phase name for phase events, or tool name for tool and tool-result events.",
@@ -5139,8 +5139,8 @@
     "Compteurs d’usage de tokens portés par un événement usage ou summary."
   ],
   "AgentEventDetails.message": [
-    "Warning, failure or quota message, or the message a stop hook sent back to the model.",
-    "Message d’avertissement, d’échec ou de quota, ou message qu’un hook stop a renvoyé au modèle."
+    "Warning, failure or quota message, the failure that triggered a fallback, or the message a stop hook sent back to the model.",
+    "Message d’avertissement, d’échec ou de quota, échec ayant déclenché un repli, ou message qu’un hook stop a renvoyé au modèle."
   ],
   "AgentEventDetails.text": [
     "Text carried by the event: a streamed fragment, streamed text, final answer or submitted prompt according to kind.",
@@ -5815,12 +5815,12 @@
     "Lit la sortie terminée d’une tâche figurant dans les dépendances déclarées de cette tâche."
   ],
   "AgentEvent.resetAt": [
-    "ISO timestamp at which a quota event says the usage or rate limit resets; present only when the CLI reports it in structured form.",
-    "Horodatage ISO auquel un événement quota indique la réinitialisation de la limite d’usage ou de débit ; présent uniquement lorsque la CLI le fournit sous forme structurée."
+    "ISO timestamp at which a quota or fallback event says the usage or rate limit resets; present only when reported in structured form.",
+    "Horodatage ISO auquel un événement quota ou fallback indique la réinitialisation de la limite d’usage ou de débit ; présent uniquement lorsqu’il est fourni sous forme structurée."
   ],
   "AgentEventDetails.resetAt": [
-    "ISO timestamp at which a quota event says the usage or rate limit resets; present only when the CLI reports it in structured form.",
-    "Horodatage ISO auquel un événement quota indique la réinitialisation de la limite d’usage ou de débit ; présent uniquement lorsque la CLI le fournit sous forme structurée."
+    "ISO timestamp at which a quota or fallback event says the usage or rate limit resets; present only when reported in structured form.",
+    "Horodatage ISO auquel un événement quota ou fallback indique la réinitialisation de la limite d’usage ou de débit ; présent uniquement lorsqu’il est fourni sous forme structurée."
   ],
   "AgentAdapter.quota": [
     "Recognize a terminal usage-limit or rate-limit message in a failure event or stderr line. When the process then fails, the turn rejects with OutpostError code quota instead of process; transient retry notices must not match.",
@@ -6230,5 +6230,117 @@
   "SpeculativeCandidateResult.quota": [
     "Usage or rate limit that stopped this candidate; durable resumption reruns such candidates as new attempts from the baseline.",
     "Limite d’usage ou de débit ayant arrêté ce candidat ; la reprise durable relance ces candidats en nouvelles tentatives depuis la baseline."
+  ],
+  "AgentAdapter.unavailable": [
+    "Recognize a terminal service outage or connection failure in a failure event or stderr line. When the process then fails without a quota signal, the turn keeps code process and records details.unavailable, read by unavailableFault(); retry notices must not match.",
+    "Reconnaît une panne terminale du service ou un échec de connexion dans un événement failure ou une ligne stderr. Si le processus échoue ensuite sans signal de quota, le tour garde le code process et enregistre details.unavailable, lu par unavailableFault() ; les avis de nouvelle tentative ne doivent pas correspondre."
+  ],
+  "AgentEvent.from": [
+    "Candidate that stopped in a fallback event: its position, adapter name and model name when one was selected.",
+    "Candidat qui s’est arrêté dans un événement fallback : sa position, le nom de son adapter et le nom de son modèle s’il a été choisi."
+  ],
+  "AgentEvent.to": [
+    "Candidate that takes over in a fallback event: its position, adapter name and model name when one was selected.",
+    "Candidat qui prend le relais dans un événement fallback : sa position, le nom de son adapter et le nom de son modèle s’il a été choisi."
+  ],
+  "AgentEvent.failure": [
+    "Category that ended the previous candidate in a fallback event: quota or unavailable.",
+    "Catégorie qui a arrêté le candidat précédent dans un événement fallback : quota ou unavailable."
+  ],
+  "AgentEventDetails.from": [
+    "Candidate that stopped in a fallback event: its position, adapter name and model name when one was selected.",
+    "Candidat qui s’est arrêté dans un événement fallback : sa position, le nom de son adapter et le nom de son modèle s’il a été choisi."
+  ],
+  "AgentEventDetails.to": [
+    "Candidate that takes over in a fallback event: its position, adapter name and model name when one was selected.",
+    "Candidat qui prend le relais dans un événement fallback : sa position, le nom de son adapter et le nom de son modèle s’il a été choisi."
+  ],
+  "AgentEventDetails.failure": [
+    "Category that ended the previous candidate in a fallback event: quota or unavailable.",
+    "Catégorie qui a arrêté le candidat précédent dans un événement fallback : quota ou unavailable."
+  ],
+  "FallbackCandidate.index": [
+    "Zero-based position of the candidate in FallbackAgent.agents.",
+    "Position du candidat dans FallbackAgent.agents, à partir de zéro."
+  ],
+  "FallbackCandidate.name": [
+    "Adapter name of the candidate, such as claude, codex or custom.",
+    "Nom de l’adapter du candidat, par exemple claude, codex ou custom."
+  ],
+  "FallbackCandidate.model": [
+    "Model name selected on the candidate; absent when the CLI default is used.",
+    "Nom du modèle choisi sur le candidat ; absent lorsque le modèle par défaut de la CLI est utilisé."
+  ],
+  "DispatchAgent.agents": [
+    "Candidates of a fallback agent, in the order they are tried.",
+    "Candidats d’un agent de secours, dans l’ordre où ils sont essayés."
+  ],
+  "DispatchAgent.on": [
+    "Failure categories that hand a fallback agent's dispatch to its next candidate.",
+    "Catégories d’échec qui confient le dispatch d’un agent de secours à son candidat suivant."
+  ],
+  "FallbackAgent.kind": [
+    "Discriminator identifying an ordered fallback list rather than a single agent.",
+    "Discriminant identifiant une liste de secours ordonnée plutôt qu’un agent unique."
+  ],
+  "FallbackAgent.agents": [
+    "Frozen copy of the candidates, in the order they are tried; at least two, none of them a fallback agent.",
+    "Copie figée des candidats, dans l’ordre où ils sont essayés ; au moins deux, aucun n’étant lui-même un agent de secours."
+  ],
+  "FallbackAgent.on": [
+    "Frozen copy of the failure categories that move to the next candidate; every other failure is rethrown.",
+    "Copie figée des catégories d’échec qui font passer au candidat suivant ; tout autre échec est relancé."
+  ],
+  "DispatchResult.fallback": [
+    "Present only when the dispatch used a fallback agent: the candidate that produced this result and the candidates that stopped before it.",
+    "Présent uniquement lorsque le dispatch a utilisé un agent de secours : le candidat qui a produit ce résultat et ceux qui se sont arrêtés avant lui."
+  ],
+  "FallbackRecord.selected": [
+    "Candidate that produced the dispatch result; resume() and fork() continue with it.",
+    "Candidat qui a produit le résultat du dispatch ; resume() et fork() continuent avec lui."
+  ],
+  "FallbackRecord.attempts": [
+    "Candidates that stopped before the selected one, in order, with the failure that ended each; empty when the first candidate succeeded.",
+    "Candidats arrêtés avant celui qui a été retenu, dans l’ordre, avec l’échec qui a mis fin à chacun ; vide lorsque le premier candidat a réussi."
+  ],
+  "FallbackAttempt.failure": [
+    "Category that ended this candidate: quota or unavailable.",
+    "Catégorie qui a arrêté ce candidat : quota ou unavailable."
+  ],
+  "FallbackAttempt.message": [
+    "Quota or outage message that ended this candidate.",
+    "Message de quota ou de panne qui a arrêté ce candidat."
+  ],
+  "FallbackAttempt.resetAt": [
+    "ISO reset timestamp reported with a quota failure; absent for outages and unknown resets.",
+    "Horodatage ISO de réinitialisation signalé avec un échec de quota ; absent pour les pannes et les réinitialisations inconnues."
+  ],
+  "unavailableFault.error": [
+    "Any caught value; wrapped causes are followed.",
+    "Toute valeur interceptée ; les causes imbriquées sont suivies."
+  ],
+  "UnavailableFault.message": [
+    "Signal that identified the outage, such as HTTP 503, an overloaded stream error or the recognized agent failure text; a timeout diagnosed as a connection failure reports connection failure.",
+    "Signal qui a identifié la panne, par exemple HTTP 503, une erreur de flux overloaded ou le texte d’échec reconnu de l’agent ; un délai diagnostiqué comme échec de connexion indique connection failure."
+  ],
+  "fallbackAgent.agents": [
+    "Ordered candidates, at least two, each composed with agent() or replayAgent(); the first is tried first.",
+    "Candidats ordonnés, au moins deux, chacun composé avec agent() ou replayAgent() ; le premier est essayé en premier."
+  ],
+  "fallbackAgent.options": [
+    "Fallback policy; on is required.",
+    "Politique de repli ; on est obligatoire."
+  ],
+  "fallbackAgent.options.on": [
+    "Failure categories that move to the next candidate: quota, unavailable or both, without repetition.",
+    "Catégories d’échec qui font passer au candidat suivant : quota, unavailable ou les deux, sans répétition."
+  ],
+  "FallbackAgentOptions.on": [
+    "Failure categories that move to the next candidate: quota, unavailable or both, without repetition. Required so the policy is always explicit.",
+    "Catégories d’échec qui font passer au candidat suivant : quota, unavailable ou les deux, sans répétition. Obligatoire pour que la politique soit toujours explicite."
+  ],
+  "ReporterHandlers.fallback": [
+    "Handle a fallback agent handing the dispatch to its next candidate, with both candidates, the failure category and its message; receives pass and at metadata and may return a promise.",
+    "Traite : passage de relais d’un agent de secours à son candidat suivant, avec les deux candidats, la catégorie d’échec et son message ; reçoit pass et at et peut retourner une promesse."
   ]
 }

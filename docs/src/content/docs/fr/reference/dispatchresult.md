@@ -23,6 +23,7 @@ import type { DispatchResult } from "@elie-laloum/outpost";
 | `transcriptReference` | `TransportReference \| undefined`                                                | Optionnel | Index distant versionné de la dernière conversation capturée, lorsque son stockage utilise un transport.                                               |
 | `logReference`        | `TransportReference \| undefined`                                                | Optionnel | Index versionné du journal pour readJournal, en stockage local comme distant. Absent lorsque la journalisation est désactivée ou envoyée vers stdout.  |
 | `retainedDirectory`   | `string \| undefined`                                                            | Optionnel | Workspace conservé pour inspection ou récupération.                                                                                                    |
+| `fallback`            | `FallbackRecord \| undefined`                                                    | Optionnel | Présent uniquement lorsque le dispatch a utilisé un agent de secours : le candidat qui a produit ce résultat et ceux qui se sont arrêtés avant lui.    |
 | `resume`              | `<U = undefined>(options: ContinuationOptions<U>) => Promise<DispatchResult<U>>` | Requis    | Poursuit la conversation de ce résultat dans une sandbox nouvellement allouée.                                                                         |
 | `fork`                | `<U = undefined>(options: ContinuationOptions<U>) => Promise<DispatchResult<U>>` | Requis    | Bifurque depuis la conversation de ce résultat dans une sandbox nouvellement allouée.                                                                  |
 | `text`                | `string`                                                                         | Requis    | Texte final rapporté par l’exécution de l’agent.                                                                                                       |
@@ -45,6 +46,8 @@ export interface DispatchResult<T> extends Execution<T> {
   readonly transcriptReference?: TransportReference;
   readonly logReference?: TransportReference;
   readonly retainedDirectory?: string;
+  /** Candidate that ran and candidates that failed before it, for fallback agents. */
+  readonly fallback?: FallbackRecord;
   resume<U = undefined>(
     options: ContinuationOptions<U>,
   ): Promise<DispatchResult<U>>;
@@ -59,4 +62,5 @@ export interface DispatchResult<T> extends Execution<T> {
 - [Commit](../commit/)
 - [ContinuationOptions](../continuationoptions/)
 - [Execution](../execution/)
+- [FallbackRecord](../fallbackrecord/)
 - [TransportReference](../transportreference/)

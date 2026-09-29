@@ -7,6 +7,11 @@ sidebar:
 
 The release notes below are synchronized from the root `CHANGELOG.md`, the single source of release history.
 
+## Unreleased
+
+- Add `fallbackAgent([...agents], { on })`: an ordered list of agents or models that hands a dispatch to the next candidate when the current one fails with a listed `quota` or `unavailable` fault. Candidates run in the same sandbox and workspace from the original brief, are prepared only when tried, and keep captured conversations; `DispatchResult.fallback` and the new `fallback` agent event record the handover, and usage includes failed candidates. Continuations and `attach()` require a single agent. When every candidate hits a limit, the quota error reports the earliest reset known for all of them, `onQuota` pauses the task and the resumed attempt reruns the brief from the first candidate. `DispatchOptions.agent`, `SandboxOptions.agent` and `SpeculativeCandidate.agent` accept the new `DispatchAgent` union and `AgentEvent` gains `fallback`; update exhaustive consumers.
+- Add `unavailableFault()` and `AgentAdapter.unavailable`. Terminal overloads, 5xx responses and connection failures from Claude Code, Codex, Copilot, Kimi and Antigravity, HTTP 408/5xx/529 and transport failures from model providers, and overloaded or server stream errors now set `details.unavailable` while keeping their `process` or `provider` code. Retry notices are ignored and quota classification keeps precedence. Classification relies on recorded protocol formats, not live outage campaigns.
+
 ## 8.0.0
 
 This major release adds required workflow result fields, extends public status, event, fault and speculation unions, and reclassifies model-provider rate limits. Result producers and test doubles must provide `WorkflowResult.inputRequests`; update exhaustive handling of `TaskStatus`, `WorkflowResult.status`, `WorkflowEvent.type`, `FaultCode`, `ObservationEvent`, `Agent`, `StorageCategoryName` and speculation statuses, and handlers that matched `provider` for HTTP 429. Existing entry points remain available. Live limit campaigns and authenticated model campaigns for these additions remain outstanding.

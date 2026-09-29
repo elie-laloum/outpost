@@ -26,6 +26,7 @@ function reportFailure(error: unknown) {
 | Synchronisation refusée     | Modifications concurrentes et données de récupération conservées.                                |
 | Checkpoint possédé          | Arrêter l’ancien runner, inspecter la révision et récupérer explicitement la propriété.          |
 | Limite d’usage ou HTTP 429  | Code `quota` et `quotaFault` ; mettre les workflows en pause avec [`onQuota`](../quota-pauses/). |
+| Service indisponible        | `unavailableFault` ; passer la main avec un [agent de secours](../agent-fallback/).              |
 
 ## Reprendre délibérément
 

@@ -10,7 +10,7 @@ Les erreurs expliquent pourquoi une opération Outpost a échoué et quelles inf
 
 ## Fonctionnement et philosophie
 
-Utilisez `OutpostError` et `FaultCode` pour reconnaître les échecs documentés sans analyser leur formulation. `recoveryDetails` extrait les informations de récupération prises en charge depuis une erreur. `quotaFault` reconnaît les limites d’usage et de débit, y compris imbriquées, et renvoie l’heure de réinitialisation signalée. Distinguez échec d’opération, résultat de commande non nul et tâche de workflow en échec : leurs contrats exposent ces résultats différemment.
+Utilisez `OutpostError` et `FaultCode` pour reconnaître les échecs documentés sans analyser leur formulation. `recoveryDetails` extrait les informations de récupération prises en charge depuis une erreur. `quotaFault` reconnaît les limites d’usage et de débit, y compris imbriquées, et renvoie l’heure de réinitialisation signalée. `unavailableFault` reconnaît les pannes terminales d’un service d’agent ou de modèle, qui conservent leur code d’origine `process` ou `provider`. Distinguez échec d’opération, résultat de commande non nul et tâche de workflow en échec : leurs contrats exposent ces résultats différemment.
 
 ## Limites et responsabilités
 
@@ -22,5 +22,6 @@ Ne relancez pas aveuglément après un échec ayant des effets externes. Examine
 - [FaultCode](../../faultcode/)
 - [recoveryDetails](../../recoverydetails/)
 - [quotaFault](../../quotafault/)
+- [unavailableFault](../../unavailablefault/)
 
 [Passer à la pratique avec le Guide](../../../guide/operations/recovery/).

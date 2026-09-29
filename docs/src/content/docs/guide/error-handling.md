@@ -26,6 +26,7 @@ function reportFailure(error: unknown) {
 | Synchronization refuses host state | Concurrent edits and retained recovery data.                                       |
 | Checkpoint owned                   | Stop the old runner, inspect revision and recover ownership explicitly.            |
 | Usage limit or HTTP 429            | Code `quota` and `quotaFault`; pause workflows with [`onQuota`](../quota-pauses/). |
+| Agent or model service down        | `unavailableFault`; hand over with a [fallback agent](../agent-fallback/).         |
 
 ## Retry deliberately
 

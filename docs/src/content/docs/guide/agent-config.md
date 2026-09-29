@@ -31,4 +31,8 @@ Omit `model` to use a CLI’s default. Supply a name or `{ name, reasoning, maxO
 
 The custom [model loop](../model-loop/) requires an explicit model and a model provider. It does not install a coding-agent CLI.
 
+## Fall back to another agent or model
+
+Wrap several agents in `fallbackAgent([...], { on })` to hand a dispatch to the next one when a limit or an outage stops the current one. See [Fallback agents](../agent-fallback/).
+
 API: [agent](../../reference/agent/) · [AgentOptions](../../reference/agentoptions/).
