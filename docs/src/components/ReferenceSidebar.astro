@@ -1,6 +1,6 @@
 ---
 import Identifier from "./Identifier.astro";
-import MobileSettings from "./MobileSettings.astro";
+import NavFooter from "./NavFooter.astro";
 import { docsHref, isFrench } from "./docs-route.ts";
 import type { SidebarEntry } from "./docs-route.types.ts";
 
@@ -61,7 +61,7 @@ const holdsCurrent = (entry: SidebarEntry): boolean =>
         ),
     )
   }
-  <MobileSettings />
+  <NavFooter />
 </div>
 
 <style>

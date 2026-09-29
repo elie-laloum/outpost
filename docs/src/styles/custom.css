@@ -129,3 +129,10 @@ a[data-reference-overview] {
   padding-left: 0.5rem;
   border-left: 1px solid var(--sl-color-hairline-light);
 }
+
+site-search dialog,
+site-search .pagefind-ui__search-input,
+site-search .pagefind-ui__result,
+site-search .pagefind-ui__button {
+  border-radius: 0 !important;
+}

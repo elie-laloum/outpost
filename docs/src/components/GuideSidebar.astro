@@ -1,6 +1,6 @@
 ---
 import SidebarSublist from "@astrojs/starlight/components/SidebarSublist.astro";
-import MobileSettings from "./MobileSettings.astro";
+import NavFooter from "./NavFooter.astro";
 
 const guide = Astro.locals.starlightRoute.sidebar[0];
 ---
@@ -18,5 +18,5 @@ const guide = Astro.locals.starlightRoute.sidebar[0];
           ),
       )
   }
-  <MobileSettings />
+  <NavFooter />
 </div>

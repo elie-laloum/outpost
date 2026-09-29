@@ -1,9 +1,10 @@
 ---
 import Search from "virtual:starlight/components/Search";
-import LanguageSelect from "virtual:starlight/components/LanguageSelect";
 import ThemeSelect from "virtual:starlight/components/ThemeSelect";
 import MobileMenuToggle from "starlight-theme-celestia/components/MobileMenuToggle.astro";
 import Brand from "./Brand.astro";
+import LanguageSwitch from "./LanguageSwitch.astro";
+import SourceLinks from "./SourceLinks.astro";
 import { docsHref, docsSpace, isFrench, spaceLinks } from "./docs-route.ts";
 
 const route = Astro.locals.starlightRoute;
@@ -11,8 +12,11 @@ const space = docsSpace(route);
 ---
 
 <div class="docs-header">
-  <Brand href={docsHref(route, "")} suffix="docs" class="docs-brand" />
-  <nav aria-label={isFrench(route) ? "Espaces de la documentation" : "Documentation spaces"}>
+  <div class="cell brand-cell"><Brand href={docsHref(route, "")} class="docs-brand" /></div>
+  <nav
+    class="cell spaces"
+    aria-label={isFrench(route) ? "Espaces de la documentation" : "Documentation spaces"}
+  >
     {
       spaceLinks(route).map((link) => (
         <a href={link.href} aria-current={link.space === space ? "true" : undefined}>
@@ -21,84 +25,171 @@ const space = docsSpace(route);
       ))
     }
   </nav>
-  <div class="docs-search"><Search /></div>
-  <div class="docs-settings"><LanguageSelect /><ThemeSelect /></div>
+  <div class="cell docs-search"><Search /></div>
+  <div class="cell source"><SourceLinks /></div>
+  <div class="cell settings"><LanguageSwitch /><ThemeSelect /></div>
   <div class="docs-menu"><MobileMenuToggle /></div>
 </div>
 
 <style>
   .docs-header {
     display: flex;
-    align-items: center;
-    gap: 2rem;
     height: 100%;
+  }
+  .cell {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    border-right: 1px solid var(--sl-color-hairline-light);
+  }
+  .brand-cell {
+    flex: 0 0 17rem;
     padding: 0 1.5rem;
   }
-  nav {
-    display: flex;
-    align-self: stretch;
+  .spaces {
+    align-items: stretch;
     gap: 1.5rem;
+    padding: 0 1.5rem;
     font-size: 0.875rem;
   }
-  nav a {
+  .spaces a {
     display: flex;
     align-items: center;
     color: var(--sl-color-gray-3);
     text-decoration: none;
+    white-space: nowrap;
     transition: color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   }
-  nav a:hover {
+  .spaces a:hover {
     color: var(--sl-color-white);
   }
-  nav a[aria-current] {
+  .spaces a[aria-current] {
     color: var(--sl-color-white);
     font-weight: 500;
     box-shadow: inset 0 -2px 0 var(--sl-color-white);
   }
   .docs-search {
-    margin-left: auto;
-    width: min(23rem, 30vw);
+    flex: 1 1 auto;
+    padding: 0 1rem;
   }
-  .docs-settings {
+  .docs-search :global(site-search) {
+    display: block;
+    width: 100%;
+  }
+  .docs-search :global(button[data-open-modal]) {
     display: flex;
     align-items: center;
-    gap: 0.8rem;
+    gap: 0.6rem;
+    width: 100%;
+    max-width: none;
+    height: 2.5rem;
+    padding: 0 0.4rem 0 0.85rem;
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 0;
+    background: color-mix(in oklch, var(--sl-color-gray-6) 45%, var(--sl-color-black));
+    color: var(--sl-color-gray-3);
+    font-size: 0.875rem;
+    transition:
+      border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+      color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .docs-search :global(button[data-open-modal]:hover) {
+    border-color: var(--sl-color-gray-3);
+    background: color-mix(in oklch, var(--sl-color-gray-6) 45%, var(--sl-color-black));
+    color: var(--sl-color-white);
+  }
+  .docs-search :global(button[data-open-modal] > kbd) {
+    margin-left: auto;
+    gap: 0.2rem;
+  }
+  .docs-search :global(button[data-open-modal] kbd kbd) {
+    padding: 0.1rem 0.4rem;
+    border: 1px solid var(--sl-color-hairline-light);
+    border-radius: 0;
+    background: var(--sl-color-black);
+    color: var(--sl-color-gray-3);
+    font-family: var(--sl-font-system-mono);
+    font-size: 0.75rem;
+  }
+  .source {
+    flex: 0 0 auto;
+  }
+  .settings {
+    flex: 0 0 auto;
+    align-items: stretch;
+    border-right: 0;
+  }
+  .settings :global(starlight-theme-select) {
+    display: flex;
+    align-items: center;
+    padding: 0 1rem 0 0.4rem;
+  }
+  .docs-header :global(.theme-toggle) {
+    border-radius: 0;
+  }
+  .docs-header :global(.theme-toggle),
+  .docs-header :global(.theme-toggle svg),
+  .docs-header :global(.theme-toggle path),
+  :global(.nav-footer .theme-toggle),
+  :global(.nav-footer .theme-toggle svg),
+  :global(.nav-footer .theme-toggle path) {
+    color: var(--sl-color-gray-3);
+    fill: currentColor;
+  }
+  .docs-header :global(.theme-toggle:hover),
+  .docs-header :global(.theme-toggle:hover svg),
+  .docs-header :global(.theme-toggle:hover path) {
+    color: var(--sl-color-white);
   }
   .docs-menu {
     display: none;
   }
-  .docs-settings :global(.theme-toggle),
-  .docs-settings :global(.theme-toggle svg),
-  .docs-settings :global(.theme-toggle path) {
-    color: var(--sl-color-gray-3);
-    fill: currentColor;
+  @media (max-width: 79.99rem) {
+    .source :global(.version) {
+      display: none;
+    }
   }
-  .docs-settings :global(.theme-toggle:hover),
-  .docs-settings :global(.theme-toggle:hover svg),
-  .docs-settings :global(.theme-toggle:hover path) {
-    color: var(--sl-color-white);
+  @media (max-width: 63.99rem) {
+    .source {
+      display: none;
+    }
   }
   @media (max-width: 49.99rem) {
-    .docs-header {
-      gap: 1rem;
-      padding: 0 1rem;
+    .cell {
+      border-right: 0;
     }
-    .docs-header :global(.docs-brand .suffix),
-    .docs-settings {
+    .brand-cell {
+      flex: 0 0 auto;
+      padding: 0 0.75rem 0 1rem;
+    }
+    .spaces {
+      gap: 0.8rem;
+      padding: 0;
+      font-size: 0.8rem;
+    }
+    .docs-search {
+      flex: 0 0 auto;
+      margin-left: auto;
+      padding: 0 0.25rem;
+    }
+    .docs-search :global(site-search) {
+      width: auto;
+    }
+    .docs-search :global(button[data-open-modal]) {
+      width: 2.5rem;
+      padding: 0;
+      justify-content: center;
+      border: 0;
+      background: none;
+    }
+    .settings {
       display: none;
     }
     .docs-menu {
-      display: block;
+      display: flex;
+      align-items: center;
+      padding-right: 1rem;
     }
-    .docs-search {
-      width: auto;
-    }
-    nav {
-      gap: 0.8rem;
-      font-size: 0.8rem;
-    }
-  }
-  @media (max-width: 26rem) {
     .docs-header :global(.docs-brand .name) {
       position: absolute;
       width: 1px;

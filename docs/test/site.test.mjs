@@ -88,18 +88,45 @@ for (const [locale, heading, start, copied] of [
 }
 
 test("language switch retains the new guide page", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("guide/first-request/");
-  const select = page
-    .locator("starlight-lang-select select")
-    .filter({ visible: true });
-  const value = await select
-    .locator("option")
-    .filter({ hasText: "Français" })
-    .getAttribute("value");
-  await select.selectOption(value);
+  const language = page.locator(".docs-header .language");
+  await expect(language).toHaveAttribute("hreflang", "fr");
+  await language.click();
   await expect(page).toHaveURL(/\/fr\/guide\/first-request\/$/);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
     "Première requête",
+  );
+  await page.locator(".docs-header .language").click();
+  await expect(page).toHaveURL(/\/outpost\/guide\/first-request\/$/);
+});
+
+test("navigation bar links the source and the released version", async ({
+  page,
+}) => {
+  const manifest = JSON.parse(
+    await readFile(new URL("../../package.json", import.meta.url), "utf8"),
+  );
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("reference/dispatch/");
+  const header = page.locator(".docs-header");
+  await expect(header.locator(".brand")).toHaveText("Outpost");
+  for (const [name, href] of [
+    ["GitLab", "https://gitlab.elielaloum.com/elielaloum/outpost"],
+    ["GitHub mirror", "https://github.com/elie-laloum/outpost"],
+    ["npm", "https://www.npmjs.com/package/@elie-laloum/outpost"],
+  ])
+    await expect(
+      header.getByRole("link", { name, exact: true }),
+    ).toHaveAttribute("href", href);
+  const version = header.locator(".version");
+  await expect(version).toHaveText(`v${manifest.version}`);
+  await version.click();
+  await expect(page).toHaveURL(/\/project\/changelog\/$/);
+  const brand = await header.locator(".brand-cell").boundingBox();
+  const sidebar = await page.locator(".docs-sidebar").boundingBox();
+  expect(Math.round(brand.x + brand.width)).toBe(
+    Math.round(sidebar.x + sidebar.width),
   );
 });
 

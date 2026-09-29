@@ -1,0 +1,69 @@
+---
+import { Icon } from "@astrojs/starlight/components";
+import manifest from "../../../package.json";
+import { docsHref, isFrench } from "./docs-route.ts";
+
+interface Props {
+  class?: string;
+}
+
+const route = Astro.locals.starlightRoute;
+const french = isFrench(route);
+const sources = [
+  ["GitLab", "https://gitlab.elielaloum.com/elielaloum/outpost", "gitlab"],
+  [french ? "Miroir GitHub" : "GitHub mirror", "https://github.com/elie-laloum/outpost", "github"],
+  ["npm", "https://www.npmjs.com/package/@elie-laloum/outpost", "npm"],
+] as const;
+const version = `v${manifest.version}`;
+const versionLabel = french
+  ? `${version}, historique des versions`
+  : `${version}, changelog`;
+---
+
+<div class:list={["source-links", Astro.props.class]}>
+  {
+    sources.map(([label, href, icon]) => (
+      <a class="source" href={href} aria-label={label} title={label}>
+        <Icon name={icon} size="1.125rem" />
+      </a>
+    ))
+  }
+  <a class="version" href={docsHref(route, "project/changelog/")} aria-label={versionLabel}>
+    {version}
+  </a>
+</div>
+
+<style>
+  .source-links {
+    display: flex;
+    align-items: stretch;
+    height: 100%;
+  }
+  a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--sl-color-gray-3);
+    text-decoration: none;
+    transition:
+      color 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+      background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .source {
+    width: 2.75rem;
+  }
+  .version {
+    padding: 0 0.9rem;
+    font-family: var(--sl-font-system-mono);
+    font-size: 0.8125rem;
+    font-variant-numeric: tabular-nums;
+  }
+  a:hover {
+    background: var(--sl-color-gray-6);
+    color: var(--sl-color-white);
+  }
+  a:focus-visible {
+    outline: 2px solid var(--sl-color-accent);
+    outline-offset: -2px;
+  }
+</style>

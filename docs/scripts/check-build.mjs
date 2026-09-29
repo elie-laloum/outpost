@@ -26,9 +26,10 @@ for (const file of files) {
       `Incorrect language: ${file}`,
     );
     if (!redirect)
-      assert.ok(
-        $("starlight-lang-select select option").length >= 2,
-        `Missing language selector: ${file}`,
+      assert.equal(
+        $(".docs-header a.language").attr("hreflang"),
+        file.startsWith("fr/") ? "en" : "fr",
+        `Missing language switch: ${file}`,
       );
   }
   pages.set(file, {
