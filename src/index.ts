@@ -275,6 +275,7 @@ export type {
   AgentAdapter,
   AgentConfiguration,
   ConfigurationFile,
+  HostConfiguration,
   AgentEvent,
   AgentInput,
   AgentLiveInput,

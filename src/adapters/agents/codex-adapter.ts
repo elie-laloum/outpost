@@ -1,3 +1,4 @@
+import { codexMcpLogins } from "./codex-mcp.ts";
 import {
   mcpConfigurationPlanner,
   supportMcpServers,
@@ -43,7 +44,12 @@ function bindCodex(settings: Bound<CodexSettings>): AgentAdapter {
     settings.authentication,
     settings.model,
   );
-  const configuration = mcpConfigurationPlanner("Codex", settings.mcpServers);
+  const configuration = mcpConfigurationPlanner(
+    "Codex",
+    settings.mcpServers,
+    undefined,
+    codexMcpLogins,
+  );
   return Object.freeze({
     name: "codex",
     ...(credentials ? { credentials } : {}),

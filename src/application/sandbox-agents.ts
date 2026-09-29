@@ -65,7 +65,14 @@ export function sandboxAgents(context: ProvisionedSandbox): SandboxAgents {
           observation,
           "sandbox",
           "agent.configure",
-          async () => configureAgent(adapter, variables, runtime, signal),
+          async () =>
+            configureAgent(
+              adapter,
+              variables,
+              runtime,
+              sandboxProvider.placement,
+              signal,
+            ),
         );
       authenticated.set(adapter.name, { adapter, variables: credentials });
     }

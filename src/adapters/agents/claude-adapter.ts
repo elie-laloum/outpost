@@ -1,3 +1,4 @@
+import { claudeMcpLogins } from "./claude-mcp.ts";
 import {
   mcpConfigurationPlanner,
   sharedStartupTimeout,
@@ -60,6 +61,8 @@ function bindClaude(settings: Bound<ClaudeSettings>): AgentAdapter {
   const configuration = mcpConfigurationPlanner(
     "Claude Code",
     settings.mcpServers,
+    undefined,
+    claudeMcpLogins,
   );
   return Object.freeze({
     name: "claude",

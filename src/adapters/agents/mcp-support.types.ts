@@ -3,4 +3,5 @@ export interface McpCliSupport {
   readonly includeTools: boolean;
   readonly excludeTools: boolean;
   readonly startupTimeout: "server" | "shared" | false;
+  readonly oauthLogin: boolean;
 }

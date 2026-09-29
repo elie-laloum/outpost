@@ -13,7 +13,7 @@ import type {
   ResolvedHarnessLimits,
 } from "./harness.types.ts";
 import { harnessHooks } from "./hook.ts";
-import { mcpServers } from "./mcp-server.ts";
+import { mcpLoginServers, mcpServers } from "./mcp-server.ts";
 import {
   defineHarnessInstructions,
   harnessInstructions,
@@ -94,7 +94,7 @@ export function createHarness(options: HarnessOptions): Harness {
     cache: options.cache ?? HARNESS_DEFAULTS.cache,
     ...(options.mcpServers === undefined
       ? {}
-      : { mcpServers: mcpServers(options.mcpServers) }),
+      : { mcpServers: harnessMcpServers(options.mcpServers) }),
   });
 }
 
@@ -166,4 +166,14 @@ function toolExecution(
     ),
     onError: value.onError ?? HARNESS_DEFAULTS.onError,
   });
+}
+
+function harnessMcpServers(value: unknown) {
+  const servers = mcpServers(value);
+  const logins = mcpLoginServers(servers).map(([name]) => name);
+  invariant(
+    logins.length === 0,
+    `The built-in harness cannot reuse a CLI OAuth login for MCP server ${logins.join(", ")}`,
+  );
+  return servers;
 }

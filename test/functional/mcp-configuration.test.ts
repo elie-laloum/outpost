@@ -15,7 +15,14 @@ import type {
   CliAgent,
 } from "../../src/domain/agent.types.ts";
 import type { SandboxLease } from "../../src/domain/sandbox.types.ts";
-import { createSandbox } from "../../src/index.ts";
+import {
+  createAgent,
+  createClaudeHarness,
+  createCodexHarness,
+  createKimiHarness,
+  createSandbox,
+} from "../../src/index.ts";
+import { kimiMcpStoreKey } from "../../src/adapters/agents/kimi-mcp.ts";
 import { executeProcess } from "../../src/infrastructure/process.ts";
 import { createLocalSandboxProvider } from "../../src/providers/local.ts";
 import { emit, repository, scripted } from "../helpers.ts";
@@ -62,6 +69,7 @@ test(
       configured(file({ linear: { command: "new" } })),
       {},
       lease(home),
+      "remote",
       signal,
     );
     assert.deepEqual(JSON.parse(await readFile(real, "utf8")), {
@@ -84,6 +92,7 @@ test(
       }),
       {},
       lease(fresh),
+      "remote",
       signal,
     );
     const created = join(fresh, ".gemini", "config", "mcp_config.json");
@@ -105,6 +114,7 @@ test("MCP configuration refuses to replace unreadable files or leave the home", 
         configured(file({ linear: { command: "x" } })),
         {},
         lease(home),
+        "remote",
         signal,
       ),
       { code: "process" },
@@ -119,12 +129,25 @@ test("MCP configuration refuses to replace unreadable files or leave the home", 
         }),
         {},
         lease(home),
+        "remote",
         signal,
       ),
       { code: "process" },
     );
-  await configureAgent(scripted(emit("done")), {}, lease(home), signal);
-  await configureAgent(configured({ files: [] }), {}, lease(home), signal);
+  await configureAgent(
+    scripted(emit("done")),
+    {},
+    lease(home),
+    "remote",
+    signal,
+  );
+  await configureAgent(
+    configured({ files: [] }),
+    {},
+    lease(home),
+    "remote",
+    signal,
+  );
 });
 
 test("sandboxes check MCP variables once per adapter before running the agent", async (t) => {
@@ -151,4 +174,120 @@ test("sandboxes check MCP variables once per adapter before running the agent", 
   for (let index = 0; index < 2; index += 1)
     await sandbox.dispatch({ agent: declared, brief: { text: "run" } });
   assert.deepEqual(checks, ["missing", "set"]);
+});
+
+test("host MCP OAuth logins are merged into the sandbox home without other entries", async (t) => {
+  const host = await repository(t);
+  const sandbox = await repository(t);
+  const saved = {
+    CLAUDE_CONFIG_DIR: process.env.CLAUDE_CONFIG_DIR,
+    CODEX_HOME: process.env.CODEX_HOME,
+    KIMI_CODE_HOME: process.env.KIMI_CODE_HOME,
+  };
+  t.after(() => {
+    for (const [name, value] of Object.entries(saved))
+      if (value === undefined) delete process.env[name];
+      else process.env[name] = value;
+  });
+  process.env.CLAUDE_CONFIG_DIR = join(host, "claude");
+  process.env.CODEX_HOME = join(host, "codex");
+  process.env.KIMI_CODE_HOME = join(host, "kimi");
+  const url = "https://mcp.linear.app/mcp";
+  const login = {
+    mcpServers: { linear: { url, oauth: "login" as const } },
+  };
+  await mkdir(join(host, "claude"), { recursive: true });
+  await writeFile(
+    join(host, "claude", ".credentials.json"),
+    JSON.stringify({
+      claudeAiOauth: { accessToken: "host-subscription" },
+      mcpOAuth: {
+        "linear|abc": {
+          serverName: "linear",
+          serverUrl: url,
+          accessToken: "a",
+        },
+        "other|def": { serverName: "other", serverUrl: url, accessToken: "b" },
+      },
+    }),
+  );
+  await mkdir(join(host, "codex"), { recursive: true });
+  await writeFile(
+    join(host, "codex", ".credentials.json"),
+    JSON.stringify({
+      "linear|123": {
+        server_name: "linear",
+        server_url: url,
+        access_token: "c",
+      },
+      "linear:456": {
+        server_name: "linear",
+        server_url: url,
+        executor_owned: true,
+      },
+    }),
+  );
+  const key = kimiMcpStoreKey("linear", url);
+  await mkdir(join(host, "kimi", "credentials", "mcp"), { recursive: true });
+  await writeFile(
+    join(host, "kimi", "credentials", "mcp", `${key}-tokens.json`),
+    JSON.stringify({ access_token: "d" }),
+  );
+  await writeFile(
+    join(host, "kimi", "credentials", "mcp", `${key}-client.json`),
+    JSON.stringify({ client_id: "e" }),
+  );
+  await mkdir(join(sandbox, ".claude"));
+  await writeFile(
+    join(sandbox, ".claude", ".credentials.json"),
+    JSON.stringify({ claudeAiOauth: { accessToken: "sandbox-subscription" } }),
+  );
+  const agents = [
+    createAgent({ harness: createClaudeHarness(login) }),
+    createAgent({ harness: createCodexHarness(login) }),
+    createAgent({ harness: createKimiHarness(login) }),
+  ];
+  for (const selected of agents)
+    await configureAgent(selected, {}, lease(sandbox), "remote", signal);
+  const read = async (...path: string[]) =>
+    JSON.parse(await readFile(join(sandbox, ...path), "utf8"));
+  assert.deepEqual(await read(".claude", ".credentials.json"), {
+    claudeAiOauth: { accessToken: "sandbox-subscription" },
+    mcpOAuth: {
+      "linear|abc": { serverName: "linear", serverUrl: url, accessToken: "a" },
+    },
+  });
+  assert.deepEqual(Object.keys(await read(".codex", ".credentials.json")), [
+    "linear|123",
+  ]);
+  assert.deepEqual(
+    await read(".kimi-code", "credentials", "mcp", `${key}-client.json`),
+    { client_id: "e" },
+  );
+  await assert.rejects(
+    readFile(
+      join(sandbox, ".kimi-code", "credentials", "mcp", `${key}-meta.json`),
+    ),
+    { code: "ENOENT" },
+  );
+  const local = await repository(t);
+  for (const selected of agents)
+    await configureAgent(selected, {}, lease(local), "host", signal);
+  await assert.rejects(readFile(join(local, ".codex", ".credentials.json")), {
+    code: "ENOENT",
+  });
+  const missing = createAgent({
+    harness: createClaudeHarness({
+      mcpServers: { docs: { url: "https://docs.example/mcp", oauth: "login" } },
+    }),
+  });
+  await assert.rejects(
+    configureAgent(missing, {}, lease(sandbox), "remote", signal),
+    { code: "configuration", message: /claude mcp login docs/ },
+  );
+  process.env.KIMI_CODE_HOME = join(host, "empty");
+  await assert.rejects(
+    configureAgent(agents[2]!, {}, lease(sandbox), "remote", signal),
+    { code: "configuration", message: /MCP OAuth login was not found/ },
+  );
 });

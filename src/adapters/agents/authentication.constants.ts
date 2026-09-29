@@ -12,3 +12,14 @@ export const credentialVariables = Object.freeze({
 } as const);
 
 export const KIMI_LOGIN_DEADLINE_MS = 120_000;
+
+export const hostCredentialSources = Object.freeze({
+  claude: {
+    path: "~/.claude/.credentials.json",
+    home: { variable: "CLAUDE_CONFIG_DIR", path: ".credentials.json" },
+  },
+  codexMcp: {
+    path: "~/.codex/.credentials.json",
+    home: { variable: "CODEX_HOME", path: ".credentials.json" },
+  },
+});

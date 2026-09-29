@@ -1,4 +1,8 @@
-import { isMcpStdioServer } from "../../domain/mcp-server.ts";
+import type { HostConfiguration } from "../../domain/agent.types.ts";
+import { isMcpStdioServer, mcpLoginServers } from "../../domain/mcp-server.ts";
+import { hostCredentialSources } from "./authentication.constants.ts";
+import { loginEntries } from "./mcp-configuration.ts";
+import { asRecord, parseCredential } from "./protocol.ts";
 import type { McpServer, McpServers } from "../../domain/mcp-server.types.ts";
 
 // JSON strings and string arrays are valid TOML values; tables use quoted keys.
@@ -12,12 +16,42 @@ function table(value: Readonly<Record<string, string>>): string {
 export function codexMcpArguments(
   servers: McpServers | undefined,
 ): readonly string[] {
-  return Object.entries(servers ?? {})
-    .flatMap(([name, server]) => {
+  return [
+    ...(mcpLoginServers(servers).length
+      ? ['mcp_oauth_credentials_store="file"']
+      : []),
+    ...Object.entries(servers ?? {}).flatMap(([name, server]) => {
       const key = `mcp_servers.${name}`;
       return [...transport(key, server), ...options(key, server)];
-    })
-    .flatMap((value) => ["-c", value]);
+    }),
+  ].flatMap((value) => ["-c", value]);
+}
+
+// Codex keys stored logins by server name and URL only, so entries keep their host keys.
+export function codexMcpLogins(
+  servers: McpServers,
+): readonly HostConfiguration[] {
+  const logins = mcpLoginServers(servers);
+  if (!logins.length) return [];
+  return [
+    {
+      source: hostCredentialSources.codexMcp,
+      path: ".codex/.credentials.json",
+      login: 'codex mcp login with mcp_oauth_credentials_store = "file"',
+      select: (content) =>
+        loginEntries(
+          "Codex",
+          asRecord(parseCredential(content, "Codex")),
+          logins,
+          (entry, name, url) =>
+            entry.server_name === name &&
+            entry.server_url === url &&
+            entry.executor_owned !== true,
+          (name) =>
+            `codex mcp login ${name} with mcp_oauth_credentials_store = "file"`,
+        ),
+    },
+  ];
 }
 
 function transport(key: string, server: McpServer): readonly string[] {

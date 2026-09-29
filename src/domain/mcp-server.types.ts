@@ -16,6 +16,7 @@ export interface McpHttpServer {
   readonly url: string;
   readonly headers?: Readonly<Record<string, string>>;
   readonly bearerTokenVariable?: string;
+  readonly oauth?: "login";
   readonly tools?: McpToolFilter;
   readonly startupTimeoutMs?: number;
 }

@@ -1,11 +1,16 @@
 import type {
   AgentConfiguration,
   ConfigurationFile,
+  HostConfiguration,
 } from "../../domain/agent.types.ts";
 import type { Variables } from "../../domain/command.types.ts";
 import { invariant } from "../../domain/errors.ts";
 import { mcpServerVariables } from "../../domain/mcp-server.ts";
-import type { McpServers } from "../../domain/mcp-server.types.ts";
+import type {
+  McpHttpServer,
+  McpServers,
+} from "../../domain/mcp-server.types.ts";
+import { asRecord } from "./protocol.ts";
 import type { McpCliSupport } from "./mcp-support.types.ts";
 
 export function supportMcpServers(
@@ -20,6 +25,10 @@ export function supportMcpServers(
     invariant(
       server.tools?.exclude === undefined || support.excludeTools,
       `${support.agent} cannot exclude tools of MCP server ${name}`,
+    );
+    invariant(
+      support.oauthLogin || !("oauth" in server),
+      `${support.agent} cannot reuse a host OAuth login for MCP server ${name}; use bearerTokenVariable`,
     );
     invariant(
       server.startupTimeoutMs === undefined || support.startupTimeout,
@@ -49,17 +58,19 @@ export function mcpConfigurationPlanner(
   agent: string,
   servers: McpServers | undefined,
   file?: (servers: McpServers) => ConfigurationFile,
+  logins?: (servers: McpServers) => readonly HostConfiguration[],
 ): ((variables: Variables) => AgentConfiguration) | undefined {
   if (!servers || Object.keys(servers).length === 0) return undefined;
   const required = mcpServerVariables(servers);
   const files = Object.freeze(file ? [file(servers)] : []);
+  const host = Object.freeze(logins?.(servers) ?? []);
   return (variables) => {
     for (const name of required)
       invariant(
         variables[name],
         `Missing ${name} for ${agent} MCP servers. Declare it in the harness variables or .outpost/.env.`,
       );
-    return { files };
+    return host.length ? { files, host } : { files };
   };
 }
 
@@ -85,6 +96,31 @@ export function excludedTools(
   return Object.entries(servers ?? {}).flatMap(([name, server]) =>
     (server.tools?.exclude ?? []).map((tool) => [name, tool] as const),
   );
+}
+
+export function loginEntries(
+  agent: string,
+  stored: Readonly<Record<string, unknown>>,
+  logins: readonly (readonly [name: string, server: McpHttpServer])[],
+  matches: (
+    entry: Record<string, unknown>,
+    name: string,
+    url: string,
+  ) => boolean,
+  login: (name: string) => string,
+): Readonly<Record<string, unknown>> {
+  const selected: Record<string, unknown> = {};
+  for (const [name, server] of logins) {
+    const found = Object.entries(stored).filter(([, entry]) =>
+      matches(asRecord(entry), name, server.url),
+    );
+    invariant(
+      found.length > 0,
+      `No ${agent} MCP OAuth login for server ${name} at ${server.url}. Run ${login(name)} on the host with the same server name and URL.`,
+    );
+    Object.assign(selected, Object.fromEntries(found));
+  }
+  return selected;
 }
 
 export function mapServers(

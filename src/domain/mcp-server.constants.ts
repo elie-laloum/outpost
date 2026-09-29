@@ -17,6 +17,7 @@ export const MCP_HTTP_FIELDS: ReadonlySet<string> = new Set([
   "url",
   "headers",
   "bearerTokenVariable",
+  "oauth",
   "tools",
   "startupTimeoutMs",
 ]);

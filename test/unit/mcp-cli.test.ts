@@ -10,6 +10,7 @@ import {
   createKimiHarness,
 } from "../../src/index.ts";
 import type { McpServers } from "../../src/index.ts";
+import { kimiMcpStoreKey } from "../../src/adapters/agents/kimi-mcp.ts";
 
 const servers: McpServers = {
   linear: {
@@ -381,6 +382,63 @@ test("startup timeouts use each CLI's setting and unsupported ones are refused",
       {
         code: "configuration",
         message: /has no MCP startup timeout/,
+      },
+    );
+});
+
+test("OAuth logins are copied from the host for Claude, Codex and Kimi only", () => {
+  const login: McpServers = {
+    linear: { url: "https://mcp.linear.app/mcp", oauth: "login" },
+  };
+  const codex = createAgent({
+    harness: createCodexHarness({ mcpServers: login }),
+  });
+  assert.deepEqual(codex.request({ text: "go" }).arguments!.slice(0, 2), [
+    "-c",
+    'mcp_oauth_credentials_store="file"',
+  ]);
+  assert.deepEqual(
+    codex.configuration!({}).host?.map(({ path, section }) => [path, section]),
+    [[".codex/.credentials.json", undefined]],
+  );
+  const claude = createAgent({
+    harness: createClaudeHarness({ mcpServers: login }),
+  }).configuration!({});
+  assert.deepEqual(
+    claude.host?.map(({ path, section }) => [path, section]),
+    [[".claude/.credentials.json", "mcpOAuth"]],
+  );
+  const kimi = createAgent({
+    harness: createKimiHarness({ mcpServers: login }),
+  }).configuration!({});
+  assert.equal(
+    (kimi.files[0]!.entries as Record<string, Record<string, unknown>>).linear
+      ?.auth,
+    "oauth",
+  );
+  const key = kimiMcpStoreKey("linear", "https://mcp.linear.app/mcp#x");
+  assert.match(key, /^linear-[0-9a-f]{24}$/);
+  assert.equal(key, kimiMcpStoreKey("linear", "https://mcp.linear.app/mcp"));
+  assert.deepEqual(
+    kimi.host?.map(({ path, optional }) => [path, optional ?? false]),
+    [
+      [`.kimi-code/credentials/mcp/${key}-tokens.json`, false],
+      [`.kimi-code/credentials/mcp/${key}-client.json`, true],
+      [`.kimi-code/credentials/mcp/${key}-discovery.json`, true],
+      [`.kimi-code/credentials/mcp/${key}-meta.json`, true],
+    ],
+  );
+  assert.equal(
+    createAgent({ harness: createCodexHarness({ mcpServers: servers }) })
+      .configuration!(variables).host,
+    undefined,
+  );
+  for (const harness of [createCopilotHarness, createAntigravityHarness])
+    assert.throws(
+      () => createAgent({ harness: harness({ mcpServers: login }) }),
+      {
+        code: "configuration",
+        message: /cannot reuse a host OAuth login for MCP server linear/,
       },
     );
 });

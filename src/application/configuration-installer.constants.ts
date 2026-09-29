@@ -20,9 +20,10 @@ for (const file of input.files) {
   } catch (error) {
     if (error.code !== "ENOENT") throw new Error("Cannot merge " + file.path + ": " + error.message);
   }
-  if (!isObject(current) || (current[file.section] !== undefined && !isObject(current[file.section])))
-    throw new Error("Cannot merge " + file.path + ": expected a JSON object with an object " + file.section);
-  current[file.section] = { ...current[file.section], ...file.entries };
+  if (!isObject(current) || (file.section !== undefined && current[file.section] !== undefined && !isObject(current[file.section])))
+    throw new Error("Cannot merge " + file.path + ": expected a JSON object" + (file.section === undefined ? "" : " with an object " + file.section));
+  if (file.section === undefined) Object.assign(current, file.entries);
+  else current[file.section] = { ...current[file.section], ...file.entries };
   const temporary = path.join(path.dirname(target), ".outpost-" + randomUUID());
   try {
     fs.writeFileSync(temporary, JSON.stringify(current, null, 2) + "\\n", { mode, flag: "wx" });

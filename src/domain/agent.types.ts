@@ -303,12 +303,22 @@ export interface GeneratedCredential {
 
 export interface ConfigurationFile {
   readonly path: string;
-  readonly section: string;
+  readonly section?: string;
   readonly entries: Readonly<Record<string, unknown>>;
+}
+
+export interface HostConfiguration {
+  readonly source: HostCredentialPath;
+  readonly path: string;
+  readonly section?: string;
+  readonly optional?: boolean;
+  readonly login: string;
+  select(content: string): Readonly<Record<string, unknown>>;
 }
 
 export interface AgentConfiguration {
   readonly files: readonly ConfigurationFile[];
+  readonly host?: readonly HostConfiguration[];
 }
 
 export interface CredentialPlan {

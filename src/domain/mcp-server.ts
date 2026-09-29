@@ -46,6 +46,16 @@ export function mcpServers(value: unknown): McpServers {
   return Object.freeze(Object.fromEntries(servers));
 }
 
+export function mcpLoginServers(
+  servers: McpServers | undefined,
+): readonly (readonly [name: string, server: McpHttpServer])[] {
+  return Object.entries(servers ?? {}).flatMap(([name, server]) =>
+    !isMcpStdioServer(server) && server.oauth === "login"
+      ? [[name, server] as const]
+      : [],
+  );
+}
+
 export function isMcpStdioServer(server: McpServer): server is McpStdioServer {
   return "command" in server;
 }
@@ -133,9 +143,23 @@ function httpServer(name: string, server: object): McpHttpServer {
       `MCP server ${name} sets both an Authorization header and bearerTokenVariable`,
     );
   }
+  if (value.oauth !== undefined) {
+    invariant(
+      value.oauth === "login",
+      `MCP server ${name} oauth must be "login"`,
+    );
+    invariant(
+      value.bearerTokenVariable === undefined &&
+        Object.keys(headers).every(
+          (key) => key.toLowerCase() !== "authorization",
+        ),
+      `MCP server ${name} uses OAuth; remove bearerTokenVariable and the Authorization header`,
+    );
+  }
   return Object.freeze({
     url: value.url,
     ...(value.headers ? { headers } : {}),
+    ...(value.oauth ? { oauth: value.oauth } : {}),
     ...(value.bearerTokenVariable
       ? { bearerTokenVariable: value.bearerTokenVariable }
       : {}),

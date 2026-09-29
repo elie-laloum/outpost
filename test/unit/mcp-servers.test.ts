@@ -142,3 +142,25 @@ test("MCP startup timeouts are bounded positive integers", () => {
       { code: "configuration", message: /startupTimeoutMs/ },
     );
 });
+
+test("OAuth logins exclude static bearer credentials", () => {
+  assert.deepEqual(
+    mcpServers({ a: { url: "https://example.com/mcp", oauth: "login" } }).a,
+    { url: "https://example.com/mcp", oauth: "login" },
+  );
+  for (const server of [
+    { url: "https://example.com/mcp", oauth: "device" },
+    {
+      url: "https://example.com/mcp",
+      oauth: "login",
+      bearerTokenVariable: "T",
+    },
+    {
+      url: "https://example.com/mcp",
+      oauth: "login",
+      headers: { Authorization: "x" },
+    },
+    { command: "x", oauth: "login" },
+  ])
+    assert.throws(() => mcpServers({ a: server }), { code: "configuration" });
+});

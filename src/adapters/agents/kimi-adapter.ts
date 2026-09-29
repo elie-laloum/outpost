@@ -3,7 +3,7 @@ import {
   supportMcpServers,
 } from "./mcp-configuration.ts";
 import { mcpSupport } from "./mcp-support.constants.ts";
-import { kimiMcpFile } from "./kimi-mcp.ts";
+import { kimiMcpFile, kimiMcpLogins } from "./kimi-mcp.ts";
 import { textMatcher } from "./text-matcher.ts";
 import {
   conversationSettings,
@@ -48,6 +48,7 @@ function bindKimi(settings: Bound<KimiSettings>): AgentAdapter {
     "Kimi Code",
     settings.mcpServers,
     kimiMcpFile,
+    kimiMcpLogins,
   );
   return Object.freeze({
     name: "kimi",

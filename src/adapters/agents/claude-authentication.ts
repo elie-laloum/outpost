@@ -1,5 +1,8 @@
 import { invariant } from "../../domain/errors.ts";
-import { credentialVariables } from "./authentication.constants.ts";
+import {
+  credentialVariables,
+  hostCredentialSources,
+} from "./authentication.constants.ts";
 import { excluding, hostFile, variableCredential } from "./authentication.ts";
 import type {
   CredentialRecipe,
@@ -22,10 +25,7 @@ function subscription(content: string): string {
 }
 
 const file = hostFile({
-  source: {
-    path: "~/.claude/.credentials.json",
-    home: { variable: "CLAUDE_CONFIG_DIR", path: ".credentials.json" },
-  },
+  source: hostCredentialSources.claude,
   destination: { file: ".claude/.credentials.json" },
   login: "claude and /login",
   alternative: `{ account: { variable: "${tokenVariable}" } } with a token from claude setup-token`,

@@ -137,6 +137,16 @@ test("the built-in harness validates and keeps declared MCP servers", () => {
   assert.equal(createHarness({ modelProvider }).mcpServers, undefined);
   assert.throws(
     () =>
+      createHarness({
+        modelProvider,
+        mcpServers: {
+          docs: { url: "https://example.com/mcp", oauth: "login" },
+        },
+      }),
+    { code: "configuration", message: /cannot reuse a CLI OAuth login/ },
+  );
+  assert.throws(
+    () =>
       createHarness({ modelProvider, mcpServers: { "a b": { command: "x" } } }),
     { code: "configuration" },
   );
