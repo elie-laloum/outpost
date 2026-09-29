@@ -20,7 +20,7 @@ const review = defineTask({
   perform: () => {
     if (++calls === 1)
       throw new OutpostError("quota", "You've hit your session limit", {
-        resetAt: new Date(Date.now() + 50).toISOString(),
+        resetAt: new Date(Date.now() + 1_000).toISOString(),
       });
     return "reviewed";
   },
@@ -41,7 +41,7 @@ console.log(result.value(review));
 
 <!-- check:run -->
 
-Here the simulated limit resets after 50 ms, within `maxWaitMs`, so the workflow waits and then runs the task again. In real use, agent and model tasks raise quota errors themselves.
+Here the simulated limit resets after one second, within `maxWaitMs`, so the workflow waits and then runs the task again. In real use, agent and model tasks raise quota errors themselves.
 
 ## What counts as a quota
 

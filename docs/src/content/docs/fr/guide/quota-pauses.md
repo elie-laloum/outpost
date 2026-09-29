@@ -20,7 +20,7 @@ const review = defineTask({
   perform: () => {
     if (++calls === 1)
       throw new OutpostError("quota", "You've hit your session limit", {
-        resetAt: new Date(Date.now() + 50).toISOString(),
+        resetAt: new Date(Date.now() + 1_000).toISOString(),
       });
     return "reviewed";
   },
@@ -41,7 +41,7 @@ console.log(result.value(review));
 
 <!-- check:run -->
 
-Ici, la limite simulée se réinitialise après 50 ms, dans la fenêtre `maxWaitMs` : le workflow attend puis relance la tâche. En usage réel, ce sont les tâches d’agent et de modèle qui lèvent elles-mêmes les erreurs de quota.
+Ici, la limite simulée se réinitialise après une seconde, dans la fenêtre `maxWaitMs` : le workflow attend puis relance la tâche. En usage réel, ce sont les tâches d’agent et de modèle qui lèvent elles-mêmes les erreurs de quota.
 
 ## Ce qui compte comme quota
 
