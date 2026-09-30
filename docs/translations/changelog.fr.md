@@ -1,5 +1,9 @@
 # Historique des versions
 
+## 9.0.2
+
+- Refonte de la page d’accueil de la documentation autour de « Le code orchestre. Les agents réfléchissent. » : une comparaison animée d’un pipeline orchestré par un LLM et d’un pipeline orchestré par le code, les difficultés des pipelines pilotés par un LLM face à ce que fait Outpost, un tableau montrant que seul le travail de l’agent varie d’une exécution à l’autre du même workflow, à côté du vrai contrôle qui le vérifie, et une liste compacte des agents et des sandboxes. Les deux figures se mettent en pause ou se rejouent, restent fixes quand les animations sont réduites et sont décrites pour les lecteurs d’écran. Les contrats publics de la bibliothèque sont inchangés.
+
 ## 9.0.1
 
 - Réécriture du Guide en anglais et en français par tâche du lecteur : douze chapitres dans l’ordre de lecture, six recettes complètes de cas d’usage, et des pages dessinées avec des cellules de fonctionnalités, des parcours de lecture, des flux et des arborescences de fichiers. Les URL du Guide déplacées redirigent vers leurs nouvelles pages.

@@ -1,5 +1,9 @@
 # Changelog
 
+## 9.0.2
+
+- Rebuild the documentation home page around “Code orchestrates. Agents think.”: an animated comparison of a pipeline orchestrated by an LLM and one orchestrated by code, the pains of LLM-driven pipelines paired with what Outpost does instead, a table showing that only the agent’s work varies between runs of the same workflow beside the real verification check that gates it, and a compact list of agents and sandboxes. Both figures can be paused or replayed, show still states when motion is reduced, and are described for screen readers. Public library contracts are unchanged.
+
 ## 9.0.1
 
 - Rewrite the English and French Guide by reader task: twelve chapters in reading order, six complete use-case recipes, and pages drawn with feature cells, reading paths, flows and file trees. Moved Guide URLs redirect to their new pages.

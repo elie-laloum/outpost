@@ -27,6 +27,8 @@ Available in 9.0.0: the [Firecracker provider](../../guide/firecracker/) is no l
 
 Available in 9.0.1: the [Guide](../../guide/introduction/) is organized by reader task, and the [Reference](../../reference/) descriptions were checked against the source, with decision tables in each family overview. This documentation release does not change the validation status of experimental features.
 
+Available in 9.0.2: the documentation home page presents Outpost through the split between code orchestration and agent judgment. This documentation release does not change the validation status of experimental features.
+
 Available in 8.0.0: [record and replay](../../guide/record-replay/) replays a dispatch journal without calling a model, rebuilding its commits inside the sandbox and reporting divergences. Deterministic tests cover CLI and harness recordings, failures, repairs, passes and a real Docker sandbox. Replaying a whole workflow, uncommitted changes and a CLI command remain planned.
 
 Available in 8.0.0: the [task result cache](../../guide/task-cache/) reuses a task's JSON result when the workflow, task, version and key match, with `repositoryFingerprint()` for repository-state keys, expiry, refresh and a `task-cache` retention scope. Deterministic tests cover hits, invalid and concurrent entries, checkpoints and retention. Single-flight coordination between concurrent executions and authenticated entries remain future work.
