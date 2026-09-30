@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-30T12:00:00+00:00",
+  "generatedAt": "2026-09-30T21:00:00+00:00",
   "title": "Design System: Outpost",
   "extensions": {
     "colorMeta": {
@@ -196,7 +196,7 @@
       },
       "title": {
         "displayName": "Title",
-        "purpose": "Lane titles, pain names and step titles."
+        "purpose": "Lane titles and pain names; demo step and determinism column names step down."
       },
       "body": {
         "displayName": "Body",
@@ -204,11 +204,11 @@
       },
       "label": {
         "displayName": "Label",
-        "purpose": "Captions, group labels, footer headings, facts line, demo title, beats and meter labels."
+        "purpose": "Captions, group labels, footer headings, facts line, demo title, beats, determinism controls and meter labels."
       },
       "code": {
         "displayName": "Code",
-        "purpose": "Code windows, commands and API names only."
+        "purpose": "The install command, the determinism code excerpt and API names only; in the determinism table only the branch name, diff counts and npm test."
       }
     },
     "shadows": [],
@@ -257,6 +257,21 @@
         "name": "demo-cut",
         "value": "0.6s",
         "purpose": "Interrupted cut drawing down both lanes."
+      },
+      {
+        "name": "determinism-turn",
+        "value": "1000ms",
+        "purpose": "A model's turn in the determinism table's Agent cell (ember underline grows linearly)."
+      },
+      {
+        "name": "determinism-replayed-turn",
+        "value": "300ms",
+        "purpose": "A replayed turn in the Agent cell (tonal underline, no ember)."
+      },
+      {
+        "name": "determinism-row",
+        "value": "0.25s",
+        "purpose": "A new run's row fading in and the oldest fading out."
       }
     ],
     "breakpoints": [
@@ -304,14 +319,6 @@
       "css": ".ds-install{display:flex;max-width:26rem;border:1px solid #364153;background:#0f1520}.ds-install code{flex:1;padding:.8rem 1rem;color:#fff;font:400 .875rem ui-monospace,SFMono-Regular,Menlo,monospace;white-space:nowrap}.ds-install code span{color:#99a1af}.ds-install button{width:2.9rem;border:0;border-left:1px solid #364153;background:none;color:#99a1af;cursor:pointer}.ds-install button:hover{color:#fff}.ds-install button:focus-visible{outline:2px solid #fb923c;outline-offset:-2px}.ds-install svg{width:1rem;height:1rem;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}"
     },
     {
-      "name": "Code Window",
-      "kind": "custom",
-      "refersTo": "code-tab-selected",
-      "description": "Tabbed code surface with gutter, ink tab underline and an ember active range.",
-      "html": "<div class=\"ds-code\"><div class=\"ds-code-bar\"><button class=\"ds-tab\" aria-selected=\"true\">run.ts</button><button class=\"ds-tab\" aria-selected=\"false\">brief.md</button></div><pre><span class=\"ds-line\">const agent = createAgent({</span><span class=\"ds-line ds-active\">  harness: createCodexHarness(),</span><span class=\"ds-line\">});</span></pre></div>",
-      "css": ".ds-code{border:1px solid #364153;background:#0f1520;counter-reset:line}.ds-code-bar{display:flex;min-height:2.75rem;border-bottom:1px solid #364153}.ds-tab{padding:0 1rem;border:0;border-right:1px solid #364153;background:none;color:#99a1af;font:400 .8125rem ui-monospace,SFMono-Regular,Menlo,monospace;cursor:pointer}.ds-tab:hover{color:#fff}.ds-tab[aria-selected=true]{color:#fff;background:#18202d;box-shadow:inset 0 -2px 0 #fff}.ds-tab:focus-visible{outline:2px solid #fb923c;outline-offset:-2px}.ds-code pre{margin:0;padding:1.1rem 0;color:#adbac7;font:400 .8125rem/1.7 ui-monospace,SFMono-Regular,Menlo,monospace}.ds-line{display:block}.ds-line::before{counter-increment:line;content:counter(line);display:inline-block;width:2.25rem;margin-right:1.1rem;color:#99a1af;text-align:right}.ds-active{background:rgba(251,146,60,.1);box-shadow:inset 2px 0 0 #fb923c}.ds-active::before{color:#fff}"
-    },
-    {
       "name": "Orchestration Demo Lane",
       "kind": "custom",
       "refersTo": "demo-step",
@@ -328,6 +335,22 @@
       "css": ".ds-beats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid #364153;background:#0f1520}.ds-beats button{position:relative;min-height:2.75rem;padding:0 .5rem;border:0;border-right:1px solid #364153;background:none;color:#99a1af;font:500 .8125rem Inter,system-ui,sans-serif;cursor:pointer;transition:background-color .2s cubic-bezier(.16,1,.3,1),color .2s cubic-bezier(.16,1,.3,1)}.ds-beats button:last-child{border-right:0}.ds-beats button:hover{color:#fff}.ds-beats button[aria-pressed=true]{background:#18202d;color:#fff}.ds-beats button[aria-pressed=true]::after{content:\"\";position:absolute;inset:auto 0 0;height:2px;background:#fff}.ds-beats button:focus-visible{outline:2px solid #fb923c;outline-offset:-2px}"
     },
     {
+      "name": "Determinism Table",
+      "kind": "custom",
+      "refersTo": "determinism-cell",
+      "description": "Runs of the same workflow on a real table: owner-tagged columns, a live Agent cell in ember while a model works (tonal when replayed), a tfoot key, and Run again / Replay the recording controls with a square switch.",
+      "html": "<div class=\"ds-dt\"><table><thead><tr><td></td><th scope=\"col\"><span class=\"ds-dt-col\">Branch</span><span class=\"ds-dt-tag\">code</span></th><th scope=\"col\"><span class=\"ds-dt-col\">Agent</span><span class=\"ds-dt-tag ds-dt-agent\">agent</span></th><th scope=\"col\"><span class=\"ds-dt-col\">Verify</span><span class=\"ds-dt-tag\">code</span></th></tr></thead><tbody><tr><th scope=\"row\">Run <b>3</b></th><td><code>fix-parser</code></td><td>+19 −6 <span class=\"ds-dt-muted\">2 files</span><span class=\"ds-dt-note\">2nd try</span></td><td><code>npm test</code></td></tr><tr><th scope=\"row\">Run <b>4</b></th><td><code>fix-parser</code></td><td class=\"ds-dt-live\">+57 −21 <span class=\"ds-dt-muted\">4 files</span></td><td></td></tr></tbody><tfoot><tr><td></td><td>same each run</td><td class=\"ds-dt-key\">varies each run</td><td>same each run</td></tr></tfoot></table><div class=\"ds-dt-controls\"><button type=\"button\" aria-disabled=\"true\">Run again</button><button type=\"button\" aria-pressed=\"true\"><span class=\"ds-dt-switch\"></span>Replay the recording</button></div></div>",
+      "css": ".ds-dt{border:1px solid #364153;background:#0f1520;font:400 .75rem/1.4 Inter,system-ui,sans-serif}.ds-dt table{width:calc(100% - 2rem);margin:1rem;border-collapse:collapse;table-layout:fixed}.ds-dt th,.ds-dt td{height:3.25rem;padding:.5rem .6rem;border:1px solid #364153;background:#030712;color:#fff;text-align:start;vertical-align:middle}.ds-dt thead td,.ds-dt tfoot td{background:none}.ds-dt thead td{border-top-color:transparent;border-left-color:transparent}.ds-dt thead th{height:auto}.ds-dt thead th>span{display:block}.ds-dt-col{margin-bottom:.3rem;font-size:.875rem;font-weight:500}.ds-dt-tag{width:fit-content;padding:.05rem .35rem;border:1px solid #364153;color:#99a1af;font-size:.6875rem}.ds-dt-agent{border-color:#fff;background:#fff;color:#030712}.ds-dt tbody th{color:#99a1af;font-weight:500}.ds-dt tbody th b{color:#fff;font-weight:500}.ds-dt code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.75rem}.ds-dt-muted{color:#d1d5dc}.ds-dt-note{display:block;margin-top:.15rem;color:#99a1af}.ds-dt-live{position:relative;background:color-mix(in srgb,#fb923c 12%,#030712)!important;box-shadow:inset 0 -2px 0 #fb923c}.ds-dt tfoot td{height:auto;border-inline-color:transparent;border-bottom:0;color:#99a1af}.ds-dt tfoot .ds-dt-key{color:#fff;font-weight:500}.ds-dt-controls{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid #364153}.ds-dt-controls button{display:inline-flex;align-items:center;justify-content:center;gap:.45rem;min-height:2.75rem;border:0;background:none;color:#fff;font:500 .8125rem Inter,system-ui,sans-serif;cursor:pointer}.ds-dt-controls button+button{border-left:1px solid #364153}.ds-dt-controls button[aria-disabled=true]{color:#99a1af;cursor:progress}.ds-dt-controls button[aria-pressed=true]{background:#18202d;box-shadow:inset 0 -2px 0 #fff}.ds-dt-controls button:focus-visible{outline:2px solid #fb923c;outline-offset:-2px}.ds-dt-switch{position:relative;width:1.75rem;height:1rem;border:1px solid #4a5565}.ds-dt-switch::after{content:\"\";position:absolute;top:2px;left:2px;width:calc(1rem - 6px);height:calc(1rem - 6px);background:#99a1af}[aria-pressed=true]>.ds-dt-switch{border-color:#fff;background:#fff}[aria-pressed=true]>.ds-dt-switch::after{background:#030712;transform:translateX(.75rem)}"
+    },
+    {
+      "name": "Determinism Excerpt",
+      "kind": "custom",
+      "refersTo": "determinism-excerpt",
+      "description": "Hairline-framed code surface with a caption bar; the code scrolls horizontally in a focusable region with a right-edge fade while code remains hidden.",
+      "html": "<figure class=\"ds-ex\"><figcaption>The check is plain code: the tests decide, not the model.</figcaption><div class=\"ds-ex-code\" role=\"region\" tabindex=\"0\" aria-label=\"The check is plain code: the tests decide, not the model.\" data-clipped><pre>async check(context) {\n  const tests = await sandbox.command({ executable: \"npm\", arguments: [\"test\"], signal: context.signal });\n  return tests.status === 0 ? { done: true } : { done: false, feedback: tests.stdout };\n},</pre></div></figure>",
+      "css": ".ds-ex{max-width:28rem;margin:0;border:1px solid #364153;background:#0f1520}.ds-ex figcaption{padding:.65rem 1rem;border-bottom:1px solid #364153;color:#d1d5dc;font:400 .8125rem Inter,system-ui,sans-serif}.ds-ex-code{overflow-x:auto;scrollbar-width:thin;scrollbar-color:#4a5565 transparent}.ds-ex-code[data-clipped]{mask-image:linear-gradient(to right,#000 calc(100% - 2.5rem),transparent)}.ds-ex-code:focus-visible{outline:2px solid #fb923c;outline-offset:-2px}.ds-ex pre{margin:0;padding:.85rem 1rem;color:#adbac7;font:400 .75rem/1.7 ui-monospace,SFMono-Regular,Menlo,monospace}"
+    },
+    {
       "name": "Pain Table Row",
       "kind": "custom",
       "refersTo": "pain-row",
@@ -342,14 +365,6 @@
       "description": "Linked hairline name box for an agent or sandbox; experimental entries carry the ember flask.",
       "html": "<a class=\"ds-runtime\" href=\"#\">Firecracker<svg viewBox=\"0 0 24 24\" role=\"img\" aria-label=\"Experimental\"><path d=\"M9 3h6M10 3v6l-5 9a2 2 0 0 0 1.7 3h10.6a2 2 0 0 0 1.7-3l-5-9V3\"/></svg></a>",
       "css": ".ds-runtime{display:inline-flex;align-items:center;gap:.45rem;min-height:2.25rem;padding:0 .8rem;border:1px solid #364153;color:#fff;font:500 .9375rem Inter,system-ui,sans-serif;text-decoration:none;transition:background-color .2s cubic-bezier(.16,1,.3,1),border-color .2s cubic-bezier(.16,1,.3,1)}.ds-runtime:hover{border-color:#4a5565;background:#0f1520}.ds-runtime:focus-visible{outline:2px solid #fb923c;outline-offset:2px}.ds-runtime svg{width:.9rem;height:.9rem;fill:none;stroke:#fb923c;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}"
-    },
-    {
-      "name": "Step Button",
-      "kind": "custom",
-      "refersTo": "step-button",
-      "description": "Numbered workflow step; pressed state fills the number box with ink.",
-      "html": "<button class=\"ds-step\" aria-pressed=\"true\"><span class=\"ds-step-n\">1</span><span><strong>An agent in its own sandbox</strong><span>The fix task allocates its own sandbox.</span></span></button>",
-      "css": ".ds-step{display:grid;grid-template-columns:2rem 1fr;gap:.75rem;width:100%;padding:1.35rem 2.5rem;border:0;border-bottom:1px solid #364153;background:none;color:#d1d5dc;font:400 .875rem/1.55 Inter,system-ui,sans-serif;text-align:start;cursor:pointer}.ds-step strong{display:block;color:#fff;font-weight:500;font-size:1rem}.ds-step:hover,.ds-step[aria-pressed=true]{background:#0f1520}.ds-step-n{display:grid;place-items:center;width:1.75rem;height:1.75rem;border:1px solid #364153;color:#99a1af;font-variant-numeric:tabular-nums}.ds-step[aria-pressed=true] .ds-step-n{border-color:#fff;background:#fff;color:#030712}.ds-step:focus-visible{outline:2px solid #fb923c;outline-offset:-2px}"
     },
     {
       "name": "Header Navigation",
@@ -370,7 +385,7 @@
   ],
   "narrative": {
     "northStar": "The Survey Sheet",
-    "overview": "Outpost's web surfaces read like a technical drawing. The frame is drawn first: one hairline grid, measured bays, and every element placed on it. The page has no decoration to fall back on. The structure is the lines, the content is real code and plain facts, and color appears only where something is live: an active code range, a model at work, a focus ring, an experimental flag. It serves developers who read with a terminal open, so density is welcome and ornament is not.\n\nThe system is inherited from the Starlight documentation chrome with the Celestia theme: a cool grayscale in both light and dark, Inter for all prose, the platform monospace for code, and a single ember accent. The landing page on the docs home extends that chrome with no new identity. It is the same header, the same hairlines and the same grays, set out as a blueprint of bays.\n\nBoth themes are first-class. Every value below has a dark and a light counterpart, and the theme switch in the header selects between them.",
+    "overview": "Outpost's web surfaces read like a technical drawing. The frame is drawn first: one hairline grid, measured bays, and every element placed on it. The page has no decoration to fall back on. The structure is the lines, the content is real code and plain facts, and color appears only where something is live: a model at work, a focus ring, an experimental flag. It serves developers who read with a terminal open, so density is welcome and ornament is not.\n\nThe system is inherited from the Starlight documentation chrome with the Celestia theme: a cool grayscale in both light and dark, Inter for all prose, the platform monospace for code, and a single ember accent. The landing page on the docs home extends that chrome with no new identity. It is the same header, the same hairlines and the same grays, set out as a blueprint of bays.\n\nBoth themes are first-class. Every value below has a dark and a light counterpart, and the theme switch in the header selects between them.",
     "keyCharacteristics": [
       "One 12-track frame; sections split at track 5, inner cells at track 9.",
       "1px hairlines as the only structure; square corners on the landing.",
@@ -381,7 +396,7 @@
     "rules": [
       {
         "name": "The Live-Only Ember Rule",
-        "body": "Ember marks what is active or focused right now: highlighted code, a model or agent step running right now, focus, selection, experimental status. Selected tabs, pressed steps, hovers and link underlines use white or slate ink and fills, never ember.",
+        "body": "Ember marks what is active or focused right now: a model or agent step running right now, a model working on the determinism table's Agent cell, focus, selection, experimental status. A replayed turn is not a model at work and stays tonal. Pressed beats and controls, hovers and link underlines use white or slate ink and fills, never ember.",
         "section": "colors"
       },
       {
@@ -413,14 +428,14 @@
     "dos": [
       "Do place every vertical division on the shared 12-track frame (tracks 5 and 9 on the landing).",
       "Do prove each claim in the bay beside it with a working demonstration, real typechecked code or a factual table.",
-      "Do keep ember for highlighted code, a model or agent step running right now, focus, selection and experimental status only.",
+      "Do keep ember for a model or agent step running right now, a model working in the determinism table, focus, selection and experimental status only.",
       "Do give every color role a dark and a light value that meet WCAG 2.2 AA.",
       "Do use drawn SVG icons with a 1.6 stroke and round caps and joins.",
-      "Do make every code window scroll inside itself, with edge fades instead of page overflow."
+      "Do make every code surface scroll inside itself, with edge fades instead of page overflow."
     ],
     "donts": [
       "Don't add shadows, glows or glass. Depth is tonal.",
-      "Don't round the corners of landing bays, cells, buttons or code windows.",
+      "Don't round the corners of landing bays, cells, buttons or code surfaces.",
       "Don't use monospace for labels, eyebrows or decoration.",
       "Don't put kickers or eyebrows above headings.",
       "Don't reduce inactive code to low-contrast gray to emphasize a range. Tint the active range instead.",

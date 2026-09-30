@@ -63,33 +63,34 @@ landing:
           - pain: "Resuming means re-interpreting"
             detail: "After a crash or a quota, the model rebuilds its state from a transcript."
             answer: "Finished tasks come back from the checkpoint as JSON. Rerunning an interrupted one takes your explicit consent."
-  workflow:
-    title: "Only the fix goes to the agent"
-    text: "A plain TypeScript workflow. One task runs an agent in its sandbox; code reads its typed result, waits for a human and resumes from a checkpoint."
-    stepsLabel: "Workflow steps"
-    copy: "Copy this file"
-    steps:
-      - {
-          title: "One agent task",
-          text: "The agent gets a brief, its own sandbox and a named branch. It fixes the tests; it does not decide what runs next.",
-          lines: "11-20",
-        }
-      - {
-          title: "Code reads a typed result",
-          text: "fix and summary are plain functions. They read the branch and the commit count as values, not as text to interpret.",
-          lines: "21-33",
-        }
-      - {
-          title: "A human decides",
-          text: "The approval gate pauses the run until an allowed actor approves or rejects the merge.",
-          lines: "34-39",
-        }
-      - {
-          title: "Resume without rereading",
-          text: "Finished tasks persist as JSON in the checkpoint. Starting again restores them instead of running them again.",
-          lines: "41-53",
-        }
-    link: { label: "Durable runs", href: "guide/durable-runs/" }
+  determinism:
+    title: "Probabilistic in one place. Deterministic everywhere else."
+    text: "Run the same workflow again: the order, the branch, the checks and the integration are identical every time. Only the agent’s work varies, and nothing uses it until a check accepts it. Outpost does not make the model deterministic; it keeps everything else out of its hands."
+    link: { label: "Verification loops", href: "guide/verification-loops/" }
+    replayLink:
+      { label: "Replay without a model", href: "guide/record-replay/" }
+    check: "The check is plain code: the tests decide, not the model."
+    demo:
+      title: "The same workflow, run again"
+      run: "Run"
+      rerun: "Run again"
+      replay: "Replay the recording"
+      calls: "Replay · 0 model calls"
+      columns: ["Branch", "Agent", "Verify", "Integrate"]
+      owners: { code: "code", agent: "agent" }
+      same: "same each run"
+      varies: "varies each run"
+      replayed: "same, replayed"
+      captions:
+        live: "Only the agent column changes. Nothing is integrated until the tests pass."
+        replay: "Replayed from a recording: the agent’s answer comes back identical, without calling a model."
+      file: "file"
+      files: "files"
+      retry: "2nd try"
+      replayedNote: "replayed"
+      failed: "failed"
+      merged: "merged"
+      announce: "Run {run}: tests pass, branch merged."
   runtimes:
     title: "Any agent, any sandbox"
     text: "Swap either in one line; the workflow stays the same. You declare how each agent authenticates, and an isolated sandbox never falls back to your host."

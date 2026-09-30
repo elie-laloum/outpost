@@ -76,7 +76,12 @@ try {
     resolve(workspace, "en/outpost.config.mts"),
     resolve(landingDirectory, "outpost.config.mts"),
   );
-  for (const name of await readdir(landing)) {
+  // The landing may carry no snippet at all; its folder then does not exist.
+  const landingNames = await readdir(landing).catch((error) => {
+    if (error.code === "ENOENT") return [];
+    throw error;
+  });
+  for (const name of landingNames) {
     if (!name.endsWith(".ts")) continue;
     const file = resolve(landingDirectory, name.replace(/\.ts$/, ".mts"));
     await writeFile(file, await readFile(resolve(landing, name), "utf8"));

@@ -63,33 +63,34 @@ landing:
           - pain: "Reprendre, c’est réinterpréter"
             detail: "Après un crash ou un quota, le modèle reconstruit son état à partir d’une transcription."
             answer: "Les tâches terminées reviennent du checkpoint en JSON. Relancer une tâche interrompue demande votre accord explicite."
-  workflow:
-    title: "Seul le correctif va à l’agent"
-    text: "Un workflow en TypeScript simple. Une tâche exécute un agent dans sa sandbox ; le code lit son résultat typé, attend un humain et reprend depuis un checkpoint."
-    stepsLabel: "Étapes du workflow"
-    copy: "Copier ce fichier"
-    steps:
-      - {
-          title: "Une tâche d’agent",
-          text: "L’agent reçoit un brief, sa propre sandbox et une branche nommée. Il corrige les tests ; il ne décide pas de la suite.",
-          lines: "11-20",
-        }
-      - {
-          title: "Le code lit un résultat typé",
-          text: "fix et summary sont de simples fonctions. Elles lisent la branche et le nombre de commits comme des valeurs, pas comme du texte à interpréter.",
-          lines: "21-33",
-        }
-      - {
-          title: "Un humain décide",
-          text: "L’étape de validation met l’exécution en pause jusqu’à ce qu’un acteur autorisé approuve ou rejette la fusion.",
-          lines: "34-39",
-        }
-      - {
-          title: "Reprendre sans relire",
-          text: "Les tâches terminées sont conservées en JSON dans le checkpoint. Relancer les restaure au lieu de les exécuter de nouveau.",
-          lines: "41-53",
-        }
-    link: { label: "Exécutions durables", href: "guide/durable-runs/" }
+  determinism:
+    title: "Probabiliste à un seul endroit. Déterministe partout ailleurs."
+    text: "Relancez le même workflow : l’ordre, la branche, les vérifications et l’intégration sont identiques à chaque fois. Seul le travail de l’agent varie, et rien ne l’utilise avant qu’un contrôle l’ait accepté. Outpost ne rend pas le modèle déterministe : il lui retire tout le reste."
+    link:
+      { label: "Boucles de vérification", href: "guide/verification-loops/" }
+    replayLink: { label: "Rejouer sans modèle", href: "guide/record-replay/" }
+    check: "Le contrôle est du simple code : les tests décident, pas le modèle."
+    demo:
+      title: "Le même workflow, relancé"
+      run: "Exécution"
+      rerun: "Relancer"
+      replay: "Rejouer l’enregistrement"
+      calls: "Rejeu · 0 appel au modèle"
+      columns: ["Branche", "Agent", "Vérifier", "Intégrer"]
+      owners: { code: "code", agent: "agent" }
+      same: "identique à chaque fois"
+      varies: "varie à chaque fois"
+      replayed: "identique, rejoué"
+      captions:
+        live: "Seule la colonne de l’agent change. Rien n’est intégré avant que les tests passent."
+        replay: "Rejouée depuis un enregistrement : la réponse de l’agent revient identique, sans appeler de modèle."
+      file: "fichier"
+      files: "fichiers"
+      retry: "2ᵉ essai"
+      replayedNote: "rejouée"
+      failed: "échec"
+      merged: "intégrée"
+      announce: "Exécution {run} : tests réussis, branche intégrée."
   runtimes:
     title: "Tout agent, toute sandbox"
     text: "Changer l’un ou l’autre tient en une ligne ; le workflow reste identique. Vous déclarez comment chaque agent s’authentifie, et une sandbox isolée ne se replie jamais sur votre machine."

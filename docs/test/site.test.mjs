@@ -40,13 +40,15 @@ for (const [locale, title, reference] of [
   });
 }
 
-for (const [locale, heading, start, copied, beat] of [
+for (const [locale, heading, start, copied, beat, rerun, replay] of [
   [
     "",
     "Code orchestrates.",
     "Get started",
     "Copy the install command",
     "Resume",
+    "Run again",
+    "Replay the recording",
   ],
   [
     "fr/",
@@ -54,9 +56,11 @@ for (const [locale, heading, start, copied, beat] of [
     "Commencer",
     "Copier la commande d’installation",
     "Reprise",
+    "Relancer",
+    "Rejouer l’enregistrement",
   ],
 ]) {
-  test(`landing comparison, copy and workflow steps work (${locale || "en"})`, async ({
+  test(`landing demos and copy work (${locale || "en"})`, async ({
     page,
     context,
   }) => {
@@ -88,12 +92,29 @@ for (const [locale, heading, start, copied, beat] of [
     expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
       "npx @elie-laloum/outpost init",
     );
-    const steps = page.locator("[data-workflow] [data-lines]");
-    await expect(steps.first()).toHaveAttribute("aria-pressed", "true");
-    await steps.nth(2).click();
-    await expect(steps.nth(2)).toHaveAttribute("aria-pressed", "true");
-    const active = page.locator("[data-workflow] .line[data-active]");
-    await expect(active.first()).toContainText("defineApprovalTask");
+    const determinism = page.locator("outpost-determinism");
+    const runs = determinism.locator("tbody tr");
+    await expect(runs).toHaveCount(3);
+    await determinism.getByRole("button", { name: rerun }).click();
+    await expect(runs.last()).toHaveAttribute("data-run", "4");
+    await expect(runs).toHaveCount(3);
+    await expect(
+      determinism.locator('tbody tr:last-child [data-col="integrate"]'),
+    ).toHaveAttribute("data-state", "done", { timeout: 5000 });
+    await determinism.getByRole("button", { name: replay }).click();
+    await expect(
+      determinism.getByRole("button", { name: replay }),
+    ).toHaveAttribute("aria-pressed", "true");
+    const replayed = determinism.locator("tbody tr:last-child");
+    await expect(replayed).toHaveAttribute("data-run", "5");
+    await expect(replayed).toHaveAttribute("data-replayed", "");
+    await expect(replayed.locator('[data-col="integrate"]')).toHaveAttribute(
+      "data-state",
+      "done",
+      { timeout: 5000 },
+    );
+    await expect(replayed.locator(".diff")).toHaveText("+42 −17");
+    await expect(determinism.locator("tbody tr[data-replayed]")).toHaveCount(1);
     await page.getByRole("link", { name: start }).click();
     await expect(page).toHaveURL(new RegExp(`/${locale}guide/setup/$`));
   });
@@ -110,6 +131,11 @@ test("landing comparison stays still with reduced motion", async ({ page }) => {
   await expect(
     demo.locator('[data-lane="model"] .step').nth(3),
   ).toHaveAttribute("data-note", "early");
+  const determinism = page.locator("outpost-determinism");
+  await determinism.getByRole("button", { name: "Run again" }).click();
+  await expect(
+    determinism.locator('tbody tr:last-child [data-col="integrate"]'),
+  ).toHaveAttribute("data-state", "done");
 });
 
 test("language switch retains the new guide page", async ({ page }) => {

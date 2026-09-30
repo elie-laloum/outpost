@@ -1,0 +1,654 @@
+---
+import type { CollectionEntry } from "astro:content";
+import DemoFrame from "./DemoFrame.astro";
+
+type Demo = NonNullable<
+  CollectionEntry<"docs">["data"]["landing"]
+>["determinism"]["demo"];
+
+interface Props {
+  demo: Demo;
+}
+
+const { demo } = Astro.props;
+// Illustrative agent outcomes; the script cycles through the same list.
+const variants = [
+  { files: 3, added: 42, removed: 17 },
+  { files: 2, added: 31, removed: 9 },
+  { files: 2, added: 19, removed: 6, retry: true },
+];
+const owners = ["code", "agent", "code", "code"] as const;
+const diff = (added: number, removed: number) => `+${added} −${removed}`;
+const count = (files: number) =>
+  `${files} ${files === 1 ? demo.file : demo.files}`;
+---
+
+<DemoFrame tag="outpost-determinism" id="determinism" title={demo.title}>
+  <div slot="bar" class="bar">
+    <p class="title" id="determinism-title">{demo.title}</p>
+    <span class="calls">{demo.calls}</span>
+  </div>
+  <div
+    class="body"
+    data-file={demo.file}
+    data-files={demo.files}
+    data-announce={demo.announce}
+  >
+    <p class="caption">
+      <span data-caption="live">{demo.captions.live}</span>
+      <span data-caption="replay">{demo.captions.replay}</span>
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <td></td>
+          {
+            demo.columns.map((column, index) => (
+              <th scope="col">
+                <span class="column">{column}</span>
+                <span class="tag" data-owner={owners[index]}>
+                  {demo.owners[owners[index]!]}
+                </span>
+              </th>
+            ))
+          }
+        </tr>
+      </thead>
+      <tbody data-rows>
+        {
+          variants.map((variant, index) => (
+            <tr data-run={index + 1}>
+              <th scope="row">
+                <span class="run-word">{demo.run} </span>
+                <span class="run-number">{index + 1}</span>
+              </th>
+              <td data-col="branch" data-state="done">
+                <code>fix-parser</code>
+              </td>
+              <td data-col="agent" data-state="done">
+                <span class="outcome">
+                  <code class="diff">
+                    {diff(variant.added, variant.removed)}
+                  </code>
+                  <span class="files">{count(variant.files)}</span>
+                </span>
+                <span class="retry" hidden={!variant.retry}>
+                  {demo.retry}
+                </span>
+                <span class="replayed">{demo.replayedNote}</span>
+              </td>
+              <td data-col="verify" data-state="done">
+                <code>npm test</code>
+                <span class="failed">{demo.failed}</span>
+                <svg viewBox="0 0 24 24" class="check" aria-hidden="true">
+                  <path d="m5 12.5 4.5 4.5L19 7.5" />
+                </svg>
+              </td>
+              <td data-col="integrate" data-state="done">
+                <span>{demo.merged}</span>
+              </td>
+            </tr>
+          ))
+        }
+      </tbody>
+      <tfoot>
+        <tr>
+          <td></td>
+          {
+            owners.map((owner) => (
+              <td data-key={owner}>
+                {owner === "agent" ? (
+                  <>
+                    <span data-mode="live">{demo.varies}</span>
+                    <span data-mode="replay">{demo.replayed}</span>
+                  </>
+                ) : (
+                  demo.same
+                )}
+              </td>
+            ))
+          }
+        </tr>
+      </tfoot>
+    </table>
+    <p class="sr" role="status" aria-live="polite" data-status></p>
+  </div>
+  <div slot="foot" class="controls">
+    <button type="button" data-rerun>
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3" />
+        <path d="M4.5 4.5v3.2h3.2" />
+      </svg>
+      {demo.rerun}
+    </button>
+    <button type="button" data-replay aria-pressed="false">
+      <span class="switch" aria-hidden="true"></span>
+      {demo.replay}
+    </button>
+  </div>
+</DemoFrame>
+
+<script>
+  type Variant = {
+    files: number;
+    added: number;
+    removed: number;
+    retry?: boolean;
+  };
+
+  // The first attempt of a retried run touches one file and fails the tests.
+  const VARIANTS: readonly Variant[] = [
+    { files: 3, added: 42, removed: 17 },
+    { files: 2, added: 31, removed: 9 },
+    { files: 2, added: 19, removed: 6, retry: true },
+    { files: 4, added: 57, removed: 21 },
+    { files: 2, added: 25, removed: 12 },
+  ];
+  const FIRST_TRY: Variant = { files: 1, added: 12, removed: 4 };
+  const SHOWN = 3;
+
+  class OutpostDeterminism extends HTMLElement {
+    #timers: number[] = [];
+    #still = matchMedia("(prefers-reduced-motion: reduce)");
+
+    connectedCallback() {
+      this.querySelector("[data-rerun]")?.addEventListener("click", () =>
+        this.#rerun(),
+      );
+      this.querySelector("[data-replay]")?.addEventListener("click", () =>
+        this.#toggleReplay(),
+      );
+    }
+
+    get #body() {
+      return this.querySelector<HTMLElement>(".body")!;
+    }
+
+    get #replaying() {
+      return this.hasAttribute("data-replay");
+    }
+
+    #variant(run: number): Variant {
+      return this.#replaying ? VARIANTS[0]! : VARIANTS[(run - 1) % VARIANTS.length]!;
+    }
+
+    #at(ms: number, action: () => void) {
+      if (this.#still.matches) return action();
+      this.#timers.push(window.setTimeout(action, ms));
+    }
+
+    #outcome(cell: HTMLElement, variant: Variant, retry = false) {
+      const { file = "", files = "" } = this.#body.dataset;
+      cell.querySelector(".diff")!.textContent = `+${variant.added} −${variant.removed}`;
+      cell.querySelector(".files")!.textContent =
+        `${variant.files} ${variant.files === 1 ? file : files}`;
+      cell.querySelector<HTMLElement>(".retry")!.hidden = !retry;
+    }
+
+    #set(row: HTMLElement, column: string, state: string, run = 0) {
+      const cell = row.querySelector<HTMLElement>(`[data-col="${column}"]`)!;
+      cell.dataset.state = state;
+      if (run) cell.style.setProperty("--run", `${run}ms`);
+      return cell;
+    }
+
+    // Replay applies to the runs that follow; runs already shown keep their model calls.
+    #toggleReplay() {
+      const replay = !this.#replaying;
+      this.toggleAttribute("data-replay", replay);
+      this.querySelector("[data-replay]")?.setAttribute(
+        "aria-pressed",
+        String(replay),
+      );
+      if (replay) this.#rerun();
+    }
+
+    #refresh() {
+      const rows = [...this.querySelectorAll<HTMLElement>("[data-rows] tr")];
+      const shown = rows.filter((row) => !row.hasAttribute("data-leaving"));
+      this.toggleAttribute(
+        "data-all-replayed",
+        shown.every((row) => row.hasAttribute("data-replayed")),
+      );
+    }
+
+    #rerun() {
+      const button = this.querySelector<HTMLButtonElement>("[data-rerun]")!;
+      if (button.getAttribute("aria-disabled") === "true") return;
+      const rows = this.querySelector<HTMLElement>("[data-rows]")!;
+      const last = rows.lastElementChild as HTMLElement;
+      const row = last.cloneNode(true) as HTMLElement;
+      const run = Number(last.dataset.run) + 1;
+      const variant = this.#variant(run);
+      row.dataset.run = String(run);
+      row.toggleAttribute("data-replayed", this.#replaying);
+      row.querySelector(".run-number")!.textContent = String(run);
+      for (const column of ["branch", "agent", "verify", "integrate"])
+        this.#set(row, column, "");
+      row.toggleAttribute("data-entering", true);
+      rows.append(row);
+      requestAnimationFrame(() => row.toggleAttribute("data-entering", false));
+      const oldest = rows.firstElementChild as HTMLElement;
+      if (rows.children.length > SHOWN) {
+        oldest.toggleAttribute("data-leaving", true);
+        this.#at(250, () => oldest.remove());
+      }
+      this.#refresh();
+      button.setAttribute("aria-disabled", "true");
+      const end = this.#timeline(row, variant);
+      this.#at(end, () => {
+        button.setAttribute("aria-disabled", "false");
+        const status = this.querySelector<HTMLElement>("[data-status]")!;
+        status.textContent = (this.#body.dataset.announce ?? "").replace("{run}", String(run));
+      });
+    }
+
+    // Code cells settle at once; the agent cell takes a model's time unless replayed.
+    #timeline(row: HTMLElement, variant: Variant) {
+      const agent = row.querySelector<HTMLElement>('[data-col="agent"]')!;
+      const turn = row.hasAttribute("data-replayed") ? 300 : 1000;
+      this.#at(150, () => this.#set(row, "branch", "done"));
+      let time = 300;
+      if (variant.retry) {
+        this.#at(time, () => {
+          this.#outcome(agent, FIRST_TRY);
+          this.#set(row, "agent", "live", 800);
+        });
+        time += 800;
+        this.#at(time, () => {
+          this.#set(row, "agent", "done");
+          this.#set(row, "verify", "live", 300);
+        });
+        time += 300;
+        this.#at(time, () => this.#set(row, "verify", "fail"));
+        time += 150;
+      }
+      this.#at(time, () => {
+        this.#outcome(agent, variant, !!variant.retry);
+        this.#set(row, "agent", "live", turn);
+      });
+      time += turn;
+      this.#at(time, () => {
+        this.#set(row, "agent", "done");
+        this.#set(row, "verify", "live", 300);
+      });
+      time += 300;
+      this.#at(time, () => this.#set(row, "verify", "done"));
+      time += 150;
+      this.#at(time, () => this.#set(row, "integrate", "done"));
+      return time;
+    }
+  }
+  customElements.define("outpost-determinism", OutpostDeterminism);
+</script>
+
+<style>
+  .sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .bar {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0 var(--demo-pad);
+  }
+  .title {
+    margin: 0;
+    color: var(--sl-color-white);
+    font-size: 0.8125rem;
+    font-weight: 500;
+  }
+  .calls {
+    padding: 0.1rem 0.45rem;
+    border: 1px solid var(--sl-color-white);
+    color: var(--sl-color-white);
+    font-size: 0.75rem;
+    font-weight: 500;
+    opacity: 0;
+    transition: opacity 0.3s var(--landing-ease);
+  }
+  :global(.demo[data-replay]) .calls {
+    opacity: 1;
+  }
+
+  .body {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1.25rem var(--demo-pad) 1.35rem;
+  }
+  /* Both captions share one cell; the hidden one leaves the accessibility tree. */
+  .caption {
+    display: grid;
+    margin: 0;
+    color: var(--sl-color-gray-2);
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+  .caption span {
+    grid-area: 1 / 1;
+    visibility: hidden;
+    opacity: 0;
+    transition:
+      opacity 0.35s var(--landing-ease),
+      visibility 0s linear 0.35s;
+  }
+  :global(.demo:not([data-replay])) [data-caption="live"],
+  :global(.demo[data-replay]) [data-caption="replay"] {
+    visibility: visible;
+    opacity: 1;
+    transition: opacity 0.35s var(--landing-ease);
+  }
+
+  table {
+    width: 100%;
+    margin: 0;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+  th,
+  td {
+    height: 3.25rem;
+    padding: 0.5rem 0.6rem;
+    border: 1px solid var(--landing-line);
+    background: var(--sl-color-black);
+    text-align: start;
+    vertical-align: middle;
+  }
+  thead td,
+  tbody th,
+  tfoot td:first-child {
+    width: 5.5rem;
+  }
+  thead td,
+  tfoot td {
+    background: none;
+  }
+  thead td {
+    border-top-color: transparent;
+    border-left-color: transparent;
+  }
+  thead th {
+    height: auto;
+    padding-block: 0.6rem;
+  }
+  thead th > span {
+    display: block;
+  }
+  .column {
+    margin-bottom: 0.3rem;
+    color: var(--sl-color-white);
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+  .tag {
+    width: fit-content;
+    padding: 0.05rem 0.35rem;
+    border: 1px solid var(--landing-line);
+    color: var(--sl-color-gray-3);
+    font-size: 0.6875rem;
+    font-weight: 400;
+    line-height: 1.4;
+  }
+  .tag[data-owner="agent"] {
+    border-color: var(--sl-color-white);
+    background: var(--sl-color-white);
+    color: var(--sl-color-black);
+  }
+  tbody th {
+    color: var(--sl-color-gray-3);
+    font-size: 0.75rem;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  tbody th .run-number {
+    color: var(--sl-color-white);
+    font-variant-numeric: tabular-nums;
+  }
+  tbody td {
+    position: relative;
+    color: var(--sl-color-white);
+    font-size: 0.75rem;
+    transition:
+      background-color 0.3s var(--landing-ease),
+      opacity 0.25s var(--landing-ease);
+  }
+  tbody td > * {
+    opacity: 0;
+    transition: opacity 0.3s var(--landing-ease);
+  }
+  tbody td:is([data-state="done"], [data-state="fail"]) > *:not(.failed),
+  tbody td[data-state="fail"] > .failed {
+    opacity: 1;
+  }
+  tbody td .failed,
+  tbody td[data-state="fail"] .check {
+    display: none;
+  }
+  tbody td[data-state="fail"] .failed {
+    display: inline;
+    color: var(--sl-color-gray-3);
+  }
+  tbody td[data-state="fail"] code {
+    color: var(--sl-color-gray-3);
+  }
+  tbody code {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--sl-color-white);
+    font-size: 0.75rem;
+  }
+  td[data-col="verify"]:not([data-state="fail"]) {
+    white-space: nowrap;
+  }
+  .check {
+    display: inline-block;
+    width: 0.9rem;
+    height: 0.9rem;
+    margin-inline-start: 0.35rem;
+    vertical-align: -0.15rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .outcome {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 0.5rem;
+  }
+  .files {
+    color: var(--sl-color-gray-2);
+  }
+  .retry {
+    display: block;
+    margin-top: 0.15rem;
+    color: var(--sl-color-gray-3);
+  }
+  .retry[hidden] {
+    display: none;
+  }
+  .replayed {
+    display: none;
+    margin-top: 0.15rem;
+    color: var(--sl-color-gray-3);
+  }
+  tr[data-replayed] .replayed {
+    display: block;
+  }
+
+  /* A cell being worked on: ember while a model thinks, tonal for code or a replay. */
+  tbody td::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0;
+    height: 2px;
+    background: var(--sl-color-gray-3);
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+  tbody td[data-state="live"] {
+    background: var(--landing-code-bg-active);
+  }
+  tbody td[data-state="live"]::after {
+    transform: scaleX(1);
+    transition: transform var(--run, 0.3s) linear;
+  }
+  tr:not([data-replayed]) td[data-col="agent"][data-state="live"] {
+    background: color-mix(
+      in srgb,
+      var(--sl-color-accent) 12%,
+      var(--sl-color-black)
+    );
+  }
+  tr:not([data-replayed]) td[data-col="agent"]::after {
+    background: var(--sl-color-accent);
+  }
+  tr[data-entering] > *,
+  tr[data-leaving] > * {
+    opacity: 0;
+  }
+  tr > * {
+    transition: opacity 0.25s var(--landing-ease);
+  }
+
+  tfoot td {
+    text-wrap: balance;
+    height: auto;
+    padding-block: 0.55rem;
+    border-inline-color: transparent;
+    border-bottom: 0;
+    color: var(--sl-color-gray-3);
+    font-size: 0.75rem;
+  }
+  tfoot td[data-key="agent"] {
+    color: var(--sl-color-white);
+    font-weight: 500;
+  }
+  [data-mode] {
+    display: none;
+  }
+  :global(.demo:not([data-all-replayed])) [data-mode="live"],
+  :global(.demo[data-all-replayed]) [data-mode="replay"] {
+    display: inline;
+  }
+
+  .controls {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    border-top: 1px solid var(--landing-line);
+  }
+  .controls button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    min-height: 2.75rem;
+    padding: 0 0.75rem;
+    border: 0;
+    background: none;
+    color: var(--sl-color-white);
+    font: inherit;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s var(--landing-ease);
+  }
+  .controls button + button {
+    border-left: 1px solid var(--landing-line);
+  }
+  .controls button:hover {
+    background: var(--landing-code-bg-active);
+  }
+  .controls button[aria-disabled="true"] {
+    color: var(--sl-color-gray-3);
+    cursor: progress;
+  }
+  .controls button[aria-pressed="true"] {
+    background: var(--landing-code-bg-active);
+    box-shadow: inset 0 -2px 0 var(--sl-color-white);
+  }
+  /* A square switch states the replay mode without comparing the two buttons. */
+  .switch {
+    position: relative;
+    flex: none;
+    width: 1.75rem;
+    height: 1rem;
+    border: 1px solid var(--sl-color-gray-4);
+    transition:
+      background-color 0.2s var(--landing-ease),
+      border-color 0.2s var(--landing-ease);
+  }
+  .switch::after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: calc(1rem - 6px);
+    height: calc(1rem - 6px);
+    background: var(--sl-color-gray-3);
+    transition:
+      transform 0.2s var(--landing-ease),
+      background-color 0.2s var(--landing-ease);
+  }
+  [aria-pressed="true"] > .switch {
+    border-color: var(--sl-color-white);
+    background: var(--sl-color-white);
+  }
+  [aria-pressed="true"] > .switch::after {
+    background: var(--sl-color-black);
+    transform: translateX(0.75rem);
+  }
+  .controls svg {
+    width: 1rem;
+    height: 1rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .controls button:focus-visible {
+    outline: 2px solid var(--sl-color-accent);
+    outline-offset: -2px;
+  }
+
+  @media (max-width: 40rem) {
+    .body {
+      padding-inline: 1rem;
+    }
+    thead td,
+    tbody th,
+    tfoot td:first-child {
+      width: 2rem;
+    }
+    .run-word {
+      display: none;
+    }
+    th,
+    td {
+      padding: 0.45rem 0.4rem;
+    }
+    .column {
+      font-size: 0.8125rem;
+    }
+    tbody code,
+    tbody td,
+    tfoot td {
+      font-size: 0.6875rem;
+    }
+    .check {
+      display: block;
+      margin: 0.2rem 0 0;
+    }
+  }
+</style>

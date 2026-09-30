@@ -1,10 +1,11 @@
 ---
+import Code from "starlight-theme-celestia/components/Code.astro";
 import manifest from "../../../../package.json";
 import Brand from "../Brand.astro";
 import Arrow from "./Arrow.astro";
-import CodeWindow from "./CodeWindow.astro";
+import DeterminismDemo from "./DeterminismDemo.astro";
 import OrchestrationDemo from "./OrchestrationDemo.astro";
-import pipeline from "./snippets/pipeline.ts?raw";
+import fixTests from "./snippets/fix-tests.ts?raw";
 
 const route = Astro.locals.starlightRoute;
 const landing = route.entry.data.landing!;
@@ -12,14 +13,16 @@ const locale = route.locale === "fr" ? "fr/" : "";
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 const href = (path: string) =>
   /^https?:/.test(path) ? path : `${base}/${locale}${path}`;
-const pipelineLines = pipeline.split("\n");
-for (const step of landing.workflow.steps) {
-  const [first = 0] = step.lines.split("-").map(Number);
-  if (!pipelineLines[first - 1]?.startsWith("const "))
-    throw new Error(
-      `Workflow step "${step.title}" does not start at a declaration.`,
-    );
-}
+// The determinism bay shows the loop's check, cut from a typechecked file.
+const fixLines = fixTests.split("\n");
+const checkStart = fixLines.findIndex((line) => line.includes("async check("));
+const checkEnd = fixLines.indexOf("  },", checkStart);
+if (checkStart < 0 || checkEnd < 0)
+  throw new Error("The fix-tests snippet no longer has a check block.");
+const checkCode = fixLines
+  .slice(checkStart, checkEnd + 1)
+  .map((line) => line.slice(2))
+  .join("\n");
 const runtimeGroups = [
   { label: landing.runtimes.agentsLabel, items: landing.runtimes.agents },
   { label: landing.runtimes.sandboxesLabel, items: landing.runtimes.sandboxes },
@@ -109,49 +112,32 @@ const runtimeGroups = [
       </div>
     </section>
 
-    <section
-      class="bay workflow"
-      aria-labelledby="workflow-title"
-      data-workflow
-    >
-      <div class="say flush">
-        <div class="workflow-intro">
-          <h2 id="workflow-title">{landing.workflow.title}</h2>
-          <p>{landing.workflow.text}</p>
+    <section class="bay" aria-labelledby="determinism-heading">
+      <div class="say">
+        <h2 id="determinism-heading">{landing.determinism.title}</h2>
+        <p>{landing.determinism.text}</p>
+        <figure class="excerpt">
+          <figcaption>{landing.determinism.check}</figcaption>
+          <div
+            class="excerpt-code"
+            role="region"
+            aria-label={landing.determinism.check}
+            tabindex="0"
+          >
+            <Code code={checkCode} lang="ts" />
+          </div>
+        </figure>
+        <div class="links">
+          <a class="more" href={href(landing.determinism.link.href)}
+            >{landing.determinism.link.label}<Arrow /></a
+          >
+          <a class="more" href={href(landing.determinism.replayLink.href)}
+            >{landing.determinism.replayLink.label}<Arrow /></a
+          >
         </div>
-        <ol class="steps" aria-label={landing.workflow.stepsLabel}>
-          {
-            landing.workflow.steps.map((step, index) => (
-              <li>
-                <button
-                  type="button"
-                  data-lines={step.lines}
-                  aria-pressed={index === 0 ? "true" : "false"}
-                  aria-controls="workflow-files-panel-0"
-                >
-                  <span class="step-number">{index + 1}</span>
-                  <span class="step-copy">
-                    <strong>{step.title}</strong>
-                    <span>{step.text}</span>
-                  </span>
-                </button>
-              </li>
-            ))
-          }
-        </ol>
-        <a class="more" href={href(landing.workflow.link.href)}
-          >{landing.workflow.link.label}<Arrow /></a
-        >
       </div>
-      <div class="show workflow-code">
-        <CodeWindow
-          id="workflow-files"
-          label={landing.workflow.title}
-          copyLabel={landing.workflow.copy}
-          copiedLabel={landing.install.copied}
-          files={[{ name: "pipeline.ts", code: pipeline, lang: "ts" }]}
-          scroll
-        />
+      <div class="show determinism-demo">
+        <DeterminismDemo demo={landing.determinism.demo} />
       </div>
     </section>
 
@@ -234,44 +220,19 @@ const runtimeGroups = [
   }
   customElements.define("outpost-install", OutpostInstall);
 
-  const section = document.querySelector<HTMLElement>("[data-workflow]");
-  const steps = [
-    ...(section?.querySelectorAll<HTMLButtonElement>("[data-lines]") ?? []),
-  ];
-  const scroller = section?.querySelector<HTMLElement>(".workflow-code .code");
-  const lines = [...(scroller?.querySelectorAll<HTMLElement>(".line") ?? [])];
-  const highlight = (step: HTMLButtonElement | undefined, reveal = true) => {
-    const [first = 0, last = first] = (step?.dataset.lines ?? "")
-      .split("-")
-      .map(Number);
-    lines.forEach((line, index) => {
-      line.toggleAttribute(
-        "data-active",
-        index + 1 >= first && index + 1 <= last,
+  // A fade marks the edge where the excerpt still has code to scroll to.
+  for (const scroller of document.querySelectorAll<HTMLElement>(
+    ".excerpt-code",
+  )) {
+    const measure = () =>
+      scroller.toggleAttribute(
+        "data-clipped",
+        scroller.scrollLeft + scroller.clientWidth < scroller.scrollWidth - 1,
       );
-    });
-    const target = lines[first - 1];
-    if (!reveal || !scroller || !target) return;
-    const offset =
-      target.getBoundingClientRect().top - scroller.getBoundingClientRect().top;
-    scroller.scrollTo({ top: scroller.scrollTop + offset - 24 });
-  };
-  const pinned = () =>
-    steps.find((step) => step.getAttribute("aria-pressed") === "true");
-  for (const step of steps) {
-    step.addEventListener("click", () => {
-      const active = step.getAttribute("aria-pressed") === "true";
-      steps.forEach((other) =>
-        other.setAttribute("aria-pressed", String(other === step && !active)),
-      );
-      highlight(pinned());
-    });
-    step.addEventListener("pointerenter", () => highlight(step));
-    step.addEventListener("pointerleave", () => highlight(pinned()));
-    step.addEventListener("focus", () => highlight(step));
-    step.addEventListener("blur", () => highlight(pinned()));
+    scroller.addEventListener("scroll", measure, { passive: true });
+    new ResizeObserver(measure).observe(scroller);
   }
-  highlight(pinned(), false);
+
 </script>
 
 <style>
@@ -348,8 +309,7 @@ const runtimeGroups = [
   .flush {
     padding: 0;
   }
-  .say > p,
-  .workflow-intro > p {
+  .say > p {
     max-width: 34rem;
     line-height: 1.65;
     text-wrap: pretty;
@@ -378,6 +338,58 @@ const runtimeGroups = [
   }
   .more:hover {
     text-decoration-color: var(--sl-color-white);
+  }
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 1.5rem;
+    margin-top: auto;
+  }
+  .links .more {
+    margin-top: 0;
+  }
+  .excerpt {
+    margin: 0.75rem 0 0;
+    border: 1px solid var(--landing-line);
+    background: var(--landing-code-bg);
+  }
+  .excerpt figcaption {
+    padding: 0.65rem 1rem;
+    border-bottom: 1px solid var(--landing-line);
+    color: var(--sl-color-gray-2);
+    font-size: 0.8125rem;
+  }
+  .excerpt-code[data-clipped] {
+    mask-image: linear-gradient(
+      to right,
+      #000 calc(100% - 2.5rem),
+      transparent
+    );
+  }
+  .excerpt-code:focus-visible {
+    outline: 2px solid var(--sl-color-accent);
+    outline-offset: -2px;
+  }
+  .excerpt-code {
+    overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--sl-color-gray-5) transparent;
+  }
+  .excerpt-code :global([data-celestia-code-container]) {
+    overflow: visible;
+    border: 0;
+    border-radius: 0;
+  }
+  .excerpt-code :global(celestia-code-copy-button) {
+    display: none;
+  }
+  .excerpt-code :global(pre) {
+    margin: 0;
+    padding: 0.85rem 1rem;
+    overflow: visible !important;
+    background: transparent !important;
+    font-size: 0.75rem;
+    line-height: 1.7;
   }
 
   /* Hero */
@@ -613,83 +625,6 @@ const runtimeGroups = [
       no-repeat;
   }
 
-  /* Workflow */
-  .workflow-intro {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    padding: 3.5rem var(--landing-pad) 2.5rem;
-  }
-  .steps {
-    border-top: 1px solid var(--landing-line);
-  }
-  .steps li {
-    border-bottom: 1px solid var(--landing-line);
-  }
-  .steps button {
-    display: grid;
-    grid-template-columns: 2rem minmax(0, 1fr);
-    gap: 0.75rem;
-    width: 100%;
-    padding: 1.35rem var(--landing-pad);
-    border: 0;
-    background: none;
-    color: var(--sl-color-gray-2);
-    font: inherit;
-    text-align: start;
-    cursor: pointer;
-    transition: background-color 0.2s var(--landing-ease);
-  }
-  .steps button:hover,
-  .steps button[aria-pressed="true"] {
-    background: var(--landing-code-bg);
-  }
-  .steps button:focus-visible {
-    outline-offset: -2px;
-  }
-  .step-number {
-    display: grid;
-    place-items: center;
-    width: 1.75rem;
-    height: 1.75rem;
-    border: 1px solid var(--sl-color-gray-5);
-    color: var(--sl-color-gray-3);
-    font-size: 0.8125rem;
-    font-variant-numeric: tabular-nums;
-    transition:
-      border-color 0.2s var(--landing-ease),
-      background-color 0.2s var(--landing-ease),
-      color 0.2s var(--landing-ease);
-  }
-  .steps button[aria-pressed="true"] .step-number {
-    border-color: var(--sl-color-white);
-    background: var(--sl-color-white);
-    color: var(--sl-color-black);
-  }
-  .step-copy {
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-  }
-  .step-copy strong {
-    color: var(--sl-color-white);
-    font-weight: 500;
-  }
-  .step-copy span {
-    font-size: 0.875rem;
-    line-height: 1.55;
-  }
-  .workflow .say > .more {
-    padding: 1.5rem var(--landing-pad) 2.5rem;
-  }
-  .workflow-code {
-    position: relative;
-  }
-  .workflow-code :global(.window) {
-    position: absolute;
-    inset: 3.5rem var(--landing-pad);
-  }
-
   /* Footer columns start on tracks 5 and 9. */
   .landing-footer {
     display: grid;
@@ -749,17 +684,11 @@ const runtimeGroups = [
       padding-block: 0 3rem;
     }
     .hero-demo,
-    .workflow-code {
+    .determinism-demo {
       padding-block: 2rem;
-    }
-    .workflow-code :global(.window) {
-      position: static;
     }
     .show.flush {
       border-top: 1px solid var(--landing-line);
-    }
-    .workflow .say {
-      padding: 0;
     }
   }
   @media (max-width: 40rem) {
@@ -812,12 +741,9 @@ const runtimeGroups = [
     .landing-footer .footer-brand {
       padding-bottom: 0;
     }
-    .workflow-code,
-    .hero-demo {
+    .hero-demo,
+    .determinism-demo {
       padding-inline: 0;
-    }
-    .workflow-code :global(.window) {
-      border-inline: 0;
     }
   }
   @media (prefers-reduced-motion: reduce) {
