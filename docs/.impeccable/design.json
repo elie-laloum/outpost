@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-29T14:07:22+00:00",
+  "generatedAt": "2026-09-30T12:00:00+00:00",
   "title": "Design System: Outpost",
   "extensions": {
     "colorMeta": {
@@ -183,42 +183,12 @@
           "oklch(82% 0.17 41)",
           "oklch(95% 0.17 41)"
         ]
-      },
-      "diff-red": {
-        "role": "tertiary",
-        "displayName": "Removed Line",
-        "canonical": "oklch(88.5% 0.062 18.334)",
-        "tonalRamp": [
-          "oklch(15% 0.1 18)",
-          "oklch(25% 0.1 18)",
-          "oklch(35% 0.1 18)",
-          "oklch(45% 0.1 18)",
-          "oklch(58% 0.1 18)",
-          "oklch(70% 0.1 18)",
-          "oklch(82% 0.1 18)",
-          "oklch(95% 0.1 18)"
-        ]
-      },
-      "diff-green": {
-        "role": "tertiary",
-        "displayName": "Added Line",
-        "canonical": "oklch(92.5% 0.084 155.995)",
-        "tonalRamp": [
-          "oklch(15% 0.1 156)",
-          "oklch(25% 0.1 156)",
-          "oklch(35% 0.1 156)",
-          "oklch(45% 0.1 156)",
-          "oklch(58% 0.1 156)",
-          "oklch(70% 0.1 156)",
-          "oklch(82% 0.1 156)",
-          "oklch(95% 0.1 156)"
-        ]
       }
     },
     "typographyMeta": {
       "display": {
         "displayName": "Display",
-        "purpose": "Landing tagline, one clause per line, sized from its bay with container units."
+        "purpose": "Landing headline, one clause per line, sized from its bay with container units."
       },
       "headline": {
         "displayName": "Headline",
@@ -226,7 +196,7 @@
       },
       "title": {
         "displayName": "Title",
-        "purpose": "Agent, sandbox and step names."
+        "purpose": "Lane titles, pain names and step titles."
       },
       "body": {
         "displayName": "Body",
@@ -234,7 +204,7 @@
       },
       "label": {
         "displayName": "Label",
-        "purpose": "Captions, group labels, footer headings, facts line."
+        "purpose": "Captions, group labels, footer headings, facts line, demo title, beats and meter labels."
       },
       "code": {
         "displayName": "Code",
@@ -257,6 +227,36 @@
         "name": "range",
         "value": "0.45s",
         "purpose": "Active code-range tint and gutter marker."
+      },
+      {
+        "name": "demo-model-step",
+        "value": "520ms",
+        "purpose": "Run time of a model step in the orchestration demo (ember underline grows linearly)."
+      },
+      {
+        "name": "demo-agent-step",
+        "value": "1100ms",
+        "purpose": "Run time of the agent step in the code lane."
+      },
+      {
+        "name": "demo-code-step",
+        "value": "160ms",
+        "purpose": "Run time of a code step."
+      },
+      {
+        "name": "demo-hold",
+        "value": "1300ms",
+        "purpose": "Pause after a beat ends before the next one autoplays."
+      },
+      {
+        "name": "demo-swap",
+        "value": "0.5s",
+        "purpose": "Order beat cell swap and meter fill growth."
+      },
+      {
+        "name": "demo-cut",
+        "value": "0.6s",
+        "purpose": "Interrupted cut drawing down both lanes."
       }
     ],
     "breakpoints": [
@@ -267,10 +267,6 @@
       {
         "name": "compact",
         "value": "40rem"
-      },
-      {
-        "name": "narrow",
-        "value": "26rem"
       },
       {
         "name": "guide-mobile",
@@ -316,12 +312,36 @@
       "css": ".ds-code{border:1px solid #364153;background:#0f1520;counter-reset:line}.ds-code-bar{display:flex;min-height:2.75rem;border-bottom:1px solid #364153}.ds-tab{padding:0 1rem;border:0;border-right:1px solid #364153;background:none;color:#99a1af;font:400 .8125rem ui-monospace,SFMono-Regular,Menlo,monospace;cursor:pointer}.ds-tab:hover{color:#fff}.ds-tab[aria-selected=true]{color:#fff;background:#18202d;box-shadow:inset 0 -2px 0 #fff}.ds-tab:focus-visible{outline:2px solid #fb923c;outline-offset:-2px}.ds-code pre{margin:0;padding:1.1rem 0;color:#adbac7;font:400 .8125rem/1.7 ui-monospace,SFMono-Regular,Menlo,monospace}.ds-line{display:block}.ds-line::before{counter-increment:line;content:counter(line);display:inline-block;width:2.25rem;margin-right:1.1rem;color:#99a1af;text-align:right}.ds-active{background:rgba(251,146,60,.1);box-shadow:inset 2px 0 0 #fb923c}.ds-active::before{color:#fff}"
     },
     {
-      "name": "Bay Cell",
-      "kind": "card",
-      "refersTo": "bay-cell",
-      "description": "Hairline-bounded linked cell: title over a muted note.",
-      "html": "<a class=\"ds-cell\" href=\"#\"><strong>Claude Code</strong><span>capture · resume · fork</span></a>",
-      "css": ".ds-cell{display:flex;flex-direction:column;gap:.4rem;padding:1.4rem 2.5rem;border:1px solid #364153;color:#d1d5dc;text-decoration:none;font-family:Inter,system-ui,sans-serif;transition:background-color .2s cubic-bezier(.16,1,.3,1)}.ds-cell strong{color:#fff;font-size:1.0625rem;font-weight:500;letter-spacing:-.01em}.ds-cell span{color:#99a1af;font-size:.8125rem}.ds-cell:hover{background:#0f1520}.ds-cell:focus-visible{outline:2px solid #fb923c;outline-offset:2px}"
+      "name": "Orchestration Demo Lane",
+      "kind": "custom",
+      "refersTo": "demo-step",
+      "description": "One lane of the hero demo: four step cells on 1px gaps with owner tags; a running model step takes the ember tint and underline, code steps are chained by drawn chevrons.",
+      "html": "<div class=\"ds-lane\"><p class=\"ds-lane-title\">Code orchestrates</p><ol class=\"ds-steps\"><li class=\"ds-dstep\"><span class=\"ds-dname\">Branch</span><span class=\"ds-tag\">code</span></li><li class=\"ds-dstep ds-model ds-running\"><span class=\"ds-dname\">Fix</span><span class=\"ds-tag\">agent</span></li><li class=\"ds-dstep\"><span class=\"ds-dname\">Verify</span><span class=\"ds-tag\">code</span></li><li class=\"ds-dstep\"><span class=\"ds-dname\">Integrate</span><span class=\"ds-tag\">code</span></li></ol><div class=\"ds-meter\"><span>Agent context</span><span class=\"ds-track\"><span></span></span></div></div>",
+      "css": ".ds-lane{display:flex;flex-direction:column;gap:1rem;padding:1.35rem 1.5rem 1.25rem;border:1px solid #364153;background:#0f1520;font-family:Inter,system-ui,sans-serif}.ds-lane-title{margin:0;color:#fff;font-size:1.0625rem;font-weight:500;letter-spacing:-.01em}.ds-steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;margin:0;padding:0;border:1px solid #364153;background:#364153;list-style:none}.ds-dstep{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:.45rem;padding:.8rem .8rem .7rem;background:#030712}.ds-dstep:not(:last-child)::before{content:\"\";position:absolute;top:1.1rem;right:calc(-.35rem - .5px);z-index:1;width:.6rem;height:.6rem;border-top:1px solid #4a5565;border-right:1px solid #4a5565;background:#030712;transform:rotate(45deg)}.ds-dname{color:#fff;font-size:.9375rem;font-weight:500}.ds-tag{padding:.15rem .4rem;border:1px solid #364153;color:#99a1af;font-size:.75rem;line-height:1.3}.ds-model .ds-tag{border-color:#fff;background:#fff;color:#030712}.ds-running{background:color-mix(in srgb,#fb923c 12%,#030712)}.ds-running::after{content:\"\";position:absolute;inset:auto 0 0;height:2px;background:#fb923c}.ds-meter{display:grid;grid-template-columns:minmax(6.5rem,auto) 1fr;align-items:center;gap:1rem;color:#99a1af;font-size:.8125rem}.ds-track{height:.5rem;border:1px solid #364153}.ds-track span{display:block;height:100%;width:25%;background:#99a1af}"
+    },
+    {
+      "name": "Demo Beats",
+      "kind": "custom",
+      "refersTo": "demo-beat-pressed",
+      "description": "Four beat buttons along the demo's foot; the pressed beat takes the 80% code fill and an ink underline.",
+      "html": "<div class=\"ds-beats\" role=\"group\" aria-label=\"Compare\"><button aria-pressed=\"false\">Steps</button><button aria-pressed=\"true\">Context</button><button aria-pressed=\"false\">Order</button><button aria-pressed=\"false\">Resume</button></div>",
+      "css": ".ds-beats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid #364153;background:#0f1520}.ds-beats button{position:relative;min-height:2.75rem;padding:0 .5rem;border:0;border-right:1px solid #364153;background:none;color:#99a1af;font:500 .8125rem Inter,system-ui,sans-serif;cursor:pointer;transition:background-color .2s cubic-bezier(.16,1,.3,1),color .2s cubic-bezier(.16,1,.3,1)}.ds-beats button:last-child{border-right:0}.ds-beats button:hover{color:#fff}.ds-beats button[aria-pressed=true]{background:#18202d;color:#fff}.ds-beats button[aria-pressed=true]::after{content:\"\";position:absolute;inset:auto 0 0;height:2px;background:#fff}.ds-beats button:focus-visible{outline:2px solid #fb923c;outline-offset:-2px}"
+    },
+    {
+      "name": "Pain Table Row",
+      "kind": "custom",
+      "refersTo": "pain-row",
+      "description": "Problem-bay row split 4|3 on track 9: pain and detail on the left, the answer in ink behind a hairline.",
+      "html": "<div class=\"ds-pains\"><div class=\"ds-pain-head\"><h3>Using LLMs today</h3><span>With Outpost</span></div><div class=\"ds-pain\"><div class=\"ds-pain-q\"><strong>The context keeps growing</strong><span>Each step adds to one conversation that the model rereads.</span></div><div class=\"ds-pain-a\">Each agent task starts from its own brief, in its own sandbox.</div></div></div>",
+      "css": ".ds-pains{border:1px solid #364153;font-family:Inter,system-ui,sans-serif}.ds-pain-head,.ds-pain{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,3fr)}.ds-pain-head{border-bottom:1px solid #364153}.ds-pain-head>*{margin:0;padding:.8rem 2.5rem;color:#99a1af;font-size:.8125rem;font-weight:500}.ds-pain-head span,.ds-pain-a{border-left:1px solid #364153}.ds-pain-q,.ds-pain-a{padding:1.4rem 2.5rem;font-size:.9375rem;line-height:1.55}.ds-pain-q{display:flex;flex-direction:column;gap:.35rem;color:#d1d5dc}.ds-pain-q strong{color:#fff;font-size:1.0625rem;font-weight:500;letter-spacing:-.01em}.ds-pain-a{color:#fff}"
+    },
+    {
+      "name": "Runtime Name",
+      "kind": "chip",
+      "refersTo": "runtime-name",
+      "description": "Linked hairline name box for an agent or sandbox; experimental entries carry the ember flask.",
+      "html": "<a class=\"ds-runtime\" href=\"#\">Firecracker<svg viewBox=\"0 0 24 24\" role=\"img\" aria-label=\"Experimental\"><path d=\"M9 3h6M10 3v6l-5 9a2 2 0 0 0 1.7 3h10.6a2 2 0 0 0 1.7-3l-5-9V3\"/></svg></a>",
+      "css": ".ds-runtime{display:inline-flex;align-items:center;gap:.45rem;min-height:2.25rem;padding:0 .8rem;border:1px solid #364153;color:#fff;font:500 .9375rem Inter,system-ui,sans-serif;text-decoration:none;transition:background-color .2s cubic-bezier(.16,1,.3,1),border-color .2s cubic-bezier(.16,1,.3,1)}.ds-runtime:hover{border-color:#4a5565;background:#0f1520}.ds-runtime:focus-visible{outline:2px solid #fb923c;outline-offset:2px}.ds-runtime svg{width:.9rem;height:.9rem;fill:none;stroke:#fb923c;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}"
     },
     {
       "name": "Step Button",
@@ -350,18 +370,18 @@
   ],
   "narrative": {
     "northStar": "The Survey Sheet",
-    "overview": "Outpost's web surfaces read like a technical drawing. The frame is drawn first: one hairline grid, measured bays, and every element placed on it. The page has no decoration to fall back on. The structure is the lines, the content is real code and plain facts, and color appears only where something is live: an active code range, a focus ring, an experimental flag. It serves developers who read with a terminal open, so density is welcome and ornament is not.\n\nThe system is inherited from the Starlight documentation chrome with the Celestia theme: a cool grayscale in both light and dark, Inter for all prose, the platform monospace for code, and a single ember accent. The landing page on the docs home extends that chrome with no new identity. It is the same header, the same hairlines and the same grays, set out as a blueprint of bays.\n\nBoth themes are first-class. Every value below has a dark and a light counterpart, and the theme switch in the header selects between them.",
+    "overview": "Outpost's web surfaces read like a technical drawing. The frame is drawn first: one hairline grid, measured bays, and every element placed on it. The page has no decoration to fall back on. The structure is the lines, the content is real code and plain facts, and color appears only where something is live: an active code range, a model at work, a focus ring, an experimental flag. It serves developers who read with a terminal open, so density is welcome and ornament is not.\n\nThe system is inherited from the Starlight documentation chrome with the Celestia theme: a cool grayscale in both light and dark, Inter for all prose, the platform monospace for code, and a single ember accent. The landing page on the docs home extends that chrome with no new identity. It is the same header, the same hairlines and the same grays, set out as a blueprint of bays.\n\nBoth themes are first-class. Every value below has a dark and a light counterpart, and the theme switch in the header selects between them.",
     "keyCharacteristics": [
       "One 12-track frame; sections split at track 5, inner cells at track 9.",
       "1px hairlines as the only structure; square corners on the landing.",
       "Grayscale everywhere; ember only for live state and focus.",
       "Monospace strictly for code, commands and API names.",
-      "Real, typechecked code as the proof inside every bay."
+      "Every bay carries its proof: a working demonstration, real typechecked code or plain facts."
     ],
     "rules": [
       {
         "name": "The Live-Only Ember Rule",
-        "body": "Ember marks what is active or focused right now: highlighted code, focus, selection, experimental status. Selected tabs, pressed steps, hovers and link underlines use white or slate ink and fills, never ember.",
+        "body": "Ember marks what is active or focused right now: highlighted code, a model or agent step running right now, focus, selection, experimental status. Selected tabs, pressed steps, hovers and link underlines use white or slate ink and fills, never ember.",
         "section": "colors"
       },
       {
@@ -392,8 +412,8 @@
     ],
     "dos": [
       "Do place every vertical division on the shared 12-track frame (tracks 5 and 9 on the landing).",
-      "Do prove each claim with real, typechecked code or a factual ledger in the bay beside it.",
-      "Do keep ember for highlighted code, focus, selection and experimental status only.",
+      "Do prove each claim in the bay beside it with a working demonstration, real typechecked code or a factual table.",
+      "Do keep ember for highlighted code, a model or agent step running right now, focus, selection and experimental status only.",
       "Do give every color role a dark and a light value that meet WCAG 2.2 AA.",
       "Do use drawn SVG icons with a 1.6 stroke and round caps and joins.",
       "Do make every code window scroll inside itself, with edge fades instead of page overflow."

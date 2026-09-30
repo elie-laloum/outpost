@@ -1,13 +1,10 @@
 ---
-import Code from "starlight-theme-celestia/components/Code.astro";
 import manifest from "../../../../package.json";
 import Brand from "../Brand.astro";
 import Arrow from "./Arrow.astro";
 import CodeWindow from "./CodeWindow.astro";
-import brief from "./snippets/brief.md?raw";
+import OrchestrationDemo from "./OrchestrationDemo.astro";
 import pipeline from "./snippets/pipeline.ts?raw";
-import run from "./snippets/run.ts?raw";
-import workflow from "./snippets/workflow.ts?raw";
 
 const route = Astro.locals.starlightRoute;
 const landing = route.entry.data.landing!;
@@ -15,15 +12,6 @@ const locale = route.locale === "fr" ? "fr/" : "";
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 const href = (path: string) =>
   /^https?:/.test(path) ? path : `${base}/${locale}${path}`;
-const swap = [
-  "const agent = createAgent({",
-  '  harness: createCodexHarness({ authentication: "account" }), // [!code --]',
-  '  harness: createClaudeHarness({ authentication: "account" }), // [!code ++]',
-  "});",
-  "const sandboxProvider =",
-  '  createDockerSandboxProvider({ image: "outpost:dev" }); // [!code --]',
-  '  createPodmanSandboxProvider({ image: "outpost:dev" }); // [!code ++]',
-].join("\n");
 const pipelineLines = pipeline.split("\n");
 for (const step of landing.workflow.steps) {
   const [first = 0] = step.lines.split("-").map(Number);
@@ -32,28 +20,6 @@ for (const step of landing.workflow.steps) {
       `Workflow step "${step.title}" does not start at a declaration.`,
     );
 }
-const heroFiles = [
-  {
-    name: "run.ts",
-    code: run,
-    lang: "ts",
-    note: landing.window.notes.run,
-    command: true,
-  },
-  {
-    name: "brief.md",
-    code: brief,
-    lang: "md",
-    note: landing.window.notes.brief,
-  },
-  {
-    name: "workflow.ts",
-    code: workflow,
-    lang: "ts",
-    note: landing.window.notes.workflow,
-    example: true,
-  },
-];
 const runtimeGroups = [
   { label: landing.runtimes.agentsLabel, items: landing.runtimes.agents },
   { label: landing.runtimes.sandboxesLabel, items: landing.runtimes.sandboxes },
@@ -102,108 +68,41 @@ const runtimeGroups = [
           <a href={href(landing.reference.href)}>{landing.reference.label}</a>
         </p>
       </div>
-      <div class="show hero-code">
-        <CodeWindow
-          id="hero-files"
-          label={landing.window.label}
-          copyLabel={landing.window.copy}
-          copiedLabel={landing.install.copied}
-          exampleLabel={landing.window.example}
-          files={heroFiles}
-        />
+      <div class="show hero-demo">
+        <OrchestrationDemo demo={landing.demo} />
       </div>
     </section>
 
-    <section class="bay" aria-labelledby="pillar-run">
+    <section class="bay" aria-labelledby="problem-title">
       <div class="say">
-        <h2 id="pillar-run">{landing.run.title}</h2>
-        <p>{landing.run.text}</p>
-        <a class="more" href={href(landing.run.link.href)}
-          >{landing.run.link.label}<Arrow /></a
+        <h2 id="problem-title">{landing.problem.title}</h2>
+        <p>{landing.problem.text}</p>
+        <a class="more" href={href(landing.problem.link.href)}
+          >{landing.problem.link.label}<Arrow /></a
         >
       </div>
-      <div class="show">
-        <figure class="swap">
-          <figcaption>{landing.run.caption}</figcaption>
-          <div class="swap-code"><Code code={swap} lang="ts" /></div>
-        </figure>
-      </div>
-    </section>
-
-    <section class="bay" aria-labelledby="pillar-own">
-      <div class="say">
-        <h2 id="pillar-own">{landing.own.title}</h2>
-        <p>{landing.own.text}</p>
-        <a class="more" href={href(landing.own.link.href)}
-          >{landing.own.link.label}<Arrow /></a
-        >
-      </div>
-      <div class="show flush">
-        <dl class="ledger">
-          {
-            landing.own.ledger.map((row) => (
-              <div>
-                <dt>{row.term}</dt>
-                <dd>{row.detail}</dd>
+      <div class="show flush pains">
+        {
+          landing.problem.groups.map((group) => (
+            <div class="pain-group">
+              <div class="pain-head">
+                <h3>{group.title}</h3>
+                <span aria-hidden="true">{landing.problem.answerLabel}</span>
               </div>
-            ))
-          }
-        </dl>
-      </div>
-    </section>
-
-    <section class="bay" aria-labelledby="pillar-compose">
-      <div class="say">
-        <h2 id="pillar-compose">{landing.compose.title}</h2>
-        <p>{landing.compose.text}</p>
-        <a class="more" href={href(landing.compose.link.href)}
-          >{landing.compose.link.label}<Arrow /></a
-        >
-      </div>
-      <ul class="show flush cells">
-        {
-          landing.compose.primitives.map((primitive) => (
-            <li>
-              <a href={href(primitive.href)}>
-                <code>{primitive.name}()</code>
-                <span>{primitive.detail}</span>
-              </a>
-            </li>
-          ))
-        }
-      </ul>
-    </section>
-
-    <section class="bay" aria-labelledby="runtimes-title">
-      <div class="say">
-        <h2 id="runtimes-title">{landing.runtimes.title}</h2>
-        <p>{landing.runtimes.text}</p>
-      </div>
-      <div class="show flush">
-        {
-          runtimeGroups.map((group) => (
-            <div class="runtime-group">
-              <h3>{group.label}</h3>
-              <ul class="cells">
-                {group.items.map((item) => (
-                  <li>
-                    <a href={href(item.href)}>
-                      <span class="runtime-name">
-                        {item.name}
-                        {item.experimental && (
-                          <span
-                            class="flask"
-                            role="img"
-                            aria-label={landing.runtimes.experimental}
-                            title={landing.runtimes.experimental}
-                          />
-                        )}
-                      </span>
-                      <span class="runtime-note">{item.note}</span>
-                    </a>
-                  </li>
+              <dl>
+                {group.rows.map((row) => (
+                  <div class="pain">
+                    <dt>
+                      <strong>{row.pain}</strong>
+                      <span>{row.detail}</span>
+                    </dt>
+                    <dd>
+                      <span class="sr-label">{landing.problem.answerLabel}: </span>
+                      {row.answer}
+                    </dd>
+                  </div>
                 ))}
-              </ul>
+              </dl>
             </div>
           ))
         }
@@ -248,7 +147,7 @@ const runtimeGroups = [
         <CodeWindow
           id="workflow-files"
           label={landing.workflow.title}
-          copyLabel={landing.window.copy}
+          copyLabel={landing.workflow.copy}
           copiedLabel={landing.install.copied}
           files={[{ name: "pipeline.ts", code: pipeline, lang: "ts" }]}
           scroll
@@ -256,10 +155,46 @@ const runtimeGroups = [
       </div>
     </section>
 
+    <section class="bay" aria-labelledby="runtimes-title">
+      <div class="say">
+        <h2 id="runtimes-title">{landing.runtimes.title}</h2>
+        <p>{landing.runtimes.text}</p>
+        <a class="more" href={href(landing.runtimes.link.href)}
+          >{landing.runtimes.link.label}<Arrow /></a
+        >
+      </div>
+      <div class="show flush runtimes">
+        {
+          runtimeGroups.map((group) => (
+            <div class="runtime-group">
+              <h3>{group.label}</h3>
+              <ul>
+                {group.items.map((item) => (
+                  <li>
+                    <a href={href(item.href)}>
+                      {item.name}
+                      {item.experimental && (
+                        <span
+                          class="flask"
+                          role="img"
+                          aria-label={landing.runtimes.experimental}
+                          title={landing.runtimes.experimental}
+                        />
+                      )}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
     <footer class="landing-footer">
       <div class="footer-brand">
         <Brand href={href("")} class="wordmark" />
-        <p>{landing.headline.join(" ")}</p>
+        <p>{landing.tagline}</p>
       </div>
       {
         [landing.footer.documentation, landing.footer.source].map((column) => (
@@ -578,141 +513,62 @@ const runtimeGroups = [
     color: var(--sl-color-white);
   }
 
-  /* Run */
-  .swap {
-    border: 1px solid var(--landing-line);
-    background: var(--landing-code-bg);
-  }
-  .swap figcaption {
-    padding: 0.65rem 1rem;
-    border-bottom: 1px solid var(--landing-line);
-    color: var(--sl-color-gray-3);
-    font-size: 0.8125rem;
-  }
-  .swap-code {
-    overflow-x: auto;
-    scrollbar-width: thin;
-    scrollbar-color: var(--sl-color-gray-5) transparent;
-  }
-  .swap-code :global([data-celestia-code-container]) {
-    overflow: visible;
-    border: 0;
-    border-radius: 0;
-  }
-  .swap-code :global(celestia-code-copy-button) {
-    display: none;
-  }
-  .swap-code :global(pre) {
-    margin: 0;
-    padding: 0.9rem 0;
-    overflow: visible !important;
-    background: transparent !important;
-    font-size: 0.8125rem;
-    line-height: 1.7;
-  }
-  .swap-code :global(code) {
-    display: block;
-    min-width: max-content;
-  }
-  .swap-code :global(.line) {
-    display: inline-block;
-    min-width: 100%;
-    padding: 0 1rem 0 0;
-  }
-  .swap-code :global(.line)::before {
-    content: "";
-    display: inline-block;
-    width: 2rem;
-    text-align: center;
-  }
-  .swap-code :global(.line.diff.remove) {
-    background: color-mix(in oklch, var(--sl-color-red-high) 11%, transparent);
-  }
-  .swap-code :global(.line.diff.add) {
-    background: color-mix(
-      in oklch,
-      var(--sl-color-green-high) 11%,
-      transparent
-    );
-  }
-  .swap-code :global(.line.diff.remove)::before {
-    content: "−";
-    color: var(--sl-color-red-high);
-  }
-  .swap-code :global(.line.diff.add)::before {
-    content: "+";
-    color: var(--sl-color-green-high);
-  }
-
-  /* Own */
-  .ledger {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    height: 100%;
-  }
-  .ledger div {
-    display: grid;
-    grid-template-columns: minmax(0, 2fr) minmax(0, 5fr);
-    gap: 1.5rem;
-    padding: 1.35rem var(--landing-pad);
-  }
-  .ledger div + div {
+  /* Pains split the seven-track bay 4|3 so the answer column starts on track 9. */
+  .pain-group + .pain-group {
     border-top: 1px solid var(--landing-line);
   }
-  .ledger dt {
-    color: var(--sl-color-white);
-    font-size: 0.9375rem;
-    font-weight: 500;
-  }
-  .ledger dd {
-    color: var(--sl-color-gray-2);
-    font-size: 0.9375rem;
-    line-height: 1.55;
-  }
-
-  /* Cells split the seven-track bay 4|3 so their inner line sits on track 9. */
-  .cells {
+  .pain-head,
+  .pain {
     display: grid;
     grid-template-columns: minmax(0, 4fr) minmax(0, 3fr);
   }
-  .cells li {
-    min-width: 0;
+  .pain-head {
     border-bottom: 1px solid var(--landing-line);
   }
-  .cells li:nth-child(odd) {
-    border-right: 1px solid var(--landing-line);
+  .pain-head > * {
+    padding: 0.8rem var(--landing-pad);
+    color: var(--sl-color-gray-3);
+    font-size: 0.8125rem;
+    font-weight: 500;
   }
-  .cells li:nth-last-child(2):nth-child(odd),
-  .cells li:last-child {
-    border-bottom: 0;
+  .pain-head span,
+  .pain dd {
+    border-left: 1px solid var(--landing-line);
   }
-  .cells a {
+  .pain + .pain {
+    border-top: 1px solid var(--landing-line);
+  }
+  .pain dt,
+  .pain dd {
+    padding: 1.4rem var(--landing-pad);
+    font-size: 0.9375rem;
+    line-height: 1.55;
+  }
+  .pain dt {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    gap: 0.4rem;
-    height: 100%;
-    padding: 1.4rem var(--landing-pad);
-    color: var(--sl-color-gray-2);
-    text-decoration: none;
-    transition: background-color 0.2s var(--landing-ease);
+    gap: 0.35rem;
   }
-  .cells a:hover {
-    background: var(--landing-code-bg);
-  }
-  .cells code {
-    padding: 0;
-    border: 0;
-    background: none;
+  .pain strong {
     color: var(--sl-color-white);
-    font-size: 0.9375rem;
+    font-size: 1.0625rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
   }
-  .cells a > span:not(.runtime-name) {
-    font-size: 0.875rem;
+  .pain dd {
+    color: var(--sl-color-white);
   }
-  ul.show.cells a {
-    min-height: 8.5rem;
+  .sr-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  /* Runtimes */
+  .runtimes {
+    justify-content: center;
   }
   .runtime-group + .runtime-group {
     border-top: 1px solid var(--landing-line);
@@ -724,22 +580,34 @@ const runtimeGroups = [
     font-size: 0.8125rem;
     font-weight: 500;
   }
-  .runtime-name {
+  .runtime-group ul {
     display: flex;
-    align-items: center;
+    flex-wrap: wrap;
     gap: 0.5rem;
-    color: var(--sl-color-white);
-    font-size: 1.0625rem;
-    font-weight: 500;
-    letter-spacing: -0.01em;
+    padding: 1.25rem var(--landing-pad) 1.4rem;
   }
-  .runtime-note {
-    color: var(--sl-color-gray-3);
-    font-size: 0.8125rem;
+  .runtime-group a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    min-height: 2.25rem;
+    padding: 0 0.8rem;
+    border: 1px solid var(--landing-line);
+    color: var(--sl-color-white);
+    font-size: 0.9375rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition:
+      background-color 0.2s var(--landing-ease),
+      border-color 0.2s var(--landing-ease);
+  }
+  .runtime-group a:hover {
+    border-color: var(--sl-color-gray-4);
+    background: var(--landing-code-bg);
   }
   .flask {
-    width: 1rem;
-    height: 1rem;
+    width: 0.9rem;
+    height: 0.9rem;
     background-color: var(--sl-color-accent);
     mask: url("../../assets/reference-experiment.svg") center / contain
       no-repeat;
@@ -880,7 +748,7 @@ const runtimeGroups = [
     .show {
       padding-block: 0 3rem;
     }
-    .hero-code,
+    .hero-demo,
     .workflow-code {
       padding-block: 2rem;
     }
@@ -898,19 +766,42 @@ const runtimeGroups = [
     .rail {
       border-inline: 0;
     }
-    .cells {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-    ul.show.cells a {
-      min-height: 0;
-    }
-    .cells a {
-      padding: 1.1rem 1.25rem;
-    }
-    .ledger div {
+    .pain-head,
+    .pain {
       grid-template-columns: minmax(0, 1fr);
-      gap: 0.25rem;
-      padding-block: 1.1rem;
+    }
+    .pain-head {
+      background: var(--landing-code-bg);
+    }
+    .pain-head h3 {
+      color: var(--sl-color-white);
+      font-size: 0.9375rem;
+      font-weight: 600;
+    }
+    .pain-head span {
+      display: none;
+    }
+    .pain dt {
+      padding-bottom: 1rem;
+    }
+    .pain dd {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      margin-inline: var(--landing-pad);
+      padding: 0.9rem 0 1.4rem;
+      border-top: 1px solid var(--landing-line);
+      border-left: 0;
+    }
+    .pain .sr-label {
+      position: static;
+      width: auto;
+      height: auto;
+      overflow: visible;
+      clip-path: none;
+      color: var(--sl-color-gray-3);
+      font-size: 0.8125rem;
+      font-weight: 500;
     }
     .landing-footer {
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -922,24 +813,11 @@ const runtimeGroups = [
       padding-bottom: 0;
     }
     .workflow-code,
-    .hero-code {
+    .hero-demo {
       padding-inline: 0;
     }
-    .workflow-code :global(.window),
-    .hero-code :global(.window) {
+    .workflow-code :global(.window) {
       border-inline: 0;
-    }
-  }
-  @media (max-width: 26rem) {
-    ul.show.cells {
-      grid-template-columns: minmax(0, 1fr);
-    }
-    ul.show.cells li {
-      border-right: 0;
-      border-bottom: 1px solid var(--landing-line);
-    }
-    ul.show.cells li:last-child {
-      border-bottom: 0;
     }
   }
   @media (prefers-reduced-motion: reduce) {

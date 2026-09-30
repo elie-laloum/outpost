@@ -1,12 +1,12 @@
 ---
 title: Outpost
-description: "Exécutez un agent, maîtrisez son environnement, composez un workflow."
+description: "Le code orchestre. Les agents réfléchissent. Une bibliothèque TypeScript pour exécuter des agents de code dans des workflows écrits en code."
 landing:
   headline:
-    - "Exécutez un agent,"
-    - "maîtrisez son environnement,"
-    - "composez un workflow."
-  lead: "Outpost est une bibliothèque TypeScript et une CLI pour exécuter des agents de code dans les sandboxes de votre choix, sur des workspaces Git que vous contrôlez, sous forme de workflows typés qui résistent aux interruptions."
+    - "Le code orchestre."
+    - "Les agents réfléchissent."
+  tagline: "Exécutez un agent, maîtrisez son environnement, composez un workflow."
+  lead: "Outpost est une bibliothèque TypeScript pour exécuter des agents de code dans des workflows écrits en code. L’ordre, les vérifications et la reprise restent dans le code ; l’agent ne reçoit que le travail qui demande du jugement."
   install:
     command: "npx @elie-laloum/outpost init"
     copy: "Copier la commande d’installation"
@@ -15,151 +15,102 @@ landing:
   secondary: { label: "Lire le guide", href: "guide/introduction/" }
   facts: "Node.js 24+ · MIT"
   reference: { label: "Référence de l’API", href: "reference/" }
-  window:
-    label: "Fichiers d’un projet d’exemple"
+  demo:
+    title: "Une tâche, deux orchestrateurs"
+    pause: "Mettre la comparaison en pause"
+    replay: "Rejouer la comparaison"
+    beatsLabel: "Comparer"
+    beats: ["Étapes", "Contexte", "Ordre", "Reprise"]
+    steps: ["Branche", "Correctif", "Vérification", "Intégration"]
+    owners: { model: "modèle", code: "code", agent: "agent" }
+    notes: { early: "trop tôt", reread: "relu", restored: "restauré" }
+    interrupted: "Interruption"
+    model:
+      title: "Un LLM orchestre"
+      context: "Contexte du modèle"
+      captions:
+        - "Le modèle interprète chaque étape, même les plus sûres."
+        - "Chaque étape s’ajoute à la conversation qu’il relit."
+        - "Il décide de l’ordre en chemin, et peut dériver."
+        - "Après une interruption, il relit tout."
+    code:
+      title: "Le code orchestre"
+      context: "Contexte de l’agent"
+      captions:
+        - "Le code crée la branche, vérifie et intègre. L’agent corrige, c’est tout."
+        - "L’agent part de son brief, rien de plus."
+        - "L’ordre est un graphe de tâches, fixé avant l’exécution."
+        - "Les étapes terminées reviennent du checkpoint."
+  problem:
+    title: "On demande tout aux modèles"
+    text: "Un LLM excelle dans le jugement : lire du code, écrire un correctif, relire une modification. La plupart des pipelines d’IA lui confient aussi les étapes, l’ordre et la reprise, que le code fait mieux."
+    link: { label: "Comment fonctionne Outpost", href: "guide/how-it-works/" }
+    answerLabel: "Avec Outpost"
+    groups:
+      - title: "Avec les LLM aujourd’hui"
+        rows:
+          - pain: "Tout est interprété"
+            detail: "Même un nom de branche ou une commande de test passe par le modèle, à chaque fois."
+            answer: "Le code exécute les étapes sûres. L’agent ne reçoit que le travail qui demande du jugement."
+          - pain: "Le contexte ne cesse de grossir"
+            detail: "Chaque étape s’ajoute à une seule conversation que le modèle relit."
+            answer: "Chaque tâche d’agent part de son propre brief, dans sa propre sandbox."
+      - title: "En construisant des workflows d’IA"
+        rows:
+          - pain: "L’orchestrateur dérive"
+            detail: "Quand un modèle décide de l’ordre, il peut sauter, répéter ou réordonner des étapes."
+            answer: "Le graphe de tâches est en TypeScript, validé avant l’exécution. Les réponses typées sont vérifiées contre leur schéma."
+          - pain: "Reprendre, c’est réinterpréter"
+            detail: "Après un crash ou un quota, le modèle reconstruit son état à partir d’une transcription."
+            answer: "Les tâches terminées reviennent du checkpoint en JSON. Relancer une tâche interrompue demande votre accord explicite."
+  workflow:
+    title: "Seul le correctif va à l’agent"
+    text: "Un workflow en TypeScript simple. Une tâche exécute un agent dans sa sandbox ; le code lit son résultat typé, attend un humain et reprend depuis un checkpoint."
+    stepsLabel: "Étapes du workflow"
     copy: "Copier ce fichier"
-    example: "exemple"
-    notes:
-      run: 'node run.ts "Fix the failing tests, verify and commit."'
-      brief: "{{OBJECTIVE}} vient de la ligne de commande ; Outpost renseigne les noms de branche."
-      workflow: "Deux revues en parallèle, chacune dans sa propre sandbox Podman."
-  run:
-    title: "Exécutez un agent"
-    text: "Claude Code, Codex, Copilot CLI, Kimi Code, Antigravity ou le harness intégré d’Outpost, sur Docker, Podman, Vercel, Daytona ou votre machine. Changer l’un ou l’autre tient en une ligne ; le dispatch reste identique."
-    caption: "Changer d’agent et de sandbox"
-    link: { label: "Choisir un environnement", href: "guide/choose-a-sandbox/" }
-  own:
-    title: "Maîtrisez son environnement"
-    text: "Rien n’est implicite. Vous choisissez comment chaque agent s’authentifie, où il s’exécute et comment sa branche est intégrée."
-    ledger:
+    steps:
       - {
-          term: "Identifiants",
-          detail: "Votre connexion de compte ou une clé d’API, déclarée par harness. Jamais de trousseau système.",
+          title: "Une tâche d’agent",
+          text: "L’agent reçoit un brief, sa propre sandbox et une branche nommée. Il corrige les tests ; il ne décide pas de la suite.",
+          lines: "11-20",
         }
       - {
-          term: "Sandbox",
-          detail: "Votre fournisseur. Une sandbox isolée ne se replie jamais sur l’hôte.",
+          title: "Le code lit un résultat typé",
+          text: "fix et summary sont de simples fonctions. Elles lisent la branche et le nombre de commits comme des valeurs, pas comme du texte à interpréter.",
+          lines: "21-33",
         }
       - {
-          term: "Branche",
-          detail: "Le checkout courant, une branche nommée ou intégrée : votre choix à chaque dispatch.",
+          title: "Un humain décide",
+          text: "L’étape de validation met l’exécution en pause jusqu’à ce qu’un acteur autorisé approuve ou rejette la fusion.",
+          lines: "34-39",
         }
       - {
-          term: "Récupération",
-          detail: "Conservée dès qu’un nettoyage perdrait du travail.",
+          title: "Reprendre sans relire",
+          text: "Les tâches terminées sont conservées en JSON dans le checkpoint. Relancer les restaure au lieu de les exécuter de nouveau.",
+          lines: "41-53",
         }
-    link: { label: "Identifiants et limites", href: "guide/authentication/" }
-  compose:
-    title: "Composez un workflow"
-    text: "Les tâches se transmettent des résultats typés. Les exécutions posent des checkpoints, attendent des validations, se mettent en pause sur quota et reprennent la conversation là où elle s’était arrêtée."
-    primitives:
-      - {
-          name: "defineWorkflow",
-          href: "reference/defineworkflow/",
-          detail: "Valide le graphe de tâches",
-        }
-      - {
-          name: "defineIsolatedTask",
-          href: "reference/defineisolatedtask/",
-          detail: "Un agent avec sa propre sandbox",
-        }
-      - {
-          name: "defineApprovalTask",
-          href: "reference/defineapprovaltask/",
-          detail: "Attend une décision humaine",
-        }
-      - {
-          name: "defineLoopTask",
-          href: "reference/definelooptask/",
-          detail: "Réessaie avec le retour d’une vérification",
-        }
-    link: { label: "Relier les tâches", href: "guide/task-dependencies/" }
+    link: { label: "Exécutions durables", href: "guide/durable-runs/" }
   runtimes:
-    title: "Agents et sandboxes"
-    text: "Chaque agent pris en charge s’exécute dans chaque sandbox. La gestion des conversations varie selon l’agent : chacun est présenté avec ce qu’il sait faire."
+    title: "Tout agent, toute sandbox"
+    text: "Changer l’un ou l’autre tient en une ligne ; le workflow reste identique. Vous déclarez comment chaque agent s’authentifie, et une sandbox isolée ne se replie jamais sur votre machine."
     agentsLabel: "Agents"
     sandboxesLabel: "Sandboxes"
     experimental: "Expérimental"
     agents:
-      - {
-          name: "Claude Code",
-          href: "guide/claude-code/",
-          note: "capture · reprise · fork",
-        }
-      - {
-          name: "Codex",
-          href: "guide/codex/",
-          note: "capture · reprise · fork",
-        }
-      - {
-          name: "Kimi Code",
-          href: "guide/kimi-code/",
-          note: "capture · reprise · fork",
-        }
-      - {
-          name: "Copilot CLI",
-          href: "guide/copilot-cli/",
-          note: "capture · reprise",
-        }
-      - {
-          name: "Antigravity",
-          href: "guide/antigravity/",
-          note: "reprise dans sa sandbox",
-        }
-      - {
-          name: "Harness Outpost",
-          href: "guide/harness/",
-          note: "modèles OpenAI et Anthropic",
-        }
+      - { name: "Claude Code", href: "guide/claude-code/" }
+      - { name: "Codex", href: "guide/codex/" }
+      - { name: "Kimi Code", href: "guide/kimi-code/" }
+      - { name: "Copilot CLI", href: "guide/copilot-cli/" }
+      - { name: "Antigravity", href: "guide/antigravity/" }
+      - { name: "Harness Outpost", href: "guide/harness/" }
     sandboxes:
-      - { name: "Docker", href: "guide/containers/", note: "conteneur local" }
-      - {
-          name: "Podman",
-          href: "guide/containers/#podman",
-          note: "conteneur local",
-        }
-      - {
-          name: "Vercel",
-          href: "guide/cloud-sandboxes/#vercel-sandbox",
-          note: "sandbox cloud",
-        }
-      - {
-          name: "Daytona",
-          href: "guide/cloud-sandboxes/#daytona-sandbox",
-          note: "sandbox cloud",
-        }
-      - {
-          name: "Processus hôte",
-          href: "guide/host-process/",
-          note: "explicite, sans isolation",
-        }
-      - { name: "Firecracker", href: "guide/firecracker/", note: "microVM" }
-  workflow:
-    title: "D’une tâche à un workflow persistant"
-    text: "Une correction, un résumé typé et une validation humaine, avec des checkpoints pour que l’exécution puisse s’arrêter et reprendre sans refaire le travail terminé."
-    stepsLabel: "Étapes du workflow"
-    steps:
-      - {
-          title: "Un agent dans sa propre sandbox",
-          text: "Une tâche isolée alloue sa propre sandbox, exécute l’agent de votre configuration sur une branche nommée et libère la sandbox. fix conserve sa branche et son nombre de commits en JSON pour le checkpoint.",
-          lines: "11-27",
-        }
-      - {
-          title: "Des résultats typés en aval",
-          text: "context.value(fix) est le résultat de la tâche fix, entièrement typé. Le résumé ne démarre qu’après sa réussite.",
-          lines: "28-33",
-        }
-      - {
-          title: "Un humain décide",
-          text: "L’étape de validation met l’exécution en pause jusqu’à ce qu’un acteur autorisé approuve ou rejette le changement.",
-          lines: "34-39",
-        }
-      - {
-          title: "Checkpoints et reprise",
-          text: "Les tâches terminées sont conservées dans le store de checkpoints. Relancer avec la décision reprend l’exécution.",
-          lines: "41-53",
-        }
-    link: { label: "Exécutions durables", href: "guide/durable-runs/" }
+      - { name: "Docker", href: "guide/containers/" }
+      - { name: "Podman", href: "guide/containers/#podman" }
+      - { name: "Vercel", href: "guide/cloud-sandboxes/#vercel-sandbox" }
+      - { name: "Daytona", href: "guide/cloud-sandboxes/#daytona-sandbox" }
+      - { name: "Processus hôte", href: "guide/host-process/" }
+      - { name: "Firecracker", href: "guide/firecracker/", experimental: true }
+    link: { label: "Choisir un agent", href: "guide/choose-an-agent/" }
   footer:
     documentation:
       title: "Documentation"
@@ -186,4 +137,4 @@ landing:
     license: "Publié sous licence MIT."
 ---
 
-Outpost exécute des agents de code depuis TypeScript. Choisissez un agent et une sandbox, donnez-lui un workspace Git et composez ses résultats en workflows typés et persistants. Commencez par le [guide de configuration](guide/setup/) ou consultez une API dans la [référence](reference/).
+Outpost exécute des agents de code dans des workflows écrits en TypeScript. Le code garde l’ordre, les vérifications et la reprise ; l’agent reçoit le travail qui demande du jugement. Commencez par le [guide de configuration](guide/setup/) ou consultez une API dans la [référence](reference/).

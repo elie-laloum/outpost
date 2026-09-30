@@ -40,16 +40,23 @@ for (const [locale, title, reference] of [
   });
 }
 
-for (const [locale, heading, start, copied] of [
-  ["", "Run an agent,", "Get started", "Copy the install command"],
+for (const [locale, heading, start, copied, beat] of [
+  [
+    "",
+    "Code orchestrates.",
+    "Get started",
+    "Copy the install command",
+    "Resume",
+  ],
   [
     "fr/",
-    "Exécutez un agent,",
+    "Le code orchestre.",
     "Commencer",
     "Copier la commande d’installation",
+    "Reprise",
   ],
 ]) {
-  test(`landing files, copy and workflow steps work (${locale || "en"})`, async ({
+  test(`landing comparison, copy and workflow steps work (${locale || "en"})`, async ({
     page,
     context,
   }) => {
@@ -65,13 +72,18 @@ for (const [locale, heading, start, copied] of [
     await expect(page.getByRole("heading", { level: 1 })).toContainText(
       heading,
     );
-    const tabs = page.getByRole("tablist").first().getByRole("tab");
-    await expect(tabs).toHaveCount(3);
-    await tabs.first().focus();
-    await page.keyboard.press("ArrowRight");
-    await expect(tabs.nth(1)).toHaveAttribute("aria-selected", "true");
-    await expect(page.locator("#hero-files-panel-1")).toBeVisible();
-    await expect(page.locator("#hero-files-panel-0")).toBeHidden();
+    const demo = page.locator("outpost-demo");
+    await expect(demo).toHaveAttribute("data-state", "playing");
+    const toggle = demo.locator("[data-toggle]");
+    await toggle.click();
+    await expect(demo).toHaveAttribute("data-state", "stopped");
+    await expect(demo.locator("button[data-beat]")).toHaveCount(4);
+    await demo.getByRole("button", { name: beat, exact: true }).click();
+    await expect(
+      demo.getByRole("button", { name: beat, exact: true }),
+    ).toHaveAttribute("aria-pressed", "true");
+    await expect(demo).toHaveAttribute("data-beat", "3");
+    await expect(demo.locator(".demo-summary li")).toHaveCount(4);
     await page.getByRole("button", { name: copied }).click();
     expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
       "npx @elie-laloum/outpost init",
@@ -86,6 +98,19 @@ for (const [locale, heading, start, copied] of [
     await expect(page).toHaveURL(new RegExp(`/${locale}guide/setup/$`));
   });
 }
+
+test("landing comparison stays still with reduced motion", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("");
+  const demo = page.locator("outpost-demo");
+  await expect(demo.locator("[data-toggle]")).toBeHidden();
+  await expect(demo).not.toHaveAttribute("data-state", "playing");
+  await demo.getByRole("button", { name: "Order", exact: true }).click();
+  await expect(demo).toHaveAttribute("data-drift", "");
+  await expect(
+    demo.locator('[data-lane="model"] .step').nth(3),
+  ).toHaveAttribute("data-note", "early");
+});
 
 test("language switch retains the new guide page", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });

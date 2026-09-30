@@ -7,20 +7,20 @@ related_targets: ["src/content/docs/fr/index.md"]
 
 # Surface: docs home landing (EN `index.md`, FR `fr/index.md`)
 
-Mode: Persuade. Audience: TypeScript developers evaluating Outpost (see PRODUCT.md). Action: Get started → Setup; copy `npx @elie-laloum/outpost init`; tertiary Guide and Reference.
+Mode: Persuade. Audience: TypeScript developers who already use coding agents and suffer from how LLM-driven pipelines behave (see PRODUCT.md). Action: Get started → Setup; copy `npx @elie-laloum/outpost init`; tertiary Guide and Reference.
 
-Confirmed shape (2026-09-29): layout grammar of better-auth.com, not its look; hero with tagline, install command, CTAs and a code window with static file tabs `run.ts` / `brief.md` / `workflow.ts` (representative example, labelled); three-pillar bordered grid; agents & sandboxes strip (text wordmarks, no invented logos); workflow showcase; quiet footer close, no CTA band. Anti-goals: pixel clone, marketing hype. Visual authority: the existing Guide chrome (Celestia grayscale, hairlines, Inter, light and dark).
+Confirmed shape (2026-09-30, replaces 2026-09-29): problem-led and shorter. Headline "Code orchestrates. Agents think." (FR « Le code orchestre. Les agents réfléchissent. »). Pains the user named: LLMs interpret everything even simple, certain steps; context grows because everything goes through the model; an LLM orchestrator drifts; resume is re-interpretation. Sequence: hero with an in-page motion comparison (no code window) → the problem, two labelled groups (Using LLMs today / Building AI workflows), pain | Outpost answer rows → the workflow showcase reframed as "only the fix goes to the agent" → one compact agents & sandboxes bay with ownership line → footer carrying the former tagline. Removed: three pillars, 12-cell runtime grid, primitive cells, swap diff. Anti-goals: hype, "LLMs are bad", invented metrics or timings, video files.
 
 ## Direction contract
 
-THESIS: The home is a working document framed like a blueprint: one hairline grid that runs from header to footer, every section a bay of that grid split on track 5 (the left bay says, the right bay proves) with inner cells on track 9, every claim backed by real code or facts in the bay beside it. It refuses the centered gradient hero with a feature-card farm.
+THESIS: The home demonstrates one split, code decides and the agent judges, by running the same job twice side by side; it refuses the feature-pillar tour and the code-window hero.
 
-OWN-WORLD: Celestia grayscale on both themes, 1px hairlines as the only structure, square-cornered bays, Inter at display weight with tight tracking, monospace reserved for code, commands and package names, one restrained accent used only for active code lines and focus.
+OWN-WORLD: Survey Sheet unchanged: Celestia grayscale, 1px hairlines, square bays on the 5 | 7 frame with cells on track 9, Inter, mono only for code; ember marks only a model that is working right now.
 
-STORY: A developer reads the tagline, sees the actual script they would run, understands that agent and sandbox are swappable, that they own credentials and state, and that runs become typed durable workflows; they copy the init command or open Setup.
+STORY: The visitor recognises their pipeline in the "LLM orchestrates" lane (every step through the model, context growing, order drifting, resume re-reading), sees the "Code orchestrates" lane finish with one agent step, reads the four pains answered in words, sees the real workflow code, then copies init or opens Setup.
 
-FIRST VIEWPORT: Guide header across the top. Below it, the hero bay split on track 5 of 12: the left five tracks hold the tagline, one clause per line in white, sized so each English clause holds one line in the bay (about 2.6–3rem between 1280 and 1440; French clauses may wrap), one supporting sentence, the install command field with copy, Get started (solid) and Read the guide (outline) side by side, facts line under them; the right seven tracks hold the code window with the three file tabs, highlighted run.ts, copy control and a run-command strip at its foot. Primary action sits under the tagline, above the fold at 1280×720.
+FIRST VIEWPORT: Guide header. Hero bay split on track 5: left the two-line headline, one lead sentence pair, install field, Get started + Read the guide, facts line; right a framed figure: bar (job title, pause/replay square), two stacked lanes of four step cells (Branch, Fix, Verify, Integrate) with owner tags and a context meter each, and a row of four beat buttons (Steps, Context, Order, Resume) along its foot. Primary action above the fold at 1280×720.
 
-FORM: Brief-pinned layout (better-auth.com grammar), no concept roll; signature interaction: in the workflow showcase, focusing or hovering a numbered step highlights its lines in the code bay.
+FORM: Brief-pinned composition from shape, no concept roll (seed: none, user-pinned). Signature interaction: the beat-driven lane comparison, autoplayed once in view, beats clickable, reduced motion shows end states.
 
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance

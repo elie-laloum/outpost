@@ -1,12 +1,12 @@
 ---
 title: Outpost
-description: "Run an agent, own its environment, compose a workflow."
+description: "Code orchestrates. Agents think. A TypeScript library for running coding agents inside workflows you write in code."
 landing:
   headline:
-    - "Run an agent,"
-    - "own its environment,"
-    - "compose a workflow."
-  lead: "Outpost is a TypeScript library and CLI for running coding agents in sandboxes you choose, on Git workspaces you control, as typed workflows that survive interruptions."
+    - "Code orchestrates."
+    - "Agents think."
+  tagline: "Run an agent, own its environment, compose a workflow."
+  lead: "Outpost is a TypeScript library for running coding agents inside workflows you write in code. The order, the checks and the resume stay in code; the agent only gets the work that needs judgment."
   install:
     command: "npx @elie-laloum/outpost init"
     copy: "Copy the install command"
@@ -15,144 +15,102 @@ landing:
   secondary: { label: "Read the guide", href: "guide/introduction/" }
   facts: "Node.js 24+ · MIT"
   reference: { label: "API reference", href: "reference/" }
-  window:
-    label: "Example project files"
+  demo:
+    title: "One job, two orchestrators"
+    pause: "Pause the comparison"
+    replay: "Replay the comparison"
+    beatsLabel: "Compare"
+    beats: ["Steps", "Context", "Order", "Resume"]
+    steps: ["Branch", "Fix", "Verify", "Integrate"]
+    owners: { model: "model", code: "code", agent: "agent" }
+    notes: { early: "too early", reread: "reread", restored: "restored" }
+    interrupted: "Interrupted"
+    model:
+      title: "An LLM orchestrates"
+      context: "Model context"
+      captions:
+        - "The model interprets every step, even the certain ones."
+        - "Every step adds to the conversation it rereads."
+        - "It decides the order as it goes, and can drift."
+        - "After an interruption, it rereads everything."
+    code:
+      title: "Code orchestrates"
+      context: "Agent context"
+      captions:
+        - "Code branches, verifies and integrates. The agent only fixes."
+        - "The agent starts from its brief, nothing more."
+        - "The order is a task graph, fixed before the run."
+        - "Finished steps come back from the checkpoint."
+  problem:
+    title: "Models are asked to do everything"
+    text: "An LLM is good at judgment: reading code, writing a fix, reviewing a change. Most AI pipelines also hand it the steps, the order and the recovery, which code does better."
+    link: { label: "How Outpost works", href: "guide/how-it-works/" }
+    answerLabel: "With Outpost"
+    groups:
+      - title: "Using LLMs today"
+        rows:
+          - pain: "Everything is interpreted"
+            detail: "Even a branch name or a test command goes through the model, every time."
+            answer: "Code runs the certain steps. The agent gets only the work that needs judgment."
+          - pain: "The context keeps growing"
+            detail: "Each step adds to one conversation that the model rereads."
+            answer: "Each agent task starts from its own brief, in its own sandbox."
+      - title: "Building AI workflows"
+        rows:
+          - pain: "The orchestrator drifts"
+            detail: "When a model decides the order, it can skip, repeat or reorder steps."
+            answer: "The task graph is TypeScript, validated before the run. Typed responses are checked against their schema."
+          - pain: "Resuming means re-interpreting"
+            detail: "After a crash or a quota, the model rebuilds its state from a transcript."
+            answer: "Finished tasks come back from the checkpoint as JSON. Rerunning an interrupted one takes your explicit consent."
+  workflow:
+    title: "Only the fix goes to the agent"
+    text: "A plain TypeScript workflow. One task runs an agent in its sandbox; code reads its typed result, waits for a human and resumes from a checkpoint."
+    stepsLabel: "Workflow steps"
     copy: "Copy this file"
-    example: "example"
-    notes:
-      run: 'node run.ts "Fix the failing tests, verify and commit."'
-      brief: "{{OBJECTIVE}} comes from the command line; Outpost fills the branch names."
-      workflow: "Two reviews in parallel, each in its own Podman sandbox."
-  run:
-    title: "Run an agent"
-    text: "Claude Code, Codex, Copilot CLI, Kimi Code, Antigravity or Outpost’s own harness, on Docker, Podman, Vercel, Daytona or your host. Changing either is a one-line edit; the dispatch stays the same."
-    caption: "Swap the agent and the sandbox"
-    link: { label: "Choose an environment", href: "guide/choose-a-sandbox/" }
-  own:
-    title: "Own its environment"
-    text: "Nothing is implicit. You pick how each agent authenticates, where it runs and how its branch lands."
-    ledger:
+    steps:
       - {
-          term: "Credentials",
-          detail: "Your account login or an API key, declared per harness. No system keychain.",
+          title: "One agent task",
+          text: "The agent gets a brief, its own sandbox and a named branch. It fixes the tests; it does not decide what runs next.",
+          lines: "11-20",
         }
       - {
-          term: "Sandbox",
-          detail: "Your provider. Isolated sandboxes never fall back to the host.",
+          title: "Code reads a typed result",
+          text: "fix and summary are plain functions. They read the branch and the commit count as values, not as text to interpret.",
+          lines: "21-33",
         }
       - {
-          term: "Branch",
-          detail: "The current checkout, a named branch or an integrated one: your choice per dispatch.",
-        }
-      - { term: "Recovery", detail: "Kept whenever cleanup would lose work." }
-    link: { label: "Credentials and boundaries", href: "guide/authentication/" }
-  compose:
-    title: "Compose a workflow"
-    text: "Tasks pass typed results to each other. Runs checkpoint, wait for approvals, pause on quotas and resume the conversation where it stopped."
-    primitives:
-      - {
-          name: "defineWorkflow",
-          href: "reference/defineworkflow/",
-          detail: "Validates the task graph",
+          title: "A human decides",
+          text: "The approval gate pauses the run until an allowed actor approves or rejects the merge.",
+          lines: "34-39",
         }
       - {
-          name: "defineIsolatedTask",
-          href: "reference/defineisolatedtask/",
-          detail: "An agent with its own sandbox",
+          title: "Resume without rereading",
+          text: "Finished tasks persist as JSON in the checkpoint. Starting again restores them instead of running them again.",
+          lines: "41-53",
         }
-      - {
-          name: "defineApprovalTask",
-          href: "reference/defineapprovaltask/",
-          detail: "Waits for a human decision",
-        }
-      - {
-          name: "defineLoopTask",
-          href: "reference/definelooptask/",
-          detail: "Retries with verification feedback",
-        }
-    link: { label: "Connect tasks", href: "guide/task-dependencies/" }
+    link: { label: "Durable runs", href: "guide/durable-runs/" }
   runtimes:
-    title: "Agents and sandboxes"
-    text: "Any supported agent runs in any sandbox. Conversation support differs by agent, so each one is listed with what it can do."
+    title: "Any agent, any sandbox"
+    text: "Swap either in one line; the workflow stays the same. You declare how each agent authenticates, and an isolated sandbox never falls back to your host."
     agentsLabel: "Agents"
     sandboxesLabel: "Sandboxes"
     experimental: "Experimental"
     agents:
-      - {
-          name: "Claude Code",
-          href: "guide/claude-code/",
-          note: "capture · resume · fork",
-        }
-      - { name: "Codex", href: "guide/codex/", note: "capture · resume · fork" }
-      - {
-          name: "Kimi Code",
-          href: "guide/kimi-code/",
-          note: "capture · resume · fork",
-        }
-      - {
-          name: "Copilot CLI",
-          href: "guide/copilot-cli/",
-          note: "capture · resume",
-        }
-      - {
-          name: "Antigravity",
-          href: "guide/antigravity/",
-          note: "resume in its sandbox",
-        }
-      - {
-          name: "Outpost harness",
-          href: "guide/harness/",
-          note: "OpenAI and Anthropic models",
-        }
+      - { name: "Claude Code", href: "guide/claude-code/" }
+      - { name: "Codex", href: "guide/codex/" }
+      - { name: "Kimi Code", href: "guide/kimi-code/" }
+      - { name: "Copilot CLI", href: "guide/copilot-cli/" }
+      - { name: "Antigravity", href: "guide/antigravity/" }
+      - { name: "Outpost harness", href: "guide/harness/" }
     sandboxes:
-      - { name: "Docker", href: "guide/containers/", note: "local container" }
-      - {
-          name: "Podman",
-          href: "guide/containers/#podman",
-          note: "local container",
-        }
-      - {
-          name: "Vercel",
-          href: "guide/cloud-sandboxes/#vercel-sandbox",
-          note: "cloud sandbox",
-        }
-      - {
-          name: "Daytona",
-          href: "guide/cloud-sandboxes/#daytona-sandbox",
-          note: "cloud sandbox",
-        }
-      - {
-          name: "Host process",
-          href: "guide/host-process/",
-          note: "explicit, no isolation",
-        }
-      - { name: "Firecracker", href: "guide/firecracker/", note: "microVM" }
-  workflow:
-    title: "From one task to a durable workflow"
-    text: "A fix, a typed summary and a human approval, checkpointed so the run can stop and resume without repeating finished work."
-    stepsLabel: "Workflow steps"
-    steps:
-      - {
-          title: "An agent in its own sandbox",
-          text: "An isolated task allocates its own sandbox, runs the agent from your Setup configuration on a named branch and releases the sandbox. fix keeps its branch and commit count as JSON for the checkpoint.",
-          lines: "11-27",
-        }
-      - {
-          title: "Typed results downstream",
-          text: "context.value(fix) is the fix task’s result, fully typed. The summary starts only after it succeeds.",
-          lines: "28-33",
-        }
-      - {
-          title: "A human decides",
-          text: "The approval gate pauses the run until an allowed actor approves or rejects the change.",
-          lines: "34-39",
-        }
-      - {
-          title: "Checkpointed and resumable",
-          text: "Finished tasks persist in the checkpoint store. Starting again with the decision resumes the run.",
-          lines: "41-53",
-        }
-    link: { label: "Durable runs", href: "guide/durable-runs/" }
+      - { name: "Docker", href: "guide/containers/" }
+      - { name: "Podman", href: "guide/containers/#podman" }
+      - { name: "Vercel", href: "guide/cloud-sandboxes/#vercel-sandbox" }
+      - { name: "Daytona", href: "guide/cloud-sandboxes/#daytona-sandbox" }
+      - { name: "Host process", href: "guide/host-process/" }
+      - { name: "Firecracker", href: "guide/firecracker/", experimental: true }
+    link: { label: "Choose an agent", href: "guide/choose-an-agent/" }
   footer:
     documentation:
       title: "Documentation"
@@ -179,4 +137,4 @@ landing:
     license: "Released under the MIT License."
 ---
 
-Outpost runs coding agents from TypeScript. Choose an agent and a sandbox, give it a Git workspace and compose its results into typed, durable workflows. Start with the [setup guide](guide/setup/) or look up an API in the [reference](reference/).
+Outpost runs coding agents inside workflows you write in TypeScript. Code keeps the order, the checks and the resume; the agent gets the work that needs judgment. Start with the [setup guide](guide/setup/) or look up an API in the [reference](reference/).
