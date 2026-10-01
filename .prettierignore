@@ -10,3 +10,6 @@ docs/.impeccable/
 
 docs/test-results/
 docs/playwright-report/
+
+# Vendored skills are byte-pinned by skills-lock.json.
+.claude/skills/landing-page-conversion-audit/
