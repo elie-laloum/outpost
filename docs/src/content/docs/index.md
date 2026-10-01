@@ -88,12 +88,12 @@ landing:
             detail: "After a crash or a quota, the model rebuilds its state from a transcript."
             answer: "Finished tasks come back from the checkpoint as JSON. Rerunning an interrupted one takes your explicit consent."
   determinism:
-    title: "Probabilistic in one place. Deterministic everywhere else."
-    text: "Run the same workflow again: the order, the branch, the checks and the integration are identical every time. Only the agent’s work varies, and nothing uses it until a check accepts it. Outpost does not make the model deterministic; it keeps everything else out of its hands."
+    title: "The agent says it is fixed. Your tests decide."
+    text: "Outpost never takes that answer on trust. Every run branches, lets the agent work, runs your check and integrates only what passed — the same four steps, in the same order, every time. Only the agent’s column varies, and a run the check rejects goes back for another try instead of onto your branch."
     link: { label: "Verification loops", href: "guide/verification-loops/" }
     replayLink:
       { label: "Replay without a model", href: "guide/record-replay/" }
-    check: "The check is plain code: the tests decide, not the model."
+    check: "Your check is ordinary code. This one runs `npm test` and hands the output back as feedback when it fails."
     demo:
       title: "The same workflow, run again"
       run: "Run"
@@ -144,8 +144,8 @@ landing:
         text: "If the whole job fits in one conversation, run the agent CLI directly. Outpost earns its place when the branch, the checks, the order and the resume are yours."
       - lead: "A single CI step"
         text: "A workflow file that runs an agent and stops is less code. Outpost runs the same job from CI, a queue, a cron slot or a verified webhook, and keeps the checkpoint when the worker restarts."
-      - lead: "An LLM pipeline"
-        text: "If your steps are model calls, a pipeline framework fits them better. Outpost chains tasks, not prompts: the order is TypeScript you write and typecheck, an agent task runs a whole coding agent in its own sandbox rather than one prompt, and there is no vector store or retrieval layer anywhere in it."
+      - lead: "Work that is not code"
+        text: "Outpost’s unit is a repository: every agent task gets a sandbox, a branch and commits. If what you are orchestrating is text in and text out — summarise, classify, extract — that machinery is pure overhead, and a pipeline framework is the right tool."
     link: { label: "Job queues and workers", href: "guide/job-queues/" }
     action: { label: "Start with the setup guide", href: "guide/setup/" }
   footer:

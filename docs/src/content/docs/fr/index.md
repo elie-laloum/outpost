@@ -88,12 +88,12 @@ landing:
             detail: "Après un crash ou un quota, le modèle reconstruit son état à partir d’une transcription."
             answer: "Les tâches terminées reviennent du checkpoint en JSON. Relancer une tâche interrompue demande votre accord explicite."
   determinism:
-    title: "Probabiliste à un seul endroit. Déterministe partout ailleurs."
-    text: "Relancez le même workflow : l’ordre, la branche, les vérifications et l’intégration sont identiques à chaque fois. Seul le travail de l’agent varie, et rien ne l’utilise avant qu’un contrôle l’ait accepté. Outpost ne rend pas le modèle déterministe : il lui retire tout le reste."
+    title: "L’agent dit que c’est corrigé. Vos tests décident."
+    text: "Outpost ne prend jamais cette réponse pour argent comptant. Chaque exécution crée la branche, laisse l’agent travailler, lance votre contrôle et n’intègre que ce qui est passé — les mêmes quatre étapes, dans le même ordre, à chaque fois. Seule la colonne de l’agent varie, et une exécution rejetée repart pour un essai au lieu d’atterrir sur votre branche."
     link:
       { label: "Boucles de vérification", href: "guide/verification-loops/" }
     replayLink: { label: "Rejouer sans modèle", href: "guide/record-replay/" }
-    check: "Le contrôle est du simple code : les tests décident, pas le modèle."
+    check: "Votre contrôle est du code ordinaire. Celui-ci lance `npm test` et renvoie sa sortie en commentaire quand il échoue."
     demo:
       title: "Le même workflow, relancé"
       run: "Exécution"
@@ -144,8 +144,8 @@ landing:
         text: "Si toute la tâche tient dans une conversation, lancez la CLI de l’agent directement. Outpost prend son sens quand la branche, les vérifications, l’ordre et la reprise vous appartiennent."
       - lead: "Une seule étape de CI"
         text: "Un fichier de workflow qui lance un agent et s’arrête demande moins de code. Outpost lance la même tâche depuis la CI, une file, un créneau cron ou un webhook vérifié, et garde le checkpoint quand le worker redémarre."
-      - lead: "Un pipeline de LLM"
-        text: "Si vos étapes sont des appels au modèle, un framework de pipeline leur convient mieux. Outpost enchaîne des tâches, pas des prompts : l’ordre est du TypeScript que vous écrivez et typez, une tâche d’agent exécute un agent de code entier dans sa propre sandbox plutôt qu’un seul prompt, et il n’y a nulle part de base vectorielle ni de couche de recherche."
+      - lead: "Du travail qui n’est pas du code"
+        text: "L’unité d’Outpost, c’est un dépôt : chaque tâche d’agent reçoit une sandbox, une branche et des commits. Si ce que vous orchestrez, c’est du texte en entrée et du texte en sortie — résumer, classer, extraire — toute cette mécanique n’est que du surcoût, et un framework de pipeline est l’outil adapté."
     link: { label: "Files de jobs et workers", href: "guide/job-queues/" }
     action:
       { label: "Commencer par le guide d’installation", href: "guide/setup/" }

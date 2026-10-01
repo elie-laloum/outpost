@@ -24,9 +24,12 @@ const checkCode = fixLines
   .slice(checkStart, checkEnd + 1)
   .map((line) => line.slice(2))
   .join("\n");
-const outcome = landing.install.outcome
-  .split(/`([^`]+)`/)
-  .map((part, index) => ({ part, code: index % 2 === 1 }));
+const marked = (text: string) =>
+  text.split(/`([^`]+)`/).map((part, index) => ({ part, code: index % 2 === 1 }));
+// A heading made of sentences breaks between them, never inside one.
+const sentences = (text: string) => text.split(/(?<=\.)\s+/);
+const outcome = marked(landing.install.outcome);
+const check = marked(landing.determinism.check);
 const runtimeGroups = [
   { label: landing.runtimes.agentsLabel, items: landing.runtimes.agents },
   { label: landing.runtimes.sandboxesLabel, items: landing.runtimes.sandboxes },
@@ -162,7 +165,11 @@ const runtimeGroups = [
 
     <section class="bay" aria-labelledby="determinism-heading">
       <div class="say">
-        <h2 id="determinism-heading">{landing.determinism.title}</h2>
+        <h2 id="determinism-heading">
+          {sentences(landing.determinism.title).map((clause) => (
+            <span>{clause}</span>
+          ))}
+        </h2>
         <p>{landing.determinism.text}</p>
         <div class="links">
           <a class="more" href={href(landing.determinism.link.href)}
@@ -177,7 +184,9 @@ const runtimeGroups = [
         <DeterminismDemo demo={landing.determinism.demo} />
       </div>
       <div class="say check-say">
-        <p id="check-caption">{landing.determinism.check}</p>
+        <p id="check-caption">
+          {check.map(({ part, code }) => (code ? <code>{part}</code> : part))}
+        </p>
       </div>
       <div class="show check-show">
         <div
@@ -375,7 +384,6 @@ const runtimeGroups = [
   .say {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
     gap: 1rem;
     min-width: 0;
     padding: 3.5rem var(--landing-pad);
@@ -405,10 +413,17 @@ const runtimeGroups = [
     color: var(--sl-color-gray-2);
     font-size: 0.9375rem;
   }
+  .check-say code {
+    color: var(--sl-color-white);
+    font-size: 0.875rem;
+  }
   .say > p {
     max-width: 34rem;
     line-height: 1.65;
     text-wrap: pretty;
+  }
+  .say h2 span {
+    display: block;
   }
   .say h2 {
     color: var(--sl-color-white);
