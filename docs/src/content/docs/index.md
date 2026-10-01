@@ -110,6 +110,7 @@ landing:
         replay: "Replayed from a recording: the agent’s answer comes back identical, without calling a model."
       file: "file"
       files: "files"
+      working: "fixing…"
       retry: "2nd try"
       replayedNote: "replayed"
       failed: "failed"

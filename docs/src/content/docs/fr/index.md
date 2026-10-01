@@ -110,6 +110,7 @@ landing:
         replay: "Rejouée depuis un enregistrement : la réponse de l’agent revient identique, sans appeler de modèle."
       file: "fichier"
       files: "fichiers"
+      working: "corrige…"
       retry: "2ᵉ essai"
       replayedNote: "rejouée"
       failed: "échec"

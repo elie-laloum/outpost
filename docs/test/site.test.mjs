@@ -107,7 +107,11 @@ for (const [locale, heading, start, copied, beat, rerun, replay] of [
     await expect(page.locator(".landing .boundary")).toHaveCount(3);
     const determinism = page.locator("outpost-determinism");
     const runs = determinism.locator("tbody tr");
+    await determinism.scrollIntoViewIfNeeded();
     await expect(runs).toHaveCount(3);
+    await expect(
+      determinism.locator('tbody tr:last-child [data-col="integrate"]'),
+    ).toHaveAttribute("data-state", "done", { timeout: 10000 });
     await determinism.getByRole("button", { name: rerun }).click();
     await expect(runs.last()).toHaveAttribute("data-run", "4");
     await expect(runs).toHaveCount(3);
@@ -145,6 +149,8 @@ test("landing comparison stays still with reduced motion", async ({ page }) => {
     demo.locator('[data-lane="model"] .step').nth(3),
   ).toHaveAttribute("data-note", "early");
   const determinism = page.locator("outpost-determinism");
+  await determinism.scrollIntoViewIfNeeded();
+  await expect(determinism.locator("tbody tr")).toHaveCount(3);
   await determinism.getByRole("button", { name: "Run again" }).click();
   await expect(
     determinism.locator('tbody tr:last-child [data-col="integrate"]'),

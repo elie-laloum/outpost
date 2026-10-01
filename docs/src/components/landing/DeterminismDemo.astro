@@ -15,7 +15,6 @@ const { demo } = Astro.props;
 const variants = [
   { files: 3, added: 42, removed: 17 },
   { files: 2, added: 31, removed: 9 },
-  { files: 2, added: 19, removed: 6, retry: true },
 ];
 const owners = ["code", "agent", "code", "code"] as const;
 const diff = (added: number, removed: number) => `+${added} −${removed}`;
@@ -72,6 +71,7 @@ const count = (files: number) =>
                   </code>
                   <span class="files">{count(variant.files)}</span>
                 </span>
+                <span class="working">{demo.working}</span>
                 <span class="retry" hidden={!variant.retry}>
                   {demo.retry}
                 </span>
@@ -158,6 +158,19 @@ const count = (files: number) =>
       this.querySelector("[data-replay]")?.addEventListener("click", () =>
         this.#toggleReplay(),
       );
+      this.#playInView();
+    }
+
+    #playInView() {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          if (!entries.some((entry) => entry.intersectionRatio >= 0.35)) return;
+          observer.disconnect();
+          this.#rerun();
+        },
+        { threshold: 0.35 },
+      );
+      observer.observe(this);
     }
 
     get #body() {
@@ -424,9 +437,21 @@ const count = (files: number) =>
     opacity: 0;
     transition: opacity 0.3s var(--landing-ease);
   }
-  tbody td:is([data-state="done"], [data-state="fail"]) > *:not(.failed),
+  tbody td:is([data-state="done"], [data-state="fail"]) > *:not(.failed, .working),
   tbody td[data-state="fail"] > .failed {
     opacity: 1;
+  }
+  /* A live cell shows what it is doing; only a finished one shows its result. */
+  tbody td[data-state="live"] > :is(.working, code) {
+    opacity: 1;
+    color: var(--sl-color-gray-3);
+  }
+  .working {
+    display: none;
+    color: var(--sl-color-gray-3);
+  }
+  td[data-state="live"] > .working {
+    display: block;
   }
   tbody td .failed,
   tbody td[data-state="fail"] .check {
@@ -434,6 +459,7 @@ const count = (files: number) =>
   }
   tbody td[data-state="fail"] .failed {
     display: inline;
+    margin-inline-start: 0.4rem;
     color: var(--sl-color-gray-3);
   }
   tbody td[data-state="fail"] code {

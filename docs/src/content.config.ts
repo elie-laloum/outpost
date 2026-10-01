@@ -106,6 +106,7 @@ const landing = z.object({
       captions: z.object({ live: z.string(), replay: z.string() }),
       file: z.string(),
       files: z.string(),
+      working: z.string(),
       retry: z.string(),
       replayedNote: z.string(),
       failed: z.string(),
