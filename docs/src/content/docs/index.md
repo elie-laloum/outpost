@@ -87,35 +87,19 @@ landing:
           - pain: "Resuming means re-interpreting"
             detail: "After a crash or a quota, the model rebuilds its state from a transcript."
             answer: "Finished tasks come back from the checkpoint as JSON. Rerunning an interrupted one takes your explicit consent."
-  determinism:
-    title: "The agent says it is fixed. Your tests decide."
-    text: "Outpost never takes that answer on trust. Every run branches, lets the agent work, runs your check and integrates only what passed — the same four steps, in the same order, every time. Only the agent’s column varies, and a run the check rejects goes back for another try instead of onto your branch."
-    link: { label: "Verification loops", href: "guide/verification-loops/" }
-    replayLink:
-      { label: "Replay without a model", href: "guide/record-replay/" }
-    check: "Your check is ordinary code. This one runs `npm test` and hands the output back as feedback when it fails."
-    demo:
-      title: "The same workflow, run again"
-      run: "Run"
-      rerun: "Run again"
-      replay: "Replay the recording"
-      calls: "Replay · 0 model calls"
-      columns: ["Branch", "Agent", "Verify", "Integrate"]
-      owners: { code: "code", agent: "agent" }
-      same: "same each run"
-      varies: "varies each run"
-      replayed: "same, replayed"
-      captions:
-        live: "Only the agent column changes. Nothing is integrated until the tests pass."
-        replay: "Replayed from a recording: the agent’s answer comes back identical, without calling a model."
-      file: "file"
-      files: "files"
-      working: "fixing…"
-      retry: "2nd try"
-      replayedNote: "replayed"
-      failed: "failed"
-      merged: "merged"
-      announce: "Run {run}: tests pass, branch merged."
+  start:
+    title: "One command writes the project. You read every file."
+    text: "`init` scaffolds a workflow you own: six files, none of them hidden, and one container image. It preserves an existing package manifest and extends an existing ignore file. Point it at any directory and any repository — the workflow never has to live inside the repository it edits."
+    link: { label: "Set it up", href: "guide/setup/" }
+    secondary: { label: "CLI commands", href: "guide/cli/" }
+    filesLabel: "What init writes"
+    files:
+      - { name: "run.ts", note: "The workflow script you run." }
+      - { name: "brief.md", note: "The agent’s instructions." }
+      - { name: ".env.example", note: "The variables your sign-in needs." }
+      - { name: "Dockerfile", note: "The agent image recipe." }
+      - { name: ".gitignore", note: "Extends an existing one." }
+      - { name: "package.json", note: "Only when the directory has none." }
   runtimes:
     title: "Any agent, any sandbox"
     text: "Swap either in one line; the workflow stays the same. You declare how each agent authenticates, and an isolated sandbox never falls back to your host."

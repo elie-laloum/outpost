@@ -40,15 +40,13 @@ for (const [locale, title, reference] of [
   });
 }
 
-for (const [locale, heading, start, copied, beat, rerun, replay] of [
+for (const [locale, heading, start, copied, beat] of [
   [
     "",
     "Run coding agents",
     "Get started",
     "Copy the install command",
     "Resume",
-    "Run again",
-    "Replay the recording",
   ],
   [
     "fr/",
@@ -56,8 +54,6 @@ for (const [locale, heading, start, copied, beat, rerun, replay] of [
     "Commencer",
     "Copier la commande d’installation",
     "Reprise",
-    "Relancer",
-    "Rejouer l’enregistrement",
   ],
 ]) {
   test(`landing demos and copy work (${locale || "en"})`, async ({
@@ -105,33 +101,11 @@ for (const [locale, heading, start, copied, beat, rerun, replay] of [
       "npx @elie-laloum/outpost init",
     );
     await expect(page.locator(".landing .boundary")).toHaveCount(3);
-    const determinism = page.locator("outpost-determinism");
-    const runs = determinism.locator("tbody tr");
-    await determinism.scrollIntoViewIfNeeded();
-    await expect(runs).toHaveCount(3);
-    await expect(
-      determinism.locator('tbody tr:last-child [data-col="integrate"]'),
-    ).toHaveAttribute("data-state", "done", { timeout: 10000 });
-    await determinism.getByRole("button", { name: rerun }).click();
-    await expect(runs.last()).toHaveAttribute("data-run", "4");
-    await expect(runs).toHaveCount(3);
-    await expect(
-      determinism.locator('tbody tr:last-child [data-col="integrate"]'),
-    ).toHaveAttribute("data-state", "done", { timeout: 5000 });
-    await determinism.getByRole("button", { name: replay }).click();
-    await expect(
-      determinism.getByRole("button", { name: replay }),
-    ).toHaveAttribute("aria-pressed", "true");
-    const replayed = determinism.locator("tbody tr:last-child");
-    await expect(replayed).toHaveAttribute("data-run", "5");
-    await expect(replayed).toHaveAttribute("data-replayed", "");
-    await expect(replayed.locator('[data-col="integrate"]')).toHaveAttribute(
-      "data-state",
-      "done",
-      { timeout: 5000 },
-    );
-    await expect(replayed.locator(".diff")).toHaveText("+42 −17");
-    await expect(determinism.locator("tbody tr[data-replayed]")).toHaveCount(1);
+    const scaffold = page.locator("outpost-scaffold");
+    await scaffold.scrollIntoViewIfNeeded();
+    await expect(scaffold).toHaveAttribute("data-written", "");
+    await expect(scaffold.locator("li")).toHaveCount(6);
+    await expect(scaffold.locator("li code").first()).toHaveText("run.ts");
     await hero.getByRole("link", { name: start }).click();
     await expect(page).toHaveURL(new RegExp(`/${locale}guide/setup/$`));
   });
@@ -148,13 +122,9 @@ test("landing comparison stays still with reduced motion", async ({ page }) => {
   await expect(
     demo.locator('[data-lane="model"] .step').nth(3),
   ).toHaveAttribute("data-note", "early");
-  const determinism = page.locator("outpost-determinism");
-  await determinism.scrollIntoViewIfNeeded();
-  await expect(determinism.locator("tbody tr")).toHaveCount(3);
-  await determinism.getByRole("button", { name: "Run again" }).click();
-  await expect(
-    determinism.locator('tbody tr:last-child [data-col="integrate"]'),
-  ).toHaveAttribute("data-state", "done");
+  const scaffold = page.locator("outpost-scaffold");
+  await scaffold.scrollIntoViewIfNeeded();
+  await expect(scaffold.locator("li").first()).toBeVisible();
 });
 
 test("language switch retains the new guide page", async ({ page }) => {

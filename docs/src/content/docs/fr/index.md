@@ -87,35 +87,19 @@ landing:
           - pain: "Reprendre, c’est réinterpréter"
             detail: "Après un crash ou un quota, le modèle reconstruit son état à partir d’une transcription."
             answer: "Les tâches terminées reviennent du checkpoint en JSON. Relancer une tâche interrompue demande votre accord explicite."
-  determinism:
-    title: "L’agent dit que c’est corrigé. Vos tests décident."
-    text: "Outpost ne prend jamais cette réponse pour argent comptant. Chaque exécution crée la branche, laisse l’agent travailler, lance votre contrôle et n’intègre que ce qui est passé — les mêmes quatre étapes, dans le même ordre, à chaque fois. Seule la colonne de l’agent varie, et une exécution rejetée repart pour un essai au lieu d’atterrir sur votre branche."
-    link:
-      { label: "Boucles de vérification", href: "guide/verification-loops/" }
-    replayLink: { label: "Rejouer sans modèle", href: "guide/record-replay/" }
-    check: "Votre contrôle est du code ordinaire. Celui-ci lance `npm test` et renvoie sa sortie en commentaire quand il échoue."
-    demo:
-      title: "Le même workflow, relancé"
-      run: "Exécution"
-      rerun: "Relancer"
-      replay: "Rejouer l’enregistrement"
-      calls: "Rejeu · 0 appel au modèle"
-      columns: ["Branche", "Agent", "Vérifier", "Intégrer"]
-      owners: { code: "code", agent: "agent" }
-      same: "identique à chaque fois"
-      varies: "varie à chaque fois"
-      replayed: "identique, rejoué"
-      captions:
-        live: "Seule la colonne de l’agent change. Rien n’est intégré avant que les tests passent."
-        replay: "Rejouée depuis un enregistrement : la réponse de l’agent revient identique, sans appeler de modèle."
-      file: "fichier"
-      files: "fichiers"
-      working: "corrige…"
-      retry: "2ᵉ essai"
-      replayedNote: "rejouée"
-      failed: "échec"
-      merged: "intégrée"
-      announce: "Exécution {run} : tests réussis, branche intégrée."
+  start:
+    title: "Une commande écrit le projet. Vous lisez chaque fichier."
+    text: "`init` échafaude un workflow qui vous appartient : six fichiers, aucun caché, et une image de conteneur. Il préserve un manifeste de paquet existant et complète un fichier d’exclusion existant. Pointez-le vers le dossier et le dépôt de votre choix — le workflow n’a jamais besoin de vivre dans le dépôt qu’il modifie."
+    link: { label: "Installer", href: "guide/setup/" }
+    secondary: { label: "Commandes CLI", href: "guide/cli/" }
+    filesLabel: "Ce qu’écrit init"
+    files:
+      - { name: "run.ts", note: "Le script de workflow que vous lancez." }
+      - { name: "brief.md", note: "Les instructions de l’agent." }
+      - { name: ".env.example", note: "Les variables de votre connexion." }
+      - { name: "Dockerfile", note: "La recette de l’image d’agent." }
+      - { name: ".gitignore", note: "Complète un fichier existant." }
+      - { name: "package.json", note: "Seulement si le dossier n’en a pas." }
   runtimes:
     title: "Tout agent, toute sandbox"
     text: "Changer l’un ou l’autre tient en une ligne ; le workflow reste identique. Vous déclarez comment chaque agent s’authentifie, et une sandbox isolée ne se replie jamais sur votre machine."

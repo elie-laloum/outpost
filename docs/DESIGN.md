@@ -93,17 +93,6 @@ components:
     textColor: "{colors.pewter}"
     rounded: "{rounded.none}"
     padding: "0.15rem 0.4rem"
-  determinism-cell:
-    backgroundColor: "{colors.night}"
-    textColor: "{colors.white-ink}"
-    rounded: "{rounded.none}"
-    padding: "0.5rem 0.6rem"
-    height: "3.25rem"
-  determinism-control:
-    textColor: "{colors.white-ink}"
-    rounded: "{rounded.none}"
-    padding: "0 0.75rem"
-    height: "2.75rem"
   demo-beat-pressed:
     textColor: "{colors.white-ink}"
     rounded: "{rounded.none}"
@@ -140,20 +129,20 @@ A cool slate grayscale taken from Celestia's Tailwind grays. The ember accent is
 
 ### Primary
 
-- **Ember** (#fb923c dark / Ember Deep #c2410c light): the only accent. It marks a model or agent step running right now in the orchestration demo (a 12% tint mixed in sRGB and a 2px ember underline that grows for the step's duration), the determinism table's Agent cell while a model works (the same 12% sRGB tint and a 2px ember underline growing for the turn; replayed runs are tonal, never ember), focus rings (2px outline), text selection (a 32% tint), and the experimental flask on Firecracker. Nothing else is orange: finished steps and cells, code steps, owner tags and the table's key stay in ink.
+- **Ember** (#fb923c dark / Ember Deep #c2410c light): the only accent. It marks a model or agent step running right now in the orchestration demo (a 12% tint mixed in sRGB and a 2px ember underline that grows for the step's duration), focus rings (2px outline), text selection (a 32% tint), and the experimental flask on Firecracker. Nothing else is orange: finished steps, code steps and owner tags stay in ink.
 
 ### Neutral
 
 - **Night** (dark ground) / **Paper** (light ground): page and rail backgrounds. Night is Celestia's gray-950.
-- **White Ink** (dark) / **Slate Ink** (light): headings, primary labels, pressed beats and controls, the filled model and agent owner tags, the replay badge and the replay switch when on, the "varies each run" key, and the primary button's fill.
-- **Mist** (dark body) / **Graphite** (light body): body copy, lane, beat and determinism captions, the determinism file counts, and pain details.
-- **Pewter** (dark muted) / **Steel** (light muted): captions, the facts line, inactive beats, outlined code owner tags (in the orchestration demo and the determinism table), meter labels and fills at rest, step notes, the determinism row labels ("Run n", with the number in ink), its "2nd try", "failed" and "replayed" notes, its "same each run" key, a disabled control, and group labels. Both pass 4.5:1 on their ground.
+- **White Ink** (dark) / **Slate Ink** (light): headings, primary labels, pressed beats and controls, the filled model and agent owner tags, and the primary button's fill.
+- **Mist** (dark body) / **Graphite** (light body): body copy, lane and beat captions, scaffold notes, and pain details.
+- **Pewter** (dark muted) / **Steel** (light muted): captions, the facts line, inactive beats, outlined code owner tags, meter labels and fills at rest, step notes, scaffold file icons, a disabled control, and group labels. Both pass 4.5:1 on their ground.
 - **Graphite** (dark hairline) / **Fog Line** (light hairline): every rule, frame edge and cell divider, through `--sl-color-hairline-light`.
 - **Slate Panel** (gray-800 dark, gray-200 light): hover fill for buttons and navigation. Mixed at 45% into Night, it becomes the code surface (at 80% for a pressed beat or control and a table cell being worked on).
 
 ### Named Rules
 
-**The Live-Only Ember Rule.** Ember marks what is active or focused right now: a model or agent step running right now, a model working on the determinism table's Agent cell, focus, selection, experimental status. A replayed turn is not a model at work and stays tonal. Pressed beats and controls, hovers and link underlines use white or slate ink and fills, never ember.
+**The Live-Only Ember Rule.** Ember marks what is active or focused right now: a model or agent step running right now, focus, selection, experimental status. Pressed beats and controls, hovers and link underlines use white or slate ink and fills, never ember.
 
 **The Two-Theme Rule.** No color is picked for one theme alone. Each role above has a dark and a light value, and both must meet WCAG 2.2 AA.
 
@@ -171,10 +160,10 @@ Celestia sets the root to 14px. All rem values in this file are relative to that
 
 - **Display** (600, sized from its bay's width with container units, 1.05): the landing headline ("Run coding agents" / "from your TypeScript."), one clause per line, all in White/Slate Ink. The former tagline now sits in the footer under the wordmark at 0.875rem in Pewter/Steel.
 - **Headline** (600, clamp(1.5rem, 2.2vw, 1.875rem), 1.15, -0.03em): section headings in the left bays; Guide page titles follow the same tight tracking at clamp(1.8rem, 3vw, 2.3rem).
-- **Title** (500, 1.0625rem, -0.01em): lane titles and pain names. Demo step names use 0.9375rem at 500 (0.75rem below 40rem); determinism column names 0.875rem at 500.
+- **Title** (500, 1.0625rem, -0.01em): lane titles and pain names. Demo step names use 0.9375rem at 500 (0.75rem below 40rem).
 - **Body** (400, 1rem, 1.65): explanatory copy, capped at about 34rem, with `text-wrap: pretty`. Guide articles use 0.95rem at 1.8.
-- **Label** (500, 0.8125rem): group labels, captions, footer headings, the facts line, the demo title, beats, the determinism controls and meter labels. Step notes, the Interrupted mark, the replay badge, determinism row labels, cell text and the table key drop to 0.75rem; owner tags to 0.75rem (0.6875rem in the determinism table).
-- **Code** (400, 0.8125rem, 1.7): the install command, the determinism code excerpt (at 0.75rem) and API names. In the determinism table, mono is kept only for the branch name `fix-parser`, the diff counts and `npm test`; file counts, notes and "merged" stay in Inter.
+- **Label** (500, 0.8125rem): group labels, captions, footer headings, the facts line, the demo title, beats, meter labels and the scaffold head. Step notes and the Interrupted mark drop to 0.75rem; owner tags to 0.75rem.
+- **Code** (400, 0.8125rem, 1.7): the install command, the hero's `dispatch()` excerpt, scaffold file names (0.875rem) and API names. The excerpt drops to 0.75rem below 40rem.
 
 ### Named Rules
 
@@ -186,11 +175,11 @@ Celestia sets the root to 14px. All rem values in this file are relative to that
 
 The landing page sits in a centered rail, 82rem wide at most, with 1px hairlines on both edges. Outside the rail, a -45° hatch (1px lines every 8px, gray-5 at 45%) fills the margins like the unused area of a drawing sheet.
 
-Inside the rail, every section is a bay on a 12-track frame split 5 | 7. The left bay states the idea (heading, one paragraph, a link), and the right bay proves it (the `dispatch()` excerpt, use-case rows, the pain/answer table, the determinism table, runtime name boxes or boundary rows). One row escapes the split: the orchestration demo opens the problem bay as a full-width figure across all twelve tracks, above that bay's 5 | 7 division, because its own four-step lanes need the frame. A bay may take a second 5 | 7 row rather than stretch one column: the determinism bay states its idea and proves it live in the first row, then captions and shows the real `check` block in the second, because that code cannot be read in five tracks. A bay's trailing link follows the paragraph it belongs to; the sheet left under it is unused area, not a gap to fill. Rows inside the right bay split 4 | 3, so their divider falls on track 9 in every section. The footer's columns start on the same tracks 5 and 9. Horizontal hairlines separate the bays. Content never floats outside a bay. A framed figure (the orchestration demo, the determinism demo) is a drawing set inside its bay; its inner divisions follow its own content.
+Inside the rail, every section is a bay on a 12-track frame split 5 | 7. The left bay states the idea (heading, one paragraph, a link), and the right bay proves it (the `dispatch()` excerpt, use-case rows, the pain/answer table, the scaffold list, runtime name boxes or boundary rows). One row escapes the split: the orchestration demo opens the problem bay as a full-width figure across all twelve tracks, above that bay's 5 | 7 division, because its own four-step lanes need the frame. A bay's trailing link follows the paragraph it belongs to; the sheet left under it is unused area, not a gap to fill. Rows inside the right bay split 4 | 3, so their divider falls on track 9 in every section. The footer's columns start on the same tracks 5 and 9. Horizontal hairlines separate the bays. Content never floats outside a bay. A framed figure (the orchestration demo) is a drawing set inside its bay; its inner divisions follow its own content.
 
 The gutter is `clamp(1.25rem, 3.2vw, 3rem)`. Bays use 3.5rem of vertical padding, stacks inside them 1rem gaps, and cells 1.4rem. More space sits above a heading than below it.
 
-Below 64rem, every bay stacks to one column: the left bay first, then its proof, separated by a hairline. Below 40rem, the rail loses its side borders, both demos run edge to edge, the determinism table keeps its layout with row numbers only and the Verify check on its own line, pain rows stack, and the footer becomes two columns under a full-width brand. The hero's first viewport keeps the primary action above the fold at 1280×720.
+Below 64rem, every bay stacks to one column: the left bay first, then its proof, separated by a hairline. Below 40rem, the rail loses its side borders, the orchestration demo runs edge to edge, pain rows stack, and the footer becomes two columns under a full-width brand. The hero's first viewport keeps the primary action above the fold at 1280×720.
 
 The documentation carries the same frame. Every Guide, Reference and Project page shares one shell: a fixed 4rem header, a 17rem sidebar for the current space with a hairline edge, and a content pane of at most 84rem. From 100rem wide, a 16rem "On this page" rail joins the pane as a full-height column. The pane (with its rail) is centred as one sheet in the space beside the sidebar; the margins on both sides are hatched like the landing's out-of-frame area, with one hairline on each side of the sheet. Those edges are drawn outside the sheet, so with no margin they merge into the sidebar's edge and no line is drawn at the window edge. Inside the pane, a 2.75rem breadcrumb bar sits above a title section, then one section per `h2`, each laid on the 12-track frame:
 
@@ -213,7 +202,7 @@ Flat. There are no shadows anywhere. Depth comes from tone: the code surface is 
 
 ## Shapes
 
-Square, everywhere. Landing bays, docs sections, cells, buttons, the code excerpt and code blocks, the install field, demo step cells, owner tags, context meters, beat buttons, determinism table cells, the replay badge and the replay switch and its knob, runtime name boxes, inline code and sidebar hover and current states all have 0 radius. Icons are drawn SVG with a 1.6 stroke, round caps and round joins. Breadcrumb separators and the demo's code-lane chevrons are drawn with two hairline borders, not glyphs. The one dashed line in the system is the orchestration demo's Interrupted cut.
+Square, everywhere. Landing bays, docs sections, cells, buttons, the code excerpt and code blocks, the install field, demo step cells, owner tags, context meters, beat buttons, scaffold rows, runtime name boxes, inline code and sidebar hover and current states all have 0 radius. Icons are drawn SVG with a 1.6 stroke, round caps and round joins. Breadcrumb separators and the demo's code-lane chevrons are drawn with two hairline borders, not glyphs. The one dashed line in the system is the orchestration demo's Interrupted cut.
 
 ## Components
 
@@ -232,10 +221,10 @@ A single-line code field with a muted `$` prompt, the command in White/Slate Ink
 
 ### Code Excerpt
 
-A framed block of real, typechecked code in a bay. Two ship: the hero's whole `dispatch()` call from `snippets/dispatch.ts`, and the determinism bay's `check` block, cut at build time from `snippets/fix-tests.ts` (the build fails if the block disappears).
+A framed block of real, typechecked code in a bay: the hero's whole `dispatch()` call, rendered from `snippets/dispatch.ts`, which `docs/scripts/check-examples.mjs` typechecks against the package.
 
-- **Frame:** a 1px hairline around the code surface. The hero excerpt carries its caption as a bar above a hairline (Mist/Graphite, 0.8125rem); the determinism excerpt takes the left cell of its own bay row as the caption and labels the code region from it.
-- **Body:** Celestia's highlighting at 1.7 without line numbers, and no copy button. The hero excerpt takes the Code role's 0.8125rem, dropping to the determinism excerpt's 0.75rem below 40rem; the determinism excerpt stays at 0.75rem.
+- **Frame:** a 1px hairline around the code surface, with a caption bar above a hairline (Mist/Graphite, 0.8125rem) stating what the code proves.
+- **Body:** Celestia's highlighting at 1.7 without line numbers, and no copy button. The Code role's 0.8125rem, dropping to 0.75rem below 40rem.
 - **Scroll:** the code scrolls horizontally inside a focusable region (`role="region"`, labelled by the caption) with the ember focus ring inside and a thin gray-5 scrollbar. A 2.5rem fade masks the right edge while code remains hidden.
 
 ### Use-Case Rows
@@ -251,7 +240,7 @@ The closing bay's right half: a definition list of the cases where Outpost is no
 The shared chrome and player of both landing demos (`DemoFrame.astro`, `demo-player.ts`): a framed figure on the code surface with a 1px hairline border.
 
 - **Bar:** a 2.75rem strip holding the figure title (Label, ink); a `bar` slot replaces it with custom content. When beats are given, a square pause/replay toggle with drawn icons sits at the right edge behind a hairline, hidden under reduced motion.
-- **Optional parts:** beats, the pause toggle and the summary are optional; a `foot` slot replaces the beats with custom controls. The Orchestration Demo uses beats, toggle and summary; the Determinism Demo uses both slots and neither.
+- **Optional parts:** beats, the pause toggle and the summary are optional, and `bar` and `foot` slots replace them with custom content. The Orchestration Demo, its one consumer, uses beats, toggle and summary.
 - **Summary:** a visually hidden list gives each beat's captions as text for assistive technology.
 - **Beats:** buttons along the foot, split by hairlines, as a labelled group with `aria-pressed`. The pressed beat takes the 80% fill and ink text; while playing, a 2px ink underline runs across it for the beat's duration. Focus draws the ember outline inside.
 - **Player:** autoplays once when 35% in view and chains through the beats; clicking a beat stops the chain and plays that beat alone; the toggle stops or replays. A figure may open on any beat at rest. Under reduced motion nothing animates and each beat shows its still end state.
@@ -281,19 +270,12 @@ Below 40rem the columns stack: the group head becomes a tonal band (code-surface
 
 The agents and sandboxes bay lists two groups (a Label head row above a hairline) of linked name boxes that wrap: 2.25rem tall, a 1px hairline border, the name at 0.9375rem and 500 in ink. Hover darkens the border to gray-4 and adds the code-surface fill. The experimental Firecracker entry carries the ember flask with a localized accessible label.
 
-### Determinism Demo
+### Scaffold List
 
-The proof of the "Probabilistic in one place. Deterministic everywhere else." bay, on the Demo Frame. The same workflow runs again and again; only the agent's column varies.
+The adoption bay's right half: the files `outpost init` writes, as ruled rows on the bay's own grid. Each row carries a drawn file icon in Pewter/Steel, the file name in monospace ink at 0.875rem and its one-line note in Pewter/Steel, split 4 | 3 so the note starts on track 9. A Label head row names the list above a hairline.
 
-- **Bar:** the figure title (Label, ink) and, at the right, a "Replay · 0 model calls" badge outlined in ink (0.75rem, 500), visible only in replay mode.
-- **Caption:** a live and a replay caption in Mist/Graphite at 0.875rem share one grid cell; the hidden one leaves the accessibility tree.
-- **Table:** a real `<table>` with hairline borders on Night cells 3.25rem tall. A row header "Run n" (Pewter/Steel, number in ink with tabular numerals), then four columns Branch, Agent, Verify and Integrate, each head a column name over an owner tag: code outlined in a hairline with muted text, agent filled in ink.
-- **Cell states:** empty (contents hidden), live (the 80% fill, a 2px underline growing over the step's time — Pewter/Steel for code and replayed turns, ember for a model's turn — and the cell's own word for what it is doing in Pewter/Steel: the agent's working label, Verify's `npm test`), done (results shown; Verify adds a drawn check), and fail (Verify's `npm test` and a "failed" note turn Pewter/Steel). The retried run shows a "2nd try" note under the agent's diff; replayed rows add a "replayed" note.
-- **Key:** a tfoot row under the columns reads "same each run" for code columns and, in ink at 500, "varies each run" for Agent. It becomes "same, replayed" only when every visible row was replayed.
-- **Controls:** the foot slot holds two equal buttons split by a hairline (Label, ink, 2.75rem). "Run again" carries a drawn replay icon and is `aria-disabled` (Pewter/Steel text) while a run plays. "Replay the recording" is an `aria-pressed` toggle with a square switch (1.75rem by 1rem, gray-4 hairline, muted knob); when on, the switch fills in ink, its knob turns Night and moves right, and the button takes the 80% fill with a 2px ink underline. Hover takes the 80% fill; focus draws the ember outline inside.
-- **Runs:** two finished runs are rendered, and the refused third plays once when the figure is 35% in view, so a reader who never clicks still sees a check reject an agent's work and the retry that follows. Three rows are shown from then on; each new run is appended and the oldest fades out. Turning replay on starts a run; replay applies to following runs only and never rewrites runs already shown. A polite status region announces each finished run.
-- **Motion:** code cells settle at once; a model's turn takes about a second, a replayed turn a third of that. A live cell is never blank: an empty cell reads as broken rather than as busy. Under reduced motion every state applies instantly.
-- **Below 40rem:** the table keeps its layout with row numbers only, smaller text and the Verify check on its own line.
+- **Motion:** the rows write themselves in sequence, 90ms apart, once the list is 35% in view, so the figure performs what the command does. Under reduced motion every row is present at once.
+- **Quiet by default:** the list is not a link list and has no hover; the bay's actions are the two links in its left half.
 
 ### Navigation
 
@@ -334,7 +316,7 @@ Icons are drawn per Guide page in `docs/scripts/guide-icons.mjs` on the 24px gri
 
 - **Do** place every vertical division on the shared 12-track frame (tracks 5 and 9 on the landing).
 - **Do** prove each claim in the bay beside it with a working demonstration, real typechecked code or a factual table.
-- **Do** keep ember for a model or agent step running right now, a model working in the determinism table, focus, selection and experimental status only.
+- **Do** keep ember for a model or agent step running right now, focus, selection and experimental status only.
 - **Do** give every color role a dark and a light value that meet WCAG 2.2 AA.
 - **Do** use drawn SVG icons with a 1.6 stroke and round caps and joins.
 - **Do** make every code surface scroll inside itself, with edge fades instead of page overflow.

@@ -16,6 +16,7 @@ const entry = z.object({
   href: z.string(),
 });
 const boundary = z.object({ lead: z.string(), text: z.string() });
+const scaffold = z.object({ name: z.string(), note: z.string() });
 const four = z.array(z.string()).length(4);
 const lane = z.object({
   title: z.string(),
@@ -86,33 +87,13 @@ const landing = z.object({
       }),
     ),
   }),
-  determinism: z.object({
+  start: z.object({
     title: z.string(),
     text: z.string(),
     link,
-    replayLink: link,
-    check: z.string(),
-    demo: z.object({
-      title: z.string(),
-      run: z.string(),
-      rerun: z.string(),
-      replay: z.string(),
-      calls: z.string(),
-      columns: four,
-      owners: z.object({ code: z.string(), agent: z.string() }),
-      same: z.string(),
-      varies: z.string(),
-      replayed: z.string(),
-      captions: z.object({ live: z.string(), replay: z.string() }),
-      file: z.string(),
-      files: z.string(),
-      working: z.string(),
-      retry: z.string(),
-      replayedNote: z.string(),
-      failed: z.string(),
-      merged: z.string(),
-      announce: z.string(),
-    }),
+    secondary: link,
+    filesLabel: z.string(),
+    files: z.array(scaffold).min(3).max(8),
   }),
   runtimes: z.object({
     title: z.string(),

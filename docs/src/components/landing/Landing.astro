@@ -3,10 +3,8 @@ import Code from "starlight-theme-celestia/components/Code.astro";
 import manifest from "../../../../package.json";
 import Brand from "../Brand.astro";
 import Arrow from "./Arrow.astro";
-import DeterminismDemo from "./DeterminismDemo.astro";
 import OrchestrationDemo from "./OrchestrationDemo.astro";
 import dispatchCall from "./snippets/dispatch.ts?raw";
-import fixTests from "./snippets/fix-tests.ts?raw";
 
 const route = Astro.locals.starlightRoute;
 const landing = route.entry.data.landing!;
@@ -14,22 +12,11 @@ const locale = route.locale === "fr" ? "fr/" : "";
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 const href = (path: string) =>
   /^https?:/.test(path) ? path : `${base}/${locale}${path}`;
-// The determinism bay shows the loop's check, cut from a typechecked file.
-const fixLines = fixTests.split("\n");
-const checkStart = fixLines.findIndex((line) => line.includes("async check("));
-const checkEnd = fixLines.indexOf("  },", checkStart);
-if (checkStart < 0 || checkEnd < 0)
-  throw new Error("The fix-tests snippet no longer has a check block.");
-const checkCode = fixLines
-  .slice(checkStart, checkEnd + 1)
-  .map((line) => line.slice(2))
-  .join("\n");
 const marked = (text: string) =>
   text.split(/`([^`]+)`/).map((part, index) => ({ part, code: index % 2 === 1 }));
 // A heading made of sentences breaks between them, never inside one.
 const sentences = (text: string) => text.split(/(?<=\.)\s+/);
 const outcome = marked(landing.install.outcome);
-const check = marked(landing.determinism.check);
 const runtimeGroups = [
   { label: landing.runtimes.agentsLabel, items: landing.runtimes.agents },
   { label: landing.runtimes.sandboxesLabel, items: landing.runtimes.sandboxes },
@@ -163,40 +150,45 @@ const runtimeGroups = [
       </div>
     </section>
 
-    <section class="bay" aria-labelledby="determinism-heading">
+    <section class="bay" aria-labelledby="start-title">
       <div class="say">
-        <h2 id="determinism-heading">
-          {sentences(landing.determinism.title).map((clause) => (
-            <span>{clause}</span>
-          ))}
+        <h2 id="start-title">
+          {sentences(landing.start.title).map((clause) => <span>{clause}</span>)}
         </h2>
-        <p>{landing.determinism.text}</p>
-        <div class="links">
-          <a class="more" href={href(landing.determinism.link.href)}
-            >{landing.determinism.link.label}<Arrow /></a
-          >
-          <a class="more" href={href(landing.determinism.replayLink.href)}
-            >{landing.determinism.replayLink.label}<Arrow /></a
-          >
-        </div>
-      </div>
-      <div class="show determinism-demo">
-        <DeterminismDemo demo={landing.determinism.demo} />
-      </div>
-      <div class="say check-say">
-        <p id="check-caption">
-          {check.map(({ part, code }) => (code ? <code>{part}</code> : part))}
+        <p>
+          {
+            marked(landing.start.text).map(({ part, code }) =>
+              code ? <code>{part}</code> : part,
+            )
+          }
         </p>
-      </div>
-      <div class="show check-show">
-        <div
-          class="excerpt excerpt-code"
-          role="region"
-          aria-labelledby="check-caption"
-          tabindex="0"
-        >
-          <Code code={checkCode} lang="ts" />
+        <div class="links">
+          <a class="more" href={href(landing.start.link.href)}
+            >{landing.start.link.label}<Arrow /></a
+          >
+          <a class="more" href={href(landing.start.secondary.href)}
+            >{landing.start.secondary.label}<Arrow /></a
+          >
         </div>
+      </div>
+      <div class="show flush">
+        <outpost-scaffold class="scaffold">
+          <p class="scaffold-head">{landing.start.filesLabel}</p>
+          <ol>
+            {
+              landing.start.files.map((file, index) => (
+                <li style={`--order: ${index}`}>
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M14 3v5h5" />
+                    <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
+                  </svg>
+                  <code>{file.name}</code>
+                  <span>{file.note}</span>
+                </li>
+              ))
+            }
+          </ol>
+        </outpost-scaffold>
       </div>
     </section>
 
@@ -310,6 +302,22 @@ const runtimeGroups = [
   }
   customElements.define("outpost-install", OutpostInstall);
 
+  // The file list writes itself when it comes into view, once.
+  class OutpostScaffold extends HTMLElement {
+    connectedCallback() {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          if (!entries.some((entry) => entry.intersectionRatio >= 0.35)) return;
+          observer.disconnect();
+          this.toggleAttribute("data-written", true);
+        },
+        { threshold: 0.35 },
+      );
+      observer.observe(this);
+    }
+  }
+  customElements.define("outpost-scaffold", OutpostScaffold);
+
   // A fade marks the edge where the excerpt still has code to scroll to.
   for (const scroller of document.querySelectorAll<HTMLElement>(
     ".excerpt-code",
@@ -403,19 +411,6 @@ const runtimeGroups = [
     grid-column: 1 / -1;
     padding-block: 2.75rem;
     border-bottom: 1px solid var(--landing-line);
-  }
-  .check-say,
-  .check-show {
-    padding-block: 2.25rem 3rem;
-    border-top: 1px solid var(--landing-line);
-  }
-  .check-say p {
-    color: var(--sl-color-gray-2);
-    font-size: 0.9375rem;
-  }
-  .check-say code {
-    color: var(--sl-color-white);
-    font-size: 0.875rem;
   }
   .say > p {
     max-width: 34rem;
@@ -857,6 +852,56 @@ const runtimeGroups = [
     line-height: 1.55;
   }
 
+  /* init writes its files one after another, so the list does too. */
+  .scaffold {
+    display: block;
+  }
+  .scaffold-head {
+    padding: 0.8rem var(--landing-pad);
+    border-bottom: 1px solid var(--landing-line);
+    color: var(--sl-color-gray-3);
+    font-size: 0.8125rem;
+    font-weight: 500;
+  }
+  .scaffold li {
+    display: grid;
+    grid-template-columns: auto minmax(0, 4fr) minmax(0, 3fr);
+    align-items: baseline;
+    gap: 0 0.75rem;
+    padding: 0.95rem var(--landing-pad);
+    opacity: 0;
+    transform: translateY(0.3rem);
+  }
+  .scaffold li + li {
+    border-top: 1px solid var(--landing-line);
+  }
+  .scaffold[data-written] li {
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity 0.35s var(--landing-ease) calc(var(--order) * 90ms),
+      transform 0.35s var(--landing-ease) calc(var(--order) * 90ms);
+  }
+  .scaffold svg {
+    width: 0.95rem;
+    height: 0.95rem;
+    align-self: center;
+    fill: none;
+    stroke: var(--sl-color-gray-3);
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .scaffold code {
+    color: var(--sl-color-white);
+    font-size: 0.875rem;
+  }
+  .scaffold span {
+    color: var(--sl-color-gray-3);
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+
   /* Footer columns start on tracks 5 and 9. */
   .landing-footer {
     display: grid;
@@ -915,9 +960,6 @@ const runtimeGroups = [
     .show {
       padding-block: 0 3rem;
     }
-    .determinism-demo {
-      padding-block: 2rem;
-    }
     .figure-wide {
       padding-block: 2.5rem;
     }
@@ -975,8 +1017,7 @@ const runtimeGroups = [
     .landing-footer .footer-brand {
       padding-bottom: 0;
     }
-    .figure-wide,
-    .determinism-demo {
+    .figure-wide {
       padding-inline: 0;
     }
     .hero-excerpt .excerpt-code :global(pre) {
@@ -987,6 +1028,10 @@ const runtimeGroups = [
     .landing *,
     .landing :global(*) {
       transition: none !important;
+    }
+    .scaffold li {
+      opacity: 1;
+      transform: none;
     }
   }
 </style>
