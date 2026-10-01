@@ -169,7 +169,7 @@ Celestia sets the root to 14px. All rem values in this file are relative to that
 
 ### Hierarchy
 
-- **Display** (600, sized from its bay's width with container units, 1.05): the landing headline ("Code orchestrates." / "Agents think."), one clause per line, all in White/Slate Ink. The former tagline now sits in the footer under the wordmark at 0.875rem in Pewter/Steel.
+- **Display** (600, sized from its bay's width with container units, 1.05): the landing headline ("Run coding agents" / "from your TypeScript."), one clause per line, all in White/Slate Ink. The former tagline now sits in the footer under the wordmark at 0.875rem in Pewter/Steel.
 - **Headline** (600, clamp(1.5rem, 2.2vw, 1.875rem), 1.15, -0.03em): section headings in the left bays; Guide page titles follow the same tight tracking at clamp(1.8rem, 3vw, 2.3rem).
 - **Title** (500, 1.0625rem, -0.01em): lane titles and pain names. Demo step names use 0.9375rem at 500 (0.75rem below 40rem); determinism column names 0.875rem at 500.
 - **Body** (400, 1rem, 1.65): explanatory copy, capped at about 34rem, with `text-wrap: pretty`. Guide articles use 0.95rem at 1.8.
@@ -186,7 +186,7 @@ Celestia sets the root to 14px. All rem values in this file are relative to that
 
 The landing page sits in a centered rail, 82rem wide at most, with 1px hairlines on both edges. Outside the rail, a -45° hatch (1px lines every 8px, gray-5 at 45%) fills the margins like the unused area of a drawing sheet.
 
-Inside the rail, every section is a bay on a 12-track frame split 5 | 7. The left bay states the idea (heading, one paragraph, a link), and the right bay proves it (the orchestration demo, the pain/answer table, the determinism table, or runtime name boxes). The determinism bay's left column also carries a code excerpt (a caption bar over the real `check` block, cut at build time from the typechecked `snippets/fix-tests.ts`) and two links in a row at its foot. Rows inside the right bay split 4 | 3, so their divider falls on track 9 in every section. The footer's columns start on the same tracks 5 and 9. Horizontal hairlines separate the bays. Content never floats outside a bay. A framed figure (the orchestration demo, the determinism demo) is a drawing set inside its bay; its inner divisions follow its own content.
+Inside the rail, every section is a bay on a 12-track frame split 5 | 7. The left bay states the idea (heading, one paragraph, a link), and the right bay proves it (the `dispatch()` excerpt, use-case rows, the pain/answer table, the determinism table, runtime name boxes or boundary rows). One row escapes the split: the orchestration demo opens the problem bay as a full-width figure across all twelve tracks, above that bay's 5 | 7 division, because its own four-step lanes need the frame. The hero and determinism bays each carry a code excerpt (a caption bar over the real `check` block, cut at build time from the typechecked `snippets/fix-tests.ts`) and two links in a row at its foot. Rows inside the right bay split 4 | 3, so their divider falls on track 9 in every section. The footer's columns start on the same tracks 5 and 9. Horizontal hairlines separate the bays. Content never floats outside a bay. A framed figure (the orchestration demo, the determinism demo) is a drawing set inside its bay; its inner divisions follow its own content.
 
 The gutter is `clamp(1.25rem, 3.2vw, 3rem)`. Bays use 3.5rem of vertical padding, stacks inside them 1rem gaps, and cells 1.4rem. More space sits above a heading than below it.
 
@@ -213,7 +213,7 @@ Flat. There are no shadows anywhere. Depth comes from tone: the code surface is 
 
 ## Shapes
 
-Square, everywhere. Landing bays, docs sections, cells, buttons, the code excerpt and code blocks, the install field, demo step cells, owner tags, context meters, beat buttons, determinism table cells, the replay badge and the replay switch and its knob, runtime name boxes, inline code and sidebar hover and current states all have 0 radius. Icons are drawn SVG with a 1.6 stroke, round caps and round joins. Breadcrumb separators and the demo's code-lane chevrons are drawn with two hairline borders, not glyphs. The one dashed line in the system is the hero demo's Interrupted cut.
+Square, everywhere. Landing bays, docs sections, cells, buttons, the code excerpt and code blocks, the install field, demo step cells, owner tags, context meters, beat buttons, determinism table cells, the replay badge and the replay switch and its knob, runtime name boxes, inline code and sidebar hover and current states all have 0 radius. Icons are drawn SVG with a 1.6 stroke, round caps and round joins. Breadcrumb separators and the demo's code-lane chevrons are drawn with two hairline borders, not glyphs. The one dashed line in the system is the orchestration demo's Interrupted cut.
 
 ## Components
 
@@ -230,13 +230,21 @@ Blunt, rectangular and confident.
 
 A single-line code field with a muted `$` prompt, the command in White/Slate Ink, and a square copy button behind a hairline. On copy, the icon swaps to a check in ink, with an announcement through a polite status region.
 
-### Determinism Excerpt
+### Code Excerpt
 
-The code in the determinism bay's left column: the loop's real `check` block, cut at build time from the typechecked `snippets/fix-tests.ts` (the build fails if the block disappears).
+A framed block of real, typechecked code in a bay. Two ship: the hero's whole `dispatch()` call from `snippets/dispatch.ts`, and the determinism bay's `check` block, cut at build time from `snippets/fix-tests.ts` (the build fails if the block disappears).
 
 - **Frame:** a 1px hairline around the code surface, with a caption bar above a hairline (Mist/Graphite, 0.8125rem) stating what the code proves.
-- **Body:** Celestia's highlighting at 0.75rem and 1.7, without line numbers; the copy button is hidden.
+- **Body:** Celestia's highlighting at 1.7 without line numbers, and no copy button. The hero excerpt takes the Code role's 0.8125rem, dropping to the determinism excerpt's 0.75rem below 40rem; the determinism excerpt stays at 0.75rem.
 - **Scroll:** the code scrolls horizontally inside a focusable region (`role="region"`, labelled by the caption) with the ember focus ring inside and a thin gray-5 scrollbar. A 2.5rem fade masks the right edge while code remains hidden.
+
+### Use-Case Rows
+
+The use-case bay's right half: one hairline-divided row per job, each row a whole link to its guide page. The name is Title style in ink over one Pewter/Steel sentence capped at 34rem, with the drawn arrow on the right of the first line, muted at rest and in ink on hover. The whole row takes the code-surface fill on hover and the arrow moves 3px right. A row has no inner column, so the list adds no vertical line to the frame.
+
+### Boundary Rows
+
+The closing bay's right half: a definition list of the cases where Outpost is not the answer. Each row carries the case as a Label-size term in Pewter/Steel over its statement in ink at 0.9375rem, capped at 34rem, with hairlines between rows. The rows are not links and have no hover: the bay's only action is the closing primary button in its left half, beside the `.more` link.
 
 ### Demo Frame
 
@@ -250,7 +258,7 @@ The shared chrome and player of both landing demos (`DemoFrame.astro`, `demo-pla
 
 ### Orchestration Demo
 
-The signature component: the hero's proof. One job (Branch, Fix, Verify, Integrate) runs twice, once with a model deciding every step and once in code, inside a framed figure on the code surface.
+The signature component: the drawing that opens the problem bay, full width, registered on no inner track but its own. One job (Branch, Fix, Verify, Integrate) runs twice, once with a model deciding every step and once in code, inside a framed figure on the code surface.
 
 - **Bar:** a 2.75rem strip with the job title (Label, ink) and, at the right edge behind a hairline, a square pause/replay toggle with drawn icons. The toggle is hidden under reduced motion.
 - **Lanes:** two stacked lanes, "An LLM orchestrates" above "Code orchestrates", separated by a hairline. Each has a Title-style name, a caption for the current beat (all captions share one grid cell so switching never shifts the layout), a row of four step cells and a context meter.

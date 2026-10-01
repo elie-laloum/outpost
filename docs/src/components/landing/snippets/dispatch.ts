@@ -6,7 +6,7 @@ const result = await dispatch({
   sandboxProvider,
   agent: coder,
   branch: { mode: "named", name: "outpost/fix-tests" },
-  brief: { text: "Fix the failing tests, run them and commit the fix." },
+  brief: { text: "Fix the failing tests and commit." },
 });
 
 console.log(result.text);

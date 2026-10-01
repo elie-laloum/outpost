@@ -487,9 +487,12 @@ const runtimeGroups = [
     min-height: min(calc(100svh - 4rem), 48rem);
   }
   .hero-copy {
-    justify-content: center;
     gap: 0;
     container-type: inline-size;
+  }
+  .hero-code {
+    justify-content: flex-start;
+    padding-block: 3.5rem;
   }
   h1 {
     color: var(--sl-color-white);
@@ -500,6 +503,7 @@ const runtimeGroups = [
   }
   h1 span {
     display: block;
+    text-wrap: balance;
   }
   .lead {
     max-width: 34rem;
@@ -525,9 +529,7 @@ const runtimeGroups = [
     margin-top: 0.4rem;
   }
   .install-next code {
-    display: inline-block;
-    padding: 0.25rem 0.5rem;
-    background: var(--landing-code-bg);
+    white-space: normal;
   }
   .install {
     position: relative;
@@ -649,8 +651,8 @@ const runtimeGroups = [
     font-size: 0.8125rem;
     font-weight: 500;
   }
-  .hero-evidence li + li::before {
-    margin-right: 0.5rem;
+  .hero-evidence li:not(:last-child)::after {
+    margin-left: 0.5rem;
     color: var(--sl-color-gray-4);
     content: "\00b7";
   }
@@ -956,6 +958,9 @@ const runtimeGroups = [
     .figure-wide,
     .determinism-demo {
       padding-inline: 0;
+    }
+    .hero-excerpt .excerpt-code :global(pre) {
+      font-size: 0.75rem;
     }
   }
   @media (prefers-reduced-motion: reduce) {
