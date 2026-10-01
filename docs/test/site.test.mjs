@@ -88,6 +88,7 @@ for (const [locale, heading, start, copied, beat, rerun, replay] of [
       `/outpost/${locale}guide/fix-failing-ci/`,
     );
     const demo = page.locator("outpost-demo");
+    await demo.scrollIntoViewIfNeeded();
     await expect(demo).toHaveAttribute("data-state", "playing");
     const toggle = demo.locator("[data-toggle]");
     await toggle.click();
@@ -168,7 +169,7 @@ test("documentation section styles leave the landing untouched", async ({
   page,
 }) => {
   await page.goto("");
-  const primary = page.locator(".landing .button.primary");
+  const primary = page.locator(".landing .hero .button.primary");
   await expect(primary).toHaveText(/Get started/);
   const colors = await primary.evaluate((element) => {
     const style = getComputedStyle(element);
@@ -188,17 +189,21 @@ test("navigation bar links the source and the released version", async ({
     await readFile(new URL("../../package.json", import.meta.url), "utf8"),
   );
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto("reference/dispatch/");
-  const header = page.locator(".docs-header");
-  await expect(header.locator(".brand")).toHaveText("Outpost");
-  for (const [name, href] of [
+  const sources = [
     ["GitLab", "https://gitlab.elielaloum.com/elielaloum/outpost"],
     ["GitHub mirror", "https://github.com/elie-laloum/outpost"],
     ["npm", "https://www.npmjs.com/package/@elie-laloum/outpost"],
-  ])
-    await expect(
-      header.getByRole("link", { name, exact: true }),
-    ).toHaveAttribute("href", href);
+  ];
+  // The repository is the adoption action, so it is reachable from the landing too.
+  for (const route of ["", "reference/dispatch/"]) {
+    await page.goto(route);
+    for (const [name, href] of sources)
+      await expect(
+        page.locator(".docs-header").getByRole("link", { name, exact: true }),
+      ).toHaveAttribute("href", href);
+  }
+  const header = page.locator(".docs-header");
+  await expect(header.locator(".brand")).toHaveText("Outpost");
   const version = header.locator(".version");
   await expect(version).toHaveText(`v${manifest.version}`);
   await version.click();

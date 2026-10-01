@@ -45,7 +45,7 @@ In order of emphasis:
 ## Brand Commitments
 
 - Name: **Outpost**.
-- Headline (2026-10-01): “Run coding agents from your TypeScript.” (FR « Exécutez des agents de code depuis votre TypeScript. »).
+- Headline (2026-10-01): “Run coding agents from your TypeScript.” (FR « Exécutez des agents de code en TypeScript. »).
 - Tagline, kept in the landing footer: “Run an agent, own its environment, compose a workflow.”
 - Voice: direct, precise and factual; states boundaries and limitations plainly; never promises zero side effects or implies unreleased capabilities have shipped.
 - English/French parity for all user-facing content.

@@ -14,7 +14,7 @@ landing:
     copy: "Copy the install command"
     copied: "Copied"
     prerequisites: "You need Node.js 24+, a Git repository with at least one commit, Docker or Podman running, and your agent CLI signed in."
-    outcome: "It writes run.ts, brief.md, a Dockerfile and your configuration, then builds the agent image. Then run:"
+    outcome: "It writes `run.ts`, `brief.md`, a `Dockerfile` and your configuration, then builds the agent image. Then run:"
     next: 'node run.ts "Describe this repository"'
   primary: { label: "Get started", href: "guide/setup/" }
   secondary: { label: "Read the guide", href: "guide/introduction/" }

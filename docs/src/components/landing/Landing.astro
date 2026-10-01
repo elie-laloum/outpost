@@ -24,6 +24,9 @@ const checkCode = fixLines
   .slice(checkStart, checkEnd + 1)
   .map((line) => line.slice(2))
   .join("\n");
+const outcome = landing.install.outcome
+  .split(/`([^`]+)`/)
+  .map((part, index) => ({ part, code: index % 2 === 1 }));
 const runtimeGroups = [
   { label: landing.runtimes.agentsLabel, items: landing.runtimes.agents },
   { label: landing.runtimes.sandboxesLabel, items: landing.runtimes.sandboxes },
@@ -60,7 +63,9 @@ const runtimeGroups = [
           <span class="status" role="status" aria-live="polite"></span>
         </outpost-install>
         <p class="install-note">
-          {landing.install.outcome}
+          {outcome.map(({ part, code }) => (code ? <code>{part}</code> : part))}
+        </p>
+        <p class="install-note install-next">
           <code>{landing.install.next}</code>
         </p>
         <div class="actions">
@@ -512,11 +517,17 @@ const runtimeGroups = [
     text-wrap: pretty;
   }
   .install-note code {
-    padding: 0.1rem 0.3rem;
-    background: var(--landing-code-bg);
     color: var(--sl-color-white);
     font-size: 0.8125rem;
     white-space: nowrap;
+  }
+  .install-next {
+    margin-top: 0.4rem;
+  }
+  .install-next code {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    background: var(--landing-code-bg);
   }
   .install {
     position: relative;

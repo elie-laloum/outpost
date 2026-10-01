@@ -1,10 +1,10 @@
 ---
 title: Outpost
-description: "Exécutez des agents de code depuis votre TypeScript. Claude Code, Codex, Copilot CLI et Kimi Code dans une sandbox que vous maîtrisez, sur une branche Git que vous contrôlez."
+description: "Exécutez des agents de code en TypeScript. Claude Code, Codex, Copilot CLI et Kimi Code dans une sandbox que vous maîtrisez, sur une branche Git que vous contrôlez."
 landing:
   headline:
     - "Exécutez des agents de code"
-    - "depuis votre TypeScript."
+    - "en TypeScript."
   tagline: "Exécutez un agent, maîtrisez son environnement, composez un workflow."
   lead: "Claude Code, Codex, Copilot CLI et Kimi Code, dans une sandbox Docker, Podman ou cloud que vous maîtrisez, sur une branche Git que vous contrôlez. Votre code garde l’ordre, les vérifications et la reprise ; l’agent ne reçoit que le travail qui demande du jugement."
   hero:
@@ -14,7 +14,7 @@ landing:
     copy: "Copier la commande d’installation"
     copied: "Copié"
     prerequisites: "Il vous faut Node.js 24+, un dépôt Git avec au moins un commit, Docker ou Podman démarré, et la CLI de votre agent connectée."
-    outcome: "La commande écrit run.ts, brief.md, un Dockerfile et votre configuration, puis construit l’image de l’agent. Ensuite :"
+    outcome: "La commande écrit `run.ts`, `brief.md`, un `Dockerfile` et votre configuration, puis construit l’image de l’agent. Ensuite :"
     next: 'node run.ts "Describe this repository"'
   primary: { label: "Commencer", href: "guide/setup/" }
   secondary: { label: "Lire le guide", href: "guide/introduction/" }
