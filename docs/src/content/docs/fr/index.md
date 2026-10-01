@@ -1,19 +1,29 @@
 ---
 title: Outpost
-description: "Le code orchestre. Les agents réfléchissent. Une bibliothèque TypeScript pour exécuter des agents de code dans des workflows écrits en code."
+description: "Exécutez des agents de code depuis votre TypeScript. Claude Code, Codex, Copilot CLI et Kimi Code dans une sandbox que vous maîtrisez, sur une branche Git que vous contrôlez."
 landing:
   headline:
-    - "Le code orchestre."
-    - "Les agents réfléchissent."
+    - "Exécutez des agents de code"
+    - "depuis votre TypeScript."
   tagline: "Exécutez un agent, maîtrisez son environnement, composez un workflow."
-  lead: "Outpost est une bibliothèque TypeScript pour exécuter des agents de code dans des workflows écrits en code. L’ordre, les vérifications et la reprise restent dans le code ; l’agent ne reçoit que le travail qui demande du jugement."
+  lead: "Claude Code, Codex, Copilot CLI et Kimi Code, dans une sandbox Docker, Podman ou cloud que vous maîtrisez, sur une branche Git que vous contrôlez. Votre code garde l’ordre, les vérifications et la reprise ; l’agent ne reçoit que le travail qui demande du jugement."
+  hero:
+    caption: "Une tâche de bout en bout : une sandbox, une branche nommée, la réponse de l’agent et ses commits."
   install:
     command: "npx @elie-laloum/outpost init"
     copy: "Copier la commande d’installation"
     copied: "Copié"
+    prerequisites: "Il vous faut Node.js 24+, un dépôt Git avec au moins un commit, Docker ou Podman démarré, et la CLI de votre agent connectée."
+    outcome: "La commande écrit run.ts, brief.md, un Dockerfile et votre configuration, puis construit l’image de l’agent. Ensuite :"
+    next: 'node run.ts "Describe this repository"'
   primary: { label: "Commencer", href: "guide/setup/" }
   secondary: { label: "Lire le guide", href: "guide/introduction/" }
-  facts: "Node.js 24+ · MIT"
+  facts: "MIT"
+  evidence:
+    - "CI sur Windows, macOS et Linux"
+    - "Tests Docker et Podman réels"
+    - "Seuil de couverture à 80 %"
+    - "Publication npm avec provenance"
   reference: { label: "Référence de l’API", href: "reference/" }
   demo:
     title: "Une tâche, deux orchestrateurs"
@@ -138,4 +148,4 @@ landing:
     license: "Publié sous licence MIT."
 ---
 
-Outpost exécute des agents de code dans des workflows écrits en TypeScript. Le code garde l’ordre, les vérifications et la reprise ; l’agent reçoit le travail qui demande du jugement. Commencez par le [guide de configuration](guide/setup/) ou consultez une API dans la [référence](reference/).
+Outpost exécute des agents de code dans une sandbox que vous maîtrisez, depuis des workflows écrits en TypeScript. Le code garde l’ordre, les vérifications et la reprise ; l’agent reçoit le travail qui demande du jugement. Commencez par le [guide de configuration](guide/setup/) ou consultez une API dans la [référence](reference/).

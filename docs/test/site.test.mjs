@@ -43,7 +43,7 @@ for (const [locale, title, reference] of [
 for (const [locale, heading, start, copied, beat, rerun, replay] of [
   [
     "",
-    "Code orchestrates.",
+    "Run coding agents",
     "Get started",
     "Copy the install command",
     "Resume",
@@ -52,7 +52,7 @@ for (const [locale, heading, start, copied, beat, rerun, replay] of [
   ],
   [
     "fr/",
-    "Le code orchestre.",
+    "Exécutez des agents de code",
     "Commencer",
     "Copier la commande d’installation",
     "Reprise",
@@ -76,6 +76,11 @@ for (const [locale, heading, start, copied, beat, rerun, replay] of [
     await expect(page.getByRole("heading", { level: 1 })).toContainText(
       heading,
     );
+    const hero = page.locator(".landing .hero");
+    await expect(hero.locator(".hero-excerpt code").first()).toContainText(
+      "dispatch({",
+    );
+    await expect(hero.locator(".hero-evidence li")).toHaveCount(4);
     const demo = page.locator("outpost-demo");
     await expect(demo).toHaveAttribute("data-state", "playing");
     const toggle = demo.locator("[data-toggle]");
@@ -115,7 +120,7 @@ for (const [locale, heading, start, copied, beat, rerun, replay] of [
     );
     await expect(replayed.locator(".diff")).toHaveText("+42 −17");
     await expect(determinism.locator("tbody tr[data-replayed]")).toHaveCount(1);
-    await page.getByRole("link", { name: start }).click();
+    await hero.getByRole("link", { name: start }).click();
     await expect(page).toHaveURL(new RegExp(`/${locale}guide/setup/$`));
   });
 }

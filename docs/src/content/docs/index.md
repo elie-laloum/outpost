@@ -1,19 +1,29 @@
 ---
 title: Outpost
-description: "Code orchestrates. Agents think. A TypeScript library for running coding agents inside workflows you write in code."
+description: "Run coding agents from your TypeScript. Claude Code, Codex, Copilot CLI and Kimi Code in a sandbox you own, on a Git branch you control."
 landing:
   headline:
-    - "Code orchestrates."
-    - "Agents think."
+    - "Run coding agents"
+    - "from your TypeScript."
   tagline: "Run an agent, own its environment, compose a workflow."
-  lead: "Outpost is a TypeScript library for running coding agents inside workflows you write in code. The order, the checks and the resume stay in code; the agent only gets the work that needs judgment."
+  lead: "Claude Code, Codex, Copilot CLI and Kimi Code, in a Docker, Podman or cloud sandbox you own, on a Git branch you control. Your code keeps the order, the checks and the resume; the agent gets only the work that needs judgment."
+  hero:
+    caption: "One task from end to end: a sandbox, a named branch, the agent’s answer and its commits."
   install:
     command: "npx @elie-laloum/outpost init"
     copy: "Copy the install command"
     copied: "Copied"
+    prerequisites: "You need Node.js 24+, a Git repository with at least one commit, Docker or Podman running, and your agent CLI signed in."
+    outcome: "It writes run.ts, brief.md, a Dockerfile and your configuration, then builds the agent image. Then run:"
+    next: 'node run.ts "Describe this repository"'
   primary: { label: "Get started", href: "guide/setup/" }
   secondary: { label: "Read the guide", href: "guide/introduction/" }
-  facts: "Node.js 24+ · MIT"
+  facts: "MIT"
+  evidence:
+    - "CI on Windows, macOS and Linux"
+    - "Real Docker and Podman tests"
+    - "80% coverage gate"
+    - "npm publish with provenance"
   reference: { label: "API reference", href: "reference/" }
   demo:
     title: "One job, two orchestrators"
@@ -138,4 +148,4 @@ landing:
     license: "Released under the MIT License."
 ---
 
-Outpost runs coding agents inside workflows you write in TypeScript. Code keeps the order, the checks and the resume; the agent gets the work that needs judgment. Start with the [setup guide](guide/setup/) or look up an API in the [reference](reference/).
+Outpost runs coding agents in a sandbox you own, from workflows you write in TypeScript. Code keeps the order, the checks and the resume; the agent gets the work that needs judgment. Start with the [setup guide](guide/setup/) or look up an API in the [reference](reference/).

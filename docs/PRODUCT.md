@@ -20,7 +20,7 @@ Outpost is a TypeScript library and CLI (`@elie-laloum/outpost`, MIT) for runnin
 
 In order of emphasis:
 
-1. **Code orchestrates, agents think.** LLM pipelines hand the model everything: certain steps, order, context and recovery. Outpost keeps order, checks, branch handling and resume in typed TypeScript and gives an agent only the work that needs judgment, from its own brief, in its own sandbox. The home page leads with the pains this removes: everything interpreted, growing context, orchestrator drift, resume as re-interpretation.
+1. **Code orchestrates, agents think.** LLM pipelines hand the model everything: certain steps, order, context and recovery. Outpost keeps order, checks, branch handling and resume in typed TypeScript and gives an agent only the work that needs judgment, from its own brief, in its own sandbox. The home page leads with the capability and the API; the thesis follows in the lead, and the pains this removes are the page’s second movement: everything interpreted, growing context, orchestrator drift, resume as re-interpretation.
 2. **Agent × sandbox independence.** Claude Code, Codex, Antigravity, GitHub Copilot CLI, Kimi Code and Outpost's own built-in harness run on Docker, Podman, Vercel, Daytona or explicit host execution, behind stable ports, from one TypeScript API.
 3. **Explicit ownership.** The developer owns the environment, credentials, Git workspace and recoverable state. Authentication is chosen explicitly per harness, nothing silently falls back to the host, and recovery artifacts are preserved rather than discarded.
 4. **Typed durable workflows.** Agent runs become typed tasks with dependencies, checkpoints, gates, caches, replay, quota pauses and resumable conversations, rather than one-shot chat calls.
@@ -45,7 +45,7 @@ In order of emphasis:
 ## Brand Commitments
 
 - Name: **Outpost**.
-- Headline (2026-09-30): “Code orchestrates. Agents think.” (FR « Le code orchestre. Les agents réfléchissent. »).
+- Headline (2026-10-01): “Run coding agents from your TypeScript.” (FR « Exécutez des agents de code depuis votre TypeScript. »).
 - Tagline, kept in the landing footer: “Run an agent, own its environment, compose a workflow.”
 - Voice: direct, precise and factual; states boundaries and limitations plainly; never promises zero side effects or implies unreleased capabilities have shipped.
 - English/French parity for all user-facing content.

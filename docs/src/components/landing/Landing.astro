@@ -5,6 +5,7 @@ import Brand from "../Brand.astro";
 import Arrow from "./Arrow.astro";
 import DeterminismDemo from "./DeterminismDemo.astro";
 import OrchestrationDemo from "./OrchestrationDemo.astro";
+import dispatchCall from "./snippets/dispatch.ts?raw";
 import fixTests from "./snippets/fix-tests.ts?raw";
 
 const route = Astro.locals.starlightRoute;
@@ -37,6 +38,7 @@ const runtimeGroups = [
           {landing.headline.map((clause) => <span>{clause}</span>)}
         </h1>
         <p class="lead">{landing.lead}</p>
+        <p class="install-note">{landing.install.prerequisites}</p>
         <outpost-install class="install" data-copied={landing.install.copied}>
           <code><span aria-hidden="true">$ </span>{landing.install.command}</code
           >
@@ -57,6 +59,10 @@ const runtimeGroups = [
           </button>
           <span class="status" role="status" aria-live="polite"></span>
         </outpost-install>
+        <p class="install-note">
+          {landing.install.outcome}
+          <code>{landing.install.next}</code>
+        </p>
         <div class="actions">
           <a class="button primary" href={href(landing.primary.href)}>
             {landing.primary.label}
@@ -71,12 +77,28 @@ const runtimeGroups = [
           <a href={href(landing.reference.href)}>{landing.reference.label}</a>
         </p>
       </div>
-      <div class="show hero-demo">
-        <OrchestrationDemo demo={landing.demo} />
+      <div class="show hero-code">
+        <figure class="excerpt hero-excerpt">
+          <figcaption>{landing.hero.caption}</figcaption>
+          <div
+            class="excerpt-code"
+            role="region"
+            aria-label={landing.hero.caption}
+            tabindex="0"
+          >
+            <Code code={dispatchCall.trimEnd()} lang="ts" />
+          </div>
+        </figure>
       </div>
+      <ul class="hero-evidence">
+        {landing.evidence.map((fact) => <li>{fact}</li>)}
+      </ul>
     </section>
 
-    <section class="bay" aria-labelledby="problem-title">
+    <section class="bay problem" aria-labelledby="problem-title">
+      <div class="show figure-wide">
+        <OrchestrationDemo demo={landing.demo} />
+      </div>
       <div class="say">
         <h2 id="problem-title">{landing.problem.title}</h2>
         <p>{landing.problem.text}</p>
@@ -309,6 +331,11 @@ const runtimeGroups = [
   .flush {
     padding: 0;
   }
+  .figure-wide {
+    grid-column: 1 / -1;
+    padding-block: 2.75rem;
+    border-bottom: 1px solid var(--landing-line);
+  }
   .say > p {
     max-width: 34rem;
     line-height: 1.65;
@@ -357,6 +384,12 @@ const runtimeGroups = [
     padding: 0.65rem 1rem;
     border-bottom: 1px solid var(--landing-line);
     color: var(--sl-color-gray-2);
+    font-size: 0.8125rem;
+  }
+  .hero-excerpt {
+    margin: 0;
+  }
+  .hero-excerpt .excerpt-code :global(pre) {
     font-size: 0.8125rem;
   }
   .excerpt-code[data-clipped] {
@@ -418,12 +451,27 @@ const runtimeGroups = [
     line-height: 1.65;
     text-wrap: pretty;
   }
+  .install-note {
+    max-width: 34rem;
+    margin-top: 1.5rem;
+    color: var(--sl-color-gray-3);
+    font-size: 0.8125rem;
+    line-height: 1.6;
+    text-wrap: pretty;
+  }
+  .install-note code {
+    padding: 0.1rem 0.3rem;
+    background: var(--landing-code-bg);
+    color: var(--sl-color-white);
+    font-size: 0.8125rem;
+    white-space: nowrap;
+  }
   .install {
     position: relative;
     display: flex;
     align-items: center;
     max-width: 26rem;
-    margin-top: 2rem;
+    margin-top: 0.75rem;
     border: 1px solid var(--landing-line);
     background: var(--landing-code-bg);
   }
@@ -480,11 +528,14 @@ const runtimeGroups = [
     overflow: hidden;
     clip-path: inset(50%);
   }
+  .install + .install-note {
+    margin-top: 0.75rem;
+  }
   .actions {
     display: flex;
     flex-wrap: wrap;
     gap: 0.75rem;
-    margin-top: 1rem;
+    margin-top: 1.5rem;
   }
   .button {
     display: inline-flex;
@@ -523,6 +574,22 @@ const runtimeGroups = [
   }
   .facts a:hover {
     color: var(--sl-color-white);
+  }
+  .hero-evidence {
+    display: flex;
+    flex-wrap: wrap;
+    grid-column: 1 / -1;
+    gap: 0 0.5rem;
+    padding: 0.9rem var(--landing-pad);
+    border-top: 1px solid var(--landing-line);
+    color: var(--sl-color-gray-3);
+    font-size: 0.8125rem;
+    font-weight: 500;
+  }
+  .hero-evidence li + li::before {
+    margin-right: 0.5rem;
+    color: var(--sl-color-gray-4);
+    content: "\00b7";
   }
 
   /* Pains split the seven-track bay 4|3 so the answer column starts on track 9. */
@@ -683,9 +750,11 @@ const runtimeGroups = [
     .show {
       padding-block: 0 3rem;
     }
-    .hero-demo,
     .determinism-demo {
       padding-block: 2rem;
+    }
+    .figure-wide {
+      padding-block: 2.5rem;
     }
     .show.flush {
       border-top: 1px solid var(--landing-line);
@@ -741,7 +810,7 @@ const runtimeGroups = [
     .landing-footer .footer-brand {
       padding-bottom: 0;
     }
-    .hero-demo,
+    .figure-wide,
     .determinism-demo {
       padding-inline: 0;
     }
