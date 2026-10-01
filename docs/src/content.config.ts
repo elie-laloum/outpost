@@ -10,6 +10,11 @@ const runtime = z.object({
   href: z.string(),
   experimental: z.boolean().optional(),
 });
+const entry = z.object({
+  title: z.string(),
+  text: z.string(),
+  href: z.string(),
+});
 const four = z.array(z.string()).length(4);
 const lane = z.object({
   title: z.string(),
@@ -35,6 +40,12 @@ const landing = z.object({
   facts: z.string(),
   evidence: z.array(z.string()).min(3).max(5),
   reference: link,
+  useCases: z.object({
+    title: z.string(),
+    text: z.string(),
+    link,
+    entries: z.array(entry).min(3).max(4),
+  }),
   demo: z.object({
     title: z.string(),
     pause: z.string(),

@@ -25,6 +25,20 @@ landing:
     - "80% coverage gate"
     - "npm publish with provenance"
   reference: { label: "API reference", href: "reference/" }
+  useCases:
+    title: "What you can run"
+    text: "Each one is a guide page: the code, the contracts it uses and what comes back."
+    link: { label: "Your first task", href: "guide/first-request/" }
+    entries:
+      - title: "Fix a failing CI build"
+        text: "An agent fixes the tests on a branch while Outpost reruns them after each attempt and feeds the failures back."
+        href: "guide/fix-failing-ci/"
+      - title: "Review a pull request on demand"
+        text: "A label on a pull request queues an agent review, and your code posts the typed verdict it returns."
+        href: "guide/review-on-label/"
+      - title: "Nightly maintenance"
+        text: "Every weekday night, an agent updates dependencies on a dated branch and leaves a typed report for the morning."
+        href: "guide/nightly-maintenance/"
   demo:
     title: "One job, two orchestrators"
     pause: "Pause the comparison"

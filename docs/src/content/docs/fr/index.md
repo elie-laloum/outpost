@@ -25,6 +25,20 @@ landing:
     - "Seuil de couverture à 80 %"
     - "Publication npm avec provenance"
   reference: { label: "Référence de l’API", href: "reference/" }
+  useCases:
+    title: "Ce que vous pouvez lancer"
+    text: "Chaque cas est une page du guide : le code, les contrats qu’il utilise et ce qui revient."
+    link: { label: "Votre première tâche", href: "guide/first-request/" }
+    entries:
+      - title: "Réparer une CI en échec"
+        text: "Un agent corrige les tests sur une branche, et Outpost les relance après chaque tentative en lui renvoyant les échecs."
+        href: "guide/fix-failing-ci/"
+      - title: "Relire une pull request à la demande"
+        text: "Un label sur une pull request met une revue en file, et votre code publie le verdict typé qu’elle renvoie."
+        href: "guide/review-on-label/"
+      - title: "Maintenance nocturne"
+        text: "Chaque nuit de semaine, un agent met à jour les dépendances sur une branche datée et laisse un rapport typé pour le matin."
+        href: "guide/nightly-maintenance/"
   demo:
     title: "Une tâche, deux orchestrateurs"
     pause: "Mettre la comparaison en pause"

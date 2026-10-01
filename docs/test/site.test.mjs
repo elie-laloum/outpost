@@ -81,6 +81,12 @@ for (const [locale, heading, start, copied, beat, rerun, replay] of [
       "dispatch({",
     );
     await expect(hero.locator(".hero-evidence li")).toHaveCount(4);
+    const useCases = page.locator(".landing .use-cases a");
+    await expect(useCases).toHaveCount(3);
+    await expect(useCases.first()).toHaveAttribute(
+      "href",
+      `/outpost/${locale}guide/fix-failing-ci/`,
+    );
     const demo = page.locator("outpost-demo");
     await expect(demo).toHaveAttribute("data-state", "playing");
     const toggle = demo.locator("[data-toggle]");

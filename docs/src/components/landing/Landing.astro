@@ -95,6 +95,27 @@ const runtimeGroups = [
       </ul>
     </section>
 
+    <section class="bay" aria-labelledby="use-cases-title">
+      <div class="say">
+        <h2 id="use-cases-title">{landing.useCases.title}</h2>
+        <p>{landing.useCases.text}</p>
+        <a class="more" href={href(landing.useCases.link.href)}
+          >{landing.useCases.link.label}<Arrow /></a
+        >
+      </div>
+      <div class="show flush use-cases">
+        {
+          landing.useCases.entries.map((useCase) => (
+            <a href={href(useCase.href)}>
+              <strong>{useCase.title}</strong>
+              <span>{useCase.text}</span>
+              <Arrow />
+            </a>
+          ))
+        }
+      </div>
+    </section>
+
     <section class="bay problem" aria-labelledby="problem-title">
       <div class="show figure-wide">
         <OrchestrationDemo demo={landing.demo} />
@@ -590,6 +611,51 @@ const runtimeGroups = [
     margin-right: 0.5rem;
     color: var(--sl-color-gray-4);
     content: "\00b7";
+  }
+
+  /* Use cases are whole rows, so they add no vertical line to the frame. */
+  .use-cases {
+    justify-content: center;
+  }
+  .use-cases a {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: 0.35rem 1.25rem;
+    padding: 1.4rem var(--landing-pad);
+    color: var(--sl-color-gray-2);
+    font-size: 0.9375rem;
+    line-height: 1.55;
+    text-decoration: none;
+    transition: background-color 0.2s var(--landing-ease);
+  }
+  .use-cases a + a {
+    border-top: 1px solid var(--landing-line);
+  }
+  .use-cases a:hover {
+    background: var(--landing-code-bg);
+  }
+  .use-cases strong {
+    color: var(--sl-color-white);
+    font-size: 1.0625rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+  .use-cases span {
+    grid-column: 1;
+    max-width: 34rem;
+  }
+  .use-cases :global(.arrow) {
+    grid-row: 1;
+    grid-column: 2;
+    align-self: center;
+    color: var(--sl-color-gray-3);
+    transition:
+      color 0.2s var(--landing-ease),
+      transform 0.2s var(--landing-ease);
+  }
+  .use-cases a:hover :global(.arrow) {
+    color: var(--sl-color-white);
   }
 
   /* Pains split the seven-track bay 4|3 so the answer column starts on track 9. */
