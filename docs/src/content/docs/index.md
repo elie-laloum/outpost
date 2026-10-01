@@ -145,7 +145,7 @@ landing:
       - lead: "A single CI step"
         text: "A workflow file that runs an agent and stops is less code. Outpost runs the same job from CI, a queue, a cron slot or a verified webhook, and keeps the checkpoint when the worker restarts."
       - lead: "An LLM pipeline"
-        text: "Outpost does not chain prompts and has no vector store or retrieval layer. It runs coding agents against Git repositories; the model calls it makes itself go through its own harness."
+        text: "If your steps are model calls, a pipeline framework fits them better. Outpost chains tasks, not prompts: the order is TypeScript you write and typecheck, an agent task runs a whole coding agent in its own sandbox rather than one prompt, and there is no vector store or retrieval layer anywhere in it."
     link: { label: "Job queues and workers", href: "guide/job-queues/" }
     action: { label: "Start with the setup guide", href: "guide/setup/" }
   footer:

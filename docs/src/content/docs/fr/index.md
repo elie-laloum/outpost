@@ -145,7 +145,7 @@ landing:
       - lead: "Une seule étape de CI"
         text: "Un fichier de workflow qui lance un agent et s’arrête demande moins de code. Outpost lance la même tâche depuis la CI, une file, un créneau cron ou un webhook vérifié, et garde le checkpoint quand le worker redémarre."
       - lead: "Un pipeline de LLM"
-        text: "Outpost n’enchaîne pas de prompts et n’a ni base vectorielle ni couche de recherche. Il exécute des agents de code sur des dépôts Git ; les appels au modèle qu’il fait lui-même passent par son propre harness."
+        text: "Si vos étapes sont des appels au modèle, un framework de pipeline leur convient mieux. Outpost enchaîne des tâches, pas des prompts : l’ordre est du TypeScript que vous écrivez et typez, une tâche d’agent exécute un agent de code entier dans sa propre sandbox plutôt qu’un seul prompt, et il n’y a nulle part de base vectorielle ni de couche de recherche."
     link: { label: "Files de jobs et workers", href: "guide/job-queues/" }
     action:
       { label: "Commencer par le guide d’installation", href: "guide/setup/" }

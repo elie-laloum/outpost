@@ -164,17 +164,6 @@ const runtimeGroups = [
       <div class="say">
         <h2 id="determinism-heading">{landing.determinism.title}</h2>
         <p>{landing.determinism.text}</p>
-        <figure class="excerpt">
-          <figcaption>{landing.determinism.check}</figcaption>
-          <div
-            class="excerpt-code"
-            role="region"
-            aria-label={landing.determinism.check}
-            tabindex="0"
-          >
-            <Code code={checkCode} lang="ts" />
-          </div>
-        </figure>
         <div class="links">
           <a class="more" href={href(landing.determinism.link.href)}
             >{landing.determinism.link.label}<Arrow /></a
@@ -186,6 +175,19 @@ const runtimeGroups = [
       </div>
       <div class="show determinism-demo">
         <DeterminismDemo demo={landing.determinism.demo} />
+      </div>
+      <div class="say check-say">
+        <p id="check-caption">{landing.determinism.check}</p>
+      </div>
+      <div class="show check-show">
+        <div
+          class="excerpt excerpt-code"
+          role="region"
+          aria-labelledby="check-caption"
+          tabindex="0"
+        >
+          <Code code={checkCode} lang="ts" />
+        </div>
       </div>
     </section>
 
@@ -373,6 +375,7 @@ const runtimeGroups = [
   .say {
     display: flex;
     flex-direction: column;
+    align-items: flex-start;
     gap: 1rem;
     min-width: 0;
     padding: 3.5rem var(--landing-pad);
@@ -393,6 +396,15 @@ const runtimeGroups = [
     padding-block: 2.75rem;
     border-bottom: 1px solid var(--landing-line);
   }
+  .check-say,
+  .check-show {
+    padding-block: 2.25rem 3rem;
+    border-top: 1px solid var(--landing-line);
+  }
+  .check-say p {
+    color: var(--sl-color-gray-2);
+    font-size: 0.9375rem;
+  }
   .say > p {
     max-width: 34rem;
     line-height: 1.65;
@@ -411,7 +423,6 @@ const runtimeGroups = [
     align-items: center;
     gap: 0.4rem;
     align-self: flex-start;
-    margin-top: auto;
     padding-top: 0.75rem;
     color: var(--sl-color-white);
     font-size: 0.875rem;
@@ -427,10 +438,6 @@ const runtimeGroups = [
     display: flex;
     flex-wrap: wrap;
     gap: 0 1.5rem;
-    margin-top: auto;
-  }
-  .links .more {
-    margin-top: 0;
   }
   .excerpt {
     margin: 0.75rem 0 0;
@@ -808,11 +815,9 @@ const runtimeGroups = [
     flex-wrap: wrap;
     align-items: center;
     gap: 0.75rem 1.5rem;
-    margin-top: auto;
     padding-top: 1rem;
   }
   .closing .more {
-    margin-top: 0;
     padding-top: 0;
   }
   .boundaries {
