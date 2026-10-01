@@ -136,6 +136,18 @@ landing:
       - { name: "Host process", href: "guide/host-process/" }
       - { name: "Firecracker", href: "guide/firecracker/", experimental: true }
     link: { label: "Choose an agent", href: "guide/choose-an-agent/" }
+  boundaries:
+    title: "Where Outpost is not the answer"
+    text: "Outpost owns the steps around an agent. When those steps are not yours to own, something smaller is the better choice."
+    entries:
+      - lead: "One agent session is enough"
+        text: "If the whole job fits in one conversation, run the agent CLI directly. Outpost earns its place when the branch, the checks, the order and the resume are yours."
+      - lead: "A single CI step"
+        text: "A workflow file that runs an agent and stops is less code. Outpost runs the same job from CI, a queue, a cron slot or a verified webhook, and keeps the checkpoint when the worker restarts."
+      - lead: "An LLM pipeline"
+        text: "Outpost does not chain prompts and has no vector store or retrieval layer. It runs coding agents against Git repositories; the model calls it makes itself go through its own harness."
+    link: { label: "Job queues and workers", href: "guide/job-queues/" }
+    action: { label: "Start with the setup guide", href: "guide/setup/" }
   footer:
     documentation:
       title: "Documentation"

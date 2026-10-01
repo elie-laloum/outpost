@@ -15,6 +15,7 @@ const entry = z.object({
   text: z.string(),
   href: z.string(),
 });
+const boundary = z.object({ lead: z.string(), text: z.string() });
 const four = z.array(z.string()).length(4);
 const lane = z.object({
   title: z.string(),
@@ -121,6 +122,13 @@ const landing = z.object({
     agents: z.array(runtime),
     sandboxes: z.array(runtime),
     link,
+  }),
+  boundaries: z.object({
+    title: z.string(),
+    text: z.string(),
+    link,
+    action: link,
+    entries: z.array(boundary).min(2).max(4),
   }),
   footer: z.object({
     documentation: links,

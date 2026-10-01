@@ -103,6 +103,7 @@ for (const [locale, heading, start, copied, beat, rerun, replay] of [
     expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
       "npx @elie-laloum/outpost init",
     );
+    await expect(page.locator(".landing .boundary")).toHaveCount(3);
     const determinism = page.locator("outpost-determinism");
     const runs = determinism.locator("tbody tr");
     await expect(runs).toHaveCount(3);

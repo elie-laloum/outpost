@@ -136,6 +136,19 @@ landing:
       - { name: "Processus hôte", href: "guide/host-process/" }
       - { name: "Firecracker", href: "guide/firecracker/", experimental: true }
     link: { label: "Choisir un agent", href: "guide/choose-an-agent/" }
+  boundaries:
+    title: "Quand Outpost n’est pas la réponse"
+    text: "Outpost prend en charge les étapes autour de l’agent. Quand ces étapes ne sont pas les vôtres, un outil plus petit convient mieux."
+    entries:
+      - lead: "Une seule session d’agent suffit"
+        text: "Si toute la tâche tient dans une conversation, lancez la CLI de l’agent directement. Outpost prend son sens quand la branche, les vérifications, l’ordre et la reprise vous appartiennent."
+      - lead: "Une seule étape de CI"
+        text: "Un fichier de workflow qui lance un agent et s’arrête demande moins de code. Outpost lance la même tâche depuis la CI, une file, un créneau cron ou un webhook vérifié, et garde le checkpoint quand le worker redémarre."
+      - lead: "Un pipeline de LLM"
+        text: "Outpost n’enchaîne pas de prompts et n’a ni base vectorielle ni couche de recherche. Il exécute des agents de code sur des dépôts Git ; les appels au modèle qu’il fait lui-même passent par son propre harness."
+    link: { label: "Files de jobs et workers", href: "guide/job-queues/" }
+    action:
+      { label: "Commencer par le guide d’installation", href: "guide/setup/" }
   footer:
     documentation:
       title: "Documentation"

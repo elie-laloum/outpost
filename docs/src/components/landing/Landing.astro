@@ -220,6 +220,37 @@ const runtimeGroups = [
       </div>
     </section>
 
+    <section class="bay" aria-labelledby="boundaries-title">
+      <div class="say">
+        <h2 id="boundaries-title">{landing.boundaries.title}</h2>
+        <p>{landing.boundaries.text}</p>
+        <div class="closing">
+          <a
+            class="button primary"
+            href={href(landing.boundaries.action.href)}
+          >
+            {landing.boundaries.action.label}
+            <Arrow />
+          </a>
+          <a class="more" href={href(landing.boundaries.link.href)}
+            >{landing.boundaries.link.label}<Arrow /></a
+          >
+        </div>
+      </div>
+      <div class="show flush boundaries">
+        <dl>
+          {
+            landing.boundaries.entries.map((boundary) => (
+              <div class="boundary">
+                <dt>{boundary.lead}</dt>
+                <dd>{boundary.text}</dd>
+              </div>
+            ))
+          }
+        </dl>
+      </div>
+    </section>
+
     <footer class="landing-footer">
       <div class="footer-brand">
         <Brand href={href("")} class="wordmark" />
@@ -756,6 +787,41 @@ const runtimeGroups = [
     background-color: var(--sl-color-accent);
     mask: url("../../assets/reference-experiment.svg") center / contain
       no-repeat;
+  }
+
+  /* The page closes on its own limits, with the action beside them. */
+  .closing {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1.5rem;
+    margin-top: auto;
+    padding-top: 1rem;
+  }
+  .closing .more {
+    margin-top: 0;
+    padding-top: 0;
+  }
+  .boundaries {
+    justify-content: center;
+  }
+  .boundary {
+    padding: 1.4rem var(--landing-pad);
+  }
+  .boundary + .boundary {
+    border-top: 1px solid var(--landing-line);
+  }
+  .boundary dt {
+    color: var(--sl-color-gray-3);
+    font-size: 0.8125rem;
+    font-weight: 500;
+  }
+  .boundary dd {
+    max-width: 34rem;
+    margin-top: 0.35rem;
+    color: var(--sl-color-white);
+    font-size: 0.9375rem;
+    line-height: 1.55;
   }
 
   /* Footer columns start on tracks 5 and 9. */
