@@ -16,7 +16,7 @@ const { toc } = Astro.locals.starlightRoute;
 <style>
   .docs-columns {
     display: grid;
-    grid-template-columns: minmax(0, 84rem);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 84rem) minmax(0, 1fr);
     min-height: calc(100vh - 4rem);
     background-image: repeating-linear-gradient(
       -45deg,
@@ -24,22 +24,31 @@ const { toc } = Astro.locals.starlightRoute;
       color-mix(in oklch, var(--sl-color-gray-5) 45%, transparent) 7px 8px
     );
   }
+  /* Edges are drawn outside the sheet so they merge with the sidebar and window edges. */
   .docs-pane {
+    grid-column: 2;
     min-width: 0;
-    border-right: 1px solid var(--docs-line);
     background: var(--sl-color-black);
+    box-shadow:
+      -1px 0 0 var(--docs-line),
+      1px 0 0 var(--docs-line);
   }
   .docs-rail {
     display: none;
   }
   @media (min-width: 100rem) {
     .has-rail {
-      grid-template-columns: minmax(0, 84rem) 16rem;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 84rem) 16rem minmax(0, 1fr);
+    }
+    .has-rail .docs-pane {
+      border-right: 1px solid var(--docs-line);
+      box-shadow: -1px 0 0 var(--docs-line);
     }
     .docs-rail {
       display: block;
+      grid-column: 3;
       background: var(--sl-color-black);
-      border-right: 1px solid var(--docs-line);
+      box-shadow: 1px 0 0 var(--docs-line);
     }
     .docs-rail :global(.right-sidebar-panel) {
       position: sticky;
@@ -55,7 +64,8 @@ const { toc } = Astro.locals.starlightRoute;
       grid-template-columns: minmax(0, 1fr);
     }
     .docs-pane {
-      border-right: 0;
+      grid-column: 1;
+      box-shadow: none;
     }
   }
 </style>
