@@ -16,7 +16,6 @@ const entry = z.object({
   href: z.string(),
 });
 const boundary = z.object({ lead: z.string(), text: z.string() });
-const scaffold = z.object({ name: z.string(), note: z.string() });
 const four = z.array(z.string()).length(4);
 const lane = z.object({
   title: z.string(),
@@ -87,13 +86,17 @@ const landing = z.object({
       }),
     ),
   }),
-  start: z.object({
+  typed: z.object({
     title: z.string(),
     text: z.string(),
     link,
     secondary: link,
-    filesLabel: z.string(),
-    files: z.array(scaffold).min(3).max(8),
+    declareLabel: z.string(),
+    answerLabel: z.string(),
+    answerText: z.string(),
+    answerTag: z.string(),
+    valueLabel: z.string(),
+    value: z.string(),
   }),
   runtimes: z.object({
     title: z.string(),

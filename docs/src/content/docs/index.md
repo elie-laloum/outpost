@@ -87,19 +87,18 @@ landing:
           - pain: "Resuming means re-interpreting"
             detail: "After a crash or a quota, the model rebuilds its state from a transcript."
             answer: "Finished tasks come back from the checkpoint as JSON. Rerunning an interrupted one takes your explicit consent."
-  start:
-    title: "One command writes the project. You read every file."
-    text: "`init` scaffolds a workflow you own: six files, none of them hidden, and one container image. It preserves an existing package manifest and extends an existing ignore file. Point it at any directory and any repository — the workflow never has to live inside the repository it edits."
-    link: { label: "Set it up", href: "guide/setup/" }
-    secondary: { label: "CLI commands", href: "guide/cli/" }
-    filesLabel: "What init writes"
-    files:
-      - { name: "run.ts", note: "The workflow script you run." }
-      - { name: "brief.md", note: "The agent’s instructions." }
-      - { name: ".env.example", note: "The variables your sign-in needs." }
-      - { name: "Dockerfile", note: "The agent image recipe." }
-      - { name: ".gitignore", note: "Extends an existing one." }
-      - { name: "package.json", note: "Only when the directory has none." }
+  typed:
+    title: "The agent answers in prose. Your code gets a typed value."
+    text: "Declare the answer with a Zod schema. Outpost pulls the tagged block out of the agent’s reply, validates it against your schema, and hands you `result.value` typed from it. An answer that fails the schema is not yours to patch: the agent gets repair turns on the same conversation, and a run that still fails throws rather than hand your code bad data."
+    link: { label: "Typed responses", href: "guide/typed-responses/" }
+    secondary:
+      { label: "Review a pull request", href: "guide/review-on-label/" }
+    declareLabel: "You declare the answer"
+    answerLabel: "The agent replies"
+    answerText: "I reviewed the last commit. The fix is correct, but there is no regression test for it."
+    answerTag: '<verdict>{"approved": false, "reasons": ["no regression test"]}</verdict>'
+    valueLabel: "Your code receives result.value"
+    value: '{ approved: false, reasons: ["no regression test"] }'
   runtimes:
     title: "Any agent, any sandbox"
     text: "Swap either in one line; the workflow stays the same. You declare how each agent authenticates, and an isolated sandbox never falls back to your host."

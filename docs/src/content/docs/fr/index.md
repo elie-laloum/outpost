@@ -87,19 +87,18 @@ landing:
           - pain: "Reprendre, c’est réinterpréter"
             detail: "Après un crash ou un quota, le modèle reconstruit son état à partir d’une transcription."
             answer: "Les tâches terminées reviennent du checkpoint en JSON. Relancer une tâche interrompue demande votre accord explicite."
-  start:
-    title: "Une commande écrit le projet. Vous lisez chaque fichier."
-    text: "`init` échafaude un workflow qui vous appartient : six fichiers, aucun caché, et une image de conteneur. Il préserve un manifeste de paquet existant et complète un fichier d’exclusion existant. Pointez-le vers le dossier et le dépôt de votre choix — le workflow n’a jamais besoin de vivre dans le dépôt qu’il modifie."
-    link: { label: "Installer", href: "guide/setup/" }
-    secondary: { label: "Commandes CLI", href: "guide/cli/" }
-    filesLabel: "Ce qu’écrit init"
-    files:
-      - { name: "run.ts", note: "Le script de workflow que vous lancez." }
-      - { name: "brief.md", note: "Les instructions de l’agent." }
-      - { name: ".env.example", note: "Les variables de votre connexion." }
-      - { name: "Dockerfile", note: "La recette de l’image d’agent." }
-      - { name: ".gitignore", note: "Complète un fichier existant." }
-      - { name: "package.json", note: "Seulement si le dossier n’en a pas." }
+  typed:
+    title: "L’agent répond en prose. Votre code reçoit une valeur typée."
+    text: "Déclarez la réponse avec un schéma Zod. Outpost extrait le bloc balisé de la réponse de l’agent, le valide contre votre schéma et vous rend `result.value` typé depuis celui-ci. Une réponse qui ne passe pas le schéma n’est pas à vous de rattraper : l’agent obtient des tours de réparation sur la même conversation, et une exécution qui échoue encore lève une erreur plutôt que de livrer de mauvaises données à votre code."
+    link: { label: "Réponses typées", href: "guide/typed-responses/" }
+    secondary:
+      { label: "Relire une pull request", href: "guide/review-on-label/" }
+    declareLabel: "Vous déclarez la réponse"
+    answerLabel: "L’agent répond"
+    answerText: "J’ai relu le dernier commit. Le correctif est juste, mais il n’a pas de test de régression."
+    answerTag: '<verdict>{"approved": false, "reasons": ["pas de test de régression"]}</verdict>'
+    valueLabel: "Votre code reçoit result.value"
+    value: '{ approved: false, reasons: ["pas de test de régression"] }'
   runtimes:
     title: "Tout agent, toute sandbox"
     text: "Changer l’un ou l’autre tient en une ligne ; le workflow reste identique. Vous déclarez comment chaque agent s’authentifie, et une sandbox isolée ne se replie jamais sur votre machine."

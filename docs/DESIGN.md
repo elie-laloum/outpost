@@ -135,8 +135,8 @@ A cool slate grayscale taken from Celestia's Tailwind grays. The ember accent is
 
 - **Night** (dark ground) / **Paper** (light ground): page and rail backgrounds. Night is Celestia's gray-950.
 - **White Ink** (dark) / **Slate Ink** (light): headings, primary labels, pressed beats and controls, the filled model and agent owner tags, and the primary button's fill.
-- **Mist** (dark body) / **Graphite** (light body): body copy, lane and beat captions, scaffold notes, and pain details.
-- **Pewter** (dark muted) / **Steel** (light muted): captions, the facts line, inactive beats, outlined code owner tags, meter labels and fills at rest, step notes, scaffold file icons, a disabled control, and group labels. Both pass 4.5:1 on their ground.
+- **Mist** (dark body) / **Graphite** (light body): body copy, lane and beat captions, the response figure's reply, and pain details.
+- **Pewter** (dark muted) / **Steel** (light muted): captions, the facts line, inactive beats, outlined code owner tags, meter labels and fills at rest, step notes, the response figure's pane labels and its tag before it is read, a disabled control, and group labels. Both pass 4.5:1 on their ground.
 - **Graphite** (dark hairline) / **Fog Line** (light hairline): every rule, frame edge and cell divider, through `--sl-color-hairline-light`.
 - **Slate Panel** (gray-800 dark, gray-200 light): hover fill for buttons and navigation. Mixed at 45% into Night, it becomes the code surface (at 80% for a pressed beat or control and a table cell being worked on).
 
@@ -162,8 +162,8 @@ Celestia sets the root to 14px. All rem values in this file are relative to that
 - **Headline** (600, clamp(1.5rem, 2.2vw, 1.875rem), 1.15, -0.03em): section headings in the left bays; Guide page titles follow the same tight tracking at clamp(1.8rem, 3vw, 2.3rem).
 - **Title** (500, 1.0625rem, -0.01em): lane titles and pain names. Demo step names use 0.9375rem at 500 (0.75rem below 40rem).
 - **Body** (400, 1rem, 1.65): explanatory copy, capped at about 34rem, with `text-wrap: pretty`. Guide articles use 0.95rem at 1.8.
-- **Label** (500, 0.8125rem): group labels, captions, footer headings, the facts line, the demo title, beats, meter labels and the scaffold head. Step notes and the Interrupted mark drop to 0.75rem; owner tags to 0.75rem.
-- **Code** (400, 0.8125rem, 1.7): the install command, the hero's `dispatch()` excerpt, scaffold file names (0.875rem) and API names. The excerpt drops to 0.75rem below 40rem.
+- **Label** (500, 0.8125rem): group labels, captions, footer headings, the facts line, the demo title, beats, meter labels and the response figure's pane labels. Step notes and the Interrupted mark drop to 0.75rem; owner tags to 0.75rem.
+- **Code** (400, 0.8125rem, 1.7): the install command, the hero's `dispatch()` excerpt and API names; the excerpt drops to 0.75rem below 40rem. The response figure sets all three of its panes at 0.75rem.
 
 ### Named Rules
 
@@ -175,7 +175,7 @@ Celestia sets the root to 14px. All rem values in this file are relative to that
 
 The landing page sits in a centered rail, 82rem wide at most, with 1px hairlines on both edges. Outside the rail, a -45° hatch (1px lines every 8px, gray-5 at 45%) fills the margins like the unused area of a drawing sheet.
 
-Inside the rail, every section is a bay on a 12-track frame split 5 | 7. The left bay states the idea (heading, one paragraph, a link), and the right bay proves it (the `dispatch()` excerpt, use-case rows, the pain/answer table, the scaffold list, runtime name boxes or boundary rows). One row escapes the split: the orchestration demo opens the problem bay as a full-width figure across all twelve tracks, above that bay's 5 | 7 division, because its own four-step lanes need the frame. A bay's trailing link follows the paragraph it belongs to; the sheet left under it is unused area, not a gap to fill. Rows inside the right bay split 4 | 3, so their divider falls on track 9 in every section. The footer's columns start on the same tracks 5 and 9. Horizontal hairlines separate the bays. Content never floats outside a bay. A framed figure (the orchestration demo) is a drawing set inside its bay; its inner divisions follow its own content.
+Inside the rail, every section is a bay on a 12-track frame split 5 | 7. The left bay states the idea (heading, one paragraph, a link), and the right bay proves it (the `dispatch()` excerpt, use-case rows, the pain/answer table, the response figure, runtime name boxes or boundary rows). One row escapes the split: the orchestration demo opens the problem bay as a full-width figure across all twelve tracks, above that bay's 5 | 7 division, because its own four-step lanes need the frame. A bay's trailing link follows the paragraph it belongs to; the sheet left under it is unused area, not a gap to fill. Rows inside the right bay split 4 | 3, so their divider falls on track 9 in every section. The footer's columns start on the same tracks 5 and 9. Horizontal hairlines separate the bays. Content never floats outside a bay. A framed figure (the orchestration demo) is a drawing set inside its bay; its inner divisions follow its own content.
 
 The gutter is `clamp(1.25rem, 3.2vw, 3rem)`. Bays use 3.5rem of vertical padding, stacks inside them 1rem gaps, and cells 1.4rem. More space sits above a heading than below it.
 
@@ -202,7 +202,7 @@ Flat. There are no shadows anywhere. Depth comes from tone: the code surface is 
 
 ## Shapes
 
-Square, everywhere. Landing bays, docs sections, cells, buttons, the code excerpt and code blocks, the install field, demo step cells, owner tags, context meters, beat buttons, scaffold rows, runtime name boxes, inline code and sidebar hover and current states all have 0 radius. Icons are drawn SVG with a 1.6 stroke, round caps and round joins. Breadcrumb separators and the demo's code-lane chevrons are drawn with two hairline borders, not glyphs. The one dashed line in the system is the orchestration demo's Interrupted cut.
+Square, everywhere. Landing bays, docs sections, cells, buttons, the code excerpt and code blocks, the install field, demo step cells, owner tags, context meters, beat buttons, response figure panes, runtime name boxes, inline code and sidebar hover and current states all have 0 radius. Icons are drawn SVG with a 1.6 stroke, round caps and round joins. Breadcrumb separators and the demo's code-lane chevrons are drawn with two hairline borders, not glyphs. The one dashed line in the system is the orchestration demo's Interrupted cut.
 
 ## Components
 
@@ -270,12 +270,13 @@ Below 40rem the columns stack: the group head becomes a tonal band (code-surface
 
 The agents and sandboxes bay lists two groups (a Label head row above a hairline) of linked name boxes that wrap: 2.25rem tall, a 1px hairline border, the name at 0.9375rem and 500 in ink. Hover darkens the border to gray-4 and adds the code-surface fill. The experimental Firecracker entry carries the ember flask with a localized accessible label.
 
-### Scaffold List
+### Response Figure
 
-The adoption bay's right half: the files `outpost init` writes, as ruled rows on the bay's own grid. Each row carries a drawn file icon in Pewter/Steel, the file name in monospace ink at 0.875rem and its one-line note in Pewter/Steel, split 4 | 3 so the note starts on track 9. A Label head row names the list above a hairline.
+The typed-response bay's proof: three stacked panes inside one hairline frame on the code surface, each under a Label caption, with a drawn chevron (two hairline borders turned 45°) between them.
 
-- **Motion:** the rows write themselves in sequence, 90ms apart, once the list is 35% in view, so the figure performs what the command does. Under reduced motion every row is present at once.
-- **Quiet by default:** the list is not a link list and has no hover; the bay's actions are the two links in its left half.
+- **Panes:** the `defineJsonResponse()` declaration, cut at build time from the typechecked `snippets/verdict.ts`; the agent's reply as prose with its tagged block on its own line; and the `result.value` your code receives.
+- **Motion:** the frame opens on the declaration alone. When it is 35% in view the reply appears, then after 900ms the value, and the tagged block takes the 80% fill and ink text at that moment — the highlight says which part of the prose became the value. Under reduced motion all three panes and the highlight are present at once.
+- **Scroll:** the declaration pane scrolls horizontally inside a focusable region (`role="region"`, labelled by its caption) with the ember focus ring inside. Below 40rem the tagged block wraps instead of scrolling.
 
 ### Navigation
 

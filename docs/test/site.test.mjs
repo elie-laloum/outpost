@@ -101,11 +101,15 @@ for (const [locale, heading, start, copied, beat] of [
       "npx @elie-laloum/outpost init",
     );
     await expect(page.locator(".landing .boundary")).toHaveCount(3);
-    const scaffold = page.locator("outpost-scaffold");
-    await scaffold.scrollIntoViewIfNeeded();
-    await expect(scaffold).toHaveAttribute("data-written", "");
-    await expect(scaffold.locator("li")).toHaveCount(6);
-    await expect(scaffold.locator("li code").first()).toHaveText("run.ts");
+    const verdict = page.locator("outpost-verdict");
+    await verdict.scrollIntoViewIfNeeded();
+    await expect(verdict.locator(".pane.code")).toContainText(
+      "defineJsonResponse({",
+    );
+    await expect(verdict).toHaveAttribute("data-step", "3", { timeout: 5000 });
+    await expect(verdict.locator(".value code")).toContainText(
+      "approved: false",
+    );
     await hero.getByRole("link", { name: start }).click();
     await expect(page).toHaveURL(new RegExp(`/${locale}guide/setup/$`));
   });
@@ -122,9 +126,9 @@ test("landing comparison stays still with reduced motion", async ({ page }) => {
   await expect(
     demo.locator('[data-lane="model"] .step').nth(3),
   ).toHaveAttribute("data-note", "early");
-  const scaffold = page.locator("outpost-scaffold");
-  await scaffold.scrollIntoViewIfNeeded();
-  await expect(scaffold.locator("li").first()).toBeVisible();
+  const verdict = page.locator("outpost-verdict");
+  await verdict.scrollIntoViewIfNeeded();
+  await expect(verdict).toHaveAttribute("data-step", "3");
 });
 
 test("language switch retains the new guide page", async ({ page }) => {
