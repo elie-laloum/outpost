@@ -89,6 +89,12 @@ const summary = demo.beats.map(
   const MODEL_STEP = 520;
   const CODE_STEP = 160;
   const AGENT_STEP = 1100;
+  // Ember at half the context window, red at three quarters.
+  const LEVELS = [
+    { from: 0.75, level: "high" },
+    { from: 0.5, level: "mid" },
+    { from: 0, level: "low" },
+  ];
 
   class OutpostDemo extends DemoPlayer {
     #lanes: Record<LaneKey, Lane> = {
@@ -115,7 +121,9 @@ const summary = demo.beats.map(
     }
 
     #fill(lane: LaneKey, value: number) {
-      this.#lanes[lane].fill.style.setProperty("--fill", String(value));
+      const { fill } = this.#lanes[lane];
+      fill.style.setProperty("--fill", String(value));
+      fill.dataset.level = LEVELS.find((step) => value >= step.from)!.level;
     }
 
     protected reset() {
@@ -300,10 +308,11 @@ const summary = demo.beats.map(
   }
   .step {
     position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.45rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-content: start;
+    justify-items: start;
+    gap: 0.45rem 0.6rem;
     min-width: 0;
     padding: 0.8rem 0.8rem 0.7rem;
     background: var(--sl-color-black);
@@ -358,6 +367,7 @@ const summary = demo.beats.map(
   }
   .step-notes {
     display: grid;
+    grid-column: 1 / -1;
     min-height: 1.2em;
     color: var(--sl-color-gray-3);
     font-size: 0.75rem;
@@ -382,9 +392,9 @@ const summary = demo.beats.map(
     stroke-width: 1.6;
     stroke-linecap: round;
     stroke-linejoin: round;
-    position: absolute;
-    right: 0.7rem;
-    bottom: 0.7rem;
+    grid-row: 1;
+    grid-column: 2;
+    justify-self: end;
     color: var(--sl-color-white);
     opacity: 0;
     transform: scale(0.6);
@@ -445,6 +455,14 @@ const summary = demo.beats.map(
       background-color 0.3s var(--landing-ease);
   }
 
+  /* A filling context window is the one place the demo warns. */
+  .meter-fill[data-level="mid"] {
+    background: var(--sl-color-accent);
+  }
+  .meter-fill[data-level="high"] {
+    background: var(--sl-color-red);
+  }
+
   .cut {
     position: absolute;
     inset: 0 auto 0 50%;
@@ -478,7 +496,7 @@ const summary = demo.beats.map(
   :global(.demo[data-beat="1"]) .meter-label {
     color: var(--sl-color-white);
   }
-  :global(.demo[data-beat="1"]) .meter-fill {
+  :global(.demo[data-beat="1"]) .meter-fill[data-level="low"] {
     background: var(--sl-color-white);
   }
   :global(.demo[data-beat="2"]) [data-lane="code"] .step::before {
@@ -498,8 +516,6 @@ const summary = demo.beats.map(
       top: 0.85rem;
     }
     .step-check {
-      right: 0.4rem;
-      bottom: 0.55rem;
       width: 0.8rem;
       height: 0.8rem;
     }

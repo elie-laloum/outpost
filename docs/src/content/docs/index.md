@@ -118,7 +118,7 @@ landing:
       - { name: "Vercel", href: "guide/cloud-sandboxes/#vercel-sandbox" }
       - { name: "Daytona", href: "guide/cloud-sandboxes/#daytona-sandbox" }
       - { name: "Host process", href: "guide/host-process/" }
-      - { name: "Firecracker", href: "guide/firecracker/", experimental: true }
+      - { name: "Firecracker", href: "guide/firecracker/" }
     link: { label: "Choose an agent", href: "guide/choose-an-agent/" }
   boundaries:
     title: "Where Outpost is not the answer"
@@ -128,8 +128,8 @@ landing:
         text: "If the whole job fits in one conversation, run the agent CLI directly. Outpost earns its place when the branch, the checks, the order and the resume are yours."
       - lead: "A single CI step"
         text: "A workflow file that runs an agent and stops is less code. Outpost runs the same job from CI, a queue, a cron slot or a verified webhook, and keeps the checkpoint when the worker restarts."
-      - lead: "Work that is not code"
-        text: "Outpost’s unit is a repository: every agent task gets a sandbox, a branch and commits. If what you are orchestrating is text in and text out — summarise, classify, extract — that machinery is pure overhead, and a pipeline framework is the right tool."
+      - lead: "You only want to read"
+        text: "A question about the code produces no branch, no commits and nothing for a check to gate. Run the agent in your own terminal and keep the answer."
     link: { label: "Job queues and workers", href: "guide/job-queues/" }
     action: { label: "Start with the setup guide", href: "guide/setup/" }
   footer:

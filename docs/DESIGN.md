@@ -14,6 +14,8 @@ colors:
   fog-line: "oklch(92.8% 0.006 264.531)"
   ember: "#fb923c"
   ember-deep: "#c2410c"
+  alarm: "oklch(70.4% 0.191 22.216)"
+  alarm-deep: "oklch(39.6% 0.141 25.723)"
 typography:
   display:
     fontFamily: "Inter, system-ui, sans-serif"
@@ -129,7 +131,9 @@ A cool slate grayscale taken from Celestia's Tailwind grays. The ember accent is
 
 ### Primary
 
-- **Ember** (#fb923c dark / Ember Deep #c2410c light): the only accent. It marks a model or agent step running right now in the orchestration demo (a 12% tint mixed in sRGB and a 2px ember underline that grows for the step's duration), focus rings (2px outline), text selection (a 32% tint), and the experimental flask on Firecracker. Nothing else is orange: finished steps, code steps and owner tags stay in ink.
+- **Ember** (#fb923c dark / Ember Deep #c2410c light): the only accent. It marks a model or agent step running right now in the orchestration demo (a 12% tint mixed in sRGB and a 2px ember underline that grows for the step's duration), the model's context meter once it passes half, focus rings (2px outline), text selection (a 32% tint), and the experimental flask when a runtime carries one. Nothing else is orange: finished steps, code steps and owner tags stay in ink.
+
+**Alarm** (`--sl-color-red`, light red on the dark ground, deep red on the light one): one job only, the model's context meter past three quarters. Nothing else in the system is red, and nothing uses it for an error, a required field or a destructive action.
 
 ### Neutral
 
@@ -142,7 +146,9 @@ A cool slate grayscale taken from Celestia's Tailwind grays. The ember accent is
 
 ### Named Rules
 
-**The Live-Only Ember Rule.** Ember marks what is active or focused right now: a model or agent step running right now, focus, selection, experimental status. Pressed beats and controls, hovers and link underlines use white or slate ink and fills, never ember.
+**The Live-Only Ember Rule.** Ember marks what is active or focused right now, plus one cost that is accumulating: a model or agent step running right now, the model's context meter past half, focus, selection, experimental status. Pressed beats and controls, hovers and link underlines use white or slate ink and fills, never ember.
+
+**The One Alarm Rule.** The meter is the only element that turns red, and only past three quarters. A second red anywhere would make the first one ordinary.
 
 **The Two-Theme Rule.** No color is picked for one theme alone. Each role above has a dark and a light value, and both must meet WCAG 2.2 AA.
 
@@ -251,9 +257,9 @@ The signature component: the drawing that opens the problem bay, full width, reg
 
 - **Bar:** a 2.75rem strip with the job title (Label, ink) and, at the right edge behind a hairline, a square pause/replay toggle with drawn icons. The toggle is hidden under reduced motion.
 - **Lanes:** two stacked lanes, "An LLM orchestrates" above "Code orchestrates", separated by a hairline. Each has a Title-style name, a caption for the current beat (all captions share one grid cell so switching never shifts the layout), a row of four step cells and a context meter.
-- **Step cells:** a 4-column grid whose dividers are 1px gaps over the line colour, on the Night ground. Each cell holds the step name, an owner tag, a note slot and a drawn check that appears at the right end of the note slot when done, clear of long step names. Model and agent tags are filled in White/Slate Ink; code tags are outlined in a hairline with Pewter/Steel text, so the split reads at rest.
+- **Step cells:** a 4-column grid whose dividers are 1px gaps over the line colour, on the Night ground. Each cell holds the step name with its drawn check on the same line at the cell's right edge, an owner tag under it, and a note slot across the foot. Name and check read as one finished step at any cell width. Model and agent tags are filled in White/Slate Ink; code tags are outlined in a hairline with Pewter/Steel text, so the split reads at rest.
 - **Running state:** a model or agent step gets the ember tint and an ember underline that grows over its run time; a code step gets the 80% code fill and a Pewter/Steel underline. Only the code lane draws chevrons between its steps, because only its order is fixed.
-- **Context meter:** a label and a 0.5rem hairline track whose Pewter/Steel fill grows with each model step (the code lane stays at a quarter).
+- **Context meter:** a label and a 0.5rem hairline track whose fill grows with each model step, while the code lane stays at a quarter. The fill is Pewter/Steel below half, ember from half, Alarm from three quarters, so the two lanes read as a calm bar beside a filling one before either caption is read.
 - **Beats:** four buttons along the foot (Steps, Context, Order, Resume), split by hairlines. The pressed beat takes the 80% fill and ink text; while playing, a 2px ink underline runs across it for the beat's duration. Each beat puts ink on what it explains: code tags, the meters, the code chevrons.
 - **Order beat:** the last two model cells swap places and the moved Integrate cell shows "too early".
 - **Resume beat:** a dashed ink "Interrupted" cut drops down the middle of both lanes, labelled in a hairline box; lane titles and captions knock the line out with the code-surface fill. The model lane reruns its first steps marked "reread"; the code lane marks them "restored".
@@ -268,7 +274,7 @@ Below 40rem the columns stack: the group head becomes a tonal band (code-surface
 
 ### Runtime Names
 
-The agents and sandboxes bay lists two groups (a Label head row above a hairline) of linked name boxes that wrap: 2.25rem tall, a 1px hairline border, the name at 0.9375rem and 500 in ink. Hover darkens the border to gray-4 and adds the code-surface fill. The experimental Firecracker entry carries the ember flask with a localized accessible label.
+The agents and sandboxes bay lists two groups (a Label head row above a hairline) of linked name boxes that wrap: 2.25rem tall, a 1px hairline border, the name at 0.9375rem and 500 in ink. Hover darkens the border to gray-4 and adds the code-surface fill. An entry marked experimental carries the ember flask with a localized accessible label; none is marked today.
 
 ### Response Figure
 

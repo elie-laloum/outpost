@@ -118,7 +118,7 @@ landing:
       - { name: "Vercel", href: "guide/cloud-sandboxes/#vercel-sandbox" }
       - { name: "Daytona", href: "guide/cloud-sandboxes/#daytona-sandbox" }
       - { name: "Processus hôte", href: "guide/host-process/" }
-      - { name: "Firecracker", href: "guide/firecracker/", experimental: true }
+      - { name: "Firecracker", href: "guide/firecracker/" }
     link: { label: "Choisir un agent", href: "guide/choose-an-agent/" }
   boundaries:
     title: "Quand Outpost n’est pas la réponse"
@@ -128,8 +128,8 @@ landing:
         text: "Si toute la tâche tient dans une conversation, lancez la CLI de l’agent directement. Outpost prend son sens quand la branche, les vérifications, l’ordre et la reprise vous appartiennent."
       - lead: "Une seule étape de CI"
         text: "Un fichier de workflow qui lance un agent et s’arrête demande moins de code. Outpost lance la même tâche depuis la CI, une file, un créneau cron ou un webhook vérifié, et garde le checkpoint quand le worker redémarre."
-      - lead: "Du travail qui n’est pas du code"
-        text: "L’unité d’Outpost, c’est un dépôt : chaque tâche d’agent reçoit une sandbox, une branche et des commits. Si ce que vous orchestrez, c’est du texte en entrée et du texte en sortie — résumer, classer, extraire — toute cette mécanique n’est que du surcoût, et un framework de pipeline est l’outil adapté."
+      - lead: "Vous voulez seulement lire"
+        text: "Une question sur le code ne produit ni branche, ni commits, ni rien qu’un contrôle puisse valider. Lancez l’agent dans votre terminal et gardez la réponse."
     link: { label: "Files de jobs et workers", href: "guide/job-queues/" }
     action:
       { label: "Commencer par le guide d’installation", href: "guide/setup/" }
