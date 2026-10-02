@@ -7,6 +7,15 @@ sidebar:
 
 The release notes below are synchronized from the root `CHANGELOG.md`, the single source of release history.
 
+## 9.0.3
+
+- Rebuild the documentation landing page as a path for a developer deciding whether to install: the headline runs on one rule, the install command carries its prerequisites and the first command to run, and a `dispatch()` call cut from a typechecked snippet shows one task end to end. The page then reads as what you can run, the comparison drawing, the agents and sandboxes it runs on, the argument that drawing opened, typed responses, and where Outpost is not the answer.
+- Make the orchestration comparison argue in numbers. Two lanes, “The model orchestrates” and “Your code orchestrates”, play four beats; each step reports its own time — 0.6 s for a model step, 0.9 s for an agent turn, 0.1 s for code, read from one constants module so no figure can disagree with another — and the running total turns the Resume beat into a number: the model climbs from 2.4 s to 3.6 s because it rereads two steps, while the code lane holds at 1.2 s because restored steps run nothing. The model’s context meter turns ember past half and red past three quarters while the code lane stays at a quarter. The chain loops, carries on from a clicked beat, parks on pointer or focus, keeps the explicit pause toggle and shows a still state when motion is reduced.
+- Drive the problem register from that figure instead of repeating it: one pain shows at a time beside the beat that makes its case, with a four-tick pager that fills over the beat’s own duration, a visually hidden list of all four for assistive technology and search, and the first pain served as static prose when scripts do not run.
+- Show the whole typed-response call rather than its schema alone: the Zod declaration, the `dispatch()` that passes it as `response` and the typed value read back, cut at build time from a typechecked snippet, beside the agent’s reply in prose with its tagged block lit at the moment it becomes typed data.
+- Rewrite the landing copy in both languages so each reads as written rather than translated, without moving a claim, a proof or a link.
+- Stop flagging Firecracker as experimental on the landing page, where the reference already ships it stable; the note there now covers speculation only. Public library contracts are unchanged.
+
 ## 9.0.2
 
 - Rebuild the documentation home page around “Code orchestrates. Agents think.”: an animated comparison of a pipeline orchestrated by an LLM and one orchestrated by code, the pains of LLM-driven pipelines paired with what Outpost does instead, a table showing that only the agent’s work varies between runs of the same workflow beside the real verification check that gates it, and a compact list of agents and sandboxes. Both figures can be paused or replayed, show still states when motion is reduced, and are described for screen readers. Public library contracts are unchanged.

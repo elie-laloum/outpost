@@ -29,6 +29,8 @@ Disponible en 9.0.1 : le [Guide](../../guide/introduction/) est organisé par t�
 
 Disponible en 9.0.2 : la page d’accueil de la documentation présente Outpost par le partage entre l’orchestration par le code et le jugement de l’agent. Cette version documentaire ne change pas le statut de validation des fonctionnalités expérimentales.
 
+Disponible en 9.0.3 : la page d’accueil est organisée pour le développeur qui se demande s’il installe, de la commande d’installation et de ses prérequis à la comparaison chronométrée des deux orchestrateurs, à la valeur typée que reçoit un workflow et aux cas où Outpost n’est pas la réponse. Cette version documentaire ne change pas le statut de validation des fonctionnalités expérimentales.
+
 Disponible en 8.0.0 : [Enregistrer et rejouer](../../guide/record-replay/) rejoue le journal d’un dispatch sans appeler de modèle, reconstruit ses commits dans la sandbox et signale les divergences. Les tests déterministes couvrent les enregistrements CLI et harness, les échecs, les réparations, les passes et une vraie sandbox Docker. Le rejeu d’un workflow entier, les modifications non commitées et une commande CLI restent prévus.
 
 Disponible en 8.0.0 : le [cache de tâches](../../guide/task-cache/) réutilise le résultat JSON d’une tâche lorsque workflow, tâche, version et clé correspondent, avec `repositoryFingerprint()` pour les clés fondées sur l’état du dépôt, expiration, rafraîchissement et périmètre de rétention `task-cache`. Les tests déterministes couvrent les correspondances, les entrées invalides et concurrentes, les checkpoints et la rétention. La coordination entre exécutions concurrentes et l’authentification des entrées restent à faire.

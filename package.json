@@ -1,6 +1,6 @@
 {
   "name": "@elie-laloum/outpost",
-  "version": "9.0.2",
+  "version": "9.0.3",
   "description": "Programmable sandboxes, coding agents and typed workflows.",
   "type": "module",
   "license": "MIT",
