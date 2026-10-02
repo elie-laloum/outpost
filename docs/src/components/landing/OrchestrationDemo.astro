@@ -72,11 +72,17 @@ const summary = demo.beats.map(
               </li>
             ))}
           </ol>
-          <div class="meter">
-            <span class="meter-label">{lane.context}</span>
-            <span class="meter-track">
-              <span class="meter-fill" style={`--fill: ${fill}`} />
-            </span>
+          <div class="lane-foot">
+            <p class="total">
+              <span class="total-label">{demo.totalLabel}</span>
+              <span class="total-value" />
+            </p>
+            <div class="meter">
+              <span class="meter-label">{lane.context}</span>
+              <span class="meter-track">
+                <span class="meter-fill" style={`--fill: ${fill}`} />
+              </span>
+            </div>
           </div>
         </div>
       ))
@@ -89,9 +95,11 @@ const summary = demo.beats.map(
   import { DemoPlayer } from "./demo-player.ts";
 
   type LaneKey = "model" | "code";
-  type Lane = { steps: HTMLElement[]; fill: HTMLElement };
+  type Lane = { steps: HTMLElement[]; fill: HTMLElement; total: HTMLElement };
 
-  import { STEP_DURATIONS } from "./orchestration.constants.ts";
+  import { STEP_DURATIONS, seconds } from "./orchestration.constants.ts";
+
+  const LOCALE = document.documentElement.lang || "en";
   // Ember at half the context window, red at three quarters.
   const LEVELS = [
     { from: 0.75, level: "high" },
@@ -101,9 +109,10 @@ const summary = demo.beats.map(
 
   class OutpostDemo extends DemoPlayer {
     #lanes: Record<LaneKey, Lane> = {
-      model: { steps: [], fill: this },
-      code: { steps: [], fill: this },
+      model: { steps: [], fill: this, total: this },
+      code: { steps: [], fill: this, total: this },
     };
+    #elapsed: Record<LaneKey, number> = { model: 0, code: 0 };
 
     connectedCallback() {
       for (const key of ["model", "code"] as const) {
@@ -111,6 +120,7 @@ const summary = demo.beats.map(
         this.#lanes[key] = {
           steps: [...(lane?.querySelectorAll<HTMLElement>(".step") ?? [])],
           fill: lane?.querySelector<HTMLElement>(".meter-fill") ?? this,
+          total: lane?.querySelector<HTMLElement>(".total-value") ?? this,
         };
       }
       super.connectedCallback();
@@ -121,6 +131,11 @@ const summary = demo.beats.map(
       if (!step) return;
       step.dataset.state = state;
       step.dataset.note = note;
+    }
+
+    #spend(lane: LaneKey, ms: number) {
+      this.#elapsed[lane] += ms;
+      this.#lanes[lane].total.textContent = seconds(this.#elapsed[lane], LOCALE);
     }
 
     #fill(lane: LaneKey, value: number) {
@@ -135,6 +150,8 @@ const summary = demo.beats.map(
           this.#step(lane, index, "idle"),
         );
         this.#fill(lane, 0);
+        this.#elapsed[lane] = 0;
+        this.#spend(lane, 0);
       }
       this.toggleAttribute("data-drift", false);
       this.toggleAttribute("data-cut", false);
@@ -158,6 +175,7 @@ const summary = demo.beats.map(
         time += duration;
         this.at(time, () => {
           this.#step(lane, index, "done", note);
+          if (note !== "restored") this.#spend(lane, duration);
           if (owner === "model") this.#fill(lane, (filled + position + 1) / 4);
         });
       });
@@ -178,6 +196,7 @@ const summary = demo.beats.map(
         time += STEP_DURATIONS.model;
         this.at(time, () => {
           this.#step("model", index, "done", note);
+          this.#spend("model", STEP_DURATIONS.model);
           this.#fill("model", (position + 1) / 4);
         });
       });
@@ -222,6 +241,12 @@ const summary = demo.beats.map(
         );
       this.#fill("model", 1);
       this.#fill("code", 0.25);
+      const reread = beat === 3 ? 2 * STEP_DURATIONS.model : 0;
+      this.#elapsed.model = 4 * STEP_DURATIONS.model + reread;
+      this.#elapsed.code =
+        3 * STEP_DURATIONS.code + STEP_DURATIONS.agent;
+      for (const lane of ["model", "code"] as const)
+        this.#spend(lane, 0);
       if (beat === 2) {
         this.toggleAttribute("data-drift", true);
         this.#step("model", 3, "done", "early");
@@ -438,6 +463,46 @@ const summary = demo.beats.map(
   }
   :global(.demo[data-drift]) [data-lane="model"] .step:nth-child(4) {
     transform: translateX(calc(-100% - 1px));
+  }
+
+  /* One row, two tenants: the meter on the Context beat, the total elsewhere. */
+  .lane-foot {
+    display: grid;
+    min-height: 1.4rem;
+  }
+  .lane-foot > * {
+    grid-area: 1 / 1;
+    align-self: center;
+    opacity: 0;
+    transition: opacity 0.3s var(--landing-ease);
+  }
+  :global(.demo[data-beat="1"]) .lane-foot .meter,
+  :global(.demo:not([data-beat="1"])) .lane-foot .total {
+    opacity: 1;
+  }
+  .total {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    margin: 0;
+  }
+  .total-label {
+    flex: 0 0 auto;
+    min-width: 6.5rem;
+    color: var(--sl-color-gray-3);
+    font-size: 0.8125rem;
+  }
+  .total-value {
+    color: var(--sl-color-white);
+    font-family: var(--sl-font-system-mono);
+    font-size: 0.8125rem;
+    font-variant-numeric: tabular-nums;
+  }
+  /* A step's own time only argues on the beats about cost. */
+  :global(.demo[data-beat="1"]) .step-time,
+  :global(.demo[data-beat="2"]) .step-time,
+  .step[data-note="restored"] .step-time {
+    opacity: 0;
   }
 
   .meter {

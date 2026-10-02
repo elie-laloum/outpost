@@ -69,6 +69,7 @@ const landing = z.object({
       reread: z.string(),
       restored: z.string(),
     }),
+    totalLabel: z.string(),
     interrupted: z.string(),
     model: lane,
     code: lane,

@@ -48,6 +48,7 @@ landing:
     steps: ["Branch", "Fix", "Verify", "Integrate"]
     owners: { model: "model", code: "code", agent: "agent" }
     notes: { early: "too early", reread: "reread", restored: "restored" }
+    totalLabel: "Total time"
     interrupted: "Interrupted"
     model:
       title: "The model orchestrates"

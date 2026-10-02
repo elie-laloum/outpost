@@ -48,6 +48,7 @@ landing:
     steps: ["Branche", "Correctif", "Vérification", "Intégration"]
     owners: { model: "modèle", code: "code", agent: "agent" }
     notes: { early: "trop tôt", reread: "relu", restored: "restauré" }
+    totalLabel: "Temps total"
     interrupted: "Interruption"
     model:
       title: "Le modèle orchestre"
