@@ -70,23 +70,20 @@ landing:
     text: "An LLM is good at judgment: reading code, writing a fix, reviewing a change. Most AI pipelines also hand it the steps, the order and the recovery, which code does better."
     link: { label: "How Outpost works", href: "guide/how-it-works/" }
     answerLabel: "With Outpost"
-    groups:
-      - title: "Using LLMs today"
-        rows:
-          - pain: "Everything is interpreted"
-            detail: "Even a branch name or a test command goes through the model, every time."
-            answer: "Code runs the certain steps. The agent gets only the work that needs judgment."
-          - pain: "The context keeps growing"
-            detail: "Each step adds to one conversation that the model rereads."
-            answer: "Each agent task starts from its own brief, in its own sandbox."
-      - title: "Building AI workflows"
-        rows:
-          - pain: "The orchestrator drifts"
-            detail: "When a model decides the order, it can skip, repeat or reorder steps."
-            answer: "The task graph is TypeScript, validated before the run. Typed responses are checked against their schema."
-          - pain: "Resuming means re-interpreting"
-            detail: "After a crash or a quota, the model rebuilds its state from a transcript."
-            answer: "Finished tasks come back from the checkpoint as JSON. Rerunning an interrupted one takes your explicit consent."
+    summaryLabel: "What the model is handed, step by step"
+    rows:
+      - pain: "Everything is interpreted"
+        detail: "Even a branch name or a test command goes through the model, every time."
+        answer: "Code runs the certain steps. The agent gets only the work that needs judgment."
+      - pain: "The context keeps growing"
+        detail: "Each step adds to one conversation that the model rereads."
+        answer: "Each agent task starts from its own brief, in its own sandbox."
+      - pain: "The orchestrator drifts"
+        detail: "When a model decides the order, it can skip, repeat or reorder steps."
+        answer: "The task graph is TypeScript, validated before the run. Typed responses are checked against their schema."
+      - pain: "Resuming means re-interpreting"
+        detail: "After a crash or a quota, the model rebuilds its state from a transcript."
+        answer: "Finished tasks come back from the checkpoint as JSON. Rerunning an interrupted one takes your explicit consent."
   typed:
     title: "The agent answers in prose. Your code gets a typed value."
     text: "Declare the answer with a Zod schema. Outpost pulls the tagged block out of the agent’s reply, validates it against your schema, and hands you `result.value` typed from it. An answer that fails the schema is not yours to patch: the agent gets repair turns on the same conversation, and a run that still fails throws rather than hand your code bad data."

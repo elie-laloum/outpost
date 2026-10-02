@@ -100,6 +100,11 @@ for (const [locale, heading, start, copied, beat] of [
     ).toHaveAttribute("aria-pressed", "true");
     await expect(demo).toHaveAttribute("data-beat", "3");
     await expect(demo.locator(".demo-summary li")).toHaveCount(4);
+    // The pains are the drawing's beats in words, so they move with it.
+    const problem = page.locator(".landing .problem");
+    await expect(problem).toHaveAttribute("data-beat", "3");
+    await expect(problem.locator('[data-pain="3"]')).toBeVisible();
+    await expect(problem.locator('[data-pain="0"]')).toBeHidden();
     await page.getByRole("button", { name: copied }).click();
     expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
       "npx @elie-laloum/outpost init",

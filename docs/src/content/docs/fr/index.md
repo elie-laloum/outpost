@@ -70,23 +70,20 @@ landing:
     text: "Un LLM excelle dans le jugement : lire du code, écrire un correctif, relire une modification. La plupart des pipelines d’IA lui confient aussi les étapes, l’ordre et la reprise, que le code fait mieux."
     link: { label: "Comment fonctionne Outpost", href: "guide/how-it-works/" }
     answerLabel: "Avec Outpost"
-    groups:
-      - title: "Avec les LLM aujourd’hui"
-        rows:
-          - pain: "Tout est interprété"
-            detail: "Même un nom de branche ou une commande de test passe par le modèle, à chaque fois."
-            answer: "Le code exécute les étapes sûres. L’agent ne reçoit que le travail qui demande du jugement."
-          - pain: "Le contexte ne cesse de grossir"
-            detail: "Chaque étape s’ajoute à une seule conversation que le modèle relit."
-            answer: "Chaque tâche d’agent part de son propre brief, dans sa propre sandbox."
-      - title: "En construisant des workflows d’IA"
-        rows:
-          - pain: "L’orchestrateur dérive"
-            detail: "Quand un modèle décide de l’ordre, il peut sauter, répéter ou réordonner des étapes."
-            answer: "Le graphe de tâches est en TypeScript, validé avant l’exécution. Les réponses typées sont vérifiées contre leur schéma."
-          - pain: "Reprendre, c’est réinterpréter"
-            detail: "Après un crash ou un quota, le modèle reconstruit son état à partir d’une transcription."
-            answer: "Les tâches terminées reviennent du checkpoint en JSON. Relancer une tâche interrompue demande votre accord explicite."
+    summaryLabel: "Ce qu’on confie au modèle, étape par étape"
+    rows:
+      - pain: "Tout est interprété"
+        detail: "Même un nom de branche ou une commande de test passe par le modèle, à chaque fois."
+        answer: "Le code exécute les étapes sûres. L’agent ne reçoit que le travail qui demande du jugement."
+      - pain: "Le contexte ne cesse de grossir"
+        detail: "Chaque étape s’ajoute à une seule conversation que le modèle relit."
+        answer: "Chaque tâche d’agent part de son propre brief, dans sa propre sandbox."
+      - pain: "L’orchestrateur dérive"
+        detail: "Quand un modèle décide de l’ordre, il peut sauter, répéter ou réordonner des étapes."
+        answer: "Le graphe de tâches est en TypeScript, validé avant l’exécution. Les réponses typées sont vérifiées contre leur schéma."
+      - pain: "Reprendre, c’est réinterpréter"
+        detail: "Après un crash ou un quota, le modèle reconstruit son état à partir d’une transcription."
+        answer: "Les tâches terminées reviennent du checkpoint en JSON. Relancer une tâche interrompue demande votre accord explicite."
   typed:
     title: "L’agent répond en prose. Votre code reçoit une valeur typée."
     text: "Déclarez la réponse avec un schéma Zod. Outpost extrait le bloc balisé de la réponse de l’agent, le valide contre votre schéma et vous rend `result.value` typé depuis celui-ci. Une réponse qui ne passe pas le schéma n’est pas à vous de rattraper : l’agent obtient des tours de réparation sur la même conversation, et une exécution qui échoue encore lève une erreur plutôt que de livrer de mauvaises données à votre code."

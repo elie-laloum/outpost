@@ -140,7 +140,7 @@ A cool slate grayscale taken from Celestia's Tailwind grays. The ember accent is
 - **Night** (dark ground) / **Paper** (light ground): page and rail backgrounds. Night is Celestia's gray-950.
 - **White Ink** (dark) / **Slate Ink** (light): headings, primary labels, pressed beats and controls, the filled model and agent owner tags, and the primary button's fill.
 - **Mist** (dark body) / **Graphite** (light body): body copy, lane and beat captions, the response figure's reply, and pain details.
-- **Pewter** (dark muted) / **Steel** (light muted): captions, the facts ticker, the struck rule on a pain, inactive beats, outlined code owner tags, meter labels and fills at rest, step notes, the response figure's pane labels and its tag before it is read, a disabled control, and group labels. Both pass 4.5:1 on their ground.
+- **Pewter** (dark muted) / **Steel** (light muted): captions, the facts ticker, the struck rule on a pain, the demo's step times, inactive beats, outlined code owner tags, meter labels and fills at rest, step notes, the response figure's pane labels and its tag before it is read, a disabled control, and group labels. Both pass 4.5:1 on their ground.
 - **Graphite** (dark hairline) / **Fog Line** (light hairline): every rule, frame edge and cell divider, through `--sl-color-hairline-light`.
 - **Slate Panel** (gray-800 dark, gray-200 light): hover fill for buttons and navigation. Mixed at 45% into Night, it becomes the code surface (at 80% for a pressed beat or control and a table cell being worked on).
 
@@ -181,11 +181,11 @@ Celestia sets the root to 14px. All rem values in this file are relative to that
 
 The landing page sits in a centered rail, 82rem wide at most, with 1px hairlines on both edges. Outside the rail, a -45° hatch (1px lines every 8px, gray-5 at 45%) fills the margins like the unused area of a drawing sheet.
 
-Inside the rail, every section is a bay on a 12-track frame split 5 | 7. The left bay states the idea (heading, one paragraph, a link), and the right bay proves it (the `dispatch()` excerpt, use-case rows, the redline register, the response figure, runtime name boxes or boundary rows). One row escapes the split: the orchestration demo opens the problem bay as a full-width figure across all twelve tracks, above that bay's 5 | 7 division, because its own four-step lanes need the frame. A bay's trailing link follows the paragraph it belongs to; the sheet left under it is unused area, not a gap to fill. Rows inside the right bay split 4 | 3, so their divider falls on track 9 in every section. The footer's columns start on the same tracks 5 and 9. Horizontal hairlines separate the bays. Content never floats outside a bay. A framed figure (the orchestration demo) is a drawing set inside its bay; its inner divisions follow its own content.
+Inside the rail, every section is a bay on a 12-track frame split 5 | 7. The left bay states the idea (heading, one paragraph, a link), and the right bay proves it (the `dispatch()` excerpt, use-case rows, the pain stage, the response figure, runtime name boxes or boundary rows). One row escapes the split: the orchestration demo opens the problem bay as a full-width figure across all twelve tracks, above that bay's 5 | 7 division, because its own four-step lanes need the frame. A bay's trailing link follows the paragraph it belongs to; the sheet left under it is unused area, not a gap to fill. Rows inside the right bay split 4 | 3, so their divider falls on track 9 in every section. The footer's columns start on the same tracks 5 and 9. Horizontal hairlines separate the bays. Content never floats outside a bay. A framed figure (the orchestration demo) is a drawing set inside its bay; its inner divisions follow its own content.
 
 The gutter is `clamp(1.25rem, 3.2vw, 3rem)`. Bays use 3.5rem of vertical padding, stacks inside them 1rem gaps, and cells 1.4rem. More space sits above a heading than below it.
 
-Below 64rem, every bay stacks to one column: the left bay first, then its proof, separated by a hairline. Below 40rem, the rail loses its side borders, the orchestration demo runs edge to edge, the redline register narrows its inset, and the footer becomes two columns under a full-width brand. The hero's first viewport keeps the primary action above the fold at 1280×720.
+Below 64rem, every bay stacks to one column: the left bay first, then its proof, separated by a hairline. Below 40rem, the rail loses its side borders, the orchestration demo runs edge to edge, the pain stage keeps one column, and the footer becomes two columns under a full-width brand. The hero's first viewport keeps the primary action above the fold at 1280×720.
 
 The documentation carries the same frame. Every Guide, Reference and Project page shares one shell: a fixed 4rem header, a 17rem sidebar for the current space with a hairline edge, and a content pane of at most 84rem. From 100rem wide, a 16rem "On this page" rail joins the pane as a full-height column. The pane (with its rail) is centred as one sheet in the space beside the sidebar; the margins on both sides are hatched like the landing's out-of-frame area, with one hairline on each side of the sheet. Those edges are drawn outside the sheet, so with no margin they merge into the sidebar's edge and no line is drawn at the window edge. Inside the pane, a 2.75rem breadcrumb bar sits above a title section, then one section per `h2`, each laid on the 12-track frame:
 
@@ -270,13 +270,13 @@ The signature component: the drawing that opens the problem bay, full width, reg
 - **Motion:** autoplays once when 35% in view, then chains through the beats; clicking a beat plays it alone. Transitions use the landing ease. Under reduced motion nothing animates: every beat button shows its still end state.
 - **Accessibility:** the stage is hidden from assistive technology; a visually hidden list gives each beat's two captions as text. Beat buttons are a labelled group with `aria-pressed`, and focus draws the ember outline inside.
 
-### Redline Register
+### Pain Stage
 
-The problem bay's right half: not a comparison table but a marked-up draft. Each group opens with a Label head row naming it; each entry then reads top to bottom in one column, so the bay carries no second vertical line.
+The problem bay's right half, and the second half of one argument rather than a block of its own. Its four pains are the orchestration drawing's four beats in words, in the same order, so they are shown one at a time on the beat the drawing above is explaining: the figure and the prose answer to a single control, and the bay stopped restating itself.
 
-- **Entry:** the pain as a Title in ink with a 1px Pewter/Steel rule struck across it at 55% height, its detail in body under it, then the answer in ink behind an inset hairline, under a 0.75rem "With Outpost" label. Text is capped at 38rem.
-- **Motion:** the strikes draw left to right when the register is 30% in view, 160ms apart, so code is seen taking the work back rather than claiming it. Under reduced motion every rule is already drawn.
-- **Below 40rem:** the answer's inset narrows; nothing else changes, because the entry was never two columns.
+- **Entry:** the pain at 1.375rem/600 in ink with a 1px Pewter/Steel rule struck across it at 56%, its detail in Mist/Graphite under it, then the answer in ink above a hairline, under a 0.75rem "With Outpost" label. Capped at 38rem.
+- **Switching:** all four share one grid cell, so nothing shifts; the inactive ones are `visibility: hidden` and leave the accessibility tree, and each strike draws itself 250ms after its entry arrives. A visually hidden list carries all four, labelled, for assistive technology and for search.
+- **Without script:** the bay is served on beat 0, so the first pain reads as static prose.
 
 ### Runtime Names
 

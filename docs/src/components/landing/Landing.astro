@@ -133,7 +133,7 @@ const runtimeGroups = [
       </div>
     </section>
 
-    <section class="bay problem" aria-labelledby="problem-title">
+    <section class="bay problem" data-beat="0" aria-labelledby="problem-title">
       <div class="show figure-wide">
         <OrchestrationDemo demo={landing.demo} />
       </div>
@@ -144,31 +144,33 @@ const runtimeGroups = [
           >{landing.problem.link.label}<Arrow /></a
         >
       </div>
-      <outpost-redline class="show flush pains">
-        {
-          landing.problem.groups.map((group, groupIndex) => (
-            <div class="pain-group">
-              <h3>{group.title}</h3>
-              <dl>
-                {group.rows.map((row, rowIndex) => (
-                  <div class="pain" style={`--order: ${groupIndex * 2 + rowIndex}`}>
-                    <dt>
-                      <strong>{row.pain}</strong>
-                      <span>{row.detail}</span>
-                    </dt>
-                    <dd>
-                      <span class="answer-label">
-                        {landing.problem.answerLabel}
-                      </span>
-                      {row.answer}
-                    </dd>
-                  </div>
-                ))}
-              </dl>
-            </div>
-          ))
-        }
-      </outpost-redline>
+      <outpost-pains class="show pains">
+        <div class="pain-stage">
+          {
+            landing.problem.rows.map((row, index) => (
+              <div class="pain" data-pain={index}>
+                <p class="pain-name">{row.pain}</p>
+                <p class="pain-detail">{row.detail}</p>
+                <p class="pain-answer">
+                  <span class="answer-label">{landing.problem.answerLabel}</span>
+                  {row.answer}
+                </p>
+              </div>
+            ))
+          }
+        </div>
+        <ul class="pain-summary">
+          <li>{landing.problem.summaryLabel}</li>
+          {
+            landing.problem.rows.map((row) => (
+              <li>
+                {row.pain}. {row.detail} {landing.problem.answerLabel}:{" "}
+                {row.answer}
+              </li>
+            ))
+          }
+        </ul>
+      </outpost-pains>
     </section>
 
     <section class="bay" aria-labelledby="typed-title">
@@ -353,25 +355,22 @@ const runtimeGroups = [
   }
   customElements.define("outpost-verdict", OutpostVerdict);
 
-  // Code strikes out what the model was doing, one line at a time.
-  class OutpostRedline extends HTMLElement {
+  // The pains are the drawing's four beats in words, so they follow its beat.
+  class OutpostPains extends HTMLElement {
     connectedCallback() {
-      if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        this.toggleAttribute("data-struck", true);
-        return;
-      }
-      const observer = new IntersectionObserver(
-        (entries) => {
-          if (!entries.some((entry) => entry.intersectionRatio >= 0.3)) return;
-          observer.disconnect();
-          this.toggleAttribute("data-struck", true);
-        },
-        { threshold: 0.3 },
-      );
-      observer.observe(this);
+      const bay = this.closest<HTMLElement>(".problem");
+      const demo = bay?.querySelector("outpost-demo");
+      if (!bay || !demo) return;
+      const follow = () => {
+        bay.dataset.beat = demo.getAttribute("data-beat") ?? "0";
+      };
+      new MutationObserver(follow).observe(demo, {
+        attributeFilter: ["data-beat"],
+      });
+      follow();
     }
   }
-  customElements.define("outpost-redline", OutpostRedline);
+  customElements.define("outpost-pains", OutpostPains);
 
 
   // A fade marks the edge where the excerpt still has code to scroll to.
@@ -795,72 +794,86 @@ const runtimeGroups = [
     color: var(--sl-color-white);
   }
 
-  /* Each pain is struck through and its replacement written under it. */
+  /* One pain at a time, on the beat the drawing above is explaining. */
   .pains {
-    justify-content: center;
+    justify-content: start;
   }
-  .pain-group + .pain-group {
-    border-top: 1px solid var(--landing-line);
-  }
-  .pain-group h3 {
-    padding: 0.8rem var(--landing-pad);
-    border-bottom: 1px solid var(--landing-line);
-    color: var(--sl-color-gray-3);
-    font-size: 0.8125rem;
-    font-weight: 500;
+  .pain-stage {
+    display: grid;
+    width: 100%;
+    max-width: 38rem;
   }
   .pain {
-    padding: 1.4rem var(--landing-pad);
+    grid-area: 1 / 1;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity 0.35s var(--landing-ease),
+      visibility 0s linear 0.35s;
   }
-  .pain + .pain {
-    border-top: 1px solid var(--landing-line);
+  .problem[data-beat="0"] [data-pain="0"],
+  .problem[data-beat="1"] [data-pain="1"],
+  .problem[data-beat="2"] [data-pain="2"],
+  .problem[data-beat="3"] [data-pain="3"] {
+    opacity: 1;
+    visibility: visible;
+    transition-delay: 0s;
   }
-  .pain dt {
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-    max-width: 38rem;
-    font-size: 0.9375rem;
-    line-height: 1.55;
-  }
-  .pain strong {
+  .pain-name {
     position: relative;
-    align-self: flex-start;
+    align-self: start;
+    justify-self: start;
     color: var(--sl-color-white);
-    font-size: 1.0625rem;
-    font-weight: 500;
-    letter-spacing: -0.01em;
+    font-size: 1.375rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
   }
-  .pain strong::after {
+  .pain-name::after {
     position: absolute;
-    top: 55%;
-    right: -0.15rem;
-    left: -0.15rem;
+    top: 56%;
+    right: -0.2rem;
+    left: -0.2rem;
     height: 1px;
     background: var(--sl-color-gray-3);
     transform: scaleX(0);
     transform-origin: left;
-    transition: transform 0.5s var(--landing-ease) calc(var(--order) * 160ms);
+    transition: transform 0.55s var(--landing-ease) 0.25s;
     content: "";
   }
-  .pains[data-struck] .pain strong::after {
+  .problem[data-beat="0"] [data-pain="0"] .pain-name::after,
+  .problem[data-beat="1"] [data-pain="1"] .pain-name::after,
+  .problem[data-beat="2"] [data-pain="2"] .pain-name::after,
+  .problem[data-beat="3"] [data-pain="3"] .pain-name::after {
     transform: scaleX(1);
   }
-  .pain dd {
-    max-width: 38rem;
-    margin-top: 1rem;
-    padding-left: var(--landing-pad);
-    border-left: 1px solid var(--landing-line);
+  .pain-detail {
+    margin-top: 0.6rem;
+    color: var(--sl-color-gray-2);
+    font-size: 0.9375rem;
+    line-height: 1.6;
+  }
+  .pain-answer {
+    margin-top: 1.4rem;
+    padding-top: 1.1rem;
+    border-top: 1px solid var(--landing-line);
     color: var(--sl-color-white);
     font-size: 0.9375rem;
-    line-height: 1.55;
+    line-height: 1.6;
   }
   .answer-label {
     display: block;
-    margin-bottom: 0.2rem;
+    margin-bottom: 0.3rem;
     color: var(--sl-color-gray-3);
     font-size: 0.75rem;
     font-weight: 500;
+  }
+  .pain-summary {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
   }
 
   /* Runtimes */

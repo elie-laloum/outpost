@@ -16,6 +16,11 @@ const entry = z.object({
   href: z.string(),
 });
 const boundary = z.object({ lead: z.string(), text: z.string() });
+const pain = z.object({
+  pain: z.string(),
+  detail: z.string(),
+  answer: z.string(),
+});
 const four = z.array(z.string()).length(4);
 const lane = z.object({
   title: z.string(),
@@ -73,18 +78,8 @@ const landing = z.object({
     text: z.string(),
     link,
     answerLabel: z.string(),
-    groups: z.array(
-      z.object({
-        title: z.string(),
-        rows: z.array(
-          z.object({
-            pain: z.string(),
-            detail: z.string(),
-            answer: z.string(),
-          }),
-        ),
-      }),
-    ),
+    summaryLabel: z.string(),
+    rows: z.array(pain).length(4),
   }),
   typed: z.object({
     title: z.string(),
