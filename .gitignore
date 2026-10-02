@@ -21,3 +21,6 @@ docs/test-results/
 docs/playwright-report/
 
 ARTIFACT.md
+
+# Personal editor settings.
+.vscode/
