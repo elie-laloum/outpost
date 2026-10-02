@@ -99,11 +99,7 @@ export abstract class DemoPlayer extends HTMLElement {
   }
 
   #held() {
-    return (
-      this.hasAttribute("data-hold") ||
-      this.matches(":hover") ||
-      this.contains(document.activeElement)
-    );
+    return this.matches(":hover") || this.contains(document.activeElement);
   }
 
   #show(beat: number) {

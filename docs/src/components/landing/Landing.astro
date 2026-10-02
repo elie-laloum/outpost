@@ -133,10 +133,49 @@ const runtimeGroups = [
       </div>
     </section>
 
-    <section class="bay problem" data-beat="0" aria-labelledby="problem-title">
+    <div class="bay figure-bay">
       <div class="show figure-wide">
         <OrchestrationDemo demo={landing.demo} />
       </div>
+    </div>
+
+    <section class="bay" aria-labelledby="runtimes-title">
+      <div class="say">
+        <h2 id="runtimes-title">{landing.runtimes.title}</h2>
+        <p>{landing.runtimes.text}</p>
+        <a class="more" href={href(landing.runtimes.link.href)}
+          >{landing.runtimes.link.label}<Arrow /></a
+        >
+      </div>
+      <div class="show flush runtimes">
+        {
+          runtimeGroups.map((group) => (
+            <div class="runtime-group">
+              <h3>{group.label}</h3>
+              <ul>
+                {group.items.map((item) => (
+                  <li>
+                    <a href={href(item.href)}>
+                      {item.name}
+                      {item.experimental && (
+                        <span
+                          class="flask"
+                          role="img"
+                          aria-label={landing.runtimes.experimental}
+                          title={landing.runtimes.experimental}
+                        />
+                      )}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <section class="bay problem" data-beat="0" aria-labelledby="problem-title">
       <div class="say">
         <h2 id="problem-title">{landing.problem.title}</h2>
         <p>{landing.problem.text}</p>
@@ -241,42 +280,6 @@ const runtimeGroups = [
       </div>
     </section>
 
-    <section class="bay" aria-labelledby="runtimes-title">
-      <div class="say">
-        <h2 id="runtimes-title">{landing.runtimes.title}</h2>
-        <p>{landing.runtimes.text}</p>
-        <a class="more" href={href(landing.runtimes.link.href)}
-          >{landing.runtimes.link.label}<Arrow /></a
-        >
-      </div>
-      <div class="show flush runtimes">
-        {
-          runtimeGroups.map((group) => (
-            <div class="runtime-group">
-              <h3>{group.label}</h3>
-              <ul>
-                {group.items.map((item) => (
-                  <li>
-                    <a href={href(item.href)}>
-                      {item.name}
-                      {item.experimental && (
-                        <span
-                          class="flask"
-                          role="img"
-                          aria-label={landing.runtimes.experimental}
-                          title={landing.runtimes.experimental}
-                        />
-                      )}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))
-        }
-      </div>
-    </section>
-
     <section class="bay" aria-labelledby="boundaries-title">
       <div class="say">
         <h2 id="boundaries-title">{landing.boundaries.title}</h2>
@@ -372,47 +375,67 @@ const runtimeGroups = [
   }
   customElements.define("outpost-verdict", OutpostVerdict);
 
-  // The pains are the drawing's four beats in words, so they follow its beat.
+  // Long enough to read a pain and its answer, short enough to stay alive.
+  const PAIN_MS = 6000;
+
+  // The pains are the drawing's four beats in words, but the drawing sits a bay
+  // away now, so the stage keeps its own clock and its pager is its control.
   class OutpostPains extends HTMLElement {
+    #bay: HTMLElement | null = null;
+    #ticks: HTMLButtonElement[] = [];
+    #timer = 0;
+    #beat = 0;
+
     connectedCallback() {
-      const bay = this.closest<HTMLElement>(".problem");
-      const demo = bay?.querySelector("outpost-demo");
-      if (!bay || !demo) return;
-      // The pager mirrors the player's own state, so one clock drives both.
-      const mirrored = ["data-beat", "data-state", "data-timed"];
-      const follow = () => {
-        for (const name of mirrored) {
-          const value = demo.getAttribute(name);
-          if (value === null) bay.removeAttribute(name);
-          else bay.setAttribute(name, value);
-        }
-        bay.style.setProperty(
-          "--beat-ms",
-          (demo as HTMLElement).style.getPropertyValue("--beat-ms"),
-        );
-        const beat = Number(demo.getAttribute("data-beat") ?? 0);
-        this.querySelectorAll("[data-pain-beat]").forEach((tick, index) =>
-          tick.setAttribute("aria-pressed", String(index === beat)),
-        );
-      };
-      new MutationObserver(follow).observe(demo, {
-        attributeFilter: [...mirrored, "style"],
-      });
-      // A tick drives the figure's own beat button, so there is one source.
-      this.querySelectorAll("[data-pain-beat]").forEach((tick, index) =>
-        tick.addEventListener("click", () =>
-          demo
-            .querySelectorAll<HTMLButtonElement>("button[data-beat]")
-            [index]?.click(),
-        ),
+      this.#bay = this.closest(".problem");
+      this.#ticks = [
+        ...this.querySelectorAll<HTMLButtonElement>("[data-pain-beat]"),
+      ];
+      if (!this.#bay || !this.#ticks.length) return;
+      this.#ticks.forEach((tick, index) =>
+        tick.addEventListener("click", () => this.#show(index)),
       );
-      // Reading the pain holds the chain; the figure resumes on the way out.
-      const hold = (held: boolean) => demo.toggleAttribute("data-hold", held);
-      bay.addEventListener("pointerenter", () => hold(true));
-      bay.addEventListener("pointerleave", () => hold(false));
-      bay.addEventListener("focusin", () => hold(true));
-      bay.addEventListener("focusout", () => hold(false));
-      follow();
+      for (const [event, held] of [
+        ["pointerenter", true],
+        ["pointerleave", false],
+        ["focusin", true],
+        ["focusout", false],
+      ] as const)
+        this.#bay.addEventListener(event, () =>
+          this.#bay?.toggleAttribute("data-hold", held),
+        );
+      if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      const observer = new IntersectionObserver(
+        (entries) => {
+          if (!entries.some((entry) => entry.intersectionRatio >= 0.35)) return;
+          observer.disconnect();
+          this.#show(0);
+        },
+        { threshold: 0.35 },
+      );
+      observer.observe(this);
+    }
+
+    #show(beat: number) {
+      clearTimeout(this.#timer);
+      this.#beat = beat;
+      const bay = this.#bay!;
+      bay.dataset.beat = String(beat);
+      bay.dataset.state = "playing";
+      bay.style.setProperty("--beat-ms", `${PAIN_MS}ms`);
+      bay.toggleAttribute("data-timed", false);
+      this.#ticks.forEach((tick, index) =>
+        tick.setAttribute("aria-pressed", String(index === beat)),
+      );
+      requestAnimationFrame(() => bay.toggleAttribute("data-timed", true));
+      this.#timer = window.setTimeout(() => this.#advance(), PAIN_MS);
+    }
+
+    // The pager wraps, and waits while the reader is still on this bay.
+    #advance() {
+      if (this.#bay?.hasAttribute("data-hold"))
+        return (this.#timer = window.setTimeout(() => this.#advance(), 400));
+      this.#show((this.#beat + 1) % this.#ticks.length);
     }
   }
   customElements.define("outpost-pains", OutpostPains);
@@ -506,6 +529,9 @@ const runtimeGroups = [
   }
   .flush {
     padding: 0;
+  }
+  .figure-bay {
+    display: block;
   }
   .figure-wide {
     grid-column: 1 / -1;

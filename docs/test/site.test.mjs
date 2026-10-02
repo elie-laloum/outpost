@@ -100,21 +100,18 @@ for (const [locale, heading, start, copied, beat] of [
     ).toHaveAttribute("aria-pressed", "true");
     await expect(demo).toHaveAttribute("data-beat", "3");
     await expect(demo.locator(".demo-summary li")).toHaveCount(4);
-    // The pains are the drawing's beats in words, so they move with it.
+    // The pains run their own carousel, one bay below the drawing.
     const problem = page.locator(".landing .problem");
-    await expect(problem).toHaveAttribute("data-beat", "3");
-    await expect(problem.locator('[data-pain="3"]')).toBeVisible();
-    await expect(problem.locator('[data-pain="0"]')).toBeHidden();
-    // The pager is the reader's control over the same beat.
+    await problem.scrollIntoViewIfNeeded();
     const pager = problem.locator(".pain-pager button");
     await expect(pager).toHaveCount(4);
-    await pager.nth(1).click();
-    await expect(problem).toHaveAttribute("data-beat", "1");
-    await expect(pager.nth(1)).toHaveAttribute("aria-pressed", "true");
-    await expect(problem.locator('[data-pain="1"]')).toBeVisible();
-    // The chain wraps, and holds while a reader is on the bay.
-    await problem.hover();
-    await expect(demo).toHaveAttribute("data-hold", "");
+    await pager.nth(2).click();
+    await expect(problem).toHaveAttribute("data-beat", "2");
+    await expect(pager.nth(2)).toHaveAttribute("aria-pressed", "true");
+    await expect(problem.locator('[data-pain="2"]')).toBeVisible();
+    await expect(problem.locator('[data-pain="0"]')).toBeHidden();
+    // It holds while a reader is on the bay.
+    await expect(problem).toHaveAttribute("data-hold", "");
     await page.getByRole("button", { name: copied }).click();
     expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
       "npx @elie-laloum/outpost init",
