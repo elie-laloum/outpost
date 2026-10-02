@@ -1,4 +1,5 @@
-const HOLD = 1300;
+const HOLD = 700;
+const RETRY = 400;
 
 // Plays a figure's beats once in view; subclasses schedule and settle each beat.
 export abstract class DemoPlayer extends HTMLElement {
@@ -17,7 +18,7 @@ export abstract class DemoPlayer extends HTMLElement {
         button.addEventListener("click", () => {
           this.#stop();
           if (still.matches) this.#show(beat);
-          else this.#play(beat, false);
+          else this.#play(beat, true);
         }),
     );
     this.#show(Number(this.dataset.beat ?? 0));
@@ -85,10 +86,24 @@ export abstract class DemoPlayer extends HTMLElement {
     const end = this.timeline(beat) + HOLD;
     this.#select(beat, end);
     this.at(end, () => {
-      const last = this.querySelectorAll("button[data-beat]").length - 1;
-      if (chain && beat < last) this.#play(beat + 1, true);
+      if (chain) this.#advance(beat);
       else this.#setState("stopped");
     });
+  }
+
+  // The chain wraps, and waits while the reader is on the figure or its prose.
+  #advance(beat: number) {
+    if (this.#held()) return this.at(RETRY, () => this.#advance(beat));
+    const beats = this.querySelectorAll("button[data-beat]").length;
+    this.#play((beat + 1) % beats, true);
+  }
+
+  #held() {
+    return (
+      this.hasAttribute("data-hold") ||
+      this.matches(":hover") ||
+      this.contains(document.activeElement)
+    );
   }
 
   #show(beat: number) {

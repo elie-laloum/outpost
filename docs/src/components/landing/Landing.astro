@@ -406,6 +406,12 @@ const runtimeGroups = [
             [index]?.click(),
         ),
       );
+      // Reading the pain holds the chain; the figure resumes on the way out.
+      const hold = (held: boolean) => demo.toggleAttribute("data-hold", held);
+      bay.addEventListener("pointerenter", () => hold(true));
+      bay.addEventListener("pointerleave", () => hold(false));
+      bay.addEventListener("focusin", () => hold(true));
+      bay.addEventListener("focusout", () => hold(false));
       follow();
     }
   }

@@ -1,8 +1,8 @@
 /** How long each owner takes on one step, in milliseconds. */
 export const STEP_DURATIONS = {
-  model: 820,
-  agent: 1100,
-  code: 120,
+  model: 640,
+  agent: 900,
+  code: 100,
 } as const;
 
 export type StepOwner = keyof typeof STEP_DURATIONS;
