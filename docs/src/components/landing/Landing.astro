@@ -159,6 +159,23 @@ const runtimeGroups = [
             ))
           }
         </div>
+        <div
+          class="pain-pager"
+          role="group"
+          aria-label={landing.problem.summaryLabel}
+        >
+          {
+            landing.problem.rows.map((row, index) => (
+              <button
+                type="button"
+                data-pain-beat={index}
+                aria-pressed={index === 0 ? "true" : "false"}
+              >
+                <span>{row.pain}</span>
+              </button>
+            ))
+          }
+        </div>
         <ul class="pain-summary">
           <li>{landing.problem.summaryLabel}</li>
           {
@@ -361,12 +378,34 @@ const runtimeGroups = [
       const bay = this.closest<HTMLElement>(".problem");
       const demo = bay?.querySelector("outpost-demo");
       if (!bay || !demo) return;
+      // The pager mirrors the player's own state, so one clock drives both.
+      const mirrored = ["data-beat", "data-state", "data-timed"];
       const follow = () => {
-        bay.dataset.beat = demo.getAttribute("data-beat") ?? "0";
+        for (const name of mirrored) {
+          const value = demo.getAttribute(name);
+          if (value === null) bay.removeAttribute(name);
+          else bay.setAttribute(name, value);
+        }
+        bay.style.setProperty(
+          "--beat-ms",
+          (demo as HTMLElement).style.getPropertyValue("--beat-ms"),
+        );
+        const beat = Number(demo.getAttribute("data-beat") ?? 0);
+        this.querySelectorAll("[data-pain-beat]").forEach((tick, index) =>
+          tick.setAttribute("aria-pressed", String(index === beat)),
+        );
       };
       new MutationObserver(follow).observe(demo, {
-        attributeFilter: ["data-beat"],
+        attributeFilter: [...mirrored, "style"],
       });
+      // A tick drives the figure's own beat button, so there is one source.
+      this.querySelectorAll("[data-pain-beat]").forEach((tick, index) =>
+        tick.addEventListener("click", () =>
+          demo
+            .querySelectorAll<HTMLButtonElement>("button[data-beat]")
+            [index]?.click(),
+        ),
+      );
       follow();
     }
   }
@@ -867,6 +906,67 @@ const runtimeGroups = [
     color: var(--sl-color-gray-3);
     font-size: 0.75rem;
     font-weight: 500;
+  }
+  /* Four ticks: which pain is showing, and how long before the next. */
+  .pain-pager {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1.9rem;
+  }
+  .pain-pager button {
+    position: relative;
+    flex: 1 1 0;
+    max-width: 5rem;
+    /* 1.75rem keeps the target at the 24px WCAG 2.2 minimum. */
+    height: 1.75rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+  .pain-pager button span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .pain-pager button::before,
+  .pain-pager button::after {
+    position: absolute;
+    inset-inline: 0;
+    content: "";
+  }
+  .pain-pager button::before {
+    top: 50%;
+    height: 1px;
+    background: var(--sl-color-gray-4);
+  }
+  .pain-pager button:hover::before {
+    background: var(--sl-color-gray-3);
+  }
+  .pain-pager button::after {
+    top: calc(50% - 1px);
+    height: 2px;
+    background: var(--sl-color-white);
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+  .pain-pager button[aria-pressed="true"]::after {
+    transform: scaleX(1);
+  }
+  .problem[data-state="playing"] .pain-pager button[aria-pressed="true"]::after {
+    transform: scaleX(0);
+  }
+  .problem[data-state="playing"][data-timed]
+    .pain-pager
+    button[aria-pressed="true"]::after {
+    transform: scaleX(1);
+    transition: transform var(--beat-ms) linear;
+  }
+  .pain-pager button:focus-visible {
+    outline: 2px solid var(--sl-color-accent);
+    outline-offset: 2px;
   }
   .pain-summary {
     position: absolute;

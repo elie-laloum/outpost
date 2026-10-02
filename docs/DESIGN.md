@@ -276,7 +276,8 @@ The problem bay's right half, and the second half of one argument rather than a 
 
 - **Entry:** the pain at 1.375rem/600 in ink with a 1px Pewter/Steel rule struck across it at 56%, its detail in Mist/Graphite under it, then the answer in ink above a hairline, under a 0.75rem "With Outpost" label. Capped at 38rem.
 - **Switching:** all four share one grid cell, so nothing shifts; the inactive ones are `visibility: hidden` and leave the accessibility tree, and each strike draws itself 250ms after its entry arrives. A visually hidden list carries all four, labelled, for assistive technology and for search.
-- **Without script:** the bay is served on beat 0, so the first pain reads as static prose.
+- **Pager:** four ticks at the stage's foot, each a 1px gray-4 rule in a 1.75rem target (the WCAG 2.2 minimum), named for its pain and `aria-pressed`, grouped and labelled. The current tick fills with a 2px ink line; while the figure plays, that line grows over the beat's own duration, so the reader sees how long the next pain is. A tick clicks the figure's matching beat button rather than holding state of its own: the player stays the single clock, and the stage mirrors its `data-beat`, `data-state`, `data-timed` and `--beat-ms`.
+- **Without script:** the bay is served on beat 0, so the first pain reads as static prose and its tick is filled.
 
 ### Runtime Names
 
