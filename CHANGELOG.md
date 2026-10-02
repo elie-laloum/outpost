@@ -1,5 +1,9 @@
 # Changelog
 
+## 9.0.4
+
+- Make the landing page's typed-response brief ask for the shape it expects. The brief now carries `<verdict>{"approved": true, "reasons": []}</verdict>`, so the schema, the request and the agent's tagged reply agree: Outpost sends a brief unchanged and adds no format instructions, so a brief that does not show the shape is one the agent cannot satisfy. A comment beside `repairs` says what the option buys — two more turns to fix an answer the schema rejects, on the same conversation.
+
 ## 9.0.3
 
 - Rebuild the documentation landing page as a path for a developer deciding whether to install: the headline runs on one rule, the install command carries its prerequisites and the first command to run, and a `dispatch()` call cut from a typechecked snippet shows one task end to end. The page then reads as what you can run, the comparison drawing, the agents and sandboxes it runs on, the argument that drawing opened, typed responses, and where Outpost is not the answer.

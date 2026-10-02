@@ -1,5 +1,9 @@
 # Historique des versions
 
+## 9.0.4
+
+- Sur la page d’accueil, le brief de la réponse typée demande désormais la forme qu’il attend. Il porte `<verdict>{"approved": true, "reasons": []}</verdict>`, si bien que le schéma, la demande et la réponse balisée de l’agent s’accordent : Outpost transmet un brief sans le modifier et n’ajoute aucune consigne de format, donc un brief qui ne montre pas la forme attendue est un brief que l’agent ne peut pas satisfaire. Un commentaire à côté de `repairs` dit ce que l’option apporte : deux tours de plus pour corriger une réponse rejetée par le schéma, sur la même conversation.
+
 ## 9.0.3
 
 - Refonte de la page d’accueil de la documentation en parcours pour le développeur qui se demande s’il installe : le titre tient sur une seule règle, la commande d’installation porte ses prérequis et la première commande à lancer, et un appel `dispatch()` repris d’un extrait vérifié par le typage montre une tâche de bout en bout. La page se lit ensuite ainsi : ce que l’on peut exécuter, le dessin comparatif, les agents et les sandboxes qui l’exécutent, l’argument ouvert par ce dessin, les réponses typées, puis les cas où Outpost n’est pas la réponse.
