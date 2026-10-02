@@ -76,7 +76,11 @@ for (const [locale, heading, start, copied, beat] of [
     await expect(hero.locator(".hero-excerpt code").first()).toContainText(
       "dispatch({",
     );
-    await expect(hero.locator(".hero-evidence li")).toHaveCount(4);
+    // The ticker repeats its list for the loop; only the first one is announced.
+    await expect(
+      hero.locator(".hero-evidence ul:not([aria-hidden]) li"),
+    ).toHaveCount(4);
+    await expect(hero.locator(".hero-evidence ul")).toHaveCount(2);
     const useCases = page.locator(".landing .use-cases a");
     await expect(useCases).toHaveCount(3);
     await expect(useCases.first()).toHaveAttribute(

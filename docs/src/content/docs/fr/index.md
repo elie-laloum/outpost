@@ -50,18 +50,18 @@ landing:
     notes: { early: "trop tôt", reread: "relu", restored: "restauré" }
     interrupted: "Interruption"
     model:
-      title: "Un LLM orchestre"
-      context: "Contexte du modèle"
+      title: "Le modèle orchestre"
+      context: "Contexte"
       captions:
         - "Le modèle interprète chaque étape, même les plus sûres."
         - "Chaque étape s’ajoute à la conversation qu’il relit."
-        - "Il décide de l’ordre en chemin, et peut dériver."
-        - "Après une interruption, il relit tout."
+        - "Le modèle décide de l’ordre en chemin, et peut dériver."
+        - "Après une interruption, le modèle relit tout."
     code:
-      title: "Le code orchestre"
-      context: "Contexte de l’agent"
+      title: "Votre code orchestre"
+      context: "Contexte"
       captions:
-        - "Le code crée la branche, vérifie et intègre. L’agent corrige, c’est tout."
+        - "Votre code crée la branche, vérifie et intègre. L’agent corrige, c’est tout."
         - "L’agent part de son brief, rien de plus."
         - "L’ordre est un graphe de tâches, fixé avant l’exécution."
         - "Les étapes terminées reviennent du checkpoint."

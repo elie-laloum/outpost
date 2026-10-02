@@ -50,18 +50,18 @@ landing:
     notes: { early: "too early", reread: "reread", restored: "restored" }
     interrupted: "Interrupted"
     model:
-      title: "An LLM orchestrates"
-      context: "Model context"
+      title: "The model orchestrates"
+      context: "Context"
       captions:
         - "The model interprets every step, even the certain ones."
         - "Every step adds to the conversation it rereads."
-        - "It decides the order as it goes, and can drift."
-        - "After an interruption, it rereads everything."
+        - "The model decides the order as it goes, and can drift."
+        - "After an interruption, the model rereads everything."
     code:
-      title: "Code orchestrates"
-      context: "Agent context"
+      title: "Your code orchestrates"
+      context: "Context"
       captions:
-        - "Code branches, verifies and integrates. The agent only fixes."
+        - "Your code branches, verifies and integrates. The agent only fixes."
         - "The agent starts from its brief, nothing more."
         - "The order is a task graph, fixed before the run."
         - "Finished steps come back from the checkpoint."

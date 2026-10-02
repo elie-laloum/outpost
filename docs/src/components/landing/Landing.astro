@@ -97,9 +97,19 @@ const runtimeGroups = [
           </div>
         </figure>
       </div>
-      <ul class="hero-evidence">
-        {landing.evidence.map((fact) => <li>{fact}</li>)}
-      </ul>
+      <div class="hero-evidence">
+        <div class="ticker">
+          {
+            [false, true].map((repeat) => (
+              <ul aria-hidden={repeat ? "true" : undefined}>
+                {landing.evidence.map((fact) => (
+                  <li>{fact}</li>
+                ))}
+              </ul>
+            ))
+          }
+        </div>
+      </div>
     </section>
 
     <section class="bay" aria-labelledby="use-cases-title">
@@ -134,23 +144,22 @@ const runtimeGroups = [
           >{landing.problem.link.label}<Arrow /></a
         >
       </div>
-      <div class="show flush pains">
+      <outpost-redline class="show flush pains">
         {
-          landing.problem.groups.map((group) => (
+          landing.problem.groups.map((group, groupIndex) => (
             <div class="pain-group">
-              <div class="pain-head">
-                <h3>{group.title}</h3>
-                <span aria-hidden="true">{landing.problem.answerLabel}</span>
-              </div>
+              <h3>{group.title}</h3>
               <dl>
-                {group.rows.map((row) => (
-                  <div class="pain">
+                {group.rows.map((row, rowIndex) => (
+                  <div class="pain" style={`--order: ${groupIndex * 2 + rowIndex}`}>
                     <dt>
                       <strong>{row.pain}</strong>
                       <span>{row.detail}</span>
                     </dt>
                     <dd>
-                      <span class="sr-label">{landing.problem.answerLabel}: </span>
+                      <span class="answer-label">
+                        {landing.problem.answerLabel}
+                      </span>
                       {row.answer}
                     </dd>
                   </div>
@@ -159,7 +168,7 @@ const runtimeGroups = [
             </div>
           ))
         }
-      </div>
+      </outpost-redline>
     </section>
 
     <section class="bay" aria-labelledby="typed-title">
@@ -343,6 +352,26 @@ const runtimeGroups = [
     }
   }
   customElements.define("outpost-verdict", OutpostVerdict);
+
+  // Code strikes out what the model was doing, one line at a time.
+  class OutpostRedline extends HTMLElement {
+    connectedCallback() {
+      if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        this.toggleAttribute("data-struck", true);
+        return;
+      }
+      const observer = new IntersectionObserver(
+        (entries) => {
+          if (!entries.some((entry) => entry.intersectionRatio >= 0.3)) return;
+          observer.disconnect();
+          this.toggleAttribute("data-struck", true);
+        },
+        { threshold: 0.3 },
+      );
+      observer.observe(this);
+    }
+  }
+  customElements.define("outpost-redline", OutpostRedline);
 
 
   // A fade marks the edge where the excerpt still has code to scroll to.
@@ -684,21 +713,41 @@ const runtimeGroups = [
   .facts a:hover {
     color: var(--sl-color-white);
   }
+  /* The engineering facts run as a ticker, written once and repeated. */
   .hero-evidence {
-    display: flex;
-    flex-wrap: wrap;
     grid-column: 1 / -1;
-    gap: 0 0.5rem;
-    padding: 0.9rem var(--landing-pad);
+    padding-block: 0.95rem;
+    overflow: hidden;
     border-top: 1px solid var(--landing-line);
     color: var(--sl-color-gray-3);
-    font-size: 0.8125rem;
+    font-size: 0.9375rem;
     font-weight: 500;
   }
-  .hero-evidence li:not(:last-child)::after {
-    margin-left: 0.5rem;
+  .ticker {
+    display: flex;
+    width: max-content;
+    animation: ticker 38s linear infinite;
+  }
+  .hero-evidence:hover .ticker {
+    animation-play-state: paused;
+  }
+  .ticker ul {
+    display: flex;
+    flex: none;
+  }
+  .ticker li {
+    padding-inline: 1.1rem;
+    white-space: nowrap;
+  }
+  .ticker li::after {
+    margin-left: 1.1rem;
     color: var(--sl-color-gray-4);
     content: "\00b7";
+  }
+  @keyframes ticker {
+    to {
+      transform: translateX(-50%);
+    }
   }
 
   /* Use cases are whole rows, so they add no vertical line to the frame. */
@@ -746,57 +795,72 @@ const runtimeGroups = [
     color: var(--sl-color-white);
   }
 
-  /* Pains split the seven-track bay 4|3 so the answer column starts on track 9. */
+  /* Each pain is struck through and its replacement written under it. */
+  .pains {
+    justify-content: center;
+  }
   .pain-group + .pain-group {
     border-top: 1px solid var(--landing-line);
   }
-  .pain-head,
-  .pain {
-    display: grid;
-    grid-template-columns: minmax(0, 4fr) minmax(0, 3fr);
-  }
-  .pain-head {
-    border-bottom: 1px solid var(--landing-line);
-  }
-  .pain-head > * {
+  .pain-group h3 {
     padding: 0.8rem var(--landing-pad);
+    border-bottom: 1px solid var(--landing-line);
     color: var(--sl-color-gray-3);
     font-size: 0.8125rem;
     font-weight: 500;
   }
-  .pain-head span,
-  .pain dd {
-    border-left: 1px solid var(--landing-line);
+  .pain {
+    padding: 1.4rem var(--landing-pad);
   }
   .pain + .pain {
     border-top: 1px solid var(--landing-line);
-  }
-  .pain dt,
-  .pain dd {
-    padding: 1.4rem var(--landing-pad);
-    font-size: 0.9375rem;
-    line-height: 1.55;
   }
   .pain dt {
     display: flex;
     flex-direction: column;
     gap: 0.35rem;
+    max-width: 38rem;
+    font-size: 0.9375rem;
+    line-height: 1.55;
   }
   .pain strong {
+    position: relative;
+    align-self: flex-start;
     color: var(--sl-color-white);
     font-size: 1.0625rem;
     font-weight: 500;
     letter-spacing: -0.01em;
   }
-  .pain dd {
-    color: var(--sl-color-white);
-  }
-  .sr-label {
+  .pain strong::after {
     position: absolute;
-    width: 1px;
+    top: 55%;
+    right: -0.15rem;
+    left: -0.15rem;
     height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
+    background: var(--sl-color-gray-3);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.5s var(--landing-ease) calc(var(--order) * 160ms);
+    content: "";
+  }
+  .pains[data-struck] .pain strong::after {
+    transform: scaleX(1);
+  }
+  .pain dd {
+    max-width: 38rem;
+    margin-top: 1rem;
+    padding-left: var(--landing-pad);
+    border-left: 1px solid var(--landing-line);
+    color: var(--sl-color-white);
+    font-size: 0.9375rem;
+    line-height: 1.55;
+  }
+  .answer-label {
+    display: block;
+    margin-bottom: 0.2rem;
+    color: var(--sl-color-gray-3);
+    font-size: 0.75rem;
+    font-weight: 500;
   }
 
   /* Runtimes */
@@ -1046,42 +1110,8 @@ const runtimeGroups = [
     .verdict .tag {
       white-space: normal;
     }
-    .pain-head,
-    .pain {
-      grid-template-columns: minmax(0, 1fr);
-    }
-    .pain-head {
-      background: var(--landing-code-bg);
-    }
-    .pain-head h3 {
-      color: var(--sl-color-white);
-      font-size: 0.9375rem;
-      font-weight: 600;
-    }
-    .pain-head span {
-      display: none;
-    }
-    .pain dt {
-      padding-bottom: 1rem;
-    }
     .pain dd {
-      display: flex;
-      flex-direction: column;
-      gap: 0.3rem;
-      margin-inline: var(--landing-pad);
-      padding: 0.9rem 0 1.4rem;
-      border-top: 1px solid var(--landing-line);
-      border-left: 0;
-    }
-    .pain .sr-label {
-      position: static;
-      width: auto;
-      height: auto;
-      overflow: visible;
-      clip-path: none;
-      color: var(--sl-color-gray-3);
-      font-size: 0.8125rem;
-      font-weight: 500;
+      padding-left: 1rem;
     }
     .landing-footer {
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1103,6 +1133,24 @@ const runtimeGroups = [
     .landing *,
     .landing :global(*) {
       transition: none !important;
+    }
+    /* A ticker that cannot move is a wrapped line of facts. */
+    .hero-evidence {
+      padding-inline: var(--landing-pad);
+    }
+    .ticker {
+      flex-wrap: wrap;
+      width: auto;
+      animation: none;
+    }
+    .ticker ul[aria-hidden] {
+      display: none;
+    }
+    .ticker ul {
+      flex-wrap: wrap;
+    }
+    .ticker li:first-child {
+      padding-left: 0;
     }
   }
 </style>

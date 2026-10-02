@@ -140,7 +140,7 @@ A cool slate grayscale taken from Celestia's Tailwind grays. The ember accent is
 - **Night** (dark ground) / **Paper** (light ground): page and rail backgrounds. Night is Celestia's gray-950.
 - **White Ink** (dark) / **Slate Ink** (light): headings, primary labels, pressed beats and controls, the filled model and agent owner tags, and the primary button's fill.
 - **Mist** (dark body) / **Graphite** (light body): body copy, lane and beat captions, the response figure's reply, and pain details.
-- **Pewter** (dark muted) / **Steel** (light muted): captions, the facts line, inactive beats, outlined code owner tags, meter labels and fills at rest, step notes, the response figure's pane labels and its tag before it is read, a disabled control, and group labels. Both pass 4.5:1 on their ground.
+- **Pewter** (dark muted) / **Steel** (light muted): captions, the facts ticker, the struck rule on a pain, inactive beats, outlined code owner tags, meter labels and fills at rest, step notes, the response figure's pane labels and its tag before it is read, a disabled control, and group labels. Both pass 4.5:1 on their ground.
 - **Graphite** (dark hairline) / **Fog Line** (light hairline): every rule, frame edge and cell divider, through `--sl-color-hairline-light`.
 - **Slate Panel** (gray-800 dark, gray-200 light): hover fill for buttons and navigation. Mixed at 45% into Night, it becomes the code surface (at 80% for a pressed beat or control and a table cell being worked on).
 
@@ -168,7 +168,7 @@ Celestia sets the root to 14px. All rem values in this file are relative to that
 - **Headline** (600, clamp(1.5rem, 2.2vw, 1.875rem), 1.15, -0.03em): section headings in the left bays; Guide page titles follow the same tight tracking at clamp(1.8rem, 3vw, 2.3rem).
 - **Title** (500, 1.0625rem, -0.01em): lane titles and pain names. Demo step names use 0.9375rem at 500 (0.75rem below 40rem).
 - **Body** (400, 1rem, 1.65): explanatory copy, capped at about 34rem, with `text-wrap: pretty`. Guide articles use 0.95rem at 1.8.
-- **Label** (500, 0.8125rem): group labels, captions, footer headings, the facts line, the demo title, beats, meter labels and the response figure's pane labels. Step notes and the Interrupted mark drop to 0.75rem; owner tags to 0.75rem.
+- **Label** (500, 0.8125rem): group labels, captions, footer headings, the facts ticker (0.9375rem), the demo title, beats, meter labels and the response figure's pane labels. Step notes and the Interrupted mark drop to 0.75rem; owner tags to 0.75rem.
 - **Code** (400, 0.8125rem, 1.7): the install command, the hero's `dispatch()` excerpt and API names; the excerpt drops to 0.75rem below 40rem. The response figure sets all three of its panes at 0.75rem.
 
 ### Named Rules
@@ -181,11 +181,11 @@ Celestia sets the root to 14px. All rem values in this file are relative to that
 
 The landing page sits in a centered rail, 82rem wide at most, with 1px hairlines on both edges. Outside the rail, a -45° hatch (1px lines every 8px, gray-5 at 45%) fills the margins like the unused area of a drawing sheet.
 
-Inside the rail, every section is a bay on a 12-track frame split 5 | 7. The left bay states the idea (heading, one paragraph, a link), and the right bay proves it (the `dispatch()` excerpt, use-case rows, the pain/answer table, the response figure, runtime name boxes or boundary rows). One row escapes the split: the orchestration demo opens the problem bay as a full-width figure across all twelve tracks, above that bay's 5 | 7 division, because its own four-step lanes need the frame. A bay's trailing link follows the paragraph it belongs to; the sheet left under it is unused area, not a gap to fill. Rows inside the right bay split 4 | 3, so their divider falls on track 9 in every section. The footer's columns start on the same tracks 5 and 9. Horizontal hairlines separate the bays. Content never floats outside a bay. A framed figure (the orchestration demo) is a drawing set inside its bay; its inner divisions follow its own content.
+Inside the rail, every section is a bay on a 12-track frame split 5 | 7. The left bay states the idea (heading, one paragraph, a link), and the right bay proves it (the `dispatch()` excerpt, use-case rows, the redline register, the response figure, runtime name boxes or boundary rows). One row escapes the split: the orchestration demo opens the problem bay as a full-width figure across all twelve tracks, above that bay's 5 | 7 division, because its own four-step lanes need the frame. A bay's trailing link follows the paragraph it belongs to; the sheet left under it is unused area, not a gap to fill. Rows inside the right bay split 4 | 3, so their divider falls on track 9 in every section. The footer's columns start on the same tracks 5 and 9. Horizontal hairlines separate the bays. Content never floats outside a bay. A framed figure (the orchestration demo) is a drawing set inside its bay; its inner divisions follow its own content.
 
 The gutter is `clamp(1.25rem, 3.2vw, 3rem)`. Bays use 3.5rem of vertical padding, stacks inside them 1rem gaps, and cells 1.4rem. More space sits above a heading than below it.
 
-Below 64rem, every bay stacks to one column: the left bay first, then its proof, separated by a hairline. Below 40rem, the rail loses its side borders, the orchestration demo runs edge to edge, pain rows stack, and the footer becomes two columns under a full-width brand. The hero's first viewport keeps the primary action above the fold at 1280×720.
+Below 64rem, every bay stacks to one column: the left bay first, then its proof, separated by a hairline. Below 40rem, the rail loses its side borders, the orchestration demo runs edge to edge, the redline register narrows its inset, and the footer becomes two columns under a full-width brand. The hero's first viewport keeps the primary action above the fold at 1280×720.
 
 The documentation carries the same frame. Every Guide, Reference and Project page shares one shell: a fixed 4rem header, a 17rem sidebar for the current space with a hairline edge, and a content pane of at most 84rem. From 100rem wide, a 16rem "On this page" rail joins the pane as a full-height column. The pane (with its rail) is centred as one sheet in the space beside the sidebar; the margins on both sides are hatched like the landing's out-of-frame area, with one hairline on each side of the sheet. Those edges are drawn outside the sheet, so with no margin they merge into the sidebar's edge and no line is drawn at the window edge. Inside the pane, a 2.75rem breadcrumb bar sits above a title section, then one section per `h2`, each laid on the 12-track frame:
 
@@ -220,6 +220,10 @@ Blunt, rectangular and confident.
 - **Primary:** inverted, a White Ink fill with Night text (reversed in light theme). A drawn arrow follows the label and moves 3px right on hover.
 - **Outline:** a transparent fill with a gray-5 hairline border and White/Slate Ink text. On hover the border lightens to gray-3 and a Slate Panel fill appears.
 - **Focus:** a 2px ember outline with a 2px offset.
+
+### Facts Ticker
+
+The strip closing the hero bay, full width under both halves: the engineering facts at 0.9375rem in Pewter/Steel, separated by middots in gray-4, running right to left on a 38s linear loop. The list is written once and repeated, the repeat carrying `aria-hidden`, so the loop is seamless and the facts are announced once. Hovering pauses it. Under reduced motion it does not move: the repeat is removed and the single list wraps inside the bay's gutter.
 
 ### Install Field
 
@@ -257,20 +261,22 @@ The signature component: the drawing that opens the problem bay, full width, reg
 
 - **Bar:** a 2.75rem strip with the job title (Label, ink) and, at the right edge behind a hairline, a square pause/replay toggle with drawn icons. The toggle is hidden under reduced motion.
 - **Lanes:** two stacked lanes, "An LLM orchestrates" above "Code orchestrates", separated by a hairline. Each has a Title-style name, a caption for the current beat (all captions share one grid cell so switching never shifts the layout), a row of four step cells and a context meter.
-- **Step cells:** a 4-column grid whose dividers are 1px gaps over the line colour, on the Night ground. Each cell holds the step name with its drawn check on the same line at the cell's right edge, an owner tag under it, and a note slot across the foot. Name and check read as one finished step at any cell width. Model and agent tags are filled in White/Slate Ink; code tags are outlined in a hairline with Pewter/Steel text, so the split reads at rest.
+- **Step cells:** a 4-column grid whose dividers are 1px gaps over the line colour, on the Night ground. Each cell holds the step name with its drawn check on the same line at the cell's right edge, an owner tag under it, a note slot at its foot and, at the foot's right edge, the elapsed time of that step in monospace with tabular numerals. Durations live in `orchestration.constants.ts` so the still state and the player agree: a model step costs 820ms, an agent's turn 1100ms, a code step 120ms, which makes the model's lane read as more than twice the code lane's. Name and check read as one finished step at any cell width. Model and agent tags are filled in White/Slate Ink; code tags are outlined in a hairline with Pewter/Steel text, so the split reads at rest.
 - **Running state:** a model or agent step gets the ember tint and an ember underline that grows over its run time; a code step gets the 80% code fill and a Pewter/Steel underline. Only the code lane draws chevrons between its steps, because only its order is fixed.
-- **Context meter:** a label and a 0.5rem hairline track whose fill grows with each model step, while the code lane stays at a quarter. The fill is Pewter/Steel below half, ember from half, Alarm from three quarters, so the two lanes read as a calm bar beside a filling one before either caption is read.
+- **Context meter:** both lanes label it with the same word, so the two bars are the only difference between them. A 0.5rem hairline track whose fill grows with each model step, while the code lane stays at a quarter. The fill is Pewter/Steel below half, ember from half, Alarm from three quarters, so the two lanes read as a calm bar beside a filling one before either caption is read.
 - **Beats:** four buttons along the foot (Steps, Context, Order, Resume), split by hairlines. The pressed beat takes the 80% fill and ink text; while playing, a 2px ink underline runs across it for the beat's duration. Each beat puts ink on what it explains: code tags, the meters, the code chevrons.
 - **Order beat:** the last two model cells swap places and the moved Integrate cell shows "too early".
 - **Resume beat:** a dashed ink "Interrupted" cut drops down the middle of both lanes, labelled in a hairline box; lane titles and captions knock the line out with the code-surface fill. The model lane reruns its first steps marked "reread"; the code lane marks them "restored".
 - **Motion:** autoplays once when 35% in view, then chains through the beats; clicking a beat plays it alone. Transitions use the landing ease. Under reduced motion nothing animates: every beat button shows its still end state.
 - **Accessibility:** the stage is hidden from assistive technology; a visually hidden list gives each beat's two captions as text. Beat buttons are a labelled group with `aria-pressed`, and focus draws the ember outline inside.
 
-### Pain Table
+### Redline Register
 
-A definition table in the problem bay. Each group opens with a head row (the group name and, on track 9, the "With Outpost" column label, both Label style in Pewter/Steel). Each row splits 4 | 3: the pain (Title in ink) over its detail on the left, the answer in ink on the right behind a hairline. Groups and rows are separated by hairlines.
+The problem bay's right half: not a comparison table but a marked-up draft. Each group opens with a Label head row naming it; each entry then reads top to bottom in one column, so the bay carries no second vertical line.
 
-Below 40rem the columns stack: the group head becomes a tonal band (code-surface fill, the group name in ink at 600, the column label hidden), and each answer sits under an inset hairline with a visible "With Outpost:" lead-in. On wider screens that lead-in is visually hidden but read aloud.
+- **Entry:** the pain as a Title in ink with a 1px Pewter/Steel rule struck across it at 55% height, its detail in body under it, then the answer in ink behind an inset hairline, under a 0.75rem "With Outpost" label. Text is capped at 38rem.
+- **Motion:** the strikes draw left to right when the register is 30% in view, 160ms apart, so code is seen taking the work back rather than claiming it. Under reduced motion every rule is already drawn.
+- **Below 40rem:** the answer's inset narrows; nothing else changes, because the entry was never two columns.
 
 ### Runtime Names
 

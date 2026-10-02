@@ -1,6 +1,7 @@
 ---
 import type { CollectionEntry } from "astro:content";
 import DemoFrame from "./DemoFrame.astro";
+import { stepSeconds } from "./orchestration.constants.ts";
 
 type Demo = NonNullable<CollectionEntry<"docs">["data"]["landing"]>["demo"];
 
@@ -9,6 +10,7 @@ interface Props {
 }
 
 const { demo } = Astro.props;
+const locale = Astro.locals.starlightRoute.lang ?? "en";
 const lanes = [
   {
     key: "model",
@@ -64,6 +66,9 @@ const summary = demo.beats.map(
                 <svg viewBox="0 0 24 24" class="step-check">
                   <path d="m5 12.5 4.5 4.5L19 7.5" />
                 </svg>
+                <span class="step-time">
+                  {stepSeconds(owners[index], locale)}
+                </span>
               </li>
             ))}
           </ol>
@@ -86,9 +91,7 @@ const summary = demo.beats.map(
   type LaneKey = "model" | "code";
   type Lane = { steps: HTMLElement[]; fill: HTMLElement };
 
-  const MODEL_STEP = 520;
-  const CODE_STEP = 160;
-  const AGENT_STEP = 1100;
+  import { STEP_DURATIONS } from "./orchestration.constants.ts";
   // Ember at half the context window, red at three quarters.
   const LEVELS = [
     { from: 0.75, level: "high" },
@@ -141,13 +144,9 @@ const summary = demo.beats.map(
     #run(lane: LaneKey, order: number[], start: number, note = "", filled = 0) {
       let time = start;
       order.forEach((index, position) => {
-        const owner = this.#lanes[lane].steps[index]?.dataset.owner;
-        const duration =
-          owner === "model"
-            ? MODEL_STEP
-            : owner === "agent"
-              ? AGENT_STEP
-              : CODE_STEP;
+        const owner = this.#lanes[lane].steps[index]?.dataset
+          .owner as keyof typeof STEP_DURATIONS;
+        const duration = STEP_DURATIONS[owner] ?? STEP_DURATIONS.code;
         this.at(time, () => {
           this.#lanes[lane].steps[index]?.style.setProperty(
             "--run",
@@ -172,11 +171,11 @@ const summary = demo.beats.map(
         this.at(time, () => {
           this.#lanes.model.steps[index]?.style.setProperty(
             "--run",
-            `${MODEL_STEP}ms`,
+            `${STEP_DURATIONS.model}ms`,
           );
           this.#step("model", index, "active", note);
         });
-        time += MODEL_STEP;
+        time += STEP_DURATIONS.model;
         this.at(time, () => {
           this.#step("model", index, "done", note);
           this.#fill("model", (position + 1) / 4);
@@ -365,9 +364,22 @@ const summary = demo.beats.map(
     background: var(--sl-color-white);
     color: var(--sl-color-black);
   }
+  .step-time {
+    grid-column: 2;
+    align-self: end;
+    color: var(--sl-color-gray-3);
+    font-family: var(--sl-font-system-mono);
+    font-size: 0.6875rem;
+    font-variant-numeric: tabular-nums;
+    opacity: 0;
+    transition: opacity 0.25s var(--landing-ease);
+  }
+  .step[data-state="done"] .step-time {
+    opacity: 1;
+  }
   .step-notes {
     display: grid;
-    grid-column: 1 / -1;
+    grid-column: 1;
     min-height: 1.2em;
     color: var(--sl-color-gray-3);
     font-size: 0.75rem;
