@@ -287,7 +287,7 @@ The agents and sandboxes bay lists two groups (a Label head row above a hairline
 
 The typed-response bay's proof: three stacked panes inside one hairline frame on the code surface, each under a Label caption, with a drawn chevron (two hairline borders turned 45°) between them.
 
-- **Panes:** the `defineJsonResponse()` declaration, cut at build time from the typechecked `snippets/verdict.ts`; the agent's reply as prose with its tagged block on its own line; and the `result.value` your code receives.
+- **Panes:** everything the caller writes, cut at build time from the typechecked `snippets/verdict.ts` — the schema, the `dispatch()` that passes it as `response`, and the typed value read back — then the agent's reply as prose with its tagged block on its own line, and the `result.value` that reply became. The first pane carries the whole chain because the link between a schema and a model's answer is the one thing the figure has to make obvious.
 - **Motion:** the frame opens on the declaration alone. When it is 35% in view the reply appears, then after 900ms the value, and the tagged block takes the 80% fill and ink text at that moment — the highlight says which part of the prose became the value. Under reduced motion all three panes and the highlight are present at once.
 - **Scroll:** the declaration pane scrolls horizontally inside a focusable region (`role="region"`, labelled by its caption) with the ember focus ring inside. Below 40rem the tagged block wraps instead of scrolling.
 

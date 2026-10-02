@@ -16,4 +16,5 @@ const result = await dispatch({
   brief: { text: "Review the last commit. End with a <verdict> block." },
 });
 
+// result.value is typed from the schema: { approved: boolean; reasons: string[] }
 if (!result.value.approved) console.log(result.value.reasons);

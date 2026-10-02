@@ -90,7 +90,7 @@ landing:
     link: { label: "Réponses typées", href: "guide/typed-responses/" }
     secondary:
       { label: "Relire une pull request", href: "guide/review-on-label/" }
-    declareLabel: "Vous déclarez la réponse"
+    declareLabel: "Votre code demande une réponse typée"
     answerLabel: "L’agent répond"
     answerText: "J’ai relu le dernier commit. Le correctif est juste, mais il n’a pas de test de régression."
     answerTag: '<verdict>{"approved": false, "reasons": ["pas de test de régression"]}</verdict>'

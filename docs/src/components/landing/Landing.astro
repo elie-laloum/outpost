@@ -18,17 +18,15 @@ const marked = (text: string) =>
 // A heading made of sentences breaks between them, never inside one.
 const sentences = (text: string) => text.split(/(?<=\.)\s+/);
 const outcome = marked(landing.install.outcome);
-// The response declaration, cut from the typechecked snippet beside it.
+// Everything the caller writes, cut from the typechecked snippet beside it:
+// the schema, the dispatch that asks for it, and the typed value it returns.
 const verdictLines = verdictCall.split("\n");
 const declareStart = verdictLines.findIndex((line) =>
   line.includes("defineJsonResponse({"),
 );
-const declareEnd = verdictLines.indexOf("});", declareStart);
-if (declareStart < 0 || declareEnd < 0)
+if (declareStart < 0)
   throw new Error("The verdict snippet no longer declares a JSON response.");
-const declareCode = verdictLines
-  .slice(declareStart, declareEnd + 1)
-  .join("\n");
+const declareCode = verdictLines.slice(declareStart).join("\n").trimEnd();
 const runtimeGroups = [
   { label: landing.runtimes.agentsLabel, items: landing.runtimes.agents },
   { label: landing.runtimes.sandboxesLabel, items: landing.runtimes.sandboxes },

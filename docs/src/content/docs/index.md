@@ -90,7 +90,7 @@ landing:
     link: { label: "Typed responses", href: "guide/typed-responses/" }
     secondary:
       { label: "Review a pull request", href: "guide/review-on-label/" }
-    declareLabel: "You declare the answer"
+    declareLabel: "Your code asks for a typed answer"
     answerLabel: "The agent replies"
     answerText: "I reviewed the last commit. The fix is correct, but there is no regression test for it."
     answerTag: '<verdict>{"approved": false, "reasons": ["no regression test"]}</verdict>'
