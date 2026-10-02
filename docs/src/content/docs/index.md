@@ -1,12 +1,12 @@
 ---
 title: Outpost
-description: "Run coding agents from your TypeScript. Claude Code, Codex, Copilot CLI and Kimi Code in a sandbox you own, on a Git branch you control."
+description: "Run coding agents from your TypeScript. Claude Code, Codex, Copilot CLI and Kimi Code, in a Docker, Podman or cloud sandbox of your own, on a Git branch of your own."
 landing:
   headline:
     - "Run coding agents"
     - "from your TypeScript."
   tagline: "Run an agent, own its environment, compose a workflow."
-  lead: "Claude Code, Codex, Copilot CLI and Kimi Code, in a Docker, Podman or cloud sandbox you own, on a Git branch you control. Your code keeps the order, the checks and the resume; the agent gets only the work that needs judgment."
+  lead: "Claude Code, Codex, Copilot CLI and Kimi Code, in a Docker, Podman or cloud sandbox of your own, on a Git branch of your own. Your code decides the order, runs the checks and handles the recovery; the agent only does the part that needs judgment."
   hero:
     caption: "One task from end to end: a sandbox, a named branch, the agent’s answer and its commits."
   install:
@@ -14,7 +14,7 @@ landing:
     copy: "Copy the install command"
     copied: "Copied"
     prerequisites: "You need Node.js 24+, a Git repository with at least one commit, Docker or Podman running, and your agent CLI signed in."
-    outcome: "It writes `run.ts`, `brief.md`, a `Dockerfile` and your configuration, then builds the agent image. Then run:"
+    outcome: "It writes `run.ts`, `brief.md`, a `Dockerfile` and your configuration, then builds the agent image. Now run:"
     next: 'node run.ts "Describe this repository"'
   primary: { label: "Get started", href: "guide/setup/" }
   secondary: { label: "Read the guide", href: "guide/introduction/" }
@@ -54,7 +54,7 @@ landing:
       context: "Context"
       captions:
         - "The model interprets every step, even the certain ones."
-        - "Every step adds to the conversation it rereads."
+        - "Every step adds to the conversation the model rereads."
         - "The model decides the order as it goes, and can drift."
         - "After an interruption, the model rereads everything."
     code:
@@ -67,26 +67,26 @@ landing:
         - "Finished steps come back from the checkpoint."
   problem:
     title: "Models are asked to do everything"
-    text: "An LLM is good at judgment: reading code, writing a fix, reviewing a change. Most AI pipelines also hand it the steps, the order and the recovery, which code does better."
+    text: "An LLM is good at judgment: reading code, writing a fix, reviewing a change. Most AI pipelines hand it the steps, the order and the recovery too — three things code does better than it does."
     link: { label: "How Outpost works", href: "guide/how-it-works/" }
     answerLabel: "With Outpost"
     summaryLabel: "What the model is handed, step by step"
     rows:
       - pain: "Everything is interpreted"
         detail: "Even a branch name or a test command goes through the model, every time."
-        answer: "Code runs the certain steps. The agent gets only the work that needs judgment."
+        answer: "Code runs the certain steps. The agent only gets what needs judgment."
       - pain: "The context keeps growing"
         detail: "Each step adds to one conversation that the model rereads."
         answer: "Each agent task starts from its own brief, in its own sandbox."
       - pain: "The orchestrator drifts"
         detail: "When a model decides the order, it can skip, repeat or reorder steps."
-        answer: "The task graph is TypeScript, validated before the run. Typed responses are checked against their schema."
+        answer: "The task graph is TypeScript, validated before the run. Typed responses have to satisfy their schema."
       - pain: "Resuming means re-interpreting"
-        detail: "After a crash or a quota, the model rebuilds its state from a transcript."
+        detail: "After a crash or a spent quota, the model rebuilds its state from a transcript."
         answer: "Finished tasks come back from the checkpoint as JSON. Rerunning an interrupted one takes your explicit consent."
   typed:
     title: "The agent answers in prose. Your code gets a typed value."
-    text: "Declare the answer with a Zod schema. Outpost pulls the tagged block out of the agent’s reply, validates it against your schema, and hands you `result.value` typed from it. An answer that fails the schema is not yours to patch: the agent gets repair turns on the same conversation, and a run that still fails throws rather than hand your code bad data."
+    text: "Describe the answer you want with a Zod schema. Outpost finds the tagged block in whatever the agent replies, checks it against your schema and hands back `result.value`, typed from it. And when the answer does not fit, it is not yours to patch: Outpost sends the agent back to fix it, in the same conversation. If that fails too, the run throws rather than let bad data through."
     link: { label: "Typed responses", href: "guide/typed-responses/" }
     secondary:
       { label: "Review a pull request", href: "guide/review-on-label/" }
@@ -119,12 +119,12 @@ landing:
     link: { label: "Choose an agent", href: "guide/choose-an-agent/" }
   boundaries:
     title: "Where Outpost is not the answer"
-    text: "Outpost owns the steps around an agent. When those steps are not yours to own, something smaller is the better choice."
+    text: "Outpost takes care of everything around the agent. When that is not your problem to solve, something smaller is the better choice."
     entries:
       - lead: "One agent session is enough"
         text: "If the whole job fits in one conversation, run the agent CLI directly. Outpost earns its place when the branch, the checks, the order and the resume are yours."
       - lead: "A single CI step"
-        text: "A workflow file that runs an agent and stops is less code. Outpost runs the same job from CI, a queue, a cron slot or a verified webhook, and keeps the checkpoint when the worker restarts."
+        text: "A workflow file that runs an agent and stops will cost you less code. Outpost runs the same job from CI, a queue, a cron slot or a verified webhook, and keeps the checkpoint even when the worker restarts."
       - lead: "You only want to read"
         text: "A question about the code produces no branch, no commits and nothing for a check to gate. Run the agent in your own terminal and keep the answer."
     link: { label: "Job queues and workers", href: "guide/job-queues/" }
@@ -155,4 +155,4 @@ landing:
     license: "Released under the MIT License."
 ---
 
-Outpost runs coding agents in a sandbox you own, from workflows you write in TypeScript. Code keeps the order, the checks and the resume; the agent gets the work that needs judgment. Start with the [setup guide](guide/setup/) or look up an API in the [reference](reference/).
+Outpost runs coding agents in a sandbox of your own, from workflows you write in TypeScript. Code decides the order, runs the checks and handles the recovery; the agent gets the part that needs judgment. Start with the [setup guide](guide/setup/) or look up an API in the [reference](reference/).
