@@ -33,7 +33,8 @@ jobs:
       - run: bun run build
       - run: bun run format:check
       - run: bun run test:package
-      - run: bun audit --audit-level=high
+      # braces <=3.0.3 (via @daytona/sdk) has no patched release yet; drop the ignore once one ships.
+      - run: bun audit --audit-level=high --ignore=GHSA-vfj7-8cjw-p6xm
       - uses: actions/upload-artifact@v7
         with:
           name: coverage-${{ matrix.os }}

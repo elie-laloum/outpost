@@ -23,5 +23,8 @@
     "typescript": "6.0.3",
     "valibot": "1.5.0",
     "zod": "4.6.5"
+  },
+  "overrides": {
+    "http-cache-semantics": "4.3.0"
   }
 }
