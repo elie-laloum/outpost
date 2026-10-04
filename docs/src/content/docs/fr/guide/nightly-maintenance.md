@@ -190,31 +190,37 @@ Lancez chaque commande dans son propre terminal ou service. Ctrl+C arrête l’u
 
 ## Comment ça marche
 
-<!-- flow -->
+Chaque lien indique qui transmet quoi à qui, dans le sens de la flèche.
 
-1. **La nuit**: À 02:00, heure de Paris, du lundi au vendredi.
-   - **Publier**: Le planificateur publie le job `schedule:nightly-deps:<slot>`.
-     - `runSchedules()`
-   - **Prendre le job**: Le worker démarre le workflow sous le checkpoint `deps-<date>`.
-     - `defineWorkflowJob()`
-   - **Mettre à jour**: L’agent committe sur `outpost/deps-<date>` et renvoie son rapport.
-     - `update`
-     - sandbox
-   - **Écrire le rapport**: `publish` enregistre la branche, les commits et le rapport dans `reports/deps-<date>.json`.
-     - `publish`
-     - hôte
-2. **Limite d’usage**: La tâche s’arrête sans consommer de nouvelle tentative.
-   - **Passer le relais**: Claude Code repart du brief d’origine sur la même branche.
-     - `createFallbackAgent()`
-   - **Attendre**: Une réinitialisation dans la limite de `maxWaitMs` fait patienter le worker, puis la tâche repart.
-     - `maxWaitMs`
-   - **Mettre en pause**: Une réinitialisation plus tardive ou inconnue met la tâche en pause ; le job se termine avec le statut `paused`.
-     - `onQuota`
-3. **Le matin**: À 07:00, le même `runId` à nouveau.
-   - **Reprendre**: Une tâche en pause repart, sauf si sa réinitialisation dépasse encore `maxWaitMs`.
-     - `nightly-deps-resume`
-   - **Relire**: Vous consultez la branche et son fichier de rapport.
-     - hôte
+<!-- canvas -->
+
+- [Planificateur](../cron-schedules/): `runSchedules()` publie un job à 02:00 et un autre à 07:00, du lundi au vendredi, heure de Paris.
+  - hôte
+  - → **File**: deux fois le même `runId`
+- [File](../job-queues/): `.outpost/jobs.sqlite` ; un job dont le worker s’arrête revient après son bail de 30 secondes.
+  - hôte
+  - → **Worker**: prise en charge
+- [Worker](../job-queues/): `defineWorkflowJob()` exécute le workflow de la nuit sous le checkpoint `deps-<date>`.
+  - hôte
+  - → **update**: démarrage ou reprise
+  - → **Checkpoint**: tâches terminées, pauses
+- [Workflow](../durable-runs/): Deux tâches ; `resume: "retry-incomplete"` relance celle qui n’a pas fini.
+  - workflow
+  - **update**: `defineIsolatedTask()` sur `outpost/deps-<date>`
+    - → **Codex**: brief
+  - **publish**: enregistre la branche, les commits et le rapport
+    - → **Rapport**: `reports/deps-<date>.json`
+- [Codex](../codex/): Met à jour une dépendance à la fois, lance les tests, commite ou annule.
+  - sandbox
+  - → **Claude Code**: limite d’usage
+  - → **update**: `{ updated, skipped }`
+- [Claude Code](../claude-code/): `createFallbackAgent()` lui confie le brief d’origine sur la même branche.
+  - sandbox
+  - → **update**: rapport, ou pause à sa propre limite
+- [Checkpoint](../durable-runs/): Le job de 07:00 reprend une tâche en pause, sauf si sa réinitialisation dépasse encore `maxWaitMs`.
+  - hôte
+- **Rapport**: Vous le lisez le matin avec la branche.
+  - hôte
 
 Claude Code peut indiquer quand sa limite se réinitialise ; Codex ne le fait jamais. Une exécution arrêtée par Codex seul attend donc le job de 07:00. Avec l’agent de secours, la tâche ne se met en pause que si les deux agents atteignent leur limite, et la réinitialisation n’est connue que si les deux l’indiquent.
 

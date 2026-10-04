@@ -231,31 +231,35 @@ Pointez le webhook du dépôt vers le chemin `/github` du serveur, derrière un 
 
 ## Comment ça marche
 
-<!-- flow -->
+Chaque lien indique qui transmet quoi à qui, dans le sens de la flèche.
 
-1. **Recevoir**: Le serveur répond à GitHub dans sa limite de 10 secondes.
-   - **Vérifier**: La signature doit correspondre au secret du webhook, sinon `401`.
-     - `createGithubWebhook()`
-   - **Filtrer**: Garder un nouveau label `outpost:review` sur une pull request, ajouté par une personne de `reviewers`.
-     - `labelAdded()`
-     - `event.actor`
-   - **Publier**: Mettre en file un job `review` dont l’entrée porte le dépôt, le numéro et les commits de base et de tête.
-     - `serveTriggers()`
-2. **Exécuter**: Le worker prend le job dans son propre processus.
-   - **Réclamer**: Prendre le job dans le fichier SQLite partagé.
-     - `runQueueWorker()`
-   - **Checkpoint**: Démarrer le workflow sous le `runId` du job.
-     - `defineWorkflowJob()`
-3. **Relire**: L’agent lit la pull request, pas votre checkout.
-   - **fetch**: Votre code amène les deux commits dans le clone local.
-     - host
-   - **review**: L’agent travaille sur une branche au commit de tête, dans sa propre sandbox, et renvoie un verdict validé.
-     - `defineIsolatedTask()`
-     - sandbox
-4. **Livrer**: Le verdict sort d’Outpost par votre code.
-   - **post**: Votre code publie le verdict, avec la clé `context.idempotencyKey`.
-     - `defineTask()`
-     - host
+<!-- canvas -->
+
+- **GitHub**: Envoie une livraison signée quand un label est posé sur une pull request, et attend la réponse 10 secondes.
+  - GitHub
+  - → **Serveur**: webhook
+- [Serveur](../webhooks/): `serveTriggers()` vérifie la signature (`401` sinon), le label `outpost:review` et l’acteur dans `reviewers`.
+  - hôte
+  - → **File**: job `review`
+- [File](../job-queues/): `.outpost/jobs.sqlite`, partagée par le serveur et le worker.
+  - hôte
+  - → **Worker**: prise en charge
+- [Worker](../job-queues/): `runQueueWorker()` prend le job ; `defineWorkflowJob()` exécute le workflow sous son `runId`.
+  - hôte
+  - → **fetch**: démarrage
+  - → **Checkpoint**: sorties des tâches
+- [Workflow](../task-dependencies/): Trois tâches, l’une après l’autre.
+  - workflow
+  - **fetch**: votre code apporte les commits de base et de tête dans le clone
+  - **review**: `defineIsolatedTask()` sur une branche au commit de tête
+    - → **Sandbox**: brief
+  - **post**: votre code publie le verdict, dédupliqué par `context.idempotencyKey`
+    - → **GitHub**: verdict
+- [Sandbox](../choose-a-sandbox/): L’agent lit le diff de la pull request, pas votre checkout.
+  - sandbox
+  - → **review**: `{ approved, findings }` vérifié
+- [Checkpoint](../durable-runs/): Le même label sur le même commit restaure l’exécution terminée.
+  - hôte
 
 Le `runId` nomme le commit de tête. Rajouter le label sur le même commit restaure l’exécution terminée depuis son checkpoint : rien n’est relu ni publié deux fois. Un nouveau commit lance une nouvelle revue.
 

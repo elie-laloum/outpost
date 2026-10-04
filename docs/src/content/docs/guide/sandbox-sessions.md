@@ -24,7 +24,7 @@ const tests = await sandbox.command({
 console.log(tests.status === 0 ? "Tests pass" : tests.stderr);
 ```
 
-The agent edits the worktree, then `npm test` runs in the same sandbox against its changes. How this differs from a one-shot `dispatch()`, and who closes what, is explained in [How Outpost works](../how-it-works/).
+The agent edits the worktree, then `npm test` runs in the same sandbox against its changes. How this differs from a one-shot `dispatch()`, and who closes what, is explained in [How it works](../how-it-works/).
 
 ## Run agent turns
 

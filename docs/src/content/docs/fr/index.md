@@ -10,20 +10,23 @@ landing:
   hero:
     caption: "Une tâche complète : une sandbox, une branche nommée, la réponse de l’agent et ses commits."
   install:
-    command: "npx @elie-laloum/outpost init"
+    managers: "Gestionnaire de paquets"
+    commands:
+      - { label: "npm", command: "npm install @elie-laloum/outpost" }
+      - { label: "yarn", command: "yarn add @elie-laloum/outpost" }
+      - { label: "bun", command: "bun add @elie-laloum/outpost" }
+      - { label: "pnpm", command: "pnpm add @elie-laloum/outpost" }
     copy: "Copier la commande d’installation"
     copied: "Copié"
-    prerequisites: "Il vous faut Node.js 24+, un dépôt Git avec au moins un commit, Docker ou Podman qui tourne, et votre CLI d’agent déjà connectée."
-    outcome: "La commande écrit `run.ts`, `brief.md`, un `Dockerfile` et votre configuration, puis construit l’image de l’agent. Ensuite :"
-    next: 'node run.ts "Describe this repository"'
+    prerequisites: "Il vous faut Node.js 24+."
   primary: { label: "Commencer", href: "guide/setup/" }
   secondary: { label: "Lire le guide", href: "guide/introduction/" }
   facts: "MIT"
   evidence:
-    - "CI sur Windows, macOS et Linux"
-    - "Tests Docker et Podman réels"
-    - "Seuil de couverture à 80 %"
-    - "Publication npm avec provenance"
+    - "Sandboxes Docker, Podman ou cloud"
+    - "Une branche Git nommée par tâche"
+    - "Des réponses typées validées par votre schéma"
+    - "Des exécutions qui reprennent sur checkpoint"
   reference: { label: "Référence de l’API", href: "reference/" }
   useCases:
     title: "Ce que vous pouvez lancer"
@@ -69,7 +72,7 @@ landing:
   problem:
     title: "On demande tout aux modèles"
     text: "Un LLM est excellent pour juger : lire du code, écrire un correctif, relire une modification. La plupart des pipelines d’IA lui confient en plus les étapes, l’ordre et la reprise — trois choses que le code fait mieux que lui."
-    link: { label: "Comment fonctionne Outpost", href: "guide/how-it-works/" }
+    link: { label: "Fonctionnement d’Outpost", href: "guide/how-it-works/" }
     answerLabel: "Avec Outpost"
     summaryLabel: "Ce qu’on confie au modèle, étape par étape"
     rows:
@@ -136,7 +139,7 @@ landing:
       title: "Documentation"
       links:
         - { label: "Guide", href: "guide/introduction/" }
-        - { label: "Référence", href: "reference/" }
+        - { label: "API", href: "reference/" }
         - { label: "Changelog", href: "project/changelog/" }
         - { label: "Roadmap", href: "project/roadmap/" }
     source:

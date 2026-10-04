@@ -1,5 +1,5 @@
 {
-  "title": ["Reference", "Référence"],
+  "title": ["API", "API"],
   "description": [
     "Every public contract of Outpost, grouped into families. Open a family's overview to learn its concepts, or go straight to a function, type or interface.",
     "Chaque contrat public d’Outpost, regroupé en familles. Ouvrez la vue d’ensemble d’une famille pour ses concepts, ou allez directement à une fonction, un type ou une interface."

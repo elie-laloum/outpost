@@ -110,23 +110,27 @@ L’agent peut modifier les tests ou le script `test`. Relisez le diff, et laiss
 
 ## Comment ça marche
 
-<!-- flow -->
+Chaque lien indique qui transmet quoi à qui, dans le sens de la flèche.
 
-1. **Préparer**: `createSandbox()` ouvre la branche de travail et installe les dépendances.
-   - **Ouvrir la branche**: Un worktree sur `outpost/fix-ci` sous `.outpost/workspaces` ; une branche existante est reprise.
-     - hôte
-   - **Installer**: `npm ci` s’exécute une fois dans la sandbox, avant tout tour de l’agent.
-     - sandbox
-2. **Boucler**: Chaque tour exécute `attempt`, puis `check`.
-   - **Tenter**: L’agent reçoit le brief et le dernier échec, modifie le code et commite.
-     - `perform(context)`
-   - **Vérifier**: `npm test` doit sortir avec 0 et l’arbre doit être propre ; les 20 000 derniers caractères de chaque flux deviennent le retour.
-     - `sandbox.command()`
-3. **Terminer**: Le script affiche le résumé, puis fixe le statut du job.
-   - **Rapporter**: Statut, branche, tours et tokens vont sur stdout.
-     - hôte
-   - **Fermer**: `await using` ferme la sandbox et conserve la branche ; rien n’est fusionné ni poussé.
-     - hôte
+<!-- canvas -->
+
+- [Votre script](../ci-automation/): `fix-ci.mts` ouvre la sandbox, démarre le workflow avec son `budget` et fixe le code de sortie.
+  - hôte
+  - → **Sandbox**: `createSandbox()`
+  - → **Tentative**: `workflow.start()`
+- [Boucle](../verification-loops/): `defineLoopTask()`, 4 tours au plus, chacun borné par `timeoutMs`.
+  - workflow
+  - **Tentative**: le brief, plus le dernier échec
+    - → **Agent**: `perform(context)`
+  - **Vérification**: `npm test` doit sortir avec 0, puis l’arbre doit être propre ; les 20 000 derniers caractères de sortie deviennent le retour
+    - → **Commandes**: `sandbox.command()`
+- [Sandbox](../sandbox-sessions/): Reste ouverte d’un tour à l’autre : dépendances et modifications sont conservées.
+  - sandbox
+  - **Commandes**: `npm ci` une fois, avant le premier tour ; `npm test` à chaque tour
+  - **Agent**: modifie et commite ; ses tokens comptent dans `budget`
+  - → **Branche**: commits
+- **Branche**: `outpost/fix-ci` dans `.outpost/workspaces` ; `await using` ferme la sandbox et la conserve. Rien n’est fusionné ni poussé.
+  - hôte
 
 `perform(context)` relie l’usage et l’annulation de l’agent au workflow : ses tokens comptent dans `budget`. `timeoutMs` borne chaque tour.
 

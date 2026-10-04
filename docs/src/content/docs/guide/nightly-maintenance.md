@@ -190,31 +190,37 @@ Run each command in its own terminal or service. Ctrl+C stops either one cleanly
 
 ## How it works
 
-<!-- flow -->
+Each link shows who hands what to whom, in the direction of the arrow.
 
-1. **Night**: At 02:00 Paris time, Monday to Friday.
-   - **Publish**: The scheduler publishes the job `schedule:nightly-deps:<slot>`.
-     - `runSchedules()`
-   - **Claim**: The worker starts the workflow under the checkpoint `deps-<date>`.
-     - `defineWorkflowJob()`
-   - **Update**: The agent commits on `outpost/deps-<date>` and returns its report.
-     - `update`
-     - sandbox
-   - **Write the report**: `publish` saves the branch, commits and report to `reports/deps-<date>.json`.
-     - `publish`
-     - host
-2. **Usage limit**: The task stops without using a retry.
-   - **Hand over**: Claude Code starts from the original brief on the same branch.
-     - `createFallbackAgent()`
-   - **Wait**: A reset within `maxWaitMs` keeps the worker waiting, then the task runs again.
-     - `maxWaitMs`
-   - **Pause**: A later or unknown reset pauses the task; the job completes with status `paused`.
-     - `onQuota`
-3. **Morning**: At 07:00, the same `runId` again.
-   - **Resume**: A paused task runs again unless its reset is still beyond `maxWaitMs`.
-     - `nightly-deps-resume`
-   - **Review**: You read the branch and its report file.
-     - host
+<!-- canvas -->
+
+- [Scheduler](../cron-schedules/): `runSchedules()` publishes a job at 02:00 and another at 07:00, Monday to Friday, Paris time.
+  - host
+  - → **Queue**: same `runId` twice
+- [Queue](../job-queues/): `.outpost/jobs.sqlite`; a job whose worker stops returns after its 30-second lease.
+  - host
+  - → **Worker**: claim
+- [Worker](../job-queues/): `defineWorkflowJob()` runs the night’s workflow under the checkpoint `deps-<date>`.
+  - host
+  - → **update**: start or resume
+  - → **Checkpoint**: finished tasks, pauses
+- [Workflow](../durable-runs/): Two tasks; `resume: "retry-incomplete"` reruns the unfinished one.
+  - workflow
+  - **update**: `defineIsolatedTask()` on `outpost/deps-<date>`
+    - → **Codex**: brief
+  - **publish**: saves the branch, the commits and the report
+    - → **Report**: `reports/deps-<date>.json`
+- [Codex](../codex/): Updates one dependency at a time, runs the tests, commits or reverts.
+  - sandbox
+  - → **Claude Code**: usage limit
+  - → **update**: `{ updated, skipped }`
+- [Claude Code](../claude-code/): `createFallbackAgent()` hands it the original brief on the same branch.
+  - sandbox
+  - → **update**: report, or a pause at its own limit
+- [Checkpoint](../durable-runs/): The 07:00 job resumes a paused task unless its reset is still beyond `maxWaitMs`.
+  - host
+- **Report**: You read it with the branch in the morning.
+  - host
 
 Claude Code can report when its limit resets; Codex never does. A run stopped by Codex alone therefore waits for the 07:00 job. With the fallback, the task pauses only when both agents hit their limit, and the reset is known only if both report one.
 

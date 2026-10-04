@@ -231,31 +231,35 @@ Point the repository’s webhook at the server’s `/github` path through an HTT
 
 ## How it works
 
-<!-- flow -->
+Each link shows who hands what to whom, in the direction of the arrow.
 
-1. **Receive**: The server answers GitHub within its 10-second limit.
-   - **Verify**: The signature must match the webhook secret, otherwise `401`.
-     - `createGithubWebhook()`
-   - **Filter**: Keep a new `outpost:review` label on a pull request, added by someone in `reviewers`.
-     - `labelAdded()`
-     - `event.actor`
-   - **Publish**: Queue a `review` job whose input carries the repository, number, base and head commits.
-     - `serveTriggers()`
-2. **Run**: The worker claims the job in its own process.
-   - **Claim**: Take the job from the shared SQLite file.
-     - `runQueueWorker()`
-   - **Checkpoint**: Start the workflow under the job’s `runId`.
-     - `defineWorkflowJob()`
-3. **Review**: The agent reads the pull request, not your checkout.
-   - **fetch**: Your code brings the two commits into the local clone.
-     - host
-   - **review**: The agent works on a branch at the head commit, in its own sandbox, and returns a checked verdict.
-     - `defineIsolatedTask()`
-     - sandbox
-4. **Deliver**: The verdict leaves Outpost through your code.
-   - **post**: Your code publishes the verdict, keyed by `context.idempotencyKey`.
-     - `defineTask()`
-     - host
+<!-- canvas -->
+
+- **GitHub**: Sends a signed delivery when a label is added to a pull request, and waits 10 seconds for the answer.
+  - GitHub
+  - → **Server**: webhook
+- [Server](../webhooks/): `serveTriggers()` checks the signature (`401` otherwise), the `outpost:review` label and the actor in `reviewers`.
+  - host
+  - → **Queue**: `review` job
+- [Queue](../job-queues/): `.outpost/jobs.sqlite`, shared by the server and the worker.
+  - host
+  - → **Worker**: claim
+- [Worker](../job-queues/): `runQueueWorker()` claims the job; `defineWorkflowJob()` runs the workflow under its `runId`.
+  - host
+  - → **fetch**: start
+  - → **Checkpoint**: task outputs
+- [Workflow](../task-dependencies/): Three tasks, one after the other.
+  - workflow
+  - **fetch**: your code brings the base and head commits into the clone
+  - **review**: `defineIsolatedTask()` on a branch at the head commit
+    - → **Sandbox**: brief
+  - **post**: your code publishes the verdict, keyed by `context.idempotencyKey`
+    - → **GitHub**: verdict
+- [Sandbox](../choose-a-sandbox/): The agent reads the pull request’s diff, not your checkout.
+  - sandbox
+  - → **review**: checked `{ approved, findings }`
+- [Checkpoint](../durable-runs/): The same label on the same commit restores the finished run.
+  - host
 
 The `runId` names the head commit. Adding the label again on the same commit restores the finished run from its checkpoint, so nothing is reviewed or posted twice; a new commit starts a new review.
 

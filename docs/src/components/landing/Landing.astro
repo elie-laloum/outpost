@@ -17,7 +17,6 @@ const marked = (text: string) =>
   text.split(/`([^`]+)`/).map((part, index) => ({ part, code: index % 2 === 1 }));
 // A heading made of sentences breaks between them, never inside one.
 const sentences = (text: string) => text.split(/(?<=\.)\s+/);
-const outcome = marked(landing.install.outcome);
 // Everything the caller writes, cut from the typechecked snippet beside it:
 // the schema, the dispatch that asks for it, and the typed value it returns.
 const verdictLines = verdictCall.split("\n");
@@ -43,31 +42,59 @@ const runtimeGroups = [
         <p class="lead">{landing.lead}</p>
         <p class="install-note">{landing.install.prerequisites}</p>
         <outpost-install class="install" data-copied={landing.install.copied}>
-          <code><span aria-hidden="true">$ </span>{landing.install.command}</code
+          <div
+            class="managers"
+            role="tablist"
+            aria-label={landing.install.managers}
           >
-          <button
-            type="button"
-            aria-label={landing.install.copy}
-            title={landing.install.copy}
-          >
-            <svg viewBox="0 0 24 24" aria-hidden="true" class="copy-icon">
-              <rect x="9" y="9" width="12" height="12" rx="1.5"></rect>
-              <path
-                d="M5 15H4.5A1.5 1.5 0 0 1 3 13.5v-9A1.5 1.5 0 0 1 4.5 3h9A1.5 1.5 0 0 1 15 4.5V5"
-              ></path>
-            </svg>
-            <svg viewBox="0 0 24 24" aria-hidden="true" class="done-icon"
-              ><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg
+            {
+              landing.install.commands.map(({ label }, index) => (
+                <button
+                  type="button"
+                  role="tab"
+                  id={`install-${label}`}
+                  aria-controls={`install-${label}-command`}
+                  aria-selected={index === 0 ? "true" : "false"}
+                  tabindex={index === 0 ? 0 : -1}
+                >
+                  {label}
+                </button>
+              ))
+            }
+          </div>
+          <div class="command">
+            {
+              landing.install.commands.map(({ label, command }, index) => (
+                <code
+                  role="tabpanel"
+                  id={`install-${label}-command`}
+                  aria-labelledby={`install-${label}`}
+                  hidden={index > 0}
+                >
+                  <span aria-hidden="true">$ </span>
+                  {command}
+                </code>
+              ))
+            }
+            <button
+              type="button"
+              class="copy"
+              aria-label={landing.install.copy}
+              title={landing.install.copy}
             >
-          </button>
+              <svg viewBox="0 0 24 24" aria-hidden="true" class="copy-icon">
+                <rect x="9" y="9" width="12" height="12" rx="1.5"></rect>
+                <path
+                  d="M5 15H4.5A1.5 1.5 0 0 1 3 13.5v-9A1.5 1.5 0 0 1 4.5 3h9A1.5 1.5 0 0 1 15 4.5V5"
+                ></path>
+              </svg>
+              <svg viewBox="0 0 24 24" aria-hidden="true" class="done-icon"
+                ><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg
+              >
+            </button>
+          </div>
           <span class="status" role="status" aria-live="polite"></span>
         </outpost-install>
-        <p class="install-note">
-          {outcome.map(({ part, code }) => (code ? <code>{part}</code> : part))}
-        </p>
-        <p class="install-note install-next">
-          <code>{landing.install.next}</code>
-        </p>
         <div class="actions">
           <a class="button primary" href={href(landing.primary.href)}>
             {landing.primary.label}
@@ -336,15 +363,40 @@ const runtimeGroups = [
 <script>
   class OutpostInstall extends HTMLElement {
     connectedCallback() {
-      const button = this.querySelector("button");
+      const tabs = [
+        ...this.querySelectorAll<HTMLButtonElement>('[role="tab"]'),
+      ];
+      const panels = [
+        ...this.querySelectorAll<HTMLElement>('[role="tabpanel"]'),
+      ];
+      const select = (index: number, focus: boolean) => {
+        tabs.forEach((tab, position) => {
+          tab.setAttribute("aria-selected", String(position === index));
+          tab.tabIndex = position === index ? 0 : -1;
+          panels[position].hidden = position !== index;
+        });
+        if (focus) tabs[index].focus();
+      };
+      tabs.forEach((tab, index) => {
+        tab.addEventListener("click", () => select(index, false));
+        tab.addEventListener("keydown", (event) => {
+          const step = { ArrowLeft: -1, ArrowRight: 1 }[event.key];
+          if (!step) return;
+          event.preventDefault();
+          select((index + step + tabs.length) % tabs.length, true);
+        });
+      });
+      const copy = this.querySelector<HTMLButtonElement>(".copy");
       const status = this.querySelector<HTMLElement>(".status");
-      const command = this.querySelector("code")?.lastChild?.textContent ?? "";
-      button?.addEventListener("click", async () => {
-        await navigator.clipboard.writeText(command.trim());
-        button.dataset.done = "";
+      copy?.addEventListener("click", async () => {
+        const shown = panels.find((panel) => !panel.hidden);
+        await navigator.clipboard.writeText(
+          shown?.lastChild?.textContent?.trim() ?? "",
+        );
+        copy.dataset.done = "";
         if (status) status.textContent = this.dataset.copied ?? "";
         setTimeout(() => {
-          delete button.dataset.done;
+          delete copy.dataset.done;
           if (status) status.textContent = "";
         }, 1600);
       });
@@ -626,6 +678,8 @@ const runtimeGroups = [
   /* Hero */
   .hero {
     min-height: min(calc(100svh - 4rem), 48rem);
+    /* The spare height belongs to the hero, not to the band of facts below it. */
+    grid-template-rows: 1fr auto;
   }
   .hero-copy {
     gap: 0;
@@ -661,25 +715,42 @@ const runtimeGroups = [
     line-height: 1.6;
     text-wrap: pretty;
   }
-  .install-note code {
-    color: var(--sl-color-white);
-    font-size: 0.8125rem;
-    white-space: nowrap;
-  }
-  .install-next {
-    margin-top: 0.4rem;
-  }
-  .install-next code {
-    white-space: normal;
-  }
   .install {
     position: relative;
     display: flex;
-    align-items: center;
+    flex-direction: column;
     max-width: 26rem;
     margin-top: 0.75rem;
     border: 1px solid var(--landing-line);
     background: var(--landing-code-bg);
+  }
+  .install .managers {
+    display: flex;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--landing-line);
+    scrollbar-width: none;
+  }
+  .install [role="tab"] {
+    padding: 0.5rem 0.9rem;
+    border: 0;
+    border-bottom: 1px solid transparent;
+    background: none;
+    color: var(--sl-color-gray-3);
+    font-family: var(--sl-font-mono);
+    font-size: 0.8125rem;
+    cursor: pointer;
+  }
+  .install [role="tab"]:hover {
+    color: var(--sl-color-white);
+  }
+  .install [role="tab"][aria-selected="true"] {
+    margin-bottom: -1px;
+    border-bottom-color: var(--sl-color-white);
+    color: var(--sl-color-white);
+  }
+  .install .command {
+    display: flex;
+    align-items: center;
   }
   .install code {
     flex: 1;
@@ -696,7 +767,7 @@ const runtimeGroups = [
   .install code span {
     color: var(--sl-color-gray-3);
   }
-  .install button {
+  .install .copy {
     display: grid;
     place-items: center;
     align-self: stretch;
@@ -707,8 +778,8 @@ const runtimeGroups = [
     color: var(--sl-color-gray-3);
     cursor: pointer;
   }
-  .install button:hover,
-  .install button[data-done] {
+  .install .copy:hover,
+  .install .copy[data-done] {
     color: var(--sl-color-white);
   }
   .install svg {
@@ -721,10 +792,10 @@ const runtimeGroups = [
     stroke-linejoin: round;
   }
   .done-icon,
-  .install button[data-done] .copy-icon {
+  .install .copy[data-done] .copy-icon {
     display: none;
   }
-  .install button[data-done] .done-icon {
+  .install .copy[data-done] .done-icon {
     display: block;
   }
   .status {
@@ -733,9 +804,6 @@ const runtimeGroups = [
     height: 1px;
     overflow: hidden;
     clip-path: inset(50%);
-  }
-  .install + .install-note {
-    margin-top: 0.75rem;
   }
   .actions {
     display: flex;
@@ -783,12 +851,14 @@ const runtimeGroups = [
   }
   /* The engineering facts run as a ticker, written once and repeated. */
   .hero-evidence {
+    display: flex;
+    align-items: center;
     grid-column: 1 / -1;
-    padding-block: 0.95rem;
+    padding-block: 0.6rem;
     overflow: hidden;
     border-top: 1px solid var(--landing-line);
     color: var(--sl-color-gray-3);
-    font-size: 0.9375rem;
+    font-size: 0.875rem;
     font-weight: 500;
   }
   .ticker {
@@ -1282,7 +1352,9 @@ const runtimeGroups = [
       padding-inline: var(--landing-pad);
     }
     .ticker {
+      flex: 1;
       flex-wrap: wrap;
+      min-width: 0;
       width: auto;
       animation: none;
     }
@@ -1290,7 +1362,9 @@ const runtimeGroups = [
       display: none;
     }
     .ticker ul {
+      flex: 1;
       flex-wrap: wrap;
+      min-width: 0;
     }
     .ticker li:first-child {
       padding-left: 0;

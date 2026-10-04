@@ -1,11 +1,7 @@
 ---
-title: "How Outpost works"
-description: "Three independent pieces, the life of one dispatch, who owns each resource and what stays on disk."
+title: "How it works"
+description: "Three independent pieces, the life of one run, who owns each resource and what stays on disk."
 ---
-
-## Three independent pieces
-
-Every agent task combines three choices. Changing one never forces you to change the others.
 
 <!-- features -->
 
@@ -13,7 +9,7 @@ Every agent task combines three choices. Changing one never forces you to change
   - `createAgent()`
   - `createCodexHarness()`
   - `createHarness()`
-- [Sandbox provider](../choose-a-sandbox/): Where commands run. Omitting it uses Docker.
+- [Sandbox](../choose-a-sandbox/): Where commands run. Docker by default.
   - Docker
   - Podman
   - Vercel
@@ -27,80 +23,213 @@ Every agent task combines three choices. Changing one never forces you to change
 
 ## Swap one, keep the rest
 
-`dispatch()` takes the three pieces and a **brief**, the instruction for the agent.
+`run.ts` opens a workspace, a branch and its checkout, then opens sandboxes on it. Each `dispatch()` runs an agent there with a **brief**, the instruction for the agent. Agents come from `agents.ts` and sandboxes from `sandboxes.ts`: swapping a piece means importing another name.
 
-Swapping Codex for Claude Code changes only `coder`. Moving to a cloud sandbox changes only `sandboxProvider`. The rest of the code stays the same.
+- **Same sandbox, another harness**: each `dispatch()` can take its own agent. Here Claude reviews what Codex fixed, with the same files and installed dependencies.
+- **Same workspace, another sandbox**: a new sandbox picks up the branch and its commits. Close the previous one first: a workspace holds one open sandbox at a time.
 
-```ts
-import { dispatch } from "@elie-laloum/outpost";
-import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+<!-- tabs -->
 
-const result = await dispatch({
-  agent: coder,
-  sandboxProvider,
-  repository,
+```ts title="run.ts" {21,29}
+import { openWorkspace } from "@elie-laloum/outpost";
+import { claude, codex } from "./agents.ts";
+import { dockerProvider, vercelProvider } from "./sandboxes.ts";
+
+await using workspace = await openWorkspace({
+  repository: process.cwd(),
   branch: { mode: "named", name: "outpost/fix-links" },
-  brief: { text: "Fix the broken links in the README and commit the change." },
 });
-console.log(result.branch, result.commits.length);
+
+const dockerSandbox = await workspace.sandbox({
+  sandboxProvider: dockerProvider,
+  agent: codex,
+});
+
+await dockerSandbox.dispatch({
+  brief: { text: "Fix the broken links in the README." },
+});
+
+// Same sandbox, another harness.
+await dockerSandbox.dispatch({
+  agent: claude,
+  brief: { text: "Review the fix and commit it." },
+});
+
+await dockerSandbox.close();
+
+// Same workspace and branch, another sandbox.
+const vercelSandbox = await workspace.sandbox({
+  sandboxProvider: vercelProvider,
+  agent: claude,
+});
+
+await vercelSandbox.dispatch({
+  brief: { text: "Add a link check to the CI and commit it." },
+});
+
+await vercelSandbox.close();
 ```
 
-## The life of one dispatch
+```ts title="agents.ts"
+import {
+  createAgent,
+  createClaudeHarness,
+  createCodexHarness,
+} from "@elie-laloum/outpost";
 
-<!-- flow -->
+export const codex = createAgent({
+  harness: createCodexHarness({ authentication: "account" }),
+});
 
-1. **Prepare**: Before the agent starts.
-   - **Check the request**: Options and agent are validated before anything is allocated.
-   - **Open the workspace**: Lock the branch, create its worktree under `.outpost/workspaces`, run `workspaceReady` hooks.
-     - host
-   - **Allocate the sandbox**: Containers mount the worktree. Cloud sandboxes receive the Git history and install the CLI if needed.
-     - sandbox
-   - **Prepare the agent**: Run `hostReady` and `sandboxReady` hooks, copy credentials into a private home, restore a conversation.
-     - host
-     - sandbox
-2. **Run**: The agent works in the worktree.
-   - **Run the turns**: The brief, extra passes and typed-response repairs each run as a turn.
-     - sandbox
-   - **Save the conversation**: After each turn, when the agent supports capture.
-     - host
-3. **Finish**: Whatever happens, the sandbox is released.
-   - **Bring changes back**: Cloud sandboxes download, validate and apply the new commits.
-     - host
-   - **Integrate**: `integrate` merges the work branch into its base. Nothing is pushed.
-     - host
-   - **Close**: Release the sandbox, remove a clean worktree, keep a `named` branch.
-     - host
-     - sandbox
+export const claude = createAgent({
+  harness: createClaudeHarness({ authentication: "account" }),
+});
+```
 
-When a step fails, Outpost still releases the sandbox and keeps the workspace. [`recoveryDetails()`](../../reference/recoverydetails/) reads the branch, directory, commits and transcript from the error; [Recover work](../recovery/) restores them.
+```ts title="sandboxes.ts"
+import { createDockerSandboxProvider } from "@elie-laloum/outpost/providers/docker";
+import { createVercelSandboxProvider } from "@elie-laloum/outpost/providers/vercel";
+
+export const dockerProvider = createDockerSandboxProvider({
+  image: "outpost:dev",
+});
+
+export const vercelProvider = createVercelSandboxProvider();
+```
+
+## The life of one run
+
+A run puts these objects to work together. Each link shows who talks to whom, in the direction of the arrow.
+
+<!-- canvas -->
+
+- [Triggers](../webhooks/): `serveTriggers()` receives GitHub, GitLab and Slack webhooks; `runSchedules()` follows cron schedules.
+  - CLI · HTTP
+  - → **Workflow**: jobs
+- [Workflow](../typed-workflows/): `defineWorkflow()` chains typed tasks and stops at gates.
+  - workflow
+  - → **Tasks**: runs
+  - → **Checkpoints**: state and outputs
+- [Tasks](../task-dependencies/): Each one hands a typed value to the tasks that depend on it.
+  - workflow
+  - **Host task**: `defineTask()`
+    - → **Artifacts**: `publishArtifact()`
+  - **Isolated task**: `defineIsolatedTask()`
+    - → **Workspace**: `dispatch()`
+  - **Agent task**: `defineAgentTask()`
+    - → **Sandbox**: `sandbox.dispatch()`
+  - **Gate**: `defineApprovalTask()`
+    - → **Person**: decision needed
+  - **Question**: `defineInteractiveAgentTask()`
+    - → **Person**: question
+    - → **Workspace**: each turn
+- [Person](../approvals/): Your CLI or HTTP service calls `workflow.start()` again with the decision or answer.
+  - CLI · HTTP
+  - → **Gate**: decision
+  - → **Question**: answer
+- [Your code](../first-request/): `run.ts` starts a workflow, or an agent directly with `dispatch()`.
+  - host
+  - → **Workflow**: `workflow.start()`
+  - → **Workspace**: `dispatch()`
+- **Git repository**: Your local checkout and its base branch.
+  - host
+  - → **Workspace**: work branch
+- [Workspace](../repository-and-branch/): Locks the branch and creates its worktree under `.outpost/workspaces`.
+  - host
+  - → **Sandbox**: worktree
+  - → **Git repository**: `integrate`
+- [Sandbox](../choose-a-sandbox/): Docker, Podman, Vercel, Daytona or Firecracker. Released whatever happens.
+  - sandbox
+  - → **Agents**: one call at a time
+  - → **Workspace**: commits
+- [Agents](../choose-an-agent/): Each one gets its credentials in a private home and runs its turns.
+  - sandbox
+  - **Codex**: fixes the links
+  - **Claude Code**: reviews the fix
+  - **Any other agent**: as many calls as needed
+  - → **Model**: requests
+  - → **Conversations**: transcript
+  - → **Journals**: events
+- [Model](../authentication/): The provider's API, with your account or an API key.
+  - provider
+  - → **Agents**: responses
+- [Storage](../storage/): `.outpost/storage` by default, or any other `Transport`.
+  - host
+  - **Conversations**: to resume or fork
+  - **Checkpoints**: to resume a workflow
+  - **Artifacts**: outputs published by tasks
+  - **Journals**: the course of each `dispatch()`
+
+When a run fails, nothing that matters is lost:
+
+<!-- cards -->
+
+- **Sandbox released**: Closed whatever happens, so no container or cloud machine keeps running.
+- **Workspace kept**: Its branch, directory and commits stay on disk.
+- **History saved**: Checkpoints, artifacts, conversations and journals stay in [storage](../storage/).
+- **Work restored**: To resume your run, you can [recover your work](../recovery/).
 
 ## Cold or warm
 
-|                        | `dispatch()`                      | `createSandbox()`                              |
-| ---------------------- | --------------------------------- | ---------------------------------------------- |
-| Environment            | Fresh for each call               | Kept open until `close()`                      |
-| Files and dependencies | Discarded after the call          | Kept between operations                        |
-| Operations             | One agent task                    | `dispatch()`, `command()`, `attach()`, in turn |
-| Integration            | Automatic, from the branch policy | You call `sandbox.workspace.integrate()`       |
-| Use it for             | A one-shot task                   | Tests between agent turns                      |
+`dispatch()` starts from a fresh environment every time. `sandbox.dispatch()` runs in a sandbox that stays open, so files and installed dependencies carry over from one operation to the next.
 
-Files persist in a warm sandbox, conversations do not: each `sandbox.dispatch()` starts a new one unless you [resume](../conversations/) it.
+<!-- tabs -->
+
+```ts title="cold.mts"
+import { dispatch } from "@elie-laloum/outpost";
+import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+
+const options = { agent: coder, sandboxProvider, repository };
+await dispatch({ ...options, brief: { text: "Fix the failing date tests." } });
+// A new sandbox: the first call's files and dependencies are gone.
+await dispatch({ ...options, brief: { text: "Document the date helpers." } });
+```
+
+```ts title="warm.mts"
+import { createSandbox } from "@elie-laloum/outpost";
+import { coder, repository, sandboxProvider } from "./outpost.config.mts";
+
+await using sandbox = await createSandbox({
+  agent: coder,
+  sandboxProvider,
+  repository,
+  branch: { mode: "integrate" },
+});
+await sandbox.dispatch({ brief: { text: "Fix the failing date tests." } });
+// Same sandbox: the test run sees the agent's edits right away.
+const tests = await sandbox.command({ executable: "npm", arguments: ["test"] });
+// You decide when the branch merges.
+if (tests.status === 0) await sandbox.workspace.integrate();
+```
+
+<!-- compare -->
+
+- `dispatch()`: Cold: a fresh environment for every call.
+  - **Files and dependencies**: Discarded after the call
+  - **Conversations**: `result.resume()` restores one in a new sandbox
+  - **Integration**: Automatic, from the branch policy
+  - **Use it for**: A one-shot task
+- `sandbox.dispatch()`: Warm: one environment, open until `close()`.
+  - **Files and dependencies**: Kept between operations
+  - **Conversations**: A new one per call, unless you [resume](../conversations/) one
+  - **Integration**: You call `sandbox.workspace.integrate()`
+  - **Use it for**: Deterministic or more complex workflows
 
 ## Who closes what
 
-Whoever opens a resource closes it. `close()` can be called twice, stops the running operation and waits for it; `await using` works too.
+Whoever opens a resource closes it.
 
-| Opened by                             | Closed by                                          |
-| ------------------------------------- | -------------------------------------------------- |
-| `dispatch()`                          | Itself, workspace and sandbox                      |
-| `createSandbox()` without `workspace` | `sandbox.close()`, which also closes its workspace |
-| `openWorkspace()`                     | You: close its sandbox first, then the workspace   |
+| Opened with                           | Closed by                                                                              |
+| ------------------------------------- | -------------------------------------------------------------------------------------- |
+| `dispatch()`                          | `dispatch()` itself, when the call ends, with its sandbox and workspace.               |
+| `createSandbox()` without `workspace` | You, with `sandbox.close()`, which also closes its workspace.                          |
+| `openWorkspace()`                     | You: each sandbox with `sandbox.close()`, then the workspace with `workspace.close()`. |
 
-A sandbox runs one operation at a time; a second one is rejected, not queued. Run parallel work in separate sandboxes, each on its own branch, and coordinate them with [task dependencies](../task-dependencies/).
+<!-- features -->
 
-## From tasks to workflows
-
-A workflow is a graph of tasks built on the same calls: `defineIsolatedTask()` runs a cold dispatch, `defineAgentTask()` uses a sandbox you own, `defineTask()` runs plain code. A checkpoint saves each finished task so a restarted run skips it. Start with [From a task to a workflow](../first-workflow/).
+- **Safe to repeat**: `close()` can be called twice; it stops the running operation and waits for it to end.
+- **Reverse order**: `await using` closes in the reverse order of opening: a sandbox before its workspace.
+- **One operation at a time**: A second operation is rejected, not queued. To run work in parallel, open several sandboxes and coordinate them with [task dependencies](../task-dependencies/).
 
 ## What stays in `.outpost`
 
@@ -115,18 +244,4 @@ Outpost keeps its runtime state in the target repository and hides it from Git t
   - `conversations/`: Built-in harness transcripts, Copilot and Kimi sessions.
   - `recovery/`: Transfers kept after a failed synchronization.
 
-Claude Code and Codex keep their transcripts in their own store in your home directory. The `.outpost` directory can hold the only copy of unfinished work: inspect it with [Recover work](../recovery/) and prune it with [Retention and cleanup](../retention/), never by hand.
-
-## Read the API names
-
-| Name      | When it runs                                                           | Examples                                                                   |
-| --------- | ---------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| `create*` | Builds an object you keep; starts no process, except `createSandbox()` | `createAgent()`, `createDockerSandboxProvider()`, `createLocalTransport()` |
-| `define*` | Declares what an engine runs later                                     | `defineWorkflow()`, `defineAgentTask()`, `defineJsonResponse()`            |
-| verbs     | Act now and return when done                                           | `dispatch()`, `openWorkspace()`, `attach()`, `readJournal()`               |
-
-## Security
-
-:::caution
-The agent runs project commands with the access you give it. Docker and Podman mount the checkout and its Git metadata; the host provider has no isolation. Read [Security](../security/) before running agents on untrusted code.
-:::
+Claude Code and Codex keep their transcripts in their own store, inside your home directory. The `.outpost` directory can hold the only copy of unfinished work: inspect it with [Recover work](../recovery/) and prune it with [Retention and cleanup](../retention/), never by hand.

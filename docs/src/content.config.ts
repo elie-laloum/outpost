@@ -16,6 +16,7 @@ const entry = z.object({
   href: z.string(),
 });
 const boundary = z.object({ lead: z.string(), text: z.string() });
+const packageManager = z.object({ label: z.string(), command: z.string() });
 const pain = z.object({
   pain: z.string(),
   detail: z.string(),
@@ -34,12 +35,11 @@ const landing = z.object({
   lead: z.string(),
   hero: z.object({ caption: z.string() }),
   install: z.object({
-    command: z.string(),
+    managers: z.string(),
+    commands: z.array(packageManager).min(2).max(4),
     copy: z.string(),
     copied: z.string(),
     prerequisites: z.string(),
-    outcome: z.string(),
-    next: z.string(),
   }),
   primary: link,
   secondary: link,

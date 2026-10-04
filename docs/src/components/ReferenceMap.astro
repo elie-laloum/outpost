@@ -1,34 +1,28 @@
 ---
 import { getEntry } from "astro:content";
-import { isFrench } from "./docs-route.ts";
-import type { SidebarEntry, SidebarLink } from "./docs-route.types.ts";
+import { referenceFamilies } from "../../scripts/reference-navigation.mjs";
+import { docsHref, isFrench } from "./docs-route.ts";
 
 const route = Astro.locals.starlightRoute;
-const reference = route.sidebar[1];
-const sections = reference?.type === "group" ? reference.entries : [];
+const locale = isFrench(route) ? "fr/" : "";
 const overviewLabel = isFrench(route) ? "Vue d’ensemble" : "Overview";
-const links = (entries: SidebarEntry[]) =>
-  entries.filter((entry): entry is SidebarLink => entry.type === "link");
 const families = await Promise.all(
-  sections.map(async (section) => ({
+  referenceFamilies.map(async (section) => ({
     label: section.label,
-    families:
-      section.type !== "group"
-        ? []
-        : await Promise.all(
-            section.entries.map(async (family) => {
-              const items = family.type === "group" ? links(family.entries) : [];
-              const overview = items.find((item) => "data-reference-overview" in item.attrs);
-              const id = overview?.href.replace(/^.*?\/(fr\/)?reference\//, "$1reference/").replace(/\/$/, "");
-              const entry = id ? await getEntry("docs", id) : undefined;
-              return {
-                label: family.label,
-                overview,
-                summary: entry?.data.description.match(/^.*?[.!?](\s|$)/)?.[0].trim(),
-                functions: items.filter((item) => item.attrs["data-api-kind"] === "function").slice(0, 3),
-              };
-            }),
-          ),
+    families: await Promise.all(
+      section.families.map(async (family) => {
+        const entry = await getEntry("docs", `${locale}${family.overview}`);
+        return {
+          label: family.label,
+          overview: docsHref(route, `${family.overview}/`),
+          summary: entry?.data.description.match(/^.*?[.!?](\s|$)/)?.[0].trim(),
+          functions: family.symbols
+            .filter((item) => item.attrs["data-api-kind"] === "function")
+            .slice(0, 3)
+            .map((item) => ({ label: item.label, href: docsHref(route, `${item.slug}/`) })),
+        };
+      }),
+    ),
   })),
 );
 ---
@@ -43,7 +37,7 @@ const families = await Promise.all(
         <ul class="families not-content">
           {section.families.map((family) => (
             <li>
-              <a class="family" href={family.overview?.href}>
+              <a class="family" href={family.overview}>
                 <span class="family-name">{family.label}</span>
                 {family.summary && <span class="family-summary">{family.summary}</span>}
                 <span class="family-overview">{overviewLabel}</span>

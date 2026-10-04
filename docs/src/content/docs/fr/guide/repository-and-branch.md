@@ -74,7 +74,7 @@ try {
 
 Un workspace ouvert possède le dépôt, la branche et les fichiers copiés. `workspace.dispatch()` et `workspace.sandbox()` démarrent à chaque appel une nouvelle sandbox sur ce workspace : deux agents peuvent ainsi travailler à tour de rôle sur la même branche. Passer `workspace` à [`createSandbox()`](../../reference/createsandbox/) ou à `dispatch()` revient au même.
 
-Un workspace sert une seule sandbox à la fois. Fermez la sandbox avant le workspace : [Fonctionnement d’Outpost](../how-it-works/) indique qui ferme quoi.
+Un workspace sert une seule sandbox à la fois. Fermez la sandbox avant le workspace : la page [Fonctionnement](../how-it-works/) indique qui ferme quoi.
 
 ## Copier des fichiers ignorés dans le worktree
 

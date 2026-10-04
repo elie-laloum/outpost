@@ -7,7 +7,7 @@ description: "Outpost runs coding agents from your TypeScript code: any supporte
 
 `dispatch()` starts a sandbox, runs the agent on a branch, collects its commits and releases the sandbox.
 
-The three imports come from the configuration written in [Setup](../setup/).
+The three imports come from the configuration file you write in [Setup](../setup/).
 
 ```ts title="fix.mts"
 import { dispatch } from "@elie-laloum/outpost";
@@ -26,57 +26,58 @@ console.log(result.commits.map((commit) => commit.subject)); // commits on outpo
 console.log(result.usage); // input, cached and output token counts
 ```
 
-## What you can build
+## Features
 
 <!-- features -->
 
-- [Agent tasks](../briefs/): Brief an agent, pick its branch and get typed data back.
-  - `dispatch()`
-  - `createSandbox()`
-- [Any coding agent](../choose-an-agent/): Five agent CLIs, signed in with your account or, for most, an API key.
+- [Write a brief](../briefs/): Give your instructions as text, or as a Markdown template with variables and command output.
+  - `{ text }`
+  - `{ file, values }`
+- [Choose an agent](../choose-an-agent/): Five agent CLIs, signed in with your account or, for most, an API key.
   - Claude Code
   - Codex
   - Copilot CLI
   - Kimi Code
   - Antigravity
-- [Your own agent loop](../harness/): Drive a model with your tools, permissions and subagents.
+- [Built-in harness](../harness/): Drive a model with your tools, permissions and subagents.
   - OpenAI
   - Anthropic
   - `createHarness()`
-- [Any sandbox](../choose-a-sandbox/): Local containers, cloud sandboxes, a microVM or the host.
+- [Choose a sandbox](../choose-a-sandbox/): Local containers, cloud sandboxes, a microVM or the host.
   - Docker
   - Podman
   - Vercel
   - Daytona
   - Firecracker
-- [MCP tools](../mcp-servers/): Give agents Model Context Protocol servers, secrets passed by name.
+- [MCP servers](../mcp-servers/): Give your agents Model Context Protocol servers, with secrets passed by name.
   - stdio
   - HTTP
   - OAuth
-- [Isolation](../network-restrictions/): Restrict outbound traffic and keep Git metadata private.
+- [Isolation](../isolation/): Restrict outbound traffic and keep Git metadata private.
   - egress rules
   - private Git
-- [Typed workflows](../task-dependencies/): Tasks pass typed results, retry and loop until checks pass.
+- [Typed workflows](../typed-workflows/): Tasks pass typed results, retry and loop until checks pass.
   - `defineWorkflow()`
   - `defineLoopTask()`
-- [Durable runs](../durable-runs/): Checkpoint progress, pause on quotas, resume without redoing work.
+- [Durable runs](../durable-runs/): Checkpoint progress, pause when a quota is hit, resume without redoing the work.
   - checkpoints
   - quota pauses
   - cache
-- [People in the loop](../approvals/): Wait for an approval or let the agent ask questions.
+- [Approvals](../approvals/): Stop the workflow at a gate until a person approves or rejects.
   - `defineApprovalTask()`
-  - `defineInteractiveAgentTask()`
-- [Unattended runs](../job-queues/): Run from CI, queues, cron schedules and verified webhooks.
+  - `definePauseTask()`
+  - signed gates
+- [Unattended runs](../unattended-runs/): Run from CI, queues, cron schedules and verified webhooks.
   - SQLite
   - Redis
   - GitHub
   - GitLab
   - Slack
-- [Observe and recover](../observability/): Journals, traces, offline replay and preserved work.
+- [Observe and recover](../observe-and-recover/): Journals, traces, offline replay and work preserved when a run stops.
   - OpenTelemetry
   - replay
   - recovery
-- [Extend Outpost](../integration-ports/): Plug in another agent CLI, sandbox or storage.
+- [Integration ports](../integration-ports/): Plug in your own agent CLI, sandbox or storage.
   - `AgentAdapter`
   - `SandboxProvider`
   - `Transport`
@@ -85,18 +86,18 @@ console.log(result.usage); // input, cached and output token counts
 
 <!-- features -->
 
+- [Build a development workflow](../development-workflow/): From a ticket to a reviewed branch: questions, plan, red tests, then code.
 - [Fix a failing CI build](../fix-failing-ci/): Loop until the test command passes.
-- [Review a pull request on demand](../review-on-label/): Adding a label to a pull request starts a review.
-- [Nightly maintenance](../nightly-maintenance/): A scheduled run that survives restarts and limits.
-- [Change several repositories](../multi-repository-change/): One change, one sandbox per repository.
+- [Review a pull request on demand](../review-on-label/): A label on the pull request starts the review.
+- [Nightly maintenance](../nightly-maintenance/): A scheduled run that survives restarts and quota limits.
+- [Change several repositories](../multi-repository-change/): The same change, one sandbox per repository.
 - [Let agents compete](../compete-agents/): Run several approaches, keep the one that passes.
-- [Write a specification with a human](../specify-with-a-human/): Questions first, code after approval.
 
 ## Where to start
 
 <!-- path -->
 
-1. [How Outpost works](../how-it-works/): The agent, the sandbox and the workspace.
-2. [Setup](../setup/): Install Outpost and write its configuration.
+1. [How it works](../how-it-works/): The agent, the sandbox and the workspace.
+2. [Setup](../setup/): Install Outpost and write its configuration file.
 3. [Your first task](../first-request/): Run an agent and read its result.
 4. [From a task to a workflow](../first-workflow/): Check, approve and resume.

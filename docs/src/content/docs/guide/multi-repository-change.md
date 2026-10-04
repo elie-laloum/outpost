@@ -186,26 +186,39 @@ It prints `done`. The branches are merged into each checkout’s current branch,
 
 ## How it works
 
-<!-- flow -->
+Each link shows who hands what to whom, in the direction of the arrow.
 
-1. **API**: The contract changes first.
-   - `api`: Renames the field on its branch and returns `{ from, to, notes }`.
-     - `defineIsolatedTask()`
-     - `defineJsonResponse()`
-     - sandbox
-2. **Clients**: Two agents run at the same time.
-   - **`web`, `mobile`**: Each gets its own sandbox and branch, with the API change in its brief.
-     - `context.value()`
-     - `concurrency`
-     - sandbox
-3. **Approval**: The run stops until a maintainer decides.
-   - `approve`: Saves the request in the checkpoint and ends the process with `paused`.
-     - `defineApprovalTask()`
-   - **Decision**: `approve` or `reject` restarts the run; finished tasks come from the checkpoint.
-     - `decisions`
-4. **Merge**: Only after approval.
-   - `merge`: Fast-forwards each checkout to its branch, API first.
-     - host
+<!-- canvas -->
+
+- [Your script](../durable-runs/): `rename-field.mts` starts the run, then resumes it with `approve` or `reject`.
+  - host
+  - → **api**: `workflow.start()`
+  - → **approve**: decision
+- [api](../typed-responses/): Renames the field first and returns `{ from, to, notes }`, checked by `defineJsonResponse()`.
+  - workflow
+  - → **API**: brief
+  - → **Clients**: the change
+- [Clients](../concurrency-and-retries/): Both run at the same time, with `concurrency: 2`.
+  - workflow
+  - **web**: the API change in its brief
+    - → **Web**: brief
+  - **mobile**: the API change in its brief
+    - → **Mobile**: brief
+  - → **approve**: three branches
+- [approve](../approvals/): `defineApprovalTask()` saves the request and ends the process with `paused`.
+  - workflow
+  - → **merge**: approved
+- **merge**: Fast-forwards each checkout to its branch, API first.
+  - workflow
+  - → **Checkouts**: `git merge --ff-only`
+- [Sandboxes](../multiple-repositories/): One per repository, each on `outpost/rename-user-name`.
+  - sandbox
+  - **API**: `/projects/api`
+  - **Web**: `/projects/web`
+  - **Mobile**: `/projects/mobile`
+  - → **Checkouts**: commits on each branch
+- **Checkouts**: Your three repositories. Nothing is pushed.
+  - host
 
 Checkpoints hold JSON only. Each wrapper task therefore calls its isolated task’s `perform()` and keeps `repository`, `branch` and `commits`, not the dispatch result.
 

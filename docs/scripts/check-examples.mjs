@@ -55,9 +55,27 @@ try {
         "utf8",
       );
       let index = 0;
-      for (const match of markdown.matchAll(/^```ts[^\n]*\n([\s\S]*?)^```/gm)) {
-        const file = resolve(localeDirectory, `${name}-${index++}.mts`);
-        await writeFile(file, `${match[1]}\nexport {};\n`);
+      const project = resolve(localeDirectory, name.replace(/\.md$/, ""));
+      const projectFiles = new Set();
+      for (const match of markdown.matchAll(
+        /^```ts([^\n]*)\n([\s\S]*?)^```/gm,
+      )) {
+        // Blocks titled `*.ts` form one project per page, so they can import each other.
+        const title = match[1].match(/title="([\w.-]+\.ts)"/)?.[1];
+        let file = resolve(localeDirectory, `${name}-${index++}.mts`);
+        if (title) {
+          assert.ok(!projectFiles.has(title), `Duplicate ${title} in ${name}`);
+          if (!projectFiles.size) {
+            await mkdir(project);
+            await copyFile(
+              resolve(localeDirectory, "outpost.config.mts"),
+              resolve(project, "outpost.config.mts"),
+            );
+          }
+          projectFiles.add(title);
+          file = resolve(project, title);
+        }
+        await writeFile(file, `${match[2]}\nexport {};\n`);
         roots.push(file);
         if (
           markdown

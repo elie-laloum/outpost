@@ -2,10 +2,10 @@ import { readFile } from "node:fs/promises";
 import { test, expect } from "@playwright/test";
 
 for (const [locale, title, reference] of [
-  ["", "Your first task", "Reference"],
-  ["fr/", "Votre première tâche", "Référence"],
+  ["", "Your first task", "API"],
+  ["fr/", "Votre première tâche", "API"],
 ]) {
-  test(`guide navigation opens Reference (${locale || "en"})`, async ({
+  test(`guide navigation opens the API space (${locale || "en"})`, async ({
     page,
   }) => {
     await page.goto(`${locale}guide/first-request/`);
@@ -114,7 +114,19 @@ for (const [locale, heading, start, copied, beat] of [
     await expect(problem).toHaveAttribute("data-hold", "");
     await page.getByRole("button", { name: copied }).click();
     expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
-      "npx @elie-laloum/outpost init",
+      "npm install @elie-laloum/outpost",
+    );
+    // The copy button follows the selected package manager.
+    const install = page.locator(".landing .install");
+    await expect(install.getByRole("tab")).toHaveCount(4);
+    await install.getByRole("tab", { name: "pnpm" }).click();
+    await expect(install.getByRole("tab", { name: "pnpm" })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    await page.getByRole("button", { name: copied }).click();
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
+      "pnpm add @elie-laloum/outpost",
     );
     await expect(page.locator(".landing .boundary")).toHaveCount(3);
     const verdict = page.locator("outpost-verdict");
@@ -173,7 +185,7 @@ test("documentation section styles leave the landing untouched", async ({
   });
   expect(colors[0]).not.toBe(colors[1]);
   const code = await page
-    .locator(".landing .install code")
+    .locator(".landing .install code:not([hidden])")
     .evaluate((element) => getComputedStyle(element).paddingTop);
   expect(parseFloat(code)).toBeGreaterThan(8);
 });
@@ -381,37 +393,27 @@ for (const [locale, overview] of [
   ["", "Overview"],
   ["fr/", "Vue d’ensemble"],
 ]) {
-  test(`provider overview icon is accessible and Firecracker is stable (${locale || "en"})`, async ({
+  test(`reference map opens family overviews (${locale || "en"})`, async ({
     page,
   }) => {
-    await page.goto(`${locale}reference/firecracker/`);
-    const firecracker = page
-      .getByRole("link", {
-        name: "createFirecrackerSandboxProvider",
-        exact: true,
-      })
-      .filter({ visible: true });
-    const family = firecracker.locator("xpath=ancestor::details[1]");
-    await expect(family.locator("summary").first()).toContainText("Providers");
-    const overviewLink = family.locator("a").first();
-    await expect(overviewLink).toHaveText(overview);
-    await expect(overviewLink).toHaveAttribute("data-reference-overview", "");
-    const overviewIcon = await overviewLink.evaluate((element) => {
-      const style = getComputedStyle(element, "::before");
-      return { mask: style.maskImage, width: parseFloat(style.width) };
+    await page.goto(`${locale}reference/`);
+    const sections = page.locator(".reference-map");
+    await expect(sections.locator("h2")).toHaveText([
+      "Environment",
+      "Agents & models",
+      "Orchestration",
+      "Storage",
+      "Operations",
+    ]);
+    const agents = sections.filter({ hasText: "Agents & models" });
+    await expect(
+      agents.locator(".family-name").filter({ hasText: /^Harness$/ }),
+    ).toHaveCount(1);
+    const providers = sections.locator("a.family").filter({
+      has: page.locator(".family-name", { hasText: /^Providers$/ }),
     });
-    expect(overviewIcon.mask).toMatch(/^url\(/);
-    expect(overviewIcon.width).toBeGreaterThan(0);
-    await expect(page.locator("a[data-reference-overview]")).toHaveCount(25);
-    for (const name of [
-      "createFirecrackerSandboxProvider",
-      "FirecrackerOptions",
-    ]) {
-      const link = family.getByRole("link", { name, exact: true });
-      await expect(link).toHaveCount(1);
-      await expect(link).not.toHaveAttribute("data-api-status", "experimental");
-    }
-    await family.getByRole("link", { name: overview, exact: true }).click();
+    await expect(providers.locator(".family-overview")).toHaveText(overview);
+    await providers.click();
     await expect(page).toHaveURL(
       new RegExp(`/${locale}reference/overview/providers/$`),
     );
@@ -447,37 +449,8 @@ for (const locale of ["", "fr/"]) {
 }
 
 for (const locale of ["", "fr/"]) {
-  test(`direct model reference icons are accessible (${locale || "en"})`, async ({
-    page,
-  }) => {
-    await page.goto(`${locale}reference/openaicompatible/`);
-    const factory = page
-      .getByRole("link", {
-        name: "createOpenAIModelProvider",
-        exact: true,
-      })
-      .filter({ visible: true });
-    const family = factory.locator("xpath=ancestor::details[1]");
-    await expect(family.locator("summary").first()).toContainText("Models");
-    for (const name of [
-      "createOpenAIModelProvider",
-      "OpenAIModelProviderOptions",
-      "ModelProvider",
-      "ModelRequest",
-      "ModelResult",
-      "createAnthropicModelProvider",
-      "AnthropicModelProviderOptions",
-    ]) {
-      const link = family.getByRole("link", { name, exact: true });
-      await expect(link).toHaveCount(1);
-      await expect(link).not.toHaveAttribute("data-api-status", "experimental");
-    }
-  });
-}
-
-for (const locale of ["", "fr/"]) {
   for (const width of [1280, 390]) {
-    test(`reference categories stay visible while families collapse (${locale || "en"}, ${width}px)`, async ({
+    test(`reference sidebar lists every symbol alphabetically (${locale || "en"}, ${width}px)`, async ({
       page,
     }) => {
       await page.setViewportSize({ width, height: 900 });
@@ -485,73 +458,66 @@ for (const locale of ["", "fr/"]) {
       if (width < 800)
         await page.getByRole("button", { name: "Menu", exact: true }).click();
       const panel = page.locator(".reference-navigation");
-      const headings = panel.locator(".reference-section > h2");
-      await expect(headings).toHaveText([
-        "Environment",
-        "Agents & models",
-        "Orchestration",
-        "Storage",
-        "Operations",
-      ]);
-      await expect(panel.locator(".reference-section")).toHaveCount(5);
-      const labels = panel.locator(
-        ".reference-section > ul > li > details > summary .large",
+      await expect(panel.locator("h2, details, summary")).toHaveCount(0);
+      await expect(
+        panel.locator('a[href*="/reference/overview/"]'),
+      ).toHaveCount(0);
+      const families = JSON.parse(
+        await readFile(
+          new URL("../reference-content/navigation.json", import.meta.url),
+          "utf8",
+        ),
       );
-      const names = await labels.allTextContents();
-      expect(names).toHaveLength(25);
-      expect(names.every((name) => !/\s/.test(name.trim()))).toBe(true);
-      expect(names).toEqual([
-        "Workspaces",
-        "Sandboxes",
-        "Providers",
-        "Commands",
-        "Agents",
-        "Harness",
-        "Dispatch",
-        "Prompts",
-        "Conversations",
-        "Models",
-        "Workflows",
-        "Checkpoints",
-        "Gates",
-        "Artifacts",
-        "Queues",
-        "Triggers",
-        "Speculation",
-        "Transports",
-        "Reservations",
-        "Diagnostics",
-        "Observability",
-        "Activity",
-        "Errors",
-        "Retention",
-        "Recovery",
-      ]);
-      const styles = await headings.first().evaluate((heading) => {
-        const section = heading.parentElement;
-        const label = section.querySelector("summary .large");
-        return {
-          titleSize: parseFloat(getComputedStyle(heading).fontSize),
-          labelSize: parseFloat(getComputedStyle(label).fontSize),
-          titleColor: getComputedStyle(heading).color,
-          labelColor: getComputedStyle(label).color,
-          border: parseFloat(getComputedStyle(heading).borderBottomWidth),
-          collapsible: Boolean(heading.closest("details")),
-        };
-      });
-      expect(styles.titleSize).toBeLessThan(styles.labelSize);
-      expect(styles.titleColor).not.toBe(styles.labelColor);
-      expect(styles.border).toBeGreaterThan(0);
-      expect(styles.collapsible).toBe(false);
-      const providers = panel
-        .locator("summary")
-        .filter({ hasText: /^Providers$/ });
-      const family = providers.locator("..");
-      await expect(family).toHaveAttribute("open", "");
-      await providers.focus();
-      await page.keyboard.press("Enter");
-      await expect(family).not.toHaveAttribute("open");
-      await expect(headings.first()).toBeVisible();
+      const links = panel.locator(".reference-symbols > li > a[data-api-kind]");
+      await expect(links).toHaveCount(
+        families.flatMap((family) => family.items.slice(1)).length,
+      );
+      const names = (await links.allTextContents()).map((name) => name.trim());
+      const sorted = [...names].sort(
+        (a, b) =>
+          a.localeCompare(b, "en", { sensitivity: "base" }) ||
+          a.localeCompare(b, "en"),
+      );
+      expect(names).toEqual(sorted);
+      await expect(panel.locator('a[aria-current="page"]')).toHaveText(
+        "createFirecrackerSandboxProvider",
+      );
+      for (const name of [
+        "createFirecrackerSandboxProvider",
+        "FirecrackerOptions",
+        "createOpenAIModelProvider",
+        "OpenAIModelProviderOptions",
+        "ModelProvider",
+        "ModelRequest",
+        "ModelResult",
+        "createAnthropicModelProvider",
+        "AnthropicModelProviderOptions",
+        "createHarness",
+        "defineHarnessTool",
+        "HarnessToolContext",
+        "defineHarnessSubagent",
+        "HarnessSubagentOptions",
+      ]) {
+        const link = panel.getByRole("link", { name, exact: true });
+        await expect(link).toHaveCount(1);
+        await expect(link).not.toHaveAttribute(
+          "data-api-status",
+          "experimental",
+        );
+      }
+      for (const name of [
+        "createClaudeHarness",
+        "createCodexHarness",
+        "createAntigravityHarness",
+        "createCopilotHarness",
+        "createKimiHarness",
+        "AgentAuthentication",
+        "AccountCredential",
+        "UsageCredential",
+      ])
+        await expect(
+          panel.getByRole("link", { name, exact: true }),
+        ).toHaveCount(1);
       await expect(page.getByRole("tab")).toHaveCount(0);
       expect(
         await page.evaluate(
@@ -560,59 +526,6 @@ for (const locale of ["", "fr/"]) {
       ).toBe(true);
     });
   }
-}
-
-for (const [locale, overview] of [
-  ["", "Overview"],
-  ["fr/", "Vue d’ensemble"],
-]) {
-  test(`Harness is a first-level family in Agents & models (${locale || "en"})`, async ({
-    page,
-  }) => {
-    await page.goto(`${locale}reference/codexharness/`);
-    const preset = page
-      .getByRole("link", { name: "createCodexHarness", exact: true })
-      .filter({ visible: true });
-    const family = preset.locator("xpath=ancestor::details[1]");
-    await expect(family.locator("summary").first()).toHaveText("Harness");
-    await expect(family.locator("xpath=ancestor::details")).toHaveCount(0);
-    const section = family.locator(
-      'xpath=ancestor::*[contains(@class,"reference-section")][1]',
-    );
-    await expect(section.locator("h2")).toHaveText("Agents & models");
-    for (const name of [
-      "createClaudeHarness",
-      "createCodexHarness",
-      "createAntigravityHarness",
-      "createCopilotHarness",
-      "createKimiHarness",
-      "AgentAuthentication",
-      "AccountCredential",
-      "UsageCredential",
-    ]) {
-      await expect(family.getByRole("link", { name, exact: true })).toHaveCount(
-        1,
-      );
-    }
-    for (const name of [
-      "createHarness",
-      "defineHarnessTool",
-      "HarnessToolContext",
-      "defineHarnessSubagent",
-      "HarnessSubagentOptions",
-    ]) {
-      const link = family.getByRole("link", { name, exact: true });
-      await expect(link).toHaveCount(1);
-      await expect(link).not.toHaveAttribute("data-api-status", "experimental");
-    }
-    await family.getByRole("link", { name: overview, exact: true }).click();
-    await expect(page).toHaveURL(
-      new RegExp(`/${locale}reference/overview/harness/$`),
-    );
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-      `Harness — ${overview}`,
-    );
-  });
 }
 
 for (const locale of ["", "fr/"]) {
@@ -661,8 +574,33 @@ for (const locale of ["", "fr/"]) {
     await expect(page).toHaveURL(new RegExp(`/${locale}guide/briefs/$`));
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(`${locale}guide/how-it-works/`);
-    await expect(page.locator("ol.flow > li")).toHaveCount(3);
+    const canvas = page.locator("[data-canvas]");
+    await expect(canvas.locator(".canvas-node")).toHaveCount(11);
+    await expect(canvas.locator(".canvas-branch")).toHaveCount(12);
+    // 22 labelled links; the workflow's and the sandbox's fan out to five tasks and three agents.
+    await expect(canvas.locator(".canvas-label")).toHaveCount(22);
+    await expect(canvas.locator(".canvas-link")).toHaveCount(28);
+    // Hovering a gate lights only its exchange with the person.
+    await canvas.locator(".canvas-branch").filter({ hasText: "Gate" }).hover();
+    await expect(canvas).toHaveAttribute("data-focus", "");
+    await expect(canvas.locator(".canvas-link.is-lit")).toHaveCount(2);
+    await page.mouse.move(0, 0);
+    await expect(canvas).not.toHaveAttribute("data-focus", "");
+    const world = canvas.locator(".canvas-world");
+    const before = await world.getAttribute("style");
+    await canvas.locator('[data-zoom="in"]').click();
+    await expect(world).not.toHaveAttribute("style", before ?? "");
+    await canvas.locator('[data-zoom="fit"]').click();
+    await expect(canvas.locator(".canvas-scale")).not.toHaveText("100 %");
     await expect(page.locator("ul.files .file")).not.toHaveCount(0);
+    await expect(page.locator("ul.compare .compare-side")).toHaveCount(2);
+    await expect(page.locator("ul.features div.feature-cell")).toHaveCount(3);
+    await expect(page.locator("ol.cards .card")).toHaveCount(4);
+    const strip = page.locator(".code-tabs").first();
+    await expect(strip.locator(".code-tab-panel:visible")).toHaveCount(1);
+    await strip.locator(".code-tab").nth(1).click();
+    await expect(strip.locator(".code-tab-panel").nth(1)).toBeVisible();
+    await expect(strip.locator(".code-tab-panel").first()).toBeHidden();
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= window.innerWidth,

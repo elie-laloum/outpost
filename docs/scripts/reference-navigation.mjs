@@ -57,22 +57,28 @@ const remaining = new Map(
   families.map((family) => [family.items[0].slug, family]),
 );
 
-export const referenceSidebar = sections.map(([label, entries]) => ({
+// Reference map on the reference home: sections of families, each opened by its overview.
+export const referenceFamilies = sections.map(([label, entries]) => ({
   label,
-  items: entries.map(([id, label]) => {
+  families: entries.map(([id, label]) => {
     const slug = `reference/overview/${id}`;
     const family = remaining.get(slug);
     if (!family) throw new Error(`Unknown or repeated reference family: ${id}`);
     remaining.delete(slug);
-    return {
-      label,
-      collapsed: true,
-      items: family.items,
-    };
+    const [overview, ...symbols] = family.items;
+    return { label, overview: overview.slug, symbols };
   }),
 }));
 
 if (remaining.size)
   throw new Error(
     `Reference families missing a section: ${[...remaining.keys()].join(", ")}`,
+  );
+
+export const referenceSidebar = referenceFamilies
+  .flatMap((section) => section.families.flatMap((family) => family.symbols))
+  .sort(
+    (a, b) =>
+      a.label.localeCompare(b.label, "en", { sensitivity: "base" }) ||
+      a.label.localeCompare(b.label, "en"),
   );

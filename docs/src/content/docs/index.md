@@ -10,20 +10,23 @@ landing:
   hero:
     caption: "One task from end to end: a sandbox, a named branch, the agent’s answer and its commits."
   install:
-    command: "npx @elie-laloum/outpost init"
+    managers: "Package manager"
+    commands:
+      - { label: "npm", command: "npm install @elie-laloum/outpost" }
+      - { label: "yarn", command: "yarn add @elie-laloum/outpost" }
+      - { label: "bun", command: "bun add @elie-laloum/outpost" }
+      - { label: "pnpm", command: "pnpm add @elie-laloum/outpost" }
     copy: "Copy the install command"
     copied: "Copied"
-    prerequisites: "You need Node.js 24+, a Git repository with at least one commit, Docker or Podman running, and your agent CLI signed in."
-    outcome: "It writes `run.ts`, `brief.md`, a `Dockerfile` and your configuration, then builds the agent image. Now run:"
-    next: 'node run.ts "Describe this repository"'
+    prerequisites: "You need Node.js 24+."
   primary: { label: "Get started", href: "guide/setup/" }
   secondary: { label: "Read the guide", href: "guide/introduction/" }
   facts: "MIT"
   evidence:
-    - "CI on Windows, macOS and Linux"
-    - "Real Docker and Podman tests"
-    - "80% coverage gate"
-    - "npm publish with provenance"
+    - "Docker, Podman or cloud sandboxes"
+    - "A named Git branch per task"
+    - "Typed answers your schema validates"
+    - "Runs that resume from a checkpoint"
   reference: { label: "API reference", href: "reference/" }
   useCases:
     title: "What you can run"
@@ -69,7 +72,7 @@ landing:
   problem:
     title: "Models are asked to do everything"
     text: "An LLM is good at judgment: reading code, writing a fix, reviewing a change. Most AI pipelines hand it the steps, the order and the recovery too — three things code does better than it does."
-    link: { label: "How Outpost works", href: "guide/how-it-works/" }
+    link: { label: "How it works", href: "guide/how-it-works/" }
     answerLabel: "With Outpost"
     summaryLabel: "What the model is handed, step by step"
     rows:
@@ -135,7 +138,7 @@ landing:
       title: "Documentation"
       links:
         - { label: "Guide", href: "guide/introduction/" }
-        - { label: "Reference", href: "reference/" }
+        - { label: "API", href: "reference/" }
         - { label: "Changelog", href: "project/changelog/" }
         - { label: "Roadmap", href: "project/roadmap/" }
     source:

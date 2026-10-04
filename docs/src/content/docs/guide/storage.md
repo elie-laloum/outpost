@@ -54,7 +54,7 @@ Nothing is written until a store saves an object. Each key then becomes one file
     - `recovery/`: Archived recovery transfers.
   - `.outpost/locks/`: Locks that serialize writers on this machine.
 
-The rest of the `.outpost` directory is described in [How Outpost works](../how-it-works/).
+The rest of the `.outpost` directory is described in [How it works](../how-it-works/).
 
 ## Share one transport
 

@@ -204,6 +204,6 @@ const region = defineTask({
 - Cancelling stops a running turn; a question already saved stays pending.
 - Changing the agent, model, brief, repository, provider, actors or `maxTurns` makes the saved checkpoint incompatible: start a new `runId`.
 
-A complete scenario with an approval and an implementation step: [Write a specification with a human](../specify-with-a-human/).
+A complete scenario with an approval, red tests and reviewed code: [Build a development workflow](../development-workflow/).
 
 API: [defineInteractiveAgentTask](../../reference/defineinteractiveagenttask/) · [InteractiveAgentTaskOptions](../../reference/interactiveagenttaskoptions/) · [InteractiveAgentResult](../../reference/interactiveagentresult/) · [WorkflowInputRequest](../../reference/workflowinputrequest/) · [WorkflowAnswer](../../reference/workflowanswer/) · [TaskInteractionContext](../../reference/taskinteractioncontext/)

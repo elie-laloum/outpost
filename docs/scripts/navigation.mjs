@@ -14,12 +14,12 @@ export const chapters = [
     "Use cases",
     "Cas d’usage",
     [
+      "guide/development-workflow",
       "guide/fix-failing-ci",
       "guide/review-on-label",
       "guide/nightly-maintenance",
       "guide/multi-repository-change",
       "guide/compete-agents",
-      "guide/specify-with-a-human",
     ],
   ],
   [
@@ -76,6 +76,7 @@ export const chapters = [
       "guide/host-process",
       "guide/firecracker",
       "guide/environment-variables",
+      "guide/isolation",
       "guide/network-restrictions",
       "guide/private-git",
     ],
@@ -84,6 +85,7 @@ export const chapters = [
     "Workflows",
     "Workflows",
     [
+      "guide/typed-workflows",
       "guide/task-dependencies",
       "guide/concurrency-and-retries",
       "guide/verification-loops",
@@ -108,6 +110,7 @@ export const chapters = [
     "Automation",
     "Automatisation",
     [
+      "guide/unattended-runs",
       "guide/ci-automation",
       "guide/job-queues",
       "guide/redis-workers",
@@ -119,6 +122,7 @@ export const chapters = [
     "Storage and observability",
     "Stockage et observabilité",
     [
+      "guide/observe-and-recover",
       "guide/storage",
       "guide/object-storage",
       "guide/journals",

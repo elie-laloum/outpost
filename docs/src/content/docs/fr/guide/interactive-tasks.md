@@ -204,6 +204,6 @@ const region = defineTask({
 - Une annulation arrête le tour en cours ; une question déjà enregistrée reste en attente.
 - Changer l’agent, le modèle, le brief, le dépôt, le provider, les acteurs ou `maxTurns` rend le checkpoint enregistré incompatible : démarrez un nouveau `runId`.
 
-Un scénario complet, avec une approbation et une étape d’implémentation : [Rédiger une spécification avec un humain](../specify-with-a-human/).
+Un scénario complet, avec une approbation, des tests rouges et du code relu : [Construire un workflow de développement](../development-workflow/).
 
 API : [defineInteractiveAgentTask](../../reference/defineinteractiveagenttask/) · [InteractiveAgentTaskOptions](../../reference/interactiveagenttaskoptions/) · [InteractiveAgentResult](../../reference/interactiveagentresult/) · [WorkflowInputRequest](../../reference/workflowinputrequest/) · [WorkflowAnswer](../../reference/workflowanswer/) · [TaskInteractionContext](../../reference/taskinteractioncontext/)

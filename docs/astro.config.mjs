@@ -50,8 +50,7 @@ export default defineConfig({
           ],
         },
         {
-          label: "Reference",
-          translations: { fr: "Référence" },
+          label: "API",
           items: referenceSidebar,
         },
       ],

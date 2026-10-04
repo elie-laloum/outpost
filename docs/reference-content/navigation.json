@@ -8,110 +8,137 @@
       },
       {
         "slug": "reference/createlocaltransport",
+        "label": "createLocalTransport",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/creates3transport",
+        "label": "createS3Transport",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/createartifactstore",
+        "label": "createArtifactStore",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/createworkflowcheckpointstore",
+        "label": "createWorkflowCheckpointStore",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/createtaskcachestore",
+        "label": "createTaskCacheStore",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/recoverworkflowcheckpoint",
+        "label": "recoverWorkflowCheckpoint",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/readjournal",
+        "label": "readJournal",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/createtransportconversations",
+        "label": "createTransportConversations",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/archiverecovery",
+        "label": "archiveRecovery",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/materializerecoveryarchive",
+        "label": "materializeRecoveryArchive",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/transportconflict",
+        "label": "TransportConflict",
         "attrs": { "data-api-kind": "class" }
       },
       {
         "slug": "reference/transport",
+        "label": "Transport",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/transportentry",
+        "label": "TransportEntry",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/transportobject",
+        "label": "TransportObject",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/transportreadoptions",
+        "label": "TransportReadOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/transportwriteoptions",
+        "label": "TransportWriteOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/transportreference",
+        "label": "TransportReference",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/transportstoreoptions",
+        "label": "TransportStoreOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/localtransportoptions",
+        "label": "LocalTransportOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/s3transportoptions",
+        "label": "S3TransportOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/artifactstoreoptions",
+        "label": "ArtifactStoreOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/checkpointrecoveryoptions",
+        "label": "CheckpointRecoveryOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/readjournaloptions",
+        "label": "ReadJournalOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/transportconversationoptions",
+        "label": "TransportConversationOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/recoveryarchiveoptions",
+        "label": "RecoveryArchiveOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/recoveryarchiverestoreoptions",
+        "label": "RecoveryArchiveRestoreOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/taskcachestoreoptions",
+        "label": "TaskCacheStoreOptions",
         "attrs": { "data-api-kind": "interface" }
       }
     ]
@@ -125,35 +152,47 @@
       },
       {
         "slug": "reference/diagnosesandbox",
+        "label": "diagnoseSandbox",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/diagnoseagentprotocol",
+        "label": "diagnoseAgentProtocol",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/diagnosticstatus",
+        "label": "DiagnosticStatus",
         "attrs": { "data-api-kind": "type" }
       },
-      { "slug": "reference/doctoragent", "attrs": { "data-api-kind": "type" } },
+      {
+        "slug": "reference/doctoragent",
+        "label": "DoctorAgent",
+        "attrs": { "data-api-kind": "type" }
+      },
       {
         "slug": "reference/sandboxdiagnosticoptions",
+        "label": "SandboxDiagnosticOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/sandboxdiagnosticreport",
+        "label": "SandboxDiagnosticReport",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/diagnosticcapability",
+        "label": "DiagnosticCapability",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/diagnosticcheck",
+        "label": "DiagnosticCheck",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/agentprotocolreport",
+        "label": "AgentProtocolReport",
         "attrs": { "data-api-kind": "interface" }
       }
     ]
@@ -167,35 +206,47 @@
       },
       {
         "slug": "reference/openworkspace",
+        "label": "openWorkspace",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/branchpolicy",
+        "label": "BranchPolicy",
         "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/workspace",
+        "label": "Workspace",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/workspaceoptions",
+        "label": "WorkspaceOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/workspacerecord",
+        "label": "WorkspaceRecord",
         "attrs": { "data-api-kind": "interface" }
       },
-      { "slug": "reference/commit", "attrs": { "data-api-kind": "interface" } },
+      {
+        "slug": "reference/commit",
+        "label": "Commit",
+        "attrs": { "data-api-kind": "interface" }
+      },
       {
         "slug": "reference/disposal",
+        "label": "Disposal",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/stagelimits",
+        "label": "StageLimits",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/lifecyclehooks",
+        "label": "LifecycleHooks",
         "attrs": { "data-api-kind": "interface" }
       }
     ]
@@ -209,14 +260,17 @@
       },
       {
         "slug": "reference/createsandbox",
+        "label": "createSandbox",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/sandbox",
+        "label": "Sandbox",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/sandboxoptions",
+        "label": "SandboxOptions",
         "attrs": { "data-api-kind": "interface" }
       }
     ]
@@ -230,51 +284,67 @@
       },
       {
         "slug": "reference/dispatch",
+        "label": "dispatch",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/createsteering",
+        "label": "createSteering",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/continuationoptions",
+        "label": "ContinuationOptions",
         "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/steeringmode",
+        "label": "SteeringMode",
         "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/steeringstate",
+        "label": "SteeringState",
         "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/dispatchoptions",
+        "label": "DispatchOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/dispatchresult",
+        "label": "DispatchResult",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/warmdispatchresult",
+        "label": "WarmDispatchResult",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/execution",
+        "label": "Execution",
         "attrs": { "data-api-kind": "interface" }
       },
-      { "slug": "reference/turn", "attrs": { "data-api-kind": "interface" } },
+      {
+        "slug": "reference/turn",
+        "label": "Turn",
+        "attrs": { "data-api-kind": "interface" }
+      },
       {
         "slug": "reference/steering",
+        "label": "Steering",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/steeringdelivery",
+        "label": "SteeringDelivery",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/steeringsendoptions",
+        "label": "SteeringSendOptions",
         "attrs": { "data-api-kind": "interface" }
       }
     ]
@@ -286,26 +356,39 @@
         "slug": "reference/overview/commands",
         "attrs": { "data-reference-overview": "" }
       },
-      { "slug": "reference/attach", "attrs": { "data-api-kind": "function" } },
-      { "slug": "reference/channel", "attrs": { "data-api-kind": "type" } },
+      {
+        "slug": "reference/attach",
+        "label": "attach",
+        "attrs": { "data-api-kind": "function" }
+      },
+      {
+        "slug": "reference/channel",
+        "label": "Channel",
+        "attrs": { "data-api-kind": "type" }
+      },
       {
         "slug": "reference/variablequestion",
+        "label": "VariableQuestion",
         "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/attachoptions",
+        "label": "AttachOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/attachresult",
+        "label": "AttachResult",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/command",
+        "label": "Command",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/commandresult",
+        "label": "CommandResult",
         "attrs": { "data-api-kind": "interface" }
       }
     ]
@@ -319,60 +402,82 @@
       },
       {
         "slug": "reference/createagent",
+        "label": "createAgent",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/createfallbackagent",
+        "label": "createFallbackAgent",
         "attrs": { "data-api-kind": "function" }
       },
-      { "slug": "reference/type-agent", "attrs": { "data-api-kind": "type" } },
       {
-        "slug": "reference/agentoptions",
+        "slug": "reference/type-agent",
+        "label": "Agent",
         "attrs": { "data-api-kind": "type" }
       },
-      { "slug": "reference/modelspec", "attrs": { "data-api-kind": "type" } },
+      {
+        "slug": "reference/agentoptions",
+        "label": "AgentOptions",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/modelspec",
+        "label": "ModelSpec",
+        "attrs": { "data-api-kind": "type" }
+      },
       {
         "slug": "reference/modelreasoning",
+        "label": "ModelReasoning",
         "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/dispatchagent",
+        "label": "DispatchAgent",
         "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/fallbacktrigger",
+        "label": "FallbackTrigger",
         "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/cliagent",
+        "label": "CliAgent",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/customagent",
+        "label": "CustomAgent",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/agentmodel",
+        "label": "AgentModel",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/type-fallbackagent",
+        "label": "FallbackAgent",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/fallbackagentoptions",
+        "label": "FallbackAgentOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/fallbackcandidate",
+        "label": "FallbackCandidate",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/fallbackattempt",
+        "label": "FallbackAttempt",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/fallbackrecord",
+        "label": "FallbackRecord",
         "attrs": { "data-api-kind": "interface" }
       }
     ]
@@ -386,367 +491,477 @@
       },
       {
         "slug": "reference/createharness",
+        "label": "createHarness",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/defineharnesssubagent",
+        "label": "defineHarnessSubagent",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/defineharnesstool",
+        "label": "defineHarnessTool",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/defineharnesstoolset",
+        "label": "defineHarnessToolset",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/defineharnessinstructions",
+        "label": "defineHarnessInstructions",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/definemcpprompt",
+        "label": "defineMcpPrompt",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/createantigravityharness",
+        "label": "createAntigravityHarness",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/createclaudeharness",
+        "label": "createClaudeHarness",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/createcodexharness",
+        "label": "createCodexHarness",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/createcopilotharness",
+        "label": "createCopilotHarness",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/createkimiharness",
+        "label": "createKimiHarness",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/defineharnesshook",
+        "label": "defineHarnessHook",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/defineharnesspermissions",
+        "label": "defineHarnessPermissions",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/createharnessfiletools",
+        "label": "createHarnessFileTools",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/createharnessedittools",
+        "label": "createHarnessEditTools",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/createharnesssearchtools",
+        "label": "createHarnessSearchTools",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/createharnessgittools",
+        "label": "createHarnessGitTools",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/createharnessshelltools",
+        "label": "createHarnessShellTools",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/defineharnesscontextstrategy",
+        "label": "defineHarnessContextStrategy",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/truncatetoolresults",
+        "label": "truncateToolResults",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/summarizehistory",
+        "label": "summarizeHistory",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/defineharnessskill",
+        "label": "defineHarnessSkill",
         "attrs": { "data-api-kind": "function" }
       },
-      { "slug": "reference/harness", "attrs": { "data-api-kind": "type" } },
+      {
+        "slug": "reference/harness",
+        "label": "AgentHarness",
+        "attrs": { "data-api-kind": "type" }
+      },
       {
         "slug": "reference/harnessinstructionsource",
+        "label": "HarnessInstructionSource",
         "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/harnessinstructionsoption",
+        "label": "HarnessInstructionsOption",
         "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/harnesstoolevent",
+        "label": "HarnessToolEvent",
         "attrs": { "data-api-kind": "type" }
       },
-      { "slug": "reference/jsonschema", "attrs": { "data-api-kind": "type" } },
-      { "slug": "reference/tooloutput", "attrs": { "data-api-kind": "type" } },
+      {
+        "slug": "reference/jsonschema",
+        "label": "JsonSchema",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/tooloutput",
+        "label": "ToolOutput",
+        "attrs": { "data-api-kind": "type" }
+      },
       {
         "slug": "reference/toolvalidation",
+        "label": "ToolValidation",
         "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/harnesshookinput",
+        "label": "HarnessHookInput",
         "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/harnesshookphase",
+        "label": "HarnessHookPhase",
         "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/harnesshookresult",
+        "label": "HarnessHookResult",
         "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/permissiondecision",
+        "label": "PermissionDecision",
         "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/permissioneffect",
+        "label": "PermissionEffect",
         "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/harnesscontextresult",
+        "label": "HarnessContextResult",
         "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/agentauthentication",
+        "label": "AgentAuthentication",
         "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/accountcredential",
+        "label": "AccountCredential",
         "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/usagecredential",
+        "label": "UsageCredential",
         "attrs": { "data-api-kind": "type" }
       },
-      { "slug": "reference/mcpserver", "attrs": { "data-api-kind": "type" } },
-      { "slug": "reference/mcpservers", "attrs": { "data-api-kind": "type" } },
+      {
+        "slug": "reference/mcpserver",
+        "label": "McpServer",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/mcpservers",
+        "label": "McpServers",
+        "attrs": { "data-api-kind": "type" }
+      },
       {
         "slug": "reference/agentversions",
+        "label": "agentVersions",
         "attrs": { "data-api-kind": "constant" }
       },
       {
         "slug": "reference/harnesssubagent",
+        "label": "HarnessSubagent",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/harnesssubagentinput",
+        "label": "HarnessSubagentInput",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/harnesssubagentoptions",
+        "label": "HarnessSubagentOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/cliharness",
+        "label": "CliHarness",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/type-customharness",
+        "label": "Harness",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/customharnessoptions",
+        "label": "HarnessOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/harnesslimits",
+        "label": "HarnessLimits",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/harnesstoolexecution",
+        "label": "HarnessToolExecution",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/harnessinstructions",
+        "label": "HarnessInstructions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/harnessinstructioncontext",
+        "label": "HarnessInstructionContext",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/harnessmcpcontext",
+        "label": "HarnessMcpContext",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/mcppromptoptions",
+        "label": "McpPromptOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/harnesstool",
+        "label": "HarnessTool",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/harnesstooloptions",
+        "label": "HarnessToolOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/harnesstoolcontext",
+        "label": "HarnessToolContext",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/harnesstoolset",
+        "label": "HarnessToolset",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/harnesstoolsetoptions",
+        "label": "HarnessToolsetOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/standardjsonschema",
+        "label": "StandardJsonSchema",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/harnesshook",
+        "label": "HarnessHook",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/harnesshookcontext",
+        "label": "HarnessHookContext",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/harnesshookdecisions",
+        "label": "HarnessHookDecisions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/harnesshookevents",
+        "label": "HarnessHookEvents",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/harnesshookoptions",
+        "label": "HarnessHookOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/harnesstoolresultview",
+        "label": "HarnessToolResultView",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/harnesspermissionrule",
+        "label": "HarnessPermissionRule",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/harnesspermissions",
+        "label": "HarnessPermissions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/harnesspermissionsoptions",
+        "label": "HarnessPermissionsOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/toolresources",
+        "label": "ToolResources",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/shelltoolsoptions",
+        "label": "ShellToolsOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/harnesscontextinput",
+        "label": "HarnessContextInput",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/harnesscontextstrategy",
+        "label": "HarnessContextStrategy",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/harnesscontextstrategyoptions",
+        "label": "HarnessContextStrategyOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/summarizehistoryoptions",
+        "label": "SummarizeHistoryOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/truncatetoolresultsoptions",
+        "label": "TruncateToolResultsOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/harnessskill",
+        "label": "HarnessSkill",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/harnessskilloptions",
+        "label": "HarnessSkillOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/antigravitysettings",
+        "label": "AntigravitySettings",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/claudesettings",
+        "label": "ClaudeSettings",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/codexsettings",
+        "label": "CodexSettings",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/codexmodelprovider",
+        "label": "CodexModelProvider",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/copilotsettings",
+        "label": "CopilotSettings",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/kimisettings",
+        "label": "KimiSettings",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/mcpstdioserver",
+        "label": "McpStdioServer",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/mcphttpserver",
+        "label": "McpHttpServer",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/mcptoolfilter",
+        "label": "McpToolFilter",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/mcpclientcredentials",
+        "label": "McpClientCredentials",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/agentadapter",
+        "label": "AgentAdapter",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/agentinput",
+        "label": "AgentInput",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/agentliveinput",
+        "label": "AgentLiveInput",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/agentlivesession",
+        "label": "AgentLiveSession",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/agentliveread",
+        "label": "AgentLiveRead",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/agentconfiguration",
+        "label": "AgentConfiguration",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/configurationfile",
+        "label": "ConfigurationFile",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/hostconfiguration",
+        "label": "HostConfiguration",
         "attrs": { "data-api-kind": "interface" }
       }
     ]
@@ -760,27 +975,37 @@
       },
       {
         "slug": "reference/definetextresponse",
+        "label": "defineTextResponse",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/definejsonresponse",
+        "label": "defineJsonResponse",
         "attrs": { "data-api-kind": "function" }
       },
-      { "slug": "reference/brief", "attrs": { "data-api-kind": "type" } },
+      {
+        "slug": "reference/brief",
+        "label": "Brief",
+        "attrs": { "data-api-kind": "type" }
+      },
       {
         "slug": "reference/promptvariables",
+        "label": "PromptVariables",
         "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/responseerror",
+        "label": "ResponseError",
         "attrs": { "data-api-kind": "class" }
       },
       {
         "slug": "reference/responsespec",
+        "label": "ResponseSpec",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/standardvalidator",
+        "label": "StandardValidator",
         "attrs": { "data-api-kind": "interface" }
       }
     ]
@@ -794,78 +1019,97 @@
       },
       {
         "slug": "reference/createclaudeconversations",
+        "label": "createClaudeConversations",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/createcodexconversations",
+        "label": "createCodexConversations",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/createcopilotconversations",
+        "label": "createCopilotConversations",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/createkimiconversations",
+        "label": "createKimiConversations",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/createtranscriptconversations",
+        "label": "createTranscriptConversations",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/createsessionbundleconversations",
+        "label": "createSessionBundleConversations",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/createharnessconversations",
+        "label": "createHarnessConversations",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/conversations",
+        "label": "conversations",
         "attrs": { "data-api-kind": "constant" }
       },
       {
         "slug": "reference/conversationformat",
+        "label": "ConversationFormat",
         "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/conversationlocation",
+        "label": "ConversationLocation",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/transcriptconversationlayout",
+        "label": "TranscriptConversationLayout",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/sessionbundleprofile",
+        "label": "SessionBundleProfile",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/sessionbundlefiles",
+        "label": "SessionBundleFiles",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/sessionbundlehelpers",
+        "label": "SessionBundleHelpers",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/sessionbundlerelocation",
+        "label": "SessionBundleRelocation",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/conversationcontext",
+        "label": "ConversationContext",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/conversationrecord",
+        "label": "ConversationRecord",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/conversationstore",
+        "label": "ConversationStore",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/nativeconversationstore",
+        "label": "NativeConversationStore",
         "attrs": { "data-api-kind": "interface" }
       }
     ]
@@ -879,145 +1123,192 @@
       },
       {
         "slug": "reference/createobservationhub",
+        "label": "createObservationHub",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/createreporter",
+        "label": "createReporter",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/createcustomreporter",
+        "label": "createCustomReporter",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/createreplayagent",
+        "label": "createReplayAgent",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/createopentelemetryobserver",
+        "label": "createOpenTelemetryObserver",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/observationsource",
+        "label": "ObservationSource",
         "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/observationevent",
+        "label": "ObservationEvent",
         "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/reporterhandlers",
+        "label": "ReporterHandlers",
         "attrs": { "data-api-kind": "type" }
       },
-      { "slug": "reference/logging", "attrs": { "data-api-kind": "type" } },
+      {
+        "slug": "reference/logging",
+        "label": "Logging",
+        "attrs": { "data-api-kind": "type" }
+      },
       {
         "slug": "reference/replaydivergence",
+        "label": "ReplayDivergence",
         "attrs": { "data-api-kind": "class" }
       },
       {
         "slug": "reference/replaydivergencekind",
+        "label": "ReplayDivergenceKind",
         "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/replaydivergencepolicy",
+        "label": "ReplayDivergencePolicy",
         "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/workspacecommitsevent",
+        "label": "WorkspaceCommitsEvent",
         "attrs": { "data-api-kind": "type" }
       },
-      { "slug": "reference/agentevent", "attrs": { "data-api-kind": "type" } },
+      {
+        "slug": "reference/agentevent",
+        "label": "AgentEvent",
+        "attrs": { "data-api-kind": "type" }
+      },
       {
         "slug": "reference/agentobservation",
+        "label": "AgentObservation",
         "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/observation",
+        "label": "Observation",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/observationscope",
+        "label": "ObservationScope",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/operationevent",
+        "label": "OperationEvent",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/observationhub",
+        "label": "ObservationHub",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/observationhuboptions",
+        "label": "ObservationHubOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/observationsink",
+        "label": "ObservationSink",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/reporteroptions",
+        "label": "ReporterOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/customreporter",
+        "label": "CustomReporter",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/customreporteroptions",
+        "label": "CustomReporterOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/dispatchtelemetry",
+        "label": "DispatchTelemetry",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/dispatchtelemetrysession",
+        "label": "DispatchTelemetrySession",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/dispatchtelemetryoutcome",
+        "label": "DispatchTelemetryOutcome",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/type-replayagent",
+        "label": "ReplayAgent",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/replayagentoptions",
+        "label": "ReplayAgentOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/replayturn",
+        "label": "ReplayTurn",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/replayfailure",
+        "label": "ReplayFailure",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/replaydivergencedetails",
+        "label": "ReplayDivergenceDetails",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/recordedcommit",
+        "label": "RecordedCommit",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/recordedidentity",
+        "label": "RecordedIdentity",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/recordedrevision",
+        "label": "RecordedRevision",
         "attrs": { "data-api-kind": "interface" }
       },
-      { "slug": "reference/usage", "attrs": { "data-api-kind": "interface" } },
+      {
+        "slug": "reference/usage",
+        "label": "Usage",
+        "attrs": { "data-api-kind": "interface" }
+      },
       {
         "slug": "reference/opentelemetryoptions",
+        "label": "OpenTelemetryOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/opentelemetryobserver",
+        "label": "OpenTelemetryObserver",
         "attrs": { "data-api-kind": "interface" }
       }
     ]
@@ -1031,181 +1322,237 @@
       },
       {
         "slug": "reference/definelooptask",
+        "label": "defineLoopTask",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/definetask",
+        "label": "defineTask",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/defineworkflow",
+        "label": "defineWorkflow",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/defineagenttask",
+        "label": "defineAgentTask",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/definecommandtask",
+        "label": "defineCommandTask",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/defineisolatedtask",
+        "label": "defineIsolatedTask",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/defineinteractiveagenttask",
+        "label": "defineInteractiveAgentTask",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/repositoryfingerprint",
+        "label": "repositoryFingerprint",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/looptaskexhausted",
+        "label": "LoopTaskExhausted",
         "attrs": { "data-api-kind": "class" }
       },
       {
         "slug": "reference/loopcheckresult",
+        "label": "LoopCheckResult",
         "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/workflowfailure",
+        "label": "WorkflowFailure",
         "attrs": { "data-api-kind": "class" }
       },
-      { "slug": "reference/taskoptions", "attrs": { "data-api-kind": "type" } },
-      { "slug": "reference/taskstatus", "attrs": { "data-api-kind": "type" } },
+      {
+        "slug": "reference/taskoptions",
+        "label": "TaskOptions",
+        "attrs": { "data-api-kind": "type" }
+      },
+      {
+        "slug": "reference/taskstatus",
+        "label": "TaskStatus",
+        "attrs": { "data-api-kind": "type" }
+      },
       {
         "slug": "reference/workflowbudgetexceeded",
+        "label": "WorkflowBudgetExceeded",
         "attrs": { "data-api-kind": "class" }
       },
       {
         "slug": "reference/workflowusageunavailable",
+        "label": "WorkflowUsageUnavailable",
         "attrs": { "data-api-kind": "class" }
       },
       {
         "slug": "reference/interactiveagentresult",
+        "label": "InteractiveAgentResult",
         "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/quotaresumepolicy",
+        "label": "QuotaResumePolicy",
         "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/taskcachemode",
+        "label": "TaskCacheMode",
         "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/taskcacheoutcome",
+        "label": "TaskCacheOutcome",
         "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/looptaskcontext",
+        "label": "LoopTaskContext",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/looptaskoptions",
+        "label": "LoopTaskOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/looproundrecord",
+        "label": "LoopRoundRecord",
         "attrs": { "data-api-kind": "interface" }
       },
-      { "slug": "reference/retry", "attrs": { "data-api-kind": "interface" } },
+      {
+        "slug": "reference/retry",
+        "label": "Retry",
+        "attrs": { "data-api-kind": "interface" }
+      },
       {
         "slug": "reference/type-task",
+        "label": "Task",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/taskcontext",
+        "label": "TaskContext",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/taskrecord",
+        "label": "TaskRecord",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/type-workflow",
+        "label": "Workflow",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/workflowevent",
+        "label": "WorkflowEvent",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/workflowtelemetry",
+        "label": "WorkflowTelemetry",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/workflowoptions",
+        "label": "WorkflowOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/workflowbudget",
+        "label": "WorkflowBudget",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/workflowusage",
+        "label": "WorkflowUsage",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/workflowresult",
+        "label": "WorkflowResult",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/interactiveagenttaskoptions",
+        "label": "InteractiveAgentTaskOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/workflowinputquestion",
+        "label": "WorkflowInputQuestion",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/workflowinputrequest",
+        "label": "WorkflowInputRequest",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/workflowanswer",
+        "label": "WorkflowAnswer",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/workflowanswerrecord",
+        "label": "WorkflowAnswerRecord",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/taskinteraction",
+        "label": "TaskInteraction",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/taskinteractionrecord",
+        "label": "TaskInteractionRecord",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/taskinteractioncontext",
+        "label": "TaskInteractionContext",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/workflowquotapolicy",
+        "label": "WorkflowQuotaPolicy",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/workflowquotapause",
+        "label": "WorkflowQuotaPause",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/taskcacheoptions",
+        "label": "TaskCacheOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/type-taskcachestore",
+        "label": "TaskCacheStore",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/taskcacheentry",
+        "label": "TaskCacheEntry",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/taskcacheaccessoptions",
+        "label": "TaskCacheAccessOptions",
         "attrs": { "data-api-kind": "interface" }
       }
     ]
@@ -1219,86 +1566,114 @@
       },
       {
         "slug": "reference/createdockersandboxprovider",
+        "label": "createDockerSandboxProvider",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/createpodmansandboxprovider",
+        "label": "createPodmanSandboxProvider",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/createlocalsandboxprovider",
+        "label": "createLocalSandboxProvider",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/createvercelsandboxprovider",
+        "label": "createVercelSandboxProvider",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/createdaytonasandboxprovider",
+        "label": "createDaytonaSandboxProvider",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/createfirecrackersandboxprovider",
+        "label": "createFirecrackerSandboxProvider",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/createmountedsandboxprovider",
+        "label": "createMountedSandboxProvider",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/createremotesandboxprovider",
+        "label": "createRemoteSandboxProvider",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/egresspolicy",
+        "label": "EgressPolicy",
         "attrs": { "data-api-kind": "type" }
       },
-      { "slug": "reference/variables", "attrs": { "data-api-kind": "type" } },
+      {
+        "slug": "reference/variables",
+        "label": "Variables",
+        "attrs": { "data-api-kind": "type" }
+      },
       {
         "slug": "reference/firecrackeroptions",
+        "label": "FirecrackerOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/containeroptions",
+        "label": "ContainerOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/dependencycache",
+        "label": "DependencyCache",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/verceloptions",
+        "label": "VercelOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/daytonaoptions",
+        "label": "DaytonaOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/sandboxcontext",
+        "label": "SandboxContext",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/sandboxlease",
+        "label": "SandboxLease",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/sandboxprovider",
+        "label": "SandboxProvider",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/transferoptions",
+        "label": "TransferOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/filetransfers",
+        "label": "FileTransfers",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/filemanifestentry",
+        "label": "FileManifestEntry",
         "attrs": { "data-api-kind": "interface" }
       },
-      { "slug": "reference/volume", "attrs": { "data-api-kind": "interface" } }
+      {
+        "slug": "reference/volume",
+        "label": "Volume",
+        "attrs": { "data-api-kind": "interface" }
+      }
     ]
   },
   {
@@ -1310,66 +1685,82 @@
       },
       {
         "slug": "reference/createopenaimodelprovider",
+        "label": "createOpenAIModelProvider",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/createanthropicmodelprovider",
+        "label": "createAnthropicModelProvider",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/modelcontentblock",
+        "label": "ModelContentBlock",
         "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/modelstopreason",
+        "label": "ModelStopReason",
         "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/modelstreamevent",
+        "label": "ModelStreamEvent",
         "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/anthropicmodelprovideroptions",
+        "label": "AnthropicModelProviderOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/openaimodelprovideroptions",
+        "label": "OpenAIModelProviderOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/modelprovider",
+        "label": "ModelProvider",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/modelrequest",
+        "label": "ModelRequest",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/modelresult",
+        "label": "ModelResult",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/modelmessage",
+        "label": "ModelMessage",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/modeltextblock",
+        "label": "ModelTextBlock",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/modeltoolcallblock",
+        "label": "ModelToolCallBlock",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/modeltoolresultblock",
+        "label": "ModelToolResultBlock",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/modelreasoningblock",
+        "label": "ModelReasoningBlock",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/modeltoolspec",
+        "label": "ModelToolSpec",
         "attrs": { "data-api-kind": "interface" }
       }
     ]
@@ -1383,50 +1774,62 @@
       },
       {
         "slug": "reference/planrecoveryretention",
+        "label": "planRecoveryRetention",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/prunerecoveryretention",
+        "label": "pruneRecoveryRetention",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/assertrecoveryquota",
+        "label": "assertRecoveryQuota",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/verifyrecoverytransfer",
+        "label": "verifyRecoveryTransfer",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/recoveryretentionpolicy",
+        "label": "RecoveryRetentionPolicy",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/recoveryretentionoptions",
+        "label": "RecoveryRetentionOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/recoveryretentionplan",
+        "label": "RecoveryRetentionPlan",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/recoveryretentionentry",
+        "label": "RecoveryRetentionEntry",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/recoverypruneresult",
+        "label": "RecoveryPruneResult",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/recoveryquotaoptions",
+        "label": "RecoveryQuotaOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/recoveryverification",
+        "label": "RecoveryVerification",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/recoveryverificationoptions",
+        "label": "RecoveryVerificationOptions",
         "attrs": { "data-api-kind": "interface" }
       }
     ]
@@ -1440,27 +1843,37 @@
       },
       {
         "slug": "reference/recoverydetails",
+        "label": "recoveryDetails",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/quotafault",
+        "label": "quotaFault",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/unavailablefault",
+        "label": "unavailableFault",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/outposterror",
+        "label": "OutpostError",
         "attrs": { "data-api-kind": "class" }
       },
-      { "slug": "reference/faultcode", "attrs": { "data-api-kind": "type" } },
+      {
+        "slug": "reference/faultcode",
+        "label": "FaultCode",
+        "attrs": { "data-api-kind": "type" }
+      },
       {
         "slug": "reference/type-quotafault",
+        "label": "QuotaFault",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/type-unavailablefault",
+        "label": "UnavailableFault",
         "attrs": { "data-api-kind": "interface" }
       }
     ]
@@ -1474,18 +1887,22 @@
       },
       {
         "slug": "reference/reserverecoverystorage",
+        "label": "reserveRecoveryStorage",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/recoverystoragereservationoptions",
+        "label": "RecoveryStorageReservationOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/storagereservation",
+        "label": "StorageReservation",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/storagereservationoptions",
+        "label": "StorageReservationOptions",
         "attrs": { "data-api-kind": "interface" }
       }
     ]
@@ -1499,22 +1916,27 @@
       },
       {
         "slug": "reference/planrecoveryrestore",
+        "label": "planRecoveryRestore",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/restorerecoverytransfer",
+        "label": "restoreRecoveryTransfer",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/recoveryrestoreoptions",
+        "label": "RecoveryRestoreOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/recoveryrestoreplan",
+        "label": "RecoveryRestorePlan",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/recoveryrestoreresult",
+        "label": "RecoveryRestoreResult",
         "attrs": { "data-api-kind": "interface" }
       }
     ]
@@ -1528,42 +1950,52 @@
       },
       {
         "slug": "reference/inspectrecovery",
+        "label": "inspectRecovery",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/resourceoperationkind",
+        "label": "ResourceOperationKind",
         "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/resourcephase",
+        "label": "ResourcePhase",
         "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/recoveryinspection",
+        "label": "RecoveryInspection",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/recoveryinspectionoptions",
+        "label": "RecoveryInspectionOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/resourceactivityrecord",
+        "label": "ResourceActivityRecord",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/resourceinspection",
+        "label": "ResourceInspection",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/resourceinspectionentry",
+        "label": "ResourceInspectionEntry",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/resourceoperation",
+        "label": "ResourceOperation",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/resourceoperationresult",
+        "label": "ResourceOperationResult",
         "attrs": { "data-api-kind": "interface" }
       }
     ]
@@ -1577,26 +2009,32 @@
       },
       {
         "slug": "reference/workflowcheckpointvalue",
+        "label": "WorkflowCheckpointValue",
         "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/workflowjson",
+        "label": "WorkflowJson",
         "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/workflowcheckpoint",
+        "label": "WorkflowCheckpoint",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/workflowcheckpointoptions",
+        "label": "WorkflowCheckpointOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/workflowcheckpointstore",
+        "label": "WorkflowCheckpointStore",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/workflowcheckpointlease",
+        "label": "WorkflowCheckpointLease",
         "attrs": { "data-api-kind": "interface" }
       }
     ]
@@ -1610,62 +2048,77 @@
       },
       {
         "slug": "reference/defineapprovaltask",
+        "label": "defineApprovalTask",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/definepausetask",
+        "label": "definePauseTask",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/signworkflowdecision",
+        "label": "signWorkflowDecision",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/createed25519decisionverifier",
+        "label": "createEd25519DecisionVerifier",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/workflowdecisionverifier",
+        "label": "WorkflowDecisionVerifier",
         "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/workflowdecisionproof",
+        "label": "WorkflowDecisionProof",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/workflowdecisionverification",
+        "label": "WorkflowDecisionVerification",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/workflowdecisionsigningoptions",
+        "label": "WorkflowDecisionSigningOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/workflowapproverkey",
+        "label": "WorkflowApproverKey",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/workflowdecisionverifieroptions",
+        "label": "WorkflowDecisionVerifierOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/workflowgate",
+        "label": "WorkflowGate",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/workflowgateoptions",
+        "label": "WorkflowGateOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/workflowpauserequest",
+        "label": "WorkflowPauseRequest",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/workflowdecision",
+        "label": "WorkflowDecision",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/workflowdecisionrecord",
+        "label": "WorkflowDecisionRecord",
         "attrs": { "data-api-kind": "interface" }
       }
     ]
@@ -1679,66 +2132,82 @@
       },
       {
         "slug": "reference/definejsonartifact",
+        "label": "defineJsonArtifact",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/definebinaryartifact",
+        "label": "defineBinaryArtifact",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/publishartifact",
+        "label": "publishArtifact",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/readstoredartifact",
+        "label": "readStoredArtifact",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/defineartifacttask",
+        "label": "defineArtifactTask",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/readartifact",
+        "label": "readArtifact",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/artifactcontractoptions",
+        "label": "ArtifactContractOptions",
         "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/jsonartifactoptions",
+        "label": "JsonArtifactOptions",
         "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/artifacttaskoptions",
+        "label": "ArtifactTaskOptions",
         "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/artifactcontract",
+        "label": "ArtifactContract",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/artifactidentity",
+        "label": "ArtifactIdentity",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/artifactproducer",
+        "label": "ArtifactProducer",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/artifactreference",
+        "label": "ArtifactReference",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/artifactstore",
+        "label": "ArtifactStore",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/publishartifactoptions",
+        "label": "PublishArtifactOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/readartifactoptions",
+        "label": "ReadArtifactOptions",
         "attrs": { "data-api-kind": "interface" }
       }
     ]
@@ -1752,94 +2221,117 @@
       },
       {
         "slug": "reference/createsqlitetaskqueue",
+        "label": "createSqliteTaskQueue",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/createbullmqtaskqueue",
+        "label": "createBullMQTaskQueue",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/servetaskqueue",
+        "label": "serveTaskQueue",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/createhttptaskqueue",
+        "label": "createHttpTaskQueue",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/runqueueworker",
+        "label": "runQueueWorker",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/definequeuedtask",
+        "label": "defineQueuedTask",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/queuehandler",
+        "label": "QueueHandler",
         "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/queuedtaskoptions",
+        "label": "QueuedTaskOptions",
         "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/type-bullmqtaskqueue",
+        "label": "BullMQTaskQueue",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/bullmqtaskqueueoptions",
+        "label": "BullMQTaskQueueOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/queuerequest",
+        "label": "QueueRequest",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/queueresult",
+        "label": "QueueResult",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/queuequota",
+        "label": "QueueQuota",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/queuejob",
+        "label": "QueueJob",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/queueclaim",
+        "label": "QueueClaim",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/queuelease",
+        "label": "QueueLease",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/taskqueue",
+        "label": "TaskQueue",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/durabletaskqueue",
+        "label": "DurableTaskQueue",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/queueserveroptions",
+        "label": "QueueServerOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/queueserver",
+        "label": "QueueServer",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/queueclientoptions",
+        "label": "QueueClientOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/queuehandlercontext",
+        "label": "QueueHandlerContext",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/queueworkeroptions",
+        "label": "QueueWorkerOptions",
         "attrs": { "data-api-kind": "interface" }
       }
     ]
@@ -1853,158 +2345,197 @@
       },
       {
         "slug": "reference/createcronschedule",
+        "label": "createCronSchedule",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/runschedules",
+        "label": "runSchedules",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/servetriggers",
+        "label": "serveTriggers",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/creategithubwebhook",
+        "label": "createGithubWebhook",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/creategitlabwebhook",
+        "label": "createGitlabWebhook",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/createslacksource",
+        "label": "createSlackSource",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/createstandardwebhook",
+        "label": "createStandardWebhook",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/labeladded",
+        "label": "labelAdded",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/commandissued",
+        "label": "commandIssued",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/defineworkflowjob",
+        "label": "defineWorkflowJob",
         "attrs": { "data-api-kind": "function" }
       },
       {
         "slug": "reference/triggeroutcome",
+        "label": "TriggerOutcome",
         "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/triggersecret",
+        "label": "TriggerSecret",
         "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/gitlabwebhookoptions",
+        "label": "GitlabWebhookOptions",
         "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/workflowjobstartoptions",
+        "label": "WorkflowJobStartOptions",
         "attrs": { "data-api-kind": "type" }
       },
       {
         "slug": "reference/cronschedule",
+        "label": "CronSchedule",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/cronoptions",
+        "label": "CronOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/triggerschedule",
+        "label": "TriggerSchedule",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/runschedulesoptions",
+        "label": "RunSchedulesOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/schedulefailure",
+        "label": "ScheduleFailure",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/triggerjob",
+        "label": "TriggerJob",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/triggerjobinput",
+        "label": "TriggerJobInput",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/triggerroute",
+        "label": "TriggerRoute",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/triggerserveroptions",
+        "label": "TriggerServerOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/triggerserver",
+        "label": "TriggerServer",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/triggerfailure",
+        "label": "TriggerFailure",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/triggerevent",
+        "label": "TriggerEvent",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/triggerhttprequest",
+        "label": "TriggerHttpRequest",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/triggerreply",
+        "label": "TriggerReply",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/triggersource",
+        "label": "TriggerSource",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/githubwebhookoptions",
+        "label": "GithubWebhookOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/gitlabsigningoptions",
+        "label": "GitlabSigningOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/gitlabtokenoptions",
+        "label": "GitlabTokenOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/slackrequestoptions",
+        "label": "SlackRequestOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/standardwebhookoptions",
+        "label": "StandardWebhookOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/triggerlabel",
+        "label": "TriggerLabel",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/triggercommand",
+        "label": "TriggerCommand",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/workflowjoboptions",
+        "label": "WorkflowJobOptions",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/workflowjobcontext",
+        "label": "WorkflowJobContext",
         "attrs": { "data-api-kind": "interface" }
       },
       {
         "slug": "reference/workflowjobcheckpoint",
+        "label": "WorkflowJobCheckpoint",
         "attrs": { "data-api-kind": "interface" }
       }
     ]
@@ -2018,6 +2549,7 @@
       },
       {
         "slug": "reference/speculate",
+        "label": "speculate",
         "attrs": {
           "data-api-kind": "function",
           "data-api-status": "experimental",
@@ -2026,6 +2558,7 @@
       },
       {
         "slug": "reference/recoverspeculation",
+        "label": "recoverSpeculation",
         "attrs": {
           "data-api-kind": "function",
           "data-api-status": "experimental",
@@ -2034,6 +2567,7 @@
       },
       {
         "slug": "reference/checkspeculationintegration",
+        "label": "checkSpeculationIntegration",
         "attrs": {
           "data-api-kind": "function",
           "data-api-status": "experimental",
@@ -2042,6 +2576,7 @@
       },
       {
         "slug": "reference/speculativeoutput",
+        "label": "SpeculativeOutput",
         "attrs": {
           "data-api-kind": "type",
           "data-api-status": "experimental",
@@ -2050,6 +2585,7 @@
       },
       {
         "slug": "reference/speculationdurability",
+        "label": "SpeculationDurability",
         "attrs": {
           "data-api-kind": "interface",
           "data-api-status": "experimental",
@@ -2058,6 +2594,7 @@
       },
       {
         "slug": "reference/speculationrecoveryoptions",
+        "label": "SpeculationRecoveryOptions",
         "attrs": {
           "data-api-kind": "interface",
           "data-api-status": "experimental",
@@ -2066,6 +2603,7 @@
       },
       {
         "slug": "reference/speculationintegration",
+        "label": "SpeculationIntegration",
         "attrs": {
           "data-api-kind": "interface",
           "data-api-status": "experimental",
@@ -2074,6 +2612,7 @@
       },
       {
         "slug": "reference/speculationoptions",
+        "label": "SpeculationOptions",
         "attrs": {
           "data-api-kind": "interface",
           "data-api-status": "experimental",
@@ -2082,6 +2621,7 @@
       },
       {
         "slug": "reference/speculationresult",
+        "label": "SpeculationResult",
         "attrs": {
           "data-api-kind": "interface",
           "data-api-status": "experimental",
@@ -2090,6 +2630,7 @@
       },
       {
         "slug": "reference/speculativecandidate",
+        "label": "SpeculativeCandidate",
         "attrs": {
           "data-api-kind": "interface",
           "data-api-status": "experimental",
@@ -2098,6 +2639,7 @@
       },
       {
         "slug": "reference/speculativecandidateresult",
+        "label": "SpeculativeCandidateResult",
         "attrs": {
           "data-api-kind": "interface",
           "data-api-status": "experimental",
@@ -2106,6 +2648,7 @@
       },
       {
         "slug": "reference/speculativehostsnapshot",
+        "label": "SpeculativeHostSnapshot",
         "attrs": {
           "data-api-kind": "interface",
           "data-api-status": "experimental",
@@ -2114,6 +2657,7 @@
       },
       {
         "slug": "reference/speculativevalidation",
+        "label": "SpeculativeValidation",
         "attrs": {
           "data-api-kind": "interface",
           "data-api-status": "experimental",

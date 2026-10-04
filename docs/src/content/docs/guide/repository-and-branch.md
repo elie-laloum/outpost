@@ -74,7 +74,7 @@ try {
 
 An open workspace owns the repository, the branch and the copied files. `workspace.dispatch()` and `workspace.sandbox()` start a fresh sandbox on it each time, so two agents can work in turn on the same branch. Passing `workspace` to [`createSandbox()`](../../reference/createsandbox/) or `dispatch()` does the same.
 
-A workspace serves one sandbox at a time. Close the sandbox before the workspace: [How Outpost works](../how-it-works/) shows who closes what.
+A workspace serves one sandbox at a time. Close the sandbox before the workspace: [How it works](../how-it-works/) shows who closes what.
 
 ## Copy ignored files into the worktree
 

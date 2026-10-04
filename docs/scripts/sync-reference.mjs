@@ -189,6 +189,7 @@ const navigation = groups.map((group) => ({
         );
         return {
           slug: `reference/${slug(symbol)}`,
+          label: symbol.name,
           attrs: {
             "data-api-kind": kind,
             ...(group.experimental?.includes(symbol.name)

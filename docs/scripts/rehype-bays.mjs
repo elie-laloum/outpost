@@ -32,9 +32,12 @@ const requiredLabels = new Set(["Required", "Requis"]);
 
 export function rehypeBays() {
   return (tree, file) => {
-    const kind = pageKind(file.path ?? file.history?.[0] ?? "");
+    const path = (file.path ?? file.history?.[0] ?? "").replaceAll("\\", "/");
+    const kind = pageKind(path);
     if (!kind) return;
-    if (kind === "guide") tree.children = applyComponents(tree.children);
+    const locale = path.includes("src/content/docs/fr/") ? "fr" : "en";
+    if (kind === "guide")
+      tree.children = applyComponents(tree.children, { locale });
     const sections = splitSections(tree.children);
     const bays = layouts[kind](sections);
     tree.children = bays;

@@ -73,7 +73,7 @@ git diff HEAD...outpost/readme-fix
 
 ## What just happened
 
-Outpost opened a worktree under `.outpost/workspaces/`, ran the agent in a sandbox, then closed the sandbox and kept the branch. [How Outpost works](../how-it-works/) details the lifecycle.
+Outpost opened a worktree under `.outpost/workspaces/`, ran the agent in a sandbox, then closed the sandbox and kept the branch. [How it works](../how-it-works/) details the lifecycle.
 
 ## Next steps
 

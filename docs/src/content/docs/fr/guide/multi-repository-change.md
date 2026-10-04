@@ -184,28 +184,41 @@ node rename-field.mts approve
 
 Le script affiche `done`. Les branches sont fusionnées dans la branche courante de chaque checkout, l’API en premier. Rien n’est poussé.
 
-## Fonctionnement
+## Comment ça marche
 
-<!-- flow -->
+Chaque lien indique qui transmet quoi à qui, dans le sens de la flèche.
 
-1. **API**: Le contrat change d’abord.
-   - `api`: Renomme le champ sur sa branche et renvoie `{ from, to, notes }`.
-     - `defineIsolatedTask()`
-     - `defineJsonResponse()`
-     - sandbox
-2. **Clients**: Deux agents travaillent en même temps.
-   - **`web`, `mobile`**: Chacun reçoit sa sandbox et sa branche, avec la modification de l’API dans son brief.
-     - `context.value()`
-     - `concurrency`
-     - sandbox
-3. **Approbation**: L’exécution s’arrête jusqu’à la décision d’un mainteneur.
-   - `approve`: Enregistre la demande dans le checkpoint et termine le processus avec `paused`.
-     - `defineApprovalTask()`
-   - **Décision**: `approve` ou `reject` relance l’exécution ; les tâches terminées viennent du checkpoint.
-     - `decisions`
-4. **Fusion**: Seulement après l’approbation.
-   - `merge`: Avance chaque checkout jusqu’à sa branche, l’API en premier.
-     - hôte
+<!-- canvas -->
+
+- [Votre script](../durable-runs/): `rename-field.mts` démarre l’exécution, puis la reprend avec `approve` ou `reject`.
+  - hôte
+  - → **api**: `workflow.start()`
+  - → **approve**: décision
+- [api](../typed-responses/): Renomme d’abord le champ et rend `{ from, to, notes }`, vérifié par `defineJsonResponse()`.
+  - workflow
+  - → **API**: brief
+  - → **Clients**: le changement
+- [Clients](../concurrency-and-retries/): Les deux s’exécutent en même temps, avec `concurrency: 2`.
+  - workflow
+  - **web**: le changement de l’API dans son brief
+    - → **Web**: brief
+  - **mobile**: le changement de l’API dans son brief
+    - → **Mobile**: brief
+  - → **approve**: trois branches
+- [approve](../approvals/): `defineApprovalTask()` enregistre la demande et termine le processus en `paused`.
+  - workflow
+  - → **merge**: approuvé
+- **merge**: Avance chaque checkout jusqu’à sa branche, l’API d’abord.
+  - workflow
+  - → **Checkouts**: `git merge --ff-only`
+- [Sandboxes](../multiple-repositories/): Une par dépôt, chacune sur `outpost/rename-user-name`.
+  - sandbox
+  - **API**: `/projects/api`
+  - **Web**: `/projects/web`
+  - **Mobile**: `/projects/mobile`
+  - → **Checkouts**: commits sur chaque branche
+- **Checkouts**: Vos trois dépôts. Rien n’est poussé.
+  - hôte
 
 Un checkpoint ne contient que du JSON. Chaque tâche du workflow appelle donc le `perform()` de sa tâche isolée et garde `repository`, `branch` et `commits`, pas le résultat du dispatch.
 

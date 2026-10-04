@@ -1,5 +1,5 @@
 ---
-title: "Reference"
+title: "API"
 description: "Every public contract of Outpost, grouped into families. Open a family's overview to learn its concepts, or go straight to a function, type or interface."
 ---
 

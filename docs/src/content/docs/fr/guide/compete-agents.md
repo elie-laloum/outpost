@@ -115,33 +115,29 @@ Le script affiche le statut et la branche de chaque candidat, par exemple `claud
 
 ## Comment ça marche
 
-<!-- flow -->
+Chaque lien indique qui transmet quoi à qui, dans le sens de la flèche.
 
-1. **Démarrage**: Tous les candidats partent du même commit.
-   - **Figer la base**: `speculate()` enregistre le commit courant du checkout.
-     - hôte
-   - **Ouvrir une branche par candidat**: `outpost/speculation/<id>/<key>`, avec son worktree et sa sandbox.
-     - hôte
-     - sandbox
-2. **Course**: Au plus `concurrency` candidats tournent en même temps.
-   - **Admettre**: Chaque démarrage consomme une des `budget.attempts` ; la limite de tokens arrête tous les candidats en cours dès qu’elle est atteinte.
-   - **Exécuter le brief**: L’agent corrige le bug et committe.
-     - sandbox
-   - **Valider**: `validate` rejette un candidat sans commit, puis lance `npm test` dans sa sandbox.
-     - `validate`
-     - sandbox
-3. **Sélection**: Le premier candidat qui passe et se ferme proprement gagne.
-   - **Arrêter les autres**: Les candidats en cours sont annulés, ceux en attente sont ignorés.
-   - **Fermer**: Les sandboxes sont libérées, les worktrees propres supprimés, les branches conservées.
-     - hôte
-   - **Vérifier l’intégration**: `git merge-tree` teste le gagnant contre le `HEAD` du checkout sans toucher à vos fichiers.
-     - `result.integration`
-     - hôte
-4. **Fusion**: Votre code, après votre réponse.
-   - **Vérifier à nouveau**: `checkSpeculationIntegration()` bloque si le checkout ou la branche a bougé entre-temps.
-     - hôte
-   - **Fusionner**: `git merge` s’exécute sur votre checkout. Outpost ne pousse rien.
-     - hôte
+<!-- canvas -->
+
+- [Votre script](../speculation/): `compete.mts` appelle `speculate()`, affiche chaque candidat, puis demande avant de fusionner.
+  - hôte
+  - → **Admission**: `speculate()`
+  - → **Checkout**: `git merge`, après votre réponse
+- [Course](../speculation/): Chaque candidat part du commit actuel du checkout ; `concurrency` en exécute au plus autant à la fois.
+  - workflow
+  - **Admission**: chaque démarrage consomme une tentative de `budget.attempts` ; la limite de tokens les arrête tous
+    - → **Sandboxes**: le même brief
+  - **Validation**: sans commit, refusé ; sinon `npm test` tranche
+  - **Sélection**: le premier qui passe gagne ; les autres sont annulés ou sautés
+    - → **Votre script**: `winner`, `integration`
+    - → **Checkout**: `git merge-tree`, en lecture seule
+- [Sandboxes](../sandbox-sessions/): Une par candidat, sur `outpost/speculation/<id>/<key>` ; libérées à la fin, branches conservées.
+  - sandbox
+  - **codex**: corrige le bug et commite
+  - **claude**: corrige le bug et commite
+  - → **Validation**: commits, `npm test`
+- **Checkout**: Votre branche. `checkSpeculationIntegration()` bloque la fusion si elle ou le gagnant a bougé depuis. Outpost ne pousse rien.
+  - hôte
 
 `result.status` vaut `winner`, `no-winner`, `budget-exhausted`, `quota` (une limite d’usage a arrêté un candidat, voir [Pauses sur quota](../quota-pauses/)) ou `aborted` (votre `signal`). Chaque candidat a son propre statut :
 

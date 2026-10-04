@@ -110,23 +110,27 @@ The agent can edit the tests or the `test` script. Review the diff, and let your
 
 ## How it works
 
-<!-- flow -->
+Each link shows who hands what to whom, in the direction of the arrow.
 
-1. **Prepare**: `createSandbox()` opens the work branch and installs dependencies.
-   - **Open the branch**: A worktree on `outpost/fix-ci` under `.outpost/workspaces`; an existing branch is reused.
-     - host
-   - **Install**: `npm ci` runs once in the sandbox, before any agent turn.
-     - sandbox
-2. **Loop**: Each round runs `attempt`, then `check`.
-   - **Attempt**: The agent gets the brief plus the last failure, edits and commits.
-     - `perform(context)`
-   - **Check**: `npm test` must exit 0 and the tree must be clean; the last 20,000 characters of each stream become the feedback.
-     - `sandbox.command()`
-3. **Finish**: The script prints the summary, then settles the job status.
-   - **Report**: Status, branch, rounds and tokens go to stdout.
-     - host
-   - **Close**: `await using` closes the sandbox and keeps the branch; nothing is merged or pushed.
-     - host
+<!-- canvas -->
+
+- [Your script](../ci-automation/): `fix-ci.mts` opens the sandbox, starts the workflow with its `budget` and settles the exit code.
+  - host
+  - → **Sandbox**: `createSandbox()`
+  - → **Attempt**: `workflow.start()`
+- [Loop](../verification-loops/): `defineLoopTask()`, at most 4 rounds, each bounded by `timeoutMs`.
+  - workflow
+  - **Attempt**: the brief, plus the last failure
+    - → **Agent**: `perform(context)`
+  - **Check**: `npm test` must exit 0, then the tree must be clean; the last 20,000 characters of output become the feedback
+    - → **Commands**: `sandbox.command()`
+- [Sandbox](../sandbox-sessions/): Stays open between rounds, so dependencies and edits carry over.
+  - sandbox
+  - **Commands**: `npm ci` once, before the first turn; `npm test` each round
+  - **Agent**: edits and commits; its tokens count against `budget`
+  - → **Branch**: commits
+- **Branch**: `outpost/fix-ci` in `.outpost/workspaces`; `await using` closes the sandbox and keeps it. Nothing is merged or pushed.
+  - host
 
 `perform(context)` ties the agent’s usage and cancellation to the workflow, so its tokens count against `budget`. `timeoutMs` bounds each round.
 

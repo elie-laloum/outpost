@@ -8,7 +8,7 @@ import type {
 
 const spaceLabels = {
   guide: ["Guide", "Guide"],
-  reference: ["Reference", "Référence"],
+  reference: ["API", "API"],
   project: ["Project", "Projet"],
 } as const;
 const spaceHomes = {
@@ -72,26 +72,17 @@ export function breadcrumbs(route: DocsRoute): Crumb[] {
   const space = docsSpace(route);
   if (space === "landing") return [];
   const home = spaceLinks(route).find((link) => link.space === space)!;
-  const root = route.sidebar[space === "reference" ? 1 : 0];
-  if (space === "project" || !root || root.type !== "group")
+  const root = route.sidebar[0];
+  if (space !== "guide" || !root || root.type !== "group")
     return [{ label: home.label, href: home.href }];
   const trail = currentTrail(root.entries).map((group) => ({
     label: group.label,
-    href: familyOverview(group),
   }));
   return [{ label: home.label, href: home.href }, ...trail];
 }
 
 function isCurrentLink(entry: SidebarEntry): boolean {
   return entry.type === "link" && entry.isCurrent;
-}
-
-function familyOverview(group: SidebarEntry): string | undefined {
-  if (group.type !== "group") return undefined;
-  const first = group.entries[0];
-  if (first?.type !== "link" || !("data-reference-overview" in first.attrs))
-    return undefined;
-  return first.isCurrent ? undefined : first.href;
 }
 
 // Identifier words, so long API names wrap between words rather than mid-word.

@@ -28,7 +28,7 @@
 .sl-markdown-content
   .bay[data-bay="wide"]
   > .bay-say
-  > :not(table, .cells, .props, .features, .path, .flow) {
+  > :not(table, .cells, .props, .features, .path, .flow, .canvas, .cards) {
   max-width: 70ch;
 }
 .bay-wide {
@@ -172,6 +172,7 @@
 }
 .sl-markdown-content .bay ul.cells > li {
   margin: 0;
+  padding: 0;
   border-bottom: 1px solid var(--docs-line);
 }
 .sl-markdown-content .bay ul.cells > li + li {

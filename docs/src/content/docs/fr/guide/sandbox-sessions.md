@@ -24,7 +24,7 @@ const tests = await sandbox.command({
 console.log(tests.status === 0 ? "Tests pass" : tests.stderr);
 ```
 
-L’agent modifie le worktree, puis `npm test` s’exécute dans la même sandbox, sur ses modifications. La différence avec un `dispatch()` ponctuel, et qui ferme quoi, sont expliquées dans [Fonctionnement d’Outpost](../how-it-works/).
+L’agent modifie le worktree, puis `npm test` s’exécute dans la même sandbox, sur ses modifications. La page [Fonctionnement](../how-it-works/) explique la différence avec un `dispatch()` ponctuel, et qui ferme quoi.
 
 ## Lancer des tours d’agent
 

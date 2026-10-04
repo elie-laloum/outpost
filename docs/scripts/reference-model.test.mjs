@@ -9,6 +9,7 @@ import {
   referenceKind,
 } from "./reference-model.mjs";
 import { explain } from "./reference-explanations.mjs";
+import { referenceSidebar } from "./reference-navigation.mjs";
 
 function model(source) {
   const file = ts.createSourceFile(
@@ -276,6 +277,24 @@ test("every family starts with its own bilingual conceptual overview", async () 
       assert.equal([...source.matchAll(/^## /gm)].length, 3, route);
     }
   }
+});
+
+test("the reference sidebar is one alphabetical list of symbols without overviews", () => {
+  const symbols = navigation.flatMap((group) => group.items.slice(1));
+  assert.equal(referenceSidebar.length, symbols.length);
+  assert.ok(referenceSidebar.every((item) => item.attrs["data-api-kind"]));
+  assert.ok(!referenceSidebar.some((item) => "items" in item));
+  const labels = referenceSidebar.map((item) => item.label);
+  assert.deepEqual(
+    labels,
+    symbols
+      .map((item) => item.label)
+      .sort(
+        (a, b) =>
+          a.localeCompare(b, "en", { sensitivity: "base" }) ||
+          a.localeCompare(b, "en"),
+      ),
+  );
 });
 
 test("Firecracker is classified only under Providers and marked stable", () => {

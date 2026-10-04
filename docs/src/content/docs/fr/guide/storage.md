@@ -54,7 +54,7 @@ Rien n’est écrit tant qu’un store n’enregistre pas d’objet. Chaque clé
     - `recovery/`: Transferts de récupération archivés.
   - `.outpost/locks/`: Verrous qui sérialisent les écrivains de cette machine.
 
-Le reste du dossier `.outpost` est décrit dans [Fonctionnement d’Outpost](../how-it-works/).
+Le reste du dossier `.outpost` est décrit dans la page [Fonctionnement](../how-it-works/).
 
 ## Partager un transport
 
