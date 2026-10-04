@@ -33,6 +33,8 @@ Available in 9.0.3: the landing page is organized for a developer deciding wheth
 
 Available in 9.0.4: the landing page's typed-response figure shows the brief that asks for the shape it receives, so the example works as written. This documentation release does not change the validation status of experimental features.
 
+Available in 9.0.5: the [development workflow](../../guide/development-workflow/) use case takes a ticket to a reviewed branch through a plan approval and test-first work, four Guide chapters open with an overview page, and the Reference space is labelled “API” with an alphabetical symbol sidebar. This documentation release does not change the validation status of experimental features.
+
 Available in 8.0.0: [record and replay](../../guide/record-replay/) replays a dispatch journal without calling a model, rebuilding its commits inside the sandbox and reporting divergences. Deterministic tests cover CLI and harness recordings, failures, repairs, passes and a real Docker sandbox. Replaying a whole workflow, uncommitted changes and a CLI command remain planned.
 
 Available in 8.0.0: the [task result cache](../../guide/task-cache/) reuses a task's JSON result when the workflow, task, version and key match, with `repositoryFingerprint()` for repository-state keys, expiry, refresh and a `task-cache` retention scope. Deterministic tests cover hits, invalid and concurrent entries, checkpoints and retention. Single-flight coordination between concurrent executions and authenticated entries remain future work.

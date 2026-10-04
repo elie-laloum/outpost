@@ -1,5 +1,12 @@
 # Historique des versions
 
+## 9.0.5
+
+- Nouveau cas d’usage de workflow de développement, qui mène un ticket jusqu’à une branche relue : un agent interroge le responsable et planifie, le responsable approuve le plan, puis des agents écrivent des tests qui échouent et le code qui les fait passer sous le regard d’un agent relecteur, tandis que le workflow vérifie chaque étape et fait chaque commit. Il remplace la recette « Écrire une spécification avec un humain », dont l’URL redirige vers lui.
+- Quatre chapitres du Guide s’ouvrent sur une page de vue d’ensemble — isolation, workflows typés, exécutions sans surveillance, observer et récupérer — qui présente les choix du chapitre avant ses pages détaillées. Les flux dessinés dans les pages du Guide peuvent désormais être déplacés et zoomés.
+- L’espace Référence s’intitule « API » dans l’en-tête, la barre latérale et le fil d’Ariane, dans les deux langues ; ses URL restent sous `/reference/`. La barre latérale liste chaque symbole public par ordre alphabétique avec l’icône de son genre, et la carte des familles avec chaque vue d’ensemble passe sur l’accueil de la référence.
+- La page d’accueil présente la commande d’installation de chaque gestionnaire de paquets dans des onglets. Les contrats publics de la bibliothèque sont inchangés.
+
 ## 9.0.4
 
 - Sur la page d’accueil, le brief de la réponse typée demande désormais la forme qu’il attend. Il porte `<verdict>{"approved": true, "reasons": []}</verdict>`, si bien que le schéma, la demande et la réponse balisée de l’agent s’accordent : Outpost transmet un brief sans le modifier et n’ajoute aucune consigne de format, donc un brief qui ne montre pas la forme attendue est un brief que l’agent ne peut pas satisfaire. Un commentaire à côté de `repairs` dit ce que l’option apporte : deux tours de plus pour corriger une réponse rejetée par le schéma, sur la même conversation.

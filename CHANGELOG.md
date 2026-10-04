@@ -1,5 +1,12 @@
 # Changelog
 
+## 9.0.5
+
+- Add a development-workflow use case that takes a ticket to a reviewed branch: an agent questions the owner and plans, the owner approves the plan, then agents write failing tests and the code that makes them pass under a reviewer agent, while the workflow checks every step and makes every commit. It replaces the “Write a specification with a human” recipe, whose URL redirects to it.
+- Open four Guide chapters with an overview page — isolation, typed workflows, unattended runs, and observe and recover — that maps the chapter's choices before its detailed pages. Flows drawn in Guide pages can now be panned and zoomed.
+- Label the Reference space “API” in the header, sidebar and breadcrumbs in both languages; its URLs stay under `/reference/`. The sidebar lists every public symbol alphabetically with its kind icon, and the family map with each overview moves to the reference home.
+- Show the landing page's install command for each package manager in tabs. Public library contracts are unchanged.
+
 ## 9.0.4
 
 - Make the landing page's typed-response brief ask for the shape it expects. The brief now carries `<verdict>{"approved": true, "reasons": []}</verdict>`, so the schema, the request and the agent's tagged reply agree: Outpost sends a brief unchanged and adds no format instructions, so a brief that does not show the shape is one the agent cannot satisfy. A comment beside `repairs` says what the option buys — two more turns to fix an answer the schema rejects, on the same conversation.
